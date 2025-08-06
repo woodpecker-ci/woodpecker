@@ -27,7 +27,7 @@
     "http_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp.git"
   },
   "object_attributes": {
-    "assignee_id": 4575606,
+    "assignee_id": null,
     "author_id": 4575606,
     "created_at": "2025-08-05 21:48:25 UTC",
     "description": ":tada: text that you might read eventually.",
@@ -53,30 +53,17 @@
     "target_project_id": 72081820,
     "time_estimate": 0,
     "title": "Edit README for more text to read",
-    "updated_at": "2025-08-05 22:01:30 UTC",
+    "updated_at": "2025-08-06 01:21:37 UTC",
     "updated_by_id": 4575606,
     "prepared_at": "2025-08-05 21:48:27 UTC",
-    "assignee_ids": [4575606],
+    "assignee_ids": [],
     "blocking_discussions_resolved": true,
     "detailed_merge_status": "mergeable",
     "first_contribution": true,
     "human_time_change": null,
     "human_time_estimate": null,
     "human_total_time_spent": null,
-    "labels": [
-      {
-        "id": 41869663,
-        "title": "documentation",
-        "color": "#0075ca",
-        "project_id": 72081820,
-        "created_at": "2025-07-30 00:40:00 UTC",
-        "updated_at": "2025-07-30 00:40:00 UTC",
-        "template": false,
-        "description": null,
-        "type": "ProjectLabel",
-        "group_id": null
-      }
-    ],
+    "labels": [],
     "last_commit": {
       "id": "2f7670508b771e7e77839402be8b34b13787aba8",
       "message": "Edit README.md",
@@ -133,44 +120,40 @@
     "approval_rules": [],
     "action": "update"
   },
-  "labels": [
-    {
-      "id": 41869663,
-      "title": "documentation",
-      "color": "#0075ca",
-      "project_id": 72081820,
-      "created_at": "2025-07-30 00:40:00 UTC",
-      "updated_at": "2025-07-30 00:40:00 UTC",
-      "template": false,
-      "description": null,
-      "type": "ProjectLabel",
-      "group_id": null
-    }
-  ],
+  "labels": [],
   "changes": {
-    "description": {
-      "previous": ":tada: text that you might read eventually",
-      "current": ":tada: text that you might read eventually."
-    },
-    "last_edited_at": {
-      "previous": null,
-      "current": "2025-08-05 22:01:30 UTC"
-    },
-    "last_edited_by_id": {
-      "previous": null,
-      "current": 4575606
-    },
-    "title": {
-      "previous": "Edit README.md for more text to read",
-      "current": "Edit README for more text to read"
-    },
     "updated_at": {
-      "previous": "2025-08-05 21:48:27 UTC",
-      "current": "2025-08-05 22:01:30 UTC"
+      "previous": "2025-08-06 01:20:04 UTC",
+      "current": "2025-08-06 01:21:37 UTC"
     },
-    "updated_by_id": {
-      "previous": null,
-      "current": 4575606
+    "labels": {
+      "previous": [
+        {
+          "id": 41869665,
+          "title": "enhancement",
+          "color": "#a2eeef",
+          "project_id": 72081820,
+          "created_at": "2025-07-30 00:40:00 UTC",
+          "updated_at": "2025-07-30 00:40:00 UTC",
+          "template": false,
+          "description": null,
+          "type": "ProjectLabel",
+          "group_id": null
+        },
+        {
+          "id": 41869667,
+          "title": "help wanted",
+          "color": "#008672",
+          "project_id": 72081820,
+          "created_at": "2025-07-30 00:40:00 UTC",
+          "updated_at": "2025-07-30 00:40:00 UTC",
+          "template": false,
+          "description": null,
+          "type": "ProjectLabel",
+          "group_id": null
+        }
+      ],
+      "current": []
     }
   },
   "repository": {
@@ -178,14 +161,5 @@
     "url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
     "description": null,
     "homepage": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp"
-  },
-  "assignees": [
-    {
-      "id": 4575606,
-      "name": "6543",
-      "username": "real6543",
-      "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/4575606/avatar.png",
-      "email": "[REDACTED]"
-    }
-  ]
+  }
 }

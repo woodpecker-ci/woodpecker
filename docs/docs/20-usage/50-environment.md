@@ -298,6 +298,7 @@ The event reasons are separated via `,` as an list in `CI_PIPELINE_EVENT_REASON`
 |title_edited       | title edited                                      |
 |unassigned         | all assignees removed                             |
 |unapproved         | approval revoked                                  |
+|review_requested   | new review was requested                          |
 
 ### Bitbucket
 

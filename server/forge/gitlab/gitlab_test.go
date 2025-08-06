@@ -124,7 +124,7 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("test parse webhook", func(t *testing.T) {
 		// Test hook method
-		t.Run("parse push hook", func(t *testing.T) {
+		t.Run("parse push", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
@@ -143,10 +143,11 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "refs/heads/main", pipeline.Ref)
 				assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
 				assert.Equal(t, model.EventPush, pipeline.Event)
+				assert.Empty(t, pipeline.EventReason)
 			}
 		})
 
-		t.Run("tag push hook", func(t *testing.T) {
+		t.Run("tag push", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
@@ -164,10 +165,11 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "refs/tags/v22", pipeline.Ref)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventTag, pipeline.Event)
+				assert.Empty(t, pipeline.EventReason)
 			}
 		})
 
-		t.Run("merge request hook", func(t *testing.T) {
+		t.Run("merge request", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
@@ -186,6 +188,29 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "Update client.go 🎉", pipeline.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
+				assert.Empty(t, pipeline.EventReason)
+			}
+		})
+
+		t.Run("merge request new opened", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequestOpened),
+			)
+			req.Header = fixtures.MergeRequestHookHeaders
+
+			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "main", hookRepo.Branch)
+				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
+				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
+				assert.Equal(t, "Edit README.md for more text to read", pipeline.Title)
+				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+				assert.Equal(t, model.EventPull, pipeline.Event)
+				assert.Empty(t, pipeline.EventReason)
 			}
 		})
 
@@ -197,11 +222,14 @@ func Test_GitLab(t *testing.T) {
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
-			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 			hookRepo, pipeline, err := client.Hook(ctx, req)
 			assert.Nil(t, hookRepo)
 			assert.Nil(t, pipeline)
-			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+			if assert.ErrorIs(t, err, &types.ErrIgnoreEvent{}) {
+				assert.EqualValues(t,
+					"explicit ignored event 'Merge Request Hook', reason: Action 'update' no supported changes detected",
+					err.Error())
+			}
 		})
 
 		t.Run("ignore unsupported action", func(t *testing.T) {
@@ -216,7 +244,9 @@ func Test_GitLab(t *testing.T) {
 			assert.Nil(t, hookRepo)
 			assert.Nil(t, pipeline)
 			if assert.ErrorIs(t, err, &types.ErrIgnoreEvent{}) {
-				assert.EqualValues(t, "explicit ignored event 'Merge Request Hook', reason: Action 'action_we_do_not_support' not supported", err.Error())
+				assert.EqualValues(t,
+					"explicit ignored event 'Merge Request Hook', reason: Action 'action_we_do_not_support' not supported",
+					err.Error())
 			}
 		})
 
@@ -282,7 +312,7 @@ func Test_GitLab(t *testing.T) {
 			}
 		})
 
-		t.Run("parse merge request edited", func(t *testing.T) {
+		t.Run("merge request title and description edited", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
@@ -304,7 +334,7 @@ func Test_GitLab(t *testing.T) {
 			}
 		})
 
-		t.Run("release hook", func(t *testing.T) {
+		t.Run("release", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
@@ -326,7 +356,7 @@ func Test_GitLab(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
-				bytes.NewReader(fixtures.HookPullRequestReviewAck),
+				bytes.NewReader(fixtures.HookPullRequestApproved),
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
@@ -334,9 +364,9 @@ func Test_GitLab(t *testing.T) {
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
-				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
-				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Some ned more AAAA", pipeline.Title)
+				assert.Equal(t, "anbraten", hookRepo.Owner)
+				assert.Equal(t, "woodpecker", hookRepo.Name)
+				assert.Equal(t, "Update client.go 🎉", pipeline.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
 				assert.Equal(t, "approved", pipeline.EventReason)

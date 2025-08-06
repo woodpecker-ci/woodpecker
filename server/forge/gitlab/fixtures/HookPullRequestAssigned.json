@@ -53,7 +53,7 @@
     "target_project_id": 72081820,
     "time_estimate": 0,
     "title": "Edit README for more text to read",
-    "updated_at": "2025-08-05 22:01:30 UTC",
+    "updated_at": "2025-08-06 01:23:04 UTC",
     "updated_by_id": 4575606,
     "prepared_at": "2025-08-05 21:48:27 UTC",
     "assignee_ids": [4575606],
@@ -65,9 +65,9 @@
     "human_total_time_spent": null,
     "labels": [
       {
-        "id": 41869663,
-        "title": "documentation",
-        "color": "#0075ca",
+        "id": 41869666,
+        "title": "good first issue",
+        "color": "#7057ff",
         "project_id": 72081820,
         "created_at": "2025-07-30 00:40:00 UTC",
         "updated_at": "2025-07-30 00:40:00 UTC",
@@ -135,9 +135,9 @@
   },
   "labels": [
     {
-      "id": 41869663,
-      "title": "documentation",
-      "color": "#0075ca",
+      "id": 41869666,
+      "title": "good first issue",
+      "color": "#7057ff",
       "project_id": 72081820,
       "created_at": "2025-07-30 00:40:00 UTC",
       "updated_at": "2025-07-30 00:40:00 UTC",
@@ -148,29 +148,21 @@
     }
   ],
   "changes": {
-    "description": {
-      "previous": ":tada: text that you might read eventually",
-      "current": ":tada: text that you might read eventually."
-    },
-    "last_edited_at": {
-      "previous": null,
-      "current": "2025-08-05 22:01:30 UTC"
-    },
-    "last_edited_by_id": {
-      "previous": null,
-      "current": 4575606
-    },
-    "title": {
-      "previous": "Edit README.md for more text to read",
-      "current": "Edit README for more text to read"
-    },
     "updated_at": {
-      "previous": "2025-08-05 21:48:27 UTC",
-      "current": "2025-08-05 22:01:30 UTC"
+      "previous": "2025-08-06 01:21:37 UTC",
+      "current": "2025-08-06 01:23:04 UTC"
     },
-    "updated_by_id": {
-      "previous": null,
-      "current": 4575606
+    "assignees": {
+      "previous": [],
+      "current": [
+        {
+          "id": 4575606,
+          "name": "6543",
+          "username": "real6543",
+          "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/4575606/avatar.png",
+          "email": "[REDACTED]"
+        }
+      ]
     }
   },
   "repository": {

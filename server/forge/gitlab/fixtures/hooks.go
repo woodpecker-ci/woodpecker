@@ -57,6 +57,9 @@ var HookTag []byte
 //go:embed HookPullRequestUpdated.json
 var HookPullRequestUpdated []byte
 
+//go:embed HookPullRequestOpened.json
+var HookPullRequestOpened []byte
+
 //go:embed HookPullRequestWithoutChanges.json
 var HookPullRequestWithoutChanges []byte
 
@@ -75,11 +78,38 @@ var HookPullRequestMerged []byte
 //go:embed WebhookReleaseBody.json
 var WebhookReleaseBody []byte
 
-//go:embed HookPullRequestReviewAck.json
-var HookPullRequestReviewAck []byte
-
 //go:embed HookPullRequestReopened.json
 var HookPullRequestReopened []byte
 
 //go:embed HookPullRequestUnsupportedAction.json
 var HookPullRequestUnsupportedAction []byte
+
+//go:embed HookPullRequestReviewRequested.json
+var HookPullRequestReviewRequested []byte
+
+//go:embed HookPullRequestReviewRequestDel.json
+var HookPullRequestReviewRequestDel []byte
+
+//go:embed HookPullRequestAssigned.json
+var HookPullRequestAssigned []byte
+
+//go:embed HookPullRequestDemilestoned.json
+var HookPullRequestDemilestoned []byte
+
+//go:embed HookPullRequestLabelsAdded.json
+var HookPullRequestLabelsAdded []byte
+
+//go:embed HookPullRequestLabelsCleared.json
+var HookPullRequestLabelsCleared []byte
+
+//go:embed HookPullRequestLabelsUpdated.json
+var HookPullRequestLabelsUpdated []byte
+
+//go:embed HookPullRequestMilestoned.json
+var HookPullRequestMilestoned []byte
+
+//go:embed HookPullRequestUnapproved.json
+var HookPullRequestUnapproved []byte
+
+//go:embed HookPullRequestUnassigned.json
+var HookPullRequestUnassigned []byte

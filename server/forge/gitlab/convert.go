@@ -51,6 +51,7 @@ const (
 	metadataReasonLabelsAdded       = "labels_added"
 	metadataReasonLabelsCleared     = "labels_cleared"
 	metadataReasonLabelsUpdated     = "labels_updated"
+	metadataReasonReviewRequested   = "review_requested"
 )
 
 func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
@@ -133,6 +134,10 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 			reason = append(reason, metadataReasonLabelsCleared)
 		} else if len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) != 0 {
 			reason = append(reason, metadataReasonLabelsUpdated)
+		}
+
+		if len(hook.Changes.Reviewers.Current) > len(hook.Changes.Reviewers.Previous) {
+			reason = append(reason, metadataReasonReviewRequested)
 		}
 
 		pipeline.EventReason = strings.Join(reason, ",")
