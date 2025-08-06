@@ -129,7 +129,7 @@
     "url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp/-/merge_requests/1",
     "work_in_progress": false,
     "approval_rules": [],
-    "action": "approved"
+    "action": "action_we_do_not_support"
   },
   "labels": [
     {

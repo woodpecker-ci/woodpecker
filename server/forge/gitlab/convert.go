@@ -23,6 +23,7 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
@@ -31,11 +32,25 @@ const (
 	mergeRefs               = "refs/merge-requests/%d/head" // merge request merged with base
 	VisibilityLevelInternal = 10
 
-	stateOpen = "open"
+	stateOpened = "opened"
 
-	actionClose  = "close"
-	actionReopen = "reopen"
-	actionMerge  = "merge"
+	actionOpen       = "open"
+	actionClose      = "close"
+	actionReopen     = "reopen"
+	actionMerge      = "merge"
+	actionUpdate     = "update"
+	actionApproved   = "approved"
+	actionUnapproved = "unapproved"
+
+	metadataReasonAssigned          = "assigned"
+	metadataReasonUnassigned        = "unassigned"
+	metadataReasonMilestoned        = "milestoned"
+	metadataReasonDemilestoned      = "demilestoned"
+	metadataReasonTitleEdited       = "title_edited"
+	metadataReasonDescriptionEdited = "description_edited"
+	metadataReasonLabelsAdded       = "labels_added"
+	metadataReasonLabelsCleared     = "labels_cleared"
+	metadataReasonLabelsUpdated     = "labels_updated"
 )
 
 func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
@@ -80,13 +95,64 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
 	// https://github.com/woodpecker-ci/woodpecker/pull/3338
 	// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
-	if (obj.OldRev != "" && obj.State == stateOpen) || obj.Action == actionReopen {
+	if obj.Action == actionOpen ||
+		obj.Action == actionReopen ||
+		(obj.Action == actionUpdate && obj.OldRev != "" && obj.State == stateOpened) {
 		pipeline.Event = model.EventPull
 	} else if obj.Action == actionClose || obj.Action == actionMerge {
 		pipeline.Event = model.EventPullClosed
-	} else {
+	} else if obj.Action == actionUpdate {
+		pipeline.Event = model.EventPullMetadata
+		// All changes are just update actions ... so we have to look into the changes section
+		var reason []string
+		if len(hook.Changes.Assignees.Current) != 0 {
+			reason = append(reason, metadataReasonAssigned)
+		}
+		if len(hook.Changes.Assignees.Previous) != 0 {
+			reason = append(reason, metadataReasonUnassigned)
+		}
+
+		if hook.Changes.MilestoneID.Current != 0 {
+			reason = append(reason, metadataReasonMilestoned)
+		}
+		if hook.Changes.MilestoneID.Previous != 0 {
+			reason = append(reason, metadataReasonDemilestoned)
+		}
+
+		if len(hook.Changes.Title.Current) != 0 || len(hook.Changes.Title.Previous) != 0 {
+			reason = append(reason, metadataReasonTitleEdited)
+		}
+
+		if len(hook.Changes.Description.Current) != 0 || len(hook.Changes.Description.Previous) != 0 {
+			reason = append(reason, metadataReasonDescriptionEdited)
+		}
+
+		if len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) == 0 {
+			reason = append(reason, metadataReasonLabelsAdded)
+		} else if len(hook.Changes.Labels.Current) == 0 && len(hook.Changes.Labels.Previous) != 0 {
+			reason = append(reason, metadataReasonLabelsCleared)
+		} else if len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) != 0 {
+			reason = append(reason, metadataReasonLabelsUpdated)
+		}
+
+		pipeline.EventReason = strings.Join(reason, ",")
+
+		if pipeline.EventReason == "" {
+			return 0, nil, nil, &types.ErrIgnoreEvent{
+				Event:  "Merge Request Hook",
+				Reason: fmt.Sprintf("Action '%s' no supported changes detected", obj.Action),
+			}
+		}
+	} else if obj.Action == actionApproved ||
+		obj.Action == actionUnapproved {
+		// all actions that are not updates but supported
 		pipeline.Event = model.EventPullMetadata
 		pipeline.EventReason = obj.Action
+	} else {
+		return 0, nil, nil, &types.ErrIgnoreEvent{
+			Event:  "Merge Request Hook",
+			Reason: fmt.Sprintf("Action '%s' not supported", obj.Action),
+		}
 	}
 
 	switch {

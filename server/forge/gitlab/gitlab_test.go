@@ -171,7 +171,7 @@ func Test_GitLab(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
-				bytes.NewReader(fixtures.HookPullRequest),
+				bytes.NewReader(fixtures.HookPullRequestUpdated),
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
@@ -204,19 +204,20 @@ func Test_GitLab(t *testing.T) {
 			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 		})
 
-		t.Run("ignore merge request approval", func(t *testing.T) {
+		t.Run("ignore unsupported action", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
-				bytes.NewReader(fixtures.HookPullRequestApproved),
+				bytes.NewReader(fixtures.HookPullRequestUnsupportedAction),
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
-			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 			hookRepo, pipeline, err := client.Hook(ctx, req)
 			assert.Nil(t, hookRepo)
 			assert.Nil(t, pipeline)
-			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+			if assert.ErrorIs(t, err, &types.ErrIgnoreEvent{}) {
+				assert.EqualValues(t, "explicit ignored event 'Merge Request Hook', reason: Action 'action_we_do_not_support' not supported", err.Error())
+			}
 		})
 
 		t.Run("parse merge request closed", func(t *testing.T) {
@@ -294,12 +295,12 @@ func Test_GitLab(t *testing.T) {
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
-				assert.Equal(t, "anbraten", hookRepo.Owner)
-				assert.Equal(t, "woodpecker-test", hookRepo.Name)
-				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
+				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
+				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "updated", pipeline.EventReason)
+				assert.Equal(t, "title_edited,description_edited", pipeline.EventReason)
 			}
 		})
 

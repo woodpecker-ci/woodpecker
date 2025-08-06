@@ -27,36 +27,38 @@
     "http_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp.git"
   },
   "object_attributes": {
-    "assignee_id": null,
-    "author_id": 29352663,
-    "created_at": "2025-07-29 20:00:54 UTC",
-    "description": "yeaaa",
+    "assignee_id": 4575606,
+    "author_id": 4575606,
+    "created_at": "2025-08-05 21:48:25 UTC",
+    "description": ":tada: text that you might read eventually",
     "draft": false,
     "head_pipeline_id": null,
-    "id": 403287663,
-    "iid": 1,
+    "id": 405095454,
+    "iid": 3,
     "last_edited_at": null,
     "last_edited_by_id": null,
     "merge_commit_sha": null,
     "merge_error": null,
-    "merge_params": {},
-    "merge_status": "can_be_merged",
+    "merge_params": {
+      "force_remove_source_branch": "0"
+    },
+    "merge_status": "checking",
     "merge_user_id": null,
     "merge_when_pipeline_succeeds": false,
-    "milestone_id": null,
-    "source_branch": "6543-patch-1",
+    "milestone_id": 6088906,
+    "source_branch": "real6543-main-patch-42541",
     "source_project_id": 72081820,
     "state_id": 1,
     "target_branch": "main",
     "target_project_id": 72081820,
     "time_estimate": 0,
-    "title": "Some ned more AAAA",
-    "updated_at": "2025-07-30 00:46:56 UTC",
+    "title": "Edit README.md for more text to read",
+    "updated_at": "2025-08-05 21:48:27 UTC",
     "updated_by_id": null,
-    "prepared_at": null,
-    "assignee_ids": [],
+    "prepared_at": "2025-08-05 21:48:27 UTC",
+    "assignee_ids": [4575606],
     "blocking_discussions_resolved": true,
-    "detailed_merge_status": "mergeable",
+    "detailed_merge_status": "checking",
     "first_contribution": true,
     "human_time_change": null,
     "human_time_estimate": null,
@@ -76,17 +78,17 @@
       }
     ],
     "last_commit": {
-      "id": "36b5813240a9d2daa29b05046d56a53e18f39a3e",
-      "message": "Some ned more AAAA\n",
-      "title": "Some ned more AAAA",
-      "timestamp": "2025-07-29T16:45:02+02:00",
-      "url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp/-/commit/36b5813240a9d2daa29b05046d56a53e18f39a3e",
+      "id": "2f7670508b771e7e77839402be8b34b13787aba8",
+      "message": "Edit README.md",
+      "title": "Edit README.md",
+      "timestamp": "2025-08-05T21:45:58+00:00",
+      "url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp/-/commit/2f7670508b771e7e77839402be8b34b13787aba8",
       "author": {
         "name": "6543",
         "email": "[REDACTED]"
       }
     },
-    "reviewer_ids": [29352668],
+    "reviewer_ids": [],
     "source": {
       "id": 72081820,
       "name": "test_ci_tmp",
@@ -126,10 +128,10 @@
     },
     "time_change": 0,
     "total_time_spent": 0,
-    "url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp/-/merge_requests/1",
+    "url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp/-/merge_requests/3",
     "work_in_progress": false,
     "approval_rules": [],
-    "action": "approved"
+    "action": "open"
   },
   "labels": [
     {
@@ -145,19 +147,32 @@
       "group_id": null
     }
   ],
-  "changes": {},
+  "changes": {
+    "merge_status": {
+      "previous": "preparing",
+      "current": "checking"
+    },
+    "updated_at": {
+      "previous": "2025-08-05 21:48:25 UTC",
+      "current": "2025-08-05 21:48:27 UTC"
+    },
+    "prepared_at": {
+      "previous": null,
+      "current": "2025-08-05 21:48:27 UTC"
+    }
+  },
   "repository": {
     "name": "test_ci_tmp",
     "url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
     "description": null,
     "homepage": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp"
   },
-  "reviewers": [
+  "assignees": [
     {
-      "id": 29352668,
-      "name": "Placeholder github Source User",
-      "username": "demoaccount2commits_placeholder_6s82rp",
-      "avatar_url": "https://secure.gravatar.com/avatar/6d8b40c6bd417e69e359e712b55471dfc72af88c732fed9fe8d276a210aa5dd8?s=80&d=identicon",
+      "id": 4575606,
+      "name": "6543",
+      "username": "real6543",
+      "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/4575606/avatar.png",
       "email": "[REDACTED]"
     }
   ]

@@ -54,8 +54,8 @@ var HookTag []byte
 
 // HookPullRequest is payload of a PULL_REQUEST event
 //
-//go:embed HookPullRequest.json
-var HookPullRequest []byte
+//go:embed HookPullRequestUpdated.json
+var HookPullRequestUpdated []byte
 
 //go:embed HookPullRequestWithoutChanges.json
 var HookPullRequestWithoutChanges []byte
@@ -80,3 +80,6 @@ var HookPullRequestReviewAck []byte
 
 //go:embed HookPullRequestReopened.json
 var HookPullRequestReopened []byte
+
+//go:embed HookPullRequestUnsupportedAction.json
+var HookPullRequestUnsupportedAction []byte

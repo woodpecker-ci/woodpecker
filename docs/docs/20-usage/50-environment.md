@@ -282,9 +282,22 @@ For the `pull_request_metadata` event, the exact reason a metadata change was de
 
 ### GitLab
 
-:::Critical
-TODO
-:::
+As GitLab merges metadata updates into one webhook we get only one event.
+The event reasons are separated via `,` as an list in `CI_PIPELINE_EVENT_REASON`.
+
+| NAME              | Description                                       |
+|-------------------|---------------------------------------------------|
+|assigned           | user assigned                                     |
+|approved           | review approved the merge request                 |
+|demilestoned       | milestone removed                                 |
+|description_edited | description edited                                |
+|labels_added       | pull had non and now got label added              |
+|labels_cleared     | all labels removed                                |
+|labels_updated     | labels changed                                    |
+|milestoned         | milestone added / changed                         |
+|title_edited       | title edited                                      |
+|unassigned         | all assignees removed                             |
+|unapproved         | approval revoked                                  |
 
 ### Bitbucket
 
