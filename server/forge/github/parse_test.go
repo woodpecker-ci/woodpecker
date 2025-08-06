@@ -316,7 +316,7 @@ func Test_parseHook(t *testing.T) {
 		}
 	})
 
-	// lable change will result two webhooks an unlable and labelled
+	// lable change will result two webhooks an unlable and labeled
 
 	t.Run("pull request unlabeled", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestLabelRemoved), hookPull)

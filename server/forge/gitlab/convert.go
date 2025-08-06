@@ -141,11 +141,12 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 			reason = append(reason, metadataReasonDescriptionEdited)
 		}
 
-		if len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) == 0 {
+		switch {
+		case len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) == 0:
 			reason = append(reason, metadataReasonLabelsAdded)
-		} else if len(hook.Changes.Labels.Current) == 0 && len(hook.Changes.Labels.Previous) != 0 {
+		case len(hook.Changes.Labels.Current) == 0 && len(hook.Changes.Labels.Previous) != 0:
 			reason = append(reason, metadataReasonLabelsCleared)
-		} else if len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) != 0 {
+		case len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) != 0:
 			reason = append(reason, metadataReasonLabelsUpdated)
 		}
 
