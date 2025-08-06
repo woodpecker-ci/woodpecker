@@ -93,16 +93,29 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	source := hook.ObjectAttributes.Source
 	obj := hook.ObjectAttributes
 
-	// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
-	// https://github.com/woodpecker-ci/woodpecker/pull/3338
-	// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
-	if obj.Action == actionOpen ||
-		obj.Action == actionReopen ||
-		(obj.Action == actionUpdate && obj.OldRev != "" && obj.State == stateOpened) {
-		pipeline.Event = model.EventPull
-	} else if obj.Action == actionClose || obj.Action == actionMerge {
+	switch obj.Action {
+	case actionClose, actionMerge:
+		// pull close event
 		pipeline.Event = model.EventPullClosed
-	} else if obj.Action == actionUpdate {
+
+	case actionOpen, actionReopen:
+		// pull open event -> pull event
+		pipeline.Event = model.EventPull
+
+	case actionApproved, actionUnapproved:
+		// all actions that are not updates but supported -> pull metadata
+		pipeline.Event = model.EventPullMetadata
+		pipeline.EventReason = obj.Action
+
+	case actionUpdate:
+		if obj.OldRev != "" && obj.State == stateOpened {
+			// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
+			// https://github.com/woodpecker-ci/woodpecker/pull/3338
+			// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
+			pipeline.Event = model.EventPull
+			break
+		}
+
 		pipeline.Event = model.EventPullMetadata
 		// All changes are just update actions ... so we have to look into the changes section
 		var reason []string
@@ -148,12 +161,8 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 				Reason: fmt.Sprintf("Action '%s' no supported changes detected", obj.Action),
 			}
 		}
-	} else if obj.Action == actionApproved ||
-		obj.Action == actionUnapproved {
-		// all actions that are not updates but supported
-		pipeline.Event = model.EventPullMetadata
-		pipeline.EventReason = obj.Action
-	} else {
+	default:
+		// non supported action
 		return 0, nil, nil, &types.ErrIgnoreEvent{
 			Event:  "Merge Request Hook",
 			Reason: fmt.Sprintf("Action '%s' not supported", obj.Action),
