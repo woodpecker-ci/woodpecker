@@ -726,5 +726,7 @@
     "leave_empty_to_keep_current_value": "Оставьте пустым, чтобы сохранить текущее значение",
     "forges_desc": "Настройте платформы, содержащие репозитории, для которых требуется выполнение Woodpecker.",
     "merge_ref_desc": "Ref-основание для слияния. Используется для определения изменений в запросах на слияние.",
-    "login_to_woodpecker_with": "Войти в Woodpecker через"
+    "login_to_woodpecker_with": "Войти в Woodpecker через",
+    "fullscreen": "Полноэкранный режим",
+    "exit_fullscreen": "Выйти из полноэкранного режима"
 }
