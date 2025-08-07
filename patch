@@ -122,4 +122,3 @@ index 927512517..9ecd07de4 100644
 +	ja := jsonassert.New(t)
 +	ja.Assertf(string(podJSON), expected)
 +}
-
