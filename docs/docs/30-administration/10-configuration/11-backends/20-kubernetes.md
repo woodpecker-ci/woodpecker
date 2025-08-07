@@ -308,6 +308,15 @@ The namespace to create worker Pods in.
 
 ---
 
+### BACKEND_K8S_NAMESPACE_PER_ORGANIZATION
+
+- Name: `WOODPECKER_BACKEND_K8S_NAMESPACE_PER_ORGANIZATION`
+- Default: `false`
+
+Enables namespace isolation per Woodpecker organization. When enabled, each organization gets its own dedicated Kubernetes namespace for improved security and resource isolation.
+
+With this feature enabled, Woodpecker creates separate Kubernetes namespaces for each organization using the format `{WOODPECKER_BACKEND_K8S_NAMESPACE}-{organization-id}`. Namespaces are created automatically when needed, but they are not automatically deleted when organizations are removed from Woodpecker.
+
 ### BACKEND_K8S_VOLUME_SIZE
 
 - Name: `WOODPECKER_BACKEND_K8S_VOLUME_SIZE`

@@ -19,7 +19,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 	"golang.org/x/oauth2"
 )
 

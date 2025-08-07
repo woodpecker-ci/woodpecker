@@ -21,7 +21,7 @@ steps:
         from_secret: github_token
     commands:
       - apk add -q --no-cache jq curl
-      - export ISSUE_NUMBER=4514
+      - export ISSUE_NUMBER=5326
       - export DESCRIPTION=$(cat links.md)
       - |
         curl -X PATCH \

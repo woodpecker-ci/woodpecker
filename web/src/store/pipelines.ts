@@ -34,11 +34,12 @@ export const usePipelineStore = defineStore('pipelines', () => {
   const repoStore = useRepoStore();
 
   const pipelines: Map<number, Map<number, Pipeline>> = reactive(new Map());
+  const loading = ref(false);
 
   function setPipeline(repoId: number, pipeline: Pipeline) {
     const repoPipelines = pipelines.get(repoId) || new Map<number, Pipeline>();
     repoPipelines.set(pipeline.number, {
-      ...(repoPipelines.get(pipeline.number) || {}),
+      ...repoPipelines.get(pipeline.number),
       ...pipeline,
     });
 
@@ -82,15 +83,19 @@ export const usePipelineStore = defineStore('pipelines', () => {
   }
 
   async function loadRepoPipelines(repoId: number, page?: number) {
+    loading.value = true;
     const _pipelines = await apiClient.getPipelineList(repoId, { page });
     _pipelines.forEach((pipeline) => {
       setPipeline(repoId, pipeline);
     });
+    loading.value = false;
   }
 
   async function loadPipeline(repoId: number, pipelinesNumber: number) {
+    loading.value = true;
     const pipeline = await apiClient.getPipeline(repoId, pipelinesNumber);
     setPipeline(repoId, pipeline);
+    loading.value = false;
   }
 
   const pipelineFeed = computed(() =>
@@ -117,14 +122,17 @@ export const usePipelineStore = defineStore('pipelines', () => {
   async function loadPipelineFeed() {
     await repoStore.loadRepos();
 
+    loading.value = true;
     const _pipelines = await apiClient.getPipelineFeed();
     _pipelines.forEach((pipeline) => {
       setPipeline(pipeline.repo_id, pipeline);
     });
+    loading.value = false;
   }
 
   return {
     pipelines,
+    loading,
     setPipeline,
     setWorkflow,
     getRepoPipelines,

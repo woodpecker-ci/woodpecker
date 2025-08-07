@@ -77,7 +77,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     title: isEditingAgent.value ? t('admin.settings.agents.saved') : t('admin.settings.agents.created'),
     type: 'success',
   });
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
@@ -88,7 +88,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 
   await props.deleteAgent(_agent);
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editAgent(agent: Agent) {

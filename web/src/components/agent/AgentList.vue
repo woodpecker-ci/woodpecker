@@ -1,7 +1,7 @@
 <template>
-  <div v-if="!props.loading" class="text-wp-text-100 space-y-4">
+  <div class="text-wp-text-100 space-y-4">
     <ListItem
-      v-for="agent in props.agents"
+      v-for="agent in agents"
       :key="agent.id"
       class="bg-wp-background-200! dark:bg-wp-background-100! items-center"
     >
@@ -9,7 +9,7 @@
       <span class="ml-auto">
         <span class="hidden space-x-2 md:inline-block">
           <Badge
-            v-if="props.isAdmin === true && agent.org_id !== -1"
+            v-if="isAdmin === true && agent.org_id !== -1"
             :label="$t('admin.settings.agents.org.badge')"
             :value="agent.org_id"
           />
@@ -31,15 +31,15 @@
         icon="trash"
         :title="$t('admin.settings.agents.delete_agent')"
         class="hover:text-wp-error-100 ml-2 h-8 w-8"
-        :is-loading="props.isDeleting"
+        :is-loading="isDeleting"
         @click="$emit('delete', agent)"
       />
     </ListItem>
 
-    <div v-if="props.agents?.length === 0" class="ml-2">{{ $t('admin.settings.agents.none') }}</div>
-  </div>
-  <div v-else class="flex justify-center">
-    <Icon name="loading" class="animate-spin" />
+    <div v-if="loading" class="flex justify-center">
+      <Icon name="spinner" class="animate-spin" />
+    </div>
+    <div v-else-if="agents?.length === 0" class="ml-2">{{ $t('admin.settings.agents.none') }}</div>
   </div>
 </template>
 
@@ -51,7 +51,7 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import { useDate } from '~/compositions/useDate';
 import type { Agent } from '~/lib/api/types';
 
-const props = defineProps<{
+defineProps<{
   agents: Agent[];
   isDeleting: boolean;
   loading: boolean;

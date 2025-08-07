@@ -39,7 +39,10 @@
         />
       </ListItem>
 
-      <div v-if="users?.length === 0" class="ml-2">{{ $t('admin.settings.users.none') }}</div>
+      <div v-if="loading" class="flex justify-center">
+        <Icon name="spinner" class="animate-spin" />
+      </div>
+      <div v-else-if="users?.length === 0" class="ml-2">{{ $t('admin.settings.users.none') }}</div>
     </div>
     <div v-else>
       <form @submit.prevent="saveUser">
@@ -88,6 +91,7 @@ import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
@@ -112,7 +116,7 @@ async function loadUsers(page: number): Promise<User[] | null> {
   return apiClient.getUsers({ page });
 }
 
-const { resetPage, data: users } = usePagination(loadUsers, () => !selectedUser.value);
+const { resetPage, data: users, loading } = usePagination(loadUsers, () => !selectedUser.value);
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedUser.value) {
@@ -133,7 +137,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
     });
   }
   selectedUser.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
@@ -144,7 +148,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
   await apiClient.deleteUser(_user);
   notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editUser(user: User) {

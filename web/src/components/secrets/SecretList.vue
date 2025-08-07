@@ -31,7 +31,10 @@
       </template>
     </ListItem>
 
-    <div v-if="secrets?.length === 0" class="ml-2">{{ $t('secrets.none') }}</div>
+    <div v-if="loading" class="flex justify-center">
+      <Icon name="spinner" class="animate-spin" />
+    </div>
+    <div v-else-if="secrets?.length === 0" class="ml-2">{{ $t('secrets.none') }}</div>
   </div>
 </template>
 
@@ -40,6 +43,7 @@ import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import type { Secret } from '~/lib/api/types';
@@ -47,6 +51,7 @@ import type { Secret } from '~/lib/api/types';
 const props = defineProps<{
   modelValue: (Secret & { edit?: boolean })[];
   isDeleting: boolean;
+  loading: boolean;
 }>();
 
 const emit = defineEmits<{

@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
