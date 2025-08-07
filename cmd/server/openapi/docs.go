@@ -907,42 +907,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/lookup/{org_full_name}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organizations"
-                ],
-                "summary": "Lookup an organization by full name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the organizations full name / slug",
-                        "name": "org_full_name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Org"
-                        }
-                    }
-                }
-            }
-        },
         "/orgs": {
             "get": {
                 "description": "Returns all registered orgs in the system. Requires admin rights.",
@@ -985,6 +949,42 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/Org"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/lookup/{org_full_name}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orgs"
+                ],
+                "summary": "Lookup an organization by full name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the organizations full name / slug",
+                        "name": "org_full_name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Org"
                         }
                     }
                 }

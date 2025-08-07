@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v73/github"
+	"github.com/google/go-github/v74/github"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -33,6 +33,7 @@ const (
 	hookField = "payload"
 
 	actionOpen     = "opened"
+	actionReopen   = "reopened"
 	actionClose    = "closed"
 	actionSync     = "synchronize"
 	actionReleased = "released"
@@ -148,7 +149,10 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
 func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
-	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync && hook.GetAction() != actionClose {
+	if hook.GetAction() != actionOpen &&
+		hook.GetAction() != actionSync &&
+		hook.GetAction() != actionClose &&
+		hook.GetAction() != actionReopen {
 		return nil, nil, nil, nil
 	}
 

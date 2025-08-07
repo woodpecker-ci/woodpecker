@@ -66,3 +66,6 @@ var HookPullRequestMerged []byte
 
 //go:embed WebhookReleaseBody.json
 var WebhookReleaseBody []byte
+
+//go:embed HookPullRequestReopened.json
+var HookPullRequestReopened []byte
