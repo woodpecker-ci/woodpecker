@@ -70,6 +70,7 @@ type config struct {
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 	NativeSecretsAllowFromStep  bool
+	PriorityClassName           string
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -103,6 +104,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				StorageClass:                c.String("backend-k8s-storage-class"),
 				VolumeSize:                  c.String("backend-k8s-volume-size"),
 				StorageRwx:                  c.Bool("backend-k8s-storage-rwx"),
+				PriorityClassName:           c.String("backend-k8s-priority-class"),
 				PodLabels:                   make(map[string]string), // just init empty map to prevent nil panic
 				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
 				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
