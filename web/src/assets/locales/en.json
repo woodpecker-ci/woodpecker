@@ -239,6 +239,7 @@
         "tag": "Tag",
         "pr": "Pull Request",
         "pr_closed": "Pull Request merged/closed",
+        "pr_metadata": "Pull Request metadata changed",
         "deploy": "Deploy",
         "cron": "Cron",
         "manual": "Manual",

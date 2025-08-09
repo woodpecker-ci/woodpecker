@@ -17,6 +17,7 @@ package forgejo
 import (
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -26,20 +27,52 @@ import (
 )
 
 const (
-	hookEvent       = "X-Forgejo-Event"
-	hookPush        = "push"
-	hookCreated     = "create"
-	hookPullRequest = "pull_request"
-	hookRelease     = "release"
+	hookEvent        = "X-Forgejo-Event"
+	hookPush         = "push"
+	hookCreated      = "create"
+	hookPullRequest  = "pull_request"
+	hookRelease      = "release"
+	hookPullApproved = "pull_request_approved"
+	hookPullRejected = "pull_request_rejected"
+	hookPullComment  = "pull_request_comment"
 
-	actionOpen   = "opened"
-	actionSync   = "synchronized"
-	actionClose  = "closed"
-	actionReopen = "reopened"
+	actionOpen          = "opened"
+	actionSync          = "synchronized"
+	actionClose         = "closed"
+	actionEdited        = "edited"
+	actionLabelUpdate   = "label_updated"
+	actionLabelCleared  = "label_cleared"
+	actionMilestoned    = "milestoned"
+	actionDeMilestoned  = "demilestoned"
+	actionReviewRequest = "review_requested"
+	actionAssigned      = "assigned"
+	actionUnAssigned    = "unassigned"
+	actionReviewed      = "reviewed"
+	actionReopen        = "reopened"
 
 	refBranch = "branch"
 	refTag    = "tag"
 )
+
+var actionList = []string{
+	actionOpen,
+	actionSync,
+	actionClose,
+	actionEdited,
+	actionLabelUpdate,
+	actionMilestoned,
+	actionDeMilestoned,
+	actionReviewRequest,
+	actionLabelCleared,
+	actionAssigned,
+	actionUnAssigned,
+	actionReviewed,
+	actionReopen,
+}
+
+func supportedAction(action string) bool {
+	return slices.Contains(actionList, action)
+}
 
 // parseHook parses a Forgejo hook from an http.Request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
@@ -52,6 +85,16 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 		return parseCreatedHook(r.Body)
 	case hookPullRequest:
 		return parsePullRequestHook(r.Body)
+	case hookPullApproved,
+		hookPullRejected,
+		hookPullComment:
+		repo, pipe, err := parsePullRequestHook(r.Body)
+		if err != nil {
+			return repo, pipe, err
+		}
+		// as actions states all the same we update it
+		pipe.EventReason = hookType
+		return repo, pipe, nil
 	case hookRelease:
 		return parseReleaseHook(r.Body)
 	}
@@ -111,17 +154,20 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, err
 	}
 
-	// Don't trigger pipelines for non-code changes ...
-	if pr.Action != actionOpen &&
-		pr.Action != actionSync &&
-		pr.Action != actionClose &&
-		pr.Action != actionReopen {
-		log.Debug().Msgf("pull_request action is '%s' and no open or sync", pr.Action)
+	// Only trigger pipelines for supported event types
+	if !supportedAction(pr.Action) {
+		log.Debug().Msgf("pull_request action is '%s'. Only '%s' are supported", pr.Action, strings.Join(actionList, "', '"))
 		return nil, nil, nil
 	}
 
 	repo = toRepo(pr.Repo)
 	pipeline = pipelineFromPullRequest(pr)
+
+	if pr.Action == actionLabelCleared {
+		// all other actions return the state of labels after the actions where done ... so we should too
+		pipeline.PullRequestLabels = []string{}
+	}
+
 	return repo, pipeline, err
 }
 
