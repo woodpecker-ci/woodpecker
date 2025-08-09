@@ -38,6 +38,7 @@
 
 ### 📚 Documentation
 
+- fix(deps): update docs npm deps non-major [[#5395](https://github.com/woodpecker-ci/woodpecker/pull/5395)]
 - chore(deps): lock file maintenance [[#5388](https://github.com/woodpecker-ci/woodpecker/pull/5388)]
 - fix(deps): update docs npm deps non-major [[#5384](https://github.com/woodpecker-ci/woodpecker/pull/5384)]
 - Remove references of kaniko [[#5371](https://github.com/woodpecker-ci/woodpecker/pull/5371)]
