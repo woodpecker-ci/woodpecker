@@ -95,4 +95,10 @@ var Flags = []cli.Flag{
 		Usage:   "whether to allow existing Kubernetes secrets to be referenced from steps",
 		Value:   false,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PRIORITY_CLASS"),
+		Name:    "backend-k8s-priority-class",
+		Usage:   "which kubernetes priority class to assign to created job pods",
+		Value:   "",
+	},
 }
