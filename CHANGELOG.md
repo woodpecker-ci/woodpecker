@@ -27,15 +27,6 @@
 - Support secrets in `cli exec` [[#5374](https://github.com/woodpecker-ci/woodpecker/pull/5374)]
 - Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
 
-### 📚 Documentation
-
-- chore(deps): lock file maintenance [[#5388](https://github.com/woodpecker-ci/woodpecker/pull/5388)]
-- fix(deps): update docs npm deps non-major [[#5384](https://github.com/woodpecker-ci/woodpecker/pull/5384)]
-- Remove references of kaniko [[#5371](https://github.com/woodpecker-ci/woodpecker/pull/5371)]
-- Add ASCII JUnit Test Report plugin [[#5355](https://github.com/woodpecker-ci/woodpecker/pull/5355)]
-- fix(deps): update docs npm deps non-major [[#5340](https://github.com/woodpecker-ci/woodpecker/pull/5340)]
-- chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
-
 ### 🐛 Bug Fixes
 
 - Correct OpenApi LookupOrg router path [[#5351](https://github.com/woodpecker-ci/woodpecker/pull/5351)]
@@ -45,8 +36,18 @@
 - Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
 - Use correct parameter for forge selection on login [[#5325](https://github.com/woodpecker-ci/woodpecker/pull/5325)]
 
+### 📚 Documentation
+
+- chore(deps): lock file maintenance [[#5388](https://github.com/woodpecker-ci/woodpecker/pull/5388)]
+- fix(deps): update docs npm deps non-major [[#5384](https://github.com/woodpecker-ci/woodpecker/pull/5384)]
+- Remove references of kaniko [[#5371](https://github.com/woodpecker-ci/woodpecker/pull/5371)]
+- Add ASCII JUnit Test Report plugin [[#5355](https://github.com/woodpecker-ci/woodpecker/pull/5355)]
+- fix(deps): update docs npm deps non-major [[#5340](https://github.com/woodpecker-ci/woodpecker/pull/5340)]
+- chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
+
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.4.0 [[#5394](https://github.com/woodpecker-ci/woodpecker/pull/5394)]
 - chore(deps): update dependency golang to v1.24.6 [[#5393](https://github.com/woodpecker-ci/woodpecker/pull/5393)]
 - fix(deps): update golang-packages [[#5392](https://github.com/woodpecker-ci/woodpecker/pull/5392)]
 - fix(deps): update dependency simple-icons to v15.9.0 [[#5387](https://github.com/woodpecker-ci/woodpecker/pull/5387)]
