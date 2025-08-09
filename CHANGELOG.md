@@ -48,6 +48,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5396](https://github.com/woodpecker-ci/woodpecker/pull/5396)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.4.0 [[#5394](https://github.com/woodpecker-ci/woodpecker/pull/5394)]
 - chore(deps): update dependency golang to v1.24.6 [[#5393](https://github.com/woodpecker-ci/woodpecker/pull/5393)]
 - fix(deps): update golang-packages [[#5392](https://github.com/woodpecker-ci/woodpecker/pull/5392)]
