@@ -56,7 +56,7 @@ After installing the agent, copy the example environment file `/etc/woodpecker/w
 ```ini title="/usr/local/lib/systemd/system/woodpecker-agent.service"
 [Unit]
 Description=WoodpeckerCI agent
-Documentation=https://woodpecker-ci.org/docs/administration/agent-config
+Documentation=https://woodpecker-ci.org/docs/administration/configuration/agent
 Requires=network.target
 After=network.target
 ConditionFileNotEmpty=/etc/woodpecker/woodpecker-agent.env
