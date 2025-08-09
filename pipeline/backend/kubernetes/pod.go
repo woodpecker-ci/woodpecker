@@ -179,6 +179,14 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
+
+	// If there are tolerations and they are allowed
+	if config.PodTolerationsAllowFromStep && len(options.Tolerations) != 0 {
+		spec.Tolerations = tolerations(options.Tolerations)
+	} else {
+		spec.Tolerations = tolerations(config.PodTolerations)
+	}
+
 	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
