@@ -49,11 +49,6 @@ export interface Repo {
   // Whether the repository is publicly visible.
   private: boolean;
 
-  // Whether the repository has trusted access for pipelines.
-  // If the repository is trusted then the host network can be used and
-  // volumes can be created.
-  trusted: RepoTrusted;
-
   // x-dart-type: Duration
   // The amount of time in minutes before the pipeline is killed.
   timeout: number;
@@ -101,7 +96,6 @@ export type RepoSettings = Pick<
   | 'config_file'
   | 'timeout'
   | 'visibility'
-  | 'trusted'
   | 'require_approval'
   | 'approval_allowed_users'
   | 'allow_pr'
@@ -115,10 +109,4 @@ export interface RepoPermissions {
   push: boolean;
   admin: boolean;
   synced: number;
-}
-
-export interface RepoTrusted {
-  network: boolean;
-  volumes: boolean;
-  security: boolean;
 }

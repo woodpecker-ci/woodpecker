@@ -40,7 +40,7 @@ const (
 	defaultFSGroup  int64 = 1000
 )
 
-func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
+func mkPod(step *types.Step, trusted types.TrustedConfiguration, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
 	var err error
 
 	nsp := newNativeSecretsProcessor(config, options.Secrets)
@@ -54,12 +54,12 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options, nsp)
+	spec, err := podSpec(step, trusted, config, options, nsp)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(step, podName, goos, options, nsp)
+	container, err := podContainer(step, trusted, podName, goos, options, nsp)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ func podAnnotations(config *config, options BackendOptions) map[string]string {
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
+func podSpec(step *types.Step, trusted types.TrustedConfiguration, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
@@ -176,14 +176,25 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
-		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
-	}
-	spec.Volumes, err = pvcVolumes(step.Volumes)
-	if err != nil {
-		return spec, err
+		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged && trusted.Security),
 	}
 
-	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
+	if trusted.Volumes {
+		spec.Volumes, err = pvcVolumes(step.Volumes)
+		if err != nil {
+			return spec, err
+		}
+	}
+
+	if step.WorkspaceVolume != "" {
+		volumeName, err := volumeName(step.WorkspaceVolume)
+		if err != nil {
+			return spec, err
+		}
+		spec.Volumes = append(spec.Volumes, pvcVolume(volumeName))
+	}
+
+	if trusted.Network && (len(step.DNS) != 0 || len(step.DNSSearch) != 0) {
 		spec.DNSConfig = &v1.PodDNSConfig{}
 		if len(step.DNS) != 0 {
 			spec.DNSConfig.Nameservers = step.DNS
@@ -209,14 +220,14 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (v1.Container, error) {
+func podContainer(step *types.Step, trusted types.TrustedConfiguration, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:            podName,
 		Image:           step.Image,
 		WorkingDir:      step.WorkingDir,
 		Ports:           containerPorts(step.Ports),
-		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
+		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged && trusted.Security),
 	}
 
 	if step.Pull {
@@ -250,9 +261,19 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		return container, err
 	}
 
-	container.VolumeMounts, err = volumeMounts(step.Volumes)
-	if err != nil {
-		return container, err
+	if trusted.Volumes {
+		container.VolumeMounts, err = volumeMounts(step.Volumes)
+		if err != nil {
+			return container, err
+		}
+	}
+	if step.WorkspaceVolume != "" {
+		volumeName, err := volumeName(step.WorkspaceVolume)
+		if err != nil {
+			return container, err
+		}
+
+		container.VolumeMounts = append(container.VolumeMounts, volumeMount(volumeName, volumeMountPath(step.WorkspaceVolume)))
 	}
 
 	container.EnvFrom = append(container.EnvFrom, nsp.envFromSources...)
@@ -586,13 +607,13 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
+func startPod(ctx context.Context, engine *kube, step *types.Step, trusted types.TrustedConfiguration, options BackendOptions) (*v1.Pod, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
 	engineConfig := engine.getConfig()
-	pod, err := mkPod(step, engineConfig, podName, engine.goos, options)
+	pod, err := mkPod(step, trusted, engineConfig, podName, engine.goos, options)
 	if err != nil {
 		return nil, err
 	}

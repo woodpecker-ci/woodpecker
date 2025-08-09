@@ -85,29 +85,6 @@ func repoOutput(c *cli.Command, repos []*woodpecker.Repo, fd ...io.Writer) error
 	default:
 		table := output.NewTable(out)
 
-		// Add custom field mapping for nested Trusted fields
-		table.AddFieldFn("TrustedNetwork", func(obj any) string {
-			repo, ok := obj.(*woodpecker.Repo)
-			if !ok {
-				return ""
-			}
-			return output.YesNo(repo.Trusted.Network)
-		})
-		table.AddFieldFn("TrustedSecurity", func(obj any) string {
-			repo, ok := obj.(*woodpecker.Repo)
-			if !ok {
-				return ""
-			}
-			return output.YesNo(repo.Trusted.Security)
-		})
-		table.AddFieldFn("TrustedVolume", func(obj any) string {
-			repo, ok := obj.(*woodpecker.Repo)
-			if !ok {
-				return ""
-			}
-			return output.YesNo(repo.Trusted.Volumes)
-		})
-
 		table.AddFieldAlias("Is_Active", "Active")
 		table.AddFieldAlias("Is_SCM_Private", "SCM_Private")
 

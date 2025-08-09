@@ -62,3 +62,9 @@ func WithTaskUUID(uuid string) Option {
 		r.taskUUID = uuid
 	}
 }
+
+func WithTrustedConfiguration(c backend.TrustedConfiguration) Option {
+	return func(r *Runtime) {
+		r.trusted = c
+	}
+}
