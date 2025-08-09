@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @qwerty287, @wgroeneveld
+@6543, @anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @lilioid, @qwerty287, @wgroeneveld
 
 ### 🔒 Security
 
@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- feat(k8s): k8s priority class name config [[#5391](https://github.com/woodpecker-ci/woodpecker/pull/5391)]
 - Count reopening an pull as opening an pull [[#5370](https://github.com/woodpecker-ci/woodpecker/pull/5370)]
 - Add pipeline log fullscreen [[#5377](https://github.com/woodpecker-ci/woodpecker/pull/5377)]
 - Show changed files as file-tree [[#5379](https://github.com/woodpecker-ci/woodpecker/pull/5379)]
