@@ -738,7 +738,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 		"spec": {
 			"containers": [
 				{
-					"name": "wp-he8bebctabr3kgk0qj36d2me-0",
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 					"image": "alpine",
 					"resources": {}
 				}
