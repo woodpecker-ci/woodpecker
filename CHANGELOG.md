@@ -49,6 +49,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook pre-commit/pre-commit-hooks to v6 [[#5399](https://github.com/woodpecker-ci/woodpecker/pull/5399)]
 - fix(deps): update dependency simple-icons to v15.10.0 [[#5400](https://github.com/woodpecker-ci/woodpecker/pull/5400)]
 - fix(deps): update web npm deps non-major [[#5396](https://github.com/woodpecker-ci/woodpecker/pull/5396)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.4.0 [[#5394](https://github.com/woodpecker-ci/woodpecker/pull/5394)]
