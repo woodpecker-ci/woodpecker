@@ -815,7 +815,6 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 
 	ja = jsonassert.New(t)
 	ja.Assertf(string(podJSON), expectedAllow)
-
 }
 
 func TestStepSecret(t *testing.T) {
