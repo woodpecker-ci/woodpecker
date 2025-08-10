@@ -244,7 +244,9 @@ execute a local pipeline
 
 **--backend-k8s-allow-native-secrets**: whether to allow existing Kubernetes secrets to be referenced from steps
 
-**--backend-k8s-namespace**="": backend k8s namespace (default: woodpecker)
+**--backend-k8s-namespace**="": backend k8s namespace, if used with WOODPECKER_BACKEND_K8S_NAMESPACE_PER_ORGANIZATION, this will be the prefix for the namespace appended with the organization name. (default: woodpecker)
+
+**--backend-k8s-namespace-per-org**: Whether to enable namespace segregation per organization feature. When enabled, Woodpecker will create the Kubernetes resources to separated Kubernetes namespaces per Woodpecker organization.
 
 **--backend-k8s-pod-annotations**="": backend k8s additional Agent-wide worker pod annotations
 
@@ -266,7 +268,7 @@ execute a local pipeline
 
 **--backend-k8s-volume-size**="": backend k8s volume size (default 10G) (default: 10G)
 
-**--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: /var/folders/6m/t779gl5s7fq17_t_59fflg5w0000gn/T/)
+**--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: /tmp)
 
 **--backend-no-proxy**="": if set, pass the environment variable down as "NO_PROXY" to steps
 
@@ -384,6 +386,8 @@ execute a local pipeline
 
 **--repo-url**="": Set the metadata environment variable "CI_REPO_URL".
 
+**--secrets**="": map of secrets, ex. 'secret="val",secret2="value2"' (default: map[])
+
 **--system-host**="": Set the metadata environment variable "CI_SYSTEM_HOST".
 
 **--system-name**="": Set the metadata environment variable "CI_SYSTEM_NAME". (default: woodpecker)
@@ -417,7 +421,7 @@ lint a pipeline configuration file
 
 **--plugins-privileged**="": allow plugins to run in privileged mode, if set empty, there is no (default: [])
 
-**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.3 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
+**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.5 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
 
 **--strict**: treat warnings as errors
 

@@ -23,10 +23,10 @@
       <TextField :id="id" v-model="forge.url" required />
     </InputField>
 
-    <hr class="my-4 border-gray-800" />
-
     <template v-if="forge.type && forge.url">
-      <InputField v-slot="{ id }" :label="$t('oauth_redirect_uri')">
+      <hr class="my-4 border-gray-800" />
+
+      <InputField v-slot="{ id }" :label="$t('oauth_redirect_url')">
         <i18n-t keypath="use_this_redirect_uri_to_create" tag="p" class="mb-2">
           <a rel="noopener noreferrer" :href="oauthAppForgeUrl" target="_blank" class="underline">{{
             $t('developer_settings')
@@ -109,7 +109,7 @@
       </Panel>
 
       <div class="flex gap-2">
-        <Button :text="$t('cancel')" @click="forge = {}" />
+        <Button :text="$t('cancel')" :to="{ name: 'admin-settings-forges' }" />
 
         <Button :is-loading="isSaving" type="submit" color="green" :text="isNew ? $t('add') : $t('save')" />
       </div>
