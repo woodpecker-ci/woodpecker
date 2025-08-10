@@ -732,7 +732,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 			"creationTimestamp": null,
 			"labels": {
 				"step": "toleration-test",
-				"woodpecker-ci.org/step": "toleration-disallow-test"
+				"woodpecker-ci.org/step": "toleration-test"
 			}
 		},
 		"spec": {
@@ -755,7 +755,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 			"creationTimestamp": null,
 			"labels": {
 				"step": "toleration-test",
-				"woodpecker-ci.org/step": "toleration-disallow-test"
+				"woodpecker-ci.org/step": "toleration-test"
 			}
 		},
 		"spec": {
@@ -766,7 +766,14 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 					"resources": {}
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"tolerations": [
+				{
+					"key": "custom",
+					"value": "value",
+					"effect": "NoSchedule"
+				}
+			]
 		},
 		"status": {}
 	}`
@@ -795,7 +802,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expectedDisallow)
 
-	pod, err := mkPod(step, &config{
+	pod, err = mkPod(step, &config{
 		Namespace:                   "woodpecker",
 		PodTolerationsAllowFromStep: true,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
@@ -803,10 +810,10 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	podJSON, err := json.Marshal(pod)
+	podJSON, err = json.Marshal(pod)
 	assert.NoError(t, err)
 
-	ja := jsonassert.New(t)
+	ja = jsonassert.New(t)
 	ja.Assertf(string(podJSON), expectedAllow)
 
 }
