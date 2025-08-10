@@ -724,14 +724,37 @@ func TestPodTolerations(t *testing.T) {
 }
 
 func TestPodTolerationsAllowFromStep(t *testing.T) {
-	const expected = `
+	const expectedDisallow = `
 	{
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
-				"step": "toleration-allow-test",
+				"step": "toleration-test",
+				"woodpecker-ci.org/step": "toleration-disallow-test"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never"
+		},
+		"status": {}
+	}`
+	const expectedAllow = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"step": "toleration-test",
 				"woodpecker-ci.org/step": "toleration-disallow-test"
 			}
 		},
@@ -752,11 +775,13 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 		{Key: "custom", Value: "value", Effect: TaintEffectNoSchedule},
 	}
 
-	pod, err := mkPod(&types.Step{
-		Name:  "toleration-disallow-test",
+	step := &types.Step{
+		Name:  "toleration-test",
 		Image: "alpine",
 		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
-	}, &config{
+	}
+
+	pod, err := mkPod(step, &config{
 		Namespace:                   "woodpecker",
 		PodTolerationsAllowFromStep: false,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
@@ -768,7 +793,22 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(podJSON), expected)
+	ja.Assertf(string(podJSON), expectedDisallow)
+
+	pod, err := mkPod(step, &config{
+		Namespace:                   "woodpecker",
+		PodTolerationsAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Tolerations: stepTolerations,
+	})
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expectedAllow)
+
 }
 
 func TestStepSecret(t *testing.T) {
