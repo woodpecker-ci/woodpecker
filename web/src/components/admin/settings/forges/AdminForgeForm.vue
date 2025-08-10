@@ -26,7 +26,7 @@
     <template v-if="forge.type && forge.url">
       <hr class="my-4 border-gray-800" />
 
-      <InputField v-slot="{ id }" :label="$t('oauth_redirect_uri')">
+      <InputField v-slot="{ id }" :label="$t('oauth_redirect_url')">
         <i18n-t keypath="use_this_redirect_uri_to_create" tag="p" class="mb-2">
           <a rel="noopener noreferrer" :href="oauthAppForgeUrl" target="_blank" class="underline">{{
             $t('developer_settings')

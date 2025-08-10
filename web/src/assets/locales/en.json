@@ -557,7 +557,7 @@
   "skip_verify_desc": "Skip SSL verification for the API connection. This is not recommended for production use.",
   "url": "URL",
   "forge_managed_by_env": "The primary forge is managed by environment variables. Any changes to this forge will be reverted on a restart.",
-  "oauth_redirect_uri": "OAuth redirect URL",
+  "oauth_redirect_url": "OAuth redirect URL",
   "forge_created": "Forge created",
   "advanced_options": "Advanced options",
   "leave_empty_to_keep_current_value": "Leave empty to keep current value",
