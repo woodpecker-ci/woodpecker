@@ -422,3 +422,12 @@ Determines if containers must be required to run as non-root users.
 - Default: none
 
 Secret names to pull images from private repositories. See, how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
+
+---
+
+### BACKEND_K8S_PRIORITY_CLASS
+
+- Name: `WOODPECKER_BACKEND_K8S_PRIORITY_CLASS`
+- Default: none, which will use the default priority class configured in Kubernetes
+
+Which [Kubernetes PriorityClass](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/priority-class-v1/) to assign to created job pods.
