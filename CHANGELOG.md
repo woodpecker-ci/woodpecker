@@ -31,6 +31,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix bitbucket status sending [[#5372](https://github.com/woodpecker-ci/woodpecker/pull/5372)]
 - Correct OpenApi LookupOrg router path [[#5351](https://github.com/woodpecker-ci/woodpecker/pull/5351)]
 - fix(agent): handle context cancellation [[#5323](https://github.com/woodpecker-ci/woodpecker/pull/5323)]
 - woodpecker-go/types: fix time-related struct field tags [[#5343](https://github.com/woodpecker-ci/woodpecker/pull/5343)]
