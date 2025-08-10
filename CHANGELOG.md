@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-09
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -49,6 +49,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v15.10.0 [[#5400](https://github.com/woodpecker-ci/woodpecker/pull/5400)]
 - fix(deps): update web npm deps non-major [[#5396](https://github.com/woodpecker-ci/woodpecker/pull/5396)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.4.0 [[#5394](https://github.com/woodpecker-ci/woodpecker/pull/5394)]
 - chore(deps): update dependency golang to v1.24.6 [[#5393](https://github.com/woodpecker-ci/woodpecker/pull/5393)]
@@ -91,7 +92,6 @@
 
 ### Misc
 
-- Support namespace per org for Kubernetes step secrets [[#5383](https://github.com/woodpecker-ci/woodpecker/pull/5383)]
 - 🧑‍💻 Add support for proxying to existing woodpecker server [[#5354](https://github.com/woodpecker-ci/woodpecker/pull/5354)]
 - Update and improve nix flake [[#5349](https://github.com/woodpecker-ci/woodpecker/pull/5349)]
 - Update issue number for link checker [[#5327](https://github.com/woodpecker-ci/woodpecker/pull/5327)]
