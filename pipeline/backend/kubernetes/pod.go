@@ -173,11 +173,20 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
+		PriorityClassName:  config.PriorityClassName,
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
+
+	// If there are tolerations and they are allowed
+	if config.PodTolerationsAllowFromStep && len(options.Tolerations) != 0 {
+		spec.Tolerations = tolerations(options.Tolerations)
+	} else {
+		spec.Tolerations = tolerations(config.PodTolerations)
+	}
+
 	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
