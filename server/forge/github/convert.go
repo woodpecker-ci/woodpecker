@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/google/go-github/v73/github"
+	"github.com/google/go-github/v74/github"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
