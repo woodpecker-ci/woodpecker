@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- Allow to set default approval mode [[#5406](https://github.com/woodpecker-ci/woodpecker/pull/5406)]
 - Add Agent-level Tolerations setting [[#5266](https://github.com/woodpecker-ci/woodpecker/pull/5266)]
 - feat(k8s): k8s priority class name config [[#5391](https://github.com/woodpecker-ci/woodpecker/pull/5391)]
 - Count reopening an pull as opening an pull [[#5370](https://github.com/woodpecker-ci/woodpecker/pull/5370)]
@@ -41,7 +42,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5404](https://github.com/woodpecker-ci/woodpecker/pull/5404)]
 - fix(deps): update docs npm deps non-major [[#5395](https://github.com/woodpecker-ci/woodpecker/pull/5395)]
 - fix(deps): update docs npm deps non-major [[#5384](https://github.com/woodpecker-ci/woodpecker/pull/5384)]
 - Remove references of kaniko [[#5371](https://github.com/woodpecker-ci/woodpecker/pull/5371)]
@@ -51,6 +51,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#5404](https://github.com/woodpecker-ci/woodpecker/pull/5404)]
 - chore(deps): update pre-commit hook pre-commit/pre-commit-hooks to v6 [[#5399](https://github.com/woodpecker-ci/woodpecker/pull/5399)]
 - fix(deps): update dependency simple-icons to v15.10.0 [[#5400](https://github.com/woodpecker-ci/woodpecker/pull/5400)]
 - fix(deps): update web npm deps non-major [[#5396](https://github.com/woodpecker-ci/woodpecker/pull/5396)]
