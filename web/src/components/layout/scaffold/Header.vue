@@ -1,6 +1,9 @@
 <template>
-  <header class="border-wp-background-400 text-wp-text-100" :class="{ 'md:px-4': fullWidth }">
-    <Container :full-width="fullWidth" class="relative py-0!">
+  <header
+    class="border-wp-background-400 bg-wp-background-100 text-wp-text-100 dark:border-wp-background-100 dark:bg-wp-background-300 border-b"
+    :class="{ 'md:px-4': fullWidth }"
+  >
+    <Container :full-width="fullWidth" class="py-0!">
       <div class="flex w-full flex-col gap-2 py-3 md:flex-row md:items-center md:justify-between md:gap-10">
         <div
           class="flex min-h-10 content-start items-center"
@@ -44,8 +47,6 @@
           <slot name="tabActions" />
         </div>
       </div>
-
-      <div class="bg-wp-background-400 -mt-px h-px w-full rounded-md" />
     </Container>
   </header>
 </template>
