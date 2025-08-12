@@ -17,9 +17,6 @@ package fixtures
 
 import _ "embed"
 
-//go:embed HookPush.json
-var HookPush string
-
 const HookPushEmptyHash = `
 {
   "push": {
@@ -35,11 +32,46 @@ const HookPushEmptyHash = `
 }
 `
 
-//go:embed HookPull.json
-var HookPull string
+//go:embed HookPush.json
+var HookPush string
 
-//go:embed HookPullRequestMerged.json
-var HookPullRequestMerged string
+var HookPushHeaders = map[string][]string{
+	"X-Event-Key":    {"repo:push"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"a9a1e3d4-de91-4e45-9fc3-941976118544"},
+	"Content-Type":   {"application/json"},
+}
 
-//go:embed HookPullRequestDeclined.json
-var HookPullRequestDeclined string
+//go:embed HookPullRequestRejected.json
+var HookPullRequestRejected string
+
+var HookPullRequestRejectedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:rejected"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"cfadee1f-282d-4dc5-9abb-a8067960868b"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullRequestCreated.json
+var HookPullRequestCreated string
+
+var HookPullRequestCreatedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:created"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"b6a7936d-956e-4d6d-a5ad-3e179249add6"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullPush.json
+var HookPullPush string
+
+var HookPullPushHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:updated"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"77429825-4efc-4326-916e-bd4c1a18546a"},
+	"Content-Type":   {"application/json"},
+}

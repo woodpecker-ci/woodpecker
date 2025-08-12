@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"slices"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -25,16 +26,46 @@ import (
 )
 
 const (
-	hookEvent        = "X-Event-Key"
-	hookPush         = "repo:push"
-	hookPullCreated  = "pullrequest:created"
-	hookPullUpdated  = "pullrequest:updated"
-	hookPullMerged   = "pullrequest:fulfilled"
-	hookPullDeclined = "pullrequest:rejected"
-	stateOpen        = "OPEN"
-	stateClosed      = "MERGED"
-	stateDeclined    = "DECLINED"
+	hookEvent = "X-Event-Key"
+
+	hookPush                      = "repo:push"
+	hookPullCreated               = "pullrequest:created"
+	hookPullUpdated               = "pullrequest:updated"
+	hookPullMerged                = "pullrequest:fulfilled"
+	hookPullDeclined              = "pullrequest:rejected"
+	hookPullApproved              = "pullrequest:approved"
+	hookPullChangesRequestCreated = "pullrequest:changes_request_created"
+	hookPullChangesRequestRemoved = "pullrequest:changes_request_removed"
+	hookPullCommentCreated        = "pullrequest:comment_created"
+	hookPullCommentDeleted        = "pullrequest:comment_deleted"
+	hookPullCommentReopened       = "pullrequest:comment_reopened"
+	hookPullCommentResolved       = "pullrequest:comment_resolved"
+	hookPullCommentUpdated        = "pullrequest:comment_updated"
+	hookPullPush                  = "pullrequest:push"
+	hookPullUnapproved            = "pullrequest:unapproved"
+
+	stateOpen     = "OPEN"
+	stateClosed   = "MERGED"
+	stateDeclined = "DECLINED"
 )
+
+var supportedHookEvents = []string{
+	hookPush,
+	hookPullApproved,
+	hookPullChangesRequestCreated,
+	hookPullChangesRequestRemoved,
+	hookPullCommentCreated,
+	hookPullCommentDeleted,
+	hookPullCommentReopened,
+	hookPullCommentResolved,
+	hookPullCommentUpdated,
+	hookPullCreated,
+	hookPullMerged,
+	hookPullPush,
+	hookPullDeclined,
+	hookPullUnapproved,
+	hookPullUpdated,
+}
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
@@ -45,13 +76,15 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	}
 
 	hookType := r.Header.Get(hookEvent)
+	if !slices.Contains(supportedHookEvents, hookType) {
+		return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
+	}
+
 	switch hookType {
 	case hookPush:
 		return parsePushHook(payload)
-	case hookPullCreated, hookPullUpdated, hookPullMerged, hookPullDeclined:
-		return parsePullHook(payload)
 	default:
-		return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
+		return parsePullHook(payload)
 	}
 }
 

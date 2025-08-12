@@ -310,10 +310,13 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	}
 	_ = c.Deactivate(ctx, u, r, link)
 
+	// to get events look into
+	// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-webhooks/#api-hook-events-subject-type-get-response
+	// and expand child properties till you have the event description
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
 		Desc:   rawURL.Host,
-		Events: []string{"repo:push", "pullrequest:created", "pullrequest:updated", "pullrequest:fulfilled", "pullrequest:rejected"},
+		Events: supportedHookEvents,
 		URL:    link,
 	})
 }
