@@ -203,8 +203,7 @@ func TestBitbucket(t *testing.T) {
 
 	buf := bytes.NewBufferString(fixtures.HookPush)
 	req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-	req.Header = http.Header{}
-	req.Header.Set(hookEvent, hookPush)
+	req.Header = fixtures.HookPushHeaders
 
 	mockStore := mocks_store.NewStore(t)
 	ctx = store.InjectToContext(ctx, mockStore)

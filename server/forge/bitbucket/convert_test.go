@@ -16,14 +16,39 @@
 package bitbucket
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+)
+
+const (
+	demoAvatarLinkRaw = "http://...avatar..."
+	demoForgeURLRaw   = "https://bitbucket.org/foo/bar"
+)
+
+var (
+	demoAvatarLinks = internal.WebhookLinks{
+		linkKeyAvatar: struct {
+			Href string `json:"href"`
+		}{
+			Href: demoAvatarLinkRaw,
+		},
+	}
+	demoForgeURLLinks = internal.WebhookLinks{
+		linkKeyHTML: struct {
+			Href string `json:"href"`
+		}{
+			Href: demoForgeURLRaw,
+		},
+	}
 )
 
 func Test_convertStatus(t *testing.T) {
@@ -36,44 +61,41 @@ func Test_convertStatus(t *testing.T) {
 }
 
 func Test_convertRepo(t *testing.T) {
-	from := &internal.Repo{
-		FullName:  "octocat/hello-world",
-		IsPrivate: true,
-		Scm:       "git",
+	var from internal.Repo
+	if !assert.NoError(t, json.Unmarshal([]byte(fixtures.APIRepo), &from)) {
+		t.FailNow()
 	}
-	from.Owner.Links.Avatar.Href = "http://..."
-	from.Links.HTML.Href = "https://bitbucket.org/foo/bar"
-	from.MainBranch.Name = "default"
+
 	fromPerm := &internal.RepoPerm{
 		Permission: "write",
 	}
 
-	to := convertRepo(from, fromPerm)
-	assert.Equal(t, from.Owner.Links.Avatar.Href, to.Avatar)
+	to := convertRepo(&from, fromPerm)
+	assert.Equal(t, demoAvatarLinkRaw, to.Avatar)
 	assert.Equal(t, from.FullName, to.FullName)
 	assert.Equal(t, "octocat", to.Owner)
 	assert.Equal(t, "hello-world", to.Name)
 	assert.Equal(t, "default", to.Branch)
 	assert.Equal(t, from.IsPrivate, to.IsSCMPrivate)
-	assert.Equal(t, from.Links.HTML.Href, to.Clone)
-	assert.Equal(t, from.Links.HTML.Href, to.ForgeURL)
+	assert.Equal(t, demoForgeURLRaw, to.Clone)
+	assert.Equal(t, demoForgeURLRaw, to.ForgeURL)
 	assert.True(t, to.Perm.Push)
 	assert.False(t, to.Perm.Admin)
 }
 
 func Test_convertWorkspace(t *testing.T) {
 	from := &internal.Workspace{Slug: "octocat"}
-	from.Links.Avatar.Href = "http://..."
+	from.Links = demoAvatarLinks
 	to := convertWorkspace(from)
-	assert.Equal(t, from.Links.Avatar.Href, to.Avatar)
+	assert.Equal(t, demoAvatarLinkRaw, to.Avatar)
 	assert.Equal(t, from.Slug, to.Login)
 }
 
 func Test_convertWorkspaceList(t *testing.T) {
 	from := &internal.Workspace{Slug: "octocat"}
-	from.Links.Avatar.Href = "http://..."
+	from.Links = demoAvatarLinks
 	to := convertWorkspaceList([]*internal.Workspace{from})
-	assert.Equal(t, from.Links.Avatar.Href, to[0].Avatar)
+	assert.Equal(t, demoAvatarLinkRaw, to[0].Avatar)
 	assert.Equal(t, from.Slug, to[0].Login)
 }
 
@@ -84,10 +106,10 @@ func Test_convertUser(t *testing.T) {
 		Expiry:       time.Now(),
 	}
 	user := &internal.Account{Login: "octocat"}
-	user.Links.Avatar.Href = "http://..."
+	user.Links = demoAvatarLinks
 
 	result := convertUser(user, token)
-	assert.Equal(t, user.Links.Avatar.Href, result.Avatar)
+	assert.Equal(t, demoAvatarLinkRaw, result.Avatar)
 	assert.Equal(t, user.Login, result.Login)
 	assert.Equal(t, token.AccessToken, result.AccessToken)
 	assert.Equal(t, token.RefreshToken, result.RefreshToken)
@@ -112,14 +134,14 @@ func Test_cloneLink(t *testing.T) {
 func Test_convertPullHook(t *testing.T) {
 	hook := &internal.PullRequestHook{}
 	hook.Actor.Login = "octocat"
-	hook.Actor.Links.Avatar.Href = "https://..."
-	hook.PullRequest.Dest.Commit.Hash = "73f9c44d"
-	hook.PullRequest.Dest.Branch.Name = "main"
-	hook.PullRequest.Dest.Repo.Links.HTML.Href = "https://bitbucket.org/foo/bar"
+	hook.Actor.Links = demoAvatarLinks
+	hook.PullRequest.Destination.Commit.Hash = "73f9c44d"
+	hook.PullRequest.Destination.Branch.Name = "main"
+	hook.PullRequest.Destination.Repo.Links = demoForgeURLLinks
 	hook.PullRequest.Source.Branch.Name = "change"
 	hook.PullRequest.Source.Repo.FullName = "baz/bar"
 	hook.PullRequest.Source.Commit.Hash = "c8411d7"
-	hook.PullRequest.Links.HTML.Href = "https://bitbucket.org/foo/bar/pulls/5"
+	hook.PullRequest.Links = internal.WebhookLinks{linkKeyHTML: internal.Link{Href: "https://bitbucket.org/foo/bar/pulls/5"}}
 	hook.PullRequest.Title = "updated README"
 	hook.PullRequest.Updated = time.Now()
 	hook.PullRequest.ID = 1
@@ -127,10 +149,10 @@ func Test_convertPullHook(t *testing.T) {
 	pipeline := convertPullHook(hook)
 	assert.Equal(t, model.EventPull, pipeline.Event)
 	assert.Equal(t, hook.Actor.Login, pipeline.Author)
-	assert.Equal(t, hook.Actor.Links.Avatar.Href, pipeline.Avatar)
+	assert.Equal(t, demoAvatarLinkRaw, pipeline.Avatar)
 	assert.Equal(t, hook.PullRequest.Source.Commit.Hash, pipeline.Commit)
 	assert.Equal(t, hook.PullRequest.Source.Branch.Name, pipeline.Branch)
-	assert.Equal(t, hook.PullRequest.Links.HTML.Href, pipeline.ForgeURL)
+	assert.Equal(t, fmt.Sprintf("%s/pulls/5", demoForgeURLRaw), pipeline.ForgeURL)
 	assert.Equal(t, "refs/pull-requests/1/from", pipeline.Ref)
 	assert.Equal(t, "change:main", pipeline.Refspec)
 	assert.Equal(t, hook.PullRequest.Title, pipeline.Message)
@@ -141,23 +163,23 @@ func Test_convertPushHook(t *testing.T) {
 	change := internal.Change{}
 	change.New.Target.Hash = "73f9c44d"
 	change.New.Name = "main"
-	change.New.Target.Links.HTML.Href = "https://bitbucket.org/foo/bar/commits/73f9c44d"
+	change.New.Target.Links = internal.WebhookLinks{linkKeyHTML: internal.Link{Href: "https://bitbucket.org/foo/bar/commits/73f9c44d"}}
 	change.New.Target.Message = "updated README"
 	change.New.Target.Date = time.Now()
 	change.New.Target.Author.Raw = "Test <test@domain.tld>"
 
 	hook := internal.PushHook{}
 	hook.Actor.Login = "octocat"
-	hook.Actor.Links.Avatar.Href = "https://..."
+	hook.Actor.Links = demoAvatarLinks
 
 	pipeline := convertPushHook(&hook, &change)
 	assert.Equal(t, model.EventPush, pipeline.Event)
 	assert.Equal(t, "test@domain.tld", pipeline.Email)
 	assert.Equal(t, hook.Actor.Login, pipeline.Author)
-	assert.Equal(t, hook.Actor.Links.Avatar.Href, pipeline.Avatar)
+	assert.Equal(t, demoAvatarLinkRaw, pipeline.Avatar)
 	assert.Equal(t, change.New.Target.Hash, pipeline.Commit)
 	assert.Equal(t, change.New.Name, pipeline.Branch)
-	assert.Equal(t, change.New.Target.Links.HTML.Href, pipeline.ForgeURL)
+	assert.Equal(t, "https://bitbucket.org/foo/bar/commits/73f9c44d", pipeline.ForgeURL)
 	assert.Equal(t, "refs/heads/main", pipeline.Ref)
 	assert.Equal(t, change.New.Target.Message, pipeline.Message)
 	assert.Equal(t, change.New.Target.Date.Unix(), pipeline.Timestamp)

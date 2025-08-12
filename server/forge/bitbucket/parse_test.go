@@ -113,8 +113,7 @@ func Test_parseHook(t *testing.T) {
 	t.Run("push hook", func(t *testing.T) {
 		buf := bytes.NewBufferString(fixtures.HookPush)
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPush)
+		req.Header = fixtures.HookPushHeaders
 
 		r, b, err := parseHook(req)
 		assert.NoError(t, err)

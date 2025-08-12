@@ -31,6 +31,9 @@ const (
 	statusPending = "INPROGRESS" // cspell:disable-line
 	statusSuccess = "SUCCESSFUL"
 	statusFailure = "FAILED"
+
+	linkKeyAvatar = "avatar"
+	linkKeyHTML   = "html"
 )
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
@@ -46,6 +49,15 @@ func convertStatus(status model.StatusValue) string {
 	}
 }
 
+// getLink returns href value or nothing
+func getLink(links internal.Links, key string) string {
+	val, ok := links[key]
+	if ok {
+		return val.Href
+	}
+	return ""
+}
+
 // convertRepo is a helper function used to convert a Bitbucket repository
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
@@ -56,12 +68,32 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		Owner:         strings.Split(from.FullName, "/")[0],
 		Name:          strings.Split(from.FullName, "/")[1],
 		FullName:      from.FullName,
-		ForgeURL:      from.Links.HTML.Href,
+		ForgeURL:      getLink(from.Links, linkKeyHTML),
 		IsSCMPrivate:  from.IsPrivate,
-		Avatar:        from.Owner.Links.Avatar.Href,
+		Avatar:        getLink(from.Owner.Links, linkKeyAvatar),
 		Branch:        from.MainBranch.Name,
 		Perm:          convertPerm(perm),
 		PREnabled:     true,
+	}
+	return &repo
+}
+
+// convertWebhookRepo is a helper function used to convert a Bitbucket repository
+// structure to the common Woodpecker repository structure.
+func convertWebhookRepo(from *internal.WebhookRepo, perm *internal.RepoPerm) *model.Repo {
+	repo := model.Repo{
+		ForgeRemoteID: model.ForgeRemoteID(from.UUID),
+		// Clone:     gould be generated
+		// CloneSSH:  cant get that here
+		Owner:        strings.Split(from.FullName, "/")[0],
+		Name:         strings.Split(from.FullName, "/")[1],
+		FullName:     from.FullName,
+		ForgeURL:     getLink(from.Links, linkKeyHTML),
+		IsSCMPrivate: from.IsPrivate,
+		Avatar:       getLink(from.Owner.Links, linkKeyAvatar),
+		// Branch:    cant get that here
+		Perm:      convertPerm(perm),
+		PREnabled: true,
 	}
 	return &repo
 }
@@ -132,7 +164,7 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 		AccessToken:   token.AccessToken,
 		RefreshToken:  token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
-		Avatar:        from.Links.Avatar.Href,
+		Avatar:        getLink(from.Links, linkKeyAvatar),
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
 	}
 }
@@ -152,7 +184,7 @@ func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 func convertWorkspace(from *internal.Workspace) *model.Team {
 	return &model.Team{
 		Login:  from.Slug,
-		Avatar: from.Links.Avatar.Href,
+		Avatar: getLink(from.Links, linkKeyAvatar),
 	}
 }
 
@@ -170,22 +202,22 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
-			from.PullRequest.Dest.Branch.Name,
+			from.PullRequest.Destination.Branch.Name,
 		),
-		ForgeURL:  from.PullRequest.Links.HTML.Href,
+		ForgeURL:  getLink(from.PullRequest.Links, linkKeyHTML),
 		Branch:    from.PullRequest.Source.Branch.Name,
 		Message:   from.PullRequest.Title,
-		Avatar:    from.Actor.Links.Avatar.Href,
+		Avatar:    getLink(from.Actor.Links, linkKeyAvatar),
 		Author:    from.Actor.Login,
 		Sender:    from.Actor.Login,
 		Timestamp: from.PullRequest.Updated.UTC().Unix(),
-		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
+		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Destination.Repo.UUID,
 	}
 
 	if from.PullRequest.State == stateClosed {
 		pipeline.Commit = from.PullRequest.MergeCommit.Hash
-		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name)
-		pipeline.Branch = from.PullRequest.Dest.Branch.Name
+		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Destination.Branch.Name)
+		pipeline.Branch = from.PullRequest.Destination.Branch.Name
 	}
 
 	return pipeline
@@ -196,10 +228,10 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit:    change.New.Target.Hash,
-		ForgeURL:  change.New.Target.Links.HTML.Href,
+		ForgeURL:  getLink(change.New.Target.Links, linkKeyHTML),
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
-		Avatar:    hook.Actor.Links.Avatar.Href,
+		Avatar:    getLink(hook.Actor.Links, linkKeyAvatar),
 		Author:    hook.Actor.Login,
 		Sender:    hook.Actor.Login,
 		Timestamp: change.New.Target.Date.UTC().Unix(),
