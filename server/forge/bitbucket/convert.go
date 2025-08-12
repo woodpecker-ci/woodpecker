@@ -50,7 +50,7 @@ func convertStatus(status model.StatusValue) string {
 }
 
 // getLink returns href value or nothing
-func getLink(links internal.Links, key string) string {
+func getLink(links internal.WebhookLinks, key string) string {
 	val, ok := links[key]
 	if ok {
 		return val.Href
@@ -68,7 +68,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		Owner:         strings.Split(from.FullName, "/")[0],
 		Name:          strings.Split(from.FullName, "/")[1],
 		FullName:      from.FullName,
-		ForgeURL:      getLink(from.Links, linkKeyHTML),
+		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        getLink(from.Owner.Links, linkKeyAvatar),
 		Branch:        from.MainBranch.Name,
@@ -160,7 +160,7 @@ func sshCloneLink(repo *internal.Repo) string {
 // structure to the Woodpecker User structure.
 func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 	return &model.User{
-		Login:         from.Login,
+		Login:         from.Nickname,
 		AccessToken:   token.AccessToken,
 		RefreshToken:  token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
@@ -208,8 +208,8 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		Branch:    from.PullRequest.Source.Branch.Name,
 		Message:   from.PullRequest.Title,
 		Avatar:    getLink(from.Actor.Links, linkKeyAvatar),
-		Author:    from.Actor.Login,
-		Sender:    from.Actor.Login,
+		Author:    from.Actor.Nickname,
+		Sender:    from.Actor.Nickname,
 		Timestamp: from.PullRequest.Updated.UTC().Unix(),
 		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Destination.Repo.UUID,
 	}
@@ -232,8 +232,8 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
 		Avatar:    getLink(hook.Actor.Links, linkKeyAvatar),
-		Author:    hook.Actor.Login,
-		Sender:    hook.Actor.Login,
+		Author:    hook.Actor.Nickname,
+		Sender:    hook.Actor.Nickname,
 		Timestamp: change.New.Target.Date.UTC().Unix(),
 	}
 	switch change.New.Type {

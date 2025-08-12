@@ -105,12 +105,12 @@ func Test_convertUser(t *testing.T) {
 		RefreshToken: "bar",
 		Expiry:       time.Now(),
 	}
-	user := &internal.Account{Login: "octocat"}
+	user := &internal.Account{Nickname: "octocat", DisplayName: "OctoCat"}
 	user.Links = demoAvatarLinks
 
 	result := convertUser(user, token)
 	assert.Equal(t, demoAvatarLinkRaw, result.Avatar)
-	assert.Equal(t, user.Login, result.Login)
+	assert.Equal(t, user.Nickname, result.Login)
 	assert.Equal(t, token.AccessToken, result.AccessToken)
 	assert.Equal(t, token.RefreshToken, result.RefreshToken)
 	assert.Equal(t, token.Expiry.UTC().Unix(), result.Expiry)
@@ -133,7 +133,7 @@ func Test_cloneLink(t *testing.T) {
 
 func Test_convertPullHook(t *testing.T) {
 	hook := &internal.PullRequestHook{}
-	hook.Actor.Login = "octocat"
+	hook.Actor.Nickname = "octocat"
 	hook.Actor.Links = demoAvatarLinks
 	hook.PullRequest.Destination.Commit.Hash = "73f9c44d"
 	hook.PullRequest.Destination.Branch.Name = "main"
@@ -148,7 +148,7 @@ func Test_convertPullHook(t *testing.T) {
 
 	pipeline := convertPullHook(hook)
 	assert.Equal(t, model.EventPull, pipeline.Event)
-	assert.Equal(t, hook.Actor.Login, pipeline.Author)
+	assert.Equal(t, hook.Actor.Nickname, pipeline.Author)
 	assert.Equal(t, demoAvatarLinkRaw, pipeline.Avatar)
 	assert.Equal(t, hook.PullRequest.Source.Commit.Hash, pipeline.Commit)
 	assert.Equal(t, hook.PullRequest.Source.Branch.Name, pipeline.Branch)
@@ -163,19 +163,25 @@ func Test_convertPushHook(t *testing.T) {
 	change := internal.Change{}
 	change.New.Target.Hash = "73f9c44d"
 	change.New.Name = "main"
-	change.New.Target.Links = internal.WebhookLinks{linkKeyHTML: internal.Link{Href: "https://bitbucket.org/foo/bar/commits/73f9c44d"}}
+	change.New.Target.Links = internal.WebhookLinks{
+		linkKeyHTML: struct {
+			Href string `json:"href"`
+		}{
+			Href: "https://bitbucket.org/foo/bar/commits/73f9c44d",
+		},
+	}
 	change.New.Target.Message = "updated README"
 	change.New.Target.Date = time.Now()
 	change.New.Target.Author.Raw = "Test <test@domain.tld>"
 
 	hook := internal.PushHook{}
-	hook.Actor.Login = "octocat"
+	hook.Actor.Nickname = "octocat"
 	hook.Actor.Links = demoAvatarLinks
 
 	pipeline := convertPushHook(&hook, &change)
 	assert.Equal(t, model.EventPush, pipeline.Event)
 	assert.Equal(t, "test@domain.tld", pipeline.Email)
-	assert.Equal(t, hook.Actor.Login, pipeline.Author)
+	assert.Equal(t, hook.Actor.Nickname, pipeline.Author)
 	assert.Equal(t, demoAvatarLinkRaw, pipeline.Avatar)
 	assert.Equal(t, change.New.Target.Hash, pipeline.Commit)
 	assert.Equal(t, change.New.Name, pipeline.Branch)

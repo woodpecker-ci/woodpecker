@@ -109,7 +109,7 @@ func (c *config) Auth(ctx context.Context, token, secret string) (string, error)
 	if err != nil {
 		return "", err
 	}
-	return user.Login, nil
+	return user.Nickname, nil
 }
 
 // Refresh refreshes the Bitbucket oauth2 access token. If the token is
@@ -412,6 +412,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
+	// As the repo from the webhook is incomplete we need to ask the API
 	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, nil, err
