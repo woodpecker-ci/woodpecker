@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="text-neutral-content border-wp-background-100 bg-wp-primary-200 text-wp-primary-text-100 dark:bg-wp-primary-300 flex border-b p-4 font-bold"
+    class="text-neutral-content border-wp-background-300 dark:border-wp-background-100 bg-wp-primary-200 text-wp-primary-text-100 dark:bg-wp-primary-300 flex border-b p-4 font-bold"
   >
     <div class="flex items-center space-x-2">
       <router-link :to="{ name: 'home' }" class="-my-2 flex flex-col px-2">
@@ -37,7 +37,7 @@
         v-else
         :text="$t('login')"
         :to="`/login?url=${route.fullPath}`"
-        class="navbar-link !text-wp-primary-text-100 bg-wp-primary-200 dark:bg-wp-primary-300 !border-transparent !shadow-none"
+        class="navbar-link !text-wp-primary-text-100 bg-wp-primary-200 dark:bg-wp-primary-300 !border-transparent"
       />
     </div>
   </nav>
@@ -70,7 +70,7 @@ const { enableSwagger } = config;
 @reference '~/tailwind.css';
 
 .navbar-icon {
-  @apply h-11 w-11 rounded-md p-2.5;
+  @apply h-11 w-11 rounded-md p-2.5 hover:bg-black/20 dark:hover:bg-white/5;
 }
 
 .navbar-icon :deep(svg) {
@@ -78,6 +78,6 @@ const { enableSwagger } = config;
 }
 
 .navbar-link {
-  @apply hover-effect -my-1 rounded-md px-3 py-2;
+  @apply -my-1 rounded-md px-3 py-2 hover:bg-black/20 dark:hover:bg-white/5;
 }
 </style>

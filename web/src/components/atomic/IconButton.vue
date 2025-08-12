@@ -47,6 +47,7 @@ defineProps<{
 @reference '~/tailwind.css';
 
 .icon-button {
-  @apply hover-effect relative flex cursor-pointer items-center justify-center overflow-hidden rounded-md bg-transparent px-1 py-1 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply hover:bg-wp-control-neutral-100 dark:hover:bg-wp-control-neutral-300 relative flex shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-md bg-transparent px-1 py-1 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply in-[.border-wp-background-300]:hover:bg-wp-control-neutral-200;
 }
 </style>

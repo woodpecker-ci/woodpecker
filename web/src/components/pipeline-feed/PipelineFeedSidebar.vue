@@ -2,7 +2,7 @@
   <aside
     v-if="isOpen"
     ref="target"
-    class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 z-50 flex flex-col items-center overflow-y-auto"
+    class="border-wp-background-300 dark:border-wp-background-100 bg-wp-background-100 dark:bg-wp-background-300 z-50 flex flex-col items-center overflow-y-auto"
     :aria-label="$t('pipeline_feed')"
   >
     <router-link
@@ -12,7 +12,7 @@
         name: 'repo-pipeline',
         params: { repoId: pipeline.repo_id, pipelineId: pipeline.number },
       }"
-      class="border-wp-background-400 hover:bg-wp-background-300 dark:hover:bg-wp-background-400 flex w-full border-b px-2 py-4 hover:shadow-xs"
+      class="border-wp-background-300 dark:border-wp-background-100 hover:bg-wp-control-neutral-100 dark:hover:bg-wp-control-neutral-200 flex w-full border-b px-2 py-4"
     >
       <PipelineFeedItem :pipeline="pipeline" />
     </router-link>

@@ -4,28 +4,30 @@
       <ListItem
         v-for="org in orgs"
         :key="org.id"
-        class="bg-wp-background-200! dark:bg-wp-background-100! items-center gap-2"
+        class="bg-wp-background-200! dark:bg-wp-background-200! items-center gap-2"
       >
         <span>{{ org.name }}</span>
-        <IconButton
-          icon="chevron-right"
-          :title="$t('admin.settings.orgs.view')"
-          class="ml-auto h-8 w-8"
-          :to="{ name: 'org', params: { orgId: org.id } }"
-        />
-        <IconButton
-          icon="settings-outline"
-          :title="$t('admin.settings.orgs.org_settings')"
-          class="h-8 w-8"
-          :to="{ name: 'org-settings', params: { orgId: org.id } }"
-        />
-        <IconButton
-          icon="trash"
-          :title="$t('admin.settings.orgs.delete_org')"
-          class="hover:text-wp-error-100 ml-2 h-8 w-8"
-          :is-loading="isDeleting"
-          @click="deleteOrg(org)"
-        />
+        <div class="ml-auto flex items-center gap-2">
+          <IconButton
+            icon="chevron-right"
+            :title="$t('admin.settings.orgs.view')"
+            class="h-8 w-8"
+            :to="{ name: 'org', params: { orgId: org.id } }"
+          />
+          <IconButton
+            icon="settings-outline"
+            :title="$t('admin.settings.orgs.org_settings')"
+            class="h-8 w-8"
+            :to="{ name: 'org-settings', params: { orgId: org.id } }"
+          />
+          <IconButton
+            icon="trash"
+            :title="$t('admin.settings.orgs.delete_org')"
+            class="hover:text-wp-error-100 h-8 w-8"
+            :is-loading="isDeleting"
+            @click="deleteOrg(org)"
+          />
+        </div>
       </ListItem>
 
       <div v-if="loading" class="flex justify-center">

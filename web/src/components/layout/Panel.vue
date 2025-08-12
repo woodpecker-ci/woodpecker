@@ -1,12 +1,10 @@
 <template>
-  <div
-    class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 w-full overflow-hidden rounded-md border shadow-sm"
-  >
+  <div class="border-wp-background-300 dark:border-wp-background-100 w-full overflow-hidden rounded-md border">
     <component
       :is="collapsable ? 'button' : 'div'"
       v-if="title"
       type="button"
-      class="bg-wp-background-400 text-wp-text-100 flex w-full gap-2 px-4 py-2 font-bold"
+      class="bg-wp-control-neutral-100 text-wp-text-100 flex w-full gap-2 px-4 py-2 font-bold"
       :class="{
         'cursor-pointer': collapsable,
       }"
