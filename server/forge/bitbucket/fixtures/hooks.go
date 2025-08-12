@@ -163,3 +163,14 @@ var HookPullMergedHeaders = map[string][]string{
 	"X-Request-UUID": {"a7ff3cfe-b917-4c96-b9b9-64b6ad58e893"},
 	"Content-Type":   {"application/json"},
 }
+
+//go:embed HookPullReviewRequested.json
+var HookPullReviewRequested string
+
+var HookPullReviewRequestedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:updated"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"407b8a5f-a397-45ea-83ab-d08971f0cf03"},
+	"Content-Type":   {"application/json"},
+}
