@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-11
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -51,6 +51,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5407](https://github.com/woodpecker-ci/woodpecker/pull/5407)]
 - chore(deps): lock file maintenance [[#5404](https://github.com/woodpecker-ci/woodpecker/pull/5404)]
 - chore(deps): update pre-commit hook pre-commit/pre-commit-hooks to v6 [[#5399](https://github.com/woodpecker-ci/woodpecker/pull/5399)]
 - fix(deps): update dependency simple-icons to v15.10.0 [[#5400](https://github.com/woodpecker-ci/woodpecker/pull/5400)]
