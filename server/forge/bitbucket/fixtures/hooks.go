@@ -75,3 +75,91 @@ var HookPullPushHeaders = map[string][]string{
 	"X-Request-UUID": {"77429825-4efc-4326-916e-bd4c1a18546a"},
 	"Content-Type":   {"application/json"},
 }
+
+//go:embed HookPullToDraft.json
+var HookPullToDraft string
+
+var HookPullToDraftHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:updated"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"f8916d54-02f3-41f7-a38e-8eee3d72a00d"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullReadyFromDraft.json
+var HookPullReadyFromDraft string
+
+var HookPullReadyFromDraftHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:updated"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"1b49a8cb-e36d-49c4-99ec-ee2c800832ba"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullCommentCreated.json
+var HookPullCommentCreated string
+
+var HookPullCommentCreatedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:comment_created"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"325ce2a9-4d86-4fae-ab59-7d1376fe0438"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullChangesRequestCreated.json
+var HookPullChangesRequestCreated string
+
+var HookPullChangesRequestCreatedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:changes_request_created"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"5cb41f6b-531a-469a-8fb0-9489f4530dbd"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullChangesRequestRemoved.json
+var HookPullChangesRequestRemoved string
+
+var HookPullChangesRequestRemovedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:changes_request_removed"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"78ff767e-741d-4137-a546-b1fc526ffb79"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullApproved.json
+var HookPullApproved string
+
+var HookPullApprovedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:approved"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"23ac9e91-8346-4e2a-8238-1d244d6b0138"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullUnapproved.json
+var HookPullUnapproved string
+
+var HookPullUnapprovedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:unapproved"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"b612e0dc-6fa5-4075-8440-1c6a0d67262c"},
+	"Content-Type":   {"application/json"},
+}
+
+//go:embed HookPullMerged.json
+var HookPullMerged string
+
+var HookPullMergedHeaders = map[string][]string{
+	"X-Event-Key":    {"pullrequest:fulfilled"},
+	"X-Hook-UUID":    {"81424cfd-6ea3-47d0-bb73-ae76bb3fb3a0"},
+	"User-Agent":     {"Bitbucket-Webhooks/2.0"},
+	"X-Request-UUID": {"a7ff3cfe-b917-4c96-b9b9-64b6ad58e893"},
+	"Content-Type":   {"application/json"},
+}
