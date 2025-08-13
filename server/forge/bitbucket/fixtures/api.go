@@ -18,3 +18,6 @@ import _ "embed"
 
 //go:embed APIRepo.json
 var APIRepo string
+
+//go:embed APIUser.json
+var APIUser string

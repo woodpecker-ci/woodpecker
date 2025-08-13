@@ -159,7 +159,8 @@ func Test_convertPullHook(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("%s/pulls/5", demoForgeURLRaw), pipeline.ForgeURL)
 	assert.Equal(t, "refs/pull-requests/1/from", pipeline.Ref)
 	assert.Equal(t, "change:main", pipeline.Refspec)
-	assert.Equal(t, hook.PullRequest.Title, pipeline.Message)
+	assert.Equal(t, "updated README", pipeline.Title)
+	assert.Equal(t, "", pipeline.Message)
 	assert.Equal(t, hook.PullRequest.Updated.Unix(), pipeline.Timestamp)
 }
 

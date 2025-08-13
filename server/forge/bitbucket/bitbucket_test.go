@@ -104,7 +104,7 @@ func TestBitbucket(t *testing.T) {
 
 	repo, err := c.Repo(ctx, fakeUser, "", fakeRepo.Owner, fakeRepo.Name)
 	assert.NoError(t, err)
-	assert.Equal(t, fakeRepo.FullName, repo.FullName)
+	assert.Equal(t, "6543/collect-webhooks", repo.FullName)
 
 	_, err = c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 	assert.Error(t, err)
@@ -212,14 +212,14 @@ func TestBitbucket(t *testing.T) {
 
 	r, b, err := c.Hook(ctx, req)
 	assert.NoError(t, err)
-	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
-	assert.Equal(t, "master", r.Branch)
-	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.Equal(t, "6543/collect-webhooks", r.FullName)
+	assert.Equal(t, "niam", r.Branch)
+	assert.Equal(t, "859c737a468f8168b257db109295876fd1f5dbd6", b.Commit)
 }
 
 var (
 	fakeUser = &model.User{
-		Login:       "superman",
+		Login:       "6543",
 		AccessToken: "cfcd2084",
 	}
 
