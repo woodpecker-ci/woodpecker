@@ -49,7 +49,7 @@ func convertStatus(status model.StatusValue) string {
 	}
 }
 
-// getLink returns href value or nothing
+// getLink returns href value or nothing.
 func getLink(links internal.WebhookLinks, key string) string {
 	val, ok := links[key]
 	if ok {
