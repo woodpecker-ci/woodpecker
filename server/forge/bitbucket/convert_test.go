@@ -71,14 +71,14 @@ func Test_convertRepo(t *testing.T) {
 	}
 
 	to := convertRepo(&from, fromPerm)
-	assert.Equal(t, demoAvatarLinkRaw, to.Avatar)
-	assert.Equal(t, from.FullName, to.FullName)
-	assert.Equal(t, "octocat", to.Owner)
-	assert.Equal(t, "hello-world", to.Name)
-	assert.Equal(t, "default", to.Branch)
-	assert.Equal(t, from.IsPrivate, to.IsSCMPrivate)
-	assert.Equal(t, demoForgeURLRaw, to.Clone)
-	assert.Equal(t, demoForgeURLRaw, to.ForgeURL)
+	assert.Equal(t, "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png", to.Avatar)
+	assert.Equal(t, "6543/collect-webhooks", to.FullName)
+	assert.Equal(t, "6543", to.Owner)
+	assert.Equal(t, "collect-webhooks", to.Name)
+	assert.Equal(t, "niam", to.Branch)
+	assert.True(t, to.IsSCMPrivate)
+	assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks.git", to.Clone)
+	assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks", to.ForgeURL)
 	assert.True(t, to.Perm.Push)
 	assert.False(t, to.Perm.Admin)
 }
@@ -141,7 +141,14 @@ func Test_convertPullHook(t *testing.T) {
 	hook.PullRequest.Source.Branch.Name = "change"
 	hook.PullRequest.Source.Repo.FullName = "baz/bar"
 	hook.PullRequest.Source.Commit.Hash = "c8411d7"
-	hook.PullRequest.Links = internal.WebhookLinks{linkKeyHTML: internal.Link{Href: "https://bitbucket.org/foo/bar/pulls/5"}}
+	hook.PullRequest.Links = internal.WebhookLinks{
+		linkKeyHTML: struct {
+			Href string `json:"href"`
+		}{
+			Href: "https://bitbucket.org/foo/bar/pulls/5",
+		},
+	}
+
 	hook.PullRequest.Title = "updated README"
 	hook.PullRequest.Updated = time.Now()
 	hook.PullRequest.ID = 1
