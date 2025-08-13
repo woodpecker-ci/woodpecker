@@ -75,6 +75,8 @@ type parsedHookMetadata struct {
 	RepoFullName string
 
 	NeedPostProcessing bool
+
+	DiffStatApi string
 }
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
@@ -141,6 +143,8 @@ func parseHook(r *http.Request) (*parsedHookMetadata, *model.Pipeline, error) {
 		RepoOwner:    hookRepo.Owner.Nickname,
 		RepoName:     hookRepo.Name,
 		RepoFullName: hookRepo.FullName,
+
+		DiffStatApi: getLink(hookPull.PullRequest.Links, linkKeyDiffStat),
 
 		NeedPostProcessing: needPostProcessing,
 	}, p, nil

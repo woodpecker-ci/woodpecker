@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"slices"
 	"strconv"
 
 	"golang.org/x/oauth2"
@@ -423,15 +424,37 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
-	// pull events only get the sort sha so we query the long one
+	// pull events need more metadata via api requests
 	if pl.Event == model.EventPull ||
 		pl.Event == model.EventPullClosed ||
 		pl.Event == model.EventPullMetadata {
-		commit, err := c.getCommit(ctx, repo, pl.Commit)
+		client, err := c.getClientForRepo(ctx, repo)
 		if err != nil {
 			return nil, nil, err
 		}
-		pl.Commit = commit.SHA
+		// pull events only get the sort sha so we query the long one
+		commit, err := client.GetCommit(repo.Owner, repo.Name, pl.Commit)
+		if err != nil {
+			return nil, nil, err
+		}
+		pl.Commit = commit.Hash
+
+		if hookMetadata.DiffStatApi != "" {
+			diffStat, err := client.GetDiffStat(hookMetadata.DiffStatApi)
+			if err != nil {
+				return nil, nil, fmt.Errorf("got error while query changed files of pull: %w", err)
+			}
+			for _, stat := range diffStat {
+				if stat.Old != nil {
+					pl.ChangedFiles = append(pl.ChangedFiles, stat.Old.Path)
+				}
+				if stat.New != nil {
+					pl.ChangedFiles = append(pl.ChangedFiles, stat.New.Path)
+				}
+			}
+			slices.Sort(pl.ChangedFiles)
+			pl.ChangedFiles = slices.Compact(pl.ChangedFiles)
+		}
 	}
 
 	// the "pullrequest:updated" event will be pre-parsed but needs post processing via API query and DB query
@@ -512,7 +535,7 @@ func (c *config) newOAuth2Config() *oauth2.Config {
 	}
 }
 
-func (c *config) getCommit(ctx context.Context, repo *model.Repo, sha string) (*model.Commit, error) {
+func (c *config) getClientForRepo(ctx context.Context, repo *model.Repo) (*internal.Client, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("could not get store from context")
@@ -528,15 +551,7 @@ func (c *config) getCommit(ctx context.Context, repo *model.Repo, sha string) (*
 		return nil, err
 	}
 
-	commit, err := c.newClient(ctx, user).GetCommit(repo.Owner, repo.Name, sha)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.Commit{
-		SHA:      commit.Hash,
-		ForgeURL: commit.Links.HTML.Href,
-	}, nil
+	return c.newClient(ctx, user)
 }
 
 // helper function to return matching hooks.

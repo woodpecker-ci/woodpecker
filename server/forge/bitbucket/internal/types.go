@@ -388,3 +388,27 @@ type Dir struct {
 	Type string `json:"type"`
 	Size uint   `json:"size"`
 }
+
+type DiffStatResponse struct {
+	Values  []*DiffStatValue `json:"values"`
+	Pagelen int              `json:"pagelen"`
+	Size    int              `json:"size"`
+	Page    int              `json:"page"`
+	Next    *string          `json:"next"`
+}
+
+type DiffStatValue struct {
+	Type         string              `json:"type"`
+	LinesAdded   int                 `json:"lines_added"`
+	LinesRemoved int                 `json:"lines_removed"`
+	Status       string              `json:"status"`
+	Old          *DiffStatCommitFile `json:"old"`
+	New          *DiffStatCommitFile `json:"new"`
+}
+
+type DiffStatCommitFile struct {
+	Path        string       `json:"path"`
+	Type        string       `json:"type"`
+	EscapedPath string       `json:"escaped_path"`
+	Links       WebhookLinks `json:"links"`
+}

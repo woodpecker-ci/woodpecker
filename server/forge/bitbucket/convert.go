@@ -32,8 +32,9 @@ const (
 	statusSuccess = "SUCCESSFUL"
 	statusFailure = "FAILED"
 
-	linkKeyAvatar = "avatar"
-	linkKeyHTML   = "html"
+	linkKeyAvatar   = "avatar"
+	linkKeyHTML     = "html"
+	linkKeyDiffStat = "diffstat" // cspell:disable-line
 )
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
