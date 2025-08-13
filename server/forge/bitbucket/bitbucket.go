@@ -551,7 +551,7 @@ func (c *config) getClientForRepo(ctx context.Context, repo *model.Repo) (*inter
 		return nil, err
 	}
 
-	return c.newClient(ctx, user)
+	return c.newClient(ctx, user), nil
 }
 
 // helper function to return matching hooks.
