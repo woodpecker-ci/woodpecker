@@ -48,6 +48,8 @@ const (
 	pathCommit       = "%s/2.0/repositories/%s/%s/commits/%s"
 	pathDir          = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pageSize         = 100
+
+	maxIterations = 1000
 )
 
 type Client struct {
@@ -262,11 +264,22 @@ func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) 
 // GetDiffStat is used to get the files changed in a pull
 // we ned the exact api url from that pull so constructing is no option
 // use the linkKeyDiffStat to identify it in the pull links list
-func (c *Client) GetDiffStat(diffStatAPI string) ([]*DiffStatValue, error) {
+func (c *Client) GetDiffStat(diffStatAPI string, itMax ...int) ([]*DiffStatValue, error) {
+	maxPage := maxIterations
+	if len(itMax) != 0 {
+		maxPage = itMax[0]
+	}
 	out := new(DiffStatResponse)
 	_, err := c.do(diffStatAPI, http.MethodGet, nil, out)
 	if err != nil {
 		return nil, err
+	}
+	if out.Next != nil && maxPage > 0 {
+		values, err := c.GetDiffStat(*out.Next, maxPage-1)
+		if err != nil {
+			return nil, err
+		}
+		out.Values = append(out.Values, values...)
 	}
 	return out.Values, nil
 }
