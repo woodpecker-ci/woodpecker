@@ -469,7 +469,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		if !errors.Is(err, store_types.RecordNotExist) {
 			return nil, nil, fmt.Errorf("could not post process pull event by getting last pipeline: %w")
 		}
-		if oldPl.Commit == pl.Commit {
+		if oldPl != nil && oldPl.Commit == pl.Commit {
 			pl.Event = model.EventPullMetadata
 			pl.EventReason = "update"
 		}
