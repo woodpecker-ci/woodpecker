@@ -32,6 +32,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	store_types "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -405,20 +407,49 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	hookRepo, pl, err := parseHook(req)
+	hookMetadata, pl, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err
 	}
-	repoUUID := model.ForgeRemoteID(hookRepo.UUID)
+	repoUUID := model.ForgeRemoteID(hookMetadata.RepoUUID)
 
 	u, err := common.RepoUserForgeID(ctx, repoUUID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	repo, err := c.Repo(ctx, u, repoUUID, hookRepo.Owner.Nickname, hookRepo.Name)
+	repo, err := c.Repo(ctx, u, repoUUID, hookMetadata.RepoOwner, hookMetadata.RepoName)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// pull events only get the sort sha so we query the long one
+	if pl.Event == model.EventPull ||
+		pl.Event == model.EventPullClosed ||
+		pl.Event == model.EventPullMetadata {
+		commit, err := c.getCommit(ctx, repo, pl.Commit)
+		if err != nil {
+			return nil, nil, err
+		}
+		pl.Commit = commit.SHA
+	}
+
+	// the "pullrequest:updated" event will be pre-parsed but needs post processing via API query and DB query
+	if hookMetadata.NeedPostProcessing {
+		// we check if we saw the pull head commit last time we got a hook from this specific pull e.g. by an create/update hook
+		// if yes then no git change was made and we know that it must have been a metadata change, else its just a normal pull event
+		_store, ok := store.TryFromContext(ctx)
+		if !ok {
+			return nil, nil, fmt.Errorf("could not get store from context")
+		}
+		oldPl, err := _store.GetPipelineLastByPull(repo, pl.ForgeURL)
+		if !errors.Is(err, store_types.RecordNotExist) {
+			return nil, nil, fmt.Errorf("could not post process pull event by getting last pipeline: %w")
+		}
+		if oldPl.Commit == pl.Commit {
+			pl.Event = model.EventPullMetadata
+			pl.EventReason = "update"
+		}
 	}
 
 	return repo, pl, nil
@@ -479,6 +510,33 @@ func (c *config) newOAuth2Config() *oauth2.Config {
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
+}
+
+func (c *config) getCommit(ctx context.Context, repo *model.Repo, sha string) (*model.Commit, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("could not get store from context")
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	commit, err := c.newClient(ctx, user).GetCommit(repo.Owner, repo.Name, sha)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Commit{
+		SHA:      commit.Hash,
+		ForgeURL: commit.Links.HTML.Href,
+	}, nil
 }
 
 // helper function to return matching hooks.

@@ -68,9 +68,19 @@ var supportedHookEvents = []string{
 	hookPullUpdated,
 }
 
+type parsedHookMetadata struct {
+	RepoUUID,
+	RepoOwner,
+	RepoName,
+	RepoFullName string
+
+	NeedPostProcessing bool
+}
+
 // parseHook parses a Bitbucket hook from an http.Request request and returns
-// Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) {
+// Repo and Pipeline detail.
+// NOTE: the "pullrequest:updated" event will be pre-parsed but needs post processing via API query and DB query!
+func parseHook(r *http.Request) (*parsedHookMetadata, *model.Pipeline, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, nil, err
@@ -91,6 +101,8 @@ func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) 
 		return nil, nil, err
 	}
 
+	needPostProcessing := false
+
 	// detect pull event type
 	switch hookType {
 	case hookPullCreated:
@@ -109,7 +121,8 @@ func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) 
 		}
 
 		p.Event = model.EventPull
-
+		// we need more info via api so we just pass it as task onto our caller
+		needPostProcessing = true
 	default:
 		// first we only care about open pulls
 		if hookPull.PullRequest.State != stateOpen {
@@ -123,12 +136,19 @@ func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) 
 		p.EventReason = strings.TrimPrefix(hookType, "pullrequest:")
 	}
 
-	return hookRepo, p, nil
+	return &parsedHookMetadata{
+		RepoUUID:     hookRepo.UUID,
+		RepoOwner:    hookRepo.Owner.Nickname,
+		RepoName:     hookRepo.Name,
+		RepoFullName: hookRepo.FullName,
+
+		NeedPostProcessing: needPostProcessing,
+	}, p, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload []byte) (*internal.WebhookRepo, *model.Pipeline, error) {
+func parsePushHook(payload []byte) (*parsedHookMetadata, *model.Pipeline, error) {
 	hook := internal.PushHook{}
 
 	err := json.Unmarshal(payload, &hook)
@@ -140,7 +160,12 @@ func parsePushHook(payload []byte) (*internal.WebhookRepo, *model.Pipeline, erro
 		if change.New.Target.Hash == "" {
 			continue
 		}
-		return &hook.Repo, convertPushHook(&hook, &change), nil
+		return &parsedHookMetadata{
+			RepoUUID:     hook.Repo.UUID,
+			RepoOwner:    hook.Repo.Owner.Nickname,
+			RepoName:     hook.Repo.Name,
+			RepoFullName: hook.Repo.FullName,
+		}, convertPushHook(&hook, &change), nil
 	}
 	return nil, nil, &types.ErrIgnoreEvent{Event: hookPush, Reason: "no changes detected"}
 }
