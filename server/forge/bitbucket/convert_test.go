@@ -117,18 +117,16 @@ func Test_convertUser(t *testing.T) {
 }
 
 func Test_cloneLink(t *testing.T) {
-	repo := &internal.Repo{}
-	repo.Links.Clone = append(repo.Links.Clone, internal.Link{
-		Name: "https",
-		Href: "https://bitbucket.org/foo/bar.git",
-	})
-	link := cloneLink(repo)
-	assert.Equal(t, repo.Links.Clone[0].Href, link)
+	var repo internal.Repo
+	if !assert.NoError(t, json.Unmarshal([]byte(fixtures.APIRepo), &repo)) {
+		t.FailNow()
+	}
+	assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks.git", cloneLink(&repo))
+	assert.Equal(t, "git@bitbucket.org:6543/collect-webhooks.git", sshCloneLink(&repo))
 
-	repo = &internal.Repo{}
+	repo = internal.Repo{}
 	repo.Links.HTML.Href = "https://foo:bar@bitbucket.org/foo/bar.git"
-	link = cloneLink(repo)
-	assert.Equal(t, "https://bitbucket.org/foo/bar.git", link)
+	assert.Equal(t, "https://bitbucket.org/foo/bar.git", cloneLink(&repo))
 }
 
 func Test_convertPullHook(t *testing.T) {

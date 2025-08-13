@@ -151,6 +151,9 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
+	if name == "" {
+		return nil, fmt.Errorf("no unique repo identifier")
+	}
 	if owner == "" {
 		repos, err := c.Repos(ctx, u)
 		if err != nil {
@@ -402,18 +405,18 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	repo, pl, err := parseHook(req)
+	hookRepo, pl, err := parseHook(req)
+	if err != nil {
+		return nil, nil, err
+	}
+	repoUUID := model.ForgeRemoteID(hookRepo.UUID)
+
+	u, err := common.RepoUserForgeID(ctx, repoUUID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	u, err := common.RepoUserForgeID(ctx, repo.ForgeRemoteID)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// As the repo from the webhook is incomplete we need to ask the API
-	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	repo, err := c.Repo(ctx, u, repoUUID, hookRepo.Owner.Nickname, hookRepo.Name)
 	if err != nil {
 		return nil, nil, err
 	}

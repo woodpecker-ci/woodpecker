@@ -69,7 +69,7 @@ var supportedHookEvents = []string{
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, nil, err
@@ -90,7 +90,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
+func parsePushHook(payload []byte) (*internal.WebhookRepo, *model.Pipeline, error) {
 	hook := internal.PushHook{}
 
 	err := json.Unmarshal(payload, &hook)
@@ -102,19 +102,19 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 		if change.New.Target.Hash == "" {
 			continue
 		}
-		return convertWebhookRepo(&hook.Repo, &internal.RepoPerm{}), convertPushHook(&hook, &change), nil
+		return &hook.Repo, convertPushHook(&hook, &change), nil
 	}
-	return nil, nil, nil
+	return nil, nil, &types.ErrIgnoreEvent{Event: hookPush, Reason: "no changes detected"}
 }
 
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
-func parsePullHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
+func parsePullHook(payload []byte) (*internal.WebhookRepo, *model.Pipeline, error) {
 	hook := internal.PullRequestHook{}
 
 	if err := json.Unmarshal(payload, &hook); err != nil {
 		return nil, nil, err
 	}
 
-	return convertWebhookRepo(&hook.Repo, &internal.RepoPerm{}), convertPullHook(&hook), nil
+	return &hook.Repo, convertPullHook(&hook), nil
 }

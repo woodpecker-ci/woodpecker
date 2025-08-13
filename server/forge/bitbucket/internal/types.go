@@ -94,7 +94,6 @@ type WebhookLinks map[string]struct {
 
 type Link struct {
 	Href string `json:"href"`
-	Name string `json:"name"`
 }
 
 type Repo struct {
@@ -107,9 +106,12 @@ type Repo struct {
 	Scm       string  `json:"scm"`
 	Desc      string  `json:"desc"`
 	Links     struct {
-		Avatar Link   `json:"avatar"`
-		HTML   Link   `json:"html"`
-		Clone  []Link `json:"clone"`
+		Avatar Link `json:"avatar"`
+		HTML   Link `json:"html"`
+		Clone  []struct {
+			Href string `json:"href"`
+			Name string `json:"name"`
+		} `json:"clone"`
 	} `json:"links"`
 	MainBranch struct {
 		Type string `json:"type"`

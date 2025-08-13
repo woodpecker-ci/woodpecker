@@ -78,26 +78,6 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 	return &repo
 }
 
-// convertWebhookRepo is a helper function used to convert a Bitbucket repository
-// structure to the common Woodpecker repository structure.
-func convertWebhookRepo(from *internal.WebhookRepo, perm *internal.RepoPerm) *model.Repo {
-	repo := model.Repo{
-		ForgeRemoteID: model.ForgeRemoteID(from.UUID),
-		// Clone:     gould be generated
-		// CloneSSH:  cant get that here
-		Owner:        strings.Split(from.FullName, "/")[0],
-		Name:         strings.Split(from.FullName, "/")[1],
-		FullName:     from.FullName,
-		ForgeURL:     getLink(from.Links, linkKeyHTML),
-		IsSCMPrivate: from.IsPrivate,
-		Avatar:       getLink(from.Owner.Links, linkKeyAvatar),
-		// Branch:    cant get that here
-		Perm:      convertPerm(perm),
-		PREnabled: true,
-	}
-	return &repo
-}
-
 func convertPerm(from *internal.RepoPerm) *model.Perm {
 	perms := new(model.Perm)
 	switch from.Permission {
