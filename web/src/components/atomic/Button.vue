@@ -2,7 +2,7 @@
   <component
     :is="to === undefined ? 'button' : httpLink ? 'a' : 'router-link'"
     v-bind="btnAttrs"
-    class="border-wp-background-300 dark:border-wp-background-100 relative flex shrink-0 cursor-pointer items-center overflow-hidden rounded-md border px-2 py-1 whitespace-nowrap transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50"
+    class="border-wp-background-400 dark:border-wp-background-100 relative flex shrink-0 cursor-pointer items-center overflow-hidden rounded-md border px-2 py-1 whitespace-nowrap transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50"
     :class="{
       'border-wp-control-neutral-300 dark:border-wp-background-100 bg-wp-control-neutral-100 text-wp-text-100 hover:bg-wp-control-neutral-200':
         color === 'gray',

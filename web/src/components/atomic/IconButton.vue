@@ -48,6 +48,6 @@ defineProps<{
 
 .icon-button {
   @apply hover:bg-wp-control-neutral-100 dark:hover:bg-wp-control-neutral-300 relative flex shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-md bg-transparent px-1 py-1 disabled:cursor-not-allowed disabled:opacity-50;
-  @apply in-[.border-wp-background-300]:hover:bg-wp-control-neutral-200;
+  @apply in-[.border-wp-background-400]:hover:bg-wp-control-neutral-200;
 }
 </style>

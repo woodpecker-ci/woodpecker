@@ -24,7 +24,7 @@
 
       <div
         v-if="isDropdownOpen"
-        class="tabs-dropdown border-wp-background-300 dark:border-wp-background-100 bg-wp-background-100 dark:bg-wp-background-200 dark:shadow-wp-background-500 absolute z-20 mt-1 rounded-md border shadow-lg"
+        class="tabs-dropdown border-wp-background-400 dark:border-wp-background-100 bg-wp-background-100 dark:bg-wp-background-200 dark:shadow-wp-background-500 absolute z-20 mt-1 rounded-md border shadow-lg"
         :class="[visibleTabs.length === 0 ? 'left-0' : 'right-0']"
       >
         <router-link

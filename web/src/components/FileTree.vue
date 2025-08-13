@@ -36,7 +36,7 @@
 
     <div
       v-if="node.isDirectory && !collapsed"
-      class="border-wp-background-300 dark:border-wp-background-100 mt-1 ml-2 border-l pl-1 transition-all duration-200"
+      class="border-wp-background-400 dark:border-wp-background-100 mt-1 ml-2 border-l pl-1 transition-all duration-200"
     >
       <FileTree v-for="child in node.children" :key="child.path" :node="child" />
     </div>
