@@ -169,10 +169,6 @@ const config = {
               label: 'Bluesky',
               href: 'https://bsky.app/profile/woodpecker-ci.org',
             },
-            {
-              label: 'X',
-              href: 'https://twitter.com/woodpeckerci',
-            },
           ],
         },
         {
