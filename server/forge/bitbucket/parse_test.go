@@ -62,6 +62,7 @@ func Test_parseHook(t *testing.T) {
 			assert.Equal(t, model.EventPull, b.Event)
 			assert.Equal(t, "39f188d78e1e", b.Commit)
 			assert.Equal(t, "aha", b.Title)
+			assert.Equal(t, "", b.Message)
 			assert.Equal(t, "6543", b.Author)
 		})
 
@@ -76,6 +77,7 @@ func Test_parseHook(t *testing.T) {
 			assert.Equal(t, model.EventPull, b.Event)
 			assert.Equal(t, "26240d6b7e74", b.Commit)
 			assert.Equal(t, "aha", b.Title)
+			assert.Equal(t, "some nice ahas", b.Message)
 			assert.Equal(t, "6543", b.Author)
 		})
 
@@ -90,6 +92,7 @@ func Test_parseHook(t *testing.T) {
 			assert.Equal(t, model.EventPullClosed, b.Event)
 			assert.Equal(t, "fc2a2c05765d", b.Commit)
 			assert.Equal(t, "aha", b.Title)
+			assert.Equal(t, "bha", b.Message)
 			assert.Equal(t, "demoaccount2-commits", b.Author)
 		})
 
@@ -104,6 +107,7 @@ func Test_parseHook(t *testing.T) {
 			assert.Equal(t, model.EventPullClosed, b.Event)
 			assert.Equal(t, "d0e829618d28", b.Commit)
 			assert.Equal(t, "taerg era senilwen", b.Title)
+			assert.Equal(t, "", b.Message)
 			assert.Equal(t, "6543", b.Author)
 		})
 
@@ -224,7 +228,7 @@ func Test_parseHook(t *testing.T) {
 			r, b, err := parseHook(req)
 			assert.Nil(t, r)
 			assert.Nil(t, b)
-			assert.NoError(t, err)
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 		})
 
 		t.Run("push hook", func(t *testing.T) {

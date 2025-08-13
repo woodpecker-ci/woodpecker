@@ -70,7 +70,7 @@
     "type": "pullrequest",
     "id": 2,
     "title": "aha",
-    "description": "",
+    "description": "bha",
     "rendered": {
       "title": { "type": "rendered", "raw": "aha", "markup": "markdown", "html": "<p>aha</p>" },
       "description": { "type": "rendered", "raw": "", "markup": "markdown", "html": "" }
