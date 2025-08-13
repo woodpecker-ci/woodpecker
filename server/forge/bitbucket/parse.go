@@ -16,6 +16,7 @@ package bitbucket
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"slices"
@@ -45,9 +46,8 @@ const (
 	hookPullPush                  = "pullrequest:push"
 	hookPullUnapproved            = "pullrequest:unapproved"
 
-	stateOpen     = "OPEN"
-	stateClosed   = "MERGED"
-	stateDeclined = "DECLINED"
+	stateMerged = "MERGED"
+	stateOpen   = "OPEN"
 )
 
 var supportedHookEvents = []string{
@@ -86,7 +86,7 @@ func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) 
 	}
 	// ok it must be an pullrequest:* event
 
-	hookRepo, p, err := parsePullHook(payload)
+	hookRepo, hookPull, p, err := parsePullHook(payload)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -95,12 +95,21 @@ func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) 
 	switch hookType {
 	case hookPullCreated:
 		p.Event = model.EventPull
+
 	case hookPullMerged, hookPullDeclined:
 		p.Event = model.EventPullClosed
-	case hookPullCommentUpdated:
-		// as this can have more reasons we need to figure it out
+
+	case hookPullUpdated:
+		// first we only care about open pulls get updated
+		if hookPull.PullRequest.State != stateOpen {
+			return nil, nil, &types.ErrIgnoreEvent{
+				Event:  hookType,
+				Reason: fmt.Sprintf("pull state not %s but %s", stateOpen, hookPull.PullRequest.State),
+			}
+		}
+
 		p.Event = model.EventPull
-		p.EventReason = "TODO"
+
 	default:
 		p.Event = model.EventPullMetadata
 		p.EventReason = strings.TrimPrefix(hookType, "pullrequest:")
@@ -130,12 +139,12 @@ func parsePushHook(payload []byte) (*internal.WebhookRepo, *model.Pipeline, erro
 
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
-func parsePullHook(payload []byte) (*internal.WebhookRepo, *model.Pipeline, error) {
+func parsePullHook(payload []byte) (*internal.WebhookRepo, *internal.PullRequestHook, *model.Pipeline, error) {
 	hook := internal.PullRequestHook{}
 
 	if err := json.Unmarshal(payload, &hook); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return &hook.Repo, convertPullHook(&hook), nil
+	return &hook.Repo, &hook, convertPullHook(&hook), nil
 }

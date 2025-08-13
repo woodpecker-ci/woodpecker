@@ -189,7 +189,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Destination.Repo.UUID,
 	}
 
-	if from.PullRequest.State == stateClosed {
+	if from.PullRequest.State == stateMerged {
 		pipeline.Commit = from.PullRequest.MergeCommit.Hash
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Destination.Branch.Name)
 		pipeline.Branch = from.PullRequest.Destination.Branch.Name

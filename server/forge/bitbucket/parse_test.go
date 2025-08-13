@@ -220,6 +220,7 @@ func Test_parseHook(t *testing.T) {
 			}
 		})
 
+		// TODO: currently BB dont allow us to distinquish
 		t.Run("pull-request to draft", func(t *testing.T) {
 			buf := bytes.NewBufferString(fixtures.HookPullToDraft)
 			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
@@ -230,8 +231,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
-				assert.Equal(t, model.EventPullMetadata, b.Event)
-				assert.Equal(t, "todo", b.EventReason)
+				assert.Equal(t, model.EventPull, b.Event) // TODO: model.EventPullMetadata
+				assert.Equal(t, "", b.EventReason)        // TODO: marked_as_draft
 				assert.Equal(t, "d0e829618d28", b.Commit)
 				assert.Equal(t, "taerg era senilwen", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -239,6 +240,7 @@ func Test_parseHook(t *testing.T) {
 			}
 		})
 
+		// TODO: currently BB dont allow us to distinquish
 		t.Run("pull-request ready from draft", func(t *testing.T) {
 			buf := bytes.NewBufferString(fixtures.HookPullReadyFromDraft)
 			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
@@ -249,8 +251,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
-				assert.Equal(t, model.EventPullMetadata, b.Event)
-				assert.Equal(t, "todo", b.EventReason)
+				assert.Equal(t, model.EventPull, b.Event) // TODO: model.EventPullMetadata
+				assert.Equal(t, "", b.EventReason)        // TODO: marked_as_ready
 				assert.Equal(t, "d0e829618d28", b.Commit)
 				assert.Equal(t, "taerg era senilwen", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -258,6 +260,7 @@ func Test_parseHook(t *testing.T) {
 			}
 		})
 
+		// TODO: currently BB dont allow us to distinquish
 		t.Run("pull-request review requested", func(t *testing.T) {
 			buf := bytes.NewBufferString(fixtures.HookPullReviewRequested)
 			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
@@ -268,8 +271,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/3", b.ForgeURL)
-				assert.Equal(t, model.EventPullMetadata, b.Event)
-				assert.Equal(t, "todo", b.EventReason)
+				assert.Equal(t, model.EventPull, b.Event) // TODO: model.EventPullMetadata
+				assert.Equal(t, "", b.EventReason)        // TODO: review_request if we can distinquish
 				assert.Equal(t, "dd1c5b604ee9", b.Commit)
 				assert.Equal(t, "hturt eht llet", b.Title)
 				assert.Equal(t, "", b.Message)

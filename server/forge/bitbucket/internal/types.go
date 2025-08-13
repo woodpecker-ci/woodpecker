@@ -180,6 +180,15 @@ type PushHook struct {
 	} `json:"push"`
 }
 
+type Participant struct {
+	Type           string    `json:"type"`
+	User           Account   `json:"user"`
+	Role           string    `json:"role"`
+	Approved       bool      `json:"approved"`
+	State          *string   `json:"state"`
+	ParticipatedOn time.Time `json:"participated_on"`
+}
+
 type PullRequestHook struct {
 	Actor       Account     `json:"actor"`
 	Repo        WebhookRepo `json:"repository"`
@@ -197,11 +206,11 @@ type PullRequestHook struct {
 		Created      time.Time    `json:"created_on"`
 		Updated      time.Time    `json:"updated_on"`
 
-		CloseSourceBranch bool      `json:"close_source_branch"`
-		ClosedBy          *Account  `json:"closed_by"`
-		Author            Account   `json:"author"`
-		Reviewers         []Account `json:"reviewers"`
-		Participants      []Account `json:"participants"`
+		CloseSourceBranch bool          `json:"close_source_branch"`
+		ClosedBy          *Account      `json:"closed_by"`
+		Author            Account       `json:"author"`
+		Reviewers         []Account     `json:"reviewers"`
+		Participants      []Participant `json:"participants"`
 
 		Rendered struct {
 			Title struct {
