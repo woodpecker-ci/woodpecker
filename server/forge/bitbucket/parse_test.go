@@ -58,12 +58,14 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.Equal(t, "6543/collect-webhooks", r.FullName)
-			assert.Equal(t, model.EventPull, b.Event)
-			assert.Equal(t, "39f188d78e1e", b.Commit)
-			assert.Equal(t, "aha", b.Title)
-			assert.Equal(t, "", b.Message)
-			assert.Equal(t, "6543", b.Author)
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "39f188d78e1e", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+			}
 		})
 
 		t.Run("pull-request updated", func(t *testing.T) {
@@ -73,12 +75,14 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.Equal(t, "6543/collect-webhooks", r.FullName)
-			assert.Equal(t, model.EventPull, b.Event)
-			assert.Equal(t, "26240d6b7e74", b.Commit)
-			assert.Equal(t, "aha", b.Title)
-			assert.Equal(t, "some nice ahas", b.Message)
-			assert.Equal(t, "6543", b.Author)
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "some nice ahas", b.Message)
+				assert.Equal(t, "6543", b.Author)
+			}
 		})
 
 		t.Run("pull-request merged", func(t *testing.T) {
@@ -88,12 +92,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.Equal(t, "6543/collect-webhooks", r.FullName)
-			assert.Equal(t, model.EventPullClosed, b.Event)
-			assert.Equal(t, "fc2a2c05765d", b.Commit)
-			assert.Equal(t, "aha", b.Title)
-			assert.Equal(t, "bha", b.Message)
-			assert.Equal(t, "demoaccount2-commits", b.Author)
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPullClosed, b.Event)
+				assert.Equal(t, "fc2a2c05765d", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "bha", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+			}
 		})
 
 		t.Run("pull-request rejected", func(t *testing.T) {
@@ -103,12 +110,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.Equal(t, "6543/collect-webhooks", r.FullName)
-			assert.Equal(t, model.EventPullClosed, b.Event)
-			assert.Equal(t, "d0e829618d28", b.Commit)
-			assert.Equal(t, "taerg era senilwen", b.Title)
-			assert.Equal(t, "", b.Message)
-			assert.Equal(t, "6543", b.Author)
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
+				assert.Equal(t, model.EventPullClosed, b.Event)
+				assert.Equal(t, "d0e829618d28", b.Commit)
+				assert.Equal(t, "taerg era senilwen", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+			}
 		})
 
 		t.Run("pull-request approved", func(t *testing.T) {
@@ -118,9 +128,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.NotNil(t, b)
-			assert.NotNil(t, r)
-			// TODO: Add appropriate assertions based on the actual fixture content
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+			}
 		})
 
 		t.Run("pull-request unapproved", func(t *testing.T) {
@@ -130,9 +146,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.NotNil(t, b)
-			assert.NotNil(t, r)
-			// TODO: Add appropriate assertions based on the actual fixture content
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+			}
 		})
 
 		t.Run("pull-request comment created", func(t *testing.T) {
@@ -142,9 +164,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.NotNil(t, b)
-			assert.NotNil(t, r)
-			// TODO: Add appropriate assertions based on the actual fixture content
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+			}
 		})
 
 		t.Run("pull-request changes request created", func(t *testing.T) {
@@ -154,9 +182,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.NotNil(t, b)
-			assert.NotNil(t, r)
-			// TODO: Add appropriate assertions based on the actual fixture content
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/3", b.ForgeURL)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "dd1c5b604ee9", b.Commit)
+				assert.Equal(t, "hturt eht llet", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+			}
 		})
 
 		t.Run("pull-request changes request removed", func(t *testing.T) {
@@ -166,9 +200,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.NotNil(t, b)
-			assert.NotNil(t, r)
-			// TODO: Add appropriate assertions based on the actual fixture content
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+			}
 		})
 
 		t.Run("pull-request to draft", func(t *testing.T) {
@@ -178,9 +218,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.NotNil(t, b)
-			assert.NotNil(t, r)
-			// TODO: Add appropriate assertions based on the actual fixture content
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "d0e829618d28", b.Commit)
+				assert.Equal(t, "taerg era senilwen", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+			}
 		})
 
 		t.Run("pull-request ready from draft", func(t *testing.T) {
@@ -190,9 +236,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.NotNil(t, b)
-			assert.NotNil(t, r)
-			// TODO: Add appropriate assertions based on the actual fixture content
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "d0e829618d28", b.Commit)
+				assert.Equal(t, "taerg era senilwen", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+			}
 		})
 
 		t.Run("pull-request review requested", func(t *testing.T) {
@@ -202,9 +254,15 @@ func Test_parseHook(t *testing.T) {
 
 			r, b, err := parseHook(req)
 			assert.NoError(t, err)
-			assert.NotNil(t, b)
-			assert.NotNil(t, r)
-			// TODO: Add appropriate assertions based on the actual fixture content
+			if assert.NotNil(t, b) && assert.NotNil(t, r) {
+				assert.Equal(t, "6543/collect-webhooks", r.FullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/3", b.ForgeURL)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, "dd1c5b604ee9", b.Commit)
+				assert.Equal(t, "hturt eht llet", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+			}
 		})
 	})
 
