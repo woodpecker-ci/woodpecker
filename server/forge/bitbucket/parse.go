@@ -111,6 +111,14 @@ func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) 
 		p.Event = model.EventPull
 
 	default:
+		// first we only care about open pulls
+		if hookPull.PullRequest.State != stateOpen {
+			return nil, nil, &types.ErrIgnoreEvent{
+				Event:  hookType,
+				Reason: fmt.Sprintf("pull state not %s but %s", stateOpen, hookPull.PullRequest.State),
+			}
+		}
+
 		p.Event = model.EventPullMetadata
 		p.EventReason = strings.TrimPrefix(hookType, "pullrequest:")
 	}
