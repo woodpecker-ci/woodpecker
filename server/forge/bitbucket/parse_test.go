@@ -61,6 +61,7 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, model.EventPull, b.Event)
+				assert.Empty(t, b.EventReason)
 				assert.Equal(t, "39f188d78e1e", b.Commit)
 				assert.Equal(t, "aha", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -78,6 +79,7 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, model.EventPull, b.Event)
+				assert.Empty(t, b.EventReason)
 				assert.Equal(t, "26240d6b7e74", b.Commit)
 				assert.Equal(t, "aha", b.Title)
 				assert.Equal(t, "some nice ahas", b.Message)
@@ -96,6 +98,7 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
 				assert.Equal(t, model.EventPullClosed, b.Event)
+				assert.Empty(t, b.EventReason)
 				assert.Equal(t, "fc2a2c05765d", b.Commit)
 				assert.Equal(t, "aha", b.Title)
 				assert.Equal(t, "bha", b.Message)
@@ -114,6 +117,7 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
 				assert.Equal(t, model.EventPullClosed, b.Event)
+				assert.Empty(t, b.EventReason)
 				assert.Equal(t, "d0e829618d28", b.Commit)
 				assert.Equal(t, "taerg era senilwen", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -131,7 +135,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
-				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, "approved", b.EventReason)
 				assert.Equal(t, "26240d6b7e74", b.Commit)
 				assert.Equal(t, "aha", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -149,7 +154,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
-				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, "unapproved", b.EventReason)
 				assert.Equal(t, "26240d6b7e74", b.Commit)
 				assert.Equal(t, "aha", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -167,7 +173,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
-				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, "comment_created", b.EventReason)
 				assert.Equal(t, "26240d6b7e74", b.Commit)
 				assert.Equal(t, "aha", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -185,7 +192,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/3", b.ForgeURL)
-				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, "changes_request_created", b.EventReason)
 				assert.Equal(t, "dd1c5b604ee9", b.Commit)
 				assert.Equal(t, "hturt eht llet", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -203,7 +211,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
-				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, "changes_request_removed", b.EventReason)
 				assert.Equal(t, "26240d6b7e74", b.Commit)
 				assert.Equal(t, "aha", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -221,7 +230,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
-				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, "todo", b.EventReason)
 				assert.Equal(t, "d0e829618d28", b.Commit)
 				assert.Equal(t, "taerg era senilwen", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -239,7 +249,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
-				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, "todo", b.EventReason)
 				assert.Equal(t, "d0e829618d28", b.Commit)
 				assert.Equal(t, "taerg era senilwen", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -257,7 +268,8 @@ func Test_parseHook(t *testing.T) {
 			if assert.NotNil(t, b) && assert.NotNil(t, r) {
 				assert.Equal(t, "6543/collect-webhooks", r.FullName)
 				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/3", b.ForgeURL)
-				assert.Equal(t, model.EventPull, b.Event)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, "todo", b.EventReason)
 				assert.Equal(t, "dd1c5b604ee9", b.Commit)
 				assert.Equal(t, "hturt eht llet", b.Title)
 				assert.Equal(t, "", b.Message)
@@ -301,6 +313,7 @@ func Test_parseHook(t *testing.T) {
 			assert.Equal(t, "b hcus on si ereht\n", b.Message)
 			assert.Equal(t, "6543", b.Author)
 			assert.Equal(t, model.EventPush, b.Event)
+			assert.Empty(t, b.EventReason)
 		})
 	})
 }

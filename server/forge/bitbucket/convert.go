@@ -171,13 +171,7 @@ func convertWorkspace(from *internal.Workspace) *model.Team {
 // convertPullHook is a helper function used to convert a Bitbucket pull request
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
-	event := model.EventPull
-	if from.PullRequest.State == stateClosed || from.PullRequest.State == stateDeclined {
-		event = model.EventPullClosed
-	}
-
 	pipeline := &model.Pipeline{
-		Event:  event,
 		Commit: from.PullRequest.Source.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf("%s:%s",

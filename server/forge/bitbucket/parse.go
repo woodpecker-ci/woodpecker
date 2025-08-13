@@ -19,6 +19,7 @@ import (
 	"io"
 	"net/http"
 	"slices"
+	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -80,12 +81,32 @@ func parseHook(r *http.Request) (*internal.WebhookRepo, *model.Pipeline, error) 
 		return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
 	}
 
-	switch hookType {
-	case hookPush:
+	if hookType == hookPush {
 		return parsePushHook(payload)
-	default:
-		return parsePullHook(payload)
 	}
+	// ok it must be an pullrequest:* event
+
+	hookRepo, p, err := parsePullHook(payload)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// detect pull event type
+	switch hookType {
+	case hookPullCreated:
+		p.Event = model.EventPull
+	case hookPullMerged, hookPullDeclined:
+		p.Event = model.EventPullClosed
+	case hookPullCommentUpdated:
+		// as this can have more reasons we need to figure it out
+		p.Event = model.EventPull
+		p.EventReason = "TODO"
+	default:
+		p.Event = model.EventPullMetadata
+		p.EventReason = strings.TrimPrefix(hookType, "pullrequest:")
+	}
+
+	return hookRepo, p, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.

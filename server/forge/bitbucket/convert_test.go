@@ -152,7 +152,6 @@ func Test_convertPullHook(t *testing.T) {
 	hook.PullRequest.ID = 1
 
 	pipeline := convertPullHook(hook)
-	assert.Equal(t, model.EventPull, pipeline.Event)
 	assert.Equal(t, hook.Actor.Nickname, pipeline.Author)
 	assert.Equal(t, demoAvatarLinkRaw, pipeline.Avatar)
 	assert.Equal(t, hook.PullRequest.Source.Commit.Hash, pipeline.Commit)
