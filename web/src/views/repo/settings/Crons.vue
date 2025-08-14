@@ -18,7 +18,7 @@
       <ListItem
         v-for="cron in crons"
         :key="cron.id"
-        class="bg-wp-background-200! dark:bg-wp-background-100! items-center"
+        class="bg-wp-background-200! dark:bg-wp-background-200! items-center"
       >
         <span class="grid w-full grid-cols-3">
           <span>{{ cron.name }}</span>
@@ -30,20 +30,27 @@
             $t('repo.settings.crons.not_executed_yet')
           }}</span>
         </span>
-        <IconButton
-          icon="play-outline"
-          class="ml-auto h-8 w-8"
-          :title="$t('repo.settings.crons.run')"
-          @click="runCron(cron)"
-        />
-        <IconButton icon="edit" class="h-8 w-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
-        <IconButton
-          icon="trash"
-          class="hover:text-wp-error-100 h-8 w-8"
-          :is-loading="isDeleting"
-          :title="$t('repo.settings.crons.delete')"
-          @click="deleteCron(cron)"
-        />
+        <div class="flex items-center gap-2">
+          <IconButton
+            icon="play-outline"
+            class="h-8 w-8"
+            :title="$t('repo.settings.crons.run')"
+            @click="runCron(cron)"
+          />
+          <IconButton
+            icon="edit"
+            class="h-8 w-8"
+            :title="$t('repo.settings.crons.edit')"
+            @click="selectedCron = cron"
+          />
+          <IconButton
+            icon="trash"
+            class="hover:text-wp-error-100 h-8 w-8"
+            :is-loading="isDeleting"
+            :title="$t('repo.settings.crons.delete')"
+            @click="deleteCron(cron)"
+          />
+        </div>
       </ListItem>
 
       <div v-if="loading" class="flex justify-center">

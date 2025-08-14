@@ -3,7 +3,7 @@
     <ListItem
       v-for="secret in secrets"
       :key="secret.id"
-      class="bg-wp-background-200! dark:bg-wp-background-100! items-center"
+      class="bg-wp-background-200! dark:bg-wp-background-200! items-center"
     >
       <span>{{ secret.name }}</span>
       <Badge
@@ -14,21 +14,16 @@
       <div class="md:display-unset ml-auto hidden space-x-2">
         <Badge v-for="event in secret.events" :key="event" :value="event" />
       </div>
-      <template v-if="secret.edit !== false">
-        <IconButton
-          icon="edit"
-          class="ml-auto h-8 w-8 md:ml-2"
-          :title="$t('secrets.edit')"
-          @click="editSecret(secret)"
-        />
+      <div v-if="secret.edit !== false" class="flex items-center gap-2">
+        <IconButton icon="edit" class="h-8 w-8 md:ml-2" :title="$t('secrets.edit')" @click="editSecret(secret)" />
         <IconButton
           icon="trash"
-          class="hover:text-wp-error-100 ml-2 h-8 w-8"
+          class="hover:text-wp-error-100 h-8 w-8"
           :is-loading="isDeleting"
           :title="$t('secrets.delete')"
           @click="deleteSecret(secret)"
         />
-      </template>
+      </div>
     </ListItem>
 
     <div v-if="loading" class="flex justify-center">

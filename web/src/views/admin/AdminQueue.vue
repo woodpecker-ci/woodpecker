@@ -30,7 +30,7 @@
         <ListItem
           v-for="task in tasks"
           :key="task.id"
-          class="bg-wp-background-200! dark:bg-wp-background-100! mb-2 flex-col items-center gap-4"
+          class="bg-wp-background-200! dark:bg-wp-background-200! mb-2 flex-col items-center gap-4"
         >
           <div class="flex w-full items-center justify-between border-b pb-2">
             <div
