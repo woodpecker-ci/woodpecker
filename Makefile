@@ -59,7 +59,7 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 		--user $(shell id -u):$(shell id -g) \
 		-e VERSION="$(VERSION)" \
 		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
-		-e TARGETOS="$(TARGETOS)" \
+		-e TARGETOS="linux" \
 		-e TARGETARCH="$(TARGETARCH)" \
 		-e CGO_ENABLED="$(CGO_ENABLED)" \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)

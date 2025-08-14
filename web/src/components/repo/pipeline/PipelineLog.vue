@@ -7,7 +7,7 @@
     }"
   >
     <div
-      class="code-box-log flex grow flex-col overflow-hidden p-0! shadow-sm md:mt-0 md:rounded-md!"
+      class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0 md:rounded-md!"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -22,7 +22,7 @@
         <div class="ml-auto flex flex-row items-center gap-x-2">
           <IconButton
             :title="fullscreen ? $t('exit_fullscreen') : $t('fullscreen')"
-            class="hidden! md:flex!"
+            class="hidden! hover:bg-white/10! md:flex!"
             :icon="fullscreen ? 'exit-fullscreen' : 'fullscreen'"
             @click="fullscreen = !fullscreen"
           />

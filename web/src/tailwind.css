@@ -1044,10 +1044,6 @@
   }
 }
 
-@utility hover-effect {
-  @apply hover:bg-black/20 dark:hover:bg-white/5;
-}
-
 @utility w-fill {
   width: -webkit-fill-available;
   width: -moz-available;
