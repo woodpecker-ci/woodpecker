@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @lilioid, @qwerty287, @scottshotgg, @wgroeneveld
+@6543, @anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @lilioid, @qwerty287, @scottshotgg, @wgroeneveld, @xoxys
 
 ### 🔒 Security
 
@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- Rework background colors for light/dark theme [[#5411](https://github.com/woodpecker-ci/woodpecker/pull/5411)]
 - Allow to set default approval mode [[#5406](https://github.com/woodpecker-ci/woodpecker/pull/5406)]
 - Add Agent-level Tolerations setting [[#5266](https://github.com/woodpecker-ci/woodpecker/pull/5266)]
 - feat(k8s): k8s priority class name config [[#5391](https://github.com/woodpecker-ci/woodpecker/pull/5391)]
