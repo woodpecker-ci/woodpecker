@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-13
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -52,6 +52,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5413](https://github.com/woodpecker-ci/woodpecker/pull/5413)]
 - fix(deps): update golang-packages [[#5407](https://github.com/woodpecker-ci/woodpecker/pull/5407)]
 - chore(deps): lock file maintenance [[#5404](https://github.com/woodpecker-ci/woodpecker/pull/5404)]
 - chore(deps): update pre-commit hook pre-commit/pre-commit-hooks to v6 [[#5399](https://github.com/woodpecker-ci/woodpecker/pull/5399)]
