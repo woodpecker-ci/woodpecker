@@ -19,6 +19,7 @@
 
 ### 📈 Enhancement
 
+- Add `fsGroupChangePolicy` option to Kubernetes backend [[#5416](https://github.com/woodpecker-ci/woodpecker/pull/5416)]
 - Rework background colors for light/dark theme [[#5411](https://github.com/woodpecker-ci/woodpecker/pull/5411)]
 - Allow to set default approval mode [[#5406](https://github.com/woodpecker-ci/woodpecker/pull/5406)]
 - Add Agent-level Tolerations setting [[#5266](https://github.com/woodpecker-ci/woodpecker/pull/5266)]
