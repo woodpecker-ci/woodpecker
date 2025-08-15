@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @lilioid, @qwerty287, @scottshotgg, @wgroeneveld, @xoxys
+@6543, @anbraten, @clintonsteiner, @henkka, @hhamalai, @hrfee, @ivaltryek, @lilioid, @qwerty287, @scottshotgg, @wgroeneveld, @xoxys
 
 ### 🔒 Security
 
+- Remediate webpack vulnerability in webpack-dev-server [[#5264](https://github.com/woodpecker-ci/woodpecker/pull/5264)]
 - fix(deps): update module github.com/docker/docker to v28.3.3+incompatible [security] [[#5373](https://github.com/woodpecker-ci/woodpecker/pull/5373)]
 - Prevent secrets from leaking to Kubernetes API Server logs [[#5305](https://github.com/woodpecker-ci/woodpecker/pull/5305)]
 
