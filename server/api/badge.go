@@ -47,8 +47,10 @@ func GetBadge(c *gin.Context) {
 	var repo *model.Repo
 	var err error
 
+	forgeID := int64(1) // TODO: get forge id somehow
+
 	if c.Param("repo_name") != "" {
-		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner") + "/" + c.Param("repo_name"))
+		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner")+"/"+c.Param("repo_name"), forgeID)
 	} else {
 		var repoID int64
 		repoID, err = strconv.ParseInt(c.Param("repo_id_or_owner"), 10, 64)
@@ -101,8 +103,10 @@ func GetCC(c *gin.Context) {
 	var repo *model.Repo
 	var err error
 
+	forgeID := int64(1) // TODO: get forge id somehow
+
 	if c.Param("repo_name") != "" {
-		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner") + "/" + c.Param("repo_name"))
+		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner")+"/"+c.Param("repo_name"), forgeID)
 	} else {
 		var repoID int64
 		repoID, err = strconv.ParseInt(c.Param("repo_id_or_owner"), 10, 64)
