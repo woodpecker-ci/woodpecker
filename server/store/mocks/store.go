@@ -806,12 +806,42 @@ func (_m *Store) GetPipelineCount() (int64, error) {
 	return r0, r1
 }
 
-// GetPipelineLast provides a mock function with given fields: _a0, _a1
-func (_m *Store) GetPipelineLast(_a0 *model.Repo, _a1 string) (*model.Pipeline, error) {
+// GetPipelineLastBefore provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Store) GetPipelineLastBefore(_a0 *model.Repo, _a1 string, _a2 int64) (*model.Pipeline, error) {
+	ret := _m.Called(_a0, _a1, _a2)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPipelineLastBefore")
+	}
+
+	var r0 *model.Pipeline
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, string, int64) (*model.Pipeline, error)); ok {
+		return rf(_a0, _a1, _a2)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo, string, int64) *model.Pipeline); ok {
+		r0 = rf(_a0, _a1, _a2)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Pipeline)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo, string, int64) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPipelineLastByBranch provides a mock function with given fields: _a0, _a1
+func (_m *Store) GetPipelineLastByBranch(_a0 *model.Repo, _a1 string) (*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetPipelineLast")
+		panic("no return value specified for GetPipelineLastByBranch")
 	}
 
 	var r0 *model.Pipeline
@@ -836,29 +866,29 @@ func (_m *Store) GetPipelineLast(_a0 *model.Repo, _a1 string) (*model.Pipeline, 
 	return r0, r1
 }
 
-// GetPipelineLastBefore provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Store) GetPipelineLastBefore(_a0 *model.Repo, _a1 string, _a2 int64) (*model.Pipeline, error) {
-	ret := _m.Called(_a0, _a1, _a2)
+// GetPipelineLastByPull provides a mock function with given fields: _a0, _a1
+func (_m *Store) GetPipelineLastByPull(_a0 *model.Repo, _a1 string) (*model.Pipeline, error) {
+	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetPipelineLastBefore")
+		panic("no return value specified for GetPipelineLastByPull")
 	}
 
 	var r0 *model.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, string, int64) (*model.Pipeline, error)); ok {
-		return rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(0).(func(*model.Repo, string) (*model.Pipeline, error)); ok {
+		return rf(_a0, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, string, int64) *model.Pipeline); ok {
-		r0 = rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(0).(func(*model.Repo, string) *model.Pipeline); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Pipeline)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, string, int64) error); ok {
-		r1 = rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(1).(func(*model.Repo, string) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}

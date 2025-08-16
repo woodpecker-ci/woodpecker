@@ -1,0 +1,31 @@
+{
+  "display_name": "6543",
+  "links": {
+    "self": {
+      "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D"
+    },
+    "avatar": {
+      "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+    },
+    "repositories": {
+      "href": "https://api.bitbucket.org/2.0/repositories/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D"
+    },
+    "snippets": {
+      "href": "https://api.bitbucket.org/2.0/snippets/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D"
+    },
+    "html": {
+      "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/"
+    },
+    "hooks": {
+      "href": "https://api.bitbucket.org/2.0/workspaces/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/hooks"
+    }
+  },
+  "created_on": "2020-09-15T23:20:25.652712+00:00",
+  "type": "user",
+  "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+  "is_staff": false,
+  "account_id": "5f614bd12d51d4006ab36374",
+  "nickname": "6543",
+  "account_status": "active",
+  "location": "Berlin"
+}
