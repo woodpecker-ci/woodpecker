@@ -52,11 +52,14 @@ type (
 		ForgeURL   string `json:"forge_url,omitempty"`
 		DeployTo   string `json:"target,omitempty"`
 		DeployTask string `json:"task,omitempty"`
-		Commit     Commit `json:"commit,omitempty"`
+		Commit     Commit `json:"commit"`
 		Parent     int64  `json:"parent,omitempty"`
 		Cron       string `json:"cron,omitempty"`
+		Release    string `json:"release,omitempty"`
 		Author     string `json:"author,omitempty"`
-		Avatar     string `json:"avatar,omitempty"`
+
+		// Deprecated: remove in next major
+		Avatar string `json:"avatar,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
@@ -66,7 +69,7 @@ type (
 		Refspec           string   `json:"refspec,omitempty"`
 		Branch            string   `json:"branch,omitempty"`
 		Message           string   `json:"message,omitempty"`
-		Author            Author   `json:"author,omitempty"`
+		Author            Author   `json:"author"`
 		ChangedFiles      []string `json:"changed_files,omitempty"`
 		PullRequestLabels []string `json:"labels,omitempty"`
 		IsPrerelease      bool     `json:"is_prerelease,omitempty"`
@@ -74,9 +77,8 @@ type (
 
 	// Author defines runtime metadata for a commit author.
 	Author struct {
-		Name   string `json:"name,omitempty"`
-		Email  string `json:"email,omitempty"`
-		Avatar string `json:"avatar,omitempty"`
+		Name  string `json:"name,omitempty"`
+		Email string `json:"email,omitempty"`
 	}
 
 	// Workflow defines runtime metadata for a workflow.
