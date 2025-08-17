@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-16
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -56,6 +56,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v15.11.0 [[#5427](https://github.com/woodpecker-ci/woodpecker/pull/5427)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.4.0 [[#5425](https://github.com/woodpecker-ci/woodpecker/pull/5425)]
 - chore(deps): update postgres docker tag to v17.6 [[#5424](https://github.com/woodpecker-ci/woodpecker/pull/5424)]
 - fix(deps): update web npm deps non-major [[#5421](https://github.com/woodpecker-ci/woodpecker/pull/5421)]
