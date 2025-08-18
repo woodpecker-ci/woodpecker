@@ -35,6 +35,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix background color of pipeline step list [[#5431](https://github.com/woodpecker-ci/woodpecker/pull/5431)]
 - Fix bitbucket status sending [[#5372](https://github.com/woodpecker-ci/woodpecker/pull/5372)]
 - Correct OpenApi LookupOrg router path [[#5351](https://github.com/woodpecker-ci/woodpecker/pull/5351)]
 - fix(agent): handle context cancellation [[#5323](https://github.com/woodpecker-ci/woodpecker/pull/5323)]
