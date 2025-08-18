@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-17
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -45,6 +45,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5430](https://github.com/woodpecker-ci/woodpecker/pull/5430)]
 - chore(deps): update docs npm deps non-major [[#5420](https://github.com/woodpecker-ci/woodpecker/pull/5420)]
 - Remove X link [[#5412](https://github.com/woodpecker-ci/woodpecker/pull/5412)]
 - fix(deps): update docs npm deps non-major [[#5395](https://github.com/woodpecker-ci/woodpecker/pull/5395)]
