@@ -14,7 +14,7 @@
       <ListItem
         v-for="user in users"
         :key="user.id"
-        class="bg-wp-background-200! dark:bg-wp-background-100! items-center gap-2"
+        class="bg-wp-background-200! dark:bg-wp-background-200! items-center gap-2"
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
@@ -23,20 +23,21 @@
           class="md:display-unset ml-auto hidden"
           :value="$t('admin.settings.users.admin.admin')"
         />
-        <IconButton
-          icon="edit"
-          :title="$t('admin.settings.users.edit_user')"
-          class="md:display-unset h-8 w-8"
-          :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
-          @click="editUser(user)"
-        />
-        <IconButton
-          icon="trash"
-          :title="$t('admin.settings.users.delete_user')"
-          class="hover:text-wp-error-100 ml-2 h-8 w-8"
-          :is-loading="isDeleting"
-          @click="deleteUser(user)"
-        />
+        <div class="flex items-center gap-2" :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }">
+          <IconButton
+            icon="edit"
+            :title="$t('admin.settings.users.edit_user')"
+            class="md:display-unset h-8 w-8"
+            @click="editUser(user)"
+          />
+          <IconButton
+            icon="trash"
+            :title="$t('admin.settings.users.delete_user')"
+            class="hover:text-wp-error-100 h-8 w-8"
+            :is-loading="isDeleting"
+            @click="deleteUser(user)"
+          />
+        </div>
       </ListItem>
 
       <div v-if="loading" class="flex justify-center">

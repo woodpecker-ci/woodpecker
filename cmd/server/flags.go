@@ -153,6 +153,12 @@ var flags = append([]cli.Flag{
 		Usage:   "The default value for allowing pull requests on a repo.",
 		Value:   true,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_APPROVAL_MODE"),
+		Name:    "default-approval-mode",
+		Usage:   "The default value for allowing pull requests on a repo.",
+		Value:   "forks",
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"),
 		Name:    "default-cancel-previous-pipeline-events",

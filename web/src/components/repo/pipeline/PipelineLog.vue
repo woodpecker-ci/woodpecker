@@ -1,7 +1,13 @@
 <template>
-  <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
+  <div
+    v-if="pipeline"
+    class="fixed top-0 left-0 flex h-full w-full flex-col pt-10 md:pt-0"
+    :class="{
+      'md:absolute': !fullscreen,
+    }"
+  >
     <div
-      class="code-box-log flex grow flex-col overflow-hidden p-0! shadow-sm md:mt-0 md:rounded-md!"
+      class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0 md:rounded-md!"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -14,6 +20,12 @@
         </span>
 
         <div class="ml-auto flex flex-row items-center gap-x-2">
+          <IconButton
+            :title="fullscreen ? $t('exit_fullscreen') : $t('fullscreen')"
+            class="hidden! hover:bg-white/10! md:flex!"
+            :icon="fullscreen ? 'exit-fullscreen' : 'fullscreen'"
+            @click="fullscreen = !fullscreen"
+          />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs"
             :is-loading="downloadInProgress"
@@ -154,6 +166,7 @@ const step = computed(() => pipeline.value && findStep(pipeline.value.workflows 
 const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();
+const fullscreen = ref(false);
 
 const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(

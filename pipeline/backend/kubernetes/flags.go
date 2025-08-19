@@ -73,11 +73,23 @@ var Flags = []cli.Flag{
 		Usage:   "backend k8s Agent-wide worker pod node selector",
 		Value:   "",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_TOLERATIONS"),
+		Name:    "backend-k8s-pod-tolerations",
+		Usage:   "backend k8s Agent-wide worker pod tolerations",
+		Value:   "",
+	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP"),
 		Name:    "backend-k8s-pod-annotations-allow-from-step",
 		Usage:   "whether to allow using annotations from step's backend options",
 		Value:   false,
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-pod-tolerations-allow-from-step",
+		Usage:   "whether to allow using tolerations from step's backend options",
+		Value:   true,
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"), // cspell:words secctx nonroot
@@ -94,5 +106,11 @@ var Flags = []cli.Flag{
 		Name:    "backend-k8s-allow-native-secrets",
 		Usage:   "whether to allow existing Kubernetes secrets to be referenced from steps",
 		Value:   false,
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PRIORITY_CLASS"),
+		Name:    "backend-k8s-priority-class",
+		Usage:   "which kubernetes priority class to assign to created job pods",
+		Value:   "",
 	},
 }

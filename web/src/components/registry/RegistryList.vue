@@ -3,23 +3,25 @@
     <ListItem
       v-for="registry in registries"
       :key="registry.id"
-      class="bg-wp-background-200! dark:bg-wp-background-100! items-center"
+      class="bg-wp-background-200! dark:bg-wp-background-200! items-center"
     >
       <span>{{ registry.address }}</span>
-      <IconButton
-        :icon="registry.readonly ? 'chevron-right' : 'edit'"
-        class="ml-auto h-8 w-8"
-        :title="registry.readonly ? $t('registries.view') : $t('registries.edit')"
-        @click="editRegistry(registry)"
-      />
-      <IconButton
-        v-if="!registry.readonly"
-        icon="trash"
-        class="hover:text-wp-error-100 h-8 w-8"
-        :is-loading="isDeleting"
-        :title="$t('registries.delete')"
-        @click="deleteRegistry(registry)"
-      />
+      <div class="ml-auto flex items-center gap-2">
+        <IconButton
+          :icon="registry.readonly ? 'chevron-right' : 'edit'"
+          class="h-8 w-8"
+          :title="registry.readonly ? $t('registries.view') : $t('registries.edit')"
+          @click="editRegistry(registry)"
+        />
+        <IconButton
+          v-if="!registry.readonly"
+          icon="trash"
+          class="hover:text-wp-error-100 h-8 w-8"
+          :is-loading="isDeleting"
+          :title="$t('registries.delete')"
+          @click="deleteRegistry(registry)"
+        />
+      </div>
     </ListItem>
 
     <div v-if="loading" class="flex justify-center">
