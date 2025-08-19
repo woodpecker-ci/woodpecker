@@ -1,7 +1,8 @@
 {
   "cancel": "Cancel",
-  "login_to_woodpecker_with": "Login to Woodpecker with",
+  "login_with": "Login with {forge}",
   "login": "Login",
+  "welcome": "Welcome to Woodpecker",
   "repos": "Repos",
   "repositories": {
     "title": "Repositories",
