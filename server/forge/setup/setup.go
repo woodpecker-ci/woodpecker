@@ -41,8 +41,8 @@ func Forge(forge *model.Forge) (forge.Forge, error) {
 
 func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 	opts := &bitbucket.Opts{
-		OAuthClientID:     forge.Client,
-		OAuthClientSecret: forge.ClientSecret,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
 	}
 
 	log.Debug().
@@ -61,8 +61,8 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 
 	opts := gitea.Opts{
 		URL:               strings.TrimRight(serverURL.String(), "/"),
-		OAuthClientID:     forge.Client,
-		OAuthClientSecret: forge.ClientSecret,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
 		SkipVerify:        forge.SkipVerify,
 		OAuthHost:         forge.OAuthHost,
 	}
@@ -88,8 +88,8 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 
 	opts := forgejo.Opts{
 		URL:               strings.TrimRight(server.String(), "/"),
-		OAuthClientID:     forge.Client,
-		OAuthClientSecret: forge.ClientSecret,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
 		SkipVerify:        forge.SkipVerify,
 		OAuth2URL:         forge.OAuthHost,
 	}
@@ -110,8 +110,8 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 	opts := gitlab.Opts{
 		URL:               forge.URL,
-		OAuthClientID:     forge.Client,
-		OAuthClientSecret: forge.ClientSecret,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
 		SkipVerify:        forge.SkipVerify,
 		OAuthHost:         forge.OAuthHost,
 	}
@@ -139,8 +139,8 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 
 	opts := github.Opts{
 		URL:               forge.URL,
-		OAuthClientID:     forge.Client,
-		OAuthClientSecret: forge.ClientSecret,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
 		SkipVerify:        forge.SkipVerify,
 		MergeRef:          mergeRef,
 		OnlyPublic:        publicOnly,
@@ -171,8 +171,8 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 
 	opts := bitbucketdatacenter.Opts{
 		URL:               forge.URL,
-		OAuthClientID:     forge.Client,
-		OAuthClientSecret: forge.ClientSecret,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
 		Username:          gitUsername,
 		Password:          gitPassword,
 		OAuthHost:         forge.OAuthHost,
