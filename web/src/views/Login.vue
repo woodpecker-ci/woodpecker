@@ -112,7 +112,7 @@ const forgesWithNameAndFavicon = computed(() =>
 
     if (forge.url || forge.oauth_host) {
       const url = new URL(forge.oauth_host || forge.url);
-      name = url.origin;
+      name = url.hostname;
       favicon = `${url.origin}/favicon.ico`;
     }
 
