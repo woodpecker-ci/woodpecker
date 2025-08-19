@@ -108,7 +108,7 @@ function getHostFromUrl(forge: Forge) {
     return forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
   }
 
-  const url = new URL(forge.oauth_host ?? forge.url);
+  const url = new URL(forge.oauth_host || forge.url);
   return url.hostname;
 }
 

@@ -41,10 +41,14 @@ func Forge(forge *model.Forge) (forge.Forge, error) {
 
 func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 	opts := &bitbucket.Opts{
-		Client: forge.Client,
-		Secret: forge.ClientSecret,
+		Client:     forge.Client,
+		Secret:     forge.ClientSecret,
+		SkipVerify: forge.SkipVerify,
+		OAuthHost:  forge.OAuthHost,
 	}
 	log.Debug().
+		Str("oauth-host", opts.OAuthHost).
+		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
 		Str("type", string(forge.Type)).
