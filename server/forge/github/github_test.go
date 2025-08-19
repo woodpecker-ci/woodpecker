@@ -28,10 +28,10 @@ import (
 
 func TestNew(t *testing.T) {
 	forge, _ := New(Opts{
-		URL:        "http://localhost:8080/",
-		Client:     "0ZXh0IjoiI",
-		Secret:     "I1NiIsInR5",
-		SkipVerify: true,
+		URL:               "http://localhost:8080/",
+		OAuthClientID:     "0ZXh0IjoiI",
+		OAuthClientSecret: "I1NiIsInR5",
+		SkipVerify:        true,
 	})
 	f, _ := forge.(*client)
 	assert.Equal(t, "http://localhost:8080", f.url)

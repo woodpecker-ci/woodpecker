@@ -17,7 +17,6 @@ package bitbucket
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"net/http"
@@ -26,7 +25,6 @@ import (
 	"strconv"
 
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/bitbucket"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -46,31 +44,25 @@ const (
 
 // Opts are forge options for bitbucket.
 type Opts struct {
-	Client     string // OAuth2 Client ID
-	Secret     string // OAuth2 Client Secret
-	OAuthHost  string // OAuth2 Host
-	SkipVerify bool   // Skip ssl verification.
+	OAuthClientID     string
+	OAuthClientSecret string
 }
 
 type config struct {
-	API        string
-	url        string
-	Client     string
-	Secret     string
-	OAuthHost  string
-	SkipVerify bool
+	api           string
+	url           string
+	oAuthClientID string
+	oAuthSecret   string
 }
 
 // New returns a new forge Configuration for integrating with the Bitbucket
 // repository hosting service at https://bitbucket.org
 func New(opts *Opts) (forge.Forge, error) {
 	return &config{
-		API:        DefaultAPI,
-		url:        DefaultURL,
-		Client:     opts.Client,
-		Secret:     opts.Secret,
-		OAuthHost:  opts.OAuthHost,
-		SkipVerify: opts.SkipVerify,
+		api:           DefaultAPI,
+		url:           DefaultURL,
+		oAuthClientID: opts.OAuthClientID,
+		oAuthSecret:   opts.OAuthClientSecret,
 	}, nil
 	// TODO: add checks
 }
@@ -101,7 +93,7 @@ func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 		return nil, redirectURL, err
 	}
 
-	client := internal.NewClient(ctx, c.API, config.Client(ctx, token))
+	client := internal.NewClient(ctx, c.api, config.Client(ctx, token))
 	curr, err := client.FindCurrent()
 	if err != nil {
 		return nil, redirectURL, err
@@ -456,42 +448,26 @@ func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client 
 }
 
 // helper function to return the bitbucket oauth2 client.
-func (c *config) newClientToken(ctx context.Context, token, secret string) *internal.Client {
-	config := &oauth2.Config{
-		ClientID:     token,
-		ClientSecret: secret,
-		Endpoint:     bitbucket.Endpoint,
-	}
-
-	httpClient := config.Client(ctx, &oauth2.Token{
-		AccessToken:  token,
-		RefreshToken: secret,
-	})
-
-	if c.SkipVerify {
-		httpClient.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	return internal.NewClient(
+func (c *config) newClientToken(ctx context.Context, accessToken, refreshToken string) *internal.Client {
+	return internal.NewClientToken(
 		ctx,
-		c.API,
-		httpClient,
+		c.api,
+		accessToken,
+		refreshToken,
+		&oauth2.Token{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
 	)
 }
 
 // helper function to return the bitbucket oauth2 config.
 func (c *config) newOAuth2Config() *oauth2.Config {
-	publicOAuthURL := c.OAuthHost
-	if publicOAuthURL == "" {
-		publicOAuthURL = c.url
-	}
 	return &oauth2.Config{
-		ClientID:     c.Client,
-		ClientSecret: c.Secret,
+		ClientID:     c.oAuthClientID,
+		ClientSecret: c.oAuthSecret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", publicOAuthURL),
+			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
