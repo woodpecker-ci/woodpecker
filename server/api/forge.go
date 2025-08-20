@@ -125,12 +125,12 @@ func PatchForge(c *gin.Context) {
 	}
 	forge.URL = in.URL
 	forge.Type = in.Type
-	forge.Client = in.Client
+	forge.OAuthClientID = in.OAuthClientID
 	forge.OAuthHost = in.OAuthHost
 	forge.SkipVerify = in.SkipVerify
 	forge.AdditionalOptions = in.AdditionalOptions
 	if in.ClientSecret != "" {
-		forge.ClientSecret = in.ClientSecret
+		forge.OAuthClientSecret = in.ClientSecret
 	}
 
 	err = _store.ForgeUpdate(forge)
@@ -163,8 +163,8 @@ func PostForge(c *gin.Context) {
 	forge := &model.Forge{
 		URL:               in.URL,
 		Type:              in.Type,
-		Client:            in.Client,
-		ClientSecret:      in.ClientSecret,
+		OAuthClientID:     in.OAuthClientID,
+		OAuthClientSecret: in.OAuthClientSecret,
 		OAuthHost:         in.OAuthHost,
 		SkipVerify:        in.SkipVerify,
 		AdditionalOptions: in.AdditionalOptions,
