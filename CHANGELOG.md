@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-19
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -35,6 +35,7 @@
 
 ### 🐛 Bug Fixes
 
+- Handle empty url and oauth_host on login page [[#5434](https://github.com/woodpecker-ci/woodpecker/pull/5434)]
 - Fix background color of pipeline step list [[#5431](https://github.com/woodpecker-ci/woodpecker/pull/5431)]
 - Fix bitbucket status sending [[#5372](https://github.com/woodpecker-ci/woodpecker/pull/5372)]
 - Correct OpenApi LookupOrg router path [[#5351](https://github.com/woodpecker-ci/woodpecker/pull/5351)]
@@ -58,6 +59,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module google.golang.org/grpc to v1.75.0 [[#5437](https://github.com/woodpecker-ci/woodpecker/pull/5437)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.141.1 [[#5432](https://github.com/woodpecker-ci/woodpecker/pull/5432)]
 - chore(deps): update golang-lang [[#5423](https://github.com/woodpecker-ci/woodpecker/pull/5423)]
 - chore(deps): update docker.io/golang docker tag to v1.25 [[#5422](https://github.com/woodpecker-ci/woodpecker/pull/5422)]
