@@ -23,7 +23,7 @@
         <h1 class="text-wp-text-100 text-xl">{{ $t('login_to_woodpecker_with') }}</h1>
         <div class="flex flex-col gap-2">
           <Button
-            v-for="forge in forges"
+            v-for="forge in forgesWithNameAndFavicon"
             :key="forge.id"
             :start-icon="forge.type === 'addon' ? 'repo' : forge.type"
             class="whitespace-normal!"
@@ -31,15 +31,15 @@
           >
             <div class="mr-2 w-4">
               <img
-                v-if="!failedForgeFavicons.has(forge.id)"
-                :src="getFaviconUrl(forge)"
-                :alt="$t('login_to_woodpecker_with', { forge: getHostFromUrl(forge) })"
+                v-if="forge.favicon && !failedForgeFavicons.has(forge.id)"
+                :src="forge.favicon"
+                :alt="$t('login_to_woodpecker_with', { forge: forge.name })"
                 @error="() => failedForgeFavicons.add(forge.id)"
               />
               <Icon v-else :name="forge.type === 'addon' ? 'repo' : forge.type" />
             </div>
 
-            {{ getHostFromUrl(forge) }}
+            {{ forge.name }}
           </Button>
         </div>
       </div>
@@ -103,18 +103,24 @@ onMounted(async () => {
 
 useWPTitle(computed(() => [i18n.t('login')]));
 
-function getHostFromUrl(forge: Forge) {
-  if (!forge.url && !forge.oauth_host) {
-    return forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
-  }
-
-  const url = new URL(forge.oauth_host ?? forge.url);
-  return url.hostname;
-}
-
 const failedForgeFavicons = ref(new Set<number>()); // Track which favicons failed to load
-function getFaviconUrl(forge: Forge) {
-  const url = new URL(forge.oauth_host ?? forge.url);
-  return `${url.origin}/favicon.ico`;
-}
+
+const forgesWithNameAndFavicon = computed(() =>
+  forges.value.map((forge) => {
+    let name = forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
+    let favicon: null | string = null;
+
+    if (forge.url || forge.oauth_host) {
+      const url = new URL(forge.oauth_host || forge.url);
+      name = url.hostname;
+      favicon = `${url.origin}/favicon.ico`;
+    }
+
+    return {
+      ...forge,
+      name,
+      favicon,
+    };
+  }),
+);
 </script>

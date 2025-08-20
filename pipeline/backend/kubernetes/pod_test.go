@@ -293,6 +293,7 @@ func TestFullPod(t *testing.T) {
 				"runAsGroup": 101,
 				"runAsNonRoot": true,
 				"fsGroup": 101,
+				"fsGroupChangePolicy": "OnRootMismatch",
 				"appArmorProfile": {
 					"type": "Localhost",
 					"localhostProfile": "k8s-apparmor-example-deny-write"
@@ -348,12 +349,14 @@ func TestFullPod(t *testing.T) {
 		{Number: 2345, Protocol: "tcp"},
 		{Number: 3456, Protocol: "udp"},
 	}
+	fsGroupChangePolicy := v1.PodFSGroupChangePolicy("OnRootMismatch")
 	secCtx := SecurityContext{
-		Privileged:   newBool(true),
-		RunAsNonRoot: newBool(true),
-		RunAsUser:    newInt64(101),
-		RunAsGroup:   newInt64(101),
-		FSGroup:      newInt64(101),
+		Privileged:          newBool(true),
+		RunAsNonRoot:        newBool(true),
+		RunAsUser:           newInt64(101),
+		RunAsGroup:          newInt64(101),
+		FSGroup:             newInt64(101),
+		FsGroupChangePolicy: &fsGroupChangePolicy,
 		SeccompProfile: &SecProfile{
 			Type:             "Localhost",
 			LocalhostProfile: "profiles/audit.json",
