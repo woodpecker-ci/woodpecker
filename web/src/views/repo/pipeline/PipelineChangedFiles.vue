@@ -56,7 +56,7 @@ function computeCollapsedTree(): TreeNode[] {
     if (!node.isDirectory) return node;
     let collapsedChildren = node.children.map(collapseNode);
     let currentNode = { ...node, children: collapsedChildren };
-    
+
     while (
       currentNode.children.length === 1 &&
       currentNode.children[0].isDirectory
