@@ -18,7 +18,6 @@ package queue
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -38,20 +37,6 @@ func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
 type persistentQueue struct {
 	Queue
 	store store.Store
-}
-
-// Push pushes a task to the tail of this queue.
-func (q *persistentQueue) Push(c context.Context, task *model.Task) error {
-	if err := q.store.TaskInsert(task); err != nil {
-		return err
-	}
-	err := q.Queue.Push(c, task)
-	if err != nil {
-		if err2 := q.store.TaskDelete(task.ID); err2 != nil {
-			err = errors.Wrapf(err, "delete task '%s' failed: %v", task.ID, err2)
-		}
-	}
-	return err
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
@@ -85,15 +70,6 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f FilterFn) (*m
 		}
 	}
 	return task, err
-}
-
-// Evict removes a pending task from the queue.
-func (q *persistentQueue) Evict(c context.Context, id string) error {
-	err := q.Queue.Evict(c, id)
-	if err == nil {
-		return q.store.TaskDelete(id)
-	}
-	return err
 }
 
 // EvictAtOnce removes multiple pending tasks from the queue.
