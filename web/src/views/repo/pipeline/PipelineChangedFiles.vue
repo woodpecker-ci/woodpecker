@@ -50,25 +50,25 @@ function collapseNode(node: TreeNode): TreeNode {
 }
 
 const fileTree = computed(() => (pipeline.value.changed_files ?? []).reduce((acc, file) => {
-    const parts = file.split('/');
-    let currentLevel = acc;
+  const parts = file.split('/');
+  let currentLevel = acc;
 
-    parts.forEach((part, index) => {
-      const existingNode = currentLevel.find((node) => node.name === part);
-      if (existingNode) {
-        currentLevel = existingNode.children;
-      } else {
-        const newNode = {
-          name: part,
-          path: parts.slice(0, index + 1).join('/'),
-          isDirectory: index < parts.length - 1,
-          children: [],
-        };
-        currentLevel.push(newNode);
-        currentLevel = newNode.children;
-      }
-    });
+  parts.forEach((part, index) => {
+    const existingNode = currentLevel.find((node) => node.name === part);
+    if (existingNode) {
+      currentLevel = existingNode.children;
+    } else {
+      const newNode = {
+        name: part,
+        path: parts.slice(0, index + 1).join('/'),
+        isDirectory: index < parts.length - 1,
+        children: [],
+      };
+      currentLevel.push(newNode);
+      currentLevel = newNode.children;
+    }
+  });
 
-    return acc;
-  }, [] as TreeNode[]).map(collapseNode));
+  return acc;
+}, [] as TreeNode[]).map(collapseNode));
 </script>
