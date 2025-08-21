@@ -38,7 +38,7 @@ func TestNew(t *testing.T) {
 
 	f, _ := forge.(*Forgejo)
 	assert.Equal(t, "http://localhost:8080", f.url)
-	assert.True(t, f.SkipVerify)
+	assert.True(t, f.skipVerify)
 }
 
 func Test_forgejo(t *testing.T) {
