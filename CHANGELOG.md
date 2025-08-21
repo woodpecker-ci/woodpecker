@@ -15,6 +15,10 @@
 
 - fix(deps): update golang-packages [[#5442](https://github.com/woodpecker-ci/woodpecker/pull/5442)]
 
+### Misc
+
+- Remove twitter from release template [[#5447](https://github.com/woodpecker-ci/woodpecker/pull/5447)]
+
 ## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-20
 
 ### ❤️ Thanks to all contributors! ❤️
