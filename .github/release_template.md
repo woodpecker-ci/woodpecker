@@ -31,4 +31,3 @@
   - [ ] Mastodon (check if already posted from the release pipeline)
   - [ ] Bluesky (check if already posted from the release pipeline)
   - [ ] Matrix
-  - [ ] Twitter
