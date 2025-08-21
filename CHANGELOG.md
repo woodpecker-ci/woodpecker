@@ -2,6 +2,15 @@
 
 ## [3.9.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.1) - 2025-08-21
 
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 📚 Documentation
+
+- Add easypanel community package [[#5446](https://github.com/woodpecker-ci/woodpecker/pull/5446)]
+- Add some blogs and videos [[#5445](https://github.com/woodpecker-ci/woodpecker/pull/5445)]
+
 ### 📦️ Dependency
 
 - fix(deps): update golang-packages [[#5442](https://github.com/woodpecker-ci/woodpecker/pull/5442)]
