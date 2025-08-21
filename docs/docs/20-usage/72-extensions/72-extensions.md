@@ -2,9 +2,9 @@
 
 Woodpecker allows you to replace internal logic with external extensions by using pre-defined http endpoints.
 
-There are currently two types of extensions available:
+There is currently one type of extension available:
 
-- [Configuration extension](./40-configuration-extension.md) to modify or generate Woodpeckers pipeline configurations.
+- [Configuration extension](./40-configuration-extension.md) to modify or generate Woodpeckers pipeline configurations on the fly.
 
 ## Security
 
