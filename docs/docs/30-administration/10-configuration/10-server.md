@@ -1071,6 +1071,16 @@ Specify a configuration service endpoint, see [Configuration Extension](#externa
 
 ---
 
+### ALLOWED_EXTENSIONS_HOSTS
+
+- Name: `WOODPECKER_ALLOWED_EXTENSIONS_HOSTS`
+- Default: `external`
+- Default: `external`
+
+Comma-separated list of allowed hosts for extensions. Possible values are `loopback`, `private`, `external`, `*` or CIDR list.
+
+---
+
 ### FORGE_TIMEOUT
 
 - Name: `WOODPECKER_FORGE_TIMEOUT`
