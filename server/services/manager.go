@@ -75,7 +75,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
-	client, err := utils.NewHTTPClient(signaturePrivateKey, c.String("allowed-extensions-hosts"))
+	client, err := utils.NewHTTPClient(signaturePrivateKey, c.String("extensions-allowed-hosts"))
 	if err != nil {
 		return nil, err
 	}

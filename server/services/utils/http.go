@@ -42,7 +42,7 @@ func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*
 	if allowedHostListValue == "" {
 		allowedHostListValue = host_matcher.MatchBuiltinExternal
 	}
-	allowedHostMatcher := host_matcher.ParseHostMatchList("WOODPECKER_ALLOWED_EXTENSIONS_HOSTS", allowedHostListValue)
+	allowedHostMatcher := host_matcher.ParseHostMatchList("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS", allowedHostListValue)
 
 	pubKeyID := "woodpecker-ci-extensions"
 

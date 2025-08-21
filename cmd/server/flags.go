@@ -249,9 +249,9 @@ var flags = append([]cli.Flag{
 		Usage:   "url used for calling configuration service endpoint",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_ALLOWED_EXTENSIONS_HOSTS"),
-		Name:    "allowed-extensions-hosts",
-		Usage:   "Hosts that are allowed to be used by extensions",
+		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
+		Name:    "extensions-allowed-hosts",
+		Usage:   "Hosts that are allowed to be contacted by extensions",
 		Value:   hostmatcher.MatchBuiltinExternal,
 	},
 	&cli.StringFlag{
