@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/yaronf/httpsign"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
 )
 
 func TestSignClient(t *testing.T) {

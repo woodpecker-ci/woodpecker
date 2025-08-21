@@ -29,7 +29,7 @@ import (
 
 	"github.com/yaronf/httpsign"
 
-	host_matcher "go.woodpecker-ci.org/woodpecker/v2/server/services/utils/hostmatcher"
+	host_matcher "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
 )
 
 type Client struct {
