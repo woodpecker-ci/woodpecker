@@ -6,14 +6,14 @@
 
 @qwerty287
 
+### 🐛 Bug Fixes
+
+- Print execution errors [[#5448](https://github.com/woodpecker-ci/woodpecker/pull/5448)]
+
 ### 📚 Documentation
 
 - Add easypanel community package [[#5446](https://github.com/woodpecker-ci/woodpecker/pull/5446)]
 - Add some blogs and videos [[#5445](https://github.com/woodpecker-ci/woodpecker/pull/5445)]
-
-### 📦️ Dependency
-
-- fix(deps): update golang-packages [[#5442](https://github.com/woodpecker-ci/woodpecker/pull/5442)]
 
 ### Misc
 
