@@ -4,7 +4,7 @@ Woodpecker allows you to replace internal logic with external extensions by usin
 
 There is currently one type of extension available:
 
-- [Configuration extension](./40-configuration-extension.md) to modify or generate Woodpeckers pipeline configurations on the fly.
+- [Configuration extension](./40-configuration-extension.md) to modify or generate pipeline configurations on the fly.
 
 ## Security
 
