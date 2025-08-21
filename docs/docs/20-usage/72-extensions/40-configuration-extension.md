@@ -1,12 +1,12 @@
 # Configuration extension
 
-The configuration extension can be used to modify or generate Woodpeckers pipeline configurations. You can configure a HTTP
-endpoint in the repository settings in the extensions tab.
+The configuration extension can be used to modify or generate Woodpeckers pipeline configurations. You can configure an HTTP endpoint in the repository settings in the extensions tab.
 
 Using such an extension can be useful if you want to:
 
 <!-- cSpell:words templating,Starlark,Jsonnet -->
-- Preprocess the original configuration file with something like go templating
+
+- Preprocess the original configuration file with something like Go templating
 - Convert custom attributes to Woodpecker attributes
 - Add defaults to the configuration like default steps
 - Convert configuration files from a totally different format like Gitlab CI config, Starlark, Jsonnet, ...
@@ -33,10 +33,6 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
 
 When a pipeline is triggered Woodpecker will fetch the pipeline configuration from the repository, then make a HTTP POST request to the configured extension with a JSON payload containing some data like the repository, pipeline information and the current config files retrieved from the repository. The extension can then send back modified or even new pipeline configurations following Woodpeckers official yaml format that should be used.
 
-:::tip
-The netrc data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) api to get more information about the repository.
-:::
-
 ### Request
 
 The extension receives an HTTP POST request with the following JSON payload:
@@ -60,7 +56,7 @@ Checkout the following models for more information:
 - [netrc model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/netrc.go)
 
 :::tip
-The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) api to get more information about the repository.
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) API to get more information about the repository.
 :::
 
 Example request:
@@ -138,8 +134,8 @@ Example request:
 
 ### Response
 
-The extension should respond with a JSON payload containing the new configuration files in Woodpeckers official yaml format.
-If the extension wants to keep the existing configuration files, it can respond with **HTTP 204**.
+The extension should respond with a JSON payload containing the new configuration files in Woodpecker's official YAML format.
+If the extension wants to keep the existing configuration files, it can respond with HTTP status `204 No Content`.
 
 ```ts
 class Response {
