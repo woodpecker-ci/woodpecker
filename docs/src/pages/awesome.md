@@ -65,6 +65,12 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [How to deploy Woodpecker CI 1.0.3 in docker swarm behind Caddy v2.7.5](https://www.tuneit.me/how-to-deploy-woodpecker-ci-1-0-3-in-docker-swarm-behind-caddy-v2-7-5)
 - [Woodpecker CI](https://blog.mariom.pl/posts/2023/03/woodpecker/)
 - [Deploy Gitea and Woodpecker CI with Docker Compose](https://www.alexruf.net/posts/deploy-gitea-woodpecker-docker-compose/)
+- [Improving Multi-Arch Image Build Performance by not Emulating](https://blog.mei-home.net/posts/improving-container-image-build-perf-with-buildah/)
+- [CI pipelines with Woodpecker](https://blog.reinhard.codes/2024/11/19/ci-pipelines-with-woodpecker/)
+- [Setting up Woodpecker CI at home](https://jamesbrechtel.com/posts/wasting-time-for-misery-and-loss/)
+- [Woodpecker CI with automatic runner creation](https://planet.kde.org/jonah-bruchert-2023-05-13-woodpecker-ci-with-automatic-runner-creation/)
+- [Self-Hosted CI: Install and Run Woodpecker CI on Your VPS](https://mangohost.net/blog/self-hosted-ci-install-and-run-woodpecker-ci-on-your-vps/)
+- [Automating My Blog With Gitea and Woodpecker](https://bgenc.net/2022.11.19.automating-my-blog-with-gitea-and-woodpecker/)
 
 ## Videos
 
@@ -74,6 +80,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [How to Build & Publish Custom Docker Container using Gitea & Woodpecker behind Caddy Server | TUNEIT](https://www.youtube.com/watch?v=9m7DbgL1mNk)
 - [Radicle Woodpecker CI Integration](https://www.youtube.com/watch?v=Ks1nbYLn4P8)
 - [woodpecker-ci/woodpecker - Gource visualisation](https://www.youtube.com/watch?v=38JuakZ6m5s)
+- [Woodpecker CI](https://www.youtube.com/watch?v=Htd98Mepu4s)
 
 ## Plugins
 
