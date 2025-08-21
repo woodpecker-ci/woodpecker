@@ -34,13 +34,13 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
+	forge, _ := New(&Opts{OAuthClientID: "4vyW6b49Z", OAuthClientSecret: "a5012f6c6"})
 
 	f, _ := forge.(*config)
 	assert.Equal(t, DefaultURL, f.url)
-	assert.Equal(t, DefaultAPI, f.API)
-	assert.Equal(t, "4vyW6b49Z", f.Client)
-	assert.Equal(t, "a5012f6c6", f.Secret)
+	assert.Equal(t, DefaultAPI, f.api)
+	assert.Equal(t, "4vyW6b49Z", f.oAuthClientID)
+	assert.Equal(t, "a5012f6c6", f.oAuthSecret)
 }
 
 func TestBitbucket(t *testing.T) {
@@ -48,7 +48,7 @@ func TestBitbucket(t *testing.T) {
 
 	s := httptest.NewServer(fixtures.Handler())
 	defer s.Close()
-	c := &config{url: s.URL, API: s.URL}
+	c := &config{url: s.URL, api: s.URL}
 
 	ctx := t.Context()
 

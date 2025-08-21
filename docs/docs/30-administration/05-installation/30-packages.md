@@ -91,6 +91,7 @@ Woodpecker itself is not responsible for creating these packages. Please reach o
 - [openSUSE](https://software.opensuse.org/package/woodpecker)
 - [YunoHost](https://apps.yunohost.org/app/woodpecker)
 - [Cloudron](https://www.cloudron.io/store/org.woodpecker_ci.cloudronapp.html)
+- [Easypanel](https://easypanel.io/docs/templates/woodpeckerci)
 
 ### NixOS
 
