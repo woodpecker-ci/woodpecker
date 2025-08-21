@@ -1,0 +1,42 @@
+{
+  "action": "opened",
+  "number": 1,
+  "pull_request": {
+    "url": "https://api.github.com/repos/baxterthehacker/public-repo/pulls/1",
+    "html_url": "https://github.com/baxterthehacker/public-repo/pull/1",
+    "number": 1,
+    "state": "open",
+    "title": "Update the README with new information",
+    "user": {
+      "login": "baxterthehacker",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6752317?v=3"
+    },
+    "base": {
+      "label": "baxterthehacker:main",
+      "ref": "main",
+      "sha": "9353195a19e45482665306e466c832c46560532d"
+    },
+    "head": {
+      "label": "baxterthehacker:changes",
+      "ref": "changes",
+      "sha": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"
+    }
+  },
+  "repository": {
+    "id": 35129377,
+    "name": "public-repo",
+    "full_name": "baxterthehacker/public-repo",
+    "owner": {
+      "login": "baxterthehacker",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6752317?v=3"
+    },
+    "private": true,
+    "html_url": "https://github.com/baxterthehacker/public-repo",
+    "clone_url": "https://github.com/baxterthehacker/public-repo.git",
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "octocat",
+    "avatar_url": "https://avatars.githubusercontent.com/u/6752317?v=3"
+  }
+}

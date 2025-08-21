@@ -109,10 +109,10 @@ func GetOrgPermissions(c *gin.Context) {
 // LookupOrg
 //
 //	@Summary	Lookup an organization by full name
-//	@Router		/org/lookup/{org_full_name} [get]
+//	@Router		/orgs/lookup/{org_full_name} [get]
 //	@Produce	json
 //	@Success	200	{object}	Org
-//	@Tags		Organizations
+//	@Tags		Orgs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_full_name	path	string	true	"the organizations full name / slug"
 func LookupOrg(c *gin.Context) {

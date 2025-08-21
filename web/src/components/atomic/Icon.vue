@@ -58,10 +58,17 @@
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'dots'" :path="mdiDotsVertical" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="24" />
-  <SvgIcon v-else-if="name === 'file-cog-outlined'" :path="mdiFileCogOutline" size="24" />
-  <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="24" />
+  <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file-cog-outline'" :path="mdiFileCogOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file-edit-outline'" :path="mdiFileEditOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder'" :path="mdiFolderOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder-open'" :path="mdiFolderOpenOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file'" :path="mdiFileOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'forge'" :path="mdiCodeBraces" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'fullscreen'" :path="mdiFullscreen" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'exit-fullscreen'" :path="mdiFullscreenExit" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -92,6 +99,8 @@
   </svg>
 
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
+
+  <div v-else>{{ throwNotFound() }}</div>
 </template>
 
 <script lang="ts" setup>
@@ -109,6 +118,7 @@ import {
   mdiClockTimeEightOutline,
   mdiClose,
   mdiCloseCircle,
+  mdiCodeBraces,
   mdiCog,
   mdiCogOutline,
   mdiConsole,
@@ -118,8 +128,14 @@ import {
   mdiEyeOffOutline,
   mdiEyeOutline,
   mdiFileCogOutline,
+  mdiFileEditOutline,
+  mdiFileOutline,
+  mdiFolderOpenOutline,
+  mdiFolderOutline,
   mdiFormatListBulleted,
   mdiFormatListGroup,
+  mdiFullscreen,
+  mdiFullscreenExit,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
@@ -190,7 +206,6 @@ export type IconNames =
   | 'forgejo'
   | 'question'
   | 'list'
-  | 'loading'
   | 'plus'
   | 'blank'
   | 'heal'
@@ -211,7 +226,8 @@ export type IconNames =
   | 'visibility-internal'
   | 'dots'
   | 'tray-full'
-  | 'file-cog-outlined'
+  | 'file-cog-outline'
+  | 'file-edit-outline'
   | 'bug-outline'
   | 'list-group'
   | 'secret'
@@ -223,9 +239,19 @@ export type IconNames =
   | 'user'
   | 'org'
   | 'cron'
-  | 'toolbox';
+  | 'toolbox'
+  | 'forge'
+  | 'fullscreen'
+  | 'exit-fullscreen'
+  | 'folder'
+  | 'folder-open'
+  | 'file';
 
-defineProps<{
+const props = defineProps<{
   name: IconNames;
 }>();
+
+function throwNotFound() {
+  throw new Error(`Icon "${props.name}" not found`);
+}
 </script>

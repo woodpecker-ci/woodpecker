@@ -41,8 +41,8 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import { computed, inject, onMounted, ref, watch } from 'vue';
-import type { Ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import type { SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
@@ -50,27 +50,20 @@ import SelectField from '~/components/form/SelectField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
-import type { Repo } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const apiClient = useApiClient();
-const repo = inject<Ref<Repo>>('repo');
+const repo = requiredInject('repo');
 
 const badgeType = useStorage('woodpecker:last-badge-type', 'markdown');
-
-if (!repo) {
-  throw new Error('Unexpected: "repo" should be provided at this place');
-}
 
 const defaultBranch = computed(() => repo.value.default_branch);
 const branches = ref<SelectOption[]>([]);
 const branch = ref<string>('');
 
 async function loadBranches() {
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
-  }
-
   branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
     .map((b) => ({
       value: b,
@@ -96,10 +89,6 @@ const repoUrl = computed(
 );
 
 const badgeContent = computed(() => {
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
-  }
-
   if (badgeType.value === 'url') {
     return `${baseUrl}${badgeUrl.value}`;
   }
@@ -122,4 +111,7 @@ onMounted(() => {
 watch(repo, () => {
   loadBranches();
 });
+
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repo.settings.badge.badge'), repo.value.full_name]));
 </script>

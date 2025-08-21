@@ -28,8 +28,9 @@ import SelectField from '~/components/form/SelectField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import { setI18nLanguage } from '~/compositions/useI18n';
 import { useTheme } from '~/compositions/useTheme';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const { storeTheme } = useTheme();
 
 const localeOptions = computed(() =>
@@ -49,4 +50,6 @@ const selectedLocale = computed<string>({
     return storedLocale.value;
   },
 });
+
+useWPTitle(computed(() => [t('user.settings.general.general'), t('user.settings.settings')]));
 </script>

@@ -98,7 +98,7 @@
       ]
     },
     "clone_settings": {
-      "description": "Change the settings of your clone plugin. Read more: https://woodpecker-ci.org/plugins/Git%20Clone",
+      "description": "Change the settings of your clone plugin. Read more: https://woodpecker-ci.org/plugins/git-clone",
       "type": "object",
       "properties": {
         "depth": {
@@ -641,6 +641,12 @@
           }
         },
         "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
+        "tolerations": {
           "type": "object",
           "additionalProperties": {
             "type": ["boolean", "string", "number"]

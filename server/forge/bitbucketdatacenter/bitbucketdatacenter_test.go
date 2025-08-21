@@ -15,7 +15,6 @@
 package bitbucketdatacenter
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -28,11 +27,11 @@ import (
 
 func TestNew(t *testing.T) {
 	forge, err := New(Opts{
-		URL:          "http://localhost:8080",
-		Username:     "0ZXh0IjoiI",
-		Password:     "I1NiIsInR5",
-		ClientID:     "client-id",
-		ClientSecret: "client-secret",
+		URL:               "http://localhost:8080",
+		Username:          "0ZXh0IjoiI",
+		Password:          "I1NiIsInR5",
+		OAuthClientID:     "client-id",
+		OAuthClientSecret: "client-secret",
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, forge)
@@ -57,7 +56,7 @@ func TestBitbucketDC(t *testing.T) {
 		urlAPI: s.URL,
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	repo, err := c.Repo(ctx, fakeUser, model.ForgeRemoteID("1234"), "PRJ", "repo-slug")
 	assert.NoError(t, err)

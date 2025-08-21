@@ -3,7 +3,7 @@ when:
 
 steps:
   - name: lint-editorconfig
-    image: docker.io/woodpeckerci/plugin-editorconfig-checker:0.3.0
+    image: docker.io/woodpeckerci/plugin-editorconfig-checker:0.3.1
     depends_on: []
     when:
       - event: pull_request

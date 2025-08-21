@@ -17,7 +17,6 @@ package gitea
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -40,7 +39,7 @@ func TestNew(t *testing.T) {
 
 	f, _ := forge.(*Gitea)
 	assert.Equal(t, "http://localhost:8080", f.url)
-	assert.True(t, f.SkipVerify)
+	assert.True(t, f.skipVerify)
 }
 
 func Test_gitea(t *testing.T) {
@@ -54,7 +53,7 @@ func Test_gitea(t *testing.T) {
 	})
 
 	mockStore := mocks_store.NewStore(t)
-	ctx := store.InjectToContext(context.Background(), mockStore)
+	ctx := store.InjectToContext(t.Context(), mockStore)
 
 	t.Run("netrc with user token", func(t *testing.T) {
 		forge, _ := New(Opts{})

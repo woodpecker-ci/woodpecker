@@ -72,7 +72,7 @@ type Repo struct {
 	Perm                         *Perm                `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
-} //	@name Repo
+} //	@name	Repo
 
 // TableName return database table name for xorm.
 func (Repo) TableName() string {
@@ -138,7 +138,7 @@ type RepoPatch struct {
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`
 	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
-} //	@name RepoPatch
+} //	@name	RepoPatch
 
 type ForgeRemoteID string
 
@@ -162,4 +162,4 @@ type TrustedConfigurationPatch struct {
 type RepoLastPipeline struct {
 	*Repo
 	LastPipeline *Pipeline `json:"last_pipeline,omitempty"`
-} //	@name RepoLastPipeline
+} //	@name	RepoLastPipeline

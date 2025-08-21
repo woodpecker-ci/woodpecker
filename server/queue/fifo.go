@@ -74,14 +74,6 @@ func NewMemoryQueue(ctx context.Context) Queue {
 	return q
 }
 
-// Push pushes a task to the tail of this queue.
-func (q *fifo) Push(_ context.Context, task *model.Task) error {
-	q.Lock()
-	q.pending.PushBack(task)
-	q.Unlock()
-	return nil
-}
-
 // PushAtOnce pushes multiple tasks to the tail of this queue.
 func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
@@ -151,11 +143,6 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 
 	q.Unlock()
 	return nil
-}
-
-// Evict removes a pending task from the queue.
-func (q *fifo) Evict(ctx context.Context, taskID string) error {
-	return q.EvictAtOnce(ctx, []string{taskID})
 }
 
 // EvictAtOnce removes multiple pending tasks from the queue.

@@ -16,7 +16,6 @@
 package github
 
 import (
-	"context"
 	"net/http/httptest"
 	"testing"
 
@@ -29,10 +28,10 @@ import (
 
 func TestNew(t *testing.T) {
 	forge, _ := New(Opts{
-		URL:        "http://localhost:8080/",
-		Client:     "0ZXh0IjoiI",
-		Secret:     "I1NiIsInR5",
-		SkipVerify: true,
+		URL:               "http://localhost:8080/",
+		OAuthClientID:     "0ZXh0IjoiI",
+		OAuthClientSecret: "I1NiIsInR5",
+		SkipVerify:        true,
 	})
 	f, _ := forge.(*client)
 	assert.Equal(t, "http://localhost:8080", f.url)
@@ -53,7 +52,7 @@ func Test_github(t *testing.T) {
 
 	defer s.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	t.Run("netrc with user token", func(t *testing.T) {
 		forge, _ := New(Opts{})

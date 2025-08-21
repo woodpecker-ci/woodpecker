@@ -153,6 +153,12 @@ var flags = append([]cli.Flag{
 		Usage:   "The default value for allowing pull requests on a repo.",
 		Value:   true,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_APPROVAL_MODE"),
+		Name:    "default-approval-mode",
+		Usage:   "The default value for allowing pull requests on a repo.",
+		Value:   "forks",
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"),
 		Name:    "default-cancel-previous-pipeline-events",
@@ -166,13 +172,13 @@ var flags = append([]cli.Flag{
 		Usage:   "The default docker image to be used when cloning the repo",
 		Value:   constant.DefaultClonePlugin,
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"),
 		Name:    "default-pipeline-timeout",
 		Usage:   "The default time in minutes for a repo in minutes before a pipeline gets killed",
 		Value:   60,
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_MAX_PIPELINE_TIMEOUT"),
 		Name:    "max-pipeline-timeout",
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",

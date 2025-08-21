@@ -15,7 +15,6 @@
 package grpc
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -54,7 +53,7 @@ func TestRegisterAgent(t *testing.T) {
 			store: store,
 		}
 		ctx := metadata.NewIncomingContext(
-			context.Background(),
+			t.Context(),
 			metadata.Pairs("hostname", "hostname", "agent_id", "1337"),
 		)
 		agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
@@ -96,7 +95,7 @@ func TestRegisterAgent(t *testing.T) {
 			store: store,
 		}
 		ctx := metadata.NewIncomingContext(
-			context.Background(),
+			t.Context(),
 			metadata.Pairs("hostname", "newHostname", "agent_id", "1337"),
 		)
 		agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{

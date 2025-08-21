@@ -39,13 +39,13 @@ var (
 )
 
 func TestFifo(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	q := NewMemoryQueue(ctx)
 	dummyTask := genDummyTask()
 
-	assert.NoError(t, q.Push(ctx, dummyTask))
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
 	waitForProcess()
 	info := q.Info(ctx)
 	assert.Len(t, info.Pending, 1, "expect task in pending queue")
@@ -68,7 +68,7 @@ func TestFifo(t *testing.T) {
 }
 
 func TestFifoExpire(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
@@ -77,7 +77,7 @@ func TestFifoExpire(t *testing.T) {
 	dummyTask := genDummyTask()
 
 	q.extension = 0
-	assert.NoError(t, q.Push(ctx, dummyTask))
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
 	waitForProcess()
 	info := q.Info(ctx)
 	assert.Len(t, info.Pending, 1, "expect task in pending queue")
@@ -92,7 +92,7 @@ func TestFifoExpire(t *testing.T) {
 }
 
 func TestFifoWait(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
@@ -100,7 +100,7 @@ func TestFifoWait(t *testing.T) {
 
 	dummyTask := genDummyTask()
 
-	assert.NoError(t, q.Push(ctx, dummyTask))
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
 
 	waitForProcess()
 	got, err := q.Poll(ctx, 1, filterFnTrue)
@@ -119,32 +119,8 @@ func TestFifoWait(t *testing.T) {
 	wg.Wait()
 }
 
-func TestFifoEvict(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
-	t.Cleanup(func() { cancel(nil) })
-
-	q := NewMemoryQueue(ctx)
-	dummyTask := genDummyTask()
-
-	assert.NoError(t, q.Push(ctx, dummyTask))
-
-	waitForProcess()
-	info := q.Info(ctx)
-	assert.Len(t, info.Pending, 1, "expect task in pending queue")
-
-	err := q.Evict(ctx, dummyTask.ID)
-	assert.NoError(t, err)
-
-	waitForProcess()
-	info = q.Info(ctx)
-	assert.Len(t, info.Pending, 0)
-
-	err = q.Evict(ctx, dummyTask.ID)
-	assert.ErrorIs(t, err, ErrNotFound)
-}
-
 func TestFifoDependencies(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	task1 := genDummyTask()
@@ -174,7 +150,7 @@ func TestFifoDependencies(t *testing.T) {
 }
 
 func TestFifoErrors(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	task1 := genDummyTask()
@@ -216,7 +192,7 @@ func TestFifoErrors(t *testing.T) {
 }
 
 func TestFifoErrors2(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	task1 := genDummyTask()
@@ -256,7 +232,7 @@ func TestFifoErrors2(t *testing.T) {
 }
 
 func TestFifoErrorsMultiThread(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	task1 := genDummyTask()
@@ -348,7 +324,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 }
 
 func TestFifoTransitiveErrors(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	task1 := genDummyTask()
@@ -389,7 +365,7 @@ func TestFifoTransitiveErrors(t *testing.T) {
 }
 
 func TestFifoCancel(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	task1 := genDummyTask()
@@ -425,7 +401,7 @@ func TestFifoCancel(t *testing.T) {
 }
 
 func TestFifoPause(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
@@ -442,7 +418,7 @@ func TestFifoPause(t *testing.T) {
 
 	q.Pause()
 	t0 := time.Now()
-	assert.NoError(t, q.Push(ctx, dummyTask))
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
 	waitForProcess()
 	q.Resume()
 
@@ -452,13 +428,13 @@ func TestFifoPause(t *testing.T) {
 	assert.Greater(t, t1.Sub(t0), 20*time.Millisecond, "should have waited til resume")
 
 	q.Pause()
-	assert.NoError(t, q.Push(ctx, dummyTask))
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
 	q.Resume()
 	_, _ = q.Poll(ctx, 1, filterFnTrue)
 }
 
 func TestFifoPauseResume(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
@@ -467,14 +443,14 @@ func TestFifoPauseResume(t *testing.T) {
 	dummyTask := genDummyTask()
 
 	q.Pause()
-	assert.NoError(t, q.Push(ctx, dummyTask))
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
 	q.Resume()
 
 	_, _ = q.Poll(ctx, 1, filterFnTrue)
 }
 
 func TestWaitingVsPending(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	task1 := genDummyTask()
@@ -583,7 +559,7 @@ func TestShouldRun(t *testing.T) {
 }
 
 func TestFifoWithScoring(t *testing.T) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
 	q := NewMemoryQueue(ctx)

@@ -18,6 +18,7 @@
       v-if="!selectedRegistry"
       v-model="registries"
       :is-deleting="isDeleting"
+      :loading="loading"
       @edit="editRegistry"
       @delete="deleteRegistry"
     />
@@ -34,8 +35,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, inject, ref } from 'vue';
-import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -44,9 +44,11 @@ import RegistryEdit from '~/components/registry/RegistryEdit.vue';
 import RegistryList from '~/components/registry/RegistryList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import type { Org, Registry } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
+import type { Registry } from '~/lib/api/types';
 
 const emptyRegistry: Partial<Registry> = {
   address: '',
@@ -58,25 +60,17 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const org = inject<Ref<Org>>('org');
+const org = requiredInject('org');
 const selectedRegistry = ref<Partial<Registry>>();
 const isEditing = computed(() => !!selectedRegistry.value?.id);
 
 async function loadRegistries(page: number): Promise<Registry[] | null> {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
-  }
-
   return apiClient.getOrgRegistryList(org.value.id, { page });
 }
 
-const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
+const { resetPage, data: registries, loading } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
 const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
-  }
-
   if (!selectedRegistry.value) {
     throw new Error("Unexpected: Can't get registry");
   }
@@ -91,17 +85,13 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
     type: 'success',
   });
   selectedRegistry.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
-  }
-
   await apiClient.deleteOrgRegistry(org.value.id, _registry.address);
   notifications.notify({ title: i18n.t('registries.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editRegistry(registry: Registry) {
@@ -111,4 +101,6 @@ function editRegistry(registry: Registry) {
 function showAddRegistry() {
   selectedRegistry.value = cloneDeep(emptyRegistry);
 }
+
+useWPTitle(computed(() => [i18n.t('registries.registries'), org.value.name]));
 </script>

@@ -63,7 +63,7 @@ func setupConfigService(c *cli.Command, privateSignatureKey ed25519.PrivateKey) 
 	if retries == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGE_RETRY can not be 0")
 	}
-	configFetcher := config.NewForge(timeout, uint(retries))
+	configFetcher := config.NewForge(timeout, retries)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey)
@@ -115,8 +115,8 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.AdditionalOptions = make(map[string]any)
 	}
 
-	_forge.Client = strings.TrimSpace(c.String("forge-oauth-client"))
-	_forge.ClientSecret = strings.TrimSpace(c.String("forge-oauth-secret"))
+	_forge.OAuthClientID = strings.TrimSpace(c.String("forge-oauth-client"))
+	_forge.OAuthClientSecret = strings.TrimSpace(c.String("forge-oauth-secret"))
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
 	_forge.OAuthHost = c.String("forge-oauth-host")

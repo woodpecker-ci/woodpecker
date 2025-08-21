@@ -58,7 +58,7 @@ func repoOutput(c *cli.Command, repos []*woodpecker.Repo, fd ...io.Writer) error
 		log.Warn().Msgf("the --format flag is deprecated, please use --output instead")
 
 		outFmt = "go-template"
-		outOpt = []string{legacyFmt}
+		outOpt = []string{fmt.Sprintf("{{range . }}%s{{ print \"\\n\" }}{{end}}", legacyFmt)}
 	}
 
 	var out io.Writer

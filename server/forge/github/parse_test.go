@@ -126,4 +126,14 @@ func Test_parseHook(t *testing.T) {
 		assert.Len(t, strings.Split(b.Ref, "/"), 3)
 		assert.True(t, strings.HasPrefix(b.Ref, "refs/tags/"))
 	})
+
+	t.Run("reopen a pull", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestReopened), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.NotNil(t, p)
+		assert.Equal(t, model.EventPull, b.Event)
+	})
 }

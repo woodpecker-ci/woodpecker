@@ -15,7 +15,6 @@
 package dummy_test
 
 import (
-	"context"
 	"io"
 	"testing"
 
@@ -27,7 +26,7 @@ import (
 
 func TestSmalPipelineDummyRun(t *testing.T) {
 	dummyEngine := dummy.New()
-	ctx := context.Background()
+	ctx := t.Context()
 
 	assert.True(t, dummyEngine.IsAvailable(ctx))
 	assert.EqualValues(t, "dummy", dummyEngine.Name())

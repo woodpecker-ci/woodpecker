@@ -88,7 +88,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = int(c.Int("max-workflows"))
+	counter.Polling = c.Int("max-workflows")
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -199,7 +199,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	maxWorkflows := int(c.Int("max-workflows"))
+	maxWorkflows := c.Int("max-workflows")
 
 	customLabels := make(map[string]string)
 	if err := stringSliceAddToMap(c.StringSlice("labels"), customLabels); err != nil {
@@ -267,6 +267,11 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 			err := client.ReportHealth(grpcCtx)
 			if err != nil {
 				log.Err(err).Msg("failed to report health")
+				// Check if the error is due to context cancellation
+				if grpcCtx.Err() != nil || agentCtx.Err() != nil {
+					log.Debug().Msg("terminating health reporting due to context cancellation")
+					return nil
+				}
 			}
 
 			select {
@@ -291,8 +296,18 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 
 				log.Debug().Msg("polling new steps")
 				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
-					log.Error().Err(err).Msg("runner done with error")
-					return err
+					log.Error().Err(err).Msg("runner error, retrying...")
+					// Check if context is canceled
+					if agentCtx.Err() != nil {
+						return nil
+					}
+					// Wait a bit before retrying to avoid hammering the server
+					select {
+					case <-agentCtx.Done():
+						return nil
+					case <-time.After(time.Second * 5):
+						// Continue to next iteration
+					}
 				}
 			}
 		})
@@ -313,7 +328,7 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 
 		initHealth()
 
-		retryCount := int(c.Int("connect-retry-count"))
+		retryCount := c.Int("connect-retry-count")
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for i := 0; i < retryCount; i++ {

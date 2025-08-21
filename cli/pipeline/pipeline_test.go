@@ -80,7 +80,7 @@ func TestPipelineOutput(t *testing.T) {
 				},
 			}
 
-			_ = command.Run(context.Background(), tt.args)
+			_ = command.Run(t.Context(), tt.args)
 		})
 	}
 }

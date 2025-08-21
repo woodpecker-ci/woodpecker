@@ -22,7 +22,7 @@ type Config struct {
 	Hash   string `json:"hash" xorm:"UNIQUE(s) 'hash'"`
 	Name   string `json:"name" xorm:"UNIQUE(s) 'name'"`
 	Data   []byte `json:"data" xorm:"LONGBLOB 'data'"`
-} //	@name Config
+} //	@name	Config
 
 func (Config) TableName() string {
 	return "configs"

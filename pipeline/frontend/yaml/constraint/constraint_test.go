@@ -233,7 +233,22 @@ func TestConstraintList(t *testing.T) {
 		{
 			conf: "{ include: [ '*.md' ], exclude: [ CHANGELOG.md ] }",
 			with: []string{"README.md", "CHANGELOG.md"},
+			want: true,
+		},
+		{
+			conf: "{ exclude: [ CHANGELOG.md ] }",
+			with: []string{"README.md", "CHANGELOG.md"},
+			want: true,
+		},
+		{
+			conf: "{ exclude: [ CHANGELOG.md, docs/**/*.md ] }",
+			with: []string{"docs/main.md", "CHANGELOG.md"},
 			want: false,
+		},
+		{
+			conf: "{ exclude: [ CHANGELOG.md, docs/**/*.md ] }",
+			with: []string{"docs/main.md", "CHANGELOG.md", "README.md"},
+			want: true,
 		},
 		// commit message ignore matches
 		{

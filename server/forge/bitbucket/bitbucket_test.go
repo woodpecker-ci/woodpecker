@@ -17,28 +17,30 @@ package bitbucket
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestNew(t *testing.T) {
-	forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
+	forge, _ := New(&Opts{OAuthClientID: "4vyW6b49Z", OAuthClientSecret: "a5012f6c6"})
 
 	f, _ := forge.(*config)
 	assert.Equal(t, DefaultURL, f.url)
-	assert.Equal(t, DefaultAPI, f.API)
-	assert.Equal(t, "4vyW6b49Z", f.Client)
-	assert.Equal(t, "a5012f6c6", f.Secret)
+	assert.Equal(t, DefaultAPI, f.api)
+	assert.Equal(t, "4vyW6b49Z", f.oAuthClientID)
+	assert.Equal(t, "a5012f6c6", f.oAuthSecret)
 }
 
 func TestBitbucket(t *testing.T) {
@@ -46,9 +48,9 @@ func TestBitbucket(t *testing.T) {
 
 	s := httptest.NewServer(fixtures.Handler())
 	defer s.Close()
-	c := &config{url: s.URL, API: s.URL}
+	c := &config{url: s.URL, api: s.URL}
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	forge, _ := New(&Opts{})
 	netrc, _ := forge.Netrc(fakeUser, fakeRepo)
@@ -204,9 +206,15 @@ func TestBitbucket(t *testing.T) {
 	req.Header = http.Header{}
 	req.Header.Set(hookEvent, hookPush)
 
+	mockStore := mocks_store.NewStore(t)
+	ctx = store.InjectToContext(ctx, mockStore)
+	mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
+	mockStore.On("GetRepoForgeID", mock.Anything).Return(fakeRepoFromHook, nil)
+
 	r, b, err := c.Hook(ctx, req)
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
+	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
 }
 
@@ -268,6 +276,13 @@ var (
 		Owner:    "test_name",
 		Name:     "hook_empty",
 		FullName: "test_name/hook_empty",
+	}
+
+	fakeRepoFromHook = &model.Repo{
+		Owner:    "martinherren1984",
+		Name:     "publictestrepo",
+		FullName: "martinherren1984/publictestrepo",
+		UserID:   1,
 	}
 
 	fakePipeline = &model.Pipeline{

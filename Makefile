@@ -40,7 +40,7 @@ CGO_ENABLED ?= 1 # only used to compile server
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO),GO)
   # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
-	XGO_VERSION ?= go-1.24.x
+	XGO_VERSION ?= go-1.25.x
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
@@ -59,7 +59,7 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 		--user $(shell id -u):$(shell id -g) \
 		-e VERSION="$(VERSION)" \
 		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
-		-e TARGETOS="$(TARGETOS)" \
+		-e TARGETOS="linux" \
 		-e TARGETARCH="$(TARGETARCH)" \
 		-e CGO_ENABLED="$(CGO_ENABLED)" \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
@@ -129,7 +129,7 @@ check-xgo: ## Check if xgo is installed
 
 install-tools: ## Install development tools
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest ; \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest ; \
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \

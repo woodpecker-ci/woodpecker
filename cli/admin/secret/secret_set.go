@@ -26,10 +26,9 @@ import (
 )
 
 var secretUpdateCmd = &cli.Command{
-	Name:      "update",
-	Usage:     "update a secret",
-	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    secretUpdate,
+	Name:   "update",
+	Usage:  "update a secret",
+	Action: secretUpdate,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "name",

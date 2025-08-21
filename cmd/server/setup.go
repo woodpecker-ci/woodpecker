@@ -56,8 +56,8 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	xorm := store.XORM{
 		Log:             c.Bool("db-log"),
 		ShowSQL:         c.Bool("db-log-sql"),
-		MaxOpenConns:    int(c.Int("db-max-open-connections")),
-		MaxIdleConns:    int(c.Int("db-max-idle-connections")),
+		MaxOpenConns:    c.Int("db-max-open-connections"),
+		MaxIdleConns:    c.Int("db-max-idle-connections"),
 		ConnMaxLifetime: c.Duration("db-max-connection-timeout"),
 	}
 
@@ -180,6 +180,13 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	// Pull requests
 	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")
 
+	// Approval mode
+	approvalMode := model.ApprovalMode(c.String("default-approval-mode"))
+	if !approvalMode.Valid() {
+		return fmt.Errorf("approval mode %s is not valid", approvalMode)
+	}
+	server.Config.Pipeline.DefaultApprovalMode = approvalMode
+
 	// Cloning
 	server.Config.Pipeline.DefaultClonePlugin = c.String("default-clone-plugin")
 	server.Config.Pipeline.TrustedClonePlugins = c.StringSlice("plugins-trusted-clone")
@@ -189,11 +196,15 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
 	events := make([]model.WebhookEvent, 0, len(_events))
 	for _, v := range _events {
-		events = append(events, model.WebhookEvent(v))
+		e := model.WebhookEvent(v)
+		if err := e.Validate(); err != nil {
+			return err
+		}
+		events = append(events, e)
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
-	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
-	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
+	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
 
 	_labels := c.StringSlice("default-workflow-labels")
 	labels := make(map[string]string, len(_labels))
