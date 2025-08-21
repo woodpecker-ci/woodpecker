@@ -5124,9 +5124,6 @@ const docTemplate = `{
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
-                "secret_extension_endpoint": {
-                    "type": "string"
-                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -5169,6 +5166,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "clone_url_ssh": {
+                    "type": "string"
+                },
+                "config_extension_endpoint": {
                     "type": "string"
                 },
                 "config_file": {
@@ -5265,9 +5265,6 @@ const docTemplate = `{
                     }
                 },
                 "require_approval": {
-                    "type": "string"
-                },
-                "secret_extension_endpoint": {
                     "type": "string"
                 },
                 "timeout": {
