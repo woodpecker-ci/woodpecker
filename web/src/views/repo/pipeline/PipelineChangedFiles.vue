@@ -28,8 +28,8 @@ useWPTitle(
   ]),
 );
 
-const fileTree = computed(() =>
-  (pipeline.value.changed_files ?? []).reduce((acc, file) => {
+function computeCollapsedTree(): TreeNode[] {
+  const tree = (pipeline.value.changed_files ?? []).reduce((acc, file) => {
     const parts = file.split('/');
     let currentLevel = acc;
 
@@ -50,6 +50,31 @@ const fileTree = computed(() =>
     });
 
     return acc;
-  }, [] as TreeNode[]),
-);
+  }, [] as TreeNode[]);
+
+  function collapseNode(node: TreeNode): TreeNode {
+    if (!node.isDirectory) return node;
+    let collapsedChildren = node.children.map(collapseNode);
+    let currentNode = { ...node, children: collapsedChildren };
+    
+    while (
+      currentNode.children.length === 1 &&
+      currentNode.children[0].isDirectory
+    ) {
+      const onlyChild = currentNode.children[0];
+      currentNode = {
+        name: `${currentNode.name}/${onlyChild.name}`,
+        path: onlyChild.path,
+        isDirectory: true,
+        children: onlyChild.children,
+      };
+    }
+
+    return currentNode;
+  }
+
+  return tree.map(collapseNode);
+}
+
+const fileTree = computed(computeCollapsedTree);
 </script>
