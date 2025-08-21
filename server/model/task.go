@@ -17,6 +17,8 @@ package model
 import (
 	"fmt"
 	"strings"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 // Task defines scheduled pipeline Task.
@@ -28,7 +30,7 @@ type Task struct {
 	RunOn        []string               `json:"run_on"       xorm:"json 'run_on'"`
 	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'dependencies_status'"`
 	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
-} //	@name Task
+} //	@name	Task
 
 // TableName return database table name for xorm.
 func (Task) TableName() string {
@@ -48,8 +50,8 @@ func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 	if t.Labels == nil {
 		t.Labels = make(map[string]string)
 	}
-	t.Labels["repo"] = r.FullName
-	t.Labels[agentFilterOrgID] = fmt.Sprintf("%d", r.OrgID)
+	t.Labels[pipeline.LabelFilterRepo] = r.FullName
+	t.Labels[pipeline.LabelFilterOrg] = fmt.Sprintf("%d", r.OrgID)
 	return nil
 }
 

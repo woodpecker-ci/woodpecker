@@ -26,8 +26,8 @@ import (
 	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -169,7 +169,7 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		c.Instance.Match(m.Sys.Host)
 
 	// changed files filter apply only for pull-request and push events
-	if m.Curr.Event == metadata.EventPull || m.Curr.Event == metadata.EventPush {
+	if m.Curr.Event == metadata.EventPull || m.Curr.Event == metadata.EventPullClosed || m.Curr.Event == metadata.EventPush {
 		match = match && c.Path.Match(m.Curr.Commit.ChangedFiles, m.Curr.Commit.Message)
 	}
 
@@ -388,14 +388,19 @@ func (c *Path) Includes(v []string) bool {
 	return false
 }
 
-// Excludes returns true if the string matches any of the exclude patterns.
+// Excludes returns true if all of the strings match any of the exclude patterns.
 func (c *Path) Excludes(v []string) bool {
-	for _, pattern := range c.Exclude {
-		for _, file := range v {
+	for _, file := range v {
+		matched := false
+		for _, pattern := range c.Exclude {
 			if ok, _ := doublestar.Match(pattern, file); ok {
-				return true
+				matched = true
+				break
 			}
 		}
+		if !matched {
+			return false
+		}
 	}
-	return false
+	return true
 }

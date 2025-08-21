@@ -14,7 +14,7 @@
 
 package badges
 
-import "go.woodpecker-ci.org/woodpecker/v2/server/model"
+import "go.woodpecker-ci.org/woodpecker/v3/server/model"
 
 // cspell:words Verdana
 

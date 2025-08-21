@@ -38,15 +38,6 @@ steps:
     commands:
       - go test
 
-  secrets:
-    image: docker
-    commands:
-      - echo $DOCKER_USERNAME
-      - echo $DOCKER_PASSWORD
-    secrets:
-      - docker_username
-      - docker_prod_password
-
   detached:
     image: redis
     detach: true

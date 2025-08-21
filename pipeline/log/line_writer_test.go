@@ -20,9 +20,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/mocks"
 )
 
 func TestLineWriter(t *testing.T) {

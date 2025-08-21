@@ -23,7 +23,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
 )
 
 type testWriter struct {

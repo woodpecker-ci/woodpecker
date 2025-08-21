@@ -19,29 +19,31 @@ import (
 	"fmt"
 
 	"github.com/gorilla/securecookie"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 type Agent struct {
-	ID          int64  `json:"id"            xorm:"pk autoincr 'id'"`
-	Created     int64  `json:"created"       xorm:"created"`
-	Updated     int64  `json:"updated"       xorm:"updated"`
-	Name        string `json:"name"          xorm:"name"`
-	OwnerID     int64  `json:"owner_id"      xorm:"'owner_id'"`
-	Token       string `json:"token"         xorm:"token"`
-	LastContact int64  `json:"last_contact"  xorm:"last_contact"`
-	LastWork    int64  `json:"last_work"     xorm:"last_work"` // last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler
-	Platform    string `json:"platform"      xorm:"VARCHAR(100) 'platform'"`
-	Backend     string `json:"backend"       xorm:"VARCHAR(100) 'backend'"`
-	Capacity    int32  `json:"capacity"      xorm:"capacity"`
-	Version     string `json:"version"       xorm:"'version'"`
-	NoSchedule  bool   `json:"no_schedule"   xorm:"no_schedule"`
+	ID           int64             `json:"id"            xorm:"pk autoincr 'id'"`
+	Created      int64             `json:"created"       xorm:"created"`
+	Updated      int64             `json:"updated"       xorm:"updated"`
+	Name         string            `json:"name"          xorm:"name"`
+	OwnerID      int64             `json:"owner_id"      xorm:"'owner_id'"`
+	Token        string            `json:"token"         xorm:"token"`
+	LastContact  int64             `json:"last_contact"  xorm:"last_contact"`
+	LastWork     int64             `json:"last_work"     xorm:"last_work"` // last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler
+	Platform     string            `json:"platform"      xorm:"VARCHAR(100) 'platform'"`
+	Backend      string            `json:"backend"       xorm:"VARCHAR(100) 'backend'"`
+	Capacity     int32             `json:"capacity"      xorm:"capacity"`
+	Version      string            `json:"version"       xorm:"'version'"`
+	NoSchedule   bool              `json:"no_schedule"   xorm:"no_schedule"`
+	CustomLabels map[string]string `json:"custom_labels" xorm:"JSON 'custom_labels'"`
 	// OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
 	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
-} //	@name Agent
+} //	@name	Agent
 
 const (
-	IDNotSet         = -1
-	agentFilterOrgID = "org-id"
+	IDNotSet = -1
 )
 
 // TableName return database table name for xorm.
@@ -62,9 +64,9 @@ func (a *Agent) GetServerLabels() (map[string]string, error) {
 
 	// enforce filters for user and organization agents
 	if a.OrgID != IDNotSet {
-		filters[agentFilterOrgID] = fmt.Sprintf("%d", a.OrgID)
+		filters[pipeline.LabelFilterOrg] = fmt.Sprintf("%d", a.OrgID)
 	} else {
-		filters[agentFilterOrgID] = "*"
+		filters[pipeline.LabelFilterOrg] = "*"
 	}
 
 	return filters, nil

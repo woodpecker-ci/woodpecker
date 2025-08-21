@@ -15,6 +15,8 @@ tags: [community, debug]
 Sometimes you want to debug a pipeline.
 Therefore I recently discovered: <https://github.com/ekzhang/sshx>
 
+<!-- truncate -->
+
 A simple step like should allow you to debug:
 
 ```yaml

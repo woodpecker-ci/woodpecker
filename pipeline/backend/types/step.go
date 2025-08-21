@@ -17,6 +17,7 @@ package types
 // Step defines a container process.
 type Step struct {
 	Name           string            `json:"name"`
+	OrgID          int64             `json:"org_id,omitempty"`
 	UUID           string            `json:"uuid"`
 	Type           StepType          `json:"type,omitempty"`
 	Image          string            `json:"image,omitempty"`
@@ -24,7 +25,9 @@ type Step struct {
 	Detached       bool              `json:"detach,omitempty"`
 	Privileged     bool              `json:"privileged,omitempty"`
 	WorkingDir     string            `json:"working_dir,omitempty"`
+	WorkspaceBase  string            `json:"workspace_base,omitempty"`
 	Environment    map[string]string `json:"environment,omitempty"`
+	SecretMapping  map[string]string `json:"secret_mapping,omitempty"`
 	Entrypoint     []string          `json:"entrypoint,omitempty"`
 	Commands       []string          `json:"commands,omitempty"`
 	ExtraHosts     []HostAlias       `json:"extra_hosts,omitempty"`
@@ -41,6 +44,7 @@ type Step struct {
 	NetworkMode    string            `json:"network_mode,omitempty"`
 	Ports          []Port            `json:"ports,omitempty"`
 	BackendOptions map[string]any    `json:"backend_options,omitempty"`
+	WorkflowLabels map[string]string `json:"workflow_labels,omitempty"`
 }
 
 // StepType identifies the type of step.

@@ -28,15 +28,15 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // updateAgentLastWorkDelay the delay before the LastWork info should be updated.
@@ -441,7 +441,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 	return nil
 }
 
-func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {
+func (s *RPC) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
 		return -1, err
@@ -453,10 +453,11 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 		}
 	}
 
-	agent.Backend = backend
-	agent.Platform = platform
-	agent.Capacity = capacity
-	agent.Version = version
+	agent.Backend = info.Backend
+	agent.Platform = info.Platform
+	agent.Capacity = int32(info.Capacity)
+	agent.Version = info.Version
+	agent.CustomLabels = info.CustomLabels
 
 	err = s.store.AgentUpdate(agent)
 	if err != nil {
@@ -490,7 +491,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	}
 
 	if status != "I am alive!" {
-		//nolint:stylecheck
+		//nolint:staticcheck
 		return errors.New("Are you alive?")
 	}
 

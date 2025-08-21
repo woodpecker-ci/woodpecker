@@ -26,7 +26,7 @@ import (
 
 // ParamsToEnv uses reflection to convert a map[string]interface to a list
 // of environment variables.
-func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper bool, getSecretValue func(name string) (string, error)) (err error) {
+func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper bool, getSecretValue func(name string) (string, error), secretMapping map[string]string) (err error) {
 	if to == nil {
 		return fmt.Errorf("no map to write to")
 	}
@@ -34,9 +34,21 @@ func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper
 		if v == nil || len(k) == 0 {
 			continue
 		}
-		to[sanitizeParamKey(prefix, upper, k)], err = sanitizeParamValue(v, getSecretValue)
+		sanitizedParamKey := sanitizeParamKey(prefix, upper, k)
+
+		secretUsed := false
+		wrappedGetSecretValue := func(name string) (string, error) {
+			secretUsed = true
+			return getSecretValue(name)
+		}
+
+		to[sanitizedParamKey], err = sanitizeParamValue(v, wrappedGetSecretValue)
 		if err != nil {
 			return err
+		}
+
+		if secretUsed && secretMapping != nil {
+			secretMapping[sanitizedParamKey] = to[sanitizedParamKey]
 		}
 	}
 	return nil
@@ -44,8 +56,9 @@ func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper
 
 // sanitizeParamKey formats the environment variable key.
 func sanitizeParamKey(prefix string, upper bool, k string) string {
-	r := strings.ReplaceAll(strings.ReplaceAll(k, ".", "_"), "-", "_")
+	r := k
 	if upper {
+		r = strings.ReplaceAll(strings.ReplaceAll(k, ".", "_"), "-", "_")
 		r = strings.ToUpper(r)
 	}
 	return prefix + r

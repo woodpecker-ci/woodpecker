@@ -21,11 +21,7 @@
         <TextField :id="id" :model-value="agent.id?.toString()" disabled />
       </InputField>
 
-      <InputField
-        v-slot="{ id }"
-        :label="$t('admin.settings.agents.backend.backend')"
-        docs-url="docs/next/administration/backends/docker"
-      >
+      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.backend.backend')" :docs-url="backendDocsUrl">
         <TextField :id="id" v-model="agent.backend" disabled />
       </InputField>
 
@@ -34,9 +30,18 @@
       </InputField>
 
       <InputField
+        v-if="agent.custom_labels && Object.keys(agent.custom_labels).length > 0"
+        v-slot="{ id }"
+        :label="$t('admin.settings.agents.custom_labels.custom_labels')"
+      >
+        <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.custom_labels.desc') }}</span>
+        <TextField :id="id" :model-value="formatCustomLabels(agent.custom_labels)" disabled />
+      </InputField>
+
+      <InputField
         v-slot="{ id }"
         :label="$t('admin.settings.agents.capacity.capacity')"
-        docs-url="docs/next/administration/agent-config#woodpecker_max_workflows"
+        docs-url="docs/administration/configuration/agent#max_workflows"
       >
         <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.capacity.desc') }}</span>
         <TextField :id="id" :model-value="agent.capacity?.toString()" disabled />
@@ -98,7 +103,23 @@ const agent = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
+const baseDocsUrl = 'https://woodpecker-ci.org/docs/administration/configuration/backends/';
+
+const backendDocsUrl = computed(() => {
+  let backendUrlSuffix = agent.value.backend?.toLowerCase();
+  if (backendUrlSuffix === 'custom') {
+    backendUrlSuffix = 'custom-backends';
+  }
+  return `${baseDocsUrl}${backendUrlSuffix === '' ? 'docker' : backendUrlSuffix}`;
+});
+
 function updateAgent(newValues: Partial<Agent>) {
   emit('update:modelValue', { ...agent.value, ...newValues });
+}
+
+function formatCustomLabels(labels: Record<string, string>): string {
+  return Object.entries(labels)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(', ');
 }
 </script>

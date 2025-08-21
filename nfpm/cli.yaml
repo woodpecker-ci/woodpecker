@@ -9,4 +9,4 @@ maintainer: Woodpecker Authors <maintainer@woodpecker-ci.org>
 section: utils
 contents:
   - src: ./dist/cli/linux_amd64/woodpecker-cli
-    dst: /usr/local/bin/woodpecker
+    dst: /usr/local/bin/woodpecker-cli

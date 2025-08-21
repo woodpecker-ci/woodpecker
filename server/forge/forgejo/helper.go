@@ -22,10 +22,10 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // toRepo converts a Forgejo repository to a Woodpecker repository.
@@ -37,7 +37,6 @@ func toRepo(from *forgejo.Repository) *model.Repo {
 	)
 	return &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
-		SCMKind:       model.RepoGit,
 		Name:          name,
 		Owner:         from.Owner.UserName,
 		FullName:      from.FullName,
@@ -171,6 +170,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Base.Ref,
 		),
 		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
+		FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
 	}
 
 	return pipeline

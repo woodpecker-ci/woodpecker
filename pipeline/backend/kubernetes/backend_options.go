@@ -1,9 +1,10 @@
 package kubernetes
 
 import (
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
+	v1 "k8s.io/api/core/v1"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // BackendOptions defines all the advanced options for the kubernetes backend.
@@ -50,13 +51,14 @@ const (
 )
 
 type SecurityContext struct {
-	Privileged      *bool       `mapstructure:"privileged"`
-	RunAsNonRoot    *bool       `mapstructure:"runAsNonRoot"`
-	RunAsUser       *int64      `mapstructure:"runAsUser"`
-	RunAsGroup      *int64      `mapstructure:"runAsGroup"`
-	FSGroup         *int64      `mapstructure:"fsGroup"`
-	SeccompProfile  *SecProfile `mapstructure:"seccompProfile"`
-	ApparmorProfile *SecProfile `mapstructure:"apparmorProfile"`
+	Privileged          *bool                      `mapstructure:"privileged"`
+	RunAsNonRoot        *bool                      `mapstructure:"runAsNonRoot"`
+	RunAsUser           *int64                     `mapstructure:"runAsUser"`
+	RunAsGroup          *int64                     `mapstructure:"runAsGroup"`
+	FSGroup             *int64                     `mapstructure:"fsGroup"`
+	FsGroupChangePolicy *v1.PodFSGroupChangePolicy `mapstructure:"fsGroupChangePolicy"`
+	SeccompProfile      *SecProfile                `mapstructure:"seccompProfile"`
+	ApparmorProfile     *SecProfile                `mapstructure:"apparmorProfile"`
 }
 
 type SecProfile struct {
@@ -86,9 +88,9 @@ const (
 
 func parseBackendOptions(step *backend.Step) (BackendOptions, error) {
 	var result BackendOptions
-	if step.BackendOptions == nil {
+	if step == nil || step.BackendOptions == nil {
 		return result, nil
 	}
-	err := mapstructure.Decode(step.BackendOptions[EngineName], &result)
+	err := mapstructure.WeakDecode(step.BackendOptions[EngineName], &result)
 	return result, err
 }

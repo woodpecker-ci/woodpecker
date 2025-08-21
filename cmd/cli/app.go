@@ -17,23 +17,17 @@ package main
 import (
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/admin"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/deploy"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/exec"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/info"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/lint"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/log"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/loglevel"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/org"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/repo"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/secret"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/setup"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/user"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/admin"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/exec"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/info"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/org"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/setup"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/update"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 //go:generate go run docs.go app.go
@@ -49,18 +43,12 @@ func newApp() *cli.Command {
 	app.Suggest = true
 	app.Commands = []*cli.Command{
 		admin.Command,
-		org.Command,
-		repo.Command,
-		pipeline.Command,
-		log.Command,
-		deploy.Command,
 		exec.Command,
 		info.Command,
-		secret.Command,
-		user.Command,
 		lint.Command,
-		loglevel.Command,
-		cron.Command,
+		org.Command,
+		pipeline.Command,
+		repo.Command,
 		setup.Command,
 		update.Command,
 	}

@@ -21,9 +21,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/forgejo/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestForgejoParser(t *testing.T) {
@@ -55,7 +55,6 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "https://codeberg.org/meisam/woodpecktester.git",
 				CloneSSH:      "git@codeberg.org:meisam/woodpecktester.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -90,7 +89,6 @@ func TestForgejoParser(t *testing.T) {
 				ForgeURL:      "http://forgejo.golang.org/gordon/hello-world",
 				Clone:         "http://forgejo.golang.org/gordon/hello-world.git",
 				CloneSSH:      "git@forgejo.golang.org:gordon/hello-world.git",
-				SCMKind:       "git",
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -126,7 +124,6 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
 				CloneSSH:      "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -161,7 +158,6 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "http://forgejo.golang.org/gordon/hello-world.git",
 				CloneSSH:      "git@forgejo.golang.org:gordon/hello-world.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -195,7 +191,6 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "https://forgejo.golang.org/gordon/hello-world.git",
 				CloneSSH:      "",
 				Branch:        "main",
-				SCMKind:       "git",
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -220,6 +215,44 @@ func TestForgejoParser(t *testing.T) {
 			},
 		},
 		{
+			name:  "pull-request reopen events should handle a PR as it was first created",
+			data:  fixtures.HookPullRequestReopened,
+			event: "pull_request",
+			repo: &model.Repo{
+				ForgeRemoteID: "138564",
+				Owner:         "test_it",
+				Name:          "test_ci_thing",
+				FullName:      "test_it/test_ci_thing",
+				Avatar:        "https://codeberg.org/avatars/bb6f3159a98a869b43f20b350542f8fb",
+				ForgeURL:      "https://codeberg.org/test_it/test_ci_thing",
+				Clone:         "https://codeberg.org/test_it/test_ci_thing.git",
+				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
+				Branch:        "main",
+				PREnabled:     true,
+				IsSCMPrivate:  false,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "6543",
+				Event:             "pull_request",
+				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
+				Branch:            "main",
+				Ref:               "refs/pull/1/head",
+				Refspec:           "6543-patch-1:main",
+				Title:             "Some ned more AAAA",
+				Message:           "Some ned more AAAA",
+				Sender:            "6543",
+				Avatar:            "https://codeberg.org/avatars/09a234c768cb9bca78f6b2f82d6af173",
+				Email:             "6543@noreply.codeberg.org",
+				ForgeURL:          "https://codeberg.org/test_it/test_ci_thing/pulls/1",
+				PullRequestLabels: []string{},
+			},
+		},
+		{
 			name:  "pull-request events should handle a PR hook when PR got updated",
 			data:  fixtures.HookPullRequestUpdated,
 			event: "pull_request",
@@ -233,7 +266,6 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
 				CloneSSH:      "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				IsSCMPrivate:  false,
 				Perm: &model.Perm{
@@ -275,7 +307,6 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "https://forgejo.com/anbraten/test-repo.git",
 				CloneSSH:      "git@forgejo.com:anbraten/test-repo.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -313,7 +344,6 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "https://forgejo.com/anbraten/test-repo.git",
 				CloneSSH:      "git@forgejo.com:anbraten/test-repo.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -351,7 +381,6 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "https://git.xxx/anbraten/demo.git",
 				CloneSSH:      "ssh://git@git.xxx:22/anbraten/demo.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{

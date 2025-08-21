@@ -21,7 +21,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
 )
 
 var pipelineStopCmd = &cli.Command{

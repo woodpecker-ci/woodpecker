@@ -20,7 +20,7 @@ import (
 	"fmt"
 )
 
-type WebhookEvent string //	@name WebhookEvent
+type WebhookEvent string //	@name	WebhookEvent
 
 const (
 	EventPush       WebhookEvent = "push"
@@ -51,7 +51,7 @@ func (s WebhookEvent) Validate() error {
 }
 
 // StatusValue represent pipeline states woodpecker know.
-type StatusValue string //	@name StatusValue
+type StatusValue string //	@name	StatusValue
 
 const (
 	StatusSkipped  StatusValue = "skipped"  // skipped as another step failed
@@ -66,18 +66,19 @@ const (
 	StatusCreated  StatusValue = "created"  // created / internal use only
 )
 
-// SCMKind represent different version control systems.
-type SCMKind string //	@name SCMKind
+var ErrInvalidStatusValue = errors.New("invalid status value")
 
-const (
-	RepoGit      SCMKind = "git"
-	RepoHg       SCMKind = "hg"
-	RepoFossil   SCMKind = "fossil"
-	RepoPerforce SCMKind = "perforce"
-)
+func (s StatusValue) Validate() error {
+	switch s {
+	case StatusSkipped, StatusPending, StatusRunning, StatusSuccess, StatusFailure, StatusKilled, StatusError, StatusBlocked, StatusDeclined, StatusCreated:
+		return nil
+	default:
+		return fmt.Errorf("%w: %s", ErrInvalidStatusValue, s)
+	}
+}
 
 // RepoVisibility represent to what state a repo in woodpecker is visible to others.
-type RepoVisibility string //	@name RepoVisibility
+type RepoVisibility string //	@name	RepoVisibility
 
 const (
 	VisibilityPublic   RepoVisibility = "public"

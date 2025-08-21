@@ -24,13 +24,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	forge_mocks "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	mocks_manager "go.woodpecker-ci.org/woodpecker/v2/server/services/mocks"
-	store_mocks "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	mocks_manager "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 var fakePipeline = &model.Pipeline{
@@ -94,6 +94,24 @@ func TestGetPipelines(t *testing.T) {
 
 		GetPipelines(c)
 
+		assert.Equal(t, http.StatusOK, c.Writer.Status())
+	})
+
+	t.Run("should filter pipelines by events", func(t *testing.T) {
+		pipelines := []*model.Pipeline{fakePipeline}
+		mockStore := store_mocks.NewStore(t)
+		mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Request, _ = http.NewRequest(http.MethodGet, "/?event=push,pull_request", nil)
+
+		GetPipelines(c)
+
+		mockStore.AssertCalled(t, "GetPipelineList", mock.Anything, mock.Anything, &model.PipelineFilter{
+			Events: model.WebhookEventList{model.EventPush, model.EventPull},
+		})
 		assert.Equal(t, http.StatusOK, c.Writer.Status())
 	})
 }

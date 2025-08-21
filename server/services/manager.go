@@ -22,14 +22,14 @@ import (
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/environment"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/environment"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 //go:generate mockery --name Manager --output mocks --case underscore --note "+build test"

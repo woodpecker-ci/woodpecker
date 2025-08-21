@@ -14,7 +14,7 @@
 
 package forgejo
 
-import "codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
+import "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
 
 type pushHook struct {
 	Sha     string `json:"sha"`

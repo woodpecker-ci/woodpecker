@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build !generate
+// +build !generate
+
 package main
 
 import (
@@ -22,9 +25,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	_ "go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 func main() {
@@ -46,7 +49,7 @@ func main() {
 	}
 	app.Flags = flags
 
-	setupSwaggerStaticConfig()
+	setupOpenAPIStaticConfig()
 
 	if err := app.Run(ctx, os.Args); err != nil {
 		log.Error().Err(err).Msgf("error running server")

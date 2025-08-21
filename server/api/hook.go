@@ -25,13 +25,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
 // GetQueueInfo
@@ -248,7 +248,18 @@ func PostHook(c *gin.Context) {
 }
 
 func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
-	// try to get the repo by the repo-id
+	if t.Get("repo-forge-remote-id") != "" {
+		// TODO: use both the forge ID and repo forge remote ID
+		/*forgeID, err := strconv.ParseInt(t.Get("forge-id"), 10, 64)
+		if err != nil {
+			return nil, err
+		}*/
+
+		return store.GetRepoForgeID(model.ForgeRemoteID(t.Get("repo-forge-remote-id")))
+	}
+
+	// get the repo by the repo-id
+	// TODO: remove in next major
 	repoID, err := strconv.ParseInt(t.Get("repo-id"), 10, 64)
 	if err != nil {
 		return nil, err

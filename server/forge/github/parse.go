@@ -22,17 +22,18 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v74/github"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
 	hookField = "payload"
 
 	actionOpen     = "opened"
+	actionReopen   = "reopened"
 	actionClose    = "closed"
 	actionSync     = "synchronize"
 	actionReleased = "released"
@@ -148,7 +149,10 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
 func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
-	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync && hook.GetAction() != actionClose {
+	if hook.GetAction() != actionOpen &&
+		hook.GetAction() != actionSync &&
+		hook.GetAction() != actionClose &&
+		hook.GetAction() != actionReopen {
 		return nil, nil, nil, nil
 	}
 
@@ -156,6 +160,8 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	if hook.GetPullRequest().GetState() == stateClose {
 		event = model.EventPullClosed
 	}
+
+	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
 
 	pipeline := &model.Pipeline{
 		Event:    event,
@@ -173,6 +179,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
 		PullRequestLabels: convertLabels(hook.GetPullRequest().Labels),
+		FromFork:          fromFork,
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())

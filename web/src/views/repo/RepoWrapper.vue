@@ -1,10 +1,5 @@
 <template>
-  <Scaffold
-    v-if="repo && repoPermissions && route.meta.repoHeader"
-    v-model:active-tab="activeTab"
-    enable-tabs
-    disable-tab-url-hash-mode
-  >
+  <Scaffold v-if="repo && repoPermissions && route.meta.repoHeader" enable-tabs>
     <template #title>
       <span class="flex">
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
@@ -15,11 +10,11 @@
         {{ repo.name }}
       </span>
     </template>
-    <template #titleActions>
+    <template #headerActions>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
-        <img :src="badgeUrl" />
+        <img class="w-28" :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forgeIcon" class="forge" />
+      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forgeIcon" class="forge h-8 w-8" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
@@ -43,9 +38,15 @@
       />
     </template>
 
-    <Tab id="activity" :title="$t('repo.activity')" />
-    <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab v-if="repo.pr_enabled && repo.allow_pr" id="pull_requests" :title="$t('repo.pull_requests')" />
+    <Tab icon="list-group" :to="{ name: 'repo' }" :title="$t('repo.activity')" />
+    <Tab icon="branch" :to="{ name: 'repo-branches' }" match-children :title="$t('repo.branches')" />
+    <Tab
+      v-if="repo.pr_enabled && repo.allow_pr"
+      icon="pull-request"
+      :to="{ name: 'repo-pull-requests' }"
+      match-children
+      :title="$t('repo.pull_requests')"
+    />
 
     <router-view />
   </Scaffold>
@@ -53,7 +54,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
+import type { Ref } from 'vue';
+import { computed, onMounted, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -66,8 +68,10 @@ import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useForgeStore } from '~/compositions/useForgeStore';
+import { provide } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
-import type { Forge, RepoPermissions } from '~/lib/api/types';
+import useRepos from '~/compositions/useRepos';
+import type { Forge, Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
@@ -87,12 +91,13 @@ const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
 const forgeStore = useForgeStore();
+const { updateLastAccess } = useRepos();
 
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
 const pipelines = pipelineStore.getRepoPipelines(repositoryId);
-provide('repo', repo);
-provide('repo-permissions', repoPermissions);
+provide('repo', repo as Ref<Repo>); // can't be undefined because of v-if in template
+provide('repo-permissions', repoPermissions as Ref<RepoPermissions>); // can't be undefined because of v-if in template
 provide('pipelines', pipelines);
 const forge = ref<Forge>();
 const forgeIcon = computed<IconNames>(() => {
@@ -121,6 +126,7 @@ async function loadRepo() {
   if (repo.value) {
     forge.value = (await forgeStore.getForge(repo.value?.forge_id)).value;
   }
+  updateLastAccess(repositoryId.value);
 }
 
 onMounted(() => {
@@ -132,25 +138,4 @@ watch([repositoryId], () => {
 });
 
 const badgeUrl = computed(() => repo.value && `${config.rootPath}/api/badges/${repo.value.id}/status.svg`);
-
-const activeTab = computed({
-  get() {
-    if (route.name === 'repo-branches' || route.name === 'repo-branch') {
-      return 'branches';
-    }
-    if (route.name === 'repo-pull-requests' || route.name === 'repo-pull-request') {
-      return 'pull_requests';
-    }
-    return 'activity';
-  },
-  set(tab: string) {
-    if (tab === 'branches') {
-      router.push({ name: 'repo-branches' });
-    } else if (tab === 'pull_requests') {
-      router.push({ name: 'repo-pull-requests' });
-    } else {
-      router.push({ name: 'repo' });
-    }
-  },
-});
 </script>

@@ -16,7 +16,7 @@
 package model
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 )
 
 type Pipeline struct {
@@ -42,8 +42,8 @@ type Pipeline struct {
 	Message             string                 `json:"message"                 xorm:"TEXT 'message'"`
 	Timestamp           int64                  `json:"timestamp"               xorm:"'timestamp'"`
 	Sender              string                 `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Avatar              string                 `json:"author_avatar"           xorm:"avatar"`
-	Email               string                 `json:"author_email"            xorm:"email"`
+	Avatar              string                 `json:"author_avatar"           xorm:"varchar(500) avatar"`
+	Email               string                 `json:"author_email"            xorm:"varchar(500) email"`
 	ForgeURL            string                 `json:"forge_url"               xorm:"forge_url"`
 	Reviewer            string                 `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed            int64                  `json:"reviewed"                xorm:"reviewed"`
@@ -52,7 +52,8 @@ type Pipeline struct {
 	AdditionalVariables map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string               `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 	IsPrerelease        bool                   `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
-} //	@name Pipeline
+	FromFork            bool                   `json:"from_fork,omitempty"     xorm:"from_fork"`
+} //	@name	Pipeline
 
 // TableName return database table name for xorm.
 func (Pipeline) TableName() string {
@@ -60,8 +61,12 @@ func (Pipeline) TableName() string {
 }
 
 type PipelineFilter struct {
-	Before int64
-	After  int64
+	Before      int64
+	After       int64
+	Branch      string
+	Events      []WebhookEvent
+	RefContains string
+	Status      StatusValue
 }
 
 // IsMultiPipeline checks if step list contain more than one parent step.
@@ -72,4 +77,4 @@ func (p Pipeline) IsMultiPipeline() bool {
 type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
-} //	@name PipelineOptions
+} //	@name	PipelineOptions

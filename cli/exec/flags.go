@@ -64,6 +64,11 @@ var flags = []cli.Flag{
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
 	},
+	&cli.StringMapFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRETS"),
+		Name:    "secrets",
+		Usage:   "map of secrets, ex. 'secret=\"val\",secret2=\"value2\"'",
+	},
 
 	//
 	// backend options for pipeline compiler
@@ -158,12 +163,6 @@ var flags = []cli.Flag{
 		Usage:   "Set the metadata environment variable \"CI_REPO_URL\".",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_REPO_SCM"),
-		Name:    "repo-scm",
-		Usage:   "Set the metadata environment variable \"CI_REPO_SCM\".",
-		Value:   "git",
-	},
-	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_REPO_DEFAULT_BRANCH"),
 		Name:    "repo-default-branch",
 		Usage:   "Set the metadata environment variable \"CI_REPO_DEFAULT_BRANCH\".",
@@ -185,26 +184,36 @@ var flags = []cli.Flag{
 		Usage:   "Set the metadata environment variable \"CI_REPO_PRIVATE\".",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("CI_REPO_TRUSTED"),
-		Name:    "repo-trusted",
-		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED\".",
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_NETWORK"),
+		Name:    "repo-trusted-network",
+		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_NETWORK\".",
 	},
-	&cli.IntFlag{
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_VOLUMES"),
+		Name:    "repo-trusted-volumes",
+		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_VOLUMES\".",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_SECURITY"),
+		Name:    "repo-trusted-security",
+		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_SECURITY\".",
+	},
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_NUMBER"),
 		Name:    "pipeline-number",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_NUMBER\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_PARENT"),
 		Name:    "pipeline-parent",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_PARENT\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_CREATED"),
 		Name:    "pipeline-created",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_CREATED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_STARTED"),
 		Name:    "pipeline-started",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_STARTED\".",
@@ -286,22 +295,22 @@ var flags = []cli.Flag{
 		Name:    "commit-release-is-pre",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PRERELEASE\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_NUMBER"),
 		Name:    "prev-pipeline-number",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_NUMBER\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_CREATED"),
 		Name:    "prev-pipeline-created",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_CREATED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_STARTED"),
 		Name:    "prev-pipeline-started",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_STARTED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_FINISHED"),
 		Name:    "prev-pipeline-finished",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_FINISHED\".",
@@ -376,7 +385,7 @@ var flags = []cli.Flag{
 		Name:    "workflow-name",
 		Usage:   "Set the metadata environment variable \"CI_WORKFLOW_NAME\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_WORKFLOW_NUMBER"),
 		Name:    "workflow-number",
 		Usage:   "Set the metadata environment variable \"CI_WORKFLOW_NUMBER\".",

@@ -15,19 +15,18 @@
 package dummy_test
 
 import (
-	"context"
 	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func TestSmalPipelineDummyRun(t *testing.T) {
 	dummyEngine := dummy.New()
-	ctx := context.Background()
+	ctx := t.Context()
 
 	assert.True(t, dummyEngine.IsAvailable(ctx))
 	assert.EqualValues(t, "dummy", dummyEngine.Name())

@@ -21,7 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 )
 
 func TestSchema(t *testing.T) {
@@ -79,6 +79,10 @@ func TestSchema(t *testing.T) {
 		{
 			name:     "Map and Sequence Merge", // https://woodpecker-ci.org/docs/next/usage/advanced-yaml-syntax
 			testFile: ".woodpecker/test-merge-map-and-sequence.yaml",
+		},
+		{
+			name:     "Backend options",
+			testFile: ".woodpecker/test-backend-options.yaml",
 		},
 		{
 			name:     "Broken Config",

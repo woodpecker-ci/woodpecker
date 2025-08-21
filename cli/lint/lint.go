@@ -24,10 +24,10 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 // Command exports the info command.
@@ -40,13 +40,18 @@ var Command = &cli.Command{
 		&cli.StringSliceFlag{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 			Name:    "plugins-privileged",
-			Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+			Usage:   "allow plugins to run in privileged mode, if set empty, there is no",
 		},
 		&cli.StringSliceFlag{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 			Name:    "plugins-trusted-clone",
-			Usage:   "Plugins witch are trusted to handle the netrc info in clone steps",
+			Usage:   "plugins that are trusted to handle Git credentials in cloning steps",
 			Value:   constant.TrustedClonePlugins,
+		},
+		&cli.BoolFlag{
+			Sources: cli.EnvVars("WOODPECKER_LINT_STRICT"),
+			Name:    "strict",
+			Usage:   "treat warnings as errors",
 		},
 	},
 }
@@ -110,12 +115,16 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
 	err = linter.New(
-		linter.WithTrusted(true),
+		linter.WithTrusted(linter.TrustedConfiguration{
+			Network:  true,
+			Volumes:  true,
+			Security: true,
+		}),
 		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
 		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
 	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		str, err := FormatLintError(config.File, err)
+		str, err := FormatLintError(config.File, err, c.Bool("strict"))
 
 		if str != "" {
 			fmt.Print(str)

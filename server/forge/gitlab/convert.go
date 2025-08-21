@@ -21,10 +21,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
@@ -53,7 +53,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.
 			Push:  isWrite(projectMember),
 			Admin: isAdmin(projectMember),
 		},
-		PREnabled: _repo.MergeRequestsEnabled,
+		PREnabled: _repo.MergeRequestsAccessLevel != gitlab.DisabledAccessControl,
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
@@ -138,6 +138,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	pipeline.Title = obj.Title
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequestLabels = convertLabels(hook.Labels)
+	pipeline.FromFork = target.PathWithNamespace != source.PathWithNamespace
 
 	return obj.IID, repo, pipeline, nil
 }
@@ -303,7 +304,9 @@ func extractFromPath(str string) (string, string, error) {
 	if len(s) < minPathComponents {
 		return "", "", fmt.Errorf("minimum match not found")
 	}
-	return s[0], s[1], nil
+	owner := strings.Join(s[:len(s)-1], "/")
+	name := s[len(s)-1]
+	return owner, name, nil
 }
 
 func convertLabels(from []*gitlab.EventLabel) []string {

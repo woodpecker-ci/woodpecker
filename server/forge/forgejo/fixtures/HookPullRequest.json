@@ -1,0 +1,58 @@
+{
+  "action": "opened",
+  "number": 1,
+  "pull_request": {
+    "html_url": "http://forgejo.golang.org/gordon/hello-world/pull/1",
+    "state": "open",
+    "title": "Update the README with new information",
+    "body": "please merge",
+    "user": {
+      "id": 1,
+      "username": "gordon",
+      "login": "gordon",
+      "full_name": "Gordon the Gopher",
+      "email": "gordon@golang.org",
+      "avatar_url": "http://forgejo.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
+    },
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "9353195a19e45482665306e466c832c46560532d"
+    },
+    "head": {
+      "label": "feature/changes",
+      "ref": "feature/changes",
+      "sha": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"
+    }
+  },
+  "repository": {
+    "id": 35129377,
+    "name": "hello-world",
+    "full_name": "gordon/hello-world",
+    "owner": {
+      "id": 1,
+      "username": "gordon",
+      "login": "gordon",
+      "full_name": "Gordon the Gopher",
+      "email": "gordon@golang.org",
+      "avatar_url": "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
+    },
+    "private": true,
+    "html_url": "http://forgejo.golang.org/gordon/hello-world",
+    "clone_url": "https://forgejo.golang.org/gordon/hello-world.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    }
+  },
+  "sender": {
+    "id": 1,
+    "login": "gordon",
+    "username": "gordon",
+    "full_name": "Gordon the Gopher",
+    "email": "gordon@golang.org",
+    "avatar_url": "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
+  }
+}

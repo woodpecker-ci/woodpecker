@@ -18,146 +18,98 @@ package datastore
 import (
 	"testing"
 
-	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func TestRepos(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Pipeline))
+func TestCreateRepo(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo))
 	defer closer()
 
-	g := goblin.Goblin(t)
-	g.Describe("Repo", func() {
-		// before each test be sure to purge the package
-		// table data from the database.
-		g.BeforeEach(func() {
-			_, err := store.engine.Exec("DELETE FROM pipelines")
-			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM repos")
-			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM users")
-			g.Assert(err).IsNil()
-		})
+	repo := model.Repo{
+		UserID:   1,
+		FullName: "bradrydzewski/test",
+		Owner:    "bradrydzewski",
+		Name:     "test",
+	}
+	err := store.CreateRepo(&repo)
+	assert.NoError(t, err)
+	assert.NotZero(t, repo.ID)
 
-		g.It("Should Set a Repo", func() {
-			repo := model.Repo{
-				UserID:   1,
-				FullName: "bradrydzewski/test",
-				Owner:    "bradrydzewski",
-				Name:     "test",
-			}
-			err1 := store.CreateRepo(&repo)
-			err2 := store.UpdateRepo(&repo)
-			getRepo, err3 := store.GetRepo(repo.ID)
+	err2 := store.UpdateRepo(&repo)
+	getRepo, err3 := store.GetRepo(repo.ID)
 
-			g.Assert(err1).IsNil()
-			g.Assert(err2).IsNil()
-			g.Assert(err3).IsNil()
-			g.Assert(repo.ID).Equal(getRepo.ID)
-		})
+	assert.NoError(t, err2)
+	assert.NoError(t, err3)
+	assert.Equal(t, repo.ID, getRepo.ID)
 
-		g.It("Should Add a Repo", func() {
-			repo := model.Repo{
-				UserID:   1,
-				FullName: "bradrydzewski/test",
-				Owner:    "bradrydzewski",
-				Name:     "test",
-			}
-			err := store.CreateRepo(&repo)
-			g.Assert(err).IsNil()
-			g.Assert(repo.ID != 0).IsTrue()
-		})
+	// test that repo has name/owner/fullname
+	assert.Error(t, store.CreateRepo(&model.Repo{
+		UserID:   1,
+		FullName: "bradrydzewski/",
+		Owner:    "bradrydzewski",
+		Name:     "",
+	}))
+	assert.Error(t, store.CreateRepo(&model.Repo{
+		UserID:   1,
+		FullName: "/test",
+		Owner:    "",
+		Name:     "test",
+	}))
+	assert.Error(t, store.CreateRepo(&model.Repo{
+		UserID:   1,
+		FullName: "",
+		Owner:    "bradrydzewski",
+		Name:     "test",
+	}))
 
-		g.It("Should fail if repo has no name / owner / fullname", func() {
-			g.Assert(store.CreateRepo(&model.Repo{
-				UserID:   1,
-				FullName: "bradrydzewski/",
-				Owner:    "bradrydzewski",
-				Name:     "",
-			})).IsNotNil()
-			g.Assert(store.CreateRepo(&model.Repo{
-				UserID:   1,
-				FullName: "/test",
-				Owner:    "",
-				Name:     "test",
-			})).IsNotNil()
-			g.Assert(store.CreateRepo(&model.Repo{
-				UserID:   1,
-				FullName: "",
-				Owner:    "bradrydzewski",
-				Name:     "test",
-			})).IsNotNil()
-		})
+	// test unique name
+	repo2 := model.Repo{
+		UserID:   2,
+		FullName: "bradrydzewski/test",
+		Owner:    "bradrydzewski",
+		Name:     "test",
+	}
+	err2 = store.CreateRepo(&repo2)
+	assert.Error(t, err2)
+}
 
-		g.It("Should Get a Repo by ID", func() {
-			repo := model.Repo{
-				UserID:   1,
-				FullName: "bradrydzewski/test",
-				Owner:    "bradrydzewski",
-				Name:     "test",
-			}
-			g.Assert(store.CreateRepo(&repo)).IsNil()
-			getrepo, err := store.GetRepo(repo.ID)
-			g.Assert(err).IsNil()
-			g.Assert(repo.ID).Equal(getrepo.ID)
-			g.Assert(repo.UserID).Equal(getrepo.UserID)
-			g.Assert(repo.Owner).Equal(getrepo.Owner)
-			g.Assert(repo.Name).Equal(getrepo.Name)
-		})
+func TestGetRepo(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo))
+	defer closer()
+	repo := model.Repo{
+		UserID:   1,
+		FullName: "bradrydzewski/test",
+		Owner:    "bradrydzewski",
+		Name:     "test",
+	}
+	assert.NoError(t, store.CreateRepo(&repo))
+	getrepo, err := store.GetRepo(repo.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, repo.ID, getrepo.ID)
+	assert.Equal(t, repo.UserID, getrepo.UserID)
+	assert.Equal(t, repo.Owner, getrepo.Owner)
+	assert.Equal(t, repo.Name, getrepo.Name)
+}
 
-		g.It("Should Get a Repo by Name", func() {
-			repo := model.Repo{
-				UserID:   1,
-				FullName: "bradrydzewski/test",
-				Owner:    "bradrydzewski",
-				Name:     "test",
-			}
-			g.Assert(store.CreateRepo(&repo)).IsNil()
-			getrepo, err := store.GetRepoName(repo.FullName)
-			g.Assert(err).IsNil()
-			g.Assert(repo.ID).Equal(getrepo.ID)
-			g.Assert(repo.UserID).Equal(getrepo.UserID)
-			g.Assert(repo.Owner).Equal(getrepo.Owner)
-			g.Assert(repo.Name).Equal(getrepo.Name)
-		})
+func TestGetRepoName(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo))
+	defer closer()
+	repo := model.Repo{
+		UserID:   1,
+		FullName: "bradrydzewski/TEST",
+		Owner:    "bradrydzewski",
+		Name:     "TEST",
+	}
 
-		g.It("Should Get a Repo by Name (case-insensitive)", func() {
-			repo := model.Repo{
-				UserID:   1,
-				FullName: "bradrydzewski/TEST",
-				Owner:    "bradrydzewski",
-				Name:     "TEST",
-			}
-			g.Assert(store.CreateRepo(&repo)).IsNil()
-			getrepo, err := store.GetRepoName("Bradrydzewski/test")
-			g.Assert(err).IsNil()
-			g.Assert(repo.ID).Equal(getrepo.ID)
-			g.Assert(repo.UserID).Equal(getrepo.UserID)
-			g.Assert(repo.Owner).Equal(getrepo.Owner)
-			g.Assert(repo.Name).Equal(getrepo.Name)
-		})
-
-		g.It("Should Enforce Unique Repo Name", func() {
-			repo1 := model.Repo{
-				UserID:   1,
-				FullName: "bradrydzewski/test",
-				Owner:    "bradrydzewski",
-				Name:     "test",
-			}
-			repo2 := model.Repo{
-				UserID:   2,
-				FullName: "bradrydzewski/test",
-				Owner:    "bradrydzewski",
-				Name:     "test",
-			}
-			err1 := store.CreateRepo(&repo1)
-			err2 := store.CreateRepo(&repo2)
-			g.Assert(err1).IsNil()
-			g.Assert(err2 == nil).IsFalse()
-		})
-	})
+	assert.NoError(t, store.CreateRepo(&repo))
+	getrepo, err := store.GetRepoName(repo.FullName)
+	assert.NoError(t, err)
+	assert.Equal(t, repo.ID, getrepo.ID)
+	assert.Equal(t, repo.UserID, getrepo.UserID)
+	assert.Equal(t, repo.Owner, getrepo.Owner)
+	assert.Equal(t, repo.Name, getrepo.Name)
 }
 
 func TestRepoList(t *testing.T) {
@@ -165,9 +117,9 @@ func TestRepoList(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 
@@ -212,9 +164,9 @@ func TestOwnedRepoList(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 

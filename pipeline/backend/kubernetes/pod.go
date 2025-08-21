@@ -26,13 +26,18 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 const (
-	StepLabel = "step"
-	podPrefix = "wp-"
+	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
+	// This will be removed in the future.
+	StepLabelLegacy       = "step"
+	StepLabel             = "woodpecker-ci.org/step"
+	podPrefix             = "wp-"
+	defaultFSGroup  int64 = 1000
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
@@ -69,7 +74,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 }
 
 func stepToPodName(step *types.Step) (name string, err error) {
-	if step.Type == types.StepTypeService {
+	if isService(step) {
 		return serviceName(step)
 	}
 	return podName(step)
@@ -83,7 +88,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	var err error
 	meta := meta_v1.ObjectMeta{
 		Name:        podName,
-		Namespace:   config.Namespace,
+		Namespace:   config.GetNamespace(step.OrgID),
 		Annotations: podAnnotations(config, options),
 	}
 
@@ -99,9 +104,21 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 	var err error
 	labels := make(map[string]string)
 
+	for k, v := range step.WorkflowLabels {
+		// Only copy user labels if allowed by agent config.
+		// Internal labels are filtered on the server-side.
+		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
+			labels[k], err = toDNSName(v)
+			if err != nil {
+				return labels, err
+			}
+		}
+	}
+
 	if len(options.Labels) > 0 {
 		if config.PodLabelsAllowFromStep {
 			log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
+			// TODO should we filter out label with internal prefix?
 			maps.Copy(labels, options.Labels)
 		} else {
 			log.Debug().Msg("Pod labels were defined in backend options, but its using disallowed by instance configuration")
@@ -109,10 +126,15 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 	}
 	if len(config.PodLabels) > 0 {
 		log.Trace().Msgf("using labels from the configuration: %v", config.PodLabels)
+		// TODO should we filter out label with internal prefix?
 		maps.Copy(labels, config.PodLabels)
 	}
-	if step.Type == types.StepTypeService {
+	if isService(step) {
 		labels[ServiceLabel], _ = serviceName(step)
+	}
+	labels[StepLabelLegacy], err = stepLabel(step)
+	if err != nil {
+		return labels, err
 	}
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {
@@ -151,14 +173,33 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
+		PriorityClassName:  config.PriorityClassName,
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
+
+	// If there are tolerations and they are allowed
+	if config.PodTolerationsAllowFromStep && len(options.Tolerations) != 0 {
+		spec.Tolerations = tolerations(options.Tolerations)
+	} else {
+		spec.Tolerations = tolerations(config.PodTolerations)
+	}
+
 	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
+	}
+
+	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
+		spec.DNSConfig = &v1.PodDNSConfig{}
+		if len(step.DNS) != 0 {
+			spec.DNSConfig.Nameservers = step.DNS
+		}
+		if len(step.DNSSearch) != 0 {
+			spec.DNSConfig.Searches = step.DNSSearch
+		}
 	}
 
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
@@ -192,15 +233,26 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if len(step.Commands) > 0 {
-		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos)
+		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
 		container.Command = command
 		maps.Copy(step.Environment, scriptEnv)
+
+		// step.WorkingDir will be respected by the generated script
+		container.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		container.Command = step.Entrypoint
 	}
 
-	container.Env = mapToEnvVars(step.Environment)
+	stepSecret, err := stepSecretName(step)
+	if err != nil {
+		return container, err
+	}
+
+	// filter environment variables to non-secrets and secrets, refer secrets from step secrets
+	envs, secs := filterSecrets(step.Environment, step.SecretMapping)
+	envsFromSecrets := mapToEnvVarsFromStepSecrets(secs, stepSecret)
+	container.Env = append(mapToEnvVars(envs), envsFromSecrets...)
 
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
@@ -217,6 +269,38 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
 
 	return container, nil
+}
+
+func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []v1.EnvVar {
+	var ev []v1.EnvVar
+	for _, key := range secs {
+		ev = append(ev, v1.EnvVar{
+			Name: key,
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: stepSecretName,
+					},
+					Key: key,
+				},
+			},
+		})
+	}
+	return ev
+}
+
+func filterSecrets(environment, secrets map[string]string) (map[string]string, []string) {
+	ev := map[string]string{}
+	var secs []string
+
+	for k, v := range environment {
+		if _, found := secrets[k]; found {
+			secs = append(secs, k)
+		} else {
+			ev[k] = v
+		}
+	}
+	return ev, secs
 }
 
 func pvcVolumes(volumes []string) ([]v1.Volume, error) {
@@ -378,16 +462,20 @@ func toleration(backendToleration Toleration) v1.Toleration {
 
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
-		nonRoot  *bool
-		user     *int64
-		group    *int64
-		fsGroup  *int64
-		seccomp  *v1.SeccompProfile
-		apparmor *v1.AppArmorProfile
+		nonRoot             *bool
+		user                *int64
+		group               *int64
+		fsGroup             *int64
+		fsGroupChangePolicy *v1.PodFSGroupChangePolicy
+		seccomp             *v1.SeccompProfile
+		apparmor            *v1.AppArmorProfile
 	)
 
 	if secCtxConf.RunAsNonRoot {
 		nonRoot = newBool(true)
+	}
+	if secCtxConf.FSGroup != nil {
+		fsGroup = secCtxConf.FSGroup
 	}
 
 	if sc != nil {
@@ -406,6 +494,11 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 			fsGroup = sc.FSGroup
 		}
 
+		// if unset, set fsGroup to 1000 by default to support non-root images
+		if sc.FSGroup != nil {
+			fsGroup = sc.FSGroup
+		}
+
 		// only allow to set nonRoot if it's not set globally already
 		if nonRoot == nil && sc.RunAsNonRoot != nil {
 			nonRoot = sc.RunAsNonRoot
@@ -413,19 +506,21 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 		seccomp = seccompProfile(sc.SeccompProfile)
 		apparmor = apparmorProfile(sc.ApparmorProfile)
+		fsGroupChangePolicy = sc.FsGroupChangePolicy
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil && apparmor == nil {
 		return nil
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot:    nonRoot,
-		RunAsUser:       user,
-		RunAsGroup:      group,
-		FSGroup:         fsGroup,
-		SeccompProfile:  seccomp,
-		AppArmorProfile: apparmor,
+		RunAsNonRoot:        nonRoot,
+		RunAsUser:           user,
+		RunAsGroup:          group,
+		FSGroup:             fsGroup,
+		FSGroupChangePolicy: fsGroupChangePolicy,
+		SeccompProfile:      seccomp,
+		AppArmorProfile:     apparmor,
 	}
 	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
@@ -468,6 +563,7 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 		return nil
 	}
 
+	//nolint:staticcheck
 	privileged := false
 
 	// if security context privileged is set explicitly
@@ -514,7 +610,7 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 	}
 
 	log.Trace().Msgf("creating pod: %s", pod.Name)
-	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, meta_v1.CreateOptions{})
+	return engine.client.CoreV1().Pods(engineConfig.GetNamespace(step.OrgID)).Create(ctx, pod, meta_v1.CreateOptions{})
 }
 
 func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
@@ -525,7 +621,7 @@ func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts met
 
 	log.Trace().Str("name", podName).Msg("deleting pod")
 
-	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
+	err = engine.client.CoreV1().Pods(engine.config.GetNamespace(step.OrgID)).Delete(ctx, podName, deleteOpts)
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
 		return nil

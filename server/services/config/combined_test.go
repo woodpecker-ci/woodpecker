@@ -15,7 +15,6 @@
 package config_test
 
 import (
-	"context"
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
@@ -31,11 +30,11 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/yaronf/httpsign"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
 )
 
 func TestFetchFromConfigService(t *testing.T) {
@@ -225,9 +224,9 @@ func TestFetchFromConfigService(t *testing.T) {
 			forgeFetcher := config.NewForge(time.Second*3, 3)
 			configFetcher := config.NewCombined(forgeFetcher, httpFetcher)
 			files, err := configFetcher.Fetch(
-				context.Background(),
+				t.Context(),
 				f,
-				&model.User{Token: "xxx"},
+				&model.User{AccessToken: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 				[]*forge_types.FileMeta{},

@@ -21,8 +21,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 const (
@@ -32,9 +32,10 @@ const (
 	hookPullRequest = "pull_request"
 	hookRelease     = "release"
 
-	actionOpen  = "opened"
-	actionSync  = "synchronized"
-	actionClose = "closed"
+	actionOpen   = "opened"
+	actionSync   = "synchronized"
+	actionClose  = "closed"
+	actionReopen = "reopened"
 
 	refBranch = "branch"
 	refTag    = "tag"
@@ -111,7 +112,10 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 	}
 
 	// Don't trigger pipelines for non-code changes ...
-	if pr.Action != actionOpen && pr.Action != actionSync && pr.Action != actionClose {
+	if pr.Action != actionOpen &&
+		pr.Action != actionSync &&
+		pr.Action != actionClose &&
+		pr.Action != actionReopen {
 		log.Debug().Msgf("pull_request action is '%s' and no open or sync", pr.Action)
 		return nil, nil, nil
 	}

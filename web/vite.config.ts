@@ -1,25 +1,44 @@
-import { copyFile, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
+import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
-import { replaceInFileSync } from 'replace-in-file';
+import dotenv from 'dotenv';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
-import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
+import type { ViteUserConfig } from 'vitest/config';
 import { defineConfig } from 'vitest/config';
+
+dotenv.config({ path: path.resolve(__dirname, '../.env'), quiet: true });
+
+const getEnvString = (envVar: string | undefined) => (envVar != null && envVar !== '' ? envVar : undefined);
+const viteUserSessCookie = getEnvString(process.env.VITE_DEV_USER_SESS_COOKIE);
+const viteDevProxy = getEnvString(process.env.VITE_DEV_PROXY);
 
 function woodpeckerInfoPlugin(): Plugin {
   return {
     name: 'woodpecker-info',
     configureServer() {
-      const info =
-        '1) Please add `WOODPECKER_DEV_WWW_PROXY=http://localhost:8010` to your `.env` file.\n' +
-        'After starting the woodpecker server as well you should now be able to access the UI at http://localhost:8000/\n\n' +
-        '2) If you want to run the vite dev server (`pnpm start`) within a container please set `VITE_DEV_SERVER_HOST=0.0.0.0`.';
-      // eslint-disable-next-line no-console
-      console.log(info);
+      if (viteDevProxy !== undefined) {
+        console.log(
+          [
+            `Using dev server with proxy to existing Woodpecker server running at: ${viteDevProxy}`,
+            '\n  🚀 Access the UI at http://localhost:8010/',
+          ].join('\n'),
+        );
+        return;
+      }
+
+      console.log(
+        [
+          '1) Please add `WOODPECKER_DEV_WWW_PROXY=http://localhost:8010` to your `.env` file.',
+          '2) Start the Woodpecker server',
+          '3) If you want to run the vite dev server (`pnpm start`) within a container please set `VITE_DEV_SERVER_HOST=0.0.0.0`.',
+          `\n  🚀 Access the UI at http://localhost:8000/`,
+        ].join('\n'),
+      );
     },
   };
 }
@@ -55,44 +74,6 @@ export default defineConfig({
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
 
-      if (!existsSync('src/assets/dayjsLocales')) {
-        mkdirSync('src/assets/dayjsLocales');
-      }
-
-      filenames.forEach((name) => {
-        // English is always directly loaded (compiled by Vite) and thus not copied
-        if (name === 'en') {
-          return;
-        }
-        let langName = name;
-
-        // copy dayjs language
-        if (name === 'zh-Hans') {
-          // zh-Hans is called zh in dayjs
-          langName = 'zh';
-        } else if (name === 'zh-Hant') {
-          // zh-Hant is called zh-cn in dayjs
-          langName = 'zh-cn';
-        }
-
-        copyFile(
-          `node_modules/dayjs/esm/locale/${langName}.js`,
-          `src/assets/dayjsLocales/${name}.js`,
-          // eslint-disable-next-line promise/prefer-await-to-callbacks
-          (err) => {
-            if (err) {
-              throw err;
-            }
-          },
-        );
-      });
-      replaceInFileSync({
-        files: 'src/assets/dayjsLocales/*.js',
-        // remove any dayjs import and any dayjs.locale call
-        from: /(?:import dayjs.*'|dayjs\.locale.*);/g,
-        to: '',
-      });
-
       return {
         name: 'vue-i18n-supported-locales',
 
@@ -109,13 +90,13 @@ export default defineConfig({
         },
       };
     })(),
-    WindiCSS(),
     svgLoader(),
     externalCSSPlugin(),
     woodpeckerInfoPlugin(),
     prismjs({
       languages: ['yaml'],
     }),
+    tailwindcss(),
   ],
   resolve: {
     alias: {
@@ -124,11 +105,35 @@ export default defineConfig({
   },
   logLevel: 'warn',
   server: {
+    allowedHosts: true,
     host: process.env.VITE_DEV_SERVER_HOST ?? '127.0.0.1',
     port: 8010,
+    proxy:
+      viteDevProxy !== undefined
+        ? {
+            '/api': {
+              target: viteDevProxy,
+              changeOrigin: true,
+              headers: {
+                cookie: viteUserSessCookie !== undefined ? `user_sess=${viteUserSessCookie}` : '',
+              },
+            },
+            '/web-config.js': {
+              target: viteDevProxy,
+              changeOrigin: true,
+              headers: {
+                cookie: viteUserSessCookie !== undefined ? `user_sess=${viteUserSessCookie}` : '',
+              },
+            },
+            '/authorize': {
+              target: viteDevProxy,
+              changeOrigin: true,
+            },
+          }
+        : undefined,
   },
   test: {
     globals: true,
     environment: 'jsdom',
   },
-});
+} as ViteUserConfig);

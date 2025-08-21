@@ -16,6 +16,7 @@ package common
 
 import (
 	"testing"
+	"text/template"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -29,7 +30,9 @@ func TestGenerateScriptWin(t *testing.T) {
 			from: []string{"echo %PATH%", "go build", "go test"},
 			want: `
 $ErrorActionPreference = 'Stop';
-&cmd /c "mkdir c:\root";
+if (-not (Test-Path "/woodpecker/some")) { New-Item -Path "/woodpecker/some" -ItemType Directory -Force };
+if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
+if (-not (Test-Path "$env:HOME")) { New-Item -Path "$env:HOME" -ItemType Directory -Force };
 if ($Env:CI_NETRC_MACHINE) {
 $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 "machine $Env:CI_NETRC_MACHINE" >> $netrc;
@@ -38,6 +41,7 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 };
 [Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
+cd "/woodpecker/some";
 
 Write-Output ('+ "echo %PATH%"');
 & echo %PATH%; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
@@ -47,12 +51,17 @@ Write-Output ('+ "go build"');
 
 Write-Output ('+ "go test"');
 & go test; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
-
 `,
 		},
 	}
 	for _, test := range testdata {
-		script := generateScriptWindows(test.from)
+		script := generateScriptWindows(test.from, "/woodpecker/some")
 		assert.EqualValues(t, test.want, script, "Want encoded script for %s", test.from)
 	}
+}
+
+func TestSetupScriptWinProtoParse(t *testing.T) {
+	// just ensure that we have a working `setupScriptWinTmpl` on runntime
+	_, err := template.New("").Parse(setupScriptWinProto)
+	assert.NoError(t, err)
 }

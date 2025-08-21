@@ -54,6 +54,8 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 			script += fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
 		}
 		return []string{"-c", script}, nil
+	case "nu":
+		return []string{"--commands", script}, nil
 	case "powershell", "pwsh":
 		// cspell:disable-next-line
 		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil

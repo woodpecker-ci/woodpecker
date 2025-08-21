@@ -22,13 +22,13 @@ import (
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // WoodpeckerServer is a grpc server implementation.
@@ -172,7 +172,14 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 
 func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterAgentRequest) (*proto.RegisterAgentResponse, error) {
 	res := new(proto.RegisterAgentResponse)
-	agentID, err := s.peer.RegisterAgent(c, req.GetPlatform(), req.GetBackend(), req.GetVersion(), req.GetCapacity())
+	agentInfo := req.GetInfo()
+	agentID, err := s.peer.RegisterAgent(c, rpc.AgentInfo{
+		Version:      agentInfo.GetVersion(),
+		Platform:     agentInfo.GetPlatform(),
+		Backend:      agentInfo.GetBackend(),
+		Capacity:     int(agentInfo.GetCapacity()),
+		CustomLabels: agentInfo.GetCustomLabels(),
+	})
 	res.AgentId = agentID
 	return res, err
 }
