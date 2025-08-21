@@ -62,7 +62,7 @@ func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*
 		Timeout: timeout,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-			DialContext:     host_matcher.NewDialContext("extensions", allowedHostMatcher, nil),
+			DialContext:     host_matcher.NewDialContext("extensions", allowedHostMatcher),
 		},
 	}
 

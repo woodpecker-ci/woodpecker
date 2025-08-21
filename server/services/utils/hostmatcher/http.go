@@ -14,11 +14,11 @@ import (
 )
 
 // NewDialContext returns a DialContext for Transport, the DialContext will do allow/block list check.
-func NewDialContext(usage string, allowList, blockList *HostMatchList) func(ctx context.Context, network, addr string) (net.Conn, error) {
-	return NewDialContextWithProxy(usage, allowList, blockList, nil)
+func NewDialContext(usage string, allowList *HostMatchList) func(ctx context.Context, network, addr string) (net.Conn, error) {
+	return NewDialContextWithProxy(usage, allowList, nil)
 }
 
-func NewDialContextWithProxy(usage string, allowList, blockList *HostMatchList, proxy *url.URL) func(ctx context.Context, network, addr string) (net.Conn, error) {
+func NewDialContextWithProxy(usage string, allowList *HostMatchList, proxy *url.URL) func(ctx context.Context, network, addr string) (net.Conn, error) {
 	// How Go HTTP Client works with redirection:
 	//   transport.RoundTrip URL=http://domain.com, Host=domain.com
 	//   transport.DialContext addrOrHost=domain.com:80
@@ -53,19 +53,14 @@ func NewDialContextWithProxy(usage string, allowList, blockList *HostMatchList, 
 					return fmt.Errorf("%s can only call HTTP servers via TCP, deny '%s(%s:%s)', err=%w", usage, host, network, ipAddr, err)
 				}
 
-				var blockedError error
-				if blockList.MatchHostOrIP(host, tcpAddr.IP) {
-					blockedError = fmt.Errorf("%s can not call blocked HTTP servers (check your %s setting), deny '%s(%s)'", usage, blockList.SettingKeyHint, host, ipAddr)
-				}
-
 				// if we have an allow-list, check the allow-list first
 				if !allowList.IsEmpty() {
 					if !allowList.MatchHostOrIP(host, tcpAddr.IP) {
 						return fmt.Errorf("%s can only call allowed HTTP servers (check your %s setting), deny '%s(%s)'", usage, allowList.SettingKeyHint, host, ipAddr)
 					}
 				}
-				// otherwise, we always follow the blocked list
-				return blockedError
+
+				return nil
 			},
 		}
 		return dialer.DialContext(ctx, network, addrOrHost)
