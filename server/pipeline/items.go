@@ -155,15 +155,15 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 		err = updatePipelinePending(c, forge, store, currentPipeline, repo, user)
 	}
 
-	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
+	currentPipeline = applyWorkflowsFromStepBuilder(store, currentPipeline, pipelineItems)
 
 	return currentPipeline, pipelineItems, err
 }
 
-// setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
+// applyWorkflowsFromStepBuilder is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
 // a pipeline that can be stored in the database by the server.
-func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
+func applyWorkflowsFromStepBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		if pidSequence < item.Workflow.PID {
@@ -174,7 +174,19 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 	// the workflows in the pipeline should be empty as only we do populate them,
 	// but if a pipeline was already loaded form database it might contain things, so we just clean it
 	pipeline.Workflows = nil
+
 	for _, item := range pipelineItems {
+		// TODO: should / could we prevent loading all workflow again?
+		workflow, err := store.WorkflowLoad(item.Workflow.ID)
+		if err != nil {
+			return nil
+		}
+
+		if pipeline.Status == model.StatusBlocked {
+			workflow.State = model.StatusBlocked
+		}
+
+		// gather all workflow steps through stages as flat list
 		for _, stage := range item.Config.Stages {
 			for _, step := range stage.Steps {
 				pidSequence++
@@ -188,20 +200,17 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
 				}
-				if item.Workflow.State == model.StatusSkipped {
+				if !item.Pending {
 					step.State = model.StatusSkipped
 				}
 				if pipeline.Status == model.StatusBlocked {
 					step.State = model.StatusBlocked
 				}
-				item.Workflow.Children = append(item.Workflow.Children, step)
+				workflow.Children = append(workflow.Children, step)
 			}
 		}
-		if pipeline.Status == model.StatusBlocked {
-			item.Workflow.State = model.StatusBlocked
-		}
-		item.Workflow.PipelineID = pipeline.ID
-		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
+
+		pipeline.Workflows = append(pipeline.Workflows, workflow)
 	}
 
 	return pipeline

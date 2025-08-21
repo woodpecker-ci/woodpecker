@@ -18,8 +18,6 @@ package stepbuilder
 import (
 	"path/filepath"
 	"strings"
-
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func SanitizePath(path string) string {
@@ -32,7 +30,7 @@ func SanitizePath(path string) string {
 
 func stepListContainsItemsToRun(items []*Item) bool {
 	for i := range items {
-		if items[i].Workflow.State == model.StatusPending {
+		if items[i].Pending {
 			return true
 		}
 	}
@@ -44,7 +42,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
+			if !ContainsItemWithName(dep, items) {
 				itemsToRemove = append(itemsToRemove, item)
 			}
 		}
@@ -53,7 +51,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 	if len(itemsToRemove) > 0 {
 		filtered := make([]*Item, 0)
 		for _, item := range items {
-			if !containsItemWithName(item.Workflow.Name, itemsToRemove) {
+			if !ContainsItemWithName(item.Workflow.Name, itemsToRemove) {
 				filtered = append(filtered, item)
 			}
 		}
@@ -64,7 +62,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 	return items
 }
 
-func containsItemWithName(name string, items []*Item) bool {
+func ContainsItemWithName(name string, items []*Item) bool {
 	for _, item := range items {
 		if name == item.Workflow.Name {
 			return true

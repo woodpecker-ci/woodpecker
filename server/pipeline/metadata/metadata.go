@@ -20,12 +20,13 @@ import (
 	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, prev *model.Pipeline, sysURL string) func(workflow *model.Workflow) metadata.Metadata {
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, prev *model.Pipeline, sysURL string) func(workflow *stepbuilder.Workflow) metadata.Metadata {
 	host := sysURL
 	uri, err := url.Parse(sysURL)
 	if err == nil {
@@ -69,7 +70,7 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 		}
 	}
 
-	return func(workflow *model.Workflow) metadata.Metadata {
+	return func(workflow *stepbuilder.Workflow) metadata.Metadata {
 		fWorkflow := metadata.Workflow{}
 		if workflow != nil {
 			fWorkflow = metadata.Workflow{

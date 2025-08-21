@@ -29,7 +29,7 @@ import (
 func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
-		if item.Workflow.State == model.StatusSkipped {
+		if !item.Pending {
 			continue
 		}
 		task := &model.Task{
