@@ -27,11 +27,11 @@ func TestForgeCRUD(t *testing.T) {
 	defer closer()
 
 	forge1 := &model.Forge{
-		Type:         "github",
-		URL:          "https://github.com",
-		Client:       "client",
-		ClientSecret: "secret",
-		SkipVerify:   false,
+		Type:              "github",
+		URL:               "https://github.com",
+		OAuthClientID:     "client",
+		OAuthClientSecret: "secret",
+		SkipVerify:        false,
 		AdditionalOptions: map[string]any{
 			"foo": "bar",
 		},

@@ -13,10 +13,10 @@
       <ListItem
         v-for="repo in repos"
         :key="repo.id"
-        class="bg-wp-background-200 dark:bg-wp-background-100! items-center gap-2"
+        class="bg-wp-background-200 dark:bg-wp-background-200! items-center gap-2"
       >
         <span>{{ repo.full_name }}</span>
-        <div class="ml-auto flex items-center">
+        <div class="ml-auto flex items-center gap-2">
           <Badge
             v-if="!repo.active"
             class="md:display-unset mr-2 hidden"

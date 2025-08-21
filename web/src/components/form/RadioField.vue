@@ -3,7 +3,7 @@
     <input
       :id="`radio-${id}-${option.value}`"
       type="radio"
-      class="radio border-wp-control-neutral-200 bg-wp-control-neutral-100 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-full border"
+      class="radio border-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-full border"
       :value="option.value"
       :checked="innerValue?.includes(option.value)"
       @click="innerValue = option.value"

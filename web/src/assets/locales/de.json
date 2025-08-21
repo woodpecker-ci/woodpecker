@@ -739,5 +739,6 @@
     "use_this_redirect_uri_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren. Gehe zu {0} und richte die OAuth-Anwendung ein.",
     "developer_settings": "Entwicklereinstellungen",
     "public_url_for_oauth_if": "Öffentliche URL für OAuth, wenn unterschiedlich von URL ({0})",
-    "forge_saved": "Plattform gespeichert"
+    "forge_saved": "Plattform gespeichert",
+    "oauth_redirect_url": "OAuth-Weiterleitungs-URL"
 }

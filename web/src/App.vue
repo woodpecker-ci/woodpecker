@@ -1,5 +1,5 @@
 <template>
-  <div class="app bg-wp-background-200 dark:bg-wp-background-100 m-auto flex h-full w-full flex-col">
+  <div class="app bg-wp-background-100 dark:bg-wp-background-300 m-auto flex h-full w-full flex-col">
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />
@@ -8,7 +8,9 @@
           <router-view />
         </div>
         <transition name="slide-right">
-          <PipelineFeedSidebar class="absolute top-0 right-0 bottom-0 w-full max-w-80 border-l shadow-md xl:max-w-96" />
+          <PipelineFeedSidebar
+            class="dark:shadow-wp-background-500 absolute top-0 right-0 bottom-0 w-full max-w-80 border-l shadow-lg xl:max-w-96"
+          />
         </transition>
       </main>
     </template>
