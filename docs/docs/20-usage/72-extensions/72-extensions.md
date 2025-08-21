@@ -23,7 +23,7 @@ A simplistic service providing endpoints for a config and secrets extension can 
 
 ## Configuration
 
-To prevent extensions from calling local services by default only external hosts / ip-addresses are allowed. You can change this behavior by setting the `WOODPECKER_ALLOWED_EXTENSIONS_HOSTS` environment variable. You can use a comma separated list of:
+To prevent extensions from calling local services by default only external hosts / ip-addresses are allowed. You can change this behavior by setting the `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS` environment variable. You can use a comma separated list of:
 
 - Built-in networks:
   - `loopback`: 127.0.0.0/8 for IPv4 and ::1/128 for IPv6, localhost is included.
