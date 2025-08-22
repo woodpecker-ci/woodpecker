@@ -1,5 +1,5 @@
 <template>
-  <Panel>
+  <Settings :title="$t('extensions')" :description="$t('extensions_description')" docs-url="docs/usage/registries">
     <div class="mb-4 flex flex-row items-center border-b pb-4 dark:border-gray-600">
       <h1 class="text-color ml-2 text-xl">{{ $t('extensions') }}</h1>
     </div>
@@ -7,7 +7,7 @@
     <div class="flex flex-col">
       <span class="text-color font-bold">{{ $t('extensions_signatures_public_key') }}</span>
       <span class="text-color">{{ $t('extensions_signatures_public_key_description') }}</span>
-      <CodeBox>{{ signaturePublicKey }}</CodeBox>
+      <pre class="code-box">{{ signaturePublicKey }}</pre>
     </div>
 
     <div class="mt-4 flex flex-col border-t-1 dark:border-gray-600">
@@ -22,7 +22,7 @@
         <Button :is-loading="isSaving" color="green" type="submit" :text="$t('save')" />
       </form>
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -33,7 +33,7 @@ import { useI18n } from 'vue-i18n';
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
