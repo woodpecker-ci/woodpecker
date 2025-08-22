@@ -30,7 +30,7 @@ useWPTitle(
 
 function collapseNode(node: TreeNode): TreeNode {
   if (!node.isDirectory) return node;
-  let collapsedChildren = node.children.map(collapseNode);
+  const collapsedChildren = node.children.map(collapseNode);
   let currentNode = { ...node, children: collapsedChildren };
 
   while (
