@@ -15,7 +15,7 @@ Using such an extension can be useful if you want to:
 ## Security
 
 :::warning
-As Woodpecker will pass private information like tokens and will execute the returned configuration, it is extremely important to secure the external extension. Therefore Woodpecker signs every request. Read more about it in the [security section](./10-extensions.md#security).
+As Woodpecker will pass private information like tokens and will execute the returned configuration, it is extremely important to secure the external extension. Therefore Woodpecker signs every request. Read more about it in the [security section](./index.md#security).
 :::
 
 ## Global configuration
