@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@da-Kai, @qwerty287
 
 ### 📈 Enhancement
 
+- Collapse changed files file-tree [[#5451](https://github.com/woodpecker-ci/woodpecker/pull/5451)]
 - Simplify queue interface [[#5449](https://github.com/woodpecker-ci/woodpecker/pull/5449)]
 
 ### 🐛 Bug Fixes
