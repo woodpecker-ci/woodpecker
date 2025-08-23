@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-22
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -17,6 +17,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/react to v19.1.11 [[#5454](https://github.com/woodpecker-ci/woodpecker/pull/5454)]
 - Add easypanel community package [[#5446](https://github.com/woodpecker-ci/woodpecker/pull/5446)]
 - Add some blogs and videos [[#5445](https://github.com/woodpecker-ci/woodpecker/pull/5445)]
 
