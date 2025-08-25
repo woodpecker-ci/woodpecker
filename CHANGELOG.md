@@ -17,13 +17,14 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5458](https://github.com/woodpecker-ci/woodpecker/pull/5458)]
+- Add ui proxy docs [[#5459](https://github.com/woodpecker-ci/woodpecker/pull/5459)]
 - chore(deps): update dependency @types/react to v19.1.11 [[#5454](https://github.com/woodpecker-ci/woodpecker/pull/5454)]
 - Add easypanel community package [[#5446](https://github.com/woodpecker-ci/woodpecker/pull/5446)]
 - Add some blogs and videos [[#5445](https://github.com/woodpecker-ci/woodpecker/pull/5445)]
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#5458](https://github.com/woodpecker-ci/woodpecker/pull/5458)]
 - fix(deps): update golang-packages [[#5457](https://github.com/woodpecker-ci/woodpecker/pull/5457)]
 - fix(deps): update dependency simple-icons to v15.12.0 [[#5456](https://github.com/woodpecker-ci/woodpecker/pull/5456)]
 - fix(deps): update web npm deps non-major [[#5455](https://github.com/woodpecker-ci/woodpecker/pull/5455)]
