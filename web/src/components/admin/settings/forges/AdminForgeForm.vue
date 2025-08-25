@@ -27,7 +27,7 @@
       <hr class="my-4 border-gray-800" />
 
       <InputField v-slot="{ id }" :label="$t('oauth_redirect_url')">
-        {{$t('use_this_redirect_uri_to_create')}}
+        {{ $t('use_this_redirect_uri_to_create') }}
         <i18n-t v-if="forge.type !== 'addon'" keypath="developer_settings_to_create" tag="p">
           <a rel="noopener noreferrer" :href="oauthAppForgeUrl" target="_blank" class="underline">{{
             $t('developer_settings')
@@ -62,7 +62,13 @@
         </InputField>
       </template>
 
-      <Panel v-if="forge.type !== 'bitbucket'" collapsable collapsed-by-default :title="$t('advanced_options')" class="mb-4">
+      <Panel
+        v-if="forge.type !== 'bitbucket'"
+        collapsable
+        collapsed-by-default
+        :title="$t('advanced_options')"
+        class="mb-4"
+      >
         <InputField v-slot="{ id }" :label="$t('oauth_host')">
           <TextField :id="id" v-model="forge.oauth_host" :placeholder="$t('public_url_for_oauth_if', [forge.url])" />
         </InputField>
