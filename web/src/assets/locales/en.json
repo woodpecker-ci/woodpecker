@@ -566,10 +566,13 @@
   "edit_forge": "Edit forge",
   "delete_forge": "Delete forge",
   "no_forges": "There are no forges yet.",
-  "use_this_redirect_uri_to_create": "Use this redirect URI to create or update the OAuth application. Go to {0} and setup the OAuth application.",
+  "use_this_redirect_uri_to_create": "Use this redirect URI to create or update the OAuth application.",
+  "developer_settings_to_create": "Go to {0} and setup the OAuth application.",
   "developer_settings": "Developer settings",
   "public_url_for_oauth_if": "Public URL for OAuth if different from URL ({0})",
   "forge_saved": "Forge saved",
   "fullscreen": "Fullscreen",
-  "exit_fullscreen": "Exit fullscreen"
+  "exit_fullscreen": "Exit fullscreen",
+  "help_translating": "You can help translating Woodpecker in your language on {0}.",
+  "weblate": "our Weblate"
 }
