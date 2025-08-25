@@ -19,7 +19,7 @@
       />
     </InputField>
 
-    <InputField v-slot="{ id }" :label="$t('url')">
+    <InputField v-if="forge.type !== 'bitbucket'" v-slot="{ id }" :label="$t('url')">
       <TextField :id="id" v-model="forge.url" required />
     </InputField>
 
@@ -27,28 +27,42 @@
       <hr class="my-4 border-gray-800" />
 
       <InputField v-slot="{ id }" :label="$t('oauth_redirect_url')">
-        <i18n-t keypath="use_this_redirect_uri_to_create" tag="p" class="mb-2">
+        {{$t('use_this_redirect_uri_to_create')}}
+        <i18n-t v-if="forge.type !== 'addon'" keypath="developer_settings_to_create" tag="p">
           <a rel="noopener noreferrer" :href="oauthAppForgeUrl" target="_blank" class="underline">{{
             $t('developer_settings')
           }}</a>
         </i18n-t>
-        <TextField :id="id" :model-value="redirectUri" disabled />
+        <TextField :id="id" class="mt-2" :model-value="redirectUri" disabled />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('oauth_client_id')">
-        <TextField :id="id" v-model="forge.client" required />
-      </InputField>
+      <template v-if="forge.type !== 'addon'">
+        <InputField v-slot="{ id }" :label="$t('oauth_client_id')">
+          <TextField :id="id" v-model="forge.client" required />
+        </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('oauth_client_secret')">
-        <TextField
-          :id="id"
-          v-model="forge.client_secret"
-          :placeholder="isNew ? '' : $t('leave_empty_to_keep_current_value')"
-          :required="isNew"
-        />
-      </InputField>
+        <InputField v-if="forge.type !== 'addon'" v-slot="{ id }" :label="$t('oauth_client_secret')">
+          <TextField
+            :id="id"
+            v-model="forge.client_secret"
+            :placeholder="isNew ? '' : $t('leave_empty_to_keep_current_value')"
+            :required="isNew"
+          />
+        </InputField>
+      </template>
 
-      <Panel collapsable collapsed-by-default :title="$t('advanced_options')" class="mb-4">
+      <template v-else>
+        <InputField v-slot="{ id }" :label="$t('executable')">
+          <p>{{ $t('executable_desc') }}</p>
+          <TextField
+            :id="id"
+            :model-value="getAdditionalOptions('addon', 'executable')"
+            @update:model-value="setAdditionalOptions('addon', 'executable', $event)"
+          />
+        </InputField>
+      </template>
+
+      <Panel v-if="forge.type !== 'bitbucket'" collapsable collapsed-by-default :title="$t('advanced_options')" class="mb-4">
         <InputField v-slot="{ id }" :label="$t('oauth_host')">
           <TextField :id="id" v-model="forge.oauth_host" :placeholder="$t('public_url_for_oauth_if', [forge.url])" />
         </InputField>
@@ -85,16 +99,6 @@
               :id="id"
               :model-value="getAdditionalOptions('bitbucket-dc', 'git-password')"
               @update:model-value="setAdditionalOptions('bitbucket-dc', 'git-password', $event)"
-            />
-          </InputField>
-        </template>
-        <template v-if="forge.type === 'addon'">
-          <InputField v-slot="{ id }" :label="$t('executable')">
-            <p>{{ $t('executable_desc') }}</p>
-            <TextField
-              :id="id"
-              :model-value="getAdditionalOptions('addon', 'executable')"
-              @update:model-value="setAdditionalOptions('addon', 'executable', $event)"
             />
           </InputField>
         </template>
