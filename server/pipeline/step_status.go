@@ -49,7 +49,7 @@ func UpdateStepToStatusStarted(store store.Store, step model.Step, state rpc.Ste
 	return &step, store.StepUpdate(&step)
 }
 
-func UpdateStepToStatusSkipped(store store.Store, step model.Step, finished int64) (*model.Step, error) {
+func UpdateStepStatusToSkipped(store store.Store, step model.Step, finished int64) (*model.Step, error) {
 	step.State = model.StatusSkipped
 	if step.Started != 0 {
 		step.State = model.StatusSuccess // for daemons that are killed
@@ -62,12 +62,11 @@ func UpdateStepStatusToDone(store store.Store, step model.Step, state rpc.StepSt
 	step.Finished = state.Finished
 	step.Error = state.Error
 	step.ExitCode = state.ExitCode
+	step.State = model.StatusSuccess
 	if state.Started == 0 {
 		step.State = model.StatusSkipped
-	} else {
-		step.State = model.StatusSuccess
 	}
-	if step.ExitCode != 0 || step.Error != "" {
+	if state.ExitCode != 0 || state.Error != "" {
 		step.State = model.StatusFailure
 	}
 	return &step, store.StepUpdate(&step)
@@ -79,6 +78,6 @@ func UpdateStepToStatusKilled(store store.Store, step model.Step) (*model.Step, 
 	if step.Started == 0 {
 		step.Started = step.Finished
 	}
-	step.ExitCode = pipeline.ExitCodeKilled
+
 	return &step, store.StepUpdate(&step)
 }
