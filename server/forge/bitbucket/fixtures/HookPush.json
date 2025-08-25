@@ -1,232 +1,154 @@
 {
-  "actor": {
-    "display_name": "Martin Herren",
-    "links": {
-      "self": {
-        "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
-      },
-      "avatar": {
-        "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
-      },
-      "html": {
-        "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
-      }
-    },
-    "type": "user",
-    "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
-    "account_id": "5cf8e3a9678ca90f8e7cc8a8",
-    "nickname": "Martin Herren"
-  },
-  "repository": {
-    "type": "repository",
-    "full_name": "martinherren1984/publictestrepo",
-    "links": {
-      "self": {
-        "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo"
-      },
-      "html": {
-        "href": "https://bitbucket.org/martinherren1984/publictestrepo"
-      },
-      "avatar": {
-        "href": "https://bytebucket.org/ravatar/%7B898477b2-a080-4089-b385-597a783db392%7D?ts=default"
-      }
-    },
-    "name": "PublicTestRepo",
-    "scm": "git",
-    "website": null,
-    "owner": {
-      "display_name": "Martin Herren",
-      "links": {
-        "self": {
-          "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
-        },
-        "avatar": {
-          "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
-        },
-        "html": {
-          "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
-        }
-      },
-      "type": "user",
-      "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
-      "account_id": "5cf8e3a9678ca90f8e7cc8a8",
-      "nickname": "Martin Herren"
-    },
-    "workspace": {
-      "type": "workspace",
-      "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
-      "name": "Martin Herren",
-      "slug": "martinherren1984",
-      "links": {
-        "avatar": {
-          "href": "https://bitbucket.org/workspaces/martinherren1984/avatar/?ts=1658761964"
-        },
-        "html": {
-          "href": "https://bitbucket.org/martinherren1984/"
-        },
-        "self": {
-          "href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984"
-        }
-      }
-    },
-    "is_private": false,
-    "project": {
-      "type": "project",
-      "key": "PUB",
-      "uuid": "{2cede481-f59e-49ec-88d0-a85629b7925d}",
-      "name": "PublicTestProject",
-      "links": {
-        "self": {
-          "href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984/projects/PUB"
-        },
-        "html": {
-          "href": "https://bitbucket.org/martinherren1984/workspace/projects/PUB"
-        },
-        "avatar": {
-          "href": "https://bitbucket.org/account/user/martinherren1984/projects/PUB/avatar/32?ts=1658768453"
-        }
-      }
-    },
-    "uuid": "{898477b2-a080-4089-b385-597a783db392}"
-  },
   "push": {
     "changes": [
       {
         "old": {
-          "name": "main",
+          "name": "niam",
           "target": {
             "type": "commit",
-            "hash": "a51241ae1f00cbe728930db48e890b18fd527f99",
-            "date": "2022-08-17T15:24:29+00:00",
+            "hash": "71e37e58c8321051d70c3a668fabe8c92886145f",
+            "date": "2025-08-12T13:04:10+00:00",
             "author": {
               "type": "author",
-              "raw": "Martin Herren <martin.herren@xxx.com>",
+              "raw": "6543 <6543@obermui.de>",
               "user": {
-                "display_name": "Martin Herren",
+                "display_name": "6543",
                 "links": {
-                  "self": {
-                    "href": "https://api.bitbucket.org/2.0/users/%7B69cc59f2-706b-4a9c-b99c-eac2ace320da%7D"
-                  },
+                  "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
                   "avatar": {
-                    "href": "https://secure.gravatar.com/avatar/7b2e50690b4ab7bb9e1db18ea3b8ae95?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-5.png"
+                    "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
                   },
-                  "html": {
-                    "href": "https://bitbucket.org/%7B69cc59f2-706b-4a9c-b99c-eac2ace320da%7D/"
-                  }
+                  "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
                 },
                 "type": "user",
-                "uuid": "{69cc59f2-706b-4a9c-b99c-eac2ace320da}",
-                "account_id": "5d286e857133f10c17e026cb",
-                "nickname": "Martin Herren"
+                "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+                "account_id": "5f614bd12d51d4006ab36374",
+                "nickname": "6543"
               }
             },
-            "message": "Add test .woodpecker.yml\n",
-            "summary": {
-              "type": "rendered",
-              "raw": "Add test .woodpecker.yml\n",
-              "markup": "markdown",
-              "html": "<p>Add test .woodpecker.yml</p>"
-            },
+            "committer": {},
+            "message": "aaa\n",
+            "summary": { "type": "rendered", "raw": "aaa\n", "markup": "markdown", "html": "<p>aaa</p>" },
             "links": {
               "self": {
-                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/a51241ae1f00cbe728930db48e890b18fd527f99"
+                "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/71e37e58c8321051d70c3a668fabe8c92886145f"
               },
               "html": {
-                "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/a51241ae1f00cbe728930db48e890b18fd527f99"
-              }
-            },
-            "parents": [],
-            "rendered": {},
-            "properties": {}
-          },
-          "links": {
-            "self": {
-              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches/main"
-            },
-            "commits": {
-              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits/main"
-            },
-            "html": {
-              "href": "https://bitbucket.org/martinherren1984/publictestrepo/branch/main"
-            }
-          },
-          "type": "branch",
-          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
-          "default_merge_strategy": "merge_commit"
-        },
-        "new": {
-          "name": "main",
-          "target": {
-            "type": "commit",
-            "hash": "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
-            "date": "2022-09-07T20:19:25+00:00",
-            "author": {
-              "type": "author",
-              "raw": "Martin Herren <martin.herren@yyy.com>",
-              "user": {
-                "display_name": "Martin Herren",
-                "links": {
-                  "self": {
-                    "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
-                  },
-                  "avatar": {
-                    "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
-                  },
-                  "html": {
-                    "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
-                  }
-                },
-                "type": "user",
-                "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
-                "account_id": "5cf8e3a9678ca90f8e7cc8a8",
-                "nickname": "Martin Herren"
-              }
-            },
-            "message": "a\n",
-            "summary": {
-              "type": "rendered",
-              "raw": "a\n",
-              "markup": "markdown",
-              "html": "<p>a</p>"
-            },
-            "links": {
-              "self": {
-                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
-              },
-              "html": {
-                "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+                "href": "https://bitbucket.org/6543/collect-webhooks/commits/71e37e58c8321051d70c3a668fabe8c92886145f"
               }
             },
             "parents": [
               {
-                "type": "commit",
-                "hash": "a51241ae1f00cbe728930db48e890b18fd527f99",
+                "hash": "3f462a8a3d8a5e166577e600e268814c8ed0a8a6",
                 "links": {
                   "self": {
-                    "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/a51241ae1f00cbe728930db48e890b18fd527f99"
+                    "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/3f462a8a3d8a5e166577e600e268814c8ed0a8a6"
                   },
                   "html": {
-                    "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/a51241ae1f00cbe728930db48e890b18fd527f99"
+                    "href": "https://bitbucket.org/6543/collect-webhooks/commits/3f462a8a3d8a5e166577e600e268814c8ed0a8a6"
                   }
-                }
+                },
+                "type": "commit"
               }
             ],
             "rendered": {},
             "properties": {}
           },
           "links": {
-            "self": {
-              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches/main"
-            },
-            "commits": {
-              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits/main"
-            },
-            "html": {
-              "href": "https://bitbucket.org/martinherren1984/publictestrepo/branch/main"
+            "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/refs/branches/niam" },
+            "commits": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commits/niam" },
+            "html": { "href": "https://bitbucket.org/6543/collect-webhooks/branch/niam" },
+            "pullrequest_create": {
+              "href": "https://bitbucket.org/6543/collect-webhooks/pull-requests/new?source=niam&t=1"
             }
           },
           "type": "branch",
-          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
+          "merge_strategies": [
+            "merge_commit",
+            "squash",
+            "fast_forward",
+            "squash_fast_forward",
+            "rebase_fast_forward",
+            "rebase_merge"
+          ],
+          "sync_strategies": ["merge_commit", "rebase"],
+          "default_merge_strategy": "merge_commit"
+        },
+        "new": {
+          "name": "niam",
+          "target": {
+            "type": "commit",
+            "hash": "859c737a468f8168b257db109295876fd1f5dbd6",
+            "date": "2025-08-12T13:56:34+00:00",
+            "author": {
+              "type": "author",
+              "raw": "6543 <6543@obermui.de>",
+              "user": {
+                "display_name": "6543",
+                "links": {
+                  "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
+                  "avatar": {
+                    "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+                  },
+                  "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
+                },
+                "type": "user",
+                "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+                "account_id": "5f614bd12d51d4006ab36374",
+                "nickname": "6543"
+              }
+            },
+            "committer": {},
+            "message": "b hcus on si ereht\n",
+            "summary": {
+              "type": "rendered",
+              "raw": "b hcus on si ereht\n",
+              "markup": "markdown",
+              "html": "<p>b hcus on si ereht</p>"
+            },
+            "links": {
+              "self": {
+                "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/859c737a468f8168b257db109295876fd1f5dbd6"
+              },
+              "html": {
+                "href": "https://bitbucket.org/6543/collect-webhooks/commits/859c737a468f8168b257db109295876fd1f5dbd6"
+              }
+            },
+            "parents": [
+              {
+                "hash": "71e37e58c8321051d70c3a668fabe8c92886145f",
+                "links": {
+                  "self": {
+                    "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/71e37e58c8321051d70c3a668fabe8c92886145f"
+                  },
+                  "html": {
+                    "href": "https://bitbucket.org/6543/collect-webhooks/commits/71e37e58c8321051d70c3a668fabe8c92886145f"
+                  }
+                },
+                "type": "commit"
+              }
+            ],
+            "rendered": {},
+            "properties": {}
+          },
+          "links": {
+            "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/refs/branches/niam" },
+            "commits": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commits/niam" },
+            "html": { "href": "https://bitbucket.org/6543/collect-webhooks/branch/niam" },
+            "pullrequest_create": {
+              "href": "https://bitbucket.org/6543/collect-webhooks/pull-requests/new?source=niam&t=1"
+            }
+          },
+          "type": "branch",
+          "merge_strategies": [
+            "merge_commit",
+            "squash",
+            "fast_forward",
+            "squash_fast_forward",
+            "rebase_fast_forward",
+            "rebase_merge"
+          ],
+          "sync_strategies": ["merge_commit", "rebase"],
           "default_merge_strategy": "merge_commit"
         },
         "truncated": false,
@@ -235,84 +157,81 @@
         "closed": false,
         "links": {
           "commits": {
-            "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits?include=c14c1bb05dfb1fdcdf06b31485fff61b0ea44277&exclude=a51241ae1f00cbe728930db48e890b18fd527f99"
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commits?include=859c737a468f8168b257db109295876fd1f5dbd6&exclude=71e37e58c8321051d70c3a668fabe8c92886145f"
           },
           "diff": {
-            "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/diff/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277..a51241ae1f00cbe728930db48e890b18fd527f99"
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/diff/859c737a468f8168b257db109295876fd1f5dbd6..71e37e58c8321051d70c3a668fabe8c92886145f"
           },
           "html": {
-            "href": "https://bitbucket.org/martinherren1984/publictestrepo/branches/compare/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277..a51241ae1f00cbe728930db48e890b18fd527f99"
+            "href": "https://bitbucket.org/6543/collect-webhooks/branches/compare/859c737a468f8168b257db109295876fd1f5dbd6..71e37e58c8321051d70c3a668fabe8c92886145f"
           }
         },
         "commits": [
           {
             "type": "commit",
-            "hash": "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
-            "date": "2022-09-07T20:19:25+00:00",
+            "hash": "859c737a468f8168b257db109295876fd1f5dbd6",
+            "date": "2025-08-12T13:56:34+00:00",
             "author": {
               "type": "author",
-              "raw": "Martin Herren <martin.herren@yyy.com>",
+              "raw": "6543 <6543@obermui.de>",
               "user": {
-                "display_name": "Martin Herren",
+                "display_name": "6543",
                 "links": {
-                  "self": {
-                    "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
-                  },
+                  "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
                   "avatar": {
-                    "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
+                    "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
                   },
-                  "html": {
-                    "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
-                  }
+                  "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
                 },
                 "type": "user",
-                "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
-                "account_id": "5cf8e3a9678ca90f8e7cc8a8",
-                "nickname": "Martin Herren"
+                "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+                "account_id": "5f614bd12d51d4006ab36374",
+                "nickname": "6543"
               }
             },
-            "message": "a\n",
+            "committer": {},
+            "message": "b hcus on si ereht\n",
             "summary": {
               "type": "rendered",
-              "raw": "a\n",
+              "raw": "b hcus on si ereht\n",
               "markup": "markdown",
-              "html": "<p>a</p>"
+              "html": "<p>b hcus on si ereht</p>"
             },
             "links": {
               "self": {
-                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+                "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/859c737a468f8168b257db109295876fd1f5dbd6"
               },
               "html": {
-                "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+                "href": "https://bitbucket.org/6543/collect-webhooks/commits/859c737a468f8168b257db109295876fd1f5dbd6"
               },
               "diff": {
-                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/diff/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+                "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/diff/859c737a468f8168b257db109295876fd1f5dbd6"
               },
               "approve": {
-                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277/approve"
+                "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/859c737a468f8168b257db109295876fd1f5dbd6/approve"
               },
               "comments": {
-                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277/comments"
+                "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/859c737a468f8168b257db109295876fd1f5dbd6/comments"
               },
               "statuses": {
-                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277/statuses"
+                "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/859c737a468f8168b257db109295876fd1f5dbd6/statuses"
               },
               "patch": {
-                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/patch/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+                "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/patch/859c737a468f8168b257db109295876fd1f5dbd6"
               }
             },
             "parents": [
               {
-                "type": "commit",
-                "hash": "a51241ae1f00cbe728930db48e890b18fd527f99",
+                "hash": "71e37e58c8321051d70c3a668fabe8c92886145f",
                 "links": {
                   "self": {
-                    "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/a51241ae1f00cbe728930db48e890b18fd527f99"
+                    "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/71e37e58c8321051d70c3a668fabe8c92886145f"
                   },
                   "html": {
-                    "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/a51241ae1f00cbe728930db48e890b18fd527f99"
+                    "href": "https://bitbucket.org/6543/collect-webhooks/commits/71e37e58c8321051d70c3a668fabe8c92886145f"
                   }
-                }
+                },
+                "type": "commit"
               }
             ],
             "rendered": {},
@@ -321,5 +240,70 @@
         ]
       }
     ]
+  },
+  "repository": {
+    "type": "repository",
+    "full_name": "6543/collect-webhooks",
+    "links": {
+      "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks" },
+      "html": { "href": "https://bitbucket.org/6543/collect-webhooks" },
+      "avatar": { "href": "https://bytebucket.org/ravatar/%7Bcbddcb41-064e-4190-9685-c0540c2ec622%7D?ts=go" }
+    },
+    "name": "collect-webhooks",
+    "scm": "git",
+    "website": null,
+    "owner": {
+      "display_name": "6543",
+      "links": {
+        "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
+        "avatar": {
+          "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+        },
+        "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
+      },
+      "type": "user",
+      "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+      "account_id": "5f614bd12d51d4006ab36374",
+      "nickname": "6543"
+    },
+    "workspace": {
+      "type": "workspace",
+      "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+      "name": "6543",
+      "slug": "6543",
+      "links": {
+        "avatar": { "href": "https://bitbucket.org/workspaces/6543/avatar/?ts=1600212025" },
+        "html": { "href": "https://bitbucket.org/6543/" },
+        "self": { "href": "https://api.bitbucket.org/2.0/workspaces/6543" }
+      }
+    },
+    "is_private": true,
+    "project": {
+      "type": "project",
+      "key": "PROJ",
+      "uuid": "{c66cda6b-6de6-4597-ab33-60b84033558b}",
+      "name": "ProjectX",
+      "links": {
+        "self": { "href": "https://api.bitbucket.org/2.0/workspaces/6543/projects/PROJ" },
+        "html": { "href": "https://bitbucket.org/6543/workspace/projects/PROJ" },
+        "avatar": { "href": "https://bitbucket.org/6543/workspace/projects/PROJ/avatar/32?ts=1602715515" }
+      }
+    },
+    "uuid": "{cbddcb41-064e-4190-9685-c0540c2ec622}",
+    "parent": null
+  },
+  "actor": {
+    "display_name": "6543",
+    "links": {
+      "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
+      "avatar": {
+        "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+      },
+      "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
+    },
+    "type": "user",
+    "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+    "account_id": "5f614bd12d51d4006ab36374",
+    "nickname": "6543"
   }
 }
