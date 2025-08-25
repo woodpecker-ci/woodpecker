@@ -150,8 +150,19 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	)
 
 	event := model.EventPull
-	if hook.Action == actionClose {
+	switch hook.Action {
+	case actionClose:
 		event = model.EventPullClosed
+	case actionEdited,
+		actionLabelUpdate,
+		actionLabelCleared,
+		actionMilestoned,
+		actionDeMilestoned,
+		actionReviewRequest,
+		actionAssigned,
+		actionUnAssigned,
+		actionReviewed:
+		event = model.EventPullMetadata
 	}
 
 	pipeline := &model.Pipeline{
@@ -172,6 +183,10 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		),
 		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
 		FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+	}
+
+	if pipeline.Event == model.EventPullMetadata {
+		pipeline.EventReason = hook.Action
 	}
 
 	return pipeline
