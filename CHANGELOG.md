@@ -1,5 +1,40 @@
 # Changelog
 
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-25
+
+### ❤️ Thanks to all contributors! ❤️
+
+@da-Kai, @qwerty287
+
+### 📈 Enhancement
+
+- Collapse changed files file-tree [[#5451](https://github.com/woodpecker-ci/woodpecker/pull/5451)]
+- Simplify queue interface [[#5449](https://github.com/woodpecker-ci/woodpecker/pull/5449)]
+
+### 🐛 Bug Fixes
+
+- Print execution errors [[#5448](https://github.com/woodpecker-ci/woodpecker/pull/5448)]
+
+### 📚 Documentation
+
+- Add ui proxy docs [[#5459](https://github.com/woodpecker-ci/woodpecker/pull/5459)]
+- chore(deps): update dependency @types/react to v19.1.11 [[#5454](https://github.com/woodpecker-ci/woodpecker/pull/5454)]
+- Add easypanel community package [[#5446](https://github.com/woodpecker-ci/woodpecker/pull/5446)]
+- Add some blogs and videos [[#5445](https://github.com/woodpecker-ci/woodpecker/pull/5445)]
+
+### 📦️ Dependency
+
+- chore(deps): lock file maintenance [[#5458](https://github.com/woodpecker-ci/woodpecker/pull/5458)]
+- fix(deps): update golang-packages [[#5457](https://github.com/woodpecker-ci/woodpecker/pull/5457)]
+- fix(deps): update dependency simple-icons to v15.12.0 [[#5456](https://github.com/woodpecker-ci/woodpecker/pull/5456)]
+- fix(deps): update web npm deps non-major [[#5455](https://github.com/woodpecker-ci/woodpecker/pull/5455)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.142.0 [[#5452](https://github.com/woodpecker-ci/woodpecker/pull/5452)]
+- fix(deps): update golang-packages [[#5442](https://github.com/woodpecker-ci/woodpecker/pull/5442)]
+
+### Misc
+
+- Remove twitter from release template [[#5447](https://github.com/woodpecker-ci/woodpecker/pull/5447)]
+
 ## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-20
 
 ### ❤️ Thanks to all contributors! ❤️
