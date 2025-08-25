@@ -169,11 +169,19 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
-		FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+		PullRequestLabels:    convertLabels(hook.PullRequest.Labels),
+		PullRequestMilestone: convertMilestone(hook.PullRequest.Milestone),
+		FromFork:             hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
 	}
 
 	return pipeline
+}
+
+func convertMilestone(milestone *forgejo.Milestone) string {
+	if milestone == nil || milestone.ID == 0 {
+		return ""
+	}
+	return milestone.Title
 }
 
 func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
