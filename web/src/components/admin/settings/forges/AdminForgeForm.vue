@@ -41,7 +41,7 @@
           <TextField :id="id" v-model="forge.client" required />
         </InputField>
 
-        <InputField v-if="forge.type !== 'addon'" v-slot="{ id }" :label="$t('oauth_client_secret')">
+        <InputField v-slot="{ id }" :label="$t('oauth_client_secret')">
           <TextField
             :id="id"
             v-model="forge.client_secret"
