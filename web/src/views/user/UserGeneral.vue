@@ -2,7 +2,7 @@
   <Settings :title="$t('user.settings.general.general')">
     <InputField :label="$t('user.settings.general.language')">
       <template #default="{ id }">
-        <SelectField :id="id" v-model="selectedLocale" :options="localeOptions" />
+        <SelectField :id="id" v-model="selectedLocale" class="mt-2" :options="localeOptions" />
       </template>
       <template #description>
         <i18n-t keypath="help_translating" tag="p">
