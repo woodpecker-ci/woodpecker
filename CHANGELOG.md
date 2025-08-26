@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-25
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5463](https://github.com/woodpecker-ci/woodpecker/pull/5463)]
 - chore(deps): lock file maintenance [[#5458](https://github.com/woodpecker-ci/woodpecker/pull/5458)]
 - fix(deps): update golang-packages [[#5457](https://github.com/woodpecker-ci/woodpecker/pull/5457)]
 - fix(deps): update dependency simple-icons to v15.12.0 [[#5456](https://github.com/woodpecker-ci/woodpecker/pull/5456)]
