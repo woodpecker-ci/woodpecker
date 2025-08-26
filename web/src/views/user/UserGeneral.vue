@@ -1,19 +1,22 @@
 <template>
   <Settings :title="$t('user.settings.general.general')">
-    <InputField v-slot="{ id }" :label="$t('user.settings.general.language')">
-      <SelectField :id="id" v-model="selectedLocale" :options="localeOptions" />
+    <InputField :label="$t('user.settings.general.language')">
+      <template #default="{ id }">
+        <SelectField :id="id" v-model="selectedLocale" :options="localeOptions" />
+      </template>
+      <template #description>
+        <i18n-t keypath="help_translating" tag="p">
+          <a
+            rel="noopener noreferrer"
+            href="https://translate.woodpecker-ci.org/projects/woodpecker-ci/ui/"
+            target="_blank"
+            class="underline"
+          >
+            {{ $t('weblate') }}
+          </a>
+        </i18n-t>
+      </template>
     </InputField>
-
-    <i18n-t keypath="help_translating" tag="p">
-      <a
-        rel="noopener noreferrer"
-        href="https://translate.woodpecker-ci.org/projects/woodpecker-ci/ui/"
-        target="_blank"
-        class="underline"
-      >
-        {{ $t('weblate') }}
-      </a>
-    </i18n-t>
 
     <InputField v-slot="{ id }" :label="$t('user.settings.general.theme.theme')">
       <SelectField

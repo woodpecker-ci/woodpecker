@@ -573,6 +573,6 @@
   "forge_saved": "Forge saved",
   "fullscreen": "Fullscreen",
   "exit_fullscreen": "Exit fullscreen",
-  "help_translating": "You can help translating Woodpecker in your language on {0}.",
-  "weblate": "our Weblate"
+  "help_translating": "You can help translate Woodpecker into your language on {0}.",
+  "weblate": "Weblate"
 }
