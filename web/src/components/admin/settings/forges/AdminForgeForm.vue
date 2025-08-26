@@ -15,7 +15,7 @@
         <TextField :id="id" class="mt-2" :model-value="redirectUri" disabled />
       </template>
       <template #description>
-        {{ $t('use_this_redirect_uri_to_create') }}
+        {{ $t('use_this_redirect_url_to_create') }}
         <i18n-t v-if="forge.type !== 'addon'" keypath="developer_settings_to_create" tag="span">
           <a rel="noopener noreferrer" :href="oauthAppForgeUrl" target="_blank" class="underline">{{
             $t('developer_settings')
