@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-27
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@da-Kai, @qwerty287, @xoxys
+@da-Kai, @qwerty287, @xoxys, @zhedazijingang
 
 ### 📈 Enhancement
 
+- refactor: use slices.Contains to simplify [[#5468](https://github.com/woodpecker-ci/woodpecker/pull/5468)]
 - Hide unsupported forge options [[#5465](https://github.com/woodpecker-ci/woodpecker/pull/5465)]
 - Collapse changed files file-tree [[#5451](https://github.com/woodpecker-ci/woodpecker/pull/5451)]
 - Simplify queue interface [[#5449](https://github.com/woodpecker-ci/woodpecker/pull/5449)]
