@@ -664,7 +664,7 @@
         "delete": "Register löschen",
         "created": "Register-Zugangsdaten erstellt",
         "saved": "Register-Zugangsdaten gespeichert",
-        "show": "Zeige Register"
+        "show": "Register anzeigen"
     },
     "invalid_state": "Der OAuth-Status ist ungültig",
     "by_user": "von {user}",
@@ -740,5 +740,9 @@
     "developer_settings": "Entwicklereinstellungen",
     "public_url_for_oauth_if": "Öffentliche URL für OAuth, wenn unterschiedlich von URL ({0})",
     "forge_saved": "Plattform gespeichert",
-    "oauth_redirect_url": "OAuth-Weiterleitungs-URL"
+    "oauth_redirect_url": "OAuth-Weiterleitungs-URL",
+    "developer_settings_to_create": "Gehe zu den {0} und richte die OAuth-Anwendung ein.",
+    "weblate": "unserem Weblate",
+    "use_this_redirect_url_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren.",
+    "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen."
 }
