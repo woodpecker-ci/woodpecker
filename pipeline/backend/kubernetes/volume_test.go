@@ -47,7 +47,7 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	{
 	  "metadata": {
 	    "name": "somename",
-	    "namespace": "someNamespace",
+	    "namespace": "someNamespace"
 	  },
 	  "spec": {
 	    "accessModes": [
@@ -67,7 +67,7 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	{
 	  "metadata": {
 	    "name": "somename",
-	    "namespace": "someNamespace",
+	    "namespace": "someNamespace"
 	  },
 	  "spec": {
 	    "accessModes": [
