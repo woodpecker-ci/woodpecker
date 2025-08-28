@@ -210,7 +210,6 @@ func TestRegistrySecret(t *testing.T) {
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 			"namespace": "woodpecker",
-			"creationTimestamp": null,
 			"labels": {
 				"step": "go-test",
 				"woodpecker-ci.org/step": "go-test"
