@@ -15,6 +15,7 @@
 package datastore
 
 import (
+	"sync"
 	"time"
 
 	"xorm.io/builder"
@@ -128,6 +129,11 @@ func (s storage) GetPipelineCount() (int64, error) {
 }
 
 func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Step) error {
+	mutexInterface, _ := s.pipelineMutexes.LoadOrStore(pipeline.RepoID, &sync.Mutex{})
+	repoMutex := mutexInterface.(*sync.Mutex)
+
+	repoMutex.Lock()
+	defer repoMutex.Unlock()
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
