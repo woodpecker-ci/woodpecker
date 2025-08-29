@@ -4946,6 +4946,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "pr_milestone": {
+                    "type": "string"
+                },
                 "ref": {
                     "type": "string"
                 },
@@ -5552,6 +5555,9 @@ const docTemplate = `{
                     }
                 },
                 "message": {
+                    "type": "string"
+                },
+                "milestone": {
                     "type": "string"
                 },
                 "ref": {
