@@ -234,7 +234,7 @@ For the `pull_request_metadata` event, the exact reason a metadata change was de
 
 | NAME                  | Description                                        |
 |-----------------------|----------------------------------------------------|
-|assigned               | pull request was assigned to a user                |
+|`assigned`               | pull request was assigned to a user                |
 |auto_merge_disabled    | Auto merge was disabled for a pull request         |
 |auto_merge_enabled     | Auto merge was enabled for a pull request          |
 |converted_to_draft     | pull request was converted to a draft              |
