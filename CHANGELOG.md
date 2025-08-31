@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-28
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-08-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -19,6 +19,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5472](https://github.com/woodpecker-ci/woodpecker/pull/5472)]
 - Add ui proxy docs [[#5459](https://github.com/woodpecker-ci/woodpecker/pull/5459)]
 - chore(deps): update dependency @types/react to v19.1.11 [[#5454](https://github.com/woodpecker-ci/woodpecker/pull/5454)]
 - Add easypanel community package [[#5446](https://github.com/woodpecker-ci/woodpecker/pull/5446)]
