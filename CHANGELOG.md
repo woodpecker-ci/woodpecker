@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5473](https://github.com/woodpecker-ci/woodpecker/pull/5473)]
 - fix(deps): update golang-packages [[#5467](https://github.com/woodpecker-ci/woodpecker/pull/5467)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.142.2 [[#5466](https://github.com/woodpecker-ci/woodpecker/pull/5466)]
 - fix(deps): update golang-packages [[#5463](https://github.com/woodpecker-ci/woodpecker/pull/5463)]
