@@ -708,7 +708,7 @@
     "delete_forge": "Excluir forja",
     "no_forges": "Não há forja ainda.",
     "use_this_redirect_uri_to_create": "Use este URI de redirecionamento para criar ou atualizar o aplicativo OAuth. Acesse {0} e configure o aplicativo OAuth.",
-    "developer_settings": "Configurações do desenvolvedor",
+    "developer_settings": "configurações do desenvolvedor",
     "public_url_for_oauth_if": "URL pública para OAuth se diferente da URL ({0})",
     "forge_saved": "Forja salva",
     "forges_desc": "Configura forjas hospedando repositórios para os quais Woodpecker deve ser executado.",
@@ -723,5 +723,9 @@
     "login_to_woodpecker_with": "Entrar no Woodpecker com",
     "fullscreen": "Tela cheia",
     "exit_fullscreen": "Sair de tela cheia",
-    "oauth_redirect_url": "URL de redirecionamento de OAuth"
+    "oauth_redirect_url": "URL de redirecionamento de OAuth",
+    "use_this_redirect_url_to_create": "Use esta URL de redirecionamento para criar ou atualizar o aplicativo OAuth.",
+    "developer_settings_to_create": "Vá para {0} e configure o aplicativo OAuth.",
+    "weblate": "nosso Weblate",
+    "help_translating": "Você pode ajudar a traduzir Woodpecker para o seu idioma em {0}."
 }
