@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@da-Kai, @qwerty287, @xoxys, @zhedazijingang
+@6543, @da-Kai, @qwerty287, @xoxys, @zhedazijingang
+
+### ✨ Features
+
+- Add milestone to metadata [[#5174](https://github.com/woodpecker-ci/woodpecker/pull/5174)]
 
 ### 📈 Enhancement
 
