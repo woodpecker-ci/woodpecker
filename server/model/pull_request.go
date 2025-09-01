@@ -15,8 +15,9 @@
 package model
 
 type PullRequest struct {
-	Index    ForgeRemoteID `json:"index"`
-	Title    string        `json:"title"`
-	Labels   []string      `json:"labels,omitempty"`
-	FromFork bool          `json:"from_fork,omitempty"`
+	Index     ForgeRemoteID `json:"index"`
+	Title     string        `json:"title"`
+	Labels    []string      `json:"labels,omitempty"`
+	Milestone string        `json:"milestone,omitempty"`
+	FromFork  bool          `json:"from_fork,omitempty"`
 } //	@name	PullRequest

@@ -62,9 +62,9 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.
 	return repo, nil
 }
 
-func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Pipeline, error) {
-	repo := &model.Repo{}
-	pipeline := &model.Pipeline{}
+func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeID, milestoneID int, repo *model.Repo, pipeline *model.Pipeline, err error) {
+	repo = &model.Repo{}
+	pipeline = &model.Pipeline{}
 
 	target := hook.ObjectAttributes.Target
 	source := hook.ObjectAttributes.Source
@@ -72,17 +72,17 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	switch {
 	case target == nil && source == nil:
-		return 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
+		return 0, 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
 	case target == nil:
-		return 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
+		return 0, 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
 	case source == nil:
-		return 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
+		return 0, 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {
 		var err error
 		if repo.Owner, repo.Name, err = extractFromPath(target.PathWithNamespace); err != nil {
-			return 0, nil, nil, err
+			return 0, 0, nil, nil, err
 		}
 		repo.FullName = target.PathWithNamespace
 	} else {
@@ -141,7 +141,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		Index:    model.ForgeRemoteID(strconv.Itoa(obj.IID)),
 	}
 
-	return obj.IID, repo, pipeline, nil
+	return obj.IID, hook.ObjectAttributes.MilestoneID, repo, pipeline, nil
 }
 
 func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, error) {

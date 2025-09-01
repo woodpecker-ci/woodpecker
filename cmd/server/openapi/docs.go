@@ -4905,6 +4905,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "author_avatar": {
+                    "description": "Avatar URL of the author of the commit",
                     "type": "string"
                 },
                 "author_email": {
@@ -5082,6 +5083,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "milestone": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -5623,6 +5627,9 @@ const docTemplate = `{
                 "message": {
                     "type": "string"
                 },
+                "milestone": {
+                    "type": "string"
+                },
                 "ref": {
                     "type": "string"
                 },
@@ -5920,6 +5927,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "author_avatar": {
+                    "description": "Avatar URL of the author of the commit",
                     "type": "string"
                 },
                 "branch": {

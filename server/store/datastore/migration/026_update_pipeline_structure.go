@@ -28,7 +28,7 @@ var updatePipelineStructure = xormigrate.Migration{
 	ID: "update-pipeline-structure",
 	MigrateSession: func(sess *xorm.Session) error {
 		// perPage024 set the size of the slice to read per page.
-		var perPage024 = 100
+		perPage024 := 100
 
 		type commitAuthor struct {
 			Author string `json:"author"`

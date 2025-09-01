@@ -167,6 +167,13 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	return pipeline
 }
 
+func convertMilestone(milestone *forgejo.Milestone) string {
+	if milestone == nil || milestone.ID == 0 {
+		return ""
+	}
+	return milestone.Title
+}
+
 func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
@@ -262,10 +269,11 @@ func matchingHooks(hooks []*forgejo.Hook, rawURL string) *forgejo.Hook {
 
 func convertPullRequests(from *forgejo.PullRequest) *model.PullRequest {
 	return &model.PullRequest{
-		Index:    model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
-		Title:    from.Title,
-		Labels:   convertLabels(from.Labels),
-		FromFork: from.Head.RepoID != from.Base.RepoID,
+		Index:     model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
+		Title:     from.Title,
+		Labels:    convertLabels(from.Labels),
+		Milestone: convertMilestone(hook.PullRequest.Milestone),
+		FromFork:  from.Head.RepoID != from.Base.RepoID,
 	}
 }
 
