@@ -1,0 +1,17 @@
+steps:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+    backend_options:
+      kubernetes:
+        tolerations:
+          - key: 'node-type'
+            operator: 'Equal'
+            value: 'pipeline'
+            effect: 'NoSchedule'
+          - key: 'some-other-key'
+            operator: 'Equal'
+            value: 'pipeline'
+            effect: 'NoSchedule'
