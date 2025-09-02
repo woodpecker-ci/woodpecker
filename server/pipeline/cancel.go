@@ -17,6 +17,7 @@ package pipeline
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/rs/zerolog/log"
 
@@ -108,13 +109,7 @@ func cancelPreviousPipelines(
 	user *model.User,
 ) error {
 	// check this event should cancel previous pipelines
-	eventIncluded := false
-	for _, ev := range repo.CancelPreviousPipelineEvents {
-		if ev == pipeline.Event {
-			eventIncluded = true
-			break
-		}
-	}
+	eventIncluded := slices.Contains(repo.CancelPreviousPipelineEvents, pipeline.Event)
 	if !eventIncluded {
 		return nil
 	}

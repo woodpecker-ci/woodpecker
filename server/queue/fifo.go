@@ -18,6 +18,7 @@ import (
 	"container/list"
 	"context"
 	"fmt"
+	"slices"
 	"sync"
 	"time"
 
@@ -362,10 +363,8 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 	}
 	for possibleDepID := range q.running {
 		log.Debug().Msgf("queue: running right now: %v", possibleDepID)
-		for _, dep := range task.Dependencies {
-			if possibleDepID == dep {
-				return true
-			}
+		if slices.Contains(task.Dependencies, possibleDepID) {
+			return true
 		}
 	}
 	return false

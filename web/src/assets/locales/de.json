@@ -664,7 +664,7 @@
         "delete": "Register löschen",
         "created": "Register-Zugangsdaten erstellt",
         "saved": "Register-Zugangsdaten gespeichert",
-        "show": "Zeige Register"
+        "show": "Register anzeigen"
     },
     "invalid_state": "Der OAuth-Status ist ungültig",
     "by_user": "von {user}",
@@ -727,7 +727,7 @@
     "oauth_client_secret": "OAuth-Client-Geheimnis",
     "git_username_desc": "Benutzername für den Git-Benutzer.",
     "git_password_desc": "Password oder persönlicher Zugangsschlüssel für den Git-Benutzer.",
-    "executable": "Ausführbar",
+    "executable": "Programmdatei",
     "skip_verify_desc": "SSL-Verifikation für API-Verbindungen überspringen. Im Produktiveinsatz nicht empfohlen.",
     "forge_managed_by_env": "Die primäre Plattform wird durch Umgebungsvariablen verwaltet. Jede Änderung dieser Plattform wird bei einem Neustart verworfen.",
     "oauth_redirect_uri": "OAuth-Weiterleitungs-URI",
@@ -736,9 +736,13 @@
     "edit_forge": "Plattform bearbeiten",
     "delete_forge": "Plattform löschen",
     "no_forges": "Es gibt noch keine Plattformen.",
-    "use_this_redirect_uri_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren. Gehe zu {0} und richte die OAuth-Anwendung ein.",
+    "use_this_redirect_uri_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren. Gehe zu den {0} und richte die OAuth-Anwendung ein.",
     "developer_settings": "Entwicklereinstellungen",
     "public_url_for_oauth_if": "Öffentliche URL für OAuth, wenn unterschiedlich von URL ({0})",
     "forge_saved": "Plattform gespeichert",
-    "oauth_redirect_url": "OAuth-Weiterleitungs-URL"
+    "oauth_redirect_url": "OAuth-Weiterleitungs-URL",
+    "developer_settings_to_create": "Gehe zu den {0} und richte die OAuth-Anwendung ein.",
+    "weblate": "unserem Weblate",
+    "use_this_redirect_url_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren.",
+    "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen."
 }
