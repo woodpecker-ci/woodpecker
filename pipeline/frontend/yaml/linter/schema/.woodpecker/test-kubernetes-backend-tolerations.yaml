@@ -7,11 +7,12 @@ steps:
     backend_options:
       kubernetes:
         tolerations:
-          - key: 'node-type'
+          - key: 'partial-object'
             operator: 'Equal'
             value: 'pipeline'
             effect: 'NoSchedule'
-          - key: 'some-other-key'
+          - key: 'complete-object'
             operator: 'Equal'
             value: 'pipeline'
             effect: 'NoSchedule'
+            tolerationSeconds: 10
