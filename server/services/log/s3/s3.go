@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"path"
 	"strings"
 	"time"
@@ -18,6 +19,41 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 )
+
+// logEntryReader implements io.Reader to stream log entries as JSON lines
+type logEntryReader struct {
+	entries []*model.LogEntry
+	index   int
+	buffer  []byte
+	offset  int
+}
+
+func (r *logEntryReader) Read(p []byte) (n int, err error) {
+	for {
+		// If we have data in buffer, copy it to output
+		if r.offset < len(r.buffer) {
+			n = copy(p, r.buffer[r.offset:])
+			r.offset += n
+			return n, nil
+		}
+
+		// If no more entries, we're done
+		if r.index >= len(r.entries) {
+			return 0, io.EOF
+		}
+
+		// Marshal next entry and add newline
+		jsonBytes, err := json.Marshal(r.entries[r.index])
+		if err != nil {
+			r.index++ // Skip this entry and continue
+			continue
+		}
+
+		r.buffer = append(jsonBytes, '\n')
+		r.offset = 0
+		r.index++
+	}
+}
 
 type logStore struct {
 	client       *s3.Client
@@ -130,40 +166,34 @@ func (l *logStore) LogAppend(step *model.Step, entries []*model.LogEntry) error 
 		}
 
 		if len(dbEntries) > 0 {
-			var buf bytes.Buffer
-			for _, entry := range dbEntries {
-				if jsonBytes, err := json.Marshal(entry); err == nil {
-					buf.Write(jsonBytes)
-					buf.WriteByte('\n')
-				} else {
-					logger.Warn().Err(err).Msg("failed to marshal log entry")
-				}
+			logPath := l.logPath(step.ID)
+
+			// Create streaming reader for log entries
+			reader := &logEntryReader{entries: dbEntries}
+
+			_, err := l.uploader.Upload(context.TODO(), &s3.PutObjectInput{
+				Bucket: aws.String(l.bucket),
+				Key:    aws.String(logPath),
+				Body:   reader,
+				Metadata: map[string]string{
+					"step-id":     fmt.Sprintf("%d", step.ID),
+					"entry-count": fmt.Sprintf("%d", len(dbEntries)),
+					"uploaded-at": fmt.Sprintf("%d", time.Now().Unix()),
+				},
+			})
+
+			if err != nil {
+				logger.Warn().Err(err).Int64("stepID", step.ID).Msg("S3 upload failed, keeping in DB")
+				return nil // Don't fail, logs are safe in DB
 			}
 
-			if buf.Len() > 0 {
-				logPath := l.logPath(step.ID)
-				_, err := l.uploader.Upload(context.TODO(), &s3.PutObjectInput{
-					Bucket: aws.String(l.bucket),
-					Key:    aws.String(logPath),
-					Body:   bytes.NewReader(buf.Bytes()),
-					Metadata: map[string]string{
-						"step-id":     fmt.Sprintf("%d", step.ID),
-						"entry-count": fmt.Sprintf("%d", len(dbEntries)),
-						"uploaded-at": fmt.Sprintf("%d", time.Now().Unix()),
-					},
-				})
+			logger.Debug().Int64("stepID", step.ID).Str("logPath", logPath).Msg("uploaded logs to S3")
 
-				if err != nil {
-					logger.Warn().Err(err).Int64("stepID", step.ID).Msg("S3 upload failed, keeping in DB")
-					return nil // Don't fail, logs are safe in DB
-				}
-
-				// Clean up database after successful upload
-				if err := l.dbStore.LogDelete(step); err != nil {
-					logger.Error().Err(err).Int64("stepID", step.ID).Msg("failed to cleanup DB after S3 upload")
-				} else {
-					logger.Debug().Int64("stepID", step.ID).Msg("successfully uploaded logs to S3 and cleaned up DB")
-				}
+			// Clean up database after successful upload
+			if err := l.dbStore.LogDelete(step); err != nil {
+				logger.Error().Err(err).Int64("stepID", step.ID).Msg("failed to cleanup DB after S3 upload")
+			} else {
+				logger.Info().Int64("stepID", step.ID).Msg("successfully uploaded logs to S3 and cleaned up DB")
 			}
 		}
 	}
