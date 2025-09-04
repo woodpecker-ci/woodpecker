@@ -1,67 +1,38 @@
 package s3
 
 import (
-	"bytes"
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"path"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	logger "github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 )
 
-// logEntryReader implements io.Reader to stream log entries as JSON lines
-type logEntryReader struct {
-	entries []*model.LogEntry
-	index   int
-	buffer  []byte
-	offset  int
-}
-
-func (r *logEntryReader) Read(p []byte) (n int, err error) {
-	for {
-		// If we have data in buffer, copy it to output
-		if r.offset < len(r.buffer) {
-			n = copy(p, r.buffer[r.offset:])
-			r.offset += n
-			return n, nil
-		}
-
-		// If no more entries, we're done
-		if r.index >= len(r.entries) {
-			return 0, io.EOF
-		}
-
-		// Marshal next entry and add newline
-		jsonBytes, err := json.Marshal(r.entries[r.index])
-		if err != nil {
-			r.index++ // Skip this entry and continue
-			continue
-		}
-
-		r.buffer = append(jsonBytes, '\n')
-		r.offset = 0
-		r.index++
-	}
-}
+const (
+	// Add base64 overhead and space for other JSON fields (just to be safe).
+	maxLineLength = (pipeline.MaxLogLineLength/3)*4 + (64 * 1024)
+)
 
 type logStore struct {
 	client       *s3.Client
 	bucket       string
 	bucketFolder string
 	dbStore      log.Service
-	uploader     *manager.Uploader
-	downloader   *manager.Downloader
+}
+
+func (l *logStore) logPath(stepID int64) string {
+	return "/" + path.Join(l.bucketFolder, fmt.Sprintf("%d.json", stepID))
 }
 
 func NewLogStore(bucket, folder string, dbStore log.Service) (log.Service, error) {
@@ -80,63 +51,55 @@ func NewLogStore(bucket, folder string, dbStore log.Service) (log.Service, error
 	folder = strings.TrimSuffix(folder, "/")
 
 	s3Client := s3.NewFromConfig(cfg)
-	uploader := manager.NewUploader(s3Client)
-	downloader := manager.NewDownloader(s3Client)
 
 	return &logStore{
 		client:       s3Client,
 		bucket:       bucket,
 		bucketFolder: folder,
 		dbStore:      dbStore,
-		uploader:     uploader,
-		downloader:   downloader,
 	}, nil
 }
 
-func (l *logStore) logPath(stepID int64) string {
-	return "/" + path.Join(l.bucketFolder, fmt.Sprintf("%d.json", stepID))
-}
-
 func (l *logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
-	dbEntries, dbErr := l.dbStore.LogFind(step)
-
-	// If logs found in database, return them (step still active or upload failed)
-	if dbErr == nil && len(dbEntries) > 0 {
-		return dbEntries, nil
-	}
-
-	// No logs in database, try S3 (step completed and uploaded)
 	logPath := l.logPath(step.ID)
 
-	buf := manager.NewWriteAtBuffer(nil)
-	_, err := l.downloader.Download(context.TODO(), buf, &s3.GetObjectInput{
+	response, err := l.client.GetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(l.bucket),
 		Key:    aws.String(logPath),
 	})
 
-	if err != nil {
-		logger.Debug().Err(err).Str("logPath", logPath).Msg("failed to download from S3")
-		return []*model.LogEntry{}, nil
-	}
+	if err == nil {
+		defer response.Body.Close()
 
-	var entries []*model.LogEntry
-	data := buf.Bytes()
-	lines := bytes.Split(data, []byte("\n"))
+		var entries []*model.LogEntry
+		scanner := bufio.NewScanner(response.Body)
+		scanner.Buffer(make([]byte, 0, bufio.MaxScanTokenSize), maxLineLength)
 
-	for _, line := range lines {
-		if len(line) == 0 {
-			continue
+		for scanner.Scan() {
+			line := scanner.Bytes()
+			if len(line) == 0 {
+				continue
+			}
+
+			var entry model.LogEntry
+			if err := json.Unmarshal(line, &entry); err == nil {
+				entries = append(entries, &entry)
+			} else {
+				logger.Warn().Err(err).Msg("failed to unmarshal log entry from S3")
+			}
 		}
-		var entry model.LogEntry
-		if err := json.Unmarshal(line, &entry); err == nil {
-			entries = append(entries, &entry)
-		} else {
-			logger.Warn().Err(err).Msg("failed to unmarshal log entry from S3")
-		}
-	}
 
-	logger.Debug().Int64("stepID", step.ID).Int("entryCount", len(entries)).Msg("downloaded logs from S3")
-	return entries, nil
+		if scanErr := scanner.Err(); scanErr != nil {
+			logger.Error().Err(scanErr).Str("logPath", logPath).Msg("error reading from S3")
+			return []*model.LogEntry{}, fmt.Errorf("error reading S3 content: %w", scanErr)
+		}
+
+		logger.Debug().Int64("stepID", step.ID).Int("entryCount", len(entries)).Msg("downloaded logs from S3")
+		return entries, nil
+	} else {
+		logger.Debug().Err(err).Str("logPath", logPath).Int64("stepID", step.ID).Msg("S3 download failed, falling back to database")
+		return l.dbStore.LogFind(step)
+	}
 }
 
 func (l *logStore) LogAppend(step *model.Step, entries []*model.LogEntry) error {
@@ -168,13 +131,20 @@ func (l *logStore) LogAppend(step *model.Step, entries []*model.LogEntry) error 
 		if len(dbEntries) > 0 {
 			logPath := l.logPath(step.ID)
 
-			// Create streaming reader for log entries
-			reader := &logEntryReader{entries: dbEntries}
+			// Marshal all log entries to JSON lines
+			var buf strings.Builder
+			encoder := json.NewEncoder(&buf)
+			for _, entry := range dbEntries {
+				if err := encoder.Encode(entry); err != nil {
+					logger.Warn().Err(err).Msg("failed to encode log entry")
+					continue
+				}
+			}
 
-			_, err := l.uploader.Upload(context.TODO(), &s3.PutObjectInput{
+			_, err := l.client.PutObject(context.TODO(), &s3.PutObjectInput{
 				Bucket: aws.String(l.bucket),
 				Key:    aws.String(logPath),
-				Body:   reader,
+				Body:   strings.NewReader(buf.String()),
 				Metadata: map[string]string{
 					"step-id":     fmt.Sprintf("%d", step.ID),
 					"entry-count": fmt.Sprintf("%d", len(dbEntries)),
