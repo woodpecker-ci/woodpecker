@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"context"
+	"sync"
 
 	"github.com/rs/zerolog"
 	"xorm.io/xorm"
@@ -26,7 +27,8 @@ import (
 )
 
 type storage struct {
-	engine *xorm.Engine
+	engine          *xorm.Engine
+	pipelineMutexes sync.Map
 }
 
 const perPage = 50
