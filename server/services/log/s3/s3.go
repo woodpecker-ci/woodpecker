@@ -64,87 +64,111 @@ func (l *logStore) logPath(stepID int64) string {
 func (l *logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	dbEntries, dbErr := l.dbStore.LogFind(step)
 
-	stepCompleted := step.Finished != 0 && !step.Running()
-	if dbErr == nil && len(dbEntries) > 0 && stepCompleted {
-		logger.Debug().Int64("stepID", step.ID).Int("logCount", len(dbEntries)).Msg("uploading completed step logs to S3")
-		var buf bytes.Buffer
-		for _, entry := range dbEntries {
-			if jsonBytes, err := json.Marshal(entry); err == nil {
-				buf.Write(jsonBytes)
-				buf.WriteByte('\n')
-			} else {
-				logger.Warn().Err(err).Msg("failed to marshal log entry")
-			}
-		}
-
-		if buf.Len() > 0 {
-			logPath := l.logPath(step.ID)
-			_, err := l.uploader.Upload(context.TODO(), &s3.PutObjectInput{
-				Bucket: aws.String(l.bucket),
-				Key:    aws.String(logPath),
-				Body:   bytes.NewReader(buf.Bytes()),
-				Metadata: map[string]string{
-					"step-id":     fmt.Sprintf("%d", step.ID),
-					"entry-count": fmt.Sprintf("%d", len(dbEntries)),
-					"uploaded-at": fmt.Sprintf("%d", time.Now().Unix()),
-				},
-			})
-
-			if err != nil {
-				logger.Warn().Err(err).Int64("stepID", step.ID).Msg("S3 upload failed, keeping in DB")
-				return dbEntries, nil
-			}
-
-			logger.Debug().Int64("stepID", step.ID).Str("logPath", logPath).Int("sizeBytes", buf.Len()).Msg("uploaded logs to S3")
-
-			if err := l.dbStore.LogDelete(step); err != nil {
-				logger.Error().Err(err).Int64("stepID", step.ID).Msg("failed to cleanup DB after S3 upload")
-			}
-
-			logger.Info().Int64("stepID", step.ID).Msg("successfully uploaded logs to S3 and cleaned up DB")
-		}
-
+	// If logs found in database, return them (step still active or upload failed)
+	if dbErr == nil && len(dbEntries) > 0 {
 		return dbEntries, nil
 	}
 
-	if dbErr != nil || len(dbEntries) == 0 {
-		logPath := l.logPath(step.ID)
+	// No logs in database, try S3 (step completed and uploaded)
+	logPath := l.logPath(step.ID)
 
-		buf := manager.NewWriteAtBuffer(nil)
-		_, err := l.downloader.Download(context.TODO(), buf, &s3.GetObjectInput{
-			Bucket: aws.String(l.bucket),
-			Key:    aws.String(logPath),
-		})
+	buf := manager.NewWriteAtBuffer(nil)
+	_, err := l.downloader.Download(context.TODO(), buf, &s3.GetObjectInput{
+		Bucket: aws.String(l.bucket),
+		Key:    aws.String(logPath),
+	})
 
-		if err != nil {
-			logger.Debug().Err(err).Str("logPath", logPath).Msg("failed to download from S3")
-			return []*model.LogEntry{}, nil
-		}
-		var entries []*model.LogEntry
-		data := buf.Bytes()
-		lines := bytes.Split(data, []byte("\n"))
-
-		for _, line := range lines {
-			if len(line) == 0 {
-				continue
-			}
-			var entry model.LogEntry
-			if err := json.Unmarshal(line, &entry); err == nil {
-				entries = append(entries, &entry)
-			} else {
-				logger.Warn().Err(err).Msg("failed to unmarshal log entry from S3")
-			}
-		}
-
-		logger.Debug().Int64("stepID", step.ID).Int("entryCount", len(entries)).Msg("downloaded logs from S3")
-		return entries, nil
+	if err != nil {
+		logger.Debug().Err(err).Str("logPath", logPath).Msg("failed to download from S3")
+		return []*model.LogEntry{}, nil
 	}
 
-	return dbEntries, dbErr
+	var entries []*model.LogEntry
+	data := buf.Bytes()
+	lines := bytes.Split(data, []byte("\n"))
+
+	for _, line := range lines {
+		if len(line) == 0 {
+			continue
+		}
+		var entry model.LogEntry
+		if err := json.Unmarshal(line, &entry); err == nil {
+			entries = append(entries, &entry)
+		} else {
+			logger.Warn().Err(err).Msg("failed to unmarshal log entry from S3")
+		}
+	}
+
+	logger.Debug().Int64("stepID", step.ID).Int("entryCount", len(entries)).Msg("downloaded logs from S3")
+	return entries, nil
 }
 
 func (l *logStore) LogAppend(step *model.Step, entries []*model.LogEntry) error {
-	return l.dbStore.LogAppend(step, entries)
+	// First append to database
+	if err := l.dbStore.LogAppend(step, entries); err != nil {
+		return err
+	}
+
+	// Check if this batch contains an exit code entry (indicates step completion)
+	hasExitCode := false
+	for _, entry := range entries {
+		if entry.Type == model.LogEntryExitCode {
+			hasExitCode = true
+			break
+		}
+	}
+
+	// If step is completed, upload all logs to S3 and cleanup DB
+	if hasExitCode {
+		logger.Info().Int64("stepID", step.ID).Msg("step completed, uploading logs to S3")
+
+		// Get all logs for this step from database
+		dbEntries, err := l.dbStore.LogFind(step)
+		if err != nil {
+			logger.Error().Err(err).Int64("stepID", step.ID).Msg("failed to retrieve logs from DB for S3 upload")
+			return nil // Don't fail the append, logs are still in DB
+		}
+
+		if len(dbEntries) > 0 {
+			var buf bytes.Buffer
+			for _, entry := range dbEntries {
+				if jsonBytes, err := json.Marshal(entry); err == nil {
+					buf.Write(jsonBytes)
+					buf.WriteByte('\n')
+				} else {
+					logger.Warn().Err(err).Msg("failed to marshal log entry")
+				}
+			}
+
+			if buf.Len() > 0 {
+				logPath := l.logPath(step.ID)
+				_, err := l.uploader.Upload(context.TODO(), &s3.PutObjectInput{
+					Bucket: aws.String(l.bucket),
+					Key:    aws.String(logPath),
+					Body:   bytes.NewReader(buf.Bytes()),
+					Metadata: map[string]string{
+						"step-id":     fmt.Sprintf("%d", step.ID),
+						"entry-count": fmt.Sprintf("%d", len(dbEntries)),
+						"uploaded-at": fmt.Sprintf("%d", time.Now().Unix()),
+					},
+				})
+
+				if err != nil {
+					logger.Warn().Err(err).Int64("stepID", step.ID).Msg("S3 upload failed, keeping in DB")
+					return nil // Don't fail, logs are safe in DB
+				}
+
+				// Clean up database after successful upload
+				if err := l.dbStore.LogDelete(step); err != nil {
+					logger.Error().Err(err).Int64("stepID", step.ID).Msg("failed to cleanup DB after S3 upload")
+				} else {
+					logger.Debug().Int64("stepID", step.ID).Msg("successfully uploaded logs to S3 and cleaned up DB")
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func (l *logStore) LogDelete(step *model.Step) error {
