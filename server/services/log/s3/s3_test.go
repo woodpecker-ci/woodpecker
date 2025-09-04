@@ -8,6 +8,21 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
+// mockDBStore is a mock implementation of log.Service for testing
+type mockDBStore struct{}
+
+func (m *mockDBStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
+	return []*model.LogEntry{}, nil
+}
+
+func (m *mockDBStore) LogAppend(step *model.Step, entries []*model.LogEntry) error {
+	return nil
+}
+
+func (m *mockDBStore) LogDelete(step *model.Step) error {
+	return nil
+}
+
 func TestNewLogStore(t *testing.T) {
 	t.Parallel()
 
@@ -47,7 +62,8 @@ func TestNewLogStore(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			store, err := NewLogStore(tt.bucket, tt.bucketFolder)
+			mockDB := &mockDBStore{}
+			store, err := NewLogStore(tt.bucket, tt.bucketFolder, mockDB)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -66,43 +82,32 @@ func TestNewLogStore(t *testing.T) {
 	}
 }
 
-func TestFileKey(t *testing.T) {
+func TestLogPath(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
 		name         string
 		bucketFolder string
 		stepID       int64
-		appendNum    int
-		expectedKey  string
+		expectedPath string
 	}{
 		{
 			name:         "root level (empty folder)",
 			bucketFolder: "",
 			stepID:       123,
-			appendNum:    1,
-			expectedKey:  "123/1.json",
-		},
-		{
-			name:         "root level (slash folder)",
-			bucketFolder: "",
-			stepID:       123,
-			appendNum:    2,
-			expectedKey:  "123/2.json",
+			expectedPath: "/123.json",
 		},
 		{
 			name:         "single folder",
 			bucketFolder: "logs",
 			stepID:       456,
-			appendNum:    1,
-			expectedKey:  "logs/456/1.json",
+			expectedPath: "/logs/456.json",
 		},
 		{
 			name:         "nested folder",
 			bucketFolder: "logs/pipeline",
 			stepID:       789,
-			appendNum:    3,
-			expectedKey:  "logs/pipeline/789/3.json",
+			expectedPath: "/logs/pipeline/789.json",
 		},
 	}
 
@@ -114,94 +119,8 @@ func TestFileKey(t *testing.T) {
 				bucket:       "test-bucket",
 				bucketFolder: tt.bucketFolder,
 			}
-			key := store.fileKey(tt.stepID, tt.appendNum)
-			assert.Equal(t, tt.expectedKey, key)
-		})
-	}
-}
-
-func TestStepPrefix(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name           string
-		bucketFolder   string
-		stepID         int64
-		expectedPrefix string
-	}{
-		{
-			name:           "root level (empty folder)",
-			bucketFolder:   "",
-			stepID:         123,
-			expectedPrefix: "123/",
-		},
-		{
-			name:           "single folder",
-			bucketFolder:   "logs",
-			stepID:         456,
-			expectedPrefix: "logs/456/",
-		},
-		{
-			name:           "nested folder",
-			bucketFolder:   "logs/pipeline",
-			stepID:         789,
-			expectedPrefix: "logs/pipeline/789/",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			store := &logStore{
-				bucket:       "test-bucket",
-				bucketFolder: tt.bucketFolder,
-			}
-			prefix := store.stepPrefix(tt.stepID)
-			assert.Equal(t, tt.expectedPrefix, prefix)
-		})
-	}
-}
-
-func TestMetadataKey(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name         string
-		bucketFolder string
-		stepID       int64
-		expectedKey  string
-	}{
-		{
-			name:         "root level (empty folder)",
-			bucketFolder: "",
-			stepID:       123,
-			expectedKey:  "123/metadata",
-		},
-		{
-			name:         "single folder",
-			bucketFolder: "logs",
-			stepID:       456,
-			expectedKey:  "logs/456/metadata",
-		},
-		{
-			name:         "nested folder",
-			bucketFolder: "logs/pipeline",
-			stepID:       789,
-			expectedKey:  "logs/pipeline/789/metadata",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			store := &logStore{
-				bucket:       "test-bucket",
-				bucketFolder: tt.bucketFolder,
-			}
-			key := store.stepPrefix(tt.stepID) + metadataFileName
-			assert.Equal(t, tt.expectedKey, key)
+			logPath := store.logPath(tt.stepID)
+			assert.Equal(t, tt.expectedPath, logPath)
 		})
 	}
 }
@@ -255,7 +174,8 @@ func TestLogStoreBucketFolderNormalization(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			store, err := NewLogStore("test-bucket", tt.inputFolder)
+			mockDB := &mockDBStore{}
+			store, err := NewLogStore("test-bucket", tt.inputFolder, mockDB)
 			if err != nil {
 				// Skip if AWS config fails (expected in testing)
 				t.Skipf("Skipping test due to AWS config error: %v", err)
@@ -273,7 +193,8 @@ func TestLogStoreBucketFolderNormalization(t *testing.T) {
 func TestLogOperationsInterface(t *testing.T) {
 	t.Parallel()
 
-	store, err := NewLogStore("test-bucket", "/logs")
+	mockDB := &mockDBStore{}
+	store, err := NewLogStore("test-bucket", "/logs", mockDB)
 	if err != nil {
 		// Skip if AWS config fails (expected in testing)
 		t.Skipf("Skipping test due to AWS config error: %v", err)

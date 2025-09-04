@@ -127,7 +127,7 @@ func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
 	case "s3":
-		return s3.NewLogStore(c.String("log-store-s3-bucket"), c.String("log-store-s3-bucket-folder"))
+		return s3.NewLogStore(c.String("log-store-s3-bucket"), c.String("log-store-s3-bucket-folder"), s)
 	default:
 		return s, nil
 	}

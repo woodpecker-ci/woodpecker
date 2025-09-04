@@ -1,24 +1,20 @@
 package s3
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"sort"
-	"strconv"
+	"path"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	logger "github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 )
@@ -27,14 +23,12 @@ type logStore struct {
 	client       *s3.Client
 	bucket       string
 	bucketFolder string
+	dbStore      log.Service
+	uploader     *manager.Uploader
+	downloader   *manager.Downloader
 }
 
-const (
-	maxLineLength    = (pipeline.MaxLogLineLength/3)*4 + (64 * 1024)
-	metadataFileName = "metadata"
-)
-
-func NewLogStore(bucket, folder string) (log.Service, error) {
+func NewLogStore(bucket, folder string, dbStore log.Service) (log.Service, error) {
 	if bucket == "" {
 		return nil, fmt.Errorf("S3 bucket name is required")
 	}
@@ -43,195 +37,129 @@ func NewLogStore(bucket, folder string) (log.Service, error) {
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to load AWS config")
-		return nil, fmt.Errorf("failed to load AWS config: %w", err)
+		return nil, fmt.Errorf("failed to load S3 config: %w", err)
 	}
 
 	folder = strings.TrimPrefix(folder, "/")
 	folder = strings.TrimSuffix(folder, "/")
 
+	s3Client := s3.NewFromConfig(cfg)
+	uploader := manager.NewUploader(s3Client)
+	downloader := manager.NewDownloader(s3Client)
+
 	return &logStore{
-		client:       s3.NewFromConfig(cfg),
+		client:       s3Client,
 		bucket:       bucket,
 		bucketFolder: folder,
+		dbStore:      dbStore,
+		uploader:     uploader,
+		downloader:   downloader,
 	}, nil
 }
 
-func (l *logStore) stepPrefix(stepID int64) string {
-	prefix := fmt.Sprintf("%d/", stepID)
-	if l.bucketFolder != "" {
-		prefix = l.bucketFolder + "/" + prefix
-	}
-	return prefix
-}
-
-func (l *logStore) fileKey(stepID int64, fileNum int) string {
-	return fmt.Sprintf("%s%d.json", l.stepPrefix(stepID), fileNum)
+func (l *logStore) logPath(stepID int64) string {
+	return "/" + path.Join(l.bucketFolder, fmt.Sprintf("%d.json", stepID))
 }
 
 func (l *logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
-	last, err := l.getLastFileNumber(step.ID)
-	if err != nil || last == 0 {
-		return []*model.LogEntry{}, nil
-	}
+	dbEntries, dbErr := l.dbStore.LogFind(step)
 
-	var all []*model.LogEntry
-	for i := 1; i <= last; i++ {
-		key := l.fileKey(step.ID, i)
-		res, err := l.client.GetObject(context.TODO(), &s3.GetObjectInput{
-			Bucket: aws.String(l.bucket),
-			Key:    aws.String(key),
-		})
-		if err != nil {
-			logger.Error().Err(err).Str("key", key).Msg("failed to get log file")
-			continue
-		}
-		scanner := bufio.NewScanner(res.Body)
-		scanner.Buffer(make([]byte, 0, bufio.MaxScanTokenSize), maxLineLength)
-		for scanner.Scan() {
-			var e model.LogEntry
-			if err := json.Unmarshal(scanner.Bytes(), &e); err == nil {
-				all = append(all, &e)
+	stepCompleted := step.Finished != 0 && !step.Running()
+	if dbErr == nil && len(dbEntries) > 0 && stepCompleted {
+		logger.Debug().Int64("stepID", step.ID).Int("logCount", len(dbEntries)).Msg("uploading completed step logs to S3")
+		var buf bytes.Buffer
+		for _, entry := range dbEntries {
+			if jsonBytes, err := json.Marshal(entry); err == nil {
+				buf.Write(jsonBytes)
+				buf.WriteByte('\n')
+			} else {
+				logger.Warn().Err(err).Msg("failed to marshal log entry")
 			}
 		}
-		res.Body.Close()
+
+		if buf.Len() > 0 {
+			logPath := l.logPath(step.ID)
+			_, err := l.uploader.Upload(context.TODO(), &s3.PutObjectInput{
+				Bucket: aws.String(l.bucket),
+				Key:    aws.String(logPath),
+				Body:   bytes.NewReader(buf.Bytes()),
+				Metadata: map[string]string{
+					"step-id":     fmt.Sprintf("%d", step.ID),
+					"entry-count": fmt.Sprintf("%d", len(dbEntries)),
+					"uploaded-at": fmt.Sprintf("%d", time.Now().Unix()),
+				},
+			})
+
+			if err != nil {
+				logger.Warn().Err(err).Int64("stepID", step.ID).Msg("S3 upload failed, keeping in DB")
+				return dbEntries, nil
+			}
+
+			logger.Debug().Int64("stepID", step.ID).Str("logPath", logPath).Int("sizeBytes", buf.Len()).Msg("uploaded logs to S3")
+
+			if err := l.dbStore.LogDelete(step); err != nil {
+				logger.Error().Err(err).Int64("stepID", step.ID).Msg("failed to cleanup DB after S3 upload")
+			}
+
+			logger.Info().Int64("stepID", step.ID).Msg("successfully uploaded logs to S3 and cleaned up DB")
+		}
+
+		return dbEntries, nil
 	}
-	return all, nil
+
+	if dbErr != nil || len(dbEntries) == 0 {
+		logPath := l.logPath(step.ID)
+
+		buf := manager.NewWriteAtBuffer(nil)
+		_, err := l.downloader.Download(context.TODO(), buf, &s3.GetObjectInput{
+			Bucket: aws.String(l.bucket),
+			Key:    aws.String(logPath),
+		})
+
+		if err != nil {
+			logger.Debug().Err(err).Str("logPath", logPath).Msg("failed to download from S3")
+			return []*model.LogEntry{}, nil
+		}
+		var entries []*model.LogEntry
+		data := buf.Bytes()
+		lines := bytes.Split(data, []byte("\n"))
+
+		for _, line := range lines {
+			if len(line) == 0 {
+				continue
+			}
+			var entry model.LogEntry
+			if err := json.Unmarshal(line, &entry); err == nil {
+				entries = append(entries, &entry)
+			} else {
+				logger.Warn().Err(err).Msg("failed to unmarshal log entry from S3")
+			}
+		}
+
+		logger.Debug().Int64("stepID", step.ID).Int("entryCount", len(entries)).Msg("downloaded logs from S3")
+		return entries, nil
+	}
+
+	return dbEntries, dbErr
 }
 
 func (l *logStore) LogAppend(step *model.Step, entries []*model.LogEntry) error {
-	if len(entries) == 0 {
-		return nil
-	}
-	last, err := l.getLastFileNumber(step.ID)
-	if err != nil {
-		return err
-	}
-	next := last + 1
-
-	var buf bytes.Buffer
-	for _, e := range entries {
-		if b, err := json.Marshal(e); err == nil {
-			buf.Write(b)
-			buf.WriteByte('\n')
-		}
-	}
-
-	key := l.fileKey(step.ID, next)
-	_, err = l.client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(l.bucket),
-		Key:    aws.String(key),
-		Body:   bytes.NewReader(buf.Bytes()),
-	})
-	if err != nil {
-		logger.Error().Err(err).Str("key", key).Msg("failed to upload log file")
-		return err
-	}
-
-	_ = l.saveLastFileNumber(step.ID, next) // non-fatal if fails
-	return nil
+	return l.dbStore.LogAppend(step, entries)
 }
 
 func (l *logStore) LogDelete(step *model.Step) error {
-	last, err := l.getLastFileNumber(step.ID)
-	var nums []int
-	if err != nil {
-		// fallback: list all files
-		nums, err = l.listFiles(step.ID)
-		if err != nil {
-			return err
-		}
-	} else {
-		for i := 1; i <= last; i++ {
-			nums = append(nums, i)
-		}
+	if err := l.dbStore.LogDelete(step); err != nil {
+		logger.Error().Err(err).Int64("stepID", step.ID).Msg("failed to delete from database")
+		return fmt.Errorf("failed to delete from database: %w", err)
 	}
 
-	for _, n := range nums {
-		key := l.fileKey(step.ID, n)
-		_, _ = l.client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
-			Bucket: aws.String(l.bucket),
-			Key:    aws.String(key),
-		})
-	}
-	_, _ = l.client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+	logPath := l.logPath(step.ID)
+	if _, err := l.client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: aws.String(l.bucket),
-		Key:    aws.String(l.stepPrefix(step.ID) + metadataFileName),
-	})
+		Key:    aws.String(logPath),
+	}); err != nil {
+		logger.Debug().Err(err).Str("logPath", logPath).Msg("failed to delete log from S3 (may not exist)")
+	}
+
 	return nil
-}
-
-// --- private helpers ---
-
-func (l *logStore) getLastFileNumber(stepID int64) (int, error) {
-	key := l.stepPrefix(stepID) + metadataFileName
-	res, err := l.client.GetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: aws.String(l.bucket),
-		Key:    aws.String(key),
-	})
-	if err != nil {
-		var noKey *types.NoSuchKey
-		if errors.As(err, &noKey) {
-			return l.rebuildMetadata(stepID)
-		}
-		return 0, err
-	}
-	defer res.Body.Close()
-
-	data, _ := io.ReadAll(res.Body)
-	n, err := strconv.Atoi(strings.TrimSpace(string(data)))
-	if err != nil {
-		return l.rebuildMetadata(stepID)
-	}
-	return n, nil
-}
-
-func (l *logStore) saveLastFileNumber(stepID int64, n int) error {
-	key := l.stepPrefix(stepID) + metadataFileName
-	_, err := l.client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(l.bucket),
-		Key:    aws.String(key),
-		Body:   strings.NewReader(strconv.Itoa(n)),
-	})
-	return err
-}
-
-func (l *logStore) rebuildMetadata(stepID int64) (int, error) {
-	nums, err := l.listFiles(stepID)
-	if err != nil {
-		return 0, err
-	}
-	last := 0
-	if len(nums) > 0 {
-		last = nums[len(nums)-1]
-	}
-	_ = l.saveLastFileNumber(stepID, last)
-	return last, nil
-}
-
-func (l *logStore) listFiles(stepID int64) ([]int, error) {
-	prefix := l.stepPrefix(stepID)
-	p := s3.NewListObjectsV2Paginator(l.client, &s3.ListObjectsV2Input{
-		Bucket: aws.String(l.bucket),
-		Prefix: aws.String(prefix),
-	})
-
-	var nums []int
-	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
-		if err != nil {
-			return nil, err
-		}
-		for _, o := range page.Contents {
-			if o.Key == nil || strings.HasSuffix(*o.Key, metadataFileName) {
-				continue
-			}
-			name := strings.TrimPrefix(*o.Key, prefix)
-			if n, err := strconv.Atoi(strings.TrimSuffix(name, ".json")); err == nil {
-				nums = append(nums, n)
-			}
-		}
-	}
-	sort.Ints(nums)
-	return nums, nil
 }
