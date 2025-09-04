@@ -63,7 +63,7 @@ func TestNewLogStore(t *testing.T) {
 			t.Parallel()
 
 			mockDB := &mockDBStore{}
-			store, err := NewLogStore(tt.bucket, tt.bucketFolder, mockDB)
+			store, err := NewLogStore(tt.bucket, tt.bucketFolder, false, mockDB)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -95,19 +95,19 @@ func TestLogPath(t *testing.T) {
 			name:         "root level (empty folder)",
 			bucketFolder: "",
 			stepID:       123,
-			expectedPath: "/123.json",
+			expectedPath: "123.json",
 		},
 		{
 			name:         "single folder",
 			bucketFolder: "logs",
 			stepID:       456,
-			expectedPath: "/logs/456.json",
+			expectedPath: "logs/456.json",
 		},
 		{
 			name:         "nested folder",
 			bucketFolder: "logs/pipeline",
 			stepID:       789,
-			expectedPath: "/logs/pipeline/789.json",
+			expectedPath: "logs/pipeline/789.json",
 		},
 	}
 
@@ -175,7 +175,7 @@ func TestLogStoreBucketFolderNormalization(t *testing.T) {
 			t.Parallel()
 
 			mockDB := &mockDBStore{}
-			store, err := NewLogStore("test-bucket", tt.inputFolder, mockDB)
+			store, err := NewLogStore("test-bucket", tt.inputFolder, false, mockDB)
 			if err != nil {
 				// Skip if AWS config fails (expected in testing)
 				t.Skipf("Skipping test due to AWS config error: %v", err)
@@ -194,7 +194,7 @@ func TestLogOperationsInterface(t *testing.T) {
 	t.Parallel()
 
 	mockDB := &mockDBStore{}
-	store, err := NewLogStore("test-bucket", "/logs", mockDB)
+	store, err := NewLogStore("test-bucket", "/logs", false, mockDB)
 	if err != nil {
 		// Skip if AWS config fails (expected in testing)
 		t.Skipf("Skipping test due to AWS config error: %v", err)

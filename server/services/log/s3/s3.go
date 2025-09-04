@@ -32,10 +32,10 @@ type logStore struct {
 }
 
 func (l *logStore) logPath(stepID int64) string {
-	return "/" + path.Join(l.bucketFolder, fmt.Sprintf("%d.json", stepID))
+	return path.Join(l.bucketFolder, fmt.Sprintf("%d.json", stepID))
 }
 
-func NewLogStore(bucket, folder string, dbStore log.Service) (log.Service, error) {
+func NewLogStore(bucket, folder string, pathStyle bool, dbStore log.Service) (log.Service, error) {
 	if bucket == "" {
 		return nil, fmt.Errorf("S3 bucket name is required")
 	}
@@ -50,7 +50,11 @@ func NewLogStore(bucket, folder string, dbStore log.Service) (log.Service, error
 	folder = strings.TrimPrefix(folder, "/")
 	folder = strings.TrimSuffix(folder, "/")
 
-	s3Client := s3.NewFromConfig(cfg)
+	s3Client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		if pathStyle {
+			o.UsePathStyle = true
+		}
+	})
 
 	return &logStore{
 		client:       s3Client,
@@ -131,6 +135,8 @@ func (l *logStore) LogAppend(step *model.Step, entries []*model.LogEntry) error 
 					continue
 				}
 			}
+
+			logger.Debug().Str("bucket", l.bucket).Str("key", logPath).Msg("uploading logs to S3")
 
 			_, err := l.client.PutObject(context.TODO(), &s3.PutObjectInput{
 				Bucket: aws.String(l.bucket),

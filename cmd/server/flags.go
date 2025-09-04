@@ -324,6 +324,12 @@ var flags = append([]cli.Flag{
 		Name:    "log-store-s3-bucket-folder",
 		Usage:   "S3 bucket folder path for log storage",
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_S3_PATH_STYLE"),
+		Name:    "log-store-s3-path-style",
+		Usage:   "use path-style URLs for S3 (required for some S3-compatible services)",
+		Value:   false,
+	},
 	//
 	// backend options for pipeline compiler
 	//

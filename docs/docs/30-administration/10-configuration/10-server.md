@@ -1145,6 +1145,15 @@ S3 bucket folder path for log storage when [`WOODPECKER_LOG_STORE`](#log_store) 
 
 ---
 
+### LOG_STORE_S3_PATH_STYLE
+
+- Name: `WOODPECKER_LOG_STORE_S3_PATH_STYLE`
+- Default: `false`
+
+Use path-style URLs for S3 when [`WOODPECKER_LOG_STORE`](#log_store) is `s3`. Required for MinIO and some S3-compatible services. When enabled, URLs will be in the format `http://endpoint/bucket/key` instead of `http://bucket.endpoint/key`.
+
+---
+
 ### EXPERT_WEBHOOK_HOST
 
 - Name: `WOODPECKER_EXPERT_WEBHOOK_HOST`
