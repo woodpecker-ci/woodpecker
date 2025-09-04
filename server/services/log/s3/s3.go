@@ -108,17 +108,8 @@ func (l *logStore) LogAppend(step *model.Step, entries []*model.LogEntry) error 
 		return err
 	}
 
-	// Check if this batch contains an exit code entry (indicates step completion)
-	hasExitCode := false
-	for _, entry := range entries {
-		if entry.Type == model.LogEntryExitCode {
-			hasExitCode = true
-			break
-		}
-	}
-
-	// If step is completed, upload all logs to S3 and cleanup DB
-	if hasExitCode {
+	// Check if step is completed (Finished timestamp indicates completion)
+	if step.Finished != 0 {
 		logger.Info().Int64("stepID", step.ID).Msg("step completed, uploading logs to S3")
 
 		// Get all logs for this step from database
@@ -152,22 +143,18 @@ func (l *logStore) LogAppend(step *model.Step, entries []*model.LogEntry) error 
 				},
 			})
 
-			if err != nil {
-				logger.Warn().Err(err).Int64("stepID", step.ID).Msg("S3 upload failed, keeping in DB")
-				return nil // Don't fail, logs are safe in DB
+			// Always delete logs from database to avoid orphaned logs on last step log
+			if deleteErr := l.dbStore.LogDelete(step); deleteErr != nil {
+				logger.Error().Err(deleteErr).Int64("stepID", step.ID).Msg("failed to cleanup database")
 			}
 
-			logger.Debug().Int64("stepID", step.ID).Str("logPath", logPath).Msg("uploaded logs to S3")
-
-			// Clean up database after successful upload
-			if err := l.dbStore.LogDelete(step); err != nil {
-				logger.Error().Err(err).Int64("stepID", step.ID).Msg("failed to cleanup DB after S3 upload")
+			if err != nil {
+				return fmt.Errorf("S3 upload failed: %w", err)
 			} else {
-				logger.Info().Int64("stepID", step.ID).Msg("successfully uploaded logs to S3 and cleaned up DB")
+				logger.Debug().Int64("stepID", step.ID).Msg("successfully uploaded logs to S3 and cleaned up DB")
 			}
 		}
 	}
-
 	return nil
 }
 
