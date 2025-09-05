@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @da-Kai, @qwerty287, @xoxys, @zhedazijingang
+@6543, @da-Kai, @klausi85, @qwerty287, @xoxys, @zhedazijingang
 
 ### ✨ Features
 
@@ -48,6 +48,7 @@
 
 ### Misc
 
+- fix: changed schema definition for "backend_options.kubernetes.tolerations" to accept an array of objects [[#5478](https://github.com/woodpecker-ci/woodpecker/pull/5478)]
 - Remove twitter from release template [[#5447](https://github.com/woodpecker-ci/woodpecker/pull/5447)]
 
 ## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-20
