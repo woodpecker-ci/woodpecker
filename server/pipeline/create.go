@@ -42,13 +42,9 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	if pipeline.Event == model.EventPush || pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed {
-		skipMatch := skipPipelineRegex.FindString(pipeline.Message)
+		skipMatch := skipPipelineRegex.FindString(pipeline.Commit.Message)
 		if len(skipMatch) > 0 {
-			ref := pipeline.Commit
-			if len(ref) == 0 {
-				ref = pipeline.Ref
-			}
-			log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
+			log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", pipeline.Commit.SHA, pipeline.Commit.Message)
 			return nil, ErrFiltered
 		}
 	}
