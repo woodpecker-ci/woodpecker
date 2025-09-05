@@ -28,6 +28,5 @@ var Command = &cli.Command{
 	Commands: []*cli.Command{
 		registry.Command,
 		secret.Command,
-		orgListCmd,
 	},
 }

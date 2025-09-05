@@ -12,6 +12,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
+var Command = &cli.Command{
+	Name:  "org",
+	Usage: "manage organizations",
+	Commands: []*cli.Command{
+		orgListCmd,
+	},
+}
+
 var orgListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list organizations",
