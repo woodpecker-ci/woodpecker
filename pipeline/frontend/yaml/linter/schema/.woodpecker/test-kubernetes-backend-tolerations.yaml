@@ -1,0 +1,18 @@
+steps:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+    backend_options:
+      kubernetes:
+        tolerations:
+          - key: 'partial-object'
+            operator: 'Equal'
+            value: 'pipeline'
+            effect: 'NoSchedule'
+          - key: 'complete-object'
+            operator: 'Equal'
+            value: 'pipeline'
+            effect: 'NoSchedule'
+            tolerationSeconds: 10
