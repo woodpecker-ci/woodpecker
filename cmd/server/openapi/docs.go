@@ -5078,6 +5078,9 @@ const docTemplate = `{
                 "clone_url_ssh": {
                     "type": "string"
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5168,6 +5171,9 @@ const docTemplate = `{
                 "clone_url_ssh": {
                     "type": "string"
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5248,6 +5254,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/WebhookEvent"
                     }
+                },
+                "config_extension_endpoint": {
+                    "type": "string"
                 },
                 "config_file": {
                     "type": "string"

@@ -154,6 +154,12 @@ const routes: RouteRecordRaw[] = [
                 component: (): Component => import('~/views/repo/settings/Actions.vue'),
                 props: true,
               },
+              {
+                path: 'extensions',
+                name: 'repo-settings-extensions',
+                component: (): Component => import('~/views/repo/settings/Extensions.vue'),
+                props: true,
+              },
             ],
           },
           {
