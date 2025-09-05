@@ -53,9 +53,6 @@ func orgList(ctx context.Context, c *cli.Command) error {
 // Template for org list items.
 var tmplOrgList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 Organization ID: {{ .ID }}
-{{- if .IsUser }}
-Is user: {{ .IsUser }}
-{{- end }}
 `
 
 var orgFuncMap = template.FuncMap{
