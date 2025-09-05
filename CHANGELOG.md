@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-04
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -31,6 +31,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/prometheus/client_golang to v1.23.1 [[#5483](https://github.com/woodpecker-ci/woodpecker/pull/5483)]
 - fix(deps): update golang-packages to v28.4.0+incompatible [[#5480](https://github.com/woodpecker-ci/woodpecker/pull/5480)]
 - fix(deps): update golang-packages [[#5479](https://github.com/woodpecker-ci/woodpecker/pull/5479)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.142.5 [[#5475](https://github.com/woodpecker-ci/woodpecker/pull/5475)]
