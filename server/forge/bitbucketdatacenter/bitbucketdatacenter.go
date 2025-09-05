@@ -636,13 +636,6 @@ func (*client) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 	return nil, nil
 }
 
-// OrgMembership returns if user is member of organization and if user
-// is admin/owner in this organization.
-func (c *client) OrgMembership(_ context.Context, _ *model.User, _ string) (*model.OrgPerm, error) {
-	// TODO: Not implemented currently
-	return nil, nil
-}
-
 // Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
 func (c *client) Org(_ context.Context, _ *model.User, owner string) (*model.Org, error) {
 	if strings.HasPrefix(owner, "~") {

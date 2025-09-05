@@ -15,6 +15,8 @@
 package fixtures
 
 import (
+	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 
 	"github.com/neticdk/go-bitbucket/bitbucket"
@@ -62,5 +64,73 @@ func Server() *httptest.Server {
 			DisplayID: "main",
 			Default:   true,
 		}),
+	)
+}
+
+func ServerWithOrgPermissions() *httptest.Server {
+	return mock.NewMockServer(
+		mock.WithRequestMatchHandler(mock.SearchRepositories, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			projectKey := r.URL.Query().Get("projectkey")
+			permission := r.URL.Query().Get("permission")
+
+			var response bitbucket.RepositoryList
+
+			switch {
+			case projectKey == "PRJ-ADMIN" && bitbucket.Permission(permission) == bitbucket.PermissionRepoAdmin:
+				response = bitbucket.RepositoryList{
+					ListResponse: bitbucket.ListResponse{
+						LastPage: true,
+					},
+					Repositories: []*bitbucket.Repository{
+						{
+							ID:   uint64(123),
+							Slug: "admin-repo",
+							Name: "Admin Repo",
+							Project: &bitbucket.Project{
+								ID:  uint64(456),
+								Key: "PRJ-ADMIN",
+							},
+						},
+					},
+				}
+			case projectKey == "PRJ-WRITE" && bitbucket.Permission(permission) == bitbucket.PermissionRepoAdmin:
+				response = bitbucket.RepositoryList{
+					ListResponse: bitbucket.ListResponse{
+						LastPage: true,
+					},
+					Repositories: []*bitbucket.Repository{},
+				}
+			case projectKey == "PRJ-WRITE" && bitbucket.Permission(permission) == bitbucket.PermissionRepoWrite:
+				response = bitbucket.RepositoryList{
+					ListResponse: bitbucket.ListResponse{
+						LastPage: true,
+					},
+					Repositories: []*bitbucket.Repository{
+						{
+							ID:   uint64(124),
+							Slug: "write-repo",
+							Name: "Write Repo",
+							Project: &bitbucket.Project{
+								ID:  uint64(457),
+								Key: "PRJ-WRITE",
+							},
+						},
+					},
+				}
+			default:
+				response = bitbucket.RepositoryList{
+					ListResponse: bitbucket.ListResponse{
+						LastPage: true,
+					},
+					Repositories: []*bitbucket.Repository{},
+				}
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			err := json.NewEncoder(w).Encode(response)
+			if err != nil {
+				return
+			}
+		})),
 	)
 }
