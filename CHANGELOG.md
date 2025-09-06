@@ -23,6 +23,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/node to v22.18.1 [[#5484](https://github.com/woodpecker-ci/woodpecker/pull/5484)]
 - chore(deps): update docs npm deps non-major [[#5472](https://github.com/woodpecker-ci/woodpecker/pull/5472)]
 - Add ui proxy docs [[#5459](https://github.com/woodpecker-ci/woodpecker/pull/5459)]
 - chore(deps): update dependency @types/react to v19.1.11 [[#5454](https://github.com/woodpecker-ci/woodpecker/pull/5454)]
