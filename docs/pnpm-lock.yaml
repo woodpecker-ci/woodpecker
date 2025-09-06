@@ -56,7 +56,7 @@ importers:
         version: 4.7.0(prettier@3.6.2)
       '@types/node':
         specifier: ^22.15.31
-        version: 22.18.0
+        version: 22.18.1
       '@types/react':
         specifier: ^19.1.7
         version: 19.1.12
@@ -99,7 +99,7 @@ importers:
         version: 2.0.3
       '@types/node':
         specifier: ^22.10.5
-        version: 22.18.0
+        version: 22.18.1
       axios:
         specifier: ^1.7.9
         version: 1.11.0
@@ -766,6 +766,10 @@ packages:
 
   '@babel/runtime@7.28.3':
     resolution: {integrity: sha512-9uIQ10o0WGdpP6GDhXcdOJPJuDgFtIDtN/9+ArJQ2NAfAmiuhTQdzkaTGR33v43GYS2UrSA0eX2pPPHoFVvpxA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.28.4':
+    resolution: {integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.27.2':
@@ -1939,8 +1943,8 @@ packages:
   '@types/node@17.0.45':
     resolution: {integrity: sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==}
 
-  '@types/node@22.18.0':
-    resolution: {integrity: sha512-m5ObIqwsUp6BZzyiy4RdZpzWGub9bqLJMvZDD0QMXhxjqMHMENlj+SqF5QxoUwaQNFe+8kz8XM8ZQhqkQPTgMQ==}
+  '@types/node@22.18.1':
+    resolution: {integrity: sha512-rzSDyhn4cYznVG+PCzGe1lwuMYJrcBS1fc3JqSa2PvtABwWo+dZ1ij5OVok3tqfpEBCBoaR4d7upFJk73HRJDw==}
 
   '@types/prismjs@1.26.5':
     resolution: {integrity: sha512-AUZTa7hQ2KY5L7AmtSiqxlhWxb4ina0yd8hNbl4TWuqnv/pFP0nDMb3YrfSBf4hJVGLh2YEIBfKaBW/9UEl6IQ==}
@@ -6789,6 +6793,8 @@ snapshots:
 
   '@babel/runtime@7.28.3': {}
 
+  '@babel/runtime@7.28.4': {}
+
   '@babel/template@7.27.2':
     dependencies:
       '@babel/code-frame': 7.27.1
@@ -8002,7 +8008,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
       '@types/yargs': 17.0.33
       chalk: 4.1.2
 
@@ -8319,7 +8325,7 @@ snapshots:
 
   '@slorber/react-helmet-async@1.3.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.28.4
       invariant: 2.2.4
       prop-types: 15.8.1
       react: 19.1.1
@@ -8539,20 +8545,20 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/bonjour@3.5.13':
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/connect-history-api-fallback@1.5.4':
     dependencies:
       '@types/express-serve-static-core': 4.19.6
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/debug@4.1.12':
     dependencies:
@@ -8576,7 +8582,7 @@ snapshots:
 
   '@types/express-serve-static-core@4.19.6':
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.5
@@ -8604,7 +8610,7 @@ snapshots:
 
   '@types/http-proxy@1.17.16':
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/istanbul-lib-coverage@2.0.6': {}
 
@@ -8630,11 +8636,11 @@ snapshots:
 
   '@types/node-forge@1.3.14':
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/node@17.0.45': {}
 
-  '@types/node@22.18.0':
+  '@types/node@22.18.1':
     dependencies:
       undici-types: 6.21.0
 
@@ -8673,12 +8679,12 @@ snapshots:
 
   '@types/sax@1.2.7':
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/send@0.17.5':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/serve-index@1.9.4':
     dependencies:
@@ -8687,12 +8693,12 @@ snapshots:
   '@types/serve-static@1.15.8':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
       '@types/send': 0.17.5
 
   '@types/sockjs@0.3.36':
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/stylis@4.2.5': {}
 
@@ -8705,7 +8711,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -9820,7 +9826,7 @@ snapshots:
 
   eval@0.1.8:
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
       require-like: 0.1.2
 
   eventemitter3@4.0.7: {}
@@ -10514,7 +10520,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -10522,13 +10528,13 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 22.18.0
+      '@types/node': 22.18.1
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -11578,7 +11584,7 @@ snapshots:
 
   polished@4.3.1:
     dependencies:
-      '@babel/runtime': 7.28.3
+      '@babel/runtime': 7.28.4
 
   postcss-attribute-case-insensitive@7.0.1(postcss@8.5.6):
     dependencies:
