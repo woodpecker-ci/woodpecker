@@ -707,6 +707,36 @@ func (_m *Client) Org(orgID int64) (*woodpecker.Org, error) {
 	return r0, r1
 }
 
+// OrgList provides a mock function with given fields: opt
+func (_m *Client) OrgList(opt woodpecker.ListOptions) ([]*woodpecker.Org, error) {
+	ret := _m.Called(opt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgList")
+	}
+
+	var r0 []*woodpecker.Org
+	var r1 error
+	if rf, ok := ret.Get(0).(func(woodpecker.ListOptions) ([]*woodpecker.Org, error)); ok {
+		return rf(opt)
+	}
+	if rf, ok := ret.Get(0).(func(woodpecker.ListOptions) []*woodpecker.Org); ok {
+		r0 = rf(opt)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*woodpecker.Org)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(woodpecker.ListOptions) error); ok {
+		r1 = rf(opt)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // OrgLookup provides a mock function with given fields: orgName
 func (_m *Client) OrgLookup(orgName string) (*woodpecker.Org, error) {
 	ret := _m.Called(orgName)
