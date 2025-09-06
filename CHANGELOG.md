@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @da-Kai, @klausi85, @qwerty287, @xoxys, @zhedazijingang
+@6543, @da-Kai, @hhamalai, @klausi85, @qwerty287, @xoxys, @zhedazijingang
 
 ### ✨ Features
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- feat: expose listing available organizations via woodpecker-go / CLI [[#5481](https://github.com/woodpecker-ci/woodpecker/pull/5481)]
 - refactor: use slices.Contains to simplify [[#5468](https://github.com/woodpecker-ci/woodpecker/pull/5468)]
 - Hide unsupported forge options [[#5465](https://github.com/woodpecker-ci/woodpecker/pull/5465)]
 - Collapse changed files file-tree [[#5451](https://github.com/woodpecker-ci/woodpecker/pull/5451)]
