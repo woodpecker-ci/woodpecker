@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @intlify/unplugin-vue-i18n to v11 [[#5487](https://github.com/woodpecker-ci/woodpecker/pull/5487)]
 - fix(deps): update web npm deps non-major [[#5486](https://github.com/woodpecker-ci/woodpecker/pull/5486)]
 - chore(deps): update dependency golang to v1.25.1 [[#5485](https://github.com/woodpecker-ci/woodpecker/pull/5485)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.23.1 [[#5483](https://github.com/woodpecker-ci/woodpecker/pull/5483)]
