@@ -42,7 +42,7 @@
     "@eslint/js": "^9.17.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.5.1",
     "@intlify/eslint-plugin-vue-i18n": "4.1.0",
-    "@intlify/unplugin-vue-i18n": "^6.0.8",
+    "@intlify/unplugin-vue-i18n": "^11.0.0",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "4.1.13",
     "@types/lodash": "^4.17.20",
