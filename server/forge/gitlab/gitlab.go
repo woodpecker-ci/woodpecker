@@ -642,12 +642,12 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
-		mergeIID, repo, pipeline, err := convertMergeRequestHook(event, req)
+		mergeID, milestoneID, repo, pipeline, err := convertMergeRequestHook(event, req)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		if pipeline, err = g.loadChangedFilesFromMergeRequest(ctx, repo, pipeline, mergeIID); err != nil {
+		if pipeline, err = g.loadMetadataFromMergeRequest(ctx, repo, pipeline, mergeID, milestoneID); err != nil {
 			return nil, nil, err
 		}
 
@@ -772,7 +772,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
-func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, mergeIID int) (*model.Pipeline, error) {
+func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, mergeID, milestoneID int) (*model.Pipeline, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
@@ -799,7 +799,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeIID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
+	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -809,6 +809,14 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		files = append(files, file.NewPath, file.OldPath)
 	}
 	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
+
+	if milestoneID != 0 {
+		milestone, _, err := client.Milestones.GetMilestone(_repo.ID, milestoneID)
+		if err != nil {
+			return nil, err
+		}
+		pipeline.PullRequestMilestone = milestone.Title
+	}
 
 	return pipeline, nil
 }
