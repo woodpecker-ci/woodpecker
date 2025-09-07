@@ -16,7 +16,9 @@ package compiler
 
 import (
 	"fmt"
+	"maps"
 	"path"
+	"slices"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
@@ -72,13 +74,7 @@ func (s *Secret) Match(event string) bool {
 		event = "pull_request"
 	}
 	// one match is enough
-	for _, e := range s.Events {
-		if e == event {
-			return true
-		}
-	}
-	// a filter is set but the webhook did not match it
-	return false
+	return slices.Contains(s.Events, event)
 }
 
 // Compiler compiles the yaml.
@@ -129,14 +125,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// create a default volume
-	config.Volume = &backend_types.Volume{
-		Name: fmt.Sprintf("%s_default", c.prefix),
-	}
+	config.Volume = fmt.Sprintf("%s_default", c.prefix)
 
 	// create a default network
-	config.Network = &backend_types.Network{
-		Name: fmt.Sprintf("%s_default", c.prefix),
-	}
+	config.Network = fmt.Sprintf("%s_default", c.prefix)
 
 	// create secrets for mask
 	for _, sec := range c.secrets {
@@ -196,9 +188,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
 			if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
-				for k, v := range c.cloneEnv {
-					step.Environment[k] = v
-				}
+				maps.Copy(step.Environment, c.cloneEnv)
 			}
 
 			stage.Steps = append(stage.Steps, step)
@@ -253,9 +243,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 		// only inject netrc if it's a trusted repo or a trusted plugin
 		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
-			for k, v := range c.cloneEnv {
-				step.Environment[k] = v
-			}
+			maps.Copy(step.Environment, c.cloneEnv)
 		}
 
 		steps = append(steps, &dagCompilerStep{

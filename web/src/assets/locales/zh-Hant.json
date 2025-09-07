@@ -5,18 +5,53 @@
     "logout": "登出",
     "password": "密碼",
     "repos": "儲存庫",
-    "repositories": "儲存庫",
-    "search": "搜索…",
+    "repositories": {
+        "title": "儲存庫",
+        "all": {
+            "title": "所有儲存庫"
+        },
+        "last": {
+            "title": "上次瀏覽"
+        }
+    },
+    "search": "搜尋…",
     "unknown_error": "出現未知錯誤",
     "url": "URL",
     "welcome": "歡迎使用 Woodpecker",
     "repo": {
         "manual_pipeline": {
             "select_branch": "選擇分支"
+        },
+        "pipeline": {
+            "actions": {
+                "cancel": "取消"
+            },
+            "tasks": "任務"
+        },
+        "settings": {
+            "general": {
+                "save": "儲存設定",
+                "timeout": {
+                    "timeout": "逾時"
+                }
+            },
+            "badge": {
+                "branch": "分支"
+            }
         }
     },
     "cancel": "取消",
     "not_found": {
         "back_home": "返回首頁"
-    }
+    },
+    "admin": {
+        "settings": {
+            "users": {
+                "cancel": "取消",
+                "login": "登入",
+                "email": "Email"
+            }
+        }
+    },
+    "username": "帳號"
 }

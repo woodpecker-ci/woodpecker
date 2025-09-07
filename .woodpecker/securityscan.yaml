@@ -5,7 +5,7 @@ when:
       - ${CI_REPO_DEFAULT_BRANCH}
 
 variables:
-  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.4.0
+  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.4.1
 
 steps:
   backend:

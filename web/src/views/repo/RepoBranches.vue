@@ -1,20 +1,18 @@
 <template>
   <div class="space-y-4">
-    <template v-if="branches.length > 0">
-      <ListItem
-        v-for="branch in branchesWithDefaultBranchFirst"
-        :key="branch"
-        class="text-wp-text-100"
-        :to="{ name: 'repo-branch', params: { branch } }"
-      >
-        {{ branch }}
-        <Badge v-if="branch === repo?.default_branch" :value="$t('default')" class="ml-auto" />
-      </ListItem>
-    </template>
-    <div v-else-if="loading" class="text-wp-text-100 flex justify-center">
+    <ListItem
+      v-for="branch in branchesWithDefaultBranchFirst"
+      :key="branch"
+      class="text-wp-text-100"
+      :to="{ name: 'repo-branch', params: { branch } }"
+    >
+      {{ branch }}
+      <Badge v-if="branch === repo?.default_branch" :value="$t('default')" class="ml-auto" />
+    </ListItem>
+    <div v-if="loading" class="text-wp-text-100 flex justify-center">
       <Icon name="spinner" />
     </div>
-    <Panel v-else class="flex justify-center">
+    <Panel v-else-if="branches.length === 0" class="flex justify-center">
       {{ $t('empty_list', { entity: $t('repo.branches') }) }}
     </Panel>
   </div>

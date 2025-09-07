@@ -64,6 +64,11 @@ var flags = []cli.Flag{
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
 	},
+	&cli.StringMapFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRETS"),
+		Name:    "secrets",
+		Usage:   "map of secrets, ex. 'secret=\"val\",secret2=\"value2\"'",
+	},
 
 	//
 	// backend options for pipeline compiler
@@ -284,6 +289,11 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_LABELS"),
 		Name:    "commit-pull-labels",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_LABELS\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_MILESTONE"),
+		Name:    "commit-pull-milestone",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_MILESTONE\".",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("CI_COMMIT_PRERELEASE"),

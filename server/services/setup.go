@@ -115,8 +115,8 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.AdditionalOptions = make(map[string]any)
 	}
 
-	_forge.Client = strings.TrimSpace(c.String("forge-oauth-client"))
-	_forge.ClientSecret = strings.TrimSpace(c.String("forge-oauth-secret"))
+	_forge.OAuthClientID = strings.TrimSpace(c.String("forge-oauth-client"))
+	_forge.OAuthClientSecret = strings.TrimSpace(c.String("forge-oauth-secret"))
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
 	_forge.OAuthHost = c.String("forge-oauth-host")

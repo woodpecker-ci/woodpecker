@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -28,6 +29,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
@@ -77,8 +79,11 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
 	}
+
+	var execErr error
+
 	// TODO: respect depends_on and do parallel runs with output to multiple _windows_ e.g. tmux like
-	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
+	walkErr := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
@@ -86,13 +91,23 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
-			_ = runExec(ctx, c, path, repoPath, false) // TODO: should we drop errors or store them and report back?
+			err := runExec(ctx, c, path, repoPath, false)
+			if err != nil {
+				fmt.Print(err)
+				execErr = multierr.Append(execErr, err)
+			}
 			fmt.Println("")
 			return nil
 		}
 
 		return nil
 	})
+
+	if walkErr != nil {
+		return walkErr
+	}
+
+	return execErr
 }
 
 func execFile(ctx context.Context, c *cli.Command, file string) error {
@@ -153,9 +168,9 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	}
 
 	environ := metadata.Environ()
+	maps.Copy(environ, metadata.Workflow.Matrix)
 	var secrets []compiler.Secret
-	for key, val := range metadata.Workflow.Matrix {
-		environ[key] = val
+	for key, val := range c.StringMap("secrets") {
 		secrets = append(secrets, compiler.Secret{
 			Name:  key,
 			Value: val,

@@ -132,10 +132,13 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 				Email:  pipeline.Email,
 				Avatar: pipeline.Avatar,
 			},
-			ChangedFiles:      pipeline.ChangedFiles,
-			PullRequestLabels: pipeline.PullRequestLabels,
-			IsPrerelease:      pipeline.IsPrerelease,
+			ChangedFiles:         pipeline.ChangedFiles,
+			PullRequestLabels:    pipeline.PullRequestLabels,
+			PullRequestMilestone: pipeline.PullRequestMilestone,
+			IsPrerelease:         pipeline.IsPrerelease,
 		},
-		Cron: cron,
+		Cron:   cron,
+		Author: pipeline.Author,
+		Avatar: pipeline.Avatar,
 	}
 }

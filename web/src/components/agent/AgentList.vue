@@ -1,7 +1,7 @@
 <template>
-  <div v-if="!props.loading" class="text-wp-text-100 space-y-4">
+  <div class="text-wp-text-100 space-y-4">
     <ListItem
-      v-for="agent in props.agents"
+      v-for="agent in agents"
       :key="agent.id"
       class="bg-wp-background-200! dark:bg-wp-background-100! items-center"
     >
@@ -9,7 +9,7 @@
       <span class="ml-auto">
         <span class="hidden space-x-2 md:inline-block">
           <Badge
-            v-if="props.isAdmin === true && agent.org_id !== -1"
+            v-if="isAdmin === true && agent.org_id !== -1"
             :label="$t('admin.settings.agents.org.badge')"
             :value="agent.org_id"
           />
@@ -21,25 +21,27 @@
           agent.last_contact ? date.timeAgo(agent.last_contact * 1000) : $t('admin.settings.agents.never')
         }}</span>
       </span>
-      <IconButton
-        icon="edit"
-        :title="$t('admin.settings.agents.edit_agent')"
-        class="ml-2 h-8 w-8"
-        @click="$emit('edit', agent)"
-      />
-      <IconButton
-        icon="trash"
-        :title="$t('admin.settings.agents.delete_agent')"
-        class="hover:text-wp-error-100 ml-2 h-8 w-8"
-        :is-loading="props.isDeleting"
-        @click="$emit('delete', agent)"
-      />
+      <div class="ml-auto flex items-center gap-2">
+        <IconButton
+          icon="edit"
+          :title="$t('admin.settings.agents.edit_agent')"
+          class="h-8 w-8"
+          @click="$emit('edit', agent)"
+        />
+        <IconButton
+          icon="trash"
+          :title="$t('admin.settings.agents.delete_agent')"
+          class="hover:text-wp-error-100 h-8 w-8"
+          :is-loading="isDeleting"
+          @click="$emit('delete', agent)"
+        />
+      </div>
     </ListItem>
 
-    <div v-if="props.agents?.length === 0" class="ml-2">{{ $t('admin.settings.agents.none') }}</div>
-  </div>
-  <div v-else class="flex justify-center">
-    <Icon name="loading" class="animate-spin" />
+    <div v-if="loading" class="flex justify-center">
+      <Icon name="spinner" class="animate-spin" />
+    </div>
+    <div v-else-if="agents?.length === 0" class="ml-2">{{ $t('admin.settings.agents.none') }}</div>
   </div>
 </template>
 
@@ -51,7 +53,7 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import { useDate } from '~/compositions/useDate';
 import type { Agent } from '~/lib/api/types';
 
-const props = defineProps<{
+defineProps<{
   agents: Agent[];
   isDeleting: boolean;
   loading: boolean;

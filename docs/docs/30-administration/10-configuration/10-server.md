@@ -808,6 +808,15 @@ The default setting for allowing pull requests on a repo.
 
 ---
 
+### DEFAULT_APPROVAL_MODE
+
+- Name: `WOODPECKER_DEFAULT_APPROVAL_MODE`
+- Default: `forks`
+
+The default setting for the approval mode on a repo. Possible values: `none`, `forks`, `pull_requests` or `all_events`.
+
+---
+
 ### DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS
 
 - Name: `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`

@@ -41,7 +41,11 @@
                 "token": "Token",
                 "version": "版本",
                 "custom_labels": {
-                    "custom_labels": "自定义标签"
+                    "custom_labels": "自定义标签",
+                    "desc": "Agent 管理员在 agent 启动时设置的自定义标签。"
+                },
+                "org": {
+                    "badge": "组织"
                 }
             },
             "not_allowed": "你没有访问服务器设置的权限",
@@ -133,6 +137,10 @@
                 "saved": "已保存用户",
                 "show": "显示用户",
                 "users": "用户"
+            },
+            "registries": {
+                "desc": "可以添加全局注册凭据以在所有流水线中使用私有镜像。",
+                "warning": "这些注册凭据对所有用户可用。"
             }
         }
     },
@@ -177,7 +185,13 @@
                 "show": "显示所有密钥",
                 "value": "值"
             },
-            "settings": "设置"
+            "settings": "设置",
+            "agents": {
+                "desc": "注册到此组织的 Agents。"
+            },
+            "registries": {
+                "desc": "可以为组织添加注册表凭据，以便在所有流水线中使用私有镜像。"
+            }
         }
     },
     "password": "密码",
@@ -294,8 +308,13 @@
                 "download_metadata": "下载元数据",
                 "metadata_download_error": "下载元数据时出错",
                 "metadata_download_successful": "元数据下载成功",
-                "no_permission": "您无权访问调试信息"
-            }
+                "no_permission": "您无权访问调试信息",
+                "metadata_exec_title": "本地重新运行流水线",
+                "metadata_exec_desc": "下载此流水线的元数据以便在本地运行。这样可以在提交更改前修复问题并进行测试。Woodpecker CLI 必须与服务器版本一致并已在本地安装。"
+            },
+            "duration": "流水线耗时：{duration}",
+            "log_delete_confirm": "您确定要删除步骤日志吗？",
+            "log_delete_error": "删除步骤日志时发生了错误"
         },
         "pull_requests": "合并请求",
         "settings": {
@@ -390,10 +409,16 @@
                     "desc": "流水线容器可以使用高级功能，比如挂载卷。",
                     "trusted": "受信任",
                     "network": {
-                        "network": "网络"
+                        "network": "网络",
+                        "desc": "流水线容器可以获得网络权限，例如更改 DNS。"
                     },
                     "security": {
-                        "security": "安全"
+                        "security": "安全",
+                        "desc": "流水线容器可以获得安全权限。"
+                    },
+                    "volumes": {
+                        "volumes": "卷",
+                        "desc": "流水线容器允许被挂载卷。"
                     }
                 },
                 "visibility": {
@@ -412,7 +437,8 @@
                     "visibility": "项目可见性"
                 },
                 "allow_deploy": {
-                    "allow": "允许部署"
+                    "allow": "允许部署",
+                    "desc": "允许成功的流水线进行部署。所有具有推送权限的用户都可以触发这些操作，因此请谨慎使用。"
                 }
             },
             "not_allowed": "你没有权限访问此仓库的设置",
@@ -482,7 +508,8 @@
     "repositories": {
         "title": "仓库",
         "all": {
-            "title": "所有仓库"
+            "title": "所有仓库",
+            "desc": "所有仓库（按流水线创建时间排序）"
         },
         "last": {
             "title": "上次访问",
@@ -563,6 +590,12 @@
                 "swagger_ui": "Swagger 界面",
                 "desc": "个人访问令牌、CLI 和 API 用法",
                 "cli_and_api": "CLI & API"
+            },
+            "registries": {
+                "desc": "可以添加用户注册表凭据，以便在所有个人流水线中使用私有镜像。"
+            },
+            "agents": {
+                "desc": "在您的账号仓库中已注册的 Agent。"
             }
         }
     },
@@ -585,7 +618,8 @@
         },
         "none": "无",
         "none_desc": "所有事件都会触发管道，包括拉取请求。此设置可能很危险，仅建议用于私有实例。",
-        "pull_requests": "所有拉取请求"
+        "pull_requests": "所有拉取请求",
+        "forks": "从已 fork 的仓库进行 Pull request"
     },
     "secrets": {
         "secrets": "密钥",
@@ -599,7 +633,15 @@
         "name": "名称",
         "value": "值",
         "deleted": "密钥已删除",
-        "delete_confirm": "您确实要删除这个密钥吗？"
+        "delete_confirm": "您确实要删除这个密钥吗？",
+        "events": {
+            "events": "适用于以下事件"
+        },
+        "none": "目前没有密钥。",
+        "desc": "密钥可以被用于这个仓库的所有流水线中。",
+        "plugins": {
+            "images": "仅适用于以下的插件"
+        }
     },
     "no_search_results": "未找到结果",
     "org_access_denied": "您无权访问此组织",
@@ -609,7 +651,24 @@
     "access_denied": "您无权访问此实例",
     "registries": {
         "address": {
-            "address": "地址"
-        }
-    }
+            "address": "地址",
+            "desc": "注册表地址（如 docker.io）"
+        },
+        "deleted": "已删除注册表凭据",
+        "show": "显示注册表",
+        "save": "保存注册表",
+        "add": "添加注册表",
+        "view": "查看注册表",
+        "edit": "编辑注册表",
+        "delete": "删除注册表",
+        "created": "已创建注册表凭据",
+        "registries": "注册表",
+        "delete_confirm": "您真的要删除此注册表吗？",
+        "credentials": "注册表凭据",
+        "desc": "在流水线中可添加注册表凭据使用私有镜像。",
+        "none": "目前还没有注册表凭据。",
+        "saved": "已保存注册表凭据"
+    },
+    "registration_closed": "已关闭注册",
+    "oauth_error": "与 OAuth 提供商进行身份验证时出错"
 }

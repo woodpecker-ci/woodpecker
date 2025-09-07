@@ -18,7 +18,7 @@
       <ListItem
         v-for="cron in crons"
         :key="cron.id"
-        class="bg-wp-background-200! dark:bg-wp-background-100! items-center"
+        class="bg-wp-background-200! dark:bg-wp-background-200! items-center"
       >
         <span class="grid w-full grid-cols-3">
           <span>{{ cron.name }}</span>
@@ -30,23 +30,33 @@
             $t('repo.settings.crons.not_executed_yet')
           }}</span>
         </span>
-        <IconButton
-          icon="play-outline"
-          class="ml-auto h-8 w-8"
-          :title="$t('repo.settings.crons.run')"
-          @click="runCron(cron)"
-        />
-        <IconButton icon="edit" class="h-8 w-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
-        <IconButton
-          icon="trash"
-          class="hover:text-wp-error-100 h-8 w-8"
-          :is-loading="isDeleting"
-          :title="$t('repo.settings.crons.delete')"
-          @click="deleteCron(cron)"
-        />
+        <div class="flex items-center gap-2">
+          <IconButton
+            icon="play-outline"
+            class="h-8 w-8"
+            :title="$t('repo.settings.crons.run')"
+            @click="runCron(cron)"
+          />
+          <IconButton
+            icon="edit"
+            class="h-8 w-8"
+            :title="$t('repo.settings.crons.edit')"
+            @click="selectedCron = cron"
+          />
+          <IconButton
+            icon="trash"
+            class="hover:text-wp-error-100 h-8 w-8"
+            :is-loading="isDeleting"
+            :title="$t('repo.settings.crons.delete')"
+            @click="deleteCron(cron)"
+          />
+        </div>
       </ListItem>
 
-      <div v-if="crons?.length === 0" class="ml-2">{{ $t('repo.settings.crons.none') }}</div>
+      <div v-if="loading" class="flex justify-center">
+        <Icon name="spinner" class="animate-spin" />
+      </div>
+      <div v-else-if="crons?.length === 0" class="ml-2">{{ $t('repo.settings.crons.none') }}</div>
     </div>
 
     <div v-else class="space-y-4">
@@ -109,6 +119,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import InputField from '~/components/form/InputField.vue';
@@ -137,7 +148,7 @@ async function loadCrons(page: number): Promise<Cron[] | null> {
   return apiClient.getCronList(repo.value.id, { page });
 }
 
-const { resetPage, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
+const { resetPage, data: crons, loading } = usePagination(loadCrons, () => !selectedCron.value);
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedCron.value) {
@@ -154,13 +165,13 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
     type: 'success',
   });
   selectedCron.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_cron: Cron) => {
   await apiClient.deleteCron(repo.value.id, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {

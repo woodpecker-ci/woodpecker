@@ -42,8 +42,7 @@ func TestService(t *testing.T) {
 	{
 	  "metadata": {
 	    "name": "wp-svc-01he8bebctabr3kgk0qj36d2me-0-bar",
-	    "namespace": "foo",
-	    "creationTimestamp": null
+	    "namespace": "foo"
 	  },
 	  "spec": {
 	    "ports": [

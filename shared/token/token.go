@@ -17,6 +17,7 @@ package token
 import (
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog/log"
@@ -55,13 +56,7 @@ func Parse(allowedTypes []Type, raw string, fn SecretFunc) (*Token, error) {
 		return nil, jwt.ErrTokenUnverifiable
 	}
 
-	hasAllowedType := false
-	for _, k := range allowedTypes {
-		if k == token.Type {
-			hasAllowedType = true
-			break
-		}
-	}
+	hasAllowedType := slices.Contains(allowedTypes, token.Type)
 
 	if !hasAllowedType {
 		return nil, jwt.ErrInvalidType

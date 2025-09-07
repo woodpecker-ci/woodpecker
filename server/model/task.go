@@ -16,6 +16,7 @@ package model
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
@@ -30,7 +31,7 @@ type Task struct {
 	RunOn        []string               `json:"run_on"       xorm:"json 'run_on'"`
 	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'dependencies_status'"`
 	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
-} //	@name Task
+} //	@name	Task
 
 // TableName return database table name for xorm.
 func (Task) TableName() string {
@@ -83,12 +84,7 @@ func (t *Task) ShouldRun() bool {
 }
 
 func (t *Task) runsOnFailure() bool {
-	for _, status := range t.RunOn {
-		if status == string(StatusFailure) {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(t.RunOn, string(StatusFailure))
 }
 
 func (t *Task) runsOnSuccess() bool {
@@ -96,10 +92,5 @@ func (t *Task) runsOnSuccess() bool {
 		return true
 	}
 
-	for _, status := range t.RunOn {
-		if status == string(StatusSuccess) {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(t.RunOn, string(StatusSuccess))
 }

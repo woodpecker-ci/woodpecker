@@ -250,6 +250,15 @@ backend_options:
         localhostProfile: k8s-apparmor-example-deny-write
 ```
 
+or configure a specific `fsGroupChangePolicy` (Kubernetes defaults to 'Always')
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      fsGroupChangePolicy: OnRootMismatch
+```
+
 :::note
 The feature requires Kubernetes v1.30 or above.
 :::
@@ -307,6 +316,15 @@ These env vars can be set in the `env:` sections of the agent.
 The namespace to create worker Pods in.
 
 ---
+
+### BACKEND_K8S_NAMESPACE_PER_ORGANIZATION
+
+- Name: `WOODPECKER_BACKEND_K8S_NAMESPACE_PER_ORGANIZATION`
+- Default: `false`
+
+Enables namespace isolation per Woodpecker organization. When enabled, each organization gets its own dedicated Kubernetes namespace for improved security and resource isolation.
+
+With this feature enabled, Woodpecker creates separate Kubernetes namespaces for each organization using the format `{WOODPECKER_BACKEND_K8S_NAMESPACE}-{organization-id}`. Namespaces are created automatically when needed, but they are not automatically deleted when organizations are removed from Woodpecker.
 
 ### BACKEND_K8S_VOLUME_SIZE
 
@@ -371,6 +389,24 @@ Determines if Pod annotations can be defined from a step's backend options.
 
 ---
 
+### BACKEND_K8S_POD_TOLERATIONS
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_TOLERATIONS`
+- Default: none
+
+Additional tolerations to apply to worker Pods. Must be a YAML object, e.g. `[{"effect":"NoSchedule","key":"jobs","operator":"Exists"}]`.
+
+---
+
+### BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP`
+- Default: `true`
+
+Determines if Pod tolerations can be defined from a step's backend options.
+
+---
+
 ### BACKEND_K8S_POD_NODE_SELECTOR
 
 - Name: `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR`
@@ -395,3 +431,12 @@ Determines if containers must be required to run as non-root users.
 - Default: none
 
 Secret names to pull images from private repositories. See, how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
+
+---
+
+### BACKEND_K8S_PRIORITY_CLASS
+
+- Name: `WOODPECKER_BACKEND_K8S_PRIORITY_CLASS`
+- Default: none, which will use the default priority class configured in Kubernetes
+
+Which [Kubernetes PriorityClass](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/priority-class-v1/) to assign to created job pods.
