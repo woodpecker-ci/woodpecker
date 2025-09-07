@@ -33,6 +33,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v15.14.0 [[#5490](https://github.com/woodpecker-ci/woodpecker/pull/5490)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.23.2 [[#5489](https://github.com/woodpecker-ci/woodpecker/pull/5489)]
 - chore(deps): update dependency @intlify/unplugin-vue-i18n to v11 [[#5487](https://github.com/woodpecker-ci/woodpecker/pull/5487)]
 - fix(deps): update web npm deps non-major [[#5486](https://github.com/woodpecker-ci/woodpecker/pull/5486)]
