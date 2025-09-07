@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-06
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -33,6 +33,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/prometheus/client_golang to v1.23.2 [[#5489](https://github.com/woodpecker-ci/woodpecker/pull/5489)]
 - chore(deps): update dependency @intlify/unplugin-vue-i18n to v11 [[#5487](https://github.com/woodpecker-ci/woodpecker/pull/5487)]
 - fix(deps): update web npm deps non-major [[#5486](https://github.com/woodpecker-ci/woodpecker/pull/5486)]
 - chore(deps): update dependency golang to v1.25.1 [[#5485](https://github.com/woodpecker-ci/woodpecker/pull/5485)]
