@@ -47,25 +47,25 @@ const (
 
 // Opts are forge options for bitbucket.
 type Opts struct {
-	Client string
-	Secret string
+	OAuthClientID     string
+	OAuthClientSecret string
 }
 
 type config struct {
-	API    string
-	url    string
-	Client string
-	Secret string
+	api           string
+	url           string
+	oAuthClientID string
+	oAuthSecret   string
 }
 
 // New returns a new forge Configuration for integrating with the Bitbucket
 // repository hosting service at https://bitbucket.org
 func New(opts *Opts) (forge.Forge, error) {
 	return &config{
-		API:    DefaultAPI,
-		url:    DefaultURL,
-		Client: opts.Client,
-		Secret: opts.Secret,
+		api:           DefaultAPI,
+		url:           DefaultURL,
+		oAuthClientID: opts.OAuthClientID,
+		oAuthSecret:   opts.OAuthClientSecret,
 	}, nil
 	// TODO: add checks
 }
@@ -96,7 +96,7 @@ func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 		return nil, redirectURL, err
 	}
 
-	client := internal.NewClient(ctx, c.API, config.Client(ctx, token))
+	client := internal.NewClient(ctx, c.api, config.Client(ctx, token))
 	curr, err := client.FindCurrent()
 	if err != nil {
 		return nil, redirectURL, err
@@ -509,15 +509,15 @@ func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client 
 }
 
 // helper function to return the bitbucket oauth2 client.
-func (c *config) newClientToken(ctx context.Context, token, secret string) *internal.Client {
+func (c *config) newClientToken(ctx context.Context, accessToken, refreshToken string) *internal.Client {
 	return internal.NewClientToken(
 		ctx,
-		c.API,
-		c.Client,
-		c.Secret,
+		c.api,
+		accessToken,
+		refreshToken,
 		&oauth2.Token{
-			AccessToken:  token,
-			RefreshToken: secret,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
 		},
 	)
 }
@@ -525,8 +525,8 @@ func (c *config) newClientToken(ctx context.Context, token, secret string) *inte
 // helper function to return the bitbucket oauth2 config.
 func (c *config) newOAuth2Config() *oauth2.Config {
 	return &oauth2.Config{
-		ClientID:     c.Client,
-		ClientSecret: c.Secret,
+		ClientID:     c.oAuthClientID,
+		ClientSecret: c.oAuthSecret,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),

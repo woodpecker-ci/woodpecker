@@ -121,7 +121,6 @@ func TestTinyPod(t *testing.T) {
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 			"namespace": "woodpecker",
-			"creationTimestamp": null,
 			"labels": {
 				"step": "build-via-gradle",
 				"woodpecker-ci.org/step": "build-via-gradle"
@@ -202,7 +201,6 @@ func TestFullPod(t *testing.T) {
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 			"namespace": "woodpecker",
-			"creationTimestamp": null,
 			"labels": {
 				"app": "test",
 				"part-of": "woodpecker-ci",
@@ -293,6 +291,7 @@ func TestFullPod(t *testing.T) {
 				"runAsGroup": 101,
 				"runAsNonRoot": true,
 				"fsGroup": 101,
+				"fsGroupChangePolicy": "OnRootMismatch",
 				"appArmorProfile": {
 					"type": "Localhost",
 					"localhostProfile": "k8s-apparmor-example-deny-write"
@@ -348,12 +347,14 @@ func TestFullPod(t *testing.T) {
 		{Number: 2345, Protocol: "tcp"},
 		{Number: 3456, Protocol: "udp"},
 	}
+	fsGroupChangePolicy := v1.PodFSGroupChangePolicy("OnRootMismatch")
 	secCtx := SecurityContext{
-		Privileged:   newBool(true),
-		RunAsNonRoot: newBool(true),
-		RunAsUser:    newInt64(101),
-		RunAsGroup:   newInt64(101),
-		FSGroup:      newInt64(101),
+		Privileged:          newBool(true),
+		RunAsNonRoot:        newBool(true),
+		RunAsUser:           newInt64(101),
+		RunAsGroup:          newInt64(101),
+		FSGroup:             newInt64(101),
+		FsGroupChangePolicy: &fsGroupChangePolicy,
 		SeccompProfile: &SecProfile{
 			Type:             "Localhost",
 			LocalhostProfile: "profiles/audit.json",
@@ -501,7 +502,6 @@ func TestScratchPod(t *testing.T) {
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 			"namespace": "woodpecker",
-			"creationTimestamp": null,
 			"labels": {
 				"step": "curl-google",
 				"woodpecker-ci.org/step": "curl-google"
@@ -548,7 +548,6 @@ func TestSecrets(t *testing.T) {
 		"metadata": {
 			"name": "wp-3kgk0qj36d2me01he8bebctabr-0",
 			"namespace": "woodpecker",
-			"creationTimestamp": null,
 			"labels": {
 				"step": "test-secrets",
 				"woodpecker-ci.org/step": "test-secrets"
@@ -669,7 +668,6 @@ func TestPodTolerations(t *testing.T) {
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 			"namespace": "woodpecker",
-			"creationTimestamp": null,
 			"labels": {
 				"step": "toleration-test",
 				"woodpecker-ci.org/step": "toleration-test"
@@ -729,7 +727,6 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 			"namespace": "woodpecker",
-			"creationTimestamp": null,
 			"labels": {
 				"step": "toleration-test",
 				"woodpecker-ci.org/step": "toleration-test"
@@ -752,7 +749,6 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
 			"namespace": "woodpecker",
-			"creationTimestamp": null,
 			"labels": {
 				"step": "toleration-test",
 				"woodpecker-ci.org/step": "toleration-test"
@@ -821,8 +817,7 @@ func TestStepSecret(t *testing.T) {
 	const expected = `{
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0-step-secret",
-			"namespace": "woodpecker",
-			"creationTimestamp": null
+			"namespace": "woodpecker"
 		},
 		"type": "Opaque",
 		"stringData": {

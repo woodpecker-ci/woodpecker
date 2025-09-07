@@ -250,6 +250,15 @@ backend_options:
         localhostProfile: k8s-apparmor-example-deny-write
 ```
 
+or configure a specific `fsGroupChangePolicy` (Kubernetes defaults to 'Always')
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      fsGroupChangePolicy: OnRootMismatch
+```
+
 :::note
 The feature requires Kubernetes v1.30 or above.
 :::

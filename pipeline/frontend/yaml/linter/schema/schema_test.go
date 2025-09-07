@@ -114,6 +114,11 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-broken-plugin2.yaml",
 			fail:     true,
 		},
+		{
+			name:     "Kubernetes backend tolerations",
+			testFile: ".woodpecker/test-kubernetes-backend-tolerations.yaml",
+			fail:     false,
+		},
 	}
 
 	for _, tt := range testTable {

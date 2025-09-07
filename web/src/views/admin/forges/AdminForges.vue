@@ -8,23 +8,25 @@
       <ListItem
         v-for="forge in forges"
         :key="forge.id"
-        class="bg-wp-background-200! dark:bg-wp-background-100! items-center gap-2"
+        class="bg-wp-background-200! dark:bg-wp-background-200! items-center gap-2"
       >
         <span>{{ forge.url.replace(/http(s):\/\//, '') }}</span>
         <Badge class="md:display-unset ml-auto hidden" :value="forge.type" />
-        <IconButton
-          icon="edit"
-          :title="$t('edit_forge')"
-          class="md:display-unset h-8 w-8"
-          :to="{ name: 'admin-settings-forge', params: { forgeId: forge.id } }"
-        />
-        <IconButton
-          icon="trash"
-          :title="$t('delete_forge')"
-          class="hover:text-wp-error-100 ml-2 h-8 w-8"
-          :is-loading="isDeleting"
-          @click="deleteForge(forge)"
-        />
+        <div class="flex items-center gap-2">
+          <IconButton
+            icon="edit"
+            :title="$t('edit_forge')"
+            class="h-8 w-8"
+            :to="{ name: 'admin-settings-forge', params: { forgeId: forge.id } }"
+          />
+          <IconButton
+            icon="trash"
+            :title="$t('delete_forge')"
+            class="hover:text-wp-error-100 h-8 w-8"
+            :is-loading="isDeleting"
+            @click="deleteForge(forge)"
+          />
+        </div>
       </ListItem>
 
       <div v-if="loading" class="flex justify-center">
