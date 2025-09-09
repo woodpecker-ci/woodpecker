@@ -199,6 +199,9 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "plugins-privileged",
 		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),

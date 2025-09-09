@@ -41,6 +41,9 @@ var Command = &cli.Command{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 			Name:    "plugins-privileged",
 			Usage:   "allow plugins to run in privileged mode, if set empty, there is no",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringSliceFlag{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
