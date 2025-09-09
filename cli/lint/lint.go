@@ -50,6 +50,9 @@ var Command = &cli.Command{
 			Name:    "plugins-trusted-clone",
 			Usage:   "plugins that are trusted to handle Git credentials in cloning steps",
 			Value:   constant.TrustedClonePlugins,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.BoolFlag{
 			Sources: cli.EnvVars("WOODPECKER_LINT_STRICT"),
