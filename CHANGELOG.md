@@ -4,22 +4,23 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @da-Kai, @hhamalai, @klausi85, @qwerty287, @xoxys, @zhedazijingang
+@6543, @Gusted, @da-Kai, @hhamalai, @klausi85, @qwerty287, @xoxys, @zhedazijingang
 
 ### ✨ Features
 
+- feat: expose listing available organizations via woodpecker-go / CLI [[#5481](https://github.com/woodpecker-ci/woodpecker/pull/5481)]
 - Add milestone to metadata [[#5174](https://github.com/woodpecker-ci/woodpecker/pull/5174)]
 
 ### 📈 Enhancement
 
-- feat: expose listing available organizations via woodpecker-go / CLI [[#5481](https://github.com/woodpecker-ci/woodpecker/pull/5481)]
 - refactor: use slices.Contains to simplify [[#5468](https://github.com/woodpecker-ci/woodpecker/pull/5468)]
 - Hide unsupported forge options [[#5465](https://github.com/woodpecker-ci/woodpecker/pull/5465)]
-- Collapse changed files file-tree [[#5451](https://github.com/woodpecker-ci/woodpecker/pull/5451)]
+- Collapse changed files in file-tree [[#5451](https://github.com/woodpecker-ci/woodpecker/pull/5451)]
 - Simplify queue interface [[#5449](https://github.com/woodpecker-ci/woodpecker/pull/5449)]
 
 ### 🐛 Bug Fixes
 
+- fix: allow spaces in cli string slices [[#5494](https://github.com/woodpecker-ci/woodpecker/pull/5494)]
 - Print execution errors [[#5448](https://github.com/woodpecker-ci/woodpecker/pull/5448)]
 
 ### 📚 Documentation
