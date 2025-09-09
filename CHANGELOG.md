@@ -6,6 +6,10 @@
 
 @6543, @Gusted, @da-Kai, @hhamalai, @klausi85, @qwerty287, @xoxys, @zhedazijingang
 
+### 🔒 Security
+
+- chore(deps): update dependency vite to v7.1.5 [security] [[#5495](https://github.com/woodpecker-ci/woodpecker/pull/5495)]
+
 ### ✨ Features
 
 - feat: expose listing available organizations via woodpecker-go / CLI [[#5481](https://github.com/woodpecker-ci/woodpecker/pull/5481)]
@@ -21,6 +25,7 @@
 ### 🐛 Bug Fixes
 
 - fix: allow spaces in cli string slices [[#5494](https://github.com/woodpecker-ci/woodpecker/pull/5494)]
+- fix: changed schema definition for "backend_options.kubernetes.tolerations" to accept an array of objects [[#5478](https://github.com/woodpecker-ci/woodpecker/pull/5478)]
 - Print execution errors [[#5448](https://github.com/woodpecker-ci/woodpecker/pull/5448)]
 
 ### 📚 Documentation
@@ -59,7 +64,6 @@
 
 ### Misc
 
-- fix: changed schema definition for "backend_options.kubernetes.tolerations" to accept an array of objects [[#5478](https://github.com/woodpecker-ci/woodpecker/pull/5478)]
 - Remove twitter from release template [[#5447](https://github.com/woodpecker-ci/woodpecker/pull/5447)]
 
 ## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-20
