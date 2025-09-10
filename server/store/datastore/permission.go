@@ -23,14 +23,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
+func (s *storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
 	perm := new(model.Perm)
 	return perm, wrapGet(s.engine.
 		Where(builder.Eq{"user_id": user.ID, "repo_id": repo.ID}).
 		Get(perm))
 }
 
-func (s storage) PermUpsert(perm *model.Perm) error {
+func (s *storage) PermUpsert(perm *model.Perm) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
@@ -44,7 +44,7 @@ func (s storage) PermUpsert(perm *model.Perm) error {
 	return sess.Commit()
 }
 
-func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
+func (s *storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 	if perm.RepoID == 0 && perm.Repo == nil {
 		return fmt.Errorf("could not determine repo for permission: %v", perm)
 	}

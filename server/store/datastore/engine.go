@@ -56,15 +56,15 @@ func NewEngine(opts *store.Opts) (store.Store, error) {
 	}, nil
 }
 
-func (s storage) Ping() error {
+func (s *storage) Ping() error {
 	return s.engine.Ping()
 }
 
 // Migrate old storage or init new one.
-func (s storage) Migrate(ctx context.Context, allowLong bool) error {
+func (s *storage) Migrate(ctx context.Context, allowLong bool) error {
 	return migration.Migrate(ctx, s.engine, allowLong)
 }
 
-func (s storage) Close() error {
+func (s *storage) Close() error {
 	return s.engine.Close()
 }

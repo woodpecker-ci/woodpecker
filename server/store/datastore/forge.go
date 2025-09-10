@@ -18,28 +18,28 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) ForgeGet(id int64) (*model.Forge, error) {
+func (s *storage) ForgeGet(id int64) (*model.Forge, error) {
 	forge := new(model.Forge)
 	return forge, wrapGet(s.engine.ID(id).Get(forge))
 }
 
-func (s storage) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
+func (s *storage) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
 	forges := make([]*model.Forge, 0, 10)
 	return forges, s.paginate(p).Find(&forges)
 }
 
-func (s storage) ForgeCreate(forge *model.Forge) error {
+func (s *storage) ForgeCreate(forge *model.Forge) error {
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(forge)
 	return err
 }
 
-func (s storage) ForgeUpdate(forge *model.Forge) error {
+func (s *storage) ForgeUpdate(forge *model.Forge) error {
 	_, err := s.engine.ID(forge.ID).AllCols().Update(forge)
 	return err
 }
 
-func (s storage) ForgeDelete(forge *model.Forge) error {
+func (s *storage) ForgeDelete(forge *model.Forge) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {

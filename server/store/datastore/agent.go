@@ -22,16 +22,16 @@ import (
 
 var ErrNoTokenProvided = errors.New("please provide a token")
 
-func (s storage) AgentList(p *model.ListOptions) (agents []*model.Agent, _ error) {
+func (s *storage) AgentList(p *model.ListOptions) (agents []*model.Agent, _ error) {
 	return agents, s.paginate(p).OrderBy("id").Find(&agents)
 }
 
-func (s storage) AgentFind(id int64) (*model.Agent, error) {
+func (s *storage) AgentFind(id int64) (*model.Agent, error) {
 	agent := new(model.Agent)
 	return agent, wrapGet(s.engine.ID(id).Get(agent))
 }
 
-func (s storage) AgentFindByToken(token string) (*model.Agent, error) {
+func (s *storage) AgentFindByToken(token string) (*model.Agent, error) {
 	// Searching with an empty token would result in an empty where clause and therefore returning first item
 	if token == "" {
 		return nil, ErrNoTokenProvided
@@ -40,21 +40,21 @@ func (s storage) AgentFindByToken(token string) (*model.Agent, error) {
 	return agent, wrapGet(s.engine.Where("token = ?", token).Get(agent))
 }
 
-func (s storage) AgentCreate(agent *model.Agent) error {
+func (s *storage) AgentCreate(agent *model.Agent) error {
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(agent)
 	return err
 }
 
-func (s storage) AgentUpdate(agent *model.Agent) error {
+func (s *storage) AgentUpdate(agent *model.Agent) error {
 	_, err := s.engine.ID(agent.ID).AllCols().Update(agent)
 	return err
 }
 
-func (s storage) AgentDelete(agent *model.Agent) error {
+func (s *storage) AgentDelete(agent *model.Agent) error {
 	return wrapDelete(s.engine.ID(agent.ID).Delete(new(model.Agent)))
 }
 
-func (s storage) AgentListForOrg(orgID int64, p *model.ListOptions) (agents []*model.Agent, _ error) {
+func (s *storage) AgentListForOrg(orgID int64, p *model.ListOptions) (agents []*model.Agent, _ error) {
 	return agents, s.paginate(p).Where("org_id = ?", orgID).OrderBy("id").Find(&agents)
 }

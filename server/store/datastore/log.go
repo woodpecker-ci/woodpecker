@@ -25,12 +25,12 @@ import (
 // Too large a value results in `pq: got XX parameters but PostgreSQL only supports 65535 parameters`.
 const pgBatchSize = 1000
 
-func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
+func (s *storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
 	return logEntries, s.engine.Asc("id").Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
-func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
+func (s *storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
 	var err error
 
 	// TODO: adapted from slices.Chunk(); switch to it in Go 1.23+
@@ -46,7 +46,7 @@ func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
 	return err
 }
 
-func (s storage) LogDelete(step *model.Step) error {
+func (s *storage) LogDelete(step *model.Step) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return logDelete(sess, step.ID)

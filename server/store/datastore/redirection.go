@@ -21,24 +21,24 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) getRedirection(e *xorm.Session, fullName string) (*model.Redirection, error) {
+func (s *storage) getRedirection(e *xorm.Session, fullName string) (*model.Redirection, error) {
 	repo := new(model.Redirection)
 	return repo, wrapGet(e.Where("repo_full_name = ?", fullName).Get(repo))
 }
 
-func (s storage) CreateRedirection(redirect *model.Redirection) error {
+func (s *storage) CreateRedirection(redirect *model.Redirection) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.createRedirection(sess, redirect)
 }
 
-func (s storage) createRedirection(e *xorm.Session, redirect *model.Redirection) error {
+func (s *storage) createRedirection(e *xorm.Session, redirect *model.Redirection) error {
 	// only Insert set auto created ID back to object
 	_, err := e.Insert(redirect)
 	return err
 }
 
-func (s storage) HasRedirectionForRepo(repoID int64, fullName string) (bool, error) {
+func (s *storage) HasRedirectionForRepo(repoID int64, fullName string) (bool, error) {
 	return s.engine.Where(
 		builder.Eq{"repo_id": repoID, "repo_full_name": fullName},
 	).Exist(new(model.Redirection))

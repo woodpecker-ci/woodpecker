@@ -20,7 +20,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) WorkflowGetTree(pipeline *model.Pipeline) ([]*model.Workflow, error) {
+func (s *storage) WorkflowGetTree(pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	sess := s.engine.NewSession()
 	wfList, err := s.workflowList(sess, pipeline)
 	if err != nil {
@@ -37,7 +37,7 @@ func (s storage) WorkflowGetTree(pipeline *model.Pipeline) ([]*model.Workflow, e
 	return wfList, sess.Commit()
 }
 
-func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
+func (s *storage) WorkflowsCreate(workflows []*model.Workflow) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
@@ -51,7 +51,7 @@ func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
 	return sess.Commit()
 }
 
-func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow) error {
+func (s *storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow) error {
 	for i := range workflows {
 		// only Insert on single object ref set auto created ID back to object
 		if err := s.stepCreate(sess, workflows[i].Children); err != nil {
@@ -65,7 +65,7 @@ func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow
 }
 
 // WorkflowsReplace performs an atomic replacement of workflows and associated steps by deleting all existing workflows and steps and inserting the new ones.
-func (s storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.Workflow) error {
+func (s *storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.Workflow) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
@@ -83,7 +83,7 @@ func (s storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.W
 	return sess.Commit()
 }
 
-func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
+func (s *storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 	// delete related steps
 	for startSteps := 0; ; startSteps += perPage {
 		stepIDs := make([]int64, 0, perPage)
@@ -105,12 +105,12 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 	return err
 }
 
-func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, error) {
+func (s *storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	return s.workflowList(s.engine.NewSession(), pipeline)
 }
 
 // workflowList lists workflows without child steps.
-func (s storage) workflowList(sess *xorm.Session, pipeline *model.Pipeline) ([]*model.Workflow, error) {
+func (s *storage) workflowList(sess *xorm.Session, pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	var wfList []*model.Workflow
 	err := sess.Where("pipeline_id = ?", pipeline.ID).
 		OrderBy("pid").
@@ -122,12 +122,12 @@ func (s storage) workflowList(sess *xorm.Session, pipeline *model.Pipeline) ([]*
 	return wfList, nil
 }
 
-func (s storage) WorkflowLoad(id int64) (*model.Workflow, error) {
+func (s *storage) WorkflowLoad(id int64) (*model.Workflow, error) {
 	workflow := new(model.Workflow)
 	return workflow, wrapGet(s.engine.ID(id).Get(workflow))
 }
 
-func (s storage) WorkflowUpdate(workflow *model.Workflow) error {
+func (s *storage) WorkflowUpdate(workflow *model.Workflow) error {
 	_, err := s.engine.ID(workflow.ID).AllCols().Update(workflow)
 	return err
 }

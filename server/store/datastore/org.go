@@ -23,11 +23,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) OrgCreate(org *model.Org) error {
+func (s *storage) OrgCreate(org *model.Org) error {
 	return s.orgCreate(org, s.engine.NewSession())
 }
 
-func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
+func (s *storage) orgCreate(org *model.Org, sess *xorm.Session) error {
 	if org.Name == "" {
 		return fmt.Errorf("org name is empty")
 	}
@@ -36,26 +36,26 @@ func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
 	return err
 }
 
-func (s storage) OrgGet(id int64) (*model.Org, error) {
+func (s *storage) OrgGet(id int64) (*model.Org, error) {
 	org := new(model.Org)
 	return org, wrapGet(s.engine.ID(id).Get(org))
 }
 
-func (s storage) OrgUpdate(org *model.Org) error {
+func (s *storage) OrgUpdate(org *model.Org) error {
 	return s.orgUpdate(s.engine.NewSession(), org)
 }
 
-func (s storage) orgUpdate(sess *xorm.Session, org *model.Org) error {
+func (s *storage) orgUpdate(sess *xorm.Session, org *model.Org) error {
 	// update
 	_, err := sess.ID(org.ID).AllCols().Update(org)
 	return err
 }
 
-func (s storage) OrgDelete(id int64) error {
+func (s *storage) OrgDelete(id int64) error {
 	return s.orgDelete(s.engine.NewSession(), id)
 }
 
-func (s storage) orgDelete(sess *xorm.Session, id int64) error {
+func (s *storage) orgDelete(sess *xorm.Session, id int64) error {
 	if _, err := sess.Where("org_id = ?", id).Delete(new(model.Secret)); err != nil {
 		return err
 	}
@@ -74,22 +74,22 @@ func (s storage) orgDelete(sess *xorm.Session, id int64) error {
 	return wrapDelete(sess.ID(id).Delete(new(model.Org)))
 }
 
-func (s storage) OrgFindByName(name string, forgeID int64) (*model.Org, error) {
+func (s *storage) OrgFindByName(name string, forgeID int64) (*model.Org, error) {
 	return s.orgFindByName(s.engine.NewSession(), name, forgeID)
 }
 
-func (s storage) orgFindByName(sess *xorm.Session, name string, forgeID int64) (*model.Org, error) {
+func (s *storage) orgFindByName(sess *xorm.Session, name string, forgeID int64) (*model.Org, error) {
 	// sanitize
 	org := new(model.Org)
 	return org, wrapGet(sess.Where("LOWER(name) = ?", strings.ToLower(name)).And("forge_id = ?", forgeID).Get(org))
 }
 
-func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
+func (s *storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
 	var repos []*model.Repo
 	return repos, s.paginate(p).OrderBy("id").Where("org_id = ?", org.ID).Find(&repos)
 }
 
-func (s storage) OrgList(p *model.ListOptions) ([]*model.Org, error) {
+func (s *storage) OrgList(p *model.ListOptions) ([]*model.Org, error) {
 	var orgs []*model.Org
 	return orgs, s.paginate(p).Where("is_user = ?", false).OrderBy("id").Find(&orgs)
 }

@@ -22,7 +22,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) getFeedSelect() string {
+func (s *storage) getFeedSelect() string {
 	const feedTemplate = `repos.id as repo_id,
 pipelines.id as pipeline_id,
 pipelines.number as pipeline_number,
@@ -44,7 +44,7 @@ pipelines.avatar as pipeline_avatar`
 	return fmt.Sprintf(feedTemplate, s.engine.Dialect().Quoter().Quote("commit"))
 }
 
-func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
+func (s *storage) GetPipelineQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	err := s.engine.Table("pipelines").
 		Select(s.getFeedSelect()).
@@ -54,7 +54,7 @@ func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 	return feed, err
 }
 
-func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
+func (s *storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	err := s.engine.Table("repos").
 		Select(s.getFeedSelect()).
@@ -68,7 +68,7 @@ func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	return feed, err
 }
 
-func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
+func (s *storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 
 	err := s.engine.Table("repos").
