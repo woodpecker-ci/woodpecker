@@ -47,16 +47,25 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUMES"),
 		Name:    "volumes",
 		Usage:   "pipeline volumes",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_NETWORKS"),
 		Name:    "network",
 		Usage:   "external networks",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "plugins-privileged",
 		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND"),
@@ -289,6 +298,9 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_LABELS"),
 		Name:    "commit-pull-labels",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_LABELS\".",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_MILESTONE"),
@@ -399,6 +411,9 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_ENV"),
 		Name:    "env",
 		Usage:   "Set the metadata environment variable \"CI_ENV\".",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_FORGE_TYPE"),

@@ -8,6 +8,7 @@ import (
 const (
 	pathOrg           = "%s/api/orgs/%d"
 	pathOrgLookup     = "%s/api/orgs/lookup/%s"
+	pathOrgList       = "%s/api/orgs"
 	pathOrgSecrets    = "%s/api/orgs/%d/secrets"
 	pathOrgSecret     = "%s/api/orgs/%d/secrets/%s"
 	pathOrgRegistries = "%s/api/orgs/%d/registries"
@@ -27,6 +28,14 @@ func (c *client) OrgLookup(name string) (*Org, error) {
 	out := new(Org)
 	uri := fmt.Sprintf(pathOrgLookup, c.addr, name)
 	err := c.get(uri, out)
+	return out, err
+}
+
+func (c *client) OrgList(opt ListOptions) ([]*Org, error) {
+	var out []*Org
+	uri, _ := url.Parse(fmt.Sprintf(pathOrgList, c.addr))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

@@ -647,10 +647,12 @@
           }
         },
         "tolerations": {
-          "type": "object",
-          "additionalProperties": {
-            "type": ["boolean", "string", "number"]
-          }
+          "description": "The tolerations section defines a list of references to the native Kubernetes tolerations. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#tolerations",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step_backend_kubernetes_toleration_object"
+          },
+          "minLength": 1
         },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
@@ -788,6 +790,27 @@
           }
         }
       ]
+    },
+    "step_backend_kubernetes_toleration_object": {
+      "description": "Toleration entry for the kubernetes backend.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "effect": {
+          "type": "string"
+        },
+        "tolerationSeconds": {
+          "type": "integer"
+        }
+      }
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",

@@ -41,12 +41,18 @@ var Command = &cli.Command{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 			Name:    "plugins-privileged",
 			Usage:   "allow plugins to run in privileged mode, if set empty, there is no",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringSliceFlag{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 			Name:    "plugins-trusted-clone",
 			Usage:   "plugins that are trusted to handle Git credentials in cloning steps",
 			Value:   constant.TrustedClonePlugins,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.BoolFlag{
 			Sources: cli.EnvVars("WOODPECKER_LINT_STRICT"),
