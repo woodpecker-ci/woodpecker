@@ -134,7 +134,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		return err
 	}
 
-	repoExist, err := sess.Where("id = ?", pipeline.RepoID).Exist(&model.Repo{})
+	repoExist, err := sess.ForUpdate().Where("id = ?", pipeline.RepoID).Exist(&model.Repo{})
 	if err != nil {
 		return err
 	}
