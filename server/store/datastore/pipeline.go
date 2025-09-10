@@ -15,6 +15,7 @@
 package datastore
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -130,7 +131,10 @@ func (s *storage) GetPipelineCount() (int64, error) {
 
 func (s *storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Step) error {
 	mutexInterface, _ := s.pipelineMutexes.LoadOrStore(pipeline.RepoID, &sync.Mutex{})
-	repoMutex := mutexInterface.(*sync.Mutex)
+	repoMutex, ok := mutexInterface.(*sync.Mutex)
+	if !ok {
+		return fmt.Errorf("unexpected mutex type for repo %s: %T", pipeline.RepoID, mutexInterface)
+	}
 
 	repoMutex.Lock()
 	defer repoMutex.Unlock()
