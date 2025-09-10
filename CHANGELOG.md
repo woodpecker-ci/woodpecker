@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Gusted, @da-Kai, @hhamalai, @klausi85, @qwerty287, @xoxys, @zhedazijingang
+@6543, @Gusted, @da-Kai, @hhamalai, @j04n-f, @klausi85, @qwerty287, @xoxys, @zhedazijingang
 
 ### 🔒 Security
 
@@ -30,6 +30,7 @@
 
 ### 📚 Documentation
 
+- Add Bitbucket key limit known issue [[#5497](https://github.com/woodpecker-ci/woodpecker/pull/5497)]
 - chore(deps): lock file maintenance [[#5492](https://github.com/woodpecker-ci/woodpecker/pull/5492)]
 - chore(deps): update dependency @types/node to v22.18.1 [[#5484](https://github.com/woodpecker-ci/woodpecker/pull/5484)]
 - chore(deps): update docs npm deps non-major [[#5472](https://github.com/woodpecker-ci/woodpecker/pull/5472)]
