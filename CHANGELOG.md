@@ -24,6 +24,7 @@
 
 ### 🐛 Bug Fixes
 
+- Show readable error [[#5501](https://github.com/woodpecker-ci/woodpecker/pull/5501)]
 - fix: allow spaces in cli string slices [[#5494](https://github.com/woodpecker-ci/woodpecker/pull/5494)]
 - fix: changed schema definition for "backend_options.kubernetes.tolerations" to accept an array of objects [[#5478](https://github.com/woodpecker-ci/woodpecker/pull/5478)]
 - Print execution errors [[#5448](https://github.com/woodpecker-ci/woodpecker/pull/5448)]
