@@ -133,7 +133,7 @@ func (s *storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.St
 	mutexInterface, _ := s.pipelineMutexes.LoadOrStore(pipeline.RepoID, &sync.Mutex{})
 	repoMutex, ok := mutexInterface.(*sync.Mutex)
 	if !ok {
-		return fmt.Errorf("unexpected mutex type for repo %s: %T", pipeline.RepoID, mutexInterface)
+		return fmt.Errorf("unexpected mutex type for repo %d: %T", pipeline.RepoID, mutexInterface)
 	}
 
 	repoMutex.Lock()
