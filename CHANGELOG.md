@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-11
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -31,6 +31,7 @@
 
 ### 📚 Documentation
 
+- docs: add SonarQube to plugins list [[#5502](https://github.com/woodpecker-ci/woodpecker/pull/5502)]
 - Add Bitbucket key limit known issue [[#5497](https://github.com/woodpecker-ci/woodpecker/pull/5497)]
 - chore(deps): lock file maintenance [[#5492](https://github.com/woodpecker-ci/woodpecker/pull/5492)]
 - chore(deps): update dependency @types/node to v22.18.1 [[#5484](https://github.com/woodpecker-ci/woodpecker/pull/5484)]
