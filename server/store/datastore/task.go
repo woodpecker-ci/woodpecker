@@ -18,17 +18,17 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) TaskList() ([]*model.Task, error) {
+func (s *storage) TaskList() ([]*model.Task, error) {
 	tasks := make([]*model.Task, 0, perPage)
 	return tasks, s.engine.Find(&tasks)
 }
 
-func (s storage) TaskInsert(task *model.Task) error {
+func (s *storage) TaskInsert(task *model.Task) error {
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(task)
 	return err
 }
 
-func (s storage) TaskDelete(id string) error {
+func (s *storage) TaskDelete(id string) error {
 	return wrapDelete(s.engine.Where("id = ?", id).Delete(new(model.Task)))
 }
