@@ -336,13 +336,29 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE"),
 		Name:    "log-store",
-		Usage:   "log store to use ('database' or 'file')",
+		Usage:   "log store to use ('database', 'file', or 's3')",
 		Value:   "database",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FILE_PATH"),
 		Name:    "log-store-file-path",
 		Usage:   "directory used for file based log storage",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_S3_BUCKET"),
+		Name:    "log-store-s3-bucket",
+		Usage:   "S3 bucket name for log storage",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_S3_BUCKET_FOLDER"),
+		Name:    "log-store-s3-bucket-folder",
+		Usage:   "S3 bucket folder path for log storage",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_S3_PATH_STYLE"),
+		Name:    "log-store-s3-path-style",
+		Usage:   "use path-style URLs for S3 (required for some S3-compatible services)",
+		Value:   false,
 	},
 	//
 	// backend options for pipeline compiler
