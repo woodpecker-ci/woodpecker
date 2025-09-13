@@ -37,9 +37,6 @@ const (
 	actionClose    = "closed"
 	actionSync     = "synchronize"
 	actionReleased = "released"
-
-	stateOpen  = "open"
-	stateClose = "closed"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
@@ -149,31 +146,33 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
 func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
-	if hook.GetAction() != actionOpen &&
-		hook.GetAction() != actionSync &&
-		hook.GetAction() != actionClose &&
-		hook.GetAction() != actionReopen {
-		return nil, nil, nil, nil
-	}
-
 	event := model.EventPull
-	if hook.GetPullRequest().GetState() == stateClose {
+	eventAction := ""
+
+	switch hook.GetAction() {
+	case actionOpen, actionReopen, actionSync:
+		// default case nothing to do
+	case actionClose:
 		event = model.EventPullClosed
+	default: // metadata catches the rest
+		event = model.EventPullMetadata
+		eventAction = hook.GetAction()
 	}
 
 	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
 
 	pipeline := &model.Pipeline{
-		Event:    event,
-		Commit:   hook.GetPullRequest().GetHead().GetSHA(),
-		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
-		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
-		Branch:   hook.GetPullRequest().GetBase().GetRef(),
-		Message:  hook.GetPullRequest().GetTitle(),
-		Author:   hook.GetPullRequest().GetUser().GetLogin(),
-		Avatar:   hook.GetPullRequest().GetUser().GetAvatarURL(),
-		Title:    hook.GetPullRequest().GetTitle(),
-		Sender:   hook.GetSender().GetLogin(),
+		Event:       event,
+		EventReason: eventAction,
+		Commit:      hook.GetPullRequest().GetHead().GetSHA(),
+		ForgeURL:    hook.GetPullRequest().GetHTMLURL(),
+		Ref:         fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
+		Branch:      hook.GetPullRequest().GetBase().GetRef(),
+		Message:     hook.GetPullRequest().GetTitle(),
+		Author:      hook.GetPullRequest().GetUser().GetLogin(),
+		Avatar:      hook.GetPullRequest().GetUser().GetAvatarURL(),
+		Title:       hook.GetPullRequest().GetTitle(),
+		Sender:      hook.GetSender().GetLogin(),
 		Refspec: fmt.Sprintf(refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
@@ -184,6 +183,10 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
+	}
+
+	if event == model.EventPullMetadata {
+		pipeline.EventReason = hook.GetAction()
 	}
 
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil

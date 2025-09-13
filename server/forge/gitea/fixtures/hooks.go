@@ -50,6 +50,48 @@ var HookPullRequestMerged string
 //go:embed HookPullRequestClosed.json
 var HookPullRequestClosed string
 
+//go:embed HookPullRequestChangeTitle.json
+var HookPullRequestChangeTitle string
+
+//go:embed HookPullRequestChangeBody.json
+var HookPullRequestChangeBody string
+
+//go:embed HookPullRequestAddReviewRequest.json
+var HookPullRequestAddReviewRequest string
+
+//go:embed HookPullRequestReviewAck.json
+var HookPullRequestReviewAck string
+
+//go:embed HookPullRequestReviewDeny.json
+var HookPullRequestReviewDeny string
+
+//go:embed HookPullRequestReviewComment.json
+var HookPullRequestReviewComment string
+
+//go:embed HookPullRequestAddLabel.json
+var HookPullRequestAddLabel string
+
+//go:embed HookPullRequestChangeLabel.json
+var HookPullRequestChangeLabel string
+
+//go:embed HookPullRequestRemoveLabel.json
+var HookPullRequestRemoveLabel string
+
+//go:embed HookPullRequestAddMile.json
+var HookPullRequestAddMile string
+
+//go:embed HookPullRequestChangeMile.json
+var HookPullRequestChangeMile string
+
+//go:embed HookPullRequestRemoveMile.json
+var HookPullRequestRemoveMile string
+
+//go:embed HookPullRequestAssigneesAdded.json
+var HookPullRequestAssigneesAdded string
+
+//go:embed HookPullRequestAssigneesRemoved.json
+var HookPullRequestAssigneesRemoved string
+
 //go:embed HookRelease.json
 var HookRelease string
 
