@@ -76,7 +76,7 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	} else {
 		repoPath, _ = filepath.Abs(filepath.Dir(dir))
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
 	}
 
@@ -117,7 +117,7 @@ func execFile(ctx context.Context, c *cli.Command, file string) error {
 	} else {
 		repoPath, _ = filepath.Abs(filepath.Dir(file))
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
 	}
 	return runExec(ctx, c, file, repoPath, true)
@@ -127,6 +127,13 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string, singleE
 	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
+	}
+
+	// if we use the local backend we should signal to run at $repoPath
+	if c.String("backend-engine") == "local" {
+		if err := c.Set("internal-backend-local-exec-dir", repoPath); err != nil {
+			return err
+		}
 	}
 
 	axes, err := matrix.ParseString(string(dat))
