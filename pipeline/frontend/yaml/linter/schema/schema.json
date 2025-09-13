@@ -503,7 +503,17 @@
       }
     },
     "event_enum": {
-      "enum": ["push", "pull_request", "pull_request_closed", "tag", "deployment", "cron", "manual", "release"]
+      "enum": [
+        "push",
+        "pull_request",
+        "pull_request_closed",
+        "pull_request_metadata",
+        "tag",
+        "deployment",
+        "cron",
+        "manual",
+        "release"
+      ]
     },
     "event_constraint_list": {
       "oneOf": [
