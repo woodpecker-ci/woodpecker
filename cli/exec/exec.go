@@ -25,6 +25,7 @@ import (
 	"runtime"
 	"strings"
 
+	"codeberg.org/6543/xyaml"
 	"github.com/drone/envsubst"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -168,6 +169,25 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 			Name:  key,
 			Value: val,
 		})
+	}
+	if secretsFile := c.String("secrets-file"); secretsFile != "" {
+		fileContent, err := os.ReadFile(secretsFile)
+		if err != nil {
+			return err
+		}
+
+		var m map[string]string
+		err = xyaml.Unmarshal(fileContent, &m)
+		if err != nil {
+			return err
+		}
+
+		for key, val := range m {
+			secrets = append(secrets, compiler.Secret{
+				Name:  key,
+				Value: val,
+			})
+		}
 	}
 
 	pipelineEnv := make(map[string]string)
