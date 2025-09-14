@@ -54,6 +54,9 @@ var Command = &cli.Command{
 			Name:    "param",
 			Aliases: []string{"p"},
 			Usage:   "custom parameters to inject into the step environment. Format: KEY=value",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 	},
 }

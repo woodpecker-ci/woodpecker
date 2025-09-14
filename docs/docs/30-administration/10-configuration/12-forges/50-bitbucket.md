@@ -84,6 +84,10 @@ Configures the Bitbucket OAuth client secret. This is used to authorize access.
 
 Read the value for `WOODPECKER_BITBUCKET_SECRET` from the specified filepath
 
+## Known Issues
+
+Bitbucket build keys are limited to 40 characters: [issue #5176](https://github.com/woodpecker-ci/woodpecker/issues/5176). If a job exceeds this limit, you can adjust the key by modifying the `WOODPECKER_STATUS_CONTEXT` or `WOODPECKER_STATUS_CONTEXT_FORMAT` variables. See the [environment variables documentation](../10-server.md#environment-variables) for more details.
+
 ## Missing Features
 
 Path filters for pull requests are not supported. We are interested in patches to include this functionality.
