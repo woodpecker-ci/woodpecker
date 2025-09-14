@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Allow to get secrets from file [[#5509](https://github.com/woodpecker-ci/woodpecker/pull/5509)]
 - refactor: use slices.Contains to simplify [[#5468](https://github.com/woodpecker-ci/woodpecker/pull/5468)]
 - Hide unsupported forge options [[#5465](https://github.com/woodpecker-ci/woodpecker/pull/5465)]
 - Collapse changed files in file-tree [[#5451](https://github.com/woodpecker-ci/woodpecker/pull/5451)]
@@ -31,6 +32,7 @@
 
 ### 📚 Documentation
 
+- Add a blog post [[#5510](https://github.com/woodpecker-ci/woodpecker/pull/5510)]
 - chore(deps): update docs npm deps non-major [[#5503](https://github.com/woodpecker-ci/woodpecker/pull/5503)]
 - docs: add SonarQube to plugins list [[#5502](https://github.com/woodpecker-ci/woodpecker/pull/5502)]
 - Add Bitbucket key limit known issue [[#5497](https://github.com/woodpecker-ci/woodpecker/pull/5497)]
