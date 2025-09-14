@@ -78,6 +78,11 @@ var flags = []cli.Flag{
 		Name:    "secrets",
 		Usage:   "map of secrets, ex. 'secret=\"val\",secret2=\"value2\"'",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRETS_FILE"),
+		Name:    "secrets",
+		Usage:   "path to yaml file with secrets map",
+	},
 
 	//
 	// backend options for pipeline compiler
