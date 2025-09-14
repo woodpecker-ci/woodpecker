@@ -18,6 +18,7 @@ import (
 	"net/rpc"
 
 	"github.com/hashicorp/go-plugin"
+
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 )
 
