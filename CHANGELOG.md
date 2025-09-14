@@ -32,6 +32,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5512](https://github.com/woodpecker-ci/woodpecker/pull/5512)]
 - Add a blog post [[#5510](https://github.com/woodpecker-ci/woodpecker/pull/5510)]
 - chore(deps): update docs npm deps non-major [[#5503](https://github.com/woodpecker-ci/woodpecker/pull/5503)]
 - docs: add SonarQube to plugins list [[#5502](https://github.com/woodpecker-ci/woodpecker/pull/5502)]
