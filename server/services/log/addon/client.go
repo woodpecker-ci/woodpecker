@@ -83,7 +83,7 @@ func (g *RPC) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 
 func (g *RPC) LogAppend(step *model.Step, logEntries []*model.LogEntry) error {
 	args, err := json.Marshal(&argumentsAppend{
-		Step: step,
+		Step:       step,
 		LogEntries: logEntries,
 	})
 	if err != nil {

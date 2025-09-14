@@ -37,7 +37,7 @@ type RPCServer struct {
 }
 
 type argumentsAppend struct {
-	Step *model.Step `json:"step"`
+	Step       *model.Step       `json:"step"`
 	LogEntries []*model.LogEntry `json:"log_entries"`
 }
 
