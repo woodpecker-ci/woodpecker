@@ -173,13 +173,13 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	if secretsFile := c.String("secrets-file"); secretsFile != "" {
 		fileContent, err := os.ReadFile(secretsFile)
 		if err != nil {
-			return  err
+			return err
 		}
 
 		var m map[string]string
 		err = xyaml.Unmarshal(fileContent, &m)
 		if err != nil {
-			return  err
+			return err
 		}
 
 		for key, val := range m {
