@@ -28,6 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
 // make sure RPC implements forge.Forge.
@@ -40,8 +41,8 @@ func Load(file string) (forge.Forge, error) {
 			pluginKey: &Plugin{},
 		},
 		Cmd: exec.Command(file),
-		Logger: &clientLogger{
-			logger: log.With().Str("addon", file).Logger(),
+		Logger: &logger.AddonClientLogger{
+			Logger: log.With().Str("addon", file).Logger(),
 		},
 	})
 	// TODO: defer client.Kill()
