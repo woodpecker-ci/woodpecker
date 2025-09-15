@@ -25,6 +25,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
@@ -198,7 +199,7 @@ func (q *fifo) Extend(_ context.Context, agentID int64, taskID string) error {
 }
 
 // Info returns internal queue information.
-func (q *fifo) Info(_ context.Context) InfoT {
+func (q *fifo) Info(c context.Context) InfoT {
 	q.Lock()
 	stats := InfoT{}
 	stats.Stats.Workers = len(q.workers)
@@ -206,15 +207,42 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
 
+	// Create a map of agent IDs to names
+	agentNames := make(map[int64]string)
+	_store := store.FromContext(c)
+	if _store != nil {
+		agents, err := _store.AgentList(nil)
+		if err == nil {
+			for _, agent := range agents {
+				agentNames[agent.ID] = agent.Name
+			}
+		}
+	}
+
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
+		if task.AgentID != 0 {
+			if name, ok := agentNames[task.AgentID]; ok {
+				task.AgentName = name
+			}
+		}
 		stats.Pending = append(stats.Pending, task)
 	}
 	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
+		if task.AgentID != 0 {
+			if name, ok := agentNames[task.AgentID]; ok {
+				task.AgentName = name
+			}
+		}
 		stats.WaitingOnDeps = append(stats.WaitingOnDeps, task)
 	}
 	for _, entry := range q.running {
+		if entry.item.AgentID != 0 {
+			if name, ok := agentNames[entry.item.AgentID]; ok {
+				entry.item.AgentName = name
+			}
+		}
 		stats.Running = append(stats.Running, entry.item)
 	}
 	stats.Paused = q.paused
@@ -271,6 +299,12 @@ func (q *fifo) process() {
 		for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
 			task, _ := pending.Value.(*model.Task)
 			task.AgentID = worker.agentID
+			// Set agent name when assigning task to worker
+			if worker.filter != nil {
+				if agentTask, ok := task.Labels["agent-name"]; ok {
+					task.AgentName = agentTask
+				}
+			}
 			delete(q.workers, worker)
 			q.pending.Remove(pending)
 			q.running[task.ID] = &entry{
