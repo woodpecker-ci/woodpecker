@@ -122,7 +122,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the agent's id",
-                        "name": "agent_id",
+                        "name": ,
                         "in": "path",
                         "required": true
                     }
