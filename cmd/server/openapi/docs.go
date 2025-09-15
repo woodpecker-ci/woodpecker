@@ -5432,6 +5432,9 @@ const docTemplate = `{
                 "agent_id": {
                     "type": "integer"
                 },
+                "agent_name": {
+                    "type": "string"
+                },
                 "dep_status": {
                     "type": "object",
                     "additionalProperties": {
@@ -5452,6 +5455,15 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
                 },
                 "run_on": {
                     "type": "array",

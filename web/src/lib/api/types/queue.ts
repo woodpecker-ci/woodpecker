@@ -1,10 +1,14 @@
 export interface Task {
   id: number;
+  name: string;
   labels: Record<string, string>;
   dependencies: string[];
   dep_status: Record<string, string>;
   run_on: string[];
   agent_id: number;
+  agent_name: string;
+  pipeline_id: number;
+  repo_id: number;
 }
 
 export interface QueueStats {
