@@ -16,6 +16,7 @@ package model
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
@@ -83,12 +84,7 @@ func (t *Task) ShouldRun() bool {
 }
 
 func (t *Task) runsOnFailure() bool {
-	for _, status := range t.RunOn {
-		if status == string(StatusFailure) {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(t.RunOn, string(StatusFailure))
 }
 
 func (t *Task) runsOnSuccess() bool {
@@ -96,10 +92,5 @@ func (t *Task) runsOnSuccess() bool {
 		return true
 	}
 
-	for _, status := range t.RunOn {
-		if status == string(StatusSuccess) {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(t.RunOn, string(StatusSuccess))
 }

@@ -186,6 +186,9 @@ type Client interface {
 	// OrgLookup returns an organization id by name.
 	OrgLookup(orgName string) (*Org, error)
 
+	// OrgList returns a list of all organizations.
+	OrgList(opt ListOptions) ([]*Org, error)
+
 	// OrgSecret returns an organization secret by name.
 	OrgSecret(orgID int64, secret string) (*Secret, error)
 
