@@ -157,10 +157,8 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		actionLabelCleared,
 		actionMilestoned,
 		actionDeMilestoned,
-		actionReviewRequest,
 		actionAssigned,
-		actionUnAssigned,
-		actionReviewed:
+		actionUnAssigned:
 		event = model.EventPullMetadata
 	}
 
