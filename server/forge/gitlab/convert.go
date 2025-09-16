@@ -157,14 +157,14 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 		pipeline.EventReason = strings.Join(reason, ",")
 
 		if pipeline.EventReason == "" {
-			return 0, nil, nil, &types.ErrIgnoreEvent{
+			return 0, 0, nil, nil, &types.ErrIgnoreEvent{
 				Event:  "Merge Request Hook",
 				Reason: fmt.Sprintf("Action '%s' no supported changes detected", obj.Action),
 			}
 		}
 	default:
 		// non supported action
-		return 0, nil, nil, &types.ErrIgnoreEvent{
+		return 0, 0, nil, nil, &types.ErrIgnoreEvent{
 			Event:  "Merge Request Hook",
 			Reason: fmt.Sprintf("Action '%s' not supported", obj.Action),
 		}
