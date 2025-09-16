@@ -330,7 +330,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, []string{"title_edited,description_edited"}, pipeline.EventReason)
+				assert.Equal(t, []string{"title_edited", "description_edited"}, pipeline.EventReason)
 			}
 		})
 
@@ -423,7 +423,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, []string{"assigned,unassigned"}, pipeline.EventReason)
+				assert.Equal(t, []string{"assigned", "unassigned"}, pipeline.EventReason)
 			}
 		})
 
