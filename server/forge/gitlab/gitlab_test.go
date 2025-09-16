@@ -352,7 +352,7 @@ func Test_GitLab(t *testing.T) {
 			}
 		})
 
-		t.Run("merge request review acknowledgment", func(t *testing.T) {
+		t.Run("merge request review approved", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
@@ -361,16 +361,9 @@ func Test_GitLab(t *testing.T) {
 			req.Header = fixtures.MergeRequestHookHeaders
 
 			hookRepo, pipeline, err := client.Hook(ctx, req)
-			assert.NoError(t, err)
-			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-				assert.Equal(t, "main", hookRepo.Branch)
-				assert.Equal(t, "anbraten", hookRepo.Owner)
-				assert.Equal(t, "woodpecker", hookRepo.Name)
-				assert.Equal(t, "Update client.go 🎉", pipeline.Title)
-				assert.Len(t, pipeline.ChangedFiles, 0)
-				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "approved", pipeline.EventReason)
-			}
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+			assert.Nil(t, hookRepo)
+			assert.Nil(t, pipeline)
 		})
 
 		t.Run("merge request review requested", func(t *testing.T) {
@@ -543,15 +536,9 @@ func Test_GitLab(t *testing.T) {
 			req.Header = fixtures.MergeRequestHookHeaders
 
 			hookRepo, pipeline, err := client.Hook(ctx, req)
-			assert.NoError(t, err)
-			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-				assert.Equal(t, "main", hookRepo.Branch)
-				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
-				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Len(t, pipeline.ChangedFiles, 0)
-				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "unapproved", pipeline.EventReason)
-			}
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+			assert.Nil(t, hookRepo)
+			assert.Nil(t, pipeline)
 		})
 	})
 }

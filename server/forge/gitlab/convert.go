@@ -34,13 +34,11 @@ const (
 
 	stateOpened = "opened"
 
-	actionOpen       = "open"
-	actionClose      = "close"
-	actionReopen     = "reopen"
-	actionMerge      = "merge"
-	actionUpdate     = "update"
-	actionApproved   = "approved"
-	actionUnapproved = "unapproved"
+	actionOpen   = "open"
+	actionClose  = "close"
+	actionReopen = "reopen"
+	actionMerge  = "merge"
+	actionUpdate = "update"
 
 	metadataReasonAssigned          = "assigned"
 	metadataReasonUnassigned        = "unassigned"
@@ -101,11 +99,6 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 	case actionOpen, actionReopen:
 		// pull open event -> pull event
 		pipeline.Event = model.EventPull
-
-	case actionApproved, actionUnapproved:
-		// all actions that are not updates but supported -> pull metadata
-		pipeline.Event = model.EventPullMetadata
-		pipeline.EventReason = obj.Action
 
 	case actionUpdate:
 		if obj.OldRev != "" && obj.State == stateOpened {

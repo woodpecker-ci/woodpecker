@@ -279,7 +279,6 @@ The event reasons are separated via `,` as an list in `CI_PIPELINE_EVENT_REASON`
 | NAME                | Description                                       |
 |---------------------|---------------------------------------------------|
 |`assigned`           | user assigned                                     |
-|`approved`           | review approved the merge request                 |
 |`demilestoned`       | milestone removed                                 |
 |`description_edited` | description edited                                |
 |`labels_added`       | pull had non and now got label added              |
@@ -288,7 +287,6 @@ The event reasons are separated via `,` as an list in `CI_PIPELINE_EVENT_REASON`
 |`milestoned`         | milestone added / changed                         |
 |`title_edited`       | title edited                                      |
 |`unassigned`         | all assignees removed                             |
-|`unapproved`         | approval revoked                                  |
 |`review_requested`   | new review was requested                          |
 
 ### Bitbucket
