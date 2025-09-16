@@ -263,7 +263,7 @@ func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) 
 
 // GetDiffStat is used to get the files changed in a pull
 // we ned the exact api url from that pull so constructing is no option
-// use the linkKeyDiffStat to identify it in the pull links list
+// use the linkKeyDiffStat to identify it in the pull links list.
 func (c *Client) GetDiffStat(diffStatAPI string, itMax ...int) ([]*DiffStatValue, error) {
 	maxPage := maxIterations
 	if len(itMax) != 0 {

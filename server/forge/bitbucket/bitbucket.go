@@ -439,8 +439,8 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		pl.Commit = commit.Hash
 
-		if hookMetadata.DiffStatApi != "" {
-			diffStat, err := client.GetDiffStat(hookMetadata.DiffStatApi)
+		if hookMetadata.DiffStatAPI != "" {
+			diffStat, err := client.GetDiffStat(hookMetadata.DiffStatAPI)
 			if err != nil {
 				return nil, nil, fmt.Errorf("got error while query changed files of pull: %w", err)
 			}
@@ -467,7 +467,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		oldPl, err := _store.GetPipelineLastByPull(repo, pl.ForgeURL)
 		if !errors.Is(err, store_types.RecordNotExist) {
-			return nil, nil, fmt.Errorf("could not post process pull event by getting last pipeline: %w")
+			return nil, nil, fmt.Errorf("could not post process pull event by getting last pipeline: %w", err)
 		}
 		if oldPl != nil && oldPl.Commit == pl.Commit {
 			pl.Event = model.EventPullMetadata

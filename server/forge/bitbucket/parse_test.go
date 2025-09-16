@@ -265,7 +265,6 @@ func Test_parseHook(t *testing.T) {
 					assert.Equal(t, "taerg era senilwen", b.Title)
 					assert.Equal(t, "", b.Message)
 					assert.Equal(t, "6543", b.Author)
-
 				}
 			})
 
