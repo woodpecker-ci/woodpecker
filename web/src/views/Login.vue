@@ -27,7 +27,7 @@
             :key="forge.id"
             :start-icon="forge.type === 'addon' ? 'repo' : forge.type"
             class="whitespace-normal!"
-            @click="doLogin(forge.id)"
+            @click="authenticate(forge.id)"
           >
             <div class="mr-2 w-4">
               <img
@@ -62,16 +62,11 @@ import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Forge } from '~/lib/api/types';
 
 const route = useRoute();
-const authentication = useAuthentication();
+const { authenticate } = useAuthentication();
 const i18n = useI18n();
 const apiClient = useApiClient();
 
 const forges = ref<Forge[]>([]);
-
-function doLogin(forgeId?: number) {
-  const url = typeof route.query.url === 'string' ? route.query.url : '';
-  authentication.authenticate(url, forgeId);
-}
 
 const authErrorMessages = {
   oauth_error: i18n.t('oauth_error'),

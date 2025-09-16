@@ -8,7 +8,7 @@ import useUserConfig from '~/compositions/useUserConfig';
 
 declare module 'vue-router' {
   interface RouteMeta {
-    authentication?: 'required' | 'optional' | 'none';
+    authentication?: 'required' | 'none';
     repoHeader?: true;
     layout?: 'default' | 'blank';
   }
@@ -38,17 +38,16 @@ const routes: RouteRecordRaw[] = [
         path: ':repoId',
         component: (): Component => import('~/views/repo/RepoWrapper.vue'),
         props: true,
-        meta: { authentication: 'optional' },
         children: [
           {
             path: '',
             name: 'repo',
             component: (): Component => import('~/views/repo/RepoPipelines.vue'),
-            meta: { repoHeader: true, authentication: 'optional' },
+            meta: { repoHeader: true },
           },
           {
             path: 'branches',
-            meta: { repoHeader: true, authentication: 'optional' },
+            meta: { repoHeader: true },
             children: [
               {
                 path: '',
@@ -66,7 +65,7 @@ const routes: RouteRecordRaw[] = [
 
           {
             path: 'pull-requests',
-            meta: { repoHeader: true, authentication: 'optional' },
+            meta: { repoHeader: true },
             children: [
               {
                 path: '',
@@ -85,7 +84,6 @@ const routes: RouteRecordRaw[] = [
             path: 'pipeline/:pipelineId',
             component: (): Component => import('~/views/repo/pipeline/PipelineWrapper.vue'),
             props: true,
-            meta: { authentication: 'optional' },
             children: [
               {
                 path: ':stepId?',
@@ -115,6 +113,7 @@ const routes: RouteRecordRaw[] = [
                 name: 'repo-pipeline-debug',
                 component: (): Component => import('~/views/repo/pipeline/PipelineDebug.vue'),
                 props: true,
+                meta: { authentication: 'required' },
               },
             ],
           },
@@ -122,6 +121,7 @@ const routes: RouteRecordRaw[] = [
             path: 'settings',
             component: (): Component => import('~/views/repo/settings/RepoSettings.vue'),
             props: true,
+            meta: { authentication: 'required' },
             children: [
               {
                 path: '',
@@ -165,7 +165,7 @@ const routes: RouteRecordRaw[] = [
             path: 'manual',
             name: 'repo-manual',
             component: (): Component => import('~/views/repo/RepoManualPipeline.vue'),
-            meta: { repoHeader: true },
+            meta: { repoHeader: true, authentication: 'required' },
           },
         ],
       },
@@ -173,7 +173,6 @@ const routes: RouteRecordRaw[] = [
         path: ':repoOwner/:repoName/:pathMatch(.*)*',
         component: (): Component => import('~/views/repo/RepoDeprecatedRedirect.vue'),
         props: true,
-        meta: { authentication: 'optional' },
       },
     ],
   },
@@ -187,12 +186,12 @@ const routes: RouteRecordRaw[] = [
         name: 'org',
         component: (): Component => import('~/views/org/OrgRepos.vue'),
         props: true,
-        meta: { authentication: 'optional' },
       },
       {
         path: 'settings',
         component: (): Component => import('~/views/org/settings/OrgSettingsWrapper.vue'),
         props: true,
+        meta: { authentication: 'required' },
         children: [
           {
             path: '',
@@ -225,11 +224,11 @@ const routes: RouteRecordRaw[] = [
     path: '/org/:orgName/:pathMatch(.*)*',
     component: (): Component => import('~/views/org/OrgDeprecatedRedirect.vue'),
     props: true,
-    meta: { authentication: 'optional' },
   },
   {
     path: '/admin',
     component: (): Component => import('~/views/admin/AdminSettingsWrapper.vue'),
+    meta: { authentication: 'required' },
     children: [
       {
         path: '',
@@ -301,6 +300,7 @@ const routes: RouteRecordRaw[] = [
     path: '/user',
     component: (): Component => import('~/views/user/UserWrapper.vue'),
     props: true,
+    meta: { authentication: 'required' },
     children: [
       {
         path: '',
@@ -338,19 +338,18 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/cli/auth',
     component: (): Component => import('~/views/cli/Auth.vue'),
+    meta: { authentication: 'required' },
   },
 
   // TODO: deprecated routes => remove after some time
   {
     path: '/:ownerOrOrgId',
     redirect: (route) => ({ name: 'org', params: route.params }),
-    meta: { authentication: 'optional' },
   },
   {
     path: '/:repoOwner/:repoName/:pathMatch(.*)*',
     component: (): Component => import('~/views/repo/RepoDeprecatedRedirect.vue'),
     props: true,
-    meta: { authentication: 'optional' },
   },
 
   // not found handler
@@ -358,7 +357,6 @@ const routes: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: (): Component => import('~/views/NotFound.vue'),
-    meta: { authentication: 'optional' },
   },
 ];
 
@@ -369,22 +367,26 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, _, next) => {
+  const { isAuthenticated } = useAuthentication();
+  const authenticationMode = to.matched.toReversed().find((record) => record.meta.authentication != null)
+    ?.meta.authentication;
+
   const config = useUserConfig();
   const { redirectUrl } = config.userConfig.value;
-  if (redirectUrl !== '' && to.name !== 'login') {
+  // redirect to saved url when not on login page
+  if (redirectUrl !== '' && authenticationMode !== 'none') {
     config.setUserConfig('redirectUrl', '');
     next(redirectUrl);
-  }
-
-  const authentication = useAuthentication();
-  const authenticationMode =
-    to.matched.find((record) => record.meta.authentication != null)?.meta.authentication ?? 'required';
-  if (authenticationMode === 'required' && !authentication.isAuthenticated) {
-    next({ name: 'login', query: { url: to.fullPath } });
     return;
   }
 
-  if (authenticationMode === 'none' && authentication.isAuthenticated) {
+  if (authenticationMode === 'required' && !isAuthenticated) {
+    config.setUserConfig('redirectUrl', to.fullPath);
+    next({ name: 'login' });
+    return;
+  }
+
+  if (authenticationMode === 'none' && isAuthenticated) {
     next({ name: 'home' });
     return;
   }
