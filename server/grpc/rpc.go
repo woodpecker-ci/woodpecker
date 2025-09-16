@@ -87,6 +87,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		if err != nil || task == nil {
 			return nil, err
 		}
+		task.AgentName = agent.Name
 
 		if task.ShouldRun() {
 			workflow := new(rpc.Workflow)

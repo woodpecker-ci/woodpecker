@@ -25,7 +25,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
@@ -207,42 +206,15 @@ func (q *fifo) Info(c context.Context) InfoT {
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
 
-	// Create a map of agent IDs to names
-	agentNames := make(map[int64]string)
-	_store := store.FromContext(c)
-	if _store != nil {
-		agents, err := _store.AgentList(nil)
-		if err == nil {
-			for _, agent := range agents {
-				agentNames[agent.ID] = agent.Name
-			}
-		}
-	}
-
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
-		if task.AgentID != 0 {
-			if name, ok := agentNames[task.AgentID]; ok {
-				task.AgentName = name
-			}
-		}
 		stats.Pending = append(stats.Pending, task)
 	}
 	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
-		if task.AgentID != 0 {
-			if name, ok := agentNames[task.AgentID]; ok {
-				task.AgentName = name
-			}
-		}
 		stats.WaitingOnDeps = append(stats.WaitingOnDeps, task)
 	}
 	for _, entry := range q.running {
-		if entry.item.AgentID != 0 {
-			if name, ok := agentNames[entry.item.AgentID]; ok {
-				entry.item.AgentName = name
-			}
-		}
 		stats.Running = append(stats.Running, entry.item)
 	}
 	stats.Paused = q.paused
