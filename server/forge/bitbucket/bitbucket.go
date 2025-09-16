@@ -471,7 +471,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		if oldPl != nil && oldPl.Commit == pl.Commit {
 			pl.Event = model.EventPullMetadata
-			pl.EventReason = "update"
+			pl.EventReason = []string{"update"}
 		}
 	}
 

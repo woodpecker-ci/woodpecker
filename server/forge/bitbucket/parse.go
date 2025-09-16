@@ -135,7 +135,7 @@ func parseHook(r *http.Request) (*parsedHookMetadata, *model.Pipeline, error) {
 		}
 
 		p.Event = model.EventPullMetadata
-		p.EventReason = strings.TrimPrefix(hookType, "pullrequest:")
+		p.EventReason = []string{strings.TrimPrefix(hookType, "pullrequest:")}
 	}
 
 	return &parsedHookMetadata{
