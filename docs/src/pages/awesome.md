@@ -71,6 +71,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Woodpecker CI with automatic runner creation](https://planet.kde.org/jonah-bruchert-2023-05-13-woodpecker-ci-with-automatic-runner-creation/)
 - [Self-Hosted CI: Install and Run Woodpecker CI on Your VPS](https://mangohost.net/blog/self-hosted-ci-install-and-run-woodpecker-ci-on-your-vps/)
 - [Automating My Blog With Gitea and Woodpecker](https://bgenc.net/2022.11.19.automating-my-blog-with-gitea-and-woodpecker/)
+- [Testcontainers in Woodpecker CI](https://gaborpihaj.com/posts/testcontainers-in-woodpecker-ci/)
 
 ## Videos
 
