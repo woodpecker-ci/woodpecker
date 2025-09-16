@@ -272,7 +272,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'forges',
-        component: (): Component => import('~/components/layout/RouteWrapper.vue'),
+        component: (): Component => import('~/views/RouterView.vue'),
         props: true,
         children: [
           {
