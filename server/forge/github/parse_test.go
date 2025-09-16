@@ -122,7 +122,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, b)
 		assert.NotNil(t, p)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, "edited", b.EventReason)
+		assert.Equal(t, []string{"edited"}, b.EventReason)
 	})
 
 	t.Run("deploy hook", func(t *testing.T) {
@@ -165,7 +165,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, "milestoned", b.EventReason)
+		assert.Equal(t, []string{"milestoned"}, b.EventReason)
 		if assert.NotNil(t, p) {
 			assert.Equal(t, int64(2705176047), *p.ID)
 			assert.Equal(t, 1, *p.Number)
@@ -212,7 +212,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, "demilestoned", b.EventReason)
+		assert.Equal(t, []string{"demilestoned"}, b.EventReason)
 		if assert.NotNil(t, p) {
 			assert.Equal(t, int64(2705176047), *p.ID)
 			assert.Equal(t, 1, *p.Number)
@@ -247,7 +247,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, "labeled", b.EventReason)
+		assert.Equal(t, []string{"labeled"}, b.EventReason)
 		if assert.NotNil(t, p) {
 			assert.Equal(t, int64(2705176047), *p.ID)
 			assert.Equal(t, 1, *p.Number)
@@ -297,7 +297,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, "unlabeled", b.EventReason)
+		assert.Equal(t, []string{"unlabeled"}, b.EventReason)
 		if assert.NotNil(t, p) {
 			assert.Equal(t, int64(2705176047), *p.ID)
 			assert.Equal(t, 1, *p.Number)
@@ -331,7 +331,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, "assigned", b.EventReason)
+		assert.Equal(t, []string{"assigned"}, b.EventReason)
 		if assert.NotNil(t, p) {
 			assert.Equal(t, int64(2705176047), *p.ID)
 			assert.Equal(t, 1, *p.Number)
@@ -374,7 +374,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, "unassigned", b.EventReason)
+		assert.Equal(t, []string{"unassigned"}, b.EventReason)
 		if assert.NotNil(t, p) {
 			assert.Equal(t, int64(2705176047), *p.ID)
 			assert.Equal(t, 1, *p.Number)

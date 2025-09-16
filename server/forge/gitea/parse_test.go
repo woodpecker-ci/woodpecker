@@ -357,7 +357,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "edited",
+				EventReason:       []string{"edited"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -379,7 +379,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "edited",
+				EventReason:       []string{"edited"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -421,7 +421,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "label_updated",
+				EventReason:       []string{"label_updated"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -443,7 +443,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "label_updated",
+				EventReason:       []string{"label_updated"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -465,7 +465,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "label_cleared",
+				EventReason:       []string{"label_cleared"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -487,7 +487,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "milestoned",
+				EventReason:       []string{"milestoned"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -509,7 +509,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "milestoned",
+				EventReason:       []string{"milestoned"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -531,7 +531,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "demilestoned",
+				EventReason:       []string{"demilestoned"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -553,7 +553,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "assigned",
+				EventReason:       []string{"assigned"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -575,7 +575,7 @@ func TestGiteaParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
-				EventReason:       "unassigned",
+				EventReason:       []string{"unassigned"},
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",

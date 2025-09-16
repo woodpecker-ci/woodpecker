@@ -159,7 +159,9 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		pipeline.PullRequestLabels = []string{}
 	}
 
-	pipeline.EventReason = common.NormalizeEventReason(pipeline.EventReason)
+	for i := range pipeline.EventReason {
+		pipeline.EventReason[i] = common.NormalizeEventReason(pipeline.EventReason[i])
+	}
 
 	return repo, pipeline, err
 }

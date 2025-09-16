@@ -185,7 +185,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	}
 
 	if pipeline.Event == model.EventPullMetadata {
-		pipeline.EventReason = hook.Action
+		pipeline.EventReason = []string{hook.Action}
 	}
 
 	return pipeline

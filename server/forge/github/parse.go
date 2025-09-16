@@ -191,7 +191,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 
 	pipeline := &model.Pipeline{
 		Event:       event,
-		EventReason: eventAction,
+		EventReason: []string{eventAction},
 		Commit:      hook.GetPullRequest().GetHead().GetSHA(),
 		ForgeURL:    hook.GetPullRequest().GetHTMLURL(),
 		Ref:         fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
@@ -214,7 +214,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	}
 
 	if event == model.EventPullMetadata {
-		pipeline.EventReason = hook.GetAction()
+		pipeline.EventReason = []string{hook.GetAction()}
 	}
 
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil

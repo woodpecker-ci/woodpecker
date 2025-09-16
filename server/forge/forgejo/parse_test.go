@@ -317,7 +317,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "anbraten",
 				Event:             "pull_request_metadata",
-				EventReason:       "edited",
+				EventReason:       []string{"edited"},
 				Commit:            "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
@@ -463,7 +463,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "6543",
 				Event:             "pull_request_metadata",
-				EventReason:       "assigned",
+				EventReason:       []string{"assigned"},
 				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
@@ -502,7 +502,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "6543",
 				Event:             "pull_request_metadata",
-				EventReason:       "milestoned",
+				EventReason:       []string{"milestoned"},
 				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
@@ -541,7 +541,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "6543",
 				Event:             "pull_request_metadata",
-				EventReason:       "label_updated",
+				EventReason:       []string{"label_updated"},
 				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
@@ -580,7 +580,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "6543",
 				Event:             "pull_request_metadata",
-				EventReason:       "unassigned",
+				EventReason:       []string{"unassigned"},
 				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
@@ -619,7 +619,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "6543",
 				Event:             "pull_request_metadata",
-				EventReason:       "milestoned",
+				EventReason:       []string{"milestoned"},
 				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
@@ -658,7 +658,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "6543",
 				Event:             "pull_request_metadata",
-				EventReason:       "label_updated",
+				EventReason:       []string{"label_updated"},
 				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
@@ -697,7 +697,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "6543",
 				Event:             "pull_request_metadata",
-				EventReason:       "label_cleared",
+				EventReason:       []string{"label_cleared"},
 				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
@@ -736,7 +736,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Author:            "6543",
 				Event:             "pull_request_metadata",
-				EventReason:       "demilestoned",
+				EventReason:       []string{"demilestoned"},
 				Commit:            "36b5813240a9d2daa29b05046d56a53e18f39a3e",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
