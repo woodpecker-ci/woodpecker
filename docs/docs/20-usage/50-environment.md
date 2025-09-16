@@ -233,73 +233,67 @@ For the `pull_request_metadata` event, the exact reason a metadata change was de
 
 ### GitHub
 
-| NAME                  | Description                                        |
-|-----------------------|----------------------------------------------------|
+| NAME                    | Description                                        |
+|-------------------------|----------------------------------------------------|
 |`assigned`               | pull request was assigned to a user                |
-|auto_merge_disabled    | Auto merge was disabled for a pull request         |
-|auto_merge_enabled     | Auto merge was enabled for a pull request          |
-|converted_to_draft     | pull request was converted to a draft              |
-|demilestoned           | pull request was removed from a milestone          |
-|dequeued               | pull request was removed from the merge queue      |
-|edited                 | The title or body of a pull request was edited, or the base branch of a pull request was changed|
-|enqueued               | pull request was added to the merge queue          |
-|labeled                | label was added to a pull request                  |
-|locked                 | conversation on a pull request was locked          |
-|milestoned             | pull request was added to a milestone              |
-|ready_for_review       | draft pull request was marked as ready for review  |
-|review_request_removed | request for review by a person or team was removed |
-|review_requested       | review by a person or team was requested           |
-|unassigned             | user was unassigned from a pull request            |
-|unlabeled              | label was removed from a pull request              |
-|unlocked               | conversation on a pull request was unlocked        |
+|`converted_to_draft`     | pull request was converted to a draft              |
+|`demilestoned`           | pull request was removed from a milestone          |
+|`edited`                 | The title or body of a pull request was edited, or the base branch of a pull request was changed|
+|`labeled`                | label was added to a pull request                  |
+|`locked`                 | conversation on a pull request was locked          |
+|`milestoned`             | pull request was added to a milestone              |
+|`ready_for_review`       | draft pull request was marked as ready for review  |
+|`unassigned`             | user was unassigned from a pull request            |
+|`unlabeled`              | label was removed from a pull request              |
+|`unlocked`               | conversation on a pull request was unlocked        |
 
 ### Gitea
 
-| NAME            | Description                                       |
-|-----------------|---------------------------------------------------|
-|assigned         | user assigned                                     |
-|demilestoned     | milestone removed                                 |
-|edited           | title or description edited                       |
-|label_cleared    | all labels removed                                |
-|label_updated    | new label added / label changed                   |
-|milestoned       | milestone added / changed                         |
-|review_requested | new review was requested                          |
-|reviewed         | review was done (accepted / commented / rejected) |
-|unassigned       | all assignees removed                             |
+| NAME              | Description                                       |
+|-------------------|---------------------------------------------------|
+|`assigned`         | user assigned                                     |
+|`demilestoned`     | milestone removed                                 |
+|`edited`           | title or description edited                       |
+|`label_cleared`    | all labels removed                                |
+|`label_updated`    | new label added / label changed                   |
+|`milestoned`       | milestone added / changed                         |
+|`review_requested` | new review was requested                          |
+|`reviewed`         | review was done (accepted / commented / rejected) |
+|`unassigned`       | all assignees removed                             |
 
 ### Forgejo
 
-| NAME            | Description                                       |
-|-----------------|---------------------------------------------------|
-|assigned         | user assigned                                     |
-|demilestoned     | milestone removed                                 |
-|edited           | title or description edited                       |
-|label_cleared    | all labels removed                                |
-|label_updated    | new label added / label changed                   |
-|milestoned       | milestone added / changed                         |
-|review_requested | new review was requested                          |
-|reviewed         | review was done (accepted / commented / rejected) |
-|unassigned       | all assignees removed                             |
+| NAME              | Description                                       |
+|-------------------|---------------------------------------------------|
+|`assigned`         | user assigned                                     |
+|`demilestoned`     | milestone removed                                 |
+|`edited`           | title or description edited                       |
+|`label_cleared`    | all labels removed                                |
+|`label_updated`    | new label added / label changed                   |
+|`milestoned`       | milestone added / changed                         |
+|`review_requested` | new review was requested                          |
+|`reviewed`         | review was done (accepted / commented / rejected) |
+|`unassigned`       | all assignees removed                             |
 
 ### GitLab
 
 As GitLab merges metadata updates into one webhook we get only one event.
 The event reasons are separated via `,` as an list in `CI_PIPELINE_EVENT_REASON`.
 
-| NAME              | Description                                       |
-|-------------------|---------------------------------------------------|
-|assigned           | user assigned                                     |
-|approved           | review approved the merge request                 |
-|demilestoned       | milestone removed                                 |
-|description_edited | description edited                                |
-|labels_added       | pull had non and now got label added              |
-|labels_cleared     | all labels removed                                |
-|labels_updated     | labels changed                                    |
-|milestoned         | milestone added / changed                         |
-|title_edited       | title edited                                      |
-|unassigned         | all assignees removed                             |
-|unapproved         | approval revoked                                  |
-|review_requested   | new review was requested                          |
+| NAME                | Description                                       |
+|---------------------|---------------------------------------------------|
+|`assigned`           | user assigned                                     |
+|`approved`           | review approved the merge request                 |
+|`demilestoned`       | milestone removed                                 |
+|`description_edited` | description edited                                |
+|`labels_added`       | pull had non and now got label added              |
+|`labels_cleared`     | all labels removed                                |
+|`labels_updated`     | labels changed                                    |
+|`milestoned`         | milestone added / changed                         |
+|`title_edited`       | title edited                                      |
+|`unassigned`         | all assignees removed                             |
+|`unapproved`         | approval revoked                                  |
+|`review_requested`   | new review was requested                          |
 
 ### Bitbucket
 

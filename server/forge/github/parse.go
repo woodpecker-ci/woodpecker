@@ -32,11 +32,22 @@ import (
 const (
 	hookField = "payload"
 
-	actionOpen     = "opened"
-	actionReopen   = "reopened"
-	actionClose    = "closed"
-	actionSync     = "synchronize"
-	actionReleased = "released"
+	actionOpen             = "opened"
+	actionReopen           = "reopened"
+	actionClose            = "closed"
+	actionSync             = "synchronize"
+	actionReleased         = "released"
+	actionAssigned         = "assigned"
+	actionConvertedToDraft = "converted_to_draft"
+	actionDemilestoned     = "demilestoned"
+	actionEdited           = "edited"
+	actionLabeled          = "labeled"
+	actionLocked           = "locked"
+	actionMilestoned       = "milestoned"
+	actionReadyForReview   = "ready_for_review"
+	actionUnassigned       = "unassigned"
+	actionUnlabeled        = "unlabeled"
+	actionUnlocked         = "unlocked"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
@@ -154,9 +165,25 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		// default case nothing to do
 	case actionClose:
 		event = model.EventPullClosed
-	default: // metadata catches the rest
+	case actionAssigned,
+		actionConvertedToDraft,
+		actionDemilestoned,
+		actionEdited,
+		actionLabeled,
+		actionLocked,
+		actionMilestoned,
+		actionReadyForReview,
+		actionUnassigned,
+		actionUnlabeled,
+		actionUnlocked:
+		// metadata pull events
 		event = model.EventPullMetadata
 		eventAction = hook.GetAction()
+	default:
+		return nil, nil, nil, &types.ErrIgnoreEvent{
+			Event:  string(model.EventPullMetadata),
+			Reason: fmt.Sprintf("action %s is not supported", hook.GetAction()),
+		}
 	}
 
 	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
