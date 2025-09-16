@@ -330,7 +330,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "title_edited,description_edited", pipeline.EventReason)
+				assert.Equal(t, []string{"title_edited,description_edited"}, pipeline.EventReason)
 			}
 		})
 
@@ -352,7 +352,7 @@ func Test_GitLab(t *testing.T) {
 			}
 		})
 
-		t.Run("merge request review acknowledgment", func(t *testing.T) {
+		t.Run("merge request review approved", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
 				fixtures.ServiceHookURL.String(),
@@ -361,16 +361,9 @@ func Test_GitLab(t *testing.T) {
 			req.Header = fixtures.MergeRequestHookHeaders
 
 			hookRepo, pipeline, err := client.Hook(ctx, req)
-			assert.NoError(t, err)
-			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-				assert.Equal(t, "main", hookRepo.Branch)
-				assert.Equal(t, "anbraten", hookRepo.Owner)
-				assert.Equal(t, "woodpecker", hookRepo.Name)
-				assert.Equal(t, "Update client.go 🎉", pipeline.Title)
-				assert.Len(t, pipeline.ChangedFiles, 0)
-				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "approved", pipeline.EventReason)
-			}
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+			assert.Nil(t, hookRepo)
+			assert.Nil(t, pipeline)
 		})
 
 		t.Run("merge request review requested", func(t *testing.T) {
@@ -390,7 +383,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "review_requested", pipeline.EventReason)
+				assert.Equal(t, []string{"review_requested"}, pipeline.EventReason)
 			}
 		})
 
@@ -410,7 +403,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "assigned", pipeline.EventReason)
+				assert.Equal(t, []string{"assigned"}, pipeline.EventReason)
 			}
 		})
 
@@ -430,7 +423,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "assigned,unassigned", pipeline.EventReason)
+				assert.Equal(t, []string{"assigned,unassigned"}, pipeline.EventReason)
 			}
 		})
 
@@ -450,7 +443,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "milestoned", pipeline.EventReason)
+				assert.Equal(t, []string{"milestoned"}, pipeline.EventReason)
 			}
 		})
 
@@ -470,7 +463,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "demilestoned", pipeline.EventReason)
+				assert.Equal(t, []string{"demilestoned"}, pipeline.EventReason)
 			}
 		})
 
@@ -490,7 +483,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "labels_added", pipeline.EventReason)
+				assert.Equal(t, []string{"label_added"}, pipeline.EventReason)
 			}
 		})
 
@@ -510,7 +503,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "labels_cleared", pipeline.EventReason)
+				assert.Equal(t, []string{"label_cleared"}, pipeline.EventReason)
 			}
 		})
 
@@ -530,7 +523,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "labels_updated", pipeline.EventReason)
+				assert.Equal(t, []string{"label_updated"}, pipeline.EventReason)
 			}
 		})
 
@@ -543,15 +536,9 @@ func Test_GitLab(t *testing.T) {
 			req.Header = fixtures.MergeRequestHookHeaders
 
 			hookRepo, pipeline, err := client.Hook(ctx, req)
-			assert.NoError(t, err)
-			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-				assert.Equal(t, "main", hookRepo.Branch)
-				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
-				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Len(t, pipeline.ChangedFiles, 0)
-				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "unapproved", pipeline.EventReason)
-			}
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+			assert.Nil(t, hookRepo)
+			assert.Nil(t, pipeline)
 		})
 	})
 }

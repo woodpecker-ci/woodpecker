@@ -23,6 +23,7 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -34,13 +35,11 @@ const (
 
 	stateOpened = "opened"
 
-	actionOpen       = "open"
-	actionClose      = "close"
-	actionReopen     = "reopen"
-	actionMerge      = "merge"
-	actionUpdate     = "update"
-	actionApproved   = "approved"
-	actionUnapproved = "unapproved"
+	actionOpen   = "open"
+	actionClose  = "close"
+	actionReopen = "reopen"
+	actionMerge  = "merge"
+	actionUpdate = "update"
 
 	metadataReasonAssigned          = "assigned"
 	metadataReasonUnassigned        = "unassigned"
@@ -102,11 +101,6 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 		// pull open event -> pull event
 		pipeline.Event = model.EventPull
 
-	case actionApproved, actionUnapproved:
-		// all actions that are not updates but supported -> pull metadata
-		pipeline.Event = model.EventPullMetadata
-		pipeline.EventReason = obj.Action
-
 	case actionUpdate:
 		if obj.OldRev != "" && obj.State == stateOpened {
 			// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
@@ -154,17 +148,20 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 			reason = append(reason, metadataReasonReviewRequested)
 		}
 
-		pipeline.EventReason = strings.Join(reason, ",")
+		for i := range reason {
+			reason[i] = common.NormalizeEventReason(reason[i])
+		}
 
-		if pipeline.EventReason == "" {
-			return 0, nil, nil, &types.ErrIgnoreEvent{
+		pipeline.EventReason = reason
+		if len(pipeline.EventReason) == 0 {
+			return 0, 0, nil, nil, &types.ErrIgnoreEvent{
 				Event:  "Merge Request Hook",
 				Reason: fmt.Sprintf("Action '%s' no supported changes detected", obj.Action),
 			}
 		}
 	default:
 		// non supported action
-		return 0, nil, nil, &types.ErrIgnoreEvent{
+		return 0, 0, nil, nil, &types.ErrIgnoreEvent{
 			Event:  "Merge Request Hook",
 			Reason: fmt.Sprintf("Action '%s' not supported", obj.Action),
 		}

@@ -24,33 +24,29 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 const (
-	hookEvent        = "X-Gitea-Event"
-	hookPush         = "push"
-	hookCreated      = "create"
-	hookPullRequest  = "pull_request"
-	hookRelease      = "release"
-	hookPullApproved = "pull_request_approved"
-	hookPullRejected = "pull_request_rejected"
-	hookPullComment  = "pull_request_comment"
+	hookEvent       = "X-Gitea-Event"
+	hookPush        = "push"
+	hookCreated     = "create"
+	hookPullRequest = "pull_request"
+	hookRelease     = "release"
 
-	actionOpen          = "opened"
-	actionSync          = "synchronized"
-	actionClose         = "closed"
-	actionEdited        = "edited"
-	actionLabelUpdate   = "label_updated"
-	actionLabelCleared  = "label_cleared"
-	actionMilestoned    = "milestoned"
-	actionDeMilestoned  = "demilestoned"
-	actionReviewRequest = "review_requested"
-	actionAssigned      = "assigned"
-	actionUnAssigned    = "unassigned"
-	actionReviewed      = "reviewed"
-	actionReopen        = "reopened"
+	actionOpen         = "opened"
+	actionSync         = "synchronized"
+	actionClose        = "closed"
+	actionEdited       = "edited"
+	actionLabelUpdate  = "label_updated"
+	actionLabelCleared = "label_cleared"
+	actionMilestoned   = "milestoned"
+	actionDeMilestoned = "demilestoned"
+	actionAssigned     = "assigned"
+	actionUnAssigned   = "unassigned"
+	actionReopen       = "reopened"
 
 	refBranch = "branch"
 	refTag    = "tag"
@@ -64,11 +60,9 @@ var actionList = []string{
 	actionLabelUpdate,
 	actionMilestoned,
 	actionDeMilestoned,
-	actionReviewRequest,
 	actionLabelCleared,
 	actionAssigned,
 	actionUnAssigned,
-	actionReviewed,
 	actionReopen,
 }
 
@@ -87,16 +81,6 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 		return parseCreatedHook(r.Body)
 	case hookPullRequest:
 		return parsePullRequestHook(r.Body)
-	case hookPullApproved,
-		hookPullRejected,
-		hookPullComment:
-		repo, pipe, err := parsePullRequestHook(r.Body)
-		if err != nil {
-			return repo, pipe, err
-		}
-		// as actions states all the same we update it
-		pipe.EventReason = hookType
-		return repo, pipe, nil
 	case hookRelease:
 		return parseReleaseHook(r.Body)
 	}
@@ -173,6 +157,10 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 	if pr.Action == actionLabelCleared {
 		// all other actions return the state of labels after the actions where done ... so we should too
 		pipeline.PullRequestLabels = []string{}
+	}
+
+	for i := range pipeline.EventReason {
+		pipeline.EventReason[i] = common.NormalizeEventReason(pipeline.EventReason[i])
 	}
 
 	return repo, pipeline, err
