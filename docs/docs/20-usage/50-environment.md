@@ -281,9 +281,9 @@ The event reasons are separated via `,` as an list in `CI_PIPELINE_EVENT_REASON`
 |`assigned`           | user assigned                                     |
 |`demilestoned`       | milestone removed                                 |
 |`description_edited` | description edited                                |
-|`labels_added`       | pull had non and now got label added              |
-|`labels_cleared`     | all labels removed                                |
-|`labels_updated`     | labels changed                                    |
+|`label_added`        | pull had non and now got label added              |
+|`label_cleared`      | all labels removed                                |
+|`label_updated`      | labels changed                                    |
 |`milestoned`         | milestone added / changed                         |
 |`title_edited`       | title edited                                      |
 |`unassigned`         | all assignees removed                             |

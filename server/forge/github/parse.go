@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-github/v74/github"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -178,7 +179,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		actionUnlocked:
 		// metadata pull events
 		event = model.EventPullMetadata
-		eventAction = hook.GetAction()
+		eventAction = common.NormalizeEventReason(hook.GetAction())
 	default:
 		return nil, nil, nil, &types.ErrIgnoreEvent{
 			Event:  string(model.EventPullMetadata),

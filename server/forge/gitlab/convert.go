@@ -23,6 +23,7 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -145,6 +146,10 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 
 		if len(hook.Changes.Reviewers.Current) > len(hook.Changes.Reviewers.Previous) {
 			reason = append(reason, metadataReasonReviewRequested)
+		}
+
+		for i := range reason {
+			reason[i] = common.NormalizeEventReason(reason[i])
 		}
 
 		pipeline.EventReason = strings.Join(reason, ",")

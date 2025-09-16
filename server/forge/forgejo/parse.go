@@ -22,6 +22,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -150,6 +151,8 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		// all other actions return the state of labels after the actions were done
 		pipeline.PullRequestLabels = []string{}
 	}
+
+	pipeline.EventReason = common.NormalizeEventReason(pipeline.EventReason)
 
 	return repo, pipeline, err
 }

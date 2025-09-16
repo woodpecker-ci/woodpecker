@@ -483,7 +483,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "labels_added", pipeline.EventReason)
+				assert.Equal(t, "label_added", pipeline.EventReason)
 			}
 		})
 
@@ -503,7 +503,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "labels_cleared", pipeline.EventReason)
+				assert.Equal(t, "label_cleared", pipeline.EventReason)
 			}
 		})
 
@@ -523,7 +523,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-				assert.Equal(t, "labels_updated", pipeline.EventReason)
+				assert.Equal(t, "label_updated", pipeline.EventReason)
 			}
 		})
 
