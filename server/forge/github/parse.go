@@ -213,10 +213,6 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
 	}
 
-	if event == model.EventPullMetadata {
-		pipeline.EventReason = []string{hook.GetAction()}
-	}
-
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil
 }
 
