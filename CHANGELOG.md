@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-15
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Cleanup columns in forges table [[#5517](https://github.com/woodpecker-ci/woodpecker/pull/5517)]
 - Allow to get secrets from file [[#5509](https://github.com/woodpecker-ci/woodpecker/pull/5509)]
 - refactor: use slices.Contains to simplify [[#5468](https://github.com/woodpecker-ci/woodpecker/pull/5468)]
 - Hide unsupported forge options [[#5465](https://github.com/woodpecker-ci/woodpecker/pull/5465)]
