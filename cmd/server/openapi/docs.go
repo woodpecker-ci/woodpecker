@@ -4917,7 +4917,10 @@ const docTemplate = `{
                     "$ref": "#/definitions/WebhookEvent"
                 },
                 "event_reason": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "finished": {
                     "type": "integer"
@@ -5638,7 +5641,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "event_reason": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "finished": {
                     "type": "integer"
