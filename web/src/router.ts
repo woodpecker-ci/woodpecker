@@ -8,7 +8,7 @@ import useUserConfig from '~/compositions/useUserConfig';
 
 declare module 'vue-router' {
   interface RouteMeta {
-    authentication: 'required' | 'optional';
+    authentication?: 'required' | 'optional' | 'none';
     repoHeader?: true;
     layout?: 'default' | 'blank';
   }
@@ -28,13 +28,11 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'repos',
         component: (): Component => import('~/views/Repos.vue'),
-        meta: { authentication: 'required' },
       },
       {
         path: 'add',
         name: 'repo-add',
         component: (): Component => import('~/views/RepoAdd.vue'),
-        meta: { authentication: 'required' },
       },
       {
         path: ':repoId',
@@ -123,7 +121,6 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'settings',
             component: (): Component => import('~/views/repo/settings/RepoSettings.vue'),
-            meta: { authentication: 'required' },
             props: true,
             children: [
               {
@@ -168,7 +165,7 @@ const routes: RouteRecordRaw[] = [
             path: 'manual',
             name: 'repo-manual',
             component: (): Component => import('~/views/repo/RepoManualPipeline.vue'),
-            meta: { authentication: 'required', repoHeader: true },
+            meta: { repoHeader: true },
           },
         ],
       },
@@ -195,7 +192,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'settings',
         component: (): Component => import('~/views/org/settings/OrgSettingsWrapper.vue'),
-        meta: { authentication: 'required' },
         props: true,
         children: [
           {
@@ -234,7 +230,6 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/admin',
     component: (): Component => import('~/views/admin/AdminSettingsWrapper.vue'),
-    meta: { authentication: 'required' },
     children: [
       {
         path: '',
@@ -305,38 +300,32 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/user',
     component: (): Component => import('~/views/user/UserWrapper.vue'),
-    meta: { authentication: 'required' },
     props: true,
     children: [
       {
         path: '',
         name: 'user',
         component: (): Component => import('~/views/user/UserGeneral.vue'),
-        props: true,
       },
       {
         path: 'secrets',
         name: 'user-secrets',
         component: (): Component => import('~/views/user/UserSecrets.vue'),
-        props: true,
       },
       {
         path: 'registries',
         name: 'user-registries',
         component: (): Component => import('~/views/user/UserRegistries.vue'),
-        props: true,
       },
       {
         path: 'cli-and-api',
         name: 'user-cli-and-api',
         component: (): Component => import('~/views/user/UserCLIAndAPI.vue'),
-        props: true,
       },
       {
         path: 'agents',
         name: 'user-agents',
         component: (): Component => import('~/views/user/UserAgents.vue'),
-        props: true,
       },
     ],
   },
@@ -344,12 +333,11 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
-    meta: { layout: 'blank', authentication: 'optional' },
+    meta: { layout: 'blank', authentication: 'none' },
   },
   {
     path: '/cli/auth',
     component: (): Component => import('~/views/cli/Auth.vue'),
-    meta: { authentication: 'required' },
   },
 
   // TODO: deprecated routes => remove after some time
@@ -390,9 +378,14 @@ router.beforeEach(async (to, _, next) => {
 
   const authentication = useAuthentication();
   const authenticationMode =
-    to.matched.find((record) => record.meta.authentication === 'required')?.meta.authentication ?? 'required';
+    to.matched.find((record) => record.meta.authentication != null)?.meta.authentication ?? 'required';
   if (authenticationMode === 'required' && !authentication.isAuthenticated) {
     next({ name: 'login', query: { url: to.fullPath } });
+    return;
+  }
+
+  if (authenticationMode === 'none' && authentication.isAuthenticated) {
+    next({ name: 'home' });
     return;
   }
 
