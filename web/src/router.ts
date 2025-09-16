@@ -120,8 +120,8 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'settings',
             component: (): Component => import('~/views/repo/settings/RepoSettings.vue'),
-            props: true,
             meta: { authentication: 'required' },
+            props: true,
             children: [
               {
                 path: '',
@@ -165,7 +165,7 @@ const routes: RouteRecordRaw[] = [
             path: 'manual',
             name: 'repo-manual',
             component: (): Component => import('~/views/repo/RepoManualPipeline.vue'),
-            meta: { repoHeader: true, authentication: 'required' },
+            meta: { authentication: 'required', repoHeader: true },
           },
         ],
       },
@@ -190,8 +190,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'settings',
         component: (): Component => import('~/views/org/settings/OrgSettingsWrapper.vue'),
-        props: true,
         meta: { authentication: 'required' },
+        props: true,
         children: [
           {
             path: '',
@@ -299,7 +299,6 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/user',
     component: (): Component => import('~/views/user/UserWrapper.vue'),
-    props: true,
     meta: { authentication: 'required' },
     children: [
       {
