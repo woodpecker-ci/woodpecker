@@ -26,6 +26,7 @@ type Pipeline struct {
 	Author               string                 `json:"author"                  xorm:"INDEX 'author'"`
 	Parent               int64                  `json:"parent"                  xorm:"parent"`
 	Event                WebhookEvent           `json:"event"                   xorm:"event"`
+	EventReason          []string               `json:"event_reason"            xorm:"json 'event_reason'"`
 	Status               StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
 	Errors               []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
 	Created              int64                  `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
@@ -73,6 +74,11 @@ type PipelineFilter struct {
 // IsMultiPipeline checks if step list contain more than one parent step.
 func (p Pipeline) IsMultiPipeline() bool {
 	return len(p.Workflows) > 1
+}
+
+// IsPullRequest checks if it's a PR event.
+func (p Pipeline) IsPullRequest() bool {
+	return p.Event == EventPull || p.Event == EventPullClosed || p.Event == EventPullMetadata
 }
 
 type PipelineOptions struct {

@@ -1,0 +1,228 @@
+{
+  "object_kind": "merge_request",
+  "event_type": "merge_request",
+  "user": {
+    "id": 4575606,
+    "name": "6543",
+    "username": "real6543",
+    "avatar_url": "https://gitlab.com/uploads/-/system/user/avatar/4575606/avatar.png",
+    "email": "[REDACTED]"
+  },
+  "project": {
+    "id": 72081820,
+    "name": "test_ci_tmp",
+    "description": null,
+    "web_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp",
+    "avatar_url": null,
+    "git_ssh_url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+    "git_http_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp.git",
+    "namespace": "demoaccount2-commits-group",
+    "visibility_level": 0,
+    "path_with_namespace": "demoaccount2-commits-group/test_ci_tmp",
+    "default_branch": "main",
+    "ci_config_path": "",
+    "homepage": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp",
+    "url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+    "ssh_url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+    "http_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp.git"
+  },
+  "object_attributes": {
+    "assignee_id": null,
+    "author_id": 4575606,
+    "created_at": "2025-08-05 21:48:25 UTC",
+    "description": ":tada: text that you might read eventually.",
+    "draft": false,
+    "head_pipeline_id": null,
+    "id": 405095454,
+    "iid": 3,
+    "last_edited_at": "2025-08-05 22:01:30 UTC",
+    "last_edited_by_id": 4575606,
+    "merge_commit_sha": null,
+    "merge_error": null,
+    "merge_params": {
+      "force_remove_source_branch": "0"
+    },
+    "merge_status": "can_be_merged",
+    "merge_user_id": null,
+    "merge_when_pipeline_succeeds": false,
+    "milestone_id": 6088906,
+    "source_branch": "real6543-main-patch-42541",
+    "source_project_id": 72081820,
+    "state_id": 1,
+    "target_branch": "main",
+    "target_project_id": 72081820,
+    "time_estimate": 0,
+    "title": "Edit README for more text to read",
+    "updated_at": "2025-08-06 01:20:04 UTC",
+    "updated_by_id": 4575606,
+    "prepared_at": "2025-08-05 21:48:27 UTC",
+    "assignee_ids": [],
+    "blocking_discussions_resolved": true,
+    "detailed_merge_status": "mergeable",
+    "first_contribution": true,
+    "human_time_change": null,
+    "human_time_estimate": null,
+    "human_total_time_spent": null,
+    "labels": [
+      {
+        "id": 41869665,
+        "title": "enhancement",
+        "color": "#a2eeef",
+        "project_id": 72081820,
+        "created_at": "2025-07-30 00:40:00 UTC",
+        "updated_at": "2025-07-30 00:40:00 UTC",
+        "template": false,
+        "description": null,
+        "type": "ProjectLabel",
+        "group_id": null
+      },
+      {
+        "id": 41869667,
+        "title": "help wanted",
+        "color": "#008672",
+        "project_id": 72081820,
+        "created_at": "2025-07-30 00:40:00 UTC",
+        "updated_at": "2025-07-30 00:40:00 UTC",
+        "template": false,
+        "description": null,
+        "type": "ProjectLabel",
+        "group_id": null
+      }
+    ],
+    "last_commit": {
+      "id": "2f7670508b771e7e77839402be8b34b13787aba8",
+      "message": "Edit README.md",
+      "title": "Edit README.md",
+      "timestamp": "2025-08-05T21:45:58+00:00",
+      "url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp/-/commit/2f7670508b771e7e77839402be8b34b13787aba8",
+      "author": {
+        "name": "6543",
+        "email": "[REDACTED]"
+      }
+    },
+    "reviewer_ids": [],
+    "source": {
+      "id": 72081820,
+      "name": "test_ci_tmp",
+      "description": null,
+      "web_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp",
+      "avatar_url": null,
+      "git_ssh_url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+      "git_http_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp.git",
+      "namespace": "demoaccount2-commits-group",
+      "visibility_level": 0,
+      "path_with_namespace": "demoaccount2-commits-group/test_ci_tmp",
+      "default_branch": "main",
+      "ci_config_path": "",
+      "homepage": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp",
+      "url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+      "ssh_url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+      "http_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp.git"
+    },
+    "state": "opened",
+    "target": {
+      "id": 72081820,
+      "name": "test_ci_tmp",
+      "description": null,
+      "web_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp",
+      "avatar_url": null,
+      "git_ssh_url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+      "git_http_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp.git",
+      "namespace": "demoaccount2-commits-group",
+      "visibility_level": 0,
+      "path_with_namespace": "demoaccount2-commits-group/test_ci_tmp",
+      "default_branch": "main",
+      "ci_config_path": "",
+      "homepage": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp",
+      "url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+      "ssh_url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+      "http_url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp.git"
+    },
+    "time_change": 0,
+    "total_time_spent": 0,
+    "url": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp/-/merge_requests/3",
+    "work_in_progress": false,
+    "approval_rules": [],
+    "action": "update"
+  },
+  "labels": [
+    {
+      "id": 41869665,
+      "title": "enhancement",
+      "color": "#a2eeef",
+      "project_id": 72081820,
+      "created_at": "2025-07-30 00:40:00 UTC",
+      "updated_at": "2025-07-30 00:40:00 UTC",
+      "template": false,
+      "description": null,
+      "type": "ProjectLabel",
+      "group_id": null
+    },
+    {
+      "id": 41869667,
+      "title": "help wanted",
+      "color": "#008672",
+      "project_id": 72081820,
+      "created_at": "2025-07-30 00:40:00 UTC",
+      "updated_at": "2025-07-30 00:40:00 UTC",
+      "template": false,
+      "description": null,
+      "type": "ProjectLabel",
+      "group_id": null
+    }
+  ],
+  "changes": {
+    "updated_at": {
+      "previous": "2025-08-06 01:18:10 UTC",
+      "current": "2025-08-06 01:20:04 UTC"
+    },
+    "labels": {
+      "previous": [
+        {
+          "id": 41869663,
+          "title": "documentation",
+          "color": "#0075ca",
+          "project_id": 72081820,
+          "created_at": "2025-07-30 00:40:00 UTC",
+          "updated_at": "2025-07-30 00:40:00 UTC",
+          "template": false,
+          "description": null,
+          "type": "ProjectLabel",
+          "group_id": null
+        }
+      ],
+      "current": [
+        {
+          "id": 41869665,
+          "title": "enhancement",
+          "color": "#a2eeef",
+          "project_id": 72081820,
+          "created_at": "2025-07-30 00:40:00 UTC",
+          "updated_at": "2025-07-30 00:40:00 UTC",
+          "template": false,
+          "description": null,
+          "type": "ProjectLabel",
+          "group_id": null
+        },
+        {
+          "id": 41869667,
+          "title": "help wanted",
+          "color": "#008672",
+          "project_id": 72081820,
+          "created_at": "2025-07-30 00:40:00 UTC",
+          "updated_at": "2025-07-30 00:40:00 UTC",
+          "template": false,
+          "description": null,
+          "type": "ProjectLabel",
+          "group_id": null
+        }
+      ]
+    }
+  },
+  "repository": {
+    "name": "test_ci_tmp",
+    "url": "git@gitlab.com:demoaccount2-commits-group/test_ci_tmp.git",
+    "description": null,
+    "homepage": "https://gitlab.com/demoaccount2-commits-group/test_ci_tmp"
+  }
+}
