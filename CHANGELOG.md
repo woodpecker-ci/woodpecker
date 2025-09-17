@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-16
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -49,12 +49,14 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.145.0 [[#5523](https://github.com/woodpecker-ci/woodpecker/pull/5523)]
 - fix(deps): update dependency marked to v16.3.0 [[#5513](https://github.com/woodpecker-ci/woodpecker/pull/5513)]
 - fix(deps): update dependency simple-icons to v15.15.0 [[#5508](https://github.com/woodpecker-ci/woodpecker/pull/5508)]
 - chore(deps): update dependency jsdom to v27 [[#5506](https://github.com/woodpecker-ci/woodpecker/pull/5506)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.144.1 [[#5505](https://github.com/woodpecker-ci/woodpecker/pull/5505)]
 - chore(deps): update web npm deps non-major [[#5504](https://github.com/woodpecker-ci/woodpecker/pull/5504)]
 - fix(deps): update golang-packages [[#5499](https://github.com/woodpecker-ci/woodpecker/pull/5499)]
+- fix(deps): update golang-packages [[#5496](https://github.com/woodpecker-ci/woodpecker/pull/5496)]
 - fix(deps): update golang-packages [[#5493](https://github.com/woodpecker-ci/woodpecker/pull/5493)]
 - fix(deps): update golang-packages [[#5491](https://github.com/woodpecker-ci/woodpecker/pull/5491)]
 - fix(deps): update dependency simple-icons to v15.14.0 [[#5490](https://github.com/woodpecker-ci/woodpecker/pull/5490)]
@@ -67,6 +69,7 @@
 - fix(deps): update golang-packages [[#5479](https://github.com/woodpecker-ci/woodpecker/pull/5479)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.142.5 [[#5475](https://github.com/woodpecker-ci/woodpecker/pull/5475)]
 - fix(deps): update web npm deps non-major [[#5473](https://github.com/woodpecker-ci/woodpecker/pull/5473)]
+- fix(deps): update golang-packages [[#5467](https://github.com/woodpecker-ci/woodpecker/pull/5467)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.142.2 [[#5466](https://github.com/woodpecker-ci/woodpecker/pull/5466)]
 - fix(deps): update golang-packages [[#5463](https://github.com/woodpecker-ci/woodpecker/pull/5463)]
 - chore(deps): lock file maintenance [[#5458](https://github.com/woodpecker-ci/woodpecker/pull/5458)]
