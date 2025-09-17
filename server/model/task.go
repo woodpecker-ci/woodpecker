@@ -31,7 +31,7 @@ type Task struct {
 	Dependencies []string               `json:"dependencies" xorm:"json 'dependencies'"`
 	RunOn        []string               `json:"run_on"       xorm:"json 'run_on'"`
 	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'dependencies_status'"`
-	AgentID      int64                  `json:"agent_id"     xorm:"-"`
+	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
 	AgentName    string                 `json:"agent_name,omitempty" xorm:"-"`
 	PipelineID   int64                  `json:"pipeline_id"  xorm:"'pipeline_id'"`
 	RepoID       int64                  `json:"repo_id"      xorm:"'repo_id'"`

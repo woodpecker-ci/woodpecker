@@ -198,7 +198,7 @@ func (q *fifo) Extend(_ context.Context, agentID int64, taskID string) error {
 }
 
 // Info returns internal queue information.
-func (q *fifo) Info(c context.Context) InfoT {
+func (q *fifo) Info(_ context.Context) InfoT {
 	q.Lock()
 	stats := InfoT{}
 	stats.Stats.Workers = len(q.workers)
