@@ -16,7 +16,7 @@ package datastore
 
 import "go.woodpecker-ci.org/woodpecker/v3/server/model"
 
-func (s storage) ServerConfigGet(key string) (string, error) {
+func (s *storage) ServerConfigGet(key string) (string, error) {
 	config := new(model.ServerConfig)
 	err := wrapGet(s.engine.ID(key).Get(config))
 	if err != nil {
@@ -26,7 +26,7 @@ func (s storage) ServerConfigGet(key string) (string, error) {
 	return config.Value, nil
 }
 
-func (s storage) ServerConfigSet(key, value string) error {
+func (s *storage) ServerConfigSet(key, value string) error {
 	config := &model.ServerConfig{
 		Key: key,
 	}
@@ -56,7 +56,7 @@ func (s storage) ServerConfigSet(key, value string) error {
 	return sess.Commit()
 }
 
-func (s storage) ServerConfigDelete(key string) error {
+func (s *storage) ServerConfigDelete(key string) error {
 	config := &model.ServerConfig{
 		Key: key,
 	}

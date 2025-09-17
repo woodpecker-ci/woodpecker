@@ -26,29 +26,29 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-func (s storage) GetRepo(id int64) (*model.Repo, error) {
+func (s *storage) GetRepo(id int64) (*model.Repo, error) {
 	repo := new(model.Repo)
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
-func (s storage) GetRepoForgeID(remoteID model.ForgeRemoteID) (*model.Repo, error) {
+func (s *storage) GetRepoForgeID(remoteID model.ForgeRemoteID) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.getRepoForgeID(sess, remoteID)
 }
 
-func (s storage) getRepoForgeID(e *xorm.Session, remoteID model.ForgeRemoteID) (*model.Repo, error) {
+func (s *storage) getRepoForgeID(e *xorm.Session, remoteID model.ForgeRemoteID) (*model.Repo, error) {
 	repo := new(model.Repo)
 	return repo, wrapGet(e.Where("forge_remote_id = ?", remoteID).Get(repo))
 }
 
-func (s storage) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+func (s *storage) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.getRepoNameFallback(sess, remoteID, fullName)
 }
 
-func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+func (s *storage) getRepoNameFallback(e *xorm.Session, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
 	repo, err := s.getRepoForgeID(e, remoteID)
 	if errors.Is(err, types.RecordNotExist) {
 		return s.getRepoName(e, fullName)
@@ -56,7 +56,7 @@ func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.ForgeRemote
 	return repo, err
 }
 
-func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
+func (s *storage) GetRepoName(fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	repo, err := s.getRepoName(sess, fullName)
@@ -71,16 +71,16 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	return repo, err
 }
 
-func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
+func (s *storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
 	repo := new(model.Repo)
 	return repo, wrapGet(e.Where("LOWER(full_name) = ?", strings.ToLower(fullName)).Get(repo))
 }
 
-func (s storage) GetRepoCount() (int64, error) {
+func (s *storage) GetRepoCount() (int64, error) {
 	return s.engine.Where(builder.Eq{"active": true}).Count(new(model.Repo))
 }
 
-func (s storage) CreateRepo(repo *model.Repo) error {
+func (s *storage) CreateRepo(repo *model.Repo) error {
 	switch {
 	case repo.Name == "":
 		return fmt.Errorf("repo name is empty")
@@ -94,16 +94,16 @@ func (s storage) CreateRepo(repo *model.Repo) error {
 	return err
 }
 
-func (s storage) UpdateRepo(repo *model.Repo) error {
+func (s *storage) UpdateRepo(repo *model.Repo) error {
 	_, err := s.engine.ID(repo.ID).AllCols().Update(repo)
 	return err
 }
 
-func (s storage) DeleteRepo(repo *model.Repo) error {
+func (s *storage) DeleteRepo(repo *model.Repo) error {
 	return s.deleteRepo(s.engine.NewSession(), repo)
 }
 
-func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
+func (s *storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 	const batchSize = perPage
 	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
@@ -143,7 +143,7 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 
 // RepoList list all repos where permissions for specific user are stored
 // TODO: paginate
-func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, error) {
+func (s *storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.engine.Table("repos").
 		Join("INNER", "perms", "perms.repo_id = repos.id").
@@ -160,7 +160,7 @@ func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, 
 }
 
 // RepoListAll list all repos.
-func (s storage) RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error) {
+func (s *storage) RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.paginate(p).Table("repos")
 	if active {

@@ -22,14 +22,14 @@ import (
 
 const orderRegistriesBy = "id"
 
-func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
+func (s *storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
 	reg := new(model.Registry)
 	return reg, wrapGet(s.engine.Where(
 		builder.Eq{"repo_id": repo.ID, "address": addr},
 	).Get(reg))
 }
 
-func (s storage) RegistryList(repo *model.Repo, includeGlobalAndOrg bool, p *model.ListOptions) ([]*model.Registry, error) {
+func (s *storage) RegistryList(repo *model.Repo, includeGlobalAndOrg bool, p *model.ListOptions) ([]*model.Registry, error) {
 	var regs []*model.Registry
 	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrg {
@@ -39,46 +39,46 @@ func (s storage) RegistryList(repo *model.Repo, includeGlobalAndOrg bool, p *mod
 	return regs, s.paginate(p).Where(cond).OrderBy(orderRegistriesBy).Find(&regs)
 }
 
-func (s storage) RegistryListAll() ([]*model.Registry, error) {
+func (s *storage) RegistryListAll() ([]*model.Registry, error) {
 	var registries []*model.Registry
 	return registries, s.engine.Find(&registries)
 }
 
-func (s storage) RegistryCreate(registry *model.Registry) error {
+func (s *storage) RegistryCreate(registry *model.Registry) error {
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(registry)
 	return err
 }
 
-func (s storage) RegistryUpdate(registry *model.Registry) error {
+func (s *storage) RegistryUpdate(registry *model.Registry) error {
 	_, err := s.engine.ID(registry.ID).AllCols().Update(registry)
 	return err
 }
 
-func (s storage) RegistryDelete(registry *model.Registry) error {
+func (s *storage) RegistryDelete(registry *model.Registry) error {
 	return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))
 }
 
-func (s storage) OrgRegistryFind(orgID int64, name string) (*model.Registry, error) {
+func (s *storage) OrgRegistryFind(orgID int64, name string) (*model.Registry, error) {
 	registry := new(model.Registry)
 	return registry, wrapGet(s.engine.Where(
 		builder.Eq{"org_id": orgID, "address": name},
 	).Get(registry))
 }
 
-func (s storage) OrgRegistryList(orgID int64, p *model.ListOptions) ([]*model.Registry, error) {
+func (s *storage) OrgRegistryList(orgID int64, p *model.ListOptions) ([]*model.Registry, error) {
 	registries := make([]*model.Registry, 0)
 	return registries, s.paginate(p).Where("org_id = ?", orgID).OrderBy(orderRegistriesBy).Find(&registries)
 }
 
-func (s storage) GlobalRegistryFind(name string) (*model.Registry, error) {
+func (s *storage) GlobalRegistryFind(name string) (*model.Registry, error) {
 	registry := new(model.Registry)
 	return registry, wrapGet(s.engine.Where(
 		builder.Eq{"org_id": 0, "repo_id": 0, "address": name},
 	).Get(registry))
 }
 
-func (s storage) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
+func (s *storage) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
 	registries := make([]*model.Registry, 0)
 	return registries, s.paginate(p).Where(
 		builder.Eq{"org_id": 0, "repo_id": 0},
