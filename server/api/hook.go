@@ -37,64 +37,72 @@ import (
 // GetQueueInfo
 //
 //	@Summary		Get pipeline queue information
-//	@Description	TODO: link the InfoT response object - this is blocked, until the `swaggo/swag` tool dependency is v1.18.12 or newer
+//	@Description	Returns pipeline queue information with agent details
 //	@Router			/queue/info [get]
 //	@Produce		json
-//	@Success		200	{object}	map[string]string
+//	@Success		200	{object}	QueueInfo
 //	@Tags			Pipeline queues
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetQueueInfo(c *gin.Context) {
 	info := server.Config.Services.Queue.Info(c)
 	_store := store.FromContext(c)
 
-	// Collect all unique agent IDs from tasks
-	agentIDs := collectAgentIDs(info.Pending, info.WaitingOnDeps, info.Running)
-
-	// Get agent names for all unique agent IDs
-	agentNameMap := getAgentNames(_store, agentIDs)
-
-	// Enrich tasks with agent names
-	applyAgentNames(info.Pending, agentNameMap)
-	applyAgentNames(info.WaitingOnDeps, agentNameMap)
-	applyAgentNames(info.Running, agentNameMap)
-
-	c.IndentedJSON(http.StatusOK, info)
-}
-
-// collectAgentIDs collects all unique agent IDs from task lists
-func collectAgentIDs(taskLists ...[]*model.Task) map[int64]struct{} {
-	agentIDs := make(map[int64]struct{})
-	for _, tasks := range taskLists {
-		for _, task := range tasks {
-			if task.AgentID != 0 {
-				agentIDs[task.AgentID] = struct{}{}
-			}
-		}
-	}
-	return agentIDs
-}
-
-// getAgentNames gets agent names for the given agent IDs
-func getAgentNames(store store.Store, agentIDs map[int64]struct{}) map[int64]string {
+	// Create a map to store agent names by ID
 	agentNameMap := make(map[int64]string)
-	for agentID := range agentIDs {
-		agent, err := store.AgentFind(agentID)
-		if err == nil && agent != nil {
-			agentNameMap[agentID] = agent.Name
-		}
+
+	// Process tasks and add agent names
+	pendingWithAgents := processQueueTasks(_store, info.Pending, agentNameMap)
+	waitingWithAgents := processQueueTasks(_store, info.WaitingOnDeps, agentNameMap)
+	runningWithAgents := processQueueTasks(_store, info.Running, agentNameMap)
+
+	// Create response with agent-enhanced tasks
+	response := model.QueueInfo{
+		Pending:       pendingWithAgents,
+		WaitingOnDeps: waitingWithAgents,
+		Running:       runningWithAgents,
+		Stats: struct {
+			WorkerCount        int `json:"worker_count"`
+			PendingCount       int `json:"pending_count"`
+			WaitingOnDepsCount int `json:"waiting_on_deps_count"`
+			RunningCount       int `json:"running_count"`
+		}{
+			WorkerCount:        info.Stats.Workers,
+			PendingCount:       info.Stats.Pending,
+			WaitingOnDepsCount: info.Stats.WaitingOnDeps,
+			RunningCount:       info.Stats.Running,
+		},
+		Paused: info.Paused,
 	}
-	return agentNameMap
+
+	c.IndentedJSON(http.StatusOK, response)
 }
 
-// applyAgentNames applies agent names to tasks
-func applyAgentNames(tasks []*model.Task, agentNameMap map[int64]string) {
-	for _, task := range tasks {
+// processQueueTasks converts tasks to QueueTask structs and adds agent names.
+func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[int64]string) []model.QueueTask {
+	result := make([]model.QueueTask, len(tasks))
+	for i, task := range tasks {
+		// Create response struct from task
+		taskResponse := model.QueueTask{
+			Task: *task,
+		}
+
+		// Add agent name if available
 		if task.AgentID != 0 {
-			if name, ok := agentNameMap[task.AgentID]; ok {
-				task.AgentName = name
+			name, exists := agentNameMap[task.AgentID]
+			if !exists {
+				if agent, err := store.AgentFind(task.AgentID); err == nil && agent != nil {
+					name = agent.Name
+					agentNameMap[task.AgentID] = name
+				}
+			}
+			if exists && name != "" {
+				taskResponse.AgentName = name
 			}
 		}
+
+		result[i] = taskResponse
 	}
+	return result
 }
 
 // PauseQueue
