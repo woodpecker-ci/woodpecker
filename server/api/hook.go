@@ -44,9 +44,38 @@ import (
 //	@Tags			Pipeline queues
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetQueueInfo(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK,
-		server.Config.Services.Queue.Info(c),
-	)
+	info := server.Config.Services.Queue.Info(c)
+
+	// Get the store from the context
+	_store := store.FromContext(c)
+
+	// Enrich tasks with agent information by calling GetAgent for each task
+	for _, task := range info.Pending {
+		if task.AgentID != 0 {
+			agent, err := _store.AgentFind(task.AgentID)
+			if err == nil && agent != nil {
+				task.AgentName = agent.Name
+			}
+		}
+	}
+	for _, task := range info.WaitingOnDeps {
+		if task.AgentID != 0 {
+			agent, err := _store.AgentFind(task.AgentID)
+			if err == nil && agent != nil {
+				task.AgentName = agent.Name
+			}
+		}
+	}
+	for _, task := range info.Running {
+		if task.AgentID != 0 {
+			agent, err := _store.AgentFind(task.AgentID)
+			if err == nil && agent != nil {
+				task.AgentName = agent.Name
+			}
+		}
+	}
+
+	c.IndentedJSON(http.StatusOK, info)
 }
 
 // PauseQueue
