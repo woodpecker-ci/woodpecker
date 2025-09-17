@@ -77,30 +77,49 @@ func GetQueueInfo(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, response)
 }
 
+// getAgentName finds an agent's name, utilizing a map as a cache.
+func getAgentName(store store.Store, agentNameMap map[int64]string, agentID int64) (string, bool) {
+	// 1. Check the cache first.
+	name, exists := agentNameMap[agentID]
+	if exists {
+		return name, true
+	}
+
+	// 2. If not in cache, query the store.
+	agent, err := store.AgentFind(agentID)
+	if err != nil || agent == nil {
+		// Agent not found or an error occurred.
+		return "", false
+	}
+
+	// 3. Found the agent, update the cache and return the name.
+	if agent.Name != "" {
+		agentNameMap[agentID] = agent.Name
+		return agent.Name, true
+	}
+
+	return "", false
+}
+
 // processQueueTasks converts tasks to QueueTask structs and adds agent names.
 func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[int64]string) []model.QueueTask {
-	result := make([]model.QueueTask, len(tasks))
-	for i, task := range tasks {
-		// Create response struct from task
+	result := make([]model.QueueTask, 0, len(tasks))
+
+	for _, task := range tasks {
 		taskResponse := model.QueueTask{
 			Task: *task,
 		}
 
-		// Add agent name if available
-		if task.AgentID != 0 {
-			name, exists := agentNameMap[task.AgentID]
-			if !exists {
-				if agent, err := store.AgentFind(task.AgentID); err == nil && agent != nil {
-					name = agent.Name
-					agentNameMap[task.AgentID] = name
-				}
-			}
-			if exists && name != "" {
-				taskResponse.AgentName = name
-			}
+		if task.AgentID == 0 {
+			result = append(result, taskResponse)
+			continue
 		}
 
-		result[i] = taskResponse
+		if name, ok := getAgentName(store, agentNameMap, task.AgentID); ok {
+			taskResponse.AgentName = name
+		}
+
+		result = append(result, taskResponse)
 	}
 	return result
 }
