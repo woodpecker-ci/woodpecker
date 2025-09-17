@@ -45,37 +45,56 @@ import (
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetQueueInfo(c *gin.Context) {
 	info := server.Config.Services.Queue.Info(c)
-
-	// Get the store from the context
 	_store := store.FromContext(c)
 
-	// Enrich tasks with agent information by calling GetAgent for each task
-	for _, task := range info.Pending {
-		if task.AgentID != 0 {
-			agent, err := _store.AgentFind(task.AgentID)
-			if err == nil && agent != nil {
-				task.AgentName = agent.Name
-			}
-		}
-	}
-	for _, task := range info.WaitingOnDeps {
-		if task.AgentID != 0 {
-			agent, err := _store.AgentFind(task.AgentID)
-			if err == nil && agent != nil {
-				task.AgentName = agent.Name
-			}
-		}
-	}
-	for _, task := range info.Running {
-		if task.AgentID != 0 {
-			agent, err := _store.AgentFind(task.AgentID)
-			if err == nil && agent != nil {
-				task.AgentName = agent.Name
-			}
-		}
-	}
+	// Collect all unique agent IDs from tasks
+	agentIDs := collectAgentIDs(info.Pending, info.WaitingOnDeps, info.Running)
+
+	// Get agent names for all unique agent IDs
+	agentNameMap := getAgentNames(_store, agentIDs)
+
+	// Enrich tasks with agent names
+	applyAgentNames(info.Pending, agentNameMap)
+	applyAgentNames(info.WaitingOnDeps, agentNameMap)
+	applyAgentNames(info.Running, agentNameMap)
 
 	c.IndentedJSON(http.StatusOK, info)
+}
+
+// collectAgentIDs collects all unique agent IDs from task lists
+func collectAgentIDs(taskLists ...[]*model.Task) map[int64]struct{} {
+	agentIDs := make(map[int64]struct{})
+	for _, tasks := range taskLists {
+		for _, task := range tasks {
+			if task.AgentID != 0 {
+				agentIDs[task.AgentID] = struct{}{}
+			}
+		}
+	}
+	return agentIDs
+}
+
+// getAgentNames gets agent names for the given agent IDs
+func getAgentNames(store store.Store, agentIDs map[int64]struct{}) map[int64]string {
+	agentNameMap := make(map[int64]string)
+	for agentID := range agentIDs {
+		agent, err := store.AgentFind(agentID)
+		if err == nil && agent != nil {
+			agentNameMap[agentID] = agent.Name
+		}
+	}
+	return agentNameMap
+}
+
+// applyAgentNames applies agent names to tasks
+func applyAgentNames(tasks []*model.Task, agentNameMap map[int64]string) {
+	for _, task := range tasks {
+		if task.AgentID != 0 {
+			if name, ok := agentNameMap[task.AgentID]; ok {
+				task.AgentName = name
+			}
+		}
+	}
 }
 
 // PauseQueue
