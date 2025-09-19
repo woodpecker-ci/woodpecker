@@ -344,7 +344,7 @@
         "version": "Version",
         "last_contact": {
           "last_contact": "Last contact",
-          "badge": "last_contact"
+          "badge": "last contact"
         },
         "never": "Never",
         "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
