@@ -271,7 +271,8 @@
         "no_permission": "You are not allowed to access the debug information",
         "metadata_exec_title": "Re-run pipeline locally",
         "metadata_exec_desc": "Download the metadata of this pipeline to run it locally. This allows you to fix problems and test changes before committing them. The Woodpecker CLI must be installed locally in the same version as the server."
-      }
+      },
+      "view": "View pipeline"
     }
   },
   "org": {
@@ -341,7 +342,10 @@
           "badge": "org"
         },
         "version": "Version",
-        "last_contact": "Last contact",
+        "last_contact": {
+          "last_contact": "Last contact",
+          "badge": "last contact"
+        },
         "never": "Never",
         "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
         "edit_agent": "Edit agent",

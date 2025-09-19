@@ -51,7 +51,7 @@
         <TextField :id="id" :model-value="agent.version" disabled />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.last_contact')">
+      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.last_contact.last_contact')">
         <TextField
           :id="id"
           :model-value="
