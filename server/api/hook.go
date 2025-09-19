@@ -51,9 +51,23 @@ func GetQueueInfo(c *gin.Context) {
 	agentNameMap := make(map[int64]string)
 
 	// Process tasks and add agent names
-	pendingWithAgents := processQueueTasks(_store, info.Pending, agentNameMap)
-	waitingWithAgents := processQueueTasks(_store, info.WaitingOnDeps, agentNameMap)
-	runningWithAgents := processQueueTasks(_store, info.Running, agentNameMap)
+	pendingWithAgents, err := processQueueTasks(_store, info.Pending, agentNameMap)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	waitingWithAgents, err := processQueueTasks(_store, info.WaitingOnDeps, agentNameMap)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	runningWithAgents, err := processQueueTasks(_store, info.Running, agentNameMap)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	// Create response with agent-enhanced tasks
 	response := model.QueueInfo{
@@ -102,7 +116,7 @@ func getAgentName(store store.Store, agentNameMap map[int64]string, agentID int6
 }
 
 // processQueueTasks converts tasks to QueueTask structs and adds agent names.
-func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[int64]string) []model.QueueTask {
+func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[int64]string) ([]model.QueueTask, error) {
 	result := make([]model.QueueTask, 0, len(tasks))
 
 	for _, task := range tasks {
@@ -115,13 +129,15 @@ func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[
 			continue
 		}
 
-		if name, ok := getAgentName(store, agentNameMap, task.AgentID); ok {
-			taskResponse.AgentName = name
+		name, ok := getAgentName(store, agentNameMap, task.AgentID)
+		if !ok {
+			return nil, fmt.Errorf("agent not found for task %s", task.ID)
 		}
 
+		taskResponse.AgentName = name
 		result = append(result, taskResponse)
 	}
-	return result
+	return result, nil
 }
 
 // PauseQueue
