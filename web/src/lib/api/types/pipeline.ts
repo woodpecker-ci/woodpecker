@@ -19,6 +19,8 @@ export interface Pipeline {
 
   event: WebhookEvents;
 
+  event_reason: string[];
+
   //  The current status of the pipeline.
   status: PipelineStatus;
 

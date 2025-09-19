@@ -559,6 +559,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		Events: []string{
 			"push",
 			"pull_request",
+			"pull_request_review",
 			"deployment",
 		},
 		Config: &github.HookConfig{
