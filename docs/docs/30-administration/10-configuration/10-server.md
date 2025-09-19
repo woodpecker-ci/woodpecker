@@ -1112,7 +1112,9 @@ Disable version check in admin web UI.
 - Name: `WOODPECKER_LOG_STORE`
 - Default: `database`
 
-Where to store logs. Possible values: `database` or `file`.
+Where to store logs. Possible values: `database`, `file`, or `s3`.
+
+**Note:** When using S3 log storage, configure AWS credentials using standard AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, etc.) or AWS credential providers.
 
 ---
 
@@ -1122,6 +1124,33 @@ Where to store logs. Possible values: `database` or `file`.
 - Default: none
 
 Directory to store logs in if [`WOODPECKER_LOG_STORE`](#log_store) is `file`.
+
+---
+
+### LOG_STORE_S3_BUCKET
+
+- Name: `WOODPECKER_LOG_STORE_S3_BUCKET`
+- Default: none
+
+S3 bucket name for log storage when [`WOODPECKER_LOG_STORE`](#log_store) is `s3`. Required when using S3 log storage.
+
+---
+
+### LOG_STORE_S3_BUCKET_FOLDER
+
+- Name: `WOODPECKER_LOG_STORE_S3_BUCKET_FOLDER`
+- Default: empty (root level)
+
+S3 bucket folder path for log storage when [`WOODPECKER_LOG_STORE`](#log_store) is `s3`.
+
+---
+
+### LOG_STORE_S3_PATH_STYLE
+
+- Name: `WOODPECKER_LOG_STORE_S3_PATH_STYLE`
+- Default: `false`
+
+Use path-style URLs for S3 when [`WOODPECKER_LOG_STORE`](#log_store) is `s3`. Required for MinIO and some S3-compatible services. When enabled, URLs will be in the format `http://endpoint/bucket/key` instead of `http://bucket.endpoint/key`.
 
 ---
 
