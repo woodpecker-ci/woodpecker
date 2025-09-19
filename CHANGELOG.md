@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-17
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -49,6 +49,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.146.0 [[#5524](https://github.com/woodpecker-ci/woodpecker/pull/5524)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.145.0 [[#5523](https://github.com/woodpecker-ci/woodpecker/pull/5523)]
 - fix(deps): update dependency marked to v16.3.0 [[#5513](https://github.com/woodpecker-ci/woodpecker/pull/5513)]
 - fix(deps): update dependency simple-icons to v15.15.0 [[#5508](https://github.com/woodpecker-ci/woodpecker/pull/5508)]
