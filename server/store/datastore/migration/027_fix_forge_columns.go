@@ -22,13 +22,13 @@ import (
 var fixForgeColumns = xormigrate.Migration{
 	ID: "fix-forge-columns",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		type forge struct {
+		type forges struct {
 			OAuthClientID     string `xorm:"VARCHAR(250) 'o_auth_client_i_d'"`
 			OAuthClientSecret string `xorm:"VARCHAR(250) 'o_auth_client_secret'"`
 		}
 
 		// Ensure columns to rename exist
-		if err := sess.Sync(new(forge)); err != nil {
+		if err := sess.Sync(new(forges)); err != nil {
 			return err
 		}
 
