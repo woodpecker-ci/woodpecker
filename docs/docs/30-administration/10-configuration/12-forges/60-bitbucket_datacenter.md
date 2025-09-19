@@ -22,6 +22,7 @@ To enable Bitbucket Server you should configure the Woodpecker container using t
 +      - WOODPECKER_BITBUCKET_DC_CLIENT_ID=xxx
 +      - WOODPECKER_BITBUCKET_DC_CLIENT_SECRET=yyy
 +      - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
++      - WOODPECKER_BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN=true
 
    woodpecker-agent:
      [...]
@@ -124,3 +125,12 @@ Read the value for `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD` from the specified fil
 - Default: `false`
 
 Configure if SSL verification should be skipped.
+
+---
+
+### BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN
+
+- Name: `WOODPECKER_BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN`
+- Default: `false`
+
+When enabled, the Bitbucket Application Link for Woodpecker should include the `PROJECT_ADMIN` scope. Enabling this feature flag will allow the users of Bitbucket Datacenter to use organization secrets and properly list repositories within the organization.

@@ -536,6 +536,11 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.BoolFlag{ // TODO: Remove this feature flag in next major version
+		Sources: cli.EnvVars("WOODPECKER_BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN"),
+		Name:    "bitbucket-dc-oauth-enable-oauth2-scope-project-admin",
+		Usage:   "Bitbucket DataCenter/Server oauth2 scope should be configured to include PROJECT_ADMIN configuration.",
+	},
 	//
 	// development flags
 	//
