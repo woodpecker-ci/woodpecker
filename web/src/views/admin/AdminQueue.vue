@@ -62,9 +62,9 @@
             <div class="ml-auto flex items-center gap-2">
               <span class="flex gap-2">
                 <Badge
-                  v-if="task.agent_id !== 0"
+                  v-if="task.agent_name !== ''"
                   :label="$t('admin.settings.queue.agent')"
-                  :value="task.agent_name || task.agent_id"
+                  :value="task.agent_name"
                 />
                 <Badge
                   v-if="task.dependencies"
