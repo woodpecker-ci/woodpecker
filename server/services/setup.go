@@ -30,6 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -57,7 +58,7 @@ func setupSecretService(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Command, privateSignatureKey ed25519.PrivateKey) (config.Service, error) {
+func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, error) {
 	timeout := c.Duration("forge-timeout")
 	retries := c.Uint("forge-retry")
 	if retries == 0 {
@@ -66,7 +67,7 @@ func setupConfigService(c *cli.Command, privateSignatureKey ed25519.PrivateKey) 
 	configFetcher := config.NewForge(timeout, retries)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey)
+		httpFetcher := config.NewHTTP(endpoint, client)
 		return config.NewCombined(configFetcher, httpFetcher), nil
 	}
 
