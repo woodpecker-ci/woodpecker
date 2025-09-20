@@ -37,13 +37,23 @@ when:
     evaluate: 'TASK == "docs"'
 
 steps:
-  prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:next
+  install-dependencies:
+    image: *node_image
     directory: docs/
-    settings:
-      version: 3.6.2
-      plugins:
-        - '@ianvs/prettier-plugin-sort-imports'
+    commands:
+      - corepack enable
+      - pnpm install --frozen-lockfile
+    when:
+      - path: *when_path
+        event: [tag, pull_request, push]
+      - event: manual
+
+  format-check:
+    image: *node_image
+    directory: docs/
+    commands:
+      - corepack enable
+      - pnpm format:check
     when:
       - path: *when_path
         event: pull_request
@@ -61,8 +71,6 @@ steps:
     image: *node_image
     directory: docs/
     commands:
-      - corepack enable
-      - pnpm install --frozen-lockfile
       - pnpm build
     when:
       - path: *when_path
