@@ -1,5 +1,92 @@
 # Changelog
 
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-20
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @Gusted, @da-Kai, @hhamalai, @j04n-f, @klausi85, @qwerty287, @xoxys, @zhedazijingang
+
+### 🔒 Security
+
+- chore(deps): update dependency vite to v7.1.5 [security] [[#5495](https://github.com/woodpecker-ci/woodpecker/pull/5495)]
+
+### ✨ Features
+
+- feat: expose listing available organizations via woodpecker-go / CLI [[#5481](https://github.com/woodpecker-ci/woodpecker/pull/5481)]
+- Add milestone to metadata [[#5174](https://github.com/woodpecker-ci/woodpecker/pull/5174)]
+
+### 📈 Enhancement
+
+- Cleanup columns in forges table [[#5517](https://github.com/woodpecker-ci/woodpecker/pull/5517)]
+- Allow to get secrets from file [[#5509](https://github.com/woodpecker-ci/woodpecker/pull/5509)]
+- refactor: use slices.Contains to simplify [[#5468](https://github.com/woodpecker-ci/woodpecker/pull/5468)]
+- Hide unsupported forge options [[#5465](https://github.com/woodpecker-ci/woodpecker/pull/5465)]
+- Collapse changed files in file-tree [[#5451](https://github.com/woodpecker-ci/woodpecker/pull/5451)]
+- Simplify queue interface [[#5449](https://github.com/woodpecker-ci/woodpecker/pull/5449)]
+
+### 🐛 Bug Fixes
+
+- Show readable error [[#5501](https://github.com/woodpecker-ci/woodpecker/pull/5501)]
+- fix: allow spaces in cli string slices [[#5494](https://github.com/woodpecker-ci/woodpecker/pull/5494)]
+- fix: changed schema definition for "backend_options.kubernetes.tolerations" to accept an array of objects [[#5478](https://github.com/woodpecker-ci/woodpecker/pull/5478)]
+- Print execution errors [[#5448](https://github.com/woodpecker-ci/woodpecker/pull/5448)]
+
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#5527](https://github.com/woodpecker-ci/woodpecker/pull/5527)]
+- chore(deps): lock file maintenance [[#5514](https://github.com/woodpecker-ci/woodpecker/pull/5514)]
+- chore(deps): update docs npm deps non-major [[#5512](https://github.com/woodpecker-ci/woodpecker/pull/5512)]
+- Add a blog post [[#5510](https://github.com/woodpecker-ci/woodpecker/pull/5510)]
+- chore(deps): update docs npm deps non-major [[#5503](https://github.com/woodpecker-ci/woodpecker/pull/5503)]
+- docs: add SonarQube to plugins list [[#5502](https://github.com/woodpecker-ci/woodpecker/pull/5502)]
+- Add Bitbucket key limit known issue [[#5497](https://github.com/woodpecker-ci/woodpecker/pull/5497)]
+- chore(deps): lock file maintenance [[#5492](https://github.com/woodpecker-ci/woodpecker/pull/5492)]
+- chore(deps): update dependency @types/node to v22.18.1 [[#5484](https://github.com/woodpecker-ci/woodpecker/pull/5484)]
+- chore(deps): update docs npm deps non-major [[#5472](https://github.com/woodpecker-ci/woodpecker/pull/5472)]
+- Add ui proxy docs [[#5459](https://github.com/woodpecker-ci/woodpecker/pull/5459)]
+- chore(deps): update dependency @types/react to v19.1.11 [[#5454](https://github.com/woodpecker-ci/woodpecker/pull/5454)]
+- Add easypanel community package [[#5446](https://github.com/woodpecker-ci/woodpecker/pull/5446)]
+- Add some blogs and videos [[#5445](https://github.com/woodpecker-ci/woodpecker/pull/5445)]
+
+### 📦️ Dependency
+
+- fix(deps): update web npm deps non-major [[#5528](https://github.com/woodpecker-ci/woodpecker/pull/5528)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.146.0 [[#5524](https://github.com/woodpecker-ci/woodpecker/pull/5524)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.145.0 [[#5523](https://github.com/woodpecker-ci/woodpecker/pull/5523)]
+- fix(deps): update dependency marked to v16.3.0 [[#5513](https://github.com/woodpecker-ci/woodpecker/pull/5513)]
+- fix(deps): update dependency simple-icons to v15.15.0 [[#5508](https://github.com/woodpecker-ci/woodpecker/pull/5508)]
+- chore(deps): update dependency jsdom to v27 [[#5506](https://github.com/woodpecker-ci/woodpecker/pull/5506)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.144.1 [[#5505](https://github.com/woodpecker-ci/woodpecker/pull/5505)]
+- chore(deps): update web npm deps non-major [[#5504](https://github.com/woodpecker-ci/woodpecker/pull/5504)]
+- fix(deps): update golang-packages [[#5499](https://github.com/woodpecker-ci/woodpecker/pull/5499)]
+- fix(deps): update golang-packages [[#5496](https://github.com/woodpecker-ci/woodpecker/pull/5496)]
+- fix(deps): update golang-packages [[#5493](https://github.com/woodpecker-ci/woodpecker/pull/5493)]
+- fix(deps): update golang-packages [[#5491](https://github.com/woodpecker-ci/woodpecker/pull/5491)]
+- fix(deps): update dependency simple-icons to v15.14.0 [[#5490](https://github.com/woodpecker-ci/woodpecker/pull/5490)]
+- fix(deps): update module github.com/prometheus/client_golang to v1.23.2 [[#5489](https://github.com/woodpecker-ci/woodpecker/pull/5489)]
+- chore(deps): update dependency @intlify/unplugin-vue-i18n to v11 [[#5487](https://github.com/woodpecker-ci/woodpecker/pull/5487)]
+- fix(deps): update web npm deps non-major [[#5486](https://github.com/woodpecker-ci/woodpecker/pull/5486)]
+- chore(deps): update dependency golang to v1.25.1 [[#5485](https://github.com/woodpecker-ci/woodpecker/pull/5485)]
+- fix(deps): update module github.com/prometheus/client_golang to v1.23.1 [[#5483](https://github.com/woodpecker-ci/woodpecker/pull/5483)]
+- fix(deps): update golang-packages to v28.4.0+incompatible [[#5480](https://github.com/woodpecker-ci/woodpecker/pull/5480)]
+- fix(deps): update golang-packages [[#5479](https://github.com/woodpecker-ci/woodpecker/pull/5479)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.142.5 [[#5475](https://github.com/woodpecker-ci/woodpecker/pull/5475)]
+- fix(deps): update web npm deps non-major [[#5473](https://github.com/woodpecker-ci/woodpecker/pull/5473)]
+- fix(deps): update golang-packages [[#5467](https://github.com/woodpecker-ci/woodpecker/pull/5467)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.142.2 [[#5466](https://github.com/woodpecker-ci/woodpecker/pull/5466)]
+- fix(deps): update golang-packages [[#5463](https://github.com/woodpecker-ci/woodpecker/pull/5463)]
+- chore(deps): lock file maintenance [[#5458](https://github.com/woodpecker-ci/woodpecker/pull/5458)]
+- fix(deps): update golang-packages [[#5457](https://github.com/woodpecker-ci/woodpecker/pull/5457)]
+- fix(deps): update dependency simple-icons to v15.12.0 [[#5456](https://github.com/woodpecker-ci/woodpecker/pull/5456)]
+- fix(deps): update web npm deps non-major [[#5455](https://github.com/woodpecker-ci/woodpecker/pull/5455)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.142.0 [[#5452](https://github.com/woodpecker-ci/woodpecker/pull/5452)]
+- fix(deps): update golang-packages [[#5442](https://github.com/woodpecker-ci/woodpecker/pull/5442)]
+
+### Misc
+
+- eslint ignore html-indent in vue [[#5521](https://github.com/woodpecker-ci/woodpecker/pull/5521)]
+- Remove twitter from release template [[#5447](https://github.com/woodpecker-ci/woodpecker/pull/5447)]
+
 ## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-20
 
 ### ❤️ Thanks to all contributors! ❤️
