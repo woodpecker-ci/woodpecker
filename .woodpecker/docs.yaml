@@ -71,6 +71,7 @@ steps:
     image: *node_image
     directory: docs/
     commands:
+      - corepack enable
       - pnpm build
     when:
       - path: *when_path
