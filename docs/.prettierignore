@@ -1,7 +1,6 @@
 pnpm-lock.yaml
 dist
-coverage/
 LICENSE
-components.d.ts
-src/assets/locales/*.json
-!src/assets/locales/en.json
+openapi.json
+docs/40-cli.md
+build/

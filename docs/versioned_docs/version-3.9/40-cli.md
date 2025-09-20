@@ -56,7 +56,6 @@ woodpecker-cli [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 
 **--token, -t**="": server auth token
 
-
 # COMMANDS
 
 ## admin
@@ -404,9 +403,9 @@ execute a local pipeline
 
 **--workflow-number**="": Set the metadata environment variable "CI_WORKFLOW_NUMBER". (default: 0)
 
-**--workspace-base**="":  (default: /woodpecker)
+**--workspace-base**="": (default: /woodpecker)
 
-**--workspace-path**="":  (default: src)
+**--workspace-path**="": (default: src)
 
 ## info
 
