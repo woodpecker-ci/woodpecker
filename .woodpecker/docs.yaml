@@ -39,10 +39,10 @@ when:
 steps:
   prettier:
     image: docker.io/woodpeckerci/plugin-prettier:next
+    directory: docs/
     settings:
-      version: 3.3.3
+      version: 3.6.2
       plugins:
-        - 'prettier-plugin-tailwindcss'
         - '@ianvs/prettier-plugin-sort-imports'
     when:
       - event: pull_request
