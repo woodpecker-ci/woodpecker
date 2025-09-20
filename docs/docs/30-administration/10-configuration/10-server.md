@@ -1112,7 +1112,11 @@ Disable version check in admin web UI.
 - Name: `WOODPECKER_LOG_STORE`
 - Default: `database`
 
-Where to store logs. Possible values: `database`, `addon` or `file`.
+Where to store logs. Possible values:
+
+- `database`: stores the logs in the database
+- `file`: stores logs in JSON files on the files system
+- `addon`: uses a separate addon to store logs. See [Addons](../../92-development/100-addons.md)
 
 ---
 
