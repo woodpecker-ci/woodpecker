@@ -10,7 +10,7 @@ Addons are still experimental. Their implementation can change and break at any 
 You must trust the author of the addon you are using. They may have access to authentication codes and other potentially sensitive information.
 :::
 
-### Bug reports
+## Bug reports
 
 If you experience bugs, please check which component has the issue. If it's the addon, **do not raise an issue in the main repository**, but rather use the separate addon repositories. To check which component is responsible for the bug, look at the logs. Logs from addons are marked with a special field `addon` containing their addon file name.
 
