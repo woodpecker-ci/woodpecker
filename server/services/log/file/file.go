@@ -102,3 +102,5 @@ func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) erro
 func (l logStore) LogDelete(step *model.Step) error {
 	return os.Remove(l.filePath(step.ID))
 }
+
+func (l logStore) StepFinished(_ *model.Step) {}
