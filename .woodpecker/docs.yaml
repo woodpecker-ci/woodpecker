@@ -45,7 +45,8 @@ steps:
       plugins:
         - '@ianvs/prettier-plugin-sort-imports'
     when:
-      - event: pull_request
+      - path: *when_path
+        event: pull_request
 
   build-cli:
     image: *golang_image
