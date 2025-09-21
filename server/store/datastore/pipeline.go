@@ -164,7 +164,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 
 	case schemas.MYSQL:
 		if _, err := sess.SQL("LOCK TABLE `pipelines` WRITE").Exec(); err != nil {
-			return err
+			return fmt.Errorf("could not exclusive lock table 'pipelines': %w", err)
 		}
 		// session end does not unlock so we have to
 		defer func() {
@@ -174,8 +174,8 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		}()
 
 	case schemas.POSTGRES:
-		if _, err := sess.SQL("LOCK TABLE pipelines IN EXCLUSIVE MODE").Exec(); err != nil {
-			return err
+		if _, err := sess.SQL("LOCK TABLE `pipelines` IN EXCLUSIVE MODE").Exec(); err != nil {
+			return fmt.Errorf("could not exclusive lock table 'pipelines': %w", err)
 		}
 
 	default:
