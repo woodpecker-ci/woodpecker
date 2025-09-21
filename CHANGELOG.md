@@ -50,6 +50,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.5.0 [[#5535](https://github.com/woodpecker-ci/woodpecker/pull/5535)]
 - fix(deps): update dependency simple-icons to v15.16.0 [[#5532](https://github.com/woodpecker-ci/woodpecker/pull/5532)]
 - fix(deps): update module github.com/gin-gonic/gin to v1.11.0 [[#5531](https://github.com/woodpecker-ci/woodpecker/pull/5531)]
 - fix(deps): update web npm deps non-major [[#5528](https://github.com/woodpecker-ci/woodpecker/pull/5528)]
