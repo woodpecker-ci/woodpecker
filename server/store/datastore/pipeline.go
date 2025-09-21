@@ -19,6 +19,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"xorm.io/builder"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
@@ -167,7 +168,9 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		}
 		// session end does not unlock so we have to
 		defer func() {
-			sess.SQL("UNLOCK TABLES").Exec()
+			if _, err := sess.SQL("UNLOCK TABLES").Exec(); err != nil {
+				log.Error().Err(err).Msg("Could not unlock table 'pipelines' after inserting new pipeline")
+			}
 		}()
 
 	case schemas.POSTGRES:
