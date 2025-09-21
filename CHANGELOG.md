@@ -27,6 +27,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix dir not found handling [[#5533](https://github.com/woodpecker-ci/woodpecker/pull/5533)]
 - Show readable error [[#5501](https://github.com/woodpecker-ci/woodpecker/pull/5501)]
 - fix: allow spaces in cli string slices [[#5494](https://github.com/woodpecker-ci/woodpecker/pull/5494)]
 - fix: changed schema definition for "backend_options.kubernetes.tolerations" to accept an array of objects [[#5478](https://github.com/woodpecker-ci/woodpecker/pull/5478)]
