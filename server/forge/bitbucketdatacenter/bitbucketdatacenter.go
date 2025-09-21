@@ -38,12 +38,12 @@ const listLimit = 250
 
 // Opts defines configuration options.
 type Opts struct {
-	URL          string // Bitbucket server url for API access.
-	Username     string // Git machine account username.
-	Password     string // Git machine account password.
-	ClientID     string // OAuth 2.0 client id
-	ClientSecret string // OAuth 2.0 client secret
-	OAuthHost    string // OAuth 2.0 host
+	URL               string // Bitbucket server url for API access.
+	Username          string // Git machine account username.
+	Password          string // Git machine account password.
+	OAuthClientID     string // OAuth 2.0 client id
+	OAuthClientSecret string // OAuth 2.0 client secret
+	OAuthHost         string // OAuth 2.0 host
 }
 
 type client struct {
@@ -62,8 +62,8 @@ func New(opts Opts) (forge.Forge, error) {
 	config := &client{
 		url:          opts.URL,
 		urlAPI:       fmt.Sprintf("%s/rest", opts.URL),
-		clientID:     opts.ClientID,
-		clientSecret: opts.ClientSecret,
+		clientID:     opts.OAuthClientID,
+		clientSecret: opts.OAuthClientSecret,
 		oauthHost:    opts.OAuthHost,
 		username:     opts.Username,
 		password:     opts.Password,
@@ -74,9 +74,9 @@ func New(opts Opts) (forge.Forge, error) {
 		return nil, fmt.Errorf("must have a git machine account username")
 	case opts.Password == "":
 		return nil, fmt.Errorf("must have a git machine account password")
-	case opts.ClientID == "":
+	case opts.OAuthClientID == "":
 		return nil, fmt.Errorf("must have an oauth 2.0 client id")
-	case opts.ClientSecret == "":
+	case opts.OAuthClientSecret == "":
 		return nil, fmt.Errorf("must have an oauth 2.0 client secret")
 	}
 
@@ -314,7 +314,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		State:       convertStatus(workflow.State),
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
-		Description: common.GetPipelineStatusDescription(pipeline.Status),
+		Description: common.GetPipelineStatusDescription(workflow.State),
 		Ref:         pipeline.Ref,
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)

@@ -39,7 +39,7 @@ func TestNew(t *testing.T) {
 
 	f, _ := forge.(*Gitea)
 	assert.Equal(t, "http://localhost:8080", f.url)
-	assert.True(t, f.SkipVerify)
+	assert.True(t, f.skipVerify)
 }
 
 func Test_gitea(t *testing.T) {

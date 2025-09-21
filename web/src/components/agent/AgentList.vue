@@ -21,19 +21,21 @@
           agent.last_contact ? date.timeAgo(agent.last_contact * 1000) : $t('admin.settings.agents.never')
         }}</span>
       </span>
-      <IconButton
-        icon="edit"
-        :title="$t('admin.settings.agents.edit_agent')"
-        class="ml-2 h-8 w-8"
-        @click="$emit('edit', agent)"
-      />
-      <IconButton
-        icon="trash"
-        :title="$t('admin.settings.agents.delete_agent')"
-        class="hover:text-wp-error-100 ml-2 h-8 w-8"
-        :is-loading="isDeleting"
-        @click="$emit('delete', agent)"
-      />
+      <div class="ml-auto flex items-center gap-2">
+        <IconButton
+          icon="edit"
+          :title="$t('admin.settings.agents.edit_agent')"
+          class="h-8 w-8"
+          @click="$emit('edit', agent)"
+        />
+        <IconButton
+          icon="trash"
+          :title="$t('admin.settings.agents.delete_agent')"
+          class="hover:text-wp-error-100 h-8 w-8"
+          :is-loading="isDeleting"
+          @click="$emit('delete', agent)"
+        />
+      </div>
     </ListItem>
 
     <div v-if="loading" class="flex justify-center">

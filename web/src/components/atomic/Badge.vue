@@ -2,7 +2,7 @@
   <span class="inline-flex items-center text-xs font-medium">
     <span
       v-if="label !== undefined"
-      class="border-wp-state-neutral-100 bg-wp-state-neutral-100 rounded-l-full border-1 py-0.5 pr-1 pl-2 whitespace-nowrap text-gray-300"
+      class="border-wp-state-neutral-100 bg-wp-state-neutral-100 rounded-l-full border-1 py-0.5 pr-1 pl-2 whitespace-nowrap text-white"
     >
       {{ label }}
     </span>

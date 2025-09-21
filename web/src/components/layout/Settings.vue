@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <div class="dark:border-wp-background-100 mb-4 flex flex-col justify-center border-b pb-4">
+    <div class="border-wp-background-400 dark:border-wp-background-100 mb-4 flex flex-col justify-center border-b pb-4">
       <div class="flex items-center justify-between">
         <h1 class="text-wp-text-100 flex items-center gap-1 text-xl">
           {{ title }}

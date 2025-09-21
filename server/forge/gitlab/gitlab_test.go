@@ -36,13 +36,13 @@ func load(config string) *GitLab {
 
 	gitlab := GitLab{}
 	gitlab.url = _url.String()
-	gitlab.ClientID = params.Get("client_id")
-	gitlab.ClientSecret = params.Get("client_secret")
-	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
-	gitlab.HideArchives, _ = strconv.ParseBool(params.Get("hide_archives"))
+	gitlab.oAuthClientID = params.Get("client_id")
+	gitlab.oAuthClientSecret = params.Get("client_secret")
+	gitlab.skipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
+	gitlab.hideArchives, _ = strconv.ParseBool(params.Get("hide_archives"))
 
 	// this is a temp workaround
-	gitlab.Search, _ = strconv.ParseBool(params.Get("search"))
+	gitlab.search, _ = strconv.ParseBool(params.Get("search"))
 
 	return &gitlab
 }
@@ -70,14 +70,14 @@ func Test_GitLab(t *testing.T) {
 	ctx := t.Context()
 	// Test projects method
 	t.Run("Should return only non-archived projects is hidden", func(t *testing.T) {
-		client.HideArchives = true
+		client.hideArchives = true
 		_projects, err := client.Repos(ctx, &user)
 		assert.NoError(t, err)
 		assert.Len(t, _projects, 1)
 	})
 
 	t.Run("Should return all the projects", func(t *testing.T) {
-		client.HideArchives = false
+		client.hideArchives = false
 		_projects, err := client.Repos(ctx, &user)
 
 		assert.NoError(t, err)
@@ -184,6 +184,26 @@ func Test_GitLab(t *testing.T) {
 			assert.Equal(t, "woodpecker", hookRepo.Name)
 			assert.Equal(t, "Update client.go 🎉", pipeline.Title)
 			assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+			assert.Equal(t, model.EventPull, pipeline.Event)
+		}
+	})
+
+	t.Run("merge request reopened", func(t *testing.T) {
+		req, _ := http.NewRequest(
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookPullRequestReopened),
+		)
+		req.Header = fixtures.ServiceHookHeaders
+
+		hookRepo, pipeline, err := client.Hook(ctx, req)
+		assert.NoError(t, err)
+		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+			assert.Equal(t, "main", hookRepo.Branch)
+			assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
+			assert.Equal(t, "test_ci_tmp", hookRepo.Name)
+			assert.Equal(t, "Some ned more AAAA", pipeline.Title)
+			assert.Len(t, pipeline.ChangedFiles, 0)
 			assert.Equal(t, model.EventPull, pipeline.Event)
 		}
 	})

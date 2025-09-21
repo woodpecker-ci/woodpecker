@@ -47,22 +47,41 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUMES"),
 		Name:    "volumes",
 		Usage:   "pipeline volumes",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_NETWORKS"),
 		Name:    "network",
 		Usage:   "external networks",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "plugins-privileged",
 		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND"),
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
+	},
+	&cli.StringMapFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRETS"),
+		Name:    "secrets",
+		Usage:   "map of secrets, ex. 'secret=\"val\",secret2=\"value2\"'",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRETS_FILE"),
+		Name:    "secrets",
+		Usage:   "path to yaml file with secrets map",
 	},
 
 	//
@@ -269,6 +288,14 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_LABELS"),
 		Name:    "commit-pull-labels",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_LABELS\".",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_MILESTONE"),
+		Name:    "commit-pull-milestone",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_MILESTONE\".",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("CI_COMMIT_PRERELEASE"),
@@ -374,6 +401,9 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_ENV"),
 		Name:    "env",
 		Usage:   "Set the metadata environment variable \"CI_ENV\".",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_FORGE_TYPE"),

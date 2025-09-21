@@ -279,6 +279,16 @@
       "name": "Peckify",
       "docs": "https://codeberg.org/woodpecker-community/peckify/raw/branch/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "ASCII JUnit Test Report",
+      "docs": "https://raw.githubusercontent.com/wgroeneveld/woodpecker-ascii-junit/refs/heads/main/README.md",
+      "verified": false
+    },
+    {
+      "name": "SonarQube",
+      "docs": "https://raw.githubusercontent.com/j04n-f/woodpecker-sonar-plugin/refs/heads/main/docs.md",
+      "verified": false
     }
   ]
 }

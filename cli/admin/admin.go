@@ -18,6 +18,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/loglevel"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/org"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/registry"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/secret"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/user"
@@ -29,6 +30,7 @@ var Command = &cli.Command{
 	Usage: "manage server settings",
 	Commands: []*cli.Command{
 		loglevel.Command,
+		org.Command,
 		registry.Command,
 		secret.Command,
 		user.Command,

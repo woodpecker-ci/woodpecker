@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'docker.io/golang:1.24'
+  - &golang_image 'docker.io/golang:1.25'
   - &node_image 'docker.io/node:23-alpine'
   - &alpine_image 'docker.io/alpine:3.22'
   - path: &when_path
@@ -37,15 +37,26 @@ when:
     evaluate: 'TASK == "docs"'
 
 steps:
-  prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:next
-    settings:
-      version: 3.3.3
-      plugins:
-        - 'prettier-plugin-tailwindcss'
-        - '@ianvs/prettier-plugin-sort-imports'
+  install-dependencies:
+    image: *node_image
+    directory: docs/
+    commands:
+      - corepack enable
+      - pnpm install --frozen-lockfile
     when:
-      - event: pull_request
+      - path: *when_path
+        event: [tag, pull_request, push]
+      - event: manual
+
+  format-check:
+    image: *node_image
+    directory: docs/
+    commands:
+      - corepack enable
+      - pnpm format:check
+    when:
+      - path: *when_path
+        event: pull_request
 
   build-cli:
     image: *golang_image
@@ -61,7 +72,6 @@ steps:
     directory: docs/
     commands:
       - corepack enable
-      - pnpm install --frozen-lockfile
       - pnpm build
     when:
       - path: *when_path

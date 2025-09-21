@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v73/github"
+	"github.com/google/go-github/v74/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -47,13 +47,13 @@ const (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL        string // GitHub server url.
-	Client     string // GitHub oauth client id.
-	Secret     string // GitHub oauth client secret.
-	SkipVerify bool   // Skip ssl verification.
-	MergeRef   bool   // Clone pull requests using the merge ref.
-	OnlyPublic bool   // Only obtain OAuth tokens with access to public repos.
-	OAuthHost  string // Public url for oauth if different from url.
+	URL               string // GitHub server url.
+	OAuthClientID     string // GitHub oauth client id.
+	OAuthClientSecret string // GitHub oauth client secret.
+	SkipVerify        bool   // Skip ssl verification.
+	MergeRef          bool   // Clone pull requests using the merge ref.
+	OnlyPublic        bool   // Only obtain OAuth tokens with access to public repos.
+	OAuthHost         string // Public url for oauth if different from url.
 }
 
 // New returns a Forge implementation that integrates with a GitHub Cloud or
@@ -62,8 +62,8 @@ func New(opts Opts) (forge.Forge, error) {
 	r := &client{
 		API:        defaultAPI,
 		url:        defaultURL,
-		Client:     opts.Client,
-		Secret:     opts.Secret,
+		Client:     opts.OAuthClientID,
+		Secret:     opts.OAuthClientSecret,
 		oAuthHost:  opts.OAuthHost,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
