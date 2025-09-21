@@ -78,7 +78,7 @@ func (e *dummy) Load(_ context.Context) (*backend.BackendInfo, error) {
 	}, nil
 }
 
-func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string, _ backend.TrustedConfiguration) error {
 	if taskUUID == WorkflowSetupFailUUID {
 		return fmt.Errorf("expected fail to setup workflow")
 	}
@@ -87,7 +87,7 @@ func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID str
 	return nil
 }
 
-func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string, _ backend.TrustedConfiguration) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	// internal state checks
