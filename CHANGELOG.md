@@ -49,6 +49,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v15.16.0 [[#5532](https://github.com/woodpecker-ci/woodpecker/pull/5532)]
 - fix(deps): update module github.com/gin-gonic/gin to v1.11.0 [[#5531](https://github.com/woodpecker-ci/woodpecker/pull/5531)]
 - fix(deps): update web npm deps non-major [[#5528](https://github.com/woodpecker-ci/woodpecker/pull/5528)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.146.0 [[#5524](https://github.com/woodpecker-ci/woodpecker/pull/5524)]
