@@ -116,7 +116,6 @@ The following restructuring was done to achieve a more consistent grouping:
   Additionally, the description has been updated to reflect that these filters only apply to plugins ([#4069](https://github.com/woodpecker-ci/woodpecker/pull/4069)).
 
 - SDK changes:
-
   - The SDK fields `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` have been renamed to `started`, `finished`, `created`, `started`, `finished`, `reviewed` ([#3968](https://github.com/woodpecker-ci/woodpecker/pull/3968))
   - The `trusted` field of the repo model was changed from `boolean` to `object` ([#4025](https://github.com/woodpecker-ci/woodpecker/pull/4025))
 
@@ -279,14 +278,12 @@ Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4
 
 - Dropped support for `DRONE_*` environment variables. The according `WOODPECKER_*` variables must be used instead.
   Additionally some alternative namings have been removed to simplify maintenance:
-
   - `WOODPECKER_AGENT_SECRET` replaces `WOODPECKER_SECRET`, `DRONE_SECRET`, `WOODPECKER_PASSWORD`, `DRONE_PASSWORD` and `DRONE_AGENT_SECRET`.
   - `WOODPECKER_HOST` replaces `DRONE_HOST` and `DRONE_SERVER_HOST`.
   - `WOODPECKER_DATABASE_DRIVER` replaces `DRONE_DATABASE_DRIVER` and `DATABASE_DRIVER`.
   - `WOODPECKER_DATABASE_DATASOURCE` replaces `DRONE_DATABASE_DATASOURCE` and `DATABASE_CONFIG`.
 
 - Dropped support for `DRONE_*` environment variables in pipeline steps. Pipeline meta-data can be accessed with `CI_*` variables.
-
   - `CI_*` prefix replaces `DRONE_*`
   - `CI` value is now `woodpecker`
   - `DRONE=true` has been removed
@@ -316,7 +313,6 @@ Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4
 - Default workspace base path has moved from `/drone` to `/woodpecker`
 
 - Default SQLite database location has changed:
-
   - `/var/lib/drone/drone.sqlite` -> `/var/lib/woodpecker/woodpecker.sqlite`
   - `drone.sqlite` -> `woodpecker.sqlite`
 
