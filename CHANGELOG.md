@@ -85,6 +85,7 @@
 
 ### Misc
 
+- Fix prettier configs [[#5529](https://github.com/woodpecker-ci/woodpecker/pull/5529)]
 - eslint ignore html-indent in vue [[#5521](https://github.com/woodpecker-ci/woodpecker/pull/5521)]
 - Remove twitter from release template [[#5447](https://github.com/woodpecker-ci/woodpecker/pull/5447)]
 
