@@ -87,6 +87,7 @@ export default antfu(
           math: 'always',
         },
       ],
+      'vue/html-indent': 'off',
       'vue/block-order': [
         'error',
         {

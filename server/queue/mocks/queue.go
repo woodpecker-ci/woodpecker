@@ -73,24 +73,6 @@ func (_m *Queue) ErrorAtOnce(c context.Context, ids []string, err error) error {
 	return r0
 }
 
-// Evict provides a mock function with given fields: c, id
-func (_m *Queue) Evict(c context.Context, id string) error {
-	ret := _m.Called(c, id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Evict")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(c, id)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // EvictAtOnce provides a mock function with given fields: c, ids
 func (_m *Queue) EvictAtOnce(c context.Context, ids []string) error {
 	ret := _m.Called(c, ids)
@@ -183,24 +165,6 @@ func (_m *Queue) Poll(c context.Context, agentID int64, f queue.FilterFn) (*mode
 	}
 
 	return r0, r1
-}
-
-// Push provides a mock function with given fields: c, task
-func (_m *Queue) Push(c context.Context, task *model.Task) error {
-	ret := _m.Called(c, task)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Push")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.Task) error); ok {
-		r0 = rf(c, task)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // PushAtOnce provides a mock function with given fields: c, tasks
