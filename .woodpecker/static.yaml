@@ -23,7 +23,4 @@ steps:
     pull: true
     depends_on: []
     settings:
-      version: 3.3.3
-      plugins:
-        - 'prettier-plugin-tailwindcss'
-        - '@ianvs/prettier-plugin-sort-imports'
+      version: 3.6.2
