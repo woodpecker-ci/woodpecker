@@ -36,6 +36,7 @@ func Handler() http.Handler {
 	e.GET("/api/v1/repos/:owner/:name/pulls/:index/files", getPRFiles)
 	e.GET("/api/v1/user/repos", getUserRepos)
 	e.GET("/api/v1/version", getVersion)
+	e.GET("/api/v1/repos/:owner/:name/git/commits/:sha", getCommit)
 
 	return e
 }
@@ -137,6 +138,15 @@ func getPRFiles(c *gin.Context) {
 	}
 }
 
+func getCommit(c *gin.Context) {
+	switch c.Param("sha") {
+	case "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c":
+		c.String(http.StatusOK, commitPayload)
+	default:
+		c.String(http.StatusNotFound, "")
+	}
+}
+
 const listRepoHookPayloads = `
 [
   {
@@ -207,4 +217,75 @@ const prFilesPayload = `
     "raw_url": "http://localhost/username/repo/raw/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md"
   }
 ]
+`
+
+const commitPayload = `
+{
+  "url": "http://localhost:3000/api/v1/repos/qwerty287/woodpecker/git/commits/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+  "sha": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+  "created": "2025-01-05T12:31:42+02:00",
+  "html_url": "http://localhost:3000/qwerty287/woodpecker/commit/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+  "commit": {
+    "url": "http://localhost:3000/api/v1/repos/qwerty287/woodpecker/git/commits/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+    "author": {
+      "name": "qwerty287",
+      "email": "qwerty287@noreply.localhost",
+      "date": "2025-01-05T12:31:42+02:00"
+    },
+    "committer": {
+      "name": "qwerty287",
+      "email": "qwerty287@noreply.localhost",
+      "date": "2025-01-05T12:31:42+02:00"
+    },
+    "message": "README.md aktualisiert\n",
+    "tree": {
+      "url": "http://localhost:3000/api/v1/repos/qwerty287/woodpecker/git/trees/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+      "sha": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+      "created": "2025-01-05T12:31:42+02:00"
+    },
+    "verification": {
+      "verified": false,
+      "reason": "gpg.error.not_signed_commit",
+      "signature": "",
+      "signer": null,
+      "payload": ""
+    }
+  },
+  "author": {
+    "id": 1,
+    "login": "qwerty287",
+    "login_name": "",
+    "source_id": 0,
+    "full_name": "",
+    "email": "qwerty287@noreply.localhost",
+    "avatar_url": "http://localhost:3000/avatars/25a4ce9e2945c8583f82ce7b2ee8bc3c",
+    "html_url": "http://localhost:3000/qwerty287",
+    "language": "",
+    "is_admin": false,
+    "last_login": "0001-01-01T00:00:00Z",
+    "created": "2023-04-12T18:52:45+03:00",
+    "restricted": false,
+    "active": false,
+    "prohibit_login": false,
+    "location": "",
+    "website": "",
+    "description": "",
+    "visibility": "public",
+    "followers_count": 0,
+    "following_count": 0,
+    "starred_repos_count": 0,
+    "username": "qwerty287"
+  },
+  "files": [
+    {
+      "filename": "README.md",
+      "status": "modified"
+    }
+  ],
+  "stats": {
+    "total": 2,
+    "additions": 1,
+    "deletions": 1
+  }
+}
 `
