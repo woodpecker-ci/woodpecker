@@ -132,7 +132,7 @@ func (s storage) GetPipelineCount() (int64, error) {
 }
 
 // createPipelineSQLiteLock is needed for CreatePipeline if sqlite is used
-// as sqlite don't support to upgrade the transaction lock to be exclusive and xorm don't support EXCLUSIVE transactions jet
+// as sqlite don't support to upgrade the transaction lock to be exclusive and xorm don't support EXCLUSIVE transactions jet.
 var createPipelineSQLiteLock = &sync.Mutex{}
 
 func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Step) error {
