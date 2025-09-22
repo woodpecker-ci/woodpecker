@@ -1,3 +1,10 @@
+# renovate: datasource=github-releases depName=mvdan/gofumpt
+GOFUMPT_VERSION := v0.9.1
+# renovate: datasource=github-releases depName=golangci/golangci-lint
+GOLANGCI_LINT_VERSION := v2.5.0
+# renovate: datasource=docker depName=docker.io/techknowlogick/xgo
+XGO_VERSION := go-1.25.x
+
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 TARGETOS ?= $(shell go env GOOS)
@@ -39,11 +46,10 @@ CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO),GO)
-  # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
-	XGO_VERSION ?= go-1.25.x
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
+
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
@@ -129,10 +135,10 @@ check-xgo: ## Check if xgo is installed
 
 install-tools: ## Install development tools
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest ; \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(XGO_VERSION) ; \
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install mvdan.cc/gofumpt@latest; \
+		go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION); \
 	fi ; \
 	hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/google/addlicense@latest; \
