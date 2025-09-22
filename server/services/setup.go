@@ -155,6 +155,7 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.Type = model.ForgeTypeBitbucketDatacenter
 		_forge.AdditionalOptions["git-username"] = c.String("bitbucket-dc-git-username")
 		_forge.AdditionalOptions["git-password"] = c.String("bitbucket-dc-git-password")
+		_forge.AdditionalOptions["oauth-enable-project-admin-scope"] = c.Bool("bitbucket-dc-oauth-enable-oauth2-scope-project-admin")
 	default:
 		return errors.New("forge not configured")
 	}
