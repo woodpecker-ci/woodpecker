@@ -240,14 +240,14 @@ func Test_parseHook(t *testing.T) {
 		}
 	})
 
-	t.Run("pull request labeled", func(t *testing.T) {
+	t.Run("pull request labele added", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestLabelAdded), hookPull)
 		p, r, b, err := parseHook(req, false)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, []string{"labeled"}, b.EventReason)
+		assert.Equal(t, []string{"label_updated"}, b.EventReason)
 		if assert.NotNil(t, p) {
 			assert.Equal(t, int64(2705176047), *p.ID)
 			assert.Equal(t, 1, *p.Number)
@@ -290,14 +290,14 @@ func Test_parseHook(t *testing.T) {
 
 	// lable change will result two webhooks an unlable and labeled
 
-	t.Run("pull request unlabeled", func(t *testing.T) {
+	t.Run("pull request got label removed", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestLabelRemoved), hookPull)
 		p, r, b, err := parseHook(req, false)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
-		assert.Equal(t, []string{"unlabeled"}, b.EventReason)
+		assert.Equal(t, []string{"label_updated"}, b.EventReason)
 		if assert.NotNil(t, p) {
 			assert.Equal(t, int64(2705176047), *p.ID)
 			assert.Equal(t, 1, *p.Number)
@@ -312,6 +312,35 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "bug", *p.Labels[0].Name)
 				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
 				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
+			}
+			if assert.NotNil(t, p.Head) {
+				assert.Equal(t, "6543-patch-1", *p.Head.Ref)
+				assert.Equal(t, "36b5813240a9d2daa29b05046d56a53e18f39a3e", *p.Head.SHA)
+			}
+			if assert.NotNil(t, p.Base) {
+				assert.Equal(t, "main", *p.Base.Ref)
+				assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", *p.Base.SHA)
+			}
+		}
+	})
+
+	t.Run("pull request got all label removed", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestLabelsCleared), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, []string{"label_cleared"}, b.EventReason)
+		if assert.NotNil(t, p) {
+			assert.Equal(t, int64(2705176047), *p.ID)
+			assert.Equal(t, 1, *p.Number)
+			assert.Equal(t, "open", *p.State)
+			assert.Equal(t, "Some ned more AAAA", *p.Title)
+			assert.Empty(t, p.Labels)
+			if assert.NotNil(t, p.User) {
+				assert.Equal(t, "6543", *p.User.Login)
+				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.NotNil(t, p.Head) {
 				assert.Equal(t, "6543-patch-1", *p.Head.Ref)

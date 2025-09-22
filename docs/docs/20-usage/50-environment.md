@@ -239,7 +239,8 @@ For the `pull_request_metadata` event, the exact reason a metadata change was de
 |`converted_to_draft`     | pull request was converted to a draft              |
 |`demilestoned`           | pull request was removed from a milestone          |
 |`edited`                 | The title or body of a pull request was edited, or the base branch of a pull request was changed|
-|`labeled`                | label was added to a pull request                  |
+|`label_cleared`          | all labels removed                                 |
+|`label_updated`          | new label(s) added / label(s) changed              |
 |`locked`                 | conversation on a pull request was locked          |
 |`milestoned`             | pull request was added to a milestone              |
 |`ready_for_review`       | draft pull request was marked as ready for review  |
@@ -255,7 +256,7 @@ For the `pull_request_metadata` event, the exact reason a metadata change was de
 |`demilestoned`     | milestone removed                                 |
 |`edited`           | title or description edited                       |
 |`label_cleared`    | all labels removed                                |
-|`label_updated`    | new label added / label changed                   |
+|`label_updated`    | new label(s) added / label(s) changed             |
 |`milestoned`       | milestone added / changed                         |
 |`unassigned`       | all assignees removed                             |
 
@@ -267,7 +268,7 @@ For the `pull_request_metadata` event, the exact reason a metadata change was de
 |`demilestoned`     | milestone removed                                 |
 |`edited`           | title or description edited                       |
 |`label_cleared`    | all labels removed                                |
-|`label_updated`    | new label added / label changed                   |
+|`label_updated`    | new label(s) added / label(s) changed             |
 |`milestoned`       | milestone added / changed                         |
 |`unassigned`       | all assignees removed                             |
 
@@ -281,7 +282,7 @@ The event reasons are separated via `,` as an list in `CI_PIPELINE_EVENT_REASON`
 |`assigned`           | user assigned                                     |
 |`demilestoned`       | milestone removed                                 |
 |`description_edited` | description edited                                |
-|`label_added`        | pull had non and now got label added              |
+|`label_added`        | pull had non and now got label(s) added           |
 |`label_cleared`      | all labels removed                                |
 |`label_updated`      | labels changed                                    |
 |`milestoned`         | milestone added / changed                         |
