@@ -19,7 +19,7 @@ export function getRawHeader(data: string): string {
 }
 
 export async function getContent(data: string): Promise<string> {
-  const marked = await import('marked')
+  const marked = await import('marked');
 
   const content = data.replace(regexContent, '').replace(/<!--(.*?)-->/gm, '');
   if (!content) {
