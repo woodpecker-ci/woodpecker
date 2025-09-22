@@ -233,20 +233,20 @@ For the `pull_request_metadata` event, the exact reason a metadata change was de
 
 ### GitHub
 
-| NAME                    | Description                                        |
-|-------------------------|----------------------------------------------------|
-|`assigned`               | pull request was assigned to a user                |
-|`converted_to_draft`     | pull request was converted to a draft              |
-|`demilestoned`           | pull request was removed from a milestone          |
+| NAME                    | Description                                                                                     |
+|-------------------------|-------------------------------------------------------------------------------------------------|
+|`assigned`               | pull request was assigned to a user                                                             |
+|`converted_to_draft`     | pull request was converted to a draft                                                           |
+|`demilestoned`           | pull request was removed from a milestone                                                       |
 |`edited`                 | The title or body of a pull request was edited, or the base branch of a pull request was changed|
-|`label_cleared`          | all labels removed                                 |
-|`label_updated`          | new label(s) added / label(s) changed              |
-|`locked`                 | conversation on a pull request was locked          |
-|`milestoned`             | pull request was added to a milestone              |
-|`ready_for_review`       | draft pull request was marked as ready for review  |
-|`unassigned`             | user was unassigned from a pull request            |
-|`unlabeled`              | label was removed from a pull request              |
-|`unlocked`               | conversation on a pull request was unlocked        |
+|`label_cleared`          | all labels removed                                                                              |
+|`label_updated`          | new label(s) added / label(s) changed                                                           |
+|`locked`                 | conversation on a pull request was locked                                                       |
+|`milestoned`             | pull request was added to a milestone                                                           |
+|`ready_for_review`       | draft pull request was marked as ready for review                                               |
+|`unassigned`             | user was unassigned from a pull request                                                         |
+|`unlabeled`              | label was removed from a pull request                                                           |
+|`unlocked`               | conversation on a pull request was unlocked                                                     |
 
 ### Gitea
 
