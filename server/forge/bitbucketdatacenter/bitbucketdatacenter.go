@@ -490,7 +490,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		repo = convertRepo(&e.Repository, nil, "")
 		pipe = convertRepositoryPushEvent(e, c.url)
 	case *bb.PullRequestEvent:
-		repo = convertRepo(&e.PullRequest.Source.Repository, nil, "")
+		repo = convertRepo(&e.PullRequest.Target.Repository, nil, "")
 		pipe = convertPullRequestEvent(e, c.url)
 	default:
 		return nil, nil, nil
