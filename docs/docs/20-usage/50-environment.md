@@ -227,73 +227,32 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
 +      target: /target/${CI_COMMIT_TAG##v}
 ```
 
-## Forge specific environments
+## `pull_request_metadata` specific event reason values
 
 For the `pull_request_metadata` event, the exact reason a metadata change was detected is passe through in `CI_PIPELINE_EVENT_REASON`.
 
-### GitHub
+**GitLab** Merges metadata updates into one webhook. Event reasons are separated by `,` as a list.
 
-| NAME                 | Description                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------ |
-| `assigned`           | pull request was assigned to a user                                                              |
-| `converted_to_draft` | pull request was converted to a draft                                                            |
-| `demilestoned`       | pull request was removed from a milestone                                                        |
-| `edited`             | The title or body of a pull request was edited, or the base branch of a pull request was changed |
-| `label_cleared`      | all labels removed                                                                               |
-| `label_updated`      | new label(s) added / label(s) changed                                                            |
-| `locked`             | conversation on a pull request was locked                                                        |
-| `milestoned`         | pull request was added to a milestone                                                            |
-| `ready_for_review`   | draft pull request was marked as ready for review                                                |
-| `unassigned`         | user was unassigned from a pull request                                                          |
-| `unlabeled`          | label was removed from a pull request                                                            |
-| `unlocked`           | conversation on a pull request was unlocked                                                      |
+## Supported Events by Forge
 
-### Gitea
+| Event                | GitHub             | Gitea              | Forgejo            | GitLab             | Bitbucket | Bitbucket Datacenter | Description                                                                    |
+| -------------------- | ------------------ | ------------------ | ------------------ | ------------------ | --------- | -------------------- | ------------------------------------------------------------------------------ |
+| `assigned`           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | Pull request was assigned to a user                                            |
+| `converted_to_draft` | :white_check_mark: | :x:                | :x:                | :x:                | :x:       | :x:                  | Pull request was converted to a draft                                          |
+| `demilestoned`       | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | Pull request was removed from a milestone                                      |
+| `description_edited` | :x:                | :x:                | :x:                | :white_check_mark: | :x:       | :x:                  | Description edited                                                             |
+| `edited`             | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:                | :x:       | :x:                  | The title or body of a pull request was edited, or the base branch was changed |
+| `label_added`        | :x:                | :x:                | :x:                | :white_check_mark: | :x:       | :x:                  | Pull had no labels and now got label(s) added                                  |
+| `label_cleared`      | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | All labels removed                                                             |
+| `label_updated`      | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | New label(s) added / label(s) changed                                          |
+| `locked`             | :white_check_mark: | :x:                | :x:                | :x:                | :x:       | :x:                  | Conversation on a pull request was locked                                      |
+| `milestoned`         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | Pull request was added to a milestone                                          |
+| `ready_for_review`   | :white_check_mark: | :x:                | :x:                | :x:                | :x:       | :x:                  | Draft pull request was marked as ready for review                              |
+| `review_requested`   | :x:                | :x:                | :x:                | :white_check_mark: | :x:       | :x:                  | New review was requested                                                       |
+| `title_edited`       | :x:                | :x:                | :x:                | :white_check_mark: | :x:       | :x:                  | Title edited                                                                   |
+| `unassigned`         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | User was unassigned from a pull request                                        |
+| `unlabeled`          | :white_check_mark: | :x:                | :x:                | :x:                | :x:       | :x:                  | Label was removed from a pull request                                          |
+| `unlocked`           | :white_check_mark: | :x:                | :x:                | :x:                | :x:       | :x:                  | Conversation on a pull request was unlocked                                    |
 
-| NAME            | Description                           |
-| --------------- | ------------------------------------- |
-| `assigned`      | user assigned                         |
-| `demilestoned`  | milestone removed                     |
-| `edited`        | title or description edited           |
-| `label_cleared` | all labels removed                    |
-| `label_updated` | new label(s) added / label(s) changed |
-| `milestoned`    | milestone added / changed             |
-| `unassigned`    | all assignees removed                 |
-
-### Forgejo
-
-| NAME            | Description                           |
-| --------------- | ------------------------------------- |
-| `assigned`      | user assigned                         |
-| `demilestoned`  | milestone removed                     |
-| `edited`        | title or description edited           |
-| `label_cleared` | all labels removed                    |
-| `label_updated` | new label(s) added / label(s) changed |
-| `milestoned`    | milestone added / changed             |
-| `unassigned`    | all assignees removed                 |
-
-### GitLab
-
-As GitLab merges metadata updates into one webhook we get only one event.
-The event reasons are separated via `,` as an list in `CI_PIPELINE_EVENT_REASON`.
-
-| NAME                 | Description                             |
-| -------------------- | --------------------------------------- |
-| `assigned`           | user assigned                           |
-| `demilestoned`       | milestone removed                       |
-| `description_edited` | description edited                      |
-| `label_added`        | pull had non and now got label(s) added |
-| `label_cleared`      | all labels removed                      |
-| `label_updated`      | labels changed                          |
-| `milestoned`         | milestone added / changed               |
-| `title_edited`       | title edited                            |
-| `unassigned`         | all assignees removed                   |
-| `review_requested`   | new review was requested                |
-
-### Bitbucket
-
-[Not supported atm](https://github.com/woodpecker-ci/woodpecker/pull/5214)
-
-### Bitbucket Datacenter
-
-[Not supported atm](https://github.com/woodpecker-ci/woodpecker/pull/5214)
+- **Bitbucket & Bitbucket Datacenter**: [Not supported at the moment](https://github.com/woodpecker-ci/woodpecker/pull/5214)
+- Event reason values are forge-specific and may change between versions
