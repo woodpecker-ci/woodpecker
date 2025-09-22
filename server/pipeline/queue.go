@@ -34,6 +34,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 		}
 		task := &model.Task{
 			ID:         fmt.Sprint(item.Workflow.ID),
+			PID:        item.Workflow.PID,
 			Name:       item.Workflow.Name,
 			Labels:     make(map[string]string),
 			PipelineID: item.Workflow.PipelineID,

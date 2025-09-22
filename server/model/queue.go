@@ -3,7 +3,8 @@ package model
 // QueueTask represents a task in the queue with additional API-specific fields.
 type QueueTask struct {
 	Task
-	AgentName string `json:"agent_name,omitempty"` // Agent name if available
+	PipelineNumber int64  `json:"pipeline_number"`
+	AgentName      string `json:"agent_name"`
 }
 
 // QueueInfo represents the response structure for queue information API.

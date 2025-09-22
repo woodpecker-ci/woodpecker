@@ -135,6 +135,14 @@ func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[
 		}
 
 		taskResponse.AgentName = name
+
+		p, err := store.GetPipeline(task.PipelineID)
+		if err != nil {
+			return nil, err
+		}
+
+		taskResponse.PipelineNumber = p.Number
+
 		result = append(result, taskResponse)
 	}
 	return result, nil

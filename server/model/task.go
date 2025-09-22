@@ -25,6 +25,7 @@ import (
 // Task defines scheduled pipeline Task.
 type Task struct {
 	ID           string                 `json:"id"           xorm:"PK UNIQUE 'id'"`
+	PID          int                    `json:"pid"          xorm:"'pid'"`
 	Name         string                 `json:"name"         xorm:"'name'"`
 	Data         []byte                 `json:"-"            xorm:"LONGBLOB 'data'"`
 	Labels       map[string]string      `json:"labels"       xorm:"json 'labels'"`

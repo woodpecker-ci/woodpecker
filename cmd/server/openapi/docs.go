@@ -5496,6 +5496,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "pid": {
+                    "type": "integer"
+                },
                 "pipeline_id": {
                     "type": "integer"
                 },
@@ -5859,7 +5862,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "agent_name": {
-                    "description": "Agent name if available",
                     "type": "string"
                 },
                 "dep_status": {
@@ -5886,7 +5888,13 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "pid": {
+                    "type": "integer"
+                },
                 "pipeline_id": {
+                    "type": "integer"
+                },
+                "pipeline_number": {
                     "type": "integer"
                 },
                 "repo_id": {

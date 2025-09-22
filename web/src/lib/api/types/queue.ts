@@ -1,5 +1,6 @@
 export interface Task {
   id: number;
+  pid: number;
   name: string;
   labels: Record<string, string>;
   dependencies: string[];
@@ -8,6 +9,7 @@ export interface Task {
   agent_id: number;
   agent_name: string;
   pipeline_id: number;
+  pipeline_number: number;
   repo_id: number;
 }
 

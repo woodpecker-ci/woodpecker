@@ -76,7 +76,7 @@
                 class="h-8 w-8"
                 :to="{
                   name: 'repo-pipeline',
-                  params: { repoId: task.repo_id, pipelineId: task.pipeline_id },
+                  params: { repoId: task.repo_id, pipelineId: task.pipeline_number, stepId: task.pid },
                 }"
               />
             </div>
