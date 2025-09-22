@@ -233,8 +233,6 @@ For the `pull_request_metadata` event, the exact reason a metadata change was de
 
 **GitLab** Merges metadata updates into one webhook. Event reasons are separated by `,` as a list.
 
-## Supported Events by Forge
-
 | Event                | GitHub             | Gitea              | Forgejo            | GitLab             | Bitbucket | Bitbucket Datacenter | Description                                                                    |
 | -------------------- | ------------------ | ------------------ | ------------------ | ------------------ | --------- | -------------------- | ------------------------------------------------------------------------------ |
 | `assigned`           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x:       | :x:                  | Pull request was assigned to a user                                            |
