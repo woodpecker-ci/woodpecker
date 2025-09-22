@@ -37,7 +37,7 @@ type Client struct {
 }
 
 func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*httpsign.Client, error) {
-	timeout := 10 * time.Second
+	timeout := 10 * time.Second //nolint:mnd
 
 	if allowedHostListValue == "" {
 		allowedHostListValue = host_matcher.MatchBuiltinExternal
