@@ -32,7 +32,9 @@
           :key="task.id"
           class="bg-wp-background-200! dark:bg-wp-background-200! mb-2 flex-col items-center gap-4"
         >
-          <div class="flex w-full items-center justify-between gap-2 border-b pb-2">
+          <div
+            class="border-wp-background-400 dark:border-wp-background-100 flex w-full items-center justify-between gap-2 border-b pb-2"
+          >
             <div
               class="flex items-center gap-2"
               :title="
@@ -71,6 +73,7 @@
             </div>
             <div class="ml-2 flex items-center gap-2">
               <IconButton
+                v-if="task.agent_name"
                 icon="chevron-right"
                 :title="$t('repo.pipeline.view')"
                 class="h-8 w-8"
