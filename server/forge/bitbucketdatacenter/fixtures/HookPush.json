@@ -1,0 +1,136 @@
+{
+  "date": "2025-09-23T03:15:55+0300",
+  "actor": {
+    "emailAddress": "renovatebot@example.com",
+    "displayName": "Renovate Bot",
+    "name": "renovatebot",
+    "active": true,
+    "links": {"self": [{"href": "https://bitbucket.example.com/users/renovatebot"}]},
+    "id": 14570,
+    "type": "NORMAL",
+    "slug": "renovatebot"
+  },
+  "toCommit": {
+    "committer": {
+      "emailAddress": "renovatebot@example.com",
+      "displayName": "Renovate Bot",
+      "name": "renovatebot",
+      "active": true,
+      "links": {"self": [{"href": "https://bitbucket.example.com/users/renovatebot"}]},
+      "id": 14570,
+      "type": "NORMAL",
+      "slug": "renovatebot"
+    },
+    "committerTimestamp": 1758586555000,
+    "author": {
+      "emailAddress": "renovatebot@example.com",
+      "displayName": "Renovate Bot",
+      "name": "renovatebot",
+      "active": true,
+      "links": {"self": [{"href": "https://bitbucket.example.com/users/renovatebot"}]},
+      "id": 14570,
+      "type": "NORMAL",
+      "slug": "renovatebot"
+    },
+    "authorTimestamp": 1758586555000,
+    "id": "76797d54bca87db6d1e3e82ee40622c7908aa514",
+    "displayId": "76797d54bca",
+    "message": "chore(deps): update all",
+    "parents": [{
+      "committer": {
+        "emailAddress": "john.doe@example.com",
+        "name": "John Doe"
+      },
+      "committerTimestamp": 1757592099000,
+      "author": {
+        "emailAddress": "john.doe@example.com",
+        "name": "John Doe"
+      },
+      "authorTimestamp": 1757592099000,
+      "id": "8c49fecb1363fffdf00456cedaaff6a50613725a",
+      "displayId": "8c49fecb136",
+      "message": "chore: bump deployment automation version",
+      "parents": [{
+        "id": "c690da9e7f6a6d90defe03d57b8802df149c4aff",
+        "displayId": "c690da9e7f6"
+      }]
+    }]
+  },
+  "eventKey": "repo:refs_changed",
+  "changes": [{
+    "ref": {
+      "id": "refs/heads/renovate-all",
+      "displayId": "renovate-all",
+      "type": "BRANCH"
+    },
+    "fromHash": "e0e15221b987fd8296141c0faa6a79f7c86ca4ce",
+    "toHash": "76797d54bca87db6d1e3e82ee40622c7908aa514",
+    "refId": "refs/heads/renovate-all",
+    "type": "UPDATE"
+  }],
+  "commits": [{
+    "committer": {
+      "emailAddress": "renovatebot@example.com",
+      "displayName": "Renovate Bot",
+      "name": "renovatebot",
+      "active": true,
+      "links": {"self": [{"href": "https://bitbucket.example.com/users/renovatebot"}]},
+      "id": 14570,
+      "type": "NORMAL",
+      "slug": "renovatebot"
+    },
+    "committerTimestamp": 1758586555000,
+    "author": {
+      "emailAddress": "renovatebot@example.com",
+      "displayName": "Renovate Bot",
+      "name": "renovatebot",
+      "active": true,
+      "links": {"self": [{"href": "https://bitbucket.example.com/users/renovatebot"}]},
+      "id": 14570,
+      "type": "NORMAL",
+      "slug": "renovatebot"
+    },
+    "authorTimestamp": 1758586555000,
+    "id": "76797d54bca87db6d1e3e82ee40622c7908aa514",
+    "displayId": "76797d54bca",
+    "message": "chore(deps): update all",
+    "parents": [{
+      "id": "8c49fecb1363fffdf00456cedaaff6a50613725a",
+      "displayId": "8c49fecb136"
+    }]
+  }],
+  "repository": {
+    "archived": false,
+    "public": false,
+    "hierarchyId": "da7793ace13b18fa55a5",
+    "name": "deployment-automation",
+    "forkable": true,
+    "project": {
+      "public": false,
+      "name": "devops-team",
+      "description": "DevOps Team",
+      "links": {"self": [{"href": "https://bitbucket.example.com/projects/DEV"}]},
+      "id": 565,
+      "type": "NORMAL",
+      "key": "DEV"
+    },
+    "links": {
+      "clone": [
+        {
+          "name": "http",
+          "href": "https://bitbucket.example.com/scm/dev/deployment-automation.git"
+        },
+        {
+          "name": "ssh",
+          "href": "ssh://git@bitbucket.example.com:7999/dev/deployment-automation.git"
+        }
+      ],
+      "self": [{"href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/browse"}]
+    },
+    "id": 1684,
+    "scmId": "git",
+    "state": "AVAILABLE",
+    "slug": "deployment-automation",
+    "statusMessage": "Available"
+  }
+}

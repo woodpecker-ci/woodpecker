@@ -1,0 +1,166 @@
+{
+  "date": "2025-09-22T13:36:11+0300",
+  "actor": {
+    "emailAddress": "john.doe@example.com",
+    "displayName": "EXT Doe John",
+    "name": "john.doe@example.com",
+    "active": true,
+    "links": {"self": [{"href": "https://bitbucket.example.com/users/john.doe_example.com"}]},
+    "id": 13581,
+    "type": "NORMAL",
+    "slug": "john.doe_example.com"
+  },
+  "eventKey": "pr:opened",
+  "pullRequest": {
+    "author": {
+      "approved": false,
+      "role": "AUTHOR",
+      "user": {
+        "emailAddress": "john.doe@example.com",
+        "displayName": "EXT Doe John",
+        "name": "john.doe@example.com",
+        "active": true,
+        "links": {"self": [{"href": "https://bitbucket.example.com/users/john.doe_example.com"}]},
+        "id": 13581,
+        "type": "NORMAL",
+        "slug": "john.doe_example.com"
+      },
+      "status": "UNAPPROVED"
+    },
+    "updatedDate": 1758537371875,
+    "title": "testing PROJ-4600",
+    "version": 0,
+    "reviewers": [],
+    "toRef": {
+      "latestCommit": "8c49fecb1363fffdf00456cedaaff6a50613725a",
+      "id": "refs/heads/master",
+      "displayId": "master",
+      "type": "BRANCH",
+      "repository": {
+        "archived": false,
+        "public": false,
+        "hierarchyId": "da7793ace13b18fa55a5",
+        "name": "deployment-automation",
+        "forkable": true,
+        "project": {
+          "public": false,
+          "name": "devops-team",
+          "description": "DevOps Team",
+          "links": {"self": [{"href": "https://bitbucket.example.com/projects/DEV"}]},
+          "id": 565,
+          "type": "NORMAL",
+          "key": "DEV"
+        },
+        "links": {
+          "clone": [
+            {
+              "name": "http",
+              "href": "https://bitbucket.example.com/scm/dev/deployment-automation.git"
+            },
+            {
+              "name": "ssh",
+              "href": "ssh://git@bitbucket.example.com:7999/dev/deployment-automation.git"
+            }
+          ],
+          "self": [{"href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/browse"}]
+        },
+        "id": 1684,
+        "scmId": "git",
+        "state": "AVAILABLE",
+        "slug": "deployment-automation",
+        "statusMessage": "Available"
+      }
+    },
+    "createdDate": 1758537371875,
+    "draft": false,
+    "closed": false,
+    "fromRef": {
+      "latestCommit": "716e510cecbe203618609cf103c54e040b949739",
+      "id": "refs/heads/master",
+      "displayId": "master",
+      "type": "BRANCH",
+      "repository": {
+        "hierarchyId": "da7793ace13b18fa55a5",
+        "origin": {
+          "archived": false,
+          "public": false,
+          "hierarchyId": "da7793ace13b18fa55a5",
+          "name": "deployment-automation",
+          "forkable": true,
+          "project": {
+            "public": false,
+            "name": "devops-team",
+            "description": "DevOps Team",
+            "links": {"self": [{"href": "https://bitbucket.example.com/projects/DEV"}]},
+            "id": 565,
+            "type": "NORMAL",
+            "key": "DEV"
+          },
+          "links": {
+            "clone": [
+              {
+                "name": "http",
+                "href": "https://bitbucket.example.com/scm/dev/deployment-automation.git"
+              },
+              {
+                "name": "ssh",
+                "href": "ssh://git@bitbucket.example.com:7999/dev/deployment-automation.git"
+              }
+            ],
+            "self": [{"href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/browse"}]
+          },
+          "id": 1684,
+          "scmId": "git",
+          "state": "AVAILABLE",
+          "slug": "deployment-automation",
+          "statusMessage": "Available"
+        },
+        "project": {
+          "owner": {
+            "emailAddress": "john.doe@example.com",
+            "displayName": "EXT Doe John",
+            "name": "john.doe@example.com",
+            "active": true,
+            "links": {"self": [{"href": "https://bitbucket.example.com/users/john.doe_example.com"}]},
+            "id": 13581,
+            "type": "NORMAL",
+            "slug": "john.doe_example.com"
+          },
+          "name": "EXT Doe John",
+          "links": {"self": [{"href": "https://bitbucket.example.com/users/john.doe_example.com"}]},
+          "id": 1120,
+          "type": "PERSONAL",
+          "key": "~JOHN.DOE_EXAMPLE.COM"
+        },
+        "statusMessage": "Available",
+        "archived": false,
+        "public": false,
+        "name": "deployment-automation",
+        "forkable": true,
+        "links": {
+          "clone": [
+            {
+              "name": "ssh",
+              "href": "ssh://git@bitbucket.example.com:7999/~john.doe_example.com/deployment-automation.git"
+            },
+            {
+              "name": "http",
+              "href": "https://bitbucket.example.com/scm/~john.doe_example.com/deployment-automation.git"
+            }
+          ],
+          "self": [{"href": "https://bitbucket.example.com/users/john.doe_example.com/repos/deployment-automation/browse"}]
+        },
+        "id": 1856,
+        "scmId": "git",
+        "state": "AVAILABLE",
+        "slug": "deployment-automation"
+      }
+    },
+    "links": {"self": [{"href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/pull-requests/114"}]},
+    "id": 114,
+    "state": "OPEN",
+    "locked": false,
+    "open": true,
+    "participants": []
+  }
+}
