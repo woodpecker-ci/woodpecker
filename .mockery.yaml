@@ -1,2 +1,36 @@
 ---
+all: true
 disable-version-string: true
+outpkg: 'mocks'
+dir: '{{.InterfaceDir}}/mocks'
+packages:
+  go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/server/forge:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/server/queue:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/server/services:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/server/services/config:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/server/services/environment:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/server/services/registry:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/server/services/secret:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/server/store:
+    config:
+      recursive: true
+  go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker:
+    config:
+      recursive: true

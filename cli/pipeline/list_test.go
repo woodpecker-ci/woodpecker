@@ -65,7 +65,7 @@ func TestPipelineList(t *testing.T) {
 
 	for _, tt := range testtases {
 		t.Run(tt.name, func(t *testing.T) {
-			mockClient := mocks.NewClient(t)
+			mockClient := mocks.NewMockClient(t)
 			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(func(_ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
 				if tt.pipelineErr != nil {
 					return nil, tt.pipelineErr
