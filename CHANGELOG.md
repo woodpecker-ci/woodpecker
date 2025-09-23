@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-22
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -50,6 +50,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.147.1 [[#5541](https://github.com/woodpecker-ci/woodpecker/pull/5541)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.5.0 [[#5535](https://github.com/woodpecker-ci/woodpecker/pull/5535)]
 - fix(deps): update dependency simple-icons to v15.16.0 [[#5532](https://github.com/woodpecker-ci/woodpecker/pull/5532)]
 - fix(deps): update module github.com/gin-gonic/gin to v1.11.0 [[#5531](https://github.com/woodpecker-ci/woodpecker/pull/5531)]
