@@ -119,13 +119,10 @@ clean-all: clean ## Clean all artifacts
 
 .PHONY: generate
 generate: install-tools generate-openapi ## Run all code generations
-	mockery
-	@find . -name "*.go" -not -path "./cmd/server/openapi.go" -not -path "./vendor/*" | while read -r file; do \
-		CGO_ENABLED=0 go generate "$$file"; \
-	done
+	CGO_ENABLED=0 go generate ./...
 
 generate-openapi: install-tools ## Run openapi code generation and format it
-	go run github.com/swaggo/swag/cmd/swag fmt
+	go run github.com/swaggo/swag/cmd/swag fmt --exclude pipeline/rpc/proto
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 generate-license-header: install-tools

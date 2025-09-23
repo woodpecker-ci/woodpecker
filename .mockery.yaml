@@ -3,8 +3,8 @@ all: true
 disable-version-string: true
 outpkg: 'mocks'
 dir: '{{.InterfaceDir}}/mocks'
-issue-845-fix: True
-resolve-type-alias: False
+issue-845-fix: true
+resolve-type-alias: false
 packages:
   go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc:
     config:
