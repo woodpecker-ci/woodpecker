@@ -12,7 +12,7 @@ import (
 type HookResult struct {
 	Repo     *model.Repo
 	Pipeline *model.Pipeline
-	Event    interface{}
+	Event    any
 	Payload  []byte
 }
 

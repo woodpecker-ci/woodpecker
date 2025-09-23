@@ -5,7 +5,7 @@
     "displayName": "EXT Doe John",
     "name": "john.doe@example.com",
     "active": true,
-    "links": {"self": [{"href": "https://bitbucket.example.com/users/john.doe_example.com"}]},
+    "links": { "self": [{ "href": "https://bitbucket.example.com/users/john.doe_example.com" }] },
     "id": 13581,
     "type": "NORMAL",
     "slug": "john.doe_example.com"
@@ -20,7 +20,7 @@
         "displayName": "EXT Doe John",
         "name": "john.doe@example.com",
         "active": true,
-        "links": {"self": [{"href": "https://bitbucket.example.com/users/john.doe_example.com"}]},
+        "links": { "self": [{ "href": "https://bitbucket.example.com/users/john.doe_example.com" }] },
         "id": 13581,
         "type": "NORMAL",
         "slug": "john.doe_example.com"
@@ -40,7 +40,7 @@
           "displayName": "EXT Smith Jane",
           "name": "jane.smith@contractor.com",
           "active": true,
-          "links": {"self": [{"href": "https://bitbucket.example.com/users/jane.smith_contractor.com"}]},
+          "links": { "self": [{ "href": "https://bitbucket.example.com/users/jane.smith_contractor.com" }] },
           "id": 9374,
           "type": "NORMAL",
           "slug": "jane.smith_contractor.com"
@@ -55,7 +55,7 @@
           "displayName": "EXT Johnson Mike",
           "name": "mike.johnson@vendor.com",
           "active": true,
-          "links": {"self": [{"href": "https://bitbucket.example.com/users/mike.johnson_vendor.com"}]},
+          "links": { "self": [{ "href": "https://bitbucket.example.com/users/mike.johnson_vendor.com" }] },
           "id": 15107,
           "type": "NORMAL",
           "slug": "mike.johnson_vendor.com"
@@ -70,7 +70,7 @@
           "displayName": "EXT Brown Alex",
           "name": "alex.brown@freelance.com",
           "active": true,
-          "links": {"self": [{"href": "https://bitbucket.example.com/users/alex.brown_freelance.com"}]},
+          "links": { "self": [{ "href": "https://bitbucket.example.com/users/alex.brown_freelance.com" }] },
           "id": 13360,
           "type": "NORMAL",
           "slug": "alex.brown_freelance.com"
@@ -94,7 +94,7 @@
           "public": false,
           "name": "devops-team",
           "description": "DevOps Team",
-          "links": {"self": [{"href": "https://bitbucket.example.com/projects/DEV"}]},
+          "links": { "self": [{ "href": "https://bitbucket.example.com/projects/DEV" }] },
           "id": 565,
           "type": "NORMAL",
           "key": "DEV"
@@ -110,7 +110,7 @@
               "href": "ssh://git@bitbucket.example.com:7999/dev/deployment-automation.git"
             }
           ],
-          "self": [{"href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/browse"}]
+          "self": [{ "href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/browse" }]
         },
         "id": 1684,
         "scmId": "git",
@@ -138,7 +138,7 @@
           "public": false,
           "name": "devops-team",
           "description": "DevOps Team",
-          "links": {"self": [{"href": "https://bitbucket.example.com/projects/DEV"}]},
+          "links": { "self": [{ "href": "https://bitbucket.example.com/projects/DEV" }] },
           "id": 565,
           "type": "NORMAL",
           "key": "DEV"
@@ -154,7 +154,7 @@
               "href": "ssh://git@bitbucket.example.com:7999/dev/deployment-automation.git"
             }
           ],
-          "self": [{"href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/browse"}]
+          "self": [{ "href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/browse" }]
         },
         "id": 1684,
         "scmId": "git",
@@ -163,15 +163,19 @@
         "statusMessage": "Available"
       }
     },
-    "links": {"self": [{"href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/pull-requests/111"}]},
+    "links": {
+      "self": [{ "href": "https://bitbucket.example.com/projects/DEV/repos/deployment-automation/pull-requests/111" }]
+    },
     "id": 111,
     "state": "MERGED",
     "locked": false,
     "open": false,
-    "properties": {"mergeCommit": {
-      "id": "c690da9e7f6a6d90defe03d57b8802df149c4aff",
-      "displayId": "c690da9e7f6"
-    }},
+    "properties": {
+      "mergeCommit": {
+        "id": "c690da9e7f6a6d90defe03d57b8802df149c4aff",
+        "displayId": "c690da9e7f6"
+      }
+    },
     "participants": []
   }
 }
