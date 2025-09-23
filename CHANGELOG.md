@@ -37,6 +37,7 @@
 
 ### 📚 Documentation
 
+- Add MCP tool to awesome docs [[#5546](https://github.com/woodpecker-ci/woodpecker/pull/5546)]
 - chore(deps): update docs npm deps non-major [[#5527](https://github.com/woodpecker-ci/woodpecker/pull/5527)]
 - chore(deps): update docs npm deps non-major [[#5512](https://github.com/woodpecker-ci/woodpecker/pull/5512)]
 - Add a blog post [[#5510](https://github.com/woodpecker-ci/woodpecker/pull/5510)]
