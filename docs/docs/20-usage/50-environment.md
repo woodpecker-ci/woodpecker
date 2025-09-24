@@ -231,7 +231,11 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
 
 For the `pull_request_metadata` event, the exact reason a metadata change was detected is passe through in `CI_PIPELINE_EVENT_REASON`.
 
-**GitLab** Merges metadata updates into one webhook. Event reasons are separated by `,` as a list.
+**GitLab** merges metadata updates into one webhook. Event reasons are separated by `,` as a list.
+
+:::note
+Event reason values are forge-specific and may change between versions.
+:::
 
 | Event                | GitHub             | Gitea              | Forgejo            | GitLab             | Bitbucket | Bitbucket Datacenter | Description                                                                    |
 | -------------------- | ------------------ | ------------------ | ------------------ | ------------------ | --------- | -------------------- | ------------------------------------------------------------------------------ |
