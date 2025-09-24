@@ -5673,6 +5673,46 @@ func (_c *MockStore_StepFind_Call) RunAndReturn(run func(pipeline *model.Pipelin
 	return _c
 }
 
+// StepFinished provides a mock function for the type MockStore
+func (_mock *MockStore) StepFinished(step *model.Step) {
+	_mock.Called(step)
+	return
+}
+
+// MockStore_StepFinished_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepFinished'
+type MockStore_StepFinished_Call struct {
+	*mock.Call
+}
+
+// StepFinished is a helper method to define mock.On call
+//   - step *model.Step
+func (_e *MockStore_Expecter) StepFinished(step interface{}) *MockStore_StepFinished_Call {
+	return &MockStore_StepFinished_Call{Call: _e.mock.On("StepFinished", step)}
+}
+
+func (_c *MockStore_StepFinished_Call) Run(run func(step *model.Step)) *MockStore_StepFinished_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Step
+		if args[0] != nil {
+			arg0 = args[0].(*model.Step)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_StepFinished_Call) Return() *MockStore_StepFinished_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockStore_StepFinished_Call) RunAndReturn(run func(step *model.Step)) *MockStore_StepFinished_Call {
+	_c.Run(run)
+	return _c
+}
+
 // StepList provides a mock function for the type MockStore
 func (_mock *MockStore) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
 	ret := _mock.Called(pipeline)
