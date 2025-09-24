@@ -14,8 +14,6 @@
 
 package store
 
-//go:generate mockery --name Store --output mocks --case underscore --note "+build test"
-
 import (
 	"context"
 
@@ -149,6 +147,7 @@ type Store interface {
 	LogFind(*model.Step) ([]*model.LogEntry, error)
 	LogAppend(*model.Step, []*model.LogEntry) error
 	LogDelete(*model.Step) error
+	StepFinished(*model.Step)
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter

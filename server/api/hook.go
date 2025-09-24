@@ -124,24 +124,23 @@ func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[
 			Task: *task,
 		}
 
-		if task.AgentID == 0 {
-			result = append(result, taskResponse)
-			continue
+		if task.AgentID != 0 {
+			name, ok := getAgentName(store, agentNameMap, task.AgentID)
+			if !ok {
+				return nil, fmt.Errorf("agent not found for task %s", task.ID)
+			}
+
+			taskResponse.AgentName = name
 		}
 
-		name, ok := getAgentName(store, agentNameMap, task.AgentID)
-		if !ok {
-			return nil, fmt.Errorf("agent not found for task %s", task.ID)
+		if task.PipelineID != 0 {
+			p, err := store.GetPipeline(task.PipelineID)
+			if err != nil {
+				return nil, fmt.Errorf("pipeline not found for task %s", task.ID)
+			}
+
+			taskResponse.PipelineNumber = p.Number
 		}
-
-		taskResponse.AgentName = name
-
-		p, err := store.GetPipeline(task.PipelineID)
-		if err != nil {
-			return nil, err
-		}
-
-		taskResponse.PipelineNumber = p.Number
 
 		result = append(result, taskResponse)
 	}
