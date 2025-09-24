@@ -12,6 +12,7 @@
 
 ### ✨ Features
 
+- New event pull request metadata [[#5214](https://github.com/woodpecker-ci/woodpecker/pull/5214)]
 - Add task UUID label to Kubernetes pods [[#5544](https://github.com/woodpecker-ci/woodpecker/pull/5544)]
 - feat: expose listing available organizations via woodpecker-go / CLI [[#5481](https://github.com/woodpecker-ci/woodpecker/pull/5481)]
 - Add milestone to metadata [[#5174](https://github.com/woodpecker-ci/woodpecker/pull/5174)]
