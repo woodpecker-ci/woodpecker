@@ -256,5 +256,4 @@ Event reason values are forge-specific and may change between versions.
 | `unlabeled`          | :white_check_mark: | :x:                | :x:                | :x:                | :x:       | :x:                  | Label was removed from a pull request                                          |
 | `unlocked`           | :white_check_mark: | :x:                | :x:                | :x:                | :x:       | :x:                  | Conversation on a pull request was unlocked                                    |
 
-- **Bitbucket & Bitbucket Datacenter**: [Not supported at the moment](https://github.com/woodpecker-ci/woodpecker/pull/5214)
 **Bitbucket** and **Bitbucket Datacenter** are not supported at the moment](https://github.com/woodpecker-ci/woodpecker/pull/5214).
