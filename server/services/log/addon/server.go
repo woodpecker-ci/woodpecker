@@ -83,5 +83,5 @@ func (s *RPCServer) StepFinished(args []byte, resp *[]byte) error {
 	}
 	*resp = []byte{}
 	s.Impl.StepFinished(&a)
-	return  nil
+	return nil
 }
