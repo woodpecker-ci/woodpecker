@@ -14,8 +14,6 @@
 
 package store
 
-//go:generate mockery --name Store --output mocks --case underscore --note "+build test"
-
 import (
 	"context"
 
