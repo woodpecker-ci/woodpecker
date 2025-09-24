@@ -13,3 +13,5 @@
 | [when.path filter](../../../20-usage/20-workflow-syntax.md#path) |   :white_check_mark:   |  :white_check_mark:  |    :white_check_mark:    |   :white_check_mark:   |             :x:              |                 :white_check_mark:                 |
 
 ¹ The deployment event can be triggered for all forges from Woodpecker directly. However, only GitHub can trigger them using webhooks.
+
+In addition to this, Woodpecker supports [addon forges](../100-addons.md) if the forge you are using does not meet the [Woodpecker requirements](../../../92-development/02-core-ideas.md#forges) or your setup is too specific to be included in the Woodpecker core.

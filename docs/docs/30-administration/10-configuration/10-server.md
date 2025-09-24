@@ -1116,7 +1116,7 @@ Where to store logs. Possible values:
 
 - `database`: stores the logs in the database
 - `file`: stores logs in JSON files on the files system
-- `addon`: uses a separate addon to store logs. See [Addons](../../92-development/100-addons.md)
+- `addon`: uses a separate addon to store logs. See [Addons](./100-addons.md#logs)
 
 ---
 
