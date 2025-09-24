@@ -30,8 +30,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-//go:generate mockery --name Manager --output mocks --case underscore --note "+build test"
-
 const forgeCacheTTL = 10 * time.Minute
 
 type SetupForge func(forge *model.Forge) (forge.Forge, error)

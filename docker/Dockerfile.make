@@ -2,7 +2,8 @@
 FROM docker.io/golang:1.25-alpine AS golang_image
 FROM docker.io/node:23-alpine
 
-RUN apk add --no-cache --update make gcc binutils-gold musl-dev protoc && \
+RUN apk add --no-cache --update make gcc binutils-gold musl-dev && \
+    apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main protoc && \
   corepack enable
 
 # Build packages.
