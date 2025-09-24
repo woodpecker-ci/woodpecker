@@ -23,6 +23,8 @@ var fixForgeColumns = xormigrate.Migration{
 	ID: "fix-forge-columns",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type forges struct {
+			Client            string `xorm:"VARCHAR(250) 'client'"`
+			ClientSecret      string `xorm:"VARCHAR(250) 'client_secret'"`
 			OAuthClientID     string `xorm:"VARCHAR(250) 'o_auth_client_i_d'"`
 			OAuthClientSecret string `xorm:"VARCHAR(250) 'o_auth_client_secret'"`
 		}
@@ -41,10 +43,6 @@ var fixForgeColumns = xormigrate.Migration{
 		}
 
 		// Drop client and client_secret columns if they still exist
-		if err := dropTableColumns(sess, "forges", "client", "client_secret"); err != nil {
-			return err
-		}
-
-		return nil
+		return dropTableColumns(sess, "forges", "client", "client_secret")
 	},
 }

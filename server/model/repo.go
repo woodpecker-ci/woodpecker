@@ -91,11 +91,11 @@ func ParseRepo(str string) (user, repo string, err error) {
 	before, after, _ := strings.Cut(str, "/")
 	if before == "" || after == "" {
 		err = fmt.Errorf("invalid or missing repository (e.g. octocat/hello-world)")
-		return
+		return user, repo, err
 	}
 	user = before
 	repo = after
-	return
+	return user, repo, err
 }
 
 // Update updates the repository with values from the given Repo.

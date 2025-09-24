@@ -274,7 +274,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err = startPod(ctx, e, step, options)
+	_, err = startPod(ctx, e, step, options, taskUUID)
 	return err
 }
 

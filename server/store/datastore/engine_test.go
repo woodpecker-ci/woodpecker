@@ -32,7 +32,7 @@ func testDriverConfig() (driver, config string) {
 		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
 		config = os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 	}
-	return
+	return driver, config
 }
 
 // newTestStore creates a new database connection for testing purposes.
