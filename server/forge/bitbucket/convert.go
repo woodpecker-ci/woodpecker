@@ -235,5 +235,5 @@ func extractEmail(gitAuthor string) (author string) {
 	if len(matches) == 1 {
 		author = matches[0][1]
 	}
-	return
+	return author
 }

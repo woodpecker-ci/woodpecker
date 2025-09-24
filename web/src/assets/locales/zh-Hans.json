@@ -670,5 +670,11 @@
         "saved": "已保存注册表凭据"
     },
     "registration_closed": "已关闭注册",
-    "oauth_error": "与 OAuth 提供商进行身份验证时出错"
+    "oauth_error": "与 OAuth 提供商进行身份验证时出错",
+    "public_url_for_oauth_if": "如果用于 OAuth 的对外可访问地址与当前系统的基础 URL 不同，请在({0})填入",
+    "edit_forge": "编辑代码托管平台",
+    "forge_delete_confirm": "您真的想要删除这个仓库吗？这将也会删除与此仓库相关的所有仓库、用户和管道。",
+    "no_forges": "还没有配置任何代码托管平台.",
+    "developer_settings": "开发者设置",
+    "delete_forge": "删除代码托管平台"
 }

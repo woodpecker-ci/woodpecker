@@ -2454,6 +2454,11 @@ func (_m *Store) StepFind(_a0 *model.Pipeline, _a1 int) (*model.Step, error) {
 	return r0, r1
 }
 
+// StepFinished provides a mock function with given fields: _a0
+func (_m *Store) StepFinished(_a0 *model.Step) {
+	_m.Called(_a0)
+}
+
 // StepList provides a mock function with given fields: _a0
 func (_m *Store) StepList(_a0 *model.Pipeline) ([]*model.Step, error) {
 	ret := _m.Called(_a0)

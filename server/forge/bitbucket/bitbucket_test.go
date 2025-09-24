@@ -30,7 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestNew(t *testing.T) {
@@ -205,7 +205,7 @@ func TestBitbucket(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 	req.Header = fixtures.HookPushHeaders
 
-	mockStore := mocks_store.NewStore(t)
+	mockStore := store_mocks.NewMockStore(t)
 	ctx = store.InjectToContext(ctx, mockStore)
 	mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
 	mockStore.On("GetRepoForgeID", mock.Anything).Return(fakeRepoFromHook, nil)

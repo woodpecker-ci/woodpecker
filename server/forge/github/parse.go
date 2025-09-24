@@ -49,6 +49,9 @@ const (
 	actionUnassigned       = "unassigned"
 	actionUnlabeled        = "unlabeled"
 	actionUnlocked         = "unlocked"
+
+	labelCleared = "label_cleared"
+	labelUpdated = "label_updated"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
@@ -211,6 +214,15 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
+	}
+
+	// normalize label events to match other forges
+	if eventAction == actionLabeled || eventAction == actionUnlabeled {
+		if len(pipeline.PullRequestLabels) == 0 {
+			pipeline.EventReason = []string{labelCleared}
+		} else {
+			pipeline.EventReason = []string{labelUpdated}
+		}
 	}
 
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil

@@ -100,3 +100,6 @@ var HookPullRequestAssigneeRemoved string
 
 //go:embed HookPullRequestReopened.json
 var HookPullRequestReopened string
+
+//go:embed HookPullRequestLabelsCleared.json
+var HookPullRequestLabelsCleared string

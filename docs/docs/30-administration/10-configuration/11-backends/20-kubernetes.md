@@ -19,6 +19,8 @@ The following metadata labels are supported:
 - `woodpecker-ci.org/repo-full-name`
 - `woodpecker-ci.org/branch`
 - `woodpecker-ci.org/org-id`
+- `woodpecker-ci.org/task-uuid`
+- `woodpecker-ci.org/step`
 
 ## Private registries
 

@@ -66,8 +66,6 @@ type (
 	}
 )
 
-//go:generate mockery --name Peer --output mocks --case underscore --note "+build test"
-
 // Peer defines a peer-to-peer connection.
 type Peer interface {
 	// Version returns the server- & grpc-version
