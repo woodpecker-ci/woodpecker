@@ -119,6 +119,7 @@ clean-all: clean ## Clean all artifacts
 
 .PHONY: generate
 generate: install-tools generate-openapi ## Run all code generations
+	mockery
 	CGO_ENABLED=0 go generate ./...
 
 generate-openapi: install-tools ## Run openapi code generation and format it
@@ -144,7 +145,7 @@ install-tools: ## Install development tools
 		go install github.com/google/addlicense@latest; \
 	fi ; \
 	hash mockery > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/vektra/mockery/v2@latest; \
+		go install github.com/vektra/mockery/v3@latest; \
 	fi ; \
 	hash protoc-gen-go > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install google.golang.org/protobuf/cmd/protoc-gen-go@latest; \
