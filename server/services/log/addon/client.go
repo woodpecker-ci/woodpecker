@@ -101,3 +101,16 @@ func (g *RPC) LogDelete(step *model.Step) error {
 	var jsonResp []byte
 	return g.client.Call("Plugin.LogDelete", args, &jsonResp)
 }
+
+func (g *RPC) StepFinished(step *model.Step) {
+	args, err := json.Marshal(step)
+	if err != nil {
+		log.Error().Err(err).Msg("could not marshal json for log addon")
+		return
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.StepFinished", args, &jsonResp)
+	if err != nil {
+		log.Error().Err(err).Msg("StepFinished via addon failed")
+	}
+}

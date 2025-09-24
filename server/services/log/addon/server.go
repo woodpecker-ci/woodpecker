@@ -74,3 +74,14 @@ func (s *RPCServer) LogDelete(args []byte, resp *[]byte) error {
 	*resp = []byte{}
 	return s.Impl.LogDelete(&a)
 }
+
+func (s *RPCServer) StepFinished(args []byte, resp *[]byte) error {
+	var a model.Step
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	*resp = []byte{}
+	s.Impl.StepFinished(&a)
+	return  nil
+}
