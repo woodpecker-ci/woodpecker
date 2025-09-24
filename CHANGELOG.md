@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- Migrate to mockery v3 [[#5547](https://github.com/woodpecker-ci/woodpecker/pull/5547)]
 - Show human readable information in queue info [[#5516](https://github.com/woodpecker-ci/woodpecker/pull/5516)]
 - feat(bitbucketdatacenter): Implement missing OrgMembership method [[#5476](https://github.com/woodpecker-ci/woodpecker/pull/5476)]
 - Cleanup columns in forges table [[#5517](https://github.com/woodpecker-ci/woodpecker/pull/5517)]
