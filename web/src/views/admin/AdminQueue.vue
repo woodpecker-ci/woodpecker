@@ -73,7 +73,7 @@
             </div>
             <div class="ml-2 flex items-center gap-2">
               <IconButton
-                v-if="task.agent_name"
+                v-if="task.pipeline_number"
                 icon="chevron-right"
                 :title="$t('repo.pipeline.view')"
                 class="h-8 w-8"
