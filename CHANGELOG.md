@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-24
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -32,6 +32,7 @@
 
 ### 🐛 Bug Fixes
 
+- Add back-off retry for pod log streaming to kubernetes backend [[#5550](https://github.com/woodpecker-ci/woodpecker/pull/5550)]
 - Fix dir not found handling [[#5533](https://github.com/woodpecker-ci/woodpecker/pull/5533)]
 - Show readable error [[#5501](https://github.com/woodpecker-ci/woodpecker/pull/5501)]
 - fix: allow spaces in cli string slices [[#5494](https://github.com/woodpecker-ci/woodpecker/pull/5494)]
