@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	backoff "github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
@@ -46,6 +47,7 @@ const (
 	EngineName = "kubernetes"
 	// TODO: 5 seconds is against best practice, k3s didn't work otherwise
 	defaultResyncDuration = 5 * time.Second
+	maxRetryDuration      = 1 * time.Minute
 )
 
 var defaultDeleteOptions = newDefaultDeleteOptions()
@@ -404,13 +406,22 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		Container: podName,
 	}
 
-	logs, err := e.client.CoreV1().RESTClient().Get().
-		Namespace(e.config.GetNamespace(step.OrgID)).
-		Name(podName).
-		Resource("pods").
-		SubResource("log").
-		VersionedParams(opts, scheme.ParameterCodec).
-		Stream(ctx)
+	logs, err := backoff.Retry(ctx,
+		func() (io.ReadCloser, error) {
+			return e.client.CoreV1().RESTClient().Get().
+				Namespace(e.config.GetNamespace(step.OrgID)).
+				Name(podName).
+				Resource("pods").
+				SubResource("log").
+				VersionedParams(opts, scheme.ParameterCodec).
+				Stream(ctx)
+		},
+		backoff.WithBackOff(backoff.NewExponentialBackOff()),
+		backoff.WithMaxElapsedTime(maxRetryDuration),
+		backoff.WithNotify(func(err error, delay time.Duration) {
+			log.Warn().Err(err).Str("pod", podName).Dur("backoff", delay).Msg("failed to open pod log stream, retrying with backoff")
+		}),
+	)
 	if err != nil {
 		return nil, err
 	}
