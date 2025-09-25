@@ -50,8 +50,35 @@ var HookPullRequestMerged string
 //go:embed HookPullRequestClosed.json
 var HookPullRequestClosed string
 
+//go:embed HookPullRequestEdited.json
+var HookPullRequestEdited string
+
 //go:embed HookRelease.json
 var HookRelease string
+
+//go:embed HookPullRequestAssigneesAdded.json
+var HookPullRequestAssigneesAdded string
+
+//go:embed HookPullRequestMilestoneAdded.json
+var HookPullRequestMilestoneAdded string
+
+//go:embed HookPullRequestLabelAdded.json
+var HookPullRequestLabelAdded string
+
+//go:embed HookPullRequestAssigneeCleared.json
+var HookPullRequestAssigneeCleared string
+
+//go:embed HookPullRequestMilestoneChanged.json
+var HookPullRequestMilestoneChanged string
+
+//go:embed HookPullRequestLabelsUpdated.json
+var HookPullRequestLabelsUpdated string
+
+//go:embed HookPullRequestLabelsCleared.json
+var HookPullRequestLabelsCleared string
+
+//go:embed HookPullRequestMilestoneCleared.json
+var HookPullRequestMilestoneCleared string
 
 //go:embed HookPullRequestReopened.json
 var HookPullRequestReopened string
