@@ -46,6 +46,10 @@ const (
 	EngineName = "kubernetes"
 	// TODO: 5 seconds is against best practice, k3s didn't work otherwise
 	defaultResyncDuration = 5 * time.Second
+	initialRetryDelay     = 1 * time.Second
+	maxRetryDelay         = 5 * time.Second
+	maxRetryDuration      = 1 * time.Minute
+	backoffMultiplier     = 2
 )
 
 var defaultDeleteOptions = newDefaultDeleteOptions()
@@ -404,15 +408,36 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		Container: podName,
 	}
 
-	logs, err := e.client.CoreV1().RESTClient().Get().
-		Namespace(e.config.GetNamespace(step.OrgID)).
-		Name(podName).
-		Resource("pods").
-		SubResource("log").
-		VersionedParams(opts, scheme.ParameterCodec).
-		Stream(ctx)
-	if err != nil {
-		return nil, err
+	var logs io.ReadCloser
+	start := time.Now()
+	delay := initialRetryDelay
+	for {
+		logs, err = e.client.CoreV1().RESTClient().Get().
+			Namespace(e.config.GetNamespace(step.OrgID)).
+			Name(podName).
+			Resource("pods").
+			SubResource("log").
+			VersionedParams(opts, scheme.ParameterCodec).
+			Stream(ctx)
+		if err == nil {
+			break
+		}
+		// stop retrying if context is done
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		// enforce a maximum total wait time
+		if time.Since(start) >= maxRetryDuration {
+			return nil, err
+		}
+		log.Warn().Err(err).Str("pod", podName).Msg("failed to open pod log stream, retrying with backoff")
+		time.Sleep(delay)
+		if delay < maxRetryDelay {
+			delay *= backoffMultiplier
+			if delay > maxRetryDelay {
+				delay = maxRetryDelay
+			}
+		}
 	}
 	rc, wc := io.Pipe()
 
