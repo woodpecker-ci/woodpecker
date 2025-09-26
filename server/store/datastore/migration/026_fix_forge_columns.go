@@ -23,6 +23,7 @@ var fixForgeColumns = xormigrate.Migration{
 	ID: "fix-forge-columns",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type forges struct {
+			ID                int64  `xorm:"pk autoincr 'id'"`
 			Client            string `xorm:"VARCHAR(250) 'client'"`
 			ClientSecret      string `xorm:"VARCHAR(250) 'client_secret'"`
 			OAuthClientID     string `xorm:"VARCHAR(250) 'o_auth_client_i_d'"`
