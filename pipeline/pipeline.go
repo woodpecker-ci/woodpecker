@@ -115,7 +115,15 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
+	setupErrorHandler := func(err error, step *backend.Step) {
+		if tracerErr := r.traceStep(nil, err, step); tracerErr != nil {
+			logger.Error().
+				Err(tracerErr).
+				Str("step", step.Name).
+				Msg("failed to trace setup error")
+		}
+	}
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID, setupErrorHandler); err != nil {
 		return err
 	}
 
