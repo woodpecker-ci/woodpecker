@@ -214,7 +214,7 @@ func (e *kube) getConfig() *config {
 }
 
 // SetupWorkflow sets up the pipeline environment.
-func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string, tracerF func(err error, step *types.Step)) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
@@ -237,6 +237,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 			if isService(step) {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
+					tracerF(err, step)
 					return err
 				}
 				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}

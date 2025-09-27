@@ -37,7 +37,7 @@ type Backend interface {
 	Load(ctx context.Context) (*BackendInfo, error)
 
 	// SetupWorkflow sets up the workflow environment.
-	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string, tracerF func(err error, step *Step)) error
 
 	// StartStep starts the workflow step.
 	StartStep(ctx context.Context, step *Step, taskUUID string) error

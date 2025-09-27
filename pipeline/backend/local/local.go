@@ -90,7 +90,7 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 }
 
 // SetupWorkflow the pipeline environment.
-func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
+func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string, _ func(err error, step *types.Step)) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	baseDir, err := os.MkdirTemp(e.tempDir, "woodpecker-local-*")

@@ -43,6 +43,10 @@ func mkService(step *types.Step, config *config) (*v1.Service, error) {
 		ServiceLabel: name,
 	}
 
+	if len(step.Ports) == 0 {
+		return nil, fmt.Errorf("kubernetes backend requires explicitly exposed ports for service steps, add 'ports' configuration to step '%s'", step.Name)
+	}
+
 	var svcPorts []v1.ServicePort
 	for _, port := range step.Ports {
 		svcPorts = append(svcPorts, servicePort(port))
