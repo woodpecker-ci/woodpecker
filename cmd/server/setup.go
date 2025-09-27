@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
 	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -125,6 +126,8 @@ func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
+	case "addon":
+		return addon.Load(c.String("log-store-file-path"))
 	default:
 		return s, nil
 	}
