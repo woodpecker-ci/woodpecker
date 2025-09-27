@@ -58,6 +58,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update postgres docker tag to v18 [[#5557](https://github.com/woodpecker-ci/woodpecker/pull/5557)]
 - chore(deps): update docker.io/postgres docker tag to v18 [[#5556](https://github.com/woodpecker-ci/woodpecker/pull/5556)]
 - chore(deps): update web npm deps non-major [[#5553](https://github.com/woodpecker-ci/woodpecker/pull/5553)]
 - chore(deps): update pre-commit hook hadolint/hadolint to v2.14.0 [[#5555](https://github.com/woodpecker-ci/woodpecker/pull/5555)]
