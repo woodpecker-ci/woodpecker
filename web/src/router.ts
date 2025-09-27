@@ -6,32 +6,36 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useUserConfig from '~/compositions/useUserConfig';
 
-const { rootPath } = useConfig();
+declare module 'vue-router' {
+  interface RouteMeta {
+    authentication?: 'required' | 'none';
+    repoHeader?: true;
+    layout?: 'default' | 'blank';
+  }
+}
+
 const routes: RouteRecordRaw[] = [
   {
-    path: `${rootPath}/`,
+    path: '/',
     name: 'home',
-    redirect: `${rootPath}/repos`,
+    redirect: { name: 'repos' },
   },
   {
-    path: `${rootPath}/repos`,
+    path: '/repos',
     component: (): Component => import('~/views/RouterView.vue'),
     children: [
       {
         path: '',
         name: 'repos',
         component: (): Component => import('~/views/Repos.vue'),
-        meta: { authentication: 'required' },
       },
       {
         path: 'add',
         name: 'repo-add',
         component: (): Component => import('~/views/RepoAdd.vue'),
-        meta: { authentication: 'required' },
       },
       {
         path: ':repoId',
-        name: 'repo-wrapper',
         component: (): Component => import('~/views/repo/RepoWrapper.vue'),
         props: true,
         children: [
@@ -109,6 +113,7 @@ const routes: RouteRecordRaw[] = [
                 name: 'repo-pipeline-debug',
                 component: (): Component => import('~/views/repo/pipeline/PipelineDebug.vue'),
                 props: true,
+                meta: { authentication: 'required' },
               },
             ],
           },
@@ -172,7 +177,7 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: `${rootPath}/orgs/:orgId`,
+    path: '/orgs/:orgId',
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
     children: [
@@ -184,11 +189,15 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'settings',
-        name: 'org-settings',
         component: (): Component => import('~/views/org/settings/OrgSettingsWrapper.vue'),
         meta: { authentication: 'required' },
         props: true,
         children: [
+          {
+            path: '',
+            name: 'org-settings',
+            redirect: { name: 'org-settings-secrets' },
+          },
           {
             path: 'secrets',
             name: 'org-settings-secrets',
@@ -212,12 +221,12 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: `${rootPath}/org/:orgName/:pathMatch(.*)*`,
+    path: '/org/:orgName/:pathMatch(.*)*',
     component: (): Component => import('~/views/org/OrgDeprecatedRedirect.vue'),
     props: true,
   },
   {
-    path: `${rootPath}/admin`,
+    path: '/admin',
     component: (): Component => import('~/views/admin/AdminSettingsWrapper.vue'),
     meta: { authentication: 'required' },
     children: [
@@ -288,92 +297,96 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: `${rootPath}/user`,
+    path: '/user',
     component: (): Component => import('~/views/user/UserWrapper.vue'),
     meta: { authentication: 'required' },
-    props: true,
     children: [
       {
         path: '',
         name: 'user',
         component: (): Component => import('~/views/user/UserGeneral.vue'),
-        props: true,
       },
       {
         path: 'secrets',
         name: 'user-secrets',
         component: (): Component => import('~/views/user/UserSecrets.vue'),
-        props: true,
       },
       {
         path: 'registries',
         name: 'user-registries',
         component: (): Component => import('~/views/user/UserRegistries.vue'),
-        props: true,
       },
       {
         path: 'cli-and-api',
         name: 'user-cli-and-api',
         component: (): Component => import('~/views/user/UserCLIAndAPI.vue'),
-        props: true,
       },
       {
         path: 'agents',
         name: 'user-agents',
         component: (): Component => import('~/views/user/UserAgents.vue'),
-        props: true,
       },
     ],
   },
   {
-    path: `${rootPath}/login`,
+    path: '/login',
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
-    meta: { blank: true },
-    props: true,
+    meta: { layout: 'blank', authentication: 'none' },
   },
   {
-    path: `${rootPath}/cli/auth`,
+    path: '/cli/auth',
     component: (): Component => import('~/views/cli/Auth.vue'),
     meta: { authentication: 'required' },
   },
 
   // TODO: deprecated routes => remove after some time
   {
-    path: `${rootPath}/:ownerOrOrgId`,
+    path: '/:ownerOrOrgId',
     redirect: (route) => ({ name: 'org', params: route.params }),
   },
   {
-    path: `${rootPath}/:repoOwner/:repoName/:pathMatch(.*)*`,
+    path: '/:repoOwner/:repoName/:pathMatch(.*)*',
     component: (): Component => import('~/views/repo/RepoDeprecatedRedirect.vue'),
     props: true,
   },
 
   // not found handler
   {
-    path: `${rootPath}/:pathMatch(.*)*`,
+    path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: (): Component => import('~/views/NotFound.vue'),
   },
 ];
 
+const { rootPath } = useConfig();
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes: routes.map((r) => ({ ...r, path: `${rootPath}${r.path}` })),
 });
 
 router.beforeEach(async (to, _, next) => {
+  const { isAuthenticated } = useAuthentication();
+  const authenticationMode = to.matched.toReversed().find((record) => record.meta.authentication != null)
+    ?.meta.authentication;
+
   const config = useUserConfig();
   const { redirectUrl } = config.userConfig.value;
-  if (redirectUrl !== '' && to.name !== 'login') {
+  // redirect to saved url when not on login page
+  if (redirectUrl !== '' && authenticationMode !== 'none') {
     config.setUserConfig('redirectUrl', '');
     next(redirectUrl);
+    return;
   }
 
-  const authentication = useAuthentication();
-  const authenticationRequired = to.matched.some((record) => record.meta.authentication === 'required');
-  if (authenticationRequired && !authentication.isAuthenticated) {
-    next({ name: 'login', query: { url: to.fullPath } });
+  if (authenticationMode === 'required' && !isAuthenticated) {
+    config.setUserConfig('redirectUrl', to.fullPath);
+    next({ name: 'login' });
+    return;
+  }
+
+  if (authenticationMode === 'none' && isAuthenticated) {
+    next({ name: 'home' });
     return;
   }
 
