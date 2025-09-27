@@ -517,6 +517,13 @@
   "access_denied": "You are not allowed to access this instance",
   "org_access_denied": "You are not allowed to access this organization",
   "invalid_state": "The OAuth state is invalid",
+  "extensions": "Extensions",
+  "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
+  "extension_endpoint_placeholder": "e.g. https://example.com/api",
+  "config_extension_endpoint": "Config extension endpoint",
+  "extensions_signatures_public_key": "Public key for signatures",
+  "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
+  "extensions_configuration_saved": "Extensions configuration saved",
   "require_approval": {
     "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution.",
     "require_approval_for": "Approval requirements",

@@ -284,6 +284,9 @@ func PatchRepo(c *gin.Context) {
 			return
 		}
 	}
+	if in.ConfigExtensionEndpoint != nil {
+		repo.ConfigExtensionEndpoint = *in.ConfigExtensionEndpoint
+	}
 
 	err := _store.UpdateRepo(repo)
 	if err != nil {
