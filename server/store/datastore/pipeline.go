@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"fmt"
+	"sync"
 	"time"
 
 	"xorm.io/builder"
@@ -23,19 +25,19 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
+func (s *storage) GetPipeline(id int64) (*model.Pipeline, error) {
 	pipeline := &model.Pipeline{}
 	return pipeline, wrapGet(s.engine.ID(id).Get(pipeline))
 }
 
-func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline, error) {
+func (s *storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.Where(
 		builder.Eq{"repo_id": repo.ID, "number": num},
 	).Get(pipeline))
 }
 
-func (s storage) GetPipelineBadge(repo *model.Repo, branch string) (*model.Pipeline, error) {
+func (s *storage) GetPipelineBadge(repo *model.Repo, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
@@ -44,7 +46,7 @@ func (s storage) GetPipelineBadge(repo *model.Repo, branch string) (*model.Pipel
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
+func (s *storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
@@ -52,7 +54,7 @@ func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeli
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
+func (s *storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
@@ -61,7 +63,7 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.PipelineFilter) ([]*model.Pipeline, error) {
+func (s *storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.PipelineFilter) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, 16)
 
 	cond := builder.NewCond().And(builder.Eq{"repo_id": repo.ID})
@@ -98,7 +100,7 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 }
 
 // GetRepoLatestPipelines get the latest pipeline for each repo.
-func (s storage) GetRepoLatestPipelines(repoIDs []int64) ([]*model.Pipeline, error) {
+func (s *storage) GetRepoLatestPipelines(repoIDs []int64) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, len(repoIDs))
 
 	pipelineIDs := make([]int64, 0, len(repoIDs))
@@ -114,7 +116,7 @@ func (s storage) GetRepoLatestPipelines(repoIDs []int64) ([]*model.Pipeline, err
 }
 
 // GetActivePipelineList get all pipelines that are pending, running or blocked.
-func (s storage) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error) {
+func (s *storage) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0)
 	query := s.engine.
 		Where("repo_id = ?", repo.ID).
@@ -123,11 +125,19 @@ func (s storage) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, err
 	return pipelines, query.Find(&pipelines)
 }
 
-func (s storage) GetPipelineCount() (int64, error) {
+func (s *storage) GetPipelineCount() (int64, error) {
 	return s.engine.Count(new(model.Pipeline))
 }
 
-func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Step) error {
+func (s *storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Step) error {
+	mutexInterface, _ := s.pipelineMutexes.LoadOrStore(pipeline.RepoID, &sync.Mutex{})
+	repoMutex, ok := mutexInterface.(*sync.Mutex)
+	if !ok {
+		return fmt.Errorf("unexpected mutex type for repo %d: %T", pipeline.RepoID, mutexInterface)
+	}
+
+	repoMutex.Lock()
+	defer repoMutex.Unlock()
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
@@ -170,16 +180,16 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 	return sess.Commit()
 }
 
-func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
+func (s *storage) UpdatePipeline(pipeline *model.Pipeline) error {
 	_, err := s.engine.ID(pipeline.ID).AllCols().Update(pipeline)
 	return err
 }
 
-func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
+func (s *storage) DeletePipeline(pipeline *model.Pipeline) error {
 	return s.deletePipeline(s.engine.NewSession(), pipeline.ID)
 }
 
-func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
+func (s *storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
 	if err := s.workflowsDelete(sess, pipelineID); err != nil {
 		return err
 	}
