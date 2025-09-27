@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-26
+## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -41,6 +41,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5554](https://github.com/woodpecker-ci/woodpecker/pull/5554)]
 - Add MCP tool to awesome docs [[#5546](https://github.com/woodpecker-ci/woodpecker/pull/5546)]
 - chore(deps): update docs npm deps non-major [[#5527](https://github.com/woodpecker-ci/woodpecker/pull/5527)]
 - chore(deps): update docs npm deps non-major [[#5512](https://github.com/woodpecker-ci/woodpecker/pull/5512)]
@@ -57,6 +58,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#5553](https://github.com/woodpecker-ci/woodpecker/pull/5553)]
+- chore(deps): update pre-commit hook hadolint/hadolint to v2.14.0 [[#5555](https://github.com/woodpecker-ci/woodpecker/pull/5555)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.148.0 [[#5548](https://github.com/woodpecker-ci/woodpecker/pull/5548)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.147.1 [[#5541](https://github.com/woodpecker-ci/woodpecker/pull/5541)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.5.0 [[#5535](https://github.com/woodpecker-ci/woodpecker/pull/5535)]
