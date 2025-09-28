@@ -35,7 +35,7 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 	_, err := dummyEngine.Load(ctx)
 	assert.NoError(t, err)
 
-	assert.Error(t, dummyEngine.SetupWorkflow(ctx, nil, dummy.WorkflowSetupFailUUID, nilTracer))
+	assert.Error(t, dummyEngine.SetupWorkflow(ctx, nil, dummy.WorkflowSetupFailUUID))
 
 	t.Run("expect fail of step func with non setup workflow", func(t *testing.T) {
 		step := &types.Step{Name: "step1", UUID: "SID_1"}
@@ -64,7 +64,7 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, nilTracer))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
 		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
 
@@ -101,7 +101,7 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, nilTracer))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
 		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
 
@@ -126,7 +126,7 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, nilTracer))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
 		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
 
@@ -150,7 +150,7 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, nilTracer))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
 		assert.Error(t, dummyEngine.StartStep(ctx, step, workflowUUID))
 
