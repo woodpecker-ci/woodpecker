@@ -103,9 +103,8 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
        - go build
        - go test
 
-   - name: publish
-+    image: woodpeckerci/plugin-kaniko
-     repo: foo/bar
+   - name: prettier
++    image: woodpeckerci/plugin-prettier
 
  services:
    - name: database
@@ -285,6 +284,7 @@ The available events are:
 - `push`: triggered when a commit is pushed to a branch.
 - `pull_request`: triggered when a pull request is opened or a new commit is pushed to it.
 - `pull_request_closed`: triggered when a pull request is closed or merged.
+- `pull_request_metadata`: triggered when a pull request metadata has changed (e.g. title, body, label, milestone, ...).
 - `tag`: triggered when a tag is pushed.
 - `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
 - `deployment`: triggered when a deployment is created in the repository. (This event can be triggered from Woodpecker directly. GitHub also supports webhook triggers.)
@@ -393,8 +393,7 @@ when:
 #### `path`
 
 :::info
-Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
+Path conditions are applied only to **push** and **pull_request** events. This feature is currently available for all forges except Bitbucket Cloud.
 :::
 
 Execute a step only on a pipeline with certain files being changed:
@@ -474,9 +473,11 @@ Normally steps of a workflow are executed serially in the order in which they ar
        - go build
 
    - name: deploy
-     image: woodpeckerci/plugin-kaniko
+     image: woodpeckerci/plugin-s3
      settings:
-       repo: foo/bar
+       bucket: my-bucket-name
+       source: some-file-name
+       target: /target/some-file
 +    depends_on: [build, test] # deploy will be executed after build and test finished
 
    - name: test # test will be executed immediately as no dependencies are set

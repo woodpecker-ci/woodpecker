@@ -56,6 +56,7 @@ woodpecker-cli [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 
 **--token, -t**="": server auth token
 
+
 # COMMANDS
 
 ## admin
@@ -65,6 +66,18 @@ manage server settings
 ### log-level
 
 retrieve log level from server, or set it with [level]
+
+### org
+
+manage organizations
+
+#### ls
+
+list organizations
+
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+Organization ID: {{ .ID }}
+)
 
 ### registry
 
@@ -243,7 +256,9 @@ execute a local pipeline
 
 **--backend-k8s-allow-native-secrets**: whether to allow existing Kubernetes secrets to be referenced from steps
 
-**--backend-k8s-namespace**="": backend k8s namespace (default: woodpecker)
+**--backend-k8s-namespace**="": backend k8s namespace, if used with WOODPECKER_BACKEND_K8S_NAMESPACE_PER_ORGANIZATION, this will be the prefix for the namespace appended with the organization name. (default: woodpecker)
+
+**--backend-k8s-namespace-per-org**: Whether to enable namespace segregation per organization feature. When enabled, Woodpecker will create the Kubernetes resources to separated Kubernetes namespaces per Woodpecker organization.
 
 **--backend-k8s-pod-annotations**="": backend k8s additional Agent-wide worker pod annotations
 
@@ -257,6 +272,12 @@ execute a local pipeline
 
 **--backend-k8s-pod-node-selector**="": backend k8s Agent-wide worker pod node selector
 
+**--backend-k8s-pod-tolerations**="": backend k8s Agent-wide worker pod tolerations
+
+**--backend-k8s-pod-tolerations-allow-from-step**: whether to allow using tolerations from step's backend options
+
+**--backend-k8s-priority-class**="": which kubernetes priority class to assign to created job pods
+
 **--backend-k8s-secctx-nonroot**: `run as non root` Kubernetes security context option
 
 **--backend-k8s-storage-class**="": backend k8s storage class
@@ -269,6 +290,8 @@ execute a local pipeline
 
 **--backend-no-proxy**="": if set, pass the environment variable down as "NO_PROXY" to steps
 
+**--commit-author-avatar**="": Set the metadata environment variable "CI_COMMIT_AUTHOR_AVATAR".
+
 **--commit-author-email**="": Set the metadata environment variable "CI_COMMIT_AUTHOR_EMAIL".
 
 **--commit-author-name**="": Set the metadata environment variable "CI_COMMIT_AUTHOR".
@@ -278,6 +301,8 @@ execute a local pipeline
 **--commit-message**="": Set the metadata environment variable "CI_COMMIT_MESSAGE".
 
 **--commit-pull-labels**="": Set the metadata environment variable "CI_COMMIT_PULL_REQUEST_LABELS". (default: [])
+
+**--commit-pull-milestone**="": Set the metadata environment variable "CI_COMMIT_PULL_REQUEST_MILESTONE".
 
 **--commit-ref**="": Set the metadata environment variable "CI_COMMIT_REF".
 
@@ -297,11 +322,11 @@ execute a local pipeline
 
 **--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks (default: [])
 
@@ -324,6 +349,8 @@ execute a local pipeline
 **--pipeline-url**="": Set the metadata environment variable "CI_PIPELINE_FORGE_URL".
 
 **--plugins-privileged**="": Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none (default: [])
+
+**--prev-commit-author-avatar**="": Set the metadata environment variable "CI_PREV_COMMIT_AUTHOR_AVATAR".
 
 **--prev-commit-author-email**="": Set the metadata environment variable "CI_PREV_COMMIT_AUTHOR_EMAIL".
 
@@ -379,6 +406,10 @@ execute a local pipeline
 
 **--repo-url**="": Set the metadata environment variable "CI_REPO_URL".
 
+**--secrets**="": map of secrets, ex. 'secret="val",secret2="value2"' (default: map[])
+
+**--secrets**="": path to yaml file with secrets map
+
 **--system-host**="": Set the metadata environment variable "CI_SYSTEM_HOST".
 
 **--system-name**="": Set the metadata environment variable "CI_SYSTEM_NAME". (default: woodpecker)
@@ -395,9 +426,9 @@ execute a local pipeline
 
 **--workflow-number**="": Set the metadata environment variable "CI_WORKFLOW_NUMBER". (default: 0)
 
-**--workspace-base**="": (default: /woodpecker)
+**--workspace-base**="":  (default: /woodpecker)
 
-**--workspace-path**="": (default: src)
+**--workspace-path**="":  (default: src)
 
 ## info
 
@@ -412,7 +443,7 @@ lint a pipeline configuration file
 
 **--plugins-privileged**="": allow plugins to run in privileged mode, if set empty, there is no (default: [])
 
-**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.3 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
+**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.5 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
 
 **--strict**: treat warnings as errors
 
