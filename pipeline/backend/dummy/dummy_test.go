@@ -24,8 +24,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
-func nilTracer(err error, step *types.Step) {}
-
 func TestSmalPipelineDummyRun(t *testing.T) {
 	dummyEngine := dummy.New()
 	ctx := t.Context()
