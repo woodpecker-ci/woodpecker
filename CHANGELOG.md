@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Gusted, @da-Kai, @henkka, @hhamalai, @j04n-f, @klausi85, @qwerty287, @xoxys, @zhedazijingang
+@6543, @Gusted, @da-Kai, @henkka, @hhamalai, @j04n-f, @klausi85, @marcusramberg, @qwerty287, @xoxys, @zhedazijingang
 
 ### 🔒 Security
 
@@ -19,6 +19,7 @@
 
 ### 📈 Enhancement
 
+- Enable completion support for cli [[#5552](https://github.com/woodpecker-ci/woodpecker/pull/5552)]
 - Add `StepFinished` to log service [[#5530](https://github.com/woodpecker-ci/woodpecker/pull/5530)]
 - Migrate to mockery v3 [[#5547](https://github.com/woodpecker-ci/woodpecker/pull/5547)]
 - Show human readable information in queue info [[#5516](https://github.com/woodpecker-ci/woodpecker/pull/5516)]
