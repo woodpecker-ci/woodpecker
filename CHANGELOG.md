@@ -58,6 +58,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5561](https://github.com/woodpecker-ci/woodpecker/pull/5561)]
 - chore(deps): update postgres docker tag to v18 [[#5557](https://github.com/woodpecker-ci/woodpecker/pull/5557)]
 - chore(deps): update docker.io/postgres docker tag to v18 [[#5556](https://github.com/woodpecker-ci/woodpecker/pull/5556)]
 - chore(deps): update web npm deps non-major [[#5553](https://github.com/woodpecker-ci/woodpecker/pull/5553)]
