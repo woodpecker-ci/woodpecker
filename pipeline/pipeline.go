@@ -24,10 +24,10 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 	"golang.org/x/sync/errgroup"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
