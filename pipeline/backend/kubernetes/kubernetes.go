@@ -30,6 +30,7 @@ import (
 	backoff "github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -214,7 +215,7 @@ func (e *kube) getConfig() *config {
 }
 
 // SetupWorkflow sets up the pipeline environment.
-func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string, tracerF func(err error, step *types.Step)) error {
+func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
@@ -237,8 +238,10 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 			if isService(step) {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
-					tracerF(err, step)
-					return err
+					return &pipelineErrors.ErrInvalidWorkflowSetup{
+						Err:  err,
+						Step: step,
+					}
 				}
 				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
 				extraHosts = append(extraHosts, hostAlias)

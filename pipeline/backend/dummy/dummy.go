@@ -78,7 +78,7 @@ func (e *dummy) Load(_ context.Context) (*backend.BackendInfo, error) {
 	}, nil
 }
 
-func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string, _ func(err error, step *backend.Step)) error {
+func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
 	if taskUUID == WorkflowSetupFailUUID {
 		return fmt.Errorf("expected fail to setup workflow")
 	}

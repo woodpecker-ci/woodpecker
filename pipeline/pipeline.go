@@ -24,6 +24,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 	"golang.org/x/sync/errgroup"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -115,15 +116,26 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}()
 
 	r.started = time.Now().Unix()
-	setupErrorHandler := func(err error, step *backend.Step) {
-		if tracerErr := r.traceStep(nil, err, step); tracerErr != nil {
-			logger.Error().
-				Err(tracerErr).
-				Str("step", step.Name).
-				Msg("failed to trace setup error")
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
+		var stepErr *pipelineErrors.ErrInvalidWorkflowSetup
+		if errors.As(err, &stepErr) {
+			state := new(State)
+			state.Pipeline.Step = stepErr.Step
+			state.Pipeline.Error = stepErr.Err
+			state.Process = &backend.State{
+				Error:    stepErr.Err,
+				Exited:   true,
+				ExitCode: 1,
+			}
+
+			// Trace the error if we have a tracer
+			if r.tracer != nil {
+				if err := r.tracer.Trace(state); err != nil {
+					logger.Error().Err(err).Msg("failed to trace step error")
+				}
+			}
 		}
-	}
-	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID, setupErrorHandler); err != nil {
+
 		return err
 	}
 

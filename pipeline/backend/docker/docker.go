@@ -142,7 +142,7 @@ func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
 	}, nil
 }
 
-func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string, _ func(err error, step *backend.Step)) error {
+func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
