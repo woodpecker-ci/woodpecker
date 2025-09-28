@@ -60,6 +60,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vue-tsc to v3.1.0 [[#5563](https://github.com/woodpecker-ci/woodpecker/pull/5563)]
 - fix(deps): update golang-packages [[#5561](https://github.com/woodpecker-ci/woodpecker/pull/5561)]
 - chore(deps): update postgres docker tag to v18 [[#5557](https://github.com/woodpecker-ci/woodpecker/pull/5557)]
 - chore(deps): update docker.io/postgres docker tag to v18 [[#5556](https://github.com/woodpecker-ci/woodpecker/pull/5556)]
