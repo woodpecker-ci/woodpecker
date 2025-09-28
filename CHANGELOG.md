@@ -19,6 +19,7 @@
 
 ### 📈 Enhancement
 
+- Trace errors during SetupWorkflow, make service step setup errors visible to user [[#5559](https://github.com/woodpecker-ci/woodpecker/pull/5559)]
 - Enable completion support for cli [[#5552](https://github.com/woodpecker-ci/woodpecker/pull/5552)]
 - Add `StepFinished` to log service [[#5530](https://github.com/woodpecker-ci/woodpecker/pull/5530)]
 - Migrate to mockery v3 [[#5547](https://github.com/woodpecker-ci/woodpecker/pull/5547)]
