@@ -42,6 +42,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/react to v19.1.15 [[#5562](https://github.com/woodpecker-ci/woodpecker/pull/5562)]
 - chore(deps): update docs npm deps non-major [[#5554](https://github.com/woodpecker-ci/woodpecker/pull/5554)]
 - Add MCP tool to awesome docs [[#5546](https://github.com/woodpecker-ci/woodpecker/pull/5546)]
 - chore(deps): update docs npm deps non-major [[#5527](https://github.com/woodpecker-ci/woodpecker/pull/5527)]
