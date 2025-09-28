@@ -41,6 +41,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 )
 
 const (
@@ -237,7 +238,10 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 			if isService(step) {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
-					return err
+					return &pipelineErrors.ErrInvalidWorkflowSetup{
+						Err:  err,
+						Step: step,
+					}
 				}
 				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
 				extraHosts = append(extraHosts, hostAlias)
