@@ -32,6 +32,7 @@
 
 ### 🐛 Bug Fixes
 
+- Support for pull requests opened events from forked repositories [[#5536](https://github.com/woodpecker-ci/woodpecker/pull/5536)]
 - Add back-off retry for pod log streaming to kubernetes backend [[#5550](https://github.com/woodpecker-ci/woodpecker/pull/5550)]
 - Fix dir not found handling [[#5533](https://github.com/woodpecker-ci/woodpecker/pull/5533)]
 - Show readable error [[#5501](https://github.com/woodpecker-ci/woodpecker/pull/5501)]
