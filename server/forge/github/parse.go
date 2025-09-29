@@ -22,8 +22,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v71/github"
+	"github.com/google/go-github/v74/github"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -32,13 +33,25 @@ import (
 const (
 	hookField = "payload"
 
-	actionOpen     = "opened"
-	actionClose    = "closed"
-	actionSync     = "synchronize"
-	actionReleased = "released"
+	actionOpen             = "opened"
+	actionReopen           = "reopened"
+	actionClose            = "closed"
+	actionSync             = "synchronize"
+	actionReleased         = "released"
+	actionAssigned         = "assigned"
+	actionConvertedToDraft = "converted_to_draft"
+	actionDemilestoned     = "demilestoned"
+	actionEdited           = "edited"
+	actionLabeled          = "labeled"
+	actionLocked           = "locked"
+	actionMilestoned       = "milestoned"
+	actionReadyForReview   = "ready_for_review"
+	actionUnassigned       = "unassigned"
+	actionUnlabeled        = "unlabeled"
+	actionUnlocked         = "unlocked"
 
-	stateOpen  = "open"
-	stateClose = "closed"
+	labelCleared = "label_cleared"
+	labelUpdated = "label_updated"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
@@ -148,37 +161,68 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
 func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
-	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync && hook.GetAction() != actionClose {
-		return nil, nil, nil, nil
-	}
-
 	event := model.EventPull
-	if hook.GetPullRequest().GetState() == stateClose {
+	eventAction := ""
+
+	switch hook.GetAction() {
+	case actionOpen, actionReopen, actionSync:
+		// default case nothing to do
+	case actionClose:
 		event = model.EventPullClosed
+	case actionAssigned,
+		actionConvertedToDraft,
+		actionDemilestoned,
+		actionEdited,
+		actionLabeled,
+		actionLocked,
+		actionMilestoned,
+		actionReadyForReview,
+		actionUnassigned,
+		actionUnlabeled,
+		actionUnlocked:
+		// metadata pull events
+		event = model.EventPullMetadata
+		eventAction = common.NormalizeEventReason(hook.GetAction())
+	default:
+		return nil, nil, nil, &types.ErrIgnoreEvent{
+			Event:  string(model.EventPullMetadata),
+			Reason: fmt.Sprintf("action %s is not supported", hook.GetAction()),
+		}
 	}
 
 	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
 
 	pipeline := &model.Pipeline{
-		Event:    event,
-		Commit:   hook.GetPullRequest().GetHead().GetSHA(),
-		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
-		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
-		Branch:   hook.GetPullRequest().GetBase().GetRef(),
-		Message:  hook.GetPullRequest().GetTitle(),
-		Author:   hook.GetPullRequest().GetUser().GetLogin(),
-		Avatar:   hook.GetPullRequest().GetUser().GetAvatarURL(),
-		Title:    hook.GetPullRequest().GetTitle(),
-		Sender:   hook.GetSender().GetLogin(),
+		Event:       event,
+		EventReason: []string{eventAction},
+		Commit:      hook.GetPullRequest().GetHead().GetSHA(),
+		ForgeURL:    hook.GetPullRequest().GetHTMLURL(),
+		Ref:         fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
+		Branch:      hook.GetPullRequest().GetBase().GetRef(),
+		Message:     hook.GetPullRequest().GetTitle(),
+		Author:      hook.GetPullRequest().GetUser().GetLogin(),
+		Avatar:      hook.GetPullRequest().GetUser().GetAvatarURL(),
+		Title:       hook.GetPullRequest().GetTitle(),
+		Sender:      hook.GetSender().GetLogin(),
 		Refspec: fmt.Sprintf(refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
-		PullRequestLabels: convertLabels(hook.GetPullRequest().Labels),
-		FromFork:          fromFork,
+		PullRequestLabels:    convertLabels(hook.GetPullRequest().Labels),
+		PullRequestMilestone: hook.GetPullRequest().GetMilestone().GetTitle(),
+		FromFork:             fromFork,
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
+	}
+
+	// normalize label events to match other forges
+	if eventAction == actionLabeled || eventAction == actionUnlabeled {
+		if len(pipeline.PullRequestLabels) == 0 {
+			pipeline.EventReason = []string{labelCleared}
+		} else {
+			pipeline.EventReason = []string{labelUpdated}
+		}
 	}
 
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil

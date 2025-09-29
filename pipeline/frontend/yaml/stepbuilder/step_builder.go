@@ -180,6 +180,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, d
 	for stageI := range item.Config.Stages {
 		for stepI := range item.Config.Stages[stageI].Steps {
 			item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+			// item.Config.Stages[stageI].Steps[stepI].OrgID = b.Repo.OrgID // TODO
 		}
 	}
 

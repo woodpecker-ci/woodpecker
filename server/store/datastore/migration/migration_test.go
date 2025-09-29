@@ -73,7 +73,7 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		return
+		return engine, closeDB
 	case "mysql", "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 		if !initNewDB {
@@ -84,12 +84,12 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		return
+		return engine, closeDB
 	default:
 		t.Errorf("unsupported driver: %s", driver)
 		t.FailNow()
 	}
-	return
+	return engine, closeDB
 }
 
 func TestMigrate(t *testing.T) {

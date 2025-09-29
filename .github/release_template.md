@@ -11,6 +11,7 @@
     - If possible, provide background information so users can understand the change
 - [ ] MAJOR: Create a blog entry in `docs/blog/` that highlights the most important changes and includes a link to the release notes.
 - [ ] Prepare docs PR for new version and delete old versions (keep only the last three minor versions for the current major version)
+  - [ ] Run `make generate` locally to update the automatically generated CLI documentation
   - [ ] Copy `docs/docs` to `docs/versioned_docs/version-<version>` and delete old versions
   - [ ] Create `docs/versioned_sidebars/version-<version>-sidebars.json` and delete old ones
   - [ ] Add new version to `docs/versions.json` and delete old versions
@@ -21,14 +22,13 @@
 
 - [ ] Test the latest container images to make sure they work as expected
 - [ ] Update `https://ci.woodpecker.org` to the latest version of `next` and verify that it works as expected
+- [ ] Merge documentation PR (shortly before release)
 - [ ] Merge the release PR to start the release pipeline
 
 ### Post-release
 
-- [ ] Merge the docs PR
 - [ ] Release the Helm Chart. If renovate has not created the upgrade PR already, manually trigger it from the Dependency Dashboard.
 - [ ] Announce release in relevant chats and on social media platforms
   - [ ] Mastodon (check if already posted from the release pipeline)
   - [ ] Bluesky (check if already posted from the release pipeline)
   - [ ] Matrix
-  - [ ] Twitter

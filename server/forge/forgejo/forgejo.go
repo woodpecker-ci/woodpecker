@@ -45,21 +45,21 @@ const (
 )
 
 type Forgejo struct {
-	url          string
-	oauth2URL    string
-	ClientID     string
-	ClientSecret string
-	SkipVerify   bool
-	pageSize     int
+	url               string
+	oauth2URL         string
+	oAuthClientID     string
+	oAuthClientSecret string
+	skipVerify        bool
+	pageSize          int
 }
 
 // Opts defines configuration options.
 type Opts struct {
-	URL        string // Forgejo server url.
-	OAuth2URL  string // User-facing Forgejo server url for OAuth2.
-	Client     string // OAuth2 Client ID
-	Secret     string // OAuth2 Client Secret
-	SkipVerify bool   // Skip ssl verification.
+	URL               string // Forgejo server url.
+	OAuth2URL         string // User-facing Forgejo server url for OAuth2.
+	OAuthClientID     string // OAuth2 Client ID
+	OAuthClientSecret string // OAuth2 Client Secret
+	SkipVerify        bool   // Skip ssl verification.
 }
 
 // New returns a Forge implementation that integrates with Forgejo,
@@ -70,11 +70,11 @@ func New(opts Opts) (forge.Forge, error) {
 	}
 
 	return &Forgejo{
-		url:          opts.URL,
-		oauth2URL:    opts.OAuth2URL,
-		ClientID:     opts.Client,
-		ClientSecret: opts.Secret,
-		SkipVerify:   opts.SkipVerify,
+		url:               opts.URL,
+		oauth2URL:         opts.OAuth2URL,
+		oAuthClientID:     opts.OAuthClientID,
+		oAuthClientSecret: opts.OAuthClientSecret,
+		skipVerify:        opts.SkipVerify,
 	}, nil
 }
 
@@ -90,8 +90,8 @@ func (c *Forgejo) URL() string {
 
 func (c *Forgejo) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
-			ClientID:     c.ClientID,
-			ClientSecret: c.ClientSecret,
+			ClientID:     c.oAuthClientID,
+			ClientSecret: c.oAuthClientSecret,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.oauth2URL),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.oauth2URL),
@@ -100,7 +100,7 @@ func (c *Forgejo) oauth2Config(ctx context.Context) (*oauth2.Config, context.Con
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.SkipVerify},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.skipVerify},
 			Proxy:           http.ProxyFromEnvironment,
 		}})
 }
@@ -286,8 +286,11 @@ func (c *Forgejo) Dir(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	}
 
 	// List files in repository
-	contents, _, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
+	contents, resp, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
+		}
 		return nil, err
 	}
 
@@ -498,7 +501,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 		pipeline.Commit = sha
 	}
 
-	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) && len(pipeline.ChangedFiles) == 0 {
+	if pipeline != nil && pipeline.IsPullRequest() && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
 			return nil, nil, err
@@ -568,7 +571,7 @@ func (c *Forgejo) Org(ctx context.Context, u *model.User, owner string) (*model.
 // newClientToken returns a Forgejo client with token.
 func (c *Forgejo) newClientToken(ctx context.Context, token string) (*forgejo.Client, error) {
 	httpClient := &http.Client{}
-	if c.SkipVerify {
+	if c.skipVerify {
 		httpClient.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}

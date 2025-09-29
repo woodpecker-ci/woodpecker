@@ -4,7 +4,6 @@ import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/typ
 import axios, { AxiosError } from 'axios';
 import slugify from 'slugify';
 
-
 import * as markdown from './markdown';
 import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
 
@@ -27,7 +26,7 @@ async function loadContent(): Promise<Content> {
             i.docs,
             axiosError.message,
             axiosError.response?.status,
-            axiosError.response?.statusText
+            axiosError.response?.statusText,
           );
           return undefined;
         }
@@ -40,7 +39,7 @@ async function loadContent(): Promise<Content> {
           return undefined;
         }
 
-        const docsBody = markdown.getContent(docsContent);
+        const docsBody = await markdown.getContent(docsContent);
 
         if (!docsHeader.name) {
           return undefined;

@@ -30,9 +30,11 @@
         <ListItem
           v-for="task in tasks"
           :key="task.id"
-          class="bg-wp-background-200! dark:bg-wp-background-100! mb-2 flex-col items-center gap-4"
+          class="bg-wp-background-200! dark:bg-wp-background-200! mb-2 flex-col items-center gap-4"
         >
-          <div class="flex w-full items-center justify-between border-b pb-2">
+          <div
+            class="border-wp-background-400 dark:border-wp-background-100 flex w-full items-center justify-between gap-2 border-b pb-2"
+          >
             <div
               class="flex items-center gap-2"
               :title="
@@ -57,17 +59,29 @@
                   'text-wp-state-neutral-100': task.status === 'pending',
                 }"
               />
-              <span>{{ task.id }}</span>
+              <span>{{ task.name }}</span>
             </div>
-            <div class="flex items-center">
-              <span class="ml-auto flex gap-2">
-                <Badge v-if="task.agent_id !== 0" :label="$t('admin.settings.queue.agent')" :value="task.agent_id" />
+            <div class="ml-auto flex items-center gap-2">
+              <span class="flex gap-2">
+                <Badge v-if="task.agent_name" :label="$t('admin.settings.queue.agent')" :value="task.agent_name" />
                 <Badge
                   v-if="task.dependencies"
                   :label="$t('admin.settings.queue.waiting_for')"
                   :value="task.dependencies.join(', ')"
                 />
               </span>
+            </div>
+            <div class="ml-2 flex items-center gap-2">
+              <IconButton
+                v-if="task.pipeline_number"
+                icon="chevron-right"
+                :title="$t('repo.pipeline.view')"
+                class="h-8 w-8"
+                :to="{
+                  name: 'repo-pipeline',
+                  params: { repoId: task.repo_id, pipelineId: task.pipeline_number, stepId: task.pid },
+                }"
+              />
             </div>
           </div>
           <div class="flex w-full flex-wrap gap-2">
@@ -89,6 +103,7 @@ import AdminQueueStats from '~/components/admin/settings/queue/AdminQueueStats.v
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';

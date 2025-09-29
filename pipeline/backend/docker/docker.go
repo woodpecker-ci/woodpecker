@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/containerd/errdefs"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
@@ -145,7 +146,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
-		Name:   conf.Volume.Name,
+		Name:   conf.Volume,
 		Driver: volumeDriver,
 	})
 	if err != nil {
@@ -156,7 +157,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	if e.info.OSType == "windows" {
 		networkDriver = networkDriverNAT
 	}
-	_, err = e.client.NetworkCreate(ctx, conf.Network.Name, network.CreateOptions{
+	_, err = e.client.NetworkCreate(ctx, conf.Network, network.CreateOptions{
 		Driver:     networkDriver,
 		EnableIPv6: &e.config.enableIPv6,
 	})
@@ -204,7 +205,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
 
 	_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
-	if client.IsErrNotFound(err) {
+	if errdefs.IsNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
 		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
@@ -323,11 +324,11 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, task
 			}
 		}
 	}
-	if err := e.client.VolumeRemove(ctx, conf.Volume.Name, true); err != nil {
-		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume.Name)
+	if err := e.client.VolumeRemove(ctx, conf.Volume, true); err != nil {
+		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume)
 	}
-	if err := e.client.NetworkRemove(ctx, conf.Network.Name); err != nil {
-		log.Error().Err(err).Msgf("could not remove network '%s'", conf.Network.Name)
+	if err := e.client.NetworkRemove(ctx, conf.Network); err != nil {
+		log.Error().Err(err).Msgf("could not remove network '%s'", conf.Network)
 	}
 	return nil
 }

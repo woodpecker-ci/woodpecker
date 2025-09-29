@@ -47,32 +47,32 @@ const (
 )
 
 type Gitea struct {
-	url          string
-	ClientID     string
-	ClientSecret string
-	OAuthHost    string
-	SkipVerify   bool
-	pageSize     int
+	url               string
+	oAuthClientID     string
+	oAuthClientSecret string
+	oAuthHost         string
+	skipVerify        bool
+	pageSize          int
 }
 
 // Opts defines configuration options.
 type Opts struct {
-	URL        string // Gitea server url.
-	Client     string // OAuth2 Client ID
-	Secret     string // OAuth2 Client Secret
-	OAuthHost  string // OAuth2 Host
-	SkipVerify bool   // Skip ssl verification.
+	URL               string // Gitea server url.
+	OAuthClientID     string // OAuth2 Client ID
+	OAuthClientSecret string // OAuth2 Client Secret
+	OAuthHost         string // OAuth2 Host
+	SkipVerify        bool   // Skip ssl verification.
 }
 
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
 func New(opts Opts) (forge.Forge, error) {
 	return &Gitea{
-		url:          opts.URL,
-		ClientID:     opts.Client,
-		ClientSecret: opts.Secret,
-		OAuthHost:    opts.OAuthHost,
-		SkipVerify:   opts.SkipVerify,
+		url:               opts.URL,
+		oAuthClientID:     opts.OAuthClientID,
+		oAuthClientSecret: opts.OAuthClientSecret,
+		oAuthHost:         opts.OAuthHost,
+		skipVerify:        opts.SkipVerify,
 	}, nil
 }
 
@@ -87,13 +87,13 @@ func (c *Gitea) URL() string {
 }
 
 func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
-	publicOAuthURL := c.OAuthHost
+	publicOAuthURL := c.oAuthHost
 	if publicOAuthURL == "" {
 		publicOAuthURL = c.url
 	}
 	return &oauth2.Config{
-			ClientID:     c.ClientID,
-			ClientSecret: c.ClientSecret,
+			ClientID:     c.oAuthClientID,
+			ClientSecret: c.oAuthClientSecret,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  fmt.Sprintf(authorizeTokenURL, publicOAuthURL),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
@@ -102,7 +102,7 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.SkipVerify},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.skipVerify},
 			Proxy:           http.ProxyFromEnvironment,
 		}})
 }
@@ -288,8 +288,11 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 	}
 
 	// List files in repository
-	contents, _, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
+	contents, resp, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
+		}
 		return nil, err
 	}
 
@@ -505,7 +508,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		pipeline.Commit = sha
 	}
 
-	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) && len(pipeline.ChangedFiles) == 0 {
+	if pipeline != nil && pipeline.IsPullRequest() && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
 			return nil, nil, err
@@ -575,7 +578,7 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 // newClientToken returns the Gitea client with Token.
 func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client, error) {
 	httpClient := &http.Client{}
-	if c.SkipVerify {
+	if c.skipVerify {
 		httpClient.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}

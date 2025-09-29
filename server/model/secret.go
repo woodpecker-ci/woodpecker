@@ -52,7 +52,7 @@ type Secret struct {
 	Value  string         `json:"value,omitempty" xorm:"TEXT 'value'"`
 	Images []string       `json:"images"          xorm:"json 'images'"`
 	Events []WebhookEvent `json:"events"          xorm:"json 'events'"`
-} //	@name Secret
+} //	@name	Secret
 
 // TableName return database table name for xorm.
 func (Secret) TableName() string {

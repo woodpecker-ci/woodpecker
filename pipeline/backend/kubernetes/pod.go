@@ -36,11 +36,12 @@ const (
 	// This will be removed in the future.
 	StepLabelLegacy       = "step"
 	StepLabel             = "woodpecker-ci.org/step"
+	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
 	podPrefix             = "wp-"
 	defaultFSGroup  int64 = 1000
 )
 
-func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
+func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*v1.Pod, error) {
 	var err error
 
 	nsp := newNativeSecretsProcessor(config, options.Secrets)
@@ -49,7 +50,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	meta, err := podMeta(step, config, options, podName)
+	meta, err := podMeta(step, config, options, podName, taskUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -84,15 +85,15 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (meta_v1.ObjectMeta, error) {
+func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (meta_v1.ObjectMeta, error) {
 	var err error
 	meta := meta_v1.ObjectMeta{
 		Name:        podName,
-		Namespace:   config.Namespace,
+		Namespace:   config.GetNamespace(step.OrgID),
 		Annotations: podAnnotations(config, options),
 	}
 
-	meta.Labels, err = podLabels(step, config, options)
+	meta.Labels, err = podLabels(step, config, options, taskUUID)
 	if err != nil {
 		return meta, err
 	}
@@ -100,7 +101,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	return meta, nil
 }
 
-func podLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
+func podLabels(step *types.Step, config *config, options BackendOptions, taskUUID string) (map[string]string, error) {
 	var err error
 	labels := make(map[string]string)
 
@@ -141,6 +142,10 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 		return labels, err
 	}
 
+	if len(taskUUID) > 0 {
+		labels[TaskUUIDLabel] = taskUUID
+	}
+
 	return labels, nil
 }
 
@@ -173,11 +178,20 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
+		PriorityClassName:  config.PriorityClassName,
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
+
+	// If there are tolerations and they are allowed
+	if config.PodTolerationsAllowFromStep && len(options.Tolerations) != 0 {
+		spec.Tolerations = tolerations(options.Tolerations)
+	} else {
+		spec.Tolerations = tolerations(config.PodTolerations)
+	}
+
 	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
@@ -235,7 +249,15 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		container.Command = step.Entrypoint
 	}
 
-	container.Env = mapToEnvVars(step.Environment)
+	stepSecret, err := stepSecretName(step)
+	if err != nil {
+		return container, err
+	}
+
+	// filter environment variables to non-secrets and secrets, refer secrets from step secrets
+	envs, secs := filterSecrets(step.Environment, step.SecretMapping)
+	envsFromSecrets := mapToEnvVarsFromStepSecrets(secs, stepSecret)
+	container.Env = append(mapToEnvVars(envs), envsFromSecrets...)
 
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
@@ -252,6 +274,38 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
 
 	return container, nil
+}
+
+func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []v1.EnvVar {
+	var ev []v1.EnvVar
+	for _, key := range secs {
+		ev = append(ev, v1.EnvVar{
+			Name: key,
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: stepSecretName,
+					},
+					Key: key,
+				},
+			},
+		})
+	}
+	return ev
+}
+
+func filterSecrets(environment, secrets map[string]string) (map[string]string, []string) {
+	ev := map[string]string{}
+	var secs []string
+
+	for k, v := range environment {
+		if _, found := secrets[k]; found {
+			secs = append(secs, k)
+		} else {
+			ev[k] = v
+		}
+	}
+	return ev, secs
 }
 
 func pvcVolumes(volumes []string) ([]v1.Volume, error) {
@@ -413,12 +467,13 @@ func toleration(backendToleration Toleration) v1.Toleration {
 
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
-		nonRoot  *bool
-		user     *int64
-		group    *int64
-		fsGroup  *int64
-		seccomp  *v1.SeccompProfile
-		apparmor *v1.AppArmorProfile
+		nonRoot             *bool
+		user                *int64
+		group               *int64
+		fsGroup             *int64
+		fsGroupChangePolicy *v1.PodFSGroupChangePolicy
+		seccomp             *v1.SeccompProfile
+		apparmor            *v1.AppArmorProfile
 	)
 
 	if secCtxConf.RunAsNonRoot {
@@ -456,6 +511,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 		seccomp = seccompProfile(sc.SeccompProfile)
 		apparmor = apparmorProfile(sc.ApparmorProfile)
+		fsGroupChangePolicy = sc.FsGroupChangePolicy
 	}
 
 	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil && apparmor == nil {
@@ -463,12 +519,13 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot:    nonRoot,
-		RunAsUser:       user,
-		RunAsGroup:      group,
-		FSGroup:         fsGroup,
-		SeccompProfile:  seccomp,
-		AppArmorProfile: apparmor,
+		RunAsNonRoot:        nonRoot,
+		RunAsUser:           user,
+		RunAsGroup:          group,
+		FSGroup:             fsGroup,
+		FSGroupChangePolicy: fsGroupChangePolicy,
+		SeccompProfile:      seccomp,
+		AppArmorProfile:     apparmor,
 	}
 	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
@@ -546,19 +603,19 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
+func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions, taskUUID string) (*v1.Pod, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
 	engineConfig := engine.getConfig()
-	pod, err := mkPod(step, engineConfig, podName, engine.goos, options)
+	pod, err := mkPod(step, engineConfig, podName, engine.goos, options, taskUUID)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Trace().Msgf("creating pod: %s", pod.Name)
-	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, meta_v1.CreateOptions{})
+	return engine.client.CoreV1().Pods(engineConfig.GetNamespace(step.OrgID)).Create(ctx, pod, meta_v1.CreateOptions{})
 }
 
 func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
@@ -569,7 +626,7 @@ func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts met
 
 	log.Trace().Str("name", podName).Msg("deleting pod")
 
-	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
+	err = engine.client.CoreV1().Pods(engine.config.GetNamespace(step.OrgID)).Delete(ctx, podName, deleteOpts)
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
 		return nil

@@ -50,12 +50,7 @@
           </Panel>
         </div>
 
-        <PipelineLog
-          v-else-if="selectedStepId !== null"
-          v-model:step-id="selectedStepId"
-          :pipeline="pipeline!"
-          class="fixed top-0 left-0 h-full w-full md:absolute"
-        />
+        <PipelineLog v-else-if="selectedStepId !== null" v-model:step-id="selectedStepId" :pipeline="pipeline!" />
       </div>
     </div>
   </Container>
@@ -149,7 +144,7 @@ const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAc
 useWPTitle(
   computed(() => [
     i18n.t('repo.pipeline.tasks'),
-    i18n.t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    i18n.t('repo.pipeline.pipeline', { pipelineId: pipeline.value.number }),
     repo.value.full_name,
   ]),
 );

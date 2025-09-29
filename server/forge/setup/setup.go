@@ -41,12 +41,13 @@ func Forge(forge *model.Forge) (forge.Forge, error) {
 
 func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 	opts := &bitbucket.Opts{
-		Client: forge.Client,
-		Secret: forge.ClientSecret,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
 	}
+
 	log.Debug().
-		Bool("client-set", opts.Client != "").
-		Bool("secret-set", opts.Secret != "").
+		Bool("oauth-client-id-set", opts.OAuthClientID != "").
+		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
 	return bitbucket.New(opts)
@@ -59,11 +60,11 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 	}
 
 	opts := gitea.Opts{
-		URL:        strings.TrimRight(serverURL.String(), "/"),
-		Client:     forge.Client,
-		Secret:     forge.ClientSecret,
-		SkipVerify: forge.SkipVerify,
-		OAuthHost:  forge.OAuthHost,
+		URL:               strings.TrimRight(serverURL.String(), "/"),
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
+		SkipVerify:        forge.SkipVerify,
+		OAuthHost:         forge.OAuthHost,
 	}
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
@@ -72,8 +73,8 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 		Str("url", opts.URL).
 		Str("oauth-host", opts.OAuthHost).
 		Bool("skip-verify", opts.SkipVerify).
-		Bool("client-set", opts.Client != "").
-		Bool("secret-set", opts.Secret != "").
+		Bool("oauth-client-id-set", opts.OAuthClientID != "").
+		Bool("oauth-secret-id-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
 	return gitea.New(opts)
@@ -86,11 +87,11 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 	}
 
 	opts := forgejo.Opts{
-		URL:        strings.TrimRight(server.String(), "/"),
-		Client:     forge.Client,
-		Secret:     forge.ClientSecret,
-		SkipVerify: forge.SkipVerify,
-		OAuth2URL:  forge.OAuthHost,
+		URL:               strings.TrimRight(server.String(), "/"),
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
+		SkipVerify:        forge.SkipVerify,
+		OAuth2URL:         forge.OAuthHost,
 	}
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGEJO_URL must be set")
@@ -99,8 +100,8 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 		Str("url", opts.URL).
 		Str("oauth2-url", opts.OAuth2URL).
 		Bool("skip-verify", opts.SkipVerify).
-		Bool("client-set", opts.Client != "").
-		Bool("secret-set", opts.Secret != "").
+		Bool("oauth-client-id-set", opts.OAuthClientID != "").
+		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
 	return forgejo.New(opts)
@@ -108,18 +109,18 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 
 func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 	opts := gitlab.Opts{
-		URL:          forge.URL,
-		ClientID:     forge.Client,
-		ClientSecret: forge.ClientSecret,
-		SkipVerify:   forge.SkipVerify,
-		OAuthHost:    forge.OAuthHost,
+		URL:               forge.URL,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
+		SkipVerify:        forge.SkipVerify,
+		OAuthHost:         forge.OAuthHost,
 	}
 	log.Debug().
 		Str("url", opts.URL).
 		Str("oauth-host", opts.OAuthHost).
 		Bool("skip-verify", opts.SkipVerify).
-		Bool("client-id-set", opts.ClientID != "").
-		Bool("client-secret-set", opts.ClientSecret != "").
+		Bool("oauth-client-id-set", opts.OAuthClientID != "").
+		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
 	return gitlab.New(opts)
@@ -137,13 +138,13 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 	}
 
 	opts := github.Opts{
-		URL:        forge.URL,
-		Client:     forge.Client,
-		Secret:     forge.ClientSecret,
-		SkipVerify: forge.SkipVerify,
-		MergeRef:   mergeRef,
-		OnlyPublic: publicOnly,
-		OAuthHost:  forge.OAuthHost,
+		URL:               forge.URL,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
+		SkipVerify:        forge.SkipVerify,
+		MergeRef:          mergeRef,
+		OnlyPublic:        publicOnly,
+		OAuthHost:         forge.OAuthHost,
 	}
 	log.Debug().
 		Str("url", opts.URL).
@@ -151,8 +152,8 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		Bool("merge-ref", opts.MergeRef).
 		Bool("only-public", opts.OnlyPublic).
 		Bool("skip-verify", opts.SkipVerify).
-		Bool("client-set", opts.Client != "").
-		Bool("secret-set", opts.Secret != "").
+		Bool("oauth-client-id-set", opts.OAuthClientID != "").
+		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
 	return github.New(opts)
@@ -168,20 +169,27 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		return nil, fmt.Errorf("missing git-password")
 	}
 
+	enableProjectAdminScope, ok := forge.AdditionalOptions["oauth-enable-project-admin-scope"].(bool)
+	if !ok {
+		return nil, fmt.Errorf("incorrect type for oauth-enable-project-admin-scope value")
+	}
+
 	opts := bitbucketdatacenter.Opts{
-		URL:          forge.URL,
-		ClientID:     forge.Client,
-		ClientSecret: forge.ClientSecret,
-		Username:     gitUsername,
-		Password:     gitPassword,
-		OAuthHost:    forge.OAuthHost,
+		URL:                          forge.URL,
+		OAuthClientID:                forge.OAuthClientID,
+		OAuthClientSecret:            forge.OAuthClientSecret,
+		Username:                     gitUsername,
+		Password:                     gitPassword,
+		OAuthHost:                    forge.OAuthHost,
+		OAuthEnableProjectAdminScope: enableProjectAdminScope,
 	}
 	log.Debug().
 		Str("url", opts.URL).
 		Str("oauth-host", opts.OAuthHost).
-		Bool("client-id-set", opts.ClientID != "").
-		Bool("client-secret-set", opts.ClientSecret != "").
+		Bool("oauth-client-id-set", opts.OAuthClientID != "").
+		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
+		Bool("oauth-enable-project-admin-scope", opts.OAuthEnableProjectAdminScope).
 		Msg("setting up forge")
 	return bitbucketdatacenter.New(opts)
 }

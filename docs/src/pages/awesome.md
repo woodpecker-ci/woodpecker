@@ -30,6 +30,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [woodpecker-lint](https://git.schmidl.dev/schtobia/woodpecker-lint) - A repository for linting a Woodpecker config file via pre-commit hook
 - [Grafana Dashboard](https://github.com/Janik-Haag/woodpecker-grafana-dashboard) - A dashboard visualizing information exposed by the Woodpecker prometheus endpoint.
 - [woodpecker-autoscaler](https://github.com/Lerentis/woodpecker-autoscaler) - Yet another Woodpecker autoscaler currently targeting [Hetzner cloud](https://www.hetzner.com/cloud) that works in parallel to other autoscaler implementations.
+- [Woodpecker MCP](https://github.com/j04n-f/woodpecker-mcp) - A Model Context Protocol (MCP) server that connects AI assistants to Woodpecker CI. Debug pipeline failures, analyze build logs, and troubleshoot CI/CD configurations with AI assistance.
 
 ## Configuration Services
 
@@ -41,7 +42,6 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 
 ## Posts & tutorials
 
-- [Setup Gitea with Woodpecker CI](https://containers.fan/posts/setup-gitea-with-woodpecker-ci/)
 - [Step-by-step guide to modern, secure and Open-source CI setup](https://devforth.io/blog/step-by-step-guide-to-modern-secure-ci-setup/)
 - [Using Woodpecker CI for my static sites](https://jan.wildeboer.net/2022/07/Woodpecker-CI-Jekyll/)
 - [Woodpecker CI @ Codeberg](https://www.sarkasti.eu/articles/post/woodpecker/)
@@ -50,7 +50,6 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Locally Cached Nix CI with Woodpecker](https://blog.kotatsu.dev/posts/2023-04-21-woodpecker-nix-caching/)
 - [How to run Cypress auto-tests on Woodpecker CI and report results to Slack](https://devforth.io/blog/how-to-run-cypress-auto-tests-on-woodpecker-ci-and-report-results-to-slack/)
 - [Quest For CICD - WoodpeckerCI](https://omaramin.me/posts/woodpecker/)
-- [Getting started with Woodpecker CI](https://systeemkabouter.eu/getting-started-with-woodpecker-ci.html)
 - [Installing gitea and woodpecker using binary packages](https://neelex.com/2023/03/26/Installing-gitea-using-binary-packages/)
 - [Deploying mdbook to codeberg pages using Woodpecker CI](https://www.markpitblado.me/blog/deploying-mdbook-to-codeberg-pages-using-woodpecker-ci/)
 - [Deploy a Fly app with Woodpecker CI](https://joeroe.io/2024/01/09/deploy-fly-woodpecker-ci.html)
@@ -62,9 +61,15 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Woodpecker Shenanigans](https://jan.wildeboer.net/2024/12/Woodpecker-Shenanigans/)
 - [Ansible - using Woodpecker as an alternative to Semaphore](https://pat-s.me/ansible-using-woodpecker-as-an-alternative-to-semaphore/)
 - [Building a blog using Hugo, MinIO, and Woodpecker CI](https://bluemedia.dev/blog/blog-using-hugo-minio-and-woodpcker-ci/)
-- [How to deploy Woodpecker CI 1.0.3 in docker swarm behind Caddy v2.7.5](https://www.tuneit.me/how-to-deploy-woodpecker-ci-1-0-3-in-docker-swarm-behind-caddy-v2-7-5)
 - [Woodpecker CI](https://blog.mariom.pl/posts/2023/03/woodpecker/)
 - [Deploy Gitea and Woodpecker CI with Docker Compose](https://www.alexruf.net/posts/deploy-gitea-woodpecker-docker-compose/)
+- [Improving Multi-Arch Image Build Performance by not Emulating](https://blog.mei-home.net/posts/improving-container-image-build-perf-with-buildah/)
+- [CI pipelines with Woodpecker](https://blog.reinhard.codes/2024/11/19/ci-pipelines-with-woodpecker/)
+- [Setting up Woodpecker CI at home](https://jamesbrechtel.com/posts/wasting-time-for-misery-and-loss/)
+- [Woodpecker CI with automatic runner creation](https://planet.kde.org/jonah-bruchert-2023-05-13-woodpecker-ci-with-automatic-runner-creation/)
+- [Self-Hosted CI: Install and Run Woodpecker CI on Your VPS](https://mangohost.net/blog/self-hosted-ci-install-and-run-woodpecker-ci-on-your-vps/)
+- [Automating My Blog With Gitea and Woodpecker](https://bgenc.net/2022.11.19.automating-my-blog-with-gitea-and-woodpecker/)
+- [Testcontainers in Woodpecker CI](https://gaborpihaj.com/posts/testcontainers-in-woodpecker-ci/)
 
 ## Videos
 
@@ -74,6 +79,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [How to Build & Publish Custom Docker Container using Gitea & Woodpecker behind Caddy Server | TUNEIT](https://www.youtube.com/watch?v=9m7DbgL1mNk)
 - [Radicle Woodpecker CI Integration](https://www.youtube.com/watch?v=Ks1nbYLn4P8)
 - [woodpecker-ci/woodpecker - Gource visualisation](https://www.youtube.com/watch?v=38JuakZ6m5s)
+- [Woodpecker CI](https://www.youtube.com/watch?v=Htd98Mepu4s)
 
 ## Plugins
 

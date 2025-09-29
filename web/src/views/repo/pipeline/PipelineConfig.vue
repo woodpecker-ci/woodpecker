@@ -7,7 +7,11 @@
       collapsed-by-default
       :title="pipelineConfigsDecoded && pipelineConfigsDecoded.length > 1 ? pipelineConfig.name : ''"
     >
-      <SyntaxHighlight class="overflow-auto font-mono whitespace-pre" language="yaml" :code="pipelineConfig.data" />
+      <SyntaxHighlight
+        class="code-box overflow-auto font-mono whitespace-pre"
+        language="yaml"
+        :code="pipelineConfig.data"
+      />
     </Panel>
   </div>
 </template>
@@ -38,7 +42,7 @@ const { t } = useI18n();
 useWPTitle(
   computed(() => [
     t('repo.pipeline.config'),
-    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.number }),
     repo.value.full_name,
   ]),
 );

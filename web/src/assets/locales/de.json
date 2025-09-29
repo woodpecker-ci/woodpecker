@@ -20,7 +20,10 @@
                 "desc": "Für diesen Server registrierte Agenten.",
                 "edit_agent": "Agent bearbeiten",
                 "id": "ID",
-                "last_contact": "Letzter Kontakt",
+                "last_contact": {
+                    "last_contact": "Letzter Kontakt",
+                    "badge": "letzter Kontakt"
+                },
                 "name": {
                     "name": "Name",
                     "placeholder": "Name des Agenten"
@@ -264,7 +267,8 @@
                 "push": "Push",
                 "tag": "Tag",
                 "release": "Release",
-                "pr_closed": "Pull-Request zusammengeführt/geschlossen"
+                "pr_closed": "Pull-Request zusammengeführt/geschlossen",
+                "pr_metadata": "Pull-Request-Metadaten geändert"
             },
             "exit_code": "Exit-Code {exitCode}",
             "files": "Geänderte Dateien",
@@ -317,7 +321,8 @@
                 "title": "Debug",
                 "metadata_exec_title": "Pipeline lokal erneut ausführen",
                 "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst. Das Woodpecker-CLI muss in der zum Server passenden Version lokal installiert sein."
-            }
+            },
+            "view": "Pipeline anzeigen"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -664,7 +669,7 @@
         "delete": "Register löschen",
         "created": "Register-Zugangsdaten erstellt",
         "saved": "Register-Zugangsdaten gespeichert",
-        "show": "Zeige Register"
+        "show": "Register anzeigen"
     },
     "invalid_state": "Der OAuth-Status ist ungültig",
     "by_user": "von {user}",
@@ -693,5 +698,56 @@
             "allowed_users": "Zugelassene Benutzer"
         }
     },
-    "org_access_denied": "Zugriff auf diese Organisation nicht erlaubt"
+    "org_access_denied": "Zugriff auf diese Organisation nicht erlaubt",
+    "exit_fullscreen": "Vollbild verlassen",
+    "fullscreen": "Vollbild",
+    "oauth_host": "OAuth-Host",
+    "merge_ref": "Zusammenführungs-Referenz",
+    "merge_ref_desc": "Referenz, die für die Zusammenführungs-Basis genutzt wird. Dies wird für die Unterschiede bei Pull-Requests verwerdet.",
+    "public_only": "Nur öffentlich",
+    "public_only_desc": "Nur öffentliche Repositorys anzeigen.",
+    "git_username": "Git-Benutzername",
+    "git_password": "Git-Passwort",
+    "executable_desc": "Pfad zur Programmdatei des Add-ons.",
+    "save": "Speichern",
+    "add": "Hinzufügen",
+    "skip_verify": "SSL-Verifikation überspringen",
+    "advanced_options": "Erweiterte Optionen",
+    "leave_empty_to_keep_current_value": "Leer lassen, um den aktuellen Wert beizubehalten",
+    "forge_deleted": "Plattform gelöscht",
+    "login_to_woodpecker_with": "In Woodpecker anmelden mit",
+    "forges": "Plattformen",
+    "forges_desc": "Die Plattformen konfigurieren, auf denen Repositorys gehostet sind, für die Woodpecker verwendet wird.",
+    "add_forge": "Plattform hinzufügen",
+    "show_forges": "Plattformen anzeigen",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "addon": "Add-on",
+    "forge_type": "Plattform-Typ",
+    "oauth_client_id": "OAuth-Client-ID",
+    "oauth_client_secret": "OAuth-Client-Geheimnis",
+    "git_username_desc": "Benutzername für den Git-Benutzer.",
+    "git_password_desc": "Password oder persönlicher Zugangsschlüssel für den Git-Benutzer.",
+    "executable": "Programmdatei",
+    "skip_verify_desc": "SSL-Verifikation für API-Verbindungen überspringen. Im Produktiveinsatz nicht empfohlen.",
+    "forge_managed_by_env": "Die primäre Plattform wird durch Umgebungsvariablen verwaltet. Jede Änderung dieser Plattform wird bei einem Neustart verworfen.",
+    "oauth_redirect_uri": "OAuth-Weiterleitungs-URI",
+    "forge_created": "Plattform erstellt",
+    "forge_delete_confirm": "Möchtest du diese Plattform wirklich löschen? Dies wird auch alle Repositorys, Benutzer und Pipelines dieser Plattform löschen.",
+    "edit_forge": "Plattform bearbeiten",
+    "delete_forge": "Plattform löschen",
+    "no_forges": "Es gibt noch keine Plattformen.",
+    "use_this_redirect_uri_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren. Gehe zu den {0} und richte die OAuth-Anwendung ein.",
+    "developer_settings": "Entwicklereinstellungen",
+    "public_url_for_oauth_if": "Öffentliche URL für OAuth, wenn unterschiedlich von URL ({0})",
+    "forge_saved": "Plattform gespeichert",
+    "oauth_redirect_url": "OAuth-Weiterleitungs-URL",
+    "developer_settings_to_create": "Gehe zu den {0} und richte die OAuth-Anwendung ein.",
+    "weblate": "unserem Weblate",
+    "use_this_redirect_url_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren.",
+    "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen."
 }

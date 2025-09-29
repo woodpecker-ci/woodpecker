@@ -18,8 +18,6 @@ import (
 	"net/http"
 )
 
-//go:generate mockery --name Client --output mocks --case underscore --note "+build test"
-
 // Client is used to communicate with a Woodpecker server.
 type Client interface {
 	// SetClient sets the http.Client.
@@ -185,6 +183,9 @@ type Client interface {
 
 	// OrgLookup returns an organization id by name.
 	OrgLookup(orgName string) (*Org, error)
+
+	// OrgList returns a list of all organizations.
+	OrgList(opt ListOptions) ([]*Org, error)
 
 	// OrgSecret returns an organization secret by name.
 	OrgSecret(orgID int64, secret string) (*Secret, error)

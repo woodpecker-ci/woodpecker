@@ -56,3 +56,5 @@ func logDelete(sess *xorm.Session, stepID int64) error {
 	_, err := sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry))
 	return err
 }
+
+func (s storage) StepFinished(_ *model.Step) {}

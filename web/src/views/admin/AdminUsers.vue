@@ -14,7 +14,7 @@
       <ListItem
         v-for="user in users"
         :key="user.id"
-        class="bg-wp-background-200! dark:bg-wp-background-100! items-center gap-2"
+        class="bg-wp-background-200! dark:bg-wp-background-200! items-center gap-2"
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
@@ -23,23 +23,27 @@
           class="md:display-unset ml-auto hidden"
           :value="$t('admin.settings.users.admin.admin')"
         />
-        <IconButton
-          icon="edit"
-          :title="$t('admin.settings.users.edit_user')"
-          class="md:display-unset h-8 w-8"
-          :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
-          @click="editUser(user)"
-        />
-        <IconButton
-          icon="trash"
-          :title="$t('admin.settings.users.delete_user')"
-          class="hover:text-wp-error-100 ml-2 h-8 w-8"
-          :is-loading="isDeleting"
-          @click="deleteUser(user)"
-        />
+        <div class="flex items-center gap-2" :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }">
+          <IconButton
+            icon="edit"
+            :title="$t('admin.settings.users.edit_user')"
+            class="md:display-unset h-8 w-8"
+            @click="editUser(user)"
+          />
+          <IconButton
+            icon="trash"
+            :title="$t('admin.settings.users.delete_user')"
+            class="hover:text-wp-error-100 h-8 w-8"
+            :is-loading="isDeleting"
+            @click="deleteUser(user)"
+          />
+        </div>
       </ListItem>
 
-      <div v-if="users?.length === 0" class="ml-2">{{ $t('admin.settings.users.none') }}</div>
+      <div v-if="loading" class="flex justify-center">
+        <Icon name="spinner" class="animate-spin" />
+      </div>
+      <div v-else-if="users?.length === 0" class="ml-2">{{ $t('admin.settings.users.none') }}</div>
     </div>
     <div v-else>
       <form @submit.prevent="saveUser">
@@ -88,6 +92,7 @@ import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
@@ -112,7 +117,7 @@ async function loadUsers(page: number): Promise<User[] | null> {
   return apiClient.getUsers({ page });
 }
 
-const { resetPage, data: users } = usePagination(loadUsers, () => !selectedUser.value);
+const { resetPage, data: users, loading } = usePagination(loadUsers, () => !selectedUser.value);
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedUser.value) {
@@ -133,7 +138,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
     });
   }
   selectedUser.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
@@ -144,7 +149,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
   await apiClient.deleteUser(_user);
   notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editUser(user: User) {

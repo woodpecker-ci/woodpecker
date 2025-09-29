@@ -5,6 +5,7 @@
   <SvgIcon v-else-if="name === 'branch'" :path="mdiSourceBranch" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request-closed'" :path="mdiSourceMerge" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'pull-request-metadata'" :path="mdiPencilOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'manual-pipeline'" :path="mdiGestureTap" size="1.3rem" />
   <SvgIcon v-else-if="name === 'tag'" :path="mdiTagOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="1.3rem" />
@@ -61,8 +62,14 @@
   <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="1.3rem" />
   <SvgIcon v-else-if="name === 'file-cog-outline'" :path="mdiFileCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'file-edit-outline'" :path="mdiFileEditOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder'" :path="mdiFolderOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder-open'" :path="mdiFolderOpenOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file'" :path="mdiFileOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'forge'" :path="mdiCodeBraces" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'fullscreen'" :path="mdiFullscreen" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'exit-fullscreen'" :path="mdiFullscreenExit" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -93,6 +100,8 @@
   </svg>
 
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
+
+  <div v-else>{{ throwNotFound() }}</div>
 </template>
 
 <script lang="ts" setup>
@@ -110,6 +119,7 @@ import {
   mdiClockTimeEightOutline,
   mdiClose,
   mdiCloseCircle,
+  mdiCodeBraces,
   mdiCog,
   mdiCogOutline,
   mdiConsole,
@@ -120,8 +130,13 @@ import {
   mdiEyeOutline,
   mdiFileCogOutline,
   mdiFileEditOutline,
+  mdiFileOutline,
+  mdiFolderOpenOutline,
+  mdiFolderOutline,
   mdiFormatListBulleted,
   mdiFormatListGroup,
+  mdiFullscreen,
+  mdiFullscreenExit,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
@@ -165,6 +180,7 @@ export type IconNames =
   | 'branch'
   | 'pull-request'
   | 'pull-request-closed'
+  | 'pull-request-metadata'
   | 'manual-pipeline'
   | 'tag'
   | 'deployment'
@@ -192,7 +208,6 @@ export type IconNames =
   | 'forgejo'
   | 'question'
   | 'list'
-  | 'loading'
   | 'plus'
   | 'blank'
   | 'heal'
@@ -226,9 +241,19 @@ export type IconNames =
   | 'user'
   | 'org'
   | 'cron'
-  | 'toolbox';
+  | 'toolbox'
+  | 'forge'
+  | 'fullscreen'
+  | 'exit-fullscreen'
+  | 'folder'
+  | 'folder-open'
+  | 'file';
 
-defineProps<{
+const props = defineProps<{
   name: IconNames;
 }>();
+
+function throwNotFound() {
+  throw new Error(`Icon "${props.name}" not found`);
+}
 </script>
