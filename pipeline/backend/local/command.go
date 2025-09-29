@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"al.essio.dev/pkg/shellescape"
@@ -84,29 +83,6 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
 	default:
 		// assume posix shell
-		if err := probeShellIsPosix(shell); err != nil {
-			return nil, err
-		}
-		fallthrough
-		// normal posix shells
-	case "sh", "bash", "zsh":
 		return []string{"-e", "-c", script}, nil
 	}
-}
-
-// before we generate a generic posix shell we test
-func probeShellIsPosix(shell string) error {
-	script := `x=1 && [ "$x" = "1" ] && command -v test >/dev/null && printf ok`
-
-	cmd := exec.Command(shell, "-c", script)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("%w: shell '%s' returned: %w", ErrNoPosixShell, shell, err)
-	}
-
-	if strings.TrimSpace(string(output)) != "ok" {
-		return fmt.Errorf("%w: shell '%s' returned unexpected output: '%s'", ErrNoPosixShell, shell, output)
-	}
-
-	return nil
 }
