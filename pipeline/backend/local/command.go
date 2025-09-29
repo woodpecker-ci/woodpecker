@@ -17,32 +17,47 @@
 package local
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"al.essio.dev/pkg/shellescape"
 )
 
+var (
+	ErrNoShellSet   = errors.New("no shell was set")
+	ErrNoCmdSet     = errors.New("no commands where set")
+	ErrNoPosixShell = errors.New("assumed posix shell but test failed")
+)
+
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
+	if len(cmdList) == 0 {
+		return nil, ErrNoCmdSet
+	}
+
 	script := ""
 	for _, cmd := range cmdList {
-		quotedCmd := strings.TrimSpace(shellescape.Quote("+ " + cmd))
-		// As cmd echo does not allow strings with newlines we need to replace them ...
-		quotedCmd = strings.ReplaceAll(quotedCmd, "\n", "\\n")
-		// Also the shellescape.Quote fail with any | or & char and wrapping them in quotes again can be bypassed
-		// by just leaving an string halve quoted we just replace them with symbolic representations
-		quotedCmd = strings.ReplaceAll(quotedCmd, "&", "\\AND")
-		quotedCmd = strings.ReplaceAll(quotedCmd, "|", "\\OR")
-
-		script += fmt.Sprintf("echo %s\n%s\n", quotedCmd, cmd)
+		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
 	}
 	script = strings.TrimSpace(script)
 
-	switch strings.TrimSuffix(strings.ToLower(shell), ".exe") {
+	shell = strings.TrimSuffix(strings.ToLower(shell), ".exe")
+	switch shell {
+	case "":
+		return nil, ErrNoShellSet
 	case "cmd":
 		script := "@SET PROMPT=$\n"
 		for _, cmd := range cmdList {
+			quotedCmd := strings.TrimSpace(shellescape.Quote("+ " + cmd))
+			// As cmd echo does not allow strings with newlines we need to replace them ...
+			quotedCmd = strings.ReplaceAll(quotedCmd, "\n", "\\n")
+			// Also the shellescape.Quote fail with any | or & char and wrapping them in quotes again can be bypassed
+			// by just leaving an string halve quoted we just replace them with symbolic representations
+			quotedCmd = strings.ReplaceAll(quotedCmd, "&", "\\AND")
+			quotedCmd = strings.ReplaceAll(quotedCmd, "|", "\\OR")
+
 			script += fmt.Sprintf("@echo + %s\n", strings.TrimSpace(shellescape.Quote(cmd)))
 			script += fmt.Sprintf("@%s\n", cmd)
 			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
@@ -68,7 +83,30 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 		// cspell:disable-next-line
 		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
 	default:
+		// assume posix shell
+		if err := probeShellIsPosix(shell); err != nil {
+			return nil, err
+		}
+		fallthrough
 		// normal posix shells
+	case "sh", "bash", "zsh":
 		return []string{"-e", "-c", script}, nil
 	}
+}
+
+// before we generate a generic posix shell we test
+func probeShellIsPosix(shell string) error {
+	script := `x=1 && [ "$x" = "1" ] && command -v test >/dev/null && printf ok`
+
+	cmd := exec.Command(shell, "-c", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%w: shell '%s' returned: %w", ErrNoPosixShell, shell, err)
+	}
+
+	if strings.TrimSpace(string(output)) != "ok" {
+		return fmt.Errorf("%w: shell '%s' returned unexpected output: '%s'", ErrNoPosixShell, shell, output)
+	}
+
+	return nil
 }
