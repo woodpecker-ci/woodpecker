@@ -2,7 +2,7 @@
 
 ## [3.10.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.1) - 2025-09-29
 
-### 📚 Documentation
+### 📦️ Dependency
 
 - chore(deps): lock file maintenance [[#5566](https://github.com/woodpecker-ci/woodpecker/pull/5566)]
 
