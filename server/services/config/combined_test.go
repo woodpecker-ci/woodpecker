@@ -198,7 +198,7 @@ func TestFetchFromConfigService(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: tt.name, Config: tt.repoConfig} // Using test name as repo name to provide different responses in mock server
 
-			f := new(mocks.Forge)
+			f := new(mocks.MockForge)
 			dirs := map[string][]*forge_types.FileMeta{}
 			for _, file := range tt.files {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)

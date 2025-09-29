@@ -1777,7 +1777,7 @@ const docTemplate = `{
         },
         "/queue/info": {
             "get": {
-                "description": "TODO: link the InfoT response object - this is blocked, until the ` + "`" + `swaggo/swag` + "`" + ` tool dependency is v1.18.12 or newer",
+                "description": "Returns pipeline queue information with agent details",
                 "produces": [
                     "application/json"
                 ],
@@ -1799,10 +1799,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/QueueInfo"
                         }
                     }
                 }
@@ -4916,6 +4913,12 @@ const docTemplate = `{
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
                 },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "finished": {
                     "type": "integer"
                 },
@@ -5016,6 +5019,49 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "QueueInfo": {
+            "type": "object",
+            "properties": {
+                "paused": {
+                    "type": "boolean"
+                },
+                "pending": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
+                },
+                "running": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
+                },
+                "stats": {
+                    "type": "object",
+                    "properties": {
+                        "pending_count": {
+                            "type": "integer"
+                        },
+                        "running_count": {
+                            "type": "integer"
+                        },
+                        "waiting_on_deps_count": {
+                            "type": "integer"
+                        },
+                        "worker_count": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "waiting_on_deps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
                 }
             }
         },
@@ -5462,6 +5508,18 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
+                },
                 "run_on": {
                     "type": "array",
                     "items": {
@@ -5508,6 +5566,7 @@ const docTemplate = `{
                 "push",
                 "pull_request",
                 "pull_request_closed",
+                "pull_request_metadata",
                 "tag",
                 "release",
                 "deployment",
@@ -5518,6 +5577,7 @@ const docTemplate = `{
                 "EventPush",
                 "EventPull",
                 "EventPullClosed",
+                "EventPullMetadata",
                 "EventTag",
                 "EventRelease",
                 "EventDeploy",
@@ -5640,6 +5700,12 @@ const docTemplate = `{
                 },
                 "event": {
                     "type": "string"
+                },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "finished": {
                     "type": "integer"
@@ -5811,6 +5877,59 @@ const docTemplate = `{
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
             ]
+        },
+        "model.QueueTask": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "integer"
+                },
+                "agent_name": {
+                    "type": "string"
+                },
+                "dep_status": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/StatusValue"
+                    }
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "pipeline_number": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
+                },
+                "run_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "model.TrustedConfiguration": {
             "type": "object",

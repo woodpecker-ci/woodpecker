@@ -70,8 +70,8 @@ func (s *Secret) Match(event string) bool {
 		return true
 	}
 	// treat all pull events the same way
-	if event == "pull_request_closed" {
-		event = "pull_request"
+	if metadata.EventIsPull(event) {
+		event = metadata.EventPull
 	}
 	// one match is enough
 	return slices.Contains(s.Events, event)
