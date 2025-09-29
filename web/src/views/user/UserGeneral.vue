@@ -49,10 +49,13 @@ const { locale, t } = useI18n();
 const { storeTheme } = useTheme();
 
 const localeOptions = computed(() =>
-  SUPPORTED_LOCALES.map((supportedLocale) => ({
-    value: supportedLocale,
-    text: new Intl.DisplayNames(supportedLocale, { type: 'language' }).of(supportedLocale) || supportedLocale,
-  })),
+  SUPPORTED_LOCALES.map((supportedLocale) => {
+    const language = supportedLocale.split('_')[0];
+    return {
+      value: supportedLocale,
+      text: new Intl.DisplayNames(language, { type: 'language' }).of(language) || supportedLocale,
+    };
+  }),
 );
 
 const storedLocale = useStorage('woodpecker:locale', locale.value);
