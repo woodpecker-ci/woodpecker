@@ -132,12 +132,10 @@ echo test`, args[3])
 		content, err := os.ReadFile(args[1])
 		require.NoError(t, err)
 		assert.EqualValues(t, `@SET PROMPT=$
-@echo + 'echo '"'"'test with | pipe'"'"''
+@echo + 'echo '"'"'test with \OR pipe'"'"''
 @echo 'test with | pipe'
 @IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%
-@echo + 'echo '"'"'test & ampersand'"'"'
-
-echo new line'
+@echo + 'echo '"'"'test \AND ampersand'"'"'\n\necho new line'
 @echo 'test & ampersand'
 
 echo new line

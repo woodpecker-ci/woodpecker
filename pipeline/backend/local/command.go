@@ -50,7 +50,7 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 	case "cmd":
 		script := "@SET PROMPT=$\n"
 		for _, cmd := range cmdList {
-			quotedCmd := strings.TrimSpace(shellescape.Quote("+ " + cmd))
+			quotedCmd := strings.TrimSpace(shellescape.Quote(cmd))
 			// As cmd echo does not allow strings with newlines we need to replace them ...
 			quotedCmd = strings.ReplaceAll(quotedCmd, "\n", "\\n")
 			// Also the shellescape.Quote fail with any | or & char and wrapping them in quotes again can be bypassed
@@ -58,7 +58,7 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 			quotedCmd = strings.ReplaceAll(quotedCmd, "&", "\\AND")
 			quotedCmd = strings.ReplaceAll(quotedCmd, "|", "\\OR")
 
-			script += fmt.Sprintf("@echo + %s\n", strings.TrimSpace(shellescape.Quote(cmd)))
+			script += fmt.Sprintf("@echo + %s\n", quotedCmd)
 			script += fmt.Sprintf("@%s\n", cmd)
 			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
