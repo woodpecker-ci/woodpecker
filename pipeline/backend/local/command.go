@@ -26,8 +26,8 @@ import (
 )
 
 var (
-	ErrNoShellSet   = errors.New("no shell was set")
-	ErrNoCmdSet     = errors.New("no commands where set")
+	ErrNoShellSet = errors.New("no shell was set")
+	ErrNoCmdSet   = errors.New("no commands where set")
 )
 
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
