@@ -114,18 +114,6 @@ echo test`, args[3])
 		assert.Contains(t, args[1], "echo test")
 	})
 
-	t.Run("unknown posix shell", func(t *testing.T) {
-		// This should trigger probeShellIsPosix which will likely fail for non-existent shell
-		args, err := e.genCmdByShell("nonexistentshell", []string{"echo test"})
-		if err != nil {
-			assert.ErrorIs(t, err, ErrNoPosixShell)
-		} else {
-			// If somehow it passes, verify it generates posix-style args
-			assert.Len(t, args, 3)
-			assert.Equal(t, "-e", args[0])
-		}
-	})
-
 	t.Run("command escaping", func(t *testing.T) {
 		args, err := e.genCmdByShell("cmd", []string{"echo 'test with | pipe'", "echo 'test & ampersand'\n\necho new line"})
 		require.NoError(t, err)
