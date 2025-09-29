@@ -27,7 +27,15 @@ import (
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
 	script := ""
 	for _, cmd := range cmdList {
-		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+		quotedCmd := strings.TrimSpace(shellescape.Quote("+ " + cmd))
+		// As cmd echo does not allow strings with newlines we need to replace them ...
+		quotedCmd = strings.ReplaceAll(quotedCmd, "\n", "\\n")
+		// Also the shellescape.Quote fail with any | or & char and wrapping them in quotes again can be bypassed
+		// by just leaving an string halve quoted we just replace them with symbolic representations
+		quotedCmd = strings.ReplaceAll(quotedCmd, "&", "\\AND")
+		quotedCmd = strings.ReplaceAll(quotedCmd, "|", "\\OR")
+
+		script += fmt.Sprintf("echo %s\n%s\n", quotedCmd, cmd)
 	}
 	script = strings.TrimSpace(script)
 
