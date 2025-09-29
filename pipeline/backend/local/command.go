@@ -29,7 +29,7 @@ import (
 var (
 	ErrNoShellSet   = errors.New("no shell was set")
 	ErrNoCmdSet     = errors.New("no commands where set")
-	ErrNoPosixShell = errors.New("assumed posix shell but test failed")
+	ErrNoPosixShell = errors.New("assumed posix shell but test failed. if you want it supported open an issue at woodpecker project.")
 )
 
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
