@@ -23,14 +23,15 @@ import (
 type WebhookEvent string //	@name	WebhookEvent
 
 const (
-	EventPush       WebhookEvent = "push"
-	EventPull       WebhookEvent = "pull_request"
-	EventPullClosed WebhookEvent = "pull_request_closed"
-	EventTag        WebhookEvent = "tag"
-	EventRelease    WebhookEvent = "release"
-	EventDeploy     WebhookEvent = "deployment"
-	EventCron       WebhookEvent = "cron"
-	EventManual     WebhookEvent = "manual"
+	EventPush         WebhookEvent = "push"
+	EventPull         WebhookEvent = "pull_request"
+	EventPullClosed   WebhookEvent = "pull_request_closed"
+	EventPullMetadata WebhookEvent = "pull_request_metadata"
+	EventTag          WebhookEvent = "tag"
+	EventRelease      WebhookEvent = "release"
+	EventDeploy       WebhookEvent = "deployment"
+	EventCron         WebhookEvent = "cron"
+	EventManual       WebhookEvent = "manual"
 )
 
 type WebhookEventList []WebhookEvent
@@ -43,7 +44,7 @@ var ErrInvalidWebhookEvent = errors.New("invalid webhook event")
 
 func (s WebhookEvent) Validate() error {
 	switch s {
-	case EventPush, EventPull, EventPullClosed, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
+	case EventPush, EventPull, EventPullClosed, EventPullMetadata, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidWebhookEvent, s)

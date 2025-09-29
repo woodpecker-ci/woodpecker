@@ -20,7 +20,10 @@
                 "desc": "Für diesen Server registrierte Agenten.",
                 "edit_agent": "Agent bearbeiten",
                 "id": "ID",
-                "last_contact": "Letzter Kontakt",
+                "last_contact": {
+                    "last_contact": "Letzter Kontakt",
+                    "badge": "letzter Kontakt"
+                },
                 "name": {
                     "name": "Name",
                     "placeholder": "Name des Agenten"
@@ -264,7 +267,8 @@
                 "push": "Push",
                 "tag": "Tag",
                 "release": "Release",
-                "pr_closed": "Pull-Request zusammengeführt/geschlossen"
+                "pr_closed": "Pull-Request zusammengeführt/geschlossen",
+                "pr_metadata": "Pull-Request-Metadaten geändert"
             },
             "exit_code": "Exit-Code {exitCode}",
             "files": "Geänderte Dateien",
@@ -317,7 +321,8 @@
                 "title": "Debug",
                 "metadata_exec_title": "Pipeline lokal erneut ausführen",
                 "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst. Das Woodpecker-CLI muss in der zum Server passenden Version lokal installiert sein."
-            }
+            },
+            "view": "Pipeline anzeigen"
         },
         "pull_requests": "Pull-Requests",
         "settings": {

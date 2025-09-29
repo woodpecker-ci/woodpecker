@@ -24,6 +24,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
+const (
+	stateOpen = "open"
+)
+
 func Test_convertStatus(t *testing.T) {
 	assert.Equal(t, statusSuccess, convertStatus(model.StatusSuccess))
 	assert.Equal(t, statusPending, convertStatus(model.StatusPending))

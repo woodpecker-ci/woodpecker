@@ -1,0 +1,131 @@
+{
+  "action": "edited",
+  "number": 1,
+  "pull_request": {
+    "id": 62112,
+    "url": "https://forgejo.com/anbraten/test-repo/pulls/1",
+    "number": 1,
+    "user": {
+      "id": 26907,
+      "login": "anbraten",
+      "full_name": "",
+      "email": "anbraten@forgejo.com",
+      "avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+      "visibility": "public"
+    },
+    "title": "Adjust file",
+    "body": "",
+    "labels": [],
+    "milestone": null,
+    "assignee": null,
+    "assignees": null,
+    "html_url": "https://forgejo.com/anbraten/test-repo/pulls/1",
+    "mergeable": true,
+    "merged": false,
+    "merged_at": null,
+    "merge_commit_sha": null,
+    "merged_by": null,
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "068aee163ffd44eef28a7f9ebd43e2c01774f0fa",
+      "repo_id": 46534,
+      "repo": {
+        "id": 46534,
+        "owner": {
+          "id": 26907,
+          "login": "anbraten",
+          "full_name": "",
+          "email": "anbraten@noreply.forgejo.com",
+          "avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+          "visibility": "public"
+        },
+        "name": "test-repo",
+        "full_name": "anbraten/test-repo",
+        "private": false,
+        "fork": false,
+        "html_url": "https://forgejo.com/anbraten/test-repo",
+        "url": "https://forgejo.com/api/v1/repos/anbraten/test-repo",
+        "ssh_url": "git@forgejo.com:anbraten/test-repo.git",
+        "clone_url": "https://forgejo.com/anbraten/test-repo.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "has_pull_requests": true,
+        "avatar_url": ""
+      }
+    },
+    "head": {
+      "label": "anbraten-patch-1",
+      "ref": "anbraten-patch-1",
+      "sha": "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
+      "repo_id": 46534,
+      "repo": {
+        "id": 46534,
+        "owner": {
+          "id": 26907,
+          "login": "anbraten",
+          "full_name": "",
+          "email": "anbraten@noreply.forgejo.com",
+          "avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+          "visibility": "public"
+        },
+        "name": "test-repo",
+        "full_name": "anbraten/test-repo",
+        "private": false,
+        "fork": false,
+        "html_url": "https://forgejo.com/anbraten/test-repo",
+        "url": "https://forgejo.com/api/v1/repos/anbraten/test-repo",
+        "ssh_url": "git@forgejo.com:anbraten/test-repo.git",
+        "clone_url": "https://forgejo.com/anbraten/test-repo.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "has_pull_requests": true,
+        "avatar_url": ""
+      }
+    },
+    "merge_base": "068aee163ffd44eef28a7f9ebd43e2c01774f0fa"
+  },
+  "repository": {
+    "id": 46534,
+    "owner": {
+      "id": 26907,
+      "login": "anbraten",
+      "full_name": "",
+      "email": "anbraten@repo.forgejo.com",
+      "avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+      "visibility": "public"
+    },
+    "name": "test-repo",
+    "full_name": "anbraten/test-repo",
+    "private": false,
+    "fork": false,
+    "html_url": "https://forgejo.com/anbraten/test-repo",
+    "url": "https://forgejo.com/api/v1/repos/anbraten/test-repo",
+    "ssh_url": "git@forgejo.com:anbraten/test-repo.git",
+    "clone_url": "https://forgejo.com/anbraten/test-repo.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "has_pull_requests": true,
+    "avatar_url": ""
+  },
+  "sender": {
+    "id": 26907,
+    "login": "anbraten",
+    "full_name": "",
+    "email": "anbraten@sender.forgejo.com",
+    "avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+    "visibility": "public"
+  }
+}

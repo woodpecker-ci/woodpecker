@@ -126,16 +126,25 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_ADMIN"),
 		Name:    "admin",
 		Usage:   "list of admin users",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ORGS"),
 		Name:    "orgs",
 		Usage:   "list of approved organizations",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_REPO_OWNERS"),
 		Name:    "repo-owners",
 		Usage:   "Repositories by those owners will be allowed to be used in woodpecker",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_OPEN"),
@@ -164,6 +173,9 @@ var flags = append([]cli.Flag{
 		Name:    "default-cancel-previous-pipeline-events",
 		Usage:   "List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.",
 		Value:   []string{"push", "pull_request"},
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_PLUGIN", "WOODPECKER_DEFAULT_CLONE_IMAGE"),
@@ -188,6 +200,9 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_WORKFLOW_LABELS"),
 		Name:    "default-workflow-labels",
 		Usage:   "The default label filter to set for workflows that has no label filter set. By default workflows will be allowed to run on any agent, if not specified in the workflow.",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_SESSION_EXPIRES"),
@@ -199,16 +214,25 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "plugins-privileged",
 		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 		Name:    "plugins-trusted-clone",
 		Usage:   "Plugins which are trusted to handle Git credentials in clone steps",
 		Value:   constant.TrustedClonePlugins,
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUME"),
 		Name:    "volume",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DOCKER_CONFIG"),
@@ -217,10 +241,16 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ENVIRONMENT"),
 		Name:    "environment",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_NETWORK"),
 		Name:    "network",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -505,6 +535,11 @@ var flags = append([]cli.Flag{
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},
+	},
+	&cli.BoolFlag{ // TODO: Remove this feature flag in next major version
+		Sources: cli.EnvVars("WOODPECKER_BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN"),
+		Name:    "bitbucket-dc-oauth-enable-oauth2-scope-project-admin",
+		Usage:   "Bitbucket DataCenter/Server oauth2 scope should be configured to include PROJECT_ADMIN configuration.",
 	},
 	//
 	// development flags
