@@ -151,16 +151,22 @@ func TestProbeShellIsPosix(t *testing.T) {
 
 	t.Run("invalid shell", func(t *testing.T) {
 		err := probeShellIsPosix("nonexistentshell12345")
-		if assert.ErrorIs(t, err, ErrNoPosixShell) {
-			assert.Equal(t, "shell 'nonexistentshell12345' was assumed as posix shell but test failed, if you want support for it, open an issue at woodpecker project. it returned: exec: \"nonexistentshell12345\": executable file not found in $PATH", err.Error())
+		if assert.ErrorIs(t, err, &ErrNoPosixShell{}) {
+			assert.Equal(t,
+				`Shell "nonexistentshell12345" was assumed as posix shell but test failed: exec: "nonexistentshell12345": executable file not found in $PATH
+(if you want support for it, open an issue at woodpecker project)`,
+				err.Error())
 		}
 	})
 
 	t.Run("non-posix shell", func(t *testing.T) {
 		// nologin won't understand posix syntax
 		err := probeShellIsPosix("true")
-		if assert.ErrorIs(t, err, ErrNoPosixShell) {
-			assert.Equal(t, "shell 'true' was assumed as posix shell but test failed, if you want support for it, open an issue at woodpecker project. it returned unexpected output: ''", err.Error())
+		if assert.ErrorIs(t, err, &ErrNoPosixShell{}) {
+			assert.Equal(t,
+				`Shell "true" was assumed as posix shell but test failed: unexpected output returned: ""
+(if you want support for it, open an issue at woodpecker project)`,
+				err.Error())
 		}
 	})
 }
