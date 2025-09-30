@@ -749,5 +749,12 @@
     "developer_settings_to_create": "Gehe zu den {0} und richte die OAuth-Anwendung ein.",
     "weblate": "unserem Weblate",
     "use_this_redirect_url_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren.",
-    "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen."
+    "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen.",
+    "extensions": "Erweiterungen",
+    "extension_endpoint_placeholder": "z. B. https://example.com/api",
+    "config_extension_endpoint": "Endpunkt der Config-Erweiterung",
+    "extensions_description": "Erweiterungen sind HTTP-Dienste, die von Woodpecker anstelle der integrierten aufgerufen werden können.",
+    "extensions_signatures_public_key": "Öffentlicher Schlüssel für Signaturen",
+    "extensions_configuration_saved": "Konfiguration der Erweiterungen gespeichert",
+    "extensions_signatures_public_key_description": "Dieser öffentliche Schlüssel sollte von Ihren Erweiterungen verwendet werden, um Webhook-Aufrufe von Woodpecker zu verifizieren."
 }
