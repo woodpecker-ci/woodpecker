@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @qwerty287
+@anbraten, @qwerty287, @xoxys
 
 ### ✨ Features
 
@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+- Bump buildx and limit max parallel builds [[#5579](https://github.com/woodpecker-ci/woodpecker/pull/5579)]
 - Don't split language if not required [[#5576](https://github.com/woodpecker-ci/woodpecker/pull/5576)]
 
 ### 📦️ Dependency
