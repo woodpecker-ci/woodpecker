@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.10.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.1) - 2025-09-30
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-09-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@marcusramberg
+@anbraten, @marcusramberg
+
+### ✨ Features
+
+- Allow to configure a config extension per repo [[#3349](https://github.com/woodpecker-ci/woodpecker/pull/3349)]
 
 ### 📦️ Dependency
 
