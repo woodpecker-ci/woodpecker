@@ -20,6 +20,7 @@
     <Tab icon="secret" :to="{ name: 'repo-settings-secrets' }" :title="$t('secrets.secrets')" />
     <Tab icon="docker" :to="{ name: 'repo-settings-registries' }" :title="$t('registries.registries')" />
     <Tab icon="cron" :to="{ name: 'repo-settings-crons' }" :title="$t('repo.settings.crons.crons')" />
+    <Tab icon="toolbox" :to="{ name: 'repo-extensions' }" :title="$t('extensions')" />
     <Tab icon="tag" :to="{ name: 'repo-settings-badge' }" :title="$t('repo.settings.badge.badge')" />
     <Tab icon="toolbox" :to="{ name: 'repo-settings-actions' }" :title="$t('repo.settings.actions.actions')" />
 
