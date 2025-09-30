@@ -277,6 +277,10 @@ func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID str
 		return err
 	}
 
+	// hint for the gc to clean stuff
+	state.stepCMDs.Clear()
+	state.stepOutputs.Clear()
+
 	err = os.RemoveAll(state.baseDir)
 	if err != nil {
 		return err
