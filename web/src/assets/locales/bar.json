@@ -42,7 +42,7 @@
             "no_logs": "Koane Logs",
             "pipeline": "Pipeline #{pipelineId}",
             "log_title": "Step-Logs",
-            "log_download_error": "Beim Runterladen vom Log-File is wos schiaf ganga",
+            "log_download_error": "Beim Runterladn vom Log-File is wos schiaf ganga",
             "protected": {
                 "decline": "Oblehnen",
                 "awaits": "De Pipeline dritschld auf Freigab von am Maintainer!",
@@ -66,7 +66,7 @@
                 "cancel_success": "Pipeline abbrocha",
                 "deploy": "Ausrolln",
                 "restart_success": "Pipeline neigstartet",
-                "log_download": "Runterladen",
+                "log_download": "Runterladn",
                 "log_delete": "Löschn",
                 "log_auto_scroll": "Automatisch scrollen oschoidn",
                 "log_auto_scroll_off": "Automatisch scrollen ausschoidn"
@@ -103,8 +103,8 @@
             "created": "Erstäid: {created}",
             "debug": {
                 "title": "Debug",
-                "download_metadata": "Metadaten runterladen",
-                "metadata_download_error": "Fella beim Runterladen vo de Metadaten",
+                "download_metadata": "Metadaten runterladn",
+                "metadata_download_error": "Fella beim Runterladn vo de Metadaten",
                 "metadata_download_successful": "Metadaten erfoigreich runtergladen",
                 "no_permission": "Du deafst de Debug-Infos ned oseng",
                 "metadata_exec_title": "Pipeline lokal neistarten",
@@ -125,7 +125,7 @@
             },
             "show_pipelines": "Pipelines zoang"
         },
-        "activity": "Was do so loswar",
+        "activity": "Ois da Reih nach",
         "branches": "Branches",
         "pull_requests": "Pull Requests",
         "add": "Repo dazua doa",
@@ -482,7 +482,7 @@
                 "token": "Persönlicher Access-Token",
                 "api_usage": "Beispui API-Verwendung",
                 "cli_usage": "Beispui CLI-Verwendung",
-                "download_cli": "CLI runterladen",
+                "download_cli": "CLI runterladn",
                 "reset_token": "Token zrucksetzen",
                 "swagger_ui": "Swagger UI"
             },
