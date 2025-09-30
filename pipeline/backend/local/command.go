@@ -29,7 +29,7 @@ import (
 var (
 	ErrNoShellSet   = errors.New("no shell was set")
 	ErrNoCmdSet     = errors.New("no commands where set")
-	ErrNoPosixShell = errors.New("assumed posix shell but test failed. if you want it supported open an issue at woodpecker project.")
+	ErrNoPosixShell = errors.New("was assumed as posix shell but test failed, if you want support for it, open an issue at woodpecker project.")
 )
 
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
@@ -101,11 +101,11 @@ func probeShellIsPosix(shell string) error {
 	cmd := exec.Command(shell, "-c", script)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("%w: shell '%s' returned: %w", ErrNoPosixShell, shell, err)
+		return fmt.Errorf("shell '%s' %w it returned: %w", shell, ErrNoPosixShell, err)
 	}
 
 	if strings.TrimSpace(string(output)) != "ok" {
-		return fmt.Errorf("%w: shell '%s' returned unexpected output: '%s'", ErrNoPosixShell, shell, output)
+		return fmt.Errorf("shell '%s' %w it returned unexpected output: '%s'", shell, ErrNoPosixShell, output)
 	}
 
 	return nil
