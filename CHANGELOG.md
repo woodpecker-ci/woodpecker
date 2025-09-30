@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @marcusramberg, @qwerty287
+@anbraten, @qwerty287
 
 ### ✨ Features
 
@@ -16,11 +16,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.2 [[#5577](https://github.com/woodpecker-ci/woodpecker/pull/5577)]
 - chore(deps): lock file maintenance [[#5566](https://github.com/woodpecker-ci/woodpecker/pull/5566)]
-
-### Misc
-
-- Rename Norwegian to nb-NO to fix language selector [[#5573](https://github.com/woodpecker-ci/woodpecker/pull/5573)]
 
 ## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-28
 
