@@ -4,7 +4,7 @@ depends_on:
 
 when:
   - event: tag
-    evaluate: CI_COMMIT_TAG matches "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"
+    evaluate: CI_COMMIT_TAG matches '^v?[0-9]+\.[0-9]+\.[0-9]+$'
 
 steps:
   - name: mastodon-toot
