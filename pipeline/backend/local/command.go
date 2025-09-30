@@ -87,7 +87,7 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 	}
 }
 
-// before we generate a generic posix shell we test
+// before we generate a generic posix shell we test.
 func probeShellIsPosix(shell string) error {
 	script := `x=1 && [ "$x" = "1" ] && command -v test >/dev/null && printf ok`
 
