@@ -25,6 +25,11 @@ import (
 	"al.essio.dev/pkg/shellescape"
 )
 
+func checkShellExistence(shell string) error {
+	_, err := exec.LookPath(shell)
+	return err
+}
+
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
