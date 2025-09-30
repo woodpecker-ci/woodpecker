@@ -21,6 +21,10 @@
 - chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.2 [[#5577](https://github.com/woodpecker-ci/woodpecker/pull/5577)]
 - chore(deps): lock file maintenance [[#5566](https://github.com/woodpecker-ci/woodpecker/pull/5566)]
 
+### Misc
+
+- Announce only stable releases [[#5580](https://github.com/woodpecker-ci/woodpecker/pull/5580)]
+
 ## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-28
 
 ### ❤️ Thanks to all contributors! ❤️
