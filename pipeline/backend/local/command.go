@@ -38,6 +38,15 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 
 	shell = strings.TrimSuffix(strings.ToLower(shell), ".exe")
 	switch shell {
+	default:
+		// assume posix shell
+		if err := probeShellIsPosix(shell); err != nil {
+			return nil, err
+		}
+		fallthrough
+		// normal posix shells
+	case "sh", "bash", "zsh":
+		return []string{"-e", "-c", script}, nil
 	case "":
 		return nil, ErrNoShellSet
 	case "cmd":
@@ -75,15 +84,6 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 	case "powershell", "pwsh":
 		// cspell:disable-next-line
 		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
-	default:
-		// assume posix shell
-		if err := probeShellIsPosix(shell); err != nil {
-			return nil, err
-		}
-		fallthrough
-		// normal posix shells
-	case "sh", "bash", "zsh":
-		return []string{"-e", "-c", script}, nil
 	}
 }
 

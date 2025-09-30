@@ -36,12 +36,12 @@ func (e *ErrNoPosixShell) Error() string {
 	return fmt.Sprintf("Shell %q was assumed as posix shell but test failed: %v\n(if you want support for it, open an issue at woodpecker project)", e.Shell, e.Err)
 }
 
-// Unwrap returns the underlying error for errors.Is and errors.As support
+// Unwrap returns the underlying error for errors.Is and errors.As support.
 func (e *ErrNoPosixShell) Unwrap() error {
 	return e.Err
 }
 
-// Is enables errors.Is comparison
+// Is enables errors.Is comparison.
 func (e *ErrNoPosixShell) Is(target error) bool {
 	_, ok := target.(*ErrNoPosixShell)
 	return ok
