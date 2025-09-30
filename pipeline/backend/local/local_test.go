@@ -19,12 +19,17 @@ package local
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
+	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -103,7 +108,6 @@ func TestSetupWorkflow(t *testing.T) {
 	assert.NotEmpty(t, state.baseDir)
 	assert.NotEmpty(t, state.workspaceDir)
 	assert.NotEmpty(t, state.homeDir)
-	assert.NotNil(t, state.stepCMDs)
 
 	// Verify directories were created
 	assert.DirExists(t, state.baseDir)
@@ -115,7 +119,7 @@ func TestSetupWorkflow(t *testing.T) {
 	assert.Equal(t, filepath.Join(state.baseDir, "home"), state.homeDir)
 
 	// Cleanup
-	os.RemoveAll(state.baseDir)
+	assert.NoError(t, os.RemoveAll(state.baseDir))
 }
 
 func TestDestroyWorkflow(t *testing.T) {
@@ -149,137 +153,101 @@ func TestDestroyWorkflow(t *testing.T) {
 	assert.ErrorIs(t, err, ErrWorkflowStateNotFound)
 }
 
-func TestStartStepCommands(t *testing.T) {
+func prepairEnv(t *testing.T) {
+	prevEnv := os.Environ()
+	os.Clearenv()
+	t.Cleanup(func() {
+		for i := range prevEnv {
+			env := strings.SplitN(prevEnv[i], "=", 2)
+			os.Setenv(env[0], env[1])
+		}
+	})
+}
+
+func TestRunStep(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("skipping on windows due to shell availability")
 	}
 
-	backend := New().(*local)
-	backend.tempDir = t.TempDir()
-
-	ctx := context.Background()
-	taskUUID := "test-commands-task"
-
-	// Setup workflow
-	err := backend.SetupWorkflow(ctx, &types.Config{}, taskUUID)
+	// we lookup shell tools we use first and create the PATH var based on that
+	shBinary, err := exec.LookPath("sh")
 	require.NoError(t, err)
-
-	step := &types.Step{
-		UUID:     "step-1",
-		Name:     "test-step",
-		Type:     types.StepTypeCommands,
-		Image:    "sh",
-		Commands: []string{"echo hello", "pwd"},
-		Environment: map[string]string{
-			"TEST_VAR": "test_value",
-		},
+	path := []string{filepath.Dir(shBinary)}
+	echoBinary, err := exec.LookPath("echo")
+	require.NoError(t, err)
+	if echoPath := filepath.Dir(echoBinary); !slices.Contains(path, echoPath) {
+		path = append(path, echoPath)
 	}
-
-	err = backend.StartStep(ctx, step, taskUUID)
-	require.NoError(t, err)
-
-	// Verify command was started
-	state, err := backend.getState(taskUUID)
-	require.NoError(t, err)
-	assert.Contains(t, state.stepCMDs, step.UUID)
-
-	// Cleanup
-	backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID)
-}
-
-func TestStartStepPlugin(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping on windows")
-	}
+	prepairEnv(t)
+	os.Setenv("PATH", strings.Join(path, ":"))
 
 	backend := New().(*local)
 	backend.tempDir = t.TempDir()
-
-	ctx := context.Background()
-	taskUUID := "test-plugin-task"
-
-	// Setup workflow
-	err := backend.SetupWorkflow(ctx, &types.Config{}, taskUUID)
-	require.NoError(t, err)
-
-	step := &types.Step{
-		UUID:        "step-plugin-1",
-		Name:        "test-plugin",
-		Type:        types.StepTypePlugin,
-		Image:       "echo", // Use a binary that exists
-		Environment: map[string]string{},
-	}
-
-	err = backend.StartStep(ctx, step, taskUUID)
-	require.NoError(t, err)
-
-	// Verify command was started
-	state, err := backend.getState(taskUUID)
-	require.NoError(t, err)
-	assert.Contains(t, state.stepCMDs, step.UUID)
-
-	// Cleanup
-	backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID)
-}
-
-func TestStartStepUnsupportedType(t *testing.T) {
-	backend := New().(*local)
-	backend.tempDir = t.TempDir()
-
-	ctx := context.Background()
-	taskUUID := "test-unsupported-task"
+	ctx := t.Context()
+	taskUUID := "test-run-tasks"
 
 	// Setup workflow
-	err := backend.SetupWorkflow(ctx, &types.Config{}, taskUUID)
-	require.NoError(t, err)
+	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
 
-	step := &types.Step{
-		UUID: "step-unsupported",
-		Name: "test-unsupported",
-		Type: "unsupported-type",
-	}
-
-	err = backend.StartStep(ctx, step, taskUUID)
-	assert.ErrorIs(t, err, ErrUnsupportedStepType)
-
-	// Cleanup
-	backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID)
-}
-
-func TestWaitStep(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping on windows")
-	}
-
-	backend := New().(*local)
-	backend.tempDir = t.TempDir()
-
-	ctx := context.Background()
-	taskUUID := "test-wait-task"
-
-	// Setup workflow
-	err := backend.SetupWorkflow(ctx, &types.Config{}, taskUUID)
-	require.NoError(t, err)
-
-	t.Run("successful step", func(t *testing.T) {
+	t.Run("type commands", func(t *testing.T) {
 		step := &types.Step{
-			UUID:     "step-success",
-			Name:     "success-step",
+			UUID:     "step-1",
+			Name:     "test-step",
 			Type:     types.StepTypeCommands,
 			Image:    "sh",
-			Commands: []string{"echo success"},
+			Commands: []string{"echo hello", "env"},
+			Environment: map[string]string{
+				"TEST_VAR": "test_value",
+			},
 		}
 
-		err = backend.StartStep(ctx, step, taskUUID)
-		require.NoError(t, err)
+		t.Run("start successful", func(t *testing.T) {
+			err = backend.StartStep(ctx, step, taskUUID)
+			require.NoError(t, err)
 
-		state, err := backend.WaitStep(ctx, step, taskUUID)
-		require.NoError(t, err)
-		assert.True(t, state.Exited)
-		assert.Equal(t, 0, state.ExitCode)
+			// Verify command was started
+			state, err := backend.getState(taskUUID)
+			require.NoError(t, err)
+			_, contains := state.stepCMDs.Load(step.UUID)
+			assert.True(t, contains)
+
+			var outputData []byte
+			go t.Run("TailStep", func(t *testing.T) {
+				output, err := backend.TailStep(ctx, step, taskUUID)
+				require.NoError(t, err)
+				assert.NotNil(t, output)
+
+				// Read output
+				outputData, err = io.ReadAll(output)
+				require.NoError(t, err)
+			})
+
+			// Wait for step to finish
+			t.Run("TestWaitStep", func(t *testing.T) {
+				state, err := backend.WaitStep(ctx, step, taskUUID)
+				require.NoError(t, err)
+				assert.True(t, state.Exited)
+				assert.Equal(t, 0, state.ExitCode)
+			})
+
+			// Verify output
+			require.NoError(t, err)
+			assert.EqualValues(t, `+ echo hello
+hello
++ env
+PWD=`+state.baseDir+`/workspace
+USERPROFILE=`+state.baseDir+`/home
+TEST_VAR=test_value
+HOME=`+state.baseDir+`/home
+CI_WORKSPACE=`+state.baseDir+`/workspace
+SHLVL=0
+PATH=/run/current-system/sw/bin
+_=/run/current-system/sw/bin/env
+`, string(outputData))
+		})
 	})
 
-	t.Run("failed step", func(t *testing.T) {
+	t.Run("command should fail", func(t *testing.T) {
 		step := &types.Step{
 			UUID:     "step-fail",
 			Name:     "fail-step",
@@ -297,72 +265,55 @@ func TestWaitStep(t *testing.T) {
 		assert.Equal(t, 1, state.ExitCode)
 	})
 
-	t.Run("step not found", func(t *testing.T) {
+	t.Run("WaitStep", func(t *testing.T) {
+		t.Run("step not found", func(t *testing.T) {
+			step := &types.Step{
+				UUID: "nonexistent-step",
+				Name: "missing",
+			}
+
+			_, err = backend.WaitStep(ctx, step, taskUUID)
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), "not found")
+		})
+	})
+
+	t.Run("type plugin", func(t *testing.T) {
 		step := &types.Step{
-			UUID: "nonexistent-step",
-			Name: "missing",
+			UUID:        "step-plugin-1",
+			Name:        "test-plugin",
+			Type:        types.StepTypePlugin,
+			Image:       "echo", // Use a binary that exists
+			Environment: map[string]string{},
 		}
 
-		_, err = backend.WaitStep(ctx, step, taskUUID)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not found")
+		t.Run("start", func(t *testing.T) {
+			err = backend.StartStep(ctx, step, taskUUID)
+			require.NoError(t, err)
+
+			// Verify command was started
+			state, err := backend.getState(taskUUID)
+			require.NoError(t, err)
+			_, contains := state.stepCMDs.Load(step.UUID)
+			assert.True(t, contains)
+		})
+	})
+
+	t.Run("type unsupported", func(t *testing.T) {
+		step := &types.Step{
+			UUID: "step-unsupported",
+			Name: "test-unsupported",
+			Type: "unsupported-type",
+		}
+
+		t.Run("start", func(t *testing.T) {
+			err = backend.StartStep(ctx, step, taskUUID)
+			assert.ErrorIs(t, err, ErrUnsupportedStepType)
+		})
 	})
 
 	// Cleanup
-	backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID)
-}
-
-func TestTailStep(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping on windows")
-	}
-
-	backend := New().(*local)
-	backend.tempDir = t.TempDir()
-
-	ctx := context.Background()
-	taskUUID := "test-tail-task"
-
-	// Setup workflow
-	err := backend.SetupWorkflow(ctx, &types.Config{}, taskUUID)
-	require.NoError(t, err)
-
-	step := &types.Step{
-		UUID:     "step-tail",
-		Name:     "tail-step",
-		Type:     types.StepTypeCommands,
-		Image:    "sh",
-		Commands: []string{"echo 'test output'"},
-	}
-
-	err = backend.StartStep(ctx, step, taskUUID)
-	require.NoError(t, err)
-
-	output, err := backend.TailStep(ctx, step, taskUUID)
-	require.NoError(t, err)
-	assert.NotNil(t, output)
-
-	// Read output
-	data, err := io.ReadAll(output)
-	require.NoError(t, err)
-	assert.Contains(t, string(data), "test output")
-
-	// Wait for step to complete
-	backend.WaitStep(ctx, step, taskUUID)
-
-	// Cleanup
-	backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID)
-}
-
-func TestDestroyStep(t *testing.T) {
-	backend := New().(*local)
-
-	ctx := context.Background()
-	step := &types.Step{UUID: "test-step"}
-
-	// DestroyStep should not return error (it's a no-op)
-	err := backend.DestroyStep(ctx, step, "task-uuid")
-	assert.NoError(t, err)
+	assert.NoError(t, backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID))
 }
 
 func TestStateManagement(t *testing.T) {
@@ -371,10 +322,9 @@ func TestStateManagement(t *testing.T) {
 	t.Run("save and get state", func(t *testing.T) {
 		taskUUID := "test-state-uuid"
 		state := &workflowState{
-			stepCMDs:     make(map[string]*exec.Cmd),
 			baseDir:      "/tmp/test",
-			homeDir:      "/tmp/test/home",
-			workspaceDir: "/tmp/test/workspace",
+			homeDir:      "/tmp/test/2home",
+			workspaceDir: "/tmp/test/2workspace",
 		}
 
 		backend.saveState(taskUUID, state)
@@ -393,9 +343,7 @@ func TestStateManagement(t *testing.T) {
 
 	t.Run("delete state", func(t *testing.T) {
 		taskUUID := "test-delete-uuid"
-		state := &workflowState{
-			stepCMDs: make(map[string]*exec.Cmd),
-		}
+		state := &workflowState{}
 
 		backend.saveState(taskUUID, state)
 
@@ -412,53 +360,6 @@ func TestStateManagement(t *testing.T) {
 	})
 }
 
-func TestEnvironmentVariables(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping on windows")
-	}
-
-	backend := New().(*local)
-	backend.tempDir = t.TempDir()
-
-	ctx := context.Background()
-	taskUUID := "test-env-task"
-
-	// Setup workflow
-	err := backend.SetupWorkflow(ctx, &types.Config{}, taskUUID)
-	require.NoError(t, err)
-
-	state, _ := backend.getState(taskUUID)
-
-	step := &types.Step{
-		UUID:     "step-env",
-		Name:     "env-step",
-		Type:     types.StepTypeCommands,
-		Image:    "sh",
-		Commands: []string{"env | grep -E '(HOME|CI_WORKSPACE|CUSTOM_VAR)'"},
-		Environment: map[string]string{
-			"CUSTOM_VAR": "custom_value",
-		},
-	}
-
-	err = backend.StartStep(ctx, step, taskUUID)
-	require.NoError(t, err)
-
-	// Wait and check output
-	output, _ := backend.TailStep(ctx, step, taskUUID)
-	data, _ := io.ReadAll(output)
-	outputStr := string(data)
-
-	backend.WaitStep(ctx, step, taskUUID)
-
-	// Verify HOME and CI_WORKSPACE are set
-	assert.Contains(t, outputStr, "HOME="+state.homeDir)
-	assert.Contains(t, outputStr, "CI_WORKSPACE="+state.workspaceDir)
-	assert.Contains(t, outputStr, "CUSTOM_VAR=custom_value")
-
-	// Cleanup
-	backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID)
-}
-
 func TestConcurrentWorkflows(t *testing.T) {
 	backend := New().(*local)
 	backend.tempDir = t.TempDir()
@@ -473,11 +374,53 @@ func TestConcurrentWorkflows(t *testing.T) {
 		require.NoError(t, err)
 	}
 
+	counter := atomic.Int32{}
+	counter.Store(0)
+	for _, uuid := range taskUUIDs {
+		go t.Run("start step in "+uuid, func(t *testing.T) {
+			for i := 0; i < 3; i++ {
+				counter.Store(counter.Load() + 1)
+				step := &types.Step{
+					UUID:        fmt.Sprintf("step-%s-%d", uuid, i),
+					Name:        fmt.Sprintf("step-name-%s-%d", uuid, i),
+					Type:        types.StepTypePlugin,
+					Image:       "sh",
+					Commands:    []string{fmt.Sprintf("echo %s %d", uuid, i)},
+					Environment: map[string]string{},
+				}
+				require.NoError(t, backend.StartStep(ctx, step, uuid))
+				_, err := backend.WaitStep(ctx, step, uuid)
+				require.NoError(t, err)
+				counter.Store(counter.Load() - 1)
+			}
+		})
+	}
+
 	// Verify all states exist
 	for _, uuid := range taskUUIDs {
 		state, err := backend.getState(uuid)
 		require.NoError(t, err)
 		assert.NotNil(t, state)
+	}
+
+	failSave := 0
+loop:
+	for {
+		if failSave == 100 {
+			t.Log("failSave was hit")
+			t.FailNow()
+		}
+		failSave++
+		select {
+		case <-time.After(time.Millisecond):
+			if count := counter.Load(); count == 0 {
+				break loop
+			} else {
+				t.Log(fmt.Sprintf("count at: %d", count))
+			}
+		case <-ctx.Done():
+			return
+		}
 	}
 
 	// Cleanup all workflows

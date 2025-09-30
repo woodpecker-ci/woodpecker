@@ -100,11 +100,17 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
-	// Get output and redirect Stderr to Stdout
-	e.output, _ = cmd.StdoutPipe()
-	cmd.Stderr = cmd.Stdout
+	reader, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
 
-	state.stepCMDs[step.UUID] = cmd
+	// Save state
+	state.stepCMDs.Store(step.UUID, cmd)
+	state.stepOutputs.Store(step.UUID, reader)
+
+	// Get output and redirect Stderr to Stdout
+	cmd.Stderr = cmd.Stdout
 
 	return cmd.Start()
 }

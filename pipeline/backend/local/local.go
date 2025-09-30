@@ -35,7 +35,8 @@ import (
 )
 
 type workflowState struct {
-	stepCMDs        map[string]*exec.Cmd
+	stepCMDs        sync.Map // map of *exec.Cmd
+	stepOutputs     sync.Map // map of io.ReadCloser
 	baseDir         string
 	homeDir         string
 	workspaceDir    string
@@ -45,7 +46,6 @@ type workflowState struct {
 type local struct {
 	tempDir         string
 	workflows       sync.Map
-	output          io.ReadCloser
 	pluginGitBinary string
 	os, arch        string
 }
@@ -99,7 +99,6 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	}
 
 	state := &workflowState{
-		stepCMDs:     make(map[string]*exec.Cmd),
 		baseDir:      baseDir,
 		workspaceDir: filepath.Join(baseDir, "workspace"),
 		homeDir:      filepath.Join(baseDir, "home"),
@@ -171,17 +170,23 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
-	// Get output and redirect Stderr to Stdout
-	e.output, _ = cmd.StdoutPipe()
-	cmd.Stderr = cmd.Stdout
+	reader, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
 
 	if e.os == "windows" {
 		// we get non utf8 output from windows so just sanitize it
 		// TODO: remove hack
-		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
+		reader = io.NopCloser(transform.NewReader(reader, unicode.UTF8.NewDecoder().Transformer))
 	}
 
-	state.stepCMDs[step.UUID] = cmd
+	// Get output and redirect Stderr to Stdout
+	cmd.Stderr = cmd.Stdout
+
+	// Save state
+	state.stepCMDs.Store(step.UUID, cmd)
+	state.stepOutputs.Store(step.UUID, reader)
 
 	return cmd.Start()
 }
@@ -197,11 +202,17 @@ func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflo
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
+	reader, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
 	// Get output and redirect Stderr to Stdout
-	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	state.stepCMDs[step.UUID] = cmd
+	// Save state
+	state.stepCMDs.Store(step.UUID, cmd)
+	state.stepOutputs.Store(step.UUID, reader)
 
 	return cmd.Start()
 }
@@ -216,12 +227,12 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 		return nil, err
 	}
 
-	cmd, ok := state.stepCMDs[step.UUID]
+	cmd, ok := state.stepCMDs.Load(step.UUID)
 	if !ok {
 		return nil, fmt.Errorf("step cmd for %s not found", step.UUID)
 	}
 
-	err = cmd.Wait()
+	err = cmd.(*exec.Cmd).Wait()
 	ExitCode := 0
 
 	var execExitError *exec.ExitError
@@ -239,8 +250,17 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 
 // TailStep the pipeline step logs.
 func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
+	state, err := e.getState(taskUUID)
+	if err != nil {
+		return nil, err
+	}
+	reader, found := state.stepOutputs.Load(step.UUID)
+	if !found || reader == nil {
+		return nil, ErrStepReaderNotFound
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
-	return e.output, nil
+	return reader.(io.ReadCloser), nil
 }
 
 func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
