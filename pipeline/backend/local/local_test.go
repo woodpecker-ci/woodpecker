@@ -165,8 +165,8 @@ func prepairEnv(t *testing.T) {
 }
 
 func TestRunStep(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping on windows due to shell availability")
+	if runtime.GOOS != "linux" {
+		t.Skip("skipping on non linux due to shell availability and symlink capability")
 	}
 
 	// we lookup shell tools we use first and create the PATH var based on that
@@ -178,6 +178,12 @@ func TestRunStep(t *testing.T) {
 	if echoPath := filepath.Dir(echoBinary); !slices.Contains(path, echoPath) {
 		path = append(path, echoPath)
 	}
+	// we make a symlinc to have a posix but non default shell
+	altShellDir := t.TempDir()
+	altShellPath := filepath.Join(altShellDir, "altsh")
+	require.NoError(t, os.Symlink(shBinary, altShellPath))
+	path = append(path, altShellDir)
+
 	prepairEnv(t)
 	os.Setenv("PATH", strings.Join(path, ":"))
 
@@ -241,10 +247,28 @@ TEST_VAR=test_value
 HOME=`+state.baseDir+`/home
 CI_WORKSPACE=`+state.baseDir+`/workspace
 SHLVL=0
-PATH=/run/current-system/sw/bin
+PATH=/run/current-system/sw/bin:`+altShellDir+`
 _=/run/current-system/sw/bin/env
 `, string(outputData))
 		})
+	})
+
+	t.Run("run command in alternate unix shell", func(t *testing.T) {
+		step := &types.Step{
+			UUID:     "step-altshell",
+			Name:     "altshell",
+			Type:     types.StepTypeCommands,
+			Image:    "altsh",
+			Commands: []string{"echo success"},
+		}
+
+		err = backend.StartStep(ctx, step, taskUUID)
+		require.NoError(t, err)
+
+		state, err := backend.WaitStep(ctx, step, taskUUID)
+		require.NoError(t, err)
+		assert.True(t, state.Exited)
+		assert.Equal(t, 0, state.ExitCode)
 	})
 
 	t.Run("command should fail", func(t *testing.T) {
