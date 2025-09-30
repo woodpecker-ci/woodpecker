@@ -6,8 +6,8 @@
                 "delete": "Variable löschn",
                 "title": "Zusätzliche Pipeline-Variabln",
                 "desc": "Gib extra Variabln o de wo in deina Pipeline verwendt wern. Variabln mit'm gleichn Nama wern überschriebn.",
-                "name": "Variablen-Nama",
-                "value": "Variablen-Wert"
+                "name": "Variabl-Nama",
+                "value": "Variabl-Wert"
             },
             "title": "Deployment füa aktuelle Pipeline #{pipelineId} lostreten",
             "enter_target": "Zielumgebung füas Deployment",
@@ -35,8 +35,8 @@
             }
         },
         "pipeline": {
-            "pipelines_for": "Pipelines für Branch \"{branch}\"",
-            "pipelines_for_pr": "Pipelines für Pull Request #{index}",
+            "pipelines_for": "Pipelines fia Branch \"{branch}\"",
+            "pipelines_for_pr": "Pipelines fia Pull Request #{index}",
             "exit_code": "Exit-Code {exitCode}",
             "loading": "Lod grod…",
             "no_logs": "Koane Logs",
@@ -120,8 +120,8 @@
                 "delete": "Variable löschn",
                 "title": "Zusätzliche Pipeline-Variabln",
                 "desc": "Gib extra Variabln o de wo in deina Pipeline verwendt wern. Variabln mid'm gleichn Nama wern überschriebn.",
-                "name": "Variablen-Nama",
-                "value": "Variablen-Wert"
+                "name": "Variabl-Nama",
+                "value": "Variabl-Wert"
             },
             "show_pipelines": "Pipelines zoang"
         },
@@ -450,10 +450,10 @@
                 "desc": "Organisations-Secrets kennan in de Pipelines vo olle Repos vo da Organisation verwendt wern."
             },
             "registries": {
-                "desc": "Organisations-Registry-Credentials kennan dazuagfügt wern zum private Images für olle Pipelines vo ana Organisation verwenden."
+                "desc": "Organisations-Registry-Credentials kennan dazuagfügt wern zum private Images fia olle Pipelines vo ana Organisation verwenden."
             },
             "agents": {
-                "desc": "Agents de wo für de Organisation registriert san."
+                "desc": "Agents de wo fia de Organisation registriert san."
             }
         }
     },
@@ -531,7 +531,7 @@
     "extensions_description": "Erweiterunga san HTTP-Services de wo von Woodpecker aufgruafa wern kennan anstatt de mitglifadn zu nutzn.",
     "extension_endpoint_placeholder": "z.B. https://example.com/api",
     "config_extension_endpoint": "Config-Erweiterungs-Endpunkt",
-    "extensions_signatures_public_key": "Öffentlicher Schlüssl für Signaturen",
+    "extensions_signatures_public_key": "Öffentlicher Schlüssl fia Signaturen",
     "extensions_signatures_public_key_description": "Der öffentliche Schlüssl soi vo deine Erweiterunga verwendt wern zum Webhook-Aufruaf vo Woodpecker verifizieren.",
     "extensions_configuration_saved": "Erweiterunga-Konfiguration gspeichert",
     "require_approval": {
@@ -558,9 +558,9 @@
     "oauth_client_secret": "OAuth Client Secret",
     "oauth_host": "OAuth Host",
     "merge_ref": "Merge Ref",
-    "git_username_desc": "Benutzername für'n Git-User.",
+    "git_username_desc": "Benutzername fia'n Git-User.",
     "git_password": "Git-Passwort",
-    "git_password_desc": "Passwort oda persönlicher Access-Token für'n Git-User.",
+    "git_password_desc": "Passwort oda persönlicher Access-Token fia'n Git-User.",
     "executable": "Ausführbare Datei",
     "executable_desc": "Pfad zur Addon-Executable.",
     "save": "Speichan",
