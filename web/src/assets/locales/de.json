@@ -752,7 +752,7 @@
     "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen.",
     "extensions": "Erweiterungen",
     "extension_endpoint_placeholder": "z. B. https://example.com/api",
-    "config_extension_endpoint": "Endpunkt der Config-Erweiterung",
+    "config_extension_endpoint": "Endpunkt der Konfigurations-Erweiterung",
     "extensions_description": "Erweiterungen sind HTTP-Dienste, die von Woodpecker anstelle der integrierten aufgerufen werden können.",
     "extensions_signatures_public_key": "Öffentlicher Schlüssel für Signaturen",
     "extensions_configuration_saved": "Konfiguration der Erweiterungen gespeichert",
