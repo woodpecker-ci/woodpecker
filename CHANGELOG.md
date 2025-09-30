@@ -4,11 +4,15 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @marcusramberg
+@anbraten, @marcusramberg, @qwerty287
 
 ### ✨ Features
 
 - Allow to configure a config extension per repo [[#3349](https://github.com/woodpecker-ci/woodpecker/pull/3349)]
+
+### 🐛 Bug Fixes
+
+- Don't split language if not required [[#5576](https://github.com/woodpecker-ci/woodpecker/pull/5576)]
 
 ### 📦️ Dependency
 
