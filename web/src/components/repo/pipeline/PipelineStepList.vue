@@ -70,7 +70,7 @@
           <div class="flex flex-col gap-2">
             <div v-if="workflow.environ" class="flex flex-wrap justify-end gap-x-1 gap-y-2 pt-1 pr-1 text-xs">
               <div v-for="(value, key) in workflow.environ" :key="key">
-                <Badge v-if="value" :label="key" :value="value" />
+                <Badge :label="key" :value="value" />
               </div>
             </div>
             <button
