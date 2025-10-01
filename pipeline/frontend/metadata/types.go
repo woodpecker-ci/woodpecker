@@ -49,6 +49,7 @@ type (
 		Finished   int64  `json:"finished,omitempty"`
 		Status     string `json:"status,omitempty"`
 		Event      string `json:"event,omitempty"`
+		EventReason []string `json:"event_reason,omitempty"`
 		ForgeURL   string `json:"forge_url,omitempty"`
 		DeployTo   string `json:"target,omitempty"`
 		DeployTask string `json:"task,omitempty"`

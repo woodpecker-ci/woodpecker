@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-github/v74/github"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -32,14 +33,25 @@ import (
 const (
 	hookField = "payload"
 
-	actionOpen     = "opened"
-	actionReopen   = "reopened"
-	actionClose    = "closed"
-	actionSync     = "synchronize"
-	actionReleased = "released"
+	actionOpen             = "opened"
+	actionReopen           = "reopened"
+	actionClose            = "closed"
+	actionSync             = "synchronize"
+	actionReleased         = "released"
+	actionAssigned         = "assigned"
+	actionConvertedToDraft = "converted_to_draft"
+	actionDemilestoned     = "demilestoned"
+	actionEdited           = "edited"
+	actionLabeled          = "labeled"
+	actionLocked           = "locked"
+	actionMilestoned       = "milestoned"
+	actionReadyForReview   = "ready_for_review"
+	actionUnassigned       = "unassigned"
+	actionUnlabeled        = "unlabeled"
+	actionUnlocked         = "unlocked"
 
-	stateOpen  = "open"
-	stateClose = "closed"
+	labelCleared = "label_cleared"
+	labelUpdated = "label_updated"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
@@ -149,20 +161,38 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
 func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
-	if hook.GetAction() != actionOpen &&
-		hook.GetAction() != actionSync &&
-		hook.GetAction() != actionClose &&
-		hook.GetAction() != actionReopen {
-		return nil, nil, nil, nil
-	}
-
 	event := model.EventPull
-	if hook.GetPullRequest().GetState() == stateClose {
+	eventAction := ""
+
+	switch hook.GetAction() {
+	case actionOpen, actionReopen, actionSync:
+		// default case nothing to do
+	case actionClose:
 		event = model.EventPullClosed
+	case actionAssigned,
+		actionConvertedToDraft,
+		actionDemilestoned,
+		actionEdited,
+		actionLabeled,
+		actionLocked,
+		actionMilestoned,
+		actionReadyForReview,
+		actionUnassigned,
+		actionUnlabeled,
+		actionUnlocked:
+		// metadata pull events
+		event = model.EventPullMetadata
+		eventAction = common.NormalizeEventReason(hook.GetAction())
+	default:
+		return nil, nil, nil, &types.ErrIgnoreEvent{
+			Event:  string(model.EventPullMetadata),
+			Reason: fmt.Sprintf("action %s is not supported", hook.GetAction()),
+		}
 	}
 
 	pipeline := &model.Pipeline{
 		Event: event,
+		EventReason: []string{eventAction},
 		Commit: &model.Commit{
 			SHA: hook.GetPullRequest().GetHead().GetSHA(),
 		},
@@ -179,6 +209,15 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
+	}
+
+	// normalize label events to match other forges
+	if eventAction == actionLabeled || eventAction == actionUnlabeled {
+		if len(pipeline.PullRequestLabels) == 0 {
+			pipeline.EventReason = []string{labelCleared}
+		} else {
+			pipeline.EventReason = []string{labelUpdated}
+		}
 	}
 
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil

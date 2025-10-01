@@ -100,6 +100,7 @@ type (
 		Number         int64            `json:"number"`
 		Parent         int64            `json:"parent"`
 		Event          string           `json:"event"`
+		EventReason []string         `json:"event_reason"`
 		Status         string           `json:"status"`
 		Errors         []*PipelineError `json:"errors"`
 		Created        int64            `json:"created"`

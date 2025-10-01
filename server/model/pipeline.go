@@ -26,6 +26,7 @@ type Pipeline struct {
 	Author              string                 `json:"author"                  xorm:"author"` // The user sending the webhook data or triggering the pipeline event
 	Parent              int64                  `json:"parent"                  xorm:"parent"`
 	Event               WebhookEvent           `json:"event"                   xorm:"event"`
+	EventReason          []string               `json:"event_reason"            xorm:"json 'event_reason'"`
 	Status              StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
 	Errors              []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
 	Created             int64                  `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
@@ -66,6 +67,7 @@ type APIPipeline struct {
 	FromFork          bool     `json:"from_fork,omitempty"`     // deprecated, use pull_request.from_fork instead
 	IsPrerelease      bool     `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
 	Avatar            string   `json:"avatar"`                  // deprecated, use author_avatar instead
+	PullRequestMilestone string                 `json:"pr_milestone,omitempty"` // deprecated, use pull_request.milestone instead
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
@@ -106,11 +108,12 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 			ap.Message = p.Deployment.Description
 			ap.Title = p.Deployment.Description
 		}
-	case EventPull, EventPullClosed:
+	case EventPull, EventPullClosed, EventPullMetadata:
 		if p.PullRequest != nil {
 			ap.Title = p.PullRequest.Title
 			ap.PullRequestLabels = p.PullRequest.Labels
 			ap.FromFork = p.PullRequest.FromFork
+			ap.PullRequestMilestone = p.PullRequest.Milestone
 		}
 		ap.Message = p.Commit.Message
 	}
@@ -130,6 +133,11 @@ type PipelineFilter struct {
 // IsMultiPipeline checks if step list contain more than one parent step.
 func (p Pipeline) IsMultiPipeline() bool {
 	return len(p.Workflows) > 1
+}
+
+// IsPullRequest checks if it's a PR event.
+func (p Pipeline) IsPullRequest() bool {
+	return p.Event == EventPull || p.Event == EventPullClosed || p.Event == EventPullMetadata
 }
 
 type PipelineOptions struct {

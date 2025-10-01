@@ -4961,6 +4961,12 @@ const docTemplate = `{
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
                 },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "finished": {
                     "type": "integer"
                 },
@@ -5624,6 +5630,7 @@ const docTemplate = `{
                 "push",
                 "pull_request",
                 "pull_request_closed",
+                "pull_request_metadata",
                 "tag",
                 "release",
                 "deployment",
@@ -5634,6 +5641,7 @@ const docTemplate = `{
                 "EventPush",
                 "EventPull",
                 "EventPullClosed",
+                "EventPullMetadata",
                 "EventTag",
                 "EventRelease",
                 "EventDeploy",
@@ -5754,6 +5762,12 @@ const docTemplate = `{
                 },
                 "event": {
                     "type": "string"
+                },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "finished": {
                     "type": "integer"
