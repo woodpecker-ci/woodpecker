@@ -245,18 +245,28 @@ func TestRunStep(t *testing.T) {
 
 			// Verify output
 			outputDataMutex.Lock()
-			assert.EqualValues(t, `+ echo hello
-hello
-+ env
-PWD=`+state.baseDir+`/workspace
-USERPROFILE=`+state.baseDir+`/home
-TEST_VAR=test_value
-HOME=`+state.baseDir+`/home
-CI_WORKSPACE=`+state.baseDir+`/workspace
-SHLVL=0
-PATH=/run/current-system/sw/bin:`+altShellDir+`
-_=/run/current-system/sw/bin/env
-`, string(outputData))
+			go outputDataMutex.Unlock()
+			outputLines := strings.Split(strings.TrimSpace(string(outputData)), "\n")
+			// as env output can varry per system we have to extract and sort it
+			wantBeforeEnvs := []string{
+				"+ echo hello",
+				"hello",
+				"+ env",
+			}
+			gotBeforeEnvs := outputLines[:len(wantBeforeEnvs)]
+			assert.Equal(t, wantBeforeEnvs, gotBeforeEnvs)
+			// we filter out nixos specific stuff
+			gotEnvs := slices.DeleteFunc(outputLines[len(wantBeforeEnvs):], func(s string) bool {
+				return strings.HasPrefix(s, "_=") || strings.HasPrefix(s, "SHLVL=")
+			})
+			assert.ElementsMatch(t, []string{
+				"PWD=" + state.baseDir + "/workspace",
+				"USERPROFILE=" + state.baseDir + "/home",
+				"TEST_VAR=test_value",
+				"HOME=" + state.baseDir + "/home",
+				"CI_WORKSPACE=" + state.baseDir + "/workspace",
+				"PATH=" + strings.Join(path, ":"),
+			}, gotEnvs)
 		})
 	})
 
