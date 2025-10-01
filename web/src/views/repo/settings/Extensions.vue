@@ -1,5 +1,5 @@
 <template>
-  <Settings :title="$t('extensions')" :description="$t('extensions_description')" docs-url="docs/usage/registries">
+  <Settings :title="$t('extensions')" :description="$t('extensions_description')" docs-url="docs/usage/extensions">
     <form @submit.prevent="saveExtensions">
       <InputField :label="$t('extensions_signatures_public_key')">
         <pre class="code-box">{{ signaturePublicKey }}</pre>
