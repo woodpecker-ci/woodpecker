@@ -252,7 +252,7 @@ func (e *local) getWorkflowState(taskUUID string) (*workflowState, error) {
 	return s, nil
 }
 
-func (e *local) getStepState(taskUUID string, stepUUID string) (*stepState, error) {
+func (e *local) getStepState(taskUUID, stepUUID string) (*stepState, error) {
 	wState, err := e.getWorkflowState(taskUUID)
 	if err != nil {
 		return nil, err
