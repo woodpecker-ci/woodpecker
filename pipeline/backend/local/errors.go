@@ -33,7 +33,7 @@ type ErrNoPosixShell struct {
 }
 
 func (e *ErrNoPosixShell) Error() string {
-	return fmt.Sprintf("Shell %q was assumed as posix shell but test failed: %v\n(if you want support for it, open an issue at woodpecker project)", e.Shell, e.Err)
+	return fmt.Sprintf("Shell %q was assumed to be a Posix shell, but test failed: %v\n(if you want support for it, please open an issue)", e.Shell, e.Err)
 }
 
 // Unwrap returns the underlying error for errors.Is and errors.As support.
