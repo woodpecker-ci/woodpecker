@@ -130,7 +130,7 @@ type Backend interface {
 	WaitStep(ctx context.Context, step *Step, taskUUID string) (*State, error)
 
 	// DestroyStep cleans up resources associated with a step.
-	// This is called after WaitStep completes, or if the workflow is cancelled.
+	// This is called after WaitStep completes, or if the workflow is canceled.
 	//
 	// Implementations should:
 	// - Stop the step if still running
