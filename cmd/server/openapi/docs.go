@@ -1777,7 +1777,7 @@ const docTemplate = `{
         },
         "/queue/info": {
             "get": {
-                "description": "TODO: link the InfoT response object - this is blocked, until the ` + "`" + `swaggo/swag` + "`" + ` tool dependency is v1.18.12 or newer",
+                "description": "Returns pipeline queue information with agent details",
                 "produces": [
                     "application/json"
                 ],
@@ -1799,10 +1799,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/QueueInfo"
                         }
                     }
                 }
@@ -4916,6 +4913,12 @@ const docTemplate = `{
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
                 },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "finished": {
                     "type": "integer"
                 },
@@ -5019,6 +5022,49 @@ const docTemplate = `{
                 }
             }
         },
+        "QueueInfo": {
+            "type": "object",
+            "properties": {
+                "paused": {
+                    "type": "boolean"
+                },
+                "pending": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
+                },
+                "running": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
+                },
+                "stats": {
+                    "type": "object",
+                    "properties": {
+                        "pending_count": {
+                            "type": "integer"
+                        },
+                        "running_count": {
+                            "type": "integer"
+                        },
+                        "waiting_on_deps_count": {
+                            "type": "integer"
+                        },
+                        "worker_count": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "waiting_on_deps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
+                }
+            }
+        },
         "Registry": {
             "type": "object",
             "properties": {
@@ -5076,6 +5122,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "clone_url_ssh": {
+                    "type": "string"
+                },
+                "config_extension_endpoint": {
                     "type": "string"
                 },
                 "config_file": {
@@ -5165,6 +5214,9 @@ const docTemplate = `{
                 "clone_url_ssh": {
                     "type": "string"
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5242,6 +5294,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/WebhookEvent"
                     }
+                },
+                "config_extension_endpoint": {
+                    "type": "string"
                 },
                 "config_file": {
                     "type": "string"
@@ -5444,6 +5499,18 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
+                },
                 "run_on": {
                     "type": "array",
                     "items": {
@@ -5490,6 +5557,7 @@ const docTemplate = `{
                 "push",
                 "pull_request",
                 "pull_request_closed",
+                "pull_request_metadata",
                 "tag",
                 "release",
                 "deployment",
@@ -5500,6 +5568,7 @@ const docTemplate = `{
                 "EventPush",
                 "EventPull",
                 "EventPullClosed",
+                "EventPullMetadata",
                 "EventTag",
                 "EventRelease",
                 "EventDeploy",
@@ -5622,6 +5691,12 @@ const docTemplate = `{
                 },
                 "event": {
                     "type": "string"
+                },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "finished": {
                     "type": "integer"
@@ -5777,6 +5852,90 @@ const docTemplate = `{
                 "ForgeTypeAddon"
             ]
         },
+<<<<<<< HEAD
+=======
+        "model.QueueTask": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "integer"
+                },
+                "agent_name": {
+                    "type": "string"
+                },
+                "dep_status": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/StatusValue"
+                    }
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "pipeline_number": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
+                },
+                "run_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.TrustedConfigurationPatch": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
+>>>>>>> main
         "model.Workflow": {
             "type": "object",
             "properties": {

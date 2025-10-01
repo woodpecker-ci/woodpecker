@@ -71,6 +71,7 @@ type Repo struct {
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string       `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
+	ConfigExtensionEndpoint      string         `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 } //	@name	Repo
 
 // TableName return database table name for xorm.
@@ -90,11 +91,11 @@ func ParseRepo(str string) (user, repo string, err error) {
 	before, after, _ := strings.Cut(str, "/")
 	if before == "" || after == "" {
 		err = fmt.Errorf("invalid or missing repository (e.g. octocat/hello-world)")
-		return
+		return user, repo, err
 	}
 	user = before
 	repo = after
-	return
+	return user, repo, err
 }
 
 // Update updates the repository with values from the given Repo.
@@ -136,6 +137,7 @@ type RepoPatch struct {
 	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcTrusted                 *[]string       `json:"netrc_trusted"`
+	ConfigExtensionEndpoint      *string         `json:"config_extension_endpoint,omitempty"`
 } //	@name	RepoPatch
 
 type ForgeRemoteID string

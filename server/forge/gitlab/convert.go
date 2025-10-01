@@ -23,6 +23,8 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
@@ -30,6 +32,25 @@ import (
 const (
 	mergeRefs               = "refs/merge-requests/%d/head" // merge request merged with base
 	VisibilityLevelInternal = 10
+
+	stateOpened = "opened"
+
+	actionOpen   = "open"
+	actionClose  = "close"
+	actionReopen = "reopen"
+	actionMerge  = "merge"
+	actionUpdate = "update"
+
+	metadataReasonAssigned          = "assigned"
+	metadataReasonUnassigned        = "unassigned"
+	metadataReasonMilestoned        = "milestoned"
+	metadataReasonDemilestoned      = "demilestoned"
+	metadataReasonTitleEdited       = "title_edited"
+	metadataReasonDescriptionEdited = "description_edited"
+	metadataReasonLabelsAdded       = "labels_added"
+	metadataReasonLabelsCleared     = "labels_cleared"
+	metadataReasonLabelsUpdated     = "labels_updated"
+	metadataReasonReviewRequested   = "review_requested"
 )
 
 func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
@@ -71,6 +92,81 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 	source := hook.ObjectAttributes.Source
 	obj := hook.ObjectAttributes
 
+	switch obj.Action {
+	case actionClose, actionMerge:
+		// pull close event
+		pipeline.Event = model.EventPullClosed
+
+	case actionOpen, actionReopen:
+		// pull open event -> pull event
+		pipeline.Event = model.EventPull
+
+	case actionUpdate:
+		if obj.OldRev != "" && obj.State == stateOpened {
+			// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
+			// https://github.com/woodpecker-ci/woodpecker/pull/3338
+			// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
+			pipeline.Event = model.EventPull
+			break
+		}
+
+		pipeline.Event = model.EventPullMetadata
+		// All changes are just update actions ... so we have to look into the changes section
+		var reason []string
+		if len(hook.Changes.Assignees.Current) != 0 {
+			reason = append(reason, metadataReasonAssigned)
+		}
+		if len(hook.Changes.Assignees.Previous) != 0 {
+			reason = append(reason, metadataReasonUnassigned)
+		}
+
+		if hook.Changes.MilestoneID.Current != 0 {
+			reason = append(reason, metadataReasonMilestoned)
+		}
+		if hook.Changes.MilestoneID.Previous != 0 {
+			reason = append(reason, metadataReasonDemilestoned)
+		}
+
+		if len(hook.Changes.Title.Current) != 0 || len(hook.Changes.Title.Previous) != 0 {
+			reason = append(reason, metadataReasonTitleEdited)
+		}
+
+		if len(hook.Changes.Description.Current) != 0 || len(hook.Changes.Description.Previous) != 0 {
+			reason = append(reason, metadataReasonDescriptionEdited)
+		}
+
+		switch {
+		case len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) == 0:
+			reason = append(reason, metadataReasonLabelsAdded)
+		case len(hook.Changes.Labels.Current) == 0 && len(hook.Changes.Labels.Previous) != 0:
+			reason = append(reason, metadataReasonLabelsCleared)
+		case len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) != 0:
+			reason = append(reason, metadataReasonLabelsUpdated)
+		}
+
+		if len(hook.Changes.Reviewers.Current) > len(hook.Changes.Reviewers.Previous) {
+			reason = append(reason, metadataReasonReviewRequested)
+		}
+
+		for i := range reason {
+			reason[i] = common.NormalizeEventReason(reason[i])
+		}
+
+		pipeline.EventReason = reason
+		if len(pipeline.EventReason) == 0 {
+			return 0, 0, nil, nil, &types.ErrIgnoreEvent{
+				Event:  "Merge Request Hook",
+				Reason: fmt.Sprintf("Action '%s' no supported changes detected", obj.Action),
+			}
+		}
+	default:
+		// non supported action
+		return 0, 0, nil, nil, &types.ErrIgnoreEvent{
+			Event:  "Merge Request Hook",
+			Reason: fmt.Sprintf("Action '%s' not supported", obj.Action),
+		}
+	}
+
 	switch {
 	case target == nil && source == nil:
 		return 0, 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
@@ -110,11 +206,6 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 
 	if target.AvatarURL != "" {
 		repo.Avatar = target.AvatarURL
-	}
-
-	pipeline.Event = model.EventPull
-	if obj.State == "closed" || obj.State == "merged" {
-		pipeline.Event = model.EventPullClosed
 	}
 
 	lastCommit := obj.LastCommit

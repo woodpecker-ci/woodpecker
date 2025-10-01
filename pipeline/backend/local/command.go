@@ -17,6 +17,7 @@
 package local
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -24,18 +25,38 @@ import (
 	"al.essio.dev/pkg/shellescape"
 )
 
+var (
+	ErrNoShellSet = errors.New("no shell was set")
+	ErrNoCmdSet   = errors.New("no commands where set")
+)
+
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
+	if len(cmdList) == 0 {
+		return nil, ErrNoCmdSet
+	}
+
 	script := ""
 	for _, cmd := range cmdList {
 		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
 	}
 	script = strings.TrimSpace(script)
 
-	switch strings.TrimSuffix(strings.ToLower(shell), ".exe") {
+	shell = strings.TrimSuffix(strings.ToLower(shell), ".exe")
+	switch shell {
+	case "":
+		return nil, ErrNoShellSet
 	case "cmd":
 		script := "@SET PROMPT=$\n"
 		for _, cmd := range cmdList {
-			script += fmt.Sprintf("@echo + %s\n", strings.TrimSpace(shellescape.Quote(cmd)))
+			quotedCmd := strings.TrimSpace(shellescape.Quote(cmd))
+			// As cmd echo does not allow strings with newlines we need to replace them ...
+			quotedCmd = strings.ReplaceAll(quotedCmd, "\n", "\\n")
+			// Also the shellescape.Quote fail with any | or & char and wrapping them in quotes again can be bypassed
+			// by just leaving an string halve quoted we just replace them with symbolic representations
+			quotedCmd = strings.ReplaceAll(quotedCmd, "&", "\\AND")
+			quotedCmd = strings.ReplaceAll(quotedCmd, "|", "\\OR")
+
+			script += fmt.Sprintf("@echo + %s\n", quotedCmd)
 			script += fmt.Sprintf("@%s\n", cmd)
 			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
@@ -60,7 +81,7 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 		// cspell:disable-next-line
 		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
 	default:
-		// normal posix shells
+		// assume posix shell
 		return []string{"-e", "-c", script}, nil
 	}
 }

@@ -224,6 +224,7 @@
         "tag": "Tag",
         "pr": "Pull Request",
         "pr_closed": "Pull Request merged/closed",
+        "pr_metadata": "Pull Request metadata changed",
         "deploy": "Deploy",
         "cron": "Cron",
         "manual": "Manual",
@@ -256,7 +257,8 @@
         "no_permission": "You are not allowed to access the debug information",
         "metadata_exec_title": "Re-run pipeline locally",
         "metadata_exec_desc": "Download the metadata of this pipeline to run it locally. This allows you to fix problems and test changes before committing them. The Woodpecker CLI must be installed locally in the same version as the server."
-      }
+      },
+      "view": "View pipeline"
     }
   },
   "org": {
@@ -326,7 +328,10 @@
           "badge": "org"
         },
         "version": "Version",
-        "last_contact": "Last contact",
+        "last_contact": {
+          "last_contact": "Last contact",
+          "badge": "last contact"
+        },
         "never": "Never",
         "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
         "edit_agent": "Edit agent",
@@ -497,6 +502,13 @@
   "access_denied": "You are not allowed to access this instance",
   "org_access_denied": "You are not allowed to access this organization",
   "invalid_state": "The OAuth state is invalid",
+  "extensions": "Extensions",
+  "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
+  "extension_endpoint_placeholder": "e.g. https://example.com/api",
+  "config_extension_endpoint": "Config extension endpoint",
+  "extensions_signatures_public_key": "Public key for signatures",
+  "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
+  "extensions_configuration_saved": "Extensions configuration saved",
   "require_approval": {
     "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution.",
     "require_approval_for": "Approval requirements",

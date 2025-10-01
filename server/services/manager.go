@@ -16,6 +16,7 @@ package services
 
 import (
 	"crypto"
+	"strings"
 	"time"
 
 	"github.com/jellydator/ttlcache/v3"
@@ -27,10 +28,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/environment"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
-
-//go:generate mockery --name Manager --output mocks --case underscore --note "+build test"
 
 const forgeCacheTTL = 10 * time.Minute
 
@@ -59,6 +59,7 @@ type manager struct {
 	environment         environment.Service
 	forgeCache          *ttlcache.Cache[int64, forge.Forge]
 	setupForge          SetupForge
+	client              *utils.Client
 }
 
 func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
@@ -72,7 +73,12 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
-	configService, err := setupConfigService(c, signaturePrivateKey)
+	client, err := utils.NewHTTPClient(signaturePrivateKey, c.String("extensions-allowed-hosts"))
+	if err != nil {
+		return nil, err
+	}
+
+	configService, err := setupConfigService(c, client)
 	if err != nil {
 		return nil, err
 	}
@@ -87,6 +93,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		environment:         environment.Parse(c.StringSlice("environment")),
 		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
 		setupForge:          setupForge,
+		client:              client,
 	}, nil
 }
 
@@ -110,8 +117,11 @@ func (m *manager) RegistryService() registry.Service {
 	return m.registry
 }
 
-func (m *manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
-	// TODO: decide based on repo property which config service to use
+func (m *manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
+	if repo.ConfigExtensionEndpoint != "" {
+		return config.NewCombined(m.config, config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.client))
+	}
+
 	return m.config
 }
 

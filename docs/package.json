@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.8.1",
-    "@docusaurus/tsconfig": "3.8.1",
+    "@docusaurus/tsconfig": "3.9.1",
     "@docusaurus/types": "^3.8.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.2",
     "@types/node": "^22.15.31",

@@ -36,11 +36,12 @@ const (
 	// This will be removed in the future.
 	StepLabelLegacy       = "step"
 	StepLabel             = "woodpecker-ci.org/step"
+	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
 	podPrefix             = "wp-"
 	defaultFSGroup  int64 = 1000
 )
 
-func mkPod(step *types.Step, trusted types.TrustedConfiguration, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
+func mkPod(step *types.Step, trusted types.TrustedConfiguration, config *config, podName, goos string, options BackendOptions, taskUUID string) (*v1.Pod, error) {
 	var err error
 
 	nsp := newNativeSecretsProcessor(config, options.Secrets)
@@ -49,7 +50,7 @@ func mkPod(step *types.Step, trusted types.TrustedConfiguration, config *config,
 		return nil, err
 	}
 
-	meta, err := podMeta(step, config, options, podName)
+	meta, err := podMeta(step, config, options, podName, taskUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (meta_v1.ObjectMeta, error) {
+func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (meta_v1.ObjectMeta, error) {
 	var err error
 	meta := meta_v1.ObjectMeta{
 		Name:        podName,
@@ -92,7 +93,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 		Annotations: podAnnotations(config, options),
 	}
 
-	meta.Labels, err = podLabels(step, config, options)
+	meta.Labels, err = podLabels(step, config, options, taskUUID)
 	if err != nil {
 		return meta, err
 	}
@@ -100,7 +101,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	return meta, nil
 }
 
-func podLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
+func podLabels(step *types.Step, config *config, options BackendOptions, taskUUID string) (map[string]string, error) {
 	var err error
 	labels := make(map[string]string)
 
@@ -139,6 +140,10 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {
 		return labels, err
+	}
+
+	if len(taskUUID) > 0 {
+		labels[TaskUUIDLabel] = taskUUID
 	}
 
 	return labels, nil
@@ -623,13 +628,13 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step, trusted types.TrustedConfiguration, options BackendOptions) (*v1.Pod, error) {
+func startPod(ctx context.Context, engine *kube, step *types.Step, trusted types.TrustedConfiguration, options BackendOptions, taskUUID string) (*v1.Pod, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
 	engineConfig := engine.getConfig()
-	pod, err := mkPod(step, trusted, engineConfig, podName, engine.goos, options)
+	pod, err := mkPod(step, trusted, engineConfig, podName, engine.goos, options, taskUUID)
 	if err != nil {
 		return nil, err
 	}

@@ -33,8 +33,12 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 			continue
 		}
 		task := &model.Task{
-			ID:     fmt.Sprint(item.Workflow.ID),
-			Labels: make(map[string]string),
+			ID:         fmt.Sprint(item.Workflow.ID),
+			PID:        item.Workflow.PID,
+			Name:       item.Workflow.Name,
+			Labels:     make(map[string]string),
+			PipelineID: item.Workflow.PipelineID,
+			RepoID:     repo.ID,
 		}
 		maps.Copy(task.Labels, item.Labels)
 		err := task.ApplyLabelsFromRepo(repo)
@@ -70,5 +74,5 @@ func taskIDs(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIDs []s
 			}
 		}
 	}
-	return
+	return taskIDs
 }

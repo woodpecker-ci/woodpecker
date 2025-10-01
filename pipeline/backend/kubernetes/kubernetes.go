@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	backoff "github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
@@ -40,12 +41,14 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 )
 
 const (
 	EngineName = "kubernetes"
 	// TODO: 5 seconds is against best practice, k3s didn't work otherwise
 	defaultResyncDuration = 5 * time.Second
+	maxRetryDuration      = 1 * time.Minute
 )
 
 var defaultDeleteOptions = newDefaultDeleteOptions()
@@ -235,7 +238,10 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 			if isService(step) {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
-					return err
+					return &pipelineErrors.ErrInvalidWorkflowSetup{
+						Err:  err,
+						Step: step,
+					}
 				}
 				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
 				extraHosts = append(extraHosts, hostAlias)
@@ -278,7 +284,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string,
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err = startPod(ctx, e, step, trusted, options)
+	_, err = startPod(ctx, e, step, trusted, options, taskUUID)
 	return err
 }
 
@@ -408,13 +414,22 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		Container: podName,
 	}
 
-	logs, err := e.client.CoreV1().RESTClient().Get().
-		Namespace(e.config.GetNamespace(step.OrgID)).
-		Name(podName).
-		Resource("pods").
-		SubResource("log").
-		VersionedParams(opts, scheme.ParameterCodec).
-		Stream(ctx)
+	logs, err := backoff.Retry(ctx,
+		func() (io.ReadCloser, error) {
+			return e.client.CoreV1().RESTClient().Get().
+				Namespace(e.config.GetNamespace(step.OrgID)).
+				Name(podName).
+				Resource("pods").
+				SubResource("log").
+				VersionedParams(opts, scheme.ParameterCodec).
+				Stream(ctx)
+		},
+		backoff.WithBackOff(backoff.NewExponentialBackOff()),
+		backoff.WithMaxElapsedTime(maxRetryDuration),
+		backoff.WithNotify(func(err error, delay time.Duration) {
+			log.Warn().Err(err).Str("pod", podName).Dur("backoff", delay).Msg("failed to open pod log stream, retrying with backoff")
+		}),
+	)
 	if err != nil {
 		return nil, err
 	}

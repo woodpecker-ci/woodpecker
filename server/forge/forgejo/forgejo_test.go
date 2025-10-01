@@ -27,7 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestNew(t *testing.T) {
@@ -51,7 +51,7 @@ func Test_forgejo(t *testing.T) {
 		SkipVerify: true,
 	})
 
-	mockStore := mocks_store.NewStore(t)
+	mockStore := store_mocks.NewMockStore(t)
 	ctx := store.InjectToContext(t.Context(), mockStore)
 
 	t.Run("netrc with user token", func(t *testing.T) {

@@ -25,6 +25,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
+const taskUUID = "11301"
+
 func TestPodName(t *testing.T) {
 	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0"})
 	assert.NoError(t, err)
@@ -73,9 +75,10 @@ func TestPodMeta(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", meta.Labels[ServiceLabel])
+	assert.EqualValues(t, taskUUID, meta.Labels[TaskUUIDLabel])
 
 	// Detached service
 	meta, err = podMeta(&types.Step{
@@ -87,7 +90,7 @@ func TestPodMeta(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", meta.Labels[ServiceLabel])
 
@@ -101,7 +104,7 @@ func TestPodMeta(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "", meta.Labels[ServiceLabel])
 }
@@ -123,7 +126,8 @@ func TestTinyPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "build-via-gradle",
-				"woodpecker-ci.org/step": "build-via-gradle"
+				"woodpecker-ci.org/step": "build-via-gradle",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -185,7 +189,7 @@ func TestTinyPod(t *testing.T) {
 		Environment:     map[string]string{"CI": "woodpecker"},
 	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -205,7 +209,8 @@ func TestFullPod(t *testing.T) {
 				"app": "test",
 				"part-of": "woodpecker-ci",
 				"step": "go-test",
-				"woodpecker-ci.org/step": "go-test"
+				"woodpecker-ci.org/step": "go-test",
+				"woodpecker-ci.org/task-uuid": "11301"
 			},
 			"annotations": {
 				"apps.kubernetes.io/pod-index": "0",
@@ -392,19 +397,22 @@ func TestFullPod(t *testing.T) {
 		PodTolerationsAllowFromStep: true,
 		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
 		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
-		Labels:             map[string]string{"part-of": "woodpecker-ci"},
-		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
-		NodeSelector:       map[string]string{"storage": "ssd"},
-		RuntimeClassName:   &runtimeClass,
-		ServiceAccountName: "wp-svc-acc",
-		Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
-		Resources: Resources{
-			Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
-			Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
-		},
-		SecurityContext: &secCtx,
-	})
+	},
+		"wp-01he8bebctabr3kgk0qj36d2me-0",
+		"linux/amd64",
+		BackendOptions{
+			Labels:             map[string]string{"part-of": "woodpecker-ci"},
+			Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
+			NodeSelector:       map[string]string{"storage": "ssd"},
+			RuntimeClassName:   &runtimeClass,
+			ServiceAccountName: "wp-svc-acc",
+			Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
+			Resources: Resources{
+				Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+				Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+			},
+			SecurityContext: &secCtx,
+		}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -426,7 +434,7 @@ func TestPodPrivilege(t *testing.T) {
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
 		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 			SecurityContext: &secCtx,
-		})
+		}, "")
 	}
 
 	// securty context is requesting user and group 101 (non-root)
@@ -505,7 +513,8 @@ func TestScratchPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "curl-google",
-				"woodpecker-ci.org/step": "curl-google"
+				"woodpecker-ci.org/step": "curl-google",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -533,7 +542,7 @@ func TestScratchPod(t *testing.T) {
 		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
 	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -551,7 +560,8 @@ func TestSecrets(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "test-secrets",
-				"woodpecker-ci.org/step": "test-secrets"
+				"woodpecker-ci.org/step": "test-secrets",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -653,7 +663,7 @@ func TestSecrets(t *testing.T) {
 				Target: SecretTarget{File: "~/.docker/config.json"},
 			},
 		},
-	})
+	}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -671,7 +681,8 @@ func TestPodTolerations(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
-				"woodpecker-ci.org/step": "toleration-test"
+				"woodpecker-ci.org/step": "toleration-test",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -708,11 +719,11 @@ func TestPodTolerations(t *testing.T) {
 		Name:  "toleration-test",
 		Image: "alpine",
 		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace:                   "woodpecker",
 		PodTolerations:              globalTolerations,
 		PodTolerationsAllowFromStep: false,
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -730,7 +741,8 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
-				"woodpecker-ci.org/step": "toleration-test"
+				"woodpecker-ci.org/step": "toleration-test",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -752,7 +764,8 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
-				"woodpecker-ci.org/step": "toleration-test"
+				"woodpecker-ci.org/step": "toleration-test",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -785,12 +798,12 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
 	}
 
-	pod, err := mkPod(step, &config{
+	pod, err := mkPod(step, types.TrustedConfiguration{}, &config{
 		Namespace:                   "woodpecker",
 		PodTolerationsAllowFromStep: false,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		Tolerations: stepTolerations,
-	})
+	}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -799,12 +812,12 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expectedDisallow)
 
-	pod, err = mkPod(step, &config{
+	pod, err = mkPod(step, types.TrustedConfiguration{}, &config{
 		Namespace:                   "woodpecker",
 		PodTolerationsAllowFromStep: true,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		Tolerations: stepTolerations,
-	})
+	}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err = json.Marshal(pod)

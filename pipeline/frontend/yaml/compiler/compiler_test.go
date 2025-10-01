@@ -351,16 +351,16 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 	defaultVolume := "test_default"
 	defaultCloneStage := &backend_types.Stage{
 		Steps: []*backend_types.Step{{
-			Name:          "clone",
-			Type:          backend_types.StepTypeClone,
-			Image:         constant.DefaultClonePlugin,
-			OnSuccess:     true,
-			Failure:       "fail",
-			WorkingDir:    "/woodpecker/src/github.com/octocat/hello-world",
-			WorkspaceBase: "/woodpecker",
-			Volumes:       []string{defaultVolume + ":/woodpecker"},
-			Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
-			ExtraHosts:    []backend_types.HostAlias{},
+			Name:            "clone",
+			Type:            backend_types.StepTypeClone,
+			Image:           constant.DefaultClonePlugin,
+			OnSuccess:       true,
+			Failure:         "fail",
+			WorkingDir:      "/woodpecker/src/github.com/octocat/hello-world",
+			WorkspaceBase:   "/woodpecker",
+			WorkspaceVolume: defaultVolume + ":/woodpecker",
+			Networks:        []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
+			ExtraHosts:      []backend_types.HostAlias{},
 		}},
 	}
 	tests := []struct {
@@ -382,17 +382,17 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 			backConf: &backend_types.Config{
 				Stages: []*backend_types.Stage{defaultCloneStage, {
 					Steps: []*backend_types.Step{{
-						Name:          "step",
-						Type:          backend_types.StepTypeCommands,
-						Image:         "bash",
-						Commands:      []string{"env"},
-						OnSuccess:     true,
-						Failure:       "fail",
-						WorkingDir:    "/test/src/github.com/octocat/hello-world",
-						WorkspaceBase: "/test",
-						Volumes:       []string{defaultVolume + ":/test"},
-						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"step"}}},
-						ExtraHosts:    []backend_types.HostAlias{},
+						Name:            "step",
+						Type:            backend_types.StepTypeCommands,
+						Image:           "bash",
+						Commands:        []string{"env"},
+						OnSuccess:       true,
+						Failure:         "fail",
+						WorkingDir:      "/test/src/github.com/octocat/hello-world",
+						WorkspaceBase:   "/test",
+						WorkspaceVolume: defaultVolume + ":/test",
+						Networks:        []backend_types.Conn{{Name: "test_default", Aliases: []string{"step"}}},
+						ExtraHosts:      []backend_types.HostAlias{},
 						SecretMapping: map[string]string{
 							"SECRET": "VERY_SECRET",
 						},
@@ -465,6 +465,12 @@ func TestSecretMatch(t *testing.T) {
 			name:   "pull close should match pull",
 			secret: Secret{Events: []string{"pull_request"}},
 			event:  "pull_request_closed",
+			match:  true,
+		},
+		{
+			name:   "pull metadata change should match pull",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request_metadata",
 			match:  true,
 		},
 	}
