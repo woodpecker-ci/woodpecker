@@ -64,8 +64,10 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	cmd.Stderr = cmd.Stdout
 
 	// Save state
-	state.stepCMDs.Store(step.UUID, cmd)
-	state.stepOutputs.Store(step.UUID, reader)
+	state.stepState.Store(step.UUID, &stepState{
+		cmd:    cmd,
+		output: reader,
+	})
 
 	return cmd.Start()
 }

@@ -27,6 +27,7 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -101,7 +102,7 @@ func TestSetupWorkflow(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify state was saved
-	state, err := backend.getState(taskUUID)
+	state, err := backend.getWorkflowState(taskUUID)
 	require.NoError(t, err)
 	assert.NotNil(t, state)
 	assert.NotEmpty(t, state.baseDir)
@@ -133,7 +134,7 @@ func TestDestroyWorkflow(t *testing.T) {
 	err := backend.SetupWorkflow(ctx, config, taskUUID)
 	require.NoError(t, err)
 
-	state, err := backend.getState(taskUUID)
+	state, err := backend.getWorkflowState(taskUUID)
 	require.NoError(t, err)
 	baseDir := state.baseDir
 
@@ -148,7 +149,7 @@ func TestDestroyWorkflow(t *testing.T) {
 	assert.NoDirExists(t, baseDir)
 
 	// Verify state was deleted
-	_, err = backend.getState(taskUUID)
+	_, err = backend.getWorkflowState(taskUUID)
 	assert.ErrorIs(t, err, ErrWorkflowStateNotFound)
 }
 
@@ -213,13 +214,18 @@ func TestRunStep(t *testing.T) {
 			require.NoError(t, err)
 
 			// Verify command was started
-			state, err := backend.getState(taskUUID)
+			state, err := backend.getWorkflowState(taskUUID)
 			require.NoError(t, err)
-			_, contains := state.stepCMDs.Load(step.UUID)
+			stepStateWraped, contains := state.stepState.Load(step.UUID)
 			assert.True(t, contains)
+			stepState, _ := stepStateWraped.(*stepState)
+			assert.NotNil(t, stepState.cmd)
 
 			var outputData []byte
+			outputDataMutex := sync.Mutex{}
 			go t.Run("TailStep", func(t *testing.T) {
+				outputDataMutex.Lock()
+				go outputDataMutex.Unlock()
 				output, err := backend.TailStep(ctx, step, taskUUID)
 				require.NoError(t, err)
 				assert.NotNil(t, output)
@@ -238,7 +244,7 @@ func TestRunStep(t *testing.T) {
 			})
 
 			// Verify output
-			require.NoError(t, err)
+			outputDataMutex.Lock()
 			assert.EqualValues(t, `+ echo hello
 hello
 + env
@@ -317,10 +323,9 @@ _=/run/current-system/sw/bin/env
 			require.NoError(t, err)
 
 			// Verify command was started
-			state, err := backend.getState(taskUUID)
+			state, err := backend.getStepState(taskUUID, step.UUID)
 			require.NoError(t, err)
-			_, contains := state.stepCMDs.Load(step.UUID)
-			assert.True(t, contains)
+			assert.NotEqualf(t, 0, state.cmd.Process.Pid, "expect an pid of the process")
 		})
 	})
 
@@ -354,7 +359,7 @@ func TestStateManagement(t *testing.T) {
 
 		backend.workflows.Store(taskUUID, state)
 
-		retrieved, err := backend.getState(taskUUID)
+		retrieved, err := backend.getWorkflowState(taskUUID)
 		require.NoError(t, err)
 		assert.Equal(t, state.baseDir, retrieved.baseDir)
 		assert.Equal(t, state.homeDir, retrieved.homeDir)
@@ -362,7 +367,7 @@ func TestStateManagement(t *testing.T) {
 	})
 
 	t.Run("get nonexistent state", func(t *testing.T) {
-		_, err := backend.getState("nonexistent-uuid")
+		_, err := backend.getWorkflowState("nonexistent-uuid")
 		assert.ErrorIs(t, err, ErrWorkflowStateNotFound)
 	})
 
@@ -373,14 +378,14 @@ func TestStateManagement(t *testing.T) {
 		backend.workflows.Store(taskUUID, state)
 
 		// Verify state exists
-		_, err := backend.getState(taskUUID)
+		_, err := backend.getWorkflowState(taskUUID)
 		require.NoError(t, err)
 
 		// Delete state
 		backend.workflows.Delete(taskUUID)
 
 		// Verify state is gone
-		_, err = backend.getState(taskUUID)
+		_, err = backend.getWorkflowState(taskUUID)
 		assert.ErrorIs(t, err, ErrWorkflowStateNotFound)
 	})
 }
@@ -423,7 +428,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 
 	// Verify all states exist
 	for _, uuid := range taskUUIDs {
-		state, err := backend.getState(uuid)
+		state, err := backend.getWorkflowState(uuid)
 		require.NoError(t, err)
 		assert.NotNil(t, state)
 	}
@@ -463,7 +468,7 @@ loop:
 
 	// Verify all states are deleted
 	for _, uuid := range taskUUIDs {
-		_, err := backend.getState(uuid)
+		_, err := backend.getWorkflowState(uuid)
 		assert.ErrorIs(t, err, ErrWorkflowStateNotFound)
 	}
 }

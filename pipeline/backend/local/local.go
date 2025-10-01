@@ -33,12 +33,16 @@ import (
 )
 
 type workflowState struct {
-	stepCMDs        sync.Map // map of *exec.Cmd
-	stepOutputs     sync.Map // map of io.ReadCloser
+	stepState       sync.Map // map of *stepState
 	baseDir         string
 	homeDir         string
 	workspaceDir    string
 	pluginGitBinary string
+}
+
+type stepState struct {
+	cmd    *exec.Cmd
+	output io.ReadCloser
 }
 
 type local struct {
@@ -117,7 +121,7 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	state, err := e.getState(taskUUID)
+	state, err := e.getWorkflowState(taskUUID)
 	if err != nil {
 		return err
 	}
@@ -151,59 +155,55 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
-	state, err := e.getState(taskUUID)
+	state, err := e.getStepState(taskUUID, step.UUID)
 	if err != nil {
 		return nil, err
 	}
 
-	boxedCmd, ok := state.stepCMDs.Load(step.UUID)
-	if !ok {
-		return nil, fmt.Errorf("step cmd for %s not found", step.UUID)
+	// normally we use cmd.Wait() to wait for *exec.Cmd, but cmd.StdoutPipe() tells us not
+	// as Wait() would close the io pipe even if not all logs where read and send back
+	// so we have to do use the underlying functions
+	if state.cmd.Process == nil {
+		return nil, errors.New("exec: not started")
 	}
-
-	cmd, _ := boxedCmd.(*exec.Cmd)
-	err = cmd.Wait()
-	ExitCode := 0
-
-	var execExitError *exec.ExitError
-	if errors.As(err, &execExitError) {
-		ExitCode = execExitError.ExitCode()
-		// Non-zero exit code is a step failure, but not an agent error.
-		err = nil
+	if state.cmd.ProcessState == nil {
+		cmdState, err := state.cmd.Process.Wait()
+		if err != nil {
+			return nil, err
+		}
+		state.cmd.ProcessState = cmdState
 	}
 
 	return &types.State{
 		Exited:   true,
-		ExitCode: ExitCode,
+		ExitCode: state.cmd.ProcessState.ExitCode(),
 	}, err
 }
 
 func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
-	state, err := e.getState(taskUUID)
+	state, err := e.getStepState(taskUUID, step.UUID)
 	if err != nil {
 		return nil, err
-	}
-	boxedReader, found := state.stepOutputs.Load(step.UUID)
-	if !found || boxedReader == nil {
+	} else if state.output == nil {
 		return nil, ErrStepReaderNotFound
 	}
-
-	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
-	reader, _ := boxedReader.(io.ReadCloser)
-	return reader, nil
+	return state.output, nil
 }
 
 func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
-	state, err := e.getState(taskUUID)
+	state, err := e.getStepState(taskUUID, step.UUID)
 	if err != nil {
 		return err
 	}
 
-	// WaitStep uses cmd.Wait() witch ensures the process already finished and
-	// the io pipe is closed on process end, so there is nothing to do here.
-	// we just remove the state values
-	state.stepOutputs.Delete(step.UUID)
-	state.stepCMDs.Delete(step.UUID)
+	// As WaitStep can not use cmd.Wait() witch ensures the process already finished and
+	// the io pipe is closed on process end, we make sure it is done.
+	_ = state.output.Close()
+	state.output = nil
+	_ = state.cmd.Cancel()
+	state.cmd = nil
+	workflowState, _ := e.getWorkflowState(taskUUID)
+	workflowState.stepState.Delete(step.UUID)
 
 	return nil
 }
@@ -211,7 +211,7 @@ func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string
 func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
 
-	state, err := e.getState(taskUUID)
+	state, err := e.getWorkflowState(taskUUID)
 	if err != nil {
 		return err
 	}
@@ -222,20 +222,38 @@ func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID str
 	}
 
 	// hint for the gc to clean stuff
-	state.stepCMDs.Clear()
-	state.stepOutputs.Clear()
+	state.stepState.Clear()
 	e.workflows.Delete(taskUUID)
 
 	return err
 }
 
-func (e *local) getState(taskUUID string) (*workflowState, error) {
+func (e *local) getWorkflowState(taskUUID string) (*workflowState, error) {
 	state, ok := e.workflows.Load(taskUUID)
 	if !ok {
 		return nil, ErrWorkflowStateNotFound
 	}
 
 	s, ok := state.(*workflowState)
+	if !ok {
+		return nil, fmt.Errorf("could not parse state: %v", state)
+	}
+
+	return s, nil
+}
+
+func (e *local) getStepState(taskUUID string, stepUUID string) (*stepState, error) {
+	wState, err := e.getWorkflowState(taskUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	state, ok := wState.stepState.Load(stepUUID)
+	if !ok {
+		return nil, ErrStepStateNotFound
+	}
+
+	s, ok := state.(*stepState)
 	if !ok {
 		return nil, fmt.Errorf("could not parse state: %v", state)
 	}

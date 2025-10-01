@@ -106,8 +106,10 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	}
 
 	// Save state
-	state.stepCMDs.Store(step.UUID, cmd)
-	state.stepOutputs.Store(step.UUID, reader)
+	state.stepState.Store(step.UUID, &stepState{
+		cmd:    cmd,
+		output: reader,
+	})
 
 	// Get output and redirect Stderr to Stdout
 	cmd.Stderr = cmd.Stdout
