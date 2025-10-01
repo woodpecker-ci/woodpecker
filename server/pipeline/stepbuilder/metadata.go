@@ -106,15 +106,15 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 	}
 
 	metadata := metadata.Pipeline{
-		Number:   pipeline.Number,
-		Parent:   parent,
-		Created:  pipeline.Created,
-		Started:  pipeline.Started,
-		Finished: pipeline.Finished,
-		Status:   string(pipeline.Status),
-		Event:    string(pipeline.Event),
+		Number:      pipeline.Number,
+		Parent:      parent,
+		Created:     pipeline.Created,
+		Started:     pipeline.Started,
+		Finished:    pipeline.Finished,
+		Status:      string(pipeline.Status),
+		Event:       string(pipeline.Event),
 		EventReason: pipeline.EventReason,
-		ForgeURL: pipeline.ForgeURL,
+		ForgeURL:    pipeline.ForgeURL,
 		Commit: metadata.Commit{
 			Sha:     pipeline.Commit.SHA,
 			Ref:     pipeline.Ref,

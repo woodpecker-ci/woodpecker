@@ -43,21 +43,21 @@ type (
 
 	// Pipeline defines runtime metadata for a pipeline.
 	Pipeline struct {
-		Number     int64  `json:"number,omitempty"`
-		Created    int64  `json:"created,omitempty"`
-		Started    int64  `json:"started,omitempty"`
-		Finished   int64  `json:"finished,omitempty"`
-		Status     string `json:"status,omitempty"`
-		Event      string `json:"event,omitempty"`
+		Number      int64    `json:"number,omitempty"`
+		Created     int64    `json:"created,omitempty"`
+		Started     int64    `json:"started,omitempty"`
+		Finished    int64    `json:"finished,omitempty"`
+		Status      string   `json:"status,omitempty"`
+		Event       string   `json:"event,omitempty"`
 		EventReason []string `json:"event_reason,omitempty"`
-		ForgeURL   string `json:"forge_url,omitempty"`
-		DeployTo   string `json:"target,omitempty"`
-		DeployTask string `json:"task,omitempty"`
-		Commit     Commit `json:"commit"`
-		Parent     int64  `json:"parent,omitempty"`
-		Cron       string `json:"cron,omitempty"`
-		Release    string `json:"release,omitempty"`
-		Author     string `json:"author,omitempty"`
+		ForgeURL    string   `json:"forge_url,omitempty"`
+		DeployTo    string   `json:"target,omitempty"`
+		DeployTask  string   `json:"task,omitempty"`
+		Commit      Commit   `json:"commit"`
+		Parent      int64    `json:"parent,omitempty"`
+		Cron        string   `json:"cron,omitempty"`
+		Release     string   `json:"release,omitempty"`
+		Author      string   `json:"author,omitempty"`
 
 		// Deprecated: remove in next major
 		Avatar string `json:"avatar,omitempty"`

@@ -191,7 +191,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	}
 
 	pipeline := &model.Pipeline{
-		Event: event,
+		Event:       event,
 		EventReason: []string{eventAction},
 		Commit: &model.Commit{
 			SHA: hook.GetPullRequest().GetHead().GetSHA(),

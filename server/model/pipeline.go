@@ -26,7 +26,7 @@ type Pipeline struct {
 	Author              string                 `json:"author"                  xorm:"author"` // The user sending the webhook data or triggering the pipeline event
 	Parent              int64                  `json:"parent"                  xorm:"parent"`
 	Event               WebhookEvent           `json:"event"                   xorm:"event"`
-	EventReason          []string               `json:"event_reason"            xorm:"json 'event_reason'"`
+	EventReason         []string               `json:"event_reason"            xorm:"json 'event_reason'"`
 	Status              StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
 	Errors              []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
 	Created             int64                  `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
@@ -55,19 +55,19 @@ type Pipeline struct {
 type APIPipeline struct {
 	*Pipeline
 
-	DeployTo          string   `json:"deploy_to"`               // deprecated, use deployment.target instead
-	DeployTask        string   `json:"deploy_task"`             // deprecated, use deployment.task instead
-	Commit            string   `json:"commit"`                  // deprecated, use commit_pipeline.sha instead
-	Title             string   `json:"title"`                   // deprecated, use pull_request.title (pull_request & pull_request_closed) or deployment.description
-	Message           string   `json:"message"`                 // deprecated, use commit.message (pull_request, pull_request_closed & push), deployment.description, cron (cron) or tag_title (tag) instead
-	Timestamp         int64    `json:"timestamp"`               // deprecated, use created instead
-	Sender            string   `json:"sender"`                  // deprecated, use author instead
-	Email             string   `json:"author_email"`            // deprecated, use commit.author.email instead
-	PullRequestLabels []string `json:"pr_labels,omitempty"`     // deprecated, use pull_request.labels instead
-	FromFork          bool     `json:"from_fork,omitempty"`     // deprecated, use pull_request.from_fork instead
-	IsPrerelease      bool     `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
-	Avatar            string   `json:"avatar"`                  // deprecated, use author_avatar instead
-	PullRequestMilestone string                 `json:"pr_milestone,omitempty"` // deprecated, use pull_request.milestone instead
+	DeployTo             string   `json:"deploy_to"`               // deprecated, use deployment.target instead
+	DeployTask           string   `json:"deploy_task"`             // deprecated, use deployment.task instead
+	Commit               string   `json:"commit"`                  // deprecated, use commit_pipeline.sha instead
+	Title                string   `json:"title"`                   // deprecated, use pull_request.title (pull_request & pull_request_closed) or deployment.description
+	Message              string   `json:"message"`                 // deprecated, use commit.message (pull_request, pull_request_closed & push), deployment.description, cron (cron) or tag_title (tag) instead
+	Timestamp            int64    `json:"timestamp"`               // deprecated, use created instead
+	Sender               string   `json:"sender"`                  // deprecated, use author instead
+	Email                string   `json:"author_email"`            // deprecated, use commit.author.email instead
+	PullRequestLabels    []string `json:"pr_labels,omitempty"`     // deprecated, use pull_request.labels instead
+	FromFork             bool     `json:"from_fork,omitempty"`     // deprecated, use pull_request.from_fork instead
+	IsPrerelease         bool     `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
+	Avatar               string   `json:"avatar"`                  // deprecated, use author_avatar instead
+	PullRequestMilestone string   `json:"pr_milestone,omitempty"`  // deprecated, use pull_request.milestone instead
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
