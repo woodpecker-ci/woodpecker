@@ -287,8 +287,12 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 		return nil, err
 	}
 
-	contents, _, err := client.ListContents(r.Owner, r.Name, b.Commit.SHA, f)
+	// List files in repository
+	contents, resp, err := client.ListContents(r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
+		}
 		return nil, err
 	}
 

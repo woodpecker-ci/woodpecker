@@ -26,7 +26,7 @@ import (
 )
 
 func TestLineWriter(t *testing.T) {
-	peer := mocks.NewPeer(t)
+	peer := mocks.NewMockPeer(t)
 	peer.On("EnqueueLog", mock.Anything)
 
 	secrets := []string{"world"}

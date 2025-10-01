@@ -188,6 +188,10 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
+	if state.Exited {
+		server.Config.Services.LogStore.StepFinished(step)
+	}
+
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
 		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err

@@ -28,7 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	mocks_manager "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -46,7 +46,7 @@ func TestGetPipelines(t *testing.T) {
 	t.Run("should get pipelines", func(t *testing.T) {
 		pipelines := []*model.Pipeline{fakePipeline}
 
-		mockStore := store_mocks.NewStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
 
 		w := httptest.NewRecorder()
@@ -71,7 +71,7 @@ func TestGetPipelines(t *testing.T) {
 	t.Run("should parse pipeline filter", func(t *testing.T) {
 		pipelines := []*model.Pipeline{fakePipeline}
 
-		mockStore := store_mocks.NewStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -86,7 +86,7 @@ func TestGetPipelines(t *testing.T) {
 	t.Run("should parse pipeline filter with tz offset", func(t *testing.T) {
 		pipelines := []*model.Pipeline{fakePipeline}
 
-		mockStore := store_mocks.NewStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -100,7 +100,7 @@ func TestGetPipelines(t *testing.T) {
 
 	t.Run("should filter pipelines by events", func(t *testing.T) {
 		pipelines := []*model.Pipeline{fakePipeline}
-		mockStore := store_mocks.NewStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
 
 		w := httptest.NewRecorder()
@@ -121,7 +121,7 @@ func TestDeletePipeline(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("should delete pipeline", func(t *testing.T) {
-		mockStore := store_mocks.NewStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("GetPipelineNumber", mock.Anything, mock.Anything).Return(fakePipeline, nil)
 		mockStore.On("DeletePipeline", mock.Anything).Return(nil)
 
@@ -148,7 +148,7 @@ func TestDeletePipeline(t *testing.T) {
 		fakePipeline := *fakePipeline
 		fakePipeline.Status = model.StatusPending
 
-		mockStore := store_mocks.NewStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("GetPipelineNumber", mock.Anything, mock.Anything).Return(&fakePipeline, nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -175,15 +175,15 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 	fakeRepo := &model.Repo{ID: 1}
 
-	mockForge := forge_mocks.NewForge(t)
+	mockForge := forge_mocks.NewMockForge(t)
 	mockForge.On("Name").Return("mock")
 	mockForge.On("URL").Return("https://codeberg.org")
 
-	mockManager := mocks_manager.NewManager(t)
+	mockManager := manager_mocks.NewMockManager(t)
 	mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 	server.Config.Services.Manager = mockManager
 
-	mockStore := store_mocks.NewStore(t)
+	mockStore := store_mocks.NewMockStore(t)
 	mockStore.On("GetPipelineNumber", mock.Anything, int64(2)).Return(fakePipeline, nil)
 	mockStore.On("GetPipelineLastBefore", mock.Anything, mock.Anything, int64(2)).Return(prevPipeline, nil)
 
@@ -220,7 +220,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		})
 
 		t.Run("should return not found for non-existent pipeline", func(t *testing.T) {
-			mockStore := store_mocks.NewStore(t)
+			mockStore := store_mocks.NewMockStore(t)
 			mockStore.On("GetPipelineNumber", mock.Anything, int64(3)).Return((*model.Pipeline)(nil), types.RecordNotExist)
 
 			w := httptest.NewRecorder()

@@ -638,7 +638,7 @@ func TestSanitizePath(t *testing.T) {
 }
 
 func getMockForge(t *testing.T) forge.Forge {
-	forge := mocks.NewForge(t)
+	forge := mocks.NewMockForge(t)
 	forge.On("Name").Return("mock")
 	forge.On("URL").Return("https://codeberg.org")
 	return forge
