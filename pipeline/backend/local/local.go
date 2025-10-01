@@ -156,12 +156,13 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 		return nil, err
 	}
 
-	cmd, ok := state.stepCMDs.Load(step.UUID)
+	boxedCmd, ok := state.stepCMDs.Load(step.UUID)
 	if !ok {
 		return nil, fmt.Errorf("step cmd for %s not found", step.UUID)
 	}
 
-	err = cmd.(*exec.Cmd).Wait()
+	cmd, _ := boxedCmd.(*exec.Cmd)
+	err = cmd.Wait()
 	ExitCode := 0
 
 	var execExitError *exec.ExitError
@@ -182,13 +183,14 @@ func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (
 	if err != nil {
 		return nil, err
 	}
-	reader, found := state.stepOutputs.Load(step.UUID)
-	if !found || reader == nil {
+	boxedReader, found := state.stepOutputs.Load(step.UUID)
+	if !found || boxedReader == nil {
 		return nil, ErrStepReaderNotFound
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
-	return reader.(io.ReadCloser), nil
+	reader, _ := boxedReader.(io.ReadCloser)
+	return reader, nil
 }
 
 func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {

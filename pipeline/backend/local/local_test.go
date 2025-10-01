@@ -42,8 +42,7 @@ func TestIsAvailable(t *testing.T) {
 	t.Run("not available in container", func(t *testing.T) {
 		backend := New()
 
-		os.Setenv("WOODPECKER_IN_CONTAINER", "true")
-		defer os.Unsetenv("WOODPECKER_IN_CONTAINER")
+		t.Setenv("WOODPECKER_IN_CONTAINER", "true")
 
 		available := backend.IsAvailable(context.Background())
 		assert.False(t, available)
@@ -59,7 +58,7 @@ func TestIsAvailable(t *testing.T) {
 }
 
 func TestLoad(t *testing.T) {
-	backend := New().(*local)
+	backend, _ := New().(*local)
 
 	t.Run("load without cli context", func(t *testing.T) {
 		ctx := context.Background()
@@ -91,7 +90,7 @@ func TestLoad(t *testing.T) {
 }
 
 func TestSetupWorkflow(t *testing.T) {
-	backend := New().(*local)
+	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
 	ctx := context.Background()
@@ -123,7 +122,7 @@ func TestSetupWorkflow(t *testing.T) {
 }
 
 func TestDestroyWorkflow(t *testing.T) {
-	backend := New().(*local)
+	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
 	ctx := context.Background()
@@ -159,7 +158,8 @@ func prepairEnv(t *testing.T) {
 	t.Cleanup(func() {
 		for i := range prevEnv {
 			env := strings.SplitN(prevEnv[i], "=", 2)
-			os.Setenv(env[0], env[1])
+			//nolint:usetesting // reason: the suggested t.Setenv will be undone on t.Run() end witch we explizite dont want here
+			_ = os.Setenv(env[0], env[1])
 		}
 	})
 }
@@ -187,7 +187,7 @@ func TestRunStep(t *testing.T) {
 	prepairEnv(t)
 	os.Setenv("PATH", strings.Join(path, ":"))
 
-	backend := New().(*local)
+	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 	ctx := t.Context()
 	taskUUID := "test-run-tasks"
@@ -341,7 +341,7 @@ _=/run/current-system/sw/bin/env
 }
 
 func TestStateManagement(t *testing.T) {
-	backend := New().(*local)
+	backend, _ := New().(*local)
 
 	t.Run("save and get state", func(t *testing.T) {
 		taskUUID := "test-state-uuid"
@@ -385,7 +385,7 @@ func TestStateManagement(t *testing.T) {
 }
 
 func TestConcurrentWorkflows(t *testing.T) {
-	backend := New().(*local)
+	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
 	ctx := context.Background()
