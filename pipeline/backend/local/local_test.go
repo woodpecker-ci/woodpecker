@@ -185,6 +185,7 @@ func TestRunStep(t *testing.T) {
 	path = append(path, altShellDir)
 
 	prepairEnv(t)
+	//nolint:usetesting // reason: we use prepairEnv()
 	os.Setenv("PATH", strings.Join(path, ":"))
 
 	backend, _ := New().(*local)
