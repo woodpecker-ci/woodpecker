@@ -20,6 +20,10 @@
 - Bump buildx and limit max parallel builds [[#5579](https://github.com/woodpecker-ci/woodpecker/pull/5579)]
 - Don't split language if not required [[#5576](https://github.com/woodpecker-ci/woodpecker/pull/5576)]
 
+### 📚 Documentation
+
+- Document pipeline backend engine interface precisely [[#5583](https://github.com/woodpecker-ci/woodpecker/pull/5583)]
+
 ### 📦️ Dependency
 
 - chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.2 [[#5577](https://github.com/woodpecker-ci/woodpecker/pull/5577)]
