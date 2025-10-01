@@ -16,6 +16,7 @@
 
 ### 🐛 Bug Fixes
 
+- local backend: fix steps having logs form other steps [[#5582](https://github.com/woodpecker-ci/woodpecker/pull/5582)]
 - local backend: fix windows cmd.exe command escaping [[#5569](https://github.com/woodpecker-ci/woodpecker/pull/5569)]
 - Bump buildx and limit max parallel builds [[#5579](https://github.com/woodpecker-ci/woodpecker/pull/5579)]
 - Don't split language if not required [[#5576](https://github.com/woodpecker-ci/woodpecker/pull/5576)]
