@@ -12,7 +12,7 @@
 
 ### 📈 Enhancement
 
-- local backend test shells if unknown [[#5570](https://github.com/woodpecker-ci/woodpecker/pull/5570)]
+- local backend: test shells if unknown [[#5570](https://github.com/woodpecker-ci/woodpecker/pull/5570)]
 
 ### 🐛 Bug Fixes
 
