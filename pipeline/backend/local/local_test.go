@@ -247,7 +247,7 @@ func TestRunStep(t *testing.T) {
 			outputDataMutex.Lock()
 			go outputDataMutex.Unlock()
 			outputLines := strings.Split(strings.TrimSpace(string(outputData)), "\n")
-			// as env output can varry per system we have to extract and sort it
+			// we first test output without environments
 			wantBeforeEnvs := []string{
 				"+ echo hello",
 				"hello",
@@ -255,7 +255,7 @@ func TestRunStep(t *testing.T) {
 			}
 			gotBeforeEnvs := outputLines[:len(wantBeforeEnvs)]
 			assert.Equal(t, wantBeforeEnvs, gotBeforeEnvs)
-			// we filter out nixos specific stuff
+			// we filter out nixos specific stuff catched up in env output
 			gotEnvs := slices.DeleteFunc(outputLines[len(wantBeforeEnvs):], func(s string) bool {
 				return strings.HasPrefix(s, "_=") || strings.HasPrefix(s, "SHLVL=")
 			})
