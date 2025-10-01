@@ -213,7 +213,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 
 	// normalize label events to match other forges
 	if eventAction == actionLabeled || eventAction == actionUnlabeled {
-		if len(pipeline.PullRequestLabels) == 0 {
+		if len(pipeline.PullRequest.Labels) == 0 {
 			pipeline.EventReason = []string{labelCleared}
 		} else {
 			pipeline.EventReason = []string{labelUpdated}

@@ -20,7 +20,6 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -62,32 +61,21 @@ var updatePipelineStructure = xormigrate.Migration{
 		}
 
 		type pipelines struct {
-			ID                  int64                  `json:"id"                  xorm:"pk autoincr 'id'"`
-			RepoID              int64                  `json:"-"                   xorm:"UNIQUE(s) INDEX 'repo_id'"`
-			Number              int64                  `json:"number"              xorm:"UNIQUE(s) 'number'"`
-			Parent              int64                  `json:"parent"              xorm:"parent"`
-			Status              model.StatusValue      `json:"status"              xorm:"INDEX 'status'"`
-			Errors              []*types.PipelineError `json:"errors"              xorm:"json 'errors'"`
-			Created             int64                  `json:"created"             xorm:"'created' NOT NULL DEFAULT 0 created"`
-			Updated             int64                  `json:"updated"             xorm:"'updated' NOT NULL DEFAULT 0 updated"`
-			Started             int64                  `json:"started"             xorm:"started"`
-			Finished            int64                  `json:"finished"            xorm:"finished"`
-			Reviewer            string                 `json:"reviewed_by"         xorm:"reviewer"`
-			Reviewed            int64                  `json:"reviewed"            xorm:"reviewed"`
-			AdditionalVariables map[string]string      `json:"variables,omitempty" xorm:"json 'additional_variables'"`
+			ID       int64              `xorm:"pk autoincr 'id'"`
+			Event    model.WebhookEvent `xorm:"event"`
+			Author   string             `xorm:"INDEX 'author'"`
+			ForgeURL string             `xorm:"forge_url"`
+			Ref      string             `xorm:"ref"`
 
-			// event related
-
-			Event model.WebhookEvent `json:"event"                       xorm:"event"`
-			// TODO change json to 'commit' in next major
-			Commit       *commit  `json:"commit_pipeline"             xorm:"json 'commit'"`
-			Branch       string   `json:"branch"                      xorm:"branch"`
-			Ref          string   `json:"ref"                         xorm:"ref"`
-			Refspec      string   `json:"refspec"                     xorm:"refspec"`
-			ForgeURL     string   `json:"forge_url"                   xorm:"forge_url"`
-			Author       string   `json:"author"                      xorm:"author"` // The user sending the webhook data or triggering the pipeline event
-			Avatar       string   `json:"author_avatar"               xorm:"varchar(500) 'avatar'"`
-			ChangedFiles []string `json:"changed_files,omitempty"     xorm:"LONGTEXT 'changed_files'"`
+			Commit            string   `xorm:"commit"`
+			Title             string   `xorm:"title"`
+			Message           string   `xorm:"TEXT 'message'"`
+			Sender            string   `xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
+			DeployTo          string   `xorm:"deploy"`
+			DeployTask        string   `xorm:"deploy_task"`
+			PullRequestLabels []string `xorm:"json 'pr_labels'"`
+			FromFork          bool     `xorm:"from_fork"`
+			IsPrerelease      bool     `xorm:"is_prerelease"`
 
 			// new fields
 			CommitNew   *commit      `xorm:"json 'commit_new'"`

@@ -286,7 +286,7 @@ func convertPullRequest(from *gitea.PullRequest) *model.PullRequest {
 		Index:     model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
 		Title:     from.Title,
 		Labels:    convertLabels(from.Labels),
-		Milestone: convertMilestone(hook.PullRequest.Milestone),
+		Milestone: convertMilestone(from.Milestone),
 		FromFork:  from.Head.RepoID != from.Base.RepoID,
 	}
 }

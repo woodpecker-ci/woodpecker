@@ -208,7 +208,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README.md for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README.md for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
@@ -307,7 +307,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker-test", hookRepo.Name)
-				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Equal(t, "Add new file", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullClosed, pipeline.Event)
 			}
@@ -328,7 +328,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
 				assert.Equal(t, []string{"title_edited", "description_edited"}, pipeline.EventReason)
@@ -381,7 +381,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
 				assert.Equal(t, []string{"review_requested"}, pipeline.EventReason)

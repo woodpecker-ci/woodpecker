@@ -129,7 +129,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		},
 		Cron:   pipeline.Cron,
 		Author: pipeline.Author,
-		Avatar: pipeline.Avatar,
+		Avatar: pipeline.AuthorAvatar,
 	}
 
 	if pipeline.PullRequest != nil {

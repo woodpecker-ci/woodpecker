@@ -36,7 +36,7 @@ pipelines.branch as pipeline_branch,
 pipelines.ref as pipeline_ref,
 pipelines.refspec as pipeline_refspec,
 pipelines.deployment as pipeline_deployment,
-pipelines.pr as pipeline_pr,
+pipelines.pull_request as pipeline_pr,
 pipelines.release as pipeline_release,
 pipelines.author as pipeline_author,
 pipelines.avatar as pipeline_avatar`

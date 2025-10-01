@@ -828,7 +828,7 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		if err != nil {
 			return nil, err
 		}
-		pipeline.PullRequestMilestone = milestone.Title
+		pipeline.PullRequest.Milestone = milestone.Title
 	}
 
 	return pipeline, nil
@@ -851,7 +851,7 @@ func (g *GitLab) loadReleaseAuthor(ctx context.Context, tmpRepo *model.Repo, pip
 		return nil, err
 	}
 
-	client, err := newClient(g.url, user.AccessToken, g.SkipVerify)
+	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
 		return nil, err
 	}
