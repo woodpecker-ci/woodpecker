@@ -216,6 +216,16 @@ func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID str
 		return err
 	}
 
+	// clean up steps not cleaned up because of context cancel or detached function
+	state.stepState.Range(func(_, value any) bool {
+		state, _ := value.(*stepState)
+		_ = state.output.Close()
+		state.output = nil
+		_ = state.cmd.Cancel()
+		state.cmd = nil
+		return true
+	})
+
 	err = os.RemoveAll(state.baseDir)
 	if err != nil {
 		return err
