@@ -22,8 +22,12 @@ import (
 )
 
 var (
-	ErrNoShellSet = errors.New("no shell was set")
-	ErrNoCmdSet   = errors.New("no commands where set")
+	ErrUnsupportedStepType   = errors.New("unsupported step type")
+	ErrStepReaderNotFound    = errors.New("could not found pipe reader for step")
+	ErrWorkflowStateNotFound = errors.New("workflow state not found")
+	ErrStepStateNotFound     = errors.New("step state not found")
+	ErrNoShellSet            = errors.New("no shell was set")
+	ErrNoCmdSet              = errors.New("no commands where set")
 )
 
 // ErrNoPosixShell indicates that a shell was assumed to be POSIX-compatible but failed the test.
