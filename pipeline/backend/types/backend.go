@@ -142,9 +142,9 @@ type Backend interface {
 	DestroyStep(ctx context.Context, step *Step, taskUUID string) error
 
 	// DestroyWorkflow cleans up all workflow-level resources.
-	// This is called after all steps have been destroyed (via DestroyStep).
 	//
 	// Implementations should:
+	// - Destroy steps still running in the background (detached steps and services) 
 	// - Remove workflow-specific workspaces, networks, or namespaces
 	// - Clean up shared volumes or storage
 	// - Ensure complete cleanup so the taskUUID can be reused later
