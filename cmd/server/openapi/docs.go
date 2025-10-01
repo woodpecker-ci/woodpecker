@@ -5971,7 +5971,6 @@ const docTemplate = `{
                 "ForgeTypeAddon"
             ]
         },
-<<<<<<< HEAD
         "model.Pipeline": {
             "type": "object",
             "properties": {
@@ -5987,30 +5986,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "changed_files": {
-=======
-        "model.QueueTask": {
-            "type": "object",
-            "properties": {
-                "agent_id": {
-                    "type": "integer"
-                },
-                "agent_name": {
-                    "type": "string"
-                },
-                "dep_status": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/StatusValue"
-                    }
-                },
-                "dependencies": {
->>>>>>> e9c545e25b997bd9e8f99d5c18f4ecc1b3f3c301
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-<<<<<<< HEAD
                 "commit_pipeline": {
                     "description": "TODO change json to 'commit' in next major",
                     "allOf": [
@@ -6085,23 +6065,49 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "variables": {
-=======
-                "id": {
-                    "type": "string"
-                },
-                "labels": {
->>>>>>> e9c545e25b997bd9e8f99d5c18f4ecc1b3f3c301
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
                     }
                 },
-<<<<<<< HEAD
                 "workflows": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.Workflow"
-=======
+                    }
+                }
+            }
+        },
+        "model.QueueTask": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "integer"
+                },
+                "agent_name": {
+                    "type": "string"
+                },
+                "dep_status": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/StatusValue"
+                    }
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "name": {
                     "type": "string"
                 },
@@ -6121,12 +6127,10 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
->>>>>>> e9c545e25b997bd9e8f99d5c18f4ecc1b3f3c301
                     }
                 }
             }
         },
-<<<<<<< HEAD
         "model.Release": {
             "type": "object",
             "properties": {
@@ -6138,8 +6142,6 @@ const docTemplate = `{
                 }
             }
         },
-=======
->>>>>>> e9c545e25b997bd9e8f99d5c18f4ecc1b3f3c301
         "model.TrustedConfiguration": {
             "type": "object",
             "properties": {
