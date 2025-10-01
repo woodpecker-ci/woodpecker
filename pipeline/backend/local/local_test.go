@@ -351,7 +351,7 @@ func TestStateManagement(t *testing.T) {
 			workspaceDir: "/tmp/test/2workspace",
 		}
 
-		backend.saveState(taskUUID, state)
+		backend.workflows.Store(taskUUID, state)
 
 		retrieved, err := backend.getState(taskUUID)
 		require.NoError(t, err)
@@ -369,14 +369,14 @@ func TestStateManagement(t *testing.T) {
 		taskUUID := "test-delete-uuid"
 		state := &workflowState{}
 
-		backend.saveState(taskUUID, state)
+		backend.workflows.Store(taskUUID, state)
 
 		// Verify state exists
 		_, err := backend.getState(taskUUID)
 		require.NoError(t, err)
 
 		// Delete state
-		backend.deleteState(taskUUID)
+		backend.workflows.Delete(taskUUID)
 
 		// Verify state is gone
 		_, err = backend.getState(taskUUID)

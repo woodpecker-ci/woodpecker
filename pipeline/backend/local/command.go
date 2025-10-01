@@ -17,13 +17,58 @@
 package local
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 
 	"al.essio.dev/pkg/shellescape"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
+
+// execCommands use step.Image as shell and run the commands in it.
+func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+	if err := checkShellExistence(step.Image); err != nil {
+		return err
+	}
+
+	// Prepare commands
+	// TODO: support `entrypoint` from pipeline config
+	args, err := e.genCmdByShell(step.Image, step.Commands)
+	if err != nil {
+		return fmt.Errorf("could not convert commands into args: %w", err)
+	}
+
+	// Use "image name" as run command (indicate shell)
+	cmd := exec.CommandContext(ctx, step.Image, args...)
+	cmd.Env = env
+	cmd.Dir = state.workspaceDir
+
+	reader, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	if e.os == "windows" {
+		// we get non utf8 output from windows so just sanitize it
+		// TODO: remove hack
+		reader = io.NopCloser(transform.NewReader(reader, unicode.UTF8.NewDecoder().Transformer))
+	}
+
+	// Get output and redirect Stderr to Stdout
+	cmd.Stderr = cmd.Stdout
+
+	// Save state
+	state.stepCMDs.Store(step.UUID, cmd)
+	state.stepOutputs.Store(step.UUID, reader)
+
+	return cmd.Start()
+}
 
 func checkShellExistence(shell string) error {
 	_, err := exec.LookPath(shell)

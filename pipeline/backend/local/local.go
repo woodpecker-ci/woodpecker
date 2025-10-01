@@ -28,8 +28,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -112,7 +110,7 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 		return err
 	}
 
-	e.saveState(taskUUID, state)
+	e.workflows.Store(taskUUID, state)
 
 	return nil
 }
@@ -150,71 +148,6 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 	default:
 		return ErrUnsupportedStepType
 	}
-}
-
-// execCommands use step.Image as shell and run the commands in it.
-func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	if err := checkShellExistence(step.Image); err != nil {
-		return err
-	}
-
-	// Prepare commands
-	// TODO: support `entrypoint` from pipeline config
-	args, err := e.genCmdByShell(step.Image, step.Commands)
-	if err != nil {
-		return fmt.Errorf("could not convert commands into args: %w", err)
-	}
-
-	// Use "image name" as run command (indicate shell)
-	cmd := exec.CommandContext(ctx, step.Image, args...)
-	cmd.Env = env
-	cmd.Dir = state.workspaceDir
-
-	reader, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-
-	if e.os == "windows" {
-		// we get non utf8 output from windows so just sanitize it
-		// TODO: remove hack
-		reader = io.NopCloser(transform.NewReader(reader, unicode.UTF8.NewDecoder().Transformer))
-	}
-
-	// Get output and redirect Stderr to Stdout
-	cmd.Stderr = cmd.Stdout
-
-	// Save state
-	state.stepCMDs.Store(step.UUID, cmd)
-	state.stepOutputs.Store(step.UUID, reader)
-
-	return cmd.Start()
-}
-
-// execPlugin use step.Image as exec binary.
-func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	binary, err := exec.LookPath(step.Image)
-	if err != nil {
-		return fmt.Errorf("lookup plugin binary: %w", err)
-	}
-
-	cmd := exec.CommandContext(ctx, binary)
-	cmd.Env = env
-	cmd.Dir = state.workspaceDir
-
-	reader, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-
-	// Get output and redirect Stderr to Stdout
-	cmd.Stderr = cmd.Stdout
-
-	// Save state
-	state.stepCMDs.Store(step.UUID, cmd)
-	state.stepOutputs.Store(step.UUID, reader)
-
-	return cmd.Start()
 }
 
 // WaitStep for the pipeline step to complete and returns
@@ -286,7 +219,7 @@ func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID str
 		return err
 	}
 
-	e.deleteState(taskUUID)
+	e.workflows.Delete(taskUUID)
 
 	return err
 }
@@ -303,12 +236,4 @@ func (e *local) getState(taskUUID string) (*workflowState, error) {
 	}
 
 	return s, nil
-}
-
-func (e *local) saveState(taskUUID string, state *workflowState) {
-	e.workflows.Store(taskUUID, state)
-}
-
-func (e *local) deleteState(taskUUID string) {
-	e.workflows.Delete(taskUUID)
 }
