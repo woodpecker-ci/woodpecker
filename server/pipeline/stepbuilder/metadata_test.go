@@ -25,7 +25,7 @@ import (
 )
 
 func TestMetadataFromStruct(t *testing.T) {
-	forge := mocks.NewForge(t)
+	forge := mocks.NewMockForge(t)
 	forge.On("Name").Return("gitea")
 	forge.On("URL").Return("https://gitea.com")
 

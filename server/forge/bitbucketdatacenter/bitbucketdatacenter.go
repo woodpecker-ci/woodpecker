@@ -477,40 +477,28 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 }
 
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	ev, payload, err := bb.ParsePayloadWithoutSignature(r)
+	hook, err := parseHook(r, c.url)
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to parse payload from webhook invocation: %w", err)
+		return nil, nil, fmt.Errorf("unable to parse hook: %w", err)
 	}
 
-	var repo *model.Repo
-	var pipe *model.Pipeline
-
-	switch e := ev.(type) {
-	case *bb.RepositoryPushEvent:
-		repo = convertRepo(&e.Repository, nil, "")
-		pipe = convertRepositoryPushEvent(e, c.url)
-	case *bb.PullRequestEvent:
-		repo = convertRepo(&e.PullRequest.Source.Repository, nil, "")
-		pipe = convertPullRequestEvent(e, c.url)
-	default:
-		return nil, nil, nil
-	}
-
-	user, repo, err := c.getUserAndRepo(ctx, repo)
+	user, repo, err := c.getUserAndRepo(ctx, hook.Repo)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get user and repo: %w", err)
 	}
 
-	err = bb.ValidateSignature(r, payload, []byte(repo.Hash))
+	err = bb.ValidateSignature(r, hook.Payload, []byte(repo.Hash))
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to validate signature on incoming webhook payload: %w", err)
 	}
 
-	switch e := ev.(type) {
+	var pipe *model.Pipeline
+
+	switch e := hook.Event.(type) {
 	case *bb.RepositoryPushEvent:
-		pipe, err = c.updatePipelineFromCommit(ctx, user, repo, pipe)
+		pipe, err = c.updatePipelineFromCommit(ctx, user, repo, hook.Pipeline)
 	case *bb.PullRequestEvent:
-		pipe, err = c.updatePipelineFromPullRequest(ctx, user, repo, pipe, e.PullRequest.ID)
+		pipe, err = c.updatePipelineFromPullRequest(ctx, user, repo, hook.Pipeline, e.PullRequest.ID)
 	}
 
 	if err != nil {

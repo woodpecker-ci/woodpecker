@@ -367,5 +367,5 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 		}
 	}
 
-	return
+	return err
 }

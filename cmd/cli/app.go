@@ -41,6 +41,10 @@ func newApp() *cli.Command {
 	app.Before = common.Before
 	app.After = common.After
 	app.Suggest = true
+	app.ConfigureShellCompletionCommand = func(c *cli.Command) {
+		c.Hidden = false
+		c.Usage = "generate completion script for the specified shell"
+	}
 	app.Commands = []*cli.Command{
 		admin.Command,
 		exec.Command,

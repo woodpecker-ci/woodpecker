@@ -15,7 +15,6 @@
 package local
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -29,11 +28,6 @@ var notAllowedEnvVarOverwrites = []string{
 	"SHELL",
 	"CI_WORKSPACE",
 }
-
-var (
-	ErrUnsupportedStepType   = errors.New("unsupported step type")
-	ErrWorkflowStateNotFound = errors.New("workflow state not found")
-)
 
 const netrcFile = `
 machine %s

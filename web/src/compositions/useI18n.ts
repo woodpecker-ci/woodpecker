@@ -1,11 +1,15 @@
 import { useStorage } from '@vueuse/core';
+import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
 import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import { useDate } from './useDate';
 
 export function getUserLanguage(): string {
-  const browserLocale = navigator.language.split('-')[0];
+  let browserLocale = navigator.language;
+  if (!SUPPORTED_LOCALES.includes(browserLocale)) {
+    browserLocale = browserLocale.split('-')[0];
+  }
   const selectedLocale = useStorage('woodpecker:locale', browserLocale).value;
 
   return selectedLocale;

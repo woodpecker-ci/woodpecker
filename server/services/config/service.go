@@ -22,8 +22,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-//go:generate mockery --name Service --output mocks --case underscore
-
 type Service interface {
 	Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, restart bool) (configData []*types.FileMeta, err error)
 }

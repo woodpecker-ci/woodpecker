@@ -24,12 +24,12 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestRegisterAgent(t *testing.T) {
 	t.Run("When existing agent Name is empty it should update Name with hostname from metadata", func(t *testing.T) {
-		store := mocks_store.NewStore(t)
+		store := store_mocks.NewMockStore(t)
 		storeAgent := new(model.Agent)
 		storeAgent.ID = 1337
 		updatedAgent := model.Agent{
@@ -70,7 +70,7 @@ func TestRegisterAgent(t *testing.T) {
 	})
 
 	t.Run("When existing agent hostname is present it should not update the hostname", func(t *testing.T) {
-		store := mocks_store.NewStore(t)
+		store := store_mocks.NewMockStore(t)
 		storeAgent := new(model.Agent)
 		storeAgent.ID = 1337
 		storeAgent.Name = "originalHostname"
@@ -117,7 +117,7 @@ func TestUpdateAgentLastWork(t *testing.T) {
 		agent := model.Agent{
 			LastWork: 0,
 		}
-		store := mocks_store.NewStore(t)
+		store := store_mocks.NewMockStore(t)
 		rpc := RPC{
 			store: store,
 		}
@@ -134,7 +134,7 @@ func TestUpdateAgentLastWork(t *testing.T) {
 		agent := model.Agent{
 			LastWork: lastWork,
 		}
-		store := mocks_store.NewStore(t)
+		store := store_mocks.NewMockStore(t)
 		rpc := RPC{
 			store: store,
 		}

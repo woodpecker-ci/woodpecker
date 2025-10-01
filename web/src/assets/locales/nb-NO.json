@@ -1,0 +1,583 @@
+{
+    "user": {
+        "settings": {
+            "cli_and_api": {
+                "api_usage": "Eksempel på API-bruk",
+                "cli_usage": "Eksempel på CLI-bruk",
+                "cli_and_api": "CLI & API",
+                "desc": "Personlig Tilgangs-Token, CLI og API bruk",
+                "token": "Personlig Tilgangs-Token",
+                "download_cli": "Last ned CLI",
+                "reset_token": "Nullstill token",
+                "swagger_ui": "Swagger UI"
+            },
+            "general": {
+                "theme": {
+                    "dark": "Mørkt",
+                    "theme": "Tema",
+                    "light": "Lyst",
+                    "auto": "Automatisk"
+                },
+                "general": "Konto",
+                "language": "Språk"
+            },
+            "settings": "Bruker-instillinger",
+            "secrets": {
+                "desc": "Bruker-hemmeligheter kan brukes i alle arbeidsflyter eid av brukeren."
+            },
+            "registries": {
+                "desc": "Brukerens register-hemmeligheter kan brukes for å hente private imager for alle personlige arbeidsflyter."
+            },
+            "agents": {
+                "desc": "Agenter som er registrert til dine personlige repoer."
+            }
+        }
+    },
+    "registries": {
+        "desc": "Register-hemmeligheter kan bli lagt til for å bruke private imager i arbeidsflyter.",
+        "created": "Register-hemmeligheter opprettet",
+        "registries": "Registere",
+        "credentials": "Register-hemmeligheter",
+        "none": "Det finnes ingen register-hemmeligheter enda.",
+        "address": {
+            "address": "Adresse",
+            "desc": "Register Adresse (e.g. docker.io)"
+        },
+        "show": "Vis registere",
+        "save": "Lagre register",
+        "add": "Legg til register",
+        "view": "Vis register",
+        "edit": "Rediger register",
+        "delete": "Slett register",
+        "delete_confirm": "Ønsker du virkelig å slette dette registeret?",
+        "saved": "Register-hemmeligheter lagret",
+        "deleted": "Register-hemmeligheter slettet"
+    },
+    "secrets": {
+        "desc": "Hemmeligheter kan bli brukt i alle arbeidsflyter for dette arkivet.",
+        "plugins": {
+            "desc": "Liste over utvidelses-imager hvor denne hemmeligheten er tilgengelig. La være tom for å tillate alle utvidelser og normale steg.",
+            "images": "Kun tilgjengelig for følgende utvidelser"
+        },
+        "secrets": "Hemmeligheter",
+        "none": "Det finnes ingen hemmeligheter enda.",
+        "add": "Legg til hemmelighet",
+        "save": "Lagre hemmelighet",
+        "show": "Vis hemmeligheter",
+        "name": "Navn",
+        "value": "Verdi",
+        "delete_confirm": "Ønsker du virkelig å slette denne hemmeligheten?",
+        "deleted": "Hemmeligheten ble slettet",
+        "created": "Hemmeligheten ble opprettet",
+        "saved": "Hemmeligheten ble lagret",
+        "events": {
+            "events": "Tilgjengelig for følgende hendelser",
+            "warning": "Å tilgjengeliggjøre hemmeligheter for pull-forespørsler kan la skurker stjele hemmelighetene dine med en ondsinnet pull-forespørsel."
+        },
+        "edit": "Rediger hemmelighet",
+        "delete": "Slett hemmelighet"
+    },
+    "require_approval": {
+        "none": "Ingen",
+        "none_desc": "Alle hendelser kjører arbeidsflyter, inkludert pull-forespørsler. Denne instillingen kan være skadelig og er kun anbefalt for private tjenere.",
+        "desc": "Sikre deg mot at ondsinnede arbeidsflyter eksponerer hemmeligheter eller kjører skadelige oppgaver ved å godkjenne dem før kjøring.",
+        "require_approval_for": "Godkjenningskrav",
+        "forks": "Pull-forespørsler fra gafflede arkiver",
+        "pull_requests": "Alle pull-forespørsler",
+        "all_events": "Alle hendelser fra tilbyder",
+        "allowed_users": {
+            "allowed_users": "Tillatte brukere",
+            "desc": "Arbeidsflyter fra disse brukerne trenger aldri godkjenning."
+        }
+    },
+    "org_level_secret": "organisasjons-hemmelighet",
+    "oauth_error": "Feil under autentisering mot OAuth leverandør",
+    "forges_desc": "Konfigurer tilbydere av arkiver Woodpecker skal kjøre for.",
+    "login": "Logg inn",
+    "repos": "Arkiver",
+    "repositories": {
+        "title": "Arkiver",
+        "all": {
+            "title": "Alle arkiver",
+            "desc": "Arkiver sortert etter siste arbeidsflyt"
+        },
+        "last": {
+            "title": "Sist besøkt",
+            "desc": "Siste besøkte arkiver sortert etter besøkstid"
+        }
+    },
+    "docs": "Dokumentasjon",
+    "api": "API",
+    "logout": "Logg ut",
+    "search": "Søk…",
+    "username": "Brukernavn",
+    "password": "Passord",
+    "back": "Tilbake",
+    "unknown_error": "En ukjent feil oppsto",
+    "pipeline_feed": "Arbeidsflyts-historikk",
+    "empty_list": "{entity} finnes ikke!",
+    "not_found": {
+        "back_home": "Tilbake hjem",
+        "not_found": "Oi en 404! Enten har noe gått galt, eller du skrev inn feil adresse :-/"
+    },
+    "errors": {
+        "not_found": "Tjeneren kunne ikke finne det forespurte objektet"
+    },
+    "time": {
+        "not_started": "ikke påbegynt",
+        "just_now": "akkurat nå"
+    },
+    "repo": {
+        "manual_pipeline": {
+            "title": "Start en arbeidsflyt manuelt",
+            "trigger": "Kjør arbeidsflyt",
+            "select_branch": "Velg gren",
+            "variables": {
+                "delete": "Slett variabel",
+                "title": "Ytterligere arbeidsflyts-variabler",
+                "desc": "Oppgi ytterligere variabler for din arbeidsflyt. Variabler med samme navn blir overstyrt.",
+                "name": "Variabel-navn",
+                "value": "Verdi for variabel"
+            },
+            "show_pipelines": "Vis arbeidsflyter"
+        },
+        "deploy_pipeline": {
+            "title": "Start en utrulling for nåværende arbeidsflyt #{pipelineid}",
+            "enter_target": "Ønsket miljø for utrulling",
+            "enter_task": "Utrullings-oppgave",
+            "trigger": "Rull ut",
+            "variables": {
+                "delete": "Slett variabel",
+                "title": "Ytterligere variabler for arbeidsflyt",
+                "name": "Variabel-navn",
+                "value": "Verdi for variabel",
+                "desc": "Oppgi ytterligere variabler for bruk i din arbeidsflyt. Variabler med samme navn blir overskrevet."
+            }
+        },
+        "activity": "Aktivitet",
+        "branches": "Grener",
+        "pull_requests": "Pull-forespørsler",
+        "add": "Legg til arkiv",
+        "user_none": "Denne organisasjonen/brukeren har ingen prosjekter enda",
+        "not_allowed": "Du har ikke tilgang til dette arkivet",
+        "enable": {
+            "success": "Arkiv aktivert",
+            "enable": "Aktiver",
+            "enabled": "Allerede aktivert",
+            "disabled": "Deaktivert"
+        },
+        "visibility": {
+            "visibility": "Synlighet for prosjekt",
+            "public": {
+                "public": "Offentlig",
+                "desc": "Alle kan se prosjektet ditt uten å være logget inn."
+            },
+            "private": {
+                "private": "Privat",
+                "desc": "Bare du og andre eiere av arkivet kan se dette prosjektet."
+            },
+            "internal": {
+                "internal": "Intern",
+                "desc": "Bare brukere som er logget inn til denne Woodpecker-installasjonen kan se prosjektet."
+            }
+        },
+        "settings": {
+            "not_allowed": "Du har ikke tilgang til å se instillingene for dette arkivet",
+            "general": {
+                "general": "Prosjekt",
+                "project": "Prosjekt-instillinger",
+                "save": "Lagre instillingene",
+                "success": "Prosjekt-instillingene er oppdatert",
+                "pipeline_path": {
+                    "path": "Arbeidsflyts-sti",
+                    "default": "Som standard: .woodpecker/.{'{yaml,yml'} -> .woodpecker.yaml -> .woodpecker.yml",
+                    "desc_path_example": "min/sti/",
+                    "desc": "Stil til konfigurasjon for arbeidsflyt (for eksempel {0}. Mapper skal slutte med en {1}."
+                },
+                "allow_pr": {
+                    "allow": "Tillat Pull-Forespørsler",
+                    "desc": "Tillat kjøring av arbeidsflyter for pull-forespørsler."
+                },
+                "allow_deploy": {
+                    "allow": "Tillat Utrulling",
+                    "desc": "Tillat utrulling for vellykkede arbeidsflyter. All brukere med skrive-tilgang kan starte disse, så bruk med varsomhet."
+                },
+                "netrc_only_trusted": {
+                    "netrc_only_trusted": "Egenvalgte tillatte utvidelser for kloning",
+                    "desc": "Utvidelser som får tilgang til netrc-akkreditering som kan brukes for å klone arkiver fra tilbyderen eller oppdatere dem hos tilbyderen."
+                },
+                "trusted": {
+                    "trusted": "Betrodd",
+                    "network": {
+                        "network": "Nettverk",
+                        "desc": "Arbeidsflyt-kontainere får tilgang til nettverks-rettigheter som å endre DNS."
+                    },
+                    "volumes": {
+                        "volumes": "Volumer",
+                        "desc": "Arbeidsflyts-kontainere får tilgang til å montere volumer."
+                    },
+                    "security": {
+                        "security": "Sikkerhet",
+                        "desc": "Arbeidsflyts-kontainere får tilgang til sikkerhets-privilegier."
+                    }
+                },
+                "timeout": {
+                    "timeout": "Tidsavbrudd",
+                    "minutes": "Minutter"
+                },
+                "cancel_prev": {
+                    "cancel": "Avbryt tidligere arbeidsflyter",
+                    "desc": "Valgte hendelser avbryter ventende og kjørende arbeidsflyter for den samme hendelsen før de starter nye."
+                }
+            },
+            "crons": {
+                "crons": "Periodiske oppgaver",
+                "desc": "Periodiske oppgaver (cron) kan brukes for å kjøre gjentakende arbeidsflyter.",
+                "show": "Vis periodiske oppgaver",
+                "add": "Legg til periodisk oppgave",
+                "none": "Det er ingen periodiske oppgaver enda.",
+                "save": "Lagre periodisk oppgave",
+                "created": "Periodisk oppgave opprettet",
+                "saved": "Perioidsk oppgave lagret",
+                "deleted": "Periodisk oppgave slettet",
+                "not_executed_yet": "Ikke kjørt enda",
+                "run": "Kjør nå",
+                "branch": {
+                    "title": "Gren",
+                    "placeholder": "Gren (Bruker standard gren om ikke valgt)"
+                },
+                "name": {
+                    "name": "Navn",
+                    "placeholder": "Navn på periodisk oppgave"
+                },
+                "schedule": {
+                    "title": "Kjøringsplan (basert på UTC)",
+                    "placeholder": "Kjøringsplan"
+                },
+                "edit": "Rediger periodisk oppgave",
+                "delete": "Slett periodisk oppgave",
+                "next_exec": "Neste kjøring"
+            },
+            "badge": {
+                "badge": "Merke",
+                "type": "Syntaks",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Gren"
+            },
+            "actions": {
+                "actions": "Handlinger",
+                "repair": {
+                    "repair": "Reparer arkiv",
+                    "success": "Arkivet er reparert"
+                },
+                "disable": {
+                    "disable": "Deaktiver arkiv",
+                    "success": "Arkivet er deaktivert"
+                },
+                "enable": {
+                    "enable": "Aktiver arkiv",
+                    "success": "Arkivet er aktivert"
+                },
+                "delete": {
+                    "delete": "Slett arkiv",
+                    "confirm": "Alle data vil bli tap etter denne handlingen!\n\nVil du fortsette?",
+                    "success": "Arkivet er slettet"
+                }
+            }
+        },
+        "pipeline": {
+            "tasks": "Oppgaver",
+            "config": "Konfigurasjon",
+            "files": "Endrede filer",
+            "no_pipeline_steps": "Ingen arbeidsflyts-steg er tilgjengelige!",
+            "step_not_started": "Dette steget har ikke startet enda.",
+            "pipelines_for": "Arbeidsflyter for grenen \"{branch}\"",
+            "exit_code": "Avslutnings-kode {exitCode}",
+            "loading": "Laster.…",
+            "no_logs": "Ingen logger",
+            "pipeline": "Arbeidsflyt #{pipelineId}",
+            "log_title": "Logger for Steg",
+            "log_delete_confirm": "Ønsker du virkelig å slette steg-loggene?",
+            "log_delete_error": "En feil oppsto under sletting av steg-loggene",
+            "actions": {
+                "cancel": "Avbryt",
+                "restart": "Start igjen",
+                "canceled": "Dette steget har blitt avbrutt.",
+                "cancel_success": "Arbeidsflyt avbrutt",
+                "restart_success": "Arbeidsflyten er startet på nytt",
+                "log_download": "Last ned",
+                "log_delete": "Slett",
+                "log_auto_scroll_off": "Deaktiver automatisk scrolling",
+                "deploy": "Rull ut",
+                "log_auto_scroll": "Aktiver automatisk scrolling"
+            },
+            "protected": {
+                "awaits": "Arbeidsflyten venter på godkjenning fra en forvalter!",
+                "approve": "Godkjenn",
+                "decline": "Avvis",
+                "declined": "Denne arbeidsflyten er avvist!",
+                "approve_success": "Arbeidsflyten er godkjent",
+                "decline_success": "Arbeidsflyten er avvist"
+            },
+            "event": {
+                "push": "Push",
+                "tag": "Tagg",
+                "pr": "Pull-forespørsel",
+                "pr_metadata": "Metadata for Pull-forespørsel endret",
+                "deploy": "Rull ut",
+                "cron": "Gjentagende Oppgave",
+                "release": "Utgivelse",
+                "pr_closed": "Pull-forespørslen er merget/lukket",
+                "manual": "Manuell"
+            },
+            "status": {
+                "blocked": "blokkert",
+                "pending": "ventende",
+                "running": "kjørende",
+                "started": "startet",
+                "skipped": "hoppet over",
+                "success": "suksess",
+                "declined": "avvist",
+                "error": "feil",
+                "failure": "feilet",
+                "killed": "drept",
+                "status": "Status: {status}"
+            },
+            "errors": "Feil",
+            "warnings": "Advarsler",
+            "show_errors": "Vis feil",
+            "created": "Opprettet: {created}",
+            "debug": {
+                "title": "Feilsøk",
+                "download_metadata": "Last ned metadata",
+                "metadata_download_error": "En feil oppsto under nedlastning av metadata",
+                "metadata_download_successful": "Metadata ble lastet ned",
+                "no_permission": "Du har ikke tilgang til feilsøkings-informasjon",
+                "metadata_exec_title": "Kjør arbeidsflyten igjen lokalt",
+                "metadata_exec_desc": "Last ned metadata for denne arbeidsflyten for å kjøre den lokalt. Dette lar deg fikse feilene og teste endringer før du lagrer dem til arkivet. Du må bruke samme versjon av Woodpecker-cliet som server-versjonen."
+            },
+            "view": "Vis arbeidsflyt",
+            "log_download_error": "En feil oppsto under nedlastning av logg-filen",
+            "no_pipelines": "Ingen arbeidsflyter har startet enda.",
+            "we_got_some_errors": "Å nei, en feil oppsto!",
+            "duration": "Varighet for arbeidsflyt: {duration}",
+            "pipelines_for_pr": "Arbeidsflyter for pull-forespørsel #{index}"
+        },
+        "open_in_forge": "Åpne arkiv hos leverandør"
+    },
+    "org": {
+        "settings": {
+            "registries": {
+                "desc": "Organisasjonens register-hemmeligheter kan brukes for private imager i alle arbeidsflyter for organisasjonen."
+            },
+            "agents": {
+                "desc": "Registrerte Agenter for denne organisasjonen."
+            },
+            "secrets": {
+                "desc": "Organisasjons-hemmeligheter kan brukes i arbeidsflytene til alle arkivene denne organisasjonen eier."
+            },
+            "not_allowed": "Du har ikke tilgang til instillingene for denne organisasjonen"
+        }
+    },
+    "admin": {
+        "settings": {
+            "settings": "Admin-Instillinger",
+            "secrets": {
+                "desc": "Globale hemmeligheter kan brukes arbeidsflyter for alle arkiver.",
+                "warning": "Disse hemmelighetene er tilgjengelige for alle brukere."
+            },
+            "registries": {
+                "desc": "Globale register-hemmeligheter kan bli lagt til for å bruke private imager for alle arbeidsflyter.",
+                "warning": "Disse register-hemmelighetene er tilgjengelige for alle brukere."
+            },
+            "agents": {
+                "agents": "Agenter",
+                "desc": "Agenter registert på denne tjeneren.",
+                "none": "Ingen agenter er registert enda.",
+                "id": "ID",
+                "add": "Legg til agent",
+                "save": "Lagre agent",
+                "show": "Vis agenter",
+                "created": "Agent er opprettet",
+                "deleted": "Agenten er slettet",
+                "name": {
+                    "name": "Navn",
+                    "placeholder": "Navn på agenten"
+                },
+                "no_schedule": {
+                    "name": "Deaktivert agent",
+                    "placeholder": "Stopp agenten fra å ta nye oppgaver"
+                },
+                "token": "Token",
+                "platform": {
+                    "platform": "Platform",
+                    "badge": "platform"
+                },
+                "backend": {
+                    "backend": "Backend",
+                    "badge": "backend"
+                },
+                "capacity": {
+                    "capacity": "Kapasitet",
+                    "desc": "Maksimum antall samtidige arbeidsflyter denne agenten kan kjøre.",
+                    "badge": "kapasitet"
+                },
+                "custom_labels": {
+                    "desc": "Egendefinerte merkelapper satt av agent-administrator ved oppstart.",
+                    "custom_labels": "Egendefinerte Merkelapper"
+                },
+                "org": {
+                    "badge": "org"
+                },
+                "version": "Versjon",
+                "last_contact": {
+                    "last_contact": "Siste kontakt",
+                    "badge": "siste kontakt"
+                },
+                "never": "Aldri",
+                "edit_agent": "Rediger agent",
+                "delete_agent": "Slett agent",
+                "saved": "Agenten er lagret",
+                "delete_confirm": "Ønsker du virkelig å slette denne agenten? Den vil ikke lenger kunne kontakte tjeneren."
+            },
+            "queue": {
+                "queue": "Kø",
+                "pause": "Pause",
+                "resume": "Gjenoppta",
+                "paused": "Køen er pauset",
+                "resumed": "Køen er gjenopptatt",
+                "tasks": "Oppgaver",
+                "task_running": "Oppgaven kjører",
+                "task_pending": "Oppgaven venter",
+                "task_waiting_on_deps": "Oppgaven venter på avhengigheter",
+                "agent": "agent",
+                "waiting_for": "venter på",
+                "stats": {
+                    "completed_count": "Fullførte Oppgaver",
+                    "worker_count": "Ledig",
+                    "running_count": "Kjører",
+                    "pending_count": "Venter",
+                    "waiting_on_deps_count": "Venter på avhengigheter"
+                },
+                "desc": "Oppgaver som venter på å bli kjørt av agenter."
+            },
+            "users": {
+                "users": "Brukere",
+                "desc": "Registrerte brukere på denne tjeneren.",
+                "login": "Brukernavn",
+                "email": "Epost",
+                "avatar_url": "URL til Avatar",
+                "save": "Lagre bruker",
+                "cancel": "Avbryt",
+                "show": "Vis brukere",
+                "add": "Legg til bruker",
+                "none": "Det finnes ingen brukere enda.",
+                "deleted": "Bruker slettet",
+                "created": "Bruker opprettet",
+                "saved": "Bruker lagret",
+                "admin": {
+                    "admin": "Admin",
+                    "placeholder": "Brukeren er en admin"
+                },
+                "delete_user": "Slett bruker",
+                "edit_user": "Rediger bruker",
+                "delete_confirm": "Ønsker du virkelig å slette denne brukeren? Dette vil også slette arkivene brukeren eier."
+            },
+            "orgs": {
+                "orgs": "Organisasjoner",
+                "desc": "Organisasjoner som eier arkiver på denne tjeneren.",
+                "none": "Det finnes ingen organisasjoner enda.",
+                "org_settings": "Organisasjons-instillinger",
+                "delete_org": "Slett organisasjon",
+                "deleted": "Organisasjonen er slettet",
+                "delete_confirm": "Ønsker du virkelig å slette denne organisasjonen. Dette vil også slette alle arkiver eid av denne organisasjonen.",
+                "view": "Vis organisasjon"
+            },
+            "repos": {
+                "repos": "Arkiver",
+                "desc": "Arkiver som er eller ble aktivert på denne tjeneren.",
+                "none": "Det finnes ingen arkiver enda.",
+                "view": "Vis arkiv",
+                "settings": "Arkiv-instillinger",
+                "disabled": "Deaktivert",
+                "repair": {
+                    "repair": "Reparer alle",
+                    "success": "Arkiver er reparert"
+                }
+            },
+            "not_allowed": "Du har ikke tilgang til å se server-instillingene"
+        }
+    },
+    "default": "standard",
+    "info": "Info",
+    "running_version": "Du kjører Woodpecker {0}",
+    "update_woodpecker": "Vennligst oppdater din Woodpecker-tjener til {0}",
+    "global_level_secret": "global hemmelighet",
+    "login_to_cli": "Logg inn til CLI",
+    "login_to_cli_description": "Hvis du fortsetter blir du logget inn til CLIet.",
+    "abort": "Avbryt",
+    "cli_login_success": "Innlogging til CLIet var vellykket",
+    "cli_login_failed": "Innlogging til CLIet feilet",
+    "cli_login_denied": "Innlogging til CLIet ble avvist",
+    "return_to_cli": "Du kan nå lukke denne fanen og returnere til CLIet.",
+    "settings": "Instillinger",
+    "internal_error": "En intern feil oppsto",
+    "registration_closed": "Registrering er stengt",
+    "access_denied": "Du har ikke tilgang til denne tjeneren",
+    "org_access_denied": "Du har ikke tilgang til denne organisasjonen",
+    "invalid_state": "OAuth statusen er ugyldig",
+    "no_search_results": "Ingen resultater ble funnet",
+    "forges": "Tilbydere",
+    "add_forge": "Legg til tilbyder",
+    "show_forges": "Vis tilbydere",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "addon": "Tillegg",
+    "forge_type": "Tilbyder-type",
+    "oauth_client_id": "OAuth Klient-ID",
+    "oauth_client_secret": "OAuth Klient-Hemmelighet",
+    "oauth_host": "OAuth adresse",
+    "merge_ref": "Merge ref",
+    "merge_ref_desc": "Referanse for merge basis. Dette blir brukt for å finne endringer for Pull-forespørsler.",
+    "public_only": "Kun offentlig",
+    "public_only_desc": "Bare vis offentlige arkiver.",
+    "git_username": "Git brukernavn",
+    "git_username_desc": "Brukernavn for Git brukeren.",
+    "git_password": "Git passord",
+    "git_password_desc": "Passord eller personlig tilgangs-token for Git brukeren.",
+    "executable": "Kjørbar fil",
+    "executable_desc": "Sti til kjørbar fil for tillegget.",
+    "save": "Lagre",
+    "add": "Legg til",
+    "skip_verify": "Hopp over verifisering av SSL",
+    "skip_verify_desc": "Hopp over verifisering av SSL for API-forbindelsen. Dette er ikke anbefalt i produksjon.",
+    "url": "URL",
+    "forge_managed_by_env": "Hoved-tilbyderen er administrert gjennom miljøvariabler. Alle endringer til denne tilbyderen vil bli tilbakesatt ved omstart.",
+    "oauth_redirect_url": "URL for OAuth videresending",
+    "forge_created": "Tilbyderen er opprettet",
+    "advanced_options": "Avanserte valg",
+    "leave_empty_to_keep_current_value": "La stå tom for å beholde nåværende verdi",
+    "forge_deleted": "Tilbyderen er slettet",
+    "forge_delete_confirm": "Ønsker du virkelig å slette denn tilbyderen? Dette vil også slette alle arkiver, brukere og arbeidsflyter tilknyttet denne tilbyderen.",
+    "edit_forge": "Rediger tilbyder",
+    "delete_forge": "Slett tilbyder",
+    "no_forges": "Det finnes ingen tilbydere enda.",
+    "use_this_redirect_url_to_create": "Bruk denne videresendings-URLen for å opprette eller oppdatere OAuth-applikasjonen.",
+    "developer_settings_to_create": "Gå til {0} og sett opp OAuth applikasjonen.",
+    "developer_settings": "utvikler-instillinger",
+    "public_url_for_oauth_if": "Offentlig URL for OAuth om forskjellig fra URLen ({0})",
+    "forge_saved": "Tilbyderen er lagret",
+    "fullscreen": "Fullskjerm",
+    "exit_fullscreen": "Avslutt fullskjerm",
+    "help_translating": "Du kan bidra til å oversette Woodpecker til ditt språk på {0}.",
+    "weblate": "vår Weblate",
+    "cancel": "Avbryt",
+    "documentation_for": "Dokumentasjon for \"{topic}\"",
+    "login_to_woodpecker_with": "Log inn til Woodpecker med"
+}

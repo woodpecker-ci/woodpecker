@@ -21,6 +21,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
+	host_matcher "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
@@ -276,6 +277,12 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_SERVICE_ENDPOINT"),
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling configuration service endpoint",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
+		Name:    "extensions-allowed-hosts",
+		Usage:   "Hosts that are allowed to be contacted by extensions",
+		Value:   host_matcher.MatchBuiltinExternal,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DATABASE_DRIVER"),

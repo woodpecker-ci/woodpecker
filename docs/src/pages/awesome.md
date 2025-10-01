@@ -30,6 +30,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [woodpecker-lint](https://git.schmidl.dev/schtobia/woodpecker-lint) - A repository for linting a Woodpecker config file via pre-commit hook
 - [Grafana Dashboard](https://github.com/Janik-Haag/woodpecker-grafana-dashboard) - A dashboard visualizing information exposed by the Woodpecker prometheus endpoint.
 - [woodpecker-autoscaler](https://github.com/Lerentis/woodpecker-autoscaler) - Yet another Woodpecker autoscaler currently targeting [Hetzner cloud](https://www.hetzner.com/cloud) that works in parallel to other autoscaler implementations.
+- [Woodpecker MCP](https://github.com/j04n-f/woodpecker-mcp) - A Model Context Protocol (MCP) server that connects AI assistants to Woodpecker CI. Debug pipeline failures, analyze build logs, and troubleshoot CI/CD configurations with AI assistance.
 
 ## Configuration Services
 

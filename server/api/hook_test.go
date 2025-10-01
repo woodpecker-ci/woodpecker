@@ -13,26 +13,26 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/api"
-	mocks_forge "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	mocks_config_service "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
-	mocks_services "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
+	services_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
-	mocks_registry_service "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
-	mocks_secret_service "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
+	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
 func TestHook(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	_manager := mocks_services.NewManager(t)
-	_forge := mocks_forge.NewForge(t)
-	_store := mocks_store.NewStore(t)
-	_configService := mocks_config_service.NewService(t)
-	_secretService := mocks_secret_service.NewService(t)
-	_registryService := mocks_registry_service.NewService(t)
+	_manager := services_mocks.NewMockManager(t)
+	_forge := forge_mocks.NewMockForge(t)
+	_store := store_mocks.NewMockStore(t)
+	_configService := config_service_mocks.NewMockService(t)
+	_secretService := secret_service_mocks.NewMockService(t)
+	_registryService := registry_service_mocks.NewMockService(t)
 	server.Config.Services.Manager = _manager
 	server.Config.Permissions.Open = true
 	server.Config.Permissions.Orgs = permissions.NewOrgs(nil)

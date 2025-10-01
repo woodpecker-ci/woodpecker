@@ -2,5 +2,5 @@ pnpm-lock.yaml
 dist
 LICENSE
 openapi.json
-docs/40-cli.md
+40-cli.md
 build/

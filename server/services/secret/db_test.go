@@ -22,7 +22,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 var (
@@ -52,7 +52,7 @@ var (
 )
 
 func TestSecretListPipeline(t *testing.T) {
-	mockStore := mocks_store.NewStore(t)
+	mockStore := store_mocks.NewMockStore(t)
 
 	mockStore.On("SecretList", mock.Anything, mock.Anything, mock.Anything).Once().Return([]*model.Secret{
 		globalSecret,

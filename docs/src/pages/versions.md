@@ -33,6 +33,10 @@ Here you can find documentation for previous versions of Woodpecker.
 
 |         |            |                                                                                       |
 | ------- | ---------- | ------------------------------------------------------------------------------------- |
+| 3.10.0  | 2025-29-28 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.10.0/docs/docs/)  |
+| 3.9.0   | 2025-08-20 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.9.0/docs/docs/)   |
+| 3.8.0   | 2025-07-05 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.8.0/docs/docs/)   |
+| 3.7.0   | 2025-06-06 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.7.0/docs/docs/)   |
 | 3.6.0   | 2025-05-06 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.6.0/docs/docs/)   |
 | 3.5.0   | 2025-04-02 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.5.0/docs/docs/)   |
 | 3.4.0   | 2025-03-17 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.4.0/docs/docs/)   |

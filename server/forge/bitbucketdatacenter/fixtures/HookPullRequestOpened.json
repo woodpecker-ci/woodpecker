@@ -1,0 +1,175 @@
+{
+  "date": "2025-09-19T09:07:23+0300",
+  "actor": {
+    "emailAddress": "mike.johnson@vendor.com",
+    "displayName": "EXT Johnson Mike",
+    "name": "mike.johnson@vendor.com",
+    "active": true,
+    "links": { "self": [{ "href": "https://bitbucket.example.com/users/mike.johnson_vendor.com" }] },
+    "id": 15107,
+    "type": "NORMAL",
+    "slug": "mike.johnson_vendor.com"
+  },
+  "eventKey": "pr:opened",
+  "pullRequest": {
+    "author": {
+      "approved": false,
+      "role": "AUTHOR",
+      "user": {
+        "emailAddress": "mike.johnson@vendor.com",
+        "displayName": "EXT Johnson Mike",
+        "name": "mike.johnson@vendor.com",
+        "active": true,
+        "links": { "self": [{ "href": "https://bitbucket.example.com/users/mike.johnson_vendor.com" }] },
+        "id": 15107,
+        "type": "NORMAL",
+        "slug": "mike.johnson_vendor.com"
+      },
+      "status": "UNAPPROVED"
+    },
+    "description": "#### What?\n\nGather statistics about active repositories Woodpecker",
+    "updatedDate": 1758262043663,
+    "title": "feat: gather statistics about Woodpecker migration",
+    "version": 0,
+    "reviewers": [
+      {
+        "approved": false,
+        "role": "REVIEWER",
+        "user": {
+          "emailAddress": "jane.smith@contractor.com",
+          "displayName": "EXT Smith Jane",
+          "name": "jane.smith@contractor.com",
+          "active": true,
+          "links": { "self": [{ "href": "https://bitbucket.example.com/users/jane.smith_contractor.com" }] },
+          "id": 9374,
+          "type": "NORMAL",
+          "slug": "jane.smith_contractor.com"
+        },
+        "status": "UNAPPROVED"
+      },
+      {
+        "approved": false,
+        "role": "REVIEWER",
+        "user": {
+          "emailAddress": "john.doe@example.com",
+          "displayName": "EXT Doe John",
+          "name": "john.doe@example.com",
+          "active": true,
+          "links": { "self": [{ "href": "https://bitbucket.example.com/users/john.doe_example.com" }] },
+          "id": 13581,
+          "type": "NORMAL",
+          "slug": "john.doe_example.com"
+        },
+        "status": "UNAPPROVED"
+      },
+      {
+        "approved": false,
+        "role": "REVIEWER",
+        "user": {
+          "emailAddress": "alex.brown@freelance.com",
+          "displayName": "EXT Brown Alex",
+          "name": "alex.brown@freelance.com",
+          "active": true,
+          "links": { "self": [{ "href": "https://bitbucket.example.com/users/alex.brown_freelance.com" }] },
+          "id": 13360,
+          "type": "NORMAL",
+          "slug": "alex.brown_freelance.com"
+        },
+        "status": "UNAPPROVED"
+      }
+    ],
+    "toRef": {
+      "latestCommit": "3767a5d2d2223447d03838654baa271fc15d94df",
+      "id": "refs/heads/main",
+      "displayId": "main",
+      "type": "BRANCH",
+      "repository": {
+        "hierarchyId": "618693f8805af6d8f5c7",
+        "description": "Network Monitor",
+        "project": {
+          "public": false,
+          "name": "devops-team",
+          "description": "DevOps Team",
+          "links": { "self": [{ "href": "https://bitbucket.example.com/projects/DEV" }] },
+          "id": 565,
+          "type": "NORMAL",
+          "key": "DEV"
+        },
+        "statusMessage": "Available",
+        "archived": false,
+        "public": false,
+        "name": "network-monitor",
+        "forkable": true,
+        "links": {
+          "clone": [
+            {
+              "name": "http",
+              "href": "https://bitbucket.example.com/scm/dev/network-monitor.git"
+            },
+            {
+              "name": "ssh",
+              "href": "ssh://git@bitbucket.example.com:7999/dev/network-monitor.git"
+            }
+          ],
+          "self": [{ "href": "https://bitbucket.example.com/projects/DEV/repos/network-monitor/browse" }]
+        },
+        "id": 1079,
+        "scmId": "git",
+        "state": "AVAILABLE",
+        "slug": "network-monitor"
+      }
+    },
+    "createdDate": 1758262043663,
+    "draft": false,
+    "closed": false,
+    "fromRef": {
+      "latestCommit": "1c7589876bc8b5e83122b1656925d679915193d4",
+      "id": "refs/heads/PROJ-4596",
+      "displayId": "PROJ-4596",
+      "type": "BRANCH",
+      "repository": {
+        "hierarchyId": "618693f8805af6d8f5c7",
+        "description": "Network Monitor",
+        "project": {
+          "public": false,
+          "name": "devops-team",
+          "description": "DevOps Team",
+          "links": { "self": [{ "href": "https://bitbucket.example.com/projects/DEV" }] },
+          "id": 565,
+          "type": "NORMAL",
+          "key": "DEV"
+        },
+        "statusMessage": "Available",
+        "archived": false,
+        "public": false,
+        "name": "network-monitor",
+        "forkable": true,
+        "links": {
+          "clone": [
+            {
+              "name": "http",
+              "href": "https://bitbucket.example.com/scm/dev/network-monitor.git"
+            },
+            {
+              "name": "ssh",
+              "href": "ssh://git@bitbucket.example.com:7999/dev/network-monitor.git"
+            }
+          ],
+          "self": [{ "href": "https://bitbucket.example.com/projects/DEV/repos/network-monitor/browse" }]
+        },
+        "id": 1079,
+        "scmId": "git",
+        "state": "AVAILABLE",
+        "slug": "network-monitor"
+      }
+    },
+    "links": {
+      "self": [{ "href": "https://bitbucket.example.com/projects/DEV/repos/network-monitor/pull-requests/125" }]
+    },
+    "id": 125,
+    "state": "OPEN",
+    "locked": false,
+    "open": true,
+    "participants": []
+  }
+}

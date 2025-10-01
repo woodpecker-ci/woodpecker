@@ -1,0 +1,59 @@
+<template>
+  <Settings :title="$t('extensions')" :description="$t('extensions_description')" docs-url="docs/usage/extensions">
+    <form @submit.prevent="saveExtensions">
+      <InputField :label="$t('extensions_signatures_public_key')">
+        <pre class="code-box">{{ signaturePublicKey }}</pre>
+        <template #description>
+          {{ $t('extensions_signatures_public_key_description') }}
+        </template>
+      </InputField>
+      <InputField :label="$t('config_extension_endpoint')" docs-url="docs/usage/extensions/configuration-extension">
+        <TextField v-model="extensions.config_extension_endpoint" :placeholder="$t('extension_endpoint_placeholder')" />
+      </InputField>
+
+      <Button :is-loading="isSaving" color="green" type="submit" :text="$t('save')" />
+    </form>
+  </Settings>
+</template>
+
+<script lang="ts" setup>
+import { inject, onMounted, ref } from 'vue';
+import type { Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+import Button from '~/components/atomic/Button.vue';
+import InputField from '~/components/form/InputField.vue';
+import TextField from '~/components/form/TextField.vue';
+import Settings from '~/components/layout/Settings.vue';
+import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
+import useNotifications from '~/compositions/useNotifications';
+import type { ExtensionSettings, Repo } from '~/lib/api/types';
+
+const i18n = useI18n();
+
+const apiClient = useApiClient();
+const notifications = useNotifications();
+
+const repo = inject<Ref<Repo>>('repo');
+if (!repo) {
+  throw new Error('Missing repo');
+}
+
+const signaturePublicKey = ref<string>();
+
+onMounted(async () => {
+  signaturePublicKey.value = await apiClient.getSignaturePublicKey();
+});
+
+const extensions = ref<ExtensionSettings>({
+  config_extension_endpoint: repo.value.config_extension_endpoint,
+});
+
+const { doSubmit: saveExtensions, isLoading: isSaving } = useAsyncAction(async () => {
+  await apiClient.updateRepo(repo.value.id, extensions.value);
+
+  // await loadRepo();
+  notifications.notify({ title: i18n.t('extensions_configuration_saved'), type: 'success' });
+});
+</script>

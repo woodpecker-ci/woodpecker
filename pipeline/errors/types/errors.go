@@ -1,6 +1,10 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+)
 
 type PipelineErrorType string
 
@@ -21,4 +25,16 @@ type PipelineError struct {
 
 func (e *PipelineError) Error() string {
 	return fmt.Sprintf("[%s] %s", e.Type, e.Message)
+}
+
+type ErrInvalidWorkflowSetup struct {
+	Err  error
+	Step *backend.Step
+}
+
+func (e *ErrInvalidWorkflowSetup) Error() string {
+	if e.Step != nil {
+		return fmt.Sprintf("error in workflow setup step '%s': %v", e.Step.Name, e.Err)
+	}
+	return fmt.Sprintf("error in workflow setup: %v", e.Err)
 }

@@ -301,7 +301,8 @@
                 "title": "Depuração"
             },
             "log_delete_confirm": "Você realmente deseja excluir os registros de etapas?",
-            "log_delete_error": "Ocorreu um erro ao excluir os registros de etapas"
+            "log_delete_error": "Ocorreu um erro ao excluir os registros de etapas",
+            "view": "Ver pipeline"
         },
         "branches": "Branches",
         "pull_requests": "Pull requests",

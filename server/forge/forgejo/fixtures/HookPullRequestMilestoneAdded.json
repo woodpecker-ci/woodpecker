@@ -1,0 +1,160 @@
+{
+  "action": "milestoned",
+  "number": 1,
+  "pull_request": {
+    "id": 701944,
+    "url": "https://codeberg.org/test_it/test_ci_thing/pulls/1",
+    "number": 1,
+    "user": {
+      "id": 2628,
+      "login": "6543",
+      "full_name": "",
+      "email": "6543@obermui.de",
+      "avatar_url": "https://codeberg.org/avatars/09a234c768cb9bca78f6b2f82d6af173",
+      "html_url": "https://codeberg.org/6543",
+      "visibility": "public"
+    },
+    "title": "Some ned more AAAA",
+    "body": "",
+    "labels": [],
+    "milestone": {
+      "id": 22669,
+      "title": "mile v2"
+    },
+    "assignee": {
+      "id": 2628,
+      "login": "6543",
+      "full_name": "",
+      "email": "6543@noreply.codeberg.org",
+      "avatar_url": "https://codeberg.org/avatars/09a234c768cb9bca78f6b2f82d6af173",
+      "html_url": "https://codeberg.org/6543",
+      "visibility": "public"
+    },
+    "assignees": [
+      {
+        "id": 2628,
+        "login": "6543",
+        "full_name": "",
+        "email": "6543@noreply.codeberg.org",
+        "avatar_url": "https://codeberg.org/avatars/09a234c768cb9bca78f6b2f82d6af173",
+        "html_url": "https://codeberg.org/6543",
+        "visibility": "public"
+      }
+    ],
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://codeberg.org/test_it/test_ci_thing/pulls/1",
+    "mergeable": true,
+    "merged": false,
+    "merged_at": null,
+    "merge_commit_sha": null,
+    "merged_by": null,
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "67012991d6c69b1c58378346fca366b864d8d1a1",
+      "repo_id": 138564,
+      "repo": {
+        "id": 138564,
+        "owner": {
+          "id": 90470,
+          "login": "test_it",
+          "full_name": "",
+          "email": "",
+          "avatar_url": "https://codeberg.org/avatars/bb6f3159a98a869b43f20b350542f8fb",
+          "html_url": "https://codeberg.org/test_it",
+          "visibility": "public"
+        },
+        "name": "test_ci_thing",
+        "full_name": "test_it/test_ci_thing",
+        "private": false,
+        "fork": false,
+        "html_url": "https://codeberg.org/test_it/test_ci_thing",
+        "url": "https://codeberg.org/api/v1/repos/test_it/test_ci_thing",
+        "ssh_url": "ssh://git@codeberg.org/test_it/test_ci_thing.git",
+        "clone_url": "https://codeberg.org/test_it/test_ci_thing.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": true,
+          "push": true,
+          "pull": true
+        },
+        "has_pull_requests": true,
+        "avatar_url": ""
+      }
+    },
+    "head": {
+      "label": "6543-patch-1",
+      "ref": "6543-patch-1",
+      "sha": "36b5813240a9d2daa29b05046d56a53e18f39a3e",
+      "repo_id": 138564,
+      "repo": {
+        "id": 138564,
+        "owner": {
+          "id": 90470,
+          "login": "test_it",
+          "full_name": "",
+          "email": "",
+          "avatar_url": "https://codeberg.org/avatars/bb6f3159a98a869b43f20b350542f8fb",
+          "html_url": "https://codeberg.org/test_it",
+          "visibility": "public"
+        },
+        "name": "test_ci_thing",
+        "full_name": "test_it/test_ci_thing",
+        "private": false,
+        "fork": false,
+        "html_url": "https://codeberg.org/test_it/test_ci_thing",
+        "url": "https://codeberg.org/api/v1/repos/test_it/test_ci_thing",
+        "ssh_url": "ssh://git@codeberg.org/test_it/test_ci_thing.git",
+        "clone_url": "https://codeberg.org/test_it/test_ci_thing.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": true,
+          "push": true,
+          "pull": true
+        },
+        "has_pull_requests": true,
+        "avatar_url": ""
+      }
+    },
+    "merge_base": "67012991d6c69b1c58378346fca366b864d8d1a1"
+  },
+  "repository": {
+    "id": 138564,
+    "owner": {
+      "id": 90470,
+      "login": "test_it",
+      "full_name": "",
+      "email": "",
+      "avatar_url": "https://codeberg.org/avatars/bb6f3159a98a869b43f20b350542f8fb",
+      "html_url": "https://codeberg.org/test_it",
+      "visibility": "public"
+    },
+    "name": "test_ci_thing",
+    "full_name": "test_it/test_ci_thing",
+    "private": false,
+    "fork": false,
+    "html_url": "https://codeberg.org/test_it/test_ci_thing",
+    "url": "https://codeberg.org/api/v1/repos/test_it/test_ci_thing",
+    "ssh_url": "ssh://git@codeberg.org/test_it/test_ci_thing.git",
+    "clone_url": "https://codeberg.org/test_it/test_ci_thing.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "has_pull_requests": true,
+    "avatar_url": ""
+  },
+  "sender": {
+    "id": 2628,
+    "login": "6543",
+    "full_name": "",
+    "email": "6543@noreply.codeberg.org",
+    "avatar_url": "https://codeberg.org/avatars/09a234c768cb9bca78f6b2f82d6af173",
+    "html_url": "https://codeberg.org/6543",
+    "visibility": "public"
+  }
+}
