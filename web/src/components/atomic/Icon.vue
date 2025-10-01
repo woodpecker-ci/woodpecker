@@ -27,7 +27,7 @@
   <SvgIcon v-else-if="name === 'org'" :path="mdiAccountGroupOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'cron'" :path="mdiCalendarClockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'toolbox'" :path="mdiToolboxOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'puzzle'" :path="mdiPuzzle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'puzzle'" :path="mdiPuzzleOutline" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
@@ -157,6 +157,7 @@ import {
   mdiPlus,
   mdiPower,
   mdiPuzzle,
+  mdiPuzzleOutline,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
   mdiShieldKeyOutline,
