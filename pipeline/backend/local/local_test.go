@@ -237,6 +237,7 @@ func TestRunStep(t *testing.T) {
 
 			// Wait for step to finish
 			t.Run("TestWaitStep", func(t *testing.T) {
+				time.Sleep(time.Second / 5) // needed to prevent race condition on outputData
 				state, err := backend.WaitStep(ctx, step, taskUUID)
 				require.NoError(t, err)
 				assert.True(t, state.Exited)
@@ -247,6 +248,7 @@ func TestRunStep(t *testing.T) {
 			outputDataMutex.Lock()
 			go outputDataMutex.Unlock()
 			outputLines := strings.Split(strings.TrimSpace(string(outputData)), "\n")
+			require.Truef(t, len(outputLines) > 3, "output of lines must be bigger than 3 at least but we got: %#v", outputLines)
 			// we first test output without environments
 			wantBeforeEnvs := []string{
 				"+ echo hello",
@@ -267,6 +269,11 @@ func TestRunStep(t *testing.T) {
 				"CI_WORKSPACE=" + state.baseDir + "/workspace",
 				"PATH=" + strings.Join(path, ":"),
 			}, gotEnvs)
+
+			t.Run("TestDestroyStep", func(t *testing.T) {
+				err := backend.DestroyStep(ctx, step, taskUUID)
+				require.NoError(t, err)
+			})
 		})
 	})
 
@@ -446,7 +453,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 	failSave := 0
 loop:
 	for {
-		if failSave == 10000 { // wait max 10s
+		if failSave == 1000 { // wait max 1s
 			t.Log("failSave was hit")
 			t.FailNow()
 		}
