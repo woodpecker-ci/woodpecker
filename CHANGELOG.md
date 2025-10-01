@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-01
+## [3.11.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0-rc.0) - 2025-10-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @qwerty287, @xoxys
+@6543, @anbraten, @marcusramberg, @qwerty287, @xoxys
 
 ### ✨ Features
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Improve error message when agent fails to connect [[#5587](https://github.com/woodpecker-ci/woodpecker/pull/5587)]
 - local backend: test shells if unknown [[#5570](https://github.com/woodpecker-ci/woodpecker/pull/5570)]
 
 ### 🐛 Bug Fixes
