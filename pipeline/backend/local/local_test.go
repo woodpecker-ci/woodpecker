@@ -430,7 +430,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 	failSave := 0
 loop:
 	for {
-		if failSave == 100 {
+		if failSave == 10000 { // wait max 10s
 			t.Log("failSave was hit")
 			t.FailNow()
 		}
@@ -440,7 +440,7 @@ loop:
 			if count := counter.Load(); count == 0 {
 				break loop
 			} else {
-				t.Log(fmt.Sprintf("count at: %d", count))
+				t.Logf("count at: %d", count)
 			}
 		case <-ctx.Done():
 			return
@@ -449,6 +449,13 @@ loop:
 
 	// Cleanup all workflows
 	for _, uuid := range taskUUIDs {
+		// Cleanup all steps
+		for i := 0; i < 3; i++ {
+			stepUUID := fmt.Sprintf("step-%s-%d", uuid, i)
+			assert.NoError(t, backend.DestroyStep(ctx, &types.Step{UUID: stepUUID}, uuid))
+		}
+
+		// finish with workflow cleanup
 		err := backend.DestroyWorkflow(ctx, &types.Config{}, uuid)
 		require.NoError(t, err)
 	}

@@ -87,7 +87,6 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	}, nil
 }
 
-// SetupWorkflow the pipeline environment.
 func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
@@ -115,7 +114,6 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	return nil
 }
 
-// StartStep the pipeline step.
 func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
@@ -150,8 +148,6 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 	}
 }
 
-// WaitStep for the pipeline step to complete and returns
-// the completion results.
 func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
@@ -171,7 +167,7 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 	var execExitError *exec.ExitError
 	if errors.As(err, &execExitError) {
 		ExitCode = execExitError.ExitCode()
-		// Non-zero exit code is a pipeline failure, but not an agent error.
+		// Non-zero exit code is a step failure, but not an agent error.
 		err = nil
 	}
 
@@ -181,7 +177,6 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 	}, err
 }
 
-// TailStep the pipeline step logs.
 func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	state, err := e.getState(taskUUID)
 	if err != nil {
@@ -196,12 +191,21 @@ func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (
 	return reader.(io.ReadCloser), nil
 }
 
-func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
-	// WaitStep already waits for the command to finish, so there is nothing to do here.
+func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
+	state, err := e.getState(taskUUID)
+	if err != nil {
+		return err
+	}
+
+	// WaitStep uses cmd.Wait() witch ensures the process already finished and
+	// the io pipe is closed on process end, so there is nothing to do here.
+	// we just remove the state values
+	state.stepOutputs.Delete(step.UUID)
+	state.stepCMDs.Delete(step.UUID)
+
 	return nil
 }
 
-// DestroyWorkflow the pipeline environment.
 func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
 
@@ -210,15 +214,14 @@ func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID str
 		return err
 	}
 
-	// hint for the gc to clean stuff
-	state.stepCMDs.Clear()
-	state.stepOutputs.Clear()
-
 	err = os.RemoveAll(state.baseDir)
 	if err != nil {
 		return err
 	}
 
+	// hint for the gc to clean stuff
+	state.stepCMDs.Clear()
+	state.stepOutputs.Clear()
 	e.workflows.Delete(taskUUID)
 
 	return err
