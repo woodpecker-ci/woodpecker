@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-09-30
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -9,6 +9,10 @@
 ### ✨ Features
 
 - Allow to configure a config extension per repo [[#3349](https://github.com/woodpecker-ci/woodpecker/pull/3349)]
+
+### 📈 Enhancement
+
+- local backend test shells if unknown [[#5570](https://github.com/woodpecker-ci/woodpecker/pull/5570)]
 
 ### 🐛 Bug Fixes
 
