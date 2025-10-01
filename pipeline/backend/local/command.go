@@ -17,17 +17,12 @@
 package local
 
 import (
-	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"al.essio.dev/pkg/shellescape"
-)
-
-var (
-	ErrNoShellSet = errors.New("no shell was set")
-	ErrNoCmdSet   = errors.New("no commands where set")
 )
 
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
@@ -43,6 +38,15 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 
 	shell = strings.TrimSuffix(strings.ToLower(shell), ".exe")
 	switch shell {
+	default:
+		// assume posix shell
+		if err := probeShellIsPosix(shell); err != nil {
+			return nil, err
+		}
+		fallthrough
+		// normal posix shells
+	case "sh", "bash", "zsh":
+		return []string{"-e", "-c", script}, nil
 	case "":
 		return nil, ErrNoShellSet
 	case "cmd":
@@ -80,8 +84,22 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 	case "powershell", "pwsh":
 		// cspell:disable-next-line
 		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
-	default:
-		// assume posix shell
-		return []string{"-e", "-c", script}, nil
 	}
+}
+
+// before we generate a generic posix shell we test.
+func probeShellIsPosix(shell string) error {
+	script := `x=1 && [ "$x" = "1" ] && command -v test >/dev/null && printf ok`
+
+	cmd := exec.Command(shell, "-c", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return &ErrNoPosixShell{Shell: shell, Err: err}
+	}
+
+	if strings.TrimSpace(string(output)) != "ok" {
+		return &ErrNoPosixShell{Shell: shell, Err: fmt.Errorf("unexpected output returned: %q", string(output))}
+	}
+
+	return nil
 }
