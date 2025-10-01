@@ -156,7 +156,6 @@ import {
   mdiPlayOutline,
   mdiPlus,
   mdiPower,
-  mdiPuzzle,
   mdiPuzzleOutline,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
