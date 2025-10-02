@@ -64,7 +64,7 @@ func TestCopyLineByLine(t *testing.T) {
 	}()
 
 	// wait for the goroutine to start
-	time.Sleep(time.Millisecond)
+	time.Sleep(time.Second / 10)
 
 	// write 4 bytes without newline
 	if _, err := w.Write([]byte("1234")); err != nil {
