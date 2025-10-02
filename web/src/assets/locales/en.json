@@ -319,7 +319,6 @@
         },
         "no_schedule": {
           "name": "Disable agent",
-          "disabled": "Disabled",
           "placeholder": "Stop agent from taking new tasks"
         },
         "token": "Token",
@@ -587,5 +586,6 @@
   "fullscreen": "Fullscreen",
   "exit_fullscreen": "Exit fullscreen",
   "help_translating": "You can help translate Woodpecker into your language on {0}.",
-  "weblate": "our Weblate"
+  "weblate": "our Weblate",
+  "disabled": "Disabled"
 }
