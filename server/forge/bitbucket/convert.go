@@ -31,6 +31,10 @@ const (
 	statusPending = "INPROGRESS" // cspell:disable-line
 	statusSuccess = "SUCCESSFUL"
 	statusFailure = "FAILED"
+
+	linkKeyAvatar   = "avatar"
+	linkKeyHTML     = "html"
+	linkKeyDiffStat = "diffstat" // cspell:disable-line
 )
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
@@ -46,6 +50,15 @@ func convertStatus(status model.StatusValue) string {
 	}
 }
 
+// getLink returns href value or nothing.
+func getLink(links internal.WebhookLinks, key string) string {
+	val, ok := links[key]
+	if ok {
+		return val.Href
+	}
+	return ""
+}
+
 // convertRepo is a helper function used to convert a Bitbucket repository
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
@@ -58,7 +71,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		FullName:      from.FullName,
 		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
-		Avatar:        from.Owner.Links.Avatar.Href,
+		Avatar:        getLink(from.Owner.Links, linkKeyAvatar),
 		Branch:        from.MainBranch.Name,
 		Perm:          convertPerm(perm),
 		PREnabled:     true,
@@ -128,11 +141,11 @@ func sshCloneLink(repo *internal.Repo) string {
 // structure to the Woodpecker User structure.
 func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 	return &model.User{
-		Login:         from.Login,
+		Login:         from.Nickname,
 		AccessToken:   token.AccessToken,
 		RefreshToken:  token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
-		Avatar:        from.Links.Avatar.Href,
+		Avatar:        getLink(from.Links, linkKeyAvatar),
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
 	}
 }
@@ -152,40 +165,35 @@ func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 func convertWorkspace(from *internal.Workspace) *model.Team {
 	return &model.Team{
 		Login:  from.Slug,
-		Avatar: from.Links.Avatar.Href,
+		Avatar: getLink(from.Links, linkKeyAvatar),
 	}
 }
 
 // convertPullHook is a helper function used to convert a Bitbucket pull request
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
-	event := model.EventPull
-	if from.PullRequest.State == stateClosed || from.PullRequest.State == stateDeclined {
-		event = model.EventPullClosed
-	}
-
 	pipeline := &model.Pipeline{
-		Event:  event,
 		Commit: from.PullRequest.Source.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
-			from.PullRequest.Dest.Branch.Name,
+			from.PullRequest.Destination.Branch.Name,
 		),
-		ForgeURL:  from.PullRequest.Links.HTML.Href,
+		ForgeURL:  getLink(from.PullRequest.Links, linkKeyHTML),
 		Branch:    from.PullRequest.Source.Branch.Name,
-		Message:   from.PullRequest.Title,
-		Avatar:    from.Actor.Links.Avatar.Href,
-		Author:    from.Actor.Login,
-		Sender:    from.Actor.Login,
+		Title:     from.PullRequest.Title,
+		Message:   from.PullRequest.Desc,
+		Avatar:    getLink(from.Actor.Links, linkKeyAvatar),
+		Author:    from.Actor.Nickname,
+		Sender:    from.Actor.Nickname,
 		Timestamp: from.PullRequest.Updated.UTC().Unix(),
-		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
+		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Destination.Repo.UUID,
 	}
 
-	if from.PullRequest.State == stateClosed {
+	if from.PullRequest.State == stateMerged {
 		pipeline.Commit = from.PullRequest.MergeCommit.Hash
-		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name)
-		pipeline.Branch = from.PullRequest.Dest.Branch.Name
+		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Destination.Branch.Name)
+		pipeline.Branch = from.PullRequest.Destination.Branch.Name
 	}
 
 	return pipeline
@@ -196,12 +204,12 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit:    change.New.Target.Hash,
-		ForgeURL:  change.New.Target.Links.HTML.Href,
+		ForgeURL:  getLink(change.New.Target.Links, linkKeyHTML),
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
-		Avatar:    hook.Actor.Links.Avatar.Href,
-		Author:    hook.Actor.Login,
-		Sender:    hook.Actor.Login,
+		Avatar:    getLink(hook.Actor.Links, linkKeyAvatar),
+		Author:    hook.Actor.Nickname,
+		Sender:    hook.Actor.Nickname,
 		Timestamp: change.New.Target.Date.UTC().Unix(),
 	}
 	switch change.New.Type {

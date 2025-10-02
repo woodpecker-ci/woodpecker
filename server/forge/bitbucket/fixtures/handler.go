@@ -93,7 +93,7 @@ func getRepo(c *gin.Context) {
 	case "{898477b2-a080-4089-b385-597a783db392}":
 		c.String(http.StatusOK, repoPayloadFromHook)
 	default:
-		c.String(http.StatusOK, repoPayload)
+		c.String(http.StatusOK, APIRepo)
 	}
 }
 
@@ -170,7 +170,7 @@ func getUser(c *gin.Context) {
 	case "Bearer user_not_found", "Bearer a87ff679":
 		c.String(http.StatusNotFound, "")
 	default:
-		c.String(http.StatusOK, userPayload)
+		c.String(http.StatusOK, APIUser)
 	}
 }
 
@@ -213,17 +213,9 @@ const tokenNotFoundPayload = `
 }
 `
 
-const repoPayload = `
-{
-  "full_name": "test_name/repo_name",
-  "scm": "git",
-  "is_private": true
-}
-`
-
 const permissionRepoPayload = `
 {
-  "full_name": "test_name/%s",
+  "full_name": "6543/%s",
   "scm": "git",
   "is_private": true
 }
@@ -433,19 +425,6 @@ const pullRequestsPayload = `
 		"pagelen": 10,
     "size": 2,
     "page": 1
-}
-`
-
-const userPayload = `
-{
-	"uuid": "{4d8c0f46-cd62-4b77-b0cf-faa3e4d932c6}",
-  "username": "superman",
-  "links": {
-    "avatar": {
-      "href": "http:\/\/i.imgur.com\/ZygP55A.jpg"
-    }
-  },
-  "type": "user"
 }
 `
 

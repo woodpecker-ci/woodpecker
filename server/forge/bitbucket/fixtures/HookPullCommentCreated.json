@@ -1,0 +1,233 @@
+{
+  "repository": {
+    "type": "repository",
+    "full_name": "6543/collect-webhooks",
+    "links": {
+      "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks" },
+      "html": { "href": "https://bitbucket.org/6543/collect-webhooks" },
+      "avatar": { "href": "https://bytebucket.org/ravatar/%7Bcbddcb41-064e-4190-9685-c0540c2ec622%7D?ts=go" }
+    },
+    "name": "collect-webhooks",
+    "scm": "git",
+    "website": null,
+    "owner": {
+      "display_name": "6543",
+      "links": {
+        "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
+        "avatar": {
+          "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+        },
+        "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
+      },
+      "type": "user",
+      "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+      "account_id": "5f614bd12d51d4006ab36374",
+      "nickname": "6543"
+    },
+    "workspace": {
+      "type": "workspace",
+      "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+      "name": "6543",
+      "slug": "6543",
+      "links": {
+        "avatar": { "href": "https://bitbucket.org/workspaces/6543/avatar/?ts=1600212025" },
+        "html": { "href": "https://bitbucket.org/6543/" },
+        "self": { "href": "https://api.bitbucket.org/2.0/workspaces/6543" }
+      }
+    },
+    "is_private": true,
+    "project": {
+      "type": "project",
+      "key": "PROJ",
+      "uuid": "{c66cda6b-6de6-4597-ab33-60b84033558b}",
+      "name": "ProjectX",
+      "links": {
+        "self": { "href": "https://api.bitbucket.org/2.0/workspaces/6543/projects/PROJ" },
+        "html": { "href": "https://bitbucket.org/6543/workspace/projects/PROJ" },
+        "avatar": { "href": "https://bitbucket.org/6543/workspace/projects/PROJ/avatar/32?ts=1602715515" }
+      }
+    },
+    "uuid": "{cbddcb41-064e-4190-9685-c0540c2ec622}",
+    "parent": null
+  },
+  "actor": {
+    "display_name": "6543",
+    "links": {
+      "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
+      "avatar": {
+        "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+      },
+      "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
+    },
+    "type": "user",
+    "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+    "account_id": "5f614bd12d51d4006ab36374",
+    "nickname": "6543"
+  },
+  "pullrequest": {
+    "comment_count": 1,
+    "task_count": 0,
+    "type": "pullrequest",
+    "id": 2,
+    "title": "aha",
+    "description": "",
+    "rendered": {
+      "title": { "type": "rendered", "raw": "aha", "markup": "markdown", "html": "<p>aha</p>" },
+      "description": { "type": "rendered", "raw": "", "markup": "markdown", "html": "" }
+    },
+    "state": "OPEN",
+    "draft": false,
+    "merge_commit": null,
+    "close_source_branch": false,
+    "closed_by": null,
+    "author": {
+      "display_name": "6543",
+      "links": {
+        "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
+        "avatar": {
+          "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+        },
+        "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
+      },
+      "type": "user",
+      "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+      "account_id": "5f614bd12d51d4006ab36374",
+      "nickname": "6543"
+    },
+    "reason": "",
+    "created_on": "2025-08-12T15:46:15.353760+00:00",
+    "updated_on": "2025-08-12T16:51:27.122433+00:00",
+    "destination": {
+      "branch": { "name": "niam" },
+      "commit": {
+        "hash": "859c737a468f",
+        "links": {
+          "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/859c737a468f" },
+          "html": { "href": "https://bitbucket.org/6543/collect-webhooks/commits/859c737a468f" }
+        },
+        "type": "commit"
+      },
+      "repository": {
+        "type": "repository",
+        "full_name": "6543/collect-webhooks",
+        "links": {
+          "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks" },
+          "html": { "href": "https://bitbucket.org/6543/collect-webhooks" },
+          "avatar": { "href": "https://bytebucket.org/ravatar/%7Bcbddcb41-064e-4190-9685-c0540c2ec622%7D?ts=go" }
+        },
+        "name": "collect-webhooks",
+        "uuid": "{cbddcb41-064e-4190-9685-c0540c2ec622}"
+      }
+    },
+    "source": {
+      "branch": { "name": "wen-emos", "links": {}, "sync_strategies": ["merge_commit", "rebase"] },
+      "commit": {
+        "hash": "26240d6b7e74",
+        "links": {
+          "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commit/26240d6b7e74" },
+          "html": { "href": "https://bitbucket.org/6543/collect-webhooks/commits/26240d6b7e74" }
+        },
+        "type": "commit"
+      },
+      "repository": {
+        "type": "repository",
+        "full_name": "6543/collect-webhooks",
+        "links": {
+          "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks" },
+          "html": { "href": "https://bitbucket.org/6543/collect-webhooks" },
+          "avatar": { "href": "https://bytebucket.org/ravatar/%7Bcbddcb41-064e-4190-9685-c0540c2ec622%7D?ts=go" }
+        },
+        "name": "collect-webhooks",
+        "uuid": "{cbddcb41-064e-4190-9685-c0540c2ec622}"
+      }
+    },
+    "reviewers": [],
+    "participants": [
+      {
+        "type": "participant",
+        "user": {
+          "display_name": "6543",
+          "links": {
+            "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
+            "avatar": {
+              "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+            },
+            "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
+          },
+          "type": "user",
+          "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+          "account_id": "5f614bd12d51d4006ab36374",
+          "nickname": "6543"
+        },
+        "role": "PARTICIPANT",
+        "approved": false,
+        "state": null,
+        "participated_on": "2025-08-12T16:51:27.122433+00:00"
+      }
+    ],
+    "links": {
+      "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2" },
+      "html": { "href": "https://bitbucket.org/6543/collect-webhooks/pull-requests/2" },
+      "commits": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/commits" },
+      "approve": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/approve" },
+      "request-changes": {
+        "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/request-changes"
+      },
+      "diff": {
+        "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/diff/6543/collect-webhooks:26240d6b7e74%0D859c737a468f?from_pullrequest_id=2&topic=true"
+      },
+      "diffstat": {
+        "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/diffstat/6543/collect-webhooks:26240d6b7e74%0D859c737a468f?from_pullrequest_id=2&topic=true"
+      },
+      "comments": {
+        "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/comments"
+      },
+      "activity": {
+        "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/activity"
+      },
+      "merge": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/merge" },
+      "decline": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/decline" },
+      "statuses": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/statuses" }
+    },
+    "summary": { "type": "rendered", "raw": "", "markup": "markdown", "html": "" }
+  },
+  "comment": {
+    "id": 669392967,
+    "created_on": "2025-08-12T16:51:27.119515+00:00",
+    "updated_on": "2025-08-12T16:51:27.122433+00:00",
+    "content": { "type": "rendered", "raw": "a comment", "markup": "markdown", "html": "<p>a comment</p>" },
+    "user": {
+      "display_name": "6543",
+      "links": {
+        "self": { "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D" },
+        "avatar": {
+          "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+        },
+        "html": { "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/" }
+      },
+      "type": "user",
+      "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+      "account_id": "5f614bd12d51d4006ab36374",
+      "nickname": "6543"
+    },
+    "deleted": false,
+    "pending": false,
+    "type": "pullrequest_comment",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2/comments/669392967"
+      },
+      "html": { "href": "https://bitbucket.org/6543/collect-webhooks/pull-requests/2/_/diff#comment-669392967" }
+    },
+    "pullrequest": {
+      "type": "pullrequest",
+      "id": 2,
+      "title": "aha",
+      "draft": false,
+      "links": {
+        "self": { "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests/2" },
+        "html": { "href": "https://bitbucket.org/6543/collect-webhooks/pull-requests/2" }
+      }
+    }
+  }
+}
