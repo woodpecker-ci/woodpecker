@@ -178,7 +178,7 @@
                 },
                 "cancel_prev": {
                     "cancel": "Vorherige Pipelines bleim losn",
-                    "desc": "Ausgwäids Events los leng losn und und laufende Pipelines vom gleichn Event ob brecha."
+                    "desc": "Ausgwäids Events brechan dritschlde oder los glaffane Pipelines vom gleichn Event und Quain o."
                 }
             },
             "crons": {
