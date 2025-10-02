@@ -319,6 +319,7 @@
         },
         "no_schedule": {
           "name": "Disable agent",
+          "disabled": "Disabled",
           "placeholder": "Stop agent from taking new tasks"
         },
         "token": "Token",

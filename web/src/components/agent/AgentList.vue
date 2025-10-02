@@ -7,6 +7,7 @@
     >
       <span>{{ agent.name || `Agent ${agent.id}` }}</span>
       <span class="ml-auto flex gap-2">
+        <Badge v-if="agent.no_schedule" :value="$t('admin.settings.agents.no_schedule.disabled')" />
         <Badge
           v-if="isAdmin === true && agent.org_id !== -1"
           :label="$t('admin.settings.agents.org.badge')"
