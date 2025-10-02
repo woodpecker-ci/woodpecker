@@ -1,5 +1,41 @@
 # Changelog
 
+## [3.11.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0-rc.0) - 2025-10-02
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @anbraten, @marcusramberg, @qwerty287, @xoxys
+
+### ✨ Features
+
+- Allow to configure a config extension per repo [[#3349](https://github.com/woodpecker-ci/woodpecker/pull/3349)]
+
+### 📈 Enhancement
+
+- Improve error message when agent fails to connect [[#5587](https://github.com/woodpecker-ci/woodpecker/pull/5587)]
+- local backend: test shells if unknown [[#5570](https://github.com/woodpecker-ci/woodpecker/pull/5570)]
+
+### 🐛 Bug Fixes
+
+- Support matrix environ badges only with no key-values [[#5578](https://github.com/woodpecker-ci/woodpecker/pull/5578)]
+- local backend: fix steps having logs form other steps [[#5582](https://github.com/woodpecker-ci/woodpecker/pull/5582)]
+- local backend: fix windows cmd.exe command escaping [[#5569](https://github.com/woodpecker-ci/woodpecker/pull/5569)]
+- Bump buildx and limit max parallel builds [[#5579](https://github.com/woodpecker-ci/woodpecker/pull/5579)]
+- Don't split language if not required [[#5576](https://github.com/woodpecker-ci/woodpecker/pull/5576)]
+
+### 📚 Documentation
+
+- Document pipeline backend engine interface precisely [[#5583](https://github.com/woodpecker-ci/woodpecker/pull/5583)]
+
+### 📦️ Dependency
+
+- chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.2 [[#5577](https://github.com/woodpecker-ci/woodpecker/pull/5577)]
+- chore(deps): lock file maintenance [[#5566](https://github.com/woodpecker-ci/woodpecker/pull/5566)]
+
+### Misc
+
+- Announce only stable releases [[#5580](https://github.com/woodpecker-ci/woodpecker/pull/5580)]
+
 ## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-28
 
 ### ❤️ Thanks to all contributors! ❤️
