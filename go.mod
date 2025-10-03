@@ -16,8 +16,8 @@ require (
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v28.4.0+incompatible
-	github.com/docker/docker v28.4.0+incompatible
+	github.com/docker/cli v28.5.0+incompatible
+	github.com/docker/docker v28.5.0+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
@@ -42,7 +42,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
-	github.com/neticdk/go-bitbucket v1.0.3
+	github.com/neticdk/go-bitbucket v1.0.4
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.34.0
@@ -55,7 +55,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.3.2
 	github.com/zalando/go-keyring v0.2.6
-	gitlab.com/gitlab-org/api/client-go v0.148.1
+	gitlab.com/gitlab-org/api/client-go v0.149.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.42.0
 	golang.org/x/net v0.44.0
@@ -64,7 +64,7 @@ require (
 	golang.org/x/term v0.35.0
 	golang.org/x/text v0.29.0
 	google.golang.org/grpc v1.75.1
-	google.golang.org/protobuf v1.36.9
+	google.golang.org/protobuf v1.36.10
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.34.1
