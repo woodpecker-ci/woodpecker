@@ -606,7 +606,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	pull, repo, pipeline, err := parseHook(r, c.MergeRef)
+	pull, repo, pipeline, commitBefore, commitNow, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -620,11 +620,14 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		pipeline.Commit = sha
 	}
 
-	if pull != nil && len(pipeline.ChangedFiles) == 0 {
+	if pull != nil {
 		pipeline, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, pipeline)
 		if err != nil {
 			return nil, nil, err
 		}
+	} else if pipeline.Event == model.EventPull {
+		// GitHub has removed commit summaries from Events API payloads from 7th October 2025 onwards.
+		c.loadChangedFilesFromCommits(ctx, repo, pipeline, commitBefore, commitNow)
 	}
 
 	return repo, pipeline, nil
@@ -647,24 +650,24 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return nil, err
 	}
 
-	pipeline.ChangedFiles, err = utils.Paginate(func(page int) ([]string, error) {
-		opts := &github.ListOptions{Page: page}
-		fileList := make([]string, 0, 16)
-		for opts.Page > 0 {
-			files, resp, err := c.newClientToken(ctx, user.AccessToken).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
-			if err != nil {
-				return nil, err
-			}
+	gh := c.newClientToken(ctx, user.AccessToken)
+	fileList := make([]string, 0, 16)
 
-			for _, file := range files {
-				fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
-			}
-
-			opts.Page = resp.NextPage
+	opts := &github.ListOptions{Page: 1}
+	for opts.Page > 0 {
+		files, resp, err := gh.PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
+		if err != nil {
+			return nil, err
 		}
-		return utils.DeduplicateStrings(fileList), nil
-	}, -1)
 
+		for _, file := range files {
+			fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+		}
+
+		opts.Page = resp.NextPage
+	}
+
+	pipeline.ChangedFiles = utils.DeduplicateStrings(fileList)
 	return pipeline, err
 }
 
@@ -709,4 +712,62 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		return "", fmt.Errorf("could not find tag %s", tagName)
 	}
 	return tag.GetCommit().GetSHA(), nil
+}
+
+func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, before, now string) (*model.Pipeline, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return pipeline, nil
+	}
+
+	if before == now {
+		log.Error().Msg("github did give us a push with has the same commit before and after")
+		return pipeline, nil
+	} else if now == "" {
+		log.Error().Msg("github did give us a push with has no new commit associated with")
+		return pipeline, nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	gh := c.newClientToken(ctx, user.AccessToken)
+	fileList := make([]string, 0, 16)
+
+	if before == "" {
+		opts := &github.ListOptions{Page: 1}
+		for opts.Page > 0 {
+			commit, resp, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, now, &github.ListOptions{})
+			if err != nil {
+				return nil, err
+			}
+			for _, file := range commit.Files {
+				fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+			}
+			opts.Page = resp.NextPage
+		}
+	} else {
+		opts := &github.ListOptions{Page: 1}
+		for opts.Page > 0 {
+			comp, resp, err := gh.Repositories.CompareCommits(ctx, repo.Owner, repo.Name, before, now, opts)
+			if err != nil {
+				return nil, err
+			}
+			for _, file := range comp.Files {
+				fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+			}
+			opts.Page = resp.NextPage
+		}
+	}
+
+	pipeline.ChangedFiles = utils.DeduplicateStrings(fileList)
+	return pipeline, err
 }
