@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-02
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -30,6 +30,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5594](https://github.com/woodpecker-ci/woodpecker/pull/5594)]
 - chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.2 [[#5577](https://github.com/woodpecker-ci/woodpecker/pull/5577)]
 - chore(deps): lock file maintenance [[#5566](https://github.com/woodpecker-ci/woodpecker/pull/5566)]
 
