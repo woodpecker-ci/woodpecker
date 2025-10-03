@@ -68,7 +68,7 @@ export const useRepoStore = defineStore('repos', () => {
       });
     }
   }
-  
+
   return {
     repos,
     ownedRepos,
