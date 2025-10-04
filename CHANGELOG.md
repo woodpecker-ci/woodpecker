@@ -26,11 +26,13 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5600](https://github.com/woodpecker-ci/woodpecker/pull/5600)]
 - Fix Kubernetes install docs to use OCI artifacts instead of deprecated helm chart [[#5596](https://github.com/woodpecker-ci/woodpecker/pull/5596)]
 - Document pipeline backend engine interface precisely [[#5583](https://github.com/woodpecker-ci/woodpecker/pull/5583)]
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#5602](https://github.com/woodpecker-ci/woodpecker/pull/5602)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.6 [[#5601](https://github.com/woodpecker-ci/woodpecker/pull/5601)]
 - chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.4.1 [[#5598](https://github.com/woodpecker-ci/woodpecker/pull/5598)]
 - chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.4.2 [[#5599](https://github.com/woodpecker-ci/woodpecker/pull/5599)]
