@@ -48,7 +48,9 @@ func testHookRequest(payload []byte, event string) *http.Request {
 func Test_parseHook(t *testing.T) {
 	t.Run("ignore unsupported hook events", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequest), "issues")
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.Nil(t, p)
@@ -57,7 +59,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("skip skip push hook when action is deleted", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPushDeleted), hookPush)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.NoError(t, err)
@@ -65,7 +69,9 @@ func Test_parseHook(t *testing.T) {
 	})
 	t.Run("push hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPush), hookPush)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.Nil(t, p)
 		assert.NotNil(t, r)
@@ -77,7 +83,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("PR hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequest), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -86,7 +94,9 @@ func Test_parseHook(t *testing.T) {
 	})
 	t.Run("PR closed hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestClosed), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -96,7 +106,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("reopen a pull", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestReopened), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -106,7 +118,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("PR merged hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestMerged), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -116,7 +130,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("PR edited hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestEdited), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -127,7 +143,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("deploy hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookDeploy), hookDeploy)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -139,7 +157,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("release hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookRelease), hookRelease)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -151,7 +171,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("pull review requested", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestReviewRequested), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 		assert.Nil(t, r)
 		assert.Nil(t, b)
@@ -160,7 +182,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("pull milestoned", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestMilestoneAdded), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -207,7 +231,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("pull request demilestoned", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestMilestoneRemoved), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -242,7 +268,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("pull request labele added", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestLabelAdded), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -292,7 +320,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("pull request got label removed", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestLabelRemoved), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -326,7 +356,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("pull request got all label removed", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestLabelsCleared), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -355,7 +387,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("pull request assigned", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestAssigneeAdded), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
@@ -398,7 +432,9 @@ func Test_parseHook(t *testing.T) {
 
 	t.Run("pull request unassigned", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestAssigneeRemoved), hookPull)
-		p, r, b, err := parseHook(req, false)
+		p, r, b, cb, ca, err := parseHook(req, false)
+		assert.Equal(t, "commit before TODO", cb)
+		assert.Equal(t, "commit after TODO", ca)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)

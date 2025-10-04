@@ -18,7 +18,7 @@ package github
 import (
 	"testing"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v75/github"
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -239,7 +239,9 @@ func Test_parsePushHook(t *testing.T) {
 		from.HeadCommit.ID = github.Ptr("f72fc19")
 		from.Ref = github.Ptr("refs/heads/main")
 
-		_, pipeline := parsePushHook(from)
+		_, pipeline, before, now := parsePushHook(from)
+		assert.Equal(t, "before", before)
+		assert.Equal(t, "now", now)
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
@@ -255,7 +257,9 @@ func Test_parsePushHook(t *testing.T) {
 		from := &github.PushEvent{}
 		from.Ref = github.Ptr("refs/tags/v1.0.0")
 
-		_, pipeline := parsePushHook(from)
+		_, pipeline, before, now := parsePushHook(from)
+		assert.Equal(t, "before", before)
+		assert.Equal(t, "now", now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
 	})
@@ -265,7 +269,9 @@ func Test_parsePushHook(t *testing.T) {
 		from.Ref = github.Ptr("refs/tags/v1.0.0")
 		from.BaseRef = github.Ptr("refs/heads/main")
 
-		_, pipeline := parsePushHook(from)
+		_, pipeline, before, now := parsePushHook(from)
+		assert.Equal(t, "before", before)
+		assert.Equal(t, "now", now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 	})
@@ -275,7 +281,9 @@ func Test_parsePushHook(t *testing.T) {
 		from.Ref = github.Ptr("refs/tags/v1.0.0")
 		from.BaseRef = github.Ptr("refs/refs/main")
 
-		_, pipeline := parsePushHook(from)
+		_, pipeline, before, now := parsePushHook(from)
+		assert.Equal(t, "before", before)
+		assert.Equal(t, "now", now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Branch)
 	})
