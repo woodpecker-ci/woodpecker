@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-git docker tag to v2.7.0 [[#5603](https://github.com/woodpecker-ci/woodpecker/pull/5603)]
 - chore(deps): update web npm deps non-major [[#5602](https://github.com/woodpecker-ci/woodpecker/pull/5602)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.6 [[#5601](https://github.com/woodpecker-ci/woodpecker/pull/5601)]
 - chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.4.1 [[#5598](https://github.com/woodpecker-ci/woodpecker/pull/5598)]
