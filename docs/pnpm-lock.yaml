@@ -99,7 +99,7 @@ importers:
         version: 3.9.1(@swc/core@1.13.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@tsconfig/docusaurus':
         specifier: ^2.0.3
-        version: 2.0.3
+        version: 2.0.4
       '@types/node':
         specifier: ^22.10.5
         version: 22.18.8
@@ -1896,8 +1896,8 @@ packages:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
     engines: {node: '>=10.13.0'}
 
-  '@tsconfig/docusaurus@2.0.3':
-    resolution: {integrity: sha512-3l1L5PzWVa7l0691TjnsZ0yOIEwG9DziSqu5IPZPlI5Dowi7z42cEym8Y35GHbgHvPcBfNxfrbxm7Cncn4nByQ==}
+  '@tsconfig/docusaurus@2.0.4':
+    resolution: {integrity: sha512-QEu3tpCrqHHcDJYKrv/cu9G8o3XggkpKw374rzcYqfVA2lIMsOpGrt4TcZEGyzjrFpovVt8MuWuDJyR/QeETbg==}
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -8648,7 +8648,7 @@ snapshots:
 
   '@trysound/sax@0.2.0': {}
 
-  '@tsconfig/docusaurus@2.0.3': {}
+  '@tsconfig/docusaurus@2.0.4': {}
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
