@@ -26,6 +26,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @tsconfig/docusaurus to v2.0.4 [[#5605](https://github.com/woodpecker-ci/woodpecker/pull/5605)]
 - chore(deps): update docs npm deps non-major [[#5600](https://github.com/woodpecker-ci/woodpecker/pull/5600)]
 - Fix Kubernetes install docs to use OCI artifacts instead of deprecated helm chart [[#5596](https://github.com/woodpecker-ci/woodpecker/pull/5596)]
 - Document pipeline backend engine interface precisely [[#5583](https://github.com/woodpecker-ci/woodpecker/pull/5583)]
