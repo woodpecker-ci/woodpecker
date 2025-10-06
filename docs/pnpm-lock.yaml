@@ -99,7 +99,7 @@ importers:
         version: 3.9.1(@swc/core@1.13.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@tsconfig/docusaurus':
         specifier: ^2.0.3
-        version: 2.0.3
+        version: 2.0.4
       '@types/node':
         specifier: ^22.10.5
         version: 22.18.8
@@ -229,8 +229,8 @@ packages:
   '@asamuzakjp/css-color@4.0.5':
     resolution: {integrity: sha512-lMrXidNhPGsDjytDy11Vwlb6OIGrT3CmLg3VWNFyWkLWtijKl7xjvForlh8vuj0SHGjgl4qZEQzUmYTeQA2JFQ==}
 
-  '@asamuzakjp/dom-selector@6.5.6':
-    resolution: {integrity: sha512-Mj3Hu9ymlsERd7WOsUKNUZnJYL4IZ/I9wVVYgtvOsWYiEFbkQ4G7VRIh2USxTVW4BBDIsLG+gBUgqOqf2Kvqow==}
+  '@asamuzakjp/dom-selector@6.6.1':
+    resolution: {integrity: sha512-8QT9pokVe1fUt1C8IrJketaeFOdRfTOS96DL3EBjE8CRZm3eHnwMlQe2NPoOSEYPwJ5Q25uYoX1+m9044l3ysQ==}
 
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
@@ -1896,8 +1896,8 @@ packages:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
     engines: {node: '>=10.13.0'}
 
-  '@tsconfig/docusaurus@2.0.3':
-    resolution: {integrity: sha512-3l1L5PzWVa7l0691TjnsZ0yOIEwG9DziSqu5IPZPlI5Dowi7z42cEym8Y35GHbgHvPcBfNxfrbxm7Cncn4nByQ==}
+  '@tsconfig/docusaurus@2.0.4':
+    resolution: {integrity: sha512-QEu3tpCrqHHcDJYKrv/cu9G8o3XggkpKw374rzcYqfVA2lIMsOpGrt4TcZEGyzjrFpovVt8MuWuDJyR/QeETbg==}
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -2284,8 +2284,8 @@ packages:
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
-  baseline-browser-mapping@2.8.11:
-    resolution: {integrity: sha512-i+sRXGhz4+QW8aACZ3+r1GAKMt0wlFpeA8M5rOQd0HEYw9zhDrlx9Wc8uQ0IdXakjJRthzglEwfB/yqIjO6iDg==}
+  baseline-browser-mapping@2.8.12:
+    resolution: {integrity: sha512-vAPMQdnyKCBtkmQA6FMCBvU9qFIppS3nzyXnEM+Lo2IAhG4Mpjv9cCxMudhgV3YdNNJv6TNqXy97dfRVL2LmaQ==}
     hasBin: true
 
   batch@0.6.1:
@@ -2393,8 +2393,8 @@ packages:
   caniuse-api@3.0.0:
     resolution: {integrity: sha512-bsTwuIg/BZZK/vreVTYYbSWoe2F+71P7K5QGEX+pT250DZbfU1MQ5prOKpPR+LL6uWKK3KMwMCAS74QB3Um1uw==}
 
-  caniuse-lite@1.0.30001747:
-    resolution: {integrity: sha512-mzFa2DGIhuc5490Nd/G31xN1pnBnYMadtkyTjefPI7wzypqgCEpeWu9bJr0OnDsyKrW75zA9ZAt7pbQFmwLsQg==}
+  caniuse-lite@1.0.30001748:
+    resolution: {integrity: sha512-5P5UgAr0+aBmNiplks08JLw+AW/XG/SurlgZLgB1dDLfAw7EfRGxIwzPHxdSCGY/BTKDqIVyJL87cCN6s0ZR0w==}
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -2850,8 +2850,8 @@ packages:
     resolution: {integrity: sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
 
-  detect-libc@2.1.1:
-    resolution: {integrity: sha512-ecqj/sy1jcK1uWrwpR67UhYrIFQ+5WlGxth34WquCbamhFA6hkkwiu37o6J5xCHdo1oixJRfVRw+ywV+Hq/0Aw==}
+  detect-libc@2.1.2:
+    resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
   detect-node@2.1.0:
@@ -6167,7 +6167,7 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 11.2.2
 
-  '@asamuzakjp/dom-selector@6.5.6':
+  '@asamuzakjp/dom-selector@6.6.1':
     dependencies:
       '@asamuzakjp/nwsapi': 2.3.9
       bidi-js: 1.0.3
@@ -8648,7 +8648,7 @@ snapshots:
 
   '@trysound/sax@0.2.0': {}
 
-  '@tsconfig/docusaurus@2.0.3': {}
+  '@tsconfig/docusaurus@2.0.4': {}
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
@@ -9049,7 +9049,7 @@ snapshots:
   autoprefixer@10.4.21(postcss@8.5.6):
     dependencies:
       browserslist: 4.26.3
-      caniuse-lite: 1.0.30001747
+      caniuse-lite: 1.0.30001748
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.1.1
@@ -9103,7 +9103,7 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  baseline-browser-mapping@2.8.11: {}
+  baseline-browser-mapping@2.8.12: {}
 
   batch@0.6.1: {}
 
@@ -9176,8 +9176,8 @@ snapshots:
 
   browserslist@4.26.3:
     dependencies:
-      baseline-browser-mapping: 2.8.11
-      caniuse-lite: 1.0.30001747
+      baseline-browser-mapping: 2.8.12
+      caniuse-lite: 1.0.30001748
       electron-to-chromium: 1.5.230
       node-releases: 2.0.23
       update-browserslist-db: 1.1.3(browserslist@4.26.3)
@@ -9239,11 +9239,11 @@ snapshots:
   caniuse-api@3.0.0:
     dependencies:
       browserslist: 4.26.3
-      caniuse-lite: 1.0.30001747
+      caniuse-lite: 1.0.30001748
       lodash.memoize: 4.1.2
       lodash.uniq: 4.5.0
 
-  caniuse-lite@1.0.30001747: {}
+  caniuse-lite@1.0.30001748: {}
 
   ccount@2.0.1: {}
 
@@ -9704,7 +9704,7 @@ snapshots:
 
   destroy@1.2.0: {}
 
-  detect-libc@2.1.1: {}
+  detect-libc@2.1.2: {}
 
   detect-node@2.1.0: {}
 
@@ -10707,7 +10707,7 @@ snapshots:
 
   jsdom@27.0.0(postcss@8.5.6):
     dependencies:
-      '@asamuzakjp/dom-selector': 6.5.6
+      '@asamuzakjp/dom-selector': 6.6.1
       cssstyle: 5.3.1(postcss@8.5.6)
       data-urls: 6.0.0
       decimal.js: 10.6.0
@@ -10815,7 +10815,7 @@ snapshots:
 
   lightningcss@1.30.2:
     dependencies:
-      detect-libc: 2.1.1
+      detect-libc: 2.1.2
     optionalDependencies:
       lightningcss-android-arm64: 1.30.2
       lightningcss-darwin-arm64: 1.30.2
