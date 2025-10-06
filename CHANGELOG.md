@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @henkka, @joariasl, @marcusramberg, @qwerty287, @xoxys
+@6543, @Gusted, @anbraten, @henkka, @joariasl, @marcusramberg, @qwerty287, @xoxys
 
 ### ✨ Features
 
@@ -48,6 +48,7 @@
 
 ### Misc
 
+- chore(deps): drop `github.com/gorilla/securecookie` [[#5609](https://github.com/woodpecker-ci/woodpecker/pull/5609)]
 - Announce only stable releases [[#5580](https://github.com/woodpecker-ci/woodpecker/pull/5580)]
 
 ## [3.10.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.10.0) - 2025-09-28
