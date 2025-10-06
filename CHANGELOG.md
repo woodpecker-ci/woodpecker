@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-05
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -26,6 +26,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5607](https://github.com/woodpecker-ci/woodpecker/pull/5607)]
 - chore(deps): update dependency @tsconfig/docusaurus to v2.0.4 [[#5605](https://github.com/woodpecker-ci/woodpecker/pull/5605)]
 - chore(deps): update docs npm deps non-major [[#5600](https://github.com/woodpecker-ci/woodpecker/pull/5600)]
 - Fix Kubernetes install docs to use OCI artifacts instead of deprecated helm chart [[#5596](https://github.com/woodpecker-ci/woodpecker/pull/5596)]
