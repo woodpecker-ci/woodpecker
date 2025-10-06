@@ -20,7 +20,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/securecookie"
+	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -201,7 +201,7 @@ func DeleteToken(c *gin.Context) {
 
 	user := session.User(c)
 	user.Hash = base32.StdEncoding.EncodeToString(
-		securecookie.GenerateRandomKey(32),
+		random.GetRandomBytes(32),
 	)
 	if err := _store.UpdateUser(user); err != nil {
 		c.String(http.StatusInternalServerError, "Error revoking tokens. %s", err)

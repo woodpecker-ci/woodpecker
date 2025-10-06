@@ -159,7 +159,7 @@ linters:
         - time.*
         - strings.Split
         - callerName
-        - securecookie.GenerateRandomKey
+        - random.GetRandomBytes
     revive:
       rules:
         - name: var-naming
