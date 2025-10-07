@@ -57,7 +57,7 @@ func GetUsers(c *gin.Context) {
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			login			path	string	true	"the user's login name"
 func GetUser(c *gin.Context) {
-	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
+	user, err := store.FromContext(c).LookupUserByLogin(c.Param("login"))
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -87,7 +87,7 @@ func PatchUser(c *gin.Context) {
 		return
 	}
 
-	user, err := _store.GetUserLogin(c.Param("login"))
+	user, err := _store.LookupUserByLogin(c.Param("login"))
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -159,7 +159,7 @@ func PostUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	user, err := _store.GetUserLogin(c.Param("login"))
+	user, err := _store.LookupUserByLogin(c.Param("login"))
 	if err != nil {
 		handleDBError(c, err)
 		return

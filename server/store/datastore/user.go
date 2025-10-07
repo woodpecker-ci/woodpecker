@@ -18,8 +18,6 @@ import (
 	"errors"
 	"fmt"
 
-	"xorm.io/xorm"
-
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -29,21 +27,32 @@ func (s storage) GetUser(id int64) (*model.User, error) {
 	return user, wrapGet(s.engine.ID(id).Get(user))
 }
 
-func (s storage) GetUserRemoteID(remoteID model.ForgeRemoteID, login string) (*model.User, error) {
+func (s storage) GetUserByRemoteID(forgeId int64, userRemoteID model.ForgeRemoteID) (*model.User, error) {
 	sess := s.engine.NewSession()
 	user := new(model.User)
-	err := wrapGet(sess.Where("forge_remote_id = ?", remoteID).Get(user))
+	return user, wrapGet(sess.Where("forge_id = ? AND forge_remote_id = ?", forgeId, userRemoteID).Get(user))
+}
+
+func (s storage) GetUserByLogin(forgeId int64, login string) (*model.User, error) {
+	sess := s.engine.NewSession()
+	user := new(model.User)
+	return user, wrapGet(sess.Where("forge_id = ? AND login=?", forgeId, login).Get(user))
+}
+
+// TODO: replace with more explicit GetUserByLogin / GetUserByRemoteID calls
+// LookupUserByLogin gets a user by its login name, regardless of the forge, duplicates will return an error.
+func (s storage) LookupUserByLogin(login string) (*model.User, error) {
+	sess := s.engine.NewSession()
+
+	count, err := sess.Where("login=?", login).Count()
 	if err != nil {
-		return s.getUserLogin(sess, login)
+		return nil, err
 	}
-	return user, err
-}
 
-func (s storage) GetUserLogin(login string) (*model.User, error) {
-	return s.getUserLogin(s.engine.NewSession(), login)
-}
+	if count > 1 {
+		return nil, fmt.Errorf("more than one user with login %q", login)
+	}
 
-func (s storage) getUserLogin(sess *xorm.Session, login string) (*model.User, error) {
 	user := new(model.User)
 	return user, wrapGet(sess.Where("login=?", login).Get(user))
 }
