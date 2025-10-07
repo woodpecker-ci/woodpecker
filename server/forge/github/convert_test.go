@@ -259,7 +259,7 @@ func Test_parsePushHook(t *testing.T) {
 
 		_, pipeline, before, now := parsePushHook(from)
 		assert.Empty(t, before)
-		assert.Empty(t, now)
+		assert.Equal(t, "should be here", now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
 	})
@@ -271,7 +271,7 @@ func Test_parsePushHook(t *testing.T) {
 
 		_, pipeline, before, now := parsePushHook(from)
 		assert.Empty(t, before)
-		assert.Empty(t, now)
+		assert.Equal(t, "should be here", now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 	})
@@ -283,7 +283,7 @@ func Test_parsePushHook(t *testing.T) {
 
 		_, pipeline, before, now := parsePushHook(from)
 		assert.Empty(t, before)
-		assert.Empty(t, now)
+		assert.Equal(t, "should be here", now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Branch)
 	})
