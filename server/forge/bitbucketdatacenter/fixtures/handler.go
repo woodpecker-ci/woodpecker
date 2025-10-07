@@ -15,11 +15,26 @@
 package fixtures
 
 import (
+	"encoding/json"
+	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/neticdk/go-bitbucket/mock"
+	"github.com/stretchr/testify/assert"
 )
+
+var fixturesDir string
+
+type ResponseContent map[string]interface{}
+
+func init() {
+	_, filename, _, _ := runtime.Caller(0)
+	fixturesDir = filepath.Dir(filename)
+}
 
 func Server() *httptest.Server {
 	return mock.NewMockServer(
@@ -62,5 +77,66 @@ func Server() *httptest.Server {
 			DisplayID: "main",
 			Default:   true,
 		}),
+
+		mock.WithRequestMatchHandler(PostBuildStatus, ExpectedContentHandler(
+			"ExpectedPostBuildStatus.json",
+			http.StatusNoContent, nil,
+			http.StatusBadRequest, ResponseContent{
+				"errors": []ResponseContent{
+					{
+						"context":       "",
+						"exceptionName": "",
+						"message":       "invalid branch was provided",
+					},
+				},
+			},
+		)),
 	)
 }
+
+func ExpectedContentHandler(expectedFileName string, successCode int, successContent ResponseContent, failCode int, failContent ResponseContent) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		expectedContent, err := loadExpectedContent(expectedFileName)
+		if err != nil {
+			writeResponse(w, http.StatusInternalServerError, ResponseContent{"error": "Internal Server Error"})
+			return
+		}
+
+		var requestBody ResponseContent
+		if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+			writeResponse(w, failCode, failContent)
+			return
+		}
+
+		if !assert.ObjectsAreEqual(requestBody, expectedContent) {
+			writeResponse(w, failCode, failContent)
+			return
+		}
+
+		writeResponse(w, successCode, successContent)
+	}
+}
+
+func loadExpectedContent(fileName string) (ResponseContent, error) {
+	file, err := os.Open(filepath.Join(fixturesDir, fileName))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var content ResponseContent
+	err = json.NewDecoder(file).Decode(&content)
+	return content, err
+}
+
+func writeResponse(w http.ResponseWriter, statusCode int, content ResponseContent) {
+	w.WriteHeader(statusCode)
+	if content != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(content)
+	}
+}
+
+var (
+	PostBuildStatus = mock.EndpointPattern{Pattern: "/api/latest/projects/:projectKey/repos/:repositorySlug/commits/:commitId/builds", Method: "POST"}
+)

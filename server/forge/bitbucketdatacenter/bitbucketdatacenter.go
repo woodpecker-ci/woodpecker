@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/rs/zerolog/log"
@@ -318,6 +319,9 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(workflow.State),
+		Duration:    uint64((pipeline.Finished - pipeline.Started) * 1000),
+		Parent:      common.GetPipelineStatusContext(repo, pipeline, workflow),
+		DateAdded:   bb.DateTime(time.Unix(pipeline.Started, 0)),
 		Ref:         pipeline.Ref,
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
