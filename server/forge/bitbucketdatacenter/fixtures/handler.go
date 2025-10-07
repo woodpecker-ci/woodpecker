@@ -79,7 +79,7 @@ func Server() *httptest.Server {
 		}),
 
 		mock.WithRequestMatchHandler(PostBuildStatus, ExpectedContentHandler(
-			"ExpectedPostBuildStatus.json",
+			"PostBuildStatus.json",
 			http.StatusNoContent, nil,
 			http.StatusBadRequest, ResponseContent{
 				"errors": []ResponseContent{
@@ -118,7 +118,7 @@ func ExpectedContentHandler(expectedFileName string, successCode int, successCon
 }
 
 func loadExpectedContent(fileName string) (ResponseContent, error) {
-	file, err := os.Open(filepath.Join(fixturesDir, fileName))
+	file, err := os.Open(filepath.Join(fixturesDir, "expected", fileName))
 	if err != nil {
 		return nil, err
 	}
