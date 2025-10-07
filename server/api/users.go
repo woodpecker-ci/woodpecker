@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/securecookie"
+	"github.com/google/tink/go/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
@@ -130,7 +130,7 @@ func PostUser(c *gin.Context) {
 		Email:  in.Email,
 		Avatar: in.Avatar,
 		Hash: base32.StdEncoding.EncodeToString(
-			securecookie.GenerateRandomKey(32),
+			random.GetRandomBytes(32),
 		),
 		ForgeID:       1,                        // TODO: replace with forge id when multiple forges are supported
 		ForgeRemoteID: model.ForgeRemoteID("0"), // TODO: search for the user in the forge and get the remote id
