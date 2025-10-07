@@ -240,8 +240,8 @@ func Test_parsePushHook(t *testing.T) {
 		from.Ref = github.Ptr("refs/heads/main")
 
 		_, pipeline, before, now := parsePushHook(from)
-		assert.Equal(t, "before", before)
-		assert.Equal(t, "now", now)
+		assert.Empty(t, before)
+		assert.Equal(t, "f72fc19", now)
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
@@ -258,8 +258,8 @@ func Test_parsePushHook(t *testing.T) {
 		from.Ref = github.Ptr("refs/tags/v1.0.0")
 
 		_, pipeline, before, now := parsePushHook(from)
-		assert.Equal(t, "before", before)
-		assert.Equal(t, "now", now)
+		assert.Empty(t, before)
+		assert.Empty(t, now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
 	})
@@ -270,8 +270,8 @@ func Test_parsePushHook(t *testing.T) {
 		from.BaseRef = github.Ptr("refs/heads/main")
 
 		_, pipeline, before, now := parsePushHook(from)
-		assert.Equal(t, "before", before)
-		assert.Equal(t, "now", now)
+		assert.Empty(t, before)
+		assert.Empty(t, now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 	})
@@ -282,8 +282,8 @@ func Test_parsePushHook(t *testing.T) {
 		from.BaseRef = github.Ptr("refs/refs/main")
 
 		_, pipeline, before, now := parsePushHook(from)
-		assert.Equal(t, "before", before)
-		assert.Equal(t, "now", now)
+		assert.Empty(t, before)
+		assert.Empty(t, now)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Branch)
 	})
