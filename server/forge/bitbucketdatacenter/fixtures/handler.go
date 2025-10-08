@@ -15,26 +15,24 @@
 package fixtures
 
 import (
+	"embed"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/neticdk/go-bitbucket/mock"
 	"github.com/stretchr/testify/assert"
 )
 
-var fixturesDir string
+var (
+	//go:embed expected/*
+	embeddedFixtures embed.FS
+	PostBuildStatus  = mock.EndpointPattern{Pattern: "/api/latest/projects/:projectKey/repos/:repositorySlug/commits/:commitId/builds", Method: "POST"}
+)
 
-type ResponseContent map[string]interface{}
-
-func init() {
-	_, filename, _, _ := runtime.Caller(0)
-	fixturesDir = filepath.Dir(filename)
-}
+type ResponseContent map[string]any
 
 func Server() *httptest.Server {
 	return mock.NewMockServer(
@@ -118,7 +116,7 @@ func ExpectedContentHandler(expectedFileName string, successCode int, successCon
 }
 
 func loadExpectedContent(fileName string) (ResponseContent, error) {
-	file, err := os.Open(filepath.Join(fixturesDir, "expected", fileName))
+	file, err := embeddedFixtures.Open(filepath.Join("expected", fileName))
 	if err != nil {
 		return nil, err
 	}
@@ -133,10 +131,8 @@ func writeResponse(w http.ResponseWriter, statusCode int, content ResponseConten
 	w.WriteHeader(statusCode)
 	if content != nil {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(content)
+		if err := json.NewEncoder(w).Encode(content); err != nil {
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		}
 	}
 }
-
-var (
-	PostBuildStatus = mock.EndpointPattern{Pattern: "/api/latest/projects/:projectKey/repos/:repositorySlug/commits/:commitId/builds", Method: "POST"}
-)
