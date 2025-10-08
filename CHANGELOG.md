@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-07
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Gusted, @anbraten, @henkka, @joariasl, @marcusramberg, @qwerty287, @xoxys
+@6543, @Gusted, @MartinSchmidt, @anbraten, @henkka, @joariasl, @marcusramberg, @qwerty287, @xoxys
 
 ### ✨ Features
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Enhance Bitbucket Datacenter build status reporting [[#5611](https://github.com/woodpecker-ci/woodpecker/pull/5611)]
 - List all repos in repository view if user is admin [[#5595](https://github.com/woodpecker-ci/woodpecker/pull/5595)]
 - Add disabled badge to agents [[#5593](https://github.com/woodpecker-ci/woodpecker/pull/5593)]
 - Improve error message when agent fails to connect [[#5587](https://github.com/woodpecker-ci/woodpecker/pull/5587)]
