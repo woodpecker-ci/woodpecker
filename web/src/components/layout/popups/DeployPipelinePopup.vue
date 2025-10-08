@@ -6,9 +6,9 @@
           $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber })
         }}</span>
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_target')">
-          <TextField 
-            :id="id" 
-            v-model="payload.environment" 
+          <TextField
+            :id="id"
+            v-model="payload.environment"
             placeholder="Type or select target environment..."
             :list="`${id}-options`"
             required
@@ -68,7 +68,7 @@ const router = useRouter();
 
 const pipelineConfigs = requiredInject('pipeline-configs');
 
-const decodedConfigs = computed(() => 
+const decodedConfigs = computed(() =>
   pipelineConfigs.value?.map((config) => ({
     ...config,
     data: decode(config.data), // Decode base64 to readable YAML
@@ -78,12 +78,12 @@ const decodedConfigs = computed(() =>
 // Extract CI_PIPELINE_DEPLOY_TARGET values
 const deployTargetsFromConfigs = computed(() => {
   const targets = new Set<string>();
-  
+
   decodedConfigs.value.forEach(config => {
     const yamlContent = config.data;
     // Look for evaluate: CI_PIPELINE_DEPLOY_TARGET == "somevalue" patterns
     const targetMatches = yamlContent.match(/CI_PIPELINE_DEPLOY_TARGET\s*==\s*["']([^"']+)["']/g);
-    
+
     if (targetMatches) {
       targetMatches.forEach(match => {
         // Extract the value between quotes
@@ -94,7 +94,7 @@ const deployTargetsFromConfigs = computed(() => {
       });
     }
   });
-  
+
   return Array.from(targets);
 });
 
