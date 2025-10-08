@@ -6,7 +6,18 @@
           $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber })
         }}</span>
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_target')">
-          <TextField :id="id" v-model="payload.environment" required />
+          <TextField 
+            :id="id" 
+            v-model="payload.environment" 
+            placeholder="Type or select target environment..."
+            :list="`${id}-options`"
+            required
+          />
+          <datalist :id="`${id}-options`">
+            <option v-for="option in deployTargetOptions" :key="option.text" :value="option.value">
+              {{ option.text }}
+            </option>
+          </datalist>
         </InputField>
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_task')">
           <TextField :id="id" v-model="payload.task" />
@@ -31,6 +42,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
+import { decode } from 'js-base64';
 
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
@@ -53,6 +65,45 @@ const emit = defineEmits<{
 const apiClient = useApiClient();
 const repo = requiredInject('repo');
 const router = useRouter();
+
+const pipelineConfigs = requiredInject('pipeline-configs');
+
+const decodedConfigs = computed(() => 
+  pipelineConfigs.value?.map((config) => ({
+    ...config,
+    data: decode(config.data), // Decode base64 to readable YAML
+  })) ?? []
+);
+
+// Extract CI_PIPELINE_DEPLOY_TARGET values
+const deployTargetsFromConfigs = computed(() => {
+  const targets = new Set<string>();
+  
+  decodedConfigs.value.forEach(config => {
+    const yamlContent = config.data;
+    // Look for evaluate: CI_PIPELINE_DEPLOY_TARGET == "somevalue" patterns
+    const targetMatches = yamlContent.match(/CI_PIPELINE_DEPLOY_TARGET\s*==\s*["']([^"']+)["']/g);
+    
+    if (targetMatches) {
+      targetMatches.forEach(match => {
+        // Extract the value between quotes
+        const valueMatch = match.match(/["']([^"']+)["']/);
+        if (valueMatch && valueMatch[1]) {
+          targets.add(valueMatch[1].trim());
+        }
+      });
+    }
+  });
+  
+  return Array.from(targets);
+});
+
+const deployTargetOptions = computed(() => {
+  return deployTargetsFromConfigs.value.map(target => ({
+    value: target,
+    text: target
+  }));
+});
 
 const payload = ref<{
   id: string;
