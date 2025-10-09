@@ -40,9 +40,9 @@
 </template>
 
 <script lang="ts" setup>
+import { decode } from 'js-base64';
 import { computed, onMounted, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
-import { decode } from 'js-base64';
 
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
@@ -68,24 +68,25 @@ const router = useRouter();
 
 const pipelineConfigs = requiredInject('pipeline-configs');
 
-const decodedConfigs = computed(() =>
-  pipelineConfigs.value?.map((config) => ({
-    ...config,
-    data: decode(config.data), // Decode base64 to readable YAML
-  })) ?? []
+const decodedConfigs = computed(
+  () =>
+    pipelineConfigs.value?.map((config) => ({
+      ...config,
+      data: decode(config.data), // Decode base64 to readable YAML
+    })) ?? [],
 );
 
 // Extract CI_PIPELINE_DEPLOY_TARGET values
 const deployTargetsFromConfigs = computed(() => {
   const targets = new Set<string>();
 
-  decodedConfigs.value.forEach(config => {
+  decodedConfigs.value.forEach((config) => {
     const yamlContent = config.data;
     // Look for evaluate: CI_PIPELINE_DEPLOY_TARGET == "somevalue" patterns
     const targetMatches = yamlContent.match(/CI_PIPELINE_DEPLOY_TARGET\s*==\s*["']([^"']+)["']/g);
 
     if (targetMatches) {
-      targetMatches.forEach(match => {
+      targetMatches.forEach((match) => {
         // Extract the value between quotes
         const valueMatch = match.match(/["']([^"']+)["']/);
         if (valueMatch && valueMatch[1]) {
@@ -99,9 +100,9 @@ const deployTargetsFromConfigs = computed(() => {
 });
 
 const deployTargetOptions = computed(() => {
-  return deployTargetsFromConfigs.value.map(target => ({
+  return deployTargetsFromConfigs.value.map((target) => ({
     value: target,
-    text: target
+    text: target,
   }));
 });
 
