@@ -270,7 +270,7 @@
                 "show": "Agents zoang",
                 "no_schedule": {
                     "name": "Agent abschoidn",
-                    "placeholder": "Agent ko koane neien Aufgabn mehr kriagn"
+                    "placeholder": "Agent griagt koane neien Aufgabn mehr"
                 },
                 "token": "Token",
                 "platform": {
@@ -538,7 +538,7 @@
         "desc": "Vahindere dass böswillige Pipelines Secrets ausplaudern oda schädliche Sachen macha durch Freigab vor da Ausführung.",
         "require_approval_for": "Freigab-Anforderunga",
         "none": "Koane",
-        "none_desc": "Jeds Event läsd Pipelines aus, a Pull Requests. De Eistellung ko gfährlich sei und is nur füa private Instanzen empfohln.",
+        "none_desc": "Jeds Event lösd'd Pipelines aus, a Pull Requests. De Eistellung ko gfährlich sei und is nur füa private Instanzen empfohln.",
         "forks": "Pull Request von am geforkten Repo",
         "pull_requests": "Olle Pull Requests",
         "all_events": "Olle Events vo da Forge",
