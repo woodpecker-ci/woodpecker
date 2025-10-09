@@ -72,7 +72,11 @@ func GetFeed(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error fetching user feed. %s", err)
 		return
 	}
-	c.JSON(http.StatusOK, feed)
+	var fs []*model.APIFeed
+	for _, f := range feed {
+		fs = append(fs, f.ToAPIModel())
+	}
+	c.JSON(http.StatusOK, fs)
 }
 
 // GetRepos
