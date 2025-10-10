@@ -737,6 +737,9 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 	case curr:
 		log.Error().Msg("GitHub push event contains the same commit before and after, no changes detected")
 		return pipeline, nil
+	case "0000000000000000000000000000000000000000":
+		prev = ""
+		fallthrough
 	case "":
 		// For tag events, prev is empty, but we can still fetch the changed files using the current commit
 		log.Trace().Msg("GitHub tag event, fetching changed files using current commit")
