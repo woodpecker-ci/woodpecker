@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Switch to GitHub REST API to load changed files [[#5618](https://github.com/woodpecker-ci/woodpecker/pull/5618)]
 - Enhance Bitbucket Datacenter build status reporting [[#5611](https://github.com/woodpecker-ci/woodpecker/pull/5611)]
 - List all repos in repository view if user is admin [[#5595](https://github.com/woodpecker-ci/woodpecker/pull/5595)]
 - Add disabled badge to agents [[#5593](https://github.com/woodpecker-ci/woodpecker/pull/5593)]
