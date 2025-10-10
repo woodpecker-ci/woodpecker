@@ -36,17 +36,28 @@
             "actions": {
                 "cancel": "取消"
             },
-            "tasks": "任務"
+            "tasks": "任務",
+            "status": {
+                "skipped": "跳過",
+                "success": "成功",
+                "failure": "失敗"
+            }
         },
         "settings": {
             "general": {
-                "save": "儲存設定",
+                "save": "存儲設定",
                 "timeout": {
                     "timeout": "逾時"
-                }
+                },
+                "general": "一般設定"
             },
             "badge": {
                 "branch": "分支"
+            },
+            "crons": {
+                "schedule": {
+                    "placeholder": "排程"
+                }
             }
         },
         "visibility": {
@@ -108,5 +119,7 @@
         "just_now": "剛剛",
         "not_started": "尚未開始"
     },
-    "empty_list": "找不到{entity}！"
+    "empty_list": "找不到{entity}！",
+    "default": "預設",
+    "info": "資訊"
 }
