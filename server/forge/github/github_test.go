@@ -247,4 +247,28 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "baxterthehacker", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.Avatar)
 	})
+
+	t.Run("convert tag from webhook", func(t *testing.T) {
+		// Create a mock HTTP request with a push event payload
+		req := httptest.NewRequest("POST", "/hook", strings.NewReader(fixtures.HookTag))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-GitHub-Event", "push")
+
+		// Call the Hook function
+		repo, pipeline, err := c.Hook(ctx, req)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, repo)
+		assert.NotNil(t, pipeline)
+		assert.Equal(t, model.EventTag, pipeline.Event)
+		assert.Equal(t, "main", pipeline.Branch)
+		assert.Equal(t, "refs/tags/the-tag-v1", pipeline.Ref)
+		assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit)
+		assert.Equal(t, "Update .woodpecker.yml", pipeline.Message)
+		assert.Equal(t, "https://github.com/6543/test_ci_tmp/commit/67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.ForgeURL)
+		assert.Equal(t, "6543", pipeline.Author)
+		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
+		assert.Equal(t, "6543@obermui.de", pipeline.Email)
+		assert.Empty(t, pipeline.ChangedFiles)
+	})
 }
