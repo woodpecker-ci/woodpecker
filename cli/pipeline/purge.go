@@ -41,8 +41,9 @@ var pipelinePurgeCmd = &cli.Command{
 			Usage: "remove pipelines of this branch only",
 		},
 		&cli.StringFlag{
-			Name:  "older-than",
-			Usage: "remove pipelines older than the specified time limit",
+			Name:     "older-than",
+			Usage:    "remove pipelines older than the specified time limit",
+			Required: true,
 		},
 		&cli.Int64Flag{
 			Name:  "keep-min",
