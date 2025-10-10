@@ -102,12 +102,12 @@ var (
 
 	fakeRepo = &model.Repo{
 		ForgeRemoteID: "5",
-		Owner:         "6543",
+		Owner:         "octocat",
 		Name:          "Hello-World",
 		FullName:      "octocat/Hello-World",
 		Avatar:        "https://github.com/images/error/octocat_happy.gif",
 		ForgeURL:      "https://github.com/octocat/Hello-World",
-		Clone:         "https://github.com/woodpecker-Ci/woodpecker/commit/366701fde727cb7a9e7f21eb88264f59f6f9b89c.git",
+		Clone:         "https://github.com/octocat/Hello-World.git",
 		IsSCMPrivate:  true,
 	}
 
