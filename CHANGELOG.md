@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-09
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -36,6 +36,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.155.0 [[#5617](https://github.com/woodpecker-ci/woodpecker/pull/5617)]
 - fix(deps): update golang-packages [[#5614](https://github.com/woodpecker-ci/woodpecker/pull/5614)]
 - fix(deps): update golang-packages [[#5610](https://github.com/woodpecker-ci/woodpecker/pull/5610)]
 - chore(deps): update dependency simple-icons to v15.16.1 [[#5606](https://github.com/woodpecker-ci/woodpecker/pull/5606)]
