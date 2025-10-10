@@ -277,7 +277,7 @@
                 "manual": "Manual",
                 "release": "Release",
                 "pr_closed": "Pull request mesclada/fechada",
-                "pr_metadata": "Metadados de pull request alterados"
+                "pr_metadata": "Metadados da pull request alterados"
             },
             "errors": "Erros",
             "warnings": "Avisos",
