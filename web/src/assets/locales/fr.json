@@ -226,7 +226,7 @@
                 "value": "Valeur de la variable",
                 "delete": "Supprimer la variable"
             },
-            "show_pipelines": "Afficher les pieplines"
+            "show_pipelines": "Afficher les pipelines"
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
         "open_in_forge": "Ouvrir le dépôt dans la forge",
