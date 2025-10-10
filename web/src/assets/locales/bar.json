@@ -52,7 +52,7 @@
                 "decline_success": "Pipeline obglehnt"
             },
             "tasks": "Aufgabn",
-            "config": "Config",
+            "config": "Einstellung",
             "files": "Gänderte Datein",
             "no_pipelines": "Do san no koane Pipelines gstartet worn.",
             "no_pipeline_steps": "Koane Pipeline-Schrid do!",
@@ -586,5 +586,6 @@
     "fullscreen": "Vollbild",
     "exit_fullscreen": "Vollbild verlassn",
     "help_translating": "Du kost helfa Woodpecker in dei Sproch zu übersetzen auf {0}.",
-    "weblate": "unserm Weblate"
+    "weblate": "unserm Weblate",
+    "disabled": "Abgschoidn"
 }
