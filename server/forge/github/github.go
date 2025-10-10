@@ -40,9 +40,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
+type contextKey string
+
 const (
-	defaultURL = "https://github.com"      // Default GitHub URL
-	defaultAPI = "https://api.github.com/" // Default GitHub API URL
+	defaultURL                 = "https://github.com"      // Default GitHub URL
+	defaultAPI                 = "https://api.github.com/" // Default GitHub API URL
+	githubClientKey contextKey = "github_client"
 )
 
 // Opts defines configuration options.
@@ -462,7 +465,7 @@ func (c *client) newConfig() *oauth2.Config {
 // It first checks if a client is available in the context, otherwise creates a new one.
 func (c *client) newClientToken(ctx context.Context, token string) *github.Client {
 	// Check if a client is already in the context
-	if ctxClient, ok := ctx.Value("github_client").(*github.Client); ok {
+	if ctxClient, ok := ctx.Value(githubClientKey).(*github.Client); ok {
 		return ctxClient
 	}
 
@@ -612,7 +615,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	pull, repo, pipeline, commitBefore, commitNow, err := parseHook(r, c.MergeRef)
+	pull, repo, pipeline, currCommit, prevCommit, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -633,7 +636,10 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		}
 	} else if pipeline.Event == model.EventPush {
 		// GitHub has removed commit summaries from Events API payloads from 7th October 2025 onwards.
-		c.loadChangedFilesFromCommits(ctx, repo, pipeline, commitBefore, commitNow)
+		pipeline, err = c.loadChangedFilesFromCommits(ctx, repo, pipeline, prevCommit, currCommit)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	return repo, pipeline, nil

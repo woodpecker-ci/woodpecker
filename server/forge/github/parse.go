@@ -55,7 +55,7 @@ const (
 
 // parseHook parses a GitHub hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Repo, _ *model.Pipeline, commitBefore, commitNow string, _ error) {
+func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Repo, _ *model.Pipeline, currCommit, prevCommit string, _ error) {
 	var reader io.Reader = r.Body
 
 	if payload := r.FormValue(hookField); payload != "" {
@@ -74,8 +74,8 @@ func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Rep
 
 	switch hook := payload.(type) {
 	case *github.PushEvent:
-		repo, pipeline, before, now := parsePushHook(hook)
-		return nil, repo, pipeline, before, now, nil
+		repo, pipeline, curr, prev := parsePushHook(hook)
+		return nil, repo, pipeline, curr, prev, nil
 	case *github.DeploymentEvent:
 		repo, pipeline := parseDeployHook(hook)
 		return nil, repo, pipeline, "", "", nil
