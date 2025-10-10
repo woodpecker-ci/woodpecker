@@ -92,7 +92,7 @@ func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Rep
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, before, now string) {
+func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, curr, prev string) {
 	if hook.Deleted != nil && *hook.Deleted {
 		return nil, nil, "", ""
 	}
@@ -126,7 +126,7 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, be
 		return repo, pipeline, "", ""
 	}
 
-	return repo, pipeline, hook.GetBefore(), hook.GetHeadCommit().GetID()
+	return repo, pipeline, hook.GetHeadCommit().GetID(), hook.GetBefore()
 }
 
 // parseDeployHook parses a deployment and returns the Repo and Pipeline details.

@@ -459,7 +459,13 @@ func (c *client) newConfig() *oauth2.Config {
 }
 
 // newClientToken returns the GitHub oauth2 client.
+// It first checks if a client is available in the context, otherwise creates a new one.
 func (c *client) newClientToken(ctx context.Context, token string) *github.Client {
+	// Check if a client is already in the context
+	if ctxClient, ok := ctx.Value("github_client").(*github.Client); ok {
+		return ctxClient
+	}
+
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -714,19 +720,20 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	return tag.GetCommit().GetSHA(), nil
 }
 
-func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, before, now string) (*model.Pipeline, error) {
+func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, curr, prev string) (*model.Pipeline, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
 		return pipeline, nil
 	}
 
-	if before == now {
-		log.Error().Msg("github did give us a push with has the same commit before and after")
+	switch prev {
+	case curr:
+		log.Error().Msg("GitHub push event contains the same commit before and after, no changes detected")
 		return pipeline, nil
-	} else if now == "" {
-		log.Error().Msg("github did give us a push with has no new commit associated with")
-		return pipeline, nil
+	case "":
+		// For tag events, prev is empty, but we can still fetch the changed files using the current commit
+		log.Trace().Msg("GitHub tag event, fetching changed files using current commit")
 	}
 
 	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
@@ -742,10 +749,10 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 	gh := c.newClientToken(ctx, user.AccessToken)
 	fileList := make([]string, 0, 16)
 
-	if before == "" {
+	if prev == "" {
 		opts := &github.ListOptions{Page: 1}
 		for opts.Page > 0 {
-			commit, resp, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, now, &github.ListOptions{})
+			commit, resp, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, curr, &github.ListOptions{})
 			if err != nil {
 				return nil, err
 			}
@@ -757,7 +764,7 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 	} else {
 		opts := &github.ListOptions{Page: 1}
 		for opts.Page > 0 {
-			comp, resp, err := gh.Repositories.CompareCommits(ctx, repo.Owner, repo.Name, before, now, opts)
+			comp, resp, err := gh.Repositories.CompareCommits(ctx, repo.Owner, repo.Name, prev, curr, opts)
 			if err != nil {
 				return nil, err
 			}

@@ -16,12 +16,18 @@
 package github
 
 import (
+	"context"
 	"testing"
 
 	"github.com/google/go-github/v75/github"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+
+	gh_mock "github.com/migueleliasweb/go-github-mock/src/mock"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 const (
@@ -228,20 +234,71 @@ func Test_parseDeployHook(t *testing.T) {
 }
 
 func Test_parsePushHook(t *testing.T) {
+	// Mock GitHub API for changed files
+	mockedHTTPClient := gh_mock.NewMockedHTTPClient(
+		gh_mock.WithRequestMatch(
+			gh_mock.GetReposCommitsByOwnerByRepoByRef,
+			github.RepositoryCommit{
+				Files: []*github.CommitFile{
+					{Filename: github.Ptr("README.md")},
+					{Filename: github.Ptr("main.go")},
+				},
+			},
+		),
+		gh_mock.WithRequestMatch(
+			gh_mock.GetReposCompareByOwnerByRepoByBasehead,
+			github.CommitsComparison{
+				Files: []*github.CommitFile{
+					{Filename: github.Ptr("main.go")},
+				},
+			},
+		),
+	)
+
+	// Create a GitHub client with the mocked HTTP client
+	gh_client := github.NewClient(mockedHTTPClient)
+
+	// Set up context with mocked client
+	ctx := context.WithValue(t.Context(), "github_client", gh_client)
+
+	// Create a mock store using the proper mocking pattern
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetUser", mock.Anything).Return(&model.User{
+		ID:          1,
+		Login:       "octocat",
+		AccessToken: "token",
+	}, nil)
+	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(&model.Repo{
+		ID:            1,
+		ForgeRemoteID: "1",
+		Owner:         "octocat",
+		Name:          "hello-world",
+		UserID:        1,
+	}, nil)
+
+	// Set up context with mock store
+	ctx = store.InjectToContext(ctx, mockStore)
+
+	// Create a mock client
+	c := &client{
+		API: defaultAPI,
+		url: defaultURL,
+	}
+
 	t.Run("convert push from webhook", func(t *testing.T) {
 		from := &github.PushEvent{Sender: &github.User{}, Repo: &github.PushEventRepository{}, HeadCommit: &github.HeadCommit{Author: &github.CommitAuthor{}}}
 		from.Sender.Login = github.Ptr("octocat")
 		from.Sender.AvatarURL = github.Ptr("https://avatars1.githubusercontent.com/u/583231")
 		from.Repo.CloneURL = github.Ptr("https://github.com/octocat/hello-world.git")
-		from.HeadCommit.Author.Email = github.Ptr("github.Ptr(octocat@github.com")
+		from.HeadCommit.Author.Email = github.Ptr("octocat@github.com")
 		from.HeadCommit.Message = github.Ptr("updated README.md")
 		from.HeadCommit.URL = github.Ptr("https://github.com/octocat/hello-world")
 		from.HeadCommit.ID = github.Ptr("f72fc19")
 		from.Ref = github.Ptr("refs/heads/main")
 
-		_, pipeline, before, now := parsePushHook(from)
-		assert.Empty(t, before)
-		assert.Equal(t, "f72fc19", now)
+		// Call the function that loads changed files
+		_, pipeline, _, _ := parsePushHook(from)
+
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
@@ -253,13 +310,55 @@ func Test_parsePushHook(t *testing.T) {
 		assert.Equal(t, *from.HeadCommit.Author.Email, pipeline.Email)
 	})
 
+	t.Run("load changed files from single commit", func(t *testing.T) {
+		from := &github.PushEvent{Sender: &github.User{}, Repo: &github.PushEventRepository{}, HeadCommit: &github.HeadCommit{Author: &github.CommitAuthor{}}}
+		from.HeadCommit.ID = github.Ptr("f72fc19")
+		from.Ref = github.Ptr("refs/heads/main")
+
+		// Call the function that loads changed files
+		repo, pipeline, curr, prev := parsePushHook(from)
+
+		var err error
+		pipeline, err = c.loadChangedFilesFromCommits(ctx, repo, pipeline, curr, prev)
+		assert.NoError(t, err)
+
+		assert.Equal(t, model.EventPush, pipeline.Event)
+		assert.Equal(t, "main", pipeline.Branch)
+		assert.Equal(t, "refs/heads/main", pipeline.Ref)
+		assert.Equal(t, *from.HeadCommit.ID, curr)
+		assert.NotNil(t, pipeline.ChangedFiles)
+		assert.Contains(t, pipeline.ChangedFiles, "README.md")
+		assert.Contains(t, pipeline.ChangedFiles, "main.go")
+	})
+
+	t.Run("load changed files from compare commits", func(t *testing.T) {
+		from := &github.PushEvent{Sender: &github.User{}, Repo: &github.PushEventRepository{}, HeadCommit: &github.HeadCommit{Author: &github.CommitAuthor{}}}
+		from.HeadCommit.ID = github.Ptr("f72fc19")
+		from.Before = github.Ptr("91cf27f")
+		from.Ref = github.Ptr("refs/heads/main")
+
+		// Call the function that loads changed files
+		repo, pipeline, curr, prev := parsePushHook(from)
+
+		var err error
+		pipeline, err = c.loadChangedFilesFromCommits(ctx, repo, pipeline, curr, prev)
+		assert.NoError(t, err)
+
+		assert.Equal(t, model.EventPush, pipeline.Event)
+		assert.Equal(t, "main", pipeline.Branch)
+		assert.Equal(t, "refs/heads/main", pipeline.Ref)
+		assert.Equal(t, *from.HeadCommit.ID, curr)
+		assert.Equal(t, *from.Before, prev)
+		assert.NotNil(t, pipeline.ChangedFiles)
+		assert.NotContains(t, pipeline.ChangedFiles, "README.md")
+		assert.Contains(t, pipeline.ChangedFiles, "main.go")
+	})
+
 	t.Run("convert tag from webhook", func(t *testing.T) {
 		from := &github.PushEvent{}
 		from.Ref = github.Ptr("refs/tags/v1.0.0")
 
-		_, pipeline, before, now := parsePushHook(from)
-		assert.Empty(t, before)
-		assert.Equal(t, "should be here", now)
+		_, pipeline, _, _ := parsePushHook(from)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
 	})
@@ -269,9 +368,7 @@ func Test_parsePushHook(t *testing.T) {
 		from.Ref = github.Ptr("refs/tags/v1.0.0")
 		from.BaseRef = github.Ptr("refs/heads/main")
 
-		_, pipeline, before, now := parsePushHook(from)
-		assert.Empty(t, before)
-		assert.Equal(t, "should be here", now)
+		_, pipeline, _, _ := parsePushHook(from)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 	})
@@ -281,9 +378,7 @@ func Test_parsePushHook(t *testing.T) {
 		from.Ref = github.Ptr("refs/tags/v1.0.0")
 		from.BaseRef = github.Ptr("refs/refs/main")
 
-		_, pipeline, before, now := parsePushHook(from)
-		assert.Empty(t, before)
-		assert.Equal(t, "should be here", now)
+		_, pipeline, _, _ := parsePushHook(from)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Branch)
 	})
