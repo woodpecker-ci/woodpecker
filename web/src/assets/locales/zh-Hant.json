@@ -110,7 +110,8 @@
             "users": {
                 "cancel": "取消",
                 "login": "登入",
-                "email": "Email"
+                "email": "Email",
+                "avatar_url": "Avatar URL"
             }
         }
     },
