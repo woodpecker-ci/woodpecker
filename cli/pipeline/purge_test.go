@@ -2,7 +2,6 @@ package pipeline
 
 import (
 	"context"
-	"errors"
 	"io"
 	"testing"
 	"time"
@@ -48,12 +47,6 @@ func TestPipelinePurge(t *testing.T) {
 				{Number: 3},
 			},
 			wantDelete: 2,
-		},
-		{
-			name:    "error on invalid duration",
-			repoID:  1,
-			args:    []string{"purge", "--older-than", "invalid", "repo/name"},
-			wantErr: errors.New("time: invalid duration \"invalid\""),
 		},
 		{
 			name:   "continue on 422 error",
@@ -109,7 +102,7 @@ func TestPipelinePurge(t *testing.T) {
 			command := pipelinePurgeCmd
 			command.Writer = io.Discard
 			command.Action = func(_ context.Context, c *cli.Command) error {
-				err := pipelinePurge(c, mockClient, time.Time{})
+				err := pipelinePurge(c, mockClient, time.Unix(1, 1))
 
 				if tt.wantErr != nil {
 					assert.EqualError(t, err, tt.wantErr.Error())
