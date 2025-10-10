@@ -78,8 +78,6 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, b)
 		assert.Equal(t, model.EventPush, b.Event)
 		sort.Strings(b.ChangedFiles)
-		// should be []string{"pipeline/shared/replace_secrets.go", "pipeline/shared/replace_secrets_test.go"}, but github new requires an additional api call
-		assert.Empty(t, b.ChangedFiles)
 	})
 
 	t.Run("PR hook", func(t *testing.T) {

@@ -198,6 +198,7 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
 		assert.Equal(t, "admin@philipp.info", pipeline.Email)
+		assert.Equal(t, []string{"main.go"}, pipeline.ChangedFiles)
 	})
 
 	t.Run("convert pull request from webhook", func(t *testing.T) {
@@ -222,6 +223,7 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "baxterthehacker", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.Avatar)
 		assert.Equal(t, "octocat", pipeline.Sender)
+		assert.Equal(t, []string{"README.md", "main.go"}, pipeline.ChangedFiles)
 	})
 
 	t.Run("convert deployment from webhook", func(t *testing.T) {
