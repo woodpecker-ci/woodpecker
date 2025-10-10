@@ -249,7 +249,7 @@ func TestHook(t *testing.T) {
 	})
 
 	t.Run("convert tag from webhook", func(t *testing.T) {
-		// Create a mock HTTP request with a push event payload
+		// Create a mock HTTP request with a tag event payload but push event header (tags create push events at github)
 		req := httptest.NewRequest("POST", "/hook", strings.NewReader(fixtures.HookTag))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-GitHub-Event", "push")
