@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -108,7 +109,7 @@ func TestPipelinePurge(t *testing.T) {
 			command := pipelinePurgeCmd
 			command.Writer = io.Discard
 			command.Action = func(_ context.Context, c *cli.Command) error {
-				err := pipelinePurge(c, mockClient)
+				err := pipelinePurge(c, mockClient, time.Time{})
 
 				if tt.wantErr != nil {
 					assert.EqualError(t, err, tt.wantErr.Error())

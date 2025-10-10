@@ -40,7 +40,7 @@ var pipelinePurgeCmd = &cli.Command{
 			Name:  "branch",
 			Usage: "remove pipelines of this branch only",
 		},
-		&cli.StringFlag{
+		&cli.DurationFlag{
 			Name:     "older-than",
 			Usage:    "remove pipelines older than the specified time limit",
 			Required: true,
@@ -59,14 +59,15 @@ var pipelinePurgeCmd = &cli.Command{
 }
 
 func Purge(ctx context.Context, c *cli.Command) error {
+	start := time.Now()
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	return pipelinePurge(c, client)
+	return pipelinePurge(c, client, start)
 }
 
-func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
+func pipelinePurge(c *cli.Command, client woodpecker.Client, start time.Time) (err error) {
 	repoIDOrFullName := c.Args().First()
 	if len(repoIDOrFullName) == 0 {
 		return fmt.Errorf("missing required argument repo-id / repo-full-name")
@@ -77,18 +78,13 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 	}
 
 	branch := c.String("branch")
-	olderThan := c.String("older-than")
+	olderThan := c.Duration("older-than")
 	keepMin := c.Int64("keep-min")
 	dryRun := c.Bool("dry-run")
 
 	var before time.Time
-	if olderThan != "" {
-		duration, err := time.ParseDuration(olderThan)
-		if err != nil {
-			return err
-		}
-
-		before = time.Now().Add(-duration)
+	if !start.IsZero() {
+		before = start.Add(-olderThan)
 	}
 
 	var pipelinesKeep []*woodpecker.Pipeline
