@@ -358,7 +358,7 @@
                 "pipeline_path": {
                     "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml",
                     "desc": "Ruta a la configuración de su pipeline (por ejemplo {0}). Las carpetas deben terminar en {1}.",
-                    "desc_path_example": "my/path/",
+                    "desc_path_example": "mi/directorie/",
                     "path": "Pasos del pipeline"
                 },
                 "project": "Configuración del proyecto",
