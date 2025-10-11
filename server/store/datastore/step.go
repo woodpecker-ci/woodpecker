@@ -21,33 +21,33 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) StepLoad(id int64) (*model.Step, error) {
+func (s *storage) StepLoad(id int64) (*model.Step, error) {
 	step := new(model.Step)
 	return step, wrapGet(s.engine.ID(id).Get(step))
 }
 
-func (s storage) StepFind(pipeline *model.Pipeline, pid int) (*model.Step, error) {
+func (s *storage) StepFind(pipeline *model.Pipeline, pid int) (*model.Step, error) {
 	step := new(model.Step)
 	return step, wrapGet(s.engine.Where(
 		builder.Eq{"pipeline_id": pipeline.ID, "pid": pid},
 	).Get(step))
 }
 
-func (s storage) StepByUUID(uuid string) (*model.Step, error) {
+func (s *storage) StepByUUID(uuid string) (*model.Step, error) {
 	step := new(model.Step)
 	return step, wrapGet(s.engine.Where(
 		builder.Eq{"uuid": uuid},
 	).Get(step))
 }
 
-func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*model.Step, error) {
+func (s *storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*model.Step, error) {
 	step := new(model.Step)
 	return step, wrapGet(s.engine.Where(
 		builder.Eq{"pipeline_id": pipeline.ID, "ppid": ppid, "name": child},
 	).Get(step))
 }
 
-func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
+func (s *storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
 	stepList := make([]*model.Step, 0)
 	return stepList, s.engine.
 		Where("pipeline_id = ?", pipeline.ID).
@@ -55,11 +55,11 @@ func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
 		Find(&stepList)
 }
 
-func (s storage) StepListFromWorkflowFind(workflow *model.Workflow) ([]*model.Step, error) {
+func (s *storage) StepListFromWorkflowFind(workflow *model.Workflow) ([]*model.Step, error) {
 	return s.stepListWorkflow(s.engine.NewSession(), workflow)
 }
 
-func (s storage) stepListWorkflow(sess *xorm.Session, workflow *model.Workflow) ([]*model.Step, error) {
+func (s *storage) stepListWorkflow(sess *xorm.Session, workflow *model.Workflow) ([]*model.Step, error) {
 	stepList := make([]*model.Step, 0)
 	return stepList, sess.
 		Where("pipeline_id = ?", workflow.PipelineID).
@@ -68,7 +68,7 @@ func (s storage) stepListWorkflow(sess *xorm.Session, workflow *model.Workflow) 
 		Find(&stepList)
 }
 
-func (s storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
+func (s *storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
 	for i := range steps {
 		// only Insert on single object ref set auto created ID back to object
 		if _, err := sess.Insert(steps[i]); err != nil {
@@ -78,7 +78,7 @@ func (s storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
 	return nil
 }
 
-func (s storage) StepUpdate(step *model.Step) error {
+func (s *storage) StepUpdate(step *model.Step) error {
 	_, err := s.engine.ID(step.ID).AllCols().Update(step)
 	return err
 }
