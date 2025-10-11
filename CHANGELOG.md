@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix missing background in pipeline deploy popup [[#5630](https://github.com/woodpecker-ci/woodpecker/pull/5630)]
 - Support matrix environ badges only with no key-values [[#5578](https://github.com/woodpecker-ci/woodpecker/pull/5578)]
 - local backend: fix steps having logs form other steps [[#5582](https://github.com/woodpecker-ci/woodpecker/pull/5582)]
 - local backend: fix windows cmd.exe command escaping [[#5569](https://github.com/woodpecker-ci/woodpecker/pull/5569)]
