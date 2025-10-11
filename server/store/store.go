@@ -26,10 +26,12 @@ type Store interface {
 	// Users
 	// GetUser gets a user by unique ID.
 	GetUser(int64) (*model.User, error)
-	// GetUserRemoteID gets a user by remote ID with fallback to login name.
-	GetUserRemoteID(model.ForgeRemoteID, string) (*model.User, error)
-	// GetUserLogin gets a user by unique Login name.
-	GetUserLogin(string) (*model.User, error)
+	// GetUserByRemoteID gets a user by remote ID.
+	GetUserByRemoteID(int64, model.ForgeRemoteID) (*model.User, error)
+	// GetUserByLogin gets a user by its login name.
+	GetUserByLogin(int64, string) (*model.User, error)
+	// LookupUserByLogin gets a user by its login name, regardless of the forge, duplicates will return an error.
+	LookupUserByLogin(string) (*model.User, error)
 	// GetUserList gets a list of all users in the system.
 	GetUserList(p *model.ListOptions) ([]*model.User, error)
 	// GetUserCount gets a count of all users in the system.
