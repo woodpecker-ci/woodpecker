@@ -13,40 +13,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package stepbuilder_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	server_metadata "go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
 )
+
+func getMockMetadata(t *testing.T) func(*stepbuilder.Workflow) metadata.Metadata {
+	repo := &model.Repo{}
+	curr := &model.Pipeline{
+		Message: "aaa",
+		Event:   model.EventPush,
+	}
+	last := &model.Pipeline{}
+	host := ""
+	return server_metadata.MetadataFromStruct(getMockForge(t), repo, curr, last, host)
+}
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
+	b := stepbuilder.StepBuilder{
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
 		},
-		Repo: &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
+		WorkflowMetadataFunc: getMockMetadata(t),
+		Host:                 "",
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -60,32 +69,25 @@ steps:
 		},
 	}
 
-	if pipelineItems, err := b.Build(); err != nil {
-		t.Fatal(err)
-	} else {
-		fmt.Println(pipelineItems)
-	}
+	_, err := b.Build()
+	assert.NoError(t, err)
 }
 
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
+	b := stepbuilder.StepBuilder{
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
 		},
-		Repo: &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
+		WorkflowMetadataFunc: getMockMetadata(t),
+		Host:                 "",
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -99,28 +101,21 @@ steps:
 		},
 	}
 
-	if _, err := b.Build(); err != nil {
-		fmt.Println("test rightfully failed")
-	} else {
-		t.Fatal("test erroneously succeeded")
-	}
+	_, err := b.Build()
+	assert.ErrorContains(t, err, "Invalid or missing image")
 }
 
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: `aaa
-bbb`,
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -143,27 +138,21 @@ steps:
 		},
 	}
 
-	if pipelineItems, err := b.Build(); err != nil {
-		t.Fatal(err)
-	} else {
-		fmt.Println(pipelineItems)
-	}
+	_, err := b.Build()
+	assert.NoError(t, err)
 }
 
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -194,17 +183,14 @@ steps:
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 when:
@@ -249,17 +235,14 @@ depends_on:
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -290,17 +273,14 @@ runs_on:
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{Config: ".woodpecker"},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 when:
@@ -324,7 +304,7 @@ steps:
 		t.Fatal(err)
 	}
 	pipelineNames := []string{pipelineItems[0].Workflow.Name, pipelineItems[1].Workflow.Name}
-	if !containsItemWithName("lint", pipelineItems) || !containsItemWithName("test", pipelineItems) {
+	if !stepbuilder.ContainsItemWithName("lint", pipelineItems) || !stepbuilder.ContainsItemWithName("test", pipelineItems) {
 		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 	}
 }
@@ -332,18 +312,14 @@ steps:
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Branch: "dev",
-			Event:  model.EventPush,
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -370,7 +346,7 @@ steps:
 	if !assert.Len(t, pipelineItems, 1) {
 		t.Fatal("Should have generated 1 pipeline")
 	}
-	if pipelineItems[0].Workflow.State != model.StatusPending {
+	if !pipelineItems[0].Pending {
 		t.Fatal("Should run on dev branch")
 	}
 }
@@ -378,15 +354,14 @@ steps:
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  &model.Pipeline{Event: "tag"},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -423,20 +398,19 @@ steps:
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
-	pipeline := &model.Pipeline{
-		Branch: "dev",
-		Event:  model.EventPush,
-	}
+	// pipeline := &model.Pipeline{
+	// 	Branch: "dev",
+	// 	Event:  model.EventPush,
+	// }
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  pipeline,
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -463,20 +437,19 @@ steps:
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
 
-	pipeline := &model.Pipeline{
-		Branch: "dev",
-		Event:  model.EventPush,
-	}
+	// pipeline := &model.Pipeline{
+	// 	Branch: "dev",
+	// 	Event:  model.EventPush,
+	// }
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  pipeline,
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:
@@ -521,20 +494,19 @@ depends_on: [ zerostep ]
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
 
-	pipeline := &model.Pipeline{
-		Branch: "dev",
-		Event:  model.EventPush,
-	}
+	// pipeline := &model.Pipeline{
+	// 	Branch: "dev",
+	// 	Event:  model.EventPush,
+	// }
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  pipeline,
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+	b := stepbuilder.StepBuilder{
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:
@@ -618,7 +590,7 @@ func TestSanitizePath(t *testing.T) {
 	}
 
 	for _, test := range testTable {
-		if test.sanitizedPath != SanitizePath(test.path) {
+		if test.sanitizedPath != stepbuilder.SanitizePath(test.path) {
 			t.Fatal("Path hasn't been sanitized correctly")
 		}
 	}
