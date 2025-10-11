@@ -37,6 +37,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.4.3 [[#5621](https://github.com/woodpecker-ci/woodpecker/pull/5621)]
 - chore(deps): update dependency golang to v1.25.2 [[#5620](https://github.com/woodpecker-ci/woodpecker/pull/5620)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.155.0 [[#5617](https://github.com/woodpecker-ci/woodpecker/pull/5617)]
 - fix(deps): update golang-packages [[#5614](https://github.com/woodpecker-ci/woodpecker/pull/5614)]
