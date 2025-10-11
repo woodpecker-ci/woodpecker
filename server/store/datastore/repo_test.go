@@ -152,7 +152,7 @@ func TestRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, false, false)
+	repos, err := store.RepoList(user, false, false, nil)
 	assert.NoError(t, err)
 	assert.Len(t, repos, 2)
 	assert.Equal(t, repo1.ID, repos[0].ID)
@@ -208,7 +208,7 @@ func TestOwnedRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, true, false)
+	repos, err := store.RepoList(user, true, false, nil)
 	assert.NoError(t, err)
 	assert.Len(t, repos, 2)
 	assert.Equal(t, repo1.ID, repos[0].ID)

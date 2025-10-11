@@ -4273,7 +4273,7 @@ const docTemplate = `{
         },
         "/user/repos": {
             "get": {
-                "description": "Retrieve the currently authenticated User's Repository list",
+                "description": "Retrieve the currently authenticated User's Repository list. Can be filtered by name.",
                 "produces": [
                     "application/json"
                 ],
@@ -4294,6 +4294,12 @@ const docTemplate = `{
                         "type": "boolean",
                         "description": "query all repos, including inactive ones",
                         "name": "all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter repos by name",
+                        "name": "name",
                         "in": "query"
                     }
                 ],
