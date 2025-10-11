@@ -29,6 +29,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5627](https://github.com/woodpecker-ci/woodpecker/pull/5627)]
 - chore(deps): update dependency @types/node to v22.18.10 [[#5624](https://github.com/woodpecker-ci/woodpecker/pull/5624)]
 - chore(deps): update docs npm deps non-major [[#5622](https://github.com/woodpecker-ci/woodpecker/pull/5622)]
 - chore(deps): lock file maintenance [[#5607](https://github.com/woodpecker-ci/woodpecker/pull/5607)]
@@ -39,6 +40,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.156.0 [[#5626](https://github.com/woodpecker-ci/woodpecker/pull/5626)]
 - chore(deps): update dependency @types/node to v22.18.10 [[#5625](https://github.com/woodpecker-ci/woodpecker/pull/5625)]
 - chore(deps): update web npm deps non-major [[#5623](https://github.com/woodpecker-ci/woodpecker/pull/5623)]
 - chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.4.3 [[#5621](https://github.com/woodpecker-ci/woodpecker/pull/5621)]
