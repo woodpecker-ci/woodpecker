@@ -154,8 +154,10 @@ func (s storage) RepoList(user *model.User, owned, active bool, f *model.RepoFil
 	if active {
 		sess = sess.And(builder.Eq{"repos.active": true})
 	}
-	if f != nil && f.Name != "" {
-		sess = sess.And("repos.name = ?", f.Name)
+	if f != nil {
+		if f.Name != "" {
+			sess = sess.And(builder.Eq{"repos.name": f.Name})
+		}
 	}
 	return repos, sess.
 		Asc("full_name").

@@ -4273,7 +4273,7 @@ const docTemplate = `{
         },
         "/user/repos": {
             "get": {
-                "description": "Retrieve the currently authenticated User's Repository list. Can be filtered by name.",
+                "description": "Retrieve the currently authenticated User's Repository list",
                 "produces": [
                     "application/json"
                 ],
