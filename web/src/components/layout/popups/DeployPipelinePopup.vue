@@ -1,6 +1,6 @@
 <template>
   <Popup :open="open" @close="$emit('close')">
-    <Panel v-if="!loading">
+    <Panel v-if="!loading" class="bg-wp-background-100 dark:bg-wp-background-300">
       <form @submit.prevent="triggerDeployPipeline">
         <span class="text-wp-text-100 text-xl">{{
           $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber })
