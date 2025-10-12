@@ -20,7 +20,7 @@ This example will use the Go language.
 
 Directly import Woodpecker's Go packages (`go.woodpecker-ci.org/woodpecker/v3`) and use the interfaces and types defined there.
 
-In the `main` function, just call the `Serve` in the corresponding addon package with the service as argument (see [below](#addon-types)).
+In the `main` function, just call the `Serve` method in the corresponding [addon package](#addon-types) with the service as argument.
 This will take care of connecting the addon forge to the server.
 
 :::note
