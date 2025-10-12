@@ -154,8 +154,7 @@ func (s storage) RepoList(user *model.User, owned, active bool, f *model.RepoFil
 	if active {
 		sess = sess.And(builder.Eq{"repos.active": true})
 	}
-	if f != nil {
-		if f.Name != "" {
+	if f != nil && f.Name != "" {
 			sess = sess.And(builder.Eq{"repos.name": f.Name})
 		}
 	}
