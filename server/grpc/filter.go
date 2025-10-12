@@ -29,6 +29,9 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 		// Create a copy of the labels for filtering to avoid modifying the original task
 		labels := maps.Clone(task.Labels)
 
+		if requiredLabelsMissing(labels, agentFilter.Labels) {
+			return false, 0
+		}
 		// ignore internal labels for filtering
 		for k := range labels {
 			if strings.HasPrefix(k, pipelineConsts.InternalLabelPrefix) {
@@ -63,4 +66,16 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 		}
 		return true, score
 	}
+}
+
+func requiredLabelsMissing(taskLabels, agentLabels map[string]string) bool {
+	for label, value := range agentLabels {
+		if len(label) > 0 && label[0] == '!' {
+			val, ok := taskLabels[label[1:]]
+			if !ok || val != value {
+				return true
+			}
+		}
+	}
+	return false
 }
