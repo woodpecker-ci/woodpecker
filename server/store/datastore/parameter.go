@@ -28,7 +28,7 @@ func (s storage) ParameterFindByID(repo *model.Repo, id int64) (*model.Parameter
 	return parameter, wrapGet(s.engine.Where("parameter_repo_id = ? AND parameter_id = ?", repo.ID, id).Get(parameter))
 }
 
-func (s storage) ParameterFindByNameAndBranch(repo *model.Repo, name string, branch string) (*model.Parameter, error) {
+func (s storage) ParameterFindByNameAndBranch(repo *model.Repo, name, branch string) (*model.Parameter, error) {
 	parameter := new(model.Parameter)
 	return parameter, wrapGet(s.engine.Where("parameter_repo_id = ? AND parameter_name = ? AND parameter_branch = ?", repo.ID, name, branch).Get(parameter))
 }

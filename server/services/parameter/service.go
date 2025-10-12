@@ -21,7 +21,7 @@ type Service interface {
 	// Repository parameters
 	ParameterFind(*model.Repo, string) (*model.Parameter, error)
 	ParameterFindByID(*model.Repo, int64) (*model.Parameter, error)
-	ParameterFindByNameAndBranch(repo *model.Repo, name string, branch string) (*model.Parameter, error)
+	ParameterFindByNameAndBranch(repo *model.Repo, name, branch string) (*model.Parameter, error)
 	ParameterList(*model.Repo) ([]*model.Parameter, error)
 	ParameterCreate(*model.Repo, *model.Parameter) error
 	ParameterUpdate(*model.Repo, *model.Parameter) error

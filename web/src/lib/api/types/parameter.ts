@@ -4,7 +4,7 @@ export enum ParameterType {
   MultipleChoice = 'multiple_choice',
   String = 'string',
   Text = 'text',
-  Password = 'password'
+  Password = 'password',
 }
 
 export interface Parameter {

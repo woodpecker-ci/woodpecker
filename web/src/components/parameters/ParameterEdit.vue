@@ -2,26 +2,17 @@
   <div v-if="innerParameter" class="space-y-4">
     <form @submit.prevent="handleSubmit">
       <InputField v-slot="{ id }" :label="$t('parameters.name')">
-        <TextField
-          :id="id"
-          v-model="innerParameter.name"
-          :placeholder="$t('parameters.name')"
-          required
-        />
+        <TextField :id="id" v-model="innerParameter.name" :placeholder="$t('parameters.name')" required />
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('parameters.branch')">
         <select
           :id="id"
           v-model="innerParameter.branch"
-          class="block w-full rounded-md border border-wp-control-neutral-200 bg-wp-control-neutral-100 px-3 py-2 text-sm text-wp-text-100"
+          class="border-wp-control-neutral-200 bg-wp-control-neutral-100 text-wp-text-100 block w-full rounded-md border px-3 py-2 text-sm"
         >
           <option value="*">{{ $t('parameters.any_branch') }}</option>
-          <option
-            v-for="branch in branches"
-            :key="branch"
-            :value="branch"
-          >
+          <option v-for="branch in branches" :key="branch" :value="branch">
             {{ branch }}
           </option>
         </select>
@@ -31,7 +22,7 @@
         <select
           :id="id"
           v-model="innerParameter.type"
-          class="block w-full rounded-md border border-wp-control-neutral-200 bg-wp-control-neutral-100 px-3 py-2 text-sm text-wp-text-100"
+          class="border-wp-control-neutral-200 bg-wp-control-neutral-100 text-wp-text-100 block w-full rounded-md border px-3 py-2 text-sm"
           required
         >
           <option v-for="type in parameterTypes" :key="type" :value="type">
@@ -43,11 +34,7 @@
       <template v-if="innerParameter.type">
         <InputField v-if="showDefaultValue" v-slot="{ id }" :label="$t('parameters.default_value')">
           <template v-if="isBoolean">
-            <Checkbox
-              :id="id"
-              v-model="booleanValue"
-              :label="$t('parameters.set_by_default')"
-            />
+            <Checkbox :id="id" v-model="booleanValue" :label="$t('parameters.set_by_default')" />
           </template>
           <template v-else-if="isPassword">
             <TextField
@@ -66,41 +53,28 @@
               :lines="5"
               :placeholder="$t('parameters.choices_placeholder')"
             />
-            <span class="mt-1 text-sm text-wp-text-alt-100">{{ $t('parameters.choices_help') }}</span>
+            <span class="text-wp-text-alt-100 mt-1 text-sm">{{ $t('parameters.choices_help') }}</span>
           </template>
           <template v-else-if="isText">
-            <TextField
-              :id="id"
-              v-model="innerParameter.default_value"
-              :lines="3"
-              class="text-sm"
-            />
+            <TextField :id="id" v-model="innerParameter.default_value" :lines="3" class="text-sm" />
           </template>
           <template v-else>
-            <TextField
-              :id="id"
-              v-model="innerParameter.default_value"
-              class="text-sm"
-            />
+            <TextField :id="id" v-model="innerParameter.default_value" class="text-sm" />
           </template>
         </InputField>
 
         <InputField v-if="showTrimString" v-slot="{ id }" :label="$t('parameters.trim_string')">
           <Checkbox
             :id="id"
-            v-model="innerParameter.trim_string"
+            :model-value="innerParameter.trim_string ?? false"
             :label="innerParameter.trim_string ? 'true' : 'false'"
+            @update:model-value="(val) => (innerParameter.trim_string = val)"
           />
         </InputField>
       </template>
 
       <InputField v-slot="{ id }" :label="$t('parameters.description')">
-        <TextField
-          :id="id"
-          v-model="innerParameter.description"
-          :lines="3"
-          class="text-sm"
-        />
+        <TextField :id="id" v-model="innerParameter.description" :lines="3" class="text-sm" />
       </InputField>
 
       <div class="flex gap-2">
@@ -155,18 +129,23 @@ const booleanValue = ref(props.modelValue.default_value === 'true');
 const isBoolean = computed(() => innerParameter.value.type === ParameterType.Boolean);
 const isPassword = computed(() => innerParameter.value.type === ParameterType.Password);
 const isText = computed(() => innerParameter.value.type === ParameterType.Text);
-const isChoice = computed(() =>
-  innerParameter.value.type === ParameterType.SingleChoice ||
-  innerParameter.value.type === ParameterType.MultipleChoice
+const isChoice = computed(
+  () =>
+    innerParameter.value.type === ParameterType.SingleChoice ||
+    innerParameter.value.type === ParameterType.MultipleChoice,
 );
 const showDefaultValue = computed(() => innerParameter.value.type !== undefined);
 const showTrimString = computed(() => !isBoolean.value && !isPassword.value);
 
 // Update local copy when prop changes
-watch(() => props.modelValue, (newVal) => {
-  innerParameter.value = { ...newVal };
-  booleanValue.value = innerParameter.value.default_value === 'true';
-}, { deep: true });
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    innerParameter.value = { ...newVal };
+    booleanValue.value = innerParameter.value.default_value === 'true';
+  },
+  { deep: true },
+);
 
 // Watch boolean value changes to update innerParameter
 watch(booleanValue, (newVal) => {
@@ -176,24 +155,28 @@ watch(booleanValue, (newVal) => {
 });
 
 // Convert default_value to proper type when parameter type changes
-watch(() => innerParameter.value.type, (newType) => {
-  // Don't override existing values when editing
-  if (props.existingParameter) {
-    return;
-  }
+watch(
+  () => innerParameter.value.type,
+  (newType) => {
+    // Don't override existing values when editing
+    if (props.existingParameter) {
+      return;
+    }
 
-  if (newType === ParameterType.Boolean) {
-    innerParameter.value.default_value = 'false';
-    innerParameter.value.trim_string = false;
-    booleanValue.value = false;
-  } else if (newType === ParameterType.SingleChoice || newType === ParameterType.MultipleChoice) {
-    innerParameter.value.default_value = '';
-    innerParameter.value.trim_string = true;
-  } else {
-    innerParameter.value.default_value = '';
-    innerParameter.value.trim_string = true;
-  }
-}, { immediate: true });
+    if (newType === ParameterType.Boolean) {
+      innerParameter.value.default_value = 'false';
+      innerParameter.value.trim_string = false;
+      booleanValue.value = false;
+    } else if (newType === ParameterType.SingleChoice || newType === ParameterType.MultipleChoice) {
+      innerParameter.value.default_value = '';
+      innerParameter.value.trim_string = true;
+    } else {
+      innerParameter.value.default_value = '';
+      innerParameter.value.trim_string = true;
+    }
+  },
+  { immediate: true },
+);
 
 // Load branches when component is mounted
 async function loadBranches() {
@@ -201,7 +184,7 @@ async function loadBranches() {
 
   try {
     const branchList = await apiClient.getRepoBranches(repo.value.id);
-    branches.value = branchList.map(b => b);
+    branches.value = branchList.map((b) => b);
   } catch (error) {
     console.error('Failed to load branches:', error);
   }
@@ -231,5 +214,4 @@ function handleSubmit() {
   // Emit the save event with the parameter data
   emit('save', innerParameter.value);
 }
-
 </script>

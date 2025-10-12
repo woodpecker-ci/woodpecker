@@ -7,12 +7,7 @@
         start-icon="back"
         @click="selectedParameter = undefined"
       />
-      <Button
-        v-else
-        :text="$t('parameters.add')"
-        start-icon="plus"
-        @click="showAddParameter()"
-      />
+      <Button v-else :text="$t('parameters.add')" start-icon="plus" @click="showAddParameter()" />
     </template>
 
     <ParameterList
@@ -44,11 +39,11 @@ import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
 import ParameterEdit from '~/components/parameters/ParameterEdit.vue';
 import ParameterList from '~/components/parameters/ParameterList.vue';
+import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import type { Parameter, Repo } from '~/lib/api/types';
 import { ParameterType } from '~/lib/api/types';
-import useApiClient from '~/compositions/useApiClient';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -100,7 +95,7 @@ const { doSubmit: deleteParameter, isLoading: isDeleting } = useAsyncAction(asyn
     throw new Error("Unexpected: Can't load repo");
   }
 
-  await apiClient.deleteParameter(repo.value, _parameter.id);
+  await apiClient.deleteParameter(repo.value, Number(_parameter.id));
   notifications.notify({ title: i18n.t('parameters.deleted'), type: 'success' });
   await resetPage();
 });

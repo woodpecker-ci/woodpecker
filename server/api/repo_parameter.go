@@ -66,10 +66,14 @@ func PostParameter(c *gin.Context) {
 		return
 	}
 	parameter, err := parameterService.ParameterFind(repo, in.Name)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
 	c.JSON(http.StatusOK, parameter)
 }
 
-// PatchParameter updates an existing parameter by ID
+// PatchParameter updates an existing parameter by ID.
 func PatchParameter(c *gin.Context) {
 	repo := session.Repo(c)
 	paramID, err := strconv.ParseInt(c.Param("parameter"), 10, 64)
@@ -119,6 +123,10 @@ func PatchParameter(c *gin.Context) {
 		return
 	}
 	parameter, err := parameterService.ParameterFindByID(repo, paramID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
 	c.JSON(http.StatusOK, parameter)
 }
 

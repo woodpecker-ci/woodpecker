@@ -1,39 +1,45 @@
 <template>
   <div class="flex flex-col gap-4">
-    <ListItem v-for="parameter in parameters" :key="parameter.name" class="flex flex-col gap-2 !bg-wp-background-200 dark:!bg-wp-background-100">
-      <div class="flex items-center justify-between gap-4">
+    <ListItem
+      v-for="parameter in parameters"
+      :key="parameter.name"
+      class="bg-wp-background-200! dark:bg-wp-background-100! flex flex-col gap-2"
+    >
+      <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <h3 class="font-bold">{{ parameter.name }}</h3>
+          <span>{{ parameter.name }}</span>
           <div class="flex items-center gap-1">
-            <Icon name="push" class="h-4 w-4" />
+            <Icon name="branch" class="h-4 w-4" />
             <span>{{ parameter.branch }}</span>
           </div>
         </div>
-        <div class="flex gap-2">
-          <div class="md:display-unset ml-auto hidden space-x-2">
-            <Badge :label="$t(`parameters.types.${parameter.type}`)" />
-          </div>
+        <div class="md:display-unset ml-auto hidden">
+          <Badge :value="$t(`parameters.types.${parameter.type}`)" />
+        </div>
+        <div class="flex items-center gap-2">
           <IconButton
             :title="$t('parameters.edit')"
             icon="edit"
+            class="h-8 w-8 md:ml-2"
             @click="$emit('edit', parameter)"
           />
           <IconButton
             :title="$t('parameters.delete')"
             icon="trash"
+            class="hover:text-wp-error-100 h-8 w-8"
             @click="$emit('delete', parameter)"
           />
         </div>
       </div>
-      <p v-if="parameter.description" class="text-sm text-wp-text-alt-100">
+      <div v-if="parameter.description" class="text-wp-text-alt-100 text-sm">
         {{ parameter.description }}
-      </p>
+      </div>
     </ListItem>
   </div>
 </template>
 
 <script lang="ts" setup>
-import Badge from "~/components/atomic/Badge.vue";
+import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';

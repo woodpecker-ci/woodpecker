@@ -36,7 +36,7 @@ func (d *db) ParameterFindByID(repo *model.Repo, id int64) (*model.Parameter, er
 	return d.store.ParameterFindByID(repo, id)
 }
 
-func (d *db) ParameterFindByNameAndBranch(repo *model.Repo, name string, branch string) (*model.Parameter, error) {
+func (d *db) ParameterFindByNameAndBranch(repo *model.Repo, name, branch string) (*model.Parameter, error) {
 	return d.store.ParameterFindByNameAndBranch(repo, name, branch)
 }
 
