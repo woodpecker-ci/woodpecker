@@ -16,8 +16,6 @@ package parameter
 
 import "go.woodpecker-ci.org/woodpecker/v3/server/model"
 
-//go:generate mockery --name Service --output mocks --case underscore
-
 // Service defines a service for managing parameters.
 type Service interface {
 	// Repository parameters
