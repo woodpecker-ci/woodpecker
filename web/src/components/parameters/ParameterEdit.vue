@@ -26,7 +26,7 @@
           required
         >
           <option v-for="type in parameterTypes" :key="type" :value="type">
-            {{ $t(`parameters.types.${type}`) }}
+            {{ ParameterTypeName(type) }}
           </option>
         </select>
       </InputField>
@@ -93,6 +93,7 @@
 <script lang="ts" setup>
 import { computed, inject, ref, watch } from 'vue';
 import type { Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
@@ -113,6 +114,8 @@ const emit = defineEmits<{
   (e: 'save', value: Partial<Parameter>): void;
   (e: 'cancel'): void;
 }>();
+
+const { t } = useI18n();
 
 const apiClient = useApiClient();
 const repo = inject('repo') as Ref<Repo>;
@@ -136,6 +139,25 @@ const isChoice = computed(
 );
 const showDefaultValue = computed(() => innerParameter.value.type !== undefined);
 const showTrimString = computed(() => !isBoolean.value && !isPassword.value);
+
+const ParameterTypeName = (type: ParameterType): string => {
+  switch (type) {
+    case ParameterType.Boolean:
+      return t('parameters.types.boolean');
+    case ParameterType.SingleChoice:
+      return t('parameters.types.single_choice');
+    case ParameterType.MultipleChoice:
+      return t('parameters.types.multiple_choice');
+    case ParameterType.String:
+      return t('parameters.types.string');
+    case ParameterType.Text:
+      return t('parameters.types.text');
+    case ParameterType.Password:
+      return t('parameters.types.password');
+    default:
+      return type; // Fallback to the type itself if no translation is found
+  }
+};
 
 // Update local copy when prop changes
 watch(

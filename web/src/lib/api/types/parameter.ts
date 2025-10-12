@@ -1,12 +1,3 @@
-export enum ParameterType {
-  Boolean = 'boolean',
-  SingleChoice = 'single_choice',
-  MultipleChoice = 'multiple_choice',
-  String = 'string',
-  Text = 'text',
-  Password = 'password',
-}
-
 export interface Parameter {
   id: string;
   repo_id: number;
@@ -17,3 +8,14 @@ export interface Parameter {
   default_value: string;
   trim_string: boolean;
 }
+
+/* eslint-disable no-unused-vars */
+export enum ParameterType {
+  Boolean = 'boolean',
+  SingleChoice = 'single_choice',
+  MultipleChoice = 'multiple_choice',
+  String = 'string',
+  Text = 'text',
+  Password = 'password',
+}
+/* eslint-enable */

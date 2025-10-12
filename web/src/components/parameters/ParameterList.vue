@@ -14,7 +14,7 @@
           </div>
         </div>
         <div class="md:display-unset ml-auto hidden">
-          <Badge :value="$t(`parameters.types.${parameter.type}`)" />
+          <Badge :value="ParameterTypeName(parameter.type)" />
         </div>
         <div class="flex items-center gap-2">
           <IconButton
@@ -39,6 +39,8 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
+
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
@@ -53,4 +55,25 @@ defineEmits<{
   (e: 'edit', parameter: Parameter): void;
   (e: 'delete', parameter: Parameter): void;
 }>();
+
+const { t } = useI18n();
+
+const ParameterTypeName = (type: string): string => {
+  switch (type) {
+    case 'boolean':
+      return t('parameters.types.boolean');
+    case 'single_choice':
+      return t('parameters.types.single_choice');
+    case 'multiple_choice':
+      return t('parameters.types.multiple_choice');
+    case 'string':
+      return t('parameters.types.string');
+    case 'text':
+      return t('parameters.types.text');
+    case 'password':
+      return t('parameters.types.password');
+    default:
+      return type; // Fallback to the type itself if no translation is found
+  }
+};
 </script>
