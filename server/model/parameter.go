@@ -43,8 +43,6 @@ func (p *Parameter) Validate() error {
 	switch {
 	case len(p.Name) == 0:
 		return fmt.Errorf("%w: empty name", ErrParameterNameInvalid)
-	case len(p.Branch) == 0:
-		return fmt.Errorf("%w: empty branch", ErrParameterNameInvalid)
 	case !validParameterType(p.Type):
 		return fmt.Errorf("%w: %s", ErrParameterTypeInvalid, p.Type)
 	default:

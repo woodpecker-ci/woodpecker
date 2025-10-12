@@ -228,7 +228,7 @@ async function loadParameters() {
   if (!payload.value.branch) return;
 
   try {
-    const allParams = await apiClient.getParameters(repo.value);
+    const allParams = (await apiClient.getParameters(repo.value)) || [];
     const selectedBranch = payload.value.branch;
 
     // Create a map to store parameters by name
@@ -312,9 +312,3 @@ async function triggerManualPipeline() {
 
 useWPTitle(computed(() => [i18n.t('repo.manual_pipeline.trigger'), repo.value.full_name]));
 </script>
-
-<style scoped>
-.dark input[type='checkbox'] {
-  background-color: var(--wp-background-200) !important;
-}
-</style>

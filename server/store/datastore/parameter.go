@@ -60,7 +60,7 @@ func (s storage) ParameterUpdate(repo *model.Repo, parameter *model.Parameter) e
 }
 
 func (s storage) ParameterDelete(repo *model.Repo, name string) error {
-	_, err := s.engine.Where("parameter_repo_id = ? AND parameter_id = ?", repo.ID, name).
+	_, err := s.engine.Where("parameter_repo_id = ? AND parameter_name = ?", repo.ID, name).
 		Delete(&model.Parameter{})
 	return err
 }
