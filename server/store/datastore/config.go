@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
+func (s *storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 	configs := make([]*model.Config, 0, perPage)
 	return configs, s.engine.
 		Table("configs").
@@ -35,7 +35,7 @@ func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 		Find(&configs)
 }
 
-func (s storage) configFindIdentical(sess *xorm.Session, repoID int64, hash, name string) (*model.Config, error) {
+func (s *storage) configFindIdentical(sess *xorm.Session, repoID int64, hash, name string) (*model.Config, error) {
 	conf := new(model.Config)
 	if err := wrapGet(sess.Where(
 		builder.Eq{"repo_id": repoID, "hash": hash, "name": name},
@@ -45,7 +45,7 @@ func (s storage) configFindIdentical(sess *xorm.Session, repoID int64, hash, nam
 	return conf, nil
 }
 
-func (s storage) ConfigPersist(conf *model.Config) (*model.Config, error) {
+func (s *storage) ConfigPersist(conf *model.Config) (*model.Config, error) {
 	conf.Hash = fmt.Sprintf("%x", sha256.Sum256(conf.Data))
 
 	sess := s.engine.NewSession()
@@ -69,7 +69,7 @@ func (s storage) ConfigPersist(conf *model.Config) (*model.Config, error) {
 	return conf, sess.Commit()
 }
 
-func (s storage) configCreate(sess *xorm.Session, config *model.Config) error {
+func (s *storage) configCreate(sess *xorm.Session, config *model.Config) error {
 	// should never happen but just in case
 	if config.Name == "" {
 		return fmt.Errorf("insert config to store failed: 'Name' has to be set")
@@ -83,7 +83,7 @@ func (s storage) configCreate(sess *xorm.Session, config *model.Config) error {
 	return err
 }
 
-func (s storage) PipelineConfigCreate(config *model.PipelineConfig) error {
+func (s *storage) PipelineConfigCreate(config *model.PipelineConfig) error {
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(config)
 	return err
