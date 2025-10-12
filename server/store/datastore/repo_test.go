@@ -152,11 +152,45 @@ func TestRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, false, false)
-	assert.NoError(t, err)
-	assert.Len(t, repos, 2)
-	assert.Equal(t, repo1.ID, repos[0].ID)
-	assert.Equal(t, repo2.ID, repos[1].ID)
+	tests := []struct {
+		name     string
+		filter   *model.RepoFilter
+		expected []string
+	}{
+		{
+			name:     "no filter",
+			filter:   nil,
+			expected: []string{"test", "test"},
+		},
+		{
+			name: "filter by name 'test'",
+			filter: &model.RepoFilter{
+				Name: "test",
+			},
+			expected: []string{"test", "test"},
+		},
+		{
+			name: "filter by name 'hello-world'",
+			filter: &model.RepoFilter{
+				Name: "hello-world",
+			},
+			expected: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repos, err := store.RepoList(user, false, false, tt.filter)
+			assert.NoError(t, err)
+			assert.Len(t, repos, len(tt.expected))
+
+			names := []string{}
+			for _, repo := range repos {
+				names = append(names, repo.Name)
+			}
+			assert.ElementsMatch(t, tt.expected, names)
+		})
+	}
 }
 
 func TestOwnedRepoList(t *testing.T) {
@@ -208,7 +242,7 @@ func TestOwnedRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, true, false)
+	repos, err := store.RepoList(user, true, false, nil)
 	assert.NoError(t, err)
 	assert.Len(t, repos, 2)
 	assert.Equal(t, repo1.ID, repos[0].ID)
