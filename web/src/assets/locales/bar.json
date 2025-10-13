@@ -52,7 +52,7 @@
                 "decline_success": "Pipeline obglehnt"
             },
             "tasks": "Aufgabn",
-            "config": "Config",
+            "config": "Einstellung",
             "files": "Gänderte Datein",
             "no_pipelines": "Do san no koane Pipelines gstartet worn.",
             "no_pipeline_steps": "Koane Pipeline-Schrid do!",
@@ -178,7 +178,7 @@
                 },
                 "cancel_prev": {
                     "cancel": "Vorherige Pipelines bleim losn",
-                    "desc": "Ausgwäids Events los leng losn und und laufende Pipelines vom gleichn Event ob brecha."
+                    "desc": "Ausgwäids Events brechan dritschlde oder los glaffane Pipelines vom gleichn Event und Quain o."
                 }
             },
             "crons": {
@@ -270,7 +270,7 @@
                 "show": "Agents zoang",
                 "no_schedule": {
                     "name": "Agent abschoidn",
-                    "placeholder": "Agent ko koane neien Aufgabn mehr kriagn"
+                    "placeholder": "Agent griagt koane neien Aufgabn mehr"
                 },
                 "token": "Token",
                 "platform": {
@@ -538,7 +538,7 @@
         "desc": "Vahindere dass böswillige Pipelines Secrets ausplaudern oda schädliche Sachen macha durch Freigab vor da Ausführung.",
         "require_approval_for": "Freigab-Anforderunga",
         "none": "Koane",
-        "none_desc": "Jeds Event läsd Pipelines aus, a Pull Requests. De Eistellung ko gfährlich sei und is nur füa private Instanzen empfohln.",
+        "none_desc": "Jeds Event lösd'd Pipelines aus, a Pull Requests. De Eistellung ko gfährlich sei und is nur füa private Instanzen empfohln.",
         "forks": "Pull Request von am geforkten Repo",
         "pull_requests": "Olle Pull Requests",
         "all_events": "Olle Events vo da Forge",
@@ -586,5 +586,6 @@
     "fullscreen": "Vollbild",
     "exit_fullscreen": "Vollbild verlassn",
     "help_translating": "Du kost helfa Woodpecker in dei Sproch zu übersetzen auf {0}.",
-    "weblate": "unserm Weblate"
+    "weblate": "unserm Weblate",
+    "disabled": "Abgschoidn"
 }

@@ -1,27 +1,18 @@
 <template>
-  <Settings :title="$t('extensions')" :description="$t('extensions_description')" docs-url="docs/usage/registries">
-    <div class="mb-4 flex flex-row items-center border-b pb-4 dark:border-gray-600">
-      <h1 class="text-color ml-2 text-xl">{{ $t('extensions') }}</h1>
-    </div>
+  <Settings :title="$t('extensions')" :description="$t('extensions_description')" docs-url="docs/usage/extensions">
+    <form @submit.prevent="saveExtensions">
+      <InputField :label="$t('extensions_signatures_public_key')">
+        <pre class="code-box">{{ signaturePublicKey }}</pre>
+        <template #description>
+          {{ $t('extensions_signatures_public_key_description') }}
+        </template>
+      </InputField>
+      <InputField :label="$t('config_extension_endpoint')" docs-url="docs/usage/extensions/configuration-extension">
+        <TextField v-model="extensions.config_extension_endpoint" :placeholder="$t('extension_endpoint_placeholder')" />
+      </InputField>
 
-    <div class="flex flex-col">
-      <span class="text-color font-bold">{{ $t('extensions_signatures_public_key') }}</span>
-      <span class="text-color">{{ $t('extensions_signatures_public_key_description') }}</span>
-      <pre class="code-box">{{ signaturePublicKey }}</pre>
-    </div>
-
-    <div class="mt-4 flex flex-col border-t-1 dark:border-gray-600">
-      <form @submit.prevent="saveExtensions">
-        <InputField :label="$t('config_extension_endpoint')" docs-url="docs/usage/extensions/configuration-extension">
-          <TextField
-            v-model="extensions.config_extension_endpoint"
-            :placeholder="$t('extension_endpoint_placeholder')"
-          />
-        </InputField>
-
-        <Button :is-loading="isSaving" color="green" type="submit" :text="$t('save')" />
-      </form>
-    </div>
+      <Button :is-loading="isSaving" color="green" type="submit" :text="$t('save')" />
+    </form>
   </Settings>
 </template>
 

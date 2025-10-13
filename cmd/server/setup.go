@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/securecookie"
+	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
@@ -139,7 +139,7 @@ func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
 	if errors.Is(err, types.RecordNotExist) {
 		jwtSecret := base32.StdEncoding.EncodeToString(
-			securecookie.GenerateRandomKey(32),
+			random.GetRandomBytes(32),
 		)
 		err = _store.ServerConfigSet(jwtSecretID, jwtSecret)
 		if err != nil {

@@ -3,6 +3,8 @@ import { computed, reactive, ref } from 'vue';
 import type { Ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
+import { usePaginate } from '~/compositions/usePaginate';
 import type { Repo } from '~/lib/api/types';
 
 import { usePipelineStore } from './pipelines';
@@ -49,6 +51,22 @@ export const useRepoStore = defineStore('repos', () => {
     });
 
     ownedRepoIds.value = _ownedRepos.map((repo) => repo.id);
+
+    // If the current user is a system admin, also hydrate the store with all repos (paginated)
+    const { user } = useConfig();
+    const isSystemAdmin = !!user?.admin;
+    if (isSystemAdmin) {
+      const allRepos = await usePaginate<Repo>(async (page: number) =>
+        apiClient.getAllRepos({ page }).then((r) => r ?? []),
+      );
+      allRepos.forEach((repo) => {
+        if (repo.last_pipeline) {
+          pipelineStore.setPipeline(repo.id, repo.last_pipeline);
+          repo.last_pipeline_number = repo.last_pipeline.number;
+        }
+        setRepo(repo);
+      });
+    }
   }
 
   return {
