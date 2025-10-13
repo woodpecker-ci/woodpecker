@@ -81,7 +81,8 @@ type Forge interface {
 	Auth(ctx context.Context, token, secret string) (string, error)
 
 	// Teams fetches all team/organization memberships for a user.
-	// May return empty slice if forge doesn't support teams.
+	// May return empty slice if forge doesn't support teams/organizations.
+	// Used to determine if an user is member of an team/organization.
 	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 
 	// Repo fetches a single repository.
