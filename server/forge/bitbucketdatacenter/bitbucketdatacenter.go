@@ -211,13 +211,20 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 	return convertRepo(repo, perms, b.DisplayID), nil
 }
 
-func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	if p.Page != 1 {
+		return make([]*model.Repo, 0), nil
+	}
+
 	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
+	opts := &bb.RepositorySearchOptions{
+		Permission:  bb.PermissionRepoWrite,
+		ListOptions: bb.ListOptions{Limit: listLimit},
+	}
 	all := make([]*model.Repo, 0)
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
@@ -602,7 +609,11 @@ func (c *client) updatePipelineFromPullRequest(ctx context.Context, u *model.Use
 }
 
 // Teams fetches all the projects for a given user and converts them into teams.
-func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	if p.Page != 1 {
+		return make([]*model.Team, 0), nil
+	}
+
 	opts := &bb.ListOptions{Limit: listLimit}
 	allProjects := make([]*bb.Project, 0)
 

@@ -35,9 +35,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-const stateTokenDuration = time.Minute * 5
+const (
+	stateTokenDuration = time.Minute * 5
+	perPage            = 50
+	maxPage            = 10000
+)
 
 func HandleAuth(c *gin.Context) {
 	// TODO: check if this is really needed
@@ -133,9 +138,23 @@ func HandleAuth(c *gin.Context) {
 	// if organization filter is enabled, we need to check if the user is a member of one
 	// of the configured organizations
 	if server.Config.Permissions.Orgs.IsConfigured {
-		teams, terr := _forge.Teams(c, userFromForge)
-		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
-			log.Error().Err(terr).Msgf("cannot verify team membership for %s", userFromForge.Login)
+		isMember := false
+		for page := 1; page <= maxPage; page++ {
+			teams, terr := _forge.Teams(c, userFromForge, &model.ListOptions{
+				Page:    page,
+				PerPage: perPage,
+			})
+			if terr != nil {
+				log.Error().Err(terr).Msgf("cannot verify team membership for %s", userFromForge.Login)
+				c.AbortWithError(http.StatusInternalServerError, terr)
+				return
+			}
+			if server.Config.Permissions.Orgs.IsMember(teams) {
+				isMember = true
+				break
+			}
+		}
+		if !isMember {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
 			return
 		}
@@ -268,7 +287,15 @@ func HandleAuth(c *gin.Context) {
 }
 
 func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge) error {
-	repos, _ := _forge.Repos(c, user)
+	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
+		return _forge.Repos(c, user, &model.ListOptions{
+			Page:    page,
+			PerPage: perPage,
+		})
+	}, maxPage)
+	if err != nil {
+		return err
+	}
 
 	for _, forgeRepo := range repos {
 		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
