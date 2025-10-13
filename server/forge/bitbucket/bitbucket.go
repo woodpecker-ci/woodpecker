@@ -132,9 +132,7 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams returns a list of all team membership for the Bitbucket account.
 func (c *config) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
-	if p.PerPage > pageSize {
-		p.PerPage = pageSize
-	}
+	setListOptions(p)
 
 	opts := &internal.ListWorkspacesOpts{
 		PageLen: p.PerPage,
@@ -180,9 +178,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
 func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
-	if p.PerPage > pageSize {
-		p.PerPage = pageSize
-	}
+	setListOptions(p)
 
 	client := c.newClient(ctx, u)
 
@@ -355,6 +351,8 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 
 // Branches returns the names of all branches for the named repository.
 func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	setListOptions(p)
+
 	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
 	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name, &opts)
 	if err != nil {
@@ -381,6 +379,8 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // PullRequests returns the pull requests of the named repository.
 func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
+	setListOptions(p)
+
 	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
 	pullRequests, err := c.newClient(ctx, u).ListPullRequests(r.Owner, r.Name, &opts)
 	if err != nil {
@@ -487,4 +487,10 @@ func matchingHooks(hooks []*internal.Hook, rawURL string) *internal.Hook {
 		}
 	}
 	return nil
+}
+
+func setListOptions(p *model.ListOptions) {
+	if p.PerPage > pageSize || p.PerPage == 0 {
+		p.PerPage = pageSize
+	}
 }
