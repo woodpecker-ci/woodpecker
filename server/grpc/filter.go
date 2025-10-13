@@ -32,6 +32,7 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 		if requiredLabelsMissing(labels, agentFilter.Labels) {
 			return false, 0
 		}
+
 		// ignore internal labels for filtering
 		for k := range labels {
 			if strings.HasPrefix(k, pipelineConsts.InternalLabelPrefix) {
