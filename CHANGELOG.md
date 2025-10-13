@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Allow agents to require labels on workflows [[#5633](https://github.com/woodpecker-ci/woodpecker/pull/5633)]
 - Add repo filter options to GetRepos api [[#5631](https://github.com/woodpecker-ci/woodpecker/pull/5631)]
 - Add branch filter to cli pipeline purge [[#5616](https://github.com/woodpecker-ci/woodpecker/pull/5616)]
 - Switch to GitHub REST API to load changed files [[#5618](https://github.com/woodpecker-ci/woodpecker/pull/5618)]
@@ -32,7 +33,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5634](https://github.com/woodpecker-ci/woodpecker/pull/5634)]
 - chore(deps): update dependency @types/node to v22.18.10 [[#5624](https://github.com/woodpecker-ci/woodpecker/pull/5624)]
 - chore(deps): update docs npm deps non-major [[#5622](https://github.com/woodpecker-ci/woodpecker/pull/5622)]
 - chore(deps): lock file maintenance [[#5607](https://github.com/woodpecker-ci/woodpecker/pull/5607)]
@@ -43,6 +43,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#5634](https://github.com/woodpecker-ci/woodpecker/pull/5634)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.156.0 [[#5626](https://github.com/woodpecker-ci/woodpecker/pull/5626)]
 - chore(deps): lock file maintenance [[#5627](https://github.com/woodpecker-ci/woodpecker/pull/5627)]
 - chore(deps): update dependency @types/node to v22.18.10 [[#5625](https://github.com/woodpecker-ci/woodpecker/pull/5625)]
