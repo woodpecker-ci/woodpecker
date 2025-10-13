@@ -66,6 +66,7 @@
 
 ### Misc
 
+- flake.lock: Update [[#5635](https://github.com/woodpecker-ci/woodpecker/pull/5635)]
 - chore(deps): drop `github.com/gorilla/securecookie` [[#5609](https://github.com/woodpecker-ci/woodpecker/pull/5609)]
 - Announce only stable releases [[#5580](https://github.com/woodpecker-ci/woodpecker/pull/5580)]
 
