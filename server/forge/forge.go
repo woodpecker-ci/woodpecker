@@ -44,11 +44,6 @@ import (
 // OAuth2-based authentication is assumed. Tokens are refreshed 30 minutes before
 // expiry via the optional Refresher interface.
 //
-// Webhook Processing Flow:
-//  1. HTTP request arrives at /api/hook with forge-specific format
-//  2. Webhook token verified against repo.Hash
-//  3. Hook() parses webhook and returns (Repo, Pipeline, error)
-//
 // Configuration Fetching:
 // Pipeline configurations retrieved via File() or Dir() from Repo.Config path
 // with fallback to defaults.
@@ -56,7 +51,7 @@ import (
 // Error Handling:
 // - types.ErrIgnoreEvent: Skippable webhook events
 // - types.RecordNotExist: Resource not found
-// - nil Repo/Pipeline: "No action needed" (not an error)
+// - nil Repo/Pipeline: "No action needed" (not an error).
 type Forge interface {
 	// Name returns the unique identifier of this forge driver.
 	// Examples: "github", "gitlab", "gitea", "forgejo", "bitbucket"
@@ -141,6 +136,11 @@ type Forge interface {
 	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error)
 
 	// Hook parses incoming webhook and returns pipeline data.
+	//
+	// Webhook Processing Flow:
+	//  1. HTTP request arrives at /api/hook with forge-specific format
+	//  2. Webhook token verified against repo.Hash
+	//  3. Hook() parses webhook and returns (Repo, Pipeline, error)
 	//
 	// Return Semantics:
 	// - (repo, pipeline, nil): Execute pipeline for this event

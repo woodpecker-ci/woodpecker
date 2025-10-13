@@ -29,7 +29,7 @@ import (
 // Tokens are checked before each operation. If expiring within 30 minutes,
 // Refresh() is called automatically.
 //
-// Implementations: GitLab, Bitbucket (GitHub/Gitea tokens don't expire)
+// Implementations: GitLab, Bitbucket (GitHub/Gitea tokens don't expire).
 type Refresher interface {
 	// Refresh attempts to refresh the user's OAuth access token.
 	// Should update u.AccessToken, u.RefreshToken, and u.Expiry.
