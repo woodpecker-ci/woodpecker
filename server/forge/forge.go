@@ -159,17 +159,3 @@ type Forge interface {
 	// If identifier is a user, return org with IsUser: true.
 	Org(ctx context.Context, u *model.User, org string) (*model.Org, error)
 }
-
-// Refresher is an optional interface for OAuth token refresh support.
-//
-// Tokens are checked before each operation. If expiring within 30 minutes,
-// Refresh() is called automatically.
-//
-// Implementations: GitLab, Bitbucket (GitHub/Gitea tokens don't expire)
-type Refresher interface {
-	// Refresh attempts to refresh the user's OAuth access token.
-	// Should update u.AccessToken, u.RefreshToken, and u.Expiry.
-	// Returns true if any fields were updated.
-	// Caller must persist updated user to database.
-	Refresh(ctx context.Context, u *model.User) (bool, error)
-}
