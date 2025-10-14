@@ -283,8 +283,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		}
 	})
 
-	for i := 0; i < maxWorkflows; i++ {
-		i := i
+	// https://go.dev/blog/go1.22 fixed scope for goroutines in loops
+	for i := range maxWorkflows {
 		serviceWaitingGroup.Go(func() error {
 			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
