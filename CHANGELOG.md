@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Modernize a couple of loops, fix incorrect function docs [[#5637](https://github.com/woodpecker-ci/woodpecker/pull/5637)]
 - Allow agents to require labels on workflows [[#5633](https://github.com/woodpecker-ci/woodpecker/pull/5633)]
 - Add repo filter options to GetRepos api [[#5631](https://github.com/woodpecker-ci/woodpecker/pull/5631)]
 - Add branch filter to cli pipeline purge [[#5616](https://github.com/woodpecker-ci/woodpecker/pull/5616)]
