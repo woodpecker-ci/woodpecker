@@ -85,6 +85,7 @@ func GetFeed(c *gin.Context) {
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			all				query	bool	false	"query all repos, including inactive ones"
+//	@Param			name			query	string	false	"filter repos by name"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
@@ -96,9 +97,12 @@ func GetRepos(c *gin.Context) {
 	}
 
 	all, _ := strconv.ParseBool(c.Query("all"))
+	filter := &model.RepoFilter{
+		Name: c.Query("name"),
+	}
 
 	if all {
-		dbRepos, err := _store.RepoList(user, true, false)
+		dbRepos, err := _store.RepoList(user, true, false, filter)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
@@ -134,7 +138,7 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
-	activeRepos, err := _store.RepoList(user, true, true)
+	activeRepos, err := _store.RepoList(user, true, true, filter)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return

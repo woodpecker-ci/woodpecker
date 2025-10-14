@@ -358,7 +358,7 @@
                 "pipeline_path": {
                     "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml",
                     "desc": "Ruta a la configuración de su pipeline (por ejemplo {0}). Las carpetas deben terminar en {1}.",
-                    "desc_path_example": "my/path/",
+                    "desc_path_example": "mi/directorie/",
                     "path": "Pasos del pipeline"
                 },
                 "project": "Configuración del proyecto",
@@ -534,5 +534,20 @@
     "empty_list": "¡No se ha encontrado {entidad}!",
     "org_level_secret": "secreto de organización",
     "global_level_secret": "secreto global",
-    "login_with": "Iniciar sesión con {forge}"
+    "login_with": "Iniciar sesión con {forge}",
+    "extensions": "Extensiones",
+    "extensions_configuration_saved": "Configuración de extensiones guardada",
+    "require_approval": {
+        "require_approval_for": "Requisitos aprobados",
+        "allowed_users": {
+            "allowed_users": "Usuarios permitidos"
+        }
+    },
+    "no_search_results": "No se han encontrado resultados",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "public_only": "Solo público"
 }

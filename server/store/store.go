@@ -99,7 +99,7 @@ type Store interface {
 	UserFeed(*model.User) ([]*model.Feed, error)
 
 	// Repositories
-	RepoList(user *model.User, owned, active bool) ([]*model.Repo, error)
+	RepoList(user *model.User, owned, active bool, filter *model.RepoFilter) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
 	RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error)
 

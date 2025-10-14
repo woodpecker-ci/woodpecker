@@ -4295,6 +4295,12 @@ const docTemplate = `{
                         "description": "query all repos, including inactive ones",
                         "name": "all",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter repos by name",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
