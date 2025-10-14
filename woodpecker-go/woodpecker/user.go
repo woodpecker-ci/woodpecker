@@ -9,7 +9,7 @@ const (
 	pathSelf  = "%s/api/user"
 	pathRepos = "%s/api/user/repos"
 	pathUsers = "%s/api/users"
-	pathUser  = "%s/api/users/%s"
+	pathUser  = "%s/api/users/%s?forge_id=%d"
 )
 
 type RepoListOptions struct {
@@ -41,12 +41,10 @@ func (c *client) Self() (*User, error) {
 // It is recommended to specify forgeID (default is 1).
 func (c *client) User(login string, forgeID ...int64) (*User, error) {
 	out := new(User)
-	uri, _ := url.Parse(fmt.Sprintf(pathUser, c.addr, login))
 	if len(forgeID) == 0 {
 		forgeID = []int64{defaultForgeID}
 	}
-	uri.Query().Add("forge_id", fmt.Sprint(forgeID[0]))
-	err := c.get(uri.String(), out)
+	err := c.get(fmt.Sprintf(pathUser, c.addr, login, forgeID[0]), out)
 	return out, err
 }
 
@@ -73,7 +71,7 @@ func (c *client) UserPatch(in *User) (*User, error) {
 		in.ForgeID = defaultForgeID
 	}
 	out := new(User)
-	uri := fmt.Sprintf(pathUser, c.addr, in.Login)
+	uri := fmt.Sprintf(pathUser, c.addr, in.Login, in.ForgeID)
 	err := c.patch(uri, in, out)
 	return out, err
 }
@@ -81,13 +79,10 @@ func (c *client) UserPatch(in *User) (*User, error) {
 // UserDel deletes a user account.
 // It is recommended to specify forgeID (default is 1).
 func (c *client) UserDel(login string, forgeID ...int64) error {
-	uri, _ := url.Parse(fmt.Sprintf(pathUser, c.addr, login))
 	if len(forgeID) == 0 {
 		forgeID = []int64{defaultForgeID}
 	}
-	uri.Query().Add("forge_id", fmt.Sprint(forgeID[0]))
-	err := c.delete(uri.String())
-	return err
+	return c.delete(fmt.Sprintf(pathUser, c.addr, login, forgeID[0]))
 }
 
 // RepoList returns a list of all repositories to which
