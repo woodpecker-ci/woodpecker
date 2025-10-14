@@ -28,12 +28,6 @@ var userRemoveCmd = &cli.Command{
 	Usage:     "remove a user",
 	ArgsUsage: "<username>",
 	Action:    userRemove,
-	Flags: []cli.Flag{
-		&cli.Int64Flag{
-			Name:  "forge-id",
-			Value: 1,
-		},
-	},
 }
 
 func userRemove(ctx context.Context, c *cli.Command) error {
@@ -44,7 +38,7 @@ func userRemove(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	if err := client.UserDel(login, c.Int64("forge-id")); err != nil {
+	if err := client.UserDel(login); err != nil {
 		return err
 	}
 	fmt.Printf("Successfully removed user %s\n", login)

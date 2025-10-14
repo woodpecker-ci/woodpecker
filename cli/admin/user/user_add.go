@@ -29,12 +29,6 @@ var userAddCmd = &cli.Command{
 	Usage:     "add a user",
 	ArgsUsage: "<username>",
 	Action:    userAdd,
-	Flags: []cli.Flag{
-		&cli.Int64Flag{
-			Name:  "forge-id",
-			Value: 1,
-		},
-	},
 }
 
 func userAdd(ctx context.Context, c *cli.Command) error {
@@ -45,7 +39,7 @@ func userAdd(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	user, err := client.UserPost(&woodpecker.User{Login: login, ForgeID: c.Int64("forge-id")})
+	user, err := client.UserPost(&woodpecker.User{Login: login})
 	if err != nil {
 		return err
 	}

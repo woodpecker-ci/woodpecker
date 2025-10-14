@@ -31,13 +31,7 @@ var userShowCmd = &cli.Command{
 	Usage:     "show user information",
 	ArgsUsage: "<username>",
 	Action:    userShow,
-	Flags: []cli.Flag{
-		common.FormatFlag(tmplUserInfo, false),
-		&cli.Int64Flag{
-			Name:  "forge-id",
-			Value: 1,
-		},
-	},
+	Flags:     []cli.Flag{common.FormatFlag(tmplUserInfo, false)},
 }
 
 func userShow(ctx context.Context, c *cli.Command) error {
@@ -51,7 +45,7 @@ func userShow(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("missing or invalid user login")
 	}
 
-	user, err := client.User(login, c.Int64("forge-id"))
+	user, err := client.User(login)
 	if err != nil {
 		return err
 	}
@@ -65,5 +59,4 @@ func userShow(ctx context.Context, c *cli.Command) error {
 
 // Template for user information.
 var tmplUserInfo = `User: {{ .Login }}
-Email: {{ .Email }}
-ForgeID: {{ .ForgeID }}`
+Email: {{ .Email }}`
