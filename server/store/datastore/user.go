@@ -27,16 +27,16 @@ func (s storage) GetUser(id int64) (*model.User, error) {
 	return user, wrapGet(s.engine.ID(id).Get(user))
 }
 
-func (s storage) GetUserByRemoteID(forgeId int64, userRemoteID model.ForgeRemoteID) (*model.User, error) {
+func (s storage) GetUserByRemoteID(forgeID int64, userRemoteID model.ForgeRemoteID) (*model.User, error) {
 	sess := s.engine.NewSession()
 	user := new(model.User)
-	return user, wrapGet(sess.Where("forge_id = ? AND forge_remote_id = ?", forgeId, userRemoteID).Get(user))
+	return user, wrapGet(sess.Where("forge_id = ? AND forge_remote_id = ?", forgeID, userRemoteID).Get(user))
 }
 
-func (s storage) GetUserByLogin(forgeId int64, login string) (*model.User, error) {
+func (s storage) GetUserByLogin(forgeID int64, login string) (*model.User, error) {
 	sess := s.engine.NewSession()
 	user := new(model.User)
-	return user, wrapGet(sess.Where("forge_id = ? AND login=?", forgeId, login).Get(user))
+	return user, wrapGet(sess.Where("forge_id = ? AND login=?", forgeID, login).Get(user))
 }
 
 // TODO: replace with more explicit GetUserByLogin / GetUserByRemoteID calls

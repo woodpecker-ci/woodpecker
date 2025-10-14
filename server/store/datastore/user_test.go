@@ -54,7 +54,7 @@ func TestUsers(t *testing.T) {
 	assert.Equal(t, user.Email, getUser.Email)
 	assert.Equal(t, user.Avatar, getUser.Avatar)
 
-	getUser, err = store.GetUserLogin(user.Login)
+	getUser, err = store.GetUserByLogin(user.ForgeID, user.Login)
 	assert.NoError(t, err)
 	assert.Equal(t, user.ID, getUser.ID)
 	assert.Equal(t, user.Login, getUser.Login)
