@@ -36,7 +36,7 @@ type User struct {
 
 	ForgeID int64 `json:"forge_id,omitempty" xorm:"forge_id UNIQUE(forge)"`
 
-	ForgeRemoteID ForgeRemoteID `json:"-" xorm:"forge_remote_id UNIQUE(forge)"`
+	ForgeRemoteID ForgeRemoteID `json:"forge_remote_id" xorm:"forge_remote_id UNIQUE(forge)"`
 
 	// Login is the username for this user.
 	//

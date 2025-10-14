@@ -38,10 +38,15 @@ func (c *client) Self() (*User, error) {
 }
 
 // User returns a user by login.
-func (c *client) User(login string) (*User, error) {
+// It is recommended to specify forgeID (default is 1).
+func (c *client) User(login string, forgeID ...int64) (*User, error) {
 	out := new(User)
-	uri := fmt.Sprintf(pathUser, c.addr, login)
-	err := c.get(uri, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathUser, c.addr, login))
+	if len(forgeID) == 0 {
+		forgeID = []int64{defaultForgeID}
+	}
+	uri.Query().Add("forge_id", fmt.Sprint(forgeID[0]))
+	err := c.get(uri.String(), out)
 	return out, err
 }
 
@@ -64,6 +69,9 @@ func (c *client) UserPost(in *User) (*User, error) {
 
 // UserPatch updates a user account.
 func (c *client) UserPatch(in *User) (*User, error) {
+	if in.ForgeID < defaultForgeID {
+		in.ForgeID = defaultForgeID
+	}
 	out := new(User)
 	uri := fmt.Sprintf(pathUser, c.addr, in.Login)
 	err := c.patch(uri, in, out)
@@ -71,9 +79,14 @@ func (c *client) UserPatch(in *User) (*User, error) {
 }
 
 // UserDel deletes a user account.
-func (c *client) UserDel(login string) error {
-	uri := fmt.Sprintf(pathUser, c.addr, login)
-	err := c.delete(uri)
+// It is recommended to specify forgeID (default is 1).
+func (c *client) UserDel(login string, forgeID ...int64) error {
+	uri, _ := url.Parse(fmt.Sprintf(pathUser, c.addr, login))
+	if len(forgeID) == 0 {
+		forgeID = []int64{defaultForgeID}
+	}
+	uri.Query().Add("forge_id", fmt.Sprint(forgeID[0]))
+	err := c.delete(uri.String())
 	return err
 }
 

@@ -5578,6 +5578,9 @@ const docTemplate = `{
                 "forge_id": {
                     "type": "integer"
                 },
+                "forge_remote_id": {
+                    "type": "string"
+                },
                 "id": {
                     "description": "the id for this user.\n\nrequired: true",
                     "type": "integer"
