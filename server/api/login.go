@@ -150,6 +150,10 @@ func HandleAuth(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
+	// update user login (in case forge supports renaming)
+	if user != nil {
+		user.Login = userFromForge.Login
+	}
 
 	// re-try with login name
 	if user == nil || errors.Is(err, types.RecordNotExist) {

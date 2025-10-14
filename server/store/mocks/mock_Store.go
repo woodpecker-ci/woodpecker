@@ -2712,6 +2712,142 @@ func (_c *MockStore_GetUser_Call) RunAndReturn(run func(n int64) (*model.User, e
 	return _c
 }
 
+// GetUserByLogin provides a mock function for the type MockStore
+func (_mock *MockStore) GetUserByLogin(n int64, s string) (*model.User, error) {
+	ret := _mock.Called(n, s)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByLogin")
+	}
+
+	var r0 *model.User
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, string) (*model.User, error)); ok {
+		return returnFunc(n, s)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, string) *model.User); ok {
+		r0 = returnFunc(n, s)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, string) error); ok {
+		r1 = returnFunc(n, s)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_GetUserByLogin_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByLogin'
+type MockStore_GetUserByLogin_Call struct {
+	*mock.Call
+}
+
+// GetUserByLogin is a helper method to define mock.On call
+//   - n int64
+//   - s string
+func (_e *MockStore_Expecter) GetUserByLogin(n interface{}, s interface{}) *MockStore_GetUserByLogin_Call {
+	return &MockStore_GetUserByLogin_Call{Call: _e.mock.On("GetUserByLogin", n, s)}
+}
+
+func (_c *MockStore_GetUserByLogin_Call) Run(run func(n int64, s string)) *MockStore_GetUserByLogin_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_GetUserByLogin_Call) Return(user *model.User, err error) *MockStore_GetUserByLogin_Call {
+	_c.Call.Return(user, err)
+	return _c
+}
+
+func (_c *MockStore_GetUserByLogin_Call) RunAndReturn(run func(n int64, s string) (*model.User, error)) *MockStore_GetUserByLogin_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUserByRemoteID provides a mock function for the type MockStore
+func (_mock *MockStore) GetUserByRemoteID(n int64, forgeRemoteID model.ForgeRemoteID) (*model.User, error) {
+	ret := _mock.Called(n, forgeRemoteID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByRemoteID")
+	}
+
+	var r0 *model.User
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, model.ForgeRemoteID) (*model.User, error)); ok {
+		return returnFunc(n, forgeRemoteID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, model.ForgeRemoteID) *model.User); ok {
+		r0 = returnFunc(n, forgeRemoteID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, model.ForgeRemoteID) error); ok {
+		r1 = returnFunc(n, forgeRemoteID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_GetUserByRemoteID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByRemoteID'
+type MockStore_GetUserByRemoteID_Call struct {
+	*mock.Call
+}
+
+// GetUserByRemoteID is a helper method to define mock.On call
+//   - n int64
+//   - forgeRemoteID model.ForgeRemoteID
+func (_e *MockStore_Expecter) GetUserByRemoteID(n interface{}, forgeRemoteID interface{}) *MockStore_GetUserByRemoteID_Call {
+	return &MockStore_GetUserByRemoteID_Call{Call: _e.mock.On("GetUserByRemoteID", n, forgeRemoteID)}
+}
+
+func (_c *MockStore_GetUserByRemoteID_Call) Run(run func(n int64, forgeRemoteID model.ForgeRemoteID)) *MockStore_GetUserByRemoteID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 model.ForgeRemoteID
+		if args[1] != nil {
+			arg1 = args[1].(model.ForgeRemoteID)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_GetUserByRemoteID_Call) Return(user *model.User, err error) *MockStore_GetUserByRemoteID_Call {
+	_c.Call.Return(user, err)
+	return _c
+}
+
+func (_c *MockStore_GetUserByRemoteID_Call) RunAndReturn(run func(n int64, forgeRemoteID model.ForgeRemoteID) (*model.User, error)) *MockStore_GetUserByRemoteID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetUserCount provides a mock function for the type MockStore
 func (_mock *MockStore) GetUserCount() (int64, error) {
 	ret := _mock.Called()
@@ -2823,136 +2959,6 @@ func (_c *MockStore_GetUserList_Call) Return(users []*model.User, err error) *Mo
 }
 
 func (_c *MockStore_GetUserList_Call) RunAndReturn(run func(p *model.ListOptions) ([]*model.User, error)) *MockStore_GetUserList_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetUserLogin provides a mock function for the type MockStore
-func (_mock *MockStore) GetUserLogin(s string) (*model.User, error) {
-	ret := _mock.Called(s)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetUserLogin")
-	}
-
-	var r0 *model.User
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*model.User, error)); ok {
-		return returnFunc(s)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string) *model.User); ok {
-		r0 = returnFunc(s)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.User)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(s)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_GetUserLogin_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserLogin'
-type MockStore_GetUserLogin_Call struct {
-	*mock.Call
-}
-
-// GetUserLogin is a helper method to define mock.On call
-//   - s string
-func (_e *MockStore_Expecter) GetUserLogin(s interface{}) *MockStore_GetUserLogin_Call {
-	return &MockStore_GetUserLogin_Call{Call: _e.mock.On("GetUserLogin", s)}
-}
-
-func (_c *MockStore_GetUserLogin_Call) Run(run func(s string)) *MockStore_GetUserLogin_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_GetUserLogin_Call) Return(user *model.User, err error) *MockStore_GetUserLogin_Call {
-	_c.Call.Return(user, err)
-	return _c
-}
-
-func (_c *MockStore_GetUserLogin_Call) RunAndReturn(run func(s string) (*model.User, error)) *MockStore_GetUserLogin_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetUserRemoteID provides a mock function for the type MockStore
-func (_mock *MockStore) GetUserRemoteID(forgeRemoteID model.ForgeRemoteID, s string) (*model.User, error) {
-	ret := _mock.Called(forgeRemoteID, s)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetUserRemoteID")
-	}
-
-	var r0 *model.User
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(model.ForgeRemoteID, string) (*model.User, error)); ok {
-		return returnFunc(forgeRemoteID, s)
-	}
-	if returnFunc, ok := ret.Get(0).(func(model.ForgeRemoteID, string) *model.User); ok {
-		r0 = returnFunc(forgeRemoteID, s)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.User)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(model.ForgeRemoteID, string) error); ok {
-		r1 = returnFunc(forgeRemoteID, s)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_GetUserRemoteID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserRemoteID'
-type MockStore_GetUserRemoteID_Call struct {
-	*mock.Call
-}
-
-// GetUserRemoteID is a helper method to define mock.On call
-//   - forgeRemoteID model.ForgeRemoteID
-//   - s string
-func (_e *MockStore_Expecter) GetUserRemoteID(forgeRemoteID interface{}, s interface{}) *MockStore_GetUserRemoteID_Call {
-	return &MockStore_GetUserRemoteID_Call{Call: _e.mock.On("GetUserRemoteID", forgeRemoteID, s)}
-}
-
-func (_c *MockStore_GetUserRemoteID_Call) Run(run func(forgeRemoteID model.ForgeRemoteID, s string)) *MockStore_GetUserRemoteID_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 model.ForgeRemoteID
-		if args[0] != nil {
-			arg0 = args[0].(model.ForgeRemoteID)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_GetUserRemoteID_Call) Return(user *model.User, err error) *MockStore_GetUserRemoteID_Call {
-	_c.Call.Return(user, err)
-	return _c
-}
-
-func (_c *MockStore_GetUserRemoteID_Call) RunAndReturn(run func(forgeRemoteID model.ForgeRemoteID, s string) (*model.User, error)) *MockStore_GetUserRemoteID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3437,6 +3443,68 @@ func (_c *MockStore_LogFind_Call) Return(logEntrys []*model.LogEntry, err error)
 }
 
 func (_c *MockStore_LogFind_Call) RunAndReturn(run func(step *model.Step) ([]*model.LogEntry, error)) *MockStore_LogFind_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// LookupUserByLogin provides a mock function for the type MockStore
+func (_mock *MockStore) LookupUserByLogin(s string) (*model.User, error) {
+	ret := _mock.Called(s)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LookupUserByLogin")
+	}
+
+	var r0 *model.User
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) (*model.User, error)); ok {
+		return returnFunc(s)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) *model.User); ok {
+		r0 = returnFunc(s)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(s)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_LookupUserByLogin_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LookupUserByLogin'
+type MockStore_LookupUserByLogin_Call struct {
+	*mock.Call
+}
+
+// LookupUserByLogin is a helper method to define mock.On call
+//   - s string
+func (_e *MockStore_Expecter) LookupUserByLogin(s interface{}) *MockStore_LookupUserByLogin_Call {
+	return &MockStore_LookupUserByLogin_Call{Call: _e.mock.On("LookupUserByLogin", s)}
+}
+
+func (_c *MockStore_LookupUserByLogin_Call) Run(run func(s string)) *MockStore_LookupUserByLogin_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_LookupUserByLogin_Call) Return(user *model.User, err error) *MockStore_LookupUserByLogin_Call {
+	_c.Call.Return(user, err)
+	return _c
+}
+
+func (_c *MockStore_LookupUserByLogin_Call) RunAndReturn(run func(s string) (*model.User, error)) *MockStore_LookupUserByLogin_Call {
 	_c.Call.Return(run)
 	return _c
 }
