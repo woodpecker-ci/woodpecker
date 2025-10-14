@@ -146,7 +146,7 @@ func HandleAuth(c *gin.Context) {
 			})
 			if terr != nil {
 				log.Error().Err(terr).Msgf("cannot verify team membership for %s", userFromForge.Login)
-				c.AbortWithError(http.StatusInternalServerError, terr)
+				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 				return
 			}
 			if server.Config.Permissions.Orgs.IsMember(teams) {

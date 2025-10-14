@@ -212,8 +212,10 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 }
 
 func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we do not support pagination as we merge different responses together
+	// so first page returns all and we paginate here
 	if p.Page != 1 {
-		return make([]*model.Repo, 0), nil
+		return nil, nil
 	}
 
 	bc, err := c.newClient(ctx, u)
@@ -360,7 +362,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	}
 
 	opts := &bb.BranchSearchOptions{ListOptions: convertListOptions(p)}
-	all := make([]string, 0)
+	all := make([]string, 0, p.PerPage)
 	for {
 		branches, resp, err := bc.Projects.SearchBranches(ctx, r.Owner, r.Name, opts)
 		if err != nil {
@@ -614,7 +616,7 @@ func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions)
 		return make([]*model.Team, 0), nil
 	}
 
-	opts := &bb.ListOptions{Limit: listLimit}
+	opts := convertListOptions(p)
 	allProjects := make([]*bb.Project, 0)
 
 	bc, err := c.newClient(ctx, u)
@@ -623,7 +625,7 @@ func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions)
 	}
 
 	for {
-		projects, resp, err := bc.Projects.ListProjects(ctx, opts)
+		projects, resp, err := bc.Projects.ListProjects(ctx, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to fetch projects: %w", err)
 		}
