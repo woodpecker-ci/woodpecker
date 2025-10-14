@@ -808,6 +808,15 @@ The default setting for allowing pull requests on a repo.
 
 ---
 
+### DEFAULT_APPROVAL_MODE
+
+- Name: `WOODPECKER_DEFAULT_APPROVAL_MODE`
+- Default: `forks`
+
+The default setting for the approval mode on a repo. Possible values: `none`, `forks`, `pull_requests` or `all_events`.
+
+---
+
 ### DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS
 
 - Name: `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`
@@ -1059,6 +1068,15 @@ Supported variables:
 - Default: none
 
 Specify a configuration service endpoint, see [Configuration Extension](#external-configuration-api)
+
+---
+
+### EXTENSIONS_ALLOWED_HOSTS
+
+- Name: `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS`
+- Default: `external`
+
+Comma-separated list of hosts that are allowed to be contacted by extensions. Possible values are `loopback`, `private`, `external`, `*` or CIDR list.
 
 ---
 
