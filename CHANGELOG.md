@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-13
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.157.0 [[#5640](https://github.com/woodpecker-ci/woodpecker/pull/5640)]
 - chore(deps): lock file maintenance [[#5634](https://github.com/woodpecker-ci/woodpecker/pull/5634)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.156.0 [[#5626](https://github.com/woodpecker-ci/woodpecker/pull/5626)]
 - chore(deps): lock file maintenance [[#5627](https://github.com/woodpecker-ci/woodpecker/pull/5627)]
