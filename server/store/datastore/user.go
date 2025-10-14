@@ -39,24 +39,6 @@ func (s storage) GetUserByLogin(forgeID int64, login string) (*model.User, error
 	return user, wrapGet(sess.Where("forge_id = ? AND login=?", forgeID, login).Get(user))
 }
 
-// TODO: replace with more explicit GetUserByLogin / GetUserByRemoteID calls
-// LookupUserByLogin gets a user by its login name, regardless of the forge, duplicates will return an error.
-func (s storage) LookupUserByLogin(login string) (*model.User, error) {
-	sess := s.engine.NewSession()
-
-	count, err := sess.Where("login=?", login).Count()
-	if err != nil {
-		return nil, err
-	}
-
-	if count > 1 {
-		return nil, fmt.Errorf("more than one user with login %q", login)
-	}
-
-	user := new(model.User)
-	return user, wrapGet(sess.Where("login=?", login).Get(user))
-}
-
 func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {
 	var users []*model.User
 	return users, s.paginate(p).OrderBy("login").Find(&users)

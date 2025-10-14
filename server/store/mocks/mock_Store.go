@@ -3447,68 +3447,6 @@ func (_c *MockStore_LogFind_Call) RunAndReturn(run func(step *model.Step) ([]*mo
 	return _c
 }
 
-// LookupUserByLogin provides a mock function for the type MockStore
-func (_mock *MockStore) LookupUserByLogin(s string) (*model.User, error) {
-	ret := _mock.Called(s)
-
-	if len(ret) == 0 {
-		panic("no return value specified for LookupUserByLogin")
-	}
-
-	var r0 *model.User
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*model.User, error)); ok {
-		return returnFunc(s)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string) *model.User); ok {
-		r0 = returnFunc(s)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.User)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(s)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_LookupUserByLogin_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LookupUserByLogin'
-type MockStore_LookupUserByLogin_Call struct {
-	*mock.Call
-}
-
-// LookupUserByLogin is a helper method to define mock.On call
-//   - s string
-func (_e *MockStore_Expecter) LookupUserByLogin(s interface{}) *MockStore_LookupUserByLogin_Call {
-	return &MockStore_LookupUserByLogin_Call{Call: _e.mock.On("LookupUserByLogin", s)}
-}
-
-func (_c *MockStore_LookupUserByLogin_Call) Run(run func(s string)) *MockStore_LookupUserByLogin_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
-		if args[0] != nil {
-			arg0 = args[0].(string)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_LookupUserByLogin_Call) Return(user *model.User, err error) *MockStore_LookupUserByLogin_Call {
-	_c.Call.Return(user, err)
-	return _c
-}
-
-func (_c *MockStore_LookupUserByLogin_Call) RunAndReturn(run func(s string) (*model.User, error)) *MockStore_LookupUserByLogin_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // Migrate provides a mock function for the type MockStore
 func (_mock *MockStore) Migrate(context1 context.Context, b bool) error {
 	ret := _mock.Called(context1, b)
