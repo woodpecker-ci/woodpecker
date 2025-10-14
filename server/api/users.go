@@ -165,7 +165,7 @@ func PostUser(c *gin.Context) {
 		Hash: base32.StdEncoding.EncodeToString(
 			random.GetRandomBytes(32),
 		),
-		ForgeID:       1,                        // TODO: add UI option to set forge id and set it here
+		ForgeID:       in.ForgeID,
 		ForgeRemoteID: model.ForgeRemoteID("0"), // TODO: search for the user in the forge and get the remote id
 	}
 	if err = user.Validate(); err != nil {
