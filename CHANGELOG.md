@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-15
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Improve log.CopyByLine to be more robust [[#5641](https://github.com/woodpecker-ci/woodpecker/pull/5641)]
 - Add pagination for `Repos()` and `Teams()` in Forge interface [[#5638](https://github.com/woodpecker-ci/woodpecker/pull/5638)]
 - Modernize a couple of loops, fix incorrect function docs [[#5637](https://github.com/woodpecker-ci/woodpecker/pull/5637)]
 - Allow agents to require labels on workflows [[#5633](https://github.com/woodpecker-ci/woodpecker/pull/5633)]
