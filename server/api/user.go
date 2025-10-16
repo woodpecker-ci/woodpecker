@@ -28,6 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // GetSelf
@@ -113,7 +114,12 @@ func GetRepos(c *gin.Context) {
 			active[r.ForgeRemoteID] = r
 		}
 
-		_repos, err := _forge.Repos(c, user)
+		_repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
+			return _forge.Repos(c, user, &model.ListOptions{
+				Page:    page,
+				PerPage: perPage,
+			})
+		}, maxPage)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return

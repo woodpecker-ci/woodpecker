@@ -78,7 +78,8 @@ type Forge interface {
 	// Teams fetches all team/organization memberships for a user.
 	// May return empty slice if forge doesn't support teams/organizations.
 	// Used to determine if an user is member of an team/organization.
-	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
+	// Should support pagination via ListOptions.
+	Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error)
 
 	// Repo fetches a single repository.
 	//
@@ -91,7 +92,8 @@ type Forge interface {
 
 	// Repos fetches all repositories accessible to the user.
 	// Should include user's permission level in Repo.Perm.
-	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
+	// Should support pagination via ListOptions.
+	Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error)
 
 	// File fetches a single file at a specific commit.
 	// Primary method for retrieving pipeline configuration files.
