@@ -15,9 +15,9 @@
 package pipeline
 
 import (
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
