@@ -575,8 +575,8 @@ github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e h1:JVG44RsyaB9T2KIHavM
 github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e/go.mod h1:RbqR21r5mrJuqunuUZ/Dhy/avygyECGrLceyNeo4LiM=
 github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 h1:bAn7/zixMGCfxrRTfdpNzjtPYqr8smhKouy9mxVdGPU=
 github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673/go.mod h1:N3UwUGtsrSj3ccvlPHLoLsHnpR27oXr4ZE984MbSER8=
-github.com/yaronf/httpsign v0.3.2 h1:rBYYx9eHm60noI4oC24JAD2tJuM8AUDh9ErJO/FfzBs=
-github.com/yaronf/httpsign v0.3.2/go.mod h1:cYB/6toJrJnf4JTLVoo6IHzFH9/Zu1dcKmah4xfX2WA=
+github.com/yaronf/httpsign v0.3.3 h1:xcu+hXdXKWN5eyrkX7tYfBVjZmGHY30Yqwz1Vl6Kats=
+github.com/yaronf/httpsign v0.3.3/go.mod h1:cYB/6toJrJnf4JTLVoo6IHzFH9/Zu1dcKmah4xfX2WA=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
