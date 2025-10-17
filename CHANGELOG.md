@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-16
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -47,6 +47,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/yaronf/httpsign to v0.3.3 [[#5647](https://github.com/woodpecker-ci/woodpecker/pull/5647)]
 - fix(deps): update module github.com/charmbracelet/huh to v0.8.0 [[#5643](https://github.com/woodpecker-ci/woodpecker/pull/5643)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.157.0 [[#5640](https://github.com/woodpecker-ci/woodpecker/pull/5640)]
 - chore(deps): lock file maintenance [[#5634](https://github.com/woodpecker-ci/woodpecker/pull/5634)]
