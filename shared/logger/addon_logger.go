@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package addon
+package logger
 
 import (
 	"bytes"
@@ -24,8 +24,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type clientLogger struct {
-	logger   zerolog.Logger
+type AddonClientLogger struct {
+	Logger   zerolog.Logger
 	name     string
 	withArgs []any
 }
@@ -48,9 +48,9 @@ func convertLvl(level hclog.Level) zerolog.Level {
 	return zerolog.NoLevel
 }
 
-func (c *clientLogger) applyArgs(args []any) *zerolog.Logger {
+func (c *AddonClientLogger) applyArgs(args []any) *zerolog.Logger {
 	var key string
-	logger := c.logger.With()
+	logger := c.Logger.With()
 	args = append(args, c.withArgs)
 	for i, arg := range args {
 		switch {
@@ -68,67 +68,67 @@ func (c *clientLogger) applyArgs(args []any) *zerolog.Logger {
 	return &l
 }
 
-func (c *clientLogger) Log(level hclog.Level, msg string, args ...any) {
+func (c *AddonClientLogger) Log(level hclog.Level, msg string, args ...any) {
 	c.applyArgs(args).WithLevel(convertLvl(level)).Msg(msg)
 }
 
-func (c *clientLogger) Trace(msg string, args ...any) {
+func (c *AddonClientLogger) Trace(msg string, args ...any) {
 	c.applyArgs(args).Trace().Msg(msg)
 }
 
-func (c *clientLogger) Debug(msg string, args ...any) {
+func (c *AddonClientLogger) Debug(msg string, args ...any) {
 	c.applyArgs(args).Debug().Msg(msg)
 }
 
-func (c *clientLogger) Info(msg string, args ...any) {
+func (c *AddonClientLogger) Info(msg string, args ...any) {
 	c.applyArgs(args).Info().Msg(msg)
 }
 
-func (c *clientLogger) Warn(msg string, args ...any) {
+func (c *AddonClientLogger) Warn(msg string, args ...any) {
 	c.applyArgs(args).Warn().Msg(msg)
 }
 
-func (c *clientLogger) Error(msg string, args ...any) {
+func (c *AddonClientLogger) Error(msg string, args ...any) {
 	c.applyArgs(args).Error().Msg(msg)
 }
 
-func (c *clientLogger) IsTrace() bool {
+func (c *AddonClientLogger) IsTrace() bool {
 	return log.Logger.GetLevel() >= zerolog.TraceLevel
 }
 
-func (c *clientLogger) IsDebug() bool {
+func (c *AddonClientLogger) IsDebug() bool {
 	return log.Logger.GetLevel() >= zerolog.DebugLevel
 }
 
-func (c *clientLogger) IsInfo() bool {
+func (c *AddonClientLogger) IsInfo() bool {
 	return log.Logger.GetLevel() >= zerolog.InfoLevel
 }
 
-func (c *clientLogger) IsWarn() bool {
+func (c *AddonClientLogger) IsWarn() bool {
 	return log.Logger.GetLevel() >= zerolog.WarnLevel
 }
 
-func (c *clientLogger) IsError() bool {
+func (c *AddonClientLogger) IsError() bool {
 	return log.Logger.GetLevel() >= zerolog.ErrorLevel
 }
 
-func (c *clientLogger) ImpliedArgs() []any {
+func (c *AddonClientLogger) ImpliedArgs() []any {
 	return c.withArgs
 }
 
-func (c *clientLogger) With(args ...any) hclog.Logger {
-	return &clientLogger{
-		logger:   c.logger,
+func (c *AddonClientLogger) With(args ...any) hclog.Logger {
+	return &AddonClientLogger{
+		Logger:   c.Logger,
 		name:     c.name,
 		withArgs: args,
 	}
 }
 
-func (c *clientLogger) Name() string {
+func (c *AddonClientLogger) Name() string {
 	return c.name
 }
 
-func (c *clientLogger) Named(name string) hclog.Logger {
+func (c *AddonClientLogger) Named(name string) hclog.Logger {
 	curr := c.name
 	if curr != "" {
 		curr = c.name + "."
@@ -136,20 +136,20 @@ func (c *clientLogger) Named(name string) hclog.Logger {
 	return c.ResetNamed(curr + name)
 }
 
-func (c *clientLogger) ResetNamed(name string) hclog.Logger {
-	return &clientLogger{
-		logger:   c.logger,
+func (c *AddonClientLogger) ResetNamed(name string) hclog.Logger {
+	return &AddonClientLogger{
+		Logger:   c.Logger,
 		name:     name,
 		withArgs: c.withArgs,
 	}
 }
 
-func (c *clientLogger) SetLevel(level hclog.Level) {
-	c.logger = c.logger.Level(convertLvl(level))
+func (c *AddonClientLogger) SetLevel(level hclog.Level) {
+	c.Logger = c.Logger.Level(convertLvl(level))
 }
 
-func (c *clientLogger) GetLevel() hclog.Level {
-	switch c.logger.GetLevel() {
+func (c *AddonClientLogger) GetLevel() hclog.Level {
+	switch c.Logger.GetLevel() {
 	case zerolog.ErrorLevel:
 		return hclog.Error
 	case zerolog.WarnLevel:
@@ -164,12 +164,12 @@ func (c *clientLogger) GetLevel() hclog.Level {
 	return hclog.NoLevel
 }
 
-func (c *clientLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *std_log.Logger {
+func (c *AddonClientLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *std_log.Logger {
 	return std_log.New(c.StandardWriter(opts), "", 0)
 }
 
-func (c *clientLogger) StandardWriter(*hclog.StandardLoggerOptions) io.Writer {
-	return ioAdapter{logger: c.logger}
+func (c *AddonClientLogger) StandardWriter(*hclog.StandardLoggerOptions) io.Writer {
+	return ioAdapter{logger: c.Logger}
 }
 
 type ioAdapter struct {
