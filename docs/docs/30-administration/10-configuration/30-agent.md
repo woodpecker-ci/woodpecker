@@ -155,7 +155,8 @@ Configures the number of parallel workflows.
 
 Configures custom labels for the agent, to let workflows filter by it.
 Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard.
-By default, agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed.
+If you use `!` as key prefix it is mandatory for the workflow to have that label set (without !) set and matched.
+By default, agents provide four additional labels `platform=os/arch`, `hostname=my-agent`, `backend=my-backend` and `repo=*` which can be overwritten if needed.
 To learn how labels work, check out the [pipeline syntax page](../../20-usage/20-workflow-syntax.md#labels).
 
 ---

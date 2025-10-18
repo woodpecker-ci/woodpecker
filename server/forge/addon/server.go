@@ -54,12 +54,12 @@ func (s *RPCServer) URL(_ []byte, resp *string) error {
 }
 
 func (s *RPCServer) Teams(args []byte, resp *[]byte) error {
-	var a modelUser
+	var a argumentsTeams
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
-	teams, err := s.Impl.Teams(mkCtx(), a.asModel())
+	teams, err := s.Impl.Teams(mkCtx(), a.U.asModel(), a.P)
 	if err != nil {
 		return err
 	}
@@ -82,12 +82,12 @@ func (s *RPCServer) Repo(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) Repos(args []byte, resp *[]byte) error {
-	var a modelUser
+	var a argumentsRepos
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
-	repos, err := s.Impl.Repos(mkCtx(), a.asModel())
+	repos, err := s.Impl.Repos(mkCtx(), a.U.asModel(), a.P)
 	if err != nil {
 		return err
 	}

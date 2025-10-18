@@ -36,7 +36,8 @@
             "enabled": "Al ingeschakeld",
             "list_reloaded": "Repository lijst herladen",
             "reload": "Opslagplaatsen herladen",
-            "success": "Repository ingeschakeld"
+            "success": "Repository ingeschakeld",
+            "disabled": "Uitgeschakeld"
         },
         "manual_pipeline": {
             "select_branch": "Selecteer branch",
