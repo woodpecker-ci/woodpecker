@@ -24,10 +24,11 @@ import (
 	"github.com/rs/zerolog"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow, trusted types.TrustedConfiguration) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
 		uploads.Add(1)
 
@@ -71,12 +72,12 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
-
 		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
-
 		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
-
 		state.Pipeline.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
+		state.Pipeline.Step.Environment["CI_REPO_TRUSTED_NETWORK"] = strconv.FormatBool(trusted.Network)
+		state.Pipeline.Step.Environment["CI_REPO_TRUSTED_VOLUMES"] = strconv.FormatBool(trusted.Volumes)
+		state.Pipeline.Step.Environment["CI_REPO_TRUSTED_SECURITY"] = strconv.FormatBool(trusted.Security)
 
 		return nil
 	}
