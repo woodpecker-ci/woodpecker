@@ -181,27 +181,25 @@ func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
 }
 
 // Teams is supported by the Gitea driver.
-func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+func (c *Gitea) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
-		orgs, _, err := client.ListMyOrgs(
-			gitea.ListOrgsOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+	orgs, _, err := client.ListMyOrgs(
+		gitea.ListOrgsOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     p.Page,
+				PageSize: c.perPage(ctx, p.PerPage),
 			},
-		)
-		teams := make([]*model.Team, 0, len(orgs))
-		for _, org := range orgs {
-			teams = append(teams, toTeam(org, c.url))
-		}
-		return teams, err
-	}, -1)
+		},
+	)
+	teams := make([]*model.Team, 0, len(orgs))
+	for _, org := range orgs {
+		teams = append(teams, toTeam(org, c.url))
+	}
+	return teams, err
 }
 
 // TeamPerm is not supported by the Gitea driver.
@@ -237,23 +235,23 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRem
 
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
-func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *Gitea) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
-		repos, _, err := client.ListMyRepos(
-			gitea.ListReposOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+	repos, _, err := client.ListMyRepos(
+		gitea.ListReposOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     p.Page,
+				PageSize: c.perPage(ctx, p.PerPage),
 			},
-		)
-		return repos, err
-	}, -1)
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	result := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {
@@ -405,7 +403,7 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{
 			ListOptions: gitea.ListOptions{
 				Page:     page,
-				PageSize: c.perPage(ctx),
+				PageSize: c.perPage(ctx, c.pageSize),
 			},
 		})
 		return hooks, err
@@ -744,7 +742,7 @@ func (c *Gitea) getCommitFromSHA(ctx context.Context, user *model.User, repo *mo
 	}, nil
 }
 
-func (c *Gitea) perPage(ctx context.Context) int {
+func (c *Gitea) perPage(ctx context.Context, customPerPage int) int {
 	if c.pageSize == 0 {
 		client, err := c.newClientToken(ctx, "")
 		if err != nil {
@@ -757,5 +755,11 @@ func (c *Gitea) perPage(ctx context.Context) int {
 		}
 		c.pageSize = api.MaxResponseItems
 	}
-	return c.pageSize
+
+	pageSize := customPerPage
+	if pageSize == 0 || pageSize > c.pageSize {
+		pageSize = c.pageSize
+	}
+
+	return pageSize
 }

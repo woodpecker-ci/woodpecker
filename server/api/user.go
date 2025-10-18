@@ -20,7 +20,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/securecookie"
+	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -28,6 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // GetSelf
@@ -89,6 +90,7 @@ func GetFeed(c *gin.Context) {
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			all				query	bool	false	"query all repos, including inactive ones"
+//	@Param			name			query	string	false	"filter repos by name"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
@@ -100,9 +102,12 @@ func GetRepos(c *gin.Context) {
 	}
 
 	all, _ := strconv.ParseBool(c.Query("all"))
+	filter := &model.RepoFilter{
+		Name: c.Query("name"),
+	}
 
 	if all {
-		dbRepos, err := _store.RepoList(user, true, false)
+		dbRepos, err := _store.RepoList(user, true, false, filter)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
@@ -113,7 +118,12 @@ func GetRepos(c *gin.Context) {
 			active[r.ForgeRemoteID] = r
 		}
 
-		_repos, err := _forge.Repos(c, user)
+		_repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
+			return _forge.Repos(c, user, &model.ListOptions{
+				Page:    page,
+				PerPage: perPage,
+			})
+		}, maxPage)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
@@ -138,7 +148,7 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
-	activeRepos, err := _store.RepoList(user, true, true)
+	activeRepos, err := _store.RepoList(user, true, true, filter)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return
@@ -205,7 +215,7 @@ func DeleteToken(c *gin.Context) {
 
 	user := session.User(c)
 	user.Hash = base32.StdEncoding.EncodeToString(
-		securecookie.GenerateRandomKey(32),
+		random.GetRandomBytes(32),
 	)
 	if err := _store.UpdateUser(user); err != nil {
 		c.String(http.StatusInternalServerError, "Error revoking tokens. %s", err)

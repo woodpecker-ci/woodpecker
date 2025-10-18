@@ -140,7 +140,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
 	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval) //nolint:contextcheck
 	if err != nil {
-		return fmt.Errorf("could not create new auth interceptor: %w", err)
+		return fmt.Errorf("agent could not auth: %w", err)
 	}
 
 	conn, err := grpc.NewClient(
@@ -283,8 +283,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		}
 	})
 
-	for i := 0; i < maxWorkflows; i++ {
-		i := i
+	// https://go.dev/blog/go1.22 fixed scope for goroutines in loops
+	for i := range maxWorkflows {
 		serviceWaitingGroup.Go(func() error {
 			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
@@ -331,9 +331,9 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		retryCount := c.Int("connect-retry-count")
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
-		for i := 0; i < retryCount; i++ {
+		for range retryCount {
 			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
-				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
+				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to %s, retrying in %v", c.String("server"), retryDelay))
 				time.Sleep(retryDelay)
 			} else {
 				break

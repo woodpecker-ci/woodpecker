@@ -77,6 +77,9 @@ var HookPullRequestEdited string
 //go:embed HookRelease.json
 var HookRelease string
 
+//go:embed HookTag.json
+var HookTag string
+
 //go:embed HookPullRequestReviewRequested.json
 var HookPullRequestReviewRequested string
 

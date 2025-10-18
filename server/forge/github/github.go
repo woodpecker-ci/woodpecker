@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v76/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -40,9 +40,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
+type contextKey string
+
 const (
-	defaultURL = "https://github.com"      // Default GitHub URL
-	defaultAPI = "https://api.github.com/" // Default GitHub API URL
+	defaultURL                 = "https://github.com"      // Default GitHub URL
+	defaultAPI                 = "https://api.github.com/" // Default GitHub API URL
+	defaultPageSize            = 100
+	githubClientKey contextKey = "github_client"
 )
 
 // Opts defines configuration options.
@@ -180,22 +184,17 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 }
 
 // Teams returns a list of all team membership for the GitHub account.
-func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
 	client := c.newClientToken(ctx, u.AccessToken)
 
-	opts := new(github.ListOptions)
-	opts.Page = 1
-
-	var teams []*model.Team
-	for opts.Page > 0 {
-		list, resp, err := client.Organizations.List(ctx, "", opts)
-		if err != nil {
-			return nil, err
-		}
-		teams = append(teams, convertTeamList(list)...)
-		opts.Page = resp.NextPage
+	list, _, err := client.Organizations.List(ctx, "", &github.ListOptions{
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
+	})
+	if err != nil {
+		return nil, err
 	}
-	return teams, nil
+	return convertTeamList(list), nil
 }
 
 // Repo returns the GitHub repository.
@@ -223,26 +222,23 @@ func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeRemoteID
 
 // Repos returns a list of all repositories for GitHub account, including
 // organization repositories.
-func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
 	client := c.newClientToken(ctx, u.AccessToken)
-
-	opts := new(github.RepositoryListByAuthenticatedUserOptions)
-	opts.PerPage = 100
-	opts.Page = 1
-
-	var repos []*model.Repo
-	for opts.Page > 0 {
-		list, resp, err := client.Repositories.ListByAuthenticatedUser(ctx, opts)
-		if err != nil {
-			return nil, err
+	list, _, err := client.Repositories.ListByAuthenticatedUser(ctx, &github.RepositoryListByAuthenticatedUserOptions{
+		ListOptions: github.ListOptions{
+			Page:    p.Page,
+			PerPage: perPage(p.PerPage),
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	repos := make([]*model.Repo, 0, len(list))
+	for _, repo := range list {
+		if repo.GetArchived() {
+			continue
 		}
-		for _, repo := range list {
-			if repo.GetArchived() {
-				continue
-			}
-			repos = append(repos, convertRepo(repo))
-		}
-		opts.Page = resp.NextPage
+		repos = append(repos, convertRepo(repo))
 	}
 	return repos, nil
 }
@@ -322,8 +318,11 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	client := c.newClientToken(ctx, token)
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{Page: p.Page, PerPage: p.PerPage},
-		State:       "open",
+		ListOptions: github.ListOptions{
+			Page:    p.Page,
+			PerPage: perPage(p.PerPage),
+		},
+		State: "open",
 	})
 	if err != nil {
 		return nil, err
@@ -456,7 +455,13 @@ func (c *client) newConfig() *oauth2.Config {
 }
 
 // newClientToken returns the GitHub oauth2 client.
+// It first checks if a client is available in the context, otherwise creates a new one.
 func (c *client) newClientToken(ctx context.Context, token string) *github.Client {
+	// Check if a client is already in the context
+	if ctxClient, ok := ctx.Value(githubClientKey).(*github.Client); ok {
+		return ctxClient
+	}
+
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -574,7 +579,10 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
-		ListOptions: github.ListOptions{Page: p.Page, PerPage: p.PerPage},
+		ListOptions: github.ListOptions{
+			Page:    p.Page,
+			PerPage: perPage(p.PerPage),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -600,7 +608,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	pull, repo, pipeline, err := parseHook(r, c.MergeRef)
+	pull, repo, pipeline, currCommit, prevCommit, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -623,8 +631,14 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		}
 	}
 
-	if pull != nil && len(pipeline.ChangedFiles) == 0 {
+	if pull != nil {
 		pipeline, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, pipeline)
+		if err != nil {
+			return nil, nil, err
+		}
+	} else if pipeline.Event == model.EventPush {
+		// GitHub has removed commit summaries from Events API payloads from 7th October 2025 onwards.
+		pipeline, err = c.loadChangedFilesFromCommits(ctx, repo, pipeline, prevCommit, currCommit)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -650,24 +664,24 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return nil, err
 	}
 
-	pipeline.ChangedFiles, err = utils.Paginate(func(page int) ([]string, error) {
-		opts := &github.ListOptions{Page: page}
-		fileList := make([]string, 0, 16)
-		for opts.Page > 0 {
-			files, resp, err := c.newClientToken(ctx, user.AccessToken).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
-			if err != nil {
-				return nil, err
-			}
+	gh := c.newClientToken(ctx, user.AccessToken)
+	fileList := make([]string, 0, 16)
 
-			for _, file := range files {
-				fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
-			}
-
-			opts.Page = resp.NextPage
+	opts := &github.ListOptions{Page: 1}
+	for opts.Page > 0 {
+		files, resp, err := gh.PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
+		if err != nil {
+			return nil, err
 		}
-		return utils.DeduplicateStrings(fileList), nil
-	}, -1)
 
+		for _, file := range files {
+			fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+		}
+
+		opts.Page = resp.NextPage
+	}
+
+	pipeline.ChangedFiles = utils.DeduplicateStrings(fileList)
 	return pipeline, err
 }
 
@@ -737,4 +751,73 @@ func (c *client) getCommitFromSHA(ctx context.Context, repo *model.Repo, sha str
 	}
 
 	return convertCommit(commit.GetCommit()), nil
+}
+
+func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, curr, prev string) (*model.Pipeline, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return pipeline, nil
+	}
+
+	switch prev {
+	case curr:
+		log.Error().Msg("GitHub push event contains the same commit before and after, no changes detected")
+		return pipeline, nil
+	case "0000000000000000000000000000000000000000":
+		prev = ""
+		fallthrough
+	case "":
+		// For tag events, prev is empty, but we can still fetch the changed files using the current commit
+		log.Trace().Msg("GitHub tag event, fetching changed files using current commit")
+	}
+
+	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	gh := c.newClientToken(ctx, user.AccessToken)
+	fileList := make([]string, 0, 16)
+
+	if prev == "" {
+		opts := &github.ListOptions{Page: 1}
+		for opts.Page > 0 {
+			commit, resp, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, curr, &github.ListOptions{})
+			if err != nil {
+				return nil, err
+			}
+			for _, file := range commit.Files {
+				fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+			}
+			opts.Page = resp.NextPage
+		}
+	} else {
+		opts := &github.ListOptions{Page: 1}
+		for opts.Page > 0 {
+			comp, resp, err := gh.Repositories.CompareCommits(ctx, repo.Owner, repo.Name, prev, curr, opts)
+			if err != nil {
+				return nil, err
+			}
+			for _, file := range comp.Files {
+				fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+			}
+			opts.Page = resp.NextPage
+		}
+	}
+
+	pipeline.ChangedFiles = utils.DeduplicateStrings(fileList)
+	return pipeline, err
+}
+
+func perPage(custom int) int {
+	if custom < 1 || custom > defaultPageSize {
+		return defaultPageSize
+	}
+	return custom
 }
