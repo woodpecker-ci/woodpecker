@@ -3127,8 +3127,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "override the target deploy value",
+                        "description": "deprecated use deploy_target instead",
                         "name": "deploy_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "override the deployment target value",
+                        "name": "deploy_target",
                         "in": "query"
                     }
                 ],
@@ -4717,8 +4723,19 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
+                },
                 "created": {
                     "type": "integer"
+                },
+                "deployment": {
+                    "$ref": "#/definitions/model.Deployment"
                 },
                 "event": {
                     "type": "string"
@@ -4735,11 +4752,17 @@ const docTemplate = `{
                 "number": {
                     "type": "integer"
                 },
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
+                },
                 "ref": {
                     "type": "string"
                 },
                 "refspec": {
                     "type": "string"
+                },
+                "release": {
+                    "$ref": "#/definitions/model.Release"
                 },
                 "repo_id": {
                     "type": "integer"
@@ -4881,12 +4904,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
+                    "description": "The user sending the webhook data or triggering the pipeline event",
                     "type": "string"
                 },
                 "author_avatar": {
+                    "description": "Avatar URL of the author of the commit",
                     "type": "string"
                 },
                 "author_email": {
+                    "description": "deprecated, use commit.author.email instead",
+                    "type": "string"
+                },
+                "avatar": {
+                    "description": "deprecated, use author_avatar instead",
                     "type": "string"
                 },
                 "branch": {
@@ -4899,16 +4929,34 @@ const docTemplate = `{
                     }
                 },
                 "commit": {
+                    "description": "deprecated, use commit_pipeline.sha instead",
                     "type": "string"
+                },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
                 },
                 "created": {
                     "type": "integer"
                 },
+                "cron": {
+                    "description": "name of the cron job",
+                    "type": "string"
+                },
                 "deploy_task": {
+                    "description": "deprecated, use deployment.task instead",
                     "type": "string"
                 },
                 "deploy_to": {
+                    "description": "deprecated, use deployment.target instead",
                     "type": "string"
+                },
+                "deployment": {
+                    "$ref": "#/definitions/model.Deployment"
                 },
                 "errors": {
                     "type": "array",
@@ -4932,15 +4980,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "from_fork": {
+                    "description": "deprecated, use pull_request.from_fork instead",
                     "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "is_prerelease": {
+                    "description": "deprecated, use release.is_prerelease instead",
                     "type": "boolean"
                 },
                 "message": {
+                    "description": "deprecated, use commit.message (pull_request, pull_request_closed \u0026 push), deployment.description, cron (cron) or tag_title (tag) instead",
                     "type": "string"
                 },
                 "number": {
@@ -4950,13 +5001,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "pr_labels": {
+                    "description": "deprecated, use pull_request.labels instead",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "pr_milestone": {
-                    "type": "string"
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
                 },
                 "ref": {
                     "type": "string"
@@ -4964,14 +5016,18 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
+                "release": {
+                    "$ref": "#/definitions/model.Release"
+                },
                 "reviewed": {
+                    "description": "timestamp of the review",
                     "type": "integer"
                 },
                 "reviewed_by": {
                     "type": "string"
                 },
                 "sender": {
-                    "description": "uses reported user for webhooks and name of cron for cron pipelines",
+                    "description": "deprecated, use author instead",
                     "type": "string"
                 },
                 "started": {
@@ -4980,10 +5036,15 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/StatusValue"
                 },
+                "tag_title": {
+                    "type": "string"
+                },
                 "timestamp": {
+                    "description": "deprecated, use created instead",
                     "type": "integer"
                 },
                 "title": {
+                    "description": "deprecated, use pull_request.title (pull_request \u0026 pull_request_closed) or deployment.description",
                     "type": "string"
                 },
                 "updated": {
@@ -5020,7 +5081,19 @@ const docTemplate = `{
         "PullRequest": {
             "type": "object",
             "properties": {
+                "from_fork": {
+                    "type": "boolean"
+                },
                 "index": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "milestone": {
                     "type": "string"
                 },
                 "title": {
@@ -5249,7 +5322,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "last_pipeline": {
-                    "$ref": "#/definitions/Pipeline"
+                    "$ref": "#/definitions/model.Pipeline"
                 },
                 "name": {
                     "type": "string"
@@ -5594,9 +5667,6 @@ const docTemplate = `{
         "metadata.Author": {
             "type": "object",
             "properties": {
-                "avatar": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -5693,6 +5763,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "avatar": {
+                    "description": "Deprecated: remove in next major",
                     "type": "string"
                 },
                 "commit": {
@@ -5724,6 +5795,9 @@ const docTemplate = `{
                 },
                 "parent": {
                     "type": "integer"
+                },
+                "release": {
+                    "type": "string"
                 },
                 "started": {
                     "type": "integer"
@@ -5863,6 +5937,48 @@ const docTemplate = `{
                 "RequireApprovalAllEvents"
             ]
         },
+        "model.Commit": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/model.CommitAuthor"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CommitAuthor": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Deployment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
         "model.ForgeType": {
             "type": "string",
             "enum": [
@@ -5883,6 +5999,113 @@ const docTemplate = `{
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
             ]
+        },
+        "model.Pipeline": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "description": "The user sending the webhook data or triggering the pipeline event",
+                    "type": "string"
+                },
+                "author_avatar": {
+                    "description": "Avatar URL of the author of the commit",
+                    "type": "string"
+                },
+                "branch": {
+                    "type": "string"
+                },
+                "changed_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "cron": {
+                    "description": "name of the cron job",
+                    "type": "string"
+                },
+                "deployment": {
+                    "$ref": "#/definitions/model.Deployment"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.PipelineError"
+                    }
+                },
+                "event": {
+                    "$ref": "#/definitions/WebhookEvent"
+                },
+                "finished": {
+                    "type": "integer"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "type": "integer"
+                },
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
+                },
+                "ref": {
+                    "type": "string"
+                },
+                "refspec": {
+                    "type": "string"
+                },
+                "release": {
+                    "$ref": "#/definitions/model.Release"
+                },
+                "reviewed": {
+                    "description": "timestamp of the review",
+                    "type": "integer"
+                },
+                "reviewed_by": {
+                    "type": "string"
+                },
+                "started": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/StatusValue"
+                },
+                "tag_title": {
+                    "type": "string"
+                },
+                "updated": {
+                    "type": "integer"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "workflows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Workflow"
+                    }
+                }
+            }
         },
         "model.QueueTask": {
             "type": "object",
@@ -5934,6 +6157,17 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "model.Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
