@@ -48,6 +48,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @antfu/eslint-config to v6 [[#5651](https://github.com/woodpecker-ci/woodpecker/pull/5651)]
 - chore(deps): update web npm deps non-major [[#5650](https://github.com/woodpecker-ci/woodpecker/pull/5650)]
 - chore(deps): update dependency golang to v1.25.3 [[#5648](https://github.com/woodpecker-ci/woodpecker/pull/5648)]
 - fix(deps): update module github.com/yaronf/httpsign to v0.3.3 [[#5647](https://github.com/woodpecker-ci/woodpecker/pull/5647)]
