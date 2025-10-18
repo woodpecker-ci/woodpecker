@@ -36,6 +36,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5649](https://github.com/woodpecker-ci/woodpecker/pull/5649)]
 - Document Forge interface precisely [[#5636](https://github.com/woodpecker-ci/woodpecker/pull/5636)]
 - chore(deps): update dependency @types/node to v22.18.10 [[#5624](https://github.com/woodpecker-ci/woodpecker/pull/5624)]
 - chore(deps): update docs npm deps non-major [[#5622](https://github.com/woodpecker-ci/woodpecker/pull/5622)]
