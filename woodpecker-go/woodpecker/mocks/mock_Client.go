@@ -4653,8 +4653,14 @@ func (_c *MockClient_StepLogsPurge_Call) RunAndReturn(run func(repoID int64, pip
 }
 
 // User provides a mock function for the type MockClient
-func (_mock *MockClient) User(s string) (*woodpecker.User, error) {
-	ret := _mock.Called(s)
+func (_mock *MockClient) User(login string, forgeID ...int64) (*woodpecker.User, error) {
+	var tmpRet mock.Arguments
+	if len(forgeID) > 0 {
+		tmpRet = _mock.Called(login, forgeID)
+	} else {
+		tmpRet = _mock.Called(login)
+	}
+	ret := tmpRet
 
 	if len(ret) == 0 {
 		panic("no return value specified for User")
@@ -4662,18 +4668,18 @@ func (_mock *MockClient) User(s string) (*woodpecker.User, error) {
 
 	var r0 *woodpecker.User
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*woodpecker.User, error)); ok {
-		return returnFunc(s)
+	if returnFunc, ok := ret.Get(0).(func(string, ...int64) (*woodpecker.User, error)); ok {
+		return returnFunc(login, forgeID...)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *woodpecker.User); ok {
-		r0 = returnFunc(s)
+	if returnFunc, ok := ret.Get(0).(func(string, ...int64) *woodpecker.User); ok {
+		r0 = returnFunc(login, forgeID...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.User)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(s)
+	if returnFunc, ok := ret.Get(1).(func(string, ...int64) error); ok {
+		r1 = returnFunc(login, forgeID...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4686,19 +4692,28 @@ type MockClient_User_Call struct {
 }
 
 // User is a helper method to define mock.On call
-//   - s string
-func (_e *MockClient_Expecter) User(s interface{}) *MockClient_User_Call {
-	return &MockClient_User_Call{Call: _e.mock.On("User", s)}
+//   - login string
+//   - forgeID ...int64
+func (_e *MockClient_Expecter) User(login interface{}, forgeID ...interface{}) *MockClient_User_Call {
+	return &MockClient_User_Call{Call: _e.mock.On("User",
+		append([]interface{}{login}, forgeID...)...)}
 }
 
-func (_c *MockClient_User_Call) Run(run func(s string)) *MockClient_User_Call {
+func (_c *MockClient_User_Call) Run(run func(login string, forgeID ...int64)) *MockClient_User_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 string
 		if args[0] != nil {
 			arg0 = args[0].(string)
 		}
+		var arg1 []int64
+		var variadicArgs []int64
+		if len(args) > 1 {
+			variadicArgs = args[1].([]int64)
+		}
+		arg1 = variadicArgs
 		run(
 			arg0,
+			arg1...,
 		)
 	})
 	return _c
@@ -4709,22 +4724,28 @@ func (_c *MockClient_User_Call) Return(user *woodpecker.User, err error) *MockCl
 	return _c
 }
 
-func (_c *MockClient_User_Call) RunAndReturn(run func(s string) (*woodpecker.User, error)) *MockClient_User_Call {
+func (_c *MockClient_User_Call) RunAndReturn(run func(login string, forgeID ...int64) (*woodpecker.User, error)) *MockClient_User_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // UserDel provides a mock function for the type MockClient
-func (_mock *MockClient) UserDel(s string) error {
-	ret := _mock.Called(s)
+func (_mock *MockClient) UserDel(login string, forgeID ...int64) error {
+	var tmpRet mock.Arguments
+	if len(forgeID) > 0 {
+		tmpRet = _mock.Called(login, forgeID)
+	} else {
+		tmpRet = _mock.Called(login)
+	}
+	ret := tmpRet
 
 	if len(ret) == 0 {
 		panic("no return value specified for UserDel")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
-		r0 = returnFunc(s)
+	if returnFunc, ok := ret.Get(0).(func(string, ...int64) error); ok {
+		r0 = returnFunc(login, forgeID...)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -4737,19 +4758,28 @@ type MockClient_UserDel_Call struct {
 }
 
 // UserDel is a helper method to define mock.On call
-//   - s string
-func (_e *MockClient_Expecter) UserDel(s interface{}) *MockClient_UserDel_Call {
-	return &MockClient_UserDel_Call{Call: _e.mock.On("UserDel", s)}
+//   - login string
+//   - forgeID ...int64
+func (_e *MockClient_Expecter) UserDel(login interface{}, forgeID ...interface{}) *MockClient_UserDel_Call {
+	return &MockClient_UserDel_Call{Call: _e.mock.On("UserDel",
+		append([]interface{}{login}, forgeID...)...)}
 }
 
-func (_c *MockClient_UserDel_Call) Run(run func(s string)) *MockClient_UserDel_Call {
+func (_c *MockClient_UserDel_Call) Run(run func(login string, forgeID ...int64)) *MockClient_UserDel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 string
 		if args[0] != nil {
 			arg0 = args[0].(string)
 		}
+		var arg1 []int64
+		var variadicArgs []int64
+		if len(args) > 1 {
+			variadicArgs = args[1].([]int64)
+		}
+		arg1 = variadicArgs
 		run(
 			arg0,
+			arg1...,
 		)
 	})
 	return _c
@@ -4760,7 +4790,7 @@ func (_c *MockClient_UserDel_Call) Return(err error) *MockClient_UserDel_Call {
 	return _c
 }
 
-func (_c *MockClient_UserDel_Call) RunAndReturn(run func(s string) error) *MockClient_UserDel_Call {
+func (_c *MockClient_UserDel_Call) RunAndReturn(run func(login string, forgeID ...int64) error) *MockClient_UserDel_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -30,7 +30,8 @@ type Client interface {
 	Self() (*User, error)
 
 	// User returns a user by login.
-	User(string) (*User, error)
+	// It is recommended to specify forgeID (default is 1).
+	User(login string, forgeID ...int64) (*User, error)
 
 	// UserList returns a list of all registered users.
 	UserList(opt UserListOptions) ([]*User, error)
@@ -42,7 +43,8 @@ type Client interface {
 	UserPatch(*User) (*User, error)
 
 	// UserDel deletes a user account.
-	UserDel(string) error
+	// It is recommended to specify forgeID (default is 1).
+	UserDel(login string, forgeID ...int64) error
 
 	// Repo returns a repository by name.
 	Repo(repoID int64) (*Repo, error)
