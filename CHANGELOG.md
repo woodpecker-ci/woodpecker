@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-18
+## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -48,6 +48,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v15.17.0 [[#5655](https://github.com/woodpecker-ci/woodpecker/pull/5655)]
 - chore(deps): update dependency jsdom to v27.0.1 [[#5653](https://github.com/woodpecker-ci/woodpecker/pull/5653)]
 - fix(deps): update module github.com/google/go-github/v75 to v76 [[#5652](https://github.com/woodpecker-ci/woodpecker/pull/5652)]
 - chore(deps): update dependency @antfu/eslint-config to v6 [[#5651](https://github.com/woodpecker-ci/woodpecker/pull/5651)]
