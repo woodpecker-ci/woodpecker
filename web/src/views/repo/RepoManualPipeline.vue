@@ -164,6 +164,11 @@ const payload = ref<{ branch: string; variables: Record<string, string> }>({
 
 const isVariablesValid = ref(true);
 
+const parameters = ref<Parameter[]>([]);
+const paramValues = ref<Record<string, any>>({});
+const paramTrimEnabled = ref<Record<string, boolean>>({});
+const passwordVisibility = ref<Record<string, boolean>>({});
+
 const isFormValid = computed(() => {
   return payload.value.branch !== '' && isVariablesValid.value;
 });
@@ -202,10 +207,6 @@ const pipelineOptions = computed(() => {
 });
 
 const loading = ref(true);
-const parameters = ref<Parameter[]>([]);
-const paramValues = ref<Record<string, any>>({});
-const paramTrimEnabled = ref<Record<string, boolean>>({});
-const passwordVisibility = ref<Record<string, boolean>>({});
 
 function getOptionsFromDefaultValue(defaultValue: string, addEmptyOption = false) {
   const options = defaultValue
