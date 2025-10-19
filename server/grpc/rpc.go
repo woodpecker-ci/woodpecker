@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"strconv"
 	"time"
 
@@ -73,9 +74,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 
 	// enforce labels from server by overwriting agent labels
-	for k, v := range agentServerLabels {
-		agentFilter.Labels[k] = v
-	}
+	maps.Copy(agentFilter.Labels, agentServerLabels)
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 

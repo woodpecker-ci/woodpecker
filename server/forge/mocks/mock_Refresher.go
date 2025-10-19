@@ -39,8 +39,8 @@ func (_m *MockRefresher) EXPECT() *MockRefresher_Expecter {
 }
 
 // Refresh provides a mock function for the type MockRefresher
-func (_mock *MockRefresher) Refresh(context1 context.Context, user *model.User) (bool, error) {
-	ret := _mock.Called(context1, user)
+func (_mock *MockRefresher) Refresh(ctx context.Context, u *model.User) (bool, error) {
+	ret := _mock.Called(ctx, u)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Refresh")
@@ -49,15 +49,15 @@ func (_mock *MockRefresher) Refresh(context1 context.Context, user *model.User) 
 	var r0 bool
 	var r1 error
 	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User) (bool, error)); ok {
-		return returnFunc(context1, user)
+		return returnFunc(ctx, u)
 	}
 	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User) bool); ok {
-		r0 = returnFunc(context1, user)
+		r0 = returnFunc(ctx, u)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User) error); ok {
-		r1 = returnFunc(context1, user)
+		r1 = returnFunc(ctx, u)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -70,13 +70,13 @@ type MockRefresher_Refresh_Call struct {
 }
 
 // Refresh is a helper method to define mock.On call
-//   - context1 context.Context
-//   - user *model.User
-func (_e *MockRefresher_Expecter) Refresh(context1 interface{}, user interface{}) *MockRefresher_Refresh_Call {
-	return &MockRefresher_Refresh_Call{Call: _e.mock.On("Refresh", context1, user)}
+//   - ctx context.Context
+//   - u *model.User
+func (_e *MockRefresher_Expecter) Refresh(ctx interface{}, u interface{}) *MockRefresher_Refresh_Call {
+	return &MockRefresher_Refresh_Call{Call: _e.mock.On("Refresh", ctx, u)}
 }
 
-func (_c *MockRefresher_Refresh_Call) Run(run func(context1 context.Context, user *model.User)) *MockRefresher_Refresh_Call {
+func (_c *MockRefresher_Refresh_Call) Run(run func(ctx context.Context, u *model.User)) *MockRefresher_Refresh_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -99,7 +99,7 @@ func (_c *MockRefresher_Refresh_Call) Return(b bool, err error) *MockRefresher_R
 	return _c
 }
 
-func (_c *MockRefresher_Refresh_Call) RunAndReturn(run func(context1 context.Context, user *model.User) (bool, error)) *MockRefresher_Refresh_Call {
+func (_c *MockRefresher_Refresh_Call) RunAndReturn(run func(ctx context.Context, u *model.User) (bool, error)) *MockRefresher_Refresh_Call {
 	_c.Call.Return(run)
 	return _c
 }
