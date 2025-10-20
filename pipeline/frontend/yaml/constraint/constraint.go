@@ -66,8 +66,8 @@ type (
 
 	// Path defines a runtime constrain for exclude & include paths.
 	Path struct {
-		Include       []string
-		Exclude       []string
+		Include       []string               `yaml:"include,omitempty"`
+		Exclude       []string               `yaml:"exclude,omitempty"`
 		IgnoreMessage string                 `yaml:"ignore_message,omitempty"`
 		OnEmpty       yamlBaseTypes.BoolTrue `yaml:"on_empty,omitempty"`
 	}
@@ -417,11 +417,11 @@ func (c Path) MarshalYAML() (interface{}, error) {
 	// if only Include is set return simple syntax
 	if len(c.Exclude) == 0 &&
 		len(c.IgnoreMessage) == 0 &&
-		!c.OnEmpty.Bool() {
+		c.OnEmpty.Bool() {
 		if len(c.Include) == 0 {
 			return nil, nil
 		}
-		return c.Include, nil
+		return yamlBaseTypes.StringOrSlice(c.Include), nil
 	}
 	return struct {
 		Include       []string

@@ -234,6 +234,13 @@ steps:
     - path:
       - test.yaml
       - test.zig
+    - ref: ref/tags/v1
+      path:
+  env:
+    image: print
+    environment:
+      DRIVER: next
+      PLATFORM: linux
 `
 
 func TestReSerialize(t *testing.T) {
@@ -259,8 +266,16 @@ func TestReSerialize(t *testing.T) {
         - repo: test
           branch:
             exclude: main
-          path
-
+          path: wow.sh
+        - path:
+            - test.yaml
+            - test.zig
+        - ref: ref/tags/v1
+    - name: env
+      image: print
+      environment:
+        DRIVER: next
+        PLATFORM: linux
 skip_clone: false
 `, string(workBin))
 }
