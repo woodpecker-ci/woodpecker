@@ -21,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: agents; Type: TABLE; Schema: public; Owner: root
+-- Name: agents; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.agents (
@@ -34,10 +34,10 @@ CREATE TABLE public.agents (
 );
 
 
-ALTER TABLE public.agents OWNER TO root;
+ALTER TABLE public.agents OWNER TO postgres;
 
 --
--- Name: agents_agent_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: agents_agent_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.agents_agent_id_seq
@@ -49,17 +49,17 @@ CREATE SEQUENCE public.agents_agent_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.agents_agent_id_seq OWNER TO root;
+ALTER TABLE public.agents_agent_id_seq OWNER TO postgres;
 
 --
--- Name: agents_agent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: agents_agent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.agents_agent_id_seq OWNED BY public.agents.agent_id;
 
 
 --
--- Name: build_config; Type: TABLE; Schema: public; Owner: root
+-- Name: build_config; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.build_config (
@@ -68,10 +68,10 @@ CREATE TABLE public.build_config (
 );
 
 
-ALTER TABLE public.build_config OWNER TO root;
+ALTER TABLE public.build_config OWNER TO postgres;
 
 --
--- Name: builds; Type: TABLE; Schema: public; Owner: root
+-- Name: builds; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.builds (
@@ -109,10 +109,10 @@ CREATE TABLE public.builds (
 );
 
 
-ALTER TABLE public.builds OWNER TO root;
+ALTER TABLE public.builds OWNER TO postgres;
 
 --
--- Name: builds_build_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: builds_build_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.builds_build_id_seq
@@ -124,17 +124,17 @@ CREATE SEQUENCE public.builds_build_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.builds_build_id_seq OWNER TO root;
+ALTER TABLE public.builds_build_id_seq OWNER TO postgres;
 
 --
--- Name: builds_build_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: builds_build_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.builds_build_id_seq OWNED BY public.builds.build_id;
 
 
 --
--- Name: config; Type: TABLE; Schema: public; Owner: root
+-- Name: config; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.config (
@@ -146,10 +146,10 @@ CREATE TABLE public.config (
 );
 
 
-ALTER TABLE public.config OWNER TO root;
+ALTER TABLE public.config OWNER TO postgres;
 
 --
--- Name: config_config_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: config_config_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.config_config_id_seq
@@ -161,17 +161,17 @@ CREATE SEQUENCE public.config_config_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.config_config_id_seq OWNER TO root;
+ALTER TABLE public.config_config_id_seq OWNER TO postgres;
 
 --
--- Name: config_config_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: config_config_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.config_config_id_seq OWNED BY public.config.config_id;
 
 
 --
--- Name: files; Type: TABLE; Schema: public; Owner: root
+-- Name: files; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.files (
@@ -190,10 +190,10 @@ CREATE TABLE public.files (
 );
 
 
-ALTER TABLE public.files OWNER TO root;
+ALTER TABLE public.files OWNER TO postgres;
 
 --
--- Name: files_file_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: files_file_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.files_file_id_seq
@@ -205,17 +205,17 @@ CREATE SEQUENCE public.files_file_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.files_file_id_seq OWNER TO root;
+ALTER TABLE public.files_file_id_seq OWNER TO postgres;
 
 --
--- Name: files_file_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: files_file_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.files_file_id_seq OWNED BY public.files.file_id;
 
 
 --
--- Name: logs; Type: TABLE; Schema: public; Owner: root
+-- Name: logs; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.logs (
@@ -225,10 +225,10 @@ CREATE TABLE public.logs (
 );
 
 
-ALTER TABLE public.logs OWNER TO root;
+ALTER TABLE public.logs OWNER TO postgres;
 
 --
--- Name: logs_log_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: logs_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.logs_log_id_seq
@@ -240,17 +240,17 @@ CREATE SEQUENCE public.logs_log_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.logs_log_id_seq OWNER TO root;
+ALTER TABLE public.logs_log_id_seq OWNER TO postgres;
 
 --
--- Name: logs_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: logs_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.logs_log_id_seq OWNED BY public.logs.log_id;
 
 
 --
--- Name: migrations; Type: TABLE; Schema: public; Owner: root
+-- Name: migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.migrations (
@@ -258,10 +258,10 @@ CREATE TABLE public.migrations (
 );
 
 
-ALTER TABLE public.migrations OWNER TO root;
+ALTER TABLE public.migrations OWNER TO postgres;
 
 --
--- Name: perms; Type: TABLE; Schema: public; Owner: root
+-- Name: perms; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.perms (
@@ -274,10 +274,10 @@ CREATE TABLE public.perms (
 );
 
 
-ALTER TABLE public.perms OWNER TO root;
+ALTER TABLE public.perms OWNER TO postgres;
 
 --
--- Name: procs; Type: TABLE; Schema: public; Owner: root
+-- Name: procs; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.procs (
@@ -298,10 +298,10 @@ CREATE TABLE public.procs (
 );
 
 
-ALTER TABLE public.procs OWNER TO root;
+ALTER TABLE public.procs OWNER TO postgres;
 
 --
--- Name: procs_proc_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: procs_proc_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.procs_proc_id_seq
@@ -313,17 +313,17 @@ CREATE SEQUENCE public.procs_proc_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.procs_proc_id_seq OWNER TO root;
+ALTER TABLE public.procs_proc_id_seq OWNER TO postgres;
 
 --
--- Name: procs_proc_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: procs_proc_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.procs_proc_id_seq OWNED BY public.procs.proc_id;
 
 
 --
--- Name: registry; Type: TABLE; Schema: public; Owner: root
+-- Name: registry; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.registry (
@@ -337,10 +337,10 @@ CREATE TABLE public.registry (
 );
 
 
-ALTER TABLE public.registry OWNER TO root;
+ALTER TABLE public.registry OWNER TO postgres;
 
 --
--- Name: registry_registry_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: registry_registry_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.registry_registry_id_seq
@@ -352,17 +352,17 @@ CREATE SEQUENCE public.registry_registry_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.registry_registry_id_seq OWNER TO root;
+ALTER TABLE public.registry_registry_id_seq OWNER TO postgres;
 
 --
--- Name: registry_registry_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: registry_registry_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.registry_registry_id_seq OWNED BY public.registry.registry_id;
 
 
 --
--- Name: repos; Type: TABLE; Schema: public; Owner: root
+-- Name: repos; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.repos (
@@ -393,10 +393,10 @@ CREATE TABLE public.repos (
 );
 
 
-ALTER TABLE public.repos OWNER TO root;
+ALTER TABLE public.repos OWNER TO postgres;
 
 --
--- Name: repos_repo_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: repos_repo_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.repos_repo_id_seq
@@ -408,17 +408,17 @@ CREATE SEQUENCE public.repos_repo_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.repos_repo_id_seq OWNER TO root;
+ALTER TABLE public.repos_repo_id_seq OWNER TO postgres;
 
 --
--- Name: repos_repo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: repos_repo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.repos_repo_id_seq OWNED BY public.repos.repo_id;
 
 
 --
--- Name: secrets; Type: TABLE; Schema: public; Owner: root
+-- Name: secrets; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.secrets (
@@ -433,10 +433,10 @@ CREATE TABLE public.secrets (
 );
 
 
-ALTER TABLE public.secrets OWNER TO root;
+ALTER TABLE public.secrets OWNER TO postgres;
 
 --
--- Name: secrets_secret_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: secrets_secret_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.secrets_secret_id_seq
@@ -448,17 +448,17 @@ CREATE SEQUENCE public.secrets_secret_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.secrets_secret_id_seq OWNER TO root;
+ALTER TABLE public.secrets_secret_id_seq OWNER TO postgres;
 
 --
--- Name: secrets_secret_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: secrets_secret_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.secrets_secret_id_seq OWNED BY public.secrets.secret_id;
 
 
 --
--- Name: senders; Type: TABLE; Schema: public; Owner: root
+-- Name: senders; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.senders (
@@ -470,10 +470,10 @@ CREATE TABLE public.senders (
 );
 
 
-ALTER TABLE public.senders OWNER TO root;
+ALTER TABLE public.senders OWNER TO postgres;
 
 --
--- Name: senders_sender_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: senders_sender_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.senders_sender_id_seq
@@ -485,17 +485,17 @@ CREATE SEQUENCE public.senders_sender_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.senders_sender_id_seq OWNER TO root;
+ALTER TABLE public.senders_sender_id_seq OWNER TO postgres;
 
 --
--- Name: senders_sender_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: senders_sender_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.senders_sender_id_seq OWNED BY public.senders.sender_id;
 
 
 --
--- Name: tasks; Type: TABLE; Schema: public; Owner: root
+-- Name: tasks; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.tasks (
@@ -507,10 +507,10 @@ CREATE TABLE public.tasks (
 );
 
 
-ALTER TABLE public.tasks OWNER TO root;
+ALTER TABLE public.tasks OWNER TO postgres;
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: root
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
@@ -528,10 +528,10 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO root;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
--- Name: users_user_id_seq; Type: SEQUENCE; Schema: public; Owner: root
+-- Name: users_user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.users_user_id_seq
@@ -543,101 +543,101 @@ CREATE SEQUENCE public.users_user_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_user_id_seq OWNER TO root;
+ALTER TABLE public.users_user_id_seq OWNER TO postgres;
 
 --
--- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: root
+-- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.users_user_id_seq OWNED BY public.users.user_id;
 
 
 --
--- Name: agents agent_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: agents agent_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.agents ALTER COLUMN agent_id SET DEFAULT nextval('public.agents_agent_id_seq'::regclass);
 
 
 --
--- Name: builds build_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: builds build_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.builds ALTER COLUMN build_id SET DEFAULT nextval('public.builds_build_id_seq'::regclass);
 
 
 --
--- Name: config config_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: config config_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.config ALTER COLUMN config_id SET DEFAULT nextval('public.config_config_id_seq'::regclass);
 
 
 --
--- Name: files file_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: files file_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.files ALTER COLUMN file_id SET DEFAULT nextval('public.files_file_id_seq'::regclass);
 
 
 --
--- Name: logs log_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: logs log_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.logs ALTER COLUMN log_id SET DEFAULT nextval('public.logs_log_id_seq'::regclass);
 
 
 --
--- Name: procs proc_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: procs proc_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.procs ALTER COLUMN proc_id SET DEFAULT nextval('public.procs_proc_id_seq'::regclass);
 
 
 --
--- Name: registry registry_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: registry registry_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.registry ALTER COLUMN registry_id SET DEFAULT nextval('public.registry_registry_id_seq'::regclass);
 
 
 --
--- Name: repos repo_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: repos repo_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.repos ALTER COLUMN repo_id SET DEFAULT nextval('public.repos_repo_id_seq'::regclass);
 
 
 --
--- Name: secrets secret_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: secrets secret_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.secrets ALTER COLUMN secret_id SET DEFAULT nextval('public.secrets_secret_id_seq'::regclass);
 
 
 --
--- Name: senders sender_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: senders sender_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.senders ALTER COLUMN sender_id SET DEFAULT nextval('public.senders_sender_id_seq'::regclass);
 
 
 --
--- Name: users user_id; Type: DEFAULT; Schema: public; Owner: root
+-- Name: users user_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.users_user_id_seq'::regclass);
 
 
 --
--- Data for Name: agents; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: agents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 --- EMPTY
 
 
 --
--- Data for Name: builds; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: builds; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.builds (build_id, build_repo_id, build_number, build_event, build_status, build_enqueued, build_created, build_started, build_finished, build_commit, build_branch, build_ref, build_refspec, build_remote, build_title, build_message, build_timestamp, build_author, build_avatar, build_email, build_link, build_deploy, build_signed, build_verified, build_parent, build_error, build_reviewer, build_reviewed, build_sender, build_config_id, changed_files) VALUES
@@ -645,7 +645,7 @@ INSERT INTO public.builds (build_id, build_repo_id, build_number, build_event, b
 
 
 --
--- Data for Name: config; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: config; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.config (config_id, config_repo_id, config_hash, config_data, config_name) VALUES
@@ -653,7 +653,7 @@ INSERT INTO public.config (config_id, config_repo_id, config_hash, config_data, 
 
 
 --
--- Data for Name: build_config; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: build_config; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.build_config (config_id, build_id) VALUES
@@ -661,21 +661,21 @@ INSERT INTO public.build_config (config_id, build_id) VALUES
 
 
 --
--- Data for Name: files; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: files; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 --- EMPTY
 
 
 --
--- Data for Name: logs; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: logs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 --- EMPTY
 
 
 --
--- Data for Name: migrations; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.migrations (name) VALUES
@@ -731,7 +731,7 @@ INSERT INTO public.migrations (name) VALUES
 
 
 --
--- Data for Name: perms; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: perms; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.perms (perm_user_id, perm_repo_id, perm_pull, perm_push, perm_admin, perm_synced) VALUES
@@ -800,7 +800,7 @@ INSERT INTO public.perms (perm_user_id, perm_repo_id, perm_pull, perm_push, perm
 
 
 --
--- Data for Name: procs; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: procs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.procs (proc_id, proc_build_id, proc_pid, proc_ppid, proc_pgid, proc_name, proc_state, proc_error, proc_exit_code, proc_started, proc_stopped, proc_machine, proc_platform, proc_environ) VALUES
@@ -810,14 +810,14 @@ INSERT INTO public.procs (proc_id, proc_build_id, proc_pid, proc_ppid, proc_pgid
 
 
 --
--- Data for Name: registry; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: registry; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 --- EMPTY
 
 
 --
--- Data for Name: repos; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: repos; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_full_name, repo_avatar, repo_link, repo_clone, repo_branch, repo_timeout, repo_private, repo_trusted, repo_allow_pr, repo_allow_push, repo_allow_deploys, repo_allow_tags, repo_hash, repo_scm, repo_config_path, repo_gated, repo_visibility, repo_counter, repo_active, repo_fallback) VALUES
@@ -885,7 +885,7 @@ INSERT INTO public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_ful
 
 
 --
--- Data for Name: secrets; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: secrets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.secrets (secret_id, secret_repo_id, secret_name, secret_value, secret_images, secret_events, secret_skip_verify, secret_conceal) VALUES
@@ -896,21 +896,21 @@ INSERT INTO public.secrets (secret_id, secret_repo_id, secret_name, secret_value
 
 
 --
--- Data for Name: senders; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: senders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 --- EMPTY
 
 
 --
--- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 --- EMPTY
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: root
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.users (user_id, user_login, user_token, user_secret, user_expiry, user_email, user_avatar, user_active, user_admin, user_hash, user_synced) VALUES
@@ -918,84 +918,84 @@ INSERT INTO public.users (user_id, user_login, user_token, user_secret, user_exp
 
 
 --
--- Name: agents_agent_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: agents_agent_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.agents_agent_id_seq', 1, false);
 
 
 --
--- Name: builds_build_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: builds_build_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.builds_build_id_seq', 1, true);
 
 
 --
--- Name: config_config_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: config_config_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.config_config_id_seq', 1, true);
 
 
 --
--- Name: files_file_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: files_file_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.files_file_id_seq', 1, false);
 
 
 --
--- Name: logs_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: logs_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.logs_log_id_seq', 1, false);
 
 
 --
--- Name: procs_proc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: procs_proc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.procs_proc_id_seq', 3, true);
 
 
 --
--- Name: registry_registry_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: registry_registry_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.registry_registry_id_seq', 1, false);
 
 
 --
--- Name: repos_repo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: repos_repo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.repos_repo_id_seq', 122, true);
 
 
 --
--- Name: secrets_secret_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: secrets_secret_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.secrets_secret_id_seq', 4, true);
 
 
 --
--- Name: senders_sender_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: senders_sender_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.senders_sender_id_seq', 1, false);
 
 
 --
--- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
+-- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.users_user_id_seq', 1, true);
 
 
 --
--- Name: agents agents_agent_addr_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: agents agents_agent_addr_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.agents
@@ -1003,7 +1003,7 @@ ALTER TABLE ONLY public.agents
 
 
 --
--- Name: agents agents_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: agents agents_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.agents
@@ -1011,7 +1011,7 @@ ALTER TABLE ONLY public.agents
 
 
 --
--- Name: build_config build_config_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: build_config build_config_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.build_config
@@ -1019,7 +1019,7 @@ ALTER TABLE ONLY public.build_config
 
 
 --
--- Name: builds builds_build_number_build_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: builds builds_build_number_build_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.builds
@@ -1027,7 +1027,7 @@ ALTER TABLE ONLY public.builds
 
 
 --
--- Name: builds builds_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: builds builds_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.builds
@@ -1035,7 +1035,7 @@ ALTER TABLE ONLY public.builds
 
 
 --
--- Name: config config_config_hash_config_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: config config_config_hash_config_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.config
@@ -1043,7 +1043,7 @@ ALTER TABLE ONLY public.config
 
 
 --
--- Name: config config_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: config config_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.config
@@ -1051,7 +1051,7 @@ ALTER TABLE ONLY public.config
 
 
 --
--- Name: files files_file_proc_id_file_name_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: files files_file_proc_id_file_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.files
@@ -1059,7 +1059,7 @@ ALTER TABLE ONLY public.files
 
 
 --
--- Name: files files_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: files files_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.files
@@ -1067,7 +1067,7 @@ ALTER TABLE ONLY public.files
 
 
 --
--- Name: logs logs_log_job_id_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: logs logs_log_job_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.logs
@@ -1075,7 +1075,7 @@ ALTER TABLE ONLY public.logs
 
 
 --
--- Name: logs logs_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: logs logs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.logs
@@ -1083,7 +1083,7 @@ ALTER TABLE ONLY public.logs
 
 
 --
--- Name: migrations migrations_name_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: migrations migrations_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.migrations
@@ -1091,7 +1091,7 @@ ALTER TABLE ONLY public.migrations
 
 
 --
--- Name: perms perms_perm_user_id_perm_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: perms perms_perm_user_id_perm_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.perms
@@ -1099,7 +1099,7 @@ ALTER TABLE ONLY public.perms
 
 
 --
--- Name: procs procs_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: procs procs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.procs
@@ -1107,7 +1107,7 @@ ALTER TABLE ONLY public.procs
 
 
 --
--- Name: procs procs_proc_build_id_proc_pid_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: procs procs_proc_build_id_proc_pid_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.procs
@@ -1115,7 +1115,7 @@ ALTER TABLE ONLY public.procs
 
 
 --
--- Name: registry registry_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: registry registry_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.registry
@@ -1123,7 +1123,7 @@ ALTER TABLE ONLY public.registry
 
 
 --
--- Name: registry registry_registry_addr_registry_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: registry registry_registry_addr_registry_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.registry
@@ -1131,7 +1131,7 @@ ALTER TABLE ONLY public.registry
 
 
 --
--- Name: repos repos_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: repos repos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.repos
@@ -1139,7 +1139,7 @@ ALTER TABLE ONLY public.repos
 
 
 --
--- Name: repos repos_repo_full_name_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: repos repos_repo_full_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.repos
@@ -1147,7 +1147,7 @@ ALTER TABLE ONLY public.repos
 
 
 --
--- Name: secrets secrets_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: secrets secrets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.secrets
@@ -1155,7 +1155,7 @@ ALTER TABLE ONLY public.secrets
 
 
 --
--- Name: secrets secrets_secret_name_secret_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: secrets secrets_secret_name_secret_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.secrets
@@ -1163,7 +1163,7 @@ ALTER TABLE ONLY public.secrets
 
 
 --
--- Name: senders senders_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: senders senders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.senders
@@ -1171,7 +1171,7 @@ ALTER TABLE ONLY public.senders
 
 
 --
--- Name: senders senders_sender_repo_id_sender_login_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: senders senders_sender_repo_id_sender_login_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.senders
@@ -1179,7 +1179,7 @@ ALTER TABLE ONLY public.senders
 
 
 --
--- Name: tasks tasks_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: tasks tasks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tasks
@@ -1187,7 +1187,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -1195,7 +1195,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_user_login_key; Type: CONSTRAINT; Schema: public; Owner: root
+-- Name: users users_user_login_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -1203,77 +1203,77 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: file_build_ix; Type: INDEX; Schema: public; Owner: root
+-- Name: file_build_ix; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX file_build_ix ON public.files USING btree (file_build_id);
 
 
 --
--- Name: file_proc_ix; Type: INDEX; Schema: public; Owner: root
+-- Name: file_proc_ix; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX file_proc_ix ON public.files USING btree (file_proc_id);
 
 
 --
--- Name: ix_build_author; Type: INDEX; Schema: public; Owner: root
+-- Name: ix_build_author; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX ix_build_author ON public.builds USING btree (build_author);
 
 
 --
--- Name: ix_build_repo; Type: INDEX; Schema: public; Owner: root
+-- Name: ix_build_repo; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX ix_build_repo ON public.builds USING btree (build_repo_id);
 
 
 --
--- Name: ix_perms_repo; Type: INDEX; Schema: public; Owner: root
+-- Name: ix_perms_repo; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX ix_perms_repo ON public.perms USING btree (perm_repo_id);
 
 
 --
--- Name: ix_perms_user; Type: INDEX; Schema: public; Owner: root
+-- Name: ix_perms_user; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX ix_perms_user ON public.perms USING btree (perm_user_id);
 
 
 --
--- Name: ix_registry_repo; Type: INDEX; Schema: public; Owner: root
+-- Name: ix_registry_repo; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX ix_registry_repo ON public.registry USING btree (registry_repo_id);
 
 
 --
--- Name: ix_secrets_repo; Type: INDEX; Schema: public; Owner: root
+-- Name: ix_secrets_repo; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX ix_secrets_repo ON public.secrets USING btree (secret_repo_id);
 
 
 --
--- Name: proc_build_ix; Type: INDEX; Schema: public; Owner: root
+-- Name: proc_build_ix; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX proc_build_ix ON public.procs USING btree (proc_build_id);
 
 
 --
--- Name: sender_repo_ix; Type: INDEX; Schema: public; Owner: root
+-- Name: sender_repo_ix; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX sender_repo_ix ON public.senders USING btree (sender_repo_id);
 
 
 --
--- Name: build_config build_config_build_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: root
+-- Name: build_config build_config_build_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.build_config
@@ -1281,7 +1281,7 @@ ALTER TABLE ONLY public.build_config
 
 
 --
--- Name: build_config build_config_config_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: root
+-- Name: build_config build_config_config_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.build_config
