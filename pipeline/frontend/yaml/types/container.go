@@ -121,6 +121,11 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
+// MarshalYAML implements custom Yaml marshaling.
+func (c ContainerList) MarshalYAML() (interface{}, error) {
+	return c.ContainerList, nil
+}
+
 func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0 &&
 		len(c.Entrypoint) == 0 &&

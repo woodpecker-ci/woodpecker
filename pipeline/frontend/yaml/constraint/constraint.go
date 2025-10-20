@@ -48,7 +48,7 @@ type (
 		Matrix   Map
 		Local    yamlBaseTypes.BoolTrue
 		Path     Path
-		Evaluate string `yaml:"evaluate,omitempty"`
+		Evaluate string `yaml:"omitempty"`
 		Event    yamlBaseTypes.StringOrSlice
 	}
 
@@ -151,6 +151,17 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+// MarshalYAML implements custom Yaml marshaling.
+func (when When) MarshalYAML() (interface{}, error) {
+	switch len(when.Constraints) {
+	case 0:
+		return nil, nil
+	case 1:
+		return when.Constraints[0], nil
+	}
+	return when.Constraints, nil
 }
 
 // Match returns true if all constraints match the given input. If a single
@@ -269,6 +280,28 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+// MarshalYAML implements custom Yaml marshaling.
+func (c List) MarshalYAML() (interface{}, error) {
+	switch {
+	case len(c.Include) == 0 && len(c.Exclude) == 0:
+		return nil, nil
+	case len(c.Exclude) == 0:
+		return yamlBaseTypes.StringOrSlice(c.Include), nil
+	case len(c.Include) == 0 && len(c.Exclude) != 0:
+		return struct {
+			Exclude yamlBaseTypes.StringOrSlice
+		}{Exclude: c.Exclude}, nil
+	default:
+		return struct {
+			Include yamlBaseTypes.StringOrSlice
+			Exclude yamlBaseTypes.StringOrSlice
+		}{
+			Include: c.Include,
+			Exclude: c.Exclude,
+		}, nil
+	}
 }
 
 // Match returns true if the params matches the include key values and does not

@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
@@ -70,7 +71,7 @@ func TestParse(t *testing.T) {
 		assert.Empty(t, out.Steps.ContainerList[0].When.Constraints)
 		assert.Equal(t, "notify_success", out.Steps.ContainerList[1].Name)
 		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[1].Image)
-		assert.Equal(t, yaml_base_types.StringOrSlice{"success"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
+		assert.Equal(t, yaml_base_types.StringOrSlice{"push"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
 	})
 }
 
@@ -216,14 +217,14 @@ steps:
 `
 
 var sampleVarYaml = `
-_slack: &SLACK
+variables: &SLACK
   image: plugins/slack
 steps:
   notify_fail: *SLACK
   notify_success:
     << : *SLACK
     when:
-      event: success
+      event: push
 `
 
 func TestReSerialize(t *testing.T) {
@@ -238,23 +239,21 @@ func TestReSerialize(t *testing.T) {
 	}
 
 	assert.EqualValues(t, `steps:
-    containerlist:
-        - image: plugins/slack
-          name: notify_fail
-          settings: {}
-        - image: plugins/slack
-          name: notify_success
-          settings: {}
-          when:
-        				path:
-        					include: []
-        					exclude: []
-skip_clone: false`, string(workBin))
+    - name: notify_fail
+      image: plugins/slack
+      settings: {}
+    - name: notify_success
+      image: plugins/slack
+      settings: {}
+      when:
+          event: push
+skip_clone: false
+`, string(workBin))
 }
 
 func TestSlice(t *testing.T) {
 	out, err := ParseString(sampleYaml)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	t.Run("should marshal a not set slice to nil", func(t *testing.T) {
 		assert.Equal(t, "test", out.Steps.ContainerList[0].Name)
