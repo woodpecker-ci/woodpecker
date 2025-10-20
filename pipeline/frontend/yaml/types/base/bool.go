@@ -51,3 +51,7 @@ func (b BoolTrue) MarshalYAML() (interface{}, error) {
 func (b BoolTrue) Bool() bool {
 	return !b.value
 }
+
+func ToBoolTrue(v bool) BoolTrue {
+	return BoolTrue{value: !v}
+}

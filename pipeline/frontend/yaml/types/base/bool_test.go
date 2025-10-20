@@ -62,14 +62,14 @@ func TestBoolTrue(t *testing.T) {
 		})
 
 		t.Run("marshal true", func(t *testing.T) {
-			in := BoolTrue{value: true}
+			in := ToBoolTrue(true)
 			out, err := yaml.Marshal(&in)
 			assert.NoError(t, err)
 			assert.EqualValues(t, "true\n", string(out))
 		})
 
 		t.Run("marshal false", func(t *testing.T) {
-			in := BoolTrue{value: false}
+			in := ToBoolTrue(false)
 			out, err := yaml.Marshal(&in)
 			assert.NoError(t, err)
 			assert.EqualValues(t, "false\n", string(out))

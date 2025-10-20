@@ -52,12 +52,16 @@ func TestStringOrSliceYaml(t *testing.T) {
 		str = StructStringOrSlice{Foo: []string{"a\""}}
 		out, err = yaml.Marshal(str)
 		assert.NoError(t, err)
-		assert.EqualValues(t, "foo: \"a\"\n", string(out))
+		assert.EqualValues(t, "foo: a\"\n", string(out))
 
 		str = StructStringOrSlice{Foo: []string{"a", "b", "c"}}
 		out, err = yaml.Marshal(str)
 		assert.NoError(t, err)
-		assert.EqualValues(t, "foo: \"\"\n", string(out))
+		assert.EqualValues(t, `foo:
+    - a
+    - b
+    - c
+`, string(out))
 	})
 
 	str := `{foo: [bar, "baz"]}`
