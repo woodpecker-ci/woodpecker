@@ -1,42 +1,36 @@
 <template>
-  <div class="flex w-full mb-4 justify-center">
-    <span class="text-color text-xl">{{ $t('repo.pipeline.pipelines_for', { branch }) }}</span>
+  <div class="mb-4 flex w-full justify-center">
+    <span class="text-wp-text-100 text-xl">{{ $t('repo.pipeline.pipelines_for', { branch }) }}</span>
   </div>
   <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, inject, Ref, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
-import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import { requiredInject } from '~/compositions/useInjectProvide';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
-export default defineComponent({
-  name: 'RepoBranch',
+const props = defineProps<{
+  branch: string;
+}>();
 
-  components: { PipelineList },
+const branch = toRef(props, 'branch');
+const repo = requiredInject('repo');
 
-  props: {
-    branch: {
-      type: String,
-      required: true,
-    },
-  },
+const allPipelines = requiredInject('pipelines');
+const pipelines = computed(() =>
+  allPipelines.value.filter(
+    (b) =>
+      b.branch === branch.value &&
+      b.event !== 'pull_request' &&
+      b.event !== 'pull_request_closed' &&
+      b.event !== 'pull_request_metadata',
+  ),
+);
 
-  setup(props) {
-    const branch = toRef(props, 'branch');
-    const repo = inject<Ref<Repo>>('repo');
-    const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-    if (!repo || !repoPermissions) {
-      throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
-    }
-
-    const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
-    const pipelines = computed(() =>
-      allPipelines?.value.filter((b) => b.branch === branch.value && b.event !== 'pull_request'),
-    );
-
-    return { pipelines, repo };
-  },
-});
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repo.activity'), branch.value, repo.value.full_name]));
 </script>

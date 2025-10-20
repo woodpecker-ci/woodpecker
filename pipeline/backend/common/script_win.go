@@ -18,29 +18,37 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"text/template"
 )
 
-func generateScriptWindows(commands []string) string {
+func generateScriptWindows(commands []string, workDir string) string {
 	var buf bytes.Buffer
+
+	if err := setupScriptWinTmpl.Execute(&buf, map[string]string{
+		"WorkDir": workDir,
+	}); err != nil {
+		// should never happen but well we have an error to trance
+		return fmt.Sprintf("echo 'failed to generate posix script from commands: %s'; exit 1", err.Error())
+	}
+
 	for _, command := range commands {
 		escaped := fmt.Sprintf("%q", command)
-		escaped = strings.Replace(escaped, "$", `\$`, -1)
+		escaped = strings.ReplaceAll(escaped, "$", `\$`)
 		buf.WriteString(fmt.Sprintf(
 			traceScriptWin,
 			escaped,
 			command,
 		))
 	}
-	script := fmt.Sprintf(
-		setupScriptWin,
-		buf.String(),
-	)
-	return script
+
+	return buf.String()
 }
 
-const setupScriptWin = `
+const setupScriptWinProto = `
 $ErrorActionPreference = 'Stop';
-&cmd /c "mkdir c:\root";
+if (-not (Test-Path "{{.WorkDir}}")) { New-Item -Path "{{.WorkDir}}" -ItemType Directory -Force };
+if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
+if (-not (Test-Path "$env:HOME")) { New-Item -Path "$env:HOME" -ItemType Directory -Force };
 if ($Env:CI_NETRC_MACHINE) {
 $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 "machine $Env:CI_NETRC_MACHINE" >> $netrc;
@@ -49,8 +57,10 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 };
 [Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
-%s
+cd "{{.WorkDir}}";
 `
+
+var setupScriptWinTmpl, _ = template.New("").Parse(setupScriptWinProto)
 
 // traceScript is a helper script that is added to the step script
 // to trace a command.

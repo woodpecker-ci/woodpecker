@@ -1,8 +1,0 @@
-# don't lint build output (make sure it's set to your correct build folder name)
-dist
-coverage/
-package.json
-tsconfig.eslint.json
-tsconfig.json
-src/assets/locales/
-components.d.ts

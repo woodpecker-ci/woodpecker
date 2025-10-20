@@ -19,77 +19,156 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestCreateFilterFunc(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name        string
-		agentLabels map[string]string
-		task        model.Task
-		exp         bool
+		agentFilter rpc.Filter
+		task        *model.Task
+		wantMatched bool
+		wantScore   int
 	}{
 		{
-			name:        "agent with missing labels",
-			agentLabels: map[string]string{"repo": "test/woodpecker"},
-			task: model.Task{
-				Labels: map[string]string{"platform": "linux/amd64", "repo": "test/woodpecker"},
+			name: "Two exact matches",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
 			},
-			exp: false,
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
+			},
+			wantMatched: true,
+			wantScore:   20,
 		},
 		{
-			name:        "agent with wrong labels",
-			agentLabels: map[string]string{"platform": "linux/arm64"},
-			task: model.Task{
-				Labels: map[string]string{"platform": "linux/amd64"},
+			name: "Wildcard and exact match",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "*", "platform": "linux"},
 			},
-			exp: false,
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
+			},
+			wantMatched: true,
+			wantScore:   11,
 		},
 		{
-			name:        "agent with correct labels",
-			agentLabels: map[string]string{"platform": "linux/amd64", "location": "europe"},
-			task: model.Task{
-				Labels: map[string]string{"platform": "linux/amd64", "location": "europe"},
+			name: "Partial match",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
 			},
-			exp: true,
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "windows"},
+			},
+			wantMatched: false,
+			wantScore:   0,
 		},
 		{
-			name:        "agent with additional labels",
-			agentLabels: map[string]string{"platform": "linux/amd64", "location": "europe"},
-			task: model.Task{
-				Labels: map[string]string{"platform": "linux/amd64"},
+			name: "No match",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "456", "platform": "linux"},
 			},
-			exp: true,
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "windows"},
+			},
+			wantMatched: false,
+			wantScore:   0,
 		},
 		{
-			name:        "agent with wildcard label",
-			agentLabels: map[string]string{"platform": "linux/amd64", "location": "*"},
-			task: model.Task{
-				Labels: map[string]string{"platform": "linux/amd64", "location": "america"},
+			name: "Missing label",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"platform": "linux"},
 			},
-			exp: true,
+			task: &model.Task{
+				Labels: map[string]string{"needed": "some"},
+			},
+			wantMatched: false,
+			wantScore:   0,
 		},
 		{
-			name:        "agent with platform label and task without",
-			agentLabels: map[string]string{"platform": "linux/amd64"},
-			task: model.Task{
-				Labels: map[string]string{"platform": ""},
+			name: "Empty task labels",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
 			},
-			exp: true,
+			task: &model.Task{
+				Labels: map[string]string{},
+			},
+			wantMatched: true,
+			wantScore:   0,
+		},
+		{
+			name: "Agent with additional label",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", "extra": "value"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", "empty": ""},
+			},
+			wantMatched: true,
+			wantScore:   20,
+		},
+		{
+			name: "Two wildcard matches",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "*", "platform": "*"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
+			},
+			wantMatched: true,
+			wantScore:   2,
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			fn, err := createFilterFunc(rpc.Filter{Labels: test.agentLabels})
-			if !assert.NoError(t, err) {
-				t.Fail()
-			}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filterFunc := createFilterFunc(tt.agentFilter)
+			gotMatched, gotScore := filterFunc(tt.task)
 
-			assert.EqualValues(t, test.exp, fn(&test.task))
+			assert.Equal(t, tt.wantMatched, gotMatched, "Matched result")
+			assert.Equal(t, tt.wantScore, gotScore, "Score")
 		})
+	}
+}
+
+func TestMissingRequiredLabels(t *testing.T) {
+	t.Parallel()
+
+	testdata := []struct {
+		taskLabels     map[string]string
+		requiredLabels map[string]string
+		want           bool
+	}{
+		// Required label present and matches
+		{
+			taskLabels:     map[string]string{"os": "linux"},
+			requiredLabels: map[string]string{"!os": "linux", "platform": "arm64"},
+			want:           false,
+		},
+		// Required label present but does not match
+		{
+			taskLabels:     map[string]string{"os": "windows"},
+			requiredLabels: map[string]string{"!os": "linux", "platform": "amd64"},
+			want:           true,
+		},
+		// Required label missing
+		{
+			taskLabels:     map[string]string{"arch": "amd64"},
+			requiredLabels: map[string]string{"!os": "linux"},
+			want:           true,
+		},
+		// No agent labels
+		{
+			taskLabels:     map[string]string{"os": "linux"},
+			requiredLabels: map[string]string{},
+			want:           false,
+		},
+	}
+
+	for _, tt := range testdata {
+		if got := requiredLabelsMissing(tt.taskLabels, tt.requiredLabels); got != tt.want {
+			t.Errorf("requiredLabelsMissing(%v, %v) = %v, want %v", tt.taskLabels, tt.requiredLabels, got, tt.want)
+		}
 	}
 }

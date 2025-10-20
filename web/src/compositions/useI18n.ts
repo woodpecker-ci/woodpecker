@@ -1,8 +1,21 @@
+import { useStorage } from '@vueuse/core';
+import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
 import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
 
-import { getUserLanguage } from '~/utils/locale';
+import { useDate } from './useDate';
 
+export function getUserLanguage(): string {
+  let browserLocale = navigator.language;
+  if (!SUPPORTED_LOCALES.includes(browserLocale)) {
+    browserLocale = browserLocale.split('-')[0];
+  }
+  const selectedLocale = useStorage('woodpecker:locale', browserLocale).value;
+
+  return selectedLocale;
+}
+
+const { setDateLocale } = useDate();
 const userLanguage = getUserLanguage();
 const fallbackLocale = 'en';
 export const i18n = createI18n({
@@ -12,10 +25,10 @@ export const i18n = createI18n({
   fallbackLocale,
 });
 
-export const loadLocaleMessages = async (locale: string) => {
-  const { default: messages } = await import(`~/assets/locales/${locale}.json`);
+const loadLocaleMessages = async (locale: string) => {
+  const messages = (await import(`~/assets/locales/${locale}.json`)) as { default: any };
 
-  i18n.global.setLocaleMessage(locale, messages);
+  i18n.global.setLocaleMessage(locale, messages.default);
 
   return nextTick();
 };
@@ -25,7 +38,9 @@ export const setI18nLanguage = async (lang: string): Promise<void> => {
     await loadLocaleMessages(lang);
   }
   i18n.global.locale.value = lang;
+  await setDateLocale(lang);
 };
 
-loadLocaleMessages(fallbackLocale);
-loadLocaleMessages(userLanguage);
+loadLocaleMessages(fallbackLocale).catch(console.error);
+loadLocaleMessages(userLanguage).catch(console.error);
+setDateLocale(userLanguage).catch(console.error);

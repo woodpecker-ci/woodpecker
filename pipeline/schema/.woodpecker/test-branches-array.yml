@@ -1,7 +1,0 @@
-branches: [master, pages]
-
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go test

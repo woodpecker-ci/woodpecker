@@ -1,8 +1,9 @@
-import { computed, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { Ref } from 'vue';
 
 export function useElapsedTime(running: Ref<boolean>, startTime: Ref<number | undefined>) {
   const time = ref<number | undefined>(startTime.value);
-  const timer = ref<NodeJS.Timer>();
+  const timer = ref<ReturnType<typeof setInterval>>();
 
   function stopTimer() {
     if (timer.value !== undefined) {
@@ -44,7 +45,7 @@ export function useElapsedTime(running: Ref<boolean>, startTime: Ref<number | un
   onBeforeUnmount(stopTimer);
 
   return {
-    time: computed(() => time.value),
+    time: computed(() => (time.value === undefined ? 0 : time.value)),
     running,
   };
 }

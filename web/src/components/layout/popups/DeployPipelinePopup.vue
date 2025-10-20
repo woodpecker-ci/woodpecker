@@ -1,60 +1,45 @@
 <template>
   <Popup :open="open" @close="$emit('close')">
-    <Panel v-if="!loading">
+    <Panel v-if="!loading" class="bg-wp-background-100 dark:bg-wp-background-300">
       <form @submit.prevent="triggerDeployPipeline">
-        <span class="text-xl text-color">{{ $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber }) }}</span>
-        <InputField :label="$t('repo.deploy_pipeline.enter_target')">
-          <TextField v-model="payload.environment" required />
+        <span class="text-wp-text-100 text-xl">{{
+          $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber })
+        }}</span>
+        <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_target')">
+          <TextField :id="id" v-model="payload.environment" required />
         </InputField>
-        <InputField :label="$t('repo.deploy_pipeline.variables.title')">
-          <span class="text-sm text-color-alt mb-2">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
-          <div class="flex flex-col gap-2">
-            <div v-for="(value, name) in payload.variables" :key="name" class="flex gap-4">
-              <TextField :model-value="name" disabled />
-              <TextField :model-value="value" disabled />
-              <div class="w-34 flex-shrink-0">
-                <Button color="red" class="ml-auto" @click="deleteVar(name)">
-                  <i-la-times />
-                </Button>
-              </div>
-            </div>
-            <form class="flex gap-4" @submit.prevent="addPipelineVariable">
-              <TextField
-                v-model="newPipelineVariable.name"
-                :placeholder="$t('repo.deploy_pipeline.variables.name')"
-                required
-              />
-              <TextField
-                v-model="newPipelineVariable.value"
-                :placeholder="$t('repo.deploy_pipeline.variables.value')"
-                required
-              />
-              <Button
-                class="w-34 flex-shrink-0"
-                start-icon="plus"
-                type="submit"
-                :text="$t('repo.deploy_pipeline.variables.add')"
-              />
-            </form>
-          </div>
+        <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_task')">
+          <TextField :id="id" v-model="payload.task" />
         </InputField>
-        <Button type="submit" :text="$t('repo.deploy_pipeline.trigger')" />
+        <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.variables.title')">
+          <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
+          <KeyValueEditor
+            :id="id"
+            v-model="payload.variables"
+            :key-placeholder="$t('repo.deploy_pipeline.variables.name')"
+            :value-placeholder="$t('repo.deploy_pipeline.variables.value')"
+            :delete-title="$t('repo.deploy_pipeline.variables.delete')"
+            @update:is-valid="isVariablesValid = $event"
+          />
+        </InputField>
+        <Button type="submit" :text="$t('repo.deploy_pipeline.trigger')" :disabled="!isFormValid" />
       </form>
     </Panel>
   </Popup>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, toRef } from 'vue';
+import { computed, onMounted, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
+import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { inject } from '~/compositions/useInjectProvide';
+import { requiredInject } from '~/compositions/useInjectProvide';
 
 const props = defineProps<{
   open: boolean;
@@ -66,45 +51,41 @@ const emit = defineEmits<{
 }>();
 
 const apiClient = useApiClient();
-
-const repo = inject('repo');
-
+const repo = requiredInject('repo');
 const router = useRouter();
 
-const payload = ref<{ id: string; environment: string; variables: Record<string, string> }>({
+const payload = ref<{
+  id: string;
+  environment: string;
+  task: string;
+  variables: Record<string, string>;
+}>({
   id: '',
   environment: '',
+  task: '',
   variables: {},
 });
-const newPipelineVariable = ref<{ name: string; value: string }>({ name: '', value: '' });
+
+const isVariablesValid = ref(true);
+
+const isFormValid = computed(() => {
+  return payload.value.environment !== '' && isVariablesValid.value;
+});
+
+const pipelineOptions = computed(() => ({
+  ...payload.value,
+  variables: payload.value.variables,
+}));
 
 const loading = ref(true);
 onMounted(async () => {
   loading.value = false;
 });
 
-function addPipelineVariable() {
-  if (!newPipelineVariable.value.name || !newPipelineVariable.value.value) {
-    return;
-  }
-  payload.value.variables[newPipelineVariable.value.name] = newPipelineVariable.value.value;
-  newPipelineVariable.value.name = '';
-  newPipelineVariable.value.value = '';
-}
-
-function deleteVar(key: string) {
-  delete payload.value.variables[key];
-}
-
 const pipelineNumber = toRef(props, 'pipelineNumber');
 async function triggerDeployPipeline() {
   loading.value = true;
-  const newPipeline = await apiClient.deployPipeline(
-    repo.value.owner,
-    repo.value.name,
-    pipelineNumber.value,
-    payload.value,
-  );
+  const newPipeline = await apiClient.deployPipeline(repo.value.id, pipelineNumber.value, pipelineOptions.value);
 
   emit('close');
 

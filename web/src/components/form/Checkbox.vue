@@ -1,68 +1,49 @@
 <template>
-  <div class="flex items-center mb-2">
+  <div class="mb-2 flex items-center">
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox flex-shrink-0 relative border border-gray-400 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-lime-600 checked:border-lime-600 focus-visible:border-gray-600 dark:(border-gray-600 checked:bg-lime-700 checked:border-lime-700 focus-visible:border-gray-300 checked:focus-visible:border-gray-300)"
+      class="checkbox border-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-md border transition-colors duration-150"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
-    <div class="flex flex-col ml-4">
-      <label v-if="label" class="cursor-pointer text-color" :for="`checkbox-${id}`">{{ label }}</label>
-      <span v-if="description" class="text-sm text-color-alt">{{ description }}</span>
+    <div class="ml-4 flex flex-col">
+      <label class="text-wp-text-100 cursor-pointer" :for="`checkbox-${id}`">{{ label }}</label>
+      <span v-if="description" class="text-wp-text-alt-100 text-sm">{{ description }}</span>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
-export default defineComponent({
-  name: 'Checkbox',
+const props = defineProps<{
+  modelValue: boolean;
+  label: string;
+  description?: string;
+}>();
 
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void;
+}>();
 
-    label: {
-      type: String,
-      default: null,
-    },
-
-    description: {
-      type: String,
-      default: null,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: boolean): boolean => true,
-  },
-
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (value) => {
-        ctx.emit('update:modelValue', value);
-      },
-    });
-
-    const id = (Math.random() + 1).toString(36).substring(7);
-
-    return {
-      id,
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (value) => {
+    emit('update:modelValue', value);
   },
 });
+
+const id = (Math.random() + 1).toString(36).substring(7);
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .checkbox {
+  width: 1.3rem;
+  height: 1.3rem;
   appearance: none;
   outline: 0;
   cursor: pointer;
@@ -75,14 +56,13 @@ export default defineComponent({
   display: block;
   top: 50%;
   left: 50%;
-  width: 8px;
-  height: 14px;
+  width: 0.5rem;
+  height: 1rem;
   border-style: solid;
   border-color: white;
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
-  @apply dark:border-gray-300;
 }
 
 .checkbox:checked::before {

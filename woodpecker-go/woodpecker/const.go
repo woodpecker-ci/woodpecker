@@ -16,10 +16,15 @@ package woodpecker
 
 // Event values.
 const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
+	EventPush         = "push"
+	EventPull         = "pull_request"
+	EventPullClosed   = "pull_request_closed"
+	EventPullMetadata = "pull_request_metadata"
+	EventTag          = "tag"
+	EventRelease      = "release"
+	EventDeploy       = "deployment"
+	EventCron         = "cron"
+	EventManual       = "manual"
 )
 
 // Status values.
@@ -43,4 +48,15 @@ const (
 	LogEntryExitCode
 	LogEntryMetadata
 	LogEntryProgress
+)
+
+// StepType identifies the type of step.
+type StepType string
+
+const (
+	StepTypeClone    StepType = "clone"
+	StepTypeService  StepType = "service"
+	StepTypePlugin   StepType = "plugin"
+	StepTypeCommands StepType = "commands"
+	StepTypeCache    StepType = "cache"
 )

@@ -1,6 +1,6 @@
 // A config for a pipeline.
-export type PipelineConfig = {
+export interface PipelineConfig {
   hash: string;
   name: string;
   data: string;
-};
+}

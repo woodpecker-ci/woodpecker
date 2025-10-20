@@ -1,22 +1,38 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package migration
 
 import (
 	"database/sql"
 	"os"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"xorm.io/xorm"
+	"time"
 
 	// blank imports to register the sql drivers
+	// Blank imports to register the sql drivers.
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/assert"
+	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
 const (
-	sqliteDB     = "./testfiles/sqlite.db"
-	postgresDump = "./testfiles/postgres.sql"
+	sqliteDB     = "./test-files/sqlite.db"
+	postgresDump = "./test-files/postgres.sql"
 )
 
 func testDriver() string {
@@ -28,7 +44,7 @@ func testDriver() string {
 }
 
 func createSQLiteDB(t *testing.T) string {
-	tmpF, err := os.CreateTemp("./testfiles", "tmp_")
+	tmpF, err := os.CreateTemp("./test-files", "tmp_")
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
@@ -43,14 +59,14 @@ func createSQLiteDB(t *testing.T) string {
 	return tmpF.Name()
 }
 
-func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
+func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) {
 	driver := testDriver()
 	var err error
 	closeDB = func() {}
 	switch driver {
 	case "sqlite3":
 		config := ":memory:"
-		if !new {
+		if !initNewDB {
 			config = createSQLiteDB(t)
 			closeDB = func() {
 				_ = os.Remove(config)
@@ -60,10 +76,10 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		return
+		return engine, closeDB
 	case "mysql":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
-		if !new {
+		if !initNewDB {
 			t.Logf("do not have dump to test against")
 			t.SkipNow()
 		}
@@ -71,7 +87,7 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		return
+		return engine, closeDB
 	case "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 		if !new {
@@ -84,12 +100,12 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		return
+		return engine, closeDB
 	default:
 		t.Errorf("unsupported driver: %s", driver)
 		t.FailNow()
 	}
-	return
+	return engine, closeDB
 }
 
 func restorePostgresDump(t *testing.T, config string) {
@@ -119,25 +135,19 @@ func cleanDB(t *testing.T, e *xorm.Engine) {
 }
 
 func TestMigrate(t *testing.T) {
-	// make all tasks required for tests
-	for _, task := range migrationTasks {
-		task.required = true
+	// init new db
+	engine, closeDB := testDB(t, true)
+	assert.NoError(t, Migrate(t.Context(), engine, true))
+	closeDB()
+
+	dbType := engine.Dialect().URI().DBType
+	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
+		// wait for mysql/postgres to sync ...
+		time.Sleep(100 * time.Millisecond)
 	}
 
-	//	// init new db
-	//	engine, closeDB := testDB(t, true)
-	//	assert.NoError(t, Migrate(engine))
-	//	closeDB()
-	//
-	//	dbType := engine.Dialect().URI().DBType
-	//	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
-	//		// wait for mysql/postgres to sync ...
-	//		time.Sleep(100 * time.Millisecond)
-	//	}
-	//	assert.NoError(t, engine.ClearCache(allBeans...))
-
 	// migrate old db
-	engine, closeDB := testDB(t, false)
-	assert.NoError(t, Migrate(engine))
+	engine, closeDB = testDB(t, false)
+	assert.NoError(t, Migrate(t.Context(), engine, true))
 	closeDB()
 }

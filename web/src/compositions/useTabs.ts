@@ -1,64 +1,25 @@
-import { computed, inject, onMounted, provide, Ref, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
 
-export type Tab = {
-  id: string;
+import type { IconNames } from '~/components/atomic/Icon.vue';
+
+import { provide, requiredInject } from './useInjectProvide';
+
+export interface Tab {
+  to: RouteLocationRaw;
   title: string;
-};
+  count?: number;
+  icon?: IconNames;
+  iconClass?: string;
+  matchChildren?: boolean;
+}
 
-export function useTabsProvider({
-  activeTabProp,
-  disableHashMode,
-  updateActiveTabProp,
-}: {
-  activeTabProp: Ref<string>;
-  updateActiveTabProp: (tab: string) => void;
-  disableHashMode: Ref<boolean>;
-}) {
-  const route = useRoute();
-
+export function useTabsProvider() {
   const tabs = ref<Tab[]>([]);
-  const activeTab = ref<string>('');
-
   provide('tabs', tabs);
-  provide(
-    'disable-hash-mode',
-    computed(() => disableHashMode.value),
-  );
-  provide(
-    'active-tab',
-    computed({
-      get: () => activeTab.value,
-      set: (value) => {
-        activeTab.value = value;
-        updateActiveTabProp(value);
-      },
-    }),
-  );
-
-  onMounted(() => {
-    if (activeTabProp.value) {
-      activeTab.value = activeTabProp.value;
-      return;
-    }
-
-    const hashTab = route.hash.replace(/^#/, '');
-    if (hashTab) {
-      activeTab.value = hashTab;
-      return;
-    }
-    activeTab.value = tabs.value[0].id;
-  });
 }
 
 export function useTabsClient() {
-  const tabs = inject<Ref<Tab[]>>('tabs');
-  const disableHashMode = inject<Ref<boolean>>('disable-hash-mode');
-  const activeTab = inject<Ref<string>>('active-tab');
-
-  if (activeTab === undefined || tabs === undefined || disableHashMode === undefined) {
-    throw new Error('Please use this "useTabsClient" composition inside a component running "useTabsProvider".');
-  }
-
-  return { activeTab, tabs, disableHashMode };
+  const tabs = requiredInject('tabs');
+  return { tabs };
 }

@@ -15,58 +15,46 @@
 package main
 
 import (
-	"os"
+	"github.com/urfave/cli/v3"
 
-	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
-
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/cron"
-	"github.com/woodpecker-ci/woodpecker/cli/deploy"
-	"github.com/woodpecker-ci/woodpecker/cli/exec"
-	"github.com/woodpecker-ci/woodpecker/cli/info"
-	"github.com/woodpecker-ci/woodpecker/cli/lint"
-	"github.com/woodpecker-ci/woodpecker/cli/log"
-	"github.com/woodpecker-ci/woodpecker/cli/loglevel"
-	"github.com/woodpecker-ci/woodpecker/cli/pipeline"
-	"github.com/woodpecker-ci/woodpecker/cli/registry"
-	"github.com/woodpecker-ci/woodpecker/cli/repo"
-	"github.com/woodpecker-ci/woodpecker/cli/secret"
-	"github.com/woodpecker-ci/woodpecker/cli/user"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/admin"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/exec"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/info"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/org"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/setup"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/update"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 //go:generate go run docs.go app.go
-func newApp() *cli.App {
-	app := cli.NewApp()
+func newApp() *cli.Command {
+	app := &cli.Command{}
 	app.Name = "woodpecker-cli"
+	app.Description = "Woodpecker command line utility"
 	app.Version = version.String()
 	app.Usage = "command line utility"
-	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
+	app.Before = common.Before
+	app.After = common.After
+	app.Suggest = true
+	app.ConfigureShellCompletionCommand = func(c *cli.Command) {
+		c.Hidden = false
+		c.Usage = "generate completion script for the specified shell"
+	}
 	app.Commands = []*cli.Command{
-		pipeline.Command,
-		log.Command,
-		deploy.Command,
+		admin.Command,
 		exec.Command,
 		info.Command,
-		registry.Command,
-		secret.Command,
-		repo.Command,
-		user.Command,
 		lint.Command,
-		loglevel.Command,
-		cron.Command,
-	}
-
-	zlog.Logger = zlog.Output(
-		zerolog.ConsoleWriter{
-			Out: os.Stderr,
-		},
-	)
-	for _, command := range app.Commands {
-		command.Before = common.SetupConsoleLogger
+		org.Command,
+		pipeline.Command,
+		repo.Command,
+		setup.Command,
+		update.Command,
 	}
 
 	return app

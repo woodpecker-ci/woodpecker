@@ -1,9 +1,11 @@
-import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/types';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/types';
 import axios, { AxiosError } from 'axios';
-import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
+import slugify from 'slugify';
+
 import * as markdown from './markdown';
+import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
 
 async function loadContent(): Promise<Content> {
   const file = path.join(__dirname, '..', 'plugins.json');
@@ -12,29 +14,55 @@ async function loadContent(): Promise<Content> {
 
   const plugins = (
     await Promise.all(
-      pluginsIndex.plugins.map(async (i) => {
-        if (i['// todo']) {
-          return undefined;
-        }
-
+      pluginsIndex.plugins.map(async (i): Promise<WoodpeckerPlugin | undefined> => {
         let docsContent: string;
         try {
           const response = await axios(i.docs);
           docsContent = response.data;
         } catch (e) {
-          console.error("Can't fetch docs file", i.docs, (e as AxiosError).message);
+          const axiosError = e as AxiosError;
+          console.error(
+            "Can't fetch docs file",
+            i.docs,
+            axiosError.message,
+            axiosError.response?.status,
+            axiosError.response?.statusText,
+          );
           return undefined;
         }
 
-        const docsHeader = markdown.getHeader<WoodpeckerPluginHeader>(docsContent);
-        const docsBody = markdown.getContent(docsContent);
+        let docsHeader: WoodpeckerPluginHeader;
+        try {
+          docsHeader = markdown.getHeader<WoodpeckerPluginHeader>(docsContent);
+        } catch (e) {
+          console.error("Can't get header from docs file", i.docs, (e as Error).message);
+          return undefined;
+        }
+
+        const docsBody = await markdown.getContent(docsContent);
 
         if (!docsHeader.name) {
           return undefined;
         }
 
-        return <WoodpeckerPlugin>{
-          name: docsHeader.name || i.name,
+        let pluginIconDataUrl: string | undefined;
+        if (docsHeader.icon) {
+          try {
+            const response = await axios(docsHeader.icon, {
+              responseType: 'arraybuffer',
+            });
+            pluginIconDataUrl = `data:${response.headers['content-type'].toString()};base64,${Buffer.from(
+              response.data,
+              'binary',
+            ).toString('base64')}`;
+          } catch (e) {
+            console.error("Can't fetch plugin icon", docsHeader.icon, (e as AxiosError).message);
+          }
+        }
+
+        return {
+          name: docsHeader.name,
+          slug: slugify(docsHeader.name, { lower: true, strict: true }),
           url: docsHeader.url,
           icon: docsHeader.icon,
           description: docsHeader.description,
@@ -44,7 +72,8 @@ async function loadContent(): Promise<Content> {
           containerImage: docsHeader.containerImage,
           containerImageUrl: docsHeader.containerImageUrl,
           verified: i.verified || false,
-        };
+          iconDataUrl: pluginIconDataUrl,
+        } satisfies WoodpeckerPlugin;
       }),
     )
   ).filter<WoodpeckerPlugin>((plugin): plugin is WoodpeckerPlugin => plugin !== undefined);
@@ -70,7 +99,7 @@ async function contentLoaded({
       const pluginJsonPath = await createData(`plugin-${i}.json`, JSON.stringify(plugin));
 
       addRoute({
-        path: `/plugins/${plugin.name}`,
+        path: `/plugins/${plugin.slug}`,
         component: '@theme/WoodpeckerPlugin',
         modules: {
           plugin: pluginJsonPath,

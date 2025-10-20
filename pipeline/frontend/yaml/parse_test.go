@@ -1,126 +1,165 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package yaml
 
 import (
 	"testing"
 
-	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 )
 
 func TestParse(t *testing.T) {
-	g := goblin.Goblin(t)
+	t.Run("Should unmarshal a string", func(t *testing.T) {
+		out, err := ParseString(sampleYaml)
+		assert.NoError(t, err)
 
-	g.Describe("Parser", func() {
-		g.Describe("Given a yaml file", func() {
-			g.It("Should unmarshal a string", func() {
-				out, err := ParseString(sampleYaml)
-				if err != nil {
-					g.Fail(err)
-				}
+		assert.Contains(t, out.When.Constraints[0].Event, "tester")
 
-				g.Assert(out.When.Constraints[0].Event.Match("tester")).Equal(true)
-
-				g.Assert(out.Workspace.Base).Equal("/go")
-				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
-				g.Assert(out.Volumes.WorkflowVolumes[0].Name).Equal("custom")
-				g.Assert(out.Volumes.WorkflowVolumes[0].Driver).Equal("blockbridge")
-				g.Assert(out.Networks.WorkflowNetworks[0].Name).Equal("custom")
-				g.Assert(out.Networks.WorkflowNetworks[0].Driver).Equal("overlay")
-				g.Assert(out.Services.ContainerList[0].Name).Equal("database")
-				g.Assert(out.Services.ContainerList[0].Image).Equal("mysql")
-				g.Assert(out.Steps.ContainerList[0].Name).Equal("test")
-				g.Assert(out.Steps.ContainerList[0].Image).Equal("golang")
-				g.Assert(out.Steps.ContainerList[0].Commands).Equal(yaml_base_types.StringOrSlice{"go install", "go test"})
-				g.Assert(out.Steps.ContainerList[1].Name).Equal("build")
-				g.Assert(out.Steps.ContainerList[1].Image).Equal("golang")
-				g.Assert(out.Steps.ContainerList[1].Commands).Equal(yaml_base_types.StringOrSlice{"go build"})
-				g.Assert(out.Steps.ContainerList[2].Name).Equal("notify")
-				g.Assert(out.Steps.ContainerList[2].Image).Equal("slack")
-				// g.Assert(out.Steps.ContainerList[2].NetworkMode).Equal("container:name")
-				g.Assert(out.Labels["com.example.team"]).Equal("frontend")
-				g.Assert(out.Labels["com.example.type"]).Equal("build")
-				g.Assert(out.DependsOn[0]).Equal("lint")
-				g.Assert(out.DependsOn[1]).Equal("test")
-				g.Assert(out.RunsOn[0]).Equal("success")
-				g.Assert(out.RunsOn[1]).Equal("failure")
-				g.Assert(out.SkipClone).Equal(false)
-			})
-
-			g.It("Should handle simple yaml anchors", func() {
-				out, err := ParseString(simpleYamlAnchors)
-				if err != nil {
-					g.Fail(err)
-				}
-				g.Assert(out.Steps.ContainerList[0].Name).Equal("notify_success")
-				g.Assert(out.Steps.ContainerList[0].Image).Equal("plugins/slack")
-			})
-
-			g.It("Should unmarshal variables", func() {
-				out, err := ParseString(sampleVarYaml)
-				if err != nil {
-					g.Fail(err)
-				}
-				g.Assert(out.Steps.ContainerList[0].Name).Equal("notify_fail")
-				g.Assert(out.Steps.ContainerList[0].Image).Equal("plugins/slack")
-				g.Assert(out.Steps.ContainerList[1].Name).Equal("notify_success")
-				g.Assert(out.Steps.ContainerList[1].Image).Equal("plugins/slack")
-
-				g.Assert(len(out.Steps.ContainerList[0].When.Constraints)).Equal(0)
-				g.Assert(out.Steps.ContainerList[1].Name).Equal("notify_success")
-				g.Assert(out.Steps.ContainerList[1].Image).Equal("plugins/slack")
-				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
-			})
-
-			matchConfig, err := ParseString(sampleYaml)
-			if err != nil {
-				g.Fail(err)
-			}
-
-			g.It("Should match event tester", func() {
-				match, err := matchConfig.When.Match(metadata.Metadata{
-					Curr: metadata.Pipeline{
-						Event: "tester",
-					},
-				}, false)
-				g.Assert(match).Equal(true)
-				g.Assert(err).IsNil()
-			})
-
-			g.It("Should match event tester2", func() {
-				match, err := matchConfig.When.Match(metadata.Metadata{
-					Curr: metadata.Pipeline{
-						Event: "tester2",
-					},
-				}, false)
-				g.Assert(match).Equal(true)
-				g.Assert(err).IsNil()
-			})
-
-			g.It("Should match branch tester", func() {
-				match, err := matchConfig.When.Match(metadata.Metadata{
-					Curr: metadata.Pipeline{
-						Commit: metadata.Commit{
-							Branch: "tester",
-						},
-					},
-				}, true)
-				g.Assert(match).Equal(true)
-				g.Assert(err).IsNil()
-			})
-
-			g.It("Should not match event push", func() {
-				match, err := matchConfig.When.Match(metadata.Metadata{
-					Curr: metadata.Pipeline{
-						Event: "push",
-					},
-				}, false)
-				g.Assert(match).Equal(false)
-				g.Assert(err).IsNil()
-			})
-		})
+		assert.Equal(t, "/go", out.Workspace.Base)
+		assert.Equal(t, "src/github.com/octocat/hello-world", out.Workspace.Path)
+		assert.Equal(t, "database", out.Services.ContainerList[0].Name)
+		assert.Equal(t, "mysql", out.Services.ContainerList[0].Image)
+		assert.Equal(t, "test", out.Steps.ContainerList[0].Name)
+		assert.Equal(t, "golang", out.Steps.ContainerList[0].Image)
+		assert.Equal(t, yaml_base_types.StringOrSlice{"go install", "go test"}, out.Steps.ContainerList[0].Commands)
+		assert.Equal(t, "build", out.Steps.ContainerList[1].Name)
+		assert.Equal(t, "golang", out.Steps.ContainerList[1].Image)
+		assert.Equal(t, yaml_base_types.StringOrSlice{"go build"}, out.Steps.ContainerList[1].Commands)
+		assert.Equal(t, "notify", out.Steps.ContainerList[2].Name)
+		assert.Equal(t, "slack", out.Steps.ContainerList[2].Image)
+		assert.Equal(t, "frontend", out.Labels["com.example.team"])
+		assert.Equal(t, "build", out.Labels["com.example.type"])
+		assert.Equal(t, "lint", out.DependsOn[0])
+		assert.Equal(t, "test", out.DependsOn[1])
+		assert.Equal(t, ("success"), out.RunsOn[0])
+		assert.Equal(t, ("failure"), out.RunsOn[1])
+		assert.False(t, out.SkipClone)
 	})
+
+	t.Run("Should handle simple yaml anchors", func(t *testing.T) {
+		out, err := ParseString(simpleYamlAnchors)
+		assert.NoError(t, err)
+		assert.Equal(t, "notify_success", out.Steps.ContainerList[0].Name)
+		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[0].Image)
+	})
+
+	t.Run("Should unmarshal variables", func(t *testing.T) {
+		out, err := ParseString(sampleVarYaml)
+		assert.NoError(t, err)
+		assert.Equal(t, "notify_fail", out.Steps.ContainerList[0].Name)
+		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[0].Image)
+		assert.Equal(t, "notify_success", out.Steps.ContainerList[1].Name)
+		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[1].Image)
+
+		assert.Empty(t, out.Steps.ContainerList[0].When.Constraints)
+		assert.Equal(t, "notify_success", out.Steps.ContainerList[1].Name)
+		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[1].Image)
+		assert.Equal(t, yaml_base_types.StringOrSlice{"success"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
+	})
+}
+
+func TestMatch(t *testing.T) {
+	matchConfig, err := ParseString(sampleYaml)
+	assert.NoError(t, err)
+
+	t.Run("Should match event tester", func(t *testing.T) {
+		match, err := matchConfig.When.Match(metadata.Metadata{
+			Curr: metadata.Pipeline{
+				Event: "tester",
+			},
+		}, false, nil)
+		assert.True(t, match)
+		assert.NoError(t, err)
+	})
+
+	t.Run("Should match event tester2", func(t *testing.T) {
+		match, err := matchConfig.When.Match(metadata.Metadata{
+			Curr: metadata.Pipeline{
+				Event: "tester2",
+			},
+		}, false, nil)
+		assert.True(t, match)
+		assert.NoError(t, err)
+	})
+
+	t.Run("Should match branch tester", func(t *testing.T) {
+		match, err := matchConfig.When.Match(metadata.Metadata{
+			Curr: metadata.Pipeline{
+				Commit: metadata.Commit{
+					Branch: "tester",
+				},
+			},
+		}, true, nil)
+		assert.True(t, match)
+		assert.NoError(t, err)
+	})
+
+	t.Run("Should not match event push", func(t *testing.T) {
+		match, err := matchConfig.When.Match(metadata.Metadata{
+			Curr: metadata.Pipeline{
+				Event: "push",
+			},
+		}, false, nil)
+		assert.False(t, match)
+		assert.NoError(t, err)
+	})
+}
+
+func TestParseLegacy(t *testing.T) {
+	sampleYamlPipeline := `
+labels:
+  platform: linux/amd64
+
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+`
+
+	sampleYamlPipelineLegacyIgnore := `
+platform: windows/amd64
+labels:
+  platform: linux/amd64
+
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+
+pipeline:
+  old crap:
+    image: bash
+    commands: meh!
+`
+
+	workflow1, err := ParseString(sampleYamlPipeline)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.EqualValues(t, workflow1, workflow2)
+	assert.Len(t, workflow1.Steps.ContainerList, 1)
+	assert.EqualValues(t, "say hello", workflow1.Steps.ContainerList[0].Name)
 }
 
 var sampleYaml = `
@@ -137,7 +176,7 @@ build:
 workspace:
   path: src/github.com/octocat/hello-world
   base: /go
-pipeline:
+steps:
   test:
     image: golang
     commands:
@@ -158,12 +197,6 @@ pipeline:
 services:
   database:
     image: mysql
-networks:
-  custom:
-    driver: overlay
-volumes:
-  custom:
-    driver: blockbridge
 labels:
   com.example.type: "build"
   com.example.team: "frontend"
@@ -178,7 +211,7 @@ runs_on:
 var simpleYamlAnchors = `
 vars:
   image: &image plugins/slack
-pipeline:
+steps:
   notify_success:
     image: *image
 `
@@ -186,10 +219,37 @@ pipeline:
 var sampleVarYaml = `
 _slack: &SLACK
   image: plugins/slack
-pipeline:
+steps:
   notify_fail: *SLACK
   notify_success:
     << : *SLACK
     when:
       event: success
 `
+
+var sampleSliceYaml = `
+steps:
+  nil_slice:
+    image: plugins/slack
+  empty_slice:
+    image: plugins/slack
+    depends_on: []
+`
+
+func TestSlice(t *testing.T) {
+	t.Run("should marshal a not set slice to nil", func(t *testing.T) {
+		out, err := ParseString(sampleSliceYaml)
+		assert.NoError(t, err)
+
+		assert.Nil(t, out.Steps.ContainerList[0].DependsOn)
+		assert.Empty(t, out.Steps.ContainerList[0].DependsOn)
+	})
+
+	t.Run("should marshal an empty slice", func(t *testing.T) {
+		out, err := ParseString(sampleSliceYaml)
+		assert.NoError(t, err)
+
+		assert.NotNil(t, out.Steps.ContainerList[1].DependsOn)
+		assert.Empty(t, (out.Steps.ContainerList[1].DependsOn))
+	})
+}

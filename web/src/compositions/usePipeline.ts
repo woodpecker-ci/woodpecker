@@ -1,14 +1,13 @@
-import { computed, Ref } from 'vue';
+import { emojify } from 'node-emoji';
+import { computed } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
-import { Pipeline } from '~/lib/api/types';
-import { prettyDuration } from '~/utils/duration';
-import { convertEmojis } from '~/utils/emoji';
-import timeAgo from '~/utils/timeAgo';
+import type { Pipeline } from '~/lib/api/types';
 
-const { toLocaleString } = useDate();
+const { toLocaleString, timeAgo, prettyDuration } = useDate();
 
 export default (pipeline: Ref<Pipeline | undefined>) => {
   const sinceRaw = computed(() => {
@@ -16,7 +15,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return undefined;
     }
 
-    const start = pipeline.value.created_at || 0;
+    const start = pipeline.value.created || 0;
 
     return start * 1000;
   });
@@ -29,14 +28,16 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const i18n = useI18n();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
-      return i18n.t('time.not_started');
+      // return i18n.t('time.not_started');
+      return '-';
     }
 
     if (sinceElapsed.value === undefined) {
       return null;
     }
 
-    return timeAgo.format(sinceElapsed.value);
+    // TODO: check whether elapsed works
+    return timeAgo(sinceElapsed.value);
   });
 
   const durationRaw = computed(() => {
@@ -44,8 +45,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return undefined;
     }
 
-    const start = pipeline.value.started_at || 0;
-    const end = pipeline.value.finished_at || pipeline.value.updated_at || 0;
+    const start = pipeline.value.started || 0;
+    const end = pipeline.value.finished || pipeline.value.updated || 0;
 
     if (start === 0 || end === 0) {
       return 0;
@@ -74,16 +75,14 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return prettyDuration(durationElapsed.value);
   });
 
-  const message = computed(() => {
-    if (!pipeline.value) {
-      return '';
-    }
+  const message = computed(() => emojify(pipeline.value?.message ?? ''));
+  const shortMessage = computed(() => message.value.split('\n')[0]);
 
-    return convertEmojis(pipeline.value.message);
-  });
+  const prTitleWithDescription = computed(() => emojify(pipeline.value?.title ?? ''));
+  const prTitle = computed(() => prTitleWithDescription.value.split('\n')[0]);
 
   const prettyRef = computed(() => {
-    if (pipeline.value?.event === 'push') {
+    if (pipeline.value?.event === 'push' || pipeline.value?.event === 'deployment') {
       return pipeline.value.branch;
     }
 
@@ -95,7 +94,11 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return pipeline.value.ref.replaceAll('refs/tags/', '');
     }
 
-    if (pipeline.value?.event === 'pull_request') {
+    if (
+      pipeline.value?.event === 'pull_request' ||
+      pipeline.value?.event === 'pull_request_closed' ||
+      pipeline.value?.event === 'pull_request_metadata'
+    ) {
       return `#${pipeline.value.ref
         .replaceAll('refs/pull/', '')
         .replaceAll('refs/merge-requests/', '')
@@ -111,10 +114,20 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return undefined;
     }
 
-    const start = pipeline.value.created_at || 0;
+    const start = pipeline.value.created || 0;
 
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, message, prettyRef, created };
+  return {
+    since,
+    duration,
+    durationElapsed,
+    message,
+    shortMessage,
+    prTitle,
+    prTitleWithDescription,
+    prettyRef,
+    created,
+  };
 };

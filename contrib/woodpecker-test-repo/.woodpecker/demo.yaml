@@ -1,0 +1,5 @@
+steps:
+  demo:
+    image: 'alpine'
+    commands:
+      - echo 'Demo'

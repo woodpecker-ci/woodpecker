@@ -14,19 +14,34 @@
 
 package metadata
 
-// Event types corresponding to scm hooks.
+// Event types corresponding to forge hooks.
 const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
-	EventCron   = "cron"
-	EventManual = "manual"
+	EventPush         = "push"
+	EventPull         = "pull_request"
+	EventPullClosed   = "pull_request_closed"
+	EventPullMetadata = "pull_request_metadata"
+	EventTag          = "tag"
+	EventRelease      = "release"
+	EventDeploy       = "deployment"
+	EventCron         = "cron"
+	EventManual       = "manual"
 )
 
-// Different ways to handle failure states
+func EventIsPull(event string) bool {
+	switch event {
+	case EventPull,
+		EventPullClosed,
+		EventPullMetadata:
+		return true
+	}
+	return false
+}
+
+// Different ways to handle failure states.
 const (
 	FailureIgnore = "ignore"
 	FailureFail   = "fail"
-	// FailureCancel = "cancel" // Not implemented yet
+	//nolint:godot
+	// TODO: Not implemented yet.
+	// FailureCancel = "cancel"
 )

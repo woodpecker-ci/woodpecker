@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// cSpell:ignore ldflags
+
 package version
 
-// Version of Woodpecker, set with ldflags, from Git tag
+// Version of Woodpecker, set with ldflags, from Git tag.
 var Version string
 
-// String returns the Version set at build time or "dev"
+// String returns the Version set at build time or "dev".
 func String() string {
 	if Version == "" {
 		return "dev"

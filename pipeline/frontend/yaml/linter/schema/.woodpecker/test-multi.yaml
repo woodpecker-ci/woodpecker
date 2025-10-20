@@ -1,0 +1,10 @@
+steps:
+  deploy:
+    image: golang
+    commands:
+      - go test
+
+depends_on:
+  - lint
+  - build
+  - test

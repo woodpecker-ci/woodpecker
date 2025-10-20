@@ -1,63 +1,49 @@
 <template>
-  <div class="flex flex-col gap-y-6">
+  <div class="flex flex-col gap-y-4">
     <Panel
-      v-for="pipelineConfig in pipelineConfigs || []"
+      v-for="pipelineConfig in pipelineConfigsDecoded"
       :key="pipelineConfig.hash"
-      collapsable
-      :title="pipelineConfig.name"
+      :collapsable="pipelineConfigsDecoded && pipelineConfigsDecoded.length > 1"
+      collapsed-by-default
+      :title="pipelineConfigsDecoded && pipelineConfigsDecoded.length > 1 ? pipelineConfig.name : ''"
     >
-      <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="pipelineConfig.data" />
+      <SyntaxHighlight
+        class="code-box overflow-auto font-mono whitespace-pre"
+        language="yaml"
+        :code="pipelineConfig.data"
+      />
     </Panel>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref, watch } from 'vue';
+<script lang="ts" setup>
+import { decode } from 'js-base64';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
 import Panel from '~/components/layout/Panel.vue';
-import useApiClient from '~/compositions/useApiClient';
-import { Pipeline, PipelineConfig, Repo } from '~/lib/api/types';
+import { requiredInject } from '~/compositions/useInjectProvide';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
-export default defineComponent({
-  name: 'PipelineConfig',
+const repo = requiredInject('repo');
+const pipeline = requiredInject('pipeline');
+const pipelineConfigs = requiredInject('pipeline-configs');
 
-  components: {
-    Panel,
-    SyntaxHighlight,
-  },
+const pipelineConfigsDecoded = computed(
+  () =>
+    pipelineConfigs.value?.map((i) => ({
+      ...i,
+      data: decode(i.data),
+    })) ?? [],
+);
 
-  setup() {
-    const pipeline = inject<Ref<Pipeline>>('pipeline');
-    const apiClient = useApiClient();
-    const repo = inject<Ref<Repo>>('repo');
-    if (!repo || !pipeline) {
-      throw new Error('Unexpected: "repo" & "pipeline" should be provided at this place');
-    }
-
-    const pipelineConfigs = ref<PipelineConfig[]>();
-    async function loadPipelineConfig() {
-      if (!repo || !pipeline) {
-        throw new Error('Unexpected: "repo" & "pipeline" should be provided at this place');
-      }
-
-      pipelineConfigs.value = (
-        await apiClient.getPipelineConfig(repo.value.owner, repo.value.name, pipeline.value.number)
-      ).map((i) => ({
-        ...i,
-        data: atob(i.data),
-      }));
-    }
-
-    onMounted(() => {
-      loadPipelineConfig();
-    });
-
-    watch(pipeline, () => {
-      loadPipelineConfig();
-    });
-
-    return { pipelineConfigs };
-  },
-});
+const { t } = useI18n();
+useWPTitle(
+  computed(() => [
+    t('repo.pipeline.config'),
+    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.number }),
+    repo.value.full_name,
+  ]),
+);
 </script>

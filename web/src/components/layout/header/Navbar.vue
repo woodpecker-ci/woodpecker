@@ -1,97 +1,83 @@
 <template>
-  <!-- Navbar -->
-  <nav class="flex bg-lime-600 text-neutral-content p-4 dark:bg-dark-gray-800 dark:border-b dark:border-gray-700">
-    <!-- Left Links Box -->
-    <div class="flex text-white dark:text-gray-400 items-center space-x-2">
-      <!-- Logo -->
-      <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
-        <img class="w-8 h-8" src="../../../assets/logo.svg?url" />
-        <span class="text-xs">{{ version }}</span>
+  <nav
+    class="text-neutral-content border-wp-background-400 dark:border-wp-background-100 bg-wp-primary-200 text-wp-primary-text-100 dark:bg-wp-primary-300 flex border-b p-4 font-bold"
+  >
+    <div class="flex items-center space-x-2">
+      <router-link :to="{ name: 'home' }" class="-my-2 flex flex-col px-2">
+        <WoodpeckerLogo class="h-8 w-8" />
+        <span class="text-xs" :title="version?.current">{{ version?.currentShort }}</span>
       </router-link>
-      <!-- Repo Link -->
-      <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-link navbar-clickable">
+      <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-clickable navbar-link">
         <span class="flex md:hidden">{{ $t('repos') }}</span>
-        <span class="hidden md:flex">{{ $t('repositories') }}</span>
+        <span class="hidden md:flex">{{ $t('repositories.title') }}</span>
       </router-link>
-      <!-- Docs Link -->
-      <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
+      <a href="https://woodpecker-ci.org/" target="_blank" class="navbar-clickable navbar-link hidden md:flex">{{
+        $t('docs')
+      }}</a>
+      <a v-if="enableSwagger" :href="apiUrl" target="_blank" class="navbar-clickable navbar-link hidden md:flex">{{
+        $t('api')
+      }}</a>
     </div>
-    <!-- Right Icons Box -->
-    <div class="flex ml-auto -m-1.5 items-center space-x-2 text-white dark:text-gray-400">
-      <!-- Dark Mode Toggle -->
-      <IconButton
-        :icon="darkMode ? 'dark' : 'light'"
-        :title="$t(darkMode ? 'color_scheme_dark' : 'color_scheme_light')"
-        class="navbar-icon"
-        @click="darkMode = !darkMode"
-      />
-      <!-- Admin Settings -->
+    <div class="-m-1.5 ml-auto flex items-center space-x-2">
       <IconButton
         v-if="user?.admin"
-        class="navbar-icon"
-        :title="$t('admin.settings.settings')"
+        class="navbar-icon relative"
+        :title="$t('settings')"
         :to="{ name: 'admin-settings' }"
       >
-        <i-clarity-settings-solid />
+        <Icon name="settings" />
+        <div v-if="version?.needsUpdate" class="bg-wp-error-100 absolute top-2 right-2 h-3 w-3 rounded-full" />
       </IconButton>
 
-      <!-- Active Pipelines Indicator -->
-      <ActivePipelines v-if="user" class="navbar-icon" />
-      <!-- User Avatar -->
-      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings')" class="navbar-icon !p-1.5">
+      <ActivePipelines v-if="user" class="navbar-icon p-1.5!" />
+      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings.settings')" class="navbar-icon p-1.5!">
         <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </IconButton>
-      <!-- Login Button -->
-      <Button v-else :text="$t('login')" @click="doLogin" />
+      <Button
+        v-else
+        :text="$t('login')"
+        :to="`/login?url=${route.fullPath}`"
+        class="navbar-link !text-wp-primary-text-100 bg-wp-primary-200 dark:bg-wp-primary-300 !border-transparent"
+      />
     </div>
   </nav>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
 import { useRoute } from 'vue-router';
 
+import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
-import { useDarkMode } from '~/compositions/useDarkMode';
+import { useVersion } from '~/compositions/useVersion';
 
 import ActivePipelines from './ActivePipelines.vue';
 
-export default defineComponent({
-  name: 'Navbar',
+const version = useVersion();
+const config = useConfig();
+const route = useRoute();
+const authentication = useAuthentication();
+const { user } = authentication;
+const apiUrl = `${config.rootPath ?? ''}/swagger/index.html`;
 
-  components: { Button, ActivePipelines, IconButton },
-
-  setup() {
-    const config = useConfig();
-    const route = useRoute();
-    const authentication = useAuthentication();
-    const { darkMode } = useDarkMode();
-    const docsUrl = window.WOODPECKER_DOCS;
-
-    function doLogin() {
-      authentication.authenticate(route.fullPath);
-    }
-
-    const version = config.version?.startsWith('next') ? 'next' : config.version;
-
-    return { darkMode, user: authentication.user, doLogin, docsUrl, version };
-  },
-});
+const { enableSwagger } = config;
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .navbar-icon {
-  @apply w-11 h-11 rounded-full p-2.5;
+  @apply h-11 w-11 rounded-md p-2.5 hover:bg-black/20 dark:hover:bg-white/5;
 }
 
 .navbar-icon :deep(svg) {
-  @apply w-full h-full;
+  @apply h-full w-full;
 }
 
 .navbar-link {
-  @apply px-3 py-2 -my-1 rounded-md hover-effect;
+  @apply -my-1 rounded-md px-3 py-2 hover:bg-black/20 dark:hover:bg-white/5;
 }
 </style>

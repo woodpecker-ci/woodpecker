@@ -1,4 +1,4 @@
-import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 import { parse as YAMLParse } from 'yaml';
 
 const tokens = ['---', '---'];
@@ -18,10 +18,12 @@ export function getRawHeader(data: string): string {
   return header[1];
 }
 
-export function getContent(data: string): string {
+export async function getContent(data: string): Promise<string> {
+  const marked = await import('marked');
+
   const content = data.replace(regexContent, '').replace(/<!--(.*?)-->/gm, '');
   if (!content) {
     throw new Error("Can't get the content");
   }
-  return marked(content);
+  return DOMPurify.sanitize(marked.marked(content) as string);
 }

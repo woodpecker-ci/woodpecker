@@ -2,27 +2,17 @@
   <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, Ref } from 'vue';
+<script lang="ts" setup>
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
-import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import { requiredInject } from '~/compositions/useInjectProvide';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
-export default defineComponent({
-  name: 'RepoPipelines',
+const repo = requiredInject('repo');
+const pipelines = requiredInject('pipelines');
 
-  components: { PipelineList },
-
-  setup() {
-    const repo = inject<Ref<Repo>>('repo');
-    const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-    if (!repo || !repoPermissions) {
-      throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
-    }
-
-    const pipelines = inject<Ref<Pipeline[]>>('pipelines');
-
-    return { pipelines, repo };
-  },
-});
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repo.activity'), repo.value.full_name]));
 </script>

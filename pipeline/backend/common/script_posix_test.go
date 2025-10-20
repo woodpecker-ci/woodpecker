@@ -16,6 +16,7 @@ package common
 
 import (
 	"testing"
+	"text/template"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -39,6 +40,8 @@ fi
 unset CI_NETRC_USERNAME
 unset CI_NETRC_PASSWORD
 unset CI_SCRIPT
+mkdir -p "/woodpecker/some"
+cd "/woodpecker/some"
 
 echo + 'echo ${PATH}'
 echo ${PATH}
@@ -48,12 +51,17 @@ go build
 
 echo + 'go test'
 go test
-
 `,
 		},
 	}
 	for _, test := range testdata {
-		script := generateScriptPosix(test.from)
+		script := generateScriptPosix(test.from, "/woodpecker/some")
 		assert.EqualValues(t, test.want, script, "Want encoded script for %s", test.from)
 	}
+}
+
+func TestSetupScriptProtoParse(t *testing.T) {
+	// just ensure that we have a working `setupScriptTmpl` on runntime
+	_, err := template.New("").Parse(setupScriptProto)
+	assert.NoError(t, err)
 }

@@ -21,17 +21,39 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
-	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
+	mergeRefs               = "refs/merge-requests/%d/head" // merge request merged with base
+	VisibilityLevelInternal = 10
+
+	stateOpened = "opened"
+
+	actionOpen   = "open"
+	actionClose  = "close"
+	actionReopen = "reopen"
+	actionMerge  = "merge"
+	actionUpdate = "update"
+
+	metadataReasonAssigned          = "assigned"
+	metadataReasonUnassigned        = "unassigned"
+	metadataReasonMilestoned        = "milestoned"
+	metadataReasonDemilestoned      = "demilestoned"
+	metadataReasonTitleEdited       = "title_edited"
+	metadataReasonDescriptionEdited = "description_edited"
+	metadataReasonLabelsAdded       = "labels_added"
+	metadataReasonLabelsCleared     = "labels_cleared"
+	metadataReasonLabelsUpdated     = "labels_updated"
+	metadataReasonReviewRequested   = "review_requested"
 )
 
-func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
+func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
@@ -41,20 +63,18 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Name:          name,
 		FullName:      _repo.PathWithNamespace,
 		Avatar:        _repo.AvatarURL,
-		Link:          _repo.WebURL,
+		ForgeURL:      _repo.WebURL,
 		Clone:         _repo.HTTPURLToRepo,
+		CloneSSH:      _repo.SSHURLToRepo,
 		Branch:        _repo.DefaultBranch,
 		Visibility:    model.RepoVisibility(_repo.Visibility),
-		IsSCMPrivate:  !_repo.Public,
+		IsSCMPrivate:  _repo.Visibility == gitlab.InternalVisibility || _repo.Visibility == gitlab.PrivateVisibility,
 		Perm: &model.Perm{
-			Pull:  isRead(_repo),
-			Push:  isWrite(_repo),
-			Admin: isAdmin(_repo),
+			Pull:  isRead(_repo, projectMember),
+			Push:  isWrite(projectMember),
+			Admin: isAdmin(projectMember),
 		},
-	}
-
-	if len(repo.Branch) == 0 { // TODO: do we need that?
-		repo.Branch = "master"
+		PREnabled: _repo.MergeRequestsAccessLevel != gitlab.DisabledAccessControl,
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
@@ -64,26 +84,102 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	return repo, nil
 }
 
-func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Pipeline, error) {
-	repo := &model.Repo{}
-	pipeline := &model.Pipeline{}
+func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeID, milestoneID int, repo *model.Repo, pipeline *model.Pipeline, err error) {
+	repo = &model.Repo{}
+	pipeline = &model.Pipeline{}
 
 	target := hook.ObjectAttributes.Target
 	source := hook.ObjectAttributes.Source
 	obj := hook.ObjectAttributes
 
-	if target == nil && source == nil {
-		return 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
-	} else if target == nil {
-		return 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
-	} else if source == nil {
-		return 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
+	switch obj.Action {
+	case actionClose, actionMerge:
+		// pull close event
+		pipeline.Event = model.EventPullClosed
+
+	case actionOpen, actionReopen:
+		// pull open event -> pull event
+		pipeline.Event = model.EventPull
+
+	case actionUpdate:
+		if obj.OldRev != "" && obj.State == stateOpened {
+			// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
+			// https://github.com/woodpecker-ci/woodpecker/pull/3338
+			// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
+			pipeline.Event = model.EventPull
+			break
+		}
+
+		pipeline.Event = model.EventPullMetadata
+		// All changes are just update actions ... so we have to look into the changes section
+		var reason []string
+		if len(hook.Changes.Assignees.Current) != 0 {
+			reason = append(reason, metadataReasonAssigned)
+		}
+		if len(hook.Changes.Assignees.Previous) != 0 {
+			reason = append(reason, metadataReasonUnassigned)
+		}
+
+		if hook.Changes.MilestoneID.Current != 0 {
+			reason = append(reason, metadataReasonMilestoned)
+		}
+		if hook.Changes.MilestoneID.Previous != 0 {
+			reason = append(reason, metadataReasonDemilestoned)
+		}
+
+		if len(hook.Changes.Title.Current) != 0 || len(hook.Changes.Title.Previous) != 0 {
+			reason = append(reason, metadataReasonTitleEdited)
+		}
+
+		if len(hook.Changes.Description.Current) != 0 || len(hook.Changes.Description.Previous) != 0 {
+			reason = append(reason, metadataReasonDescriptionEdited)
+		}
+
+		switch {
+		case len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) == 0:
+			reason = append(reason, metadataReasonLabelsAdded)
+		case len(hook.Changes.Labels.Current) == 0 && len(hook.Changes.Labels.Previous) != 0:
+			reason = append(reason, metadataReasonLabelsCleared)
+		case len(hook.Changes.Labels.Current) != 0 && len(hook.Changes.Labels.Previous) != 0:
+			reason = append(reason, metadataReasonLabelsUpdated)
+		}
+
+		if len(hook.Changes.Reviewers.Current) > len(hook.Changes.Reviewers.Previous) {
+			reason = append(reason, metadataReasonReviewRequested)
+		}
+
+		for i := range reason {
+			reason[i] = common.NormalizeEventReason(reason[i])
+		}
+
+		pipeline.EventReason = reason
+		if len(pipeline.EventReason) == 0 {
+			return 0, 0, nil, nil, &types.ErrIgnoreEvent{
+				Event:  "Merge Request Hook",
+				Reason: fmt.Sprintf("Action '%s' no supported changes detected", obj.Action),
+			}
+		}
+	default:
+		// non supported action
+		return 0, 0, nil, nil, &types.ErrIgnoreEvent{
+			Event:  "Merge Request Hook",
+			Reason: fmt.Sprintf("Action '%s' not supported", obj.Action),
+		}
+	}
+
+	switch {
+	case target == nil && source == nil:
+		return 0, 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
+	case target == nil:
+		return 0, 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
+	case source == nil:
+		return 0, 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {
 		var err error
 		if repo.Owner, repo.Name, err = extractFromPath(target.PathWithNamespace); err != nil {
-			return 0, nil, nil, err
+			return 0, 0, nil, nil, err
 		}
 		repo.FullName = target.PathWithNamespace
 	} else {
@@ -93,34 +189,33 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(obj.TargetProjectID))
-	repo.Link = target.WebURL
+	repo.ForgeURL = target.WebURL
 
 	if target.GitHTTPURL != "" {
 		repo.Clone = target.GitHTTPURL
 	} else {
 		repo.Clone = target.HTTPURL
 	}
-
-	if target.DefaultBranch != "" {
-		repo.Branch = target.DefaultBranch
+	if target.GitSSHURL != "" {
+		repo.CloneSSH = target.GitSSHURL
 	} else {
-		repo.Branch = "master"
+		repo.CloneSSH = target.SSHURL
 	}
+
+	repo.Branch = target.DefaultBranch
 
 	if target.AvatarURL != "" {
 		repo.Avatar = target.AvatarURL
 	}
 
-	pipeline.Event = model.EventPull
-
 	lastCommit := obj.LastCommit
 
 	pipeline.Message = lastCommit.Message
 	pipeline.Commit = lastCommit.ID
-	pipeline.CloneURL = obj.Source.HTTPURL
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
+	pipeline.Refspec = fmt.Sprintf("%s:%s", obj.SourceBranch, obj.TargetBranch)
 
 	author := lastCommit.Author
 
@@ -132,10 +227,11 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Title = obj.Title
-	pipeline.Link = obj.URL
+	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequestLabels = convertLabels(hook.Labels)
+	pipeline.FromFork = target.PathWithNamespace != source.PathWithNamespace
 
-	return obj.IID, repo, pipeline, nil
+	return obj.IID, hook.ObjectAttributes.MilestoneID, repo, pipeline, nil
 }
 
 func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, error) {
@@ -149,8 +245,9 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
-	repo.Link = hook.Project.WebURL
+	repo.ForgeURL = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
+	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
 
@@ -185,7 +282,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	pipeline.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 
 	return repo, pipeline, nil
 }
@@ -201,8 +298,9 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
-	repo.Link = hook.Project.WebURL
+	repo.ForgeURL = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
+	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
 
@@ -236,6 +334,46 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	return repo, pipeline, nil
 }
 
+func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline, error) {
+	repo := &model.Repo{}
+
+	var err error
+	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
+		return nil, nil, err
+	}
+
+	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.Project.ID))
+	repo.Avatar = ""
+	if hook.Project.AvatarURL != nil {
+		repo.Avatar = *hook.Project.AvatarURL
+	}
+	repo.ForgeURL = hook.Project.WebURL
+	repo.Clone = hook.Project.GitHTTPURL
+	repo.CloneSSH = hook.Project.GitSSHURL
+	repo.FullName = hook.Project.PathWithNamespace
+	repo.Branch = hook.Project.DefaultBranch
+	repo.IsSCMPrivate = hook.Project.VisibilityLevel > VisibilityLevelInternal
+
+	pipeline := &model.Pipeline{
+		Event:    model.EventRelease,
+		Commit:   hook.Commit.ID,
+		ForgeURL: hook.URL,
+		Message:  fmt.Sprintf("created release %s", hook.Name),
+		Sender:   hook.Commit.Author.Name,
+		Author:   hook.Commit.Author.Name,
+		Email:    hook.Commit.Author.Email,
+
+		// Tag name here is the ref. We should add the refs/tags, so
+		// it is known it's a tag (git-plugin looks for it)
+		Ref: "refs/tags/" + hook.Tag,
+	}
+	if len(pipeline.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Email)
+	}
+
+	return repo, pipeline, nil
+}
+
 func getUserAvatar(email string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(email))
@@ -248,12 +386,18 @@ func getUserAvatar(email string) string {
 	)
 }
 
+// extractFromPath splits a repository path string into owner and name components.
+// It requires at least two path components, otherwise an error is returned.
 func extractFromPath(str string) (string, string, error) {
+	const minPathComponents = 2
+
 	s := strings.Split(str, "/")
-	if len(s) < 2 {
-		return "", "", fmt.Errorf("Minimum match not found")
+	if len(s) < minPathComponents {
+		return "", "", fmt.Errorf("minimum match not found")
 	}
-	return s[0], s[1], nil
+	owner := strings.Join(s[:len(s)-1], "/")
+	name := s[len(s)-1]
+	return owner, name, nil
 }
 
 func convertLabels(from []*gitlab.EventLabel) []string {

@@ -1,43 +1,45 @@
 <template>
   <div v-if="stats" class="flex justify-center">
-    <div class="bg-gray-100 dark:bg-dark-gray-600 text-color dark:text-gray-400 rounded-md py-5 px-5 w-full">
+    <div
+      class="border-wp-background-400 dark:border-wp-background-100 bg-wp-background-200 text-wp-text-100 dark:bg-wp-background-100 w-full rounded-md border px-5 py-5"
+    >
       <div class="flex w-full">
-        <h3 class="text-lg font-semibold leading-tight uppercase flex-1">
+        <h3 class="flex-1 text-lg leading-tight font-semibold uppercase">
           {{ $t('admin.settings.queue.stats.completed_count') }}
         </h3>
       </div>
       <div class="relative overflow-hidden transition-all duration-500">
         <div>
           <div class="pb-4 lg:pb-6">
-            <h4 class="text-2xl lg:text-3xl font-semibold leading-tight inline-block">
+            <h4 class="inline-block text-2xl leading-tight font-semibold lg:text-3xl">
               {{ stats.completed_count }}
             </h4>
           </div>
-          <div class="pb-4 lg:pb-6">
-            <div class="overflow-hidden rounded-full h-3 flex transition-all duration-500">
+          <div v-if="total > 0" class="pb-4 lg:pb-6">
+            <div class="flex h-3 overflow-hidden rounded-full transition-all duration-500">
               <div
                 v-for="item in data"
                 :key="item.key"
                 class="h-full"
                 :class="`${item.color}`"
-                :style="{ width: `${item.perc}%` }"
+                :style="{ width: `${item.percentage}%` }"
               >
                 &nbsp;
               </div>
             </div>
           </div>
-          <div class="flex -mx-4 sm:flex-wrap">
+          <div class="-mx-4 flex sm:flex-wrap">
             <div
               v-for="(item, index) in data"
               :key="item.key"
-              class="px-4 md:w-1/4 sm:w-full"
-              :class="{ 'md:border-l border-gray-300 dark:border-gray-600': index !== 0 }"
+              class="px-4 sm:w-full md:w-1/4"
+              :class="{ 'border-gray-300 md:border-l dark:border-gray-600': index !== 0 }"
             >
-              <div class="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
-                <span class="inline-block w-2 h-2 rounded-full mr-1 align-middle" :class="`${item.color}`">&nbsp;</span>
+              <div class="overflow-hidden text-sm text-ellipsis whitespace-nowrap">
+                <span class="mr-1 inline-block h-2 w-2 rounded-full align-middle" :class="`${item.color}`">&nbsp;</span>
                 <span class="align-middle">{{ item.label }}</span>
               </div>
-              <div class="font-medium text-lg">
+              <div class="text-lg font-medium">
                 {{ item.value }}
               </div>
             </div>
@@ -52,13 +54,13 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { QueueStats } from '~/lib/api/types/queue';
-
-const { t } = useI18n();
+import type { QueueStats } from '~/lib/api/types/queue';
 
 const props = defineProps<{
   stats?: QueueStats;
 }>();
+
+const { t } = useI18n();
 
 const total = computed(() => {
   if (!props.stats) {
@@ -80,29 +82,29 @@ const data = computed(() => {
       key: 'worker_count',
       label: t('admin.settings.queue.stats.worker_count'),
       value: props.stats.worker_count,
-      perc: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
-      color: 'bg-lime-400',
+      percentage: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
+      color: 'bg-wp-state-ok-100',
     },
     {
       key: 'running_count',
       label: t('admin.settings.queue.stats.running_count'),
       value: props.stats.running_count,
-      perc: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
-      color: 'bg-blue-400',
+      percentage: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
+      color: 'bg-wp-state-info-100',
     },
     {
       key: 'pending_count',
       label: t('admin.settings.queue.stats.pending_count'),
       value: props.stats.pending_count,
-      perc: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
-      color: 'bg-gray-400',
+      percentage: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
+      color: 'bg-wp-state-neutral-100',
     },
     {
       key: 'waiting_on_deps_count',
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
-      perc: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
-      color: 'bg-red-400',
+      percentage: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
+      color: 'bg-wp-error-100 dark:bg-wp-error-200',
     },
   ];
 });

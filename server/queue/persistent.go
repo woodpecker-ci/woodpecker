@@ -18,17 +18,17 @@ package queue
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // WithTaskStore returns a queue that is backed by the TaskStore. This
 // ensures the task Queue can be restored when the system starts.
-func WithTaskStore(q Queue, s model.TaskStore) Queue {
+func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
 	tasks, _ := s.TaskList()
-	if err := q.PushAtOnce(context.Background(), tasks); err != nil {
+	if err := q.PushAtOnce(ctx, tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}
 	return &persistentQueue{q, s}
@@ -36,21 +36,7 @@ func WithTaskStore(q Queue, s model.TaskStore) Queue {
 
 type persistentQueue struct {
 	Queue
-	store model.TaskStore
-}
-
-// Push pushes a task to the tail of this queue.
-func (q *persistentQueue) Push(c context.Context, task *model.Task) error {
-	if err := q.store.TaskInsert(task); err != nil {
-		return err
-	}
-	err := q.Queue.Push(c, task)
-	if err != nil {
-		if err2 := q.store.TaskDelete(task.ID); err2 != nil {
-			err = errors.Wrapf(err, "delete task '%s' failed: %v", task.ID, err2)
-		}
-	}
-	return err
+	store store.Store
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
@@ -77,8 +63,8 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f FilterFn) (*m
 	task, err := q.Queue.Poll(c, agentID, f)
 	if task != nil {
 		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
-		if derr := q.store.TaskDelete(task.ID); derr != nil {
-			log.Error().Msgf("pull queue item: %s: failed to remove from backup: %s", task.ID, derr)
+		if deleteErr := q.store.TaskDelete(task.ID); deleteErr != nil {
+			log.Error().Err(deleteErr).Msgf("pull queue item: %s: failed to remove from backup", task.ID)
 		} else {
 			log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
 		}
@@ -86,18 +72,30 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f FilterFn) (*m
 	return task, err
 }
 
-// Evict removes a pending task from the queue.
-func (q *persistentQueue) Evict(c context.Context, id string) error {
-	err := q.Queue.Evict(c, id)
-	if err == nil {
-		return q.store.TaskDelete(id)
-	}
-	return err
-}
-
-// EvictAtOnce removes a pending task from the queue.
+// EvictAtOnce removes multiple pending tasks from the queue.
 func (q *persistentQueue) EvictAtOnce(c context.Context, ids []string) error {
 	if err := q.Queue.EvictAtOnce(c, ids); err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := q.store.TaskDelete(id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Error signals the task is done with an error.
+func (q *persistentQueue) Error(c context.Context, id string, err error) error {
+	if err := q.Queue.Error(c, id, err); err != nil {
+		return err
+	}
+	return q.store.TaskDelete(id)
+}
+
+// ErrorAtOnce signals multiple tasks are done with an error.
+func (q *persistentQueue) ErrorAtOnce(c context.Context, ids []string, err error) error {
+	if err := q.Queue.ErrorAtOnce(c, ids, err); err != nil {
 		return err
 	}
 	for _, id := range ids {

@@ -1,56 +1,76 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package repo
 
 import (
-	"os"
-	"text/template"
+	"context"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var repoListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list all repos",
 	ArgsUsage: " ",
-	Action:    repoList,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplRepoList),
+	Action:    List,
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
+		common.FormatFlag("", true),
 		&cli.StringFlag{
 			Name:  "org",
 			Usage: "filter by organization",
 		},
-	),
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "query all repos, including inactive ones",
+		},
+	}...),
 }
 
-func repoList(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func List(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-
-	repos, err := client.RepoList()
-	if err != nil || len(repos) == 0 {
-		return err
-	}
-
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	repos, err := repoList(c, client)
 	if err != nil {
 		return err
+	}
+	return repoOutput(c, repos)
+}
+
+func repoList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Repo, error) {
+	repos := make([]*woodpecker.Repo, 0)
+	opt := woodpecker.RepoListOptions{
+		All: c.Bool("all"),
+	}
+
+	raw, err := client.RepoList(opt)
+	if err != nil || len(raw) == 0 {
+		return nil, err
 	}
 
 	org := c.String("org")
-	for _, repo := range repos {
+	for _, repo := range raw {
 		if org != "" && org != repo.Owner {
 			continue
 		}
-		if err := tmpl.Execute(os.Stdout, repo); err != nil {
-			return err
-		}
+		repos = append(repos, repo)
 	}
-	return nil
+	return repos, nil
 }
-
-// template for repository list items
-var tmplRepoList = `{{ .FullName }}`

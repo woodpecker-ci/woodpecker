@@ -1,14 +1,14 @@
 <template>
-  <Scaffold v-if="org && orgPermissions && $route.meta.orgHeader">
+  <Scaffold v-if="org && orgPermissions && route.meta.orgHeader">
     <template #title>
       {{ org.name }}
     </template>
 
-    <template #titleActions>
+    <template #headerActions>
       <IconButton
         v-if="orgPermissions.admin"
-        :to="{ name: 'repo-settings' }"
-        :title="$t('org.settings.settings')"
+        :to="{ name: org.is_user ? 'user' : 'org-settings-secrets' }"
+        :title="$t('settings')"
         icon="settings"
       />
     </template>
@@ -18,48 +18,35 @@
   <router-view v-else-if="org && orgPermissions" />
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, provide, ref, toRef, watch } from 'vue';
+<script lang="ts" setup>
+import type { Ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { Org, OrgPermissions } from '~/lib/api/types';
+import { provide } from '~/compositions/useInjectProvide';
+import type { Org, OrgPermissions } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'OrgWrapper',
+const props = defineProps<{
+  orgId: string;
+}>();
 
-  components: { IconButton, Scaffold },
+const orgId = computed(() => Number.parseInt(props.orgId, 10));
+const apiClient = useApiClient();
+const route = useRoute();
 
-  props: {
-    repoOwner: {
-      type: String,
-      required: true,
-    },
-  },
+const org = ref<Org>();
+const orgPermissions = ref<OrgPermissions>();
+provide('org', org as Ref<Org>); // can't be undefined because of v-if in template
+provide('org-permissions', orgPermissions as Ref<OrgPermissions>); // can't be undefined because of v-if in template
 
-  setup(props) {
-    const repoOwner = toRef(props, 'repoOwner');
-    const apiClient = useApiClient();
-    const org = computed<Org>(() => ({ name: repoOwner.value }));
+async function load() {
+  org.value = await apiClient.getOrg(orgId.value);
+  orgPermissions.value = await apiClient.getOrgPermissions(org.value.id);
+}
 
-    const orgPermissions = ref<OrgPermissions>();
-    provide('org', org);
-    provide('org-permissions', orgPermissions);
-
-    async function load() {
-      orgPermissions.value = await apiClient.getOrgPermissions(repoOwner.value);
-    }
-
-    onMounted(() => {
-      load();
-    });
-
-    watch([repoOwner], () => {
-      load();
-    });
-
-    return { org, orgPermissions };
-  },
-});
+onMounted(load);
+watch(orgId, load);
 </script>

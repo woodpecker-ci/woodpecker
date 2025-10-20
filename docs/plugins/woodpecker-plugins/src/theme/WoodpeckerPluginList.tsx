@@ -1,17 +1,21 @@
-import React, { useState, useRef } from 'react';
-import Fuse from 'fuse.js';
 import Layout from '@theme/Layout';
+import Fuse from 'fuse.js';
+import React, { useRef, useState } from 'react';
+
 import './style.css';
+
 import { WoodpeckerPlugin } from '../types';
 import { IconPlugin, IconVerified } from './Icons';
 
 function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
-  const pluginUrl = `/plugins/${plugin.name}`;
+  const pluginUrl = `/plugins/${plugin.slug}`;
 
   return (
     <a href={pluginUrl} className="card shadow--md wp-plugin-card">
       <div className="card__header row">
-        <div className="col col--2 text--left">{plugin.icon ? <img src={plugin.icon} width="50" /> : IconPlugin()}</div>
+        <div className="col col--2 text--left">
+          {plugin.iconDataUrl ? <img src={plugin.iconDataUrl} width="50" /> : IconPlugin()}
+        </div>
         <div className="col col--10">
           <h3>{plugin.name}</h3>
           <p>{plugin.description}</p>
@@ -33,20 +37,22 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
 
 export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] }) {
   const applyForIndexUrl =
-    'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/plugins/woodpecker-plugins/plugins.json';
+    'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/plugins/woodpecker-plugins/plugins.json';
 
   const [query, setQuery] = useState('');
 
-  const fuse = useRef(new Fuse(plugins, {
-    keys: ['name', 'description'],
-    threshold: 0.3,
-  }));
+  const fuse = useRef(
+    new Fuse(plugins, {
+      keys: ['name', 'description', 'tags'],
+      threshold: 0.3,
+    }),
+  );
 
-  const searchedPlugins = query.length >= 1 ? fuse.current.search(query).map((p) => ( p.item )) : plugins;
+  const searchedPlugins = query.length >= 1 ? fuse.current.search(query).map((p) => p.item) : plugins;
 
   return (
     <Layout title="Woodpecker CI plugins" description="List of all Woodpecker-CI plugins">
-      <main className="container margin-vert--lg">
+      <main className="margin-vert--lg container">
         <section>
           <div style={{ display: 'flex', flexFlow: 'column', alignItems: 'center' }}>
             <h1>Woodpecker CI plugins</h1>

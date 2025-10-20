@@ -28,13 +28,6 @@ export default () => {
       return;
     }
     const { pipeline } = data;
-    pipelineStore.setPipeline(repo.owner, repo.name, pipeline);
-
-    // contains step update
-    if (!data.step) {
-      return;
-    }
-    const { step } = data;
-    pipelineStore.setStep(repo.owner, repo.name, pipeline.number, step);
+    pipelineStore.setPipeline(repo.id, pipeline);
   });
 };

@@ -1,3 +1,118 @@
+@reference "./tailwind.css";
+
+:root,
+:root[data-theme='light'] {
+  --wp-background-100: var(--color-white);
+  --wp-background-200: var(--color-gray-50);
+  --wp-background-300: var(--color-gray-200);
+  --wp-background-400: var(--color-gray-300);
+  --wp-background-500: var(--color-gray-400);
+
+  --wp-text-100: var(--color-gray-600);
+  --wp-text-200: var(--color-gray-700);
+  --wp-text-alt-100: var(--color-gray-500);
+
+  --wp-primary-100: var(--color-int-wp-primary-300);
+  --wp-primary-200: var(--color-int-wp-primary-400);
+  --wp-primary-300: var(--color-int-wp-primary-500);
+  --wp-primary-text-100: var(--color-white);
+
+  --wp-control-neutral-100: var(--color-gray-100);
+  --wp-control-neutral-200: var(--color-gray-200);
+  --wp-control-neutral-300: var(--color-gray-300);
+
+  --wp-control-info-100: var(--color-int-wp-control-info-100);
+  --wp-control-info-200: var(--color-int-wp-control-info-200);
+  --wp-control-info-300: var(--color-int-wp-control-info-300);
+
+  --wp-control-ok-100: var(--color-int-wp-control-ok-100);
+  --wp-control-ok-200: var(--color-int-wp-control-ok-200);
+  --wp-control-ok-300: var(--color-int-wp-control-ok-300);
+
+  --wp-error-100: var(--color-int-wp-error-100);
+  --wp-error-200: var(--color-int-wp-error-200);
+  --wp-error-300: var(--color-int-wp-error-300);
+
+  --wp-state-neutral-100: var(--color-int-wp-state-neutral-100);
+  --wp-state-ok-100: var(--color-int-wp-state-ok-100);
+  --wp-state-info-100: var(--color-int-wp-state-info-100);
+  --wp-state-warn-100: var(--color-int-wp-state-warn-100);
+
+  --wp-hint-warn-100: var(--color-int-wp-hint-warn-100);
+  --wp-hint-warn-200: var(--color-int-wp-hint-warn-200);
+
+  --wp-code-inline-100: var(--color-gray-200);
+  --wp-code-inline-200: var(--color-gray-200);
+
+  --wp-code-inline-text-100: var(--color-gray-600);
+
+  --wp-code-100: var(--color-int-wp-secondary-300);
+  --wp-code-200: var(--color-int-wp-secondary-600);
+  --wp-code-300: var(--color-int-wp-secondary-600);
+
+  --wp-code-text-100: var(--color-gray-200);
+  --wp-code-text-alt-100: var(--color-gray-300);
+
+  --wp-link-100: var(--color-blue-600);
+  --wp-link-200: var(--color-blue-700);
+}
+
+:root[data-theme='dark'] {
+  --wp-background-100: var(--color-int-wp-secondary-200);
+  --wp-background-200: var(--color-int-wp-secondary-400);
+  --wp-background-300: var(--color-int-wp-secondary-500);
+  --wp-background-400: var(--color-int-wp-secondary-600);
+  --wp-background-500: var(--color-int-wp-secondary-800);
+
+  --wp-text-100: var(--color-gray-300);
+  --wp-text-200: var(--color-gray-200);
+  --wp-text-alt-100: var(--color-gray-400);
+
+  --wp-primary-100: var(--color-int-wp-secondary-300);
+  --wp-primary-200: var(--color-int-wp-secondary-400);
+  --wp-primary-300: var(--color-int-wp-secondary-600);
+  --wp-primary-text-100: var(--color-gray-300);
+
+  --wp-control-neutral-100: var(--color-int-wp-secondary-400);
+  --wp-control-neutral-200: var(--color-int-wp-secondary-300);
+  --wp-control-neutral-300: var(--color-int-wp-secondary-200);
+
+  --wp-control-info-100: var(--color-int-wp-control-info-dark-100);
+  --wp-control-info-200: var(--color-int-wp-control-info-dark-200);
+  --wp-control-info-300: var(--color-int-wp-control-info-dark-300);
+
+  --wp-control-ok-100: var(--color-int-wp-control-ok-dark-100);
+  --wp-control-ok-200: var(--color-int-wp-control-ok-dark-200);
+  --wp-control-ok-300: var(--color-int-wp-control-ok-dark-300);
+
+  --wp-error-100: var(--color-int-wp-error-200);
+  --wp-error-200: var(--color-int-wp-error-300);
+  --wp-error-300: var(--color-int-wp-error-300);
+
+  --wp-state-neutral-100: var(--color-int-wp-state-neutral-100);
+  --wp-state-ok-100: var(--color-int-wp-state-ok-dark-100);
+  --wp-state-info-100: var(--color-int-wp-state-info-dark-100);
+  --wp-state-warn-100: var(--color-int-wp-state-warn-dark-100);
+
+  --wp-hint-warn-100: var(--color-int-wp-hint-warn-dark-100);
+  --wp-hint-warn-200: var(--color-int-wp-hint-warn-dark-200);
+
+  --wp-code-inline-100: var(--color-int-wp-secondary-700);
+  --wp-code-inline-200: var(--color-int-wp-secondary-300);
+
+  --wp-code-inline-text-100: var(--color-gray-300);
+
+  --wp-code-100: var(--color-int-wp-secondary-700); /* #222631 */
+  --wp-code-200: var(--color-int-wp-secondary-600); /* #2a2e3a */
+  --wp-code-300: var(--color-int-wp-secondary-800); /* #1B1F28 */
+
+  --wp-code-text-100: var(--color-gray-200);
+  --wp-code-text-alt-100: var(--color-gray-400);
+
+  --wp-link-100: var(--color-blue-400);
+  --wp-link-200: var(--color-blue-500);
+}
+
 html,
 body,
 #app {
@@ -6,23 +121,23 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-md text-base border-l-6;
+  @apply rounded-md border-l-4 text-base;
 }
 
 .vue-notification .notification-title {
-  @apply font-normal text-base;
+  @apply text-base font-normal;
 }
 
 .vue-notification.success {
-  @apply bg-lime-600 border-l-lime-700;
+  @apply !border-wp-error-200 !bg-wp-control-ok-100 !border-l;
 }
 
 .vue-notification.error {
-  @apply bg-red-600 border-l-red-700;
+  @apply !border-wp-error-200 !bg-wp-error-100 !border-l;
 }
 
 *::-webkit-scrollbar {
-  @apply bg-transparent w-12px h-12px;
+  @apply h-3 w-3 bg-transparent;
 }
 
 * {
@@ -32,21 +147,28 @@ body,
 *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply bg-cool-gray-200 dark:bg-dark-200 rounded-full bg-clip-content;
+  @apply dark:bg-wp-background-200 rounded-full bg-gray-200 bg-clip-content;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  @apply bg-cool-gray-300 dark:bg-dark-100;
+  @apply dark:bg-wp-background-100 bg-gray-300;
 }
 
 *::-webkit-scrollbar-corner {
   @apply bg-transparent;
 }
 
-.text-color {
-  @apply text-gray-600 dark:text-gray-400 placeholder-gray-400 dark:placeholder-gray-500;
+.code-box {
+  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 rounded-md p-4 text-sm break-words;
+  white-space: pre-wrap;
 }
 
-.text-color-alt {
-  @apply text-gray-500 dark:text-gray-500;
+.code-box-inline,
+code:not(pre > code) {
+  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 rounded-md px-1.5 py-0.5;
+}
+
+.code-box-log {
+  @apply bg-wp-code-300 text-wp-code-text-100 p-4 break-words;
+  white-space: pre-wrap;
 }

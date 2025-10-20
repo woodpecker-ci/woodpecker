@@ -1,69 +1,78 @@
 <template>
-  <FluidContainer full-width class="flex flex-col flex-grow">
-    <div class="flex w-full min-h-0 flex-grow">
+  <Container full-width class="md:min-h-xs flex grow-0 flex-col md:grow md:px-4">
+    <div class="flex min-h-0 w-full grow flex-wrap-reverse md:flex-nowrap md:gap-4">
       <PipelineStepList
-        v-if="pipeline?.steps?.length || 0 > 0"
         v-model:selected-step-id="selectedStepId"
-        :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
-        :pipeline="pipeline"
+        :class="{ 'hidden md:flex': pipeline!.status === 'blocked' }"
+        :pipeline="pipeline!"
       />
 
-      <div class="flex flex-grow relative">
-        <div v-if="error" class="flex flex-col p-4">
-          <span class="text-red-400 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
-          <span class="text-red-400">{{ error }}</span>
+      <div class="relative flex grow basis-full items-start justify-center md:basis-auto">
+        <div v-if="pipeline!.errors?.some((e) => !e.is_warning)" class="mb-4 w-full md:mb-auto">
+          <Panel>
+            <div class="flex flex-col items-center gap-4 text-center">
+              <Icon name="status-error" class="text-wp-error-100 h-16 w-16" size="1.5rem" />
+              <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
+              <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
+            </div>
+          </Panel>
         </div>
 
-        <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center p-2">
-          <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
-          <p class="text-xl text-color mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
-          <div v-if="repoPermissions.push" class="flex space-x-4">
-            <Button
-              color="green"
-              :text="$t('repo.pipeline.protected.approve')"
-              :is-loading="isApprovingPipeline"
-              @click="approvePipeline"
-            />
-            <Button
-              color="red"
-              :text="$t('repo.pipeline.protected.decline')"
-              :is-loading="isDecliningPipeline"
-              @click="declinePipeline"
-            />
-          </div>
+        <div v-else-if="pipeline!.status === 'blocked'" class="mb-4 w-full md:mb-auto">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-blocked" size="1.5rem" class="h-16 w-16" />
+              <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
+              <div v-if="repoPermissions!.push" class="flex flex-wrap items-center justify-center gap-2">
+                <Button
+                  color="green"
+                  :text="$t('repo.pipeline.protected.approve')"
+                  :is-loading="isApprovingPipeline"
+                  @click="approvePipeline"
+                />
+                <Button
+                  color="red"
+                  :text="$t('repo.pipeline.protected.decline')"
+                  :is-loading="isDecliningPipeline"
+                  @click="declinePipeline"
+                />
+              </div>
+            </div>
+          </Panel>
         </div>
 
-        <div v-else-if="pipeline.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
-          <p class="text-xl text-color">{{ $t('repo.pipeline.protected.declined') }}</p>
+        <div v-else-if="pipeline!.status === 'declined'" class="mb-4 w-full md:mb-auto">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-declined" size="1.5rem" class="text-wp-error-100 h-16 w-16" />
+              <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
+            </div>
+          </Panel>
         </div>
 
-        <PipelineLog
-          v-else-if="selectedStepId"
-          v-model:step-id="selectedStepId"
-          :pipeline="pipeline"
-          class="fixed top-0 left-0 w-full h-full md:absolute"
-        />
+        <PipelineLog v-else-if="selectedStepId !== null" v-model:step-id="selectedStepId" :pipeline="pipeline!" />
       </div>
     </div>
-  </FluidContainer>
+  </Container>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, toRef } from 'vue';
+import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Container from '~/components/layout/Container.vue';
+import Panel from '~/components/layout/Panel.vue';
 import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
-import { findStep } from '~/utils/helpers';
+import { useWPTitle } from '~/compositions/useWPTitle';
+import type { PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
   stepId?: string | null;
@@ -75,28 +84,25 @@ const route = useRoute();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const pipeline = inject<Ref<Pipeline>>('pipeline');
-const repo = inject<Ref<Repo>>('repo');
-const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-if (!repo || !repoPermissions || !pipeline) {
-  throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
-}
+const pipeline = requiredInject('pipeline');
+const repo = requiredInject('repo');
+const repoPermissions = requiredInject('repo-permissions');
 
 const stepId = toRef(props, 'stepId');
 
-const defaultStepId = computed(() => {
-  if (!pipeline.value || !pipeline.value.steps || !pipeline.value.steps[0].children) {
-    return null;
-  }
-
-  return pipeline.value.steps[0].children[0].pid;
-});
+const defaultStepId = computed(() => pipeline.value?.workflows?.[0].children?.[0].pid ?? null);
 
 const selectedStepId = computed({
   get() {
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
-      const id = parseInt(stepId.value, 10);
-      const step = pipeline.value?.steps?.reduce(
+      const id = Number.parseInt(stepId.value, 10);
+
+      let step = pipeline.value.workflows?.find((workflow) => workflow.pid === id)?.children[0];
+      if (step) {
+        return step.pid;
+      }
+
+      step = pipeline.value?.workflows?.reduce(
         (prev, p) => prev || p.children?.find((c) => c.pid === id),
         undefined as PipelineStep | undefined,
       );
@@ -104,7 +110,7 @@ const selectedStepId = computed({
         return step.pid;
       }
 
-      // return fallback if step-id is provided, but step can not be found
+      // return fallback if step-id is provided, but step cannot be found
       return defaultStepId.value;
     }
 
@@ -116,7 +122,7 @@ const selectedStepId = computed({
     return null;
   },
   set(_selectedStepId: number | null) {
-    if (!_selectedStepId) {
+    if (_selectedStepId === null) {
       router.replace({ params: { ...route.params, stepId: '' } });
       return;
     }
@@ -125,24 +131,21 @@ const selectedStepId = computed({
   },
 });
 
-const selectedStep = computed(() => findStep(pipeline.value.steps || [], selectedStepId.value || -1));
-const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
-
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
-  await apiClient.approvePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
+  await apiClient.approvePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.approve_success'), type: 'success' });
 });
 
 const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
-  await apiClient.declinePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
+  await apiClient.declinePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
 });
+
+useWPTitle(
+  computed(() => [
+    i18n.t('repo.pipeline.tasks'),
+    i18n.t('repo.pipeline.pipeline', { pipelineId: pipeline.value.number }),
+    repo.value.full_name,
+  ]),
+);
 </script>

@@ -20,17 +20,20 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/securecookie"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"github.com/google/tink/go/subtle/random"
+	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // GetSelf
 //
-//	@Summary	Returns the currently authenticated user.
+//	@Summary	Get the currently authenticated user
 //	@Router		/user [get]
 //	@Produce	json
 //	@Success	200	{object}	User
@@ -42,11 +45,11 @@ func GetSelf(c *gin.Context) {
 
 // GetFeed
 //
-//	@Summary		A feed entry for a build.
-//	@Description	Feed entries can be used to display information on the latest builds.
+//	@Summary		Get the currently authenticated users pipeline feed
+//	@Description	The feed lists the most recent pipeline for the currently authenticated user.
 //	@Router			/user/feed [get]
 //	@Produce		json
-//	@Success		200	{object}	Feed
+//	@Success		200	{array}	Feed
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetFeed(c *gin.Context) {
@@ -75,44 +78,65 @@ func GetFeed(c *gin.Context) {
 
 // GetRepos
 //
-//	@Summary		Get user's repos
+//	@Summary		Get user's repositories
 //	@Description	Retrieve the currently authenticated User's Repository list
 //	@Router			/user/repos [get]
 //	@Produce		json
-//	@Success		200	{array}	Repo
+//	@Success		200	{array}	RepoLastPipeline
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			all				query	bool	false	"query all repos, including inactive ones"
+//	@Param			name			query	string	false	"filter repos by name"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
-
 	user := session.User(c)
-	all, _ := strconv.ParseBool(c.Query("all"))
-
-	activeRepos, err := _store.RepoList(user, true, true)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	if all {
-		active := map[string]bool{}
-		for _, r := range activeRepos {
-			active[r.FullName] = r.IsActive
-		}
+	all, _ := strconv.ParseBool(c.Query("all"))
+	filter := &model.RepoFilter{
+		Name: c.Query("name"),
+	}
 
-		_repos, err := _forge.Repos(c, user)
+	if all {
+		dbRepos, err := _store.RepoList(user, true, false, filter)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
 		}
+
+		active := map[model.ForgeRemoteID]*model.Repo{}
+		for _, r := range dbRepos {
+			active[r.ForgeRemoteID] = r
+		}
+
+		_repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
+			return _forge.Repos(c, user, &model.ListOptions{
+				Page:    page,
+				PerPage: perPage,
+			})
+		}, maxPage)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+			return
+		}
+
 		var repos []*model.Repo
 		for _, r := range _repos {
-			if r.Perm.Push {
-				if active[r.FullName] {
-					r.IsActive = true
+			if r.Perm.Push && server.Config.Permissions.OwnersAllowlist.IsAllowed(r) {
+				if active[r.ForgeRemoteID] != nil {
+					existingRepo := active[r.ForgeRemoteID]
+					existingRepo.Update(r)
+					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
+					repos = append(repos, existingRepo)
+				} else if r.Perm.Admin {
+					// you must be admin to enable the repo
+					repos = append(repos, r)
 				}
-				repos = append(repos, r)
 			}
 		}
 
@@ -120,20 +144,52 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, activeRepos)
+	activeRepos, err := _store.RepoList(user, true, true, filter)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
+	}
+
+	repoIDs := make([]int64, len(activeRepos))
+	for i, repo := range activeRepos {
+		repoIDs[i] = repo.ID
+	}
+
+	pipelines, err := _store.GetRepoLatestPipelines(repoIDs)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
+	}
+
+	latestPipelines := make(map[int64]*model.Pipeline, len(activeRepos))
+	for _, pipeline := range pipelines {
+		latestPipelines[pipeline.RepoID] = pipeline
+	}
+
+	repos := make([]*model.RepoLastPipeline, len(activeRepos))
+	for i, repo := range activeRepos {
+		repos[i] = &model.RepoLastPipeline{
+			Repo:         repo,
+			LastPipeline: latestPipelines[repo.ID],
+		}
+	}
+
+	c.JSON(http.StatusOK, repos)
 }
 
 // PostToken
 //
-//	@Summary		Return the token of the current user as stringª
-//	@Router			/user/token [post]
-//	@Produce		plain
-//	@Success		200
-//	@Tags			User
-//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary	Return the token of the current user as string
+//	@Router		/user/token [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
-	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
+	t := token.New(token.UserToken)
+	t.Set("user-id", strconv.FormatInt(user.ID, 10))
+	tokenString, err := t.Sign(user.Hash)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -155,14 +211,16 @@ func DeleteToken(c *gin.Context) {
 
 	user := session.User(c)
 	user.Hash = base32.StdEncoding.EncodeToString(
-		securecookie.GenerateRandomKey(32),
+		random.GetRandomBytes(32),
 	)
 	if err := _store.UpdateUser(user); err != nil {
 		c.String(http.StatusInternalServerError, "Error revoking tokens. %s", err)
 		return
 	}
 
-	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
+	t := token.New(token.UserToken)
+	t.Set("user-id", strconv.FormatInt(user.ID, 10))
+	tokenString, err := t.Sign(user.Hash)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return

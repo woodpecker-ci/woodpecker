@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -20,7 +34,7 @@ type Network struct {
 }
 
 // MarshalYAML implements the Marshaller interface.
-func (n Networks) MarshalYAML() (interface{}, error) {
+func (n Networks) MarshalYAML() (any, error) {
 	m := map[string]*Network{}
 	for _, network := range n.Networks {
 		m[network.Name] = network
@@ -29,14 +43,14 @@ func (n Networks) MarshalYAML() (interface{}, error) {
 }
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (n *Networks) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var sliceType []interface{}
+func (n *Networks) UnmarshalYAML(unmarshal func(any) error) error {
+	var sliceType []any
 	if err := unmarshal(&sliceType); err == nil {
 		n.Networks = []*Network{}
 		for _, network := range sliceType {
 			name, ok := network.(string)
 			if !ok {
-				return fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", name, name)
+				return fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", name, name)
 			}
 			n.Networks = append(n.Networks, &Network{
 				Name: name,
@@ -45,13 +59,13 @@ func (n *Networks) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return nil
 	}
 
-	var mapType map[interface{}]interface{}
+	var mapType map[any]any
 	if err := unmarshal(&mapType); err == nil {
 		n.Networks = []*Network{}
 		for mapKey, mapValue := range mapType {
 			name, ok := mapKey.(string)
 			if !ok {
-				return fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", name, name)
+				return fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", name, name)
 			}
 			network, err := handleNetwork(name, mapValue)
 			if err != nil {
@@ -62,35 +76,47 @@ func (n *Networks) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal Networks")
+	return errors.New("failed to unmarshal Networks")
 }
 
-func handleNetwork(name string, value interface{}) (*Network, error) {
+func handleNetwork(name string, value any) (*Network, error) {
 	if value == nil {
 		return &Network{
 			Name: name,
 		}, nil
 	}
 	switch v := value.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		network := &Network{
 			Name: name,
 		}
+
+		var ok bool
 		for mapKey, mapValue := range v {
 			switch mapKey {
 			case "aliases":
-				aliases, ok := mapValue.([]interface{})
+				aliases, ok := mapValue.([]any)
 				if !ok {
-					return &Network{}, fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", aliases, aliases)
+					return &Network{}, fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", aliases, aliases)
 				}
 				network.Aliases = []string{}
 				for _, alias := range aliases {
-					network.Aliases = append(network.Aliases, alias.(string))
+					a, ok := alias.(string)
+					if !ok {
+						return &Network{}, fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", aliases, aliases)
+					}
+					network.Aliases = append(network.Aliases, a)
 				}
 			case "ipv4_address":
-				network.IPv4Address = mapValue.(string)
+				network.IPv4Address, ok = mapValue.(string)
+				if !ok {
+					return &Network{}, fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", network, network)
+				}
 			case "ipv6_address":
-				network.IPv6Address = mapValue.(string)
+				network.IPv6Address, ok = mapValue.(string)
+				if !ok {
+					return &Network{}, fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", network, network)
+				}
 			default:
 				// Ignorer unknown keys ?
 				continue
@@ -98,6 +124,6 @@ func handleNetwork(name string, value interface{}) (*Network, error) {
 		}
 		return network, nil
 	default:
-		return &Network{}, fmt.Errorf("Failed to unmarshal Network: %#v", value)
+		return &Network{}, fmt.Errorf("failed to unmarshal Network: %#v", value)
 	}
 }

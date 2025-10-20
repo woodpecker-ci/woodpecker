@@ -1,51 +1,78 @@
 import { defineStore } from 'pinia';
-import { computed, reactive, Ref, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
+import type { Ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
-import { Repo } from '~/lib/api/types';
-import { repoSlug } from '~/utils/helpers';
+import useConfig from '~/compositions/useConfig';
+import { usePaginate } from '~/compositions/usePaginate';
+import type { Repo } from '~/lib/api/types';
+
+import { usePipelineStore } from './pipelines';
 
 export const useRepoStore = defineStore('repos', () => {
   const apiClient = useApiClient();
+  const pipelineStore = usePipelineStore();
 
-  const repos: Map<string, Repo> = reactive(new Map());
-  const ownedRepoSlugs = ref<string[]>([]);
+  const repos: Map<number, Repo> = reactive(new Map());
+  const ownedRepoIds = ref<number[]>([]);
 
   const ownedRepos = computed(() =>
     Array.from(repos.entries())
-      .filter(([slug]) => ownedRepoSlugs.value.includes(slug))
+      .filter(([repoId]) => ownedRepoIds.value.includes(repoId))
       .map(([, repo]) => repo),
   );
 
-  function getRepo(owner: Ref<string>, name: Ref<string>) {
-    return computed(() => {
-      const slug = repoSlug(owner.value, name.value);
-      return repos.get(slug);
-    });
+  function getRepo(repoId: Ref<number>) {
+    return computed(() => repos.get(repoId.value));
   }
 
   function setRepo(repo: Repo) {
-    repos.set(repoSlug(repo), repo);
+    repos.set(repo.id, {
+      ...repos.get(repo.id),
+      ...repo,
+    });
   }
 
-  async function loadRepo(owner: string, name: string) {
-    const repo = await apiClient.getRepo(owner, name);
-    repos.set(repoSlug(repo), repo);
+  async function loadRepo(repoId: number) {
+    const repo = await apiClient.getRepo(repoId);
+    setRepo(repo);
     return repo;
   }
 
   async function loadRepos() {
     const _ownedRepos = await apiClient.getRepoList();
+
     _ownedRepos.forEach((repo) => {
-      repos.set(repoSlug(repo), repo);
+      if (repo.last_pipeline) {
+        pipelineStore.setPipeline(repo.id, repo.last_pipeline);
+        repo.last_pipeline_number = repo.last_pipeline.number;
+      }
+      setRepo(repo);
     });
-    ownedRepoSlugs.value = _ownedRepos.map((repo) => repoSlug(repo));
+
+    ownedRepoIds.value = _ownedRepos.map((repo) => repo.id);
+
+    // If the current user is a system admin, also hydrate the store with all repos (paginated)
+    const { user } = useConfig();
+    const isSystemAdmin = !!user?.admin;
+    if (isSystemAdmin) {
+      const allRepos = await usePaginate<Repo>(async (page: number) =>
+        apiClient.getAllRepos({ page }).then((r) => r ?? []),
+      );
+      allRepos.forEach((repo) => {
+        if (repo.last_pipeline) {
+          pipelineStore.setPipeline(repo.id, repo.last_pipeline);
+          repo.last_pipeline_number = repo.last_pipeline.number;
+        }
+        setRepo(repo);
+      });
+    }
   }
 
   return {
     repos,
     ownedRepos,
-    ownedRepoSlugs,
+    ownedRepoIds,
     getRepo,
     setRepo,
     loadRepo,

@@ -15,62 +15,90 @@
 package pipeline
 
 import (
-	"os"
-	"text/template"
+	"context"
+	"time"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
-var pipelineListCmd = &cli.Command{
-	Name:      "ls",
-	Usage:     "show pipeline history",
-	ArgsUsage: "<repo/name>",
-	Action:    pipelineList,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplPipelineList),
-		&cli.StringFlag{
-			Name:  "branch",
-			Usage: "branch filter",
-		},
-		&cli.StringFlag{
-			Name:  "event",
-			Usage: "event filter",
-		},
-		&cli.StringFlag{
-			Name:  "status",
-			Usage: "status filter",
-		},
-		&cli.IntFlag{
-			Name:  "limit",
-			Usage: "limit the list size",
-			Value: 25,
-		},
-	),
+//nolint:mnd
+func buildPipelineListCmd() *cli.Command {
+	return &cli.Command{
+		Name:      "ls",
+		Usage:     "show pipeline history",
+		ArgsUsage: "<repo-id|repo-full-name>",
+		Action:    List,
+		Flags: append(common.OutputFlags("table"), []cli.Flag{
+			&cli.StringFlag{
+				Name:  "branch",
+				Usage: "branch filter",
+			},
+			&cli.StringFlag{
+				Name:  "event",
+				Usage: "event filter",
+			},
+			&cli.StringFlag{
+				Name:  "status",
+				Usage: "status filter",
+			},
+			&cli.IntFlag{
+				Name:  "limit",
+				Usage: "limit the list size",
+				Value: 25,
+			},
+			&cli.TimestampFlag{
+				Name:  "before",
+				Usage: "only return pipelines before this date (RFC3339)",
+				Config: cli.TimestampConfig{
+					Layouts: []string{
+						time.RFC3339,
+					},
+				},
+			},
+			&cli.TimestampFlag{
+				Name:  "after",
+				Usage: "only return pipelines after this date (RFC3339)",
+				Config: cli.TimestampConfig{
+					Layouts: []string{
+						time.RFC3339,
+					},
+				},
+			},
+		}...),
+	}
 }
 
-func pipelineList(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+func List(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
+	pipelines, err := pipelineList(c, client)
 	if err != nil {
 		return err
 	}
+	return pipelineOutput(c, pipelines)
+}
 
-	pipelines, err := client.PipelineList(owner, name)
+func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipeline, error) {
+	repoIDOrFullName := c.Args().First()
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
-	if err != nil {
-		return err
+	opt := woodpecker.PipelineListOptions{}
+
+	if before := c.Timestamp("before"); !before.IsZero() {
+		opt.Before = before
+	}
+	if after := c.Timestamp("after"); !after.IsZero() {
+		opt.After = after
 	}
 
 	branch := c.String("branch")
@@ -78,35 +106,23 @@ func pipelineList(c *cli.Context) error {
 	status := c.String("status")
 	limit := c.Int("limit")
 
-	var count int
-	for _, pipeline := range pipelines {
-		if count >= limit {
-			break
-		}
-		if branch != "" && pipeline.Branch != branch {
-			continue
-		}
-		if event != "" && pipeline.Event != event {
-			continue
-		}
-		if status != "" && pipeline.Status != status {
-			continue
-		}
-		if err := tmpl.Execute(os.Stdout, pipeline); err != nil {
-			return err
-		}
-		count++
+	pipelines, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
+		return client.PipelineList(repoID,
+			woodpecker.PipelineListOptions{
+				ListOptions: woodpecker.ListOptions{
+					Page: page,
+				},
+				Before: opt.Before,
+				After:  opt.After,
+				Branch: branch,
+				Events: []string{event},
+				Status: status,
+			},
+		)
+	}, limit)
+	if err != nil {
+		return nil, err
 	}
-	return nil
-}
 
-// template for pipeline list information
-var tmplPipelineList = "\x1b[33mBuild #{{ .Number }} \x1b[0m" + `
-Status: {{ .Status }}
-Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
-Ref: {{ .Ref }}
-Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
-Message: {{ .Message }}
-`
+	return pipelines, nil
+}

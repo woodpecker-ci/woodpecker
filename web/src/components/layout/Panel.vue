@@ -1,17 +1,20 @@
 <template>
-  <div class="rounded-md w-full shadow overflow-hidden bg-gray-300 dark:bg-dark-gray-700">
+  <div class="border-wp-background-400 dark:border-wp-background-100 w-full overflow-hidden rounded-md border">
     <component
       :is="collapsable ? 'button' : 'div'"
       v-if="title"
       type="button"
-      class="flex w-full font-bold gap-2 text-gray-200 bg-gray-400 dark:bg-dark-gray-800 px-4 py-2"
-      @click="collapsed && (_collapsed = !_collapsed)"
+      class="bg-wp-control-neutral-100 text-wp-text-100 flex w-full gap-2 px-4 py-2 font-bold"
+      :class="{
+        'cursor-pointer': collapsable,
+      }"
+      @click="_collapsed = !_collapsed"
     >
       <Icon
         v-if="collapsable"
         name="chevron-right"
-        class="transition-transform duration-150 min-w-6 h-6"
-        :class="{ 'transform rotate-90': !collapsed }"
+        class="h-6 min-w-6 transition-transform duration-150"
+        :class="{ 'rotate-90 transform': !collapsed }"
       />
       {{ title }}
     </component>
@@ -20,9 +23,9 @@
         'max-h-auto': !collapsed,
         'max-h-0': collapsed,
       }"
-      class="transition-height duration-150 overflow-hidden"
+      class="transition-height overflow-hidden duration-150"
     >
-      <div class="w-full p-4 bg-white dark:bg-dark-gray-700 text-color">
+      <div class="text-wp-text-100 w-full p-4">
         <slot />
       </div>
     </div>
@@ -34,21 +37,17 @@ import { computed, ref } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 
-const props = withDefaults(
-  defineProps<{
-    title?: string;
-    collapsable?: boolean;
-  }>(),
-  {
-    title: '',
-  },
-);
+const props = defineProps<{
+  title?: string;
+  collapsable?: boolean;
+  collapsedByDefault?: boolean;
+}>();
 
 /**
  * _collapsed is used to store the internal state of the panel, but is
  * ignored if the panel is not collapsable.
  */
-const _collapsed = ref(false);
+const _collapsed = ref(props.collapsedByDefault || false);
 
 const collapsed = computed(() => props.collapsable && _collapsed.value);
 </script>

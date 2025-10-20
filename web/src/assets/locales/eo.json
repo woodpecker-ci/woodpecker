@@ -1,0 +1,195 @@
+{
+    "repos": "Repozitorioj",
+    "search": "Serĉi…",
+    "unknown_error": "Nekonata eraro okazis",
+    "time": {
+        "not_started": "ne komencita"
+    },
+    "repo": {
+        "manual_pipeline": {
+            "title": "Ekigi permanan pipeline-on",
+            "trigger": "Ekigi",
+            "select_branch": "Elekti branĉon",
+            "variables": {
+                "title": "Kromaj pipeline-variabloj",
+                "desc": "Specifu kromajn variablojn por la ekigita pipeline-o",
+                "name": "Variabla nomo",
+                "value": "Variabla valoro"
+            }
+        },
+        "deploy_pipeline": {
+            "title": "Ekigi deployment",
+            "enter_target": "Celo",
+            "trigger": "Ekigi",
+            "variables": {
+                "title": "Kromaj pipeline-variabloj",
+                "desc": "Specifu kromajn variablojn por la ekigita pipeline-o",
+                "name": "Variabla nomo",
+                "value": "Variabla valoro"
+            }
+        },
+        "activity": "Agado",
+        "branches": "Branĉoj",
+        "add": "Aldoni repozitorion",
+        "enable": {
+            "enable": "Ŝalti",
+            "enabled": "Jam ŝaltita",
+            "success": "Repozitorio ŝaltita"
+        },
+        "open_in_forge": "Malfermi en Forge",
+        "settings": {
+            "not_allowed": "Vi ne rajtas aliri la agordojn de ĉi tiu repozitorio",
+            "general": {
+                "general": "Ĝeneralaj agordoj",
+                "project": "Projektaj agordoj",
+                "pipeline_path": {
+                    "path": "Pipeline-vojo",
+                    "default": "Defaŭlte: .woodpecker/*.{'{'}yml,yaml{'}'} -> .woodpecker.yml -> .drone.yml",
+                    "desc": "Vojo al via pipeline-agordo (ekz. mia/vojo/). Dosieraj kaj dosierujaj vojoj estas permesataj"
+                },
+                "allow_pr": {
+                    "allow": "Permesi Pull Request-ojn",
+                    "desc": "Pipeline-oj de pull request-oj estos montrataj en la UI"
+                },
+                "trusted": {
+                    "trusted": "Fidata"
+                },
+                "timeout": {
+                    "timeout": "Tempolimo",
+                    "minutes": "minutoj"
+                },
+                "cancel_prev": {
+                    "cancel": "Nuligi antaŭajn pipeline-ojn",
+                    "desc": "Ŝaltante ĉi tion nuligas antaŭajn ankoraŭ rulantajn pipeline-ojn de la sama evento kaj kunteksto antaŭ ol komenci novan"
+                }
+            },
+            "badge": {
+                "badge": "Insigno",
+                "type": "Sintakso",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branĉo (opcio)"
+            },
+            "actions": {
+                "actions": "Agoj",
+                "repair": {
+                    "repair": "Ripari repozitorion",
+                    "success": "Repozitorio riparita"
+                },
+                "disable": {
+                    "disable": "Malŝalti repozitorion",
+                    "success": "Repozitorio malŝaltita"
+                },
+                "delete": {
+                    "delete": "Forigi repozitorion",
+                    "confirm": "Ĉiuj datenoj perdiĝos por ĉi tiu repozitorio (sekretoj, registrejoj, pipeline-historioj)!\n\nĈu vi volas daŭrigi?",
+                    "success": "Repozitorio forigita"
+                }
+            }
+        },
+        "pipeline": {
+            "config": "Agordo",
+            "files": "Ŝanĝitaj dosieroj ({files})",
+            "no_pipelines": "Neniuj pipeline-oj ekzekutiĝis ankoraŭ",
+            "no_pipeline_steps": "Neniuj stepoj troviĝis por ĉi tiu workflow",
+            "step_not_started": "Ĉi tiu stepo ankoraŭ ne komenciĝis",
+            "loading": "Ŝarĝante…",
+            "actions": {
+                "cancel": "Nuligi",
+                "restart": "Rekomenci",
+                "canceled": "Ĉi tiu pipeline estis nuligita",
+                "cancel_success": "Pipeline nuligita",
+                "deploy": "Deploy",
+                "restart_success": "Pipeline rekomencita"
+            },
+            "protected": {
+                "awaits": "Ĉi tiu pipeline atendas aprobon de administranto!",
+                "approve": "Aprobi",
+                "decline": "Rifuzi",
+                "declined": "Ĉi tiu pipeline estis rifuzita!",
+                "approve_success": "Pipeline aprobita",
+                "decline_success": "Pipeline rifuzita"
+            },
+            "status": {
+                "status": "Stato",
+                "blocked": "Blokita",
+                "pending": "Atendanta",
+                "running": "Rulanta",
+                "started": "Komencita",
+                "skipped": "Saltita",
+                "success": "Sukceso",
+                "declined": "Rifuzita",
+                "error": "Eraro",
+                "failure": "Malsukceso",
+                "killed": "Mortigita"
+            },
+            "we_got_some_errors": "Ho ve, ni havas iujn erarojn!",
+            "created": "Kreita"
+        }
+    },
+    "org": {
+        "settings": {
+            "secrets": {
+                "desc": "Organizaj sekretoj povas esti uzataj de ĉiuj repozitorioj ene de la organizo"
+            }
+        }
+    },
+    "admin": {
+        "settings": {
+            "settings": "Administraj agordoj",
+            "secrets": {
+                "desc": "Ĉiuj uzantoj povas uzi ĉi tiujn sekretojn"
+            },
+            "agents": {
+                "agents": "Agentoj",
+                "desc": "Agentoj estas la laboristoj kiuj plenumigas viajn pipeline-ojn",
+                "none": "Neniu",
+                "id": "ID",
+                "created": "Kreita",
+                "version": "Versio",
+                "never": "Neniam",
+                "delete_confirm": "Ĉu vi certas, ke vi volas forigi ĉi tiun agenton?",
+                "delete_agent": "Forigi agenton"
+            },
+            "queue": {
+                "queue": "Vicumo",
+                "desc": "Vicumo enhavas taskojn kiuj atendas plenumon",
+                "agent": "Agento",
+                "waiting_for": "Atendante"
+            },
+            "users": {
+                "users": "Uzantoj",
+                "desc": "Administri tutmondajn uzantojn",
+                "login": "Salutnomo",
+                "email": "Retpoŝto",
+                "avatar_url": "Avatar-URL",
+                "save": "Konservi uzanton",
+                "cancel": "Nuligi",
+                "add": "Aldoni uzanton",
+                "none": "Neniuj uzantoj troviĝis",
+                "delete_confirm": "Ĉu vi vere volas forigi ĉi tiun uzanton?",
+                "deleted": "Uzanto forigita",
+                "created": "Uzanto kreita",
+                "saved": "Uzanto konservita",
+                "delete_user": "Forigi uzanton"
+            },
+            "orgs": {
+                "orgs": "Organizoj",
+                "view": "Vidi organizon"
+            },
+            "repos": {
+                "repos": "Repozitorioj",
+                "desc": "Administri repozitoriojn",
+                "none": "Neniuj repozitorioj troviĝis",
+                "disabled": "Malŝaltita"
+            }
+        }
+    },
+    "user": {
+        "settings": {
+            "settings": "Uzanto-agordoj"
+        }
+    },
+    "url": "URL"
+}

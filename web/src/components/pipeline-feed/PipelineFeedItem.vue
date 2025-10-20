@@ -1,20 +1,24 @@
 <template>
-  <div v-if="pipeline" class="flex text-color w-full">
+  <div v-if="pipeline" class="text-wp-text-100 flex w-full">
     <PipelineStatusIcon :status="pipeline.status" class="flex items-center" />
-    <div class="flex flex-col ml-4 min-w-0">
-      <span class="underline">{{ pipeline.owner }} / {{ pipeline.name }}</span>
-      <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
-      <div class="flex flex-col mt-2">
-        <div class="flex space-x-2 items-center">
+    <div class="ml-4 flex min-w-0 flex-col">
+      <router-link
+        :to="{
+          name: 'repo',
+          params: { repoId: pipeline.repo_id },
+        }"
+        class="underline"
+      >
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+        {{ repo?.owner }} / {{ repo?.name }}
+      </router-link>
+      <span class="overflow-hidden text-ellipsis whitespace-nowrap" :title="message">{{ shortMessage }}</span>
+      <div class="mt-2 flex flex-col">
+        <div class="flex items-center space-x-2" :title="created">
           <Icon name="since" />
-          <Tooltip>
-            <span>{{ since }}</span>
-            <template #popper
-              ><span class="font-bold">{{ $t('created') }}</span> {{ created }}</template
-            >
-          </Tooltip>
+          <span>{{ since }}</span>
         </div>
-        <div class="flex space-x-2 items-center">
+        <div class="flex items-center space-x-2">
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
@@ -23,32 +27,23 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Tooltip } from 'floating-vue';
-import { defineComponent, PropType, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { PipelineFeed } from '~/lib/api/types';
+import type { PipelineFeed } from '~/lib/api/types';
+import { useRepoStore } from '~/store/repos';
 
-export default defineComponent({
-  name: 'PipelineFeedItem',
+const props = defineProps<{
+  pipeline: PipelineFeed;
+}>();
 
-  components: { PipelineStatusIcon, Icon, Tooltip },
+const repoStore = useRepoStore();
 
-  props: {
-    pipeline: {
-      type: Object as PropType<PipelineFeed>,
-      required: true,
-    },
-  },
+const pipeline = toRef(props, 'pipeline');
+const repo = repoStore.getRepo(computed(() => pipeline.value.repo_id));
 
-  setup(props) {
-    const pipeline = toRef(props, 'pipeline');
-    const { since, duration, message, created } = usePipeline(pipeline);
-
-    return { since, duration, message, created };
-  },
-});
+const { since, duration, shortMessage, message, created } = usePipeline(pipeline);
 </script>

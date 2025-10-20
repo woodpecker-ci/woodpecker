@@ -16,13 +16,17 @@
 package gitea
 
 import (
+	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 const (
@@ -30,17 +34,43 @@ const (
 	hookPush        = "push"
 	hookCreated     = "create"
 	hookPullRequest = "pull_request"
+	hookRelease     = "release"
 
-	actionOpen = "opened"
-	actionSync = "synchronized"
-
-	stateOpen = "open"
+	actionOpen         = "opened"
+	actionSync         = "synchronized"
+	actionClose        = "closed"
+	actionEdited       = "edited"
+	actionLabelUpdate  = "label_updated"
+	actionLabelCleared = "label_cleared"
+	actionMilestoned   = "milestoned"
+	actionDeMilestoned = "demilestoned"
+	actionAssigned     = "assigned"
+	actionUnAssigned   = "unassigned"
+	actionReopen       = "reopened"
 
 	refBranch = "branch"
 	refTag    = "tag"
 )
 
-// parseHook parses a Gitea hook from an http.Request request and returns
+var actionList = []string{
+	actionOpen,
+	actionSync,
+	actionClose,
+	actionEdited,
+	actionLabelUpdate,
+	actionMilestoned,
+	actionDeMilestoned,
+	actionLabelCleared,
+	actionAssigned,
+	actionUnAssigned,
+	actionReopen,
+}
+
+func supportedAction(action string) bool {
+	return slices.Contains(actionList, action)
+}
+
+// parseHook parses a Gitea hook from an http.Request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
 func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	hookType := r.Header.Get(hookEvent)
@@ -51,9 +81,11 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 		return parseCreatedHook(r.Body)
 	case hookPullRequest:
 		return parsePullRequestHook(r.Body)
+	case hookRelease:
+		return parseReleaseHook(r.Body)
 	}
-	log.Debug().Msgf("unsuported hook type: '%s'", hookType)
-	return nil, nil, nil
+	log.Debug().Msgf("unsupported hook type: '%s'", hookType)
+	return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
@@ -69,7 +101,7 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipelin
 		return nil, nil, nil
 	}
 
-	// TODO is this even needed?
+	// TODO: is this even needed?
 	if push.RefType == refBranch {
 		return nil, nil, nil
 	}
@@ -108,18 +140,48 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, err
 	}
 
-	// Don't trigger pipelines for non-code changes ...
-	if pr.Action != actionOpen && pr.Action != actionSync {
-		log.Debug().Msgf("pull_request action is '%s' and no open or sync", pr.Action)
-		return nil, nil, nil
+	if pr.PullRequest == nil {
+		// this should never have happened but it did - so we check
+		return nil, nil, fmt.Errorf("parsed pull_request webhook does not contain pull_request info")
 	}
-	// ... or if PR is not open
-	if pr.PullRequest.State != stateOpen {
-		log.Debug().Msg("pull_request is closed")
+
+	// Only trigger pipelines for supported event types
+	if !supportedAction(pr.Action) {
+		log.Debug().Msgf("pull_request action is '%s'. Only '%s' are supported", pr.Action, strings.Join(actionList, "', '"))
 		return nil, nil, nil
 	}
 
 	repo = toRepo(pr.Repo)
 	pipeline = pipelineFromPullRequest(pr)
+
+	// all other actions return the state of labels after the actions where done ... so we should too
+	if pr.Action == actionLabelCleared {
+		pipeline.PullRequestLabels = []string{}
+	}
+	if pr.Action == actionDeMilestoned {
+		pipeline.PullRequestMilestone = ""
+	}
+
+	for i := range pipeline.EventReason {
+		pipeline.EventReason[i] = common.NormalizeEventReason(pipeline.EventReason[i])
+	}
+
+	return repo, pipeline, err
+}
+
+// parseReleaseHook parses a release hook and returns the Repo and Pipeline details.
+func parseReleaseHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
+	var (
+		repo     *model.Repo
+		pipeline *model.Pipeline
+	)
+
+	release, err := parseRelease(payload)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	repo = toRepo(release.Repo)
+	pipeline = pipelineFromRelease(release)
 	return repo, pipeline, err
 }

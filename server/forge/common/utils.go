@@ -16,14 +16,15 @@ package common
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/url"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 func ExtractHostFromCloneURL(cloneURL string) (string, error) {
@@ -46,21 +47,41 @@ func ExtractHostFromCloneURL(cloneURL string) (string, error) {
 
 func UserToken(ctx context.Context, r *model.Repo, u *model.User) string {
 	if u != nil {
-		return u.Token
+		return u.AccessToken
 	}
 
-	_store, ok := store.TryFromContext(ctx)
-	if !ok {
-		log.Error().Msg("could not get store from context")
+	user, err := RepoUser(ctx, r)
+	if err != nil {
+		log.Error().Err(err).Msg("could not get repo user")
 		return ""
 	}
+	return user.AccessToken
+}
+
+func RepoUser(ctx context.Context, r *model.Repo) (*model.User, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		return nil, errors.New("could not get store from context")
+	}
 	if r == nil {
-		log.Error().Msg("can not get user token by empty repo")
-		return ""
+		log.Error().Msg("cannot get user token by empty repo")
+		return nil, errors.New("cannot get user token by empty repo")
 	}
 	user, err := _store.GetUser(r.UserID)
 	if err != nil {
-		return ""
+		return nil, err
 	}
-	return user.Token
+	return user, nil
+}
+
+func RepoUserForgeID(ctx context.Context, repoForgeID model.ForgeRemoteID) (*model.User, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		return nil, errors.New("could not get store from context")
+	}
+	r, err := _store.GetRepoForgeID(repoForgeID)
+	if err != nil {
+		return nil, err
+	}
+	return RepoUser(ctx, r)
 }

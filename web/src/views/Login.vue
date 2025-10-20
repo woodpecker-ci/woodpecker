@@ -1,72 +1,126 @@
 <template>
-  <main class="flex flex-col w-full h-full justify-center items-center">
-    <div v-if="errorMessage" class="bg-red-400 text-white dark:text-gray-500 p-4 rounded-md text-lg">
-      {{ errorMessage }}
-    </div>
+  <main class="flex h-full w-full flex-col items-center justify-center">
+    <Error v-if="errorMessage" class="w-full md:w-3xl">
+      <span class="whitespace-pre">{{ errorMessage }}</span>
+      <span v-if="errorDescription" class="mt-1 whitespace-pre">{{ errorDescription }}</span>
+      <a
+        v-if="errorUri"
+        :href="errorUri"
+        target="_blank"
+        class="text-wp-link-100 hover:text-wp-link-200 mt-1 cursor-pointer"
+      >
+        <span>{{ errorUri }}</span>
+      </a>
+    </Error>
 
     <div
-      class="flex flex-col w-full overflow-hidden md:m-8 md:rounded-md md:shadow md:border md:bg-white md:dark:bg-dark-gray-700 dark:border-dark-200 md:flex-row md:w-3xl md:h-sm justify-center"
+      class="min-h-sm border-wp-background-400 dark:border-wp-background-100 bg-wp-background-100 dark:bg-wp-background-200 flex w-full flex-col overflow-hidden border md:m-8 md:w-3xl md:flex-row md:rounded-md"
     >
-      <div class="flex md:bg-lime-500 md:dark:bg-lime-900 md:w-3/5 justify-center items-center">
-        <img class="w-48 h-48" src="../assets/logo.svg?url" />
+      <div class="bg-wp-primary-200 dark:bg-wp-primary-300 flex min-h-48 items-center justify-center md:w-3/5">
+        <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="h-32 w-32 md:h-48 md:w-48" />
       </div>
-      <div class="flex flex-col my-8 md:w-2/5 p-4 items-center justify-center">
-        <h1 class="text-xl text-color">{{ $t('welcome') }}</h1>
-        <Button class="mt-4" @click="doLogin">{{ $t('login') }}</Button>
+      <div class="flex min-h-48 flex-col items-center justify-center gap-4 p-4 text-center md:w-2/5">
+        <h1 class="text-wp-text-100 text-xl">{{ $t('login_to_woodpecker_with') }}</h1>
+        <div class="flex flex-col gap-2">
+          <Button
+            v-for="forge in forgesWithNameAndFavicon"
+            :key="forge.id"
+            :start-icon="forge.type === 'addon' ? 'repo' : forge.type"
+            class="whitespace-normal!"
+            @click="doLogin(forge.id)"
+          >
+            <div class="mr-2 w-4">
+              <img
+                v-if="forge.favicon && !failedForgeFavicons.has(forge.id)"
+                :src="forge.favicon"
+                :alt="$t('login_to_woodpecker_with', { forge: forge.name })"
+                @error="() => failedForgeFavicons.add(forge.id)"
+              />
+              <Icon v-else :name="forge.type === 'addon' ? 'repo' : forge.type" />
+            </div>
+
+            {{ forge.name }}
+          </Button>
+        </div>
       </div>
     </div>
   </main>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+<script lang="ts" setup>
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
+import Error from '~/components/atomic/Error.vue';
+import Icon from '~/components/atomic/Icon.vue';
+import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
+import { useWPTitle } from '~/compositions/useWPTitle';
+import type { Forge } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'Login',
+const route = useRoute();
+const router = useRouter();
+const authentication = useAuthentication();
+const i18n = useI18n();
+const apiClient = useApiClient();
 
-  components: {
-    Button,
-  },
+const forges = ref<Forge[]>([]);
 
-  setup() {
-    const route = useRoute();
-    const router = useRouter();
-    const authentication = useAuthentication();
-    const errorMessage = ref<string>();
-    const i18n = useI18n();
+function doLogin(forgeId?: number) {
+  const url = typeof route.query.url === 'string' ? route.query.url : '';
+  authentication.authenticate(url, forgeId);
+}
 
-    function doLogin() {
-      const url = typeof route.query.url === 'string' ? route.query.url : '';
-      authentication.authenticate(url);
+const authErrorMessages = {
+  oauth_error: i18n.t('oauth_error'),
+  internal_error: i18n.t('internal_error'),
+  registration_closed: i18n.t('registration_closed'),
+  access_denied: i18n.t('access_denied'),
+  invalid_state: i18n.t('invalid_state'),
+  org_access_denied: i18n.t('org_access_denied'),
+};
+
+const errorMessage = ref<string>();
+const errorDescription = ref<string>(route.query.error_description as string);
+const errorUri = ref<string>(route.query.error_uri as string);
+
+onMounted(async () => {
+  if (authentication.isAuthenticated) {
+    await router.replace({ name: 'home' });
+    return;
+  }
+
+  forges.value = (await apiClient.getForges()) ?? [];
+
+  if (route.query.error) {
+    const error = route.query.error as keyof typeof authErrorMessages;
+    errorMessage.value = authErrorMessages[error] ?? error;
+  }
+});
+
+useWPTitle(computed(() => [i18n.t('login')]));
+
+const failedForgeFavicons = ref(new Set<number>()); // Track which favicons failed to load
+
+const forgesWithNameAndFavicon = computed(() =>
+  forges.value.map((forge) => {
+    let name = forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
+    let favicon: null | string = null;
+
+    if (forge.url || forge.oauth_host) {
+      const url = new URL(forge.oauth_host || forge.url);
+      name = url.hostname;
+      favicon = `${url.origin}/favicon.ico`;
     }
 
-    const authErrorMessages = {
-      oauth_error: i18n.t('user.oauth_error'),
-      internal_error: i18n.t('user.internal_error'),
-      access_denied: i18n.t('user.access_denied'),
-    };
-
-    onMounted(async () => {
-      if (authentication.isAuthenticated) {
-        await router.replace({ name: 'home' });
-        return;
-      }
-
-      if (route.query.code) {
-        const code = route.query.code as keyof typeof authErrorMessages;
-        errorMessage.value = authErrorMessages[code];
-      }
-    });
-
     return {
-      doLogin,
-      errorMessage,
+      ...forge,
+      name,
+      favicon,
     };
-  },
-});
+  }),
+);
 </script>
