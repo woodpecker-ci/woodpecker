@@ -2,6 +2,14 @@
 
 ## [3.11.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.1) - 2025-10-20
 
+### ❤️ Thanks to all contributors! ❤️
+
+@6543
+
+### 🐛 Bug Fixes
+
+- cli: show description of default value for `--backend-local-temp-dir` instead of value [[#5656](https://github.com/woodpecker-ci/woodpecker/pull/5656)]
+
 ### 📦️ Dependency
 
 - chore(deps): lock file maintenance [[#5657](https://github.com/woodpecker-ci/woodpecker/pull/5657)]
