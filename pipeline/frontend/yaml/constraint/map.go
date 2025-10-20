@@ -87,9 +87,10 @@ func (c Map) MarshalYAML() (interface{}, error) {
 			Exclude map[string]string
 		}{Exclude: c.Exclude}, nil
 	default:
+		// we can not return type Map as it would lead to infinite recursion :/
 		return struct {
-			Include map[string]string
-			Exclude map[string]string
+			Include map[string]string `yaml:"include,omitempty"`
+			Exclude map[string]string `yaml:"exclude,omitempty"`
 		}{
 			Include: c.Include,
 			Exclude: c.Exclude,

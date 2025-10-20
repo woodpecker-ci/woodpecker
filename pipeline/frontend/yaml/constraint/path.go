@@ -73,6 +73,7 @@ func (c Path) MarshalYAML() (interface{}, error) {
 		}
 		return yamlBaseTypes.StringOrSlice(c.Include), nil
 	}
+	// we can not return type Path as it would lead to infinite recursion :/
 	return struct {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
 		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`

@@ -107,6 +107,7 @@ func (c List) MarshalYAML() (interface{}, error) {
 	case len(c.Exclude) == 0:
 		return yamlBaseTypes.StringOrSlice(c.Include), nil
 	default:
+		// we can not return type List as it would lead to infinite recursion :/
 		return struct {
 			Include yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
 			Exclude yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`

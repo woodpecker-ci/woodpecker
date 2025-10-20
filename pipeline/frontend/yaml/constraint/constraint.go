@@ -137,8 +137,9 @@ func (when When) MarshalYAML() (interface{}, error) {
 		return nil, nil
 	case 1:
 		return when.Constraints[0], nil
+	default:
+		return when.Constraints, nil
 	}
-	return when.Constraints, nil
 }
 
 // Match returns true if all constraints match the given input. If a single
