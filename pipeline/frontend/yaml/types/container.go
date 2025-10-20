@@ -39,7 +39,7 @@ type (
 		Commands   base.StringOrSlice `yaml:"commands,omitempty"`
 		Entrypoint base.StringOrSlice `yaml:"entrypoint,omitempty"`
 		Directory  string             `yaml:"directory,omitempty"`
-		Settings   map[string]any     `yaml:"settings"`
+		Settings   map[string]any     `yaml:"settings,omitempty"`
 		// flow control
 		DependsOn base.StringOrSlice `yaml:"depends_on,omitempty"`
 		When      constraint.When    `yaml:"when,omitempty"`

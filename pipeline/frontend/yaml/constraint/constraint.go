@@ -38,18 +38,18 @@ type (
 	}
 
 	Constraint struct {
-		Ref      List
-		Repo     List
-		Instance List
-		Platform List
-		Branch   List
-		Cron     List
-		Status   List
-		Matrix   Map
-		Local    yamlBaseTypes.BoolTrue
-		Path     Path
-		Evaluate string `yaml:"omitempty"`
-		Event    yamlBaseTypes.StringOrSlice
+		Ref      List                        `yaml:"ref,omitempty"`
+		Repo     List                        `yaml:"repo,omitempty"`
+		Instance List                        `yaml:"instance,omitempty"`
+		Platform List                        `yaml:"platform,omitempty"`
+		Branch   List                        `yaml:"branch,omitempty"`
+		Cron     List                        `yaml:"cron,omitempty"`
+		Status   List                        `yaml:"status,omitempty"`
+		Matrix   Map                         `yaml:"matrix,omitempty"`
+		Local    yamlBaseTypes.BoolTrue      `yaml:"local,omitempty"`
+		Path     Path                        `yaml:"path,omitempty"`
+		Evaluate string                      `yaml:"evaluate,omitempty"`
+		Event    yamlBaseTypes.StringOrSlice `yaml:"event,omitempty"`
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -224,6 +224,9 @@ func (c List) IsEmpty() bool {
 // Match returns true if the string matches the include patterns and does not
 // match any of the exclude patterns.
 func (c *List) Match(v string) bool {
+	if c == nil {
+		return true
+	}
 	if c.Excludes(v) {
 		return false
 	}
@@ -308,7 +311,7 @@ func (c List) MarshalYAML() (interface{}, error) {
 // match any of the exclude key values.
 func (c *Map) Match(params map[string]string) bool {
 	// when no includes or excludes automatically match
-	if len(c.Include) == 0 && len(c.Exclude) == 0 {
+	if c == nil || len(c.Include) == 0 && len(c.Exclude) == 0 {
 		return true
 	}
 
@@ -357,6 +360,28 @@ func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
+// MarshalYAML implements custom Yaml marshaling.
+func (c Map) MarshalYAML() (interface{}, error) {
+	switch {
+	case len(c.Include) == 0 && len(c.Exclude) == 0:
+		return nil, nil
+	case len(c.Exclude) == 0:
+		return c.Include, nil
+	case len(c.Include) == 0 && len(c.Exclude) != 0:
+		return struct {
+			Exclude map[string]string
+		}{Exclude: c.Exclude}, nil
+	default:
+		return struct {
+			Include map[string]string
+			Exclude map[string]string
+		}{
+			Include: c.Include,
+			Exclude: c.Exclude,
+		}, nil
+	}
+}
+
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
@@ -385,6 +410,30 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+// MarshalYAML implements custom Yaml marshaling.
+func (c Path) MarshalYAML() (interface{}, error) {
+	// if only Include is set return simple syntax
+	if len(c.Exclude) == 0 &&
+		len(c.IgnoreMessage) == 0 &&
+		!c.OnEmpty.Bool() {
+		if len(c.Include) == 0 {
+			return nil, nil
+		}
+		return c.Include, nil
+	}
+	return struct {
+		Include       []string
+		Exclude       []string
+		IgnoreMessage string
+		OnEmpty       yamlBaseTypes.BoolTrue
+	}{
+		Include:       c.Include,
+		Exclude:       c.Exclude,
+		IgnoreMessage: c.IgnoreMessage,
+		OnEmpty:       c.OnEmpty,
+	}, nil
 }
 
 // Match returns true if file paths in string slice matches the include and not exclude patterns

@@ -225,6 +225,15 @@ steps:
     << : *SLACK
     when:
       event: push
+  echo:
+    when:
+    - path: wow.sh
+      repo: "test"
+      branch:
+        exclude: main
+    - path:
+      - test.yaml
+      - test.zig
 `
 
 func TestReSerialize(t *testing.T) {
@@ -241,12 +250,17 @@ func TestReSerialize(t *testing.T) {
 	assert.EqualValues(t, `steps:
     - name: notify_fail
       image: plugins/slack
-      settings: {}
     - name: notify_success
       image: plugins/slack
-      settings: {}
       when:
-          event: push
+        event: push
+    - name: echo
+      when:
+        - repo: test
+          branch:
+            exclude: main
+          path
+
 skip_clone: false
 `, string(workBin))
 }
