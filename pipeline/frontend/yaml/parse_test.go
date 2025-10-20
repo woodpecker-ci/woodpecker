@@ -171,9 +171,6 @@ when:
     - tester2
   - branch:
     - tester
-build:
-  context: .
-  dockerfile: Dockerfile
 workspace:
   path: src/github.com/octocat/hello-world
   base: /go
@@ -190,6 +187,7 @@ steps:
       - go build
     when:
       event: push
+    depends_on: []
   notify:
     image: slack
     channel: dev
@@ -255,18 +253,17 @@ skip_clone: false`, string(workBin))
 }
 
 func TestSlice(t *testing.T) {
-	t.Run("should marshal a not set slice to nil", func(t *testing.T) {
-		out, err := ParseString(sampleYaml)
-		assert.NoError(t, err)
+	out, err := ParseString(sampleYaml)
+	assert.NoError(t, err)
 
+	t.Run("should marshal a not set slice to nil", func(t *testing.T) {
+		assert.Equal(t, "test", out.Steps.ContainerList[0].Name)
 		assert.Nil(t, out.Steps.ContainerList[0].DependsOn)
 		assert.Empty(t, out.Steps.ContainerList[0].DependsOn)
 	})
 
 	t.Run("should marshal an empty slice", func(t *testing.T) {
-		out, err := ParseString(sampleYaml)
-		assert.NoError(t, err)
-
+		assert.Equal(t, "build", out.Steps.ContainerList[1].Name)
 		assert.NotNil(t, out.Steps.ContainerList[1].DependsOn)
 		assert.Empty(t, (out.Steps.ContainerList[1].DependsOn))
 	})
