@@ -100,7 +100,7 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // MarshalYAML implements custom Yaml marshaling.
-func (c List) MarshalYAML() (interface{}, error) {
+func (c List) MarshalYAML() (any, error) {
 	switch {
 	case len(c.Include) == 0 && len(c.Exclude) == 0:
 		return nil, nil

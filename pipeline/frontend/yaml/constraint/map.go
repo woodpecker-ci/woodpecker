@@ -76,7 +76,7 @@ func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 // MarshalYAML implements custom Yaml marshaling.
-func (c Map) MarshalYAML() (interface{}, error) {
+func (c Map) MarshalYAML() (any, error) {
 	switch {
 	case len(c.Include) == 0 && len(c.Exclude) == 0:
 		return nil, nil

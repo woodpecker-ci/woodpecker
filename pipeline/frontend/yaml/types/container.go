@@ -120,7 +120,7 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // MarshalYAML implements custom Yaml marshaling.
-func (c ContainerList) MarshalYAML() (interface{}, error) {
+func (c ContainerList) MarshalYAML() (any, error) {
 	return c.ContainerList, nil
 }
 

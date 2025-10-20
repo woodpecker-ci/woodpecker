@@ -43,7 +43,7 @@ func (b *BoolTrue) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // MarshalYAML implements custom Yaml marshaling.
-func (b BoolTrue) MarshalYAML() (interface{}, error) {
+func (b BoolTrue) MarshalYAML() (any, error) {
 	return b.Bool(), nil
 }
 

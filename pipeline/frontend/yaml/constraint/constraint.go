@@ -131,7 +131,7 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // MarshalYAML implements custom Yaml marshaling.
-func (when When) MarshalYAML() (interface{}, error) {
+func (when When) MarshalYAML() (any, error) {
 	switch len(when.Constraints) {
 	case 0:
 		return nil, nil

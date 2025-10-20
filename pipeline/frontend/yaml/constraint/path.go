@@ -63,7 +63,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // MarshalYAML implements custom Yaml marshaling.
-func (c Path) MarshalYAML() (interface{}, error) {
+func (c Path) MarshalYAML() (any, error) {
 	// if only Include is set return simple syntax
 	if len(c.Exclude) == 0 &&
 		len(c.IgnoreMessage) == 0 &&
