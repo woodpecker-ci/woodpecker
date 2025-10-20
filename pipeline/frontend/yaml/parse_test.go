@@ -236,6 +236,7 @@ steps:
       - test.zig
     - path:
         exclude: a
+        on_empty: true
     - ref: ref/tags/v1
       path:
   env:
@@ -272,6 +273,8 @@ func TestReSerialize(t *testing.T) {
         - path:
             - test.yaml
             - test.zig
+        - path:
+            exclude: a
         - ref: ref/tags/v1
     - name: env
       image: print

@@ -35,10 +35,10 @@ type Path struct {
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
-		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
-		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
-		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
+		Include       yamlBaseTypes.StringOrSlice `yaml:"include"`
+		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude"`
+		IgnoreMessage string                      `yaml:"ignore_message"`
+		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty"`
 	}{}
 
 	var out2 yamlBaseTypes.StringOrSlice
@@ -74,10 +74,10 @@ func (c Path) MarshalYAML() (interface{}, error) {
 		return yamlBaseTypes.StringOrSlice(c.Include), nil
 	}
 	return struct {
-		Include       []string
-		Exclude       []string
-		IgnoreMessage string
-		OnEmpty       yamlBaseTypes.BoolTrue
+		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
+		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
+		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
 	}{
 		Include:       c.Include,
 		Exclude:       c.Exclude,
