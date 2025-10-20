@@ -106,14 +106,10 @@ func (c List) MarshalYAML() (interface{}, error) {
 		return nil, nil
 	case len(c.Exclude) == 0:
 		return yamlBaseTypes.StringOrSlice(c.Include), nil
-	case len(c.Include) == 0 && len(c.Exclude) != 0:
-		return struct {
-			Exclude yamlBaseTypes.StringOrSlice
-		}{Exclude: c.Exclude}, nil
 	default:
 		return struct {
-			Include yamlBaseTypes.StringOrSlice
-			Exclude yamlBaseTypes.StringOrSlice
+			Include yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
+			Exclude yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
 		}{
 			Include: c.Include,
 			Exclude: c.Exclude,

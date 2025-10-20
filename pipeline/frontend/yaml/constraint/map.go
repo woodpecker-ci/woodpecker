@@ -18,8 +18,8 @@ import "github.com/bmatcuk/doublestar/v4"
 
 // Map defines a runtime constraint for exclude & include map strings.
 type Map struct {
-	Include map[string]string
-	Exclude map[string]string
+	Include map[string]string `yaml:"include,omitempty"`
+	Exclude map[string]string `yaml:"exclude,omitempty"`
 }
 
 // Match returns true if the params matches the include key values and does not
@@ -82,17 +82,7 @@ func (c Map) MarshalYAML() (interface{}, error) {
 		return nil, nil
 	case len(c.Exclude) == 0:
 		return c.Include, nil
-	case len(c.Include) == 0 && len(c.Exclude) != 0:
-		return struct {
-			Exclude map[string]string
-		}{Exclude: c.Exclude}, nil
 	default:
-		return struct {
-			Include map[string]string
-			Exclude map[string]string
-		}{
-			Include: c.Include,
-			Exclude: c.Exclude,
-		}, nil
+		return c, nil
 	}
 }
