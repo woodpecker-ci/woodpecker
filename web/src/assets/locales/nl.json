@@ -96,7 +96,11 @@
         "user_none": "Deze organisatie / gebruiker heeft nog geen projecten."
     },
     "repos": "Repos",
-    "repositories": "Repositories",
+    "repositories": {
+        "last": {
+            "title": "Laatst Bezocht"
+        }
+    },
     "search": "Zoeken…",
     "time": {
         "days_short": "d",
@@ -114,5 +118,6 @@
         "internal_error": "Er is een interne fout opgetreden"
     },
     "username": "Gebruikersnaam",
-    "welcome": "Welkom bij Woodpecker"
+    "welcome": "Welkom bij Woodpecker",
+    "login_to_woodpecker_with": "Inloggen bij Woodpecker met"
 }

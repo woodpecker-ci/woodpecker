@@ -1159,8 +1159,8 @@ func (_c *MockForge_Repo_Call) RunAndReturn(run func(ctx context.Context, u *mod
 }
 
 // Repos provides a mock function for the type MockForge
-func (_mock *MockForge) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	ret := _mock.Called(ctx, u)
+func (_mock *MockForge) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	ret := _mock.Called(ctx, u, p)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Repos")
@@ -1168,18 +1168,18 @@ func (_mock *MockForge) Repos(ctx context.Context, u *model.User) ([]*model.Repo
 
 	var r0 []*model.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User) ([]*model.Repo, error)); ok {
-		return returnFunc(ctx, u)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.ListOptions) ([]*model.Repo, error)); ok {
+		return returnFunc(ctx, u, p)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User) []*model.Repo); ok {
-		r0 = returnFunc(ctx, u)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.ListOptions) []*model.Repo); ok {
+		r0 = returnFunc(ctx, u, p)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User) error); ok {
-		r1 = returnFunc(ctx, u)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User, *model.ListOptions) error); ok {
+		r1 = returnFunc(ctx, u, p)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1194,11 +1194,12 @@ type MockForge_Repos_Call struct {
 // Repos is a helper method to define mock.On call
 //   - ctx context.Context
 //   - u *model.User
-func (_e *MockForge_Expecter) Repos(ctx interface{}, u interface{}) *MockForge_Repos_Call {
-	return &MockForge_Repos_Call{Call: _e.mock.On("Repos", ctx, u)}
+//   - p *model.ListOptions
+func (_e *MockForge_Expecter) Repos(ctx interface{}, u interface{}, p interface{}) *MockForge_Repos_Call {
+	return &MockForge_Repos_Call{Call: _e.mock.On("Repos", ctx, u, p)}
 }
 
-func (_c *MockForge_Repos_Call) Run(run func(ctx context.Context, u *model.User)) *MockForge_Repos_Call {
+func (_c *MockForge_Repos_Call) Run(run func(ctx context.Context, u *model.User, p *model.ListOptions)) *MockForge_Repos_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1208,9 +1209,14 @@ func (_c *MockForge_Repos_Call) Run(run func(ctx context.Context, u *model.User)
 		if args[1] != nil {
 			arg1 = args[1].(*model.User)
 		}
+		var arg2 *model.ListOptions
+		if args[2] != nil {
+			arg2 = args[2].(*model.ListOptions)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -1221,7 +1227,7 @@ func (_c *MockForge_Repos_Call) Return(repos []*model.Repo, err error) *MockForg
 	return _c
 }
 
-func (_c *MockForge_Repos_Call) RunAndReturn(run func(ctx context.Context, u *model.User) ([]*model.Repo, error)) *MockForge_Repos_Call {
+func (_c *MockForge_Repos_Call) RunAndReturn(run func(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error)) *MockForge_Repos_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1302,8 +1308,8 @@ func (_c *MockForge_Status_Call) RunAndReturn(run func(ctx context.Context, u *m
 }
 
 // Teams provides a mock function for the type MockForge
-func (_mock *MockForge) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	ret := _mock.Called(ctx, u)
+func (_mock *MockForge) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	ret := _mock.Called(ctx, u, p)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Teams")
@@ -1311,18 +1317,18 @@ func (_mock *MockForge) Teams(ctx context.Context, u *model.User) ([]*model.Team
 
 	var r0 []*model.Team
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User) ([]*model.Team, error)); ok {
-		return returnFunc(ctx, u)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.ListOptions) ([]*model.Team, error)); ok {
+		return returnFunc(ctx, u, p)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User) []*model.Team); ok {
-		r0 = returnFunc(ctx, u)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.ListOptions) []*model.Team); ok {
+		r0 = returnFunc(ctx, u, p)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Team)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User) error); ok {
-		r1 = returnFunc(ctx, u)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User, *model.ListOptions) error); ok {
+		r1 = returnFunc(ctx, u, p)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1337,11 +1343,12 @@ type MockForge_Teams_Call struct {
 // Teams is a helper method to define mock.On call
 //   - ctx context.Context
 //   - u *model.User
-func (_e *MockForge_Expecter) Teams(ctx interface{}, u interface{}) *MockForge_Teams_Call {
-	return &MockForge_Teams_Call{Call: _e.mock.On("Teams", ctx, u)}
+//   - p *model.ListOptions
+func (_e *MockForge_Expecter) Teams(ctx interface{}, u interface{}, p interface{}) *MockForge_Teams_Call {
+	return &MockForge_Teams_Call{Call: _e.mock.On("Teams", ctx, u, p)}
 }
 
-func (_c *MockForge_Teams_Call) Run(run func(ctx context.Context, u *model.User)) *MockForge_Teams_Call {
+func (_c *MockForge_Teams_Call) Run(run func(ctx context.Context, u *model.User, p *model.ListOptions)) *MockForge_Teams_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1351,9 +1358,14 @@ func (_c *MockForge_Teams_Call) Run(run func(ctx context.Context, u *model.User)
 		if args[1] != nil {
 			arg1 = args[1].(*model.User)
 		}
+		var arg2 *model.ListOptions
+		if args[2] != nil {
+			arg2 = args[2].(*model.ListOptions)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -1364,7 +1376,7 @@ func (_c *MockForge_Teams_Call) Return(teams []*model.Team, err error) *MockForg
 	return _c
 }
 
-func (_c *MockForge_Teams_Call) RunAndReturn(run func(ctx context.Context, u *model.User) ([]*model.Team, error)) *MockForge_Teams_Call {
+func (_c *MockForge_Teams_Call) RunAndReturn(run func(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error)) *MockForge_Teams_Call {
 	_c.Call.Return(run)
 	return _c
 }

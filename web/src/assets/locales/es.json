@@ -549,5 +549,6 @@
     "bitbucket": "Bitbucket",
     "bitbucket_dc": "Bitbucket Data Center",
     "gitea": "Gitea",
-    "public_only": "Solo público"
+    "public_only": "Solo público",
+    "extensions_signatures_public_key": "Clave pública para la firma"
 }
