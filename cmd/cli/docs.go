@@ -21,25 +21,10 @@ import (
 	"os"
 
 	docs "github.com/urfave/cli-docs/v3"
-	"github.com/urfave/cli/v3"
 )
 
 func main() {
 	app := newApp()
-
-	// fix doc string
-	// TODO: remove workaround if https://github.com/urfave/cli/issues/2210 got solved
-	for _, v := range app.Commands {
-		if v.Name == "exec" {
-			for _, f := range v.Flags {
-				if f.Names()[0] == "backend-local-temp-dir" {
-					flag := f.(*cli.StringFlag)
-					flag.Value = "system temporary directory"
-				}
-			}
-		}
-	}
-
 	md, err := docs.ToMarkdown(app)
 	if err != nil {
 		panic(err)
