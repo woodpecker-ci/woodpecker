@@ -22,7 +22,8 @@ import (
 )
 
 type StructStringOrSlice struct {
-	Foo StringOrSlice
+	Foo StringOrSlice `yaml:"foo"`
+	Bar StringOrSlice `yaml:"bar,omitempty"`
 }
 
 func TestStringOrSliceYaml(t *testing.T) {
@@ -47,7 +48,7 @@ func TestStringOrSliceYaml(t *testing.T) {
 		str := StructStringOrSlice{}
 		out, err := yaml.Marshal(str)
 		assert.NoError(t, err)
-		assert.EqualValues(t, "foo: \"\"\n", string(out))
+		assert.EqualValues(t, "foo: null\n", string(out))
 
 		str = StructStringOrSlice{Foo: []string{"a\""}}
 		out, err = yaml.Marshal(str)
