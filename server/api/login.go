@@ -24,20 +24,25 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/securecookie"
+	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/httputil"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-const stateTokenDuration = time.Minute * 5
+const (
+	stateTokenDuration = time.Minute * 5
+	perPage            = 50
+	maxPage            = 10000
+)
 
 func HandleAuth(c *gin.Context) {
 	// TODO: check if this is really needed
@@ -110,7 +115,7 @@ func HandleAuth(c *gin.Context) {
 
 	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
 	if err != nil {
-		log.Error().Err(err).Msgf("Cannot get forge by id %d", forgeID)
+		log.Error().Err(err).Msgf("cannot get forge by id %d", forgeID)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
@@ -133,9 +138,23 @@ func HandleAuth(c *gin.Context) {
 	// if organization filter is enabled, we need to check if the user is a member of one
 	// of the configured organizations
 	if server.Config.Permissions.Orgs.IsConfigured {
-		teams, terr := _forge.Teams(c, userFromForge)
-		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
-			log.Error().Err(terr).Msgf("cannot verify team membership for %s", userFromForge.Login)
+		isMember := false
+		for page := 1; page <= maxPage; page++ {
+			teams, terr := _forge.Teams(c, userFromForge, &model.ListOptions{
+				Page:    page,
+				PerPage: perPage,
+			})
+			if terr != nil {
+				log.Error().Err(terr).Msgf("cannot verify team membership for %s", userFromForge.Login)
+				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+				return
+			}
+			if server.Config.Permissions.Orgs.IsMember(teams) {
+				isMember = true
+				break
+			}
+		}
+		if !isMember {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
 			return
 		}
@@ -159,15 +178,16 @@ func HandleAuth(c *gin.Context) {
 
 		// create the user account
 		user = &model.User{
-			Login:         userFromForge.Login,
+			ForgeID:       forgeID,
 			ForgeRemoteID: userFromForge.ForgeRemoteID,
-			Token:         userFromForge.Token,
-			Secret:        userFromForge.Secret,
+			Login:         userFromForge.Login,
+			AccessToken:   userFromForge.AccessToken,
+			RefreshToken:  userFromForge.RefreshToken,
+			Expiry:        userFromForge.Expiry,
 			Email:         userFromForge.Email,
 			Avatar:        userFromForge.Avatar,
-			ForgeID:       forgeID,
 			Hash: base32.StdEncoding.EncodeToString(
-				securecookie.GenerateRandomKey(32),
+				random.GetRandomBytes(32),
 			),
 		}
 
@@ -182,21 +202,25 @@ func HandleAuth(c *gin.Context) {
 	// create or set the user's organization if it isn't linked yet
 	if user.OrgID == 0 {
 		// check if an org with the same name exists already and assign it to the user if it does
-		if org, err := _store.OrgFindByName(user.Login); err == nil && org != nil {
-			org.IsUser = true
-			user.OrgID = org.ID
-
-			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
-			}
-		}
+		org, err := _store.OrgFindByName(user.Login, forgeID)
 		if err != nil && !errors.Is(err, types.RecordNotExist) {
-			log.Error().Err(err).Msgf("cannot get org %s", user.Login)
+			log.Error().Err(err).Msgf("cannot get org for user %s", user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
 
-		if user.OrgID == 0 {
+		// if an org with the same name exists => assign org to the user
+		if err == nil && org != nil {
+			org.IsUser = true
+			user.OrgID = org.ID
+
+			if err := _store.OrgUpdate(org); err != nil {
+				log.Error().Err(err).Msgf("cannot assign user %s to existing org %d", user.Login, org.ID)
+			}
+		}
+
+		// if still no org with the same name exists => create a new org
+		if user.OrgID == 0 || errors.Is(err, types.RecordNotExist) {
 			org := &model.Org{
 				Name:    user.Login,
 				IsUser:  true,
@@ -204,7 +228,7 @@ func HandleAuth(c *gin.Context) {
 				ForgeID: user.ForgeID,
 			}
 			if err := _store.OrgCreate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could not create org for user")
+				log.Error().Err(err).Msgf("cannot create org for user %s", user.Login)
 			}
 			user.OrgID = org.ID
 		}
@@ -212,21 +236,21 @@ func HandleAuth(c *gin.Context) {
 		// update org name if necessary
 		org, err := _store.OrgGet(user.OrgID)
 		if err != nil {
-			log.Error().Err(err).Msgf("cannot get org %s", user.Login)
+			log.Error().Err(err).Msgf("cannot get org %d for user %s", user.OrgID, user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
 		if org != nil && org.Name != user.Login {
 			org.Name = user.Login
 			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
+				log.Error().Err(err).Msgf("cannot update org %d name to user name %s", org.ID, user.Login)
 			}
 		}
 	}
 
 	// update the user meta data and authorization data.
-	user.Token = userFromForge.Token
-	user.Secret = userFromForge.Secret
+	user.AccessToken = userFromForge.AccessToken
+	user.RefreshToken = userFromForge.RefreshToken
 	user.Email = userFromForge.Email
 	user.Avatar = userFromForge.Avatar
 	user.ForgeID = forgeID
@@ -235,7 +259,7 @@ func HandleAuth(c *gin.Context) {
 	user.Admin = user.Admin || server.Config.Permissions.Admins.IsAdmin(userFromForge)
 
 	if err := _store.UpdateUser(user); err != nil {
-		log.Error().Err(err).Msgf("cannot update %s", user.Login)
+		log.Error().Err(err).Msgf("cannot update user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
@@ -245,14 +269,14 @@ func HandleAuth(c *gin.Context) {
 	_token.Set("user-id", strconv.FormatInt(user.ID, 10))
 	tokenString, err := _token.SignExpires(user.Hash, exp)
 	if err != nil {
-		log.Error().Msgf("cannot create token for %s", user.Login)
+		log.Error().Msgf("cannot create token for user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
 
 	err = updateRepoPermissions(c, user, _store, _forge)
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot update repo permissions for %s", user.Login)
+		log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
@@ -263,7 +287,15 @@ func HandleAuth(c *gin.Context) {
 }
 
 func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge) error {
-	repos, _ := _forge.Repos(c, user)
+	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
+		return _forge.Repos(c, user, &model.ListOptions{
+			Page:    page,
+			PerPage: perPage,
+		})
+	}, maxPage)
+	if err != nil {
+		return err
+	}
 
 	for _, forgeRepo := range repos {
 		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
@@ -278,7 +310,7 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 			continue
 		}
 
-		log.Debug().Msgf("synced user permission for %s %s", user.Login, dbRepo.FullName)
+		log.Debug().Msgf("synced user permission for user %s and repo %s", user.Login, dbRepo.FullName)
 		perm := forgeRepo.Perm
 		perm.Repo = dbRepo
 		perm.RepoID = dbRepo.ID

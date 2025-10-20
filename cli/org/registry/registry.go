@@ -19,7 +19,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 // Command exports the registry command set.
@@ -29,9 +29,9 @@ var Command = &cli.Command{
 	Commands: []*cli.Command{
 		registryCreateCmd,
 		registryDeleteCmd,
-		registryUpdateCmd,
-		registryInfoCmd,
 		registryListCmd,
+		registryShowCmd,
+		registryUpdateCmd,
 	},
 }
 

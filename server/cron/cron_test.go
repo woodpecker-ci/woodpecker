@@ -15,25 +15,24 @@
 package cron
 
 import (
-	"context"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	mocks_forge "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	mocks_manager "go.woodpecker-ci.org/woodpecker/v2/server/services/mocks"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestCreatePipeline(t *testing.T) {
-	_manager := mocks_manager.NewManager(t)
-	_forge := mocks_forge.NewForge(t)
-	store := mocks_store.NewStore(t)
-	ctx := context.Background()
+	_manager := manager_mocks.NewMockManager(t)
+	_forge := forge_mocks.NewMockForge(t)
+	store := store_mocks.NewMockStore(t)
+	ctx := t.Context()
 
 	creator := &model.User{
 		ID:    1,

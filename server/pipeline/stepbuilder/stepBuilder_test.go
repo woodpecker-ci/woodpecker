@@ -21,11 +21,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {
@@ -625,7 +625,7 @@ func TestSanitizePath(t *testing.T) {
 }
 
 func getMockForge(t *testing.T) forge.Forge {
-	forge := mocks.NewForge(t)
+	forge := mocks.NewMockForge(t)
 	forge.On("Name").Return("mock")
 	forge.On("URL").Return("https://codeberg.org")
 	return forge

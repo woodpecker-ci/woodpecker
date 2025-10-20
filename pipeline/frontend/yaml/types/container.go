@@ -19,9 +19,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
 )
 
 type (
@@ -32,36 +32,44 @@ type (
 
 	// Container defines a container.
 	Container struct {
-		BackendOptions map[string]any     `yaml:"backend_options,omitempty"`
-		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
-		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
-		Detached       bool               `yaml:"detach,omitempty"`
-		Directory      string             `yaml:"directory,omitempty"`
-		Failure        string             `yaml:"failure,omitempty"`
-		Image          string             `yaml:"image,omitempty"`
-		Name           string             `yaml:"name,omitempty"`
-		Pull           bool               `yaml:"pull,omitempty"`
-		Settings       map[string]any     `yaml:"settings"`
-		Volumes        Volumes            `yaml:"volumes,omitempty"`
-		When           constraint.When    `yaml:"when,omitempty"`
-		Ports          []string           `yaml:"ports,omitempty"`
-		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
+		// common
+		Name       string             `yaml:"name,omitempty"`
+		Image      string             `yaml:"image,omitempty"`
+		Pull       bool               `yaml:"pull,omitempty"`
+		Commands   base.StringOrSlice `yaml:"commands,omitempty"`
+		Entrypoint base.StringOrSlice `yaml:"entrypoint,omitempty"`
+		Directory  string             `yaml:"directory,omitempty"`
+		Settings   map[string]any     `yaml:"settings"`
+		// flow control
+		DependsOn base.StringOrSlice `yaml:"depends_on,omitempty"`
+		When      constraint.When    `yaml:"when,omitempty"`
+		Failure   string             `yaml:"failure,omitempty"`
+		Detached  bool               `yaml:"detach,omitempty"`
+		// state
+		Volumes Volumes `yaml:"volumes,omitempty"`
+		// network
+		Ports     []string           `yaml:"ports,omitempty"`
+		DNS       base.StringOrSlice `yaml:"dns,omitempty"`
+		DNSSearch base.StringOrSlice `yaml:"dns_search,omitempty"`
+		// backend specific
+		BackendOptions map[string]any `yaml:"backend_options,omitempty"`
 
-		Environment map[string]any `yaml:"environment,omitempty"`
+		// ACTIVE DEVELOPMENT BELOW
 
-		// Deprecated
-		Secrets []string `yaml:"secrets,omitempty"`
+		// TODO: remove base.EnvironmentMap and use map[string]any after v3.0.0 release
+		Environment base.EnvironmentMap `yaml:"environment,omitempty"`
+
+		// Remove after v3.1.0
+		Secrets []any `yaml:"secrets,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		Devices     []string           `yaml:"devices,omitempty"`
-		DNSSearch   base.StringOrSlice `yaml:"dns_search,omitempty"`
-		DNS         base.StringOrSlice `yaml:"dns,omitempty"`
-		ExtraHosts  []string           `yaml:"extra_hosts,omitempty"`
-		NetworkMode string             `yaml:"network_mode,omitempty"`
-		Tmpfs       []string           `yaml:"tmpfs,omitempty"`
+		Devices     []string `yaml:"devices,omitempty"`
+		ExtraHosts  []string `yaml:"extra_hosts,omitempty"`
+		NetworkMode string   `yaml:"network_mode,omitempty"`
+		Tmpfs       []string `yaml:"tmpfs,omitempty"`
 	}
 )
 

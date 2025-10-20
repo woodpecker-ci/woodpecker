@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestGetPipelineQueue(t *testing.T) {
@@ -27,9 +27,9 @@ func TestGetPipelineQueue(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 
@@ -48,14 +48,37 @@ func TestGetPipelineQueue(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 	pipeline1 := &model.Pipeline{
-		RepoID: repo1.ID,
-		Status: model.StatusPending,
+		RepoID:  repo1.ID,
+		Status:  model.StatusPending,
+		Number:  1,
+		Event:   "push",
+		Commit:  "abc123",
+		Branch:  "main",
+		Ref:     "refs/heads/main",
+		Message: "Initial commit",
+		Author:  "joe",
+		Email:   "foo@bar.com",
+		Title:   "First pipeline",
 	}
 	assert.NoError(t, store.CreatePipeline(pipeline1))
 
 	feed, err := store.GetPipelineQueue()
 	assert.NoError(t, err)
 	assert.Len(t, feed, 1)
+
+	feedItem := feed[0]
+	assert.Equal(t, repo1.ID, feedItem.RepoID)
+	assert.Equal(t, pipeline1.ID, feedItem.ID)
+	assert.Equal(t, pipeline1.Number, feedItem.Number)
+	assert.EqualValues(t, pipeline1.Event, feedItem.Event)
+	assert.EqualValues(t, pipeline1.Status, feedItem.Status)
+	assert.Equal(t, pipeline1.Commit, feedItem.Commit)
+	assert.Equal(t, pipeline1.Branch, feedItem.Branch)
+	assert.Equal(t, pipeline1.Ref, feedItem.Ref)
+	assert.Equal(t, pipeline1.Title, feedItem.Title)
+	assert.Equal(t, pipeline1.Message, feedItem.Message)
+	assert.Equal(t, pipeline1.Author, feedItem.Author)
+	assert.Equal(t, pipeline1.Email, feedItem.Email)
 }
 
 func TestUserFeed(t *testing.T) {
@@ -63,9 +86,9 @@ func TestUserFeed(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 
@@ -109,9 +132,9 @@ func TestRepoListLatest(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 

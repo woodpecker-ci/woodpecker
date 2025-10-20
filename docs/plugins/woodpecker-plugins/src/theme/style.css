@@ -57,8 +57,8 @@
   padding: 1rem 1rem 1rem 2.25rem;
   font-size: 1.1rem;
   appearance: none;
-  background: var(--ifm-navbar-search-input-background-color) var(--ifm-navbar-search-input-icon) no-repeat 0.75rem 1rem /
-    1.1rem 1.1rem;
+  background: var(--ifm-navbar-search-input-background-color) var(--ifm-navbar-search-input-icon) no-repeat 0.75rem
+    1rem / 1.1rem 1.1rem;
   border-radius: 0.5rem;
   border: 1px solid var(--ifm-card-background-color);
   color: var(--ifm-navbar-search-input-color);

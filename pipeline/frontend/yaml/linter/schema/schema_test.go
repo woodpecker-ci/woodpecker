@@ -21,7 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 )
 
 func TestSchema(t *testing.T) {
@@ -81,6 +81,10 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-merge-map-and-sequence.yaml",
 		},
 		{
+			name:     "Backend options",
+			testFile: ".woodpecker/test-backend-options.yaml",
+		},
+		{
 			name:     "Broken Config",
 			testFile: ".woodpecker/test-broken.yaml",
 			fail:     true,
@@ -109,6 +113,11 @@ func TestSchema(t *testing.T) {
 			name:     "Broken Plugin by commands",
 			testFile: ".woodpecker/test-broken-plugin2.yaml",
 			fail:     true,
+		},
+		{
+			name:     "Kubernetes backend tolerations",
+			testFile: ".woodpecker/test-kubernetes-backend-tolerations.yaml",
+			fail:     false,
 		},
 	}
 

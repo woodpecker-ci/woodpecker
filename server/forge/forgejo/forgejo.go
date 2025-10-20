@@ -20,23 +20,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"path"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
@@ -47,21 +45,21 @@ const (
 )
 
 type Forgejo struct {
-	url          string
-	oauth2URL    string
-	ClientID     string
-	ClientSecret string
-	SkipVerify   bool
-	pageSize     int
+	url               string
+	oauth2URL         string
+	oAuthClientID     string
+	oAuthClientSecret string
+	skipVerify        bool
+	pageSize          int
 }
 
 // Opts defines configuration options.
 type Opts struct {
-	URL        string // Forgejo server url.
-	OAuth2URL  string // User-facing Forgejo server url for OAuth2.
-	Client     string // OAuth2 Client ID
-	Secret     string // OAuth2 Client Secret
-	SkipVerify bool   // Skip ssl verification.
+	URL               string // Forgejo server url.
+	OAuth2URL         string // User-facing Forgejo server url for OAuth2.
+	OAuthClientID     string // OAuth2 Client ID
+	OAuthClientSecret string // OAuth2 Client Secret
+	SkipVerify        bool   // Skip ssl verification.
 }
 
 // New returns a Forge implementation that integrates with Forgejo,
@@ -72,11 +70,11 @@ func New(opts Opts) (forge.Forge, error) {
 	}
 
 	return &Forgejo{
-		url:          opts.URL,
-		oauth2URL:    opts.OAuth2URL,
-		ClientID:     opts.Client,
-		ClientSecret: opts.Secret,
-		SkipVerify:   opts.SkipVerify,
+		url:               opts.URL,
+		oauth2URL:         opts.OAuth2URL,
+		oAuthClientID:     opts.OAuthClientID,
+		oAuthClientSecret: opts.OAuthClientSecret,
+		skipVerify:        opts.SkipVerify,
 	}, nil
 }
 
@@ -92,8 +90,8 @@ func (c *Forgejo) URL() string {
 
 func (c *Forgejo) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
-			ClientID:     c.ClientID,
-			ClientSecret: c.ClientSecret,
+			ClientID:     c.oAuthClientID,
+			ClientSecret: c.oAuthClientSecret,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.oauth2URL),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.oauth2URL),
@@ -102,7 +100,7 @@ func (c *Forgejo) oauth2Config(ctx context.Context) (*oauth2.Config, context.Con
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.SkipVerify},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.skipVerify},
 			Proxy:           http.ProxyFromEnvironment,
 		}})
 }
@@ -133,8 +131,8 @@ func (c *Forgejo) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mo
 	}
 
 	return &model.User{
-		Token:         token.AccessToken,
-		Secret:        token.RefreshToken,
+		AccessToken:   token.AccessToken,
+		RefreshToken:  token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Login:         account.UserName,
 		Email:         account.Email,
@@ -164,8 +162,8 @@ func (c *Forgejo) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config.RedirectURL = ""
 
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.Token,
-		RefreshToken: user.Secret,
+		AccessToken:  user.AccessToken,
+		RefreshToken: user.RefreshToken,
 		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
@@ -174,34 +172,32 @@ func (c *Forgejo) Refresh(ctx context.Context, user *model.User) (bool, error) {
 		return false, err
 	}
 
-	user.Token = token.AccessToken
-	user.Secret = token.RefreshToken
+	user.AccessToken = token.AccessToken
+	user.RefreshToken = token.RefreshToken
 	user.Expiry = token.Expiry.UTC().Unix()
 	return true, nil
 }
 
 // Teams is supported by the Forgejo driver.
-func (c *Forgejo) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+func (c *Forgejo) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
-		orgs, _, err := client.ListMyOrgs(
-			forgejo.ListOrgsOptions{
-				ListOptions: forgejo.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+	orgs, _, err := client.ListMyOrgs(
+		forgejo.ListOrgsOptions{
+			ListOptions: forgejo.ListOptions{
+				Page:     p.Page,
+				PageSize: c.perPage(ctx, p.PerPage),
 			},
-		)
-		teams := make([]*model.Team, 0, len(orgs))
-		for _, org := range orgs {
-			teams = append(teams, toTeam(org, c.url))
-		}
-		return teams, err
-	})
+		},
+	)
+	teams := make([]*model.Team, 0, len(orgs))
+	for _, org := range orgs {
+		teams = append(teams, toTeam(org, c.url))
+	}
+	return teams, err
 }
 
 // TeamPerm is not supported by the Forgejo driver.
@@ -211,7 +207,7 @@ func (c *Forgejo) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 
 // Repo returns the Forgejo repository.
 func (c *Forgejo) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -237,23 +233,23 @@ func (c *Forgejo) Repo(ctx context.Context, u *model.User, remoteID model.ForgeR
 
 // Repos returns a list of all repositories for the Forgejo account, including
 // organization repositories.
-func (c *Forgejo) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+func (c *Forgejo) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	repos, err := shared_utils.Paginate(func(page int) ([]*forgejo.Repository, error) {
-		repos, _, err := client.ListMyRepos(
-			forgejo.ListReposOptions{
-				ListOptions: forgejo.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+	repos, _, err := client.ListMyRepos(
+		forgejo.ListReposOptions{
+			ListOptions: forgejo.ListOptions{
+				Page:     p.Page,
+				PageSize: c.perPage(ctx, p.PerPage),
 			},
-		)
-		return repos, err
-	})
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	result := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {
@@ -267,7 +263,7 @@ func (c *Forgejo) Repos(ctx context.Context, u *model.User) ([]*model.Repo, erro
 
 // File fetches the file from the Forgejo repository and returns its contents.
 func (c *Forgejo) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -282,27 +278,24 @@ func (c *Forgejo) File(ctx context.Context, u *model.User, r *model.Repo, b *mod
 func (c *Forgejo) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	var configs []*forge_types.FileMeta
 
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	// List files in repository. Path from root
-	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit, true)
+	// List files in repository
+	contents, resp, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
+		}
 		return nil, err
 	}
 
-	f = path.Clean(f) // We clean path and remove trailing slash
-	f += "/" + "*"    // construct pattern for match i.e. file in subdir
-	for _, e := range tree.Entries {
-		// Filter path matching pattern and type file (blob)
-		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
+	for _, e := range contents {
+		if e.Type == "file" {
 			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
-				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
-					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
-				}
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %w", e.Path, err)
 			}
 
@@ -318,7 +311,7 @@ func (c *Forgejo) Dir(ctx context.Context, u *model.User, r *model.Repo, b *mode
 
 // Status is supported by the Forgejo driver.
 func (c *Forgejo) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -346,7 +339,7 @@ func (c *Forgejo) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 	if u != nil {
 		login = u.Login
-		token = u.Token
+		token = u.AccessToken
 	}
 
 	host, err := common.ExtractHostFromCloneURL(r.Clone)
@@ -358,6 +351,7 @@ func (c *Forgejo) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    login,
 		Password: token,
 		Machine:  host,
+		Type:     model.ForgeTypeForgejo,
 	}, nil
 }
 
@@ -376,7 +370,7 @@ func (c *Forgejo) Activate(ctx context.Context, u *model.User, r *model.Repo, li
 		Active: true,
 	}
 
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -398,7 +392,7 @@ func (c *Forgejo) Activate(ctx context.Context, u *model.User, r *model.Repo, li
 // Deactivate deactivates the repository be removing repository push hooks from
 // the Forgejo repository.
 func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -407,11 +401,11 @@ func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, 
 		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, forgejo.ListHooksOptions{
 			ListOptions: forgejo.ListOptions{
 				Page:     page,
-				PageSize: c.perPage(ctx),
+				PageSize: c.perPage(ctx, c.pageSize),
 			},
 		})
 		return hooks, err
-	})
+	}, -1)
 	if err != nil {
 		return err
 	}
@@ -505,7 +499,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 		pipeline.Commit = sha
 	}
 
-	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) && len(pipeline.ChangedFiles) == 0 {
+	if pipeline != nil && pipeline.IsPullRequest() && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
 			return nil, nil, err
@@ -522,7 +516,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
 func (c *Forgejo) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -545,7 +539,7 @@ func (c *Forgejo) OrgMembership(ctx context.Context, u *model.User, owner string
 }
 
 func (c *Forgejo) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -575,7 +569,7 @@ func (c *Forgejo) Org(ctx context.Context, u *model.User, owner string) (*model.
 // newClientToken returns a Forgejo client with token.
 func (c *Forgejo) newClientToken(ctx context.Context, token string) (*forgejo.Client, error) {
 	httpClient := &http.Client{}
-	if c.SkipVerify {
+	if c.skipVerify {
 		httpClient.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
@@ -630,7 +624,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		return nil, err
 	}
 
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -647,7 +641,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 			files = append(files, file.Filename)
 		}
 		return files, nil
-	})
+	}, -1)
 }
 
 func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
@@ -667,7 +661,7 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 		return "", err
 	}
 
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return "", err
 	}
@@ -680,7 +674,7 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 	return tag.Commit.SHA, nil
 }
 
-func (c *Forgejo) perPage(ctx context.Context) int {
+func (c *Forgejo) perPage(ctx context.Context, customPerPage int) int {
 	if c.pageSize == 0 {
 		client, err := c.newClientToken(ctx, "")
 		if err != nil {
@@ -693,5 +687,11 @@ func (c *Forgejo) perPage(ctx context.Context) int {
 		}
 		c.pageSize = api.MaxResponseItems
 	}
-	return c.pageSize
+
+	pageSize := customPerPage
+	if pageSize == 0 || pageSize > c.pageSize {
+		pageSize = c.pageSize
+	}
+
+	return pageSize
 }

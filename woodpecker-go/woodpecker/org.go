@@ -1,10 +1,14 @@
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 const (
 	pathOrg           = "%s/api/orgs/%d"
 	pathOrgLookup     = "%s/api/orgs/lookup/%s"
+	pathOrgList       = "%s/api/orgs"
 	pathOrgSecrets    = "%s/api/orgs/%d/secrets"
 	pathOrgSecret     = "%s/api/orgs/%d/secrets/%s"
 	pathOrgRegistries = "%s/api/orgs/%d/registries"
@@ -27,6 +31,14 @@ func (c *client) OrgLookup(name string) (*Org, error) {
 	return out, err
 }
 
+func (c *client) OrgList(opt ListOptions) ([]*Org, error) {
+	var out []*Org
+	uri, _ := url.Parse(fmt.Sprintf(pathOrgList, c.addr))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
+	return out, err
+}
+
 // OrgSecret returns an organization secret by name.
 func (c *client) OrgSecret(orgID int64, secret string) (*Secret, error) {
 	out := new(Secret)
@@ -36,10 +48,11 @@ func (c *client) OrgSecret(orgID int64, secret string) (*Secret, error) {
 }
 
 // OrgSecretList returns a list of all organization secrets.
-func (c *client) OrgSecretList(orgID int64) ([]*Secret, error) {
+func (c *client) OrgSecretList(orgID int64, opt SecretListOptions) ([]*Secret, error) {
 	var out []*Secret
-	uri := fmt.Sprintf(pathOrgSecrets, c.addr, orgID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathOrgSecrets, c.addr, orgID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 
@@ -74,10 +87,11 @@ func (c *client) OrgRegistry(orgID int64, registry string) (*Registry, error) {
 }
 
 // OrgRegistryList returns a list of all organization registries.
-func (c *client) OrgRegistryList(orgID int64) ([]*Registry, error) {
+func (c *client) OrgRegistryList(orgID int64, opt RegistryListOptions) ([]*Registry, error) {
 	var out []*Registry
-	uri := fmt.Sprintf(pathOrgRegistries, c.addr, orgID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathOrgRegistries, c.addr, orgID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

@@ -38,14 +38,15 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"go.woodpecker-ci.org/woodpecker/v2/agent"
-	agent_rpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/agent"
+	agent_rpc "go.woodpecker-ci.org/woodpecker/v3/agent/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 const (
@@ -87,7 +88,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = int(c.Int("max-workflows"))
+	counter.Polling = c.Int("max-workflows")
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -139,7 +140,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
 	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval) //nolint:contextcheck
 	if err != nil {
-		return fmt.Errorf("could not create new auth interceptor: %w", err)
+		return fmt.Errorf("agent could not auth: %w", err)
 	}
 
 	conn, err := grpc.NewClient(
@@ -198,7 +199,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	maxWorkflows := int(c.Int("max-workflows"))
+	maxWorkflows := c.Int("max-workflows")
 
 	customLabels := make(map[string]string)
 	if err := stringSliceAddToMap(c.StringSlice("labels"), customLabels); err != nil {
@@ -245,12 +246,11 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 
 	// set default labels ...
-	labels := map[string]string{
-		"hostname": hostname,
-		"platform": engInfo.Platform,
-		"backend":  backendEngine.Name(),
-		"repo":     "*", // allow all repos by default
-	}
+	labels := make(map[string]string)
+	labels[pipeline.LabelFilterHostname] = hostname
+	labels[pipeline.LabelFilterPlatform] = engInfo.Platform
+	labels[pipeline.LabelFilterBackend] = backendEngine.Name()
+	labels[pipeline.LabelFilterRepo] = "*" // allow all repos by default
 	// ... and let it overwrite by custom ones
 	maps.Copy(labels, customLabels)
 
@@ -267,6 +267,11 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 			err := client.ReportHealth(grpcCtx)
 			if err != nil {
 				log.Err(err).Msg("failed to report health")
+				// Check if the error is due to context cancellation
+				if grpcCtx.Err() != nil || agentCtx.Err() != nil {
+					log.Debug().Msg("terminating health reporting due to context cancellation")
+					return nil
+				}
 			}
 
 			select {
@@ -278,8 +283,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		}
 	})
 
-	for i := 0; i < maxWorkflows; i++ {
-		i := i
+	// https://go.dev/blog/go1.22 fixed scope for goroutines in loops
+	for i := range maxWorkflows {
 		serviceWaitingGroup.Go(func() error {
 			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
@@ -291,8 +296,18 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 
 				log.Debug().Msg("polling new steps")
 				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
-					log.Error().Err(err).Msg("runner done with error")
-					return err
+					log.Error().Err(err).Msg("runner error, retrying...")
+					// Check if context is canceled
+					if agentCtx.Err() != nil {
+						return nil
+					}
+					// Wait a bit before retrying to avoid hammering the server
+					select {
+					case <-agentCtx.Done():
+						return nil
+					case <-time.After(time.Second * 5):
+						// Continue to next iteration
+					}
 				}
 			}
 		})
@@ -313,12 +328,12 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 
 		initHealth()
 
-		retryCount := int(c.Int("connect-retry-count"))
+		retryCount := c.Int("connect-retry-count")
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
-		for i := 0; i < retryCount; i++ {
+		for range retryCount {
 			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
-				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
+				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to %s, retrying in %v", c.String("server"), retryDelay))
 				time.Sleep(retryDelay)
 			} else {
 				break

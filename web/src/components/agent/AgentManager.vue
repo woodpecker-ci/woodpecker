@@ -1,6 +1,6 @@
 <template>
-  <Settings :title="$t('admin.settings.agents.agents')" :desc="desc">
-    <template #titleActions>
+  <Settings :title="$t('admin.settings.agents.agents')" :description>
+    <template #headerActions>
       <Button
         v-if="selectedAgent"
         :text="$t('admin.settings.agents.show')"
@@ -46,7 +46,7 @@ import AgentForm from './AgentForm.vue';
 import AgentList from './AgentList.vue';
 
 const props = defineProps<{
-  desc: string;
+  description: string;
   loadAgents: (page: number) => Promise<Agent[] | null>;
   createAgent: (agent: Partial<Agent>) => Promise<Agent>;
   updateAgent: (agent: Agent) => Promise<Agent | void>;
@@ -77,7 +77,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     title: isEditingAgent.value ? t('admin.settings.agents.saved') : t('admin.settings.agents.created'),
     type: 'success',
   });
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
@@ -88,7 +88,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 
   await props.deleteAgent(_agent);
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editAgent(agent: Agent) {

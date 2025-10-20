@@ -1,5 +1,6 @@
 import Fuse from 'fuse.js';
-import { computed, type Ref } from 'vue';
+import { computed } from 'vue';
+import type { Ref } from 'vue';
 
 import type { Repo } from '~/lib/api/types';
 

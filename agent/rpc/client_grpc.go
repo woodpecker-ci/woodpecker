@@ -20,16 +20,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
+	"github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	grpcproto "google.golang.org/protobuf/proto"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
 )
 
 const (
@@ -68,7 +68,6 @@ func (c *client) Close() error {
 
 func (c *client) newBackOff() backoff.BackOff {
 	b := backoff.NewExponentialBackOff()
-	b.MaxElapsedTime = 0
 	b.MaxInterval = 10 * time.Second          //nolint:mnd
 	b.InitialInterval = 10 * time.Millisecond //nolint:mnd
 	return b
@@ -522,10 +521,12 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
-			codes.Unavailable:
+			codes.Internal:
 			// non-fatal errors
 			log.Warn().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
+		case
+			// code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 1.2.3.4:443: i/o timeout\""
+			codes.Unavailable:
 		default:
 			log.Error().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
 			return err

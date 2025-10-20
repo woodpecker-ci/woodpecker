@@ -15,82 +15,114 @@
 package bitbucketdatacenter
 
 import (
-	"context"
 	"testing"
 	"time"
 
-	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
+
+func TestNew(t *testing.T) {
+	forge, err := New(Opts{
+		URL:               "http://localhost:8080",
+		Username:          "0ZXh0IjoiI",
+		Password:          "I1NiIsInR5",
+		OAuthClientID:     "client-id",
+		OAuthClientSecret: "client-secret",
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, forge)
+	cl, ok := forge.(*client)
+	assert.True(t, ok)
+	assert.Equal(t, &client{
+		url:          "http://localhost:8080",
+		urlAPI:       "http://localhost:8080/rest",
+		username:     "0ZXh0IjoiI",
+		password:     "I1NiIsInR5",
+		clientID:     "client-id",
+		clientSecret: "client-secret",
+	}, cl)
+}
 
 func TestBitbucketDC(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := fixtures.Server()
+	defer s.Close()
 	c := &client{
 		urlAPI: s.URL,
 	}
 
-	ctx := context.Background()
-	g := goblin.Goblin(t)
-	g.Describe("Bitbucket DataCenter/Server", func() {
-		g.After(func() {
-			s.Close()
-		})
+	server.Config.Server.StatusContext = "ci/woodpecker"
+	server.Config.Server.StatusContextFormat = "{{ .context }}/{{ .event }}/{{ .workflow }}"
 
-		g.Describe("Creating a forge", func() {
-			g.It("Should return client with specified options", func() {
-				forge, err := New(Opts{
-					URL:          "http://localhost:8080",
-					Username:     "0ZXh0IjoiI",
-					Password:     "I1NiIsInR5",
-					ClientID:     "client-id",
-					ClientSecret: "client-secret",
-				})
-				g.Assert(err).IsNil()
-				g.Assert(forge).IsNotNil()
-				cl, ok := forge.(*client)
-				g.Assert(ok).IsTrue()
-				g.Assert(cl.url).Equal("http://localhost:8080")
-				g.Assert(cl.username).Equal("0ZXh0IjoiI")
-				g.Assert(cl.password).Equal("I1NiIsInR5")
-				g.Assert(cl.clientID).Equal("client-id")
-				g.Assert(cl.clientSecret).Equal("client-secret")
-			})
-		})
+	ctx := t.Context()
 
-		g.Describe("Requesting a repository", func() {
-			g.It("should return repository details", func() {
-				repo, err := c.Repo(ctx, fakeUser, model.ForgeRemoteID("1234"), "PRJ", "repo-slug")
-				g.Assert(err).IsNil()
-				g.Assert(repo.Name).Equal("repo-slug-2")
-				g.Assert(repo.Owner).Equal("PRJ")
-				g.Assert(repo.Perm).Equal(&model.Perm{Pull: true, Push: true})
-				g.Assert(repo.Branch).Equal("main")
-			})
-		})
+	repo, err := c.Repo(ctx, fakeUser, model.ForgeRemoteID("1234"), "PRJ", "repo-slug")
+	assert.NoError(t, err)
+	assert.Equal(t, &model.Repo{
+		Name:          "repo-slug-2",
+		Owner:         "PRJ",
+		Perm:          &model.Perm{Pull: true, Push: true},
+		Branch:        "main",
+		IsSCMPrivate:  true,
+		PREnabled:     true,
+		ForgeRemoteID: model.ForgeRemoteID("1234"),
+		FullName:      "PRJ/repo-slug-2",
+	}, repo)
 
-		g.Describe("Getting organization", func() {
-			g.It("should map organization", func() {
-				org, err := c.Org(ctx, fakeUser, "ORG")
-				g.Assert(err).IsNil()
-				g.Assert(org.Name).Equal("ORG")
-				g.Assert(org.IsUser).IsFalse()
-			})
-			g.It("should map user organization", func() {
-				org, err := c.Org(ctx, fakeUser, "~ORG")
-				g.Assert(err).IsNil()
-				g.Assert(org.Name).Equal("~ORG")
-				g.Assert(org.IsUser).IsTrue()
-			})
-		})
-	})
+	// org
+	org, err := c.Org(ctx, fakeUser, "ORG")
+	assert.NoError(t, err)
+	assert.Equal(t, &model.Org{
+		Name:   "ORG",
+		IsUser: false,
+	}, org)
+
+	// user
+	org, err = c.Org(ctx, fakeUser, "~ORG")
+	assert.NoError(t, err)
+	assert.Equal(t, &model.Org{
+		Name:   "~ORG",
+		IsUser: true,
+	}, org)
+
+	// Execute the Status method
+	err = c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
+	assert.NoError(t, err)
 }
 
-var fakeUser = &model.User{
-	Token:  "fake",
-	Expiry: time.Now().Add(1 * time.Hour).Unix(),
-}
+var (
+	fakeUser = &model.User{
+		AccessToken: "fake",
+		Expiry:      time.Now().Add(1 * time.Hour).Unix(),
+	}
+
+	fakeRepo = &model.Repo{
+		ID:     1,
+		Owner:  "test-owner",
+		Name:   "test-repo",
+		Branch: "main",
+	}
+
+	fakePipeline = &model.Pipeline{
+		ID:       1,
+		Number:   42,
+		Commit:   "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		Started:  1759825800,
+		Finished: 1759825883,
+		Ref:      "refs/heads/feature-branch",
+		Event:    model.EventPush,
+	}
+
+	fakeWorkflow = &model.Workflow{
+		ID:    1,
+		PID:   1,
+		Name:  "build",
+		State: model.StatusSuccess,
+	}
+)

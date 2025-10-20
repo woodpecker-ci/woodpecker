@@ -2,6 +2,7 @@ import ApiClient, { encodeQueryString } from './client';
 import type {
   Agent,
   Cron,
+  ExtensionSettings,
   Forge,
   Org,
   OrgPermissions,
@@ -73,7 +74,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos?forge_remote_id=${forgeRemoteId}`) as Promise<Repo>;
   }
 
-  async updateRepo(repoId: number, repoSettings: RepoSettings): Promise<unknown> {
+  async updateRepo(repoId: number, repoSettings: Partial<RepoSettings & ExtensionSettings>): Promise<unknown> {
     return this._patch(`/api/repos/${repoId}`, repoSettings);
   }
 
@@ -105,7 +106,7 @@ export default class WoodpeckerClient extends ApiClient {
 
   async getPipelineList(
     repoId: number,
-    opts?: PaginationOptions & { before?: string; after?: string },
+    opts?: PaginationOptions & { before?: string; after?: string; ref?: string; branch?: string; events?: string },
   ): Promise<Pipeline[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/pipelines?${query}`) as Promise<Pipeline[]>;
@@ -303,6 +304,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   async getToken(): Promise<string> {
     return this._post('/api/user/token') as Promise<string>;
+  }
+
+  async getSignaturePublicKey(): Promise<string> {
+    return this._get('/api/signature/public-key') as Promise<string>;
   }
 
   async getAgents(opts?: PaginationOptions): Promise<Agent[] | null> {

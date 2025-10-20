@@ -27,7 +27,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // checkGitCloneCap check if we have the git binary on hand.
@@ -63,10 +63,6 @@ func (e *local) setupClone(state *workflowState) error {
 
 // execClone executes a clone-step locally.
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	if scm := step.Environment["CI_REPO_SCM"]; scm != "git" {
-		return fmt.Errorf("local backend can only clone from git repos, but this repo use '%s'", scm)
-	}
-
 	if err := checkGitCloneCap(); err != nil {
 		return fmt.Errorf("check for git clone capabilities failed: %w", err)
 	}
@@ -104,11 +100,19 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
-	// Get output and redirect Stderr to Stdout
-	e.output, _ = cmd.StdoutPipe()
-	cmd.Stderr = cmd.Stdout
+	reader, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
 
-	state.stepCMDs[step.UUID] = cmd
+	// Save state
+	state.stepState.Store(step.UUID, &stepState{
+		cmd:    cmd,
+		output: reader,
+	})
+
+	// Get output and redirect Stderr to Stdout
+	cmd.Stderr = cmd.Stdout
 
 	return cmd.Start()
 }

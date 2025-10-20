@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
 func TestConstraint(t *testing.T) {
@@ -233,7 +233,22 @@ func TestConstraintList(t *testing.T) {
 		{
 			conf: "{ include: [ '*.md' ], exclude: [ CHANGELOG.md ] }",
 			with: []string{"README.md", "CHANGELOG.md"},
+			want: true,
+		},
+		{
+			conf: "{ exclude: [ CHANGELOG.md ] }",
+			with: []string{"README.md", "CHANGELOG.md"},
+			want: true,
+		},
+		{
+			conf: "{ exclude: [ CHANGELOG.md, docs/**/*.md ] }",
+			with: []string{"docs/main.md", "CHANGELOG.md"},
 			want: false,
+		},
+		{
+			conf: "{ exclude: [ CHANGELOG.md, docs/**/*.md ] }",
+			with: []string{"docs/main.md", "CHANGELOG.md", "README.md"},
+			want: true,
 		},
 		// commit message ignore matches
 		{

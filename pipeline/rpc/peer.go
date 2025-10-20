@@ -18,7 +18,7 @@ package rpc
 import (
 	"context"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 type (
@@ -65,8 +65,6 @@ type (
 		CustomLabels map[string]string `json:"custom_labels"`
 	}
 )
-
-//go:generate mockery --name Peer --output mocks --case underscore --note "+build test"
 
 // Peer defines a peer-to-peer connection.
 type Peer interface {

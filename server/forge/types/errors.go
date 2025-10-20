@@ -29,7 +29,10 @@ type ErrIgnoreEvent struct {
 }
 
 func (err *ErrIgnoreEvent) Error() string {
-	return fmt.Sprintf("explicit ignored event '%s', reason: %s", err.Event, err.Reason)
+	if err.Reason != "" {
+		return fmt.Sprintf("explicit ignored event '%s', reason: %s", err.Event, err.Reason)
+	}
+	return fmt.Sprintf("explicit ignored event '%s'", err.Event)
 }
 
 func (*ErrIgnoreEvent) Is(target error) bool {

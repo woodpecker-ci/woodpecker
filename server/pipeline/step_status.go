@@ -16,12 +16,10 @@
 package pipeline
 
 import (
-	"time"
-
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) error {
@@ -43,42 +41,11 @@ func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) 
 	return store.StepUpdate(step)
 }
 
-func UpdateStepToStatusStarted(store store.Store, step model.Step, state rpc.StepState) (*model.Step, error) {
-	step.Started = state.Started
-	step.State = model.StatusRunning
-	return &step, store.StepUpdate(&step)
-}
-
 func UpdateStepToStatusSkipped(store store.Store, step model.Step, finished int64) (*model.Step, error) {
 	step.State = model.StatusSkipped
 	if step.Started != 0 {
 		step.State = model.StatusSuccess // for daemons that are killed
 		step.Finished = finished
 	}
-	return &step, store.StepUpdate(&step)
-}
-
-func UpdateStepStatusToDone(store store.Store, step model.Step, state rpc.StepState) (*model.Step, error) {
-	step.Finished = state.Finished
-	step.Error = state.Error
-	step.ExitCode = state.ExitCode
-	if state.Started == 0 {
-		step.State = model.StatusSkipped
-	} else {
-		step.State = model.StatusSuccess
-	}
-	if step.ExitCode != 0 || step.Error != "" {
-		step.State = model.StatusFailure
-	}
-	return &step, store.StepUpdate(&step)
-}
-
-func UpdateStepToStatusKilled(store store.Store, step model.Step) (*model.Step, error) {
-	step.State = model.StatusKilled
-	step.Finished = time.Now().Unix()
-	if step.Started == 0 {
-		step.Started = step.Finished
-	}
-	step.ExitCode = pipeline.ExitCodeKilled
 	return &step, store.StepUpdate(&step)
 }

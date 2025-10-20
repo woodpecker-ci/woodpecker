@@ -20,15 +20,22 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-// Refresher refreshes an oauth token and expiration for the given user. It
-// returns true if the token was refreshed, false if the token was not refreshed,
-// and error if it failed to refresh.
+// Refresher is an optional interface for OAuth token refresh support.
+//
+// Tokens are checked before each operation. If expiring within 30 minutes,
+// Refresh() is called automatically.
+//
+// Implementations: GitLab, Bitbucket (GitHub/Gitea tokens don't expire).
 type Refresher interface {
-	Refresh(context.Context, *model.User) (bool, error)
+	// Refresh attempts to refresh the user's OAuth access token.
+	// Should update u.AccessToken, u.RefreshToken, and u.Expiry.
+	// Returns true if any fields were updated.
+	// Caller must persist updated user to database.
+	Refresh(ctx context.Context, u *model.User) (bool, error)
 }
 
 func Refresh(c context.Context, forge Forge, _store store.Store, user *model.User) {

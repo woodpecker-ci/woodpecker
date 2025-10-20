@@ -39,7 +39,7 @@ func pinger(_ context.Context, c *cli.Command) error {
 	}
 
 	// if woodpecker do ssl on it's own
-	if c.String("server-cert") != "" || c.Bool("lets-encrypt") {
+	if c.String("server-cert") != "" {
 		scheme = "https"
 	}
 

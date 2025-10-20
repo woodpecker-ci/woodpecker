@@ -20,53 +20,60 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-const listLimit = 250
+const (
+	listLimit            = 250
+	millisecondsInSecond = 1000
+)
 
 // Opts defines configuration options.
 type Opts struct {
-	URL          string // Bitbucket server url for API access.
-	Username     string // Git machine account username.
-	Password     string // Git machine account password.
-	ClientID     string // OAuth 2.0 client id
-	ClientSecret string // OAuth 2.0 client secret
-	OAuthHost    string // OAuth 2.0 host
+	URL                          string // Bitbucket server url for API access.
+	Username                     string // Git machine account username.
+	Password                     string // Git machine account password.
+	OAuthClientID                string // OAuth 2.0 client id
+	OAuthClientSecret            string // OAuth 2.0 client secret
+	OAuthHost                    string // OAuth 2.0 host
+	OAuthEnableProjectAdminScope bool   // Whether to enable project admin scope. Should be set as default in the next major version.
 }
 
 type client struct {
-	url          string
-	urlAPI       string
-	clientID     string
-	clientSecret string
-	oauthHost    string
-	username     string
-	password     string
+	url                          string
+	urlAPI                       string
+	clientID                     string
+	clientSecret                 string
+	oauthHost                    string
+	username                     string
+	password                     string
+	oauthEnableProjectAdminScope bool
 }
 
 // New returns a Forge implementation that integrates with Bitbucket DataCenter/Server,
 // the on-premise edition of Bitbucket Cloud, formerly known as Stash.
 func New(opts Opts) (forge.Forge, error) {
 	config := &client{
-		url:          opts.URL,
-		urlAPI:       fmt.Sprintf("%s/rest", opts.URL),
-		clientID:     opts.ClientID,
-		clientSecret: opts.ClientSecret,
-		oauthHost:    opts.OAuthHost,
-		username:     opts.Username,
-		password:     opts.Password,
+		url:                          opts.URL,
+		urlAPI:                       fmt.Sprintf("%s/rest", opts.URL),
+		clientID:                     opts.OAuthClientID,
+		clientSecret:                 opts.OAuthClientSecret,
+		oauthHost:                    opts.OAuthHost,
+		username:                     opts.Username,
+		password:                     opts.Password,
+		oauthEnableProjectAdminScope: opts.OAuthEnableProjectAdminScope,
 	}
 
 	switch {
@@ -74,9 +81,9 @@ func New(opts Opts) (forge.Forge, error) {
 		return nil, fmt.Errorf("must have a git machine account username")
 	case opts.Password == "":
 		return nil, fmt.Errorf("must have a git machine account password")
-	case opts.ClientID == "":
+	case opts.OAuthClientID == "":
 		return nil, fmt.Errorf("must have an oauth 2.0 client id")
-	case opts.ClientSecret == "":
+	case opts.OAuthClientSecret == "":
 		return nil, fmt.Errorf("must have an oauth 2.0 client secret")
 	}
 
@@ -116,7 +123,7 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 		return nil, "", err
 	}
 
-	bc, err := c.newClient(ctx, &model.User{Token: token.AccessToken})
+	bc, err := c.newClient(ctx, &model.User{AccessToken: token.AccessToken})
 	if err != nil {
 		return nil, "", fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -143,7 +150,7 @@ func (c *client) Auth(ctx context.Context, accessToken, _ string) (string, error
 func (c *client) Refresh(ctx context.Context, u *model.User) (bool, error) {
 	config := c.newOAuth2Config()
 	t := &oauth2.Token{
-		RefreshToken: u.Secret,
+		RefreshToken: u.RefreshToken,
 	}
 	ts := config.TokenSource(ctx, t)
 
@@ -163,7 +170,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 
 	var repo *bb.Repository
 	if rID.IsValid() {
-		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
+		opts := &bb.RepositorySearchOptions{Name: name, ProjectKey: owner, Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
 		for {
 			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 			if err != nil {
@@ -204,13 +211,22 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 	return convertRepo(repo, perms, b.DisplayID), nil
 }
 
-func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we do not support pagination as we merge different responses together
+	// so first page returns all and we paginate here
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
+	opts := &bb.RepositorySearchOptions{
+		Permission:  bb.PermissionRepoWrite,
+		ListOptions: bb.ListOptions{Limit: listLimit},
+	}
 	all := make([]*model.Repo, 0)
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
@@ -259,7 +275,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 
 	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit)
 	if err != nil {
-		if resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			// requested directory might not exist
 			return nil, &forge_types.ErrConfigNotFound{
 				Configs: []string{f},
@@ -281,7 +297,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	for {
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
 		if err != nil {
-			if resp.StatusCode == http.StatusNotFound {
+			if resp != nil && resp.StatusCode == http.StatusNotFound {
 				// requested directory might not exist
 				return nil, &forge_types.ErrConfigNotFound{
 					Configs: []string{path},
@@ -311,10 +327,14 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		return fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 	status := &bb.BuildStatus{
-		State:       convertStatus(pipeline.Status),
+		State:       convertStatus(workflow.State),
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
-		Description: common.GetPipelineStatusDescription(pipeline.Status),
+		Description: common.GetPipelineStatusDescription(workflow.State),
+		Duration:    uint64((pipeline.Finished - pipeline.Started) * millisecondsInSecond),
+		Parent:      common.GetPipelineStatusContext(repo, pipeline, workflow),
+		DateAdded:   bb.DateTime(time.Unix(pipeline.Started, 0)),
+		Ref:         pipeline.Ref,
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
 	return err
@@ -330,6 +350,7 @@ func (c *client) Netrc(_ *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    c.username,
 		Password: c.password,
 		Machine:  host,
+		Type:     model.ForgeTypeBitbucketDatacenter,
 	}, nil
 }
 
@@ -341,7 +362,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	}
 
 	opts := &bb.BranchSearchOptions{ListOptions: convertListOptions(p)}
-	all := make([]string, 0)
+	all := make([]string, 0, p.PerPage)
 	for {
 		branches, resp, err := bc.Projects.SearchBranches(ctx, r.Owner, r.Name, opts)
 		if err != nil {
@@ -375,7 +396,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		if branch.DisplayID == b {
 			return &model.Commit{
 				SHA:      branch.LatestCommit,
-				ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, branch.LatestCommit),
+				ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), branch.LatestCommit),
 			}, nil
 		}
 	}
@@ -421,7 +442,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	webhook := &bb.Webhook{
 		Name:   "Woodpecker",
 		URL:    link,
-		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom, bb.EventKeyPullRequestMerged, bb.EventKeyPullRequestDeclined, bb.EventKeyPullRequestDeleted},
+		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom, bb.EventKeyPullRequestMerged, bb.EventKeyPullRequestDeclined, bb.EventKeyPullRequestDeleted, bb.EventKeyPullRequestOpened},
 		Active: true,
 		Config: &bb.WebhookConfiguration{
 			Secret: r.Hash,
@@ -472,37 +493,32 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 }
 
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	ev, payload, err := bb.ParsePayloadWithoutSignature(r)
+	hook, err := parseHook(r, c.url)
 	if err != nil {
-		return nil, nil, fmt.Errorf("unable to parse payload from webhook invocation: %w", err)
+		return nil, nil, fmt.Errorf("unable to parse hook: %w", err)
 	}
 
-	var repo *model.Repo
-	var pipe *model.Pipeline
-	switch e := ev.(type) {
-	case *bb.RepositoryPushEvent:
-		repo = convertRepo(&e.Repository, nil, "")
-		pipe = convertRepositoryPushEvent(e, c.url)
-	case *bb.PullRequestEvent:
-		repo = convertRepo(&e.PullRequest.Source.Repository, nil, "")
-		pipe = convertPullRequestEvent(e, c.url)
-	default:
-		return nil, nil, nil
-	}
-
-	user, repo, err := c.getUserAndRepo(ctx, repo)
+	user, repo, err := c.getUserAndRepo(ctx, hook.Repo)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to get user and repo: %w", err)
 	}
 
-	err = bb.ValidateSignature(r, payload, []byte(repo.Hash))
+	err = bb.ValidateSignature(r, hook.Payload, []byte(repo.Hash))
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to validate signature on incoming webhook payload: %w", err)
 	}
 
-	pipe, err = c.updatePipelineFromCommit(ctx, user, repo, pipe)
+	var pipe *model.Pipeline
+
+	switch e := hook.Event.(type) {
+	case *bb.RepositoryPushEvent:
+		pipe, err = c.updatePipelineFromCommit(ctx, user, repo, hook.Pipeline)
+	case *bb.PullRequestEvent:
+		pipe, err = c.updatePipelineFromPullRequest(ctx, user, repo, hook.Pipeline, e.PullRequest.ID)
+	}
+
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to update pipeline: %w", err)
 	}
 
 	if pipe == nil {
@@ -570,10 +586,60 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 	return p, nil
 }
 
-// Teams is not supported.
-func (*client) Teams(_ context.Context, _ *model.User) ([]*model.Team, error) {
-	var teams []*model.Team
-	return teams, nil
+func (c *client) updatePipelineFromPullRequest(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, pullRequestID uint64) (*model.Pipeline, error) {
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
+	}
+
+	opts := &bb.ListOptions{}
+	for {
+		changes, resp, err := bc.Projects.ListPullRequestChanges(ctx, r.Owner, r.Name, pullRequestID, opts)
+		if err != nil {
+			return nil, fmt.Errorf("unable to list changes in pull request: %w", err)
+		}
+		for _, ch := range changes {
+			p.ChangedFiles = append(p.ChangedFiles, ch.Path.Title)
+		}
+		if resp.LastPage {
+			break
+		}
+		opts.Start = resp.NextPageStart
+	}
+
+	return p, nil
+}
+
+// Teams fetches all the projects for a given user and converts them into teams.
+func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	if p.Page != 1 {
+		return make([]*model.Team, 0), nil
+	}
+
+	opts := convertListOptions(p)
+	allProjects := make([]*bb.Project, 0)
+
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create client: %w", err)
+	}
+
+	for {
+		projects, resp, err := bc.Projects.ListProjects(ctx, &opts)
+		if err != nil {
+			return nil, fmt.Errorf("unable to fetch projects: %w", err)
+		}
+
+		allProjects = append(allProjects, projects...)
+
+		if resp.LastPage {
+			break
+		}
+
+		opts.Start = resp.NextPageStart
+	}
+
+	return convertProjectsToTeams(allProjects, bc), nil
 }
 
 // TeamPerm is not supported.
@@ -583,9 +649,69 @@ func (*client) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
-func (c *client) OrgMembership(_ context.Context, _ *model.User, _ string) (*model.OrgPerm, error) {
-	// TODO: Not implemented currently
-	return nil, nil
+func (c *client) OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
+	if !c.oauthEnableProjectAdminScope {
+		// This method cannot be implemented without the PROJECT_ADMIN scope included in the OAuth2 configuration
+		return nil, nil
+	}
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
+	}
+
+	// Check if the user is Bitbucket project admin
+	if c.hasProjectAdminAccess(ctx, bc, org) {
+		return &model.OrgPerm{Member: true, Admin: true}, nil
+	}
+
+	// User is not Bitbucket project admin, check if they have write access to any repositories in the Bitbucket project.
+	// If they have, they are considered to be an organization member.
+	hasMembership, err := c.hasRepositoryWriteAccess(ctx, org, bc)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check repository access: %w", err)
+	}
+
+	if hasMembership {
+		return &model.OrgPerm{Member: true, Admin: false}, nil
+	}
+
+	return &model.OrgPerm{Member: false, Admin: false}, nil
+}
+
+func (c *client) hasProjectAdminAccess(ctx context.Context, client *bb.Client, org string) bool {
+	// If the user can access project permissions, the user has project admin access in the Bitbucket
+	perms, _, err := client.Projects.SearchProjectPermissions(ctx, org, &bb.ProjectPermissionSearchOptions{})
+	if err == nil && len(perms) > 0 {
+		return true
+	}
+	return false
+}
+
+func (c *client) hasRepositoryWriteAccess(ctx context.Context, org string, client *bb.Client) (bool, error) {
+	opts := &bb.RepositorySearchOptions{
+		Archived:   "ACTIVE",
+		ProjectKey: org,
+		Permission: bb.PermissionRepoWrite,
+	}
+
+	for {
+		repos, resp, err := client.Projects.SearchRepositories(ctx, opts)
+		if err != nil {
+			return false, fmt.Errorf("failed to search repositories: %w", err)
+		}
+
+		// If we find any repositories with write access, user has membership
+		if len(repos) > 0 {
+			return true, nil
+		}
+
+		if resp.LastPage {
+			break
+		}
+		opts.Start = resp.NextPageStart
+	}
+
+	return false, nil
 }
 
 // Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
@@ -608,6 +734,17 @@ func (c *client) newOAuth2Config() *oauth2.Config {
 		publicOAuthURL = c.urlAPI
 	}
 
+	scopes := []string{
+		string(bb.PermissionRepoRead),
+		string(bb.PermissionRepoWrite),
+		string(bb.PermissionRepoAdmin),
+	}
+
+	// TODO: Remove this feature flag in the next major version and always include project admin scope
+	if c.oauthEnableProjectAdminScope {
+		scopes = append(scopes, string(bb.PermissionProjectAdmin))
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.clientID,
 		ClientSecret: c.clientSecret,
@@ -615,7 +752,7 @@ func (c *client) newOAuth2Config() *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", publicOAuthURL),
 			TokenURL: fmt.Sprintf("%s/oauth2/latest/token", c.urlAPI),
 		},
-		Scopes:      []string{string(bb.PermissionRepoRead), string(bb.PermissionRepoWrite), string(bb.PermissionRepoAdmin)},
+		Scopes:      scopes,
 		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
@@ -623,7 +760,7 @@ func (c *client) newOAuth2Config() *oauth2.Config {
 func (c *client) newClient(ctx context.Context, u *model.User) (*bb.Client, error) {
 	config := c.newOAuth2Config()
 	t := &oauth2.Token{
-		AccessToken: u.Token,
+		AccessToken: u.AccessToken,
 	}
 	client := config.Client(ctx, t)
 	return bb.NewClient(c.urlAPI, client)

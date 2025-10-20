@@ -22,10 +22,10 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // toRepo converts a Forgejo repository to a Woodpecker repository.
@@ -37,7 +37,6 @@ func toRepo(from *forgejo.Repository) *model.Repo {
 	)
 	return &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
-		SCMKind:       model.RepoGit,
 		Name:          name,
 		Owner:         from.Owner.UserName,
 		FullName:      from.FullName,
@@ -150,8 +149,17 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	)
 
 	event := model.EventPull
-	if hook.Action == actionClose {
+	switch hook.Action {
+	case actionClose:
 		event = model.EventPullClosed
+	case actionEdited,
+		actionLabelUpdate,
+		actionLabelCleared,
+		actionMilestoned,
+		actionDeMilestoned,
+		actionAssigned,
+		actionUnAssigned:
+		event = model.EventPullMetadata
 	}
 
 	pipeline := &model.Pipeline{
@@ -170,10 +178,23 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
+		PullRequestLabels:    convertLabels(hook.PullRequest.Labels),
+		PullRequestMilestone: convertMilestone(hook.PullRequest.Milestone),
+		FromFork:             hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+	}
+
+	if pipeline.Event == model.EventPullMetadata {
+		pipeline.EventReason = []string{hook.Action}
 	}
 
 	return pipeline
+}
+
+func convertMilestone(milestone *forgejo.Milestone) string {
+	if milestone == nil || milestone.ID == 0 {
+		return ""
+	}
+	return milestone.Title
 }
 
 func pipelineFromRelease(hook *releaseHook) *model.Pipeline {

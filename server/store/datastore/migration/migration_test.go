@@ -15,7 +15,6 @@
 package migration
 
 import (
-	"context"
 	"os"
 	"testing"
 	"time"
@@ -57,14 +56,14 @@ func createSQLiteDB(t *testing.T) string {
 	return tmpF.Name()
 }
 
-func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
+func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) {
 	driver := testDriver()
 	var err error
 	closeDB = func() {}
 	switch driver {
 	case "sqlite3":
 		config := ":memory:"
-		if !new {
+		if !initNewDB {
 			config = createSQLiteDB(t)
 			closeDB = func() {
 				_ = os.Remove(config)
@@ -74,10 +73,10 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		return
+		return engine, closeDB
 	case "mysql", "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
-		if !new {
+		if !initNewDB {
 			t.Logf("do not have dump to test against")
 			t.SkipNow()
 		}
@@ -85,18 +84,18 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		return
+		return engine, closeDB
 	default:
 		t.Errorf("unsupported driver: %s", driver)
 		t.FailNow()
 	}
-	return
+	return engine, closeDB
 }
 
 func TestMigrate(t *testing.T) {
 	// init new db
 	engine, closeDB := testDB(t, true)
-	assert.NoError(t, Migrate(context.Background(), engine, true))
+	assert.NoError(t, Migrate(t.Context(), engine, true))
 	closeDB()
 
 	dbType := engine.Dialect().URI().DBType
@@ -107,6 +106,6 @@ func TestMigrate(t *testing.T) {
 
 	// migrate old db
 	engine, closeDB = testDB(t, false)
-	assert.NoError(t, Migrate(context.Background(), engine, true))
+	assert.NoError(t, Migrate(t.Context(), engine, true))
 	closeDB()
 }

@@ -24,12 +24,12 @@ func receiveTokenFromUI(c context.Context, serverURL string) (string, error) {
 	srv.Handler = setupRouter(tokenReceived)
 
 	go func() {
-		log.Debug().Msgf("Listening for token response on :%d", port)
+		log.Debug().Msgf("listening for token response on :%d", port)
 		_ = srv.ListenAndServe()
 	}()
 
 	defer func() {
-		log.Debug().Msg("Shutting down server")
+		log.Debug().Msg("shutting down server")
 		_ = srv.Shutdown(c)
 	}()
 
@@ -90,7 +90,7 @@ func setupRouter(tokenReceived chan string) *gin.Engine {
 
 		err := c.BindJSON(&data)
 		if err != nil {
-			log.Debug().Err(err).Msg("Failed to bind JSON")
+			log.Debug().Err(err).Msg("failed to bind JSON")
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "invalid request",
 			})
@@ -110,7 +110,7 @@ func setupRouter(tokenReceived chan string) *gin.Engine {
 func openBrowser(url string) error {
 	var err error
 
-	log.Debug().Msgf("Opening browser with URL: %s", url)
+	log.Debug().Msgf("opening browser with URL: %s", url)
 
 	switch runtime.GOOS {
 	case "linux":

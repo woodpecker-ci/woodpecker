@@ -18,33 +18,36 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	"codeberg.org/6543/xyaml"
 	"github.com/drone/envsubst"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	"go.uber.org/multierr"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/lint"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
-	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
+	pipelineLog "go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // Command exports the exec command.
@@ -77,8 +80,11 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
+
+	var execErr error
+
 	// TODO: respect depends_on and do parallel runs with output to multiple _windows_ e.g. tmux like
-	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
+	walkErr := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
@@ -86,13 +92,23 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
-			_ = runExec(ctx, c, path, repoPath, false) // TODO: should we drop errors or store them and report back?
+			err := runExec(ctx, c, path, repoPath, false)
+			if err != nil {
+				fmt.Print(err)
+				execErr = multierr.Append(execErr, err)
+			}
 			fmt.Println("")
 			return nil
 		}
 
 		return nil
 	})
+
+	if walkErr != nil {
+		return walkErr
+	}
+
+	return execErr
 }
 
 func execFile(ctx context.Context, c *cli.Command, file string) error {
@@ -146,13 +162,32 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	}
 
 	environ := metadata.Environ()
+	maps.Copy(environ, metadata.Workflow.Matrix)
 	var secrets []compiler.Secret
-	for key, val := range metadata.Workflow.Matrix {
-		environ[key] = val
+	for key, val := range c.StringMap("secrets") {
 		secrets = append(secrets, compiler.Secret{
 			Name:  key,
 			Value: val,
 		})
+	}
+	if secretsFile := c.String("secrets-file"); secretsFile != "" {
+		fileContent, err := os.ReadFile(secretsFile)
+		if err != nil {
+			return err
+		}
+
+		var m map[string]string
+		err = xyaml.Unmarshal(fileContent, &m)
+		if err != nil {
+			return err
+		}
+
+		for key, val := range m {
+			secrets = append(secrets, compiler.Secret{
+				Name:  key,
+				Value: val,
+			})
+		}
 	}
 
 	pipelineEnv := make(map[string]string)
@@ -220,7 +255,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		Workflow:  conf,
 	}})
 	if err != nil {
-		str, err := lint.FormatLintError(file, err)
+		str, err := lint.FormatLintError(file, err, false)
 		fmt.Print(str)
 		if err != nil {
 			return err

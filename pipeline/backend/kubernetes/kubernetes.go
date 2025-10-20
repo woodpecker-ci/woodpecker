@@ -23,8 +23,11 @@ import (
 	"os"
 	"runtime"
 	"slices"
+	"strconv"
+	"strings"
 	"time"
 
+	backoff "github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
@@ -37,13 +40,15 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 )
 
 const (
 	EngineName = "kubernetes"
 	// TODO: 5 seconds is against best practice, k3s didn't work otherwise
 	defaultResyncDuration = 5 * time.Second
+	maxRetryDuration      = 1 * time.Minute
 )
 
 var defaultDeleteOptions = newDefaultDeleteOptions()
@@ -56,6 +61,7 @@ type kube struct {
 
 type config struct {
 	Namespace                   string
+	EnableNamespacePerOrg       bool
 	StorageClass                string
 	VolumeSize                  string
 	StorageRwx                  bool
@@ -64,10 +70,21 @@ type config struct {
 	PodAnnotations              map[string]string
 	PodAnnotationsAllowFromStep bool
 	PodNodeSelector             map[string]string
+	PodTolerationsAllowFromStep bool
+	PodTolerations              []Toleration
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 	NativeSecretsAllowFromStep  bool
+	PriorityClassName           string
 }
+
+func (c *config) GetNamespace(orgID int64) string {
+	if c.EnableNamespacePerOrg {
+		return strings.ToLower(fmt.Sprintf("%s-%s", c.Namespace, strconv.FormatInt(orgID, 10)))
+	}
+	return c.Namespace
+}
+
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
 	FSGroup      *int64
@@ -88,13 +105,16 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 		if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
 			config := config{
 				Namespace:                   c.String("backend-k8s-namespace"),
+				EnableNamespacePerOrg:       c.Bool("backend-k8s-namespace-per-org"),
 				StorageClass:                c.String("backend-k8s-storage-class"),
 				VolumeSize:                  c.String("backend-k8s-volume-size"),
 				StorageRwx:                  c.Bool("backend-k8s-storage-rwx"),
+				PriorityClassName:           c.String("backend-k8s-priority-class"),
 				PodLabels:                   make(map[string]string), // just init empty map to prevent nil panic
 				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
 				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+				PodTolerationsAllowFromStep: c.Bool("backend-k8s-pod-tolerations-allow-from-step"),
 				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
@@ -122,6 +142,13 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					return nil, err
 				}
 			}
+			if podTolerations := c.String("backend-k8s-pod-tolerations"); podTolerations != "" {
+				if err := yaml.Unmarshal([]byte(podTolerations), &config.PodTolerations); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal pod tolerations '%s'", podTolerations)
+					return nil, err
+				}
+			}
+
 			return &config, nil
 		}
 	}
@@ -191,20 +218,30 @@ func (e *kube) getConfig() *config {
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
-	for _, vol := range conf.Volumes {
-		_, err := startVolume(ctx, e, vol.Name)
+	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
+
+	if e.config.EnableNamespacePerOrg {
+		err := mkNamespace(ctx, e.client.CoreV1().Namespaces(), namespace)
 		if err != nil {
 			return err
 		}
 	}
 
+	_, err := startVolume(ctx, e, conf.Volume, namespace)
+	if err != nil {
+		return err
+	}
+
 	var extraHosts []types.HostAlias
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if step.Type == types.StepTypeService {
+			if isService(step) {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
-					return err
+					return &pipelineErrors.ErrInvalidWorkflowSetup{
+						Err:  err,
+						Step: step,
+					}
 				}
 				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
 				extraHosts = append(extraHosts, hostAlias)
@@ -235,8 +272,15 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 		}
 	}
 
+	if needsStepSecret(step) {
+		err = startStepSecret(ctx, e, step)
+		if err != nil {
+			return err
+		}
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err = startPod(ctx, e, step, options)
+	_, err = startPod(ctx, e, step, options, taskUUID)
 	return err
 }
 
@@ -252,10 +296,10 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(_, new any) {
-		pod, ok := new.(*v1.Pod)
+	podUpdated := func(_, newPod any) {
+		pod, ok := newPod.(*v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
 
@@ -271,7 +315,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.Namespace))
+	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
@@ -287,7 +331,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// TODO: Cancel on ctx.Done
 	<-finished
 
-	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, meta_v1.GetOptions{})
+	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, meta_v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -328,10 +372,10 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(_, new any) {
-		pod, ok := new.(*v1.Pod)
+	podUpdated := func(_, newPod any) {
+		pod, ok := newPod.(*v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
 
@@ -346,7 +390,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.Namespace))
+	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
@@ -366,13 +410,22 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		Container: podName,
 	}
 
-	logs, err := e.client.CoreV1().RESTClient().Get().
-		Namespace(e.config.Namespace).
-		Name(podName).
-		Resource("pods").
-		SubResource("log").
-		VersionedParams(opts, scheme.ParameterCodec).
-		Stream(ctx)
+	logs, err := backoff.Retry(ctx,
+		func() (io.ReadCloser, error) {
+			return e.client.CoreV1().RESTClient().Get().
+				Namespace(e.config.GetNamespace(step.OrgID)).
+				Name(podName).
+				Resource("pods").
+				SubResource("log").
+				VersionedParams(opts, scheme.ParameterCodec).
+				Stream(ctx)
+		},
+		backoff.WithBackOff(backoff.NewExponentialBackOff()),
+		backoff.WithMaxElapsedTime(maxRetryDuration),
+		backoff.WithNotify(func(err error, delay time.Duration) {
+			log.Warn().Err(err).Str("pod", podName).Dur("backoff", delay).Msg("failed to open pod log stream, retrying with backoff")
+		}),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +434,6 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	go func() {
 		defer logs.Close()
 		defer wc.Close()
-		defer rc.Close()
 
 		_, err = io.Copy(wc, logs)
 		if err != nil {
@@ -396,6 +448,13 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	if needsRegistrySecret(step) {
 		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if needsStepSecret(step) {
+		err := stopStepSecret(ctx, e, step, defaultDeleteOptions)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -419,7 +478,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 				return err
 			}
 
-			if step.Type == types.StepTypeService {
+			if isService(step) {
 				err := stopService(ctx, e, step, defaultDeleteOptions)
 				if err != nil {
 					return err
@@ -428,11 +487,9 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		}
 	}
 
-	for _, vol := range conf.Volumes {
-		err := stopVolume(ctx, e, vol.Name, defaultDeleteOptions)
-		if err != nil {
-			return err
-		}
+	err := stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
+	if err != nil {
+		return err
 	}
 
 	return nil

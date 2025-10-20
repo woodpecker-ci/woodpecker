@@ -18,7 +18,9 @@ import (
 	"encoding/base32"
 	"fmt"
 
-	"github.com/gorilla/securecookie"
+	"github.com/google/tink/go/subtle/random"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 type Agent struct {
@@ -38,11 +40,10 @@ type Agent struct {
 	CustomLabels map[string]string `json:"custom_labels" xorm:"JSON 'custom_labels'"`
 	// OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
 	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
-} //	@name Agent
+} //	@name	Agent
 
 const (
-	IDNotSet         = -1
-	agentFilterOrgID = "org-id"
+	IDNotSet = -1
 )
 
 // TableName return database table name for xorm.
@@ -55,7 +56,7 @@ func (a *Agent) IsSystemAgent() bool {
 }
 
 func GenerateNewAgentToken() string {
-	return base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32))
+	return base32.StdEncoding.EncodeToString(random.GetRandomBytes(32))
 }
 
 func (a *Agent) GetServerLabels() (map[string]string, error) {
@@ -63,9 +64,9 @@ func (a *Agent) GetServerLabels() (map[string]string, error) {
 
 	// enforce filters for user and organization agents
 	if a.OrgID != IDNotSet {
-		filters[agentFilterOrgID] = fmt.Sprintf("%d", a.OrgID)
+		filters[pipeline.LabelFilterOrg] = fmt.Sprintf("%d", a.OrgID)
 	} else {
-		filters[agentFilterOrgID] = "*"
+		filters[pipeline.LabelFilterOrg] = "*"
 	}
 
 	return filters, nil

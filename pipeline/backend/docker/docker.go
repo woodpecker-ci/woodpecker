@@ -22,21 +22,22 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/containerd/errdefs"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/api/types/volume"
+	"github.com/docker/docker/client"
+	json_message "github.com/docker/docker/pkg/jsonmessage"
+	std_copy "github.com/docker/docker/pkg/stdcopy"
 	tls_config "github.com/docker/go-connections/tlsconfig"
-	"github.com/moby/moby/client"
-	json_message "github.com/moby/moby/pkg/jsonmessage"
-	std_copy "github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 type docker struct {
@@ -46,6 +47,7 @@ type docker struct {
 }
 
 const (
+	EngineName          = "docker"
 	networkDriverNAT    = "nat"
 	networkDriverBridge = "bridge"
 	volumeDriver        = "local"
@@ -59,7 +61,7 @@ func New() backend.Backend {
 }
 
 func (e *docker) Name() string {
-	return "docker"
+	return EngineName
 }
 
 func (e *docker) IsAvailable(ctx context.Context) bool {
@@ -143,36 +145,34 @@ func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
 func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
-	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
-			Name:   vol.Name,
-			Driver: volumeDriver,
-		})
-		if err != nil {
-			return err
-		}
+	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
+		Name:   conf.Volume,
+		Driver: volumeDriver,
+	})
+	if err != nil {
+		return err
 	}
 
 	networkDriver := networkDriverBridge
 	if e.info.OSType == "windows" {
 		networkDriver = networkDriverNAT
 	}
-	for _, n := range conf.Networks {
-		_, err := e.client.NetworkCreate(ctx, n.Name, network.CreateOptions{
-			Driver:     networkDriver,
-			EnableIPv6: &e.config.enableIPv6,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	_, err = e.client.NetworkCreate(ctx, conf.Network, network.CreateOptions{
+		Driver:     networkDriver,
+		EnableIPv6: &e.config.enableIPv6,
+	})
+	return err
 }
 
 func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+	options, err := parseBackendOptions(step)
+	if err != nil {
+		log.Error().Err(err).Msg("could not parse backend options")
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	config := e.toConfig(step)
+	config := e.toConfig(step, options)
 	hostConfig := toHostConfig(step, &e.config)
 	containerName := toContainerName(step)
 
@@ -204,8 +204,8 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	// add default volumes to the host configuration
 	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
 
-	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
-	if client.IsErrNotFound(err) {
+	_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
+	if errdefs.IsNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
 		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
@@ -248,14 +248,17 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+	log := log.Logger.With().Str("taskUUID", taskUUID).Str("stepUUID", step.UUID).Logger()
+	log.Trace().Msgf("wait for step %s", step.Name)
 
 	containerName := toContainerName(step)
 
 	wait, errC := e.client.ContainerWait(ctx, containerName, "")
 	select {
-	case <-wait:
-	case <-errC:
+	case resp := <-wait:
+		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
+	case err := <-errC:
+		log.Trace().Msgf("ContainerWait returned with err: %v", err)
 	}
 
 	info, err := e.client.ContainerInspect(ctx, containerName)
@@ -324,15 +327,11 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, task
 			}
 		}
 	}
-	for _, v := range conf.Volumes {
-		if err := e.client.VolumeRemove(ctx, v.Name, true); err != nil {
-			log.Error().Err(err).Msgf("could not remove volume '%s'", v.Name)
-		}
+	if err := e.client.VolumeRemove(ctx, conf.Volume, true); err != nil {
+		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume)
 	}
-	for _, n := range conf.Networks {
-		if err := e.client.NetworkRemove(ctx, n.Name); err != nil {
-			log.Error().Err(err).Msgf("could not remove network '%s'", n.Name)
-		}
+	if err := e.client.NetworkRemove(ctx, conf.Network); err != nil {
+		log.Error().Err(err).Msgf("could not remove network '%s'", conf.Network)
 	}
 	return nil
 }
@@ -358,6 +357,8 @@ func normalizeArchType(s string) string {
 	switch s {
 	case "x86_64":
 		return "amd64"
+	case "aarch64":
+		return "arm64"
 	default:
 		return s
 	}

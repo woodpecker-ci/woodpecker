@@ -11,6 +11,6 @@ contents:
   - src: ./dist/server/linux_amd64/woodpecker-server
     dst: /usr/local/bin/woodpecker-server
   - src: ./nfpm/woodpecker-server.service
-    dst: /usr/local/lib/systemd/system/
+    dst: /usr/local/lib/systemd/system/woodpecker-server.service
   - src: ./nfpm/woodpecker-server.env.example
-    dst: /etc/woodpecker/
+    dst: /etc/woodpecker/woodpecker-server.env.example

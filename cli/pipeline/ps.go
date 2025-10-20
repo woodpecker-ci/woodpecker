@@ -23,8 +23,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var pipelinePsCmd = &cli.Command{
@@ -32,7 +33,7 @@ var pipelinePsCmd = &cli.Command{
 	Usage:     "show pipeline steps",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelinePs,
-	Flags:     []cli.Flag{common.FormatFlag(tmplPipelinePs)},
+	Flags:     []cli.Flag{common.FormatFlag(tmplPipelinePs, false)},
 }
 
 func pipelinePs(ctx context.Context, c *cli.Command) error {
@@ -51,7 +52,7 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(repoID, "")
+		pipeline, err := client.PipelineLast(repoID, woodpecker.PipelineLastOptions{})
 		if err != nil {
 			return err
 		}

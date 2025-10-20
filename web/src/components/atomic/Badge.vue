@@ -1,14 +1,21 @@
 <template>
-  <span class="text-xs font-medium inline-flex">
+  <span class="inline-flex items-center text-xs font-medium">
     <span
-      class="pl-2 pr-1 py-0.5 bg-wp-state-neutral-100 text-gray-300 border-2 border-wp-state-neutral-100 rounded-l-full"
+      v-if="label"
+      class="border-wp-state-neutral-100 bg-wp-state-neutral-100 rounded-l-full border-1 py-0.5 pl-2 whitespace-nowrap text-white"
       :class="{
-        'rounded-r-full pr-2': value === undefined,
+        'rounded-r-full pr-2': !value,
       }"
     >
       {{ label }}
     </span>
-    <span v-if="value !== undefined" class="pl-1 pr-2 py-0.5 border-2 border-wp-state-neutral-100 rounded-r-full">
+    <span
+      v-if="value"
+      class="border-wp-state-neutral-100 rounded-r-full border-1 py-0.5 pr-2 pl-1 whitespace-nowrap"
+      :class="{
+        'rounded-l-full pl-2': !label,
+      }"
+    >
       {{ value }}
     </span>
   </span>
@@ -16,7 +23,7 @@
 
 <script lang="ts" setup>
 defineProps<{
-  label: string;
+  label?: string;
   value?: string | number;
 }>();
 </script>

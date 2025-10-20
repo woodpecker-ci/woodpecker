@@ -32,6 +32,7 @@ export default antfu(
       'perfectionist/sort-imports': 'off',
       'perfectionist/sort-named-imports': 'off',
       'promise/prefer-await-to-callbacks': 'error',
+      'vue-scoped-css/no-parsing-error': 'off',
 
       // Vue I18n
       '@intlify/vue-i18n/no-raw-text': [
@@ -86,6 +87,7 @@ export default antfu(
           math: 'always',
         },
       ],
+      'vue/html-indent': 'off',
       'vue/block-order': [
         'error',
         {
@@ -106,7 +108,6 @@ export default antfu(
       'tsconfig.json',
       'src/assets/locales/**/*',
       '!src/assets/locales/en.json',
-      'src/assets/dayjsLocales/',
       'components.d.ts',
     ],
   },

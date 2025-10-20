@@ -1,12 +1,12 @@
 <template>
   <Panel v-if="!loading">
     <form @submit.prevent="triggerManualPipeline">
-      <span class="text-xl text-wp-text-100">{{ $t('repo.manual_pipeline.title') }}</span>
+      <span class="text-wp-text-100 text-xl">{{ $t('repo.manual_pipeline.title') }}</span>
       <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.select_branch')">
         <SelectField :id="id" v-model="payload.branch" :options="branches" required />
       </InputField>
       <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
-        <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
+        <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
         <KeyValueEditor
           :id="id"
           v-model="payload.variables"
@@ -19,15 +19,14 @@
       <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" :disabled="!isFormValid" />
     </form>
   </Panel>
-  <div v-else class="flex justify-center text-wp-text-100">
+  <div v-else class="text-wp-text-100 flex justify-center">
     <Icon name="spinner" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useNotification } from '@kyvg/vue3-notification';
-import type { Ref } from 'vue';
-import { computed, onMounted, ref, inject as vueInject } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -38,9 +37,9 @@ import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { inject } from '~/compositions/useInjectProvide';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
-import type { RepoPermissions } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 defineProps<{
   open: boolean;
@@ -54,11 +53,8 @@ const apiClient = useApiClient();
 const notifications = useNotification();
 const i18n = useI18n();
 
-const repo = inject('repo');
-const repoPermissions = vueInject<Ref<RepoPermissions>>('repo-permissions');
-if (!repoPermissions) {
-  throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
-}
+const repo = requiredInject('repo');
+const repoPermissions = requiredInject('repo-permissions');
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
@@ -108,4 +104,6 @@ async function triggerManualPipeline() {
 
   loading.value = false;
 }
+
+useWPTitle(computed(() => [i18n.t('repo.manual_pipeline.trigger'), repo.value.full_name]));
 </script>
