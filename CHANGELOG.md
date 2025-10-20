@@ -6,6 +6,10 @@
 
 @6543
 
+### 🔒 Security
+
+- chore(deps): update dependency vite to v7.1.11 [security] [[#5660](https://github.com/woodpecker-ci/woodpecker/pull/5660)]
+
 ### 🐛 Bug Fixes
 
 - cli: show description of default value for `--backend-local-temp-dir` instead of value [[#5656](https://github.com/woodpecker-ci/woodpecker/pull/5656)]
