@@ -53,25 +53,25 @@ func TestBoolTrue(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	g.Describe("marshal", func() {
-		g.It("marshal empty", func() {
+	t.Run("marshal", func(t *testing.T) {
+		t.Run("marshal empty", func(t *testing.T) {
 			in := &BoolTrue{}
 			out, err := yaml.Marshal(&in)
-			g.Assert(err).IsNil("expect no error")
+			assert.NoError(t, err)
 			assert.EqualValues(t, "true\n", string(out))
 		})
 
-		g.It("marshal true", func() {
+		t.Run("marshal true", func(t *testing.T) {
 			in := BoolTrue{value: true}
 			out, err := yaml.Marshal(&in)
-			g.Assert(err).IsNil("expect no error")
+			assert.NoError(t, err)
 			assert.EqualValues(t, "true\n", string(out))
 		})
 
-		g.It("marshal false", func() {
+		t.Run("marshal false", func(t *testing.T) {
 			in := BoolTrue{value: false}
 			out, err := yaml.Marshal(&in)
-			g.Assert(err).IsNil("expect no error")
+			assert.NoError(t, err)
 			assert.EqualValues(t, "false\n", string(out))
 		})
 	})
