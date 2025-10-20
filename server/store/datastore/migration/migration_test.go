@@ -20,7 +20,6 @@ import (
 	"testing"
 	"time"
 
-	// blank imports to register the sql drivers
 	// Blank imports to register the sql drivers.
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -90,7 +89,7 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 		return engine, closeDB
 	case "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
-		if !new {
+		if !initNewDB {
 			restorePostgresDump(t, config)
 			closeDB = func() {
 				cleanDB(t, engine)
