@@ -47,7 +47,7 @@ func (s *StringOrSlice) UnmarshalYAML(unmarshal func(any) error) error {
 // MarshalYAML implements custom Yaml marshaling.
 func (s StringOrSlice) MarshalYAML() (any, error) {
 	if len(s) == 0 {
-		return "", nil
+		return nil, nil
 	} else if len(s) == 1 {
 		return s[0], nil
 	}
