@@ -73,7 +73,17 @@ func (c Path) MarshalYAML() (interface{}, error) {
 		}
 		return yamlBaseTypes.StringOrSlice(c.Include), nil
 	}
-	return c, nil
+	return struct {
+		Include       []string
+		Exclude       []string
+		IgnoreMessage string
+		OnEmpty       yamlBaseTypes.BoolTrue
+	}{
+		Include:       c.Include,
+		Exclude:       c.Exclude,
+		IgnoreMessage: c.IgnoreMessage,
+		OnEmpty:       c.OnEmpty,
+	}, nil
 }
 
 // Match returns true if file paths in string slice matches the include and not exclude patterns

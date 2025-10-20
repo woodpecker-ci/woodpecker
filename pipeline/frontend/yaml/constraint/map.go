@@ -82,7 +82,17 @@ func (c Map) MarshalYAML() (interface{}, error) {
 		return nil, nil
 	case len(c.Exclude) == 0:
 		return c.Include, nil
+	case len(c.Include) == 0 && len(c.Exclude) != 0:
+		return struct {
+			Exclude map[string]string
+		}{Exclude: c.Exclude}, nil
 	default:
-		return c, nil
+		return struct {
+			Include map[string]string
+			Exclude map[string]string
+		}{
+			Include: c.Include,
+			Exclude: c.Exclude,
+		}, nil
 	}
 }

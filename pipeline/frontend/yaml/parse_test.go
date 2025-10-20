@@ -234,6 +234,8 @@ steps:
     - path:
       - test.yaml
       - test.zig
+    - path:
+        exclude: a
     - ref: ref/tags/v1
       path:
   env:
