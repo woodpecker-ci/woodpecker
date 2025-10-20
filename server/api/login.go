@@ -28,14 +28,12 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
@@ -274,55 +272,55 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	err = updateRepoPermissions(c, user, _store, _forge)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
-		return
-	}
+	// err = updateRepoPermissions(c, user, _store, _forge)
+	// if err != nil {
+	// 	log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
+	// 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+	// 	return
+	// }
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
-func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge) error {
-	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
-		return _forge.Repos(c, user, &model.ListOptions{
-			Page:    page,
-			PerPage: perPage,
-		})
-	}, maxPage)
-	if err != nil {
-		return err
-	}
+// func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge) error {
+// 	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
+// 		return _forge.Repos(c, user, &model.ListOptions{
+// 			Page:    page,
+// 			PerPage: perPage,
+// 		})
+// 	}, maxPage)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	for _, forgeRepo := range repos {
-		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
-		if err != nil && errors.Is(err, types.RecordNotExist) {
-			continue
-		}
-		if err != nil {
-			return err
-		}
+// 	for _, forgeRepo := range repos {
+// 		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
+// 		if err != nil && errors.Is(err, types.RecordNotExist) {
+// 			continue
+// 		}
+// 		if err != nil {
+// 			return err
+// 		}
 
-		if !dbRepo.IsActive {
-			continue
-		}
+// 		if !dbRepo.IsActive {
+// 			continue
+// 		}
 
-		log.Debug().Msgf("synced user permission for user %s and repo %s", user.Login, dbRepo.FullName)
-		perm := forgeRepo.Perm
-		perm.Repo = dbRepo
-		perm.RepoID = dbRepo.ID
-		perm.UserID = user.ID
-		perm.Synced = time.Now().Unix()
-		if err := _store.PermUpsert(perm); err != nil {
-			return err
-		}
-	}
+// 		log.Debug().Msgf("synced user permission for user %s and repo %s", user.Login, dbRepo.FullName)
+// 		perm := forgeRepo.Perm
+// 		perm.Repo = dbRepo
+// 		perm.RepoID = dbRepo.ID
+// 		perm.UserID = user.ID
+// 		perm.Synced = time.Now().Unix()
+// 		if err := _store.PermUpsert(perm); err != nil {
+// 			return err
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func GetLogout(c *gin.Context) {
 	httputil.DelCookie(c.Writer, c.Request, "user_sess")
