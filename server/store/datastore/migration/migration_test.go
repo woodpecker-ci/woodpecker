@@ -25,6 +25,7 @@ import (
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 )
@@ -44,13 +45,9 @@ func testDriver() string {
 
 func createSQLiteDB(t *testing.T) string {
 	tmpF, err := os.CreateTemp("./test-files", "tmp_")
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 	dbF, err := os.ReadFile(sqliteDB)
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 
 	if !assert.NoError(t, os.WriteFile(tmpF.Name(), dbF, 0o644)) {
 		t.FailNow()
@@ -72,9 +69,7 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 			}
 		}
 		engine, err = xorm.NewEngine(driver, config)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 		return engine, closeDB
 	case "mysql":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
@@ -83,22 +78,18 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 			t.SkipNow()
 		}
 		engine, err = xorm.NewEngine(driver, config)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 		return engine, closeDB
 	case "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 		if !initNewDB {
 			restorePostgresDump(t, config)
 			closeDB = func() {
-				cleanDB(t, engine)
+				cleanPostgresDB(t, config)
 			}
 		}
 		engine, err = xorm.NewEngine(driver, config)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 		return engine, closeDB
 	default:
 		t.Errorf("unsupported driver: %s", driver)
@@ -109,28 +100,27 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 
 func restorePostgresDump(t *testing.T, config string) {
 	dump, err := os.ReadFile(postgresDump)
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 
 	db, err := sql.Open("postgres", config)
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 	defer db.Close()
 
 	_, err = db.Exec(string(dump))
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 }
 
-func cleanDB(t *testing.T, e *xorm.Engine) {
-	for _, bean := range allBeans {
-		if !assert.NoError(t, e.DropTables(bean)) {
-			t.FailNow()
-		}
-	}
+func cleanPostgresDB(t *testing.T, config string) {
+	db, err := sql.Open("postgres", config)
+	require.NoError(t, err)
+	defer db.Close()
+
+	_, err = db.Exec(`CREATE DATABASE tmp;
+\c tmp
+DROP DATABASE postgres
+CREATE DATABASE postgres
+\c postgres`)
+	require.NoError(t, err)
 }
 
 func TestMigrate(t *testing.T) {
