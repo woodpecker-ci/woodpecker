@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.1) - 2025-10-21
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -9,6 +9,10 @@
 ### 🔒 Security
 
 - chore(deps): update dependency vite to v7.1.11 [security] [[#5660](https://github.com/woodpecker-ci/woodpecker/pull/5660)]
+
+### 📈 Enhancement
+
+- Release linux/riscv64 binaries [[#5663](https://github.com/woodpecker-ci/woodpecker/pull/5663)]
 
 ### 🐛 Bug Fixes
 
