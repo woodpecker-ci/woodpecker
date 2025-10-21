@@ -274,14 +274,23 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	go func() {
+	repoUpdateFunc := func() error {
 		start := time.Now()
 		err = updateRepoPermissions(c, user, _store, _forge)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
 		}
-		log.Debug().Msgf("Update repo permissions for user %s async in %dms", user.Login, time.Since(start).Milliseconds())
-	}()
+		log.Debug().Msgf("update repo permissions for user %s in %dms", user.Login, time.Since(start).Milliseconds())
+		return err
+	}
+	if server.Config.Server.AsyncRepositoryUpdate {
+		go repoUpdateFunc()
+	} else {
+		if err := repoUpdateFunc(); err != nil {
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
