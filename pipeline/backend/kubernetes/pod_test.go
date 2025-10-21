@@ -879,15 +879,33 @@ func TestSidecarPod(t *testing.T) {
 						"-v",
 						"google.com"
 					],
-					"resources": {}
+					"resources": {},
+					"volumeMounts": [
+						{
+							"name": "dockersock",
+							"mountPath": "/var/run"
+						}
+					]
 				},
 				{
 					"name": "docker-in-docker",
 					"image": "docker:dind",
 					"resources": {},
+					"volumeMounts": [
+						{
+							"name": "dockersock",
+							"mountPath": "/var/run"
+						}
+					],
 					"securityContext": {
 						"privileged": true
 					}
+				}
+			],
+			"volumes": [
+				{
+					"name": "dockersock",
+					"emptyDir": {}
 				}
 			],
 			"restartPolicy": "Never"
@@ -899,6 +917,12 @@ func TestSidecarPod(t *testing.T) {
 		Name:       "docker-in-docker",
 		Image:      "docker:dind",
 		Privileged: true,
+		VolumeMounts: []VolumeMount{
+			{
+				Name:      "dockersock",
+				MountPath: "/var/run",
+			},
+		},
 	}
 
 	pod, err := mkPod(&types.Step{
@@ -909,7 +933,7 @@ func TestSidecarPod(t *testing.T) {
 	}, &config{
 		Namespace: "woodpecker",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
-		Containers: []Sidecar{*sidecarContainer},
+		Sidecars: []Sidecar{*sidecarContainer},
 	}, taskUUID)
 	assert.NoError(t, err)
 
