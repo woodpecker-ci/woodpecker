@@ -1,19 +1,15 @@
 when:
   - event: pull_request
-  - event: push
-    branch: renovate/*
 
 steps:
   - name: lint-editorconfig
-    image: docker.io/mstruebing/editorconfig-checker:v3.0.3
+    image: docker.io/woodpeckerci/plugin-editorconfig-checker:0.3.2
     depends_on: []
     when:
       - event: pull_request
-      - event: push
-        branch: renovate/*
 
   - name: spellcheck
-    image: docker.io/node:22-alpine
+    image: docker.io/node:23-alpine
     depends_on: []
     commands:
       - corepack enable
@@ -23,15 +19,8 @@ steps:
       - tree --gitignore -I 012_columns_rename_procs_to_steps.go -I versioned_docs -I '*opensource.svg'| pnpx cspell lint --no-progress stdin
 
   - name: prettier
-    image: docker.io/woodpeckerci/plugin-prettier:0.2.0
+    image: docker.io/woodpeckerci/plugin-prettier:next
+    pull: true
     depends_on: []
     settings:
-      version: 3.3.3
-
-  - name: links
-    image: docker.io/lycheeverse/lychee:0.15.1
-    depends_on: []
-    commands:
-      - lychee pipeline/frontend/yaml/linter/schema/schema.json
-      - lychee --exclude localhost docs/docs/
-      - lychee --exclude localhost docs/src/pages/
+      version: 3.6.2

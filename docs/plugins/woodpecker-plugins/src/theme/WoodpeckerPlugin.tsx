@@ -1,12 +1,13 @@
-import React from 'react';
 import Layout from '@theme/Layout';
+import React from 'react';
+
 import { WoodpeckerPlugin as WoodpeckerPluginType } from '../types';
 import { IconContainer, IconPlugin, IconVerified, IconWebsite } from './Icons';
 
 export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
   return (
     <Layout title="Woodpecker CI plugins" description="List of Woodpecker-CI plugins">
-      <main className="container margin-vert--lg">
+      <main className="margin-vert--lg container">
         <section>
           <div className="container">
             <div className="wp-plugin-breadcrumbs">

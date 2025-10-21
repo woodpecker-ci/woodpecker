@@ -13,9 +13,9 @@
           :to="repo.active ? { name: 'repo', params: { repoId: repo.id } } : undefined"
         >
           <span class="text-wp-text-100">{{ repo.full_name }}</span>
-          <span v-if="repo.active" class="ml-auto text-wp-text-alt-100">{{ $t('repo.enable.enabled') }}</span>
+          <span v-if="repo.active" class="text-wp-text-alt-100 ml-auto">{{ $t('repo.enable.enabled') }}</span>
           <div v-else class="ml-auto flex items-center">
-            <Badge v-if="repo.id" class="<md:hidden mr-2" :label="$t('repo.enable.disabled')" />
+            <Badge v-if="repo.id" class="md:display-unset mr-2 hidden" :value="$t('repo.enable.disabled')" />
             <Button
               :text="$t('repo.enable.enable')"
               :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
@@ -24,7 +24,7 @@
           </div>
         </ListItem>
       </template>
-      <div v-else-if="loading" class="flex justify-center text-wp-text-100">
+      <div v-else-if="loading" class="text-wp-text-100 flex justify-center">
         <Icon name="spinner" />
       </div>
     </div>
@@ -32,12 +32,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -45,6 +46,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRouteBack } from '~/compositions/useRouteBack';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Repo } from '~/lib/api/types';
 
 const router = useRouter();
@@ -73,4 +75,6 @@ const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(a
 });
 
 const goBack = useRouteBack({ name: 'repos' });
+
+useWPTitle(computed(() => [i18n.t('repo.add')]));
 </script>

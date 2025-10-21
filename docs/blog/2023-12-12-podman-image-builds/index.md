@@ -14,6 +14,8 @@ tags: [community, image, podman]
 
 I run Woodpecker CI with podman backend instead of docker and just figured out how to build images with buildah. Since I couldn't find this anywhere documented, I thought I might as well just share it here.
 
+<!-- truncate -->
+
 It's actually pretty straight forward. Here's what my repository structure looks like:
 
 ```bash

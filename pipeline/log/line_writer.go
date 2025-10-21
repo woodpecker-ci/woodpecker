@@ -16,7 +16,6 @@
 package log
 
 import (
-	"context"
 	"io"
 	"strings"
 	"sync"
@@ -24,8 +23,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/shared"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/shared"
 )
 
 // LineWriter sends logs to the client.
@@ -67,9 +66,6 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 
 	w.num++
 
-	if err := w.peer.Log(context.Background(), line); err != nil {
-		return 0, err
-	}
-
+	w.peer.EnqueueLog(line)
 	return len(data), nil
 }

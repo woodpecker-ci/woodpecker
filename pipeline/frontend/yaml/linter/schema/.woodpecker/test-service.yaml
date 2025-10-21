@@ -10,3 +10,4 @@ services:
     image: mysql
   cache:
     image: redis
+    directory: /tmp/

@@ -34,22 +34,22 @@ type User struct {
 	// required: true
 	ID int64 `json:"id" xorm:"pk autoincr 'id'"`
 
-	ForgeID int64 `json:"forge_id,omitempty" xorm:"forge_id"`
+	ForgeID int64 `json:"forge_id,omitempty" xorm:"forge_id UNIQUE(forge)"`
 
-	ForgeRemoteID ForgeRemoteID `json:"-" xorm:"forge_remote_id"`
+	ForgeRemoteID ForgeRemoteID `json:"forge_remote_id" xorm:"forge_remote_id UNIQUE(forge)"`
 
 	// Login is the username for this user.
 	//
 	// required: true
 	Login string `json:"login"  xorm:"UNIQUE 'login'"`
 
-	// Token is the oauth2 token.
-	Token string `json:"-"  xorm:"TEXT 'token'"`
+	// AccessToken is the oauth2 access token.
+	AccessToken string `json:"-"  xorm:"TEXT 'access_token'"`
 
-	// Secret is the oauth2 token secret.
-	Secret string `json:"-" xorm:"TEXT 'secret'"`
+	// RefreshToken is the oauth2 refresh token.
+	RefreshToken string `json:"-" xorm:"TEXT 'refresh_token'"`
 
-	// Expiry is the token and secret expiration timestamp.
+	// Expiry is the AccessToken expiration timestamp (unix seconds).
 	Expiry int64 `json:"-" xorm:"expiry"`
 
 	// Email is the email address for this user.
@@ -71,7 +71,7 @@ type User struct {
 
 	// OrgID is the of the user as model.Org.
 	OrgID int64 `json:"org_id" xorm:"org_id"`
-} //	@name User
+} //	@name	User
 
 // TableName return database table name for xorm.
 func (User) TableName() string {

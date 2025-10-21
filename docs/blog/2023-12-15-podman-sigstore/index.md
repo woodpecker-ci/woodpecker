@@ -14,6 +14,8 @@ tags: [community, image, podman, sigstore, signature]
 
 This example shows how to build a container image with podman while verifying the base image and signing the resulting image.
 
+<!-- truncate -->
+
 The image being pulled uses a keyless signature, while the image being built will be signed by a pre-generated private key.
 
 ## Prerequisites

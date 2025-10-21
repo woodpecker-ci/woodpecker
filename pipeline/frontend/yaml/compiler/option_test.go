@@ -19,8 +19,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func TestWithWorkspace(t *testing.T) {
@@ -65,25 +65,6 @@ func TestWithNetworks(t *testing.T) {
 	)
 	assert.Equal(t, "overlay_1", compiler.networks[0])
 	assert.Equal(t, "overlay_bar", compiler.networks[1])
-}
-
-func TestWithResourceLimit(t *testing.T) {
-	compiler := New(
-		WithResourceLimit(
-			1,
-			2,
-			3,
-			4,
-			5,
-			"0,2-5",
-		),
-	)
-	assert.EqualValues(t, 1, compiler.reslimit.MemSwapLimit)
-	assert.EqualValues(t, 2, compiler.reslimit.MemLimit)
-	assert.EqualValues(t, 3, compiler.reslimit.ShmSize)
-	assert.EqualValues(t, 4, compiler.reslimit.CPUQuota)
-	assert.EqualValues(t, 5, compiler.reslimit.CPUShares)
-	assert.Equal(t, "0,2-5", compiler.reslimit.CPUSet)
 }
 
 func TestWithPrefix(t *testing.T) {

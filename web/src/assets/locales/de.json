@@ -20,7 +20,10 @@
                 "desc": "Für diesen Server registrierte Agenten.",
                 "edit_agent": "Agent bearbeiten",
                 "id": "ID",
-                "last_contact": "Letzter Kontakt",
+                "last_contact": {
+                    "last_contact": "Letzter Kontakt",
+                    "badge": "letzter Kontakt"
+                },
                 "name": {
                     "name": "Name",
                     "placeholder": "Name des Agenten"
@@ -39,9 +42,16 @@
                 "saved": "Agent gespeichert",
                 "show": "Agenten anzeigen",
                 "token": "Schlüssel",
-                "version": "Version"
+                "version": "Version",
+                "org": {
+                    "badge": "Organisation"
+                },
+                "custom_labels": {
+                    "desc": "Die benutzerdefinierten Labels, die vom Agent-Administrator beim Start des Agenten festgelegt wurden.",
+                    "custom_labels": "Benutzerdefinierte Labels"
+                }
             },
-            "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen.",
+            "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
             "orgs": {
                 "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositorys löschen, die dieser Organisation gehören.",
                 "delete_org": "Organisation löschen",
@@ -54,7 +64,7 @@
             },
             "queue": {
                 "agent": "Agent",
-                "desc": "Aufgaben, die darauf warten, von Agenten ausgeführt zu werden",
+                "desc": "Aufgaben, die darauf warten, von Agenten ausgeführt zu werden.",
                 "pause": "Pausieren",
                 "paused": "Warteschlange wurde pausiert",
                 "queue": "Warteschlange",
@@ -89,7 +99,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Globales Geheimnis erstellt",
                 "deleted": "Globales Geheimnis gelöscht",
-                "desc": "Globale Geheimnisse können an Pipelineschritte aller Repositorys als Umgebungsvariablen übergeben werden.",
+                "desc": "Globale Geheimnisse können in Pipelines in allen Repositorys genutzt werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -121,7 +131,7 @@
                 "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen? Das wird auch alle Repositorys löschen, die diesem Benutzer gehören.",
                 "delete_user": "Benutzer löschen",
                 "deleted": "Benutzer gelöscht",
-                "desc": "Auf diesem Server registrierte Benutzer",
+                "desc": "Auf diesem Server registrierte Benutzer.",
                 "edit_user": "Benutzer bearbeiten",
                 "email": "E-Mail",
                 "login": "Benutzername",
@@ -132,8 +142,8 @@
                 "users": "Benutzer"
             },
             "registries": {
-                "desc": "Globale Register-Zugangsdaten können für private Images aller Pipelines verwendet werden.",
-                "warning": "Diese Register-Zugangsdaten sind für alle Benutzer verfügbar."
+                "desc": "Globale Registry-Zugangsdaten können hinzugefügt werden, um für private Images für alle Pipelines zu verwenden.",
+                "warning": "Diese Register-Zugangsdaten werden für alle Benutzer verfügbar sein."
             }
         }
     },
@@ -141,7 +151,7 @@
     "back": "Zurück",
     "cancel": "Abbrechen",
     "default": "Standard",
-    "docs": "Docs",
+    "docs": "Dokumentation",
     "documentation_for": "Dokumentation für „{topic}“",
     "empty_list": "Keine {entity} gefunden!",
     "errors": {
@@ -162,7 +172,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Organisations-Geheimnis erstellt",
                 "deleted": "Organisations-Geheimnis gelöscht",
-                "desc": "Organisation-Geheimnisse können an alle Pipelineschritte in Repositorys der Organisation als Umgebungsvariablen übergeben werden.",
+                "desc": "Organisation-Geheimnisse können in allen Pipelines in Repositorys, die der Organisation gehören, genutzt werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -182,7 +192,10 @@
             },
             "settings": "Einstellungen",
             "registries": {
-                "desc": "Register-Zugangsdaten der Organisation können für private Images aller Organisations-Pipelines verwendet werden."
+                "desc": "Zugangsdaten zum Register der Organisation können für private Images aller Pipelines der Organisation verwendet werden."
+            },
+            "agents": {
+                "desc": "Agents registriert für diese Organisation."
             }
         }
     },
@@ -195,7 +208,7 @@
         "branches": "Branches",
         "deploy_pipeline": {
             "enter_target": "Zielumgebung des Deployments",
-            "title": "Deployment für aktuelle Pipeline #{pipelineId} starten",
+            "title": "Ein Deployment-Event für die aktuelle Pipeline #{pipelineId} starten",
             "trigger": "Deploy",
             "variables": {
                 "add": "Variable hinzufügen",
@@ -217,11 +230,11 @@
         },
         "manual_pipeline": {
             "select_branch": "Branch auswählen",
-            "title": "Eine manuelle Pipeline ausführen",
+            "title": "Löse einen manuellen Pipeline Durchlauf aus",
             "trigger": "Pipeline ausführen",
             "variables": {
                 "add": "Variable hinzufügen",
-                "desc": "Spezifiziere weitere Variablen für deine Pipeline. Vordefinierte Variablen mit dem selben Namen werden überschrieben.",
+                "desc": "Füge weitere Variablen für deine Pipeline hinzu. Variablen mit demselben Namen werden überschrieben.",
                 "name": "Variablenname",
                 "title": "Zusätzliche Pipeline-Variablen",
                 "value": "Variablenwert",
@@ -237,15 +250,15 @@
                 "cancel_success": "Pipeline abgebrochen",
                 "canceled": "Dieser Schritt wurde abgebrochen.",
                 "deploy": "Deploy",
-                "log_auto_scroll": "Automatisches Folgen",
-                "log_auto_scroll_off": "Schalte automatisches Folgen aus",
+                "log_auto_scroll": "Automatisches Scrollen aktivieren",
+                "log_auto_scroll_off": "Automatisches Scrollen deaktivieren",
                 "log_download": "Herunterladen",
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",
                 "log_delete": "Löschen"
             },
             "config": "Konfiguration",
-            "errors": "Fehler ({count})",
+            "errors": "Fehler",
             "event": {
                 "cron": "Cron",
                 "deploy": "Deploy",
@@ -254,10 +267,11 @@
                 "push": "Push",
                 "tag": "Tag",
                 "release": "Release",
-                "pr_closed": "Pull-Request zusammengeführt/geschlossen"
+                "pr_closed": "Pull-Request zusammengeführt/geschlossen",
+                "pr_metadata": "Pull-Request-Metadaten geändert"
             },
             "exit_code": "Exit-Code {exitCode}",
-            "files": "Geänderte Dateien ({files})",
+            "files": "Geänderte Dateien",
             "loading": "Laden…",
             "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",
             "log_title": "Logs des Schrittes",
@@ -292,20 +306,30 @@
             },
             "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
             "tasks": "Vorgänge",
-            "warnings": "Warnungen ({count})",
-            "we_got_some_errors": "Oh nein, es gab einige Fehler!",
-            "log_delete_confirm": "Möchtest du die Logs diesen Schrittes wirklich löschen?",
-            "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes",
-            "duration": "Pipeline-Dauer",
+            "warnings": "Warnungen",
+            "we_got_some_errors": "Oh nein, ein Fehler ist aufgetreten!",
+            "log_delete_confirm": "Möchtest du die Logs dieses Schrittes wirklich löschen?",
+            "log_delete_error": "Ein Fehler ist beim Löschen der Logs des Schrittes aufgetreten",
+            "duration": "Pipeline-Dauer: {duration}",
             "created": "Erstellt: {created}",
-            "no_logs": "Keine Logs"
+            "no_logs": "Keine Logs",
+            "debug": {
+                "no_permission": "Du bist nicht berechtigt, auf die Debug-Informationen zuzugreifen.",
+                "download_metadata": "Metadaten herunterladen",
+                "metadata_download_successful": "Die Metadaten wurden erfolgreich heruntergeladen",
+                "metadata_download_error": "Fehler beim Herunterladen der Metadaten",
+                "title": "Debug",
+                "metadata_exec_title": "Pipeline lokal erneut ausführen",
+                "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst. Das Woodpecker-CLI muss in der zum Server passenden Version lokal installiert sein."
+            },
+            "view": "Pipeline anzeigen"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
             "actions": {
                 "actions": "Aktionen",
                 "delete": {
-                    "confirm": "Alle Daten sind nach dieser Aktion verloren!!!\n\nMöchtest du wirklich fortfahren?",
+                    "confirm": "Alle Daten sind nach dieser Aktion verloren!\n\nMöchtest du wirklich fortfahren?",
                     "delete": "Repository löschen",
                     "success": "Repository gelöscht"
                 },
@@ -361,16 +385,16 @@
             "general": {
                 "allow_pr": {
                     "allow": "Pull-Requests zulassen",
-                    "desc": "Pipelines können für Pull-Requests genutzt werden."
+                    "desc": "Die Ausführung von Pipelines für Pull-Requests erlauben."
                 },
                 "cancel_prev": {
                     "cancel": "Ältere Pipelines abbrechen",
-                    "desc": "Aktiviere diese Option, um laufende Pipelines desselben Ereignisses und Kontexts abzubrechen, bevor die neue Pipeline startet."
+                    "desc": "Bei ausgewählten Events werden laufende Pipelines desselben Ereignisses abgebrochen, bevor die neue Pipeline startet."
                 },
-                "general": "Allgemein",
+                "general": "Projekt",
                 "netrc_only_trusted": {
-                    "desc": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern bereitstellen (empfohlen).",
-                    "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
+                    "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
+                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
@@ -384,14 +408,26 @@
                     "protected": "Geschützt"
                 },
                 "save": "Einstellungen speichern",
-                "success": "Repository-Einstellungen aktualisiert",
+                "success": "Projekt-Einstellungen aktualisiert",
                 "timeout": {
                     "minutes": "Minuten",
                     "timeout": "Zeitlimit"
                 },
                 "trusted": {
                     "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen (z. B. das Einhängen von Laufwerken).",
-                    "trusted": "Vertrauenswürdig"
+                    "trusted": "Vertrauenswürdig",
+                    "network": {
+                        "network": "Netzwerk",
+                        "desc": "Pipeline-Container erhalten Zugriff auf Netzwerk-Privilegien wie das Ändern des DNS."
+                    },
+                    "volumes": {
+                        "volumes": "Volumen",
+                        "desc": "Pipeline-Container können Volumen einhängen."
+                    },
+                    "security": {
+                        "security": "Sicherheit",
+                        "desc": "Pipeline-Container erhalten Zugriff auf Sicherheits-Privilegien."
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -409,8 +445,8 @@
                     "visibility": "Sichtbarkeit des Projekts"
                 },
                 "allow_deploy": {
-                    "allow": "Deployments erlauben",
-                    "desc": "Deployments von erfolgreichen Pipelines erlauben. Nur benutzen, wenn du allen Nutzern mit Push-Zugriff vertraust."
+                    "allow": "Deployment-Events erlauben",
+                    "desc": "Deployments von erfolgreichen Pipelines erlauben. Alle Benutzer mit Push-Zugriff können diese auslösen, mit Vorsicht verwenden."
                 }
             },
             "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
@@ -459,10 +495,35 @@
             },
             "settings": "Einstellungen"
         },
-        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys."
+        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys",
+        "visibility": {
+            "visibility": "Projektsichtbarkeit",
+            "public": {
+                "public": "Öffentlich",
+                "desc": "Jeder kann dein Projekt sehen, ohne eingeloggt zu sein."
+            },
+            "private": {
+                "private": "Privat",
+                "desc": "Nur du und andere Besitzer des Repositorys können dieses Projekt sehen."
+            },
+            "internal": {
+                "internal": "Intern",
+                "desc": "Nur authentifizierte Benutzer der Woodpecker-Instanz können dieses Projekt sehen."
+            }
+        }
     },
     "repos": "Repos",
-    "repositories": "Repositorys",
+    "repositories": {
+        "title": "Repositorys",
+        "all": {
+            "title": "Alle Repositorys",
+            "desc": "Repositorys nach der letzten Erstellung einer Pipeline sortiert"
+        },
+        "last": {
+            "title": "Zuletzt besucht",
+            "desc": "Zuletzt besuchte Repositorys nach Zugriffszeit sortiert"
+        }
+    },
     "running_version": "Du verwendest Woodpecker {0}",
     "search": "Suche…",
     "time": {
@@ -472,7 +533,8 @@
         "not_started": "noch nicht gestartet",
         "sec_short": "sek",
         "template": "DD.MM.YYYY, HH:mm z",
-        "weeks_short": "w"
+        "weeks_short": "w",
+        "just_now": "gerade eben"
     },
     "unknown_error": "Ein unbekannter Fehler ist aufgetreten",
     "update_woodpecker": "Du solltest deine Woodpecker-Instanz auf {0} aktualisieren",
@@ -495,7 +557,7 @@
                 "token": "Persönlicher Zugangsschlüssel"
             },
             "general": {
-                "general": "Allgemein",
+                "general": "Konto",
                 "language": "Sprache",
                 "theme": {
                     "auto": "Automatisch",
@@ -508,7 +570,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Benutzer-Geheimnis erstellt",
                 "deleted": "Benutzer-Geheimnis gelöscht",
-                "desc": "Benutzer-Geheimnisse können an alle persönlichen Pipelineschritte als Umgebungsvariablen übergeben werden.",
+                "desc": "Benutzer-Geheimnisse können in allen Pipelines in Repositorys, die dem Benutzer gehören, genutzt werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -530,7 +592,7 @@
             "cli_and_api": {
                 "desc": "Persönlicher Zugangsschlüssel, CLI- und API-Nutzung",
                 "token": "Persönlicher Zugangsschlüssel",
-                "api_usage": "Beispiel zur Nutzung der API",
+                "api_usage": "Beispiel zur Nutzung des API",
                 "download_cli": "CLI herunterladen",
                 "reset_token": "Schlüssel zurücksetzen",
                 "swagger_ui": "Swagger-UI",
@@ -539,6 +601,9 @@
             },
             "registries": {
                 "desc": "Register-Zugangsdaten des Benutzers können für private Images aller persönlichen Pipelines verwendet werden."
+            },
+            "agents": {
+                "desc": "Agenten, die für die Repositorys deines Benutzers registriert sind."
             }
         }
     },
@@ -553,7 +618,7 @@
     "return_to_cli": "Du kannst diesen Tab jetzt schließen und zur CLI zurückkehren.",
     "secrets": {
         "secrets": "Geheimnisse",
-        "desc": "Geheimnisse können als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+        "desc": "Geheimnisse können in allen Pipelines des Repositorys genutzt werden.",
         "none": "Es gibt noch keine Geheimnisse.",
         "add": "Geheimnis hinzufügen",
         "save": "Geheimnis speichern",
@@ -570,7 +635,8 @@
         },
         "events": {
             "events": "Verfügbar bei den folgenden Ereignissen",
-            "pr_warning": "Bitte sei vorsichtig mit dieser Option: Eine böswillige Person könnte über einen Pull-Request deine Geheimnisse erhalten."
+            "pr_warning": "Bitte sei vorsichtig mit dieser Option: Eine böswillige Person könnte über einen Pull-Request deine Geheimnisse erhalten.",
+            "warning": "Geheimnisse in Pull-Requests zu erlauben könnte dazu führen, dass ein böswilliger Akteur diese mit einem Pull-Request stiehlt."
         },
         "plugins_only": "Nur für Plugins verfügbar",
         "edit": "Geheimnis bearbeiten",
@@ -582,7 +648,7 @@
     },
     "settings": "Einstellungen",
     "oauth_error": "Fehler bei der Authentifizierung mit OAuth-Anbieter",
-    "internal_error": "Ein interner Fehler ist aufgetreten",
+    "internal_error": "Interner Fehler aufgetreten",
     "registration_closed": "Die Registrierung ist geschlossen",
     "access_denied": "Du darfst nicht auf diese Instanz zugreifen",
     "registries": {
@@ -592,20 +658,20 @@
             "address": "Adresse"
         },
         "credentials": "Register-Zugangsdaten",
-        "none": "Es gibt noch keine Register-Zugangsdaten.",
+        "none": "Es sind noch keine Registry-Zugangsdaten verfügbar.",
         "registries": "Register",
-        "desc": "Register-Zugangsdaten können für private Images in Pipelines verwendet werden.",
+        "desc": "Register-Zugangsdaten können hinzugefügt werden, um private Images für Pipelines zu nutzen.",
         "deleted": "Register-Zugangsdaten gelöscht",
-        "save": "Register speichern",
+        "save": "Speicher Registry",
         "add": "Register hinzufügen",
-        "view": "Register anzeigen",
+        "view": "Register ansehen",
         "edit": "Register bearbeiten",
         "delete": "Register löschen",
         "created": "Register-Zugangsdaten erstellt",
         "saved": "Register-Zugangsdaten gespeichert",
         "show": "Register anzeigen"
     },
-    "invalid_state": "Der OAuth-Status ist ungültig.",
+    "invalid_state": "Der OAuth-Status ist ungültig",
     "by_user": "von {user}",
     "pushed_to": "gepusht auf",
     "closed": "geschlossen",
@@ -616,5 +682,80 @@
     "pipeline_since": "Die Pipeline wurde vor {created} Minuten erstellt",
     "pipeline_has_warnings": "Die Pipeline hat Warnungen",
     "pipeline_has_errors": "Die Pipeline hat Fehler",
-    "login_with": "Mit {forge} anmelden"
+    "login_with": "Mit {forge} anmelden",
+    "all_repositories": "Alle Repositorys",
+    "no_search_results": "Keine Ergebnisse gefunden",
+    "require_approval": {
+        "forks": "Pull-Request von geforkten Repositorys",
+        "require_approval_for": "Erfordert Genehmigung für",
+        "none": "Keine Genehmigung erforderlich",
+        "none_desc": "Diese Einstellung kann gefährlich sein und sollte nur in privaten Repositories verwendet werden, in denen allen Benutzern vertraut wird.",
+        "pull_requests": "Alle Pull-Requests",
+        "all_events": "Alle Ereignisse von der Forge",
+        "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst.",
+        "allowed_users": {
+            "desc": "Pipelines von diesen Benutzern erfordern nie eine Genehmigung.",
+            "allowed_users": "Zugelassene Benutzer"
+        }
+    },
+    "org_access_denied": "Zugriff auf diese Organisation nicht erlaubt",
+    "exit_fullscreen": "Vollbild verlassen",
+    "fullscreen": "Vollbild",
+    "oauth_host": "OAuth-Host",
+    "merge_ref": "Zusammenführungs-Referenz",
+    "merge_ref_desc": "Referenz, die für die Zusammenführungs-Basis genutzt wird. Dies wird für die Unterschiede bei Pull-Requests verwerdet.",
+    "public_only": "Nur öffentlich",
+    "public_only_desc": "Nur öffentliche Repositorys anzeigen.",
+    "git_username": "Git-Benutzername",
+    "git_password": "Git-Passwort",
+    "executable_desc": "Pfad zur Programmdatei des Add-ons.",
+    "save": "Speichern",
+    "add": "Hinzufügen",
+    "skip_verify": "SSL-Verifikation überspringen",
+    "advanced_options": "Erweiterte Optionen",
+    "leave_empty_to_keep_current_value": "Leer lassen, um den aktuellen Wert beizubehalten",
+    "forge_deleted": "Plattform gelöscht",
+    "login_to_woodpecker_with": "In Woodpecker anmelden mit",
+    "forges": "Plattformen",
+    "forges_desc": "Die Plattformen konfigurieren, auf denen Repositorys gehostet sind, für die Woodpecker verwendet wird.",
+    "add_forge": "Plattform hinzufügen",
+    "show_forges": "Plattformen anzeigen",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "addon": "Add-on",
+    "forge_type": "Plattform-Typ",
+    "oauth_client_id": "OAuth-Client-ID",
+    "oauth_client_secret": "OAuth-Client-Geheimnis",
+    "git_username_desc": "Benutzername für den Git-Benutzer.",
+    "git_password_desc": "Password oder persönlicher Zugangsschlüssel für den Git-Benutzer.",
+    "executable": "Programmdatei",
+    "skip_verify_desc": "SSL-Verifikation für API-Verbindungen überspringen. Im Produktiveinsatz nicht empfohlen.",
+    "forge_managed_by_env": "Die primäre Plattform wird durch Umgebungsvariablen verwaltet. Jede Änderung dieser Plattform wird bei einem Neustart verworfen.",
+    "oauth_redirect_uri": "OAuth-Weiterleitungs-URI",
+    "forge_created": "Plattform erstellt",
+    "forge_delete_confirm": "Möchtest du diese Plattform wirklich löschen? Dies wird auch alle Repositorys, Benutzer und Pipelines dieser Plattform löschen.",
+    "edit_forge": "Plattform bearbeiten",
+    "delete_forge": "Plattform löschen",
+    "no_forges": "Es gibt noch keine Plattformen.",
+    "use_this_redirect_uri_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren. Gehe zu den {0} und richte die OAuth-Anwendung ein.",
+    "developer_settings": "Entwicklereinstellungen",
+    "public_url_for_oauth_if": "Öffentliche URL für OAuth, wenn unterschiedlich von URL ({0})",
+    "forge_saved": "Plattform gespeichert",
+    "oauth_redirect_url": "OAuth-Weiterleitungs-URL",
+    "developer_settings_to_create": "Gehe zu den {0} und richte die OAuth-Anwendung ein.",
+    "weblate": "unserem Weblate",
+    "use_this_redirect_url_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren.",
+    "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen.",
+    "extensions": "Erweiterungen",
+    "extension_endpoint_placeholder": "z. B. https://example.com/api",
+    "config_extension_endpoint": "Endpunkt der Konfigurations-Erweiterung",
+    "extensions_description": "Erweiterungen sind HTTP-Dienste, die von Woodpecker anstelle der integrierten aufgerufen werden können.",
+    "extensions_signatures_public_key": "Öffentlicher Schlüssel für Signaturen",
+    "extensions_configuration_saved": "Konfiguration der Erweiterungen gespeichert",
+    "extensions_signatures_public_key_description": "Dieser öffentliche Schlüssel sollte von Ihren Erweiterungen verwendet werden, um Webhook-Aufrufe von Woodpecker zu verifizieren.",
+    "disabled": "Deaktiviert"
 }

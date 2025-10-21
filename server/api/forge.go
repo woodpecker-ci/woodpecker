@@ -20,9 +20,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // GetForges
@@ -125,12 +125,12 @@ func PatchForge(c *gin.Context) {
 	}
 	forge.URL = in.URL
 	forge.Type = in.Type
-	forge.Client = in.Client
+	forge.OAuthClientID = in.OAuthClientID
 	forge.OAuthHost = in.OAuthHost
 	forge.SkipVerify = in.SkipVerify
 	forge.AdditionalOptions = in.AdditionalOptions
 	if in.ClientSecret != "" {
-		forge.ClientSecret = in.ClientSecret
+		forge.OAuthClientSecret = in.ClientSecret
 	}
 
 	err = _store.ForgeUpdate(forge)
@@ -144,14 +144,14 @@ func PatchForge(c *gin.Context) {
 
 // PostForge
 //
-//	@Summary	Create a new forge
-//	@Description Creates a new forge with a random token
-//	@Router		/forges [post]
-//	@Produce	json
-//	@Success	200	{object}	Forge
-//	@Tags		Forges
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forge			body	Forge	true	"the forge's data (only 'name' and 'no_schedule' are read)"
+//	@Summary		Create a new forge
+//	@Description	Creates a new forge with a random token
+//	@Router			/forges [post]
+//	@Produce		json
+//	@Success		200	{object}	Forge
+//	@Tags			Forges
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			forge			body	Forge	true	"the forge's data (only 'name' and 'no_schedule' are read)"
 func PostForge(c *gin.Context) {
 	in := &model.Forge{}
 	err := c.Bind(in)
@@ -163,8 +163,8 @@ func PostForge(c *gin.Context) {
 	forge := &model.Forge{
 		URL:               in.URL,
 		Type:              in.Type,
-		Client:            in.Client,
-		ClientSecret:      in.ClientSecret,
+		OAuthClientID:     in.OAuthClientID,
+		OAuthClientSecret: in.OAuthClientSecret,
 		OAuthHost:         in.OAuthHost,
 		SkipVerify:        in.SkipVerify,
 		AdditionalOptions: in.AdditionalOptions,

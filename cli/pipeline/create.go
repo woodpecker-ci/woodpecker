@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var pipelineCreateCmd = &cli.Command{
@@ -39,6 +39,9 @@ var pipelineCreateCmd = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:  "var",
 			Usage: "key=value",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 	}...),
 }
@@ -74,5 +77,5 @@ func pipelineCreate(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
+	return pipelineOutput(c, []*woodpecker.Pipeline{pipeline})
 }

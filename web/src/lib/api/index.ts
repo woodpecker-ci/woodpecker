@@ -2,6 +2,7 @@ import ApiClient, { encodeQueryString } from './client';
 import type {
   Agent,
   Cron,
+  ExtensionSettings,
   Forge,
   Org,
   OrgPermissions,
@@ -18,6 +19,8 @@ import type {
   Secret,
   User,
 } from './types';
+
+const DEFAULT_FORGE_ID = 1;
 
 interface RepoListOptions {
   all?: boolean;
@@ -73,7 +76,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos?forge_remote_id=${forgeRemoteId}`) as Promise<Repo>;
   }
 
-  async updateRepo(repoId: number, repoSettings: RepoSettings): Promise<unknown> {
+  async updateRepo(repoId: number, repoSettings: Partial<RepoSettings & ExtensionSettings>): Promise<unknown> {
     return this._patch(`/api/repos/${repoId}`, repoSettings);
   }
 
@@ -105,7 +108,7 @@ export default class WoodpeckerClient extends ApiClient {
 
   async getPipelineList(
     repoId: number,
-    opts?: PaginationOptions & { before?: string; after?: string },
+    opts?: PaginationOptions & { before?: string; after?: string; ref?: string; branch?: string; events?: string },
   ): Promise<Pipeline[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/pipelines?${query}`) as Promise<Pipeline[]>;
@@ -117,6 +120,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   async getPipelineConfig(repoId: number, pipelineNumber: number): Promise<PipelineConfig[]> {
     return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
+  }
+
+  async getPipelineMetadata(repoId: number, pipelineNumber: number): Promise<any> {
+    return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/metadata`) as Promise<any>;
   }
 
   async getPipelineFeed(): Promise<PipelineFeed[]> {
@@ -301,6 +308,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token') as Promise<string>;
   }
 
+  async getSignaturePublicKey(): Promise<string> {
+    return this._get('/api/signature/public-key') as Promise<string>;
+  }
+
   async getAgents(opts?: PaginationOptions): Promise<Agent[] | null> {
     const query = encodeQueryString(opts);
     return this._get(`/api/agents?${query}`) as Promise<Agent[] | null>;
@@ -314,12 +325,29 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/agents', agent) as Promise<Agent>;
   }
 
-  async updateAgent(agent: Partial<Agent>): Promise<unknown> {
-    return this._patch(`/api/agents/${agent.id}`, agent);
+  async updateAgent(agent: Partial<Agent>): Promise<Agent> {
+    return this._patch(`/api/agents/${agent.id}`, agent) as Promise<Agent>;
   }
 
   async deleteAgent(agent: Agent): Promise<unknown> {
     return this._delete(`/api/agents/${agent.id}`);
+  }
+
+  async getOrgAgents(orgId: number, opts?: PaginationOptions): Promise<Agent[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs/${orgId}/agents?${query}`) as Promise<Agent[] | null>;
+  }
+
+  async createOrgAgent(orgId: number, agent: Partial<Agent>): Promise<Agent> {
+    return this._post(`/api/orgs/${orgId}/agents`, agent) as Promise<Agent>;
+  }
+
+  async updateOrgAgent(orgId: number, agentId: number, agent: Partial<Agent>): Promise<Agent> {
+    return this._patch(`/api/orgs/${orgId}/agents/${agentId}`, agent) as Promise<Agent>;
+  }
+
+  async deleteOrgAgent(orgId: number, agentId: number): Promise<unknown> {
+    return this._delete(`/api/orgs/${orgId}/agents/${agentId}`);
   }
 
   async getForges(opts?: PaginationOptions): Promise<Forge[] | null> {
@@ -360,8 +388,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/users?${query}`) as Promise<User[] | null>;
   }
 
-  async getUser(username: string): Promise<User> {
-    return this._get(`/api/users/${username}`) as Promise<User>;
+  async getUser(username: string, forgeID?: number): Promise<User> {
+    const forge = forgeID ?? DEFAULT_FORGE_ID;
+    return this._get(`/api/users/${username}?forge_id=${forge}`) as Promise<User>;
   }
 
   async createUser(user: Partial<User>): Promise<User> {
@@ -373,7 +402,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   async deleteUser(user: User): Promise<unknown> {
-    return this._delete(`/api/users/${user.login}`);
+    return this._delete(`/api/users/${user.login}?forge_id=${user.forge_id}`);
   }
 
   async resetToken(): Promise<string> {

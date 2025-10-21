@@ -24,16 +24,16 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v3/server/grpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) error {
 	lis, err := net.Listen("tcp", c.String("grpc-addr"))
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to listen on grpc-addr") //nolint:forbidigo
+		return fmt.Errorf("failed to listen on grpc-addr: %w", err)
 	}
 
 	jwtSecret := c.String("grpc-secret")

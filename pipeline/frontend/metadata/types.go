@@ -28,46 +28,49 @@ type (
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		ID          int64    `json:"id,omitempty"`
-		Name        string   `json:"name,omitempty"`
-		Owner       string   `json:"owner,omitempty"`
-		RemoteID    string   `json:"remote_id,omitempty"`
-		ForgeURL    string   `json:"forge_url,omitempty"`
-		CloneURL    string   `json:"clone_url,omitempty"`
-		CloneSSHURL string   `json:"clone_url_ssh,omitempty"`
-		Private     bool     `json:"private,omitempty"`
-		Secrets     []Secret `json:"secrets,omitempty"`
-		Branch      string   `json:"default_branch,omitempty"`
-		Trusted     bool     `json:"trusted,omitempty"`
+		ID          int64                `json:"id,omitempty"`
+		Name        string               `json:"name,omitempty"`
+		Owner       string               `json:"owner,omitempty"`
+		RemoteID    string               `json:"remote_id,omitempty"`
+		ForgeURL    string               `json:"forge_url,omitempty"`
+		CloneURL    string               `json:"clone_url,omitempty"`
+		CloneSSHURL string               `json:"clone_url_ssh,omitempty"`
+		Private     bool                 `json:"private,omitempty"`
+		Branch      string               `json:"default_branch,omitempty"`
+		Trusted     TrustedConfiguration `json:"trusted,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
 	Pipeline struct {
-		Number     int64  `json:"number,omitempty"`
-		Created    int64  `json:"created,omitempty"`
-		Started    int64  `json:"started,omitempty"`
-		Finished   int64  `json:"finished,omitempty"`
-		Status     string `json:"status,omitempty"`
-		Event      string `json:"event,omitempty"`
-		ForgeURL   string `json:"forge_url,omitempty"`
-		DeployTo   string `json:"target,omitempty"`
-		DeployTask string `json:"task,omitempty"`
-		Commit     Commit `json:"commit,omitempty"`
-		Parent     int64  `json:"parent,omitempty"`
-		Cron       string `json:"cron,omitempty"`
+		Number      int64    `json:"number,omitempty"`
+		Created     int64    `json:"created,omitempty"`
+		Started     int64    `json:"started,omitempty"`
+		Finished    int64    `json:"finished,omitempty"`
+		Status      string   `json:"status,omitempty"`
+		Event       string   `json:"event,omitempty"`
+		EventReason []string `json:"event_reason,omitempty"`
+		ForgeURL    string   `json:"forge_url,omitempty"`
+		DeployTo    string   `json:"target,omitempty"`
+		DeployTask  string   `json:"task,omitempty"`
+		Commit      Commit   `json:"commit,omitempty"`
+		Parent      int64    `json:"parent,omitempty"`
+		Cron        string   `json:"cron,omitempty"`
+		Author      string   `json:"author,omitempty"`
+		Avatar      string   `json:"avatar,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
-		Sha               string   `json:"sha,omitempty"`
-		Ref               string   `json:"ref,omitempty"`
-		Refspec           string   `json:"refspec,omitempty"`
-		Branch            string   `json:"branch,omitempty"`
-		Message           string   `json:"message,omitempty"`
-		Author            Author   `json:"author,omitempty"`
-		ChangedFiles      []string `json:"changed_files,omitempty"`
-		PullRequestLabels []string `json:"labels,omitempty"`
-		IsPrerelease      bool     `json:"is_prerelease,omitempty"`
+		Sha                  string   `json:"sha,omitempty"`
+		Ref                  string   `json:"ref,omitempty"`
+		Refspec              string   `json:"refspec,omitempty"`
+		Branch               string   `json:"branch,omitempty"`
+		Message              string   `json:"message,omitempty"`
+		Author               Author   `json:"author,omitempty"`
+		ChangedFiles         []string `json:"changed_files,omitempty"`
+		PullRequestLabels    []string `json:"labels,omitempty"`
+		PullRequestMilestone string   `json:"milestone,omitempty"`
+		IsPrerelease         bool     `json:"is_prerelease,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.
@@ -88,14 +91,6 @@ type (
 	Step struct {
 		Name   string `json:"name,omitempty"`
 		Number int    `json:"number,omitempty"`
-	}
-
-	// Secret defines a runtime secret.
-	Secret struct {
-		Name  string `json:"name,omitempty"`
-		Value string `json:"value,omitempty"`
-		Mount string `json:"mount,omitempty"`
-		Mask  bool   `json:"mask,omitempty"`
 	}
 
 	// System defines runtime metadata for a ci/cd system.
@@ -119,5 +114,11 @@ type (
 		Name() string
 		// URL returns the root url of a configured forge
 		URL() string
+	}
+
+	TrustedConfiguration struct {
+		Network  bool `json:"network,omitempty"`
+		Volumes  bool `json:"volumes,omitempty"`
+		Security bool `json:"security,omitempty"`
 	}
 )

@@ -193,8 +193,8 @@
         "add": "Ajouter un dépôt",
         "branches": "Branches",
         "deploy_pipeline": {
-            "enter_target": "Environnement de déploiement ciblé",
-            "title": "Déclenchement d'un événement de déploiement pour le pipeline courant #{pipelineId}",
+            "enter_target": "Environnement de 'déploiement' ciblé",
+            "title": "Déclenchement d'un événement de 'déploiement' pour le pipeline courant #{pipelineId}",
             "trigger": "Déployer",
             "variables": {
                 "add": "Ajouter une variable",
@@ -226,7 +226,7 @@
                 "value": "Valeur de la variable",
                 "delete": "Supprimer la variable"
             },
-            "show_pipelines": "Afficher les pieplines"
+            "show_pipelines": "Afficher les pipelines"
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
         "open_in_forge": "Ouvrir le dépôt dans la forge",
@@ -297,7 +297,12 @@
             "log_delete_confirm": "Voulez vous vraiment supprimer les logs de cette étape ?",
             "no_logs": "Aucun logs",
             "duration": "Durée du pipeline",
-            "created": "Crée : {created}"
+            "created": "Crée : {created}",
+            "debug": {
+                "title": "Débogage",
+                "download_metadata": "Télécharger les métadonnées",
+                "metadata_download_error": "Erreur lors du téléchargement des métadonnées"
+            }
         },
         "pull_requests": "Pull requests",
         "settings": {
@@ -360,7 +365,7 @@
             "general": {
                 "allow_pr": {
                     "allow": "Autoriser les demandes de fusions",
-                    "desc": "Les pipelines peuvent se déclencher sur les pull requests."
+                    "desc": "Permettre aux pipelines de se déclencher sur les pull requests."
                 },
                 "cancel_prev": {
                     "cancel": "Annuler les pipelines précédents",
@@ -368,8 +373,8 @@
                 },
                 "general": "Général",
                 "netrc_only_trusted": {
-                    "desc": "Injecter les identifiants netrc uniquement dans des conteneurs de confiance (recommandé).",
-                    "netrc_only_trusted": "Injecter les identifiants netrc uniquement dans des conteneurs de confiance"
+                    "desc": "Les plugins listés ici auront accès aux identifiants netrc qui peuvent être utiliser pour cloner des dépôts depuis la forge, ou pour pousser vers celle-ci.",
+                    "netrc_only_trusted": "Plugins de clonage personnalisés de confiance"
                 },
                 "pipeline_path": {
                     "default": "Par défaut : .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
@@ -383,14 +388,23 @@
                     "protected": "Protégé"
                 },
                 "save": "Enregistrer les paramètres",
-                "success": "Paramètres du dépôt mis à jour",
+                "success": "Paramètres du projet mis à jour",
                 "timeout": {
                     "minutes": "minutes",
                     "timeout": "Délai d’inactivité"
                 },
                 "trusted": {
                     "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées (comme le montage de volumes).",
-                    "trusted": "Vérifié"
+                    "trusted": "Vérifié",
+                    "network": {
+                        "network": "Réseau"
+                    },
+                    "volumes": {
+                        "volumes": "Volumes"
+                    },
+                    "security": {
+                        "security": "Sécurité"
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -408,8 +422,8 @@
                     "visibility": "Visibilité du projet"
                 },
                 "allow_deploy": {
-                    "allow": "Autoriser les déploiements",
-                    "desc": "Autoriser les déploiements depuis les pipelines ayant réussis. À utiliser que si vous avez confiance dans les utilisateurs ayant un accès en écriture."
+                    "allow": "Autoriser les événements de 'déploiement'.",
+                    "desc": "Permettre les déploiements depuis les pipelines ayant réussis. À utiliser que si vous avez confiance dans les utilisateurs ayant un accès en écriture."
                 }
             },
             "not_allowed": "Vous n'êtes pas autorisé à accéder aux paramètres de ce dépôt",
@@ -458,10 +472,34 @@
             },
             "settings": "Paramètres"
         },
-        "user_none": "Cet(te) organisation / utilisateur n'a pas encore de projets."
+        "user_none": "Cet(te) organisation / utilisateur n'a pas encore de projets.",
+        "visibility": {
+            "visibility": "Visibilité du projet",
+            "public": {
+                "public": "Publique",
+                "desc": "Tout le monde peut voir le projet sans être connecté."
+            },
+            "private": {
+                "private": "Privé",
+                "desc": "Seul vous et les propriétaires de ce dépôt peuvent le voir."
+            },
+            "internal": {
+                "internal": "Interne",
+                "desc": "Seuls les comptes identifiés sur cet instance de Woodpecker peuvent voir ce projet."
+            }
+        }
     },
     "repos": "Dépôt",
-    "repositories": "Dépôts",
+    "repositories": {
+        "title": "Dépôts",
+        "all": {
+            "title": "Tout les dépôts",
+            "desc": "Dépôts classés par date de création du dernier pipeline"
+        },
+        "last": {
+            "title": "Dernière visite"
+        }
+    },
     "running_version": "Vous utilisez Woodpecker {0}",
     "search": "Rechercher…",
     "time": {
@@ -471,7 +509,8 @@
         "not_started": "pas encore démarré",
         "sec_short": "sec",
         "template": "D MMM, YYYY, HH:mm z",
-        "weeks_short": "s"
+        "weeks_short": "s",
+        "just_now": "il y a peu de temps"
     },
     "unknown_error": "Une erreur inconnue est survenue",
     "update_woodpecker": "Merci de mettre à jour votre instance Woodpecker vers la version {0}",

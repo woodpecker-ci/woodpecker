@@ -16,13 +16,15 @@ package compiler
 
 import (
 	"fmt"
+	"maps"
 	"path"
+	"slices"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 const (
@@ -46,7 +48,7 @@ type Secret struct {
 func (s *Secret) Available(event string, container *yaml_types.Container) error {
 	onlyAllowSecretForPlugins := len(s.AllowedPlugins) > 0
 	if onlyAllowSecretForPlugins && !container.IsPlugin() {
-		return fmt.Errorf("secret %q only allowed to be used by plugins by step %q", s.Name, container.Name)
+		return fmt.Errorf("secret %q is only allowed to be used by plugins (a filter has been set on the secret). Note: Image filters do not work for normal steps", s.Name)
 	}
 
 	if onlyAllowSecretForPlugins && !utils.MatchImageDynamic(container.Image, s.AllowedPlugins...) {
@@ -68,47 +70,30 @@ func (s *Secret) Match(event string) bool {
 		return true
 	}
 	// treat all pull events the same way
-	if event == "pull_request_closed" {
-		event = "pull_request"
+	if metadata.EventIsPull(event) {
+		event = metadata.EventPull
 	}
 	// one match is enough
-	for _, e := range s.Events {
-		if e == event {
-			return true
-		}
-	}
-	// a filter is set but the webhook did not match it
-	return false
-}
-
-type ResourceLimit struct {
-	MemSwapLimit int64
-	MemLimit     int64
-	ShmSize      int64
-	CPUQuota     int64
-	CPUShares    int64
-	CPUSet       string
+	return slices.Contains(s.Events, event)
 }
 
 // Compiler compiles the yaml.
 type Compiler struct {
-	local               bool
-	escalated           []string
-	prefix              string
-	volumes             []string
-	networks            []string
-	env                 map[string]string
-	cloneEnv            map[string]string
-	workspaceBase       string
-	workspacePath       string
-	metadata            metadata.Metadata
-	registries          []Registry
-	secrets             map[string]Secret
-	reslimit            ResourceLimit
-	defaultClonePlugin  string
-	trustedClonePlugins []string
-	trustedPipeline     bool
-	netrcOnlyTrusted    bool
+	local                   bool
+	escalated               []string
+	prefix                  string
+	volumes                 []string
+	networks                []string
+	env                     map[string]string
+	cloneEnv                map[string]string
+	workspaceBase           string
+	workspacePath           string
+	metadata                metadata.Metadata
+	registries              []Registry
+	secrets                 map[string]Secret
+	defaultClonePlugin      string
+	trustedClonePlugins     []string
+	securityTrustedPipeline bool
 }
 
 // New creates a new Compiler with options.
@@ -140,14 +125,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// create a default volume
-	config.Volumes = append(config.Volumes, &backend_types.Volume{
-		Name: fmt.Sprintf("%s_default", c.prefix),
-	})
+	config.Volume = fmt.Sprintf("%s_default", c.prefix)
 
 	// create a default network
-	config.Networks = append(config.Networks, &backend_types.Network{
-		Name: fmt.Sprintf("%s_default", c.prefix),
-	})
+	config.Network = fmt.Sprintf("%s_default", c.prefix)
 
 	// create secrets for mask
 	for _, sec := range c.secrets {
@@ -181,7 +162,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		for k, v := range c.cloneEnv {
 			container.Environment[k] = v
 		}
-		step, err := c.createProcess(container, backend_types.StepTypeClone)
+		step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
 		}
@@ -200,16 +181,14 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 			stage := new(backend_types.Stage)
 
-			step, err := c.createProcess(container, backend_types.StepTypeClone)
+			step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 			if err != nil {
 				return nil, err
 			}
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
-			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
-				for k, v := range c.cloneEnv {
-					step.Environment[k] = v
-				}
+			if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+				maps.Copy(step.Environment, c.cloneEnv)
 			}
 
 			stage.Steps = append(stage.Steps, step)
@@ -229,7 +208,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 				return nil, err
 			}
 
-			step, err := c.createProcess(container, backend_types.StepTypeService)
+			step, err := c.createProcess(container, conf, backend_types.StepTypeService)
 			if err != nil {
 				return nil, err
 			}
@@ -257,16 +236,14 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		if container.IsPlugin() {
 			stepType = backend_types.StepTypePlugin
 		}
-		step, err := c.createProcess(container, stepType)
+		step, err := c.createProcess(container, conf, stepType)
 		if err != nil {
 			return nil, err
 		}
 
-		// inject netrc if it's a trusted repo or a trusted clone-plugin
-		if c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
-			for k, v := range c.cloneEnv {
-				step.Environment[k] = v
-			}
+		// only inject netrc if it's a trusted repo or a trusted plugin
+		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+			maps.Copy(step.Environment, c.cloneEnv)
 		}
 
 		steps = append(steps, &dagCompilerStep{

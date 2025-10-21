@@ -17,90 +17,90 @@ package model
 import (
 	"testing"
 
-	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSecretValidate(t *testing.T) {
-	g := goblin.Goblin(t)
-	g.Describe("Secret", func() {
-		g.It("should pass validation", func() {
-			secret := Secret{
+	tests := []struct {
+		s   Secret
+		err bool
+	}{
+		{
+			s: Secret{
 				Name:   "secretname",
 				Value:  "secretvalue",
 				Events: []WebhookEvent{EventPush},
 				Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql"},
-			}
-			err := secret.Validate()
-			g.Assert(err).IsNil()
-		})
-		g.Describe("should fail validation", func() {
-			g.It("when no name", func() {
-				secret := Secret{
-					Value:  "secretvalue",
-					Events: []WebhookEvent{EventPush},
-					Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql"},
-				}
-				err := secret.Validate()
-				g.Assert(err).IsNotNil()
-			})
-			g.It("when no value", func() {
-				secret := Secret{
-					Name:   "secretname",
-					Events: []WebhookEvent{EventPush},
-					Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql"},
-				}
-				err := secret.Validate()
-				g.Assert(err).IsNotNil()
-			})
-			g.It("when no events", func() {
-				secret := Secret{
-					Name:   "secretname",
-					Value:  "secretvalue",
-					Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql"},
-				}
-				err := secret.Validate()
-				g.Assert(err).IsNotNil()
-			})
-			g.It("wrong image: no value", func() {
-				secret := Secret{
-					Name:   "secretname",
-					Value:  "secretvalue",
-					Events: []WebhookEvent{EventPush},
-					Images: []string{"wrong image:no"},
-				}
-				err := secret.Validate()
-				g.Assert(err).IsNotNil()
-			})
-			g.It("wrong image: no hostname", func() {
-				secret := Secret{
-					Name:   "secretname",
-					Value:  "secretvalue",
-					Events: []WebhookEvent{EventPush},
-					Images: []string{"/library/mysql:latest", ":8443/mysql:latest", ":8443/library/mysql:latest", "/library/mysql", ":8443/mysql", ":8443/library/mysql"},
-				}
-				err := secret.Validate()
-				g.Assert(err).IsNotNil()
-			})
-			g.It("wrong image: no port number", func() {
-				secret := Secret{
-					Name:   "secretname",
-					Value:  "secretvalue",
-					Events: []WebhookEvent{EventPush},
-					Images: []string{"localregistry.test:/mysql:latest", "localregistry.test:/mysql"},
-				}
-				err := secret.Validate()
-				g.Assert(err).IsNotNil()
-			})
-			g.It("wrong image: no tag name", func() {
-				secret := Secret{
-					Name:   "secretname",
-					Value:  "secretvalue",
-					Events: []WebhookEvent{EventPush},
-					Images: []string{"docker.io/library/mysql:", "alpine:", "localregistry.test:8443/mysql:", "localregistry.test:8443/library/mysql:"},
-				}
-				err := secret.Validate()
-				g.Assert(err).IsNotNil()
-			})
-		})
-	})
+			},
+			err: false,
+		},
+		{
+			s: Secret{
+				Value:  "secretvalue",
+				Events: []WebhookEvent{EventPush},
+				Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql"},
+			},
+			err: true,
+		},
+		{
+			s: Secret{
+				Name:   "secretname",
+				Events: []WebhookEvent{EventPush},
+				Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql"},
+			},
+			err: true,
+		},
+		{
+			s: Secret{
+				Name:   "secretname",
+				Value:  "secretvalue",
+				Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql"},
+			},
+			err: true,
+		},
+		{
+			s: Secret{
+				Name:   "secretname",
+				Value:  "secretvalue",
+				Events: []WebhookEvent{EventPush},
+				Images: []string{"wrong image:no"},
+			},
+			err: true,
+		},
+		{
+			s: Secret{
+				Name:   "secretname",
+				Value:  "secretvalue",
+				Events: []WebhookEvent{EventPush},
+				Images: []string{"/library/mysql:latest", ":8443/mysql:latest", ":8443/library/mysql:latest", "/library/mysql", ":8443/mysql", ":8443/library/mysql"},
+			},
+			err: true,
+		},
+		{
+			s: Secret{
+				Name:   "secretname",
+				Value:  "secretvalue",
+				Events: []WebhookEvent{EventPush},
+				Images: []string{"localregistry.test:/mysql:latest", "localregistry.test:/mysql"},
+			},
+			err: true,
+		},
+		{
+			s: Secret{
+				Name:   "secretname",
+				Value:  "secretvalue",
+				Events: []WebhookEvent{EventPush},
+				Images: []string{"docker.io/library/mysql:", "alpine:", "localregistry.test:8443/mysql:", "localregistry.test:8443/library/mysql:"},
+			},
+			err: true,
+		},
+	}
+	for i, tt := range tests {
+		err := tt.s.Validate()
+		if tt.err {
+			assert.Errorf(t, err, "expected secret validation error on index %d", i)
+		} else {
+			assert.NoErrorf(t, err, "unexpected secret validation error on index %d", i)
+		}
+	}
 }

@@ -25,7 +25,7 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	int_str "k8s.io/apimachinery/pkg/util/intstr"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 const (
@@ -43,6 +43,10 @@ func mkService(step *types.Step, config *config) (*v1.Service, error) {
 		ServiceLabel: name,
 	}
 
+	if len(step.Ports) == 0 {
+		return nil, fmt.Errorf("kubernetes backend requires explicitly exposed ports for service steps, add 'ports' configuration to step '%s'", step.Name)
+	}
+
 	var svcPorts []v1.ServicePort
 	for _, port := range step.Ports {
 		svcPorts = append(svcPorts, servicePort(port))
@@ -52,7 +56,7 @@ func mkService(step *types.Step, config *config) (*v1.Service, error) {
 	return &v1.Service{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      name,
-			Namespace: config.Namespace,
+			Namespace: config.GetNamespace(step.OrgID),
 		},
 		Spec: v1.ServiceSpec{
 			Type:     v1.ServiceTypeClusterIP,
@@ -85,7 +89,7 @@ func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 	}
 
 	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Interface("ports", svc.Spec.Ports).Msg("creating service")
-	return engine.client.CoreV1().Services(engineConfig.Namespace).Create(ctx, svc, meta_v1.CreateOptions{})
+	return engine.client.CoreV1().Services(engineConfig.GetNamespace(step.OrgID)).Create(ctx, svc, meta_v1.CreateOptions{})
 }
 
 func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
@@ -95,7 +99,7 @@ func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts
 	}
 	log.Trace().Str("name", svcName).Msg("deleting service")
 
-	err = engine.client.CoreV1().Services(engine.config.Namespace).Delete(ctx, svcName, deleteOpts)
+	err = engine.client.CoreV1().Services(engine.config.GetNamespace(step.OrgID)).Delete(ctx, svcName, deleteOpts)
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
 		log.Trace().Err(err).Msgf("unable to delete service %s", svcName)

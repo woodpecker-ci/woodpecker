@@ -1,13 +1,126 @@
 {
-  "api": "API",
-  "back": "後退",
-  "login": "登入",
-  "logout": "登出",
-  "password": "密碼",
-  "repos": "儲存庫",
-  "repositories": "儲存庫",
-  "search": "搜索…",
-  "unknown_error": "出現未知錯誤",
-  "url": "URL",
-  "welcome": "歡迎使用 Woodpecker"
+    "api": "API",
+    "back": "返回",
+    "login": "登入",
+    "logout": "登出",
+    "password": "密碼",
+    "repos": "儲存庫",
+    "repositories": {
+        "title": "儲存庫",
+        "all": {
+            "title": "所有儲存庫"
+        },
+        "last": {
+            "title": "上次瀏覽"
+        }
+    },
+    "search": "搜尋…",
+    "unknown_error": "出現未知錯誤",
+    "url": "URL",
+    "welcome": "歡迎使用 Woodpecker",
+    "repo": {
+        "manual_pipeline": {
+            "select_branch": "選擇分支",
+            "show_pipelines": "顯示 pipeline",
+            "title": "手動觸發 pipeline",
+            "trigger": "執行 pipeline",
+            "variables": {
+                "value": "變數值",
+                "title": "額外 pipeline 變數",
+                "desc": "指定在 pipeline 中額外使用的變數。相同變數名稱會被覆蓋掉。",
+                "name": "變數名稱",
+                "delete": "刪除變數"
+            }
+        },
+        "pipeline": {
+            "actions": {
+                "cancel": "取消"
+            },
+            "tasks": "任務",
+            "status": {
+                "skipped": "跳過",
+                "success": "成功",
+                "failure": "失敗"
+            }
+        },
+        "settings": {
+            "general": {
+                "save": "存儲設定",
+                "timeout": {
+                    "timeout": "逾時"
+                },
+                "general": "一般設定"
+            },
+            "badge": {
+                "branch": "分支"
+            },
+            "crons": {
+                "schedule": {
+                    "placeholder": "排程"
+                }
+            }
+        },
+        "visibility": {
+            "visibility": "專案能見度",
+            "public": {
+                "public": "公開",
+                "desc": "所有人包含非登入的使用者都可以看到你的專案。"
+            },
+            "private": {
+                "private": "私有",
+                "desc": "只有你和其他儲存庫的擁有者可以看到這個專案。"
+            },
+            "internal": {
+                "internal": "內部的",
+                "desc": "只有已認證的使用者可以看到這個專案。"
+            }
+        },
+        "deploy_pipeline": {
+            "title": "觸發當前 pipeline #{pipelineId} 的部署",
+            "enter_target": "目標部署環境",
+            "variables": {
+                "title": "額外 pipeline 變數",
+                "delete": "刪除變數",
+                "name": "變數名稱",
+                "value": "變數值"
+            },
+            "trigger": "部署",
+            "enter_task": "部屬任務"
+        },
+        "pull_requests": "合併請求",
+        "add": "新增儲存庫",
+        "user_none": "這個組織/使用者還沒有任何專案",
+        "not_allowed": "你沒有權限存取這個儲存庫",
+        "enable": {
+            "enable": "啟用",
+            "enabled": "已經啟用",
+            "disabled": "禁用",
+            "success": "儲存庫已啟用"
+        },
+        "open_in_forge": "在版本控制系統中打開",
+        "activity": "活動",
+        "branches": "分支"
+    },
+    "cancel": "取消",
+    "not_found": {
+        "back_home": "返回首頁"
+    },
+    "admin": {
+        "settings": {
+            "users": {
+                "cancel": "取消",
+                "login": "登入",
+                "email": "Email",
+                "avatar_url": "Avatar URL"
+            }
+        }
+    },
+    "username": "帳號",
+    "time": {
+        "just_now": "剛剛",
+        "not_started": "尚未開始"
+    },
+    "empty_list": "找不到{entity}！",
+    "default": "預設",
+    "info": "資訊"
 }

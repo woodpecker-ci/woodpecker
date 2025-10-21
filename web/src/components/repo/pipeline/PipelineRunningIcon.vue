@@ -7,6 +7,8 @@ import WoodpeckerIcon from '~/assets/woodpecker.svg?component';
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 @keyframes peck {
   0% {
     transform: rotate(5deg) translateX(5%);

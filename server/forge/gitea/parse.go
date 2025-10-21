@@ -16,14 +16,17 @@
 package gitea
 
 import (
+	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 const (
@@ -33,13 +36,39 @@ const (
 	hookPullRequest = "pull_request"
 	hookRelease     = "release"
 
-	actionOpen  = "opened"
-	actionSync  = "synchronized"
-	actionClose = "closed"
+	actionOpen         = "opened"
+	actionSync         = "synchronized"
+	actionClose        = "closed"
+	actionEdited       = "edited"
+	actionLabelUpdate  = "label_updated"
+	actionLabelCleared = "label_cleared"
+	actionMilestoned   = "milestoned"
+	actionDeMilestoned = "demilestoned"
+	actionAssigned     = "assigned"
+	actionUnAssigned   = "unassigned"
+	actionReopen       = "reopened"
 
 	refBranch = "branch"
 	refTag    = "tag"
 )
+
+var actionList = []string{
+	actionOpen,
+	actionSync,
+	actionClose,
+	actionEdited,
+	actionLabelUpdate,
+	actionMilestoned,
+	actionDeMilestoned,
+	actionLabelCleared,
+	actionAssigned,
+	actionUnAssigned,
+	actionReopen,
+}
+
+func supportedAction(action string) bool {
+	return slices.Contains(actionList, action)
+}
 
 // parseHook parses a Gitea hook from an http.Request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
@@ -111,14 +140,32 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, err
 	}
 
-	// Don't trigger pipelines for non-code changes ...
-	if pr.Action != actionOpen && pr.Action != actionSync && pr.Action != actionClose {
-		log.Debug().Msgf("pull_request action is '%s' and no open or sync", pr.Action)
+	if pr.PullRequest == nil {
+		// this should never have happened but it did - so we check
+		return nil, nil, fmt.Errorf("parsed pull_request webhook does not contain pull_request info")
+	}
+
+	// Only trigger pipelines for supported event types
+	if !supportedAction(pr.Action) {
+		log.Debug().Msgf("pull_request action is '%s'. Only '%s' are supported", pr.Action, strings.Join(actionList, "', '"))
 		return nil, nil, nil
 	}
 
 	repo = toRepo(pr.Repo)
 	pipeline = pipelineFromPullRequest(pr)
+
+	// all other actions return the state of labels after the actions where done ... so we should too
+	if pr.Action == actionLabelCleared {
+		pipeline.PullRequestLabels = []string{}
+	}
+	if pr.Action == actionDeMilestoned {
+		pipeline.PullRequestMilestone = ""
+	}
+
+	for i := range pipeline.EventReason {
+		pipeline.EventReason[i] = common.NormalizeEventReason(pipeline.EventReason[i])
+	}
+
 	return repo, pipeline, err
 }
 

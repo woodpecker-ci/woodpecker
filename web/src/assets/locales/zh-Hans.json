@@ -17,7 +17,7 @@
                 "delete_agent": "删除 Agent",
                 "delete_confirm": "你真的要删除该 Agent 吗？删除后它将无法再次连接到此服务器。",
                 "deleted": "已删除 Agent",
-                "desc": "注册到此服务器的 Agents",
+                "desc": "注册到此服务器的 Agents。",
                 "edit_agent": "编辑 Agent",
                 "id": "ID",
                 "last_contact": "最后访问",
@@ -39,14 +39,21 @@
                 "saved": "已保存 Agent",
                 "show": "显示 Agents",
                 "token": "Token",
-                "version": "版本"
+                "version": "版本",
+                "custom_labels": {
+                    "custom_labels": "自定义标签",
+                    "desc": "Agent 管理员在 agent 启动时设置的自定义标签。"
+                },
+                "org": {
+                    "badge": "组织"
+                }
             },
             "not_allowed": "你没有访问服务器设置的权限",
             "orgs": {
                 "delete_confirm": "你真的想删除该组织吗？这也将删除该组织拥有的所有存储库。",
                 "delete_org": "删除组织",
                 "deleted": "组织已删除",
-                "desc": "在此服务器上拥有存储库的组织",
+                "desc": "在此服务器上拥有存储库的组织。",
                 "none": "还没有任何组织。",
                 "org_settings": "组织设置",
                 "orgs": "组织",
@@ -54,7 +61,7 @@
             },
             "queue": {
                 "agent": "agent",
-                "desc": "正在等待 Agents 执行的任务",
+                "desc": "正在等待 Agents 执行的任务。",
                 "pause": "暂停",
                 "paused": "队列已暂停",
                 "queue": "队列",
@@ -74,7 +81,7 @@
                 "waiting_for": "正在等待"
             },
             "repos": {
-                "desc": "该服务器上已启用或曾经启用的仓库",
+                "desc": "该服务器上已启用或曾经启用的仓库。",
                 "disabled": "已禁用",
                 "none": "目前还没有存储库。",
                 "repair": {
@@ -121,7 +128,7 @@
                 "delete_confirm": "你真的想删除这个用户吗？这也将删除该用户拥有的所有存储库。",
                 "delete_user": "删除用户",
                 "deleted": "删除用户",
-                "desc": "注册此服务器的用户",
+                "desc": "在此服务器上注册的用户。",
                 "edit_user": "编辑用户",
                 "email": "Email",
                 "login": "登录",
@@ -130,6 +137,10 @@
                 "saved": "已保存用户",
                 "show": "显示用户",
                 "users": "用户"
+            },
+            "registries": {
+                "desc": "可以添加全局注册凭据以在所有流水线中使用私有镜像。",
+                "warning": "这些注册凭据对所有用户可用。"
             }
         }
     },
@@ -174,7 +185,13 @@
                 "show": "显示所有密钥",
                 "value": "值"
             },
-            "settings": "设置"
+            "settings": "设置",
+            "agents": {
+                "desc": "注册到此组织的 Agents。"
+            },
+            "registries": {
+                "desc": "可以为组织添加注册表凭据，以便在所有流水线中使用私有镜像。"
+            }
         }
     },
     "password": "密码",
@@ -194,7 +211,8 @@
                 "title": "添加流水线变量",
                 "value": "变量值",
                 "delete": "删除变量"
-            }
+            },
+            "enter_task": "部署任务"
         },
         "enable": {
             "disabled": "已禁用",
@@ -215,7 +233,8 @@
                 "title": "添加流水线变量",
                 "value": "变量值",
                 "delete": "删除变量"
-            }
+            },
+            "show_pipelines": "查看流水线"
         },
         "not_allowed": "你没有权限访问这个仓库",
         "open_in_forge": "在版本控制系统中打开",
@@ -229,7 +248,8 @@
                 "log_auto_scroll_off": "关闭自动滚动",
                 "log_download": "下载",
                 "restart": "重启",
-                "restart_success": "流水线已重启"
+                "restart_success": "流水线已重启",
+                "log_delete": "删除"
             },
             "config": "配置",
             "errors": "错误 ({count})",
@@ -240,7 +260,8 @@
                 "pr": "合并请求",
                 "push": "推送",
                 "tag": "标签",
-                "release": "发布"
+                "release": "发布",
+                "pr_closed": "拉取请求已合并/关闭"
             },
             "exit_code": "退出代码 {exitCode}",
             "files": "修改的文件（{files}）",
@@ -273,13 +294,27 @@
                 "running": "运行中",
                 "skipped": "已跳过",
                 "started": "已启动",
-                "status": "状态: {status}",
+                "status": "状态：{status}",
                 "success": "成功"
             },
             "step_not_started": "该步骤尚未启动。",
             "tasks": "任务",
             "warnings": "警告 ({count})",
-            "we_got_some_errors": "哦不，我们遇到了一些错误！"
+            "we_got_some_errors": "哦不，我们遇到了一些错误！",
+            "no_logs": "无日志",
+            "created": "创建于：{created}",
+            "debug": {
+                "title": "调试",
+                "download_metadata": "下载元数据",
+                "metadata_download_error": "下载元数据时出错",
+                "metadata_download_successful": "元数据下载成功",
+                "no_permission": "您无权访问调试信息",
+                "metadata_exec_title": "本地重新运行流水线",
+                "metadata_exec_desc": "下载此流水线的元数据以便在本地运行。这样可以在提交更改前修复问题并进行测试。Woodpecker CLI 必须与服务器版本一致并已在本地安装。"
+            },
+            "duration": "流水线耗时：{duration}",
+            "log_delete_confirm": "您确定要删除步骤日志吗？",
+            "log_delete_error": "删除步骤日志时发生了错误"
         },
         "pull_requests": "合并请求",
         "settings": {
@@ -372,7 +407,19 @@
                 },
                 "trusted": {
                     "desc": "流水线容器可以使用高级功能，比如挂载卷。",
-                    "trusted": "受信任"
+                    "trusted": "受信任",
+                    "network": {
+                        "network": "网络",
+                        "desc": "流水线容器可以获得网络权限，例如更改 DNS。"
+                    },
+                    "security": {
+                        "security": "安全",
+                        "desc": "流水线容器可以获得安全权限。"
+                    },
+                    "volumes": {
+                        "volumes": "卷",
+                        "desc": "流水线容器允许被挂载卷。"
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -388,6 +435,10 @@
                         "public": "公开"
                     },
                     "visibility": "项目可见性"
+                },
+                "allow_deploy": {
+                    "allow": "允许部署",
+                    "desc": "允许成功的流水线进行部署。所有具有推送权限的用户都可以触发这些操作，因此请谨慎使用。"
                 }
             },
             "not_allowed": "你没有权限访问此仓库的设置",
@@ -436,10 +487,35 @@
             },
             "settings": "设置"
         },
-        "user_none": "此组织/用户还没有任何仓库。"
+        "user_none": "该组织/用户尚无项目",
+        "visibility": {
+            "visibility": "项目可见性",
+            "public": {
+                "desc": "任何无需登录的用户均可以看到你的项目。",
+                "public": "公共的"
+            },
+            "private": {
+                "private": "私有的",
+                "desc": "只有你和其他仓库拥有者才能看到这个项目。"
+            },
+            "internal": {
+                "internal": "内部的",
+                "desc": "只有Woodpecker的登录用户可以看到这个项目。"
+            }
+        }
     },
     "repos": "仓库",
-    "repositories": "仓库",
+    "repositories": {
+        "title": "仓库",
+        "all": {
+            "title": "所有仓库",
+            "desc": "所有仓库（按流水线创建时间排序）"
+        },
+        "last": {
+            "title": "上次访问",
+            "desc": "最近访问的仓库（按访问时间排序）"
+        }
+    },
     "running_version": "你正在运行 Woodpecker {0}",
     "search": "查找仓库…",
     "time": {
@@ -449,7 +525,8 @@
         "not_started": "还没有运行过",
         "sec_short": "秒",
         "template": "YYYY 年 MM 月 D 日 HH:mm z",
-        "weeks_short": "周"
+        "weeks_short": "周",
+        "just_now": "刚刚"
     },
     "unknown_error": "发生了未知错误",
     "update_woodpecker": "请更新你的 Woodpecker 实例到 {0}",
@@ -506,13 +583,19 @@
             "settings": "用户设置",
             "cli_and_api": {
                 "token": "个人访问令牌",
-                "api_usage": "API 使用示例",
+                "api_usage": "API 用法示例",
                 "cli_usage": "CLI 用法示例",
                 "download_cli": "下载 CLI",
                 "reset_token": "重置令牌",
-                "swagger_ui": "Swagger UI",
+                "swagger_ui": "Swagger 界面",
                 "desc": "个人访问令牌、CLI 和 API 用法",
                 "cli_and_api": "CLI & API"
+            },
+            "registries": {
+                "desc": "可以添加用户注册表凭据，以便在所有个人流水线中使用私有镜像。"
+            },
+            "agents": {
+                "desc": "在您的账号仓库中已注册的 Agent。"
             }
         }
     },
@@ -522,10 +605,76 @@
     "login_to_cli": "登录到 CLI",
     "global_level_secret": "全局密钥",
     "org_level_secret": "组织密钥",
-    "abort": "关于",
+    "abort": "中止",
     "cli_login_success": "登录到 CLI 成功",
     "cli_login_failed": "登录到 CLI 失败",
     "cli_login_denied": "登录 CLI 被拒绝",
     "login_to_cli_description": "点击继续以登录到 CLI。",
-    "return_to_cli": "您现在可以关闭此选项卡并返回 CLI。"
+    "return_to_cli": "您现在可以关闭此选项卡并返回 CLI。",
+    "login_with": "使用 {forge} 登录",
+    "require_approval": {
+        "allowed_users": {
+            "allowed_users": "已允许的用户"
+        },
+        "none": "无",
+        "none_desc": "所有事件都会触发管道，包括拉取请求。此设置可能很危险，仅建议用于私有实例。",
+        "pull_requests": "所有拉取请求",
+        "forks": "从已 fork 的仓库进行 Pull request"
+    },
+    "secrets": {
+        "secrets": "密钥",
+        "add": "添加密钥",
+        "save": "保存密钥",
+        "show": "显示密钥",
+        "created": "密钥已创建",
+        "saved": "密钥已保存",
+        "edit": "编辑密钥",
+        "delete": "删除密钥",
+        "name": "名称",
+        "value": "值",
+        "deleted": "密钥已删除",
+        "delete_confirm": "您确实要删除这个密钥吗？",
+        "events": {
+            "events": "适用于以下事件"
+        },
+        "none": "目前没有密钥。",
+        "desc": "密钥可以被用于这个仓库的所有流水线中。",
+        "plugins": {
+            "images": "仅适用于以下的插件"
+        }
+    },
+    "no_search_results": "未找到结果",
+    "org_access_denied": "您无权访问此组织",
+    "invalid_state": "OAuth 状态无效",
+    "internal_error": "发生内部错误",
+    "settings": "设置",
+    "access_denied": "您无权访问此实例",
+    "registries": {
+        "address": {
+            "address": "地址",
+            "desc": "注册表地址（如 docker.io）"
+        },
+        "deleted": "已删除注册表凭据",
+        "show": "显示注册表",
+        "save": "保存注册表",
+        "add": "添加注册表",
+        "view": "查看注册表",
+        "edit": "编辑注册表",
+        "delete": "删除注册表",
+        "created": "已创建注册表凭据",
+        "registries": "注册表",
+        "delete_confirm": "您真的要删除此注册表吗？",
+        "credentials": "注册表凭据",
+        "desc": "在流水线中可添加注册表凭据使用私有镜像。",
+        "none": "目前还没有注册表凭据。",
+        "saved": "已保存注册表凭据"
+    },
+    "registration_closed": "已关闭注册",
+    "oauth_error": "与 OAuth 提供商进行身份验证时出错",
+    "public_url_for_oauth_if": "如果用于 OAuth 的对外可访问地址与当前系统的基础 URL 不同，请在({0})填入",
+    "edit_forge": "编辑代码托管平台",
+    "forge_delete_confirm": "您真的想要删除这个仓库吗？这将也会删除与此仓库相关的所有仓库、用户和管道。",
+    "no_forges": "还没有配置任何代码托管平台.",
+    "developer_settings": "开发者设置",
+    "delete_forge": "删除代码托管平台"
 }

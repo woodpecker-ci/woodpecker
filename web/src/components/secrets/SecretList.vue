@@ -1,37 +1,35 @@
 <template>
-  <div class="space-y-4 text-wp-text-100">
+  <div class="text-wp-text-100 space-y-4">
     <ListItem
       v-for="secret in secrets"
       :key="secret.id"
-      class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      class="bg-wp-background-200! dark:bg-wp-background-200! items-center"
     >
       <span>{{ secret.name }}</span>
       <Badge
         v-if="secret.edit === false"
         class="ml-2"
-        :label="secret.org_id === 0 ? $t('global_level_secret') : $t('org_level_secret')"
+        :value="secret.org_id === 0 ? $t('global_level_secret') : $t('org_level_secret')"
       />
-      <div class="ml-auto space-x-2 <md:hidden">
-        <Badge v-for="event in secret.events" :key="event" :label="event" />
+      <div class="md:display-unset ml-auto hidden space-x-2">
+        <Badge v-for="event in secret.events" :key="event" :value="event" />
       </div>
-      <template v-if="secret.edit !== false">
-        <IconButton
-          icon="edit"
-          class="ml-2 <md:ml-auto w-8 h-8"
-          :title="$t('secrets.edit')"
-          @click="editSecret(secret)"
-        />
+      <div v-if="secret.edit !== false" class="flex items-center gap-2">
+        <IconButton icon="edit" class="h-8 w-8 md:ml-2" :title="$t('secrets.edit')" @click="editSecret(secret)" />
         <IconButton
           icon="trash"
-          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
+          class="hover:text-wp-error-100 h-8 w-8"
           :is-loading="isDeleting"
           :title="$t('secrets.delete')"
           @click="deleteSecret(secret)"
         />
-      </template>
+      </div>
     </ListItem>
 
-    <div v-if="secrets?.length === 0" class="ml-2">{{ $t('secrets.none') }}</div>
+    <div v-if="loading" class="flex justify-center">
+      <Icon name="spinner" class="animate-spin" />
+    </div>
+    <div v-else-if="secrets?.length === 0" class="ml-2">{{ $t('secrets.none') }}</div>
   </div>
 </template>
 
@@ -40,6 +38,7 @@ import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import type { Secret } from '~/lib/api/types';
@@ -47,6 +46,7 @@ import type { Secret } from '~/lib/api/types';
 const props = defineProps<{
   modelValue: (Secret & { edit?: boolean })[];
   isDeleting: boolean;
+  loading: boolean;
 }>();
 
 const emit = defineEmits<{

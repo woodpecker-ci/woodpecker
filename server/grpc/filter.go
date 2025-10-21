@@ -15,34 +15,68 @@
 package grpc
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"maps"
+	"strings"
+
+	pipelineConsts "go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 )
 
 func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
-	return func(task *model.Task) bool {
-		for taskLabel, taskLabelValue := range task.Labels {
+	return func(task *model.Task) (bool, int) {
+		// Create a copy of the labels for filtering to avoid modifying the original task
+		labels := maps.Clone(task.Labels)
+
+		if requiredLabelsMissing(labels, agentFilter.Labels) {
+			return false, 0
+		}
+
+		// ignore internal labels for filtering
+		for k := range labels {
+			if strings.HasPrefix(k, pipelineConsts.InternalLabelPrefix) {
+				delete(labels, k)
+			}
+		}
+
+		score := 0
+		for taskLabel, taskLabelValue := range labels {
 			// if a task label is empty it will be ignored
 			if taskLabelValue == "" {
 				continue
 			}
 
+			// all task labels are required to be present for an agent to match
 			agentLabelValue, ok := agentFilter.Labels[taskLabel]
-
 			if !ok {
-				return false
+				return false, 0
 			}
 
+			switch agentLabelValue {
 			// if agent label has a wildcard
-			if agentLabelValue == "*" {
-				continue
-			}
-
-			if taskLabelValue != agentLabelValue {
-				return false
+			case "*":
+				score++
+			// if agent label has an exact match
+			case taskLabelValue:
+				score += 10
+			// agent doesn't match
+			default:
+				return false, 0
 			}
 		}
-		return true
+		return true, score
 	}
+}
+
+func requiredLabelsMissing(taskLabels, agentLabels map[string]string) bool {
+	for label, value := range agentLabels {
+		if len(label) > 0 && label[0] == '!' {
+			val, ok := taskLabels[label[1:]]
+			if !ok || val != value {
+				return true
+			}
+		}
+	}
+	return false
 }

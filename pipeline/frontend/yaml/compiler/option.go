@@ -15,11 +15,12 @@
 package compiler
 
 import (
+	"maps"
 	"net/url"
 	"path"
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
 // Option configures a compiler option.
@@ -74,9 +75,7 @@ func WithMetadata(metadata metadata.Metadata) Option {
 	return func(compiler *Compiler) {
 		compiler.metadata = metadata
 
-		for k, v := range metadata.Environ() {
-			compiler.env[k] = v
-		}
+		maps.Copy(compiler.env, metadata.Environ())
 	}
 }
 
@@ -143,9 +142,7 @@ func WithLocal(local bool) Option {
 // added by default to every container in the pipeline.
 func WithEnviron(env map[string]string) Option {
 	return func(compiler *Compiler) {
-		for k, v := range env {
-			compiler.env[k] = v
-		}
+		maps.Copy(compiler.env, env)
 	}
 }
 
@@ -154,21 +151,6 @@ func WithEnviron(env map[string]string) Option {
 func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {
 		compiler.networks = networks
-	}
-}
-
-// WithResourceLimit configures the compiler with default resource limits that
-// are applied each container in the pipeline.
-func WithResourceLimit(swap, mem, shmSize, cpuQuota, cpuShares int64, cpuSet string) Option {
-	return func(compiler *Compiler) {
-		compiler.reslimit = ResourceLimit{
-			MemSwapLimit: swap,
-			MemLimit:     mem,
-			ShmSize:      shmSize,
-			CPUQuota:     cpuQuota,
-			CPUShares:    cpuShares,
-			CPUSet:       cpuSet,
-		}
 	}
 }
 
@@ -184,17 +166,10 @@ func WithTrustedClonePlugins(images []string) Option {
 	}
 }
 
-// WithTrusted configures the compiler with the trusted repo option.
-func WithTrusted(trusted bool) Option {
+// WithTrustedSecurity configures the compiler with the trusted repo option.
+func WithTrustedSecurity(trusted bool) Option {
 	return func(compiler *Compiler) {
-		compiler.trustedPipeline = trusted
-	}
-}
-
-// WithNetrcOnlyTrusted configures the compiler with the netrcOnlyTrusted repo option.
-func WithNetrcOnlyTrusted(only bool) Option {
-	return func(compiler *Compiler) {
-		compiler.netrcOnlyTrusted = only
+		compiler.securityTrustedPipeline = trusted
 	}
 }
 

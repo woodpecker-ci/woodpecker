@@ -14,11 +14,6 @@
 
 package types
 
-// Network defines a container network.
-type Network struct {
-	Name string `json:"name,omitempty"`
-}
-
 type Port struct {
 	Number   uint16 `json:"number,omitempty"`
 	Protocol string `json:"protocol,omitempty"`

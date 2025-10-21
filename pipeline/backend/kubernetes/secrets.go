@@ -15,11 +15,22 @@
 package kubernetes
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/distribution/reference"
+	config_file "github.com/docker/cli/cli/config/configfile"
+	config_file_types "github.com/docker/cli/cli/config/types"
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
 )
 
 type nativeSecretsProcessor struct {
@@ -188,4 +199,167 @@ func secretReference(name string) v1.LocalObjectReference {
 	return v1.LocalObjectReference{
 		Name: name,
 	}
+}
+
+func needsRegistrySecret(step *types.Step) bool {
+	return step.AuthConfig.Username != "" && step.AuthConfig.Password != ""
+}
+
+func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
+	name, err := registrySecretName(step)
+	if err != nil {
+		return nil, err
+	}
+
+	labels, err := registrySecretLabels(step, config)
+	if err != nil {
+		return nil, err
+	}
+
+	named, err := utils.ParseNamed(step.Image)
+	if err != nil {
+		return nil, err
+	}
+
+	authConfig := config_file.ConfigFile{
+		AuthConfigs: map[string]config_file_types.AuthConfig{
+			reference.Domain(named): {
+				Username: step.AuthConfig.Username,
+				Password: step.AuthConfig.Password,
+			},
+		},
+	}
+
+	configFileJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.Secret{
+		ObjectMeta: meta_v1.ObjectMeta{
+			Namespace: config.GetNamespace(step.OrgID),
+			Name:      name,
+			Labels:    labels,
+		},
+		Type: v1.SecretTypeDockerConfigJson,
+		Data: map[string][]byte{
+			v1.DockerConfigJsonKey: configFileJSON,
+		},
+	}, nil
+}
+
+func registrySecretName(step *types.Step) (string, error) {
+	return podName(step)
+}
+
+func registrySecretLabels(step *types.Step, config *config) (map[string]string, error) {
+	var err error
+	labels := make(map[string]string)
+
+	for k, v := range step.WorkflowLabels {
+		// Only copy user labels if allowed by agent config.
+		// Internal labels are filtered on the server-side.
+		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
+			labels[k], err = toDNSName(v)
+			if err != nil {
+				return labels, err
+			}
+		}
+	}
+
+	if step.Type == types.StepTypeService {
+		labels[ServiceLabel], _ = serviceName(step)
+	}
+	labels[StepLabelLegacy], err = stepLabel(step)
+	if err != nil {
+		return labels, err
+	}
+	labels[StepLabel], err = stepLabel(step)
+	if err != nil {
+		return labels, err
+	}
+
+	return labels, nil
+}
+
+func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) error {
+	secret, err := mkRegistrySecret(step, engine.config)
+	if err != nil {
+		return err
+	}
+	log.Trace().Msgf("creating secret: %s", secret.Name)
+	_, err = engine.client.CoreV1().Secrets(engine.config.GetNamespace(step.OrgID)).Create(ctx, secret, meta_v1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+	name, err := registrySecretName(step)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", name).Msg("deleting secret")
+
+	err = engine.client.CoreV1().Secrets(engine.config.GetNamespace(step.OrgID)).Delete(ctx, name, deleteOpts)
+	if errors.IsNotFound(err) {
+		return nil
+	}
+	return err
+}
+
+func needsStepSecret(step *types.Step) bool {
+	return len(step.SecretMapping) > 0
+}
+
+func startStepSecret(ctx context.Context, e *kube, step *types.Step) error {
+	secret, err := mkStepSecret(step, e.config)
+	if err != nil {
+		return err
+	}
+	log.Trace().Msgf("creating secret: %s", secret.Name)
+	_, err = e.client.CoreV1().Secrets(e.config.GetNamespace(step.OrgID)).Create(ctx, secret, meta_v1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func mkStepSecret(step *types.Step, config *config) (*v1.Secret, error) {
+	name, err := stepSecretName(step)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.Secret{
+		ObjectMeta: meta_v1.ObjectMeta{
+			Namespace: config.GetNamespace(step.OrgID),
+			Name:      name,
+		},
+		Type:       v1.SecretTypeOpaque,
+		StringData: step.SecretMapping,
+	}, nil
+}
+
+func stepSecretName(step *types.Step) (string, error) {
+	name, err := stepToPodName(step)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s-step-secret", name), nil
+}
+
+func stopStepSecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+	name, err := stepSecretName(step)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", name).Msg("deleting secret")
+
+	err = engine.client.CoreV1().Secrets(engine.config.GetNamespace(step.OrgID)).Delete(ctx, name, deleteOpts)
+	if errors.IsNotFound(err) {
+		return nil
+	}
+	return err
 }

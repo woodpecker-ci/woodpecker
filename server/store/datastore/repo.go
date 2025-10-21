@@ -22,8 +22,8 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetRepo(id int64) (*model.Repo, error) {
@@ -143,7 +143,7 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 
 // RepoList list all repos where permissions for specific user are stored
 // TODO: paginate
-func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, error) {
+func (s storage) RepoList(user *model.User, owned, active bool, f *model.RepoFilter) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.engine.Table("repos").
 		Join("INNER", "perms", "perms.repo_id = repos.id").
@@ -153,6 +153,9 @@ func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, 
 	}
 	if active {
 		sess = sess.And(builder.Eq{"repos.active": true})
+	}
+	if f != nil && f.Name != "" {
+		sess = sess.And(builder.Eq{"repos.name": f.Name})
 	}
 	return repos, sess.
 		Asc("full_name").

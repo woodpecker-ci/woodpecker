@@ -17,12 +17,12 @@
     },
     {
       "name": "Surge preview",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-surge-preview/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/plugin-surge-preview/raw/branch/main/docs.md",
       "verified": true
     },
     {
       "name": "S3 upload",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-s3/master/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/plugin-s3/raw/branch/main/docs.md",
       "verified": true
     },
     {
@@ -32,18 +32,13 @@
     },
     {
       "name": "Prettier",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-prettier/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/prettier/raw/branch/main/docs.md",
       "verified": true
     },
     {
       "name": "Extend env",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-extend-env/main/docs.md",
       "verified": true
-    },
-    {
-      "name": "Block Git changes",
-      "docs": "https://codeberg.org/qwerty287/woodpecker-block-git-changes/raw/branch/main/docs.md",
-      "verified": false
     },
     {
       "name": "Regex check",
@@ -91,6 +86,11 @@
       "verified": true
     },
     {
+      "name": "Sccache",
+      "docs": "https://seed.radicle.garden/raw/rad:zzmCBDptFLrfUEHSjcFsLJ2Aghav/head/docs.md",
+      "verified": false
+    },
+    {
       "name": "Woodpecker Email",
       "docs": "https://gitnet.fr/deblan/woodpecker-email/raw/branch/develop/DOCS.md",
       "verified": false
@@ -117,7 +117,7 @@
     },
     {
       "name": "TODO-Checker",
-      "docs": "https://codeberg.org/Epsilon_02/todo-checker/raw/branch/main/README.md",
+      "docs": "https://codeberg.org/Epsilon_02/todo-checker/raw/branch/main/DOCS.md",
       "verified": false
     },
     {
@@ -191,6 +191,11 @@
       "verified": true
     },
     {
+      "name": "Bluesky Post",
+      "docs": "https://codeberg.org/woodpecker-plugins/bluesky-post/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
       "name": "Discord",
       "docs": "https://raw.githubusercontent.com/appleboy/drone-discord/master/DOCS.md",
       "verified": false
@@ -207,7 +212,7 @@
     },
     {
       "name": "Gitea Package",
-      "docs": "https://gitea.ocram85.com/plugins/gitea-package/raw/branch/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-community/gitea-package/raw/branch/main/docs.md",
       "verified": false
     },
     {
@@ -218,6 +223,71 @@
     {
       "name": "Docker Tags",
       "docs": "https://raw.githubusercontent.com/dvjn/woodpecker-docker-tags-plugin/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "SSH SCP",
+      "docs": "https://raw.githubusercontent.com/appleboy/drone-scp/refs/heads/master/DOCS.md",
+      "verified": false
+    },
+    {
+      "name": "Telegram",
+      "docs": "https://raw.githubusercontent.com/appleboy/drone-telegram/refs/heads/master/DOCS.md",
+      "verified": false
+    },
+    {
+      "name": "EditorConfig Checker",
+      "docs": "https://codeberg.org/woodpecker-plugins/editorconfig-checker/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Microsoft Teams Notify",
+      "docs": "https://raw.githubusercontent.com/GECO-IT/woodpecker-plugin-teams-notify/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Basic Git Changelog",
+      "docs": "https://raw.githubusercontent.com/GECO-IT/woodpecker-plugin-git-basic-changelog/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Hugo",
+      "docs": "https://raw.githubusercontent.com/maurerle/woodpecker-hugo/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Home Assistant Notify",
+      "docs": "https://raw.githubusercontent.com/DHandspikerWade/woodpecker-plugin-ha-notify/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Microsoft Teams Notification (Advanced)",
+      "docs": "https://raw.githubusercontent.com/mobydeck/ci-teams-notification/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Pre-commit Runner",
+      "docs": "https://codeberg.org/sp1thas/woodpecker-ci-pre-commit/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Portainer Service Update",
+      "docs": "https://codeberg.org/woodpecker-community/portainer-service-update/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Peckify",
+      "docs": "https://codeberg.org/woodpecker-community/peckify/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "ASCII JUnit Test Report",
+      "docs": "https://raw.githubusercontent.com/wgroeneveld/woodpecker-ascii-junit/refs/heads/main/README.md",
+      "verified": false
+    },
+    {
+      "name": "SonarQube",
+      "docs": "https://raw.githubusercontent.com/j04n-f/woodpecker-sonar-plugin/refs/heads/main/docs.md",
       "verified": false
     }
   ]

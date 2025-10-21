@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func TestConvertDAGToStages(t *testing.T) {
