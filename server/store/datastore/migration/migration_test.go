@@ -99,6 +99,7 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 	return engine, closeDB
 }
 
+// restorePostgresDump only supports dumps generated with `pg_dump --inserts`.
 func restorePostgresDump(t *testing.T, config string) {
 	dump, err := os.ReadFile(postgresDump)
 	require.NoError(t, err)
