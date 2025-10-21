@@ -1138,13 +1138,6 @@ ALTER TABLE ONLY public.repos
     ADD CONSTRAINT repos_pkey PRIMARY KEY (repo_id);
 
 
---
--- Name: repos repos_repo_full_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.repos
-    ADD CONSTRAINT repos_repo_full_name_key UNIQUE (repo_full_name);
-
 
 --
 -- Name: secrets secrets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -1152,14 +1145,6 @@ ALTER TABLE ONLY public.repos
 
 ALTER TABLE ONLY public.secrets
     ADD CONSTRAINT secrets_pkey PRIMARY KEY (secret_id);
-
-
---
--- Name: secrets secrets_secret_name_secret_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.secrets
-    ADD CONSTRAINT secrets_secret_name_secret_repo_id_key UNIQUE (secret_name, secret_repo_id);
 
 
 --
