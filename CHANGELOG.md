@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten
+@6543, @anbraten, @qwerty287
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Add log service addon [[#5507](https://github.com/woodpecker-ci/woodpecker/pull/5507)]
 - Support multiple users with same login name but different forges [[#5612](https://github.com/woodpecker-ci/woodpecker/pull/5612)]
 - Release linux/riscv64 binaries [[#5663](https://github.com/woodpecker-ci/woodpecker/pull/5663)]
 
