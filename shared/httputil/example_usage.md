@@ -245,4 +245,3 @@ client := &http.Client{
 - If version is not set (development builds), it defaults to `"dev"` but the value will be fetched from the commit tag which is not a problem.
 - The RoundTripper clones requests before modifying them to avoid side effects
 - Existing User-Agent headers are preserved and not overwritten
-
