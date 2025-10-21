@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 18NccrfpihYnwqBivs51uHtRdmaM3893BGxRvmp6T7W9a7eNFNYZo0q0ioWALlU
+\restrict 4M1rZfLsaJIGiZgyNid36zJIiBx6srlQan1KeSbXOzB7Y6InnckEhpzQlLEKAdA
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6
@@ -809,7 +809,7 @@ COPY public.agents (id, created, updated, name, owner_id, token, last_contact, p
 --
 
 COPY public.configs (id, repo_id, hash, data, name) FROM stdin;
-1	105	ec8ca9529d6081e631aec26175b26ac91699395b96b9c5fc1f3af6d3aef5d3a8	\\x636c6f6e653a0a20206769743a0a20202020696d6167653a20776f6f647065636b657263692f706c7567696e2d6769743a746573740a0a706970656c696e653a0a20205072696e743a0a20202020696d6167653a207072696e742f656e760a20202020736563726574733a205b204141414141414141414141414141414141414141414141414141205d	drone
+1	105	ec8ca9529d6081e631aec26175b26ac91699395b96b9c5fc1f3af6d3aef5d3a8	\\x636c6f6e653a0a20206769743a0a20202020696d6167653a20776f6f647065636b657263692f706c7567696e2d6769743a746573740a0a73746570733a0a20205072696e743a0a20202020696d6167653a207072696e742f656e760a20202020736563726574733a205b204141414141414141414141414141414141414141414141414141205d	woodpecker
 \.
 
 
@@ -982,7 +982,7 @@ COPY public.pipeline_configs (config_id, pipeline_id) FROM stdin;
 --
 
 COPY public.pipelines (id, repo_id, number, event, status, created, started, finished, commit, branch, ref, refspec, title, message, "timestamp", author, avatar, email, forge_url, deploy, parent, reviewer, reviewed, sender, changed_files, updated, additional_variables, pr_labels, errors, deploy_task, is_prerelease, from_fork) FROM stdin;
-1	105	1	push	failure	1641630525	1641630525	1641630527	24bf205107cea48b92bc6444e18e40d21733a594	master	refs/heads/master			„.drone.yml“ hinzufügen\\n	1641630525	test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	test@test.test	http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594		0		0	test	[".drone.yml"]\\n	0	\N	\N	\N	\N	\N	\N
+1	105	1	push	failure	1641630525	1641630525	1641630527	24bf205107cea48b92bc6444e18e40d21733a594	master	refs/heads/master			„.woodpecker.yml“ hinzufügen\\n	1641630525	test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	test@test.test	http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594		0		0	test	[".woodpecker.yml"]\\n	0	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -1007,8 +1007,8 @@ COPY public.registries (id, repo_id, address, username, password, org_id) FROM s
 --
 
 COPY public.repos (id, user_id, owner, name, full_name, avatar, forge_url, clone, branch, timeout, private, allow_pr, repo_allow_push, hash, config_path, visibility, active, forge_remote_id, org_id, cancel_previous_pipeline_events, clone_ssh, pr_enabled, forge_id, allow_deploy, require_approval, trusted, netrc_trusted) FROM stdin;
-115	1	2	testCIservices	2/testCIservices	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/testCIservices	http://10.40.8.5:3000/2/testCIservices.git	master	60	f	t	t	FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====	.drone.yml	public	t	\N	1	\N	\N	t	1	\N	forks	{"network":false,"volumes":false,"security":false}	\N
-105	1	2	settings	2/settings	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/settings	http://10.40.8.5:3000/2/settings.git	master	60	f	t	t	3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====	.drone.yml	public	t	\N	1	\N	\N	t	1	\N	forks	{"network":false,"volumes":false,"security":false}	\N
+115	1	2	testCIservices	2/testCIservices	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/testCIservices	http://10.40.8.5:3000/2/testCIservices.git	master	60	f	t	t	FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====	.woodpecker.yml	public	t	\N	1	\N	\N	t	1	\N	forks	{"network":false,"volumes":false,"security":false}	\N
+105	1	2	settings	2/settings	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/settings	http://10.40.8.5:3000/2/settings.git	master	60	f	t	t	3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====	.woodpecker.yml	public	t	\N	1	\N	\N	t	1	\N	forks	{"network":false,"volumes":false,"security":false}	\N
 \.
 
 
@@ -1067,7 +1067,7 @@ COPY public.users (id, login, access_token, refresh_token, expiry, email, avatar
 --
 
 COPY public.workflows (id, pipeline_id, pid, name, state, error, started, finished, agent_id, platform, environ, axis_id) FROM stdin;
-1	1	1	drone	failure	Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown	1641630525	1641630527	0		{}	\N
+1	1	1	woodpecker	failure	Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown	1641630525	1641630527	0		{}	\N
 \.
 
 
@@ -1561,5 +1561,5 @@ CREATE UNIQUE INDEX "UQE_workflows_s" ON public.workflows USING btree (pipeline_
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 18NccrfpihYnwqBivs51uHtRdmaM3893BGxRvmp6T7W9a7eNFNYZo0q0ioWALlU
+\unrestrict 4M1rZfLsaJIGiZgyNid36zJIiBx6srlQan1KeSbXOzB7Y6InnckEhpzQlLEKAdA
 
