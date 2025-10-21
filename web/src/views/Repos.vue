@@ -65,7 +65,7 @@ const search = ref('');
 const { searchedRepos } = useRepoSearch(repos, search);
 const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
 
-const refreshRepositories = {doSubmit: deleteRegistry, isLoading: isRefreshing } = useAsyncAction(async () => {
+const {doSubmit: refreshRepositories, isLoading: isRefreshing} = useAsyncAction(async () => {
     await repoStore.refreshRepos();
     await repoStore.loadRepos();
   }
