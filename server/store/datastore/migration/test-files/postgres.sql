@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 5QgSz5xjibUMSAesLz29NWo75pm5sjMrrY6Sd9JU3pMIigMVkchqPgZhDX1hxvm
+\restrict mRqdVHQsedkDwxd0HF4qQJttz1Lf2eyfpZdNPwAVeFFh0cpcrJaDCOh5MZjZJaq
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6
@@ -1156,14 +1156,6 @@ ALTER TABLE ONLY public.pipelines
 
 
 --
--- Name: config config_config_hash_config_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.config
-    ADD CONSTRAINT config_config_hash_config_repo_id_key UNIQUE (config_hash, config_repo_id);
-
-
---
 -- Name: config config_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1411,6 +1403,13 @@ CREATE INDEX "IDX_workflows_workflow_pipeline_id" ON public.workflows USING btre
 
 
 --
+-- Name: UQE_config_s; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_config_s" ON public.config USING btree (config_repo_id, config_hash, config_name);
+
+
+--
 -- Name: UQE_crons_s; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1498,5 +1497,5 @@ CREATE UNIQUE INDEX "UQE_workflows_s" ON public.workflows USING btree (workflow_
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 5QgSz5xjibUMSAesLz29NWo75pm5sjMrrY6Sd9JU3pMIigMVkchqPgZhDX1hxvm
+\unrestrict mRqdVHQsedkDwxd0HF4qQJttz1Lf2eyfpZdNPwAVeFFh0cpcrJaDCOh5MZjZJaq
 
