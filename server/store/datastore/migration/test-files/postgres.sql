@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 4M1rZfLsaJIGiZgyNid36zJIiBx6srlQan1KeSbXOzB7Y6InnckEhpzQlLEKAdA
+\restrict CqELvZI3DY4n4ETCf9XharkGfqppgD8kxo1FDoGUSOJMtIcV1VUigzQFXRMJZRb
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6
@@ -797,278 +797,240 @@ ALTER TABLE ONLY public.workflows ALTER COLUMN id SET DEFAULT nextval('public.wo
 -- Data for Name: agents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.agents (id, created, updated, name, owner_id, token, last_contact, platform, backend, capacity, version, no_schedule, last_work, org_id, custom_labels) FROM stdin;
-1	1641630000	1641630000	agent-1	1	agent_token_abc123xyz	1641630000	linux	docker	2	1.0.0	f	\N	-1	\N
-2	1641630100	1641630100	agent-2	1	agent_token_def456uvw	1641630100	linux	docker	4	1.0.0	f	\N	-1	\N
-3	1641630200	1641630200	agent-3	2	agent_token_ghi789rst	1641630200	linux	kubernetes	8	1.0.1	f	\N	-1	\N
-\.
+INSERT INTO public.agents VALUES (1, 1641630000, 1641630000, 'agent-1', 1, 'agent_token_abc123xyz', 1641630000, 'linux', 'docker', 2, '1.0.0', false, NULL, -1, NULL);
+INSERT INTO public.agents VALUES (2, 1641630100, 1641630100, 'agent-2', 1, 'agent_token_def456uvw', 1641630100, 'linux', 'docker', 4, '1.0.0', false, NULL, -1, NULL);
+INSERT INTO public.agents VALUES (3, 1641630200, 1641630200, 'agent-3', 2, 'agent_token_ghi789rst', 1641630200, 'linux', 'kubernetes', 8, '1.0.1', false, NULL, -1, NULL);
 
 
 --
 -- Data for Name: configs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.configs (id, repo_id, hash, data, name) FROM stdin;
-1	105	ec8ca9529d6081e631aec26175b26ac91699395b96b9c5fc1f3af6d3aef5d3a8	\\x636c6f6e653a0a20206769743a0a20202020696d6167653a20776f6f647065636b657263692f706c7567696e2d6769743a746573740a0a73746570733a0a20205072696e743a0a20202020696d6167653a207072696e742f656e760a20202020736563726574733a205b204141414141414141414141414141414141414141414141414141205d	woodpecker
-\.
+INSERT INTO public.configs VALUES (1, 105, 'ec8ca9529d6081e631aec26175b26ac91699395b96b9c5fc1f3af6d3aef5d3a8', '\x636c6f6e653a0a20206769743a0a20202020696d6167653a20776f6f647065636b657263692f706c7567696e2d6769743a746573740a0a73746570733a0a20205072696e743a0a20202020696d6167653a207072696e742f656e760a20202020736563726574733a205b204141414141414141414141414141414141414141414141414141205d', 'woodpecker');
 
 
 --
 -- Data for Name: crons; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.crons (id, name, repo_id, creator_id, next_exec, schedule, created, branch) FROM stdin;
-1	nightly-build	105	1	1641686400	0 0 * * *	1641630600	master
-\.
+INSERT INTO public.crons VALUES (1, 'nightly-build', 105, 1, 1641686400, '0 0 * * *', 1641630600, 'master');
 
 
 --
 -- Data for Name: forges; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.forges (id, type, url, client, client_secret, skip_verify, oauth_host, additional_options) FROM stdin;
-1	gitea	http://100.114.106.50:3000	6e9119df-a86d-4fe0-b392-fe125d7a265f	gto_bagkxxp5yio7npmj7uzrf5neyyalfbqykfmri3ryqfpgvlylqwsa	f		{}
-\.
+INSERT INTO public.forges VALUES (1, 'gitea', 'http://100.114.106.50:3000', '6e9119df-a86d-4fe0-b392-fe125d7a265f', 'gto_bagkxxp5yio7npmj7uzrf5neyyalfbqykfmri3ryqfpgvlylqwsa', false, '', '{}');
 
 
 --
 -- Data for Name: log_entries; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.log_entries (id, step_id, "time", line, data, created, type) FROM stdin;
-1	2	0	0	\\x537465704e616d653a20636c6f6e65	1641630525	0
-2	2	0	1	\\x53746570547970653a20636c6f6e65	1641630525	0
-3	2	0	2	\\x53746570555549443a2030314a3151344e443232594b534a31465a443654533234343357	1641630525	0
-4	2	0	3	\\x53746570436f6d6d616e64733a	1641630525	0
-5	2	0	4	\\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d	1641630525	0
-6	2	0	5	\\x	1641630525	0
-7	2	0	6	\\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d	1641630525	0
-8	2	0	7	\\x	1641630525	0
-9	3	0	0	\\x537465704e616d653a205072696e74	1641630526	0
-10	3	0	1	\\x53746570547970653a20636f6d6d616e6473	1641630526	0
-11	3	0	2	\\x53746570555549443a2030314a3151344e443232594b534a31465a44365739385a573047	1641630526	0
-12	3	0	3	\\x53746570436f6d6d616e64733a	1641630526	0
-13	3	0	4	\\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d	1641630526	0
-14	3	0	5	\\x7072696e7420656e7620636f6d6d616e64	1641630526	0
-15	3	0	6	\\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d	1641630526	0
-16	3	0	7	\\x	1641630526	0
-\.
+INSERT INTO public.log_entries VALUES (1, 2, 0, 0, '\x537465704e616d653a20636c6f6e65', 1641630525, 0);
+INSERT INTO public.log_entries VALUES (2, 2, 0, 1, '\x53746570547970653a20636c6f6e65', 1641630525, 0);
+INSERT INTO public.log_entries VALUES (3, 2, 0, 2, '\x53746570555549443a2030314a3151344e443232594b534a31465a443654533234343357', 1641630525, 0);
+INSERT INTO public.log_entries VALUES (4, 2, 0, 3, '\x53746570436f6d6d616e64733a', 1641630525, 0);
+INSERT INTO public.log_entries VALUES (5, 2, 0, 4, '\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d', 1641630525, 0);
+INSERT INTO public.log_entries VALUES (6, 2, 0, 5, '\x', 1641630525, 0);
+INSERT INTO public.log_entries VALUES (7, 2, 0, 6, '\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d', 1641630525, 0);
+INSERT INTO public.log_entries VALUES (8, 2, 0, 7, '\x', 1641630525, 0);
+INSERT INTO public.log_entries VALUES (9, 3, 0, 0, '\x537465704e616d653a205072696e74', 1641630526, 0);
+INSERT INTO public.log_entries VALUES (10, 3, 0, 1, '\x53746570547970653a20636f6d6d616e6473', 1641630526, 0);
+INSERT INTO public.log_entries VALUES (11, 3, 0, 2, '\x53746570555549443a2030314a3151344e443232594b534a31465a44365739385a573047', 1641630526, 0);
+INSERT INTO public.log_entries VALUES (12, 3, 0, 3, '\x53746570436f6d6d616e64733a', 1641630526, 0);
+INSERT INTO public.log_entries VALUES (13, 3, 0, 4, '\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d', 1641630526, 0);
+INSERT INTO public.log_entries VALUES (14, 3, 0, 5, '\x7072696e7420656e7620636f6d6d616e64', 1641630526, 0);
+INSERT INTO public.log_entries VALUES (15, 3, 0, 6, '\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d', 1641630526, 0);
+INSERT INTO public.log_entries VALUES (16, 3, 0, 7, '\x', 1641630526, 0);
 
 
 --
 -- Data for Name: migration; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.migration (id, description) FROM stdin;
-SCHEMA_INIT	
-legacy-to-xormigrate	
-add-org-id	
-alter-table-tasks-update-type-of-task-data	
-alter-table-config-update-type-of-config-data	
-remove-plugin-only-option-from-secrets-table	
-convert-to-new-pipeline-error-format	
-rename-link-to-url	
-clean-registry-pipeline	
-set-forge-id	
-unify-columns-tables	
-alter-table-registries-fix-required-fields	
-correct-potential-corrupt-orgs-users-relation	
-gated-to-require-approval	
-cron-without-sec	
-rename-start-end-time	
-fix-v31-registries	
-remove-old-migrations-of-v1	
-add-org-agents	
-add-custom-labels-to-agent	
-split-trusted	
-remove-repo-netrc-only-trusted	
-rename-token-fields	
-set-new-defaults-for-require-approval	
-remove-repo-scm	
-\.
+INSERT INTO public.migration VALUES ('SCHEMA_INIT', '');
+INSERT INTO public.migration VALUES ('legacy-to-xormigrate', '');
+INSERT INTO public.migration VALUES ('add-org-id', '');
+INSERT INTO public.migration VALUES ('alter-table-tasks-update-type-of-task-data', '');
+INSERT INTO public.migration VALUES ('alter-table-config-update-type-of-config-data', '');
+INSERT INTO public.migration VALUES ('remove-plugin-only-option-from-secrets-table', '');
+INSERT INTO public.migration VALUES ('convert-to-new-pipeline-error-format', '');
+INSERT INTO public.migration VALUES ('rename-link-to-url', '');
+INSERT INTO public.migration VALUES ('clean-registry-pipeline', '');
+INSERT INTO public.migration VALUES ('set-forge-id', '');
+INSERT INTO public.migration VALUES ('unify-columns-tables', '');
+INSERT INTO public.migration VALUES ('alter-table-registries-fix-required-fields', '');
+INSERT INTO public.migration VALUES ('correct-potential-corrupt-orgs-users-relation', '');
+INSERT INTO public.migration VALUES ('gated-to-require-approval', '');
+INSERT INTO public.migration VALUES ('cron-without-sec', '');
+INSERT INTO public.migration VALUES ('rename-start-end-time', '');
+INSERT INTO public.migration VALUES ('fix-v31-registries', '');
+INSERT INTO public.migration VALUES ('remove-old-migrations-of-v1', '');
+INSERT INTO public.migration VALUES ('add-org-agents', '');
+INSERT INTO public.migration VALUES ('add-custom-labels-to-agent', '');
+INSERT INTO public.migration VALUES ('split-trusted', '');
+INSERT INTO public.migration VALUES ('remove-repo-netrc-only-trusted', '');
+INSERT INTO public.migration VALUES ('rename-token-fields', '');
+INSERT INTO public.migration VALUES ('set-new-defaults-for-require-approval', '');
+INSERT INTO public.migration VALUES ('remove-repo-scm', '');
 
 
 --
 -- Data for Name: orgs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.orgs (id, name, is_user, private, forge_id) FROM stdin;
-1	2	f	f	1
-2	test	t	f	1
-\.
+INSERT INTO public.orgs VALUES (1, '2', false, false, 1);
+INSERT INTO public.orgs VALUES (2, 'test', true, false, 1);
 
 
 --
 -- Data for Name: perms; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.perms (user_id, repo_id, pull, push, admin, synced, created, updated) FROM stdin;
-1	1	t	t	t	1641626844	\N	\N
-1	2	t	t	t	1641626844	\N	\N
-1	3	t	t	t	1641626844	\N	\N
-1	4	t	t	t	1641626844	\N	\N
-1	5	t	t	t	1641626844	\N	\N
-1	6	t	t	t	1641626844	\N	\N
-1	7	t	t	t	1641626844	\N	\N
-1	8	t	t	t	1641626844	\N	\N
-1	9	t	t	t	1641626844	\N	\N
-1	10	t	t	t	1641626844	\N	\N
-1	11	t	t	t	1641626844	\N	\N
-1	12	t	t	t	1641626844	\N	\N
-1	13	t	t	t	1641626844	\N	\N
-1	14	t	t	t	1641626844	\N	\N
-1	15	t	t	t	1641626844	\N	\N
-1	16	t	t	t	1641626844	\N	\N
-1	17	t	t	t	1641626844	\N	\N
-1	18	t	t	t	1641626844	\N	\N
-1	19	t	t	t	1641626844	\N	\N
-1	20	t	t	t	1641626844	\N	\N
-1	21	t	t	t	1641626844	\N	\N
-1	22	t	t	t	1641626844	\N	\N
-1	23	t	t	t	1641626844	\N	\N
-1	24	t	t	t	1641626844	\N	\N
-1	25	t	t	t	1641626844	\N	\N
-1	26	t	t	t	1641626844	\N	\N
-1	27	t	t	t	1641626844	\N	\N
-1	28	t	t	t	1641626844	\N	\N
-1	29	t	t	t	1641626844	\N	\N
-1	30	t	t	t	1641626844	\N	\N
-1	31	t	t	t	1641626844	\N	\N
-1	32	t	t	t	1641626844	\N	\N
-1	33	t	t	t	1641626844	\N	\N
-1	34	t	t	t	1641626844	\N	\N
-1	35	t	t	t	1641626844	\N	\N
-1	36	t	t	t	1641626844	\N	\N
-1	37	t	t	t	1641626844	\N	\N
-1	38	t	t	t	1641626844	\N	\N
-1	39	t	t	t	1641626844	\N	\N
-1	40	t	t	t	1641626844	\N	\N
-1	41	t	t	t	1641626844	\N	\N
-1	42	t	t	t	1641626844	\N	\N
-1	43	t	t	t	1641626844	\N	\N
-1	44	t	t	t	1641626844	\N	\N
-1	45	t	t	t	1641626844	\N	\N
-1	46	t	t	t	1641626844	\N	\N
-1	47	t	t	t	1641626844	\N	\N
-1	48	t	t	t	1641626844	\N	\N
-1	49	t	t	t	1641626844	\N	\N
-1	50	t	t	t	1641626844	\N	\N
-1	51	t	t	t	1641626844	\N	\N
-1	52	t	t	t	1641626844	\N	\N
-1	53	t	t	t	1641626844	\N	\N
-1	54	t	t	t	1641626844	\N	\N
-1	55	t	t	t	1641626844	\N	\N
-1	56	t	t	t	1641626844	\N	\N
-1	57	t	t	t	1641626844	\N	\N
-1	58	t	t	t	1641626844	\N	\N
-1	59	t	t	t	1641626844	\N	\N
-1	60	t	t	t	1641626844	\N	\N
-1	115	t	t	t	1641630451	\N	\N
-1	105	t	t	t	1641630452	\N	\N
-\.
+INSERT INTO public.perms VALUES (1, 1, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 2, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 3, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 4, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 5, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 6, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 7, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 8, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 9, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 10, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 11, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 12, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 13, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 14, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 15, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 16, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 17, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 18, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 19, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 20, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 21, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 22, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 23, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 24, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 25, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 26, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 27, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 28, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 29, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 30, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 31, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 32, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 33, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 34, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 35, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 36, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 37, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 38, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 39, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 40, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 41, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 42, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 43, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 44, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 45, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 46, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 47, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 48, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 49, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 50, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 51, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 52, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 53, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 54, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 55, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 56, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 57, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 58, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 59, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 60, true, true, true, 1641626844, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 115, true, true, true, 1641630451, NULL, NULL);
+INSERT INTO public.perms VALUES (1, 105, true, true, true, 1641630452, NULL, NULL);
 
 
 --
 -- Data for Name: pipeline_configs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.pipeline_configs (config_id, pipeline_id) FROM stdin;
-1	1
-\.
+INSERT INTO public.pipeline_configs VALUES (1, 1);
 
 
 --
 -- Data for Name: pipelines; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.pipelines (id, repo_id, number, event, status, created, started, finished, commit, branch, ref, refspec, title, message, "timestamp", author, avatar, email, forge_url, deploy, parent, reviewer, reviewed, sender, changed_files, updated, additional_variables, pr_labels, errors, deploy_task, is_prerelease, from_fork) FROM stdin;
-1	105	1	push	failure	1641630525	1641630525	1641630527	24bf205107cea48b92bc6444e18e40d21733a594	master	refs/heads/master			„.woodpecker.yml“ hinzufügen\\n	1641630525	test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	test@test.test	http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594		0		0	test	[".woodpecker.yml"]\\n	0	\N	\N	\N	\N	\N	\N
-\.
+INSERT INTO public.pipelines VALUES (1, 105, 1, 'push', 'failure', 1641630525, 1641630525, 1641630527, '24bf205107cea48b92bc6444e18e40d21733a594', 'master', 'refs/heads/master', '', '', '„.woodpecker.yml“ hinzufügen\n', 1641630525, 'test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'test@test.test', 'http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594', '', 0, '', 0, 'test', '[".woodpecker.yml"]\n', 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
 --
 -- Data for Name: redirections; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.redirections (id, repo_id, repo_full_name) FROM stdin;
-\.
 
 
 --
 -- Data for Name: registries; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.registries (id, repo_id, address, username, password, org_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: repos; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.repos (id, user_id, owner, name, full_name, avatar, forge_url, clone, branch, timeout, private, allow_pr, repo_allow_push, hash, config_path, visibility, active, forge_remote_id, org_id, cancel_previous_pipeline_events, clone_ssh, pr_enabled, forge_id, allow_deploy, require_approval, trusted, netrc_trusted) FROM stdin;
-115	1	2	testCIservices	2/testCIservices	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/testCIservices	http://10.40.8.5:3000/2/testCIservices.git	master	60	f	t	t	FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====	.woodpecker.yml	public	t	\N	1	\N	\N	t	1	\N	forks	{"network":false,"volumes":false,"security":false}	\N
-105	1	2	settings	2/settings	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/settings	http://10.40.8.5:3000/2/settings.git	master	60	f	t	t	3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====	.woodpecker.yml	public	t	\N	1	\N	\N	t	1	\N	forks	{"network":false,"volumes":false,"security":false}	\N
-\.
+INSERT INTO public.repos VALUES (115, 1, '2', 'testCIservices', '2/testCIservices', 'http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c', 'http://10.40.8.5:3000/2/testCIservices', 'http://10.40.8.5:3000/2/testCIservices.git', 'master', 60, false, true, true, 'FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====', '.woodpecker.yml', 'public', true, NULL, 1, NULL, NULL, true, 1, NULL, 'forks', '{"network":false,"volumes":false,"security":false}', NULL);
+INSERT INTO public.repos VALUES (105, 1, '2', 'settings', '2/settings', 'http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c', 'http://10.40.8.5:3000/2/settings', 'http://10.40.8.5:3000/2/settings.git', 'master', 60, false, true, true, '3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====', '.woodpecker.yml', 'public', true, NULL, 1, NULL, NULL, true, 1, NULL, 'forks', '{"network":false,"volumes":false,"security":false}', NULL);
 
 
 --
 -- Data for Name: secrets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.secrets (id, repo_id, name, value, images, events, org_id) FROM stdin;
-1	105	wow	\\x74657374	null\\n	["push","tag","deployment","pull_request"]\\n	0
-2	105	n	\\x6e	null\\n	["deployment"]\\n	0
-3	105	abc	\\x656466	null\\n	["push"]\\n	0
-4	105	quak	\\x66647361	null\\n	["pull_request"]\\n	0
-\.
+INSERT INTO public.secrets VALUES (1, 105, 'wow', '\x74657374', 'null\n', '["push","tag","deployment","pull_request"]\n', 0);
+INSERT INTO public.secrets VALUES (2, 105, 'n', '\x6e', 'null\n', '["deployment"]\n', 0);
+INSERT INTO public.secrets VALUES (3, 105, 'abc', '\x656466', 'null\n', '["push"]\n', 0);
+INSERT INTO public.secrets VALUES (4, 105, 'quak', '\x66647361', 'null\n', '["pull_request"]\n', 0);
 
 
 --
 -- Data for Name: server_configs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.server_configs (key, value) FROM stdin;
-signature-private-key	1fe3b71c87d7f89fa878306028cf08d66020ef6cafc2af90d05c40ebd03eee3c93189d2a3c46fe5292afc33e9237615ed595ee3d588dce431d5f6848b6a9bf77
-jwt-secret	GKQDHRJXNN5ONIMOHJUMYDBR4IYIH46M6E5HOXX3Q2KEVZ35GM5Q====
-\.
+INSERT INTO public.server_configs VALUES ('signature-private-key', '1fe3b71c87d7f89fa878306028cf08d66020ef6cafc2af90d05c40ebd03eee3c93189d2a3c46fe5292afc33e9237615ed595ee3d588dce431d5f6848b6a9bf77');
+INSERT INTO public.server_configs VALUES ('jwt-secret', 'GKQDHRJXNN5ONIMOHJUMYDBR4IYIH46M6E5HOXX3Q2KEVZ35GM5Q====');
 
 
 --
 -- Data for Name: steps; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.steps (id, pipeline_id, pid, ppid, name, state, error, exit_code, started, finished, uuid, failure, type) FROM stdin;
-2	1	2	1	git	success		0	1641630525	1641630527	\N	\N	\N
-3	1	3	1	Print	skipped		0	0	0	\N	\N	\N
-\.
+INSERT INTO public.steps VALUES (2, 1, 2, 1, 'git', 'success', '', 0, 1641630525, 1641630527, NULL, NULL, NULL);
+INSERT INTO public.steps VALUES (3, 1, 3, 1, 'Print', 'skipped', '', 0, 0, 0, NULL, NULL, NULL);
 
 
 --
 -- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tasks (id, data, labels, dependencies, run_on, dependencies_status, agent_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (id, login, access_token, refresh_token, expiry, email, avatar, admin, hash, forge_remote_id, org_id, forge_id) FROM stdin;
-1	test	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjowLCJleHAiOjE2NDE2MzQxMjcsImlhdCI6MTY0MTYzMDUyN30.Fu0wUP-08NpPjq737y6HOeyKN_-_SE4iOZr5yrH7S8Jrz8nIuNKfU7AvlypeMSJ7wo8e3cSTadbSH1polZuFv-Nb1AqWDDXeuXudm61BkF96sTslbSHd0nF7cOy6hqCfIAfQLQpqZTJZ4E26oOSSJxPfOOntOWhlEejRl5F-flXAoYAQLegHxdn9IfYJeM1eanZqF4k6dT9hthFp9v4fmUjODPPfHip_iS7ckPonP1E4-8KeNkU3O-lIS1fgrsbCDA8531FXIGB0U7cSur7H0picKGL6WSzAErPGntlNlQWYB5JedDtLN9Ionxy1Y9LKQON76XYL4gM1Ji98RCEXggVqd7TW0B1fGV-Jve2hU3fKaDyQywsCJp36mpnVaqb5eiTssncHixAwZE0C4yh_XsTd-WoVhsbqlEuDfPTjrtAK94mSzHJTcO3fbtE9L-MoPevQIPM7Yog0i2Xn1oPUCDXVXsV2yJriBiI_r2xbG0nz5Bwn8KAFZ0dNGJ7T9urqKaKMh9guE4jgYLIpRpod_Fd13_GAK0ebgF2CZJdjJT7eEGhzzcg4uFpFdIXL2kNgVN1D6YLMPw3HhVg7_MIfASbJgpcppFhYa4Fk-OpchL5-e_mMyeWogvaJA2wSpyY1f5zJlBnFuIyk_OdV0TwQ3b_TjutehsiibT9WRpOK8h8	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjoxLCJleHAiOjE2NDQyNTg1MjcsImlhdCI6MTY0MTYzMDUyN30.iVtIGQ6VTgRI8L3xFD_YNvVBGZ6kdFb3ERdyOCIHC_CHhOEpZxVGawMGnNNooqbNdmOqJQ0RLJyiAirEKdxSVrtWvqub6uVMjjpeBylE1sAFymCGNJQf77dKvgPHW3QY5FvOSoOoNcRU2g99Bx8sbZhiI12GnNOB-abazrzICpOUikiTdb2ri3w_TNF2Ibrn-itSa1yuhmTrVpqXt_CT4MEfteiDmgjyqonmk-J_BqbcriF3DKAvrXNK1VKVU7xODcFSIRizlgA2kDmnpMT3Oo-Z1I37TFIGAuDOTgcceOPa7rXg_Mfd_jhL7bSH1BI4RsK0rgde3NaCQlU2n7yVOYGbJCSsSWwSAi-gCjjuTTPnQWe3ep3IWrB73_7tKG2_x7YxZ1nQCSFKouA5rZH4g6yoV8wdJh8_bX2Z64-MJBUl8E7JGM2urA5GY1abo0GZ6ZuQi2JS5WnG1iTL9pFlmOoTpN1DKtNE2PUE90GJwi0qGeACif9uJBXQPDAgKk7fbUxKYQobc6ko2CJ1isoRjbi8-GsJ9lhw7tXno5zfAvN3eps9SYgmIRNh0t_vx-LMBezSTSEcTJpv-7Ap6F10GD3E9KmGcYrOMvdtaYgkWFXO6rh49uElUVid-C1tNVpKjnj7ewUosQo9MHSn-d5l1df0rJSueXcaUMSqRSrEzqQ	1641634127	test@test.test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	t	OBW2OF5QH3NMCYJ44VU5B5YEQ5LHZLTFW2FDSAJ4R4JVZ4HWSNVQ====	\N	2	1
-2	user2	eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMiIsImlhdCI6MTY0MTYzMDUyNywiZXhwIjoxNjQxNjM0MTI3fQ.example_token_user2	eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMiIsImlhdCI6MTY0MTYzMDUyNywiZXhwIjoxNjQ0MjU4NTI3fQ.example_secret_user2	1641634127	user2@test.test	http://10.40.8.5:3000/avatars/default2	f	HASH2EXAMPLEHASH2EXAMPLEHASH2EXAMPLEHASH2EXAMPLE====	\N	2	1
-\.
+INSERT INTO public.users VALUES (1, 'test', 'eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjowLCJleHAiOjE2NDE2MzQxMjcsImlhdCI6MTY0MTYzMDUyN30.Fu0wUP-08NpPjq737y6HOeyKN_-_SE4iOZr5yrH7S8Jrz8nIuNKfU7AvlypeMSJ7wo8e3cSTadbSH1polZuFv-Nb1AqWDDXeuXudm61BkF96sTslbSHd0nF7cOy6hqCfIAfQLQpqZTJZ4E26oOSSJxPfOOntOWhlEejRl5F-flXAoYAQLegHxdn9IfYJeM1eanZqF4k6dT9hthFp9v4fmUjODPPfHip_iS7ckPonP1E4-8KeNkU3O-lIS1fgrsbCDA8531FXIGB0U7cSur7H0picKGL6WSzAErPGntlNlQWYB5JedDtLN9Ionxy1Y9LKQON76XYL4gM1Ji98RCEXggVqd7TW0B1fGV-Jve2hU3fKaDyQywsCJp36mpnVaqb5eiTssncHixAwZE0C4yh_XsTd-WoVhsbqlEuDfPTjrtAK94mSzHJTcO3fbtE9L-MoPevQIPM7Yog0i2Xn1oPUCDXVXsV2yJriBiI_r2xbG0nz5Bwn8KAFZ0dNGJ7T9urqKaKMh9guE4jgYLIpRpod_Fd13_GAK0ebgF2CZJdjJT7eEGhzzcg4uFpFdIXL2kNgVN1D6YLMPw3HhVg7_MIfASbJgpcppFhYa4Fk-OpchL5-e_mMyeWogvaJA2wSpyY1f5zJlBnFuIyk_OdV0TwQ3b_TjutehsiibT9WRpOK8h8', 'eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjoxLCJleHAiOjE2NDQyNTg1MjcsImlhdCI6MTY0MTYzMDUyN30.iVtIGQ6VTgRI8L3xFD_YNvVBGZ6kdFb3ERdyOCIHC_CHhOEpZxVGawMGnNNooqbNdmOqJQ0RLJyiAirEKdxSVrtWvqub6uVMjjpeBylE1sAFymCGNJQf77dKvgPHW3QY5FvOSoOoNcRU2g99Bx8sbZhiI12GnNOB-abazrzICpOUikiTdb2ri3w_TNF2Ibrn-itSa1yuhmTrVpqXt_CT4MEfteiDmgjyqonmk-J_BqbcriF3DKAvrXNK1VKVU7xODcFSIRizlgA2kDmnpMT3Oo-Z1I37TFIGAuDOTgcceOPa7rXg_Mfd_jhL7bSH1BI4RsK0rgde3NaCQlU2n7yVOYGbJCSsSWwSAi-gCjjuTTPnQWe3ep3IWrB73_7tKG2_x7YxZ1nQCSFKouA5rZH4g6yoV8wdJh8_bX2Z64-MJBUl8E7JGM2urA5GY1abo0GZ6ZuQi2JS5WnG1iTL9pFlmOoTpN1DKtNE2PUE90GJwi0qGeACif9uJBXQPDAgKk7fbUxKYQobc6ko2CJ1isoRjbi8-GsJ9lhw7tXno5zfAvN3eps9SYgmIRNh0t_vx-LMBezSTSEcTJpv-7Ap6F10GD3E9KmGcYrOMvdtaYgkWFXO6rh49uElUVid-C1tNVpKjnj7ewUosQo9MHSn-d5l1df0rJSueXcaUMSqRSrEzqQ', 1641634127, 'test@test.test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', true, 'OBW2OF5QH3NMCYJ44VU5B5YEQ5LHZLTFW2FDSAJ4R4JVZ4HWSNVQ====', NULL, 2, 1);
+INSERT INTO public.users VALUES (2, 'user2', 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMiIsImlhdCI6MTY0MTYzMDUyNywiZXhwIjoxNjQxNjM0MTI3fQ.example_token_user2', 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMiIsImlhdCI6MTY0MTYzMDUyNywiZXhwIjoxNjQ0MjU4NTI3fQ.example_secret_user2', 1641634127, 'user2@test.test', 'http://10.40.8.5:3000/avatars/default2', false, 'HASH2EXAMPLEHASH2EXAMPLEHASH2EXAMPLEHASH2EXAMPLE====', NULL, 2, 1);
 
 
 --
 -- Data for Name: workflows; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.workflows (id, pipeline_id, pid, name, state, error, started, finished, agent_id, platform, environ, axis_id) FROM stdin;
-1	1	1	woodpecker	failure	Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown	1641630525	1641630527	0		{}	\N
-\.
+INSERT INTO public.workflows VALUES (1, 1, 1, 'woodpecker', 'failure', 'Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown', 1641630525, 1641630527, 0, '', '{}', NULL);
 
 
 --
@@ -1561,5 +1523,5 @@ CREATE UNIQUE INDEX "UQE_workflows_s" ON public.workflows USING btree (pipeline_
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 4M1rZfLsaJIGiZgyNid36zJIiBx6srlQan1KeSbXOzB7Y6InnckEhpzQlLEKAdA
+\unrestrict CqELvZI3DY4n4ETCf9XharkGfqppgD8kxo1FDoGUSOJMtIcV1VUigzQFXRMJZRb
 
