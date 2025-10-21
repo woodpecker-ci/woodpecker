@@ -290,6 +290,15 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
+	var userWithoutStoredRepositories bool
+	if userRepos, err := _store.RepoList(user, false, false, &model.RepoFilter{}); err != nil {
+		log.Error().Err(err).Msgf("Could not list stored repositories for user %s", user.Login)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		return
+	} else {
+		userWithoutStoredRepositories = len(userRepos) == 0
+	}
+
 	repoUpdateFunc := func() error {
 		start := time.Now()
 		err = updateRepoPermissions(c, user, _store, _forge)
@@ -299,13 +308,13 @@ func HandleAuth(c *gin.Context) {
 		log.Debug().Msgf("update repo permissions for user %s in %dms", user.Login, time.Since(start).Milliseconds())
 		return err
 	}
-	if server.Config.Server.AsyncRepositoryUpdate {
-		go repoUpdateFunc()
-	} else {
+	if server.Config.Server.AsyncRepositoryUpdate || userWithoutStoredRepositories {
 		if err := repoUpdateFunc(); err != nil {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
+	} else {
+		go repoUpdateFunc()
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
