@@ -291,7 +291,7 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	var noStoredRepositories bool
-	if repos, err := _store.RepoListAll(false, &model.ListOptions{PerPage: 1}); err != nil {
+	if repos, err := _store.RepoList(user, false, false, &model.RepoFilter{}); err != nil {
 		log.Error().Err(err).Msgf("Could not list stored repositories for user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
@@ -308,7 +308,7 @@ func HandleAuth(c *gin.Context) {
 		log.Debug().Msgf("update repo permissions for user %s in %dms", user.Login, time.Since(start).Milliseconds())
 		return err
 	}
-	if server.Config.Server.AsyncRepositoryUpdate || noStoredRepositories {
+	if !server.Config.Server.AsyncRepositoryUpdate || noStoredRepositories {
 		if err := repoUpdateFunc(); err != nil {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
