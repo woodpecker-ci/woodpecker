@@ -37,6 +37,10 @@ var pipelinePurgeCmd = &cli.Command{
 	Action:    Purge,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
+			Name:  "branch",
+			Usage: "remove pipelines of this branch only",
+		},
+		&cli.DurationFlag{
 			Name:     "older-than",
 			Usage:    "remove pipelines older than the specified time limit",
 			Required: true,
@@ -55,14 +59,15 @@ var pipelinePurgeCmd = &cli.Command{
 }
 
 func Purge(ctx context.Context, c *cli.Command) error {
+	start := time.Now()
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	return pipelinePurge(c, client)
+	return pipelinePurge(c, client, start)
 }
 
-func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
+func pipelinePurge(c *cli.Command, client woodpecker.Client, start time.Time) (err error) {
 	repoIDOrFullName := c.Args().First()
 	if len(repoIDOrFullName) == 0 {
 		return fmt.Errorf("missing required argument repo-id / repo-full-name")
@@ -72,25 +77,26 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 		return fmt.Errorf("invalid repo '%s': %w", repoIDOrFullName, err)
 	}
 
-	olderThan := c.String("older-than")
+	branch := c.String("branch")
+	olderThan := c.Duration("older-than")
 	keepMin := c.Int64("keep-min")
 	dryRun := c.Bool("dry-run")
 
-	duration, err := time.ParseDuration(olderThan)
-	if err != nil {
-		return err
+	var before time.Time
+	if !start.IsZero() {
+		before = start.Add(-olderThan)
 	}
 
 	var pipelinesKeep []*woodpecker.Pipeline
 
 	if keepMin > 0 {
-		pipelinesKeep, err = fetchPipelinesToKeep(client, repoID, int(keepMin))
+		pipelinesKeep, err = fetchPipelinesToKeep(client, repoID, branch, int(keepMin))
 		if err != nil {
 			return err
 		}
 	}
 
-	pipelines, err := fetchPipelines(client, repoID, duration)
+	pipelines, err := fetchPipelines(client, repoID, branch, before)
 	if err != nil {
 		return err
 	}
@@ -135,7 +141,7 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 	return nil
 }
 
-func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, keepMin int) ([]*woodpecker.Pipeline, error) {
+func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, branch string, keepMin int) ([]*woodpecker.Pipeline, error) {
 	if keepMin <= 0 {
 		return nil, nil
 	}
@@ -145,19 +151,21 @@ func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, keepMin int) (
 				ListOptions: woodpecker.ListOptions{
 					Page: page,
 				},
+				Branch: branch,
 			},
 		)
 	}, keepMin)
 }
 
-func fetchPipelines(client woodpecker.Client, repoID int64, duration time.Duration) ([]*woodpecker.Pipeline, error) {
+func fetchPipelines(client woodpecker.Client, repoID int64, branch string, before time.Time) ([]*woodpecker.Pipeline, error) {
 	return shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
 		return client.PipelineList(repoID,
 			woodpecker.PipelineListOptions{
 				ListOptions: woodpecker.ListOptions{
 					Page: page,
 				},
-				Before: time.Now().Add(-duration),
+				Before: before,
+				Branch: branch,
 			},
 		)
 	}, -1)

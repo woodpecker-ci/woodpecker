@@ -276,7 +276,8 @@
                 "cron": "Cron",
                 "manual": "Manual",
                 "release": "Release",
-                "pr_closed": "Pull request mesclada/fechada"
+                "pr_closed": "Pull request mesclada/fechada",
+                "pr_metadata": "Metadados da pull request alterados"
             },
             "errors": "Erros",
             "warnings": "Avisos",
@@ -301,7 +302,8 @@
                 "title": "Depuração"
             },
             "log_delete_confirm": "Você realmente deseja excluir os registros de etapas?",
-            "log_delete_error": "Ocorreu um erro ao excluir os registros de etapas"
+            "log_delete_error": "Ocorreu um erro ao excluir os registros de etapas",
+            "view": "Ver pipeline"
         },
         "branches": "Branches",
         "pull_requests": "Pull requests",
@@ -461,7 +463,10 @@
                     "badge": "capacidade"
                 },
                 "version": "Versão",
-                "last_contact": "Último contato",
+                "last_contact": {
+                    "last_contact": "Último contato",
+                    "badge": "último contato"
+                },
                 "never": "Nunca",
                 "edit_agent": "Editar agente",
                 "delete_agent": "Excluir agente",
@@ -727,5 +732,11 @@
     "use_this_redirect_url_to_create": "Use esta URL de redirecionamento para criar ou atualizar o aplicativo OAuth.",
     "developer_settings_to_create": "Vá para {0} e configure o aplicativo OAuth.",
     "weblate": "nosso Weblate",
-    "help_translating": "Você pode ajudar a traduzir Woodpecker para o seu idioma em {0}."
+    "help_translating": "Você pode ajudar a traduzir Woodpecker para o seu idioma em {0}.",
+    "extensions": "Extensões",
+    "extensions_description": "Extensões são serviços HTTP que podem ser chamados pelo Woodpecker em vez de usar os embutidos.",
+    "extension_endpoint_placeholder": "p.ex., https://example.com/api",
+    "config_extension_endpoint": "endpoint da extensão de configuração",
+    "extensions_signatures_public_key": "Chave pública para assinaturas",
+    "extensions_signatures_public_key_description": "Esta chave pública deve ser usada por suas extensões para verificar se o chamadas de webhook do Woodpecker."
 }

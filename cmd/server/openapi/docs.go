@@ -4295,6 +4295,12 @@ const docTemplate = `{
                         "description": "query all repos, including inactive ones",
                         "name": "all",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter repos by name",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5124,6 +5130,9 @@ const docTemplate = `{
                 "clone_url_ssh": {
                     "type": "string"
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5214,6 +5223,9 @@ const docTemplate = `{
                 "clone_url_ssh": {
                     "type": "string"
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5294,6 +5306,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/WebhookEvent"
                     }
+                },
+                "config_extension_endpoint": {
+                    "type": "string"
                 },
                 "config_file": {
                     "type": "string"
