@@ -2,12 +2,15 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.4
--- Dumped by pg_dump version 13.4
+\restrict AfzhKZb1LKPKeKR4iwdIxhKV249snggZoBlLERloec1idnISPdtsR5e5dI3aVai
+
+-- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
+-- Dumped by pg_dump version 17.6
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -25,23 +28,28 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.agents (
-    agent_id integer NOT NULL,
-    agent_addr character varying(250),
-    agent_platform character varying(500),
-    agent_capacity integer,
-    agent_created integer,
-    agent_updated integer
+    id bigint NOT NULL,
+    created bigint,
+    updated bigint,
+    name character varying(255),
+    owner_id bigint,
+    token character varying(255),
+    last_contact bigint,
+    platform character varying(100),
+    backend character varying(100),
+    capacity integer,
+    version character varying(255),
+    no_schedule boolean
 );
 
 
 ALTER TABLE public.agents OWNER TO postgres;
 
 --
--- Name: agents_agent_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: agents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.agents_agent_id_seq
-    AS integer
+CREATE SEQUENCE public.agents_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -49,67 +57,58 @@ CREATE SEQUENCE public.agents_agent_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.agents_agent_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.agents_id_seq OWNER TO postgres;
 
 --
--- Name: agents_agent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: agents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.agents_agent_id_seq OWNED BY public.agents.agent_id;
+ALTER SEQUENCE public.agents_id_seq OWNED BY public.agents.id;
 
 
 --
--- Name: build_config; Type: TABLE; Schema: public; Owner: postgres
+-- Name: pipelines; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.build_config (
-    config_id integer NOT NULL,
-    build_id integer NOT NULL
+CREATE TABLE public.pipelines (
+    pipeline_id integer NOT NULL,
+    pipeline_repo_id integer,
+    pipeline_number integer,
+    pipeline_event character varying(500),
+    pipeline_status character varying(500),
+    pipeline_enqueued integer,
+    pipeline_created integer,
+    pipeline_started integer,
+    pipeline_finished integer,
+    pipeline_commit character varying(500),
+    pipeline_branch character varying(500),
+    pipeline_ref character varying(500),
+    pipeline_refspec character varying(1000),
+    pipeline_clone_url character varying(500),
+    pipeline_title character varying(1000),
+    pipeline_message text,
+    pipeline_timestamp integer,
+    pipeline_author character varying(500),
+    pipeline_avatar character varying(1000),
+    pipeline_email character varying(500),
+    pipeline_link character varying(1000),
+    pipeline_deploy character varying(500),
+    pipeline_signed boolean,
+    pipeline_verified boolean,
+    pipeline_parent integer,
+    pipeline_error text,
+    pipeline_reviewer character varying(250),
+    pipeline_reviewed integer,
+    pipeline_sender character varying(250),
+    pipeline_config_id integer,
+    changed_files text,
+    updated bigint DEFAULT 0 NOT NULL,
+    additional_variables json,
+    pr_labels json
 );
 
 
-ALTER TABLE public.build_config OWNER TO postgres;
-
---
--- Name: builds; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.builds (
-    build_id integer NOT NULL,
-    build_repo_id integer,
-    build_number integer,
-    build_event character varying(500),
-    build_status character varying(500),
-    build_enqueued integer,
-    build_created integer,
-    build_started integer,
-    build_finished integer,
-    build_commit character varying(500),
-    build_branch character varying(500),
-    build_ref character varying(500),
-    build_refspec character varying(1000),
-    build_remote character varying(500),
-    build_title character varying(1000),
-    build_message character varying(2000),
-    build_timestamp integer,
-    build_author character varying(500),
-    build_avatar character varying(1000),
-    build_email character varying(500),
-    build_link character varying(1000),
-    build_deploy character varying(500),
-    build_signed boolean,
-    build_verified boolean,
-    build_parent integer,
-    build_error character varying(500),
-    build_reviewer character varying(250),
-    build_reviewed integer,
-    build_sender character varying(250),
-    build_config_id integer,
-    changed_files text
-);
-
-
-ALTER TABLE public.builds OWNER TO postgres;
+ALTER TABLE public.pipelines OWNER TO postgres;
 
 --
 -- Name: builds_build_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -124,13 +123,13 @@ CREATE SEQUENCE public.builds_build_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.builds_build_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.builds_build_id_seq OWNER TO postgres;
 
 --
 -- Name: builds_build_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.builds_build_id_seq OWNED BY public.builds.build_id;
+ALTER SEQUENCE public.builds_build_id_seq OWNED BY public.pipelines.pipeline_id;
 
 
 --
@@ -161,7 +160,7 @@ CREATE SEQUENCE public.config_config_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.config_config_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.config_config_id_seq OWNER TO postgres;
 
 --
 -- Name: config_config_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -171,33 +170,28 @@ ALTER SEQUENCE public.config_config_id_seq OWNED BY public.config.config_id;
 
 
 --
--- Name: files; Type: TABLE; Schema: public; Owner: postgres
+-- Name: crons; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.files (
-    file_id integer NOT NULL,
-    file_build_id integer,
-    file_proc_id integer,
-    file_name character varying(250),
-    file_mime character varying(250),
-    file_size integer,
-    file_time integer,
-    file_data bytea,
-    file_pid integer,
-    file_meta_passed integer,
-    file_meta_failed integer,
-    file_meta_skipped integer
+CREATE TABLE public.crons (
+    i_d bigint NOT NULL,
+    name character varying(255),
+    repo_id bigint,
+    creator_id bigint,
+    next_exec bigint,
+    schedule character varying(255) NOT NULL,
+    created bigint DEFAULT 0 NOT NULL,
+    branch character varying(255)
 );
 
 
-ALTER TABLE public.files OWNER TO postgres;
+ALTER TABLE public.crons OWNER TO postgres;
 
 --
--- Name: files_file_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: crons_i_d_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.files_file_id_seq
-    AS integer
+CREATE SEQUENCE public.crons_i_d_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -205,34 +199,37 @@ CREATE SEQUENCE public.files_file_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.files_file_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.crons_i_d_seq OWNER TO postgres;
 
 --
--- Name: files_file_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: crons_i_d_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.files_file_id_seq OWNED BY public.files.file_id;
+ALTER SEQUENCE public.crons_i_d_seq OWNED BY public.crons.i_d;
 
 
 --
--- Name: logs; Type: TABLE; Schema: public; Owner: postgres
+-- Name: log_entries; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.logs (
-    log_id integer NOT NULL,
-    log_job_id integer,
-    log_data bytea
+CREATE TABLE public.log_entries (
+    id bigint NOT NULL,
+    step_id bigint,
+    "time" bigint,
+    line integer,
+    data bytea,
+    created bigint,
+    type integer
 );
 
 
-ALTER TABLE public.logs OWNER TO postgres;
+ALTER TABLE public.log_entries OWNER TO postgres;
 
 --
--- Name: logs_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: log_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.logs_log_id_seq
-    AS integer
+CREATE SEQUENCE public.log_entries_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -240,13 +237,13 @@ CREATE SEQUENCE public.logs_log_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.logs_log_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.log_entries_id_seq OWNER TO postgres;
 
 --
--- Name: logs_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: log_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.logs_log_id_seq OWNED BY public.logs.log_id;
+ALTER SEQUENCE public.log_entries_id_seq OWNED BY public.log_entries.id;
 
 
 --
@@ -261,6 +258,41 @@ CREATE TABLE public.migrations (
 ALTER TABLE public.migrations OWNER TO postgres;
 
 --
+-- Name: orgs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.orgs (
+    id bigint NOT NULL,
+    name character varying(255),
+    is_user boolean,
+    private boolean
+);
+
+
+ALTER TABLE public.orgs OWNER TO postgres;
+
+--
+-- Name: orgs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.orgs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.orgs_id_seq OWNER TO postgres;
+
+--
+-- Name: orgs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.orgs_id_seq OWNED BY public.orgs.id;
+
+
+--
 -- Name: perms; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -270,35 +302,50 @@ CREATE TABLE public.perms (
     perm_pull boolean,
     perm_push boolean,
     perm_admin boolean,
-    perm_synced integer
+    perm_synced integer,
+    created bigint,
+    updated bigint
 );
 
 
 ALTER TABLE public.perms OWNER TO postgres;
 
 --
--- Name: procs; Type: TABLE; Schema: public; Owner: postgres
+-- Name: pipeline_config; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.procs (
-    proc_id integer NOT NULL,
-    proc_build_id integer,
-    proc_pid integer,
-    proc_ppid integer,
-    proc_pgid integer,
-    proc_name character varying(250),
-    proc_state character varying(250),
-    proc_error character varying(500),
-    proc_exit_code integer,
-    proc_started integer,
-    proc_stopped integer,
-    proc_machine character varying(250),
-    proc_platform character varying(250),
-    proc_environ character varying(2000)
+CREATE TABLE public.pipeline_config (
+    config_id bigint NOT NULL,
+    pipeline_id bigint NOT NULL
 );
 
 
-ALTER TABLE public.procs OWNER TO postgres;
+ALTER TABLE public.pipeline_config OWNER TO postgres;
+
+--
+-- Name: steps; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.steps (
+    step_id integer NOT NULL,
+    step_pipeline_id integer,
+    step_pid integer,
+    step_ppid integer,
+    step_pgid integer,
+    step_name character varying(250),
+    step_state character varying(250),
+    step_error text,
+    step_exit_code integer,
+    step_started integer,
+    step_stopped integer,
+    step_machine character varying(250),
+    step_uuid character varying(255),
+    step_failure character varying(255),
+    step_type character varying(255)
+);
+
+
+ALTER TABLE public.steps OWNER TO postgres;
 
 --
 -- Name: procs_proc_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -313,13 +360,47 @@ CREATE SEQUENCE public.procs_proc_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.procs_proc_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.procs_proc_id_seq OWNER TO postgres;
 
 --
 -- Name: procs_proc_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.procs_proc_id_seq OWNED BY public.procs.proc_id;
+ALTER SEQUENCE public.procs_proc_id_seq OWNED BY public.steps.step_id;
+
+
+--
+-- Name: redirections; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.redirections (
+    redirection_id bigint NOT NULL,
+    repo_id bigint,
+    repo_full_name character varying(255)
+);
+
+
+ALTER TABLE public.redirections OWNER TO postgres;
+
+--
+-- Name: redirections_redirection_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.redirections_redirection_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.redirections_redirection_id_seq OWNER TO postgres;
+
+--
+-- Name: redirections_redirection_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.redirections_redirection_id_seq OWNED BY public.redirections.redirection_id;
 
 
 --
@@ -332,8 +413,8 @@ CREATE TABLE public.registry (
     registry_addr character varying(250),
     registry_email character varying(500),
     registry_username character varying(2000),
-    registry_password character varying(8000),
-    registry_token character varying(2000)
+    registry_password text,
+    registry_token text
 );
 
 
@@ -352,7 +433,7 @@ CREATE SEQUENCE public.registry_registry_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.registry_registry_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.registry_registry_id_seq OWNER TO postgres;
 
 --
 -- Name: registry_registry_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -380,16 +461,16 @@ CREATE TABLE public.repos (
     repo_trusted boolean,
     repo_allow_pr boolean,
     repo_allow_push boolean,
-    repo_allow_deploys boolean,
-    repo_allow_tags boolean,
     repo_hash character varying(500),
     repo_scm character varying(50),
     repo_config_path character varying(500),
     repo_gated boolean,
     repo_visibility character varying(50),
-    repo_counter integer,
     repo_active boolean,
-    repo_fallback boolean
+    forge_remote_id character varying(255),
+    repo_org_id bigint,
+    cancel_previous_pipeline_events json,
+    netrc_only_trusted boolean DEFAULT true NOT NULL
 );
 
 
@@ -408,7 +489,7 @@ CREATE SEQUENCE public.repos_repo_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.repos_repo_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.repos_repo_id_seq OWNER TO postgres;
 
 --
 -- Name: repos_repo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -423,13 +504,15 @@ ALTER SEQUENCE public.repos_repo_id_seq OWNED BY public.repos.repo_id;
 
 CREATE TABLE public.secrets (
     secret_id integer NOT NULL,
-    secret_repo_id integer,
-    secret_name character varying(250),
+    secret_repo_id integer DEFAULT 0 NOT NULL,
+    secret_name character varying(250) NOT NULL,
     secret_value bytea,
     secret_images character varying(2000),
     secret_events character varying(2000),
     secret_skip_verify boolean,
-    secret_conceal boolean
+    secret_conceal boolean,
+    secret_org_id bigint DEFAULT 0 NOT NULL,
+    secret_plugins_only boolean
 );
 
 
@@ -448,7 +531,7 @@ CREATE SEQUENCE public.secrets_secret_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.secrets_secret_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.secrets_secret_id_seq OWNER TO postgres;
 
 --
 -- Name: secrets_secret_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -458,41 +541,16 @@ ALTER SEQUENCE public.secrets_secret_id_seq OWNED BY public.secrets.secret_id;
 
 
 --
--- Name: senders; Type: TABLE; Schema: public; Owner: postgres
+-- Name: server_config; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.senders (
-    sender_id integer NOT NULL,
-    sender_repo_id integer,
-    sender_login character varying(250),
-    sender_allow boolean,
-    sender_block boolean
+CREATE TABLE public.server_config (
+    key character varying(255) NOT NULL,
+    value character varying(255)
 );
 
 
-ALTER TABLE public.senders OWNER TO postgres;
-
---
--- Name: senders_sender_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.senders_sender_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.senders_sender_id_seq OWNER TO postgres;
-
---
--- Name: senders_sender_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.senders_sender_id_seq OWNED BY public.senders.sender_id;
-
+ALTER TABLE public.server_config OWNER TO postgres;
 
 --
 -- Name: tasks; Type: TABLE; Schema: public; Owner: postgres
@@ -503,7 +561,9 @@ CREATE TABLE public.tasks (
     task_data bytea,
     task_labels bytea,
     task_dependencies bytea,
-    task_run_on bytea
+    task_run_on bytea,
+    task_dep_status json,
+    agent_id bigint
 );
 
 
@@ -516,15 +576,14 @@ ALTER TABLE public.tasks OWNER TO postgres;
 CREATE TABLE public.users (
     user_id integer NOT NULL,
     user_login character varying(250),
-    user_token character varying(1000),
-    user_secret character varying(1000),
+    user_token text,
+    user_secret text,
     user_expiry integer,
     user_email character varying(500),
     user_avatar character varying(500),
-    user_active boolean,
     user_admin boolean,
     user_hash character varying(500),
-    user_synced integer
+    forge_remote_id character varying(255)
 );
 
 
@@ -543,7 +602,7 @@ CREATE SEQUENCE public.users_user_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_user_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.users_user_id_seq OWNER TO postgres;
 
 --
 -- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -553,17 +612,52 @@ ALTER SEQUENCE public.users_user_id_seq OWNED BY public.users.user_id;
 
 
 --
--- Name: agents agent_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: workflows; Type: TABLE; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.agents ALTER COLUMN agent_id SET DEFAULT nextval('public.agents_agent_id_seq'::regclass);
+CREATE TABLE public.workflows (
+    workflow_id bigint NOT NULL,
+    workflow_pipeline_id bigint,
+    workflow_pid integer,
+    workflow_name character varying(255),
+    workflow_state character varying(255),
+    workflow_error text,
+    workflow_started bigint,
+    workflow_stopped bigint,
+    workflow_agent_id bigint,
+    workflow_platform character varying(255),
+    workflow_environ json
+);
+
+
+ALTER TABLE public.workflows OWNER TO postgres;
+
+--
+-- Name: workflows_workflow_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.workflows_workflow_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.workflows_workflow_id_seq OWNER TO postgres;
+
+--
+-- Name: workflows_workflow_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.workflows_workflow_id_seq OWNED BY public.workflows.workflow_id;
 
 
 --
--- Name: builds build_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: agents id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.builds ALTER COLUMN build_id SET DEFAULT nextval('public.builds_build_id_seq'::regclass);
+ALTER TABLE ONLY public.agents ALTER COLUMN id SET DEFAULT nextval('public.agents_id_seq'::regclass);
 
 
 --
@@ -574,24 +668,38 @@ ALTER TABLE ONLY public.config ALTER COLUMN config_id SET DEFAULT nextval('publi
 
 
 --
--- Name: files file_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: crons i_d; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.files ALTER COLUMN file_id SET DEFAULT nextval('public.files_file_id_seq'::regclass);
-
-
---
--- Name: logs log_id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.logs ALTER COLUMN log_id SET DEFAULT nextval('public.logs_log_id_seq'::regclass);
+ALTER TABLE ONLY public.crons ALTER COLUMN i_d SET DEFAULT nextval('public.crons_i_d_seq'::regclass);
 
 
 --
--- Name: procs proc_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: log_entries id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.procs ALTER COLUMN proc_id SET DEFAULT nextval('public.procs_proc_id_seq'::regclass);
+ALTER TABLE ONLY public.log_entries ALTER COLUMN id SET DEFAULT nextval('public.log_entries_id_seq'::regclass);
+
+
+--
+-- Name: orgs id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.orgs ALTER COLUMN id SET DEFAULT nextval('public.orgs_id_seq'::regclass);
+
+
+--
+-- Name: pipelines pipeline_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pipelines ALTER COLUMN pipeline_id SET DEFAULT nextval('public.builds_build_id_seq'::regclass);
+
+
+--
+-- Name: redirections redirection_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.redirections ALTER COLUMN redirection_id SET DEFAULT nextval('public.redirections_redirection_id_seq'::regclass);
 
 
 --
@@ -616,10 +724,10 @@ ALTER TABLE ONLY public.secrets ALTER COLUMN secret_id SET DEFAULT nextval('publ
 
 
 --
--- Name: senders sender_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: steps step_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.senders ALTER COLUMN sender_id SET DEFAULT nextval('public.senders_sender_id_seq'::regclass);
+ALTER TABLE ONLY public.steps ALTER COLUMN step_id SET DEFAULT nextval('public.procs_proc_id_seq'::regclass);
 
 
 --
@@ -630,298 +738,308 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 
 
 --
+-- Name: workflows workflow_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.workflows ALTER COLUMN workflow_id SET DEFAULT nextval('public.workflows_workflow_id_seq'::regclass);
+
+
+--
 -- Data for Name: agents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
---- EMPTY
-
-
---
--- Data for Name: builds; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO public.builds (build_id, build_repo_id, build_number, build_event, build_status, build_enqueued, build_created, build_started, build_finished, build_commit, build_branch, build_ref, build_refspec, build_remote, build_title, build_message, build_timestamp, build_author, build_avatar, build_email, build_link, build_deploy, build_signed, build_verified, build_parent, build_error, build_reviewer, build_reviewed, build_sender, build_config_id, changed_files) VALUES
-(1, 105, 1, 'push', 'failure', 1641630525, 1641630525, 1641630525, 1641630527, '24bf205107cea48b92bc6444e18e40d21733a594', 'master', 'refs/heads/master', '', '', '', '„.drone.yml“ hinzufügen\n', '1641630525', 'test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'test@test.test', 'http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594', '', 'f', 't', '0', '', '', '0', 'test', '0', '[".drone.yml"]\n');
+COPY public.agents (id, created, updated, name, owner_id, token, last_contact, platform, backend, capacity, version, no_schedule) FROM stdin;
+\.
 
 
 --
 -- Data for Name: config; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.config (config_id, config_repo_id, config_hash, config_data, config_name) VALUES
-(1, 105, 'ec8ca9529d6081e631aec26175b26ac91699395b96b9c5fc1f3af6d3aef5d3a8', '\x636c6f6e653a0a20206769743a0a20202020696d6167653a20776f6f647065636b657263692f706c7567696e2d6769743a746573740a0a706970656c696e653a0a20205072696e743a0a20202020696d6167653a207072696e742f656e760a20202020736563726574733a205b204141414141414141414141414141414141414141414141414141205d', 'drone');
+COPY public.config (config_id, config_repo_id, config_hash, config_data, config_name) FROM stdin;
+1	105	ec8ca9529d6081e631aec26175b26ac91699395b96b9c5fc1f3af6d3aef5d3a8	\\x636c6f6e653a0a20206769743a0a20202020696d6167653a20776f6f647065636b657263692f706c7567696e2d6769743a746573740a0a706970656c696e653a0a20205072696e743a0a20202020696d6167653a207072696e742f656e760a20202020736563726574733a205b204141414141414141414141414141414141414141414141414141205d	drone
+\.
 
 
 --
--- Data for Name: build_config; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: crons; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.build_config (config_id, build_id) VALUES
-(1, 1);
-
-
---
--- Data for Name: files; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
---- EMPTY
+COPY public.crons (i_d, name, repo_id, creator_id, next_exec, schedule, created, branch) FROM stdin;
+\.
 
 
 --
--- Data for Name: logs; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: log_entries; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
---- EMPTY
+COPY public.log_entries (id, step_id, "time", line, data, created, type) FROM stdin;
+\.
 
 
 --
 -- Data for Name: migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.migrations (name) VALUES
-('create-table-users'),
-('create-table-repos'),
-('create-table-builds'),
-('create-index-builds-repo'),
-('create-index-builds-author'),
-('create-table-procs'),
-('create-index-procs-build'),
-('create-table-logs'),
-('create-table-files'),
-('create-index-files-builds'),
-('create-index-files-procs'),
-('create-table-secrets'),
-('create-index-secrets-repo'),
-('create-table-registry'),
-('create-index-registry-repo'),
-('create-table-config'),
-('create-table-tasks'),
-('create-table-agents'),
-('create-table-senders'),
-('create-index-sender-repos'),
-('alter-table-add-repo-visibility'),
-('update-table-set-repo-visibility'),
-('alter-table-add-repo-seq'),
-('update-table-set-repo-seq'),
-('update-table-set-repo-seq-default'),
-('alter-table-add-repo-active'),
-('update-table-set-repo-active'),
-('alter-table-add-user-synced'),
-('update-table-set-user-synced'),
-('create-table-perms'),
-('create-index-perms-repo'),
-('create-index-perms-user'),
-('alter-table-add-file-pid'),
-('alter-table-add-file-meta-passed'),
-('alter-table-add-file-meta-failed'),
-('alter-table-add-file-meta-skipped'),
-('alter-table-update-file-meta'),
-('create-table-build-config'),
-('alter-table-add-config-name'),
-('update-table-set-config-name'),
-('populate-build-config'),
-('alter-table-add-task-dependencies'),
-('alter-table-add-task-run-on'),
-('alter-table-add-repo-fallback'),
-('update-table-set-repo-fallback'),
-('update-table-set-repo-fallback-again'),
-('add-builds-changed_files-column'),
-('update-builds-set-changed_files'),
-('update-table-set-users-token-and-secret-length');
+COPY public.migrations (name) FROM stdin;
+create-table-users
+create-table-repos
+create-table-builds
+create-index-builds-repo
+create-index-builds-author
+create-table-procs
+create-index-procs-build
+create-table-logs
+create-table-files
+create-index-files-builds
+create-index-files-procs
+create-table-secrets
+create-index-secrets-repo
+create-table-registry
+create-index-registry-repo
+create-table-config
+create-table-tasks
+create-table-agents
+create-table-senders
+create-index-sender-repos
+alter-table-add-repo-visibility
+update-table-set-repo-visibility
+alter-table-add-repo-seq
+update-table-set-repo-seq
+update-table-set-repo-seq-default
+alter-table-add-repo-active
+update-table-set-repo-active
+alter-table-add-user-synced
+update-table-set-user-synced
+create-table-perms
+create-index-perms-repo
+create-index-perms-user
+alter-table-add-file-pid
+alter-table-add-file-meta-passed
+alter-table-add-file-meta-failed
+alter-table-add-file-meta-skipped
+alter-table-update-file-meta
+create-table-build-config
+alter-table-add-config-name
+update-table-set-config-name
+populate-build-config
+alter-table-add-task-dependencies
+alter-table-add-task-run-on
+alter-table-add-repo-fallback
+update-table-set-repo-fallback
+update-table-set-repo-fallback-again
+add-builds-changed_files-column
+update-builds-set-changed_files
+update-table-set-users-token-and-secret-length
+xorm
+alter-table-drop-repo-fallback
+drop-allow-push-tags-deploys-columns
+alter-table-drop-counter
+drop-senders
+alter-table-logs-update-type-of-data
+alter-table-add-secrets-user-id
+recreate-agents-table
+lowercase-secret-names
+rename-builds-to-pipeline
+rename-columns-builds-to-pipeline
+rename-procs-to-steps
+rename-remote-to-forge
+rename-forge-id-to-forge-remote-id
+remove-active-from-users
+remove-inactive-repos
+drop-files
+init-log_entries
+migrate-logs-to-log_entries
+parent-steps-to-workflows
+add-orgs
+\.
+
+
+--
+-- Data for Name: orgs; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.orgs (id, name, is_user, private) FROM stdin;
+1	2	f	f
+\.
 
 
 --
 -- Data for Name: perms; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.perms (perm_user_id, perm_repo_id, perm_pull, perm_push, perm_admin, perm_synced) VALUES
-(1, 1, 't', 't', 't', 1641626844),
-(1, 2, 't', 't', 't', 1641626844),
-(1, 3, 't', 't', 't', 1641626844),
-(1, 4, 't', 't', 't', 1641626844),
-(1, 5, 't', 't', 't', 1641626844),
-(1, 6, 't', 't', 't', 1641626844),
-(1, 7, 't', 't', 't', 1641626844),
-(1, 8, 't', 't', 't', 1641626844),
-(1, 9, 't', 't', 't', 1641626844),
-(1, 10, 't', 't', 't', 1641626844),
-(1, 11, 't', 't', 't', 1641626844),
-(1, 12, 't', 't', 't', 1641626844),
-(1, 13, 't', 't', 't', 1641626844),
-(1, 14, 't', 't', 't', 1641626844),
-(1, 15, 't', 't', 't', 1641626844),
-(1, 16, 't', 't', 't', 1641626844),
-(1, 17, 't', 't', 't', 1641626844),
-(1, 18, 't', 't', 't', 1641626844),
-(1, 19, 't', 't', 't', 1641626844),
-(1, 20, 't', 't', 't', 1641626844),
-(1, 21, 't', 't', 't', 1641626844),
-(1, 22, 't', 't', 't', 1641626844),
-(1, 23, 't', 't', 't', 1641626844),
-(1, 24, 't', 't', 't', 1641626844),
-(1, 25, 't', 't', 't', 1641626844),
-(1, 26, 't', 't', 't', 1641626844),
-(1, 27, 't', 't', 't', 1641626844),
-(1, 28, 't', 't', 't', 1641626844),
-(1, 29, 't', 't', 't', 1641626844),
-(1, 30, 't', 't', 't', 1641626844),
-(1, 31, 't', 't', 't', 1641626844),
-(1, 32, 't', 't', 't', 1641626844),
-(1, 33, 't', 't', 't', 1641626844),
-(1, 34, 't', 't', 't', 1641626844),
-(1, 35, 't', 't', 't', 1641626844),
-(1, 36, 't', 't', 't', 1641626844),
-(1, 37, 't', 't', 't', 1641626844),
-(1, 38, 't', 't', 't', 1641626844),
-(1, 39, 't', 't', 't', 1641626844),
-(1, 40, 't', 't', 't', 1641626844),
-(1, 41, 't', 't', 't', 1641626844),
-(1, 42, 't', 't', 't', 1641626844),
-(1, 43, 't', 't', 't', 1641626844),
-(1, 44, 't', 't', 't', 1641626844),
-(1, 45, 't', 't', 't', 1641626844),
-(1, 46, 't', 't', 't', 1641626844),
-(1, 47, 't', 't', 't', 1641626844),
-(1, 48, 't', 't', 't', 1641626844),
-(1, 49, 't', 't', 't', 1641626844),
-(1, 50, 't', 't', 't', 1641626844),
-(1, 51, 't', 't', 't', 1641626844),
-(1, 52, 't', 't', 't', 1641626844),
-(1, 53, 't', 't', 't', 1641626844),
-(1, 54, 't', 't', 't', 1641626844),
-(1, 55, 't', 't', 't', 1641626844),
-(1, 56, 't', 't', 't', 1641626844),
-(1, 57, 't', 't', 't', 1641626844),
-(1, 58, 't', 't', 't', 1641626844),
-(1, 59, 't', 't', 't', 1641626844),
-(1, 60, 't', 't', 't', 1641626844),
-(1, 115, 't', 't', 't', 1641630451),
-(1, 105, 't', 't', 't', 1641630452);
+COPY public.perms (perm_user_id, perm_repo_id, perm_pull, perm_push, perm_admin, perm_synced, created, updated) FROM stdin;
+1	1	t	t	t	1641626844	\N	\N
+1	2	t	t	t	1641626844	\N	\N
+1	3	t	t	t	1641626844	\N	\N
+1	4	t	t	t	1641626844	\N	\N
+1	5	t	t	t	1641626844	\N	\N
+1	6	t	t	t	1641626844	\N	\N
+1	7	t	t	t	1641626844	\N	\N
+1	8	t	t	t	1641626844	\N	\N
+1	9	t	t	t	1641626844	\N	\N
+1	10	t	t	t	1641626844	\N	\N
+1	11	t	t	t	1641626844	\N	\N
+1	12	t	t	t	1641626844	\N	\N
+1	13	t	t	t	1641626844	\N	\N
+1	14	t	t	t	1641626844	\N	\N
+1	15	t	t	t	1641626844	\N	\N
+1	16	t	t	t	1641626844	\N	\N
+1	17	t	t	t	1641626844	\N	\N
+1	18	t	t	t	1641626844	\N	\N
+1	19	t	t	t	1641626844	\N	\N
+1	20	t	t	t	1641626844	\N	\N
+1	21	t	t	t	1641626844	\N	\N
+1	22	t	t	t	1641626844	\N	\N
+1	23	t	t	t	1641626844	\N	\N
+1	24	t	t	t	1641626844	\N	\N
+1	25	t	t	t	1641626844	\N	\N
+1	26	t	t	t	1641626844	\N	\N
+1	27	t	t	t	1641626844	\N	\N
+1	28	t	t	t	1641626844	\N	\N
+1	29	t	t	t	1641626844	\N	\N
+1	30	t	t	t	1641626844	\N	\N
+1	31	t	t	t	1641626844	\N	\N
+1	32	t	t	t	1641626844	\N	\N
+1	33	t	t	t	1641626844	\N	\N
+1	34	t	t	t	1641626844	\N	\N
+1	35	t	t	t	1641626844	\N	\N
+1	36	t	t	t	1641626844	\N	\N
+1	37	t	t	t	1641626844	\N	\N
+1	38	t	t	t	1641626844	\N	\N
+1	39	t	t	t	1641626844	\N	\N
+1	40	t	t	t	1641626844	\N	\N
+1	41	t	t	t	1641626844	\N	\N
+1	42	t	t	t	1641626844	\N	\N
+1	43	t	t	t	1641626844	\N	\N
+1	44	t	t	t	1641626844	\N	\N
+1	45	t	t	t	1641626844	\N	\N
+1	46	t	t	t	1641626844	\N	\N
+1	47	t	t	t	1641626844	\N	\N
+1	48	t	t	t	1641626844	\N	\N
+1	49	t	t	t	1641626844	\N	\N
+1	50	t	t	t	1641626844	\N	\N
+1	51	t	t	t	1641626844	\N	\N
+1	52	t	t	t	1641626844	\N	\N
+1	53	t	t	t	1641626844	\N	\N
+1	54	t	t	t	1641626844	\N	\N
+1	55	t	t	t	1641626844	\N	\N
+1	56	t	t	t	1641626844	\N	\N
+1	57	t	t	t	1641626844	\N	\N
+1	58	t	t	t	1641626844	\N	\N
+1	59	t	t	t	1641626844	\N	\N
+1	60	t	t	t	1641626844	\N	\N
+1	115	t	t	t	1641630451	\N	\N
+1	105	t	t	t	1641630452	\N	\N
+\.
 
 
 --
--- Data for Name: procs; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: pipeline_config; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.procs (proc_id, proc_build_id, proc_pid, proc_ppid, proc_pgid, proc_name, proc_state, proc_error, proc_exit_code, proc_started, proc_stopped, proc_machine, proc_platform, proc_environ) VALUES
-(1, 1, 1, 0, 1, 'drone', 'failure', 'Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown', '1', '1641630525', '1641630527', 'someHostname', '', '{}'),
-(2, 1, 2, 1, 2, 'git', 'success', '', '0', '1641630525', '1641630527', 'someHostname', '', null),
-(3, 1, 3, 1, 3, 'Print', 'skipped', '', '0', '0', '0', '', '', null);
+COPY public.pipeline_config (config_id, pipeline_id) FROM stdin;
+1	1
+\.
+
+
+--
+-- Data for Name: pipelines; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.pipelines (pipeline_id, pipeline_repo_id, pipeline_number, pipeline_event, pipeline_status, pipeline_enqueued, pipeline_created, pipeline_started, pipeline_finished, pipeline_commit, pipeline_branch, pipeline_ref, pipeline_refspec, pipeline_clone_url, pipeline_title, pipeline_message, pipeline_timestamp, pipeline_author, pipeline_avatar, pipeline_email, pipeline_link, pipeline_deploy, pipeline_signed, pipeline_verified, pipeline_parent, pipeline_error, pipeline_reviewer, pipeline_reviewed, pipeline_sender, pipeline_config_id, changed_files, updated, additional_variables, pr_labels) FROM stdin;
+1	105	1	push	failure	1641630525	1641630525	1641630525	1641630527	24bf205107cea48b92bc6444e18e40d21733a594	master	refs/heads/master				„.drone.yml“ hinzufügen\\n	1641630525	test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	test@test.test	http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594		f	t	0			0	test	0	[".drone.yml"]\\n	0	\N	\N
+\.
+
+
+--
+-- Data for Name: redirections; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.redirections (redirection_id, repo_id, repo_full_name) FROM stdin;
+\.
 
 
 --
 -- Data for Name: registry; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
---- EMPTY
+COPY public.registry (registry_id, registry_repo_id, registry_addr, registry_email, registry_username, registry_password, registry_token) FROM stdin;
+\.
 
 
 --
 -- Data for Name: repos; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_full_name, repo_avatar, repo_link, repo_clone, repo_branch, repo_timeout, repo_private, repo_trusted, repo_allow_pr, repo_allow_push, repo_allow_deploys, repo_allow_tags, repo_hash, repo_scm, repo_config_path, repo_gated, repo_visibility, repo_counter, repo_active, repo_fallback) VALUES
-(1, 0, 'test', 'a', 'test/a', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/a', 'http://10.40.8.5:3000/test/a.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(2, 0, 'test', 'aa', 'test/aa', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/aa', 'http://10.40.8.5:3000/test/aa.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(3, 0, 'test', 'aaaa', 'test/aaaa', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/aaaa', 'http://10.40.8.5:3000/test/aaaa.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(4, 0, 'test', 'asciidoc-test', 'test/asciidoc-test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/asciidoc-test', 'http://10.40.8.5:3000/test/asciidoc-test.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(5, 0, 'test', 'bigLFS', 'test/bigLFS', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/bigLFS', 'http://10.40.8.5:3000/test/bigLFS.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(6, 0, 'test', 'codeberg-gitea', 'test/codeberg-gitea', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/codeberg-gitea', 'http://10.40.8.5:3000/test/codeberg-gitea.git', 'codeberg-1.15', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(8, 0, 'test', 'CSV-deom', 'test/CSV-deom', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/CSV-deom', 'http://10.40.8.5:3000/test/CSV-deom.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(9, 0, 'test', 'empty', 'test/empty', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/empty', 'http://10.40.8.5:3000/test/empty.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(10, 0, 'test3', 'fdsa', 'test3/fdsa', 'http://10.40.8.5:3000/avatar/68985079da908d72fcfca7b557d8f729', 'http://10.40.8.5:3000/test3/fdsa', 'http://10.40.8.5:3000/test3/fdsa.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(11, 0, 'test', 'fdsa', 'test/fdsa', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/fdsa', 'http://10.40.8.5:3000/test/fdsa.git', 'main', '0', 't', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(12, 0, 'test', 'fdsa-mig', 'test/fdsa-mig', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/fdsa-mig', 'http://10.40.8.5:3000/test/fdsa-mig.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(13, 0, 'test', 'fdsa-mig2', 'test/fdsa-mig2', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/fdsa-mig2', 'http://10.40.8.5:3000/test/fdsa-mig2.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(14, 0, 'test', 'fdsaddd', 'test/fdsaddd', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/fdsaddd', 'http://10.40.8.5:3000/test/fdsaddd.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(15, 0, 'df', 'fdsafdsafdsa', 'df/fdsafdsafdsa', 'http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f', 'http://10.40.8.5:3000/df/fdsafdsafdsa', 'http://10.40.8.5:3000/df/fdsafdsafdsa.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(16, 0, 'test', 'freebsd', 'test/freebsd', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/freebsd', 'http://10.40.8.5:3000/test/freebsd.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(17, 0, 'test', 'FreeBSD_ports', 'test/FreeBSD_ports', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/FreeBSD_ports', 'http://10.40.8.5:3000/test/FreeBSD_ports.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(18, 0, 'test', 'Gadgetbridge', 'test/Gadgetbridge', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/Gadgetbridge', 'http://10.40.8.5:3000/test/Gadgetbridge.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(19, 0, 'test', 'gcc', 'test/gcc', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/gcc', 'http://10.40.8.5:3000/test/gcc.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(20, 0, 'test', 'gitea', 'test/gitea', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/gitea', 'http://10.40.8.5:3000/test/gitea.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(21, 0, 'test', 'github-orgmode-tests', 'test/github-orgmode-tests', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/github-orgmode-tests', 'http://10.40.8.5:3000/test/github-orgmode-tests.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(22, 0, 'test', 'go-hexcolor', 'test/go-hexcolor', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/go-hexcolor', 'http://10.40.8.5:3000/test/go-hexcolor.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(23, 0, 'test', 'go-sdk', 'test/go-sdk', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/go-sdk', 'http://10.40.8.5:3000/test/go-sdk.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(24, 0, 'test', 'go-version', 'test/go-version', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/go-version', 'http://10.40.8.5:3000/test/go-version.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(25, 0, 'test', 'go-version2', 'test/go-version2', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/go-version2', 'http://10.40.8.5:3000/test/go-version2.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(26, 0, 'CI-Tests', 'helm-release', 'CI-Tests/helm-release', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/helm-release', 'http://10.40.8.5:3000/CI-Tests/helm-release.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(27, 0, 'test', 'init', 'test/init', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/init', 'http://10.40.8.5:3000/test/init.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(28, 0, 'df', 'init', 'df/init', 'http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f', 'http://10.40.8.5:3000/df/init', 'http://10.40.8.5:3000/df/init.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(29, 0, '23r3e2', 'init', '23r3e2/init', 'http://10.40.8.5:3000/avatars/9bc4c5e506b1bfbe3033e35f9e78428b', 'http://10.40.8.5:3000/23r3e2/init', 'http://10.40.8.5:3000/23r3e2/init.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(30, 0, 'test', 'LFS-TEST', 'test/LFS-TEST', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/LFS-TEST', 'http://10.40.8.5:3000/test/LFS-TEST.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(31, 0, 'test', 'mig-opendev-test', 'test/mig-opendev-test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/mig-opendev-test', 'http://10.40.8.5:3000/test/mig-opendev-test.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(32, 0, 'test', 'mig-opendev-test2', 'test/mig-opendev-test2', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/mig-opendev-test2', 'http://10.40.8.5:3000/test/mig-opendev-test2.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(33, 0, 'test', 'mopidy-autoplay', 'test/mopidy-autoplay', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/mopidy-autoplay', 'http://10.40.8.5:3000/test/mopidy-autoplay.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(34, 0, 'test', 'namla', 'test/namla', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/namla', 'http://10.40.8.5:3000/test/namla.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(36, 0, 'CI-Tests', 'pages-zola', 'CI-Tests/pages-zola', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/pages-zola', 'http://10.40.8.5:3000/CI-Tests/pages-zola.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(38, 0, 'CI-Tests', 'plugin-settings', 'CI-Tests/plugin-settings', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/plugin-settings', 'http://10.40.8.5:3000/CI-Tests/plugin-settings.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(40, 0, 'test', 'produceit', 'test/produceit', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/produceit', 'http://10.40.8.5:3000/test/produceit.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(42, 0, 'test', 'Remmina-pull', 'test/Remmina-pull', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/Remmina-pull', 'http://10.40.8.5:3000/test/Remmina-pull.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(44, 0, 'CI-Tests', 'settings', 'CI-Tests/settings', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/settings', 'http://10.40.8.5:3000/CI-Tests/settings.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(46, 0, '581', 'tag-issue', '581/tag-issue', 'http://10.40.8.5:3000/avatars/c6e19e830859f2cb9f7c8f8cacb8d2a6', 'http://10.40.8.5:3000/581/tag-issue', 'http://10.40.8.5:3000/581/tag-issue.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(48, 0, '23r3e2', 'test-clone', '23r3e2/test-clone', 'http://10.40.8.5:3000/avatars/9bc4c5e506b1bfbe3033e35f9e78428b', 'http://10.40.8.5:3000/23r3e2/test-clone', 'http://10.40.8.5:3000/23r3e2/test-clone.git', 'master', '0', 't', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(50, 0, 'test', 'test-gitea-migration-release-draft', 'test/test-gitea-migration-release-draft', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/test-gitea-migration-release-draft', 'http://10.40.8.5:3000/test/test-gitea-migration-release-draft.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(52, 0, 'test', 'testCIservices', 'test/testCIservices', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/testCIservices', 'http://10.40.8.5:3000/test/testCIservices.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(54, 0, 'test', 'testStrangeCommits', 'test/testStrangeCommits', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/testStrangeCommits', 'http://10.40.8.5:3000/test/testStrangeCommits.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(56, 0, 'test', 'vim', 'test/vim', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/vim', 'http://10.40.8.5:3000/test/vim.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(58, 0, 'test', 'ww', 'test/ww', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/ww', 'http://10.40.8.5:3000/test/ww.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(60, 0, 'test', 'x_bows', 'test/x_bows', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/x_bows', 'http://10.40.8.5:3000/test/x_bows.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(35, 0, 'orga', 'oio', 'orga/oio', 'http://10.40.8.5:3000/avatars/93778f25b68b74ce5d69b8f8634bbf36', 'http://10.40.8.5:3000/orga/oio', 'http://10.40.8.5:3000/orga/oio.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(37, 0, 'test', 'pathological', 'test/pathological', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/pathological', 'http://10.40.8.5:3000/test/pathological.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(39, 0, 'test', 'PNGs', 'test/PNGs', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/PNGs', 'http://10.40.8.5:3000/test/PNGs.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(41, 0, 'test', 'pyrocko', 'test/pyrocko', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/pyrocko', 'http://10.40.8.5:3000/test/pyrocko.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(43, 0, 'test', 'reStructuredText_ReST', 'test/reStructuredText_ReST', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/reStructuredText_ReST', 'http://10.40.8.5:3000/test/reStructuredText_ReST.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(45, 0, 'df', 'spam', 'df/spam', 'http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f', 'http://10.40.8.5:3000/df/spam', 'http://10.40.8.5:3000/df/spam.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(47, 0, 'test', 'tea', 'test/tea', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/tea', 'http://10.40.8.5:3000/test/tea.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(49, 0, 'test', 'test-event', 'test/test-event', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/test-event', 'http://10.40.8.5:3000/test/test-event.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(51, 0, 'test', 'testCI', 'test/testCI', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/testCI', 'http://10.40.8.5:3000/test/testCI.git', 'master', '0', 't', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(53, 0, 'hahaO', 'testCIservices', 'hahaO/testCIservices', 'http://10.40.8.5:3000/avatars/2a6eec168901fffe947ddd5a69dbdb82', 'http://10.40.8.5:3000/hahaO/testCIservices', 'http://10.40.8.5:3000/hahaO/testCIservices.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(55, 0, 'CI-Tests', 'version-test', 'CI-Tests/version-test', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/version-test', 'http://10.40.8.5:3000/CI-Tests/version-test.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(57, 0, 'test', 'woodpecker', 'test/woodpecker', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/woodpecker', 'http://10.40.8.5:3000/test/woodpecker.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(59, 0, 'test', 'xss-issue', 'test/xss-issue', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/xss-issue', 'http://10.40.8.5:3000/test/xss-issue.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
-(115, 1, '2', 'testCIservices', '2/testCIservices', 'http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c', 'http://10.40.8.5:3000/2/testCIservices', 'http://10.40.8.5:3000/2/testCIservices.git', 'master', '60', 'f', 'f', 't', 't', 't', 't', 'FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====', 'git', '.drone.yml', 'f', 'public', '0', 't', 't'),
-(105, 1, '2', 'settings', '2/settings', 'http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c', 'http://10.40.8.5:3000/2/settings', 'http://10.40.8.5:3000/2/settings.git', 'master', '60', 'f', 'f', 't', 't', 't', 't', '3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====', 'git', '.drone.yml', 'f', 'public', '1', 't', 't');
+COPY public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_full_name, repo_avatar, repo_link, repo_clone, repo_branch, repo_timeout, repo_private, repo_trusted, repo_allow_pr, repo_allow_push, repo_hash, repo_scm, repo_config_path, repo_gated, repo_visibility, repo_active, forge_remote_id, repo_org_id, cancel_previous_pipeline_events, netrc_only_trusted) FROM stdin;
+115	1	2	testCIservices	2/testCIservices	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/testCIservices	http://10.40.8.5:3000/2/testCIservices.git	master	60	f	f	t	t	FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====	git	.drone.yml	f	public	t	\N	1	\N	t
+105	1	2	settings	2/settings	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/settings	http://10.40.8.5:3000/2/settings.git	master	60	f	f	t	t	3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====	git	.drone.yml	f	public	t	\N	1	\N	t
+\.
 
 
 --
 -- Data for Name: secrets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.secrets (secret_id, secret_repo_id, secret_name, secret_value, secret_images, secret_events, secret_skip_verify, secret_conceal) VALUES
-(1, 105, 'wow', '\x74657374', 'null\n', '["push","tag","deployment","pull_request"]\n', 'f', 'f'),
-(2, 105, 'n', '\x6e', 'null\n', '["deployment"]\n', 'f', 'f'),
-(3, 105, 'abc', '\x656466', 'null\n', '["push"]\n', 'f', 'f'),
-(4, 105, 'quak', '\x66647361', 'null\n', '["pull-request"]\n', 'f', 'f');
+COPY public.secrets (secret_id, secret_repo_id, secret_name, secret_value, secret_images, secret_events, secret_skip_verify, secret_conceal, secret_org_id, secret_plugins_only) FROM stdin;
+1	105	wow	\\x74657374	null\\n	["push","tag","deployment","pull_request"]\\n	f	f	0	\N
+2	105	n	\\x6e	null\\n	["deployment"]\\n	f	f	0	\N
+3	105	abc	\\x656466	null\\n	["push"]\\n	f	f	0	\N
+4	105	quak	\\x66647361	null\\n	["pull-request"]\\n	f	f	0	\N
+\.
 
 
 --
--- Data for Name: senders; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: server_config; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
---- EMPTY
+COPY public.server_config (key, value) FROM stdin;
+signature-private-key	1fe3b71c87d7f89fa878306028cf08d66020ef6cafc2af90d05c40ebd03eee3c93189d2a3c46fe5292afc33e9237615ed595ee3d588dce431d5f6848b6a9bf77
+\.
+
+
+--
+-- Data for Name: steps; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.steps (step_id, step_pipeline_id, step_pid, step_ppid, step_pgid, step_name, step_state, step_error, step_exit_code, step_started, step_stopped, step_machine, step_uuid, step_failure, step_type) FROM stdin;
+2	1	2	1	2	git	success		0	1641630525	1641630527	someHostname	\N	\N	\N
+3	1	3	1	3	Print	skipped		0	0	0		\N	\N	\N
+\.
 
 
 --
 -- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
---- EMPTY
+COPY public.tasks (task_id, task_data, task_labels, task_dependencies, task_run_on, task_dep_status, agent_id) FROM stdin;
+\.
 
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.users (user_id, user_login, user_token, user_secret, user_expiry, user_email, user_avatar, user_active, user_admin, user_hash, user_synced) VALUES
-(1, 'test', 'eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjowLCJleHAiOjE2NDE2MzQxMjcsImlhdCI6MTY0MTYzMDUyN30.Fu0wUP-08NpPjq737y6HOeyKN_-_SE4iOZr5yrH7S8Jrz8nIuNKfU7AvlypeMSJ7wo8e3cSTadbSH1polZuFv-Nb1AqWDDXeuXudm61BkF96sTslbSHd0nF7cOy6hqCfIAfQLQpqZTJZ4E26oOSSJxPfOOntOWhlEejRl5F-flXAoYAQLegHxdn9IfYJeM1eanZqF4k6dT9hthFp9v4fmUjODPPfHip_iS7ckPonP1E4-8KeNkU3O-lIS1fgrsbCDA8531FXIGB0U7cSur7H0picKGL6WSzAErPGntlNlQWYB5JedDtLN9Ionxy1Y9LKQON76XYL4gM1Ji98RCEXggVqd7TW0B1fGV-Jve2hU3fKaDyQywsCJp36mpnVaqb5eiTssncHixAwZE0C4yh_XsTd-WoVhsbqlEuDfPTjrtAK94mSzHJTcO3fbtE9L-MoPevQIPM7Yog0i2Xn1oPUCDXVXsV2yJriBiI_r2xbG0nz5Bwn8KAFZ0dNGJ7T9urqKaKMh9guE4jgYLIpRpod_Fd13_GAK0ebgF2CZJdjJT7eEGhzzcg4uFpFdIXL2kNgVN1D6YLMPw3HhVg7_MIfASbJgpcppFhYa4Fk-OpchL5-e_mMyeWogvaJA2wSpyY1f5zJlBnFuIyk_OdV0TwQ3b_TjutehsiibT9WRpOK8h8', 'eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjoxLCJleHAiOjE2NDQyNTg1MjcsImlhdCI6MTY0MTYzMDUyN30.iVtIGQ6VTgRI8L3xFD_YNvVBGZ6kdFb3ERdyOCIHC_CHhOEpZxVGawMGnNNooqbNdmOqJQ0RLJyiAirEKdxSVrtWvqub6uVMjjpeBylE1sAFymCGNJQf77dKvgPHW3QY5FvOSoOoNcRU2g99Bx8sbZhiI12GnNOB-abazrzICpOUikiTdb2ri3w_TNF2Ibrn-itSa1yuhmTrVpqXt_CT4MEfteiDmgjyqonmk-J_BqbcriF3DKAvrXNK1VKVU7xODcFSIRizlgA2kDmnpMT3Oo-Z1I37TFIGAuDOTgcceOPa7rXg_Mfd_jhL7bSH1BI4RsK0rgde3NaCQlU2n7yVOYGbJCSsSWwSAi-gCjjuTTPnQWe3ep3IWrB73_7tKG2_x7YxZ1nQCSFKouA5rZH4g6yoV8wdJh8_bX2Z64-MJBUl8E7JGM2urA5GY1abo0GZ6ZuQi2JS5WnG1iTL9pFlmOoTpN1DKtNE2PUE90GJwi0qGeACif9uJBXQPDAgKk7fbUxKYQobc6ko2CJ1isoRjbi8-GsJ9lhw7tXno5zfAvN3eps9SYgmIRNh0t_vx-LMBezSTSEcTJpv-7Ap6F10GD3E9KmGcYrOMvdtaYgkWFXO6rh49uElUVid-C1tNVpKjnj7ewUosQo9MHSn-d5l1df0rJSueXcaUMSqRSrEzqQ', '1641634127', 'test@test.test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'f', 'f', 'OBW2OF5QH3NMCYJ44VU5B5YEQ5LHZLTFW2FDSAJ4R4JVZ4HWSNVQ====', '1641630445');
+COPY public.users (user_id, user_login, user_token, user_secret, user_expiry, user_email, user_avatar, user_admin, user_hash, forge_remote_id) FROM stdin;
+1	test	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjowLCJleHAiOjE2NDE2MzQxMjcsImlhdCI6MTY0MTYzMDUyN30.Fu0wUP-08NpPjq737y6HOeyKN_-_SE4iOZr5yrH7S8Jrz8nIuNKfU7AvlypeMSJ7wo8e3cSTadbSH1polZuFv-Nb1AqWDDXeuXudm61BkF96sTslbSHd0nF7cOy6hqCfIAfQLQpqZTJZ4E26oOSSJxPfOOntOWhlEejRl5F-flXAoYAQLegHxdn9IfYJeM1eanZqF4k6dT9hthFp9v4fmUjODPPfHip_iS7ckPonP1E4-8KeNkU3O-lIS1fgrsbCDA8531FXIGB0U7cSur7H0picKGL6WSzAErPGntlNlQWYB5JedDtLN9Ionxy1Y9LKQON76XYL4gM1Ji98RCEXggVqd7TW0B1fGV-Jve2hU3fKaDyQywsCJp36mpnVaqb5eiTssncHixAwZE0C4yh_XsTd-WoVhsbqlEuDfPTjrtAK94mSzHJTcO3fbtE9L-MoPevQIPM7Yog0i2Xn1oPUCDXVXsV2yJriBiI_r2xbG0nz5Bwn8KAFZ0dNGJ7T9urqKaKMh9guE4jgYLIpRpod_Fd13_GAK0ebgF2CZJdjJT7eEGhzzcg4uFpFdIXL2kNgVN1D6YLMPw3HhVg7_MIfASbJgpcppFhYa4Fk-OpchL5-e_mMyeWogvaJA2wSpyY1f5zJlBnFuIyk_OdV0TwQ3b_TjutehsiibT9WRpOK8h8	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjoxLCJleHAiOjE2NDQyNTg1MjcsImlhdCI6MTY0MTYzMDUyN30.iVtIGQ6VTgRI8L3xFD_YNvVBGZ6kdFb3ERdyOCIHC_CHhOEpZxVGawMGnNNooqbNdmOqJQ0RLJyiAirEKdxSVrtWvqub6uVMjjpeBylE1sAFymCGNJQf77dKvgPHW3QY5FvOSoOoNcRU2g99Bx8sbZhiI12GnNOB-abazrzICpOUikiTdb2ri3w_TNF2Ibrn-itSa1yuhmTrVpqXt_CT4MEfteiDmgjyqonmk-J_BqbcriF3DKAvrXNK1VKVU7xODcFSIRizlgA2kDmnpMT3Oo-Z1I37TFIGAuDOTgcceOPa7rXg_Mfd_jhL7bSH1BI4RsK0rgde3NaCQlU2n7yVOYGbJCSsSWwSAi-gCjjuTTPnQWe3ep3IWrB73_7tKG2_x7YxZ1nQCSFKouA5rZH4g6yoV8wdJh8_bX2Z64-MJBUl8E7JGM2urA5GY1abo0GZ6ZuQi2JS5WnG1iTL9pFlmOoTpN1DKtNE2PUE90GJwi0qGeACif9uJBXQPDAgKk7fbUxKYQobc6ko2CJ1isoRjbi8-GsJ9lhw7tXno5zfAvN3eps9SYgmIRNh0t_vx-LMBezSTSEcTJpv-7Ap6F10GD3E9KmGcYrOMvdtaYgkWFXO6rh49uElUVid-C1tNVpKjnj7ewUosQo9MHSn-d5l1df0rJSueXcaUMSqRSrEzqQ	1641634127	test@test.test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	f	OBW2OF5QH3NMCYJ44VU5B5YEQ5LHZLTFW2FDSAJ4R4JVZ4HWSNVQ====	\N
+\.
 
 
 --
--- Name: agents_agent_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Data for Name: workflows; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.agents_agent_id_seq', 1, false);
+COPY public.workflows (workflow_id, workflow_pipeline_id, workflow_pid, workflow_name, workflow_state, workflow_error, workflow_started, workflow_stopped, workflow_agent_id, workflow_platform, workflow_environ) FROM stdin;
+1	1	1	drone	failure	Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown	1641630525	1641630527	0		{}
+\.
+
+
+--
+-- Name: agents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.agents_id_seq', 1, false);
 
 
 --
@@ -939,17 +1057,24 @@ SELECT pg_catalog.setval('public.config_config_id_seq', 1, true);
 
 
 --
--- Name: files_file_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: crons_i_d_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.files_file_id_seq', 1, false);
+SELECT pg_catalog.setval('public.crons_i_d_seq', 1, false);
 
 
 --
--- Name: logs_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: log_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.logs_log_id_seq', 1, false);
+SELECT pg_catalog.setval('public.log_entries_id_seq', 1, false);
+
+
+--
+-- Name: orgs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.orgs_id_seq', 1, true);
 
 
 --
@@ -957,6 +1082,13 @@ SELECT pg_catalog.setval('public.logs_log_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.procs_proc_id_seq', 3, true);
+
+
+--
+-- Name: redirections_redirection_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.redirections_redirection_id_seq', 1, false);
 
 
 --
@@ -981,13 +1113,6 @@ SELECT pg_catalog.setval('public.secrets_secret_id_seq', 4, true);
 
 
 --
--- Name: senders_sender_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.senders_sender_id_seq', 1, false);
-
-
---
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -995,11 +1120,10 @@ SELECT pg_catalog.setval('public.users_user_id_seq', 1, true);
 
 
 --
--- Name: agents agents_agent_addr_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: workflows_workflow_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.agents
-    ADD CONSTRAINT agents_agent_addr_key UNIQUE (agent_addr);
+SELECT pg_catalog.setval('public.workflows_workflow_id_seq', 1, true);
 
 
 --
@@ -1007,31 +1131,23 @@ ALTER TABLE ONLY public.agents
 --
 
 ALTER TABLE ONLY public.agents
-    ADD CONSTRAINT agents_pkey PRIMARY KEY (agent_id);
+    ADD CONSTRAINT agents_pkey PRIMARY KEY (id);
 
 
 --
--- Name: build_config build_config_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: pipelines builds_build_number_build_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.build_config
-    ADD CONSTRAINT build_config_pkey PRIMARY KEY (config_id, build_id);
-
-
---
--- Name: builds builds_build_number_build_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.builds
-    ADD CONSTRAINT builds_build_number_build_repo_id_key UNIQUE (build_number, build_repo_id);
+ALTER TABLE ONLY public.pipelines
+    ADD CONSTRAINT builds_build_number_build_repo_id_key UNIQUE (pipeline_number, pipeline_repo_id);
 
 
 --
--- Name: builds builds_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: pipelines builds_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.builds
-    ADD CONSTRAINT builds_pkey PRIMARY KEY (build_id);
+ALTER TABLE ONLY public.pipelines
+    ADD CONSTRAINT builds_pkey PRIMARY KEY (pipeline_id);
 
 
 --
@@ -1051,35 +1167,19 @@ ALTER TABLE ONLY public.config
 
 
 --
--- Name: files files_file_proc_id_file_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: crons crons_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.files
-    ADD CONSTRAINT files_file_proc_id_file_name_key UNIQUE (file_proc_id, file_name);
-
-
---
--- Name: files files_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.files
-    ADD CONSTRAINT files_pkey PRIMARY KEY (file_id);
+ALTER TABLE ONLY public.crons
+    ADD CONSTRAINT crons_pkey PRIMARY KEY (i_d);
 
 
 --
--- Name: logs logs_log_job_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: log_entries log_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.logs
-    ADD CONSTRAINT logs_log_job_id_key UNIQUE (log_job_id);
-
-
---
--- Name: logs logs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.logs
-    ADD CONSTRAINT logs_pkey PRIMARY KEY (log_id);
+ALTER TABLE ONLY public.log_entries
+    ADD CONSTRAINT log_entries_pkey PRIMARY KEY (id);
 
 
 --
@@ -1091,6 +1191,14 @@ ALTER TABLE ONLY public.migrations
 
 
 --
+-- Name: orgs orgs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.orgs
+    ADD CONSTRAINT orgs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: perms perms_perm_user_id_perm_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1099,19 +1207,27 @@ ALTER TABLE ONLY public.perms
 
 
 --
--- Name: procs procs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: steps procs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.procs
-    ADD CONSTRAINT procs_pkey PRIMARY KEY (proc_id);
+ALTER TABLE ONLY public.steps
+    ADD CONSTRAINT procs_pkey PRIMARY KEY (step_id);
 
 
 --
--- Name: procs procs_proc_build_id_proc_pid_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: steps procs_proc_build_id_proc_pid_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.procs
-    ADD CONSTRAINT procs_proc_build_id_proc_pid_key UNIQUE (proc_build_id, proc_pid);
+ALTER TABLE ONLY public.steps
+    ADD CONSTRAINT procs_proc_build_id_proc_pid_key UNIQUE (step_pipeline_id, step_pid);
+
+
+--
+-- Name: redirections redirections_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.redirections
+    ADD CONSTRAINT redirections_pkey PRIMARY KEY (redirection_id);
 
 
 --
@@ -1138,7 +1254,6 @@ ALTER TABLE ONLY public.repos
     ADD CONSTRAINT repos_pkey PRIMARY KEY (repo_id);
 
 
-
 --
 -- Name: secrets secrets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -1148,19 +1263,11 @@ ALTER TABLE ONLY public.secrets
 
 
 --
--- Name: senders senders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: server_config server_config_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.senders
-    ADD CONSTRAINT senders_pkey PRIMARY KEY (sender_id);
-
-
---
--- Name: senders senders_sender_repo_id_sender_login_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.senders
-    ADD CONSTRAINT senders_sender_repo_id_sender_login_key UNIQUE (sender_repo_id, sender_login);
+ALTER TABLE ONLY public.server_config
+    ADD CONSTRAINT server_config_pkey PRIMARY KEY (key);
 
 
 --
@@ -1188,92 +1295,205 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: file_build_ix; Type: INDEX; Schema: public; Owner: postgres
+-- Name: workflows workflows_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-CREATE INDEX file_build_ix ON public.files USING btree (file_build_id);
-
-
---
--- Name: file_proc_ix; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX file_proc_ix ON public.files USING btree (file_proc_id);
+ALTER TABLE ONLY public.workflows
+    ADD CONSTRAINT workflows_pkey PRIMARY KEY (workflow_id);
 
 
 --
--- Name: ix_build_author; Type: INDEX; Schema: public; Owner: postgres
+-- Name: IDX_crons_creator_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX ix_build_author ON public.builds USING btree (build_author);
-
-
---
--- Name: ix_build_repo; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX ix_build_repo ON public.builds USING btree (build_repo_id);
+CREATE INDEX "IDX_crons_creator_id" ON public.crons USING btree (creator_id);
 
 
 --
--- Name: ix_perms_repo; Type: INDEX; Schema: public; Owner: postgres
+-- Name: IDX_crons_name; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX ix_perms_repo ON public.perms USING btree (perm_repo_id);
-
-
---
--- Name: ix_perms_user; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX ix_perms_user ON public.perms USING btree (perm_user_id);
+CREATE INDEX "IDX_crons_name" ON public.crons USING btree (name);
 
 
 --
--- Name: ix_registry_repo; Type: INDEX; Schema: public; Owner: postgres
+-- Name: IDX_crons_repo_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX ix_registry_repo ON public.registry USING btree (registry_repo_id);
-
-
---
--- Name: ix_secrets_repo; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX ix_secrets_repo ON public.secrets USING btree (secret_repo_id);
+CREATE INDEX "IDX_crons_repo_id" ON public.crons USING btree (repo_id);
 
 
 --
--- Name: proc_build_ix; Type: INDEX; Schema: public; Owner: postgres
+-- Name: IDX_log_entries_step_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX proc_build_ix ON public.procs USING btree (proc_build_id);
-
-
---
--- Name: sender_repo_ix; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX sender_repo_ix ON public.senders USING btree (sender_repo_id);
+CREATE INDEX "IDX_log_entries_step_id" ON public.log_entries USING btree (step_id);
 
 
 --
--- Name: build_config build_config_build_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: IDX_perms_perm_repo_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.build_config
-    ADD CONSTRAINT build_config_build_id_fkey FOREIGN KEY (build_id) REFERENCES public.builds(build_id);
+CREATE INDEX "IDX_perms_perm_repo_id" ON public.perms USING btree (perm_repo_id);
 
 
 --
--- Name: build_config build_config_config_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: IDX_perms_perm_user_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.build_config
-    ADD CONSTRAINT build_config_config_id_fkey FOREIGN KEY (config_id) REFERENCES public.config(config_id);
+CREATE INDEX "IDX_perms_perm_user_id" ON public.perms USING btree (perm_user_id);
+
+
+--
+-- Name: IDX_pipelines_pipeline_author; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_pipelines_pipeline_author" ON public.pipelines USING btree (pipeline_author);
+
+
+--
+-- Name: IDX_pipelines_pipeline_repo_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_pipelines_pipeline_repo_id" ON public.pipelines USING btree (pipeline_repo_id);
+
+
+--
+-- Name: IDX_pipelines_pipeline_status; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_pipelines_pipeline_status" ON public.pipelines USING btree (pipeline_status);
+
+
+--
+-- Name: IDX_registry_registry_addr; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_registry_registry_addr" ON public.registry USING btree (registry_addr);
+
+
+--
+-- Name: IDX_registry_registry_repo_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_registry_registry_repo_id" ON public.registry USING btree (registry_repo_id);
+
+
+--
+-- Name: IDX_secrets_secret_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_secrets_secret_name" ON public.secrets USING btree (secret_name);
+
+
+--
+-- Name: IDX_secrets_secret_org_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_secrets_secret_org_id" ON public.secrets USING btree (secret_org_id);
+
+
+--
+-- Name: IDX_secrets_secret_repo_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_secrets_secret_repo_id" ON public.secrets USING btree (secret_repo_id);
+
+
+--
+-- Name: IDX_steps_step_pipeline_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_steps_step_pipeline_id" ON public.steps USING btree (step_pipeline_id);
+
+
+--
+-- Name: IDX_steps_step_uuid; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_steps_step_uuid" ON public.steps USING btree (step_uuid);
+
+
+--
+-- Name: IDX_workflows_workflow_pipeline_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "IDX_workflows_workflow_pipeline_id" ON public.workflows USING btree (workflow_pipeline_id);
+
+
+--
+-- Name: UQE_crons_s; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_crons_s" ON public.crons USING btree (name, repo_id);
+
+
+--
+-- Name: UQE_orgs_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_orgs_name" ON public.orgs USING btree (name);
+
+
+--
+-- Name: UQE_pipeline_config_s; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_pipeline_config_s" ON public.pipeline_config USING btree (config_id, pipeline_id);
+
+
+--
+-- Name: UQE_redirections_repo_full_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_redirections_repo_full_name" ON public.redirections USING btree (repo_full_name);
+
+
+--
+-- Name: UQE_repos_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_repos_name" ON public.repos USING btree (repo_owner, repo_name);
+
+
+--
+-- Name: UQE_repos_repo_full_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_repos_repo_full_name" ON public.repos USING btree (repo_full_name);
+
+
+--
+-- Name: UQE_secrets_s; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_secrets_s" ON public.secrets USING btree (secret_org_id, secret_repo_id, secret_name);
+
+
+--
+-- Name: UQE_tasks_task_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_tasks_task_id" ON public.tasks USING btree (task_id);
+
+
+--
+-- Name: UQE_users_user_hash; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_users_user_hash" ON public.users USING btree (user_hash);
+
+
+--
+-- Name: UQE_workflows_s; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_workflows_s" ON public.workflows USING btree (workflow_pipeline_id, workflow_pid);
 
 
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict AfzhKZb1LKPKeKR4iwdIxhKV249snggZoBlLERloec1idnISPdtsR5e5dI3aVai
 
