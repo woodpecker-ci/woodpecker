@@ -8,7 +8,7 @@
     "LICENSE",
     "node_modules",
     "server/store/datastore/migration/test-files/sqlite.db",
-    "server/store/datastore/migration/test-files/postgres.sql"
+    "server/store/datastore/migration/test-files/postgres.sql",
     "server/store/datastore/feed.go",
     "cmd/server/openapi/docs.go",
     "_test.go",
