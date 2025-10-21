@@ -52,6 +52,7 @@ import useRepos from '~/compositions/useRepos';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import { useRepoStore } from '~/store/repos';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 
 const repoStore = useRepoStore();
 
