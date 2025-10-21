@@ -115,11 +115,14 @@ func cleanPostgresDB(t *testing.T, config string) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	_, err = db.Exec(`CREATE DATABASE tmp;
-\c tmp
-DROP DATABASE postgres
-CREATE DATABASE postgres
-\c postgres`)
+	// Drop and recreate the public schema
+	// This removes all tables, indexes, constraints, sequences, etc.
+	_, err = db.Exec(`
+		DROP SCHEMA public CASCADE;
+		CREATE SCHEMA public;
+		GRANT ALL ON SCHEMA public TO postgres;
+		GRANT ALL ON SCHEMA public TO public;
+	`)
 	require.NoError(t, err)
 }
 
