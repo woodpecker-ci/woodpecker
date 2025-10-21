@@ -177,6 +177,25 @@ func GetRepos(c *gin.Context) {
 	c.JSON(http.StatusOK, repos)
 }
 
+func RefreshRepos(c *gin.Context) {
+	_store := store.FromContext(c)
+	user := session.User(c)
+
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	if err := updateRepoPermissions(c, user, _store, _forge); err != nil {
+		log.Error().Err(err).Msgf("Can't update repo permissions for user %s in forge %s", user.Login, _forge.Name())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, "Ok")
+}
+
 // PostToken
 //
 //	@Summary	Return the token of the current user as string

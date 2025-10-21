@@ -46,6 +46,7 @@
   <SvgIcon v-else-if="name === 'alert'" :path="mdiAlertCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'refresh'" :path="mdiPlus" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1.3rem" />
   <SvgIcon v-else-if="name === 'heal'" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
@@ -171,6 +172,7 @@ import {
   mdiTrashCanOutline,
   mdiTrayFull,
   mdiWrenchCogOutline,
+  mdiRefresh,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 

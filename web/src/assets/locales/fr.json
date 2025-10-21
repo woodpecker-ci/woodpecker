@@ -191,6 +191,7 @@
     "repo": {
         "activity": "Activité",
         "add": "Ajouter un dépôt",
+        "refresh": "Actualiser la liste dépots",
         "branches": "Branches",
         "deploy_pipeline": {
             "enter_target": "Environnement de 'déploiement' ciblé",

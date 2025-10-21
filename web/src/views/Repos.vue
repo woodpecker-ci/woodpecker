@@ -6,6 +6,7 @@
 
     <template #headerActions>
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
+      <Button start-icon="refresh" end-icon="refresh" :is-loading="isRefreshing" :text="$t('repo.refresh')" @click="refreshRepositories" />
     </template>
 
     <Transition name="fade" mode="out-in">
@@ -62,6 +63,12 @@ const reposLastAccess = computed(() => sortReposByLastAccess(repos.value || []).
 const search = ref('');
 const { searchedRepos } = useRepoSearch(repos, search);
 const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
+
+const refreshRepositories = {doSubmit: deleteRegistry, isLoading: isRefreshing } = useAsyncAction(async () => {
+    await repoStore.refreshRepos();
+    await repoStore.loadRepos();
+  }
+)
 
 onMounted(async () => {
   await repoStore.loadRepos();
