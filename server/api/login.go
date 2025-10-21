@@ -15,6 +15,7 @@
 package api
 
 import (
+	"context"
 	"encoding/base32"
 	"errors"
 	"fmt"
@@ -299,8 +300,9 @@ func HandleAuth(c *gin.Context) {
 		noStoredRepositories = len(repos) == 0
 	}
 
-	repoUpdateFunc := func() error {
+	repoUpdateFunc := func(ctx context.Context) error {
 		start := time.Now()
+		c.Request = c.Request.WithContext(ctx)
 		err = updateRepoPermissions(c, user, _store, _forge)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
@@ -309,12 +311,12 @@ func HandleAuth(c *gin.Context) {
 		return err
 	}
 	if !server.Config.Server.AsyncRepositoryUpdate || noStoredRepositories {
-		if err := repoUpdateFunc(); err != nil {
+		if err := repoUpdateFunc(c.Request.Context()); err != nil {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
 	} else {
-		go repoUpdateFunc()
+		go repoUpdateFunc(context.Background())
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
