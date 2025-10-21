@@ -6,7 +6,7 @@
 
     <template #headerActions>
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
-      <Button start-icon="refresh" end-icon="refresh" :is-loading="isRefreshing" :text="$t('repo.refresh')" @click="refreshRepositories" />
+      <Button start-icon="refresh" :is-loading="isRefreshing" :text="$t('repo.refresh')" @click="refreshRepositories" />
     </template>
 
     <Transition name="fade" mode="out-in">
