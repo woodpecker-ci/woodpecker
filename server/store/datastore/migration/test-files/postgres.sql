@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict AfzhKZb1LKPKeKR4iwdIxhKV249snggZoBlLERloec1idnISPdtsR5e5dI3aVai
+\restrict jfY4LTom39twz6Gcmw9Je24Z5WfG13hXALefGXbMfzVdfoHA6q0IcaOchrQfKXA
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6
@@ -91,12 +91,9 @@ CREATE TABLE public.pipelines (
     pipeline_author character varying(500),
     pipeline_avatar character varying(1000),
     pipeline_email character varying(500),
-    pipeline_link character varying(1000),
+    pipeline_forge_url character varying(1000),
     pipeline_deploy character varying(500),
-    pipeline_signed boolean,
-    pipeline_verified boolean,
     pipeline_parent integer,
-    pipeline_error text,
     pipeline_reviewer character varying(250),
     pipeline_reviewed integer,
     pipeline_sender character varying(250),
@@ -104,7 +101,8 @@ CREATE TABLE public.pipelines (
     changed_files text,
     updated bigint DEFAULT 0 NOT NULL,
     additional_variables json,
-    pr_labels json
+    pr_labels json,
+    pipeline_errors json
 );
 
 
@@ -331,7 +329,6 @@ CREATE TABLE public.steps (
     step_pipeline_id integer,
     step_pid integer,
     step_ppid integer,
-    step_pgid integer,
     step_name character varying(250),
     step_state character varying(250),
     step_error text,
@@ -453,7 +450,7 @@ CREATE TABLE public.repos (
     repo_name character varying(250),
     repo_full_name character varying(250),
     repo_avatar character varying(500),
-    repo_link character varying(1000),
+    repo_forge_url character varying(1000),
     repo_clone character varying(1000),
     repo_branch character varying(500),
     repo_timeout integer,
@@ -470,7 +467,8 @@ CREATE TABLE public.repos (
     forge_remote_id character varying(255),
     repo_org_id bigint,
     cancel_previous_pipeline_events json,
-    netrc_only_trusted boolean DEFAULT true NOT NULL
+    netrc_only_trusted boolean DEFAULT true NOT NULL,
+    repo_clone_ssh character varying(1000)
 );
 
 
@@ -509,10 +507,7 @@ CREATE TABLE public.secrets (
     secret_value bytea,
     secret_images character varying(2000),
     secret_events character varying(2000),
-    secret_skip_verify boolean,
-    secret_conceal boolean,
-    secret_org_id bigint DEFAULT 0 NOT NULL,
-    secret_plugins_only boolean
+    secret_org_id bigint DEFAULT 0 NOT NULL
 );
 
 
@@ -583,7 +578,8 @@ CREATE TABLE public.users (
     user_avatar character varying(500),
     user_admin boolean,
     user_hash character varying(500),
-    forge_remote_id character varying(255)
+    forge_remote_id character varying(255),
+    user_org_id bigint
 );
 
 
@@ -626,7 +622,8 @@ CREATE TABLE public.workflows (
     workflow_stopped bigint,
     workflow_agent_id bigint,
     workflow_platform character varying(255),
-    workflow_environ json
+    workflow_environ json,
+    workflow_axis_id integer
 );
 
 
@@ -852,6 +849,13 @@ init-log_entries
 migrate-logs-to-log_entries
 parent-steps-to-workflows
 add-orgs
+add-org-id
+alter-table-tasks-update-type-of-task-data
+alter-table-config-update-type-of-config-data
+remove-plugin-only-option-from-secrets-table
+drop-old-col
+convert-to-new-pipeline-error-format
+rename-link-to-url
 \.
 
 
@@ -861,6 +865,7 @@ add-orgs
 
 COPY public.orgs (id, name, is_user, private) FROM stdin;
 1	2	f	f
+2	test	t	f
 \.
 
 
@@ -947,8 +952,8 @@ COPY public.pipeline_config (config_id, pipeline_id) FROM stdin;
 -- Data for Name: pipelines; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.pipelines (pipeline_id, pipeline_repo_id, pipeline_number, pipeline_event, pipeline_status, pipeline_enqueued, pipeline_created, pipeline_started, pipeline_finished, pipeline_commit, pipeline_branch, pipeline_ref, pipeline_refspec, pipeline_clone_url, pipeline_title, pipeline_message, pipeline_timestamp, pipeline_author, pipeline_avatar, pipeline_email, pipeline_link, pipeline_deploy, pipeline_signed, pipeline_verified, pipeline_parent, pipeline_error, pipeline_reviewer, pipeline_reviewed, pipeline_sender, pipeline_config_id, changed_files, updated, additional_variables, pr_labels) FROM stdin;
-1	105	1	push	failure	1641630525	1641630525	1641630525	1641630527	24bf205107cea48b92bc6444e18e40d21733a594	master	refs/heads/master				„.drone.yml“ hinzufügen\\n	1641630525	test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	test@test.test	http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594		f	t	0			0	test	0	[".drone.yml"]\\n	0	\N	\N
+COPY public.pipelines (pipeline_id, pipeline_repo_id, pipeline_number, pipeline_event, pipeline_status, pipeline_enqueued, pipeline_created, pipeline_started, pipeline_finished, pipeline_commit, pipeline_branch, pipeline_ref, pipeline_refspec, pipeline_clone_url, pipeline_title, pipeline_message, pipeline_timestamp, pipeline_author, pipeline_avatar, pipeline_email, pipeline_forge_url, pipeline_deploy, pipeline_parent, pipeline_reviewer, pipeline_reviewed, pipeline_sender, pipeline_config_id, changed_files, updated, additional_variables, pr_labels, pipeline_errors) FROM stdin;
+1	105	1	push	failure	1641630525	1641630525	1641630525	1641630527	24bf205107cea48b92bc6444e18e40d21733a594	master	refs/heads/master				„.drone.yml“ hinzufügen\\n	1641630525	test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	test@test.test	http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594		0		0	test	0	[".drone.yml"]\\n	0	\N	\N	\N
 \.
 
 
@@ -972,9 +977,9 @@ COPY public.registry (registry_id, registry_repo_id, registry_addr, registry_ema
 -- Data for Name: repos; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_full_name, repo_avatar, repo_link, repo_clone, repo_branch, repo_timeout, repo_private, repo_trusted, repo_allow_pr, repo_allow_push, repo_hash, repo_scm, repo_config_path, repo_gated, repo_visibility, repo_active, forge_remote_id, repo_org_id, cancel_previous_pipeline_events, netrc_only_trusted) FROM stdin;
-115	1	2	testCIservices	2/testCIservices	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/testCIservices	http://10.40.8.5:3000/2/testCIservices.git	master	60	f	f	t	t	FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====	git	.drone.yml	f	public	t	\N	1	\N	t
-105	1	2	settings	2/settings	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/settings	http://10.40.8.5:3000/2/settings.git	master	60	f	f	t	t	3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====	git	.drone.yml	f	public	t	\N	1	\N	t
+COPY public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_full_name, repo_avatar, repo_forge_url, repo_clone, repo_branch, repo_timeout, repo_private, repo_trusted, repo_allow_pr, repo_allow_push, repo_hash, repo_scm, repo_config_path, repo_gated, repo_visibility, repo_active, forge_remote_id, repo_org_id, cancel_previous_pipeline_events, netrc_only_trusted, repo_clone_ssh) FROM stdin;
+115	1	2	testCIservices	2/testCIservices	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/testCIservices	http://10.40.8.5:3000/2/testCIservices.git	master	60	f	f	t	t	FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====	git	.drone.yml	f	public	t	\N	1	\N	t	\N
+105	1	2	settings	2/settings	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/settings	http://10.40.8.5:3000/2/settings.git	master	60	f	f	t	t	3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====	git	.drone.yml	f	public	t	\N	1	\N	t	\N
 \.
 
 
@@ -982,11 +987,11 @@ COPY public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_full_name,
 -- Data for Name: secrets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.secrets (secret_id, secret_repo_id, secret_name, secret_value, secret_images, secret_events, secret_skip_verify, secret_conceal, secret_org_id, secret_plugins_only) FROM stdin;
-1	105	wow	\\x74657374	null\\n	["push","tag","deployment","pull_request"]\\n	f	f	0	\N
-2	105	n	\\x6e	null\\n	["deployment"]\\n	f	f	0	\N
-3	105	abc	\\x656466	null\\n	["push"]\\n	f	f	0	\N
-4	105	quak	\\x66647361	null\\n	["pull-request"]\\n	f	f	0	\N
+COPY public.secrets (secret_id, secret_repo_id, secret_name, secret_value, secret_images, secret_events, secret_org_id) FROM stdin;
+1	105	wow	\\x74657374	null\\n	["push","tag","deployment","pull_request"]\\n	0
+2	105	n	\\x6e	null\\n	["deployment"]\\n	0
+3	105	abc	\\x656466	null\\n	["push"]\\n	0
+4	105	quak	\\x66647361	null\\n	["pull-request"]\\n	0
 \.
 
 
@@ -1003,9 +1008,9 @@ signature-private-key	1fe3b71c87d7f89fa878306028cf08d66020ef6cafc2af90d05c40ebd0
 -- Data for Name: steps; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.steps (step_id, step_pipeline_id, step_pid, step_ppid, step_pgid, step_name, step_state, step_error, step_exit_code, step_started, step_stopped, step_machine, step_uuid, step_failure, step_type) FROM stdin;
-2	1	2	1	2	git	success		0	1641630525	1641630527	someHostname	\N	\N	\N
-3	1	3	1	3	Print	skipped		0	0	0		\N	\N	\N
+COPY public.steps (step_id, step_pipeline_id, step_pid, step_ppid, step_name, step_state, step_error, step_exit_code, step_started, step_stopped, step_machine, step_uuid, step_failure, step_type) FROM stdin;
+2	1	2	1	git	success		0	1641630525	1641630527	someHostname	\N	\N	\N
+3	1	3	1	Print	skipped		0	0	0		\N	\N	\N
 \.
 
 
@@ -1021,8 +1026,8 @@ COPY public.tasks (task_id, task_data, task_labels, task_dependencies, task_run_
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (user_id, user_login, user_token, user_secret, user_expiry, user_email, user_avatar, user_admin, user_hash, forge_remote_id) FROM stdin;
-1	test	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjowLCJleHAiOjE2NDE2MzQxMjcsImlhdCI6MTY0MTYzMDUyN30.Fu0wUP-08NpPjq737y6HOeyKN_-_SE4iOZr5yrH7S8Jrz8nIuNKfU7AvlypeMSJ7wo8e3cSTadbSH1polZuFv-Nb1AqWDDXeuXudm61BkF96sTslbSHd0nF7cOy6hqCfIAfQLQpqZTJZ4E26oOSSJxPfOOntOWhlEejRl5F-flXAoYAQLegHxdn9IfYJeM1eanZqF4k6dT9hthFp9v4fmUjODPPfHip_iS7ckPonP1E4-8KeNkU3O-lIS1fgrsbCDA8531FXIGB0U7cSur7H0picKGL6WSzAErPGntlNlQWYB5JedDtLN9Ionxy1Y9LKQON76XYL4gM1Ji98RCEXggVqd7TW0B1fGV-Jve2hU3fKaDyQywsCJp36mpnVaqb5eiTssncHixAwZE0C4yh_XsTd-WoVhsbqlEuDfPTjrtAK94mSzHJTcO3fbtE9L-MoPevQIPM7Yog0i2Xn1oPUCDXVXsV2yJriBiI_r2xbG0nz5Bwn8KAFZ0dNGJ7T9urqKaKMh9guE4jgYLIpRpod_Fd13_GAK0ebgF2CZJdjJT7eEGhzzcg4uFpFdIXL2kNgVN1D6YLMPw3HhVg7_MIfASbJgpcppFhYa4Fk-OpchL5-e_mMyeWogvaJA2wSpyY1f5zJlBnFuIyk_OdV0TwQ3b_TjutehsiibT9WRpOK8h8	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjoxLCJleHAiOjE2NDQyNTg1MjcsImlhdCI6MTY0MTYzMDUyN30.iVtIGQ6VTgRI8L3xFD_YNvVBGZ6kdFb3ERdyOCIHC_CHhOEpZxVGawMGnNNooqbNdmOqJQ0RLJyiAirEKdxSVrtWvqub6uVMjjpeBylE1sAFymCGNJQf77dKvgPHW3QY5FvOSoOoNcRU2g99Bx8sbZhiI12GnNOB-abazrzICpOUikiTdb2ri3w_TNF2Ibrn-itSa1yuhmTrVpqXt_CT4MEfteiDmgjyqonmk-J_BqbcriF3DKAvrXNK1VKVU7xODcFSIRizlgA2kDmnpMT3Oo-Z1I37TFIGAuDOTgcceOPa7rXg_Mfd_jhL7bSH1BI4RsK0rgde3NaCQlU2n7yVOYGbJCSsSWwSAi-gCjjuTTPnQWe3ep3IWrB73_7tKG2_x7YxZ1nQCSFKouA5rZH4g6yoV8wdJh8_bX2Z64-MJBUl8E7JGM2urA5GY1abo0GZ6ZuQi2JS5WnG1iTL9pFlmOoTpN1DKtNE2PUE90GJwi0qGeACif9uJBXQPDAgKk7fbUxKYQobc6ko2CJ1isoRjbi8-GsJ9lhw7tXno5zfAvN3eps9SYgmIRNh0t_vx-LMBezSTSEcTJpv-7Ap6F10GD3E9KmGcYrOMvdtaYgkWFXO6rh49uElUVid-C1tNVpKjnj7ewUosQo9MHSn-d5l1df0rJSueXcaUMSqRSrEzqQ	1641634127	test@test.test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	f	OBW2OF5QH3NMCYJ44VU5B5YEQ5LHZLTFW2FDSAJ4R4JVZ4HWSNVQ====	\N
+COPY public.users (user_id, user_login, user_token, user_secret, user_expiry, user_email, user_avatar, user_admin, user_hash, forge_remote_id, user_org_id) FROM stdin;
+1	test	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjowLCJleHAiOjE2NDE2MzQxMjcsImlhdCI6MTY0MTYzMDUyN30.Fu0wUP-08NpPjq737y6HOeyKN_-_SE4iOZr5yrH7S8Jrz8nIuNKfU7AvlypeMSJ7wo8e3cSTadbSH1polZuFv-Nb1AqWDDXeuXudm61BkF96sTslbSHd0nF7cOy6hqCfIAfQLQpqZTJZ4E26oOSSJxPfOOntOWhlEejRl5F-flXAoYAQLegHxdn9IfYJeM1eanZqF4k6dT9hthFp9v4fmUjODPPfHip_iS7ckPonP1E4-8KeNkU3O-lIS1fgrsbCDA8531FXIGB0U7cSur7H0picKGL6WSzAErPGntlNlQWYB5JedDtLN9Ionxy1Y9LKQON76XYL4gM1Ji98RCEXggVqd7TW0B1fGV-Jve2hU3fKaDyQywsCJp36mpnVaqb5eiTssncHixAwZE0C4yh_XsTd-WoVhsbqlEuDfPTjrtAK94mSzHJTcO3fbtE9L-MoPevQIPM7Yog0i2Xn1oPUCDXVXsV2yJriBiI_r2xbG0nz5Bwn8KAFZ0dNGJ7T9urqKaKMh9guE4jgYLIpRpod_Fd13_GAK0ebgF2CZJdjJT7eEGhzzcg4uFpFdIXL2kNgVN1D6YLMPw3HhVg7_MIfASbJgpcppFhYa4Fk-OpchL5-e_mMyeWogvaJA2wSpyY1f5zJlBnFuIyk_OdV0TwQ3b_TjutehsiibT9WRpOK8h8	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjoxLCJleHAiOjE2NDQyNTg1MjcsImlhdCI6MTY0MTYzMDUyN30.iVtIGQ6VTgRI8L3xFD_YNvVBGZ6kdFb3ERdyOCIHC_CHhOEpZxVGawMGnNNooqbNdmOqJQ0RLJyiAirEKdxSVrtWvqub6uVMjjpeBylE1sAFymCGNJQf77dKvgPHW3QY5FvOSoOoNcRU2g99Bx8sbZhiI12GnNOB-abazrzICpOUikiTdb2ri3w_TNF2Ibrn-itSa1yuhmTrVpqXt_CT4MEfteiDmgjyqonmk-J_BqbcriF3DKAvrXNK1VKVU7xODcFSIRizlgA2kDmnpMT3Oo-Z1I37TFIGAuDOTgcceOPa7rXg_Mfd_jhL7bSH1BI4RsK0rgde3NaCQlU2n7yVOYGbJCSsSWwSAi-gCjjuTTPnQWe3ep3IWrB73_7tKG2_x7YxZ1nQCSFKouA5rZH4g6yoV8wdJh8_bX2Z64-MJBUl8E7JGM2urA5GY1abo0GZ6ZuQi2JS5WnG1iTL9pFlmOoTpN1DKtNE2PUE90GJwi0qGeACif9uJBXQPDAgKk7fbUxKYQobc6ko2CJ1isoRjbi8-GsJ9lhw7tXno5zfAvN3eps9SYgmIRNh0t_vx-LMBezSTSEcTJpv-7Ap6F10GD3E9KmGcYrOMvdtaYgkWFXO6rh49uElUVid-C1tNVpKjnj7ewUosQo9MHSn-d5l1df0rJSueXcaUMSqRSrEzqQ	1641634127	test@test.test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	f	OBW2OF5QH3NMCYJ44VU5B5YEQ5LHZLTFW2FDSAJ4R4JVZ4HWSNVQ====	\N	2
 \.
 
 
@@ -1030,8 +1035,8 @@ COPY public.users (user_id, user_login, user_token, user_secret, user_expiry, us
 -- Data for Name: workflows; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.workflows (workflow_id, workflow_pipeline_id, workflow_pid, workflow_name, workflow_state, workflow_error, workflow_started, workflow_stopped, workflow_agent_id, workflow_platform, workflow_environ) FROM stdin;
-1	1	1	drone	failure	Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown	1641630525	1641630527	0		{}
+COPY public.workflows (workflow_id, workflow_pipeline_id, workflow_pid, workflow_name, workflow_state, workflow_error, workflow_started, workflow_stopped, workflow_agent_id, workflow_platform, workflow_environ, workflow_axis_id) FROM stdin;
+1	1	1	drone	failure	Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown	1641630525	1641630527	0		{}	\N
 \.
 
 
@@ -1074,7 +1079,7 @@ SELECT pg_catalog.setval('public.log_entries_id_seq', 1, false);
 -- Name: orgs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.orgs_id_seq', 1, true);
+SELECT pg_catalog.setval('public.orgs_id_seq', 2, true);
 
 
 --
@@ -1132,14 +1137,6 @@ SELECT pg_catalog.setval('public.workflows_workflow_id_seq', 1, true);
 
 ALTER TABLE ONLY public.agents
     ADD CONSTRAINT agents_pkey PRIMARY KEY (id);
-
-
---
--- Name: pipelines builds_build_number_build_repo_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.pipelines
-    ADD CONSTRAINT builds_build_number_build_repo_id_key UNIQUE (pipeline_number, pipeline_repo_id);
 
 
 --
@@ -1443,6 +1440,13 @@ CREATE UNIQUE INDEX "UQE_pipeline_config_s" ON public.pipeline_config USING btre
 
 
 --
+-- Name: UQE_pipelines_s; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "UQE_pipelines_s" ON public.pipelines USING btree (pipeline_repo_id, pipeline_number);
+
+
+--
 -- Name: UQE_redirections_repo_full_name; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1495,5 +1499,5 @@ CREATE UNIQUE INDEX "UQE_workflows_s" ON public.workflows USING btree (workflow_
 -- PostgreSQL database dump complete
 --
 
-\unrestrict AfzhKZb1LKPKeKR4iwdIxhKV249snggZoBlLERloec1idnISPdtsR5e5dI3aVai
+\unrestrict jfY4LTom39twz6Gcmw9Je24Z5WfG13hXALefGXbMfzVdfoHA6q0IcaOchrQfKXA
 
