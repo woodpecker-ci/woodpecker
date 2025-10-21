@@ -160,12 +160,28 @@ func HandleAuth(c *gin.Context) {
 		}
 	}
 
+	var user *model.User
+
 	// get the user from the database
-	user, err := _store.GetUserRemoteID(userFromForge.ForgeRemoteID, userFromForge.Login)
+	user, err = _store.GetUserByRemoteID(forgeID, userFromForge.ForgeRemoteID)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		log.Error().Err(err).Msgf("cannot get user %s", userFromForge.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
+	}
+	// update user login (in case forge supports renaming)
+	if user != nil {
+		user.Login = userFromForge.Login
+	}
+
+	// re-try with login name
+	if user == nil || errors.Is(err, types.RecordNotExist) {
+		user, err = _store.GetUserByLogin(forgeID, userFromForge.Login)
+		if err != nil && !errors.Is(err, types.RecordNotExist) {
+			log.Error().Err(err).Msgf("cannot get user %s", userFromForge.Login)
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
 	}
 
 	if user == nil || errors.Is(err, types.RecordNotExist) {
