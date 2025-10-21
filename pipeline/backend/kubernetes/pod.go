@@ -66,6 +66,14 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 	}
 	spec.Containers = append(spec.Containers, container)
 
+	for _, containerSpec := range options.Containers {
+		sidecarContainer, err := sidecarContainer(containerSpec, options)
+		if err != nil {
+			return nil, err
+		}
+		spec.Containers = append(spec.Containers, sidecarContainer)
+	}
+
 	pod := &v1.Pod{
 		ObjectMeta: meta,
 		Spec:       spec,
@@ -272,6 +280,26 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container.EnvFrom = append(container.EnvFrom, nsp.envFromSources...)
 	container.Env = append(container.Env, nsp.envVars...)
 	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
+
+	return container, nil
+}
+
+func sidecarContainer(containerSpec Sidecar, options BackendOptions) (v1.Container, error) {
+	container := v1.Container{
+		Name:            containerSpec.Name,
+		Image:           containerSpec.Image,
+		Command:         containerSpec.Commands,
+		Env:             mapToEnvVars(containerSpec.Environment),
+		SecurityContext: containerSecurityContext(options.SecurityContext, containerSpec.Privileged),
+	}
+
+	if containerSpec.Pull {
+		container.ImagePullPolicy = v1.PullAlways
+	}
+
+	if len(containerSpec.Commands) > 0 {
+		container.Command = containerSpec.Commands
+	}
 
 	return container, nil
 }

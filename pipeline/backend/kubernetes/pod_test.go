@@ -856,3 +856,66 @@ func TestStepSecret(t *testing.T) {
 	ja := jsonassert.New(t)
 	ja.Assertf(string(secretJSON), expected)
 }
+
+func TestSidecarPod(t *testing.T) {
+	const expected = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "curl-google",
+				"woodpecker-ci.org/step": "curl-google",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "quay.io/curl/curl",
+					"command": [
+						"/usr/bin/curl",
+						"-v",
+						"google.com"
+					],
+					"resources": {}
+				},
+				{
+					"name": "docker-in-docker",
+					"image": "docker:dind",
+					"resources": {},
+					"securityContext": {
+						"privileged": true
+					}
+				}
+			],
+			"restartPolicy": "Never"
+		},
+		"status": {}
+	}`
+
+	sidecarContainer := &Sidecar{
+		Name:       "docker-in-docker",
+		Image:      "docker:dind",
+		Privileged: true,
+	}
+
+	pod, err := mkPod(&types.Step{
+		Name:       "curl-google",
+		Image:      "quay.io/curl/curl",
+		UUID:       "01he8bebctabr3kgk0qj36d2me-0",
+		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Containers: []Sidecar{*sidecarContainer},
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
