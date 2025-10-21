@@ -276,13 +276,13 @@ release-server: ## Create server binaries for release
 
 release-agent: ## Create agent binaries for release
 	# compile
-	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux  GOARCH=riscv64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_riscv64/woodpecker-agent    go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=linux   GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=linux   GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=linux   GOARCH=riscv64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_riscv64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=linux   GOARCH=arm     CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=windows GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=darwin  GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=darwin  GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	# tar binary files
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_amd64.tar.gz   -C ${DIST_DIR}/agent/linux_amd64   woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm64.tar.gz   -C ${DIST_DIR}/agent/linux_arm64   woodpecker-agent
@@ -296,17 +296,17 @@ release-agent: ## Create agent binaries for release
 
 release-cli: ## Create cli binaries for release
 	# compile
-	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_amd64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_arm64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=linux   GOARCH=riscv64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_riscv64/woodpecker-cli   go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_arm/woodpecker-cli         go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/windows_amd64/woodpecker-cli.exe go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_amd64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_arm64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=linux   GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_amd64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=linux   GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_arm64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=linux   GOARCH=riscv64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_riscv64/woodpecker-cli     go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=linux   GOARCH=arm     CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_arm/woodpecker-cli         go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=windows GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/windows_amd64/woodpecker-cli.exe go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=darwin  GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_amd64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=darwin  GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_arm64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	# tar binary files
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_amd64.tar.gz   -C ${DIST_DIR}/cli/linux_amd64   woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm64.tar.gz   -C ${DIST_DIR}/cli/linux_arm64   woodpecker-cli
-	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_riscv64.tar.gz  -C ${DIST_DIR}/cli/linux_riscv64 woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_riscv64.tar.gz -C ${DIST_DIR}/cli/linux_riscv64 woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm.tar.gz     -C ${DIST_DIR}/cli/linux_arm     woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_amd64.tar.gz  -C ${DIST_DIR}/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_arm64.tar.gz  -C ${DIST_DIR}/cli/darwin_arm64  woodpecker-cli
