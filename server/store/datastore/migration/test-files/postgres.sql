@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict XBXdSoSSDWwbRG3NnofWJ7mndQevS7PuZecNDHcqXKhd3XIZycRpTSOuT83q3Qu
+\restrict 18NccrfpihYnwqBivs51uHtRdmaM3893BGxRvmp6T7W9a7eNFNYZo0q0ioWALlU
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6
@@ -818,6 +818,7 @@ COPY public.configs (id, repo_id, hash, data, name) FROM stdin;
 --
 
 COPY public.crons (id, name, repo_id, creator_id, next_exec, schedule, created, branch) FROM stdin;
+1	nightly-build	105	1	1641686400	0 0 * * *	1641630600	master
 \.
 
 
@@ -835,6 +836,22 @@ COPY public.forges (id, type, url, client, client_secret, skip_verify, oauth_hos
 --
 
 COPY public.log_entries (id, step_id, "time", line, data, created, type) FROM stdin;
+1	2	0	0	\\x537465704e616d653a20636c6f6e65	1641630525	0
+2	2	0	1	\\x53746570547970653a20636c6f6e65	1641630525	0
+3	2	0	2	\\x53746570555549443a2030314a3151344e443232594b534a31465a443654533234343357	1641630525	0
+4	2	0	3	\\x53746570436f6d6d616e64733a	1641630525	0
+5	2	0	4	\\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d	1641630525	0
+6	2	0	5	\\x	1641630525	0
+7	2	0	6	\\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d	1641630525	0
+8	2	0	7	\\x	1641630525	0
+9	3	0	0	\\x537465704e616d653a205072696e74	1641630526	0
+10	3	0	1	\\x53746570547970653a20636f6d6d616e6473	1641630526	0
+11	3	0	2	\\x53746570555549443a2030314a3151344e443232594b534a31465a44365739385a573047	1641630526	0
+12	3	0	3	\\x53746570436f6d6d616e64733a	1641630526	0
+13	3	0	4	\\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d	1641630526	0
+14	3	0	5	\\x7072696e7420656e7620636f6d6d616e64	1641630526	0
+15	3	0	6	\\x2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d	1641630526	0
+16	3	0	7	\\x	1641630526	0
 \.
 
 
@@ -1544,5 +1561,5 @@ CREATE UNIQUE INDEX "UQE_workflows_s" ON public.workflows USING btree (pipeline_
 -- PostgreSQL database dump complete
 --
 
-\unrestrict XBXdSoSSDWwbRG3NnofWJ7mndQevS7PuZecNDHcqXKhd3XIZycRpTSOuT83q3Qu
+\unrestrict 18NccrfpihYnwqBivs51uHtRdmaM3893BGxRvmp6T7W9a7eNFNYZo0q0ioWALlU
 
