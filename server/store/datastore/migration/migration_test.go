@@ -113,15 +113,12 @@ func restorePostgresDump(t *testing.T, config string) {
 	newLines := make([]string, 0, len(lines))
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		} else if strings.HasPrefix(line, "\\") {
-			continue
-		} else if strings.HasPrefix(line, "--") {
-			continue
-		} else if strings.HasPrefix(line, "\\restrict") {
-			continue
-		} else if strings.HasPrefix(line, "\\unrestrict") {
+		switch {
+		case line == "",
+			strings.HasPrefix(line, "\\"),
+			strings.HasPrefix(line, "--"),
+			strings.HasPrefix(line, "\\restrict"),
+			strings.HasPrefix(line, "\\unrestrict"):
 			continue
 		}
 		newLines = append(newLines, line)
