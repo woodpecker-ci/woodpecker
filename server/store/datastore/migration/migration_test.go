@@ -116,9 +116,7 @@ func restorePostgresDump(t *testing.T, config string) {
 		switch {
 		case line == "",
 			strings.HasPrefix(line, "\\"),
-			strings.HasPrefix(line, "--"),
-			strings.HasPrefix(line, "\\restrict"),
-			strings.HasPrefix(line, "\\unrestrict"):
+			strings.HasPrefix(line, "--"):
 			continue
 		}
 		newLines = append(newLines, line)
