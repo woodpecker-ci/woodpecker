@@ -17,6 +17,7 @@ package migration
 import (
 	"database/sql"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -106,8 +107,36 @@ func restorePostgresDump(t *testing.T, config string) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	_, err = db.Exec(string(dump))
-	require.NoError(t, err)
+	// clean dump
+	lines := strings.Split(string(dump), "\n")
+	newLines := make([]string, 0, len(lines))
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		} else if strings.HasPrefix(line, "\\") {
+			continue
+		} else if strings.HasPrefix(line, "--") {
+			continue
+		} else if strings.HasPrefix(line, "\\restrict") {
+			continue
+		} else if strings.HasPrefix(line, "\\unrestrict") {
+			continue
+		}
+		newLines = append(newLines, line)
+	}
+
+	for _, stmt := range strings.Split(strings.Join(newLines, "\n"), ";") {
+		if stmt == "" {
+			continue
+		}
+
+		_, err = db.Exec(stmt)
+		if err != nil {
+			t.Logf("Failed to execute statement: %s", stmt[:min(len(stmt), 100)])
+			require.NoErrorf(t, err, "could not load postgres dump")
+		}
+	}
 }
 
 func cleanPostgresDB(t *testing.T, config string) {
