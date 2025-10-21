@@ -18,8 +18,6 @@ import (
 	"errors"
 	"fmt"
 
-	"xorm.io/xorm"
-
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -29,23 +27,16 @@ func (s storage) GetUser(id int64) (*model.User, error) {
 	return user, wrapGet(s.engine.ID(id).Get(user))
 }
 
-func (s storage) GetUserRemoteID(remoteID model.ForgeRemoteID, login string) (*model.User, error) {
+func (s storage) GetUserByRemoteID(forgeID int64, userRemoteID model.ForgeRemoteID) (*model.User, error) {
 	sess := s.engine.NewSession()
 	user := new(model.User)
-	err := wrapGet(sess.Where("forge_remote_id = ?", remoteID).Get(user))
-	if err != nil {
-		return s.getUserLogin(sess, login)
-	}
-	return user, err
+	return user, wrapGet(sess.Where("forge_id = ? AND forge_remote_id = ?", forgeID, userRemoteID).Get(user))
 }
 
-func (s storage) GetUserLogin(login string) (*model.User, error) {
-	return s.getUserLogin(s.engine.NewSession(), login)
-}
-
-func (s storage) getUserLogin(sess *xorm.Session, login string) (*model.User, error) {
+func (s storage) GetUserByLogin(forgeID int64, login string) (*model.User, error) {
+	sess := s.engine.NewSession()
 	user := new(model.User)
-	return user, wrapGet(sess.Where("login=?", login).Get(user))
+	return user, wrapGet(sess.Where("forge_id = ? AND login=?", forgeID, login).Get(user))
 }
 
 func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {

@@ -254,22 +254,25 @@ func TestRepoCount(t *testing.T) {
 	defer closer()
 
 	repo1 := &model.Repo{
-		Owner:    "bradrydzewski",
-		Name:     "test",
-		FullName: "bradrydzewski/test",
-		IsActive: true,
+		ForgeRemoteID: "A",
+		Owner:         "bradrydzewski",
+		Name:          "test",
+		FullName:      "bradrydzewski/test",
+		IsActive:      true,
 	}
 	repo2 := &model.Repo{
-		Owner:    "test",
-		Name:     "test",
-		FullName: "test/test",
-		IsActive: true,
+		ForgeRemoteID: "B",
+		Owner:         "test",
+		Name:          "test",
+		FullName:      "test/test",
+		IsActive:      true,
 	}
 	repo3 := &model.Repo{
-		Owner:    "test",
-		Name:     "test-ui",
-		FullName: "test/test-ui",
-		IsActive: false,
+		ForgeRemoteID: "C",
+		Owner:         "test",
+		Name:          "test-ui",
+		FullName:      "test/test-ui",
+		IsActive:      false,
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
@@ -297,10 +300,12 @@ func TestRepoCrud(t *testing.T) {
 	defer closer()
 
 	repo := model.Repo{
-		UserID:   1,
-		FullName: "bradrydzewski/test",
-		Owner:    "bradrydzewski",
-		Name:     "test",
+		ForgeID:       1,
+		ForgeRemoteID: "bradrydzewskitest",
+		UserID:        1,
+		FullName:      "bradrydzewski/test",
+		Owner:         "bradrydzewski",
+		Name:          "test",
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
 	pipeline := model.Pipeline{
@@ -313,10 +318,12 @@ func TestRepoCrud(t *testing.T) {
 
 	// create unrelated
 	repoUnrelated := model.Repo{
-		UserID:   2,
-		FullName: "x/x",
-		Owner:    "x",
-		Name:     "x",
+		ForgeRemoteID: "xx",
+		ForgeID:       1,
+		UserID:        2,
+		FullName:      "x/x",
+		Owner:         "x",
+		Name:          "x",
 	}
 	assert.NoError(t, store.CreateRepo(&repoUnrelated))
 	pipelineUnrelated := model.Pipeline{
@@ -350,6 +357,7 @@ func TestRepoRedirection(t *testing.T) {
 
 	repo := model.Repo{
 		UserID:        1,
+		ForgeID:       1,
 		ForgeRemoteID: "1",
 		FullName:      "bradrydzewski/test",
 		Owner:         "bradrydzewski",
@@ -378,10 +386,11 @@ func TestRepoRedirection(t *testing.T) {
 
 	// test getting repo without forge ID (use name fallback)
 	repo = model.Repo{
-		UserID:   1,
-		FullName: "bradrydzewski/test-no-forge-id",
-		Owner:    "bradrydzewski",
-		Name:     "test-no-forge-id",
+		UserID:        1,
+		ForgeRemoteID: "bradrydzewski/test-no-forge-id",
+		FullName:      "bradrydzewski/test-no-forge-id",
+		Owner:         "bradrydzewski",
+		Name:          "test-no-forge-id",
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
 
