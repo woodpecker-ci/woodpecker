@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/rs/zerolog/log"
@@ -34,7 +35,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-const listLimit = 250
+const (
+	listLimit            = 250
+	millisecondsInSecond = 1000
+)
 
 // Opts defines configuration options.
 type Opts struct {
@@ -207,13 +211,22 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 	return convertRepo(repo, perms, b.DisplayID), nil
 }
 
-func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we do not support pagination as we merge different responses together
+	// so first page returns all and we paginate here
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
+	opts := &bb.RepositorySearchOptions{
+		Permission:  bb.PermissionRepoWrite,
+		ListOptions: bb.ListOptions{Limit: listLimit},
+	}
 	all := make([]*model.Repo, 0)
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
@@ -318,6 +331,9 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(workflow.State),
+		Duration:    uint64((pipeline.Finished - pipeline.Started) * millisecondsInSecond),
+		Parent:      common.GetPipelineStatusContext(repo, pipeline, workflow),
+		DateAdded:   bb.DateTime(time.Unix(pipeline.Started, 0)),
 		Ref:         pipeline.Ref,
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
@@ -346,7 +362,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	}
 
 	opts := &bb.BranchSearchOptions{ListOptions: convertListOptions(p)}
-	all := make([]string, 0)
+	all := make([]string, 0, p.PerPage)
 	for {
 		branches, resp, err := bc.Projects.SearchBranches(ctx, r.Owner, r.Name, opts)
 		if err != nil {
@@ -595,8 +611,12 @@ func (c *client) updatePipelineFromPullRequest(ctx context.Context, u *model.Use
 }
 
 // Teams fetches all the projects for a given user and converts them into teams.
-func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	opts := &bb.ListOptions{Limit: listLimit}
+func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	if p.Page != 1 {
+		return make([]*model.Team, 0), nil
+	}
+
+	opts := convertListOptions(p)
 	allProjects := make([]*bb.Project, 0)
 
 	bc, err := c.newClient(ctx, u)
@@ -605,7 +625,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 	}
 
 	for {
-		projects, resp, err := bc.Projects.ListProjects(ctx, opts)
+		projects, resp, err := bc.Projects.ListProjects(ctx, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to fetch projects: %w", err)
 		}

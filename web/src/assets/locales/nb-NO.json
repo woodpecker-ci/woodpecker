@@ -579,5 +579,11 @@
     "weblate": "vår Weblate",
     "cancel": "Avbryt",
     "documentation_for": "Dokumentasjon for \"{topic}\"",
-    "login_to_woodpecker_with": "Log inn til Woodpecker med"
+    "login_to_woodpecker_with": "Log inn til Woodpecker med",
+    "extensions": "Utvidelser",
+    "extensions_description": "Utvidelser er HTTP-tjenester som kan bli kalt av Woodpecker istedenfor å bruke de innebygde tjenesten.",
+    "extension_endpoint_placeholder": "f.eks. https://eksempel.no/api",
+    "config_extension_endpoint": "Konfigurer endepunkt for utvidelse",
+    "extensions_signatures_public_key": "Offentlig nøkkel for signaturer",
+    "extensions_signatures_public_key_description": "Denne offentlige nøkkelen skal brukes av dine utvidelser for å verifisere webhook-kall fra Woodpecker."
 }

@@ -80,6 +80,10 @@ func (Repo) TableName() string {
 	return "repos"
 }
 
+type RepoFilter struct {
+	Name string
+}
+
 func (r *Repo) ResetVisibility() {
 	r.Visibility = VisibilityPublic
 	if r.IsSCMPrivate {

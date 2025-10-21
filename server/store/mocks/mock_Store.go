@@ -4748,8 +4748,8 @@ func (_c *MockStore_RegistryUpdate_Call) RunAndReturn(run func(registry *model.R
 }
 
 // RepoList provides a mock function for the type MockStore
-func (_mock *MockStore) RepoList(user *model.User, owned bool, active bool) ([]*model.Repo, error) {
-	ret := _mock.Called(user, owned, active)
+func (_mock *MockStore) RepoList(user *model.User, owned bool, active bool, filter *model.RepoFilter) ([]*model.Repo, error) {
+	ret := _mock.Called(user, owned, active, filter)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoList")
@@ -4757,18 +4757,18 @@ func (_mock *MockStore) RepoList(user *model.User, owned bool, active bool) ([]*
 
 	var r0 []*model.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.User, bool, bool) ([]*model.Repo, error)); ok {
-		return returnFunc(user, owned, active)
+	if returnFunc, ok := ret.Get(0).(func(*model.User, bool, bool, *model.RepoFilter) ([]*model.Repo, error)); ok {
+		return returnFunc(user, owned, active, filter)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.User, bool, bool) []*model.Repo); ok {
-		r0 = returnFunc(user, owned, active)
+	if returnFunc, ok := ret.Get(0).(func(*model.User, bool, bool, *model.RepoFilter) []*model.Repo); ok {
+		r0 = returnFunc(user, owned, active, filter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.User, bool, bool) error); ok {
-		r1 = returnFunc(user, owned, active)
+	if returnFunc, ok := ret.Get(1).(func(*model.User, bool, bool, *model.RepoFilter) error); ok {
+		r1 = returnFunc(user, owned, active, filter)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4784,11 +4784,12 @@ type MockStore_RepoList_Call struct {
 //   - user *model.User
 //   - owned bool
 //   - active bool
-func (_e *MockStore_Expecter) RepoList(user interface{}, owned interface{}, active interface{}) *MockStore_RepoList_Call {
-	return &MockStore_RepoList_Call{Call: _e.mock.On("RepoList", user, owned, active)}
+//   - filter *model.RepoFilter
+func (_e *MockStore_Expecter) RepoList(user interface{}, owned interface{}, active interface{}, filter interface{}) *MockStore_RepoList_Call {
+	return &MockStore_RepoList_Call{Call: _e.mock.On("RepoList", user, owned, active, filter)}
 }
 
-func (_c *MockStore_RepoList_Call) Run(run func(user *model.User, owned bool, active bool)) *MockStore_RepoList_Call {
+func (_c *MockStore_RepoList_Call) Run(run func(user *model.User, owned bool, active bool, filter *model.RepoFilter)) *MockStore_RepoList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *model.User
 		if args[0] != nil {
@@ -4802,10 +4803,15 @@ func (_c *MockStore_RepoList_Call) Run(run func(user *model.User, owned bool, ac
 		if args[2] != nil {
 			arg2 = args[2].(bool)
 		}
+		var arg3 *model.RepoFilter
+		if args[3] != nil {
+			arg3 = args[3].(*model.RepoFilter)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -4816,7 +4822,7 @@ func (_c *MockStore_RepoList_Call) Return(repos []*model.Repo, err error) *MockS
 	return _c
 }
 
-func (_c *MockStore_RepoList_Call) RunAndReturn(run func(user *model.User, owned bool, active bool) ([]*model.Repo, error)) *MockStore_RepoList_Call {
+func (_c *MockStore_RepoList_Call) RunAndReturn(run func(user *model.User, owned bool, active bool, filter *model.RepoFilter) ([]*model.Repo, error)) *MockStore_RepoList_Call {
 	_c.Call.Return(run)
 	return _c
 }
