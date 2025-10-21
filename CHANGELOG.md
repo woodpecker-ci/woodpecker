@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.11.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.1) - 2025-10-20
+## [3.11.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.1) - 2025-10-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,6 +16,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module xorm.io/xorm to v1.3.11 [[#5662](https://github.com/woodpecker-ci/woodpecker/pull/5662)]
 - chore(deps): lock file maintenance [[#5657](https://github.com/woodpecker-ci/woodpecker/pull/5657)]
 
 ## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-19
