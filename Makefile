@@ -200,7 +200,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib ## Run all 
 build-ui: ## Build UI
 	(cd web/; pnpm install --frozen-lockfile; pnpm build)
 
-build-server: generate-openapi ## Build server
+build-server: build-ui generate-openapi ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/server
 
 build-agent: ## Build agent
