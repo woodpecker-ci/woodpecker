@@ -799,6 +799,19 @@ Always use authentication to clone repositories even if they are public. Needed 
 
 ---
 
+### ASYNC_REPOSITORY_UPDATE
+
+- Name: `WOODPECKER_ASYNC_REPOSITORY_UPDATE`
+- Default: `false`
+
+Enable asynchronous fetching user permissions for repositories. Will drastically improve login speed for user login if the organisation has many git repositories.
+
+When disabled (default) users will have to wait for all repository access information before being redirected to the Woodpecker homepage. Choose this for strong consistency.
+
+When enabled users will immediately be redirected to the Woodpecker homepage, but might see outdated information if repository access changed or new repositories were added. Choose this for eventual consistency.
+
+---
+
 ### DEFAULT_ALLOW_PULL_REQUESTS
 
 - Name: `WOODPECKER_DEFAULT_ALLOW_PULL_REQUESTS`
