@@ -83,11 +83,11 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 		return engine, closeDB
 	case "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
+		closeDB = func() {
+			cleanPostgresDB(t, config)
+		}
 		if !initNewDB {
 			restorePostgresDump(t, config)
-			closeDB = func() {
-				cleanPostgresDB(t, config)
-			}
 		}
 		engine, err = xorm.NewEngine(driver, config)
 		require.NoError(t, err)
