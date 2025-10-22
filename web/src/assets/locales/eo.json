@@ -3,30 +3,35 @@
     "search": "Serĉi…",
     "unknown_error": "Nekonata eraro okazis",
     "time": {
-        "not_started": "ne komencita"
+        "not_started": "ankoraŭ ne komencita",
+        "just_now": "ĵus nun"
     },
     "repo": {
         "manual_pipeline": {
-            "title": "Ekigi permanan pipeline-on",
-            "trigger": "Ekigi",
+            "title": "Ekigi permanan pipeline-rulon",
+            "trigger": "Ruli pipeline-on",
             "select_branch": "Elekti branĉon",
             "variables": {
                 "title": "Kromaj pipeline-variabloj",
-                "desc": "Specifu kromajn variablojn por la ekigita pipeline-o",
+                "desc": "Specifi kromajn variablojn por uzi en via pipeline. Variabloj kun sama nomo estas anstataŭigitaj.",
                 "name": "Variabla nomo",
-                "value": "Variabla valoro"
-            }
+                "value": "Variabla valoro",
+                "delete": "Forigi variablon"
+            },
+            "show_pipelines": "Montri pipeline-ojn"
         },
         "deploy_pipeline": {
-            "title": "Ekigi deployment",
-            "enter_target": "Celo",
-            "trigger": "Ekigi",
+            "title": "Ekigi deployment-on por nuna pipeline #{pipelineId}",
+            "enter_target": "Celmedion por deployment",
+            "trigger": "Deploy",
             "variables": {
                 "title": "Kromaj pipeline-variabloj",
-                "desc": "Specifu kromajn variablojn por la ekigita pipeline-o",
+                "desc": "Specifi kromajn variablojn por uzi en via pipeline. Variabloj kun sama nomo estas anstataŭigitaj.",
                 "name": "Variabla nomo",
-                "value": "Variabla valoro"
-            }
+                "value": "Variabla valoro",
+                "delete": "Forigi variablon"
+            },
+            "enter_task": "Deployment-tasko"
         },
         "activity": "Agado",
         "branches": "Branĉoj",
@@ -34,25 +39,39 @@
         "enable": {
             "enable": "Ŝalti",
             "enabled": "Jam ŝaltita",
-            "success": "Repozitorio ŝaltita"
+            "success": "Repozitorio ŝaltita",
+            "disabled": "Malŝaltita"
         },
-        "open_in_forge": "Malfermi en Forge",
+        "open_in_forge": "Malfermi repozitorion en Forĝo",
         "settings": {
             "not_allowed": "Vi ne rajtas aliri la agordojn de ĉi tiu repozitorio",
             "general": {
-                "general": "Ĝeneralaj agordoj",
+                "general": "Projekto",
                 "project": "Projektaj agordoj",
                 "pipeline_path": {
                     "path": "Pipeline-vojo",
-                    "default": "Defaŭlte: .woodpecker/*.{'{'}yml,yaml{'}'} -> .woodpecker.yml -> .drone.yml",
-                    "desc": "Vojo al via pipeline-agordo (ekz. mia/vojo/). Dosieraj kaj dosierujaj vojoj estas permesataj"
+                    "default": "Defaŭlte: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+                    "desc": "Vojo al via pipeline-agordo (ekzemple {0}). Dosierujoj devas finiĝi per {1}.",
+                    "desc_path_example": "mia/vojo/"
                 },
                 "allow_pr": {
                     "allow": "Permesi Pull Request-ojn",
-                    "desc": "Pipeline-oj de pull request-oj estos montrataj en la UI"
+                    "desc": "Permesi la plenumigon de pipeline-oj por pull request-oj."
                 },
                 "trusted": {
-                    "trusted": "Fidata"
+                    "trusted": "Fidata",
+                    "network": {
+                        "network": "Reto",
+                        "desc": "Pipeline-ujoj ricevas aliron al retprivilegioj kiel ŝanĝi DNS."
+                    },
+                    "volumes": {
+                        "volumes": "Volumoj",
+                        "desc": "Pipeline-ujoj rajtas munti volumojn."
+                    },
+                    "security": {
+                        "security": "Sekureco",
+                        "desc": "Pipeline-ujoj ricevas aliron al sekurecprivilegioj."
+                    }
                 },
                 "timeout": {
                     "timeout": "Tempolimo",
@@ -60,7 +79,17 @@
                 },
                 "cancel_prev": {
                     "cancel": "Nuligi antaŭajn pipeline-ojn",
-                    "desc": "Ŝaltante ĉi tion nuligas antaŭajn ankoraŭ rulantajn pipeline-ojn de la sama evento kaj kunteksto antaŭ ol komenci novan"
+                    "desc": "Elektitaj eventoj nuligas atendantajn kaj rulantajn pipeline-ojn de la sama evento antaŭ ol komenci la sekvan."
+                },
+                "save": "Konservi agordojn",
+                "success": "Projektaj agordoj ĝisdatigitaj",
+                "allow_deploy": {
+                    "allow": "Permesi Deployment-ojn",
+                    "desc": "Permesi deployment-ojn por sukcesaj pipeline-oj. Ĉiuj uzantoj kun push-permesoj povas ekigi ilin, do uzu zorgeme."
+                },
+                "netrc_only_trusted": {
+                    "netrc_only_trusted": "Propraj fidataj klon-plugin-oj",
+                    "desc": "Plugin-oj kiuj ricevas aliron al netrc-legitimaĵoj kiuj povas esti uzataj por kloni repozitoriojn el la Forĝo aŭ push-i ilin al la Forĝo."
                 }
             },
             "badge": {
@@ -69,7 +98,7 @@
                 "type_url": "URL",
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
-                "branch": "Branĉo (opcio)"
+                "branch": "Branĉo"
             },
             "actions": {
                 "actions": "Agoj",
@@ -83,28 +112,64 @@
                 },
                 "delete": {
                     "delete": "Forigi repozitorion",
-                    "confirm": "Ĉiuj datenoj perdiĝos por ĉi tiu repozitorio (sekretoj, registrejoj, pipeline-historioj)!\n\nĈu vi volas daŭrigi?",
+                    "confirm": "Ĉiuj datenoj perdiĝos post ĉi tiu ago!\n\nĈu vi vere volas daŭrigi?",
                     "success": "Repozitorio forigita"
+                },
+                "enable": {
+                    "enable": "Ŝalti repozitorion",
+                    "success": "Repozitorio ŝaltita"
                 }
+            },
+            "crons": {
+                "crons": "Cron-oj",
+                "desc": "Cron-taskoj povas esti uzataj por ekigi pipeline-ojn regule.",
+                "show": "Montri cron-ojn",
+                "add": "Aldoni cron-on",
+                "none": "Ankoraŭ estas neniuj cron-oj.",
+                "save": "Konservi cron-on",
+                "created": "Cron-o kreita",
+                "saved": "Cron-o konservita",
+                "deleted": "Cron-o forigita",
+                "next_exec": "Sekva plenumo",
+                "not_executed_yet": "Ankoraŭ ne plenumita",
+                "run": "Ruli nun",
+                "branch": {
+                    "title": "Branĉo",
+                    "placeholder": "Branĉo (uzas defaŭltan branĉon se malplena)"
+                },
+                "name": {
+                    "name": "Nomo",
+                    "placeholder": "Nomo de la cron-tasko"
+                },
+                "schedule": {
+                    "title": "Plano (bazita sur UTC)",
+                    "placeholder": "Plano"
+                },
+                "edit": "Redakti cron-on",
+                "delete": "Forigi cron-on"
             }
         },
         "pipeline": {
             "config": "Agordo",
-            "files": "Ŝanĝitaj dosieroj ({files})",
-            "no_pipelines": "Neniuj pipeline-oj ekzekutiĝis ankoraŭ",
-            "no_pipeline_steps": "Neniuj stepoj troviĝis por ĉi tiu workflow",
-            "step_not_started": "Ĉi tiu stepo ankoraŭ ne komenciĝis",
+            "files": "Ŝanĝitaj dosieroj",
+            "no_pipelines": "Neniuj pipeline-oj ankoraŭ komenciĝis.",
+            "no_pipeline_steps": "Neniuj pipeline-stepoj disponeblaj!",
+            "step_not_started": "Ĉi tiu stepo ankoraŭ ne komenciĝis.",
             "loading": "Ŝarĝante…",
             "actions": {
                 "cancel": "Nuligi",
                 "restart": "Rekomenci",
-                "canceled": "Ĉi tiu pipeline estis nuligita",
+                "canceled": "Ĉi tiu stepo estis nuligita.",
                 "cancel_success": "Pipeline nuligita",
                 "deploy": "Deploy",
-                "restart_success": "Pipeline rekomencita"
+                "restart_success": "Pipeline rekomencita",
+                "log_download": "Elŝuti",
+                "log_delete": "Forigi",
+                "log_auto_scroll": "Ŝalti aŭtomatan rulumigon",
+                "log_auto_scroll_off": "Malŝalti aŭtomatan rulumigon"
             },
             "protected": {
-                "awaits": "Ĉi tiu pipeline atendas aprobon de administranto!",
+                "awaits": "Ĉi tiu pipeline atendas aprobon de prizorganto!",
                 "approve": "Aprobi",
                 "decline": "Rifuzi",
                 "declined": "Ĉi tiu pipeline estis rifuzita!",
@@ -112,26 +177,86 @@
                 "decline_success": "Pipeline rifuzita"
             },
             "status": {
-                "status": "Stato",
-                "blocked": "Blokita",
-                "pending": "Atendanta",
-                "running": "Rulanta",
-                "started": "Komencita",
-                "skipped": "Saltita",
-                "success": "Sukceso",
-                "declined": "Rifuzita",
-                "error": "Eraro",
-                "failure": "Malsukceso",
-                "killed": "Mortigita"
+                "status": "Stato: {status}",
+                "blocked": "blokita",
+                "pending": "atendanta",
+                "running": "rulanta",
+                "started": "komencita",
+                "skipped": "saltita",
+                "success": "sukceso",
+                "declined": "rifuzita",
+                "error": "eraro",
+                "failure": "malsukceso",
+                "killed": "mortigita"
             },
-            "we_got_some_errors": "Ho ve, ni havas iujn erarojn!",
-            "created": "Kreita"
+            "we_got_some_errors": "Ho ve, eraro okazis!",
+            "created": "Kreita: {created}",
+            "tasks": "Taskoj",
+            "pipelines_for": "Pipeline-oj por branĉo \"{branch}\"",
+            "pipelines_for_pr": "Pipeline-oj por Pull Request #{index}",
+            "exit_code": "Elirkodo {exitCode}",
+            "no_logs": "Neniuj protokoloj",
+            "pipeline": "Pipeline #{pipelineId}",
+            "log_title": "Stepaj protokoloj",
+            "log_download_error": "Eraro okazis dum elŝuti la protokoldosieron",
+            "log_delete_confirm": "Ĉu vi vere volas forigi la stepajn protokolojn?",
+            "log_delete_error": "Eraro okazis dum forigi la stepajn protokolojn",
+            "event": {
+                "push": "Push",
+                "tag": "Tag",
+                "pr": "Pull Request",
+                "pr_closed": "Pull Request kunfandita/fermita",
+                "pr_metadata": "Pull Request-metadatenoj ŝanĝitaj",
+                "deploy": "Deploy",
+                "cron": "Cron",
+                "manual": "Permana",
+                "release": "Release"
+            },
+            "errors": "Eraroj",
+            "warnings": "Avertoj",
+            "show_errors": "Montri erarojn",
+            "duration": "Pipeline-daŭro: {duration}",
+            "debug": {
+                "title": "Senerarigi",
+                "download_metadata": "Elŝuti metadatenojn",
+                "metadata_download_error": "Eraro dum elŝuti metadatenojn",
+                "metadata_download_successful": "Metadatenoj sukcese elŝutitaj",
+                "no_permission": "Vi ne rajtas aliri la senerarigajn informojn",
+                "metadata_exec_title": "Reruli pipeline-on loke",
+                "metadata_exec_desc": "Elŝuti la metadatenojn de ĉi tiu pipeline por ruli ĝin loke. Ĉi tio permesas fiksi problemojn kaj testi ŝanĝojn antaŭ ol commit-i ilin. La Woodpecker CLI devas esti instalita loke en la sama versio kiel la servilo."
+            },
+            "view": "Vidi pipeline-on"
+        },
+        "pull_requests": "Pull Request-oj",
+        "user_none": "Ĉi tiu organizo/uzanto ankoraŭ havas neniujn projektojn",
+        "not_allowed": "Vi ne rajtas aliri ĉi tiun repozitorion",
+        "visibility": {
+            "visibility": "Projekta videbleco",
+            "public": {
+                "public": "Publika",
+                "desc": "Iu ajn povas vidi vian projekton sen ensaluti."
+            },
+            "private": {
+                "private": "Privata",
+                "desc": "Nur vi kaj aliaj posedantoj de la repozitorio povas vidi ĉi tiun projekton."
+            },
+            "internal": {
+                "internal": "Interna",
+                "desc": "Nur aŭtentikigitaj uzantoj de la Woodpecker-instanco povas vidi ĉi tiun projekton."
+            }
         }
     },
     "org": {
         "settings": {
             "secrets": {
-                "desc": "Organizaj sekretoj povas esti uzataj de ĉiuj repozitorioj ene de la organizo"
+                "desc": "Organizaj sekretoj povas esti uzataj en la pipeline-oj de ĉiuj repozitorioj poseditaj de la organizo."
+            },
+            "not_allowed": "Vi ne rajtas aliri la agordojn de ĉi tiu organizo",
+            "registries": {
+                "desc": "Organizaj registrejaj legitimaĵoj povas esti aldonitaj por uzi privatajn bildojn por ĉiuj pipeline-oj de organizo."
+            },
+            "agents": {
+                "desc": "Agentoj registritaj por ĉi tiu organizo."
             }
         }
     },
@@ -139,57 +264,328 @@
         "settings": {
             "settings": "Administraj agordoj",
             "secrets": {
-                "desc": "Ĉiuj uzantoj povas uzi ĉi tiujn sekretojn"
+                "desc": "Tutmondaj sekretoj povas esti uzataj en la pipeline-oj de ĉiuj repozitorioj.",
+                "warning": "Ĉi tiuj sekretoj estas disponeblaj por ĉiuj uzantoj."
             },
             "agents": {
                 "agents": "Agentoj",
-                "desc": "Agentoj estas la laboristoj kiuj plenumigas viajn pipeline-ojn",
-                "none": "Neniu",
+                "desc": "Agentoj registritaj sur ĉi tiu servilo.",
+                "none": "Ankoraŭ estas neniuj agentoj.",
                 "id": "ID",
-                "created": "Kreita",
+                "created": "Agento kreita",
                 "version": "Versio",
                 "never": "Neniam",
-                "delete_confirm": "Ĉu vi certas, ke vi volas forigi ĉi tiun agenton?",
-                "delete_agent": "Forigi agenton"
+                "delete_confirm": "Ĉu vi vere volas forigi ĉi tiun agenton? Ĝi ne plu povos konektiĝi al la servilo.",
+                "delete_agent": "Forigi agenton",
+                "add": "Aldoni agenton",
+                "save": "Konservi agenton",
+                "show": "Montri agentojn",
+                "saved": "Agento konservita",
+                "deleted": "Agento forigita",
+                "name": {
+                    "name": "Nomo",
+                    "placeholder": "Nomo de la agento"
+                },
+                "no_schedule": {
+                    "name": "Malŝalti agenton",
+                    "placeholder": "Haltigi agenton de preni novajn taskojn"
+                },
+                "token": "Ĵetono",
+                "platform": {
+                    "platform": "Platformo",
+                    "badge": "platformo"
+                },
+                "backend": {
+                    "backend": "Backend",
+                    "badge": "backend"
+                },
+                "capacity": {
+                    "capacity": "Kapacito",
+                    "desc": "La maksimuma kvanto de paralelaj pipeline-oj plenumitaj de ĉi tiu agento.",
+                    "badge": "kapacito"
+                },
+                "custom_labels": {
+                    "custom_labels": "Propraj etikedoj",
+                    "desc": "La propraj etikedoj agordita de la agenta administranto ĉe agenta starto."
+                },
+                "org": {
+                    "badge": "organizo"
+                },
+                "last_contact": {
+                    "last_contact": "Lasta kontakto",
+                    "badge": "lasta kontakto"
+                },
+                "edit_agent": "Redakti agenton"
             },
             "queue": {
                 "queue": "Vicumo",
-                "desc": "Vicumo enhavas taskojn kiuj atendas plenumon",
-                "agent": "Agento",
-                "waiting_for": "Atendante"
+                "desc": "Taskoj atendantaj plenumigon de agentoj.",
+                "agent": "agento",
+                "waiting_for": "atendante",
+                "pause": "Paŭzigi",
+                "resume": "Daŭrigi",
+                "paused": "Vicumo estas paŭzigita",
+                "resumed": "Vicumo estas daŭrigita",
+                "tasks": "Taskoj",
+                "task_running": "Tasko rulas",
+                "task_pending": "Tasko atendas",
+                "task_waiting_on_deps": "Tasko atendas dependecojn",
+                "stats": {
+                    "completed_count": "Finitaj taskoj",
+                    "worker_count": "Libera",
+                    "running_count": "Rulanta",
+                    "pending_count": "Atendanta",
+                    "waiting_on_deps_count": "Atendante dependecojn"
+                }
             },
             "users": {
                 "users": "Uzantoj",
-                "desc": "Administri tutmondajn uzantojn",
+                "desc": "Uzantoj registritaj por ĉi tiu servilo.",
                 "login": "Salutnomo",
                 "email": "Retpoŝto",
                 "avatar_url": "Avatar-URL",
                 "save": "Konservi uzanton",
                 "cancel": "Nuligi",
                 "add": "Aldoni uzanton",
-                "none": "Neniuj uzantoj troviĝis",
-                "delete_confirm": "Ĉu vi vere volas forigi ĉi tiun uzanton?",
+                "none": "Ankoraŭ estas neniuj uzantoj.",
+                "delete_confirm": "Ĉu vi vere volas forigi ĉi tiun uzanton? Ĉi tio ankaŭ forigos ĉiujn repozitoriojn poseditajn de ĉi tiu uzanto.",
                 "deleted": "Uzanto forigita",
                 "created": "Uzanto kreita",
                 "saved": "Uzanto konservita",
-                "delete_user": "Forigi uzanton"
+                "delete_user": "Forigi uzanton",
+                "show": "Montri uzantojn",
+                "admin": {
+                    "admin": "Admin",
+                    "placeholder": "Uzanto estas administranto"
+                },
+                "edit_user": "Redakti uzanton"
             },
             "orgs": {
                 "orgs": "Organizoj",
-                "view": "Vidi organizon"
+                "view": "Vidi organizon",
+                "desc": "Organizoj posedantaj repozitoriojn sur ĉi tiu servilo.",
+                "none": "Ankoraŭ estas neniuj organizoj.",
+                "org_settings": "Organizaj agordoj",
+                "delete_org": "Forigi organizon",
+                "deleted": "Organizo forigita",
+                "delete_confirm": "Ĉu vi vere volas forigi ĉi tiun organizon? Ĉi tio ankaŭ forigos ĉiujn repozitoriojn poseditajn de ĉi tiu organizo."
             },
             "repos": {
                 "repos": "Repozitorioj",
-                "desc": "Administri repozitoriojn",
-                "none": "Neniuj repozitorioj troviĝis",
-                "disabled": "Malŝaltita"
+                "desc": "Repozitorioj kiuj estas aŭ estis aktivigitaj sur ĉi tiu servilo.",
+                "none": "Ankoraŭ estas neniuj repozitorioj.",
+                "disabled": "Malŝaltita",
+                "view": "Vidi repozitorion",
+                "settings": "Repozitoriaj agordoj",
+                "repair": {
+                    "repair": "Ripari ĉiujn",
+                    "success": "Repozitorioj riparitaj"
+                }
+            },
+            "not_allowed": "Vi ne rajtas aliri la servilajn agordojn",
+            "registries": {
+                "desc": "Tutmondaj registrejaj legitimaĵoj povas esti aldonitaj por uzi privatajn bildojn por ĉiuj pipeline-oj.",
+                "warning": "Ĉi tiuj registrejaj legitimaĵoj estas disponeblaj por ĉiuj uzantoj."
             }
         }
     },
     "user": {
         "settings": {
-            "settings": "Uzanto-agordoj"
+            "settings": "Uzantaj agordoj",
+            "general": {
+                "general": "Konto",
+                "language": "Lingvo",
+                "theme": {
+                    "theme": "Etoso",
+                    "light": "Hela",
+                    "dark": "Malhela",
+                    "auto": "Aŭtomata"
+                }
+            },
+            "secrets": {
+                "desc": "Uzantaj sekretoj povas esti uzataj en la pipeline-oj de ĉiuj repozitorioj poseditaj de la uzanto."
+            },
+            "registries": {
+                "desc": "Uzantaj registrejaj legitimaĵoj povas esti aldonitaj por uzi privatajn bildojn por ĉiuj personaj pipeline-oj."
+            },
+            "cli_and_api": {
+                "cli_and_api": "CLI & API",
+                "desc": "Persona Alir-Ĵetono, CLI kaj API-uzo",
+                "token": "Persona Alir-Ĵetono",
+                "api_usage": "Ekzempla API-uzo",
+                "cli_usage": "Ekzempla CLI-uzo",
+                "download_cli": "Elŝuti CLI",
+                "reset_token": "Reagordi ĵetonon",
+                "swagger_ui": "Swagger UI"
+            },
+            "agents": {
+                "desc": "Agentoj registritaj al viaj kontaj repozitorioj."
+            }
         }
     },
-    "url": "URL"
+    "url": "URL",
+    "cancel": "Nuligi",
+    "login_to_woodpecker_with": "Ensaluti al Woodpecker per",
+    "login": "Ensaluti",
+    "repositories": {
+        "title": "Repozitorioj",
+        "all": {
+            "title": "Ĉiuj repozitorioj",
+            "desc": "Repozitorioj ordigitaj laŭ lasta pipeline-kreo"
+        },
+        "last": {
+            "title": "Laste vizititaj",
+            "desc": "Plej freŝdate vizititaj repozitorioj ordigitaj laŭ alirtempo"
+        }
+    },
+    "docs": "Dokumentaro",
+    "api": "API",
+    "logout": "Elsaluti",
+    "username": "Uzantonomo",
+    "password": "Pasvorto",
+    "back": "Reen",
+    "documentation_for": "Dokumentaro por \"{topic}\"",
+    "pipeline_feed": "Pipeline-fluo",
+    "empty_list": "Neniuj {entity} troviĝis!",
+    "not_found": {
+        "not_found": "Hu, 404, aŭ ni ion rompis aŭ vi mistajpis :-/",
+        "back_home": "Reen al hejmo"
+    },
+    "errors": {
+        "not_found": "Servilo ne povis trovi petitan objekton"
+    },
+    "secrets": {
+        "secrets": "Sekretoj",
+        "desc": "Sekretoj povas esti uzataj en ĉiuj pipeline-oj de ĉi tiu repozitorio.",
+        "none": "Ankoraŭ estas neniuj sekretoj.",
+        "add": "Aldoni sekreton",
+        "save": "Konservi sekreton",
+        "show": "Montri sekretojn",
+        "name": "Nomo",
+        "value": "Valoro",
+        "delete_confirm": "Ĉu vi vere volas forigi ĉi tiun sekreton?",
+        "deleted": "Sekreto forigita",
+        "created": "Sekreto kreita",
+        "saved": "Sekreto konservita",
+        "plugins": {
+            "images": "Disponebla nur por la sekvaj plugin-oj",
+            "desc": "Listo de plugin-bildoj kie ĉi tiu sekreto estas disponebla. Lasu malplena por permesi ĉiujn plugin-ojn kaj normalajn stepojn."
+        },
+        "events": {
+            "events": "Disponeblaj ĉe la sekvaj eventoj",
+            "warning": "Malkaŝi sekretojn al pull request-oj povus permesi malicajn agantojn ŝteli viajn sekretojn per malica pull request."
+        },
+        "edit": "Redakti sekreton",
+        "delete": "Forigi sekreton"
+    },
+    "registries": {
+        "registries": "Registrejoj",
+        "credentials": "Registrejaj legitimaĵoj",
+        "desc": "Registrejaj legitimaĵoj povas esti aldonitaj por uzi privatajn bildojn por pipeline-oj.",
+        "none": "Ankoraŭ estas neniuj registrejaj legitimaĵoj.",
+        "address": {
+            "address": "Adreso",
+            "desc": "Registreja adreso (ekz. docker.io)"
+        },
+        "show": "Montri registrejojn",
+        "save": "Konservi registrejon",
+        "add": "Aldoni registrejon",
+        "view": "Vidi registrejon",
+        "edit": "Redakti registrejon",
+        "delete": "Forigi registrejon",
+        "delete_confirm": "Ĉu vi vere volas forigi ĉi tiun registrejon?",
+        "created": "Registrejaj legitimaĵoj kreitaj",
+        "saved": "Registrejaj legitimaĵoj konservitaj",
+        "deleted": "Registrejaj legitimaĵoj forigitaj"
+    },
+    "default": "defaŭlta",
+    "info": "Info",
+    "running_version": "Vi uzas Woodpecker {0}",
+    "update_woodpecker": "Bonvolu ĝisdatigi vian Woodpecker-instancon al {0}",
+    "global_level_secret": "tutmonda sekreto",
+    "org_level_secret": "organiza sekreto",
+    "login_to_cli": "Ensaluti al CLI",
+    "login_to_cli_description": "Se vi daŭrigas, vi ensalutos al la CLI.",
+    "abort": "Ĉesigi",
+    "cli_login_success": "Ensaluto al CLI sukcesis",
+    "cli_login_failed": "Ensaluto al CLI malsukcesis",
+    "cli_login_denied": "Ensaluto al CLI rifuzita",
+    "return_to_cli": "Vi nun povas fermi ĉi tiun langeton kaj reveni al la CLI.",
+    "settings": "Agordoj",
+    "oauth_error": "Eraro dum aŭtentikigi kontraŭ OAuth-provizanto",
+    "internal_error": "Interna eraro okazis",
+    "registration_closed": "La registriĝo estas fermita",
+    "access_denied": "Vi ne rajtas aliri ĉi tiun instancon",
+    "org_access_denied": "Vi ne rajtas aliri ĉi tiun organizon",
+    "invalid_state": "La OAuth-stato estas nevalida",
+    "extensions": "Etendaĵoj",
+    "extensions_description": "Etendaĵoj estas HTTP-servoj kiuj povas esti vokitaj de Woodpecker anstataŭ uzi la integritajn.",
+    "extension_endpoint_placeholder": "ekz. https://example.com/api",
+    "config_extension_endpoint": "Agordo-etendaĵa finpunkto",
+    "extensions_signatures_public_key": "Publika ŝlosilo por subskriboj",
+    "extensions_signatures_public_key_description": "Ĉi tiu publika ŝlosilo devus esti uzata de viaj etendaĵoj por verifi webhook-vokojn el Woodpecker.",
+    "extensions_configuration_saved": "Etendaĵa agordo konservita",
+    "require_approval": {
+        "desc": "Malhelpi malicajn pipeline-ojn malkaŝi sekretojn aŭ ruli malutilajn taskojn per aprobi ilin antaŭ plenumo.",
+        "require_approval_for": "Aprob-postuloj",
+        "none": "Neniu",
+        "none_desc": "Ĉiu evento ekigas pipeline-ojn, inkluzive de pull request-oj. Ĉi tiu agordo povas esti danĝera kaj estas nur rekomendita por privataj instancoj.",
+        "forks": "Pull Request el forkita repozitorio",
+        "pull_requests": "Ĉiuj Pull Request-oj",
+        "all_events": "Ĉiuj eventoj el Forĝo",
+        "allowed_users": {
+            "allowed_users": "Permesitaj uzantoj",
+            "desc": "Pipeline-oj kreitaj de la listigitaj uzantoj neniam bezonas aprobon."
+        }
+    },
+    "no_search_results": "Neniuj rezultoj troviĝis",
+    "forges": "Forĝoj",
+    "forges_desc": "Agordi Forĝojn gastigantajn repozitoriojn por kiuj Woodpecker devus ruli.",
+    "add_forge": "Aldoni Forĝon",
+    "show_forges": "Montri Forĝojn",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "addon": "Kromprogramo",
+    "forge_type": "Forĝa tipo",
+    "oauth_client_id": "OAuth-Klienta ID",
+    "oauth_client_secret": "OAuth-Klienta sekreto",
+    "oauth_host": "OAuth-gastiganto",
+    "merge_ref": "Kunfanda ref",
+    "merge_ref_desc": "Ref uzota por kunfanda bazo. Ĉi tio estas uzata por determini la diferon por pull request-oj.",
+    "public_only": "Nur publikaj",
+    "public_only_desc": "Nur montri publikajn repozitoriojn.",
+    "git_username": "Git-uzantonomo",
+    "git_username_desc": "Uzantonomo por la Git-uzanto.",
+    "git_password": "Git-pasvorto",
+    "git_password_desc": "Pasvorto aŭ persona alir-ĵetono por la Git-uzanto.",
+    "executable": "Plenumebla",
+    "executable_desc": "Vojo al la kromprograma plenumebla dosiero.",
+    "save": "Konservi",
+    "add": "Aldoni",
+    "skip_verify": "Saltigi SSL-kontrolon",
+    "skip_verify_desc": "Saltigi SSL-kontrolon por la API-konekto. Ĉi tio ne estas rekomendita por produkta uzo.",
+    "forge_managed_by_env": "La ĉefa Forĝo estas administrata per mediaj variabloj. Ĉiuj ŝanĝoj al ĉi tiu Forĝo estos malfaritaj ĉe rekomencigo.",
+    "oauth_redirect_url": "OAuth-alidirekta URL",
+    "forge_created": "Forĝo kreita",
+    "advanced_options": "Altnivelajn opciojn",
+    "leave_empty_to_keep_current_value": "Lasu malplena por konservi nunan valoron",
+    "forge_deleted": "Forĝo forigita",
+    "forge_delete_confirm": "Ĉu vi vere volas forigi ĉi tiun Forĝon? Ĉi tio ankaŭ forigos ĉiujn repozitoriojn, uzantojn kaj pipeline-ojn rilatajn al ĉi tiu Forĝo.",
+    "edit_forge": "Redakti Forĝon",
+    "delete_forge": "Forigi Forĝon",
+    "no_forges": "Ankoraŭ estas neniuj Forĝoj.",
+    "use_this_redirect_url_to_create": "Uzu ĉi tiun alidirekt-URL por krei aŭ ĝisdatigi la OAuth-aplikaĵon.",
+    "developer_settings_to_create": "Iru al {0} kaj agordu la OAuth-aplikaĵon.",
+    "developer_settings": "evoluigistaj agordoj",
+    "public_url_for_oauth_if": "Publika URL por OAuth se malsama ol URL ({0})",
+    "forge_saved": "Forĝo konservita",
+    "fullscreen": "Plenekrano",
+    "exit_fullscreen": "Eliri plenekranon",
+    "help_translating": "Vi povas helpi traduki Woodpecker en vian lingvon ĉe {0}.",
+    "weblate": "nia Weblate",
+    "disabled": "Malŝaltita"
 }
