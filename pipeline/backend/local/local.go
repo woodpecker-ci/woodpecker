@@ -127,9 +127,8 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 				return err
 			}
 		} else if !stat.IsDir() {
-			err := fmt.Errorf("This should never happen! internalExecDir was set to an non directory path!")
-			log.Error().Err(err).Msg("")
-			return err
+			//nolint:forbidigo
+			log.Fatal().Msg("This should never happen! internalExecDir was set to an non directory path!")
 		}
 	}
 
