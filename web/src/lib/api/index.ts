@@ -20,6 +20,8 @@ import type {
   User,
 } from './types';
 
+const DEFAULT_FORGE_ID = 1;
+
 interface RepoListOptions {
   all?: boolean;
 }
@@ -386,8 +388,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/users?${query}`) as Promise<User[] | null>;
   }
 
-  async getUser(username: string): Promise<User> {
-    return this._get(`/api/users/${username}`) as Promise<User>;
+  async getUser(username: string, forgeID?: number): Promise<User> {
+    const forge = forgeID ?? DEFAULT_FORGE_ID;
+    return this._get(`/api/users/${username}?forge_id=${forge}`) as Promise<User>;
   }
 
   async createUser(user: Partial<User>): Promise<User> {
@@ -399,7 +402,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   async deleteUser(user: User): Promise<unknown> {
-    return this._delete(`/api/users/${user.login}`);
+    return this._delete(`/api/users/${user.login}?forge_id=${user.forge_id}`);
   }
 
   async resetToken(): Promise<string> {
