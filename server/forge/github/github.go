@@ -474,17 +474,12 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 	// Get the oauth2 transport to set custom base
 	tp, _ := tc.Transport.(*oauth2.Transport)
 
-	var baseTransport http.RoundTripper
+	baseTransport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+	}
 	if c.SkipVerify {
-		baseTransport = &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		}
-	} else {
-		baseTransport = &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
+		baseTransport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
 		}
 	}
 
