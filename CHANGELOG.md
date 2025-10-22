@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-21
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -22,6 +22,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/urfave/cli/v3 to v3.5.0 [[#5668](https://github.com/woodpecker-ci/woodpecker/pull/5668)]
 - fix(deps): update module xorm.io/xorm to v1.3.11 [[#5662](https://github.com/woodpecker-ci/woodpecker/pull/5662)]
 - chore(deps): lock file maintenance [[#5657](https://github.com/woodpecker-ci/woodpecker/pull/5657)]
 
