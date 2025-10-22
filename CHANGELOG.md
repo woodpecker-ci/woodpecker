@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @qwerty287
+@6543, @anbraten, @henkka, @qwerty287
 
 ### 🔒 Security
 
@@ -18,6 +18,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(bitbucketdatacenter): prevent adding new repos with empty branch [[#5669](https://github.com/woodpecker-ci/woodpecker/pull/5669)]
 - cli: show description of default value for `--backend-local-temp-dir` instead of value [[#5656](https://github.com/woodpecker-ci/woodpecker/pull/5656)]
 
 ### 📦️ Dependency
