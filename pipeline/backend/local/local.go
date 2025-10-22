@@ -47,11 +47,12 @@ type stepState struct {
 
 type local struct {
 	tempDir         string
-	internalExecDir string // to handle edge case for running local backend via cli exec
 	workflows       sync.Map
 	pluginGitBinary string
 	os, arch        string
 }
+
+var CLIWorkaroundExecAtDir string // To handle edge case for running local backend via cli exec
 
 // New returns a new local Backend.
 func New() types.Backend {
@@ -83,7 +84,6 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	c, ok := ctx.Value(types.CliCommand).(*cli.Command)
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
-		e.internalExecDir = c.String("internal-backend-local-exec-dir")
 	}
 
 	e.loadClone()
@@ -112,7 +112,7 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	}
 
 	// normal workspace setup case
-	if e.internalExecDir == "" {
+	if CLIWorkaroundExecAtDir == "" {
 		state.workspaceDir = filepath.Join(baseDir, "workspace")
 		if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
 			return err
@@ -120,9 +120,9 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	} else
 	// setup workspace via internal flag signaled from cli exec to a specific dir
 	{
-		state.workspaceDir = e.internalExecDir
-		if stat, err := os.Stat(e.internalExecDir); os.IsNotExist(err) {
-			log.Debug().Msgf("create workspace directory '%s' set by internal flag", e.internalExecDir)
+		state.workspaceDir = CLIWorkaroundExecAtDir
+		if stat, err := os.Stat(CLIWorkaroundExecAtDir); os.IsNotExist(err) {
+			log.Debug().Msgf("create workspace directory '%s' set by internal flag", CLIWorkaroundExecAtDir)
 			if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
 				return err
 			}

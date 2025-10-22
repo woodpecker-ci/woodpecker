@@ -36,9 +36,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
+	backend_docker "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
+	backend_kubernetes "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
+	backend_local "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
@@ -56,13 +56,13 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
+	Flags:     utils.MergeSlices(flags, backend_docker.Flags, backend_kubernetes.Flags, backend_local.Flags),
 }
 
 var backends = []backend_types.Backend{
-	kubernetes.New(),
-	docker.New(),
-	local.New(),
+	backend_kubernetes.New(),
+	backend_docker.New(),
+	backend_local.New(),
 }
 
 func run(ctx context.Context, c *cli.Command) error {
@@ -132,9 +132,7 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string, singleE
 
 	// if we use the local backend we should signal to run at $repoPath
 	if c.String("backend-engine") == "local" {
-		if err := c.Set("internal-backend-local-exec-dir", repoPath); err != nil {
-			return err
-		}
+		backend_local.CLIWorkaroundExecAtDir = repoPath
 	}
 
 	axes, err := matrix.ParseString(string(dat))
