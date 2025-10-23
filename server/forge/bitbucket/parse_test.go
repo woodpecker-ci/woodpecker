@@ -1,4 +1,5 @@
-// // Copyright 2018 Drone.IO Inc.
+// Copyright 2025 Woodpecker Authors
+// Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,94 +34,297 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, "issue:created")
 
-		r, b, err := parseHook(req)
-		assert.Nil(t, r)
+		m, b, err := parseHook(req)
+		assert.Nil(t, m)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 	})
 
-	t.Run("malformed pull-request hook", func(t *testing.T) {
-		buf := bytes.NewBufferString("[]")
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPullCreated)
+	t.Run("pull requests", func(t *testing.T) {
+		t.Run("malformed pull-request hook", func(t *testing.T) {
+			buf := bytes.NewBufferString("[]")
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = http.Header{}
+			req.Header.Set(hookEvent, hookPullCreated)
 
-		_, _, err := parseHook(req)
-		assert.Error(t, err)
+			_, _, err := parseHook(req)
+			assert.Error(t, err)
+		})
+
+		t.Run("pull-request created", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPullRequestCreated)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPullRequestCreatedHeaders
+
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, b) && assert.NotNil(t, m) {
+				assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+				assert.Equal(t, model.EventPull, b.Event)
+				assert.Empty(t, b.EventReason)
+				assert.Equal(t, "39f188d78e1e", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+				assert.False(t, m.NeedPostProcessing)
+			}
+		})
+
+		t.Run("pull-request merged", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPullMerged)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPullMergedHeaders
+
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, b) && assert.NotNil(t, m) {
+				assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPullClosed, b.Event)
+				assert.Empty(t, b.EventReason)
+				assert.Equal(t, "fc2a2c05765d", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "bha", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+				assert.False(t, m.NeedPostProcessing)
+			}
+		})
+
+		t.Run("pull-request rejected", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPullRequestRejected)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPullRequestRejectedHeaders
+
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, b) && assert.NotNil(t, m) {
+				assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
+				assert.Equal(t, model.EventPullClosed, b.Event)
+				assert.Empty(t, b.EventReason)
+				assert.Equal(t, "d0e829618d28", b.Commit)
+				assert.Equal(t, "taerg era senilwen", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+				assert.False(t, m.NeedPostProcessing)
+			}
+		})
+
+		t.Run("pull-request approved", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPullApproved)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPullApprovedHeaders
+
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, b) && assert.NotNil(t, m) {
+				assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, []string{"approved"}, b.EventReason)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+				assert.False(t, m.NeedPostProcessing)
+			}
+		})
+
+		t.Run("pull-request unapproved", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPullUnapproved)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPullUnapprovedHeaders
+
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, b) && assert.NotNil(t, m) {
+				assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, []string{"unapproved"}, b.EventReason)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+				assert.False(t, m.NeedPostProcessing)
+			}
+		})
+
+		t.Run("pull-request comment created", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPullCommentCreated)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPullCommentCreatedHeaders
+
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, b) && assert.NotNil(t, m) {
+				assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, []string{"comment_created"}, b.EventReason)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "6543", b.Author)
+				assert.False(t, m.NeedPostProcessing)
+			}
+		})
+
+		t.Run("pull-request changes request created", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPullChangesRequestCreated)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPullChangesRequestCreatedHeaders
+
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, b) && assert.NotNil(t, m) {
+				assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/3", b.ForgeURL)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, []string{"changes_request_created"}, b.EventReason)
+				assert.Equal(t, "dd1c5b604ee9", b.Commit)
+				assert.Equal(t, "hturt eht llet", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+				assert.False(t, m.NeedPostProcessing)
+			}
+		})
+
+		t.Run("pull-request changes request removed", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPullChangesRequestRemoved)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPullChangesRequestRemovedHeaders
+
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, b) && assert.NotNil(t, m) {
+				assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+				assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+				assert.Equal(t, model.EventPullMetadata, b.Event)
+				assert.Equal(t, []string{"changes_request_removed"}, b.EventReason)
+				assert.Equal(t, "26240d6b7e74", b.Commit)
+				assert.Equal(t, "aha", b.Title)
+				assert.Equal(t, "", b.Message)
+				assert.Equal(t, "demoaccount2-commits", b.Author)
+				assert.False(t, m.NeedPostProcessing)
+			}
+		})
+
+		t.Run("pre-parse 'pullrequest:updated'", func(t *testing.T) {
+			// the "pullrequest:updated" event will be pre-parsed but needs post processing via API query and DB query
+			t.Run("pull-request updated", func(t *testing.T) {
+				buf := bytes.NewBufferString(fixtures.HookPullPush)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+				req.Header = fixtures.HookPullPushHeaders
+
+				m, b, err := parseHook(req)
+				assert.NoError(t, err)
+				if assert.NotNil(t, b) && assert.NotNil(t, m) {
+					assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+					assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/2", b.ForgeURL)
+					assert.Equal(t, model.EventPull, b.Event)
+					assert.True(t, m.NeedPostProcessing)
+					assert.Equal(t, "26240d6b7e74", b.Commit)
+					assert.Equal(t, "aha", b.Title)
+					assert.Equal(t, "some nice ahas", b.Message)
+					assert.Equal(t, "6543", b.Author)
+				}
+			})
+			t.Run("pull-request to draft", func(t *testing.T) {
+				buf := bytes.NewBufferString(fixtures.HookPullToDraft)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+				req.Header = fixtures.HookPullToDraftHeaders
+
+				m, b, err := parseHook(req)
+				assert.NoError(t, err)
+				if assert.NotNil(t, b) && assert.NotNil(t, m) {
+					assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+					assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
+					assert.Equal(t, model.EventPull, b.Event)
+					assert.True(t, m.NeedPostProcessing)
+					assert.Equal(t, "d0e829618d28", b.Commit)
+					assert.Equal(t, "taerg era senilwen", b.Title)
+					assert.Equal(t, "", b.Message)
+					assert.Equal(t, "6543", b.Author)
+				}
+			})
+
+			t.Run("pull-request ready from draft", func(t *testing.T) {
+				buf := bytes.NewBufferString(fixtures.HookPullReadyFromDraft)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+				req.Header = fixtures.HookPullReadyFromDraftHeaders
+
+				m, b, err := parseHook(req)
+				assert.NoError(t, err)
+				if assert.NotNil(t, b) && assert.NotNil(t, m) {
+					assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+					assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/1", b.ForgeURL)
+					assert.Equal(t, model.EventPull, b.Event)
+					assert.True(t, m.NeedPostProcessing)
+					assert.Equal(t, "d0e829618d28", b.Commit)
+					assert.Equal(t, "taerg era senilwen", b.Title)
+					assert.Equal(t, "", b.Message)
+					assert.Equal(t, "6543", b.Author)
+				}
+			})
+
+			t.Run("pull-request review requested", func(t *testing.T) {
+				buf := bytes.NewBufferString(fixtures.HookPullReviewRequested)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+				req.Header = fixtures.HookPullReviewRequestedHeaders
+
+				m, b, err := parseHook(req)
+				assert.NoError(t, err)
+				if assert.NotNil(t, b) && assert.NotNil(t, m) {
+					assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+					assert.Equal(t, "https://bitbucket.org/6543/collect-webhooks/pull-requests/3", b.ForgeURL)
+					assert.Equal(t, model.EventPull, b.Event)
+					assert.True(t, m.NeedPostProcessing)
+					assert.Equal(t, "dd1c5b604ee9", b.Commit)
+					assert.Equal(t, "hturt eht llet", b.Title)
+					assert.Equal(t, "", b.Message)
+					assert.Equal(t, "6543", b.Author)
+				}
+			})
+		})
 	})
 
-	t.Run("pull-request", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPull)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPullCreated)
+	t.Run("push hooks", func(t *testing.T) {
+		t.Run("malformed push", func(t *testing.T) {
+			buf := bytes.NewBufferString("[]")
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = http.Header{}
+			req.Header.Set(hookEvent, hookPush)
 
-		r, b, err := parseHook(req)
-		assert.NoError(t, err)
-		assert.Equal(t, "user_name/repo_name", r.FullName)
-		assert.Equal(t, model.EventPull, b.Event)
-		assert.Equal(t, "d3022fc0ca3d", b.Commit)
-	})
+			_, _, err := parseHook(req)
+			assert.Error(t, err)
+		})
 
-	t.Run("pull-request merged", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPullMerged)
+		t.Run("missing commit sha", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPushEmptyHash)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = http.Header{}
+			req.Header.Set(hookEvent, hookPush)
 
-		r, b, err := parseHook(req)
-		assert.NoError(t, err)
-		assert.Equal(t, "anbraten/test-2", r.FullName)
-		assert.Equal(t, model.EventPullClosed, b.Event)
-		assert.Equal(t, "006704dbeab2", b.Commit)
-	})
+			m, b, err := parseHook(req)
+			assert.Nil(t, m)
+			assert.Nil(t, b)
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+		})
 
-	t.Run("pull-request closed", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequestDeclined)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPullDeclined)
+		t.Run("push hook", func(t *testing.T) {
+			buf := bytes.NewBufferString(fixtures.HookPush)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+			req.Header = fixtures.HookPushHeaders
 
-		r, b, err := parseHook(req)
-		assert.NoError(t, err)
-		assert.Equal(t, "anbraten/test-2", r.FullName)
-		assert.Equal(t, model.EventPullClosed, b.Event)
-		assert.Equal(t, "f90e18fc9d45", b.Commit)
-	})
-
-	t.Run("malformed push", func(t *testing.T) {
-		buf := bytes.NewBufferString("[]")
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPush)
-
-		_, _, err := parseHook(req)
-		assert.Error(t, err)
-	})
-
-	t.Run("missing commit sha", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPushEmptyHash)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPush)
-
-		r, b, err := parseHook(req)
-		assert.Nil(t, r)
-		assert.Nil(t, b)
-		assert.NoError(t, err)
-	})
-
-	t.Run("push hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPush)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPush)
-
-		r, b, err := parseHook(req)
-		assert.NoError(t, err)
-		assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
-		assert.Equal(t, "https://bitbucket.org/martinherren1984/publictestrepo", r.Clone)
-		assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
-		assert.Equal(t, "a\n", b.Message)
+			m, b, err := parseHook(req)
+			assert.NoError(t, err)
+			assert.Equal(t, "6543/collect-webhooks", m.RepoFullName)
+			assert.Equal(t, "859c737a468f8168b257db109295876fd1f5dbd6", b.Commit)
+			assert.Equal(t, "b hcus on si ereht\n", b.Message)
+			assert.Equal(t, "6543", b.Author)
+			assert.Equal(t, model.EventPush, b.Event)
+			assert.Empty(t, b.EventReason)
+		})
 	})
 }

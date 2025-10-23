@@ -30,24 +30,26 @@ import (
 )
 
 const (
-	pathUser          = "%s/2.0/user/"
-	pathEmails        = "%s/2.0/user/emails"
-	pathPermission    = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
-	pathPermissions   = "%s/2.0/user/permissions/repositories?%s"
-	pathWorkspaces    = "%s/2.0/workspaces/?%s"
-	pathWorkspace     = "%s/2.0/workspaces/%s"
-	pathRepo          = "%s/2.0/repositories/%s/%s"
-	pathRepos         = "%s/2.0/repositories/%s?%s"
-	pathHook          = "%s/2.0/repositories/%s/%s/hooks/%s"
-	pathHooks         = "%s/2.0/repositories/%s/%s/hooks?%s"
-	pathSource        = "%s/2.0/repositories/%s/%s/src/%s/%s"
-	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
-	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
-	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
-	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
-	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
-	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
-	pageSize          = 100
+	pathUser         = "%s/2.0/user/"
+	pathEmails       = "%s/2.0/user/emails"
+	pathPermission   = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathPermissions  = "%s/2.0/user/permissions/repositories?%s"
+	pathWorkspaces   = "%s/2.0/workspaces/?%s"
+	pathWorkspace    = "%s/2.0/workspaces/%s"
+	pathRepo         = "%s/2.0/repositories/%s/%s"
+	pathRepos        = "%s/2.0/repositories/%s?%s"
+	pathHook         = "%s/2.0/repositories/%s/%s/hooks/%s"
+	pathHooks        = "%s/2.0/repositories/%s/%s/hooks?%s"
+	pathSource       = "%s/2.0/repositories/%s/%s/src/%s/%s"
+	pathStatus       = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
+	pathBranches     = "%s/2.0/repositories/%s/%s/refs/branches?%s"
+	pathOrgPerms     = "%s/2.0/workspaces/%s/permissions?%s"
+	pathPullRequests = "%s/2.0/repositories/%s/%s/pullrequests?%s"
+	pathCommit       = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathDir          = "%s/2.0/repositories/%s/%s/src/%s/%s"
+	pageSize         = 100
+
+	maxIterations = 1000
 )
 
 type Client struct {
@@ -195,7 +197,7 @@ func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, er
 
 func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 	out := new(CommitsResp)
-	uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch)
+	uri := fmt.Sprintf(pathCommit, c.base, owner, name, branch)
 	_, err := c.do(uri, http.MethodGet, nil, out)
 	if err != nil {
 		return nil, err
@@ -204,6 +206,13 @@ func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 		return nil, fmt.Errorf("no commits in branch %s", branch)
 	}
 	return out.Values[0], nil
+}
+
+func (c *Client) GetCommit(owner, name, sha string) (*Commit, error) {
+	out := new(Commit)
+	uri := fmt.Sprintf(pathCommit, c.base, owner, name, sha)
+	_, err := c.do(uri, http.MethodGet, nil, out)
+	return out, err
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
@@ -250,6 +259,29 @@ func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) 
 	}
 	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
+}
+
+// GetDiffStat is used to get the files changed in a pull
+// we ned the exact api url from that pull so constructing is no option
+// use the linkKeyDiffStat to identify it in the pull links list.
+func (c *Client) GetDiffStat(diffStatAPI string, itMax ...int) ([]*DiffStatValue, error) {
+	maxPage := maxIterations
+	if len(itMax) != 0 {
+		maxPage = itMax[0]
+	}
+	out := new(DiffStatResponse)
+	_, err := c.do(diffStatAPI, http.MethodGet, nil, out)
+	if err != nil {
+		return nil, err
+	}
+	if out.Next != nil && maxPage > 0 {
+		values, err := c.GetDiffStat(*out.Next, maxPage-1)
+		if err != nil {
+			return nil, err
+		}
+		out.Values = append(out.Values, values...)
+	}
+	return out.Values, nil
 }
 
 func (c *Client) do(rawURL, method string, in, out any) (*string, error) {

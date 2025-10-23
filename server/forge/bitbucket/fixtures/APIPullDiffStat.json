@@ -1,0 +1,102 @@
+{
+  "values": [
+    {
+      "type": "diffstat",
+      "lines_added": 6,
+      "lines_removed": 1,
+      "status": "modified",
+      "old": {
+        "path": "a",
+        "type": "commit_file",
+        "escaped_path": "a",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/src/fc2a2c05765dd2c3a394c22daef5a172d6c0f378/a"
+          }
+        }
+      },
+      "new": {
+        "path": "a",
+        "type": "commit_file",
+        "escaped_path": "a",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/src/c3c36acef06437affefdefe2394685901e8791e5/a"
+          }
+        }
+      }
+    },
+    {
+      "type": "diffstat",
+      "lines_added": 2,
+      "lines_removed": 5,
+      "status": "modified",
+      "old": {
+        "path": "b",
+        "type": "commit_file",
+        "escaped_path": "b",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/src/fc2a2c05765dd2c3a394c22daef5a172d6c0f378/b"
+          }
+        }
+      },
+      "new": {
+        "path": "b",
+        "type": "commit_file",
+        "escaped_path": "b",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/src/c3c36acef06437affefdefe2394685901e8791e5/b"
+          }
+        }
+      }
+    },
+    {
+      "type": "diffstat",
+      "lines_added": 0,
+      "lines_removed": 0,
+      "status": "renamed",
+      "old": {
+        "path": "emos",
+        "type": "commit_file",
+        "escaped_path": "emos",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/src/fc2a2c05765dd2c3a394c22daef5a172d6c0f378/emos"
+          }
+        }
+      },
+      "new": {
+        "path": "dir/dir2/dir3/emos",
+        "type": "commit_file",
+        "escaped_path": "dir/dir2/dir3/emos",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/src/c3c36acef06437affefdefe2394685901e8791e5/dir/dir2/dir3/emos"
+          }
+        }
+      }
+    },
+    {
+      "type": "diffstat",
+      "lines_added": 1,
+      "lines_removed": 0,
+      "status": "added",
+      "old": null,
+      "new": {
+        "path": "dir/dir2/dir3/some-file",
+        "type": "commit_file",
+        "escaped_path": "dir/dir2/dir3/some-file",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/src/c3c36acef06437affefdefe2394685901e8791e5/dir/dir2/dir3/some-file"
+          }
+        }
+      }
+    }
+  ],
+  "pagelen": 500,
+  "size": 4,
+  "page": 1
+}

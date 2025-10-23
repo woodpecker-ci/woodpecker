@@ -23,19 +23,23 @@ import (
 // cspell:words pagelen
 
 type Account struct {
-	UUID  string `json:"uuid"`
-	Login string `json:"username"`
-	Name  string `json:"display_name"`
-	Type  string `json:"type"`
-	Links Links  `json:"links"`
+	UUID        string       `json:"uuid"`
+	AccountID   string       `json:"account_id"`
+	Nickname    string       `json:"nickname"`
+	DisplayName string       `json:"display_name"`
+	Type        string       `json:"type"`
+	Links       WebhookLinks `json:"links"`
+	// only available at the direct account api
+	AccountStatus string  `json:"account_status"` // should be "active"
+	Location      *string `json:"location"`
 }
 
 type Workspace struct {
-	UUID  string `json:"uuid"`
-	Slug  string `json:"slug"`
-	Name  string `json:"name"`
-	Type  string `json:"type"`
-	Links Links  `json:"links"`
+	UUID  string       `json:"uuid"`
+	Slug  string       `json:"slug"`
+	Name  string       `json:"name"`
+	Type  string       `json:"type"`
+	Links WebhookLinks `json:"links"`
 }
 
 type WorkspacesResp struct {
@@ -84,36 +88,62 @@ type HookResp struct {
 	Values []*Hook `json:"values"`
 }
 
-type Links struct {
-	Self   Link   `json:"self"`
-	Avatar Link   `json:"avatar"`
-	HTML   Link   `json:"html"`
-	Clone  []Link `json:"clone"`
+type WebhookLinks map[string]struct {
+	Href string `json:"href"`
 }
 
 type Link struct {
 	Href string `json:"href"`
-	Name string `json:"name"`
-}
-
-type LinkClone struct {
-	Link
 }
 
 type Repo struct {
-	UUID       string  `json:"uuid"`
-	Owner      Account `json:"owner"`
-	Name       string  `json:"name"`
-	FullName   string  `json:"full_name"`
-	Language   string  `json:"language"`
-	IsPrivate  bool    `json:"is_private"`
-	Scm        string  `json:"scm"`
-	Desc       string  `json:"desc"`
-	Links      Links   `json:"links"`
+	UUID      string  `json:"uuid"`
+	Owner     Account `json:"owner"`
+	Name      string  `json:"name"`
+	FullName  string  `json:"full_name"`
+	Language  string  `json:"language"`
+	IsPrivate bool    `json:"is_private"`
+	Scm       string  `json:"scm"`
+	Desc      string  `json:"desc"`
+	Links     struct {
+		Avatar Link `json:"avatar"`
+		HTML   Link `json:"html"`
+		Clone  []struct {
+			Href string `json:"href"`
+			Name string `json:"name"`
+		} `json:"clone"`
+	} `json:"links"`
 	MainBranch struct {
 		Type string `json:"type"`
 		Name string `json:"name"`
 	} `json:"mainbranch"` // cspell:ignore mainbranch
+}
+
+type WebhookRepo struct {
+	UUID      string       `json:"uuid"`
+	Type      string       `json:"type"`
+	Name      string       `json:"name"`
+	FullName  string       `json:"full_name"`
+	Scm       string       `json:"scm"`
+	Website   *string      `json:"website"`
+	IsPrivate bool         `json:"is_private"`
+	Links     WebhookLinks `json:"links"`
+	Owner     Account      `json:"owner"`
+	Workspace struct {
+		Type  string       `json:"type"`
+		UUID  string       `json:"uuid"`
+		Name  string       `json:"name"`
+		Slug  string       `json:"slug"`
+		Links WebhookLinks `json:"links"`
+	} `json:"workspace"`
+	Project struct {
+		Type  string       `json:"type"`
+		Key   string       `json:"key"`
+		UUID  string       `json:"uuid"`
+		Name  string       `json:"name"`
+		Links WebhookLinks `json:"links"`
+	} `json:"project"`
+	Parent *WebhookRepo `json:"parent"`
 }
 
 type RepoResp struct {
@@ -129,11 +159,11 @@ type Change struct {
 		Type   string `json:"type"`
 		Name   string `json:"name"`
 		Target struct {
-			Type    string    `json:"type"`
-			Hash    string    `json:"hash"`
-			Message string    `json:"message"`
-			Date    time.Time `json:"date"`
-			Links   Links     `json:"links"`
+			Type    string       `json:"type"`
+			Hash    string       `json:"hash"`
+			Message string       `json:"message"`
+			Date    time.Time    `json:"date"`
+			Links   WebhookLinks `json:"links"`
 			Author  struct {
 				Raw  string  `json:"raw"`
 				User Account `json:"user"`
@@ -143,47 +173,97 @@ type Change struct {
 }
 
 type PushHook struct {
-	Actor Account `json:"actor"`
-	Repo  Repo    `json:"repository"`
+	Actor Account     `json:"actor"`
+	Repo  WebhookRepo `json:"repository"`
 	Push  struct {
 		Changes []Change `json:"changes"`
 	} `json:"push"`
 }
 
+type Participant struct {
+	Type           string    `json:"type"`
+	User           Account   `json:"user"`
+	Role           string    `json:"role"`
+	Approved       bool      `json:"approved"`
+	State          *string   `json:"state"`
+	ParticipatedOn time.Time `json:"participated_on"`
+}
+
 type PullRequestHook struct {
-	Actor       Account `json:"actor"`
-	Repo        Repo    `json:"repository"`
+	Actor       Account     `json:"actor"`
+	Repo        WebhookRepo `json:"repository"`
 	PullRequest struct {
-		ID      int       `json:"id"`
-		Type    string    `json:"type"`
-		Reason  string    `json:"reason"`
-		Desc    string    `json:"description"`
-		Title   string    `json:"title"`
-		State   string    `json:"state"`
-		Links   Links     `json:"links"`
-		Created time.Time `json:"created_on"`
-		Updated time.Time `json:"updated_on"`
+		ID           int          `json:"id"`
+		Type         string       `json:"type"`
+		Reason       string       `json:"reason"`
+		Desc         string       `json:"description"`
+		Title        string       `json:"title"`
+		State        string       `json:"state"`
+		Draft        bool         `json:"draft"`
+		CommentCount int          `json:"comment_count"`
+		TaskCount    int          `json:"task_count"`
+		Links        WebhookLinks `json:"links"`
+		Created      time.Time    `json:"created_on"`
+		Updated      time.Time    `json:"updated_on"`
+
+		CloseSourceBranch bool          `json:"close_source_branch"`
+		ClosedBy          *Account      `json:"closed_by"`
+		Author            Account       `json:"author"`
+		Reviewers         []Account     `json:"reviewers"`
+		Participants      []Participant `json:"participants"`
+
+		Rendered struct {
+			Title struct {
+				Type   string `json:"type"`
+				Raw    string `json:"raw"`
+				Markup string `json:"markup"`
+				HTML   string `json:"html"`
+			} `json:"title"`
+			Description struct {
+				Type   string `json:"type"`
+				Raw    string `json:"raw"`
+				Markup string `json:"markup"`
+				HTML   string `json:"html"`
+			} `json:"description"`
+			Reason struct {
+				Type   string `json:"type"`
+				Raw    string `json:"raw"`
+				Markup string `json:"markup"`
+				HTML   string `json:"html"`
+			} `json:"reason"`
+		} `json:"rendered"`
+
+		Summary struct {
+			Type   string `json:"type"`
+			Raw    string `json:"raw"`
+			Markup string `json:"markup"`
+			HTML   string `json:"html"`
+		} `json:"summary"`
 
 		MergeCommit struct {
 			Hash string `json:"hash"`
 		} `json:"merge_commit"`
 
 		Source struct {
-			Repo   Repo `json:"repository"`
+			Repo   WebhookRepo `json:"repository"`
 			Commit struct {
-				Hash  string `json:"hash"`
-				Links Links  `json:"links"`
+				Hash  string       `json:"hash"`
+				Type  string       `json:"type"`
+				Links WebhookLinks `json:"links"`
 			} `json:"commit"`
 			Branch struct {
-				Name string `json:"name"`
+				Name           string       `json:"name"`
+				Links          WebhookLinks `json:"links"`
+				SyncStrategies []string     `json:"sync_strategies"`
 			} `json:"branch"`
 		} `json:"source"`
 
-		Dest struct {
-			Repo   Repo `json:"repository"`
+		Destination struct {
+			Repo   WebhookRepo `json:"repository"`
 			Commit struct {
-				Hash  string `json:"hash"`
-				Links Links  `json:"links"`
+				Hash  string       `json:"hash"`
+				Type  string       `json:"type"`
+				Links WebhookLinks `json:"links"`
 			} `json:"commit"`
 			Branch struct {
 				Name string `json:"name"`
@@ -307,4 +387,28 @@ type Dir struct {
 	Path string `json:"path"`
 	Type string `json:"type"`
 	Size uint   `json:"size"`
+}
+
+type DiffStatResponse struct {
+	Values  []*DiffStatValue `json:"values"`
+	Pagelen int              `json:"pagelen"`
+	Size    int              `json:"size"`
+	Page    int              `json:"page"`
+	Next    *string          `json:"next"`
+}
+
+type DiffStatValue struct {
+	Type         string              `json:"type"`
+	LinesAdded   int                 `json:"lines_added"`
+	LinesRemoved int                 `json:"lines_removed"`
+	Status       string              `json:"status"`
+	Old          *DiffStatCommitFile `json:"old"`
+	New          *DiffStatCommitFile `json:"new"`
+}
+
+type DiffStatCommitFile struct {
+	Path        string       `json:"path"`
+	Type        string       `json:"type"`
+	EscapedPath string       `json:"escaped_path"`
+	Links       WebhookLinks `json:"links"`
 }
