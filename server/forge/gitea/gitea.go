@@ -120,7 +120,7 @@ func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mode
 
 	token, err := config.Exchange(oauth2Ctx, req.Code)
 	if err != nil {
-		return nil, redirectURL, fmt.Errorf("oauth2 config exchange failed with code '%s': %w", req.Code, err)
+		return nil, redirectURL, fmt.Errorf("oauth2 config exchange failed: %w",, err)
 	}
 
 	client, err := c.newClientToken(ctx, token.AccessToken)
