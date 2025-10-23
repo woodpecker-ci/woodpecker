@@ -129,7 +129,7 @@ func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mode
 	}
 	account, _, err := client.GetMyUserInfo()
 	if err != nil {
-		return nil, redirectURL, fmt.Errorf("fetch user info failed: %w", err)
+		return nil, redirectURL, fmt.Errorf("fetching user info failed: %w", err)
 	}
 
 	return &model.User{
