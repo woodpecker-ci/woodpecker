@@ -6,6 +6,7 @@ import (
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -35,7 +36,7 @@ func parseHook(r *http.Request, baseURL string) (*HookResult, error) {
 		result.Repo = convertRepo(&e.PullRequest.Target.Repository, nil, "")
 		result.Pipeline = convertPullRequestEvent(e, baseURL)
 	default:
-		return nil, fmt.Errorf("unsupported webhook event type: %T", e)
+		return nil, &types.ErrIgnoreEvent{Event: fmt.Sprintf("%T", e), Reason: "unsupported webhook event type"}
 	}
 
 	return result, nil
