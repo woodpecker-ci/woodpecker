@@ -120,16 +120,16 @@ func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mode
 
 	token, err := config.Exchange(oauth2Ctx, req.Code)
 	if err != nil {
-		return nil, redirectURL, err
+		return nil, redirectURL, fmt.Errorf("oauth2 config exchange failed with code '%s': %w", req.Code, err)
 	}
 
 	client, err := c.newClientToken(ctx, token.AccessToken)
 	if err != nil {
-		return nil, redirectURL, err
+		return nil, redirectURL, fmt.Errorf("client creation with new access token failed: %w", err)
 	}
 	account, _, err := client.GetMyUserInfo()
 	if err != nil {
-		return nil, redirectURL, err
+		return nil, redirectURL, fmt.Errorf("fetch user info failed: %w", err)
 	}
 
 	return &model.User{
