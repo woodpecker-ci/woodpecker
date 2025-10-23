@@ -60,3 +60,5 @@ const (
 	StepTypeCommands StepType = "commands"
 	StepTypeCache    StepType = "cache"
 )
+
+const defaultForgeID = 1
