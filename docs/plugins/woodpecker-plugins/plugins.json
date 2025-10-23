@@ -289,6 +289,16 @@
       "name": "SonarQube",
       "docs": "https://raw.githubusercontent.com/j04n-f/woodpecker-sonar-plugin/refs/heads/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Github App Tokens",
+      "docs": "https://raw.githubusercontent.com/yyewolf/woodpecker-plugins/refs/heads/main/github-app-token/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Github Comment",
+      "docs": "https://raw.githubusercontent.com/yyewolf/woodpecker-plugins/refs/heads/main/github-comment/docs.md",
+      "verified": false
     }
   ]
 }
