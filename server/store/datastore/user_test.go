@@ -32,11 +32,12 @@ func TestUsers(t *testing.T) {
 	assert.Zero(t, count)
 
 	user := model.User{
-		Login:        "joe",
-		AccessToken:  "f0b461ca586c27872b43a0685cbc2847",
-		RefreshToken: "976f22a5eef7caacb7e678d6c52f49b1",
-		Email:        "foo@bar.com",
-		Avatar:       "b9015b0857e16ac4d94a0ffd9a0b79c8",
+		Login:         "joe",
+		ForgeRemoteID: "joe",
+		AccessToken:   "f0b461ca586c27872b43a0685cbc2847",
+		RefreshToken:  "976f22a5eef7caacb7e678d6c52f49b1",
+		Email:         "foo@bar.com",
+		Avatar:        "b9015b0857e16ac4d94a0ffd9a0b79c8",
 	}
 	err = store.CreateUser(&user)
 	assert.NoError(t, err)
@@ -54,25 +55,27 @@ func TestUsers(t *testing.T) {
 	assert.Equal(t, user.Email, getUser.Email)
 	assert.Equal(t, user.Avatar, getUser.Avatar)
 
-	getUser, err = store.GetUserLogin(user.Login)
+	getUser, err = store.GetUserByLogin(user.ForgeID, user.Login)
 	assert.NoError(t, err)
 	assert.Equal(t, user.ID, getUser.ID)
 	assert.Equal(t, user.Login, getUser.Login)
 
 	// check unique login
 	user2 := model.User{
-		Login:       "Joe",
-		Email:       "foo2@bar.com",
-		AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
+		Login:         "Joe",
+		ForgeRemoteID: "joe",
+		Email:         "foo2@bar.com",
+		AccessToken:   "ab20g0ddaf012c744e136da16aa21ad9",
 	}
 	err2 = store.CreateUser(&user2)
 	assert.Error(t, err2)
 
 	user2 = model.User{
-		Login:       "jane",
-		Email:       "foo@bar.com",
-		AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
-		Hash:        "A",
+		Login:         "jane",
+		ForgeRemoteID: "jane",
+		Email:         "foo@bar.com",
+		AccessToken:   "ab20g0ddaf012c744e136da16aa21ad9",
+		Hash:          "A",
 	}
 	assert.NoError(t, store.CreateUser(&user2))
 	users, err := store.GetUserList(&model.ListOptions{Page: 1, PerPage: 50})
@@ -112,9 +115,10 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 
 	// Create a new user with the same name as the existing organization
 	newUser := &model.User{
-		Login:   "existingOrg",
-		Hash:    "A",
-		ForgeID: 1,
+		Login:         "existingOrg",
+		ForgeRemoteID: "A",
+		Hash:          "A",
+		ForgeID:       1,
 	}
 	err = store.CreateUser(newUser)
 	assert.NoError(t, err)
@@ -124,9 +128,10 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 	assert.Equal(t, "existingOrg", updatedOrg.Name)
 
 	newUser2 := &model.User{
-		Login:   "new-user",
-		ForgeID: 1,
-		Hash:    "B",
+		Login:         "new-user",
+		ForgeRemoteID: "B",
+		ForgeID:       1,
+		Hash:          "B",
 	}
 	err = store.CreateUser(newUser2)
 	assert.NoError(t, err)

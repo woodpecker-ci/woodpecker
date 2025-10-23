@@ -4482,6 +4482,19 @@ const docTemplate = `{
                         "name": "login",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify forge (else default will be used)",
+                        "name": "forge_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify user id at forge (else fallback to login)",
+                        "name": "forge_remote_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4517,6 +4530,19 @@ const docTemplate = `{
                         "name": "login",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify forge (else default will be used)",
+                        "name": "forge_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify user id at forge (else fallback to login)",
+                        "name": "forge_remote_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5624,6 +5650,9 @@ const docTemplate = `{
                 },
                 "forge_id": {
                     "type": "integer"
+                },
+                "forge_remote_id": {
+                    "type": "string"
                 },
                 "id": {
                     "description": "the id for this user.\n\nrequired: true",

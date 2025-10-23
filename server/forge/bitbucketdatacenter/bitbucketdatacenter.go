@@ -16,6 +16,7 @@ package bitbucketdatacenter
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -200,6 +201,10 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 	b, _, err := bc.Projects.GetDefaultBranch(ctx, repo.Project.Key, repo.Slug)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch default branch: %w", err)
+	}
+
+	if b.DisplayID == "" {
+		return nil, errors.New("default branch setting does not exist")
 	}
 
 	perms := &model.Perm{Pull: true, Push: true}

@@ -107,7 +107,7 @@ func Test_parseHook(t *testing.T) {
 		r, b, err := parseHook(req)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
-		assert.NoError(t, err)
+		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 	})
 
 	t.Run("push hook", func(t *testing.T) {
