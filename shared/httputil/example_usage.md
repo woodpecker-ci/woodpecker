@@ -205,12 +205,14 @@ func TestUserAgent(t *testing.T) {
 If you have existing code using `http.DefaultClient` or custom clients:
 
 **Before:**
+
 ```go
 client := http.DefaultClient
 resp, err := client.Get("https://api.example.com")
 ```
 
 **After:**
+
 ```go
 import "go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 
@@ -219,6 +221,7 @@ resp, err := client.Get("https://api.example.com")
 ```
 
 **Before (with custom transport):**
+
 ```go
 client := &http.Client{
     Transport: &http.Transport{
@@ -228,6 +231,7 @@ client := &http.Client{
 ```
 
 **After:**
+
 ```go
 import "go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 
