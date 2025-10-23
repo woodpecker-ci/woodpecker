@@ -71,7 +71,7 @@ func TestCopyLineByLine(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Wait until no writes have occurred (should be immediate)
+	// wait until no writes have occurred (should be immediate)
 	assert.Eventually(t, func() bool {
 		return len(testWriter.GetWrites()) == 0
 	}, time.Second, 5*time.Millisecond, "expected 0 writes after first write")
@@ -81,7 +81,7 @@ func TestCopyLineByLine(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Wait until two writes have occurred
+	// wait until two writes have occurred
 	assert.Eventually(t, func() bool {
 		return len(testWriter.GetWrites()) == 2
 	}, time.Second, 5*time.Millisecond, "expected 2 writes after second write")
@@ -93,7 +93,7 @@ func TestCopyLineByLine(t *testing.T) {
 	// closing the writer should flush the remaining data
 	w.Close()
 
-	// Wait for the goroutine to finish
+	// wait for the goroutine to finish
 	select {
 	case <-done:
 	case <-time.After(time.Second):

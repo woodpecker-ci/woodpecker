@@ -45,13 +45,22 @@ func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 	r := bufio.NewReader(src)
 
 	for {
-		// TODO: read til newline or maxSize directly
+		// read until newline or maxSize, whichever comes first
 		line, err := r.ReadBytes('\n')
-		if len(line) > 0 {
-			if err := writeChunks(dst, line, maxSize); err != nil {
-				return err
+
+		// if line is longer than maxSize, we need to chunk it
+		if len(line) > maxSize {
+			// write in chunks of maxSize
+			if werr := writeChunks(dst, line, maxSize); werr != nil {
+				return werr
+			}
+		} else if len(line) > 0 {
+			// line fits in maxSize, write it directly
+			if _, werr := dst.Write(line); werr != nil {
+				return werr
 			}
 		}
+
 		if errors.Is(err, io.EOF) {
 			break
 		} else if err != nil {
