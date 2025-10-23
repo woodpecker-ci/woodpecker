@@ -18,6 +18,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix nil pointer dereference during GitHub Hook parsing [[#5681](https://github.com/woodpecker-ci/woodpecker/pull/5681)]
 - Allow username to be used with multiple forges [[#5676](https://github.com/woodpecker-ci/woodpecker/pull/5676)]
 - Create GitHub forge via WebUI fails to be loaded [[#5675](https://github.com/woodpecker-ci/woodpecker/pull/5675)]
 - Bitbucket: ignore push hooks with no changes propperly [[#5672](https://github.com/woodpecker-ci/woodpecker/pull/5672)]
