@@ -18,6 +18,7 @@
 
 ### 🐛 Bug Fixes
 
+- Create GitHub forge via WebUI fails to be created [[#5675](https://github.com/woodpecker-ci/woodpecker/pull/5675)]
 - Bitbucket: ignore push hooks with no changes propperly [[#5672](https://github.com/woodpecker-ci/woodpecker/pull/5672)]
 - fix(bitbucketdatacenter): prevent adding new repos with empty branch [[#5669](https://github.com/woodpecker-ci/woodpecker/pull/5669)]
 - cli: show description of default value for `--backend-local-temp-dir` instead of value [[#5656](https://github.com/woodpecker-ci/woodpecker/pull/5656)]
