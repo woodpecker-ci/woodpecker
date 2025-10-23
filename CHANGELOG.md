@@ -18,7 +18,8 @@
 
 ### 🐛 Bug Fixes
 
-- Create GitHub forge via WebUI fails to be created [[#5675](https://github.com/woodpecker-ci/woodpecker/pull/5675)]
+- Allow username to be used with multiple forges [[#5676](https://github.com/woodpecker-ci/woodpecker/pull/5676)]
+- Create GitHub forge via WebUI fails to be loaded [[#5675](https://github.com/woodpecker-ci/woodpecker/pull/5675)]
 - Bitbucket: ignore push hooks with no changes propperly [[#5672](https://github.com/woodpecker-ci/woodpecker/pull/5672)]
 - fix(bitbucketdatacenter): prevent adding new repos with empty branch [[#5669](https://github.com/woodpecker-ci/woodpecker/pull/5669)]
 - cli: show description of default value for `--backend-local-temp-dir` instead of value [[#5656](https://github.com/woodpecker-ci/woodpecker/pull/5656)]
@@ -35,6 +36,7 @@
 
 ### Misc
 
+- Also create image preview on lable change only [[#5673](https://github.com/woodpecker-ci/woodpecker/pull/5673)]
 - Add migration tests for postgres [[#669](https://github.com/woodpecker-ci/woodpecker/pull/669)]
 
 ## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-19
