@@ -50,8 +50,8 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
-	github.com/urfave/cli-docs/v3 v3.1.0
-	github.com/urfave/cli/v3 v3.4.1
+	github.com/urfave/cli-docs/v3 v3.1.1-0.20251020155410-9c1a23c69f4e
+	github.com/urfave/cli/v3 v3.5.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.3.3
 	github.com/zalando/go-keyring v0.2.6
@@ -71,7 +71,7 @@ require (
 	k8s.io/client-go v0.34.1
 	src.techknowlogick.com/xormigrate v1.7.1
 	xorm.io/builder v0.3.13
-	xorm.io/xorm v1.3.10
+	xorm.io/xorm v1.3.11
 )
 
 require (
@@ -98,7 +98,7 @@ require (
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
@@ -123,7 +123,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.27.0 // indirect
-	github.com/goccy/go-json v0.10.3 // indirect
+	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.18.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect

@@ -738,5 +738,7 @@
     "extension_endpoint_placeholder": "p.ex., https://example.com/api",
     "config_extension_endpoint": "endpoint da extensão de configuração",
     "extensions_signatures_public_key": "Chave pública para assinaturas",
-    "extensions_signatures_public_key_description": "Esta chave pública deve ser usada por suas extensões para verificar se o chamadas de webhook do Woodpecker."
+    "extensions_signatures_public_key_description": "Esta chave pública deve ser usada por suas extensões para verificar se o chamadas de webhook do Woodpecker.",
+    "extensions_configuration_saved": "Configuração de extensões salva",
+    "disabled": "Desativado"
 }

@@ -38,12 +38,14 @@ func (mode ApprovalMode) Valid() bool {
 type (
 	// User represents a user account.
 	User struct {
-		ID     int64  `json:"id"`
-		Login  string `json:"login"`
-		Email  string `json:"email"`
-		Avatar string `json:"avatar_url"`
-		Active bool   `json:"active"`
-		Admin  bool   `json:"admin"`
+		ID            int64  `json:"id"`
+		ForgeID       int64  `json:"forge_id"`
+		ForgeRemoteID string `json:"forge_remote_id"`
+		Login         string `json:"login"`
+		Email         string `json:"email"`
+		Avatar        string `json:"avatar_url"`
+		Active        bool   `json:"active"`
+		Admin         bool   `json:"admin"`
 	}
 
 	// Repo represents a repository.
