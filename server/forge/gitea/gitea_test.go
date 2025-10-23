@@ -87,7 +87,7 @@ func Test_gitea(t *testing.T) {
 	})
 
 	t.Run("repository list", func(t *testing.T) {
-		repos, err := c.Repos(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
+		repos, err := c.Repos(ctx, fakeUser)
 		assert.NoError(t, err)
 		assert.Equal(t, fakeRepo.ForgeRemoteID, repos[0].ForgeRemoteID)
 		assert.Equal(t, fakeRepo.Owner, repos[0].Owner)
@@ -95,7 +95,7 @@ func Test_gitea(t *testing.T) {
 		assert.Equal(t, fakeRepo.Owner+"/"+fakeRepo.Name, repos[0].FullName)
 	})
 	t.Run("not found error", func(t *testing.T) {
-		_, err := c.Repos(ctx, fakeUserNoRepos, &model.ListOptions{Page: 1, PerPage: 10})
+		_, err := c.Repos(ctx, fakeUserNoRepos)
 		assert.Error(t, err)
 	})
 

@@ -45,7 +45,6 @@ type contextKey string
 const (
 	defaultURL                 = "https://github.com"      // Default GitHub URL
 	defaultAPI                 = "https://api.github.com/" // Default GitHub API URL
-	defaultPageSize            = 100
 	githubClientKey contextKey = "github_client"
 )
 
@@ -184,17 +183,22 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 }
 
 // Teams returns a list of all team membership for the GitHub account.
-func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	client := c.newClientToken(ctx, u.AccessToken)
 
-	list, _, err := client.Organizations.List(ctx, "", &github.ListOptions{
-		Page:    p.Page,
-		PerPage: perPage(p.PerPage),
-	})
-	if err != nil {
-		return nil, err
+	opts := new(github.ListOptions)
+	opts.Page = 1
+
+	var teams []*model.Team
+	for opts.Page > 0 {
+		list, resp, err := client.Organizations.List(ctx, "", opts)
+		if err != nil {
+			return nil, err
+		}
+		teams = append(teams, convertTeamList(list)...)
+		opts.Page = resp.NextPage
 	}
-	return convertTeamList(list), nil
+	return teams, nil
 }
 
 // Repo returns the GitHub repository.
@@ -222,23 +226,26 @@ func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeRemoteID
 
 // Repos returns a list of all repositories for GitHub account, including
 // organization repositories.
-func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := c.newClientToken(ctx, u.AccessToken)
-	list, _, err := client.Repositories.ListByAuthenticatedUser(ctx, &github.RepositoryListByAuthenticatedUserOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	repos := make([]*model.Repo, 0, len(list))
-	for _, repo := range list {
-		if repo.GetArchived() {
-			continue
+
+	opts := new(github.RepositoryListByAuthenticatedUserOptions)
+	opts.PerPage = 100
+	opts.Page = 1
+
+	var repos []*model.Repo
+	for opts.Page > 0 {
+		list, resp, err := client.Repositories.ListByAuthenticatedUser(ctx, opts)
+		if err != nil {
+			return nil, err
 		}
-		repos = append(repos, convertRepo(repo))
+		for _, repo := range list {
+			if repo.GetArchived() {
+				continue
+			}
+			repos = append(repos, convertRepo(repo))
+		}
+		opts.Page = resp.NextPage
 	}
 	return repos, nil
 }
@@ -318,11 +325,8 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	client := c.newClientToken(ctx, token)
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
-		State: "open",
+		ListOptions: github.ListOptions{Page: p.Page, PerPage: p.PerPage},
+		State:       "open",
 	})
 	if err != nil {
 		return nil, err
@@ -582,10 +586,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
+		ListOptions: github.ListOptions{Page: p.Page, PerPage: p.PerPage},
 	})
 	if err != nil {
 		return nil, err
@@ -785,11 +786,4 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 
 	pipeline.ChangedFiles = utils.DeduplicateStrings(fileList)
 	return pipeline, err
-}
-
-func perPage(custom int) int {
-	if custom < 1 || custom > defaultPageSize {
-		return defaultPageSize
-	}
-	return custom
 }

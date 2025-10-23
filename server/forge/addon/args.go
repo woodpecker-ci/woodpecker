@@ -72,16 +72,6 @@ type argumentsOrgMembershipOrg struct {
 	Org string     `json:"org"`
 }
 
-type argumentsTeams struct {
-	U *modelUser         `json:"u"`
-	P *model.ListOptions `json:"p"`
-}
-
-type argumentsRepos struct {
-	U *modelUser         `json:"u"`
-	P *model.ListOptions `json:"p"`
-}
-
 type responseHook struct {
 	Repo     *modelRepo      `json:"repo"`
 	Pipeline *model.Pipeline `json:"pipeline"`

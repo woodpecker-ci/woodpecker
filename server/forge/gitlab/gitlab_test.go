@@ -71,14 +71,14 @@ func Test_GitLab(t *testing.T) {
 	// Test projects method
 	t.Run("Should return only non-archived projects is hidden", func(t *testing.T) {
 		client.hideArchives = true
-		_projects, err := client.Repos(ctx, &user, &model.ListOptions{Page: 1, PerPage: 10})
+		_projects, err := client.Repos(ctx, &user)
 		assert.NoError(t, err)
 		assert.Len(t, _projects, 1)
 	})
 
 	t.Run("Should return all the projects", func(t *testing.T) {
 		client.hideArchives = false
-		_projects, err := client.Repos(ctx, &user, &model.ListOptions{Page: 1, PerPage: 10})
+		_projects, err := client.Repos(ctx, &user)
 
 		assert.NoError(t, err)
 		assert.Len(t, _projects, 2)

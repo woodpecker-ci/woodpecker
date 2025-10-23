@@ -109,11 +109,8 @@ func (g *RPC) Auth(_ context.Context, token, secret string) (string, error) {
 	return resp, g.client.Call("Plugin.Auth", args, &resp)
 }
 
-func (g *RPC) Teams(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
-	args, err := json.Marshal(&argumentsTeams{
-		U: modelUserFromModel(u),
-		P: p,
-	})
+func (g *RPC) Teams(_ context.Context, u *model.User) ([]*model.Team, error) {
+	args, err := json.Marshal(modelUserFromModel(u))
 	if err != nil {
 		return nil, err
 	}
@@ -151,11 +148,8 @@ func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteI
 	return resp.asModel(), nil
 }
 
-func (g *RPC) Repos(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
-	args, err := json.Marshal(&argumentsRepos{
-		U: modelUserFromModel(u),
-		P: p,
-	})
+func (g *RPC) Repos(_ context.Context, u *model.User) ([]*model.Repo, error) {
+	args, err := json.Marshal(modelUserFromModel(u))
 	if err != nil {
 		return nil, err
 	}
