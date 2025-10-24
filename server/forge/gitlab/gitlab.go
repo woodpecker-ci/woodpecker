@@ -41,8 +41,8 @@ import (
 )
 
 const (
-	defaultScope   = "api"
-	defaultPerPage = 100
+	defaultScope = "api"
+	perPage      = 100
 )
 
 // Opts defines configuration options.
@@ -191,36 +191,35 @@ func (g *GitLab) Auth(ctx context.Context, token, _ string) (string, error) {
 }
 
 // Teams fetches a list of team memberships from the forge.
-func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptions) ([]*model.Team, error) {
+func (g *GitLab) Teams(ctx context.Context, user *model.User) ([]*model.Team, error) {
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	perPage := p.PerPage
-	if perPage > defaultPerPage {
-		perPage = defaultPerPage
-	}
+	teams := make([]*model.Team, 0, perPage)
 
-	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage,
-		},
-		AllAvailable:   gitlab.Ptr(false),
-		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
-	}, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
-	}
+	for i := 1; true; i++ {
+		batch, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
+			ListOptions:    gitlab.ListOptions{Page: i, PerPage: perPage},
+			AllAvailable:   gitlab.Ptr(false),
+			MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
+		}, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
 
-	teams := make([]*model.Team, 0, len(groups))
-	for i := range groups {
-		teams = append(teams, &model.Team{
-			Login:  groups[i].Name,
-			Avatar: groups[i].AvatarURL,
-		},
-		)
+		for i := range batch {
+			teams = append(teams, &model.Team{
+				Login:  batch[i].Name,
+				Avatar: batch[i].AvatarURL,
+			},
+			)
+		}
+
+		if len(batch) < perPage {
+			break
+		}
 	}
 
 	return teams, nil
@@ -286,22 +285,15 @@ func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.Forg
 }
 
 // Repos fetches a list of repos from the forge.
-func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, error) {
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	perPage := p.PerPage
-	if perPage > defaultPerPage {
-		perPage = defaultPerPage
-	}
-
+	repos := make([]*model.Repo, 0, perPage)
 	opts := &gitlab.ListProjectsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage,
-		},
+		ListOptions:    gitlab.ListOptions{PerPage: perPage},
 		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.hideArchives {
@@ -312,25 +304,30 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 		return nil, err
 	}
 
-	projects, _, err := client.Projects.ListProjects(opts, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
-	}
-
-	repos := make([]*model.Repo, 0, len(projects))
-
-	for i := range projects {
-		projectMember, _, err := client.ProjectMembers.GetInheritedProjectMember(projects[i].ID, intUserID, gitlab.WithContext(ctx))
+	for i := 1; true; i++ {
+		opts.Page = i
+		batch, _, err := client.Projects.ListProjects(opts, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
 		}
 
-		repo, err := g.convertGitLabRepo(projects[i], projectMember)
-		if err != nil {
-			return nil, err
+		for i := range batch {
+			projectMember, _, err := client.ProjectMembers.GetInheritedProjectMember(batch[i].ID, intUserID, gitlab.WithContext(ctx))
+			if err != nil {
+				return nil, err
+			}
+
+			repo, err := g.convertGitLabRepo(batch[i], projectMember)
+			if err != nil {
+				return nil, err
+			}
+
+			repos = append(repos, repo)
 		}
 
-		repos = append(repos, repo)
+		if len(batch) < perPage {
+			break
+		}
 	}
 
 	return repos, err
@@ -391,14 +388,14 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		return nil, err
 	}
 
-	files := make([]*forge_types.FileMeta, 0, defaultPerPage)
+	files := make([]*forge_types.FileMeta, 0, perPage)
 	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	opts := &gitlab.ListTreeOptions{
-		ListOptions: gitlab.ListOptions{PerPage: defaultPerPage},
+		ListOptions: gitlab.ListOptions{PerPage: perPage},
 		Path:        &path,
 		Ref:         &pipeline.Commit,
 		Recursive:   gitlab.Ptr(false),
@@ -428,7 +425,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 			})
 		}
 
-		if len(batch) < defaultPerPage {
+		if len(batch) < perPage {
 			break
 		}
 	}
@@ -547,7 +544,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	}
 
 	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
-		PerPage: defaultPerPage,
+		PerPage: perPage,
 		Page:    1,
 	}
 	for {
@@ -680,7 +677,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 		ListOptions: gitlab.ListOptions{
 			Page:    1,
-			PerPage: defaultPerPage,
+			PerPage: perPage,
 		},
 		Search: gitlab.Ptr(owner),
 	}, gitlab.WithContext(ctx))
@@ -701,7 +698,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	opts := &gitlab.ListGroupMembersOptions{
 		ListOptions: gitlab.ListOptions{
 			Page:    1,
-			PerPage: defaultPerPage,
+			PerPage: perPage,
 		},
 	}
 
@@ -749,7 +746,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 		ListOptions: gitlab.ListOptions{
 			Page:    1,
-			PerPage: defaultPerPage,
+			PerPage: perPage,
 		},
 		Search: gitlab.Ptr(owner),
 	}, gitlab.WithContext(ctx))
