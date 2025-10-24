@@ -119,6 +119,17 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantMatched: true,
 			wantScore:   2,
 		},
+		{
+			name: "Required label matches without shebang",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"!org-id": "123", "platform": "linux", "extra": "value"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", "empty": ""},
+			},
+			wantMatched: true,
+			wantScore:   20,
+		},
 	}
 
 	for _, tt := range tests {

@@ -50,7 +50,11 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 			// all task labels are required to be present for an agent to match
 			agentLabelValue, ok := agentFilter.Labels[taskLabel]
 			if !ok {
-				return false, 0
+				// Check for required label
+				agentLabelValue, ok = agentFilter.Labels["!"+taskLabel]
+				if !ok {
+					return false, 0
+				}
 			}
 
 			switch agentLabelValue {
