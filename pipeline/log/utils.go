@@ -16,6 +16,7 @@ package log
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"io"
 )
@@ -43,29 +44,61 @@ func writeChunks(dst io.Writer, data []byte, size int) error {
 
 func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 	r := bufio.NewReader(src)
+	// buffer to cache
+	var buf []byte
+	// buffer to read
+	readBuf := make([]byte, maxSize)
 
 	for {
-		// read until newline or maxSize, whichever comes first
-		line, err := r.ReadBytes('\n')
+		// read from reader
+		n, err := r.Read(readBuf)
 
-		// if line is longer than maxSize, we need to chunk it
-		if len(line) > maxSize {
-			// write in chunks of maxSize
-			if werr := writeChunks(dst, line, maxSize); werr != nil {
-				return werr
-			}
-		} else if len(line) > 0 {
-			// line fits in maxSize, write it directly
-			if _, werr := dst.Write(line); werr != nil {
-				return werr
+		// handle the data first
+		if n > 0 {
+			// if it has data, cache into the buffer
+			buf = append(buf, readBuf[:n]...)
+
+			for len(buf) > 0 {
+				// find the index to anchor the new line
+				idx := bytes.IndexByte(buf, '\n')
+				if idx >= 0 {
+					// found the new line, write to the dst
+					lineEnd := idx + 1
+					if lineEnd > maxSize {
+						if wErr := writeChunks(dst, buf[:lineEnd], maxSize); wErr != nil {
+							return wErr
+						}
+					} else {
+						if _, wErr := dst.Write(buf[:lineEnd]); wErr != nil {
+							return wErr
+						}
+					}
+					// remove the line written from the buffer
+					buf = buf[lineEnd:]
+				} else if len(buf) >= maxSize {
+					if _, wErr := dst.Write(buf); wErr != nil {
+						return wErr
+					}
+					buf = buf[maxSize:]
+				} else {
+					// no newline found, block to read more data
+					break
+				}
 			}
 		}
 
+		// and then if it is EOF, write the remaining data and break the loop
 		if errors.Is(err, io.EOF) {
+			if len(buf) > 0 {
+				if _, wErr := dst.Write(buf); wErr != nil {
+					return wErr
+				}
+			}
 			break
 		} else if err != nil {
 			return err
 		}
+
 	}
 	return nil
 }
