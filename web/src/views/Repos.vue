@@ -6,6 +6,7 @@
 
     <template #headerActions>
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
+      <Button start-icon="refresh" :is-loading="isRefreshing" :text="$t('repo.refresh')" @click="refreshRepositories" />
     </template>
 
     <Transition name="fade" mode="out-in">
@@ -51,6 +52,7 @@ import useRepos from '~/compositions/useRepos';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import { useRepoStore } from '~/store/repos';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 
 const repoStore = useRepoStore();
 
@@ -62,6 +64,12 @@ const reposLastAccess = computed(() => sortReposByLastAccess(repos.value || []).
 const search = ref('');
 const { searchedRepos } = useRepoSearch(repos, search);
 const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
+
+const {doSubmit: refreshRepositories, isLoading: isRefreshing} = useAsyncAction(async () => {
+    await repoStore.refreshRepos();
+    await repoStore.loadRepos();
+  }
+)
 
 onMounted(async () => {
   await repoStore.loadRepos();
