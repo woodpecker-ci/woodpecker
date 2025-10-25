@@ -20,7 +20,7 @@
   "dependencies": {
     "@kyvg/vue3-notification": "^3.4.1",
     "@mdi/js": "^7.4.47",
-    "@vueuse/core": "^13.5.0",
+    "@vueuse/core": "^14.0.0",
     "ansi_up": "^6.0.6",
     "dompurify": "^3.2.6",
     "fuse.js": "^7.1.0",
