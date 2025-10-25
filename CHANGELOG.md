@@ -34,6 +34,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency @vueuse/core to v14 [[#5692](https://github.com/woodpecker-ci/woodpecker/pull/5692)]
 - chore(deps): update dependency vitest to v4 [[#5691](https://github.com/woodpecker-ci/woodpecker/pull/5691)]
 - chore(deps): update docker.io/mysql docker tag to v9.5.0 [[#5690](https://github.com/woodpecker-ci/woodpecker/pull/5690)]
 - chore(deps): update web npm deps non-major [[#5689](https://github.com/woodpecker-ci/woodpecker/pull/5689)]
