@@ -12,13 +12,14 @@
 
 ### 📈 Enhancement
 
-- Fix so agents don't need to specify a required label twice [[#5684](https://github.com/woodpecker-ci/woodpecker/pull/5684)]
+- Make pipeline/frontend/yaml/* types able to be marshaled back to YAML [[#1835](https://github.com/woodpecker-ci/woodpecker/pull/1835)]
 - Add log service addon [[#5507](https://github.com/woodpecker-ci/woodpecker/pull/5507)]
 - Support multiple users with same login name but different forges [[#5612](https://github.com/woodpecker-ci/woodpecker/pull/5612)]
 - Release linux/riscv64 binaries [[#5663](https://github.com/woodpecker-ci/woodpecker/pull/5663)]
 
 ### 🐛 Bug Fixes
 
+- Fix so agents don't need to specify a required label twice [[#5684](https://github.com/woodpecker-ci/woodpecker/pull/5684)]
 - Fix nil pointer dereference during GitHub Hook parsing [[#5681](https://github.com/woodpecker-ci/woodpecker/pull/5681)]
 - Allow username to be used with multiple forges [[#5676](https://github.com/woodpecker-ci/woodpecker/pull/5676)]
 - Create GitHub forge via WebUI fails to be loaded [[#5675](https://github.com/woodpecker-ci/woodpecker/pull/5675)]
