@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#5689](https://github.com/woodpecker-ci/woodpecker/pull/5689)]
 - chore(deps): update dependency mvdan/gofumpt to v0.9.2 [[#5687](https://github.com/woodpecker-ci/woodpecker/pull/5687)]
 - fix(deps): update github.com/urfave/cli-docs/v3 digest to 72b87d1 [[#5686](https://github.com/woodpecker-ci/woodpecker/pull/5686)]
 - fix(deps): update module code.gitea.io/sdk/gitea to v0.22.1 [[#5682](https://github.com/woodpecker-ci/woodpecker/pull/5682)]
