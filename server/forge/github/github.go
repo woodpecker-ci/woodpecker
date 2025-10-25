@@ -37,6 +37,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -469,15 +470,22 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
+
+	// Get the oauth2 transport to set custom base
+	tp, _ := tc.Transport.(*oauth2.Transport)
+
+	baseTransport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+	}
 	if c.SkipVerify {
-		tp, _ := tc.Transport.(*oauth2.Transport)
-		tp.Base = &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
+		baseTransport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
 		}
 	}
+
+	// Wrap the base transport with User-Agent support
+	tp.Base = httputil.NewUserAgentRoundTripper(baseTransport, "forge-github")
+
 	client := github.NewClient(tc)
 	client.BaseURL, _ = url.Parse(c.API)
 	return client
