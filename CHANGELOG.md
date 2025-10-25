@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-24
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -31,6 +31,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency mvdan/gofumpt to v0.9.2 [[#5687](https://github.com/woodpecker-ci/woodpecker/pull/5687)]
+- fix(deps): update github.com/urfave/cli-docs/v3 digest to 72b87d1 [[#5686](https://github.com/woodpecker-ci/woodpecker/pull/5686)]
 - fix(deps): update module code.gitea.io/sdk/gitea to v0.22.1 [[#5682](https://github.com/woodpecker-ci/woodpecker/pull/5682)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.5.0 [[#5668](https://github.com/woodpecker-ci/woodpecker/pull/5668)]
 - fix(deps): update module xorm.io/xorm to v1.3.11 [[#5662](https://github.com/woodpecker-ci/woodpecker/pull/5662)]
