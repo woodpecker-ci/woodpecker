@@ -29,7 +29,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)
 		assert.Equal(t, "DEV/network-monitor", result.Repo.FullName)
-		assert.Equal(t, "1c7589876bc8b5e83122b1656925d679915193d4", result.Pipeline.Commit)
+		assert.Equal(t, "1c7589876bc8b5e83122b1656925d679915193d4", result.Pipeline.Commit.SHA)
 		assert.Equal(t, model.EventPull, result.Pipeline.Event)
 	})
 
@@ -49,7 +49,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)
 		assert.Equal(t, "DEV/deployment-automation", result.Repo.FullName)
-		assert.Equal(t, "716e510cecbe203618609cf103c54e040b949739", result.Pipeline.Commit)
+		assert.Equal(t, "716e510cecbe203618609cf103c54e040b949739", result.Pipeline.Commit.SHA)
 		assert.Equal(t, model.EventPull, result.Pipeline.Event)
 	})
 
@@ -69,7 +69,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)
 		assert.Equal(t, "DEV/deployment-automation", result.Repo.FullName)
-		assert.Equal(t, "76797d54bca87db6d1e3e82ee40622c7908aa514", result.Pipeline.Commit)
+		assert.Equal(t, "76797d54bca87db6d1e3e82ee40622c7908aa514", result.Pipeline.Commit.SHA)
 		assert.Equal(t, model.EventPush, result.Pipeline.Event)
 	})
 
@@ -89,7 +89,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)
 		assert.Equal(t, "DEV/deployment-automation", result.Repo.FullName)
-		assert.Equal(t, "993203acecdb65ffe947424d0917768b0e5c3903", result.Pipeline.Commit)
+		assert.Equal(t, "993203acecdb65ffe947424d0917768b0e5c3903", result.Pipeline.Commit.SHA)
 		assert.Equal(t, model.EventPullClosed, result.Pipeline.Event)
 	})
 }

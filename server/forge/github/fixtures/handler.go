@@ -63,6 +63,17 @@ func getMembership(c *gin.Context) {
 	}
 }
 
+func getCommit(c *gin.Context) {
+	switch c.Param("org") {
+	case "org_not_found":
+		c.String(http.StatusNotFound, "")
+	case "github":
+		c.String(http.StatusOK, membershipIsMemberPayload)
+	default:
+		c.String(http.StatusOK, membershipIsOwnerPayload)
+	}
+}
+
 var repoPayload = `
 {
 	"id": 5,
