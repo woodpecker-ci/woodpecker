@@ -283,6 +283,34 @@ backend_options:
 In order to enable this configuration you need to set the appropriate environment variables to `true` on the woodpecker agent:
 [WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP](#backend_k8s_pod_annotations_allow_from_step) and/or [WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP](#backend_k8s_pod_labels_allow_from_step).
 
+### Sidecars
+
+Sidecars allow you to run additional containers alongside your main step container. This is particularly useful for services like Docker-in-Docker (DinD), databases, or other dependencies that need to run during your pipeline step.
+
+#### Docker-in-Docker (DinD) Example
+
+Here's how to configure a sidecar for Docker-in-Docker functionality:
+
+```yaml
+steps:
+  - name: build-with-docker
+    image: docker:cli
+    commands:
+      - docker build -t my-app .
+      - docker run --rm my-app
+    backend_options:
+      kubernetes:
+        sidecars:
+          - name: docker-in-docker
+            image: docker:dind
+            privileged: true
+            volumeMounts:
+              - name: docker-socket
+                mountPath: /var/run
+```
+
+
+
 ## Tips and tricks
 
 ### CRI-O
