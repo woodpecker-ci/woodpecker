@@ -61,9 +61,9 @@ func TestOrgCRUD(t *testing.T) {
 	someUser := &model.Org{Name: "some_other_u", IsUser: true}
 	assert.NoError(t, store.OrgCreate(someUser))
 	assert.NoError(t, store.OrgCreate(&model.Org{Name: "some_other_org"}))
-	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "abc", FullName: "some_other_u/abc", OrgID: someUser.ID}))
-	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "xyz", FullName: "some_other_u/xyz", OrgID: someUser.ID}))
-	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "renamedorg", Name: "567", FullName: "renamedorg/567", OrgID: orgOne.ID}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{ForgeRemoteID: "a", UserID: 1, Owner: "some_other_u", Name: "abc", FullName: "some_other_u/abc", OrgID: someUser.ID}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{ForgeRemoteID: "b", UserID: 1, Owner: "some_other_u", Name: "xyz", FullName: "some_other_u/xyz", OrgID: someUser.ID}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{ForgeRemoteID: "c", UserID: 1, Owner: "renamedorg", Name: "567", FullName: "renamedorg/567", OrgID: orgOne.ID}))
 	assert.Error(t, store.OrgCreate(&model.Org{Name: ""}), "expect to fail if name is empty")
 
 	// get all repos for a specific org
