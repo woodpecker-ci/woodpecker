@@ -27,6 +27,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5688](https://github.com/woodpecker-ci/woodpecker/pull/5688)]
 - docs(plugins): add github-app-token and github-comment plugins to repository [[#5671](https://github.com/woodpecker-ci/woodpecker/pull/5671)]
 
 ### 📦️ Dependency
