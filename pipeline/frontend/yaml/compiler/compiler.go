@@ -79,21 +79,20 @@ func (s *Secret) Match(event string) bool {
 
 // Compiler compiles the yaml.
 type Compiler struct {
-	local                   bool
-	escalated               []string
-	prefix                  string
-	volumes                 []string
-	networks                []string
-	env                     map[string]string
-	cloneEnv                map[string]string
-	workspaceBase           string
-	workspacePath           string
-	metadata                metadata.Metadata
-	registries              []Registry
-	secrets                 map[string]Secret
-	defaultClonePlugin      string
-	trustedClonePlugins     []string
-	securityTrustedPipeline bool
+	local               bool
+	escalated           []string
+	prefix              string
+	volumes             []string
+	networks            []string
+	env                 map[string]string
+	cloneEnv            map[string]string
+	workspaceBase       string
+	workspacePath       string
+	metadata            metadata.Metadata
+	registries          []Registry
+	secrets             map[string]Secret
+	defaultClonePlugin  string
+	trustedClonePlugins []string
 }
 
 // New creates a new Compiler with options.
@@ -186,8 +185,8 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 				return nil, err
 			}
 
-			// only inject netrc if it's a trusted repo or a trusted plugin
-			if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+			// only inject netrc if it's a trusted plugin
+			if container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins) {
 				maps.Copy(step.Environment, c.cloneEnv)
 			}
 
@@ -241,8 +240,8 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
-		// only inject netrc if it's a trusted repo or a trusted plugin
-		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+		// only inject netrc if it's a trusted plugin
+		if container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins) {
 			maps.Copy(step.Environment, c.cloneEnv)
 		}
 

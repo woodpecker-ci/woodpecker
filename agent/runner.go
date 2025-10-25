@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"sync"
 	"time"
 
@@ -38,15 +39,23 @@ type Runner struct {
 	hostname string
 	counter  *State
 	backend  *backend.Backend
+	trusted  TrustedRepos
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
+type TrustedRepos struct {
+	Volumes  []int64
+	Network  []int64
+	Security []int64
+}
+
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend, trusted TrustedRepos) Runner {
 	return Runner{
 		client:   workEngine,
 		filter:   f,
 		hostname: h,
 		counter:  state,
 		backend:  backend,
+		trusted:  trusted,
 	}
 }
 
@@ -70,20 +79,17 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	repoName := extractRepositoryName(workflow.Config)       // hack
-	pipelineNumber := extractPipelineNumber(workflow.Config) // hack
-
 	r.counter.Add(
 		workflow.ID,
 		timeout,
-		repoName,
-		pipelineNumber,
+		workflow.RepoName,
+		workflow.PipelineNumber,
 	)
 	defer r.counter.Done(workflow.ID)
 
 	logger := log.With().
-		Str("repo", repoName).
-		Str("pipeline", pipelineNumber).
+		Str("repo", workflow.RepoName).
+		Str("pipeline", workflow.PipelineNumber).
 		Str("workflow_id", workflow.ID).
 		Logger()
 
@@ -137,19 +143,26 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		// TODO: should we return here?
 	}
 
+	trusted := backend.TrustedConfiguration{
+		Network:  slices.Contains(r.trusted.Network, workflow.RepoID),
+		Volumes:  slices.Contains(r.trusted.Volumes, workflow.RepoID),
+		Security: slices.Contains(r.trusted.Security, workflow.RepoID),
+	}
+
 	var uploads sync.WaitGroup
 	//nolint:contextcheck
 	err = pipeline.New(workflow.Config,
 		pipeline.WithContext(workflowCtx),
 		pipeline.WithTaskUUID(fmt.Sprint(workflow.ID)),
 		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
-		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
+		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow, trusted)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
-			"repo":            repoName,
-			"pipeline_number": pipelineNumber,
+			"repo":            workflow.RepoName,
+			"pipeline_number": workflow.PipelineNumber,
 		}),
+		pipeline.WithTrustedConfiguration(trusted),
 	).Run(runnerCtx)
 
 	state.Finished = time.Now().Unix()
@@ -188,12 +201,4 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 	}
 
 	return nil
-}
-
-func extractRepositoryName(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["CI_REPO"]
-}
-
-func extractPipelineNumber(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

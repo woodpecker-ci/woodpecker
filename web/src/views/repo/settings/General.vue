@@ -38,28 +38,6 @@
         </template>
       </InputField>
 
-      <InputField
-        v-if="user?.admin"
-        docs-url="docs/usage/project-settings#project-settings-1"
-        :label="$t('repo.settings.general.trusted.trusted')"
-      >
-        <Checkbox
-          v-model="repoSettings.trusted.network"
-          :label="$t('repo.settings.general.trusted.network.network')"
-          :description="$t('repo.settings.general.trusted.network.desc')"
-        />
-        <Checkbox
-          v-model="repoSettings.trusted.volumes"
-          :label="$t('repo.settings.general.trusted.volumes.volumes')"
-          :description="$t('repo.settings.general.trusted.volumes.desc')"
-        />
-        <Checkbox
-          v-model="repoSettings.trusted.security"
-          :label="$t('repo.settings.general.trusted.security.security')"
-          :description="$t('repo.settings.general.trusted.security.desc')"
-        />
-      </InputField>
-
       <InputField :label="$t('require_approval.require_approval_for')">
         <RadioField
           v-model="repoSettings.require_approval"
@@ -185,7 +163,6 @@ import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
-import useAuthentication from '~/compositions/useAuthentication';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
@@ -195,7 +172,6 @@ import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const { user } = useAuthentication();
 const repoStore = useRepoStore();
 const i18n = useI18n();
 
@@ -208,7 +184,6 @@ function loadRepoSettings() {
     timeout: repo.value.timeout,
     visibility: repo.value.visibility,
     require_approval: repo.value.require_approval,
-    trusted: repo.value.trusted,
     approval_allowed_users: repo.value.approval_allowed_users || [],
     allow_pr: repo.value.allow_pr,
     allow_deploy: repo.value.allow_deploy,

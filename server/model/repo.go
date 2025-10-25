@@ -61,7 +61,6 @@ type Repo struct {
 	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
-	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
 	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
 	ApprovalAllowedUsers         []string             `json:"approval_allowed_users"          xorm:"json approval_allowed_users"`
 	IsActive                     bool                 `json:"active"                          xorm:"active"`
@@ -133,35 +132,22 @@ func (r *Repo) Update(from *Repo) {
 
 // RepoPatch represents a repository patch object.
 type RepoPatch struct {
-	Config                       *string                    `json:"config_file,omitempty"`
-	RequireApproval              *string                    `json:"require_approval,omitempty"`
-	ApprovalAllowedUsers         *[]string                  `json:"approval_allowed_users,omitempty"`
-	Timeout                      *int64                     `json:"timeout,omitempty"`
-	Visibility                   *string                    `json:"visibility,omitempty"`
-	AllowPull                    *bool                      `json:"allow_pr,omitempty"`
-	AllowDeploy                  *bool                      `json:"allow_deploy,omitempty"`
-	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`
-	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
-	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
-	ConfigExtensionEndpoint      *string                    `json:"config_extension_endpoint,omitempty"`
+	Config                       *string         `json:"config_file,omitempty"`
+	RequireApproval              *string         `json:"require_approval,omitempty"`
+	ApprovalAllowedUsers         *[]string       `json:"approval_allowed_users,omitempty"`
+	Timeout                      *int64          `json:"timeout,omitempty"`
+	Visibility                   *string         `json:"visibility,omitempty"`
+	AllowPull                    *bool           `json:"allow_pr,omitempty"`
+	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
+	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
+	NetrcTrusted                 *[]string       `json:"netrc_trusted"`
+	ConfigExtensionEndpoint      *string         `json:"config_extension_endpoint,omitempty"`
 } //	@name	RepoPatch
 
 type ForgeRemoteID string
 
 func (r ForgeRemoteID) IsValid() bool {
 	return r != "" && r != "0"
-}
-
-type TrustedConfiguration struct {
-	Network  bool `json:"network"`
-	Volumes  bool `json:"volumes"`
-	Security bool `json:"security"`
-}
-
-type TrustedConfigurationPatch struct {
-	Network  *bool `json:"network"`
-	Volumes  *bool `json:"volumes"`
-	Security *bool `json:"security"`
 }
 
 // RepoLastPipeline represents a repository with last pipeline execution information.

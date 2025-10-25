@@ -98,7 +98,7 @@ func TestSetupWorkflow(t *testing.T) {
 	taskUUID := "test-task-uuid-123"
 	config := &types.Config{}
 
-	err := backend.SetupWorkflow(ctx, config, taskUUID)
+	err := backend.SetupWorkflow(ctx, config, taskUUID, types.TrustedConfiguration{})
 	require.NoError(t, err)
 
 	// Verify state was saved
@@ -131,7 +131,7 @@ func TestDestroyWorkflow(t *testing.T) {
 	config := &types.Config{}
 
 	// Setup workflow first
-	err := backend.SetupWorkflow(ctx, config, taskUUID)
+	err := backend.SetupWorkflow(ctx, config, taskUUID, types.TrustedConfiguration{})
 	require.NoError(t, err)
 
 	state, err := backend.getWorkflowState(taskUUID)
@@ -195,7 +195,7 @@ func TestRunStep(t *testing.T) {
 	taskUUID := "test-run-tasks"
 
 	// Setup workflow
-	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
+	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID, types.TrustedConfiguration{}))
 
 	t.Run("type commands", func(t *testing.T) {
 		step := &types.Step{
@@ -210,7 +210,7 @@ func TestRunStep(t *testing.T) {
 		}
 
 		t.Run("start successful", func(t *testing.T) {
-			err = backend.StartStep(ctx, step, taskUUID)
+			err = backend.StartStep(ctx, step, taskUUID, types.TrustedConfiguration{})
 			require.NoError(t, err)
 
 			// Verify command was started
@@ -286,7 +286,7 @@ func TestRunStep(t *testing.T) {
 			Commands: []string{"echo success"},
 		}
 
-		err = backend.StartStep(ctx, step, taskUUID)
+		err = backend.StartStep(ctx, step, taskUUID, types.TrustedConfiguration{})
 		require.NoError(t, err)
 
 		state, err := backend.WaitStep(ctx, step, taskUUID)
@@ -304,7 +304,7 @@ func TestRunStep(t *testing.T) {
 			Commands: []string{"exit 1"},
 		}
 
-		err = backend.StartStep(ctx, step, taskUUID)
+		err = backend.StartStep(ctx, step, taskUUID, types.TrustedConfiguration{})
 		require.NoError(t, err)
 
 		state, err := backend.WaitStep(ctx, step, taskUUID)
@@ -336,7 +336,7 @@ func TestRunStep(t *testing.T) {
 		}
 
 		t.Run("start", func(t *testing.T) {
-			err = backend.StartStep(ctx, step, taskUUID)
+			err = backend.StartStep(ctx, step, taskUUID, types.TrustedConfiguration{})
 			require.NoError(t, err)
 
 			// Verify command was started
@@ -354,7 +354,7 @@ func TestRunStep(t *testing.T) {
 		}
 
 		t.Run("start", func(t *testing.T) {
-			err = backend.StartStep(ctx, step, taskUUID)
+			err = backend.StartStep(ctx, step, taskUUID, types.TrustedConfiguration{})
 			assert.ErrorIs(t, err, ErrUnsupportedStepType)
 		})
 	})
@@ -417,7 +417,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 	taskUUIDs := []string{"task-1", "task-2", "task-3"}
 
 	for _, uuid := range taskUUIDs {
-		err := backend.SetupWorkflow(ctx, &types.Config{}, uuid)
+		err := backend.SetupWorkflow(ctx, &types.Config{}, uuid, types.TrustedConfiguration{})
 		require.NoError(t, err)
 	}
 
@@ -435,7 +435,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 					Commands:    []string{fmt.Sprintf("echo %s %d", uuid, i)},
 					Environment: map[string]string{},
 				}
-				require.NoError(t, backend.StartStep(ctx, step, uuid))
+				require.NoError(t, backend.StartStep(ctx, step, uuid, types.TrustedConfiguration{}))
 				_, err := backend.WaitStep(ctx, step, uuid)
 				require.NoError(t, err)
 				counter.Store(counter.Load() - 1)
