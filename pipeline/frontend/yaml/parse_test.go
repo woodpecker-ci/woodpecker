@@ -18,6 +18,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
@@ -69,7 +71,7 @@ func TestParse(t *testing.T) {
 		assert.Empty(t, out.Steps.ContainerList[0].When.Constraints)
 		assert.Equal(t, "notify_success", out.Steps.ContainerList[1].Name)
 		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[1].Image)
-		assert.Equal(t, yaml_base_types.StringOrSlice{"success"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
+		assert.Equal(t, yaml_base_types.StringOrSlice{"push"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
 	})
 }
 
@@ -170,9 +172,6 @@ when:
     - tester2
   - branch:
     - tester
-build:
-  context: .
-  dockerfile: Dockerfile
 workspace:
   path: src/github.com/octocat/hello-world
   base: /go
@@ -189,6 +188,7 @@ steps:
       - go build
     when:
       event: push
+    depends_on: []
   notify:
     image: slack
     channel: dev
@@ -217,38 +217,86 @@ steps:
 `
 
 var sampleVarYaml = `
-_slack: &SLACK
+variables: &SLACK
   image: plugins/slack
 steps:
   notify_fail: *SLACK
   notify_success:
     << : *SLACK
     when:
-      event: success
+      event: push
+  echo:
+    when:
+    - path: wow.sh
+      repo: "test"
+      branch:
+        exclude: main
+    - path:
+      - test.yaml
+      - test.zig
+    - path:
+        exclude: a
+        on_empty: true
+    - ref: ref/tags/v1
+      path:
+  env:
+    image: print
+    environment:
+      DRIVER: next
+      PLATFORM: linux
 `
 
-var sampleSliceYaml = `
-steps:
-  nil_slice:
-    image: plugins/slack
-  empty_slice:
-    image: plugins/slack
-    depends_on: []
-`
+func TestReSerialize(t *testing.T) {
+	work1, err := ParseString(sampleVarYaml)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	workBin, err := yaml.Marshal(work1)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	assert.EqualValues(t, `steps:
+    - name: notify_fail
+      image: plugins/slack
+    - name: notify_success
+      image: plugins/slack
+      when:
+        event: push
+    - name: echo
+      when:
+        - repo: test
+          branch:
+            exclude: main
+          path: wow.sh
+        - path:
+            - test.yaml
+            - test.zig
+        - path:
+            exclude: a
+        - ref: ref/tags/v1
+    - name: env
+      image: print
+      environment:
+        DRIVER: next
+        PLATFORM: linux
+skip_clone: false
+`, string(workBin))
+}
 
 func TestSlice(t *testing.T) {
-	t.Run("should marshal a not set slice to nil", func(t *testing.T) {
-		out, err := ParseString(sampleSliceYaml)
-		assert.NoError(t, err)
+	out, err := ParseString(sampleYaml)
+	require.NoError(t, err)
 
+	t.Run("should marshal a not set slice to nil", func(t *testing.T) {
+		assert.Equal(t, "test", out.Steps.ContainerList[0].Name)
 		assert.Nil(t, out.Steps.ContainerList[0].DependsOn)
 		assert.Empty(t, out.Steps.ContainerList[0].DependsOn)
 	})
 
 	t.Run("should marshal an empty slice", func(t *testing.T) {
-		out, err := ParseString(sampleSliceYaml)
-		assert.NoError(t, err)
-
+		assert.Equal(t, "build", out.Steps.ContainerList[1].Name)
 		assert.NotNil(t, out.Steps.ContainerList[1].DependsOn)
 		assert.Empty(t, (out.Steps.ContainerList[1].DependsOn))
 	})
