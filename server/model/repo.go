@@ -47,31 +47,31 @@ type Repo struct {
 	UserID  int64 `json:"-"                               xorm:"INDEX 'user_id'"`
 	ForgeID int64 `json:"forge_id,omitempty"              xorm:"UNIQUE(forge) forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
-	ForgeRemoteID                ForgeRemoteID        `json:"forge_remote_id"                 xorm:"UNIQUE(forge) forge_remote_id"`
-	OrgID                        int64                `json:"org_id"                          xorm:"INDEX 'org_id'"`
-	Owner                        string               `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
-	Name                         string               `json:"name"                            xorm:"UNIQUE(name) 'name'"`
-	FullName                     string               `json:"full_name"                       xorm:"UNIQUE 'full_name'"`
-	Avatar                       string               `json:"avatar_url,omitempty"            xorm:"varchar(500) 'avatar'"`
-	ForgeURL                     string               `json:"forge_url,omitempty"             xorm:"varchar(1000) 'forge_url'"`
-	Clone                        string               `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
-	CloneSSH                     string               `json:"clone_url_ssh"                   xorm:"varchar(1000) 'clone_ssh'"`
-	Branch                       string               `json:"default_branch,omitempty"        xorm:"varchar(500) 'branch'"`
-	PREnabled                    bool                 `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
-	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
-	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
-	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
-	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
-	ApprovalAllowedUsers         []string             `json:"approval_allowed_users"          xorm:"json approval_allowed_users"`
-	IsActive                     bool                 `json:"active"                          xorm:"active"`
-	AllowPull                    bool                 `json:"allow_pr"                        xorm:"allow_pr"`
-	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
-	Config                       string               `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
-	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
-	Perm                         *Perm                `json:"-"                               xorm:"-"`
-	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
-	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
+	ForgeRemoteID                ForgeRemoteID  `json:"forge_remote_id"                 xorm:"UNIQUE(forge) forge_remote_id"`
+	OrgID                        int64          `json:"org_id"                          xorm:"INDEX 'org_id'"`
+	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
+	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'name'"`
+	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'full_name'"`
+	Avatar                       string         `json:"avatar_url,omitempty"            xorm:"varchar(500) 'avatar'"`
+	ForgeURL                     string         `json:"forge_url,omitempty"             xorm:"varchar(1000) 'forge_url'"`
+	Clone                        string         `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
+	CloneSSH                     string         `json:"clone_url_ssh"                   xorm:"varchar(1000) 'clone_ssh'"`
+	Branch                       string         `json:"default_branch,omitempty"        xorm:"varchar(500) 'branch'"`
+	PREnabled                    bool           `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
+	Timeout                      int64          `json:"timeout,omitempty"               xorm:"timeout"`
+	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
+	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
+	RequireApproval              ApprovalMode   `json:"require_approval"                xorm:"varchar(50) require_approval"`
+	ApprovalAllowedUsers         []string       `json:"approval_allowed_users"          xorm:"json approval_allowed_users"`
+	IsActive                     bool           `json:"active"                          xorm:"active"`
+	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
+	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"allow_deploy"`
+	Config                       string         `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
+	Hash                         string         `json:"-"                               xorm:"varchar(500) 'hash'"`
+	Perm                         *Perm          `json:"-"                               xorm:"-"`
+	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
+	NetrcTrustedPlugins          []string       `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
+	ConfigExtensionEndpoint      string         `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 } //	@name	Repo
 
 // TableName return database table name for xorm.

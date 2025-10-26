@@ -5887,8 +5887,6 @@ const docTemplate = `{
                 "ForgeTypeAddon"
             ]
         },
-<<<<<<< HEAD
-=======
         "model.QueueTask": {
             "type": "object",
             "properties": {
@@ -5942,35 +5940,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.TrustedConfiguration": {
-            "type": "object",
-            "properties": {
-                "network": {
-                    "type": "boolean"
-                },
-                "security": {
-                    "type": "boolean"
-                },
-                "volumes": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "model.TrustedConfigurationPatch": {
-            "type": "object",
-            "properties": {
-                "network": {
-                    "type": "boolean"
-                },
-                "security": {
-                    "type": "boolean"
-                },
-                "volumes": {
-                    "type": "boolean"
-                }
-            }
-        },
->>>>>>> main
         "model.Workflow": {
             "type": "object",
             "properties": {
