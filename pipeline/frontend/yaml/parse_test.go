@@ -275,7 +275,6 @@ func TestReSerialize(t *testing.T) {
             - test.zig
         - path:
             exclude: a
-            on_empty: true
         - ref: ref/tags/v1
     - name: env
       image: print

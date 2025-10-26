@@ -75,6 +75,12 @@ func (c Path) MarshalYAML() (any, error) {
 		}
 		return yamlBaseTypes.StringOrSlice(c.Include), nil
 	}
+
+	// clean up on_empty if true make it none as it will default to true
+	if c.OnEmpty.Has() && c.OnEmpty.Value() {
+		c.OnEmpty = optional.None[bool]()
+	}
+
 	// we can not return type Path as it would lead to infinite recursion :/
 	return struct {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
