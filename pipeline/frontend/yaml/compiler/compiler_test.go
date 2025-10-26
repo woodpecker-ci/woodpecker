@@ -280,7 +280,7 @@ func TestCompilerCompile(t *testing.T) {
 				Name:     "step",
 				Image:    "bash",
 				Commands: []string{"env"},
-				Environment: yaml_base_types.EnvironmentMap{
+				Environment: map[string]any{
 					"MISSING": map[string]any{"from_secret": "missing"},
 				},
 			}}}},
@@ -375,7 +375,7 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 				Name:     "step",
 				Image:    "bash",
 				Commands: []string{"env"},
-				Environment: yaml_base_types.EnvironmentMap{
+				Environment: map[string]any{
 					"SECRET": map[string]any{"from_secret": "secret_name"},
 				},
 			}}}},
