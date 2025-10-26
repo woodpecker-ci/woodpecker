@@ -90,10 +90,6 @@ var updatePipelineStructure = xormigrate.Migration{
 			Email     string `xorm:"varchar(500) email"`
 		}
 
-		type oldPipelineI struct {
-			*pipelines
-		}
-
 		if err := sess.Sync(new(pipelines)); err != nil {
 			return err
 		}

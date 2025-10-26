@@ -399,6 +399,9 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
 	repo, pipeline, err := parseHook(req)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) {
 		commit, err := c.getCommit(ctx, repo, pipeline.Commit.SHA)
