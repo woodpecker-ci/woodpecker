@@ -5033,6 +5033,10 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "pr_milestone": {
+                    "description": "deprecated, use pull_request.milestone instead",
+                    "type": "string"
+                },
                 "pull_request": {
                     "$ref": "#/definitions/PullRequest"
                 },
@@ -6075,6 +6079,12 @@ const docTemplate = `{
                 },
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
+                },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "finished": {
                     "type": "integer"
