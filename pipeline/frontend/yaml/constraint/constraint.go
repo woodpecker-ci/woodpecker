@@ -133,6 +133,13 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 
 // MarshalYAML implements custom Yaml marshaling.
 func (when When) MarshalYAML() (any, error) {
+	// clean up local if true make it none as it will default to true
+	for i := range when.Constraints {
+		if when.Constraints[i].Local.Has() && when.Constraints[i].Local.Value() {
+			when.Constraints[i].Local = optional.None[bool]()
+		}
+	}
+
 	switch len(when.Constraints) {
 	case 0:
 		return nil, nil
