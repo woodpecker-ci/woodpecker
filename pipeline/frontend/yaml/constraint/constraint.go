@@ -20,6 +20,7 @@ import (
 	"path"
 	"slices"
 
+	"github.com/6543/go-optional/v2"
 	"github.com/expr-lang/expr"
 	"gopkg.in/yaml.v3"
 
@@ -43,7 +44,7 @@ type (
 		Cron     List                        `yaml:"cron,omitempty"`
 		Status   List                        `yaml:"status,omitempty"`
 		Matrix   Map                         `yaml:"matrix,omitempty"`
-		Local    yamlBaseTypes.BoolTrue      `yaml:"local,omitempty"`
+		Local    optional.Option[bool]       `yaml:"local,omitempty"`
 		Path     Path                        `yaml:"path,omitempty"`
 		Evaluate string                      `yaml:"evaluate,omitempty"`
 		Event    yamlBaseTypes.StringOrSlice `yaml:"event,omitempty"`
@@ -102,7 +103,7 @@ func (when *When) IncludesStatusSuccess() bool {
 // False if (any) non local.
 func (when *When) IsLocal() bool {
 	for _, c := range when.Constraints {
-		if !c.Local.Bool() {
+		if c.Local.Has() && !c.Local.Value() {
 			return false
 		}
 	}

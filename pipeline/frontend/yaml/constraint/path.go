@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/6543/go-optional/v2"
 	"github.com/bmatcuk/doublestar/v4"
 	"gopkg.in/yaml.v3"
 
@@ -26,10 +27,10 @@ import (
 
 // Path defines a runtime constrain for exclude & include paths.
 type Path struct {
-	Include       []string               `yaml:"include,omitempty"`
-	Exclude       []string               `yaml:"exclude,omitempty"`
-	IgnoreMessage string                 `yaml:"ignore_message,omitempty"`
-	OnEmpty       yamlBaseTypes.BoolTrue `yaml:"on_empty,omitempty"`
+	Include       []string              `yaml:"include,omitempty"`
+	Exclude       []string              `yaml:"exclude,omitempty"`
+	IgnoreMessage string                `yaml:"ignore_message,omitempty"`
+	OnEmpty       optional.Option[bool] `yaml:"on_empty,omitempty"`
 }
 
 // UnmarshalYAML unmarshal the constraint.
@@ -38,7 +39,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include"`
 		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude"`
 		IgnoreMessage string                      `yaml:"ignore_message"`
-		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty"`
+		OnEmpty       optional.Option[bool]       `yaml:"on_empty"`
 	}{}
 
 	var out2 yamlBaseTypes.StringOrSlice
@@ -67,7 +68,8 @@ func (c Path) MarshalYAML() (any, error) {
 	// if only Include is set return simple syntax
 	if len(c.Exclude) == 0 &&
 		len(c.IgnoreMessage) == 0 &&
-		c.OnEmpty.Bool() {
+		// on_empty is true if not set or value is true
+		(!c.OnEmpty.Has() || c.OnEmpty.Value()) {
 		if len(c.Include) == 0 {
 			return nil, nil
 		}
@@ -78,7 +80,7 @@ func (c Path) MarshalYAML() (any, error) {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
 		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
 		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
-		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
+		OnEmpty       optional.Option[bool]       `yaml:"on_empty,omitempty"`
 	}{
 		Include:       c.Include,
 		Exclude:       c.Exclude,
@@ -97,7 +99,8 @@ func (c *Path) Match(v []string, message string) bool {
 
 	// return value based on 'on_empty', if there are no commit files (empty commit)
 	if len(v) == 0 {
-		return c.OnEmpty.Bool()
+		// on_empty is true if not set or value is true
+		return !c.OnEmpty.Has() || c.OnEmpty.Value()
 	}
 
 	if len(c.Exclude) > 0 && c.Excludes(v) {
