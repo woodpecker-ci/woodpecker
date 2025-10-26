@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-25
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -34,6 +34,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#5694](https://github.com/woodpecker-ci/woodpecker/pull/5694)]
 - fix(deps): update dependency @vueuse/core to v14 [[#5692](https://github.com/woodpecker-ci/woodpecker/pull/5692)]
 - chore(deps): update dependency vitest to v4 [[#5691](https://github.com/woodpecker-ci/woodpecker/pull/5691)]
 - chore(deps): update docker.io/mysql docker tag to v9.5.0 [[#5690](https://github.com/woodpecker-ci/woodpecker/pull/5690)]
