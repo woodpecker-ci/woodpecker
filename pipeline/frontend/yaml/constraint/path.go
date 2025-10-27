@@ -75,7 +75,7 @@ func (c Path) MarshalYAML() (any, error) {
 		return yamlBaseTypes.StringOrSlice(c.Include), nil
 	}
 
-	// clean up on_empty if true make it none as it will default to true
+	// clean up on_empty if true make it none as we will default to true
 	if c.OnEmpty.ValueOrDefault(true) {
 		c.OnEmpty = optional.None[bool]()
 	}

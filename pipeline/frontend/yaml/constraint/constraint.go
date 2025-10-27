@@ -133,7 +133,7 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 
 // MarshalYAML implements custom Yaml marshaling.
 func (when When) MarshalYAML() (any, error) {
-	// clean up local if true make it none as it will default to true
+	// clean up local if true make it none as we will default to true
 	for i := range when.Constraints {
 		if when.Constraints[i].Local.ValueOrDefault(true) {
 			when.Constraints[i].Local = optional.None[bool]()
