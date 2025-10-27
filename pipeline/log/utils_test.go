@@ -228,7 +228,7 @@ func TestCopyLineByLineNewlineCharacter(t *testing.T) {
 	assert.Equal(t, "123\n-4567-8\n-123\n-4567-8", writtenData)
 }
 
-// TestCopyLineByLineLongLine is for the long line testing to trigger the writeChunks function
+// TestCopyLineByLineLongLine is for the long line testing to trigger the writeChunks function.
 func TestCopyLineByLineLongLine(t *testing.T) {
 	r, w := io.Pipe()
 
@@ -279,12 +279,10 @@ func TestCopyLineByLineLongLine(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("timeout waiting for goroutine to finish")
 	}
-
 }
 
-// TestCopyLineByLineWriteChunks is for the writeChunks function testing
+// TestCopyLineByLineWriteChunks is for the writeChunks function testing.
 func TestCopyLineByLineWriteChunks(t *testing.T) {
-
 	r, w := io.Pipe()
 
 	testWriter := &testWriter{
@@ -331,7 +329,6 @@ func TestCopyLineByLineWriteChunks(t *testing.T) {
 	assert.Eventually(t, func() bool {
 		return len(testWriter.GetWrites()) == expectedWrites
 	}, time.Second, 5*time.Millisecond, "expected %d writes, got %d: %v", expectedWrites, len(testWriter.GetWrites()), testWriter.GetWrites())
-
 
 	writes := testWriter.GetWrites()
 	// verify first line chunks
