@@ -58,10 +58,12 @@ func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 			// if it has data, cache into the buffer
 			buf = append(buf, readBuf[:n]...)
 
+		processBuffer:
 			for len(buf) > 0 {
 				// find the index to anchor the new line
 				idx := bytes.IndexByte(buf, '\n')
-				if idx >= 0 {
+				switch {
+				case idx >= 0:
 					// found the new line, write to the dst
 					lineEnd := idx + 1
 					if lineEnd > maxSize {
@@ -75,14 +77,14 @@ func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 					}
 					// remove the line written from the buffer
 					buf = buf[lineEnd:]
-				} else if len(buf) >= maxSize {
-					if _, wErr := dst.Write(buf); wErr != nil {
+				case len(buf) >= maxSize:
+					if _, wErr := dst.Write(buf[:maxSize]); wErr != nil {
 						return wErr
 					}
 					buf = buf[maxSize:]
-				} else {
-					// no newline found, block to read more data
-					break
+				default:
+					// no newline found and buffer not full, read more data
+					break processBuffer
 				}
 			}
 		}
