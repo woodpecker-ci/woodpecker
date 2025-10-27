@@ -52,6 +52,8 @@ type local struct {
 	os, arch        string
 }
 
+var CLIWorkaroundExecAtDir string // To handle edge case for running local backend via cli exec
+
 // New returns a new local Backend.
 func New() types.Backend {
 	return &local{
@@ -100,17 +102,34 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	}
 
 	state := &workflowState{
-		baseDir:      baseDir,
-		workspaceDir: filepath.Join(baseDir, "workspace"),
-		homeDir:      filepath.Join(baseDir, "home"),
+		baseDir: baseDir,
+		homeDir: filepath.Join(baseDir, "home"),
 	}
+	e.workflows.Store(taskUUID, state)
 
 	if err := os.Mkdir(state.homeDir, 0o700); err != nil {
 		return err
 	}
 
-	if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
-		return err
+	// normal workspace setup case
+	if CLIWorkaroundExecAtDir == "" {
+		state.workspaceDir = filepath.Join(baseDir, "workspace")
+		if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+			return err
+		}
+	} else
+	// setup workspace via internal flag signaled from cli exec to a specific dir
+	{
+		state.workspaceDir = CLIWorkaroundExecAtDir
+		if stat, err := os.Stat(CLIWorkaroundExecAtDir); os.IsNotExist(err) {
+			log.Debug().Msgf("create workspace directory '%s' set by internal flag", CLIWorkaroundExecAtDir)
+			if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+				return err
+			}
+		} else if !stat.IsDir() {
+			//nolint:forbidigo
+			log.Fatal().Msg("This should never happen! internalExecDir was set to an non directory path!")
+		}
 	}
 
 	e.workflows.Store(taskUUID, state)
