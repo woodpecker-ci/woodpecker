@@ -68,8 +68,7 @@ func (c Path) MarshalYAML() (any, error) {
 	// if only Include is set return simple syntax
 	if len(c.Exclude) == 0 &&
 		len(c.IgnoreMessage) == 0 &&
-		// on_empty is true if not set or value is true
-		(!c.OnEmpty.Has() || c.OnEmpty.Value()) {
+		c.OnEmpty.ValueOrDefault(true) {
 		if len(c.Include) == 0 {
 			return nil, nil
 		}
@@ -77,7 +76,7 @@ func (c Path) MarshalYAML() (any, error) {
 	}
 
 	// clean up on_empty if true make it none as it will default to true
-	if c.OnEmpty.Has() && c.OnEmpty.Value() {
+	if c.OnEmpty.ValueOrDefault(true) {
 		c.OnEmpty = optional.None[bool]()
 	}
 

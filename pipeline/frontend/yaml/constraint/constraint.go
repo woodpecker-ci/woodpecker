@@ -103,7 +103,7 @@ func (when *When) IncludesStatusSuccess() bool {
 // False if (any) non local.
 func (when *When) IsLocal() bool {
 	for _, c := range when.Constraints {
-		if c.Local.Has() && !c.Local.Value() {
+		if !c.Local.ValueOrDefault(true) {
 			return false
 		}
 	}
@@ -135,7 +135,7 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 func (when When) MarshalYAML() (any, error) {
 	// clean up local if true make it none as it will default to true
 	for i := range when.Constraints {
-		if when.Constraints[i].Local.Has() && when.Constraints[i].Local.Value() {
+		if when.Constraints[i].Local.ValueOrDefault(true) {
 			when.Constraints[i].Local = optional.None[bool]()
 		}
 	}
