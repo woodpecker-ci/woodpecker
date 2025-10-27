@@ -104,8 +104,7 @@ func (c *Path) Match(v []string, message string) bool {
 
 	// return value based on 'on_empty', if there are no commit files (empty commit)
 	if len(v) == 0 {
-		// on_empty is true if not set or value is true
-		return !c.OnEmpty.Has() || c.OnEmpty.Value()
+		return c.OnEmpty.ValueOrDefault(true)
 	}
 
 	if len(c.Exclude) > 0 && c.Excludes(v) {
