@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Make local backend work with `cli exec` [[#4102](https://github.com/woodpecker-ci/woodpecker/pull/4102)]
 - Make pipeline/frontend/yaml/* types able to be marshaled back to YAML [[#1835](https://github.com/woodpecker-ci/woodpecker/pull/1835)]
 - Add log service addon [[#5507](https://github.com/woodpecker-ci/woodpecker/pull/5507)]
 - Support multiple users with same login name but different forges [[#5612](https://github.com/woodpecker-ci/woodpecker/pull/5612)]
