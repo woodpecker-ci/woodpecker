@@ -22,7 +22,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Supported database drivers
+// Supported database drivers.
 const (
 	DriverMysql    = "mysql"
 	DriverPostgres = "postgres"
