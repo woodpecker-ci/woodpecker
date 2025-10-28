@@ -97,8 +97,8 @@ func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 				if _, wErr := dst.Write(buf); wErr != nil {
 						return wErr
 				}
-			} 
-			
+			}
+
 			if err != nil {
 			  return err
 			}
