@@ -50,7 +50,6 @@ func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 	readBuf := make([]byte, maxSize)
 
 	for {
-		// read from reader
 		n, err := r.Read(readBuf)
 
 		// handle the data first
@@ -90,20 +89,19 @@ func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 		}
 
 		// and then if it is EOF, write the remaining data and break the loop
-			if errors.Is(err, io.EOF) {
-				if len(buf) == 0 {
-				  break
-				}
-				if _, wErr := dst.Write(buf); wErr != nil {
-						return wErr
-				}
+		if errors.Is(err, io.EOF) {
+			if len(buf) == 0 {
+				break
 			}
+			if _, wErr := dst.Write(buf); wErr != nil {
+				return wErr
+			}
+			break
+		}
 
-			if err != nil {
-			  return err
-			}
+		if err != nil {
+			return err
 		}
 	}
-
 	return nil
 }
