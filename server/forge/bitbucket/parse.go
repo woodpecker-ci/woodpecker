@@ -56,7 +56,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
-// If the commit type is unsupported nil values are returned.
+// If the commit type is unsupported it returns an ErrIgnoreEvent error.
 func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := internal.PushHook{}
 
@@ -71,7 +71,7 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 		}
 		return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPushHook(&hook, &change), nil
 	}
-	return nil, nil, nil
+	return nil, nil, &types.ErrIgnoreEvent{Event: "push", Reason: "BB reports no Changes"}
 }
 
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
