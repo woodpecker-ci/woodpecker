@@ -90,16 +90,18 @@ func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 		}
 
 		// and then if it is EOF, write the remaining data and break the loop
-		if err != nil {
 			if errors.Is(err, io.EOF) {
-				if len(buf) > 0 {
-					if _, wErr := dst.Write(buf); wErr != nil {
-						return wErr
-					}
+				if len(buf) == 0 {
+				  break
 				}
-				break
+				if _, wErr := dst.Write(buf); wErr != nil {
+						return wErr
+				}
+			} 
+			
+			if err != nil {
+			  return err
 			}
-			return err
 		}
 	}
 
