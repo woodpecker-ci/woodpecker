@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @henkka, @marcusramberg, @qwerty287, @yyewolf
+@6543, @LUKIEYF, @anbraten, @henkka, @marcusramberg, @qwerty287, @yyewolf
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Enhancement log stream reading and writing and handle new lines and max-size [[#5683](https://github.com/woodpecker-ci/woodpecker/pull/5683)]
 - Make local backend work with `cli exec` [[#4102](https://github.com/woodpecker-ci/woodpecker/pull/4102)]
 - Make pipeline/frontend/yaml/* types able to be marshaled back to YAML [[#1835](https://github.com/woodpecker-ci/woodpecker/pull/1835)]
 - Add log service addon [[#5507](https://github.com/woodpecker-ci/woodpecker/pull/5507)]
