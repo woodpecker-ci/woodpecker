@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-27
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -35,6 +35,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.157.1 [[#5697](https://github.com/woodpecker-ci/woodpecker/pull/5697)]
 - chore(deps): lock file maintenance [[#5695](https://github.com/woodpecker-ci/woodpecker/pull/5695)]
 - chore(deps): update web npm deps non-major [[#5694](https://github.com/woodpecker-ci/woodpecker/pull/5694)]
 - fix(deps): update dependency @vueuse/core to v14 [[#5692](https://github.com/woodpecker-ci/woodpecker/pull/5692)]
