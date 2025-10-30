@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-29
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @LUKIEYF, @anbraten, @henkka, @marcusramberg, @qwerty287, @yyewolf
+@6543, @JohnWalkerx, @LUKIEYF, @anbraten, @henkka, @marcusramberg, @qwerty287, @yyewolf
 
 ### 🔒 Security
 
@@ -52,6 +52,7 @@
 
 ### Misc
 
+- Update path to plugins moved to woodpecker-community [[#5698](https://github.com/woodpecker-ci/woodpecker/pull/5698)]
 - Also create image preview on lable change only [[#5673](https://github.com/woodpecker-ci/woodpecker/pull/5673)]
 - Add migration tests for postgres [[#669](https://github.com/woodpecker-ci/woodpecker/pull/669)]
 
