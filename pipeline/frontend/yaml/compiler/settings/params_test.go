@@ -307,9 +307,9 @@ func TestSecretMappingComplexMapWithSecrets(t *testing.T) {
 
 func TestComplexTypesWithNilValuesWontPanic(t *testing.T) {
 	from := map[string]any{
-		"config": []interface{}{
+		"config": []any{
 			"copy a b",
-			map[string]interface{}{
+			map[string]any{
 				"foo": nil,
 			},
 		},
@@ -321,5 +321,4 @@ func TestComplexTypesWithNilValuesWontPanic(t *testing.T) {
 	err := ParamsToEnv(from, got, "PLUGIN_", true, nil, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedJSON, got["PLUGIN_CONFIG"])
-
 }
