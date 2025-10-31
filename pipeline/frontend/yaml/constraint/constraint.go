@@ -25,6 +25,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
 )
 
 type (
@@ -43,7 +44,7 @@ type (
 		Cron     List                        `yaml:"cron,omitempty"`
 		Status   List                        `yaml:"status,omitempty"`
 		Matrix   Map                         `yaml:"matrix,omitempty"`
-		Local    yamlBaseTypes.BoolTrue      `yaml:"local,omitempty"`
+		Local    optional.Option[bool]       `yaml:"local,omitempty"`
 		Path     Path                        `yaml:"path,omitempty"`
 		Evaluate string                      `yaml:"evaluate,omitempty"`
 		Event    yamlBaseTypes.StringOrSlice `yaml:"event,omitempty"`
@@ -102,7 +103,7 @@ func (when *When) IncludesStatusSuccess() bool {
 // False if (any) non local.
 func (when *When) IsLocal() bool {
 	for _, c := range when.Constraints {
-		if !c.Local.Bool() {
+		if !c.Local.ValueOrDefault(true) {
 			return false
 		}
 	}
@@ -132,6 +133,13 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 
 // MarshalYAML implements custom Yaml marshaling.
 func (when When) MarshalYAML() (any, error) {
+	// clean up local if true make it none as we will default to true
+	for i := range when.Constraints {
+		if when.Constraints[i].Local.ValueOrDefault(true) {
+			when.Constraints[i].Local = optional.None[bool]()
+		}
+	}
+
 	switch len(when.Constraints) {
 	case 0:
 		return nil, nil
