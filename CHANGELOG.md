@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-30
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @JohnWalkerx, @LUKIEYF, @anbraten, @henkka, @marcusramberg, @qwerty287, @yyewolf
+@6543, @JohnWalkerx, @LUKIEYF, @anbraten, @henkka, @hhamalai, @marcusramberg, @qwerty287, @yyewolf
 
 ### 🔒 Security
 
@@ -21,6 +21,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix: panic due to an invalid memory address when injectSecretRecursive encounters nil values [[#5699](https://github.com/woodpecker-ci/woodpecker/pull/5699)]
 - Fix so agents don't need to specify a required label twice [[#5684](https://github.com/woodpecker-ci/woodpecker/pull/5684)]
 - Fix nil pointer dereference during GitHub Hook parsing [[#5681](https://github.com/woodpecker-ci/woodpecker/pull/5681)]
 - Allow username to be used with multiple forges [[#5676](https://github.com/woodpecker-ci/woodpecker/pull/5676)]
