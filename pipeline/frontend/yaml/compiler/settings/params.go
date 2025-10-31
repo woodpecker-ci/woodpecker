@@ -194,7 +194,9 @@ func injectSecret(v map[string]any, getSecretValue func(name string) (string, er
 // it iterates recursively over them too, using injectSecret internally.
 func injectSecretRecursive(v any, getSecretValue func(name string) (string, error)) (any, error) {
 	t := reflect.TypeOf(v)
-
+	if t == nil {
+		return v, nil
+	}
 	if !isComplex(t.Kind()) {
 		return v, nil
 	}

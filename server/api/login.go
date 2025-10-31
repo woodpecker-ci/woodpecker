@@ -191,6 +191,7 @@ func HandleAuth(c *gin.Context) {
 		// insert the user into the database
 		if err := _store.CreateUser(user); err != nil {
 			log.Error().Err(err).Msgf("cannot insert %s", user.Login)
+			log.Trace().Msgf("user was: %#v", user)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
