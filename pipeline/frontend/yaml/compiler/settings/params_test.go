@@ -304,3 +304,21 @@ func TestSecretMappingComplexMapWithSecrets(t *testing.T) {
 	assert.Equal(t, expectedJSON, secretMapping["PLUGIN_CONFIG"])
 	assert.NotContains(t, secretMapping, "PLUGIN_SIMPLE_VAR")
 }
+
+func TestComplexTypesWithNilValuesWontPanic(t *testing.T) {
+	from := map[string]any{
+		"config": []any{
+			"copy a b",
+			map[string]any{
+				"foo": nil,
+			},
+		},
+	}
+
+	got := map[string]string{}
+	expectedJSON := `["copy a b",{"foo":null}]`
+
+	err := ParamsToEnv(from, got, "PLUGIN_", true, nil, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedJSON, got["PLUGIN_CONFIG"])
+}
