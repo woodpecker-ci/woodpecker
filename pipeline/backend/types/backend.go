@@ -91,7 +91,7 @@ type Backend interface {
 	//
 	// This function may be called concurrently for different workflows.
 	// Implementations must be thread-safe and handle concurrent workflow setup.
-	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string, trusted TrustedConfiguration) error
 
 	// StartStep set up and begins execution of a workflow step.
 	// This may be called concurrently for multiple steps within the same
@@ -105,7 +105,7 @@ type Backend interface {
 	//
 	// The step's UUID uniquely identifies it within the workflow.
 	// This function must be thread-safe for concurrent calls.
-	StartStep(ctx context.Context, step *Step, taskUUID string) error
+	StartStep(ctx context.Context, step *Step, taskUUID string, trusted TrustedConfiguration) error
 
 	// TailStep streams the step's logs back to the caller.
 	// This is started in a background goroutine immediately after

@@ -31,7 +31,7 @@ import (
 const minVolumeComponents = 2
 
 // returns a container configuration.
-func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.Config {
+func (e *docker) toConfig(step *types.Step, trusted types.TrustedConfiguration, options BackendOptions) *container.Config {
 	e.windowsPathPatch(step)
 
 	config := &container.Config{
@@ -43,11 +43,20 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
-		Volumes:      toVol(step.Volumes),
 		User:         options.User,
 	}
 	configEnv := make(map[string]string)
 	maps.Copy(configEnv, step.Environment)
+
+	var volumes []string
+	if step.WorkspaceVolume != "" {
+		volumes = append(volumes, step.WorkspaceVolume)
+	}
+	if trusted.Volumes {
+		volumes = append(volumes, step.Volumes...)
+	}
+
+	config.Volumes = toVol(volumes)
 
 	if len(step.Commands) > 0 {
 		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
@@ -74,7 +83,7 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
+func toHostConfig(step *types.Step, trusted types.TrustedConfiguration, conf *config) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
 			CPUQuota:   conf.resourceLimit.CPUQuota,
@@ -87,42 +96,54 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
-		Privileged: step.Privileged,
 	}
 
-	if len(step.NetworkMode) != 0 {
-		config.NetworkMode = container.NetworkMode(step.NetworkMode)
+	if trusted.Security {
+		config.Privileged = step.Privileged
 	}
-	if len(step.DNS) != 0 {
-		config.DNS = step.DNS
-	}
-	if len(step.DNSSearch) != 0 {
-		config.DNSSearch = step.DNSSearch
-	}
-	extraHosts := []string{}
-	for _, hostAlias := range step.ExtraHosts {
-		extraHosts = append(extraHosts, hostAlias.Name+":"+hostAlias.IP)
-	}
-	if len(step.ExtraHosts) != 0 {
-		config.ExtraHosts = extraHosts
-	}
-	if len(step.Devices) != 0 {
-		config.Devices = toDev(step.Devices)
-	}
-	if len(step.Volumes) != 0 {
-		config.Binds = step.Volumes
-	}
-	config.Tmpfs = map[string]string{}
-	for _, path := range step.Tmpfs {
-		if !strings.Contains(path, ":") {
-			config.Tmpfs[path] = ""
-			continue
+
+	if trusted.Network {
+		if len(step.NetworkMode) != 0 {
+			config.NetworkMode = container.NetworkMode(step.NetworkMode)
 		}
-		parts, err := splitVolumeParts(path)
-		if err != nil {
-			continue
+		if len(step.DNS) != 0 {
+			config.DNS = step.DNS
 		}
-		config.Tmpfs[parts[0]] = parts[1]
+		if len(step.DNSSearch) != 0 {
+			config.DNSSearch = step.DNSSearch
+		}
+		extraHosts := []string{}
+		for _, hostAlias := range step.ExtraHosts {
+			extraHosts = append(extraHosts, hostAlias.Name+":"+hostAlias.IP)
+		}
+		if len(step.ExtraHosts) != 0 {
+			config.ExtraHosts = extraHosts
+		}
+	}
+
+	if step.WorkspaceVolume != "" {
+		config.Binds = []string{step.WorkspaceVolume}
+	}
+
+	if trusted.Volumes {
+		if len(step.Devices) != 0 {
+			config.Devices = toDev(step.Devices)
+		}
+		if len(step.Volumes) != 0 {
+			config.Binds = append(config.Binds, step.Volumes...)
+		}
+		config.Tmpfs = map[string]string{}
+		for _, path := range step.Tmpfs {
+			if !strings.Contains(path, ":") {
+				config.Tmpfs[path] = ""
+				continue
+			}
+			parts, err := splitVolumeParts(path)
+			if err != nil {
+				continue
+			}
+			config.Tmpfs[parts[0]] = parts[1]
+		}
 	}
 
 	return config
