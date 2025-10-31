@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/6543/go-optional/v2"
 	"github.com/bmatcuk/doublestar/v4"
 	"gopkg.in/yaml.v3"
 
 	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
 )
 
 // Path defines a runtime constrain for exclude & include paths.

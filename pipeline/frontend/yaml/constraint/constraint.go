@@ -20,12 +20,12 @@ import (
 	"path"
 	"slices"
 
-	"github.com/6543/go-optional/v2"
 	"github.com/expr-lang/expr"
 	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
 )
 
 type (
