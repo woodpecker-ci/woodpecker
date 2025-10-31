@@ -87,6 +87,7 @@ export interface Pipeline {
   workflows?: PipelineWorkflow[];
 
   changed_files?: string[];
+  variables?: Record<string, string>;
 }
 
 export type PipelineStatus =
