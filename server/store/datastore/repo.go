@@ -42,27 +42,27 @@ func (s storage) getRepoForgeID(e *xorm.Session, remoteID model.ForgeRemoteID) (
 	return repo, wrapGet(e.Where("forge_remote_id = ?", remoteID).Get(repo))
 }
 
-func (s storage) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+func (s storage) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string, forgeID int64) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoNameFallback(sess, remoteID, fullName)
+	return s.getRepoNameFallback(sess, remoteID, fullName, forgeID)
 }
 
-func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.ForgeRemoteID, fullName string, forgeID int64) (*model.Repo, error) {
 	repo, err := s.getRepoForgeID(e, remoteID)
 	if errors.Is(err, types.RecordNotExist) {
-		return s.getRepoName(e, fullName)
+		return s.getRepoName(e, fullName, forgeID)
 	}
 	return repo, err
 }
 
-func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
+func (s storage) GetRepoName(fullName string, forgeID int64) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	repo, err := s.getRepoName(sess, fullName)
+	repo, err := s.getRepoName(sess, fullName, forgeID)
 	if errors.Is(err, types.RecordNotExist) {
 		// the repository does not exist, so look for a redirection
-		redirect, err := s.getRedirection(sess, fullName)
+		redirect, err := s.getRedirection(sess, fullName, forgeID)
 		if err != nil {
 			return nil, err
 		}
@@ -71,9 +71,9 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	return repo, err
 }
 
-func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
+func (s storage) getRepoName(e *xorm.Session, fullName string, forgeID int64) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(e.Where("LOWER(full_name) = ?", strings.ToLower(fullName)).Get(repo))
+	return repo, wrapGet(e.Where("LOWER(full_name) = ?", strings.ToLower(fullName)).And("forge_id = ?", forgeID).Get(repo))
 }
 
 func (s storage) GetRepoCount() (int64, error) {

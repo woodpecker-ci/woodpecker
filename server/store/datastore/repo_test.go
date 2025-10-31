@@ -101,10 +101,11 @@ func TestGetRepoName(t *testing.T) {
 		FullName: "bradrydzewski/TEST",
 		Owner:    "bradrydzewski",
 		Name:     "TEST",
+		ForgeID:  1,
 	}
 
 	assert.NoError(t, store.CreateRepo(&repo))
-	getrepo, err := store.GetRepoName(repo.FullName)
+	getrepo, err := store.GetRepoName(repo.FullName, repo.ForgeID)
 	assert.NoError(t, err)
 	assert.Equal(t, repo.ID, getrepo.ID)
 	assert.Equal(t, repo.UserID, getrepo.UserID)
@@ -362,6 +363,7 @@ func TestRepoRedirection(t *testing.T) {
 		FullName:      "bradrydzewski/test",
 		Owner:         "bradrydzewski",
 		Name:          "test",
+		ForgeID:       1,
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
 
@@ -380,7 +382,7 @@ func TestRepoRedirection(t *testing.T) {
 	}))
 
 	// test redirection from old repo name
-	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test")
+	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test", repo.ForgeID)
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repoUpdated.FullName)
 
@@ -394,7 +396,7 @@ func TestRepoRedirection(t *testing.T) {
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
 
-	repoFromStore, err = store.GetRepoNameFallback("", "bradrydzewski/test-no-forge-id")
+	repoFromStore, err = store.GetRepoNameFallback("", "bradrydzewski/test-no-forge-id", repo.ForgeID)
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repo.FullName)
 }
