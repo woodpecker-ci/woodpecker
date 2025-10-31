@@ -374,7 +374,13 @@
                 },
                 "trusted": {
                     "desc": "Los contenedores de pipeline subyacentes obtienen acceso a capacidades escaladas como el montaje de volúmenes.",
-                    "trusted": "Confiado"
+                    "trusted": "Confiado",
+                    "volumes": {
+                        "volumes": "Volúmenes"
+                    },
+                    "security": {
+                        "security": "Seguridad"
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -390,6 +396,9 @@
                         "public": "Público"
                     },
                     "visibility": "Visibilidad del proyecto"
+                },
+                "allow_deploy": {
+                    "allow": "Permitir despliegues"
                 }
             },
             "not_allowed": "No tienes acceso a las configuraciónes del repositorio",
@@ -459,7 +468,12 @@
     "repositories": {
         "title": "Repositorios",
         "all": {
-            "title": "Todos los repositorios"
+            "title": "Todos los repositorios",
+            "desc": "Repositorios ordenados por última creación de flujo"
+        },
+        "last": {
+            "title": "Última visita",
+            "desc": "Repositorios visitados recientemente ordenados por tiempo de acceso"
         }
     },
     "running_version": "Está ejecutando Woodpecker {0}",
@@ -550,5 +564,6 @@
     "bitbucket_dc": "Bitbucket Data Center",
     "gitea": "Gitea",
     "public_only": "Solo público",
-    "extensions_signatures_public_key": "Clave pública para la firma"
+    "extensions_signatures_public_key": "Clave pública para la firma",
+    "login_to_woodpecker_with": "Iniciar sesión en Woodpecker con"
 }
