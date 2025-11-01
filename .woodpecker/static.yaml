@@ -9,7 +9,7 @@ steps:
       - event: pull_request
 
   - name: spellcheck
-    image: docker.io/node:23-alpine
+    image: docker.io/node:24-alpine
     depends_on: []
     commands:
       - corepack enable
