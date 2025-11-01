@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-10-31
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -32,6 +32,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5701](https://github.com/woodpecker-ci/woodpecker/pull/5701)]
 - chore(deps): update docs npm deps non-major [[#5688](https://github.com/woodpecker-ci/woodpecker/pull/5688)]
 - docs(plugins): add github-app-token and github-comment plugins to repository [[#5671](https://github.com/woodpecker-ci/woodpecker/pull/5671)]
 
