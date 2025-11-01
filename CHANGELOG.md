@@ -38,6 +38,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.6.0 [[#5704](https://github.com/woodpecker-ci/woodpecker/pull/5704)]
+- chore(deps): update gitea/gitea docker tag to v1.25 [[#5703](https://github.com/woodpecker-ci/woodpecker/pull/5703)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.157.1 [[#5697](https://github.com/woodpecker-ci/woodpecker/pull/5697)]
 - chore(deps): lock file maintenance [[#5695](https://github.com/woodpecker-ci/woodpecker/pull/5695)]
 - chore(deps): update web npm deps non-major [[#5694](https://github.com/woodpecker-ci/woodpecker/pull/5694)]
