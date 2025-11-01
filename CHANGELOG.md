@@ -32,6 +32,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/node to v24 [[#5706](https://github.com/woodpecker-ci/woodpecker/pull/5706)]
 - chore(deps): update docs npm deps non-major [[#5701](https://github.com/woodpecker-ci/woodpecker/pull/5701)]
 - chore(deps): update docs npm deps non-major [[#5688](https://github.com/woodpecker-ci/woodpecker/pull/5688)]
 - docs(plugins): add github-app-token and github-comment plugins to repository [[#5671](https://github.com/woodpecker-ci/woodpecker/pull/5671)]
