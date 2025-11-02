@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-01
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -39,6 +39,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/yaronf/httpsign to v0.4.1 [[#5708](https://github.com/woodpecker-ci/woodpecker/pull/5708)]
 - chore(deps): update node.js to v24 [[#5707](https://github.com/woodpecker-ci/woodpecker/pull/5707)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.6.0 [[#5704](https://github.com/woodpecker-ci/woodpecker/pull/5704)]
 - chore(deps): update gitea/gitea docker tag to v1.25 [[#5703](https://github.com/woodpecker-ci/woodpecker/pull/5703)]
