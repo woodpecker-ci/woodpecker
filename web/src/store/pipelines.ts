@@ -37,7 +37,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
   const loading = ref(false);
 
   function setPipeline(repoId: number, pipeline: Pipeline) {
-    const repoPipelines = pipelines.get(repoId) || new Map<number, Pipeline>();
+    const repoPipelines = pipelines.get(repoId) ?? new Map<number, Pipeline>();
     repoPipelines.set(pipeline.number, {
       ...repoPipelines.get(pipeline.number),
       ...pipeline,
@@ -54,7 +54,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
   }
 
   function getRepoPipelines(repoId: Ref<number>) {
-    return computed(() => Array.from(pipelines.get(repoId.value)?.values() || []).sort(comparePipelines));
+    return computed(() => Array.from(pipelines.get(repoId.value)?.values() ?? []).sort(comparePipelines));
   }
 
   function getPipeline(repoId: Ref<number>, _pipelineNumber: Ref<string | number>) {
