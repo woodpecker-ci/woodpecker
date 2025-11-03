@@ -99,13 +99,7 @@ func GetForge(c *gin.Context) {
 func PatchForge(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	// use this struct to allow updating the client secret
-	type ForgeWithClientSecret struct {
-		model.Forge
-		ClientSecret string `json:"client_secret"`
-	}
-
-	in := &ForgeWithClientSecret{}
+	in := &model.ForgeWithClientSecret{}
 	err := c.Bind(in)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -153,7 +147,7 @@ func PatchForge(c *gin.Context) {
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			forge			body	Forge	true	"the forge's data (only 'name' and 'no_schedule' are read)"
 func PostForge(c *gin.Context) {
-	in := &model.Forge{}
+	in := &model.ForgeWithClientSecret{}
 	err := c.Bind(in)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
@@ -164,7 +158,7 @@ func PostForge(c *gin.Context) {
 		URL:               in.URL,
 		Type:              in.Type,
 		OAuthClientID:     in.OAuthClientID,
-		OAuthClientSecret: in.OAuthClientSecret,
+		OAuthClientSecret: in.ClientSecret,
 		OAuthHost:         in.OAuthHost,
 		SkipVerify:        in.SkipVerify,
 		AdditionalOptions: in.AdditionalOptions,

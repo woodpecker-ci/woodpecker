@@ -263,7 +263,6 @@ const oauthAppForgeUrl = computed(() => {
     case 'forgejo':
       return `${forgeUrl}/user/settings/applications`;
     case 'bitbucket':
-      return `${forgeUrl}/account/settings/app-passwords`;
     case 'bitbucket-dc':
       return `${forgeUrl}/account/settings/app-passwords`;
     default:
