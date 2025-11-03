@@ -33,6 +33,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5711](https://github.com/woodpecker-ci/woodpecker/pull/5711)]
 - chore(deps): update dependency isomorphic-dompurify to v2.31.0 [[#5709](https://github.com/woodpecker-ci/woodpecker/pull/5709)]
 - chore(deps): update dependency @types/node to v24 [[#5706](https://github.com/woodpecker-ci/woodpecker/pull/5706)]
 - chore(deps): update docs npm deps non-major [[#5701](https://github.com/woodpecker-ci/woodpecker/pull/5701)]
