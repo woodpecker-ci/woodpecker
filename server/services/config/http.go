@@ -65,11 +65,17 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 
 	status, err := h.client.Send(ctx, net_http.MethodPost, h.endpoint, body, response)
 	if err != nil && status != 204 {
-		return nil, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
+		return nil, fmt.Errorf("failed to fetch config via http from endpoint %s (status: %d): %w", h.endpoint, status, err)
 	}
 
+	// handle 204 - no new config available, return old config with error
+	if status == net_http.StatusNoContent {
+		return oldConfigData, fmt.Errorf("config endpoint returned 204 No Content, using fallback config")
+	}
+
+	// unexpected non-success status code
 	if status != net_http.StatusOK {
-		return oldConfigData, nil
+		return oldConfigData, fmt.Errorf("unexpected status code %d from config endpoint %s (expected 200 or 204)", status, h.endpoint)
 	}
 
 	fileMetaList := make([]*types.FileMeta, len(response.Configs))

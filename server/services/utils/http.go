@@ -111,7 +111,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 
 	resp, err := e.Do(req)
 	if err != nil {
-		return 0, err
+		return 0, enhanceHTTPError(err, method, path)
 	}
 	defer resp.Body.Close()
 
