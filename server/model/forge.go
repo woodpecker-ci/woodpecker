@@ -57,4 +57,4 @@ func (f *Forge) PublicCopy() *Forge {
 type ForgeWithClientSecret struct {
 	Forge
 	ClientSecret string `json:"client_secret"`
-}
+} //	@name	ForgeWithClientSecret

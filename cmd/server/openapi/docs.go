@@ -665,7 +665,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Forge"
+                            "$ref": "#/definitions/ForgeWithClientSecret"
                         }
                     }
                 ],
@@ -774,7 +774,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Forge"
+                            "$ref": "#/definitions/ForgeWithClientSecret"
                         }
                     }
                 ],
@@ -4789,6 +4789,37 @@ const docTemplate = `{
                     "additionalProperties": {}
                 },
                 "client": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "oauth_host": {
+                    "description": "public url for oauth if different from url",
+                    "type": "string"
+                },
+                "skip_verify": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.ForgeType"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "ForgeWithClientSecret": {
+            "type": "object",
+            "properties": {
+                "additional_options": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "client": {
+                    "type": "string"
+                },
+                "client_secret": {
                     "type": "string"
                 },
                 "id": {
