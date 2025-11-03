@@ -33,13 +33,14 @@ type (
 	// Container defines a container.
 	Container struct {
 		// common
-		Name       string             `yaml:"name,omitempty"`
-		Image      string             `yaml:"image,omitempty"`
-		Pull       bool               `yaml:"pull,omitempty"`
-		Commands   base.StringOrSlice `yaml:"commands,omitempty"`
-		Entrypoint base.StringOrSlice `yaml:"entrypoint,omitempty"`
-		Directory  string             `yaml:"directory,omitempty"`
-		Settings   map[string]any     `yaml:"settings"`
+		Name        string             `yaml:"name,omitempty"`
+		Image       string             `yaml:"image,omitempty"`
+		Pull        bool               `yaml:"pull,omitempty"`
+		Commands    base.StringOrSlice `yaml:"commands,omitempty"`
+		Entrypoint  base.StringOrSlice `yaml:"entrypoint,omitempty"`
+		Directory   string             `yaml:"directory,omitempty"`
+		Settings    map[string]any     `yaml:"settings,omitempty"`
+		Environment map[string]any     `yaml:"environment,omitempty"`
 		// flow control
 		DependsOn base.StringOrSlice `yaml:"depends_on,omitempty"`
 		When      constraint.When    `yaml:"when,omitempty"`
@@ -55,9 +56,6 @@ type (
 		BackendOptions map[string]any `yaml:"backend_options,omitempty"`
 
 		// ACTIVE DEVELOPMENT BELOW
-
-		// TODO: remove base.EnvironmentMap and use map[string]any after v3.0.0 release
-		Environment base.EnvironmentMap `yaml:"environment,omitempty"`
 
 		// Remove after v3.1.0
 		Secrets []any `yaml:"secrets,omitempty"`
@@ -119,6 +117,11 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+// MarshalYAML implements custom Yaml marshaling.
+func (c ContainerList) MarshalYAML() (any, error) {
+	return c.ContainerList, nil
 }
 
 func (c *Container) IsPlugin() bool {

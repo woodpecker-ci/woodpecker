@@ -127,15 +127,9 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 }
 
 func setupGitHub(forge *model.Forge) (forge.Forge, error) {
-	mergeRef, ok := forge.AdditionalOptions["merge-ref"].(bool)
-	if !ok {
-		return nil, fmt.Errorf("missing merge-ref")
-	}
-
-	publicOnly, ok := forge.AdditionalOptions["public-only"].(bool)
-	if !ok {
-		return nil, fmt.Errorf("missing public-only")
-	}
+	// get additional config and be false by default
+	mergeRef, _ := forge.AdditionalOptions["merge-ref"].(bool)
+	publicOnly, _ := forge.AdditionalOptions["public-only"].(bool)
 
 	opts := github.Opts{
 		URL:               forge.URL,

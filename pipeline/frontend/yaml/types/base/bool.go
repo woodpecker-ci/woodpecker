@@ -42,7 +42,16 @@ func (b *BoolTrue) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
+// MarshalYAML implements custom Yaml marshaling.
+func (b BoolTrue) MarshalYAML() (any, error) {
+	return b.Bool(), nil
+}
+
 // Bool returns the bool value.
 func (b BoolTrue) Bool() bool {
 	return !b.value
+}
+
+func ToBoolTrue(v bool) BoolTrue {
+	return BoolTrue{value: !v}
 }
