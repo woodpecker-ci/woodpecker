@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-02
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -41,6 +41,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency golangci/golangci-lint to v2.6.0 [[#5702](https://github.com/woodpecker-ci/woodpecker/pull/5702)]
+- chore(deps): update web npm deps non-major [[#5705](https://github.com/woodpecker-ci/woodpecker/pull/5705)]
 - fix(deps): update module github.com/yaronf/httpsign to v0.4.1 [[#5708](https://github.com/woodpecker-ci/woodpecker/pull/5708)]
 - chore(deps): update node.js to v24 [[#5707](https://github.com/woodpecker-ci/woodpecker/pull/5707)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.6.0 [[#5704](https://github.com/woodpecker-ci/woodpecker/pull/5704)]
