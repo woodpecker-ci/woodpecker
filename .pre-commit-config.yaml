@@ -12,7 +12,7 @@ repos:
       - id: trailing-whitespace
         exclude: ^docs/versioned_docs/.+/40-cli.md$
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.5.0
+    rev: v2.6.0
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli

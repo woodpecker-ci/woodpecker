@@ -44,7 +44,7 @@
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "^3.9.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
-    "@types/node": "^22.18.8",
+    "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
