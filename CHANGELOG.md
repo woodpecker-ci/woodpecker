@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @JohnWalkerx, @LUKIEYF, @anbraten, @henkka, @hhamalai, @marcusramberg, @qwerty287, @yyewolf
+@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @anbraten, @henkka, @hhamalai, @marcusramberg, @qwerty287, @yyewolf
 
 ### 🔒 Security
 
@@ -21,6 +21,7 @@
 
 ### 🐛 Bug Fixes
 
+- docs: add warning about 27-axis matrix limit [[#5700](https://github.com/woodpecker-ci/woodpecker/pull/5700)]
 - Revert to forge internal implementation of pagination for `Repos()` and `Teams()` for gitea/forgejo [[#5679](https://github.com/woodpecker-ci/woodpecker/pull/5679)]
 - fix: panic due to an invalid memory address when injectSecretRecursive encounters nil values [[#5699](https://github.com/woodpecker-ci/woodpecker/pull/5699)]
 - Fix so agents don't need to specify a required label twice [[#5684](https://github.com/woodpecker-ci/woodpecker/pull/5684)]
