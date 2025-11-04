@@ -20,8 +20,9 @@ import (
 	"net/http"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"golang.org/x/oauth2"
+
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 )
 
 const (
