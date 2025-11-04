@@ -45,6 +45,7 @@ const (
 )
 
 type Forgejo struct {
+	id                int64
 	url               string
 	oauth2URL         string
 	oAuthClientID     string
@@ -64,12 +65,13 @@ type Opts struct {
 
 // New returns a Forge implementation that integrates with Forgejo,
 // an open source Git service written in Go. See https://forgejo.org/
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	if opts.OAuth2URL == "" {
 		opts.OAuth2URL = opts.URL
 	}
 
 	return &Forgejo{
+		id:                id,
 		url:               opts.URL,
 		oauth2URL:         opts.OAuth2URL,
 		oAuthClientID:     opts.OAuthClientID,
@@ -626,7 +628,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		return []string{}, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -663,7 +665,7 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 		return "", nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return "", err
 	}

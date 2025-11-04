@@ -44,10 +44,10 @@ type Store interface {
 	// Repos
 	// GetRepo gets a repo by unique ID.
 	GetRepo(int64) (*model.Repo, error)
-	// GetRepoForgeID gets a repo by its forge ID.
-	GetRepoForgeID(model.ForgeRemoteID) (*model.Repo, error)
-	// GetRepoNameFallback gets the repo by its forge ID and if this doesn't exist by its full name.
-	GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)
+	// GetRepoForgeID gets a repo by its forge ID and forge remote ID.
+	GetRepoForgeID(int64, model.ForgeRemoteID) (*model.Repo, error)
+	// GetRepoNameFallback gets the repo by its forge ID and forge remote ID, and if this doesn't exist by its full name.
+	GetRepoNameFallback(forgeID int64, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
 	GetRepoName(string) (*model.Repo, error)
 	// GetRepoCount gets a count of all repositories in the system.

@@ -61,7 +61,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	repo, err := _store.GetRepoForgeID(forgeRemoteID)
+	repo, err := _store.GetRepoForgeID(user.ForgeID, forgeRemoteID)
 	enabledOnce := err == nil // if there's no error, the repo was found and enabled once already
 	if enabledOnce && repo.IsActive {
 		c.String(http.StatusConflict, "Repository is already active.")
@@ -78,6 +78,7 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Could not fetch repository from forge.")
 		return
 	}
+	from.ForgeID = forgeID
 	if !from.Perm.Admin {
 		c.String(http.StatusForbidden, "User has to be a admin of this repository")
 		return
@@ -539,6 +540,7 @@ func MoveRepo(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	from.ForgeID = repo.ForgeID
 	if !from.Perm.Admin {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -697,6 +699,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 		}
 		return
 	}
+	from.ForgeID = repo.ForgeID
 
 	if repo.FullName != from.FullName {
 		// create a redirection

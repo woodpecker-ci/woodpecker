@@ -34,7 +34,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	forge, _ := New(Opts{
+	forge, _ := New(0, Opts{
 		URL:               "http://localhost:8080/",
 		OAuthClientID:     "0ZXh0IjoiI",
 		OAuthClientSecret: "I1NiIsInR5",
@@ -52,7 +52,7 @@ func Test_github(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
-	c, _ := New(Opts{
+	c, _ := New(0, Opts{
 		URL:        s.URL,
 		SkipVerify: true,
 	})
@@ -62,7 +62,7 @@ func Test_github(t *testing.T) {
 	ctx := t.Context()
 
 	t.Run("netrc with user token", func(t *testing.T) {
-		forge, _ := New(Opts{})
+		forge, _ := New(0, Opts{})
 		netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 		assert.Equal(t, "github.com", netrc.Machine)
 		assert.Equal(t, fakeUser.AccessToken, netrc.Login)
@@ -70,7 +70,7 @@ func Test_github(t *testing.T) {
 		assert.Equal(t, model.ForgeTypeGithub, netrc.Type)
 	})
 	t.Run("netrc with machine account", func(t *testing.T) {
-		forge, _ := New(Opts{})
+		forge, _ := New(0, Opts{})
 		netrc, _ := forge.Netrc(nil, fakeRepo)
 		assert.Equal(t, "github.com", netrc.Machine)
 		assert.Empty(t, netrc.Login)

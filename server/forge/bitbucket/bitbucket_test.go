@@ -34,7 +34,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	forge, _ := New(&Opts{OAuthClientID: "4vyW6b49Z", OAuthClientSecret: "a5012f6c6"})
+	forge, _ := New(0, &Opts{OAuthClientID: "4vyW6b49Z", OAuthClientSecret: "a5012f6c6"})
 
 	f, _ := forge.(*config)
 	assert.Equal(t, DefaultURL, f.url)
@@ -52,7 +52,7 @@ func TestBitbucket(t *testing.T) {
 
 	ctx := t.Context()
 
-	forge, _ := New(&Opts{})
+	forge, _ := New(0, &Opts{})
 	netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 	assert.Equal(t, "bitbucket.org", netrc.Machine)
 	assert.Equal(t, "x-token-auth", netrc.Login)

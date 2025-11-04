@@ -62,8 +62,9 @@ type Opts struct {
 
 // New returns a Forge implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	r := &client{
+		id:         id,
 		API:        defaultAPI,
 		url:        defaultURL,
 		Client:     opts.OAuthClientID,
@@ -82,6 +83,7 @@ func New(opts Opts) (forge.Forge, error) {
 }
 
 type client struct {
+	id         int64
 	url        string
 	API        string
 	Client     string
@@ -651,7 +653,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return pipeline, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -689,7 +691,7 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		return "", nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return "", err
 	}
@@ -744,7 +746,7 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 		log.Trace().Msg("GitHub tag event, fetching changed files using current commit")
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}
