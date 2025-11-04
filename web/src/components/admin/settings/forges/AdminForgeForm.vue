@@ -32,7 +32,7 @@
       <InputField v-slot="{ id }" :label="$t('oauth_client_secret')">
         <TextField
           :id="id"
-          v-model="forge.client_secret"
+          v-model="forge.oauth_client_secret"
           :placeholder="isNew ? '' : $t('leave_empty_to_keep_current_value')"
           :required="isNew"
         />
