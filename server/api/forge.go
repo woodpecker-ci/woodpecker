@@ -93,13 +93,13 @@ func GetForge(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Forge
 //	@Tags		Forges
-//	@Param		Authorization	header	string					true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forgeId			path	int						true	"the forge's id"
-//	@Param		forgeData		body	ForgeWithClientSecret	true	"the forge's data"
+//	@Param		Authorization	header	string						true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		forgeId			path	int							true	"the forge's id"
+//	@Param		forgeData		body	ForgeWithOAuthClientSecret	true	"the forge's data"
 func PatchForge(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	in := &model.ForgeWithClientSecret{}
+	in := &model.ForgeWithOAuthClientSecret{}
 	err := c.Bind(in)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -144,10 +144,10 @@ func PatchForge(c *gin.Context) {
 //	@Produce		json
 //	@Success		200	{object}	Forge
 //	@Tags			Forges
-//	@Param			Authorization	header	string					true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			forge			body	ForgeWithClientSecret	true	"the forge's data (only 'name' and 'no_schedule' are read)"
+//	@Param			Authorization	header	string						true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			forge			body	ForgeWithOAuthClientSecret	true	"the forge's data (only 'name' and 'no_schedule' are read)"
 func PostForge(c *gin.Context) {
-	in := &model.ForgeWithClientSecret{}
+	in := &model.ForgeWithOAuthClientSecret{}
 	err := c.Bind(in)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
