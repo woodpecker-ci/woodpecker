@@ -20,7 +20,7 @@
   "dependencies": {
     "@kyvg/vue3-notification": "^3.4.1",
     "@mdi/js": "^7.4.47",
-    "@vueuse/core": "^13.5.0",
+    "@vueuse/core": "^14.0.0",
     "ansi_up": "^6.0.6",
     "dompurify": "^3.2.6",
     "fuse.js": "^7.1.0",
@@ -44,9 +44,9 @@
     "@intlify/eslint-plugin-vue-i18n": "4.1.0",
     "@intlify/unplugin-vue-i18n": "^11.0.0",
     "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "4.1.14",
+    "@tailwindcss/vite": "4.1.16",
     "@types/lodash": "^4.17.20",
-    "@types/node": "^22.10.5",
+    "@types/node": "^24.0.0",
     "@types/prismjs": "^1.26.5",
     "@types/semver": "^7.7.0",
     "@types/tinycolor2": "^1.4.6",
@@ -66,7 +66,7 @@
     "vite": "^7.0.5",
     "vite-plugin-prismjs": "^0.0.11",
     "vite-svg-loader": "^5.1.0",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.0",
     "vue-tsc": "^3.0.3"
   },
   "pnpm": {
