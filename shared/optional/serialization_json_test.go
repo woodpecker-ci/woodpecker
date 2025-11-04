@@ -1,5 +1,7 @@
-// Copyright 2024 "6543". All rights reserved.
-// SPDX-License-Identifier: MIT
+// Copyright 2025 Woodpecker Authors.
+// Copyright 2024 "6543".
+//
+// Licensed under the MIT License.
 
 package optional_test
 

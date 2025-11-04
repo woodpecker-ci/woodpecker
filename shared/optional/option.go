@@ -1,5 +1,7 @@
-// Copyright 2024 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// Copyright 2025 Woodpecker Authors.
+// Copyright 2024 The Gitea Authors.
+//
+// Licensed under the MIT License.
 
 package optional
 
