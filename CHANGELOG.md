@@ -43,6 +43,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.158.0 [[#5718](https://github.com/woodpecker-ci/woodpecker/pull/5718)]
 - chore(deps): lock file maintenance [[#5711](https://github.com/woodpecker-ci/woodpecker/pull/5711)]
 - chore(deps): update dependency golangci/golangci-lint to v2.6.0 [[#5702](https://github.com/woodpecker-ci/woodpecker/pull/5702)]
 - chore(deps): update web npm deps non-major [[#5705](https://github.com/woodpecker-ci/woodpecker/pull/5705)]
