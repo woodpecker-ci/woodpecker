@@ -56,5 +56,5 @@ func (f *Forge) PublicCopy() *Forge {
 // ForgeWithClientSecret allows to update the client secret.
 type ForgeWithClientSecret struct {
 	Forge
-	ClientSecret string `json:"client_secret"`
+	OAuthClientSecret string `json:"client_secret"`
 } //	@name	ForgeWithClientSecret
