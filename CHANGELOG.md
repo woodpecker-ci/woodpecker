@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Switch from BoolTrue to optional.Option[bool] [[#5693](https://github.com/woodpecker-ci/woodpecker/pull/5693)]
 - Enhancement log stream reading and writing and handle new lines and max-size [[#5683](https://github.com/woodpecker-ci/woodpecker/pull/5683)]
 - Make local backend work with `cli exec` [[#4102](https://github.com/woodpecker-ci/woodpecker/pull/4102)]
 - Make pipeline/frontend/yaml/* types able to be marshaled back to YAML [[#1835](https://github.com/woodpecker-ci/woodpecker/pull/1835)]
@@ -38,6 +39,7 @@
 - chore(deps): update dependency isomorphic-dompurify to v2.31.0 [[#5709](https://github.com/woodpecker-ci/woodpecker/pull/5709)]
 - chore(deps): update dependency @types/node to v24 [[#5706](https://github.com/woodpecker-ci/woodpecker/pull/5706)]
 - chore(deps): update docs npm deps non-major [[#5701](https://github.com/woodpecker-ci/woodpecker/pull/5701)]
+- Update path to plugins moved to woodpecker-community [[#5698](https://github.com/woodpecker-ci/woodpecker/pull/5698)]
 - chore(deps): update docs npm deps non-major [[#5688](https://github.com/woodpecker-ci/woodpecker/pull/5688)]
 - docs(plugins): add github-app-token and github-comment plugins to repository [[#5671](https://github.com/woodpecker-ci/woodpecker/pull/5671)]
 
@@ -67,7 +69,6 @@
 
 ### Misc
 
-- Update path to plugins moved to woodpecker-community [[#5698](https://github.com/woodpecker-ci/woodpecker/pull/5698)]
 - Also create image preview on lable change only [[#5673](https://github.com/woodpecker-ci/woodpecker/pull/5673)]
 - Add migration tests for postgres [[#669](https://github.com/woodpecker-ci/woodpecker/pull/669)]
 
