@@ -78,7 +78,7 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Could not fetch repository from forge.")
 		return
 	}
-	from.ForgeID = forgeID
+	from.ForgeID = user.ForgeID
 	if !from.Perm.Admin {
 		c.String(http.StatusForbidden, "User has to be a admin of this repository")
 		return
