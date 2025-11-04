@@ -125,7 +125,7 @@ func Test_gitea(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullRequest)
-		mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)
+		mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(fakeRepo, nil)
 		mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
 		r, b, err := c.Hook(ctx, req)
 		assert.NotNil(t, r)

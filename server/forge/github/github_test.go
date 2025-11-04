@@ -160,7 +160,7 @@ func TestHook(t *testing.T) {
 		Login:       "6543",
 		AccessToken: "token",
 	}, nil)
-	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(&model.Repo{
+	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(&model.Repo{
 		ID:            1,
 		ForgeRemoteID: "1",
 		Owner:         "6543",
