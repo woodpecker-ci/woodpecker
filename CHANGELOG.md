@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-03
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @anbraten, @henkka, @hhamalai, @marcusramberg, @qwerty287, @yyewolf
+@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @anbraten, @henkka, @hhamalai, @marcusramberg, @pixelateapotato, @qwerty287, @yyewolf
 
 ### 🔒 Security
 
@@ -21,7 +21,6 @@
 
 ### 🐛 Bug Fixes
 
-- docs: add warning about 27-axis matrix limit [[#5700](https://github.com/woodpecker-ci/woodpecker/pull/5700)]
 - Revert to forge internal implementation of pagination for `Repos()` and `Teams()` for gitea/forgejo [[#5679](https://github.com/woodpecker-ci/woodpecker/pull/5679)]
 - fix: panic due to an invalid memory address when injectSecretRecursive encounters nil values [[#5699](https://github.com/woodpecker-ci/woodpecker/pull/5699)]
 - Fix so agents don't need to specify a required label twice [[#5684](https://github.com/woodpecker-ci/woodpecker/pull/5684)]
@@ -34,7 +33,8 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5711](https://github.com/woodpecker-ci/woodpecker/pull/5711)]
+- Fix typo in about.md [[#5716](https://github.com/woodpecker-ci/woodpecker/pull/5716)]
+- docs: add warning about 27-axis matrix limit [[#5700](https://github.com/woodpecker-ci/woodpecker/pull/5700)]
 - chore(deps): update dependency isomorphic-dompurify to v2.31.0 [[#5709](https://github.com/woodpecker-ci/woodpecker/pull/5709)]
 - chore(deps): update dependency @types/node to v24 [[#5706](https://github.com/woodpecker-ci/woodpecker/pull/5706)]
 - chore(deps): update docs npm deps non-major [[#5701](https://github.com/woodpecker-ci/woodpecker/pull/5701)]
@@ -43,6 +43,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#5711](https://github.com/woodpecker-ci/woodpecker/pull/5711)]
 - chore(deps): update dependency golangci/golangci-lint to v2.6.0 [[#5702](https://github.com/woodpecker-ci/woodpecker/pull/5702)]
 - chore(deps): update web npm deps non-major [[#5705](https://github.com/woodpecker-ci/woodpecker/pull/5705)]
 - fix(deps): update module github.com/yaronf/httpsign to v0.4.1 [[#5708](https://github.com/woodpecker-ci/woodpecker/pull/5708)]
