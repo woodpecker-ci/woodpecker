@@ -55,6 +55,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&unsanitizeOrgAndUserNames,
 	&replaceZeroForgeIDsInOrgs,
 	&fixForgeColumns,
+	&updatePipelineStructure,
 }
 
 var allBeans = []any{
