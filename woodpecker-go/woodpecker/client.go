@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker/httputil"
 )
 
 const (
