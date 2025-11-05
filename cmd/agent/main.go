@@ -34,8 +34,11 @@ var backends = []backendTypes.Backend{
 }
 
 func main() {
-	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
-		log.Info().Msg("termination signal is received, shutting down agent")
-	})
-	core.RunAgent(ctx, backends)
+    log.Info().Msgf("Woodpecker Agent Version: %s", Version)
+
+    ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+        log.Info().Msg("termination signal is received, shutting down agent")
+    })
+    core.RunAgent(ctx, backends)
 }
+
