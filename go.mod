@@ -56,7 +56,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.4.1
 	github.com/zalando/go-keyring v0.2.6
-	gitlab.com/gitlab-org/api/client-go v0.158.0
+	gitlab.com/gitlab-org/api/client-go v0.159.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.43.0
 	golang.org/x/net v0.46.0
