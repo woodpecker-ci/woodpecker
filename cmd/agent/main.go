@@ -41,4 +41,3 @@ func main() {
     })
     core.RunAgent(ctx, backends)
 }
-
