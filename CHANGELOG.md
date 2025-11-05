@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-04
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix secret on new forge [[#5715](https://github.com/woodpecker-ci/woodpecker/pull/5715)]
 - Revert to forge internal implementation of pagination for `Repos()` and `Teams()` for gitea/forgejo [[#5679](https://github.com/woodpecker-ci/woodpecker/pull/5679)]
 - fix: panic due to an invalid memory address when injectSecretRecursive encounters nil values [[#5699](https://github.com/woodpecker-ci/woodpecker/pull/5699)]
 - Fix so agents don't need to specify a required label twice [[#5684](https://github.com/woodpecker-ci/woodpecker/pull/5684)]
