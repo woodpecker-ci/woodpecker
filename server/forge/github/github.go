@@ -643,7 +643,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		}
 	} else if pipeline != nil && pipeline.Event == model.EventPush {
 		// GitHub has removed commit summaries from Events API payloads from 7th October 2025 onwards.
-		pipeline, err = c.loadChangedFilesFromCommits(ctx, repo, pipeline, prevCommit, currCommit)
+		pipeline, err = c.loadChangedFilesFromCommits(ctx, repo, pipeline, currCommit, prevCommit)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -768,7 +768,7 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 	if prev == "" {
 		opts := &github.ListOptions{Page: 1}
 		for opts.Page > 0 {
-			commit, resp, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, curr, &github.ListOptions{})
+			commit, resp, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, curr, opts)
 			if err != nil {
 				return nil, err
 			}
