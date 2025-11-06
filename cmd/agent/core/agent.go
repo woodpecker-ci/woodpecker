@@ -65,6 +65,8 @@ var (
 )
 
 func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
+	log.Info().Msgf("Woodpecker Agent Version: %s", version.String())
+
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
 	stopAgentFunc = func(err error) {
 		msg := "shutdown of whole agent"

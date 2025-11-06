@@ -15,30 +15,30 @@
 package main
 
 import (
-    "context"
+	"context"
 
-    "github.com/rs/zerolog/log"
+	"github.com/rs/zerolog/log"
 
-    "go.woodpecker-ci.org/woodpecker/v3/cmd/agent/core"
-    "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
-    "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
-    "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
-    backendTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-    "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
-    "go.woodpecker-ci.org/woodpecker/v3/version"
+	"go.woodpecker-ci.org/woodpecker/v3/cmd/agent/core"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
+	backendTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 var backends = []backendTypes.Backend{
-    kubernetes.New(),
-    docker.New(),
-    local.New(),
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
 }
 
 func main() {
-    log.Info().Msgf("Woodpecker Agent Version: %s", version.String())
+	log.Info().Msgf("Woodpecker Agent Version: %s", version.String())
 
-    ctx := utils.WithContextSigtermCallback(context.Background(), func() {
-        log.Info().Msg("termination signal is received, shutting down agent")
-    })
-    core.RunAgent(ctx, backends)
+	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+		log.Info().Msg("termination signal is received, shutting down agent")
+	})
+	core.RunAgent(ctx, backends)
 }
