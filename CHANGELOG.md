@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @anbraten, @henkka, @hhamalai, @marcusramberg, @pixelateapotato, @qwerty287, @yyewolf
+@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @anbraten, @chamburr, @henkka, @hhamalai, @marcusramberg, @pixelateapotato, @qwerty287, @yyewolf
 
 ### 🔒 Security
 
@@ -23,6 +23,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix workflow path filter for GitHub [[#5721](https://github.com/woodpecker-ci/woodpecker/pull/5721)]
 - Fix secret on new forge [[#5715](https://github.com/woodpecker-ci/woodpecker/pull/5715)]
 - Revert to forge internal implementation of pagination for `Repos()` and `Teams()` for gitea/forgejo [[#5679](https://github.com/woodpecker-ci/woodpecker/pull/5679)]
 - fix: panic due to an invalid memory address when injectSecretRecursive encounters nil values [[#5699](https://github.com/woodpecker-ci/woodpecker/pull/5699)]
