@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -72,7 +73,14 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	pipeline, err := _store.GetPipelineBadge(repo, branch)
+	// Events to lookup in the pipe, set multiple separated by comma
+	// If none given, fallback to former default "push"
+	events := c.Query("events")
+	if len(events) == 0 {
+		events = string(model.EventPush)
+	}
+
+	pipeline, err := _store.GetPipelineBadge(repo, branch, strings.Split(events, ","))
 	if err != nil {
 		if !errors.Is(err, types.RecordNotExist) {
 			log.Warn().Err(err).Msg("could not get last pipeline for badge")

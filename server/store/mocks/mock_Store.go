@@ -1822,8 +1822,8 @@ func (_c *MockStore_GetPipeline_Call) RunAndReturn(run func(n int64) (*model.Pip
 }
 
 // GetPipelineBadge provides a mock function for the type MockStore
-func (_mock *MockStore) GetPipelineBadge(repo *model.Repo, s string) (*model.Pipeline, error) {
-	ret := _mock.Called(repo, s)
+func (_mock *MockStore) GetPipelineBadge(repo *model.Repo, s string, strings []string) (*model.Pipeline, error) {
+	ret := _mock.Called(repo, s, strings)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetPipelineBadge")
@@ -1831,18 +1831,18 @@ func (_mock *MockStore) GetPipelineBadge(repo *model.Repo, s string) (*model.Pip
 
 	var r0 *model.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) (*model.Pipeline, error)); ok {
-		return returnFunc(repo, s)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string, []string) (*model.Pipeline, error)); ok {
+		return returnFunc(repo, s, strings)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) *model.Pipeline); ok {
-		r0 = returnFunc(repo, s)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string, []string) *model.Pipeline); ok {
+		r0 = returnFunc(repo, s, strings)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, string) error); ok {
-		r1 = returnFunc(repo, s)
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, string, []string) error); ok {
+		r1 = returnFunc(repo, s, strings)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1857,11 +1857,12 @@ type MockStore_GetPipelineBadge_Call struct {
 // GetPipelineBadge is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - s string
-func (_e *MockStore_Expecter) GetPipelineBadge(repo interface{}, s interface{}) *MockStore_GetPipelineBadge_Call {
-	return &MockStore_GetPipelineBadge_Call{Call: _e.mock.On("GetPipelineBadge", repo, s)}
+//   - strings []string
+func (_e *MockStore_Expecter) GetPipelineBadge(repo interface{}, s interface{}, strings interface{}) *MockStore_GetPipelineBadge_Call {
+	return &MockStore_GetPipelineBadge_Call{Call: _e.mock.On("GetPipelineBadge", repo, s, strings)}
 }
 
-func (_c *MockStore_GetPipelineBadge_Call) Run(run func(repo *model.Repo, s string)) *MockStore_GetPipelineBadge_Call {
+func (_c *MockStore_GetPipelineBadge_Call) Run(run func(repo *model.Repo, s string, strings []string)) *MockStore_GetPipelineBadge_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *model.Repo
 		if args[0] != nil {
@@ -1871,9 +1872,14 @@ func (_c *MockStore_GetPipelineBadge_Call) Run(run func(repo *model.Repo, s stri
 		if args[1] != nil {
 			arg1 = args[1].(string)
 		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -1884,7 +1890,7 @@ func (_c *MockStore_GetPipelineBadge_Call) Return(pipeline *model.Pipeline, err 
 	return _c
 }
 
-func (_c *MockStore_GetPipelineBadge_Call) RunAndReturn(run func(repo *model.Repo, s string) (*model.Pipeline, error)) *MockStore_GetPipelineBadge_Call {
+func (_c *MockStore_GetPipelineBadge_Call) RunAndReturn(run func(repo *model.Repo, s string, strings []string) (*model.Pipeline, error)) *MockStore_GetPipelineBadge_Call {
 	_c.Call.Return(run)
 	return _c
 }
