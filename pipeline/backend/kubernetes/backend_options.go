@@ -18,7 +18,6 @@ type BackendOptions struct {
 	Tolerations        []Toleration      `mapstructure:"tolerations"`
 	SecurityContext    *SecurityContext  `mapstructure:"securityContext"`
 	Secrets            []SecretRef       `mapstructure:"secrets"`
-	Sidecars           []Sidecar         `mapstructure:"sidecars"`
 }
 
 // Resources defines two maps for kubernetes resource definitions.
@@ -80,21 +79,6 @@ type SecretRef struct {
 type SecretTarget struct {
 	Env  string `mapstructure:"env"`
 	File string `mapstructure:"file"`
-}
-
-type Sidecar struct {
-	Name         string            `json:"name"`
-	Image        string            `json:"image,omitempty"`
-	Pull         bool              `json:"pull,omitempty"`
-	Privileged   bool              `json:"privileged,omitempty"`
-	Environment  map[string]string `json:"environment,omitempty"`
-	Commands     []string          `json:"commands,omitempty"`
-	VolumeMounts []VolumeMount     `json:"volume_mounts,omitempty"`
-}
-
-type VolumeMount struct {
-	Name      string `json:"name"`
-	MountPath string `json:"mount_path"`
 }
 
 const (
