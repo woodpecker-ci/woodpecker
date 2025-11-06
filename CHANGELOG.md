@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @anbraten, @chamburr, @henkka, @hhamalai, @marcusramberg, @pixelateapotato, @qwerty287, @yyewolf
+@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @MartinSchmidt, @anbraten, @chamburr, @henkka, @hhamalai, @marcusramberg, @pixelateapotato, @qwerty287, @yyewolf
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Add support for sidecar containers and volumes in Kubernetes backend [[#5666](https://github.com/woodpecker-ci/woodpecker/pull/5666)]
 - Add Header User-Agent for request client [[#5664](https://github.com/woodpecker-ci/woodpecker/pull/5664)]
 - Switch from BoolTrue to optional.Option[bool] [[#5693](https://github.com/woodpecker-ci/woodpecker/pull/5693)]
 - Enhancement log stream reading and writing and handle new lines and max-size [[#5683](https://github.com/woodpecker-ci/woodpecker/pull/5683)]
