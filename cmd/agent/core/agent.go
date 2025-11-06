@@ -65,7 +65,7 @@ var (
 )
 
 func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
-	log.Info().Str("version", version.Version).Msg("Starting Woodpecker agent")
+	log.Info().Str("version", version.String()).Msg("Starting Woodpecker agent")
 
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
 	stopAgentFunc = func(err error) {
