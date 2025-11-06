@@ -32,7 +32,7 @@
       <InputField v-slot="{ id }" :label="$t('oauth_client_secret')">
         <TextField
           :id="id"
-          v-model="forge.client_secret"
+          v-model="forge.oauth_client_secret"
           :placeholder="isNew ? '' : $t('leave_empty_to_keep_current_value')"
           :required="isNew"
         />
@@ -263,7 +263,6 @@ const oauthAppForgeUrl = computed(() => {
     case 'forgejo':
       return `${forgeUrl}/user/settings/applications`;
     case 'bitbucket':
-      return `${forgeUrl}/account/settings/app-passwords`;
     case 'bitbucket-dc':
       return `${forgeUrl}/account/settings/app-passwords`;
     default:
