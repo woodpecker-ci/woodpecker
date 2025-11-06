@@ -309,8 +309,6 @@ steps:
                 mountPath: /var/run
 ```
 
-
-
 ## Tips and tricks
 
 ### CRI-O

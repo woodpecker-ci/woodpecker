@@ -67,10 +67,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 	spec.Containers = append(spec.Containers, container)
 
 	for _, sidecarSpec := range options.Sidecars {
-		sidecarContainer, err := sidecarContainer(sidecarSpec, options)
-		if err != nil {
-			return nil, err
-		}
+		sidecarContainer := sidecarContainer(sidecarSpec, options)
 		spec.Containers = append(spec.Containers, sidecarContainer)
 	}
 
@@ -286,7 +283,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	return container, nil
 }
 
-func sidecarContainer(sidecars Sidecar, options BackendOptions) (v1.Container, error) {
+func sidecarContainer(sidecars Sidecar, options BackendOptions) v1.Container {
 	container := v1.Container{
 		Name:            sidecars.Name,
 		Image:           sidecars.Image,
@@ -305,7 +302,7 @@ func sidecarContainer(sidecars Sidecar, options BackendOptions) (v1.Container, e
 
 	container.VolumeMounts = sidecarVolumeMounts(sidecars.VolumeMounts)
 
-	return container, nil
+	return container
 }
 
 func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []v1.EnvVar {
@@ -369,7 +366,7 @@ func pvcVolume(name string) v1.Volume {
 
 func sidecarPodVolumes(options BackendOptions) []v1.Volume {
 	var vols []v1.Volume
-	var allContainerVolumes = flatSidecarVolumeMounts(options)
+	allContainerVolumes := flatSidecarVolumeMounts(options)
 
 	for _, v := range allContainerVolumes {
 		vols = append(vols, v1.Volume{
