@@ -30,6 +30,7 @@ import (
 	"github.com/yaronf/httpsign"
 
 	host_matcher "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 )
 
 type Client struct {
@@ -58,12 +59,18 @@ func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*
 		return nil, err
 	}
 
-	client := http.Client{
-		Timeout: timeout,
-		Transport: &http.Transport{
+	// Create base transport with custom User-Agent
+	baseTransport := httputil.NewUserAgentRoundTripper(
+		&http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 			DialContext:     host_matcher.NewDialContext("extensions", allowedHostMatcher),
 		},
+		"server-extensions",
+	)
+
+	client := http.Client{
+		Timeout:   timeout,
+		Transport: baseTransport,
 	}
 
 	config := httpsign.NewClientConfig().SetSignatureName(pubKeyID).SetSigner(signer)

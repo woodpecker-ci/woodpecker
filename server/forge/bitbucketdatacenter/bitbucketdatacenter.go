@@ -34,6 +34,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 )
 
 const (
@@ -770,5 +771,6 @@ func (c *client) newClient(ctx context.Context, u *model.User) (*bb.Client, erro
 		AccessToken: u.AccessToken,
 	}
 	client := config.Client(ctx, t)
+	client = httputil.WrapClient(client, "forge-bitbucketdatacenter")
 	return bb.NewClient(c.urlAPI, client)
 }
