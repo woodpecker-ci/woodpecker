@@ -349,6 +349,7 @@
             "badge": {
                 "badge": "Abzeichen",
                 "branch": "Branch",
+                "events": "Ereignisse",
                 "type": "Syntax",
                 "type_html": "HTML",
                 "type_markdown": "Markdown",

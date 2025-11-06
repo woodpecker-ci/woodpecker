@@ -30,6 +30,9 @@
     <InputField v-slot="{ id }" :label="$t('repo.settings.badge.branch')">
       <SelectField :id="id" v-model="branch" :options="branches" required />
     </InputField>
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.events')">
+      <CheckboxesField :id="id" v-model="events" :options="badgeEventsOptions" />
+    </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
       <div>
@@ -44,15 +47,17 @@ import { useStorage } from '@vueuse/core';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import type { SelectOption } from '~/components/form/form.types';
+import type { SelectOption, CheckboxOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
+import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
+import { WebhookEvents } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const repo = requiredInject('repo');
@@ -62,6 +67,7 @@ const badgeType = useStorage('woodpecker:last-badge-type', 'markdown');
 const defaultBranch = computed(() => repo.value.default_branch);
 const branches = ref<SelectOption[]>([]);
 const branch = ref<string>('');
+const events = ref<string[]>([]);
 
 async function loadBranches() {
   branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
@@ -80,9 +86,19 @@ const baseUrl = `${window.location.protocol}//${window.location.hostname}${
   window.location.port ? `:${window.location.port}` : ''
 }`;
 const { rootPath } = useConfig();
-const badgeUrl = computed(
-  () => `${rootPath}/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
-);
+const badgeUrl = computed(() => {
+  const params = [];
+
+  if (branch.value !== '') {
+    params.push(`branch=${encodeURIComponent(branch.value)}`);
+  }
+
+  if (events.value.length > 0) {
+    params.push(`events=${encodeURIComponent(events.value.join(','))}`);
+  }
+
+  return `${rootPath}/api/badges/${repo.value.id}/status.svg${params.length > 0 ? `?${params.join('&')}` : ''}`;
+});
 const repoUrl = computed(
   () =>
     `${rootPath}/repos/${repo.value.id}${branch.value !== '' ? `/branches/${encodeURIComponent(branch.value)}` : ''}`,
@@ -98,7 +114,7 @@ const badgeContent = computed(() => {
   }
 
   if (badgeType.value === 'html') {
-    return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${badgeUrl.value}" alt="status-badge" />\n</a>`;
+    return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${badgeUrl.value.replace('&', '&amp;')}" alt="status-badge" />\n</a>`;
   }
 
   return '';
@@ -113,5 +129,16 @@ watch(repo, () => {
 });
 
 const { t } = useI18n();
+
+const badgeEventsOptions: CheckboxOption[] = [
+  { value: WebhookEvents.Push, text: t('repo.pipeline.event.push') },
+  { value: WebhookEvents.Tag, text: t('repo.pipeline.event.tag') },
+  { value: WebhookEvents.Release, text: t('repo.pipeline.event.release') },
+  { value: WebhookEvents.PullRequest, text: t('repo.pipeline.event.pr') },
+  { value: WebhookEvents.Deploy, text: t('repo.pipeline.event.deploy') },
+  { value: WebhookEvents.Cron, text: t('repo.pipeline.event.cron') },
+  { value: WebhookEvents.Manual, text: t('repo.pipeline.event.manual') },
+];
+
 useWPTitle(computed(() => [t('repo.settings.badge.badge'), repo.value.full_name]));
 </script>
