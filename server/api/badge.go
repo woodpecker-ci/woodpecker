@@ -82,7 +82,9 @@ func GetBadge(c *gin.Context) {
 	} else {
 		for _, event := range strings.Split(eventsQuery, ",") {
 			e := model.WebhookEvent(event)
-			if err := e.Validate(); err != nil {
+			if err := e.Validate(); err == nil {
+				events = append(events, e)
+			} else {
 				_ = c.AbortWithError(http.StatusBadRequest, err)
 				return
 			}
