@@ -135,6 +135,8 @@ const badgeEventsOptions: CheckboxOption[] = [
   { value: WebhookEvents.Tag, text: t('repo.pipeline.event.tag') },
   { value: WebhookEvents.Release, text: t('repo.pipeline.event.release') },
   { value: WebhookEvents.PullRequest, text: t('repo.pipeline.event.pr') },
+  { value: WebhookEvents.PullRequestClosed, text: t('repo.pipeline.event.pr_closed') },
+  { value: WebhookEvents.PullRequestMetadata, text: t('repo.pipeline.event.pr_metadata') },
   { value: WebhookEvents.Deploy, text: t('repo.pipeline.event.deploy') },
   { value: WebhookEvents.Cron, text: t('repo.pipeline.event.cron') },
   { value: WebhookEvents.Manual, text: t('repo.pipeline.event.manual') },
