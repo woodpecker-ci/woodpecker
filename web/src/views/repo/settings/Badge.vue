@@ -67,7 +67,7 @@ const badgeType = useStorage('woodpecker:last-badge-type', 'markdown');
 const defaultBranch = computed(() => repo.value.default_branch);
 const branches = ref<SelectOption[]>([]);
 const branch = ref<string>('');
-const events = ref<string[]>([]);
+const events = ref<string[]>([WebhookEvents.Push]);
 
 async function loadBranches() {
   branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
