@@ -240,7 +240,7 @@ func (c *Client) ListChangedFiles(owner, name, commit string) (result []string, 
 	paths := make(map[string]struct{})
 	opts := &ListOpts{Page: 1, PageLen: pageSize}
 	for {
-		resp := new(DiffStatResp)
+		var resp DiffStatResp
 		uri := fmt.Sprintf(pathDiffStat, c.base, owner, name, commit, opts.Encode())
 		if _, err = c.do(uri, http.MethodGet, nil, &resp); err != nil {
 			return nil, err

@@ -410,7 +410,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
-	pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, u.Login, pl.Commit)
+	pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
 	if err != nil {
 		return nil, nil, err
 	}
