@@ -15,11 +15,10 @@ The status badge displays the status for the latest build to your default branch
 +<scheme>://<hostname>/api/badges/<repo-id>/status.svg?branch=<branch>
 ```
 
-The badge represents the state of the last push event. If you'd like to respect other or further events, you can add the `events` query parameter:
+By default status badges do not include pull request results, since the status of a pull request does not provide an accurate representation of your repository state.
+If you'd like to respect other or further events, you can add the `events` query parameter, otherwise the badge represents only the state of the last push event:
 
 ```diff
 -<scheme>://<hostname>/api/badges/<repo-id>/status.svg
 +<scheme>://<hostname>/api/badges/<repo-id>/status.svg?events=manual,cron
 ```
-
-By default status badges do not include pull request results, since the status of a pull request does not provide an accurate representation of your repository state.
