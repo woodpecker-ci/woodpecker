@@ -73,14 +73,23 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	// Events to lookup in the pipe, set multiple separated by comma
-	// If none given, fallback to former default "push"
-	events := c.Query("events")
-	if len(events) == 0 {
-		events = string(model.EventPush)
+	// Events to lookup, multiple separated by comma
+	var events []model.WebhookEvent
+	eventsQuery := c.Query("events")
+	// If none given, fallback to default "push"
+	if len(eventsQuery) == 0 {
+		events = []model.WebhookEvent{model.EventPush}
+	} else {
+		for _, event := range strings.Split(eventsQuery, ",") {
+			e := model.WebhookEvent(event)
+			if err := e.Validate(); err != nil {
+				_ = c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+		}
 	}
 
-	pipeline, err := _store.GetPipelineBadge(repo, branch, strings.Split(events, ","))
+	pipeline, err := _store.GetPipelineBadge(repo, branch, events)
 	if err != nil {
 		if !errors.Is(err, types.RecordNotExist) {
 			log.Warn().Err(err).Msg("could not get last pipeline for badge")

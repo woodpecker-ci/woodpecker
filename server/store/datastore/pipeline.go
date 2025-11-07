@@ -35,7 +35,7 @@ func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline
 	).Get(pipeline))
 }
 
-func (s storage) GetPipelineBadge(repo *model.Repo, branch string, events []string) (*model.Pipeline, error) {
+func (s storage) GetPipelineBadge(repo *model.Repo, branch string, events []model.WebhookEvent) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
