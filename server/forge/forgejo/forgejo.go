@@ -34,6 +34,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -180,24 +181,31 @@ func (c *Forgejo) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams is supported by the Forgejo driver.
 func (c *Forgejo) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	orgs, _, err := client.ListMyOrgs(
-		forgejo.ListOrgsOptions{
-			ListOptions: forgejo.ListOptions{
-				Page:     p.Page,
-				PageSize: c.perPage(ctx, p.PerPage),
+	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
+		orgs, _, err := client.ListMyOrgs(
+			forgejo.ListOrgsOptions{
+				ListOptions: forgejo.ListOptions{
+					Page:     page,
+					PageSize: c.perPage(ctx),
+				},
 			},
-		},
-	)
-	teams := make([]*model.Team, 0, len(orgs))
-	for _, org := range orgs {
-		teams = append(teams, toTeam(org, c.url))
-	}
-	return teams, err
+		)
+		teams := make([]*model.Team, 0, len(orgs))
+		for _, org := range orgs {
+			teams = append(teams, toTeam(org, c.url))
+		}
+		return teams, err
+	}, -1)
 }
 
 // TeamPerm is not supported by the Forgejo driver.
@@ -234,22 +242,27 @@ func (c *Forgejo) Repo(ctx context.Context, u *model.User, remoteID model.ForgeR
 // Repos returns a list of all repositories for the Forgejo account, including
 // organization repositories.
 func (c *Forgejo) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	repos, _, err := client.ListMyRepos(
-		forgejo.ListReposOptions{
-			ListOptions: forgejo.ListOptions{
-				Page:     p.Page,
-				PageSize: c.perPage(ctx, p.PerPage),
+	repos, err := shared_utils.Paginate(func(page int) ([]*forgejo.Repository, error) {
+		repos, _, err := client.ListMyRepos(
+			forgejo.ListReposOptions{
+				ListOptions: forgejo.ListOptions{
+					Page:     page,
+					PageSize: c.perPage(ctx),
+				},
 			},
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
+		)
+		return repos, err
+	}, -1)
 
 	result := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {
@@ -401,7 +414,7 @@ func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, 
 		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, forgejo.ListHooksOptions{
 			ListOptions: forgejo.ListOptions{
 				Page:     page,
-				PageSize: c.perPage(ctx, c.pageSize),
+				PageSize: c.perPage(ctx),
 			},
 		})
 		return hooks, err
@@ -574,12 +587,13 @@ func (c *Forgejo) newClientToken(ctx context.Context, token string) (*forgejo.Cl
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
-	client, err := forgejo.NewClient(c.url, forgejo.SetToken(token), forgejo.SetHTTPClient(httpClient), forgejo.SetContext(ctx))
+	wrappedClient := httputil.WrapClient(httpClient, "forge-forgejo")
+	client, err := forgejo.NewClient(c.url, forgejo.SetToken(token), forgejo.SetHTTPClient(wrappedClient), forgejo.SetContext(ctx))
 	if err != nil &&
 		(errors.Is(err, &forgejo.ErrUnknownVersion{}) || strings.Contains(err.Error(), "Malformed version")) {
 		// we guess it's a dev forgejo version
 		log.Error().Err(err).Msgf("could not detect forgejo version, assume dev version %s", forgejoDevVersion)
-		client, err = forgejo.NewClient(c.url, forgejo.SetForgejoVersion(forgejoDevVersion), forgejo.SetToken(token), forgejo.SetHTTPClient(httpClient), forgejo.SetContext(ctx))
+		client, err = forgejo.NewClient(c.url, forgejo.SetForgejoVersion(forgejoDevVersion), forgejo.SetToken(token), forgejo.SetHTTPClient(wrappedClient), forgejo.SetContext(ctx))
 	}
 	return client, err
 }
@@ -674,7 +688,7 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 	return tag.Commit.SHA, nil
 }
 
-func (c *Forgejo) perPage(ctx context.Context, customPerPage int) int {
+func (c *Forgejo) perPage(ctx context.Context) int {
 	if c.pageSize == 0 {
 		client, err := c.newClientToken(ctx, "")
 		if err != nil {
@@ -687,11 +701,5 @@ func (c *Forgejo) perPage(ctx context.Context, customPerPage int) int {
 		}
 		c.pageSize = api.MaxResponseItems
 	}
-
-	pageSize := customPerPage
-	if pageSize == 0 || pageSize > c.pageSize {
-		pageSize = c.pageSize
-	}
-
-	return pageSize
+	return c.pageSize
 }

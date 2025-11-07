@@ -32,6 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -454,7 +455,7 @@ func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client 
 
 // helper function to return the bitbucket oauth2 client.
 func (c *config) newClientToken(ctx context.Context, accessToken, refreshToken string) *internal.Client {
-	return internal.NewClientToken(
+	client := internal.NewClientToken(
 		ctx,
 		c.api,
 		accessToken,
@@ -464,6 +465,8 @@ func (c *config) newClientToken(ctx context.Context, accessToken, refreshToken s
 			RefreshToken: refreshToken,
 		},
 	)
+	client.Client = httputil.WrapClient(client.Client, "forge-bitbucket")
+	return client
 }
 
 // helper function to return the bitbucket oauth2 config.
