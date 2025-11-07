@@ -409,6 +409,11 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
+	pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, u.Login, pl.Commit)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, nil, err
