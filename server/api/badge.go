@@ -80,10 +80,12 @@ func GetBadge(c *gin.Context) {
 	if len(eventsQuery) == 0 {
 		events = []model.WebhookEvent{model.EventPush}
 	} else {
-		for _, event := range strings.Split(eventsQuery, ",") {
-			e := model.WebhookEvent(event)
-			if err := e.Validate(); err == nil {
-				events = append(events, e)
+		strEvents := strings.Split(eventsQuery, ",")
+		events = make([]model.WebhookEvent, len(strEvents))
+		for i, strEvent := range strEvents {
+			event := model.WebhookEvent(strEvent)
+			if err := event.Validate(); err == nil {
+				events[i] = event
 			} else {
 				_ = c.AbortWithError(http.StatusBadRequest, err)
 				return
