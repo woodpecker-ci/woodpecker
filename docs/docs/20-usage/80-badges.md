@@ -22,4 +22,4 @@ The badge represents the state of the last push event. If you'd like to respect 
 +<scheme>://<hostname>/api/badges/<repo-id>/status.svg?events=manual,cron
 ```
 
-Please note status badges should not include pull request results, since the status of a pull request does not provide an accurate representation of your repository state.
+By default status badges do not include pull request results, since the status of a pull request does not provide an accurate representation of your repository state.
