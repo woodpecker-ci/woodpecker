@@ -47,10 +47,10 @@ import { useStorage } from '@vueuse/core';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import type { SelectOption, CheckboxOption } from '~/components/form/form.types';
+import CheckboxesField from '~/components/form/CheckboxesField.vue';
+import type { CheckboxOption, SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
-import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
