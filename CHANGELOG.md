@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-06
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -23,6 +23,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix badge label padding [[#5725](https://github.com/woodpecker-ci/woodpecker/pull/5725)]
 - Fix workflow path filter for GitHub [[#5721](https://github.com/woodpecker-ci/woodpecker/pull/5721)]
 - Fix secret on new forge [[#5715](https://github.com/woodpecker-ci/woodpecker/pull/5715)]
 - Revert to forge internal implementation of pagination for `Repos()` and `Teams()` for gitea/forgejo [[#5679](https://github.com/woodpecker-ci/woodpecker/pull/5679)]
