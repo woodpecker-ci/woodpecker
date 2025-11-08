@@ -39,6 +39,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5733](https://github.com/woodpecker-ci/woodpecker/pull/5733)]
 - Fix typo in about.md [[#5716](https://github.com/woodpecker-ci/woodpecker/pull/5716)]
 - docs: add warning about 27-axis matrix limit [[#5700](https://github.com/woodpecker-ci/woodpecker/pull/5700)]
 - chore(deps): update dependency isomorphic-dompurify to v2.31.0 [[#5709](https://github.com/woodpecker-ci/woodpecker/pull/5709)]
