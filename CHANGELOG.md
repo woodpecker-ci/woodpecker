@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-07
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- feat(agent): log agent version on startup [[#5724](https://github.com/woodpecker-ci/woodpecker/pull/5724)]
 - Add Header User-Agent for request client [[#5664](https://github.com/woodpecker-ci/woodpecker/pull/5664)]
 - Switch from BoolTrue to optional.Option[bool] [[#5693](https://github.com/woodpecker-ci/woodpecker/pull/5693)]
 - Enhancement log stream reading and writing and handle new lines and max-size [[#5683](https://github.com/woodpecker-ci/woodpecker/pull/5683)]
@@ -49,6 +50,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency golang to v1.25.4 [[#5731](https://github.com/woodpecker-ci/woodpecker/pull/5731)]
 - fix(deps): update golang-packages to v28.5.2+incompatible [[#5723](https://github.com/woodpecker-ci/woodpecker/pull/5723)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.159.0 [[#5720](https://github.com/woodpecker-ci/woodpecker/pull/5720)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.158.0 [[#5718](https://github.com/woodpecker-ci/woodpecker/pull/5718)]
@@ -75,8 +77,7 @@
 
 ### Misc
 
-- feat(agent): log agent version on startup [[#5724](https://github.com/woodpecker-ci/woodpecker/pull/5724)]
-- Also create image preview on lable change only [[#5673](https://github.com/woodpecker-ci/woodpecker/pull/5673)]
+- Also create image preview on label change only [[#5673](https://github.com/woodpecker-ci/woodpecker/pull/5673)]
 - Add migration tests for postgres [[#669](https://github.com/woodpecker-ci/woodpecker/pull/669)]
 
 ## [3.11.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.11.0) - 2025-10-19
