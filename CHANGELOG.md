@@ -50,6 +50,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.6.1 [[#5734](https://github.com/woodpecker-ci/woodpecker/pull/5734)]
 - chore(deps): update dependency golangci/golangci-lint to v2.6.1 [[#5732](https://github.com/woodpecker-ci/woodpecker/pull/5732)]
 - chore(deps): update dependency golang to v1.25.4 [[#5731](https://github.com/woodpecker-ci/woodpecker/pull/5731)]
 - fix(deps): update golang-packages to v28.5.2+incompatible [[#5723](https://github.com/woodpecker-ci/woodpecker/pull/5723)]
