@@ -39,7 +39,6 @@
 
 ### 📚 Documentation
 
-- fix(deps): update dependency marked to v17 [[#5736](https://github.com/woodpecker-ci/woodpecker/pull/5736)]
 - chore(deps): update docs npm deps non-major [[#5733](https://github.com/woodpecker-ci/woodpecker/pull/5733)]
 - Fix typo in about.md [[#5716](https://github.com/woodpecker-ci/woodpecker/pull/5716)]
 - docs: add warning about 27-axis matrix limit [[#5700](https://github.com/woodpecker-ci/woodpecker/pull/5700)]
@@ -52,6 +51,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v76 to v77 [[#5737](https://github.com/woodpecker-ci/woodpecker/pull/5737)]
+- fix(deps): update dependency marked to v17 [[#5736](https://github.com/woodpecker-ci/woodpecker/pull/5736)]
 - chore(deps): update web npm deps non-major [[#5735](https://github.com/woodpecker-ci/woodpecker/pull/5735)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.6.1 [[#5734](https://github.com/woodpecker-ci/woodpecker/pull/5734)]
 - chore(deps): update dependency golangci/golangci-lint to v2.6.1 [[#5732](https://github.com/woodpecker-ci/woodpecker/pull/5732)]
