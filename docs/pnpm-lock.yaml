@@ -105,7 +105,7 @@ importers:
         version: 24.10.0
       axios:
         specifier: ^1.7.9
-        version: 1.13.1
+        version: 1.13.2
       concurrently:
         specifier: ^9.1.2
         version: 9.2.1
@@ -114,7 +114,7 @@ importers:
         version: 2.31.0
       marked:
         specifier: ^16.0.0
-        version: 16.4.1
+        version: 16.4.2
       slugify:
         specifier: ^1.6.6
         version: 1.6.6
@@ -2251,8 +2251,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
 
-  axios@1.13.1:
-    resolution: {integrity: sha512-hU4EGxxt+j7TQijx1oYdAjw4xuIp1wRQSsbMFwSthCWeBQur1eF+qJ5iQ5sN3Tw8YRzQNKb8jszgBdMDVqwJcw==}
+  axios@1.13.2:
+    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
 
   babel-loader@9.2.1:
     resolution: {integrity: sha512-fqe8naHt46e0yIdkjUZYqddSXfej3AHajX+CSO5X7oy0EmPc6o5Xh+RClNoHjnieWz9AW4kZxW9yyFMhVB1QLA==}
@@ -3940,8 +3940,8 @@ packages:
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
-  marked@16.4.1:
-    resolution: {integrity: sha512-ntROs7RaN3EvWfy3EZi14H4YxmT6A5YvywfhO+0pm+cH/dnSQRmdAmoFIc3B9aiwTehyk7pESH4ofyBY+V5hZg==}
+  marked@16.4.2:
+    resolution: {integrity: sha512-TI3V8YYWvkVf3KJe1dRkpnjs68JUPyEa5vjKrp1XEEJUAOaQc+Qj+L1qWbPd0SJuAdQkFU0h73sXXqwDYxsiDA==}
     engines: {node: '>= 20'}
     hasBin: true
 
@@ -7237,7 +7237,7 @@ snapshots:
       '@docsearch/css': 4.2.0
       ai: 5.0.86(zod@4.1.12)
       algoliasearch: 5.42.0
-      marked: 16.4.1
+      marked: 16.4.2
       zod: 4.1.12
     optionalDependencies:
       '@types/react': 19.2.2
@@ -9058,7 +9058,7 @@ snapshots:
       postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
-  axios@1.13.1:
+  axios@1.13.2:
     dependencies:
       follow-redirects: 1.15.11(debug@4.4.3)
       form-data: 4.0.4
@@ -10885,7 +10885,7 @@ snapshots:
 
   markdown-table@3.0.4: {}
 
-  marked@16.4.1: {}
+  marked@16.4.2: {}
 
   marked@4.3.0: {}
 
