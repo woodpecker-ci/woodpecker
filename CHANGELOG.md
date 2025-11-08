@@ -51,6 +51,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v77 to v78 [[#5739](https://github.com/woodpecker-ci/woodpecker/pull/5739)]
 - fix(deps): update module github.com/google/go-github/v76 to v77 [[#5737](https://github.com/woodpecker-ci/woodpecker/pull/5737)]
 - fix(deps): update dependency marked to v17 [[#5736](https://github.com/woodpecker-ci/woodpecker/pull/5736)]
 - chore(deps): update web npm deps non-major [[#5735](https://github.com/woodpecker-ci/woodpecker/pull/5735)]
