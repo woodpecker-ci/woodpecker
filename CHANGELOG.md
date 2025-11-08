@@ -39,6 +39,7 @@
 
 ### 📚 Documentation
 
+- fix(deps): update dependency marked to v17 [[#5736](https://github.com/woodpecker-ci/woodpecker/pull/5736)]
 - chore(deps): update docs npm deps non-major [[#5733](https://github.com/woodpecker-ci/woodpecker/pull/5733)]
 - Fix typo in about.md [[#5716](https://github.com/woodpecker-ci/woodpecker/pull/5716)]
 - docs: add warning about 27-axis matrix limit [[#5700](https://github.com/woodpecker-ci/woodpecker/pull/5700)]
