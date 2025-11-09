@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-08
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -51,6 +51,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v15.20.0 [[#5742](https://github.com/woodpecker-ci/woodpecker/pull/5742)]
 - fix(deps): update module github.com/google/go-github/v77 to v78 [[#5739](https://github.com/woodpecker-ci/woodpecker/pull/5739)]
 - fix(deps): update module github.com/google/go-github/v76 to v77 [[#5737](https://github.com/woodpecker-ci/woodpecker/pull/5737)]
 - fix(deps): update dependency marked to v17 [[#5736](https://github.com/woodpecker-ci/woodpecker/pull/5736)]
