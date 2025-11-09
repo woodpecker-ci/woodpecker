@@ -44,7 +44,7 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import { computed, onMounted, ref, watch, nextTick  } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
