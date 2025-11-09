@@ -31,7 +31,7 @@
       <SelectField :id="id" v-model="branch" :options="branches" required />
     </InputField>
     <InputField v-slot="{ id }" :label="$t('repo.settings.badge.events')">
-      <CheckboxesField :id="id" v-model="events" :options="badgeEventsOptions" />
+      <CheckboxesField :id="id" v-model="events" :options="badgeEventsOptions" @update:model-value="eventsChanged" />
     </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
@@ -44,7 +44,7 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch, nextTick  } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
@@ -94,7 +94,10 @@ const badgeUrl = computed(() => {
   }
 
   if (events.value.length > 0) {
-    params.push(`events=${encodeURIComponent(events.value.join(','))}`);
+    // dont set events parameters, if only WebhookEvents.Push is selected, as this is the default behaviour
+    if (events.value.length !== 1 || events.value.at(0) !== WebhookEvents.Push) {
+      params.push(`events=${encodeURIComponent(events.value.join(','))}`);
+    }
   }
 
   return `${rootPath}/api/badges/${repo.value.id}/status.svg${params.length > 0 ? `?${params.join('&')}` : ''}`;
@@ -143,4 +146,13 @@ const badgeEventsOptions: CheckboxOption[] = [
 ];
 
 useWPTitle(computed(() => [t('repo.settings.badge.badge'), repo.value.full_name]));
+
+async function eventsChanged() {
+  if (events.value.length === 0) {
+    // wait for the DOM do handle uncheck event before setting checkbox again
+    // this is required if the last unchecked checkbox was Push
+    await nextTick();
+    events.value.push(WebhookEvents.Push);
+  }
+}
 </script>
