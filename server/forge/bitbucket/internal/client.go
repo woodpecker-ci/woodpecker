@@ -236,12 +236,12 @@ func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRe
 	return out.Values, err
 }
 
-func (c *Client) ListChangedFiles(owner, name, commit string) (result []string, err error) {
+func (c *Client) ListChangedFiles(owner, name, ref string) (result []string, err error) {
 	paths := make(map[string]struct{})
 	opts := &ListOpts{Page: 1, PageLen: pageSize}
 	for {
 		var resp DiffStatResp
-		uri := fmt.Sprintf(pathDiffStat, c.base, owner, name, commit, opts.Encode())
+		uri := fmt.Sprintf(pathDiffStat, c.base, owner, name, ref, opts.Encode())
 		if _, err = c.do(uri, http.MethodGet, nil, &resp); err != nil {
 			return nil, err
 		}

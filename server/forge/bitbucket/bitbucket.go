@@ -400,7 +400,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	repo, pl, err := parseHook(req)
+	pr, repo, pl, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -410,9 +410,26 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
-	pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
-	if err != nil {
-		return nil, nil, err
+	switch pl.Event {
+	case model.EventPush:
+		// List only the latest push changes
+		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
+		if err != nil {
+			return nil, nil, err
+		}
+	case model.EventPull:
+		client := c.newClient(ctx, u)
+
+		if pr == nil {
+			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
+		}
+
+		// List all changes between source & destination branch
+		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.PullRequest.Source.Branch.Name, pr.PullRequest.Dest.Branch.Name))
+		if err != nil {
+			return nil, nil, err
+		}
+	default:
 	}
 
 	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
