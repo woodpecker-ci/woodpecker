@@ -20,10 +20,12 @@ func Test_parseHook(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Event-Key", "pr:opened")
 
-		result, err := parseHook(req, "https://bitbucket.example.com")
+		result, curCommit, prevCommit, err := parseHook(req, "https://bitbucket.example.com")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+		assert.Empty(t, curCommit)
+		assert.Empty(t, prevCommit)
 		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
@@ -40,10 +42,12 @@ func Test_parseHook(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Event-Key", "pr:opened")
 
-		result, err := parseHook(req, "https://bitbucket.example.com")
+		result, curCommit, prevCommit, err := parseHook(req, "https://bitbucket.example.com")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+		assert.Empty(t, curCommit)
+		assert.Empty(t, prevCommit)
 		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
@@ -60,10 +64,12 @@ func Test_parseHook(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Event-Key", "repo:refs_changed")
 
-		result, err := parseHook(req, "https://bitbucket.example.com")
+		result, curCommit, prevCommit, err := parseHook(req, "https://bitbucket.example.com")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+		assert.NotEmpty(t, curCommit)
+		assert.NotEmpty(t, prevCommit)
 		assert.IsType(t, &bb.RepositoryPushEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
@@ -80,10 +86,12 @@ func Test_parseHook(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Event-Key", "pr:merged")
 
-		result, err := parseHook(req, "https://bitbucket.example.com")
+		result, curCommit, prevCommit, err := parseHook(req, "https://bitbucket.example.com")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+		assert.Empty(t, curCommit)
+		assert.Empty(t, prevCommit)
 		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)

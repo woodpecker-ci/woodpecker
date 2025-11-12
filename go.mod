@@ -230,3 +230,7 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+// XXX: requires updates to neticdk/go-bitbucket
+// XXX: https://github.com/neticdk/go-bitbucket/pull/37
+replace github.com/neticdk/go-bitbucket => github.com/hhamalai/go-bitbucket v0.0.0-20251112125708-59137a0ed682
