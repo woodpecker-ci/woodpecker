@@ -429,7 +429,6 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		if err != nil {
 			return nil, nil, err
 		}
-	default:
 	}
 
 	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
