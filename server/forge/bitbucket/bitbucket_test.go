@@ -216,6 +216,7 @@ func TestBitbucket(t *testing.T) {
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
 }
 
 var (
