@@ -17,7 +17,7 @@ type HookResult struct {
 	Payload  []byte
 }
 
-func parseHook(r *http.Request, baseURL string) (_ *HookResult, currCommit, prevCommit string, _ error) {
+func parseHook(r *http.Request, baseURL string) (*HookResult, string, string, error) {
 	ev, payload, err := bb.ParsePayloadWithoutSignature(r)
 	if err != nil {
 		return nil, "", "", fmt.Errorf("unable to parse payload from webhook invocation: %w", err)
@@ -32,7 +32,7 @@ func parseHook(r *http.Request, baseURL string) (_ *HookResult, currCommit, prev
 	case *bb.RepositoryPushEvent:
 		result.Repo = convertRepo(&e.Repository, nil, "")
 		result.Pipeline = convertRepositoryPushEvent(e, baseURL)
-		currCommit, prevCommit = convertGetCommitRange(e)
+		currCommit, prevCommit := convertGetCommitRange(e)
 		return result, currCommit, prevCommit, nil
 	case *bb.PullRequestEvent:
 		result.Repo = convertRepo(&e.PullRequest.Target.Repository, nil, "")
