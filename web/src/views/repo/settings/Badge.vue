@@ -31,7 +31,13 @@
       <SelectField :id="id" v-model="branch" :options="branches" required />
     </InputField>
     <InputField v-slot="{ id }" :label="$t('repo.settings.badge.events')">
-      <CheckboxesField :id="id" v-model="events" :options="badgeEventsOptions" @update:model-value="eventsChanged" />
+      <CheckboxesField
+        :id="id"
+        v-model="events"
+        :options="badgeEventsOptions"
+        :disabled="isDisabled"
+        @update:model-value="eventsChanged"
+      />
     </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
@@ -44,7 +50,7 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
@@ -134,7 +140,7 @@ watch(repo, () => {
 const { t } = useI18n();
 
 const badgeEventsOptions: CheckboxOption[] = [
-  { value: WebhookEvents.Push, text: t('repo.pipeline.event.push') },
+  { value: WebhookEvents.Push, text: t('repo.pipeline.event.push'), description: t('default') },
   { value: WebhookEvents.Tag, text: t('repo.pipeline.event.tag') },
   { value: WebhookEvents.Release, text: t('repo.pipeline.event.release') },
   { value: WebhookEvents.PullRequest, text: t('repo.pipeline.event.pr') },
@@ -147,12 +153,20 @@ const badgeEventsOptions: CheckboxOption[] = [
 
 useWPTitle(computed(() => [t('repo.settings.badge.badge'), repo.value.full_name]));
 
-async function eventsChanged() {
+function eventsChanged() {
   if (events.value.length === 0) {
-    // wait for the DOM do handle uncheck event before setting checkbox again
-    // this is required if the last unchecked checkbox was Push
-    await nextTick();
     events.value.push(WebhookEvents.Push);
   }
 }
+
+const isDisabled = computed(() => {
+  return (option: CheckboxOption) => {
+    if (events.value.length === 1 && events.value[0] === WebhookEvents.Push) {
+      // disable Push checkbox if only Push is selected because it's the default
+      return option.value === WebhookEvents.Push;
+    } else {
+      return false;
+    }
+  };
+});
 </script>

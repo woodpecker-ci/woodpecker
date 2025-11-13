@@ -3,8 +3,9 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox border-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-md border transition-colors duration-150"
+      class="checkbox disabled:checkbox border-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-md border transition-colors duration-150"
       :checked="innerValue"
+      :disabled="disabled || false"
       @click="innerValue = !innerValue"
     />
     <div class="ml-4 flex flex-col">
@@ -21,6 +22,7 @@ const props = defineProps<{
   modelValue: boolean;
   label: string;
   description?: string;
+  disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
