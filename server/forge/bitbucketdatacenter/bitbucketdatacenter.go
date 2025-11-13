@@ -558,7 +558,7 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 	return user, repo, nil
 }
 
-func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, currCommit string, prevCommit string) (*model.Pipeline, error) {
+func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, currCommit, prevCommit string) (*model.Pipeline, error) {
 	if p == nil {
 		return nil, nil
 	}
