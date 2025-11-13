@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-12
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -52,6 +52,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5746](https://github.com/woodpecker-ci/woodpecker/pull/5746)]
 - fix(deps): update golang-packages [[#5745](https://github.com/woodpecker-ci/woodpecker/pull/5745)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.6.0 [[#5743](https://github.com/woodpecker-ci/woodpecker/pull/5743)]
 - chore(deps): lock file maintenance [[#5744](https://github.com/woodpecker-ci/woodpecker/pull/5744)]
