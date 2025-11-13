@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @MeurillonGuillaume, @Utkarsh9571, @anbraten, @chamburr, @henkka, @hhamalai, @marcusramberg, @pixelateapotato, @qwerty287, @yyewolf
+@1001Josias, @6543, @JohnWalkerx, @LUKIEYF, @MeurillonGuillaume, @Utkarsh9571, @Xuxe, @anbraten, @chamburr, @henkka, @hhamalai, @marcusramberg, @pixelateapotato, @qwerty287, @yyewolf
 
 ### 🔒 Security
 
@@ -25,6 +25,8 @@
 
 ### 🐛 Bug Fixes
 
+- Fix crash when a HTTP/2 client goes away on SSE streams [[#5738](https://github.com/woodpecker-ci/woodpecker/pull/5738)]
+- Add created icon [[#5747](https://github.com/woodpecker-ci/woodpecker/pull/5747)]
 - Fix badge label padding [[#5725](https://github.com/woodpecker-ci/woodpecker/pull/5725)]
 - Fix workflow path filter for GitHub [[#5721](https://github.com/woodpecker-ci/woodpecker/pull/5721)]
 - Fix secret on new forge [[#5715](https://github.com/woodpecker-ci/woodpecker/pull/5715)]
