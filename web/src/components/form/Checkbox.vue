@@ -3,7 +3,7 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox disabled:checkbox border-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-md border transition-colors duration-150"
+      class="checkbox border-wp-control-neutral-200 disabled:border-wp-control-neutral-200 disabled:bg-wp-control-neutral-300 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-md border transition-colors duration-150"
       :checked="innerValue"
       :disabled="disabled || false"
       @click="innerValue = !innerValue"
@@ -65,6 +65,10 @@ const id = (Math.random() + 1).toString(36).substring(7);
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
+}
+
+.checkbox:disabled::before {
+  border-color: var(--color-gray-600);
 }
 
 .checkbox:checked::before {

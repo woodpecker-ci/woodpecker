@@ -172,12 +172,3 @@ code:not(pre > code) {
   @apply bg-wp-code-300 text-wp-code-text-100 p-4 break-words;
   white-space: pre-wrap;
 }
-
-.disabled\:checkbox:disabled {
-  background-color: var(--color-gray-300);
-  border-color: var(--color-gray-300);
-}
-
-.disabled\:checkbox:disabled::before {
-  border-color: var(--color-gray-700) !important;
-}
