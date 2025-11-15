@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-13
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -42,6 +42,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5752](https://github.com/woodpecker-ci/woodpecker/pull/5752)]
 - chore(deps): update docs npm deps non-major [[#5733](https://github.com/woodpecker-ci/woodpecker/pull/5733)]
 - Fix typo in about.md [[#5716](https://github.com/woodpecker-ci/woodpecker/pull/5716)]
 - docs: add warning about 27-axis matrix limit [[#5700](https://github.com/woodpecker-ci/woodpecker/pull/5700)]
@@ -54,6 +55,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency golangci/golangci-lint to v2.6.2 [[#5751](https://github.com/woodpecker-ci/woodpecker/pull/5751)]
 - fix(deps): update golang-packages [[#5746](https://github.com/woodpecker-ci/woodpecker/pull/5746)]
 - fix(deps): update golang-packages [[#5745](https://github.com/woodpecker-ci/woodpecker/pull/5745)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.6.0 [[#5743](https://github.com/woodpecker-ci/woodpecker/pull/5743)]
