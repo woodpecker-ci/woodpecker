@@ -66,6 +66,11 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 	}
 	spec.Containers = append(spec.Containers, container)
 
+	for _, sidecarSpec := range options.Sidecars {
+		sidecarContainer := sidecarContainer(sidecarSpec, options)
+		spec.Containers = append(spec.Containers, sidecarContainer)
+	}
+
 	pod := &v1.Pod{
 		ObjectMeta: meta,
 		Spec:       spec,
@@ -219,6 +224,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	}
 
 	spec.Volumes = append(spec.Volumes, nsp.volumes...)
+	spec.Volumes = append(spec.Volumes, sidecarPodVolumes(options)...)
 
 	return spec, nil
 }
@@ -272,8 +278,31 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container.EnvFrom = append(container.EnvFrom, nsp.envFromSources...)
 	container.Env = append(container.Env, nsp.envVars...)
 	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
+	container.VolumeMounts = append(container.VolumeMounts, sidecarVolumeMounts(flatSidecarVolumeMounts(options))...)
 
 	return container, nil
+}
+
+func sidecarContainer(sidecars Sidecar, options BackendOptions) v1.Container {
+	container := v1.Container{
+		Name:            sidecars.Name,
+		Image:           sidecars.Image,
+		Command:         sidecars.Commands,
+		Env:             mapToEnvVars(sidecars.Environment),
+		SecurityContext: containerSecurityContext(options.SecurityContext, sidecars.Privileged),
+	}
+
+	if sidecars.Pull {
+		container.ImagePullPolicy = v1.PullAlways
+	}
+
+	if len(sidecars.Commands) > 0 {
+		container.Command = sidecars.Commands
+	}
+
+	container.VolumeMounts = sidecarVolumeMounts(sidecars.VolumeMounts)
+
+	return container
 }
 
 func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []v1.EnvVar {
@@ -335,6 +364,22 @@ func pvcVolume(name string) v1.Volume {
 	}
 }
 
+func sidecarPodVolumes(options BackendOptions) []v1.Volume {
+	var vols []v1.Volume
+	allContainerVolumes := flatSidecarVolumeMounts(options)
+
+	for _, v := range allContainerVolumes {
+		vols = append(vols, v1.Volume{
+			Name: v.Name,
+			VolumeSource: v1.VolumeSource{
+				EmptyDir: &v1.EmptyDirVolumeSource{},
+			},
+		})
+	}
+
+	return vols
+}
+
 func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
 	var mounts []v1.VolumeMount
 
@@ -355,6 +400,24 @@ func volumeMount(name, path string) v1.VolumeMount {
 		Name:      name,
 		MountPath: path,
 	}
+}
+
+func sidecarVolumeMounts(sidecarVolumeMounts []VolumeMount) []v1.VolumeMount {
+	var mounts []v1.VolumeMount
+
+	for _, v := range sidecarVolumeMounts {
+		mounts = append(mounts, volumeMount(v.Name, v.MountPath))
+	}
+
+	return mounts
+}
+
+func flatSidecarVolumeMounts(options BackendOptions) []VolumeMount {
+	var allContainerVolumes []VolumeMount
+	for _, sidecar := range options.Sidecars {
+		allContainerVolumes = append(allContainerVolumes, sidecar.VolumeMounts...)
+	}
+	return allContainerVolumes
 }
 
 func containerPorts(ports []types.Port) []v1.ContainerPort {
