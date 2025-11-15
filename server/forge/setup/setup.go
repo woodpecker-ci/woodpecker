@@ -50,7 +50,7 @@ func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
-	return bitbucket.New(opts)
+	return bitbucket.New(forge.ID, opts)
 }
 
 func setupGitea(forge *model.Forge) (forge.Forge, error) {
@@ -77,7 +77,7 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 		Bool("oauth-secret-id-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
-	return gitea.New(opts)
+	return gitea.New(forge.ID, opts)
 }
 
 func setupForgejo(forge *model.Forge) (forge.Forge, error) {
@@ -104,7 +104,7 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
-	return forgejo.New(opts)
+	return forgejo.New(forge.ID, opts)
 }
 
 func setupGitLab(forge *model.Forge) (forge.Forge, error) {
@@ -123,7 +123,7 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
-	return gitlab.New(opts)
+	return gitlab.New(forge.ID, opts)
 }
 
 func setupGitHub(forge *model.Forge) (forge.Forge, error) {
@@ -150,7 +150,7 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
-	return github.New(opts)
+	return github.New(forge.ID, opts)
 }
 
 func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
@@ -185,7 +185,7 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Str("type", string(forge.Type)).
 		Bool("oauth-enable-project-admin-scope", opts.OAuthEnableProjectAdminScope).
 		Msg("setting up forge")
-	return bitbucketdatacenter.New(opts)
+	return bitbucketdatacenter.New(forge.ID, opts)
 }
 
 func setupAddon(forge *model.Forge) (forge.Forge, error) {

@@ -48,6 +48,7 @@ const (
 )
 
 type Gitea struct {
+	id                int64
 	url               string
 	oAuthClientID     string
 	oAuthClientSecret string
@@ -67,8 +68,9 @@ type Opts struct {
 
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	return &Gitea{
+		id:                id,
 		url:               opts.URL,
 		oAuthClientID:     opts.OAuthClientID,
 		oAuthClientSecret: opts.OAuthClientSecret,
@@ -635,7 +637,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return []string{}, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -672,7 +674,7 @@ func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName s
 		return "", nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return "", err
 	}

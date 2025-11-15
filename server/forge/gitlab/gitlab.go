@@ -56,6 +56,7 @@ type Opts struct {
 
 // Gitlab implements "Forge" interface.
 type GitLab struct {
+	id                int64
 	url               string
 	oAuthClientID     string
 	oAuthClientSecret string
@@ -67,8 +68,9 @@ type GitLab struct {
 
 // New returns a Forge implementation that integrates with Gitlab, an open
 // source Git service. See https://gitlab.com
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	return &GitLab{
+		id:                id,
 		url:               opts.URL,
 		oAuthClientID:     opts.OAuthClientID,
 		oAuthClientSecret: opts.OAuthClientSecret,
@@ -782,7 +784,7 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		return pipeline, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(g.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}
