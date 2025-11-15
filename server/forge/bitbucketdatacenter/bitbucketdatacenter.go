@@ -499,7 +499,7 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 }
 
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	hook, err := parseHook(r, c.url)
+	hook, currCommit, prevCommit, err := parseHook(r, c.url)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to parse hook: %w", err)
 	}
@@ -518,7 +518,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 
 	switch e := hook.Event.(type) {
 	case *bb.RepositoryPushEvent:
-		pipe, err = c.updatePipelineFromCommit(ctx, user, repo, hook.Pipeline)
+		pipe, err = c.updatePipelineFromCommits(ctx, user, repo, hook.Pipeline, currCommit, prevCommit)
 	case *bb.PullRequestEvent:
 		pipe, err = c.updatePipelineFromPullRequest(ctx, user, repo, hook.Pipeline, e.PullRequest.ID)
 	}
@@ -558,7 +558,7 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 	return user, repo, nil
 }
 
-func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline) (*model.Pipeline, error) {
+func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, currCommit, prevCommit string) (*model.Pipeline, error) {
 	if p == nil {
 		return nil, nil
 	}
@@ -574,9 +574,15 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 	}
 	p.Message = commit.Message
 
-	opts := &bb.ListOptions{}
+	opts := &bb.CompareChangesOptions{}
+	if currCommit != "" {
+		opts.From = currCommit
+	}
+	if prevCommit != "" {
+		opts.To = prevCommit
+	}
 	for {
-		changes, resp, err := bc.Projects.ListChanges(ctx, r.Owner, r.Name, p.Commit, opts)
+		changes, resp, err := bc.Projects.CompareChanges(ctx, r.Owner, r.Name, opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to list commit changes: %w", err)
 		}

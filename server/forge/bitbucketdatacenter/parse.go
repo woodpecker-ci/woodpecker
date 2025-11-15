@@ -17,10 +17,10 @@ type HookResult struct {
 	Payload  []byte
 }
 
-func parseHook(r *http.Request, baseURL string) (*HookResult, error) {
+func parseHook(r *http.Request, baseURL string) (*HookResult, string, string, error) {
 	ev, payload, err := bb.ParsePayloadWithoutSignature(r)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse payload from webhook invocation: %w", err)
+		return nil, "", "", fmt.Errorf("unable to parse payload from webhook invocation: %w", err)
 	}
 
 	result := &HookResult{
@@ -32,12 +32,13 @@ func parseHook(r *http.Request, baseURL string) (*HookResult, error) {
 	case *bb.RepositoryPushEvent:
 		result.Repo = convertRepo(&e.Repository, nil, "")
 		result.Pipeline = convertRepositoryPushEvent(e, baseURL)
+		currCommit, prevCommit := convertGetCommitRange(e)
+		return result, currCommit, prevCommit, nil
 	case *bb.PullRequestEvent:
 		result.Repo = convertRepo(&e.PullRequest.Target.Repository, nil, "")
 		result.Pipeline = convertPullRequestEvent(e, baseURL)
+		return result, "", "", nil
 	default:
-		return nil, &types.ErrIgnoreEvent{Event: fmt.Sprintf("%T", e), Reason: "unsupported webhook event type"}
+		return nil, "", "", &types.ErrIgnoreEvent{Event: fmt.Sprintf("%T", e), Reason: "unsupported webhook event type"}
 	}
-
-	return result, nil
 }
