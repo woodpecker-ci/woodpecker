@@ -4,6 +4,7 @@
     :key="option.value"
     :model-value="innerValue.includes(option.value)"
     :label="option.text"
+    :disabled="disabled ? disabled(option) : false"
     :description="option.description"
     class="mb-2"
     @update:model-value="clickOption(option)"
@@ -19,6 +20,7 @@ import type { CheckboxOption } from './form.types';
 const props = defineProps<{
   modelValue?: CheckboxOption['value'][];
   options?: CheckboxOption[];
+  disabled?: (option: CheckboxOption) => boolean;
 }>();
 const emit = defineEmits<{
   (event: 'update:modelValue', value: CheckboxOption['value'][]): void;
