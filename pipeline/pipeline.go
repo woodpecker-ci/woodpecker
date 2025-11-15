@@ -57,6 +57,7 @@ type Runtime struct {
 	spec    *backend.Config
 	engine  backend.Backend
 	started int64
+	trusted backend.TrustedConfiguration
 
 	ctx    context.Context
 	tracer Tracer
@@ -116,7 +117,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID, r.trusted); err != nil {
 		var stepErr *pipelineErrors.ErrInvalidWorkflowSetup
 		if errors.As(err, &stepErr) {
 			state := new(State)
@@ -250,7 +251,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 // Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
-	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
+	if err := r.engine.StartStep(r.ctx, step, r.taskUUID, r.trusted); err != nil {
 		return nil, err
 	}
 
