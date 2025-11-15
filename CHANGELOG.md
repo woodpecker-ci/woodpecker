@@ -55,6 +55,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v78 to v79 [[#5757](https://github.com/woodpecker-ci/woodpecker/pull/5757)]
 - fix(deps): update module github.com/docker/cli to v29 [[#5756](https://github.com/woodpecker-ci/woodpecker/pull/5756)]
 - chore(deps): update postgres docker tag to v18.1 [[#5755](https://github.com/woodpecker-ci/woodpecker/pull/5755)]
 - chore(deps): update web npm deps non-major [[#5754](https://github.com/woodpecker-ci/woodpecker/pull/5754)]
