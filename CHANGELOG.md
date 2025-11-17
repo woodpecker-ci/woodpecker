@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-15
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -42,6 +42,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5760](https://github.com/woodpecker-ci/woodpecker/pull/5760)]
 - chore(deps): update docs npm deps non-major [[#5752](https://github.com/woodpecker-ci/woodpecker/pull/5752)]
 - chore(deps): update docs npm deps non-major [[#5733](https://github.com/woodpecker-ci/woodpecker/pull/5733)]
 - Fix typo in about.md [[#5716](https://github.com/woodpecker-ci/woodpecker/pull/5716)]
@@ -55,6 +56,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/urfave/cli/v3 to v3.6.1 [[#5759](https://github.com/woodpecker-ci/woodpecker/pull/5759)]
 - chore(deps): update dependency vue-tsc to v3.1.4 [[#5758](https://github.com/woodpecker-ci/woodpecker/pull/5758)]
 - fix(deps): update module github.com/google/go-github/v78 to v79 [[#5757](https://github.com/woodpecker-ci/woodpecker/pull/5757)]
 - fix(deps): update module github.com/docker/cli to v29 [[#5756](https://github.com/woodpecker-ci/woodpecker/pull/5756)]
