@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-17
+## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -42,6 +42,7 @@
 
 ### 📚 Documentation
 
+- Add docs for 3.12 [[#5763](https://github.com/woodpecker-ci/woodpecker/pull/5763)]
 - chore(deps): lock file maintenance [[#5760](https://github.com/woodpecker-ci/woodpecker/pull/5760)]
 - chore(deps): update docs npm deps non-major [[#5752](https://github.com/woodpecker-ci/woodpecker/pull/5752)]
 - chore(deps): update docs npm deps non-major [[#5733](https://github.com/woodpecker-ci/woodpecker/pull/5733)]
