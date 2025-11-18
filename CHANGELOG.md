@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- feat(bitbucketserver): get changes from all commits in a single push event [[#5748](https://github.com/woodpecker-ci/woodpecker/pull/5748)]
 - Support for file changes in Bitbucket Cloud [[#5730](https://github.com/woodpecker-ci/woodpecker/pull/5730)]
 - feat(agent): log agent version on startup [[#5724](https://github.com/woodpecker-ci/woodpecker/pull/5724)]
 - Add Header User-Agent for request client [[#5664](https://github.com/woodpecker-ci/woodpecker/pull/5664)]
