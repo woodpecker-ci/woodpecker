@@ -43,7 +43,7 @@ require (
 	github.com/migueleliasweb/go-github-mock v1.5.0
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
-	github.com/neticdk/go-bitbucket v1.0.4
+	github.com/neticdk/go-bitbucket v1.0.5
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.34.0
@@ -230,7 +230,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-// XXX: requires updates to neticdk/go-bitbucket
-// XXX: https://github.com/neticdk/go-bitbucket/pull/37
-replace github.com/neticdk/go-bitbucket => github.com/hhamalai/go-bitbucket v0.0.0-20251112125708-59137a0ed682
