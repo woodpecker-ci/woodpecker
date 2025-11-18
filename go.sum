@@ -451,8 +451,8 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/ncruces/go-strftime v0.1.9 h1:bY0MQC28UADQmHmaF5dgpLmImcShSi2kHU9XLdhx/f4=
 github.com/ncruces/go-strftime v0.1.9/go.mod h1:Fwc5htZGVVkseilnfgOVb9mKy6w1naJmn9CehxcKcls=
-github.com/neticdk/go-bitbucket v1.0.4 h1:Nl7LtB+YuMSIupJ4m2RH7AG50yEJm9HeheqnZRWxy7A=
-github.com/neticdk/go-bitbucket v1.0.4/go.mod h1:4ZMxzmr5hi/EoLdydtR7h4dd4DpqK8tbnVLbAkscRc8=
+github.com/neticdk/go-bitbucket v1.0.5 h1:H/++KM+O0EXVDbgMadbAsKwqjLKi0vDwa+vGU9lMChg=
+github.com/neticdk/go-bitbucket v1.0.5/go.mod h1:4ZMxzmr5hi/EoLdydtR7h4dd4DpqK8tbnVLbAkscRc8=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
