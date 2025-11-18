@@ -37,7 +37,7 @@ when:
     evaluate: 'TASK == "docs"'
 
 steps:
-  install-dependencies:
+  - name: install-dependencies
     image: *node_image
     directory: docs/
     commands:
@@ -48,7 +48,7 @@ steps:
         event: [tag, pull_request, push]
       - event: manual
 
-  format-check:
+  - name: format-check
     image: *node_image
     directory: docs/
     commands:
@@ -58,7 +58,7 @@ steps:
       - path: *when_path
         event: pull_request
 
-  build-cli:
+  - name: build-cli
     image: *golang_image
     commands:
       - make generate-docs
@@ -67,7 +67,7 @@ steps:
         event: [tag, pull_request, push]
       - event: manual
 
-  build:
+  - name: build
     image: *node_image
     directory: docs/
     commands:
@@ -78,7 +78,7 @@ steps:
         event: [tag, pull_request, push]
       - event: manual
 
-  deploy-preview:
+  - name: deploy-preview
     image: docker.io/woodpeckerci/plugin-surge-preview:1.4.1
     settings:
       path: 'docs/build/'
@@ -91,7 +91,7 @@ steps:
       - event: [pull_request, pull_request_closed]
         path: *when_path
 
-  deploy-prepare:
+  - name: deploy-prepare
     image: *alpine_image
     environment:
       BOT_PRIVATE_KEY:
@@ -112,7 +112,7 @@ steps:
       - event: [manual, tag]
 
   # update latest and next version
-  version-next:
+  - name: version-next
     image: *alpine_image
     commands:
       - apk add jq
@@ -123,7 +123,7 @@ steps:
         path: *docker_path
         branch: ${CI_REPO_DEFAULT_BRANCH}
 
-  version-release:
+  - name: version-release
     image: *alpine_image
     commands:
       - apk add jq
@@ -133,7 +133,7 @@ steps:
     when:
       - event: tag
 
-  copy-files:
+  - name: copy-files
     image: *alpine_image
     commands:
       - apk add rsync
@@ -145,7 +145,7 @@ steps:
         branch: ${CI_REPO_DEFAULT_BRANCH}
       - event: manual
 
-  deploy:
+  - name: deploy
     image: *alpine_image
     environment:
       BOT_PRIVATE_KEY:
