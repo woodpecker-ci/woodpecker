@@ -493,10 +493,13 @@ func DeleteRepo(c *gin.Context) {
 //	@Param		repo_id			path	int		true	"the repository id"
 func RepairRepo(c *gin.Context) {
 	repo := session.Repo(c)
-	repairRepo(c, repo, true, false)
-	if c.Writer.Written() {
+	err := repairRepo(c, repo, true)
+	if err != nil {
+		log.Error().Err(err).Msgf("repair repo '%s' failed", repo.FullName)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
 	c.Status(http.StatusNoContent)
 }
 
@@ -635,53 +638,51 @@ func RepairAllRepos(c *gin.Context) {
 		return
 	}
 
+	var repairErr error
+
 	for _, r := range repos {
-		repairRepo(c, r, false, true)
-		if c.Writer.Written() {
-			return
+		// updatePermissions is false as RepoListAll does not load permissions
+		updatePermissions := false
+		repairErr = repairRepo(c, r, updatePermissions)
+		if repairErr != nil {
+			log.Error().Err(repairErr).Msgf("failed to repair repo '%s'", r.FullName)
 		}
 	}
 
-	c.Status(http.StatusNoContent)
+	if repairErr != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+	} else {
+		c.Status(http.StatusNoContent)
+	}
 }
 
-func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
+func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error {
 	_store := store.FromContext(c)
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+		return err
 	}
 
-	user, err := _store.GetUser(repo.UserID)
+	repoUser, err := repairRepoUser(c, repo, _store)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			oldUserID := repo.UserID
-			user = session.User(c)
-			repo.UserID = user.ID
-			err = _store.UpdateRepo(repo)
-			if err != nil {
-				_ = c.AbortWithError(http.StatusInternalServerError, err)
-			}
-			log.Debug().Msgf("Could not find repo user with ID %d during repo repair, set to repair request user with ID %d", oldUserID, user.ID)
-		} else {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-		}
-		return
+		log.Error().Err(err).Msgf("cannot assign user to repo '%s'", repo.FullName)
+		return err
 	}
 
-	// creates the jwt token used to verify the repository
+	// refresh user token if necessary
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	// creates a new jwt token used to verify webhook calls
 	t := token.New(token.HookToken)
 	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
 	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
+		return err
 	}
 
-	// reconstruct the hook url
+	// reconstruct the webhook url
 	host := server.Config.Server.WebhookHost
 	hookURL := fmt.Sprintf(
 		"%s/api/hook?access_token=%s",
@@ -689,44 +690,59 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 		sig,
 	)
 
-	from, err := _forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	from, err := _forge.Repo(c, repoUser, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
-		if !skipOnErr {
-			c.AbortWithStatus(http.StatusInternalServerError)
-		}
-		return
+		return err
 	}
 
 	if repo.FullName != from.FullName {
 		// create a redirection
 		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
 		if err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
+			return err
 		}
 	}
 
 	repo.Update(from)
 	if err := _store.UpdateRepo(repo); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
+		return err
 	}
-	if withPerms {
+
+	if updatePermissions {
 		repo.Perm.Pull = from.Perm.Pull
 		repo.Perm.Push = from.Perm.Push
 		repo.Perm.Admin = from.Perm.Admin
 		if err := _store.PermUpsert(repo.Perm); err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
+			return err
 		}
 	}
 
-	if err := _forge.Deactivate(c, user, repo, host); err != nil {
-		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
+	// remove webhook (deactivate) and recreate it (activate)
+	if err := _forge.Deactivate(c, repoUser, repo, host); err != nil {
+		log.Debug().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
-	if err := _forge.Activate(c, user, repo, hookURL); err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
+
+	return _forge.Activate(c, repoUser, repo, hookURL)
+}
+
+func repairRepoUser(c *gin.Context, repo *model.Repo, _store store.Store) (*model.User, error) {
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
+			oldUserID := repo.UserID
+			sessionUser := session.User(c)
+			repo.UserID = sessionUser.ID
+			err = _store.UpdateRepo(repo)
+			if err != nil {
+				return nil, err
+			}
+			log.Debug().Msgf("Could not find repo user with ID %d during repo repair, set to repair request user with ID %d", oldUserID, sessionUser.ID)
+			return sessionUser, nil
+		} else {
+			return nil, err
+		}
 	}
+
+	return repoUser, nil
 }
