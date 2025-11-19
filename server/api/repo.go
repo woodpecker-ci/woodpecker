@@ -638,18 +638,19 @@ func RepairAllRepos(c *gin.Context) {
 		return
 	}
 
-	var repairErr error
+	hadRepairErr := false
 
 	for _, r := range repos {
 		// updatePermissions is false as RepoListAll does not load permissions
 		updatePermissions := false
-		repairErr = repairRepo(c, r, updatePermissions)
-		if repairErr != nil {
-			log.Error().Err(repairErr).Msgf("failed to repair repo '%s'", r.FullName)
+		err := repairRepo(c, r, updatePermissions)
+		if err != nil {
+			hadRepairErr = true
+			log.Error().Err(err).Msgf("failed to repair repo '%s'", r.FullName)
 		}
 	}
 
-	if repairErr != nil {
+	if hadRepairErr {
 		c.AbortWithStatus(http.StatusInternalServerError)
 	} else {
 		c.Status(http.StatusNoContent)
