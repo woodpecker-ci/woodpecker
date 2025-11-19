@@ -646,6 +646,7 @@ func RepairAllRepos(c *gin.Context) {
 		err := repairRepo(c, r, updatePermissions)
 		if err != nil {
 			hadRepairErr = true
+			c.Error(err)
 			log.Error().Err(err).Msgf("failed to repair repo '%s'", r.FullName)
 		}
 	}
