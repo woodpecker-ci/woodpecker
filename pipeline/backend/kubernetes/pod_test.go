@@ -178,16 +178,16 @@ func TestTinyPod(t *testing.T) {
 	}`
 
 	pod, err := mkPod(&types.Step{
-		Name:        "build-via-gradle",
-		Image:       "gradle:8.4.0-jdk21",
-		UUID:        "01he8bebctabr3kgk0qj36d2me-0",
-		WorkingDir:  "/woodpecker/src",
-		Pull:        false,
-		Privileged:  false,
-		Commands:    []string{"gradle build"},
-		Volumes:     []string{"workspace:/woodpecker/src"},
-		Environment: map[string]string{"CI": "woodpecker"},
-	}, &config{
+		Name:            "build-via-gradle",
+		Image:           "gradle:8.4.0-jdk21",
+		UUID:            "01he8bebctabr3kgk0qj36d2me-0",
+		WorkingDir:      "/woodpecker/src",
+		Pull:            false,
+		Privileged:      false,
+		Commands:        []string{"gradle build"},
+		WorkspaceVolume: "workspace:/woodpecker/src",
+		Environment:     map[string]string{"CI": "woodpecker"},
+	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
@@ -370,23 +370,24 @@ func TestFullPod(t *testing.T) {
 		},
 	}
 	pod, err := mkPod(&types.Step{
-		UUID:        "01he8bebctabr3kgk0qj36d2me-0",
-		Name:        "go-test",
-		Image:       "meltwater/drone-cache",
-		WorkingDir:  "/woodpecker/src",
-		Pull:        true,
-		Privileged:  true,
-		Commands:    []string{"go get", "go test"},
-		Entrypoint:  []string{"/bin/sh", "-c"},
-		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
-		Environment: map[string]string{"CGO": "0"},
-		ExtraHosts:  hostAliases,
-		Ports:       ports,
+		UUID:            "01he8bebctabr3kgk0qj36d2me-0",
+		Name:            "go-test",
+		Image:           "meltwater/drone-cache",
+		WorkingDir:      "/woodpecker/src",
+		Pull:            true,
+		Privileged:      true,
+		Commands:        []string{"go get", "go test"},
+		Entrypoint:      []string{"/bin/sh", "-c"},
+		WorkspaceVolume: "",
+		Volumes:         []string{"woodpecker-cache:/woodpecker/src/cache"},
+		Environment:     map[string]string{"CGO": "0"},
+		ExtraHosts:      hostAliases,
+		Ports:           ports,
 		AuthConfig: types.Auth{
 			Username: "foo",
 			Password: "bar",
 		},
-	}, &config{
+	}, types.TrustedConfiguration{Volumes: true, Security: true}, &config{
 		Namespace:                   "woodpecker",
 		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
 		PodLabels:                   map[string]string{"app": "test"},
@@ -428,7 +429,7 @@ func TestPodPrivilege(t *testing.T) {
 			Image:      "golang:1.16",
 			UUID:       "01he8bebctabr3kgk0qj36d2me-0",
 			Privileged: stepPrivileged,
-		}, &config{
+		}, types.TrustedConfiguration{Security: stepPrivileged}, &config{
 			Namespace:       "woodpecker",
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
 		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
@@ -539,7 +540,7 @@ func TestScratchPod(t *testing.T) {
 		Image:      "quay.io/curl/curl",
 		UUID:       "01he8bebctabr3kgk0qj36d2me-0",
 		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
@@ -634,12 +635,12 @@ func TestSecrets(t *testing.T) {
 	}`
 
 	pod, err := mkPod(&types.Step{
-		Name:        "test-secrets",
-		Image:       "alpine",
-		UUID:        "01he8bebctabr3kgk0qj36d2me-0",
-		Environment: map[string]string{"CGO": "0"},
-		Volumes:     []string{"workspace:/woodpecker/src"},
-	}, &config{
+		Name:            "test-secrets",
+		Image:           "alpine",
+		UUID:            "01he8bebctabr3kgk0qj36d2me-0",
+		Environment:     map[string]string{"CGO": "0"},
+		WorkspaceVolume: "workspace:/woodpecker/src",
+	}, types.TrustedConfiguration{}, &config{
 		Namespace:                  "woodpecker",
 		NativeSecretsAllowFromStep: true,
 	}, "wp-3kgk0qj36d2me01he8bebctabr-0", "linux/amd64", BackendOptions{
@@ -718,7 +719,7 @@ func TestPodTolerations(t *testing.T) {
 		Name:  "toleration-test",
 		Image: "alpine",
 		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace:                   "woodpecker",
 		PodTolerations:              globalTolerations,
 		PodTolerationsAllowFromStep: false,
@@ -797,7 +798,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
 	}
 
-	pod, err := mkPod(step, &config{
+	pod, err := mkPod(step, types.TrustedConfiguration{}, &config{
 		Namespace:                   "woodpecker",
 		PodTolerationsAllowFromStep: false,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
@@ -811,7 +812,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expectedDisallow)
 
-	pod, err = mkPod(step, &config{
+	pod, err = mkPod(step, types.TrustedConfiguration{}, &config{
 		Namespace:                   "woodpecker",
 		PodTolerationsAllowFromStep: true,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{

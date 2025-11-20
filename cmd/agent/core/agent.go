@@ -262,6 +262,14 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		Labels: labels,
 	}
 
+	trustedRepos := agent.TrustedRepos{
+		Network:  c.Int64Slice("trusted-repos-network"),
+		Volumes:  c.Int64Slice("trusted-repos-volumes"),
+		Security: c.Int64Slice("trusted-repos-security"),
+	}
+
+	log.Trace().Any("trusted", trustedRepos).Msg("agent configured with trusted repos")
+
 	log.Debug().Msgf("agent registered with ID %d", agentConfig.AgentID)
 
 	serviceWaitingGroup.Go(func() error {
@@ -288,7 +296,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	// https://go.dev/blog/go1.22 fixed scope for goroutines in loops
 	for i := range maxWorkflows {
 		serviceWaitingGroup.Go(func() error {
-			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
+			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine, trustedRepos)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
