@@ -1,9 +1,10 @@
 # Changelog
 
-## [3.12.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.1) - 2025-11-19
+## [3.12.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.1) - 2025-11-20
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5770](https://github.com/woodpecker-ci/woodpecker/pull/5770)]
 - fix(deps): update golang-packages [[#5765](https://github.com/woodpecker-ci/woodpecker/pull/5765)]
 
 ## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-18
