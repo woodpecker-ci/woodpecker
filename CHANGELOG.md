@@ -2,6 +2,14 @@
 
 ## [3.12.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.1) - 2025-11-20
 
+### ❤️ Thanks to all contributors! ❤️
+
+@anbraten
+
+### 🐛 Bug Fixes
+
+- Improve repair endpoints [[#5767](https://github.com/woodpecker-ci/woodpecker/pull/5767)]
+
 ### 📦️ Dependency
 
 - fix(deps): update golang-packages [[#5770](https://github.com/woodpecker-ci/woodpecker/pull/5770)]
