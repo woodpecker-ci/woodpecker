@@ -380,7 +380,7 @@ func TestRepoRedirection(t *testing.T) {
 	}))
 
 	// test redirection from old repo name
-	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test")
+	repoFromStore, err := store.GetRepoNameFallback(0, "1", "bradrydzewski/test")
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repoUpdated.FullName)
 
@@ -394,7 +394,7 @@ func TestRepoRedirection(t *testing.T) {
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
 
-	repoFromStore, err = store.GetRepoNameFallback("", "bradrydzewski/test-no-forge-id")
+	repoFromStore, err = store.GetRepoNameFallback(0, "", "bradrydzewski/test-no-forge-id")
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repo.FullName)
 }

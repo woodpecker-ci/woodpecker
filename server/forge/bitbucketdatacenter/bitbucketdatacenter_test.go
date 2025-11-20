@@ -27,7 +27,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	forge, err := New(Opts{
+	forge, err := New(0, Opts{
 		URL:               "http://localhost:8080",
 		Username:          "0ZXh0IjoiI",
 		Password:          "I1NiIsInR5",
