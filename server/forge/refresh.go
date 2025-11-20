@@ -50,10 +50,10 @@ func Refresh(c context.Context, forge Forge, _store store.Store, user *model.Use
 			return
 		}
 
-		ok, err := refresher.Refresh(c, user)
+		userUpdated, err := refresher.Refresh(c, user)
 		if err != nil {
 			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
-		} else if ok {
+		} else if userUpdated {
 			if err := _store.UpdateUser(user); err != nil {
 				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
 			}
