@@ -334,7 +334,6 @@ steps:
 
 If ports are defined on a service, then woodpecker will create a normal service for the pod, which use hosts override using the services cluster IP.
 
-
 ## Environment variables
 
 These env vars can be set in the `env:` sections of the agent.
