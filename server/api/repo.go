@@ -51,7 +51,7 @@ func PostRepo(c *gin.Context) {
 	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from user")
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -378,7 +378,7 @@ func GetRepoBranches(c *gin.Context) {
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -387,8 +387,6 @@ func GetRepoBranches(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
-
-	forge.Refresh(c, _forge, _store, repoUser)
 
 	branches, err := _forge.Branches(c, repoUser, repo, session.Pagination(c))
 	if err != nil {
@@ -417,7 +415,7 @@ func GetRepoPullRequests(c *gin.Context) {
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -455,7 +453,7 @@ func DeleteRepo(c *gin.Context) {
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -496,7 +494,7 @@ func RepairRepo(c *gin.Context) {
 	err := repairRepo(c, repo, true)
 	if err != nil {
 		log.Error().Err(err).Msgf("repair repo '%s' failed", repo.FullName)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -520,7 +518,7 @@ func MoveRepo(c *gin.Context) {
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
