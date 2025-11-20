@@ -649,7 +649,7 @@ func RepairAllRepos(c *gin.Context) {
 	}
 
 	if len(failedRepos) > 0 {
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+		c.JSON(http.StatusInternalServerError, map[string]any{
 			"error":        "failed to repair some repos",
 			"failed_repos": failedRepos,
 		})
