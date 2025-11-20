@@ -131,6 +131,12 @@ const routes: RouteRecordRaw[] = [
                 props: true,
               },
               {
+                path: 'parameters',
+                name: 'repo-settings-parameters',
+                component: (): Component => import('~/views/repo/settings/Parameters.vue'),
+                props: true,
+              },
+              {
                 path: 'registries',
                 name: 'repo-settings-registries',
                 component: (): Component => import('~/views/repo/settings/Registries.vue'),
