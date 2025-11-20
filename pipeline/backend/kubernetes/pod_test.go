@@ -52,11 +52,11 @@ func TestStepToPodName(t *testing.T) {
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService, Ports: []types.Port{{Number: 5432}}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
 	// Detached service
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true, Ports: []types.Port{{Number: 5432}}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
 	// Detached long running container
@@ -73,6 +73,7 @@ func TestPodMeta(t *testing.T) {
 		Image:       "postgres:16",
 		WorkingDir:  "/woodpecker/src",
 		Environment: map[string]string{"CI": "woodpecker"},
+		Ports:       []types.Port{{Number: 5432}},
 	}, &config{
 		Namespace: "woodpecker",
 	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
@@ -88,6 +89,7 @@ func TestPodMeta(t *testing.T) {
 		Image:       "postgres:16",
 		WorkingDir:  "/woodpecker/src",
 		Environment: map[string]string{"CI": "woodpecker"},
+		Ports:       []types.Port{{Number: 5432}},
 	}, &config{
 		Namespace: "woodpecker",
 	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
@@ -172,7 +174,12 @@ func TestTinyPod(t *testing.T) {
 					]
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "build-via-gradle"
 		},
 		"status": {}
 	}`
@@ -337,7 +344,11 @@ func TestFullPod(t *testing.T) {
 						"cf.v6"
 					]
 				}
-			]
+			],
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "go-test"
 		},
 		"status": {}
 	}`
@@ -433,7 +444,7 @@ func TestPodPrivilege(t *testing.T) {
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
 		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 			SecurityContext: &secCtx,
-		}, "")
+		}, "11301")
 	}
 
 	// securty context is requesting user and group 101 (non-root)
@@ -529,7 +540,12 @@ func TestScratchPod(t *testing.T) {
 					"resources": {}
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "curl-google"
 		},
 		"status": {}
 	}`
@@ -628,7 +644,12 @@ func TestSecrets(t *testing.T) {
 					]
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "test-secrets"
 		},
 		"status": {}
 	}`
@@ -704,7 +725,12 @@ func TestPodTolerations(t *testing.T) {
 					"value": "qux",
 					"effect": "NoExecute"
 				}
-			]
+			],
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "toleration-test"
 		},
 		"status": {}
 	}`
@@ -752,7 +778,12 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 					"resources": {}
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "toleration-test"
 		},
 		"status": {}
 	}`
@@ -782,7 +813,12 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 					"value": "value",
 					"effect": "NoSchedule"
 				}
-			]
+			],
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "toleration-test"
 		},
 		"status": {}
 	}`

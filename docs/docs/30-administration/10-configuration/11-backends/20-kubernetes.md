@@ -304,6 +304,37 @@ It configures the address of the Kubernetes API server to connect to.
 
 If running the agent within Kubernetes, this will already be set and you don't have to add it manually.
 
+### Headless services
+
+For each workflow run a [headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) is created, 
+and all steps asigned the subdomain that matches the headless service, so any step can reach other steps via DNS by using the step name as hostname. 
+
+Using the headless services, the step pod is connected to directly, so any port on the other step pods can be reached.
+
+This is useful for some use-cases, like test-containers in a docker-in-docker setup, where the step needs to connect to many ports on the docker host service.
+
+```yaml
+steps:
+  - name: test
+    image: docker:cli # use 'docker:<major-version>-cli' or similar in production
+    environment:
+      DOCKER_HOST: 'tcp://docker:2376'
+      DOCKER_CERT_PATH: '/woodpecker/dind-certs/client'
+      DOCKER_TLS_VERIFY: '1'
+    commands:
+      - docker run hello-world
+
+  - name: docker
+    image: docker:dind # use 'docker:<major-version>-dind' or similar in production
+    detached: true
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: /woodpecker/dind-certs
+```
+
+If ports are defined on a service, then woodpecker will create a normal service for the pod, which use hosts override using the services cluster IP.
+
+
 ## Environment variables
 
 These env vars can be set in the `env:` sections of the agent.

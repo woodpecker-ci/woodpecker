@@ -232,10 +232,15 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		return err
 	}
 
+	_, err = startHeadlessService(ctx, e, namespace, taskUUID)
+	if err != nil {
+		return err
+	}
+
 	var extraHosts []types.HostAlias
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if isService(step) {
+			if isStandardService(step) {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
 					return &pipelineErrors.ErrInvalidWorkflowSetup{
@@ -471,6 +476,13 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
+	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
+
+	err := stopHeadlessService(ctx, e, namespace, taskUUID)
+	if err != nil {
+		return err
+	}
+
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			err := stopPod(ctx, e, step, defaultDeleteOptions)
@@ -478,7 +490,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 				return err
 			}
 
-			if isService(step) {
+			if isStandardService(step) {
 				err := stopService(ctx, e, step, defaultDeleteOptions)
 				if err != nil {
 					return err
@@ -487,7 +499,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		}
 	}
 
-	err := stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
+	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
 	if err != nil {
 		return err
 	}
