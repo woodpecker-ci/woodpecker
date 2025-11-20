@@ -739,9 +739,8 @@ func repairRepoUser(c *gin.Context, repo *model.Repo, _store store.Store) (*mode
 			}
 			log.Debug().Msgf("Could not find repo user with ID %d during repo repair, set to repair request user with ID %d", oldUserID, sessionUser.ID)
 			return sessionUser, nil
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 
 	return repoUser, nil
