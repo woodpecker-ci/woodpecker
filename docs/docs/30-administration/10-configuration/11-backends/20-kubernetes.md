@@ -306,8 +306,8 @@ If running the agent within Kubernetes, this will already be set and you don't h
 
 ### Headless services
 
-For each workflow run a [headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) is created, 
-and all steps asigned the subdomain that matches the headless service, so any step can reach other steps via DNS by using the step name as hostname. 
+For each workflow run a [headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) is created,
+and all steps asigned the subdomain that matches the headless service, so any step can reach other steps via DNS by using the step name as hostname.
 
 Using the headless services, the step pod is connected to directly, so any port on the other step pods can be reached.
 
