@@ -160,6 +160,7 @@ import {
   mdiPuzzleOutline,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
+  mdiRefresh,
   mdiShieldKeyOutline,
   mdiSourceBranch,
   mdiSourceCommit,
@@ -172,7 +173,6 @@ import {
   mdiTrashCanOutline,
   mdiTrayFull,
   mdiWrenchCogOutline,
-  mdiRefresh,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
@@ -213,6 +213,7 @@ export type IconNames =
   | 'question'
   | 'list'
   | 'plus'
+  | 'refresh'
   | 'blank'
   | 'heal'
   | 'chevron-right'
