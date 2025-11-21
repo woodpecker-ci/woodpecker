@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.12.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.1) - 2025-11-20
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten
+@anbraten, @henkka
+
+### 📈 Enhancement
+
+- feat: include CI_COMMIT_TAG env in deployment events [[#5773](https://github.com/woodpecker-ci/woodpecker/pull/5773)]
 
 ### 🐛 Bug Fixes
 
