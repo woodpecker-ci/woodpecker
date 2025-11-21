@@ -34,7 +34,7 @@
     :path="mdiCloseCircle"
     size="1.3rem"
   />
-  <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-pending' || name === 'status-created'" :path="mdiRadioboxBlank" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-running' || name === 'status-started'"
     type="mdi"
@@ -199,6 +199,7 @@ export type IconNames =
   | 'status-failure'
   | 'status-killed'
   | 'status-pending'
+  | 'status-created'
   | 'status-running'
   | 'status-skipped'
   | 'status-started'
