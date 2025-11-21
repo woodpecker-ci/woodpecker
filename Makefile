@@ -362,4 +362,3 @@ build-docs: generate-docs docs-dependencies ## Build the docs
 	(cd docs/; pnpm build)
 
 endif
-
