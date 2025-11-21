@@ -556,7 +556,7 @@ execute a local pipeline
 
 **--system-platform**="":
 
-**--system-url**="": (default: https://github.com/woodpecker-ci/woodpecker)
+**--system-url**="": (default: <https://github.com/woodpecker-ci/woodpecker>)
 
 **--timeout**="": pipeline timeout (default: 1h0m0s)
 
