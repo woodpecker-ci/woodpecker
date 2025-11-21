@@ -68,7 +68,7 @@ const id = (Math.random() + 1).toString(36).substring(7);
 }
 
 .checkbox:disabled::before {
-  border-color: var(--color-gray-600);
+  border-color: var(--wp-text-alt-100);
 }
 
 .checkbox:checked::before {
