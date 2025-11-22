@@ -29,8 +29,9 @@ import (
 )
 
 const (
-	ServiceLabel  = "service"
-	servicePrefix = "wp-svc-"
+	ServiceLabel          = "service"
+	HeadlessServicePrefix = "wp-hsvc-"
+	ServicePrefix         = "wp-svc-"
 )
 
 func mkService(step *types.Step, config *config) (*v1.Service, error) {
@@ -66,8 +67,32 @@ func mkService(step *types.Step, config *config) (*v1.Service, error) {
 	}, nil
 }
 
+func mkHeadlessService(namespace, taskUUID string) (*v1.Service, error) {
+	selector := map[string]string{
+		TaskUUIDLabel: taskUUID,
+	}
+
+	name, err := subdomain(taskUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Trace().Str("name", name).Interface("selector", selector).Msg("creating headless service")
+	return &v1.Service{
+		ObjectMeta: meta_v1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1.ServiceSpec{
+			Type:      v1.ServiceTypeClusterIP,
+			ClusterIP: "None",
+			Selector:  selector,
+		},
+	}, nil
+}
+
 func serviceName(step *types.Step) (string, error) {
-	return dnsName(servicePrefix + step.UUID + "-" + step.Name)
+	return dnsName(ServicePrefix + step.UUID + "-" + step.Name)
 }
 
 func servicePort(port types.Port) v1.ServicePort {
@@ -103,6 +128,37 @@ func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
 		log.Trace().Err(err).Msgf("unable to delete service %s", svcName)
+		return nil
+	}
+	return err
+}
+
+func subdomain(taskUUID string) (string, error) {
+	return dnsName(HeadlessServicePrefix + taskUUID)
+}
+
+func startHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID string) (*v1.Service, error) {
+	svc, err := mkHeadlessService(namespace, taskUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Msg("creating headless service")
+	return engine.client.CoreV1().Services(namespace).Create(ctx, svc, meta_v1.CreateOptions{})
+}
+
+func stopHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID string) error {
+	name, err := subdomain(taskUUID)
+	if err != nil {
+		return err
+	}
+
+	log.Trace().Str("name", name).Msg("deleting headless service")
+
+	err = engine.client.CoreV1().Services(namespace).Delete(ctx, name, defaultDeleteOptions)
+	if errors.IsNotFound(err) {
+		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
+		log.Trace().Err(err).Msgf("unable to delete headless service %s", name)
 		return nil
 	}
 	return err

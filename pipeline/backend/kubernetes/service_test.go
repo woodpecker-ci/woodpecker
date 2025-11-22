@@ -88,3 +88,29 @@ func TestService(t *testing.T) {
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(j))
 }
+
+func TestHeadlessService(t *testing.T) {
+	expected := `
+	{
+	  "metadata": {
+		"name": "wp-hsvc-11301",
+		"namespace": "foo"
+	  },
+	  "spec": {
+		"selector": {
+		  "woodpecker-ci.org/task-uuid": "11301"
+		},
+		"clusterIP": "None",
+		"type": "ClusterIP"
+	  },
+	  "status": {
+		"loadBalancer": {}
+	  }
+	}`
+
+	s, err := mkHeadlessService("foo", "11301")
+	assert.NoError(t, err)
+	j, err := json.Marshal(s)
+	assert.NoError(t, err)
+	assert.JSONEq(t, expected, string(j))
+}

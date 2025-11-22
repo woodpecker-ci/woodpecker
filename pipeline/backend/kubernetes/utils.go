@@ -105,8 +105,9 @@ func getClientInsideOfCluster() (kubernetes.Interface, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-func isService(step *types.Step) bool {
-	return step.Type == types.StepTypeService || (step.Detached && dnsPattern.FindStringIndex(step.Name) != nil)
+// Only services with ports are considered standard services other will resolve using DNS and headless service within subdomain.
+func isStandardService(step *types.Step) bool {
+	return len(step.Ports) > 0 && (step.Type == types.StepTypeService || (step.Detached && dnsPattern.FindStringIndex(step.Name) != nil))
 }
 
 func newBool(val bool) *bool {
