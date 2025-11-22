@@ -16,6 +16,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency isomorphic-dompurify to v2.33.0 [[#5778](https://github.com/woodpecker-ci/woodpecker/pull/5778)]
 - chore(deps): update docs npm deps non-major [[#5774](https://github.com/woodpecker-ci/woodpecker/pull/5774)]
 
 ### 📦️ Dependency
