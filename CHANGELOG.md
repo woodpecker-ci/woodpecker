@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-21
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -13,6 +13,10 @@
 ### 🐛 Bug Fixes
 
 - Improve repair endpoints [[#5767](https://github.com/woodpecker-ci/woodpecker/pull/5767)]
+
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#5774](https://github.com/woodpecker-ci/woodpecker/pull/5774)]
 
 ### 📦️ Dependency
 
