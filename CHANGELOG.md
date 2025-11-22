@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vue-i18n to v11.2.1 [[#5779](https://github.com/woodpecker-ci/woodpecker/pull/5779)]
 - chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.46.0 [[#5776](https://github.com/woodpecker-ci/woodpecker/pull/5776)]
 - chore(deps): update web npm deps non-major [[#5775](https://github.com/woodpecker-ci/woodpecker/pull/5775)]
 - fix(deps): update golang-packages [[#5770](https://github.com/woodpecker-ci/woodpecker/pull/5770)]
