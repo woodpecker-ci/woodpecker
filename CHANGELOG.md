@@ -1,5 +1,34 @@
 # Changelog
 
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-22
+
+### ❤️ Thanks to all contributors! ❤️
+
+@anbraten, @henkka
+
+### 📈 Enhancement
+
+- feat: include CI_COMMIT_TAG env in deployment events [[#5773](https://github.com/woodpecker-ci/woodpecker/pull/5773)]
+
+### 🐛 Bug Fixes
+
+- Improve repair endpoints [[#5767](https://github.com/woodpecker-ci/woodpecker/pull/5767)]
+
+### 📚 Documentation
+
+- chore(deps): update dependency isomorphic-dompurify to v2.33.0 [[#5778](https://github.com/woodpecker-ci/woodpecker/pull/5778)]
+- chore(deps): update docs npm deps non-major [[#5774](https://github.com/woodpecker-ci/woodpecker/pull/5774)]
+
+### 📦️ Dependency
+
+- chore(deps): update dependency vue-tsc to v3.1.5 [[#5781](https://github.com/woodpecker-ci/woodpecker/pull/5781)]
+- chore(deps): update dependency @types/lodash to v4.17.21 [[#5780](https://github.com/woodpecker-ci/woodpecker/pull/5780)]
+- chore(deps): update dependency vue-i18n to v11.2.1 [[#5779](https://github.com/woodpecker-ci/woodpecker/pull/5779)]
+- chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.46.0 [[#5776](https://github.com/woodpecker-ci/woodpecker/pull/5776)]
+- chore(deps): update web npm deps non-major [[#5775](https://github.com/woodpecker-ci/woodpecker/pull/5775)]
+- fix(deps): update golang-packages [[#5770](https://github.com/woodpecker-ci/woodpecker/pull/5770)]
+- fix(deps): update golang-packages [[#5765](https://github.com/woodpecker-ci/woodpecker/pull/5765)]
+
 ## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-18
 
 ### ❤️ Thanks to all contributors! ❤️
