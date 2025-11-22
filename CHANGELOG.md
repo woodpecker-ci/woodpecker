@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vue-tsc to v3.1.5 [[#5781](https://github.com/woodpecker-ci/woodpecker/pull/5781)]
 - chore(deps): update dependency @types/lodash to v4.17.21 [[#5780](https://github.com/woodpecker-ci/woodpecker/pull/5780)]
 - chore(deps): update dependency vue-i18n to v11.2.1 [[#5779](https://github.com/woodpecker-ci/woodpecker/pull/5779)]
 - chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.46.0 [[#5776](https://github.com/woodpecker-ci/woodpecker/pull/5776)]
