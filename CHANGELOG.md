@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-22
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v15.22.0 [[#5782](https://github.com/woodpecker-ci/woodpecker/pull/5782)]
 - chore(deps): update dependency vue-tsc to v3.1.5 [[#5781](https://github.com/woodpecker-ci/woodpecker/pull/5781)]
 - chore(deps): update dependency @types/lodash to v4.17.21 [[#5780](https://github.com/woodpecker-ci/woodpecker/pull/5780)]
 - chore(deps): update dependency vue-i18n to v11.2.1 [[#5779](https://github.com/woodpecker-ci/woodpecker/pull/5779)]
