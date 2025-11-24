@@ -267,9 +267,7 @@ func containsItemWithName(name string, items []*Item) bool {
 
 func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
-	for k, v := range axis {
-		environ[k] = v
-	}
+	maps.Copy(environ, axis)
 	return environ
 }
 
