@@ -291,8 +291,8 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithTrustedSecurity(b.RepoTrusted.Security),
 	)
 
-	// by adding the options from the StepBuilder struct last,
-	// we allow them to override any previously set options
+	// by adding the passed in options last, we allow them
+	// to override any of the default options set above
 	options = append(options, b.CompilerOptions...)
 
 	return compiler.New(options...).Compile(parsed)
