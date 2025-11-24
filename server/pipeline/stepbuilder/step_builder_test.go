@@ -42,11 +42,8 @@ func TestGlobalEnvsubst(t *testing.T) {
 			Message: "aaa",
 			Event:   model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Prev: &model.Pipeline{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -81,11 +78,8 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 			Message: "aaa",
 			Event:   model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Prev: &model.Pipeline{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -116,11 +110,8 @@ func TestMultilineEnvsubst(t *testing.T) {
 			Message: `aaa
 bbb`,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Prev: &model.Pipeline{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -159,11 +150,8 @@ func TestMultiPipeline(t *testing.T) {
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Prev: &model.Pipeline{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -200,11 +188,8 @@ func TestDependsOn(t *testing.T) {
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Prev: &model.Pipeline{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 when:
@@ -255,11 +240,8 @@ func TestRunsOn(t *testing.T) {
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Prev: &model.Pipeline{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -296,11 +278,8 @@ func TestPipelineName(t *testing.T) {
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Prev: &model.Pipeline{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 when:
@@ -339,11 +318,8 @@ func TestBranchFilter(t *testing.T) {
 			Branch: "dev",
 			Event:  model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Prev: &model.Pipeline{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -383,9 +359,6 @@ func TestRootWhenFilter(t *testing.T) {
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Event: "tag"},
 		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
 		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -433,9 +406,6 @@ func TestZeroSteps(t *testing.T) {
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
 		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -473,9 +443,6 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
 		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
@@ -531,9 +498,6 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Prev:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
 		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
