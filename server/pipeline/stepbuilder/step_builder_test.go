@@ -583,7 +583,7 @@ func TestInvalidYAML(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge:       getMockForge(t),
+		Forge:       nil,
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
 		Curr:        &model.Pipeline{Event: model.EventPush},
@@ -601,7 +601,7 @@ steps:
 	}
 
 	_, err := b.Build()
-	assert.Error(t, err, "Invalid YAML should return an error")
+	assert.ErrorContains(t, err, "found a tab character that violates indentation")
 }
 
 func TestEnvVarPrecedence(t *testing.T) {
