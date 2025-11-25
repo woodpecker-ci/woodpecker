@@ -36,29 +36,28 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// StepBuilder Takes the hook data and the yaml and returns in internal data model.
+// StepBuilder Takes the hook data and the yaml and returns the internal data model.
 type StepBuilder struct {
-	Repo          *model.Repo
-	Curr          *model.Pipeline
-	Prev          *model.Pipeline
-	Netrc         *model.Netrc
-	Secs          []*model.Secret
-	Regs          []*model.Registry
-	Host          string
-	Yamls         []*forge_types.FileMeta
-	Envs          map[string]string
-	Forge         metadata.ServerForge
-	DefaultLabels map[string]string
-	ProxyOpts     compiler.ProxyOptions
+	Repo                *model.Repo     // TODO: get rid of server dependency
+	Curr                *model.Pipeline // TODO: get rid of server dependency
+	Prev                *model.Pipeline // TODO: get rid of server dependency
+	Host                string
+	Yamls               []*forge_types.FileMeta
+	Envs                map[string]string
+	Forge               metadata.ServerForge
+	DefaultLabels       map[string]string
+	RepoTrusted         *metadata.TrustedConfiguration
+	TrustedClonePlugins []string
+	PrivilegedPlugins   []string
+	CompilerOptions     []compiler.Option
 }
 
 type Item struct {
-	Workflow  *model.Workflow
+	Workflow  *model.Workflow // TODO: get rid of server dependency
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string
@@ -111,7 +110,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	items = filterItemsWithMissingDependencies(items)
 
 	// check if at least one step can start if slice is not empty
-	if len(items) > 0 && !stepListContainsItemsToRun(items) {
+	if len(items) > 0 && !workflowListContainsItemsToRun(items) {
 		return nil, fmt.Errorf("pipeline has no steps to run")
 	}
 
@@ -150,8 +149,8 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 			Volumes:  b.Repo.Trusted.Volumes,
 			Security: b.Repo.Trusted.Security,
 		}),
-		linter.PrivilegedPlugins(server.Config.Pipeline.PrivilegedPlugins),
-		linter.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
+		linter.PrivilegedPlugins(b.PrivilegedPlugins),
+		linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
@@ -223,7 +222,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	return item, errorsAndWarnings
 }
 
-func stepListContainsItemsToRun(items []*Item) bool {
+func workflowListContainsItemsToRun(items []*Item) bool {
 	for i := range items {
 		if items[i].Workflow.State == model.StatusPending {
 			return true
@@ -268,57 +267,17 @@ func containsItemWithName(name string, items []*Item) bool {
 
 func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
-	for k, v := range axis {
-		environ[k] = v
-	}
+	maps.Copy(environ, axis)
 	return environ
 }
 
 func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
-	var secrets []compiler.Secret
-	for _, sec := range b.Secs {
-		var events []string
-		for _, event := range sec.Events {
-			events = append(events, string(event))
-		}
-
-		secrets = append(secrets, compiler.Secret{
-			Name:           sec.Name,
-			Value:          sec.Value,
-			AllowedPlugins: sec.Images,
-			Events:         events,
-		})
-	}
-
-	var registries []compiler.Registry
-	for _, reg := range b.Regs {
-		registries = append(registries, compiler.Registry{
-			Hostname: reg.Address,
-			Username: reg.Username,
-			Password: reg.Password,
-		})
-	}
-
-	return compiler.New(
+	options := []compiler.Option{}
+	options = append(options,
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
-		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
-		compiler.WithEscalated(server.Config.Pipeline.PrivilegedPlugins...),
-		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
-		compiler.WithNetworks(server.Config.Pipeline.Networks...),
-		compiler.WithLocal(false),
-		compiler.WithOption(
-			compiler.WithNetrc(
-				b.Netrc.Login,
-				b.Netrc.Password,
-				b.Netrc.Machine,
-			),
-			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
-		),
-		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
-		compiler.WithTrustedClonePlugins(append(b.Repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...)),
-		compiler.WithRegistry(registries...),
-		compiler.WithSecret(secrets...),
+		compiler.WithEscalated(b.PrivilegedPlugins...),
+		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
@@ -326,11 +285,15 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 				workflowID,
 			),
 		),
-		compiler.WithProxy(b.ProxyOpts),
-		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
-		compiler.WithTrustedSecurity(b.Repo.Trusted.Security),
-	).Compile(parsed)
+		compiler.WithTrustedSecurity(b.RepoTrusted.Security),
+	)
+
+	// by adding the passed in options last, we allow them
+	// to override any of the default options set above
+	options = append(options, b.CompilerOptions...)
+
+	return compiler.New(options...).Compile(parsed)
 }
 
 func SanitizePath(path string) string {
