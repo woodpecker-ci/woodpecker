@@ -215,7 +215,7 @@ func (e *kube) getConfig() *config {
 }
 
 // SetupWorkflow sets up the pipeline environment.
-func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string, trusted types.TrustedConfiguration) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
@@ -251,7 +251,11 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	log.Trace().Msgf("adding extra hosts: %v", extraHosts)
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			step.ExtraHosts = extraHosts
+			if trusted.Network {
+				step.ExtraHosts = append(step.ExtraHosts, extraHosts...)
+			} else {
+				step.ExtraHosts = extraHosts
+			}
 		}
 	}
 
@@ -259,7 +263,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 }
 
 // StartStep starts the pipeline step.
-func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string, trusted types.TrustedConfiguration) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
@@ -280,7 +284,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err = startPod(ctx, e, step, options, taskUUID)
+	_, err = startPod(ctx, e, step, trusted, options, taskUUID)
 	return err
 }
 

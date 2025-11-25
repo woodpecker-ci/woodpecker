@@ -58,11 +58,6 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_REPO_CLONE_SSH_URL", repo.CloneSSHURL)
 	setNonEmptyEnvVar(params, "CI_REPO_DEFAULT_BRANCH", repo.Branch)
 	setNonEmptyEnvVar(params, "CI_REPO_PRIVATE", strconv.FormatBool(repo.Private))
-	setNonEmptyEnvVar(params, "CI_REPO_TRUSTED_NETWORK", strconv.FormatBool(repo.Trusted.Network))
-	setNonEmptyEnvVar(params, "CI_REPO_TRUSTED_VOLUMES", strconv.FormatBool(repo.Trusted.Volumes))
-	setNonEmptyEnvVar(params, "CI_REPO_TRUSTED_SECURITY", strconv.FormatBool(repo.Trusted.Security))
-	// Deprecated remove in 4.x
-	setNonEmptyEnvVar(params, "CI_REPO_TRUSTED", strconv.FormatBool(m.Repo.Trusted.Security && m.Repo.Trusted.Network && m.Repo.Trusted.Volumes))
 
 	pipeline := m.Curr
 	setNonEmptyEnvVar(params, "CI_PIPELINE_NUMBER", strconv.FormatInt(pipeline.Number, 10))

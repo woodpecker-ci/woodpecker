@@ -15,6 +15,10 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 Extension HTTP calls (as of now the configuration extension) will by default only be allowed to contact external hosts. Set `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS` accordingly to allow additional hosts as needed.
 
+#### Behavior of the "trusted" settings
+
+Trusted settings are no longer managed by the server, but by the agent. This allows you to use trusted features even if you're not the instance admin by deploying a user agent.
+
 ## 3.0.0
 
 ### User-facing migrations
