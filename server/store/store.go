@@ -26,10 +26,10 @@ type Store interface {
 	// Users
 	// GetUser gets a user by unique ID.
 	GetUser(int64) (*model.User, error)
-	// GetUserRemoteID gets a user by remote ID with fallback to login name.
-	GetUserRemoteID(model.ForgeRemoteID, string) (*model.User, error)
-	// GetUserLogin gets a user by unique Login name.
-	GetUserLogin(string) (*model.User, error)
+	// GetUserByRemoteID gets a user by remote ID.
+	GetUserByRemoteID(int64, model.ForgeRemoteID) (*model.User, error)
+	// GetUserByLogin gets a user by its login name.
+	GetUserByLogin(int64, string) (*model.User, error)
 	// GetUserList gets a list of all users in the system.
 	GetUserList(p *model.ListOptions) ([]*model.User, error)
 	// GetUserCount gets a count of all users in the system.
@@ -97,7 +97,7 @@ type Store interface {
 	UserFeed(*model.User) ([]*model.Feed, error)
 
 	// Repositories
-	RepoList(user *model.User, owned, active bool) ([]*model.Repo, error)
+	RepoList(user *model.User, owned, active bool, filter *model.RepoFilter) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
 	RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error)
 

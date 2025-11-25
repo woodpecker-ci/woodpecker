@@ -97,22 +97,33 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	workflowMetadataFunc := metadata.MetadataFromStruct(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
 	b := stepbuilder.StepBuilder{
-		Yamls:                yamls,
+		// Repo:                 repo,
+		// Curr:                 currentPipeline,
+		// Prev:                 prev,
+		// Forge:                forge,
 		WorkflowMetadataFunc: workflowMetadataFunc,
+		Envs:                 envs,
+		Host:                 server.Config.Server.Host,
+		Yamls:                yamls,
+		TrustedClonePlugins:  append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
+		PrivilegedPlugins:    server.Config.Pipeline.PrivilegedPlugins,
 		RepoTrusted: &pipeline_metadata.TrustedConfiguration{
 			Network:  repo.Trusted.Network,
 			Volumes:  repo.Trusted.Volumes,
 			Security: repo.Trusted.Security,
 		},
-		Host:                server.Config.Server.Host,
-		Envs:                envs,
-		TrustedClonePlugins: append(server.Config.Pipeline.TrustedClonePlugins, repo.NetrcTrustedPlugins...),
-		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
-		DefaultLabels:       server.Config.Pipeline.DefaultWorkflowLabels,
+		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
 		CompilerOptions: []compiler.Option{
+			compiler.WithLocal(false),
+			compiler.WithRegistry(registries...),
+			compiler.WithSecret(secrets...),
+			compiler.WithProxy(compiler.ProxyOptions{
+				NoProxy:    server.Config.Pipeline.Proxy.No,
+				HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
+				HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
+			}),
 			compiler.WithVolumes(server.Config.Pipeline.Volumes...),
 			compiler.WithNetworks(server.Config.Pipeline.Networks...),
-			compiler.WithLocal(false),
 			compiler.WithOption(
 				compiler.WithNetrc(
 					netrc.Login,

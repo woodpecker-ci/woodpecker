@@ -21,6 +21,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
+	host_matcher "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
@@ -278,6 +279,12 @@ var flags = append([]cli.Flag{
 		Usage:   "url used for calling configuration service endpoint",
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
+		Name:    "extensions-allowed-hosts",
+		Usage:   "Hosts that are allowed to be contacted by extensions",
+		Value:   host_matcher.MatchBuiltinExternal,
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DATABASE_DRIVER"),
 		Name:    "db-driver",
 		Aliases: []string{"driver"}, // TODO: remove in v4.0.0
@@ -336,13 +343,13 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE"),
 		Name:    "log-store",
-		Usage:   "log store to use ('database' or 'file')",
+		Usage:   "log store to use ('database', 'addon' or 'file')",
 		Value:   "database",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FILE_PATH"),
 		Name:    "log-store-file-path",
-		Usage:   "directory used for file based log storage",
+		Usage:   "directory used for file based log storage or addon executable file path",
 	},
 	//
 	// backend options for pipeline compiler

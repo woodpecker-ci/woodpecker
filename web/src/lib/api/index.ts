@@ -2,6 +2,7 @@ import ApiClient, { encodeQueryString } from './client';
 import type {
   Agent,
   Cron,
+  ExtensionSettings,
   Forge,
   Org,
   OrgPermissions,
@@ -18,6 +19,8 @@ import type {
   Secret,
   User,
 } from './types';
+
+const DEFAULT_FORGE_ID = 1;
 
 interface RepoListOptions {
   all?: boolean;
@@ -73,7 +76,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos?forge_remote_id=${forgeRemoteId}`) as Promise<Repo>;
   }
 
-  async updateRepo(repoId: number, repoSettings: RepoSettings): Promise<unknown> {
+  async updateRepo(repoId: number, repoSettings: Partial<RepoSettings & ExtensionSettings>): Promise<unknown> {
     return this._patch(`/api/repos/${repoId}`, repoSettings);
   }
 
@@ -305,6 +308,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token') as Promise<string>;
   }
 
+  async getSignaturePublicKey(): Promise<string> {
+    return this._get('/api/signature/public-key') as Promise<string>;
+  }
+
   async getAgents(opts?: PaginationOptions): Promise<Agent[] | null> {
     const query = encodeQueryString(opts);
     return this._get(`/api/agents?${query}`) as Promise<Agent[] | null>;
@@ -381,8 +388,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/users?${query}`) as Promise<User[] | null>;
   }
 
-  async getUser(username: string): Promise<User> {
-    return this._get(`/api/users/${username}`) as Promise<User>;
+  async getUser(username: string, forgeID?: number): Promise<User> {
+    const forge = forgeID ?? DEFAULT_FORGE_ID;
+    return this._get(`/api/users/${username}?forge_id=${forge}`) as Promise<User>;
   }
 
   async createUser(user: Partial<User>): Promise<User> {
@@ -394,7 +402,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   async deleteUser(user: User): Promise<unknown> {
-    return this._delete(`/api/users/${user.login}`);
+    return this._delete(`/api/users/${user.login}?forge_id=${user.forge_id}`);
   }
 
   async resetToken(): Promise<string> {

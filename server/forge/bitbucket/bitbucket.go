@@ -32,6 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -131,19 +132,19 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 }
 
 // Teams returns a list of all team membership for the Bitbucket account.
-func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
-		opts := &internal.ListWorkspacesOpts{
-			PageLen: pageSize,
-			Page:    page,
-			Role:    "member",
-		}
-		resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
-		if err != nil {
-			return nil, err
-		}
-		return convertWorkspaceList(resp.Values), nil
-	}, -1)
+func (c *config) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	setListOptions(p)
+
+	opts := &internal.ListWorkspacesOpts{
+		PageLen: p.PerPage,
+		Page:    p.Page,
+		Role:    "member",
+	}
+	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
+	if err != nil {
+		return nil, err
+	}
+	return convertWorkspaceList(resp.Values), nil
 }
 
 // Repo returns the named Bitbucket repository.
@@ -152,7 +153,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 		name = string(remoteID)
 	}
 	if owner == "" {
-		repos, err := c.Repos(ctx, u)
+		repos, err := c.Repos(ctx, u, &model.ListOptions{Page: 1})
 		if err != nil {
 			return nil, err
 		}
@@ -177,20 +178,16 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
-func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	setListOptions(p)
+
 	client := c.newClient(ctx, u)
 
-	workspaces, err := shared_utils.Paginate(func(page int) ([]*internal.Workspace, error) {
-		resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
-			Page:    page,
-			PageLen: pageSize,
-			Role:    "member",
-		})
-		if err != nil {
-			return nil, err
-		}
-		return resp.Values, nil
-	}, -1)
+	resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
+		Page:    p.Page,
+		PageLen: p.PerPage,
+		Role:    "member",
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +203,7 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	}
 
 	var all []*model.Repo
-	for _, workspace := range workspaces {
+	for _, workspace := range resp.Values {
 		repos, err := client.ListReposAll(workspace.Slug)
 		if err != nil {
 			return nil, err
@@ -355,6 +352,8 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 
 // Branches returns the names of all branches for the named repository.
 func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	setListOptions(p)
+
 	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
 	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name, &opts)
 	if err != nil {
@@ -381,6 +380,8 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // PullRequests returns the pull requests of the named repository.
 func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
+	setListOptions(p)
+
 	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
 	pullRequests, err := c.newClient(ctx, u).ListPullRequests(r.Owner, r.Name, &opts)
 	if err != nil {
@@ -399,7 +400,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	repo, pl, err := parseHook(req)
+	pr, repo, pl, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -407,6 +408,27 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	u, err := common.RepoUserForgeID(ctx, repo.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	switch pl.Event {
+	case model.EventPush:
+		// List only the latest push changes
+		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
+		if err != nil {
+			return nil, nil, err
+		}
+	case model.EventPull:
+		client := c.newClient(ctx, u)
+
+		if pr == nil {
+			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
+		}
+
+		// List all changes between source & destination branch
+		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.PullRequest.Source.Branch.Name, pr.PullRequest.Dest.Branch.Name))
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
@@ -449,7 +471,7 @@ func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client 
 
 // helper function to return the bitbucket oauth2 client.
 func (c *config) newClientToken(ctx context.Context, accessToken, refreshToken string) *internal.Client {
-	return internal.NewClientToken(
+	client := internal.NewClientToken(
 		ctx,
 		c.api,
 		accessToken,
@@ -459,6 +481,8 @@ func (c *config) newClientToken(ctx context.Context, accessToken, refreshToken s
 			RefreshToken: refreshToken,
 		},
 	)
+	client.Client = httputil.WrapClient(client.Client, "forge-bitbucket")
+	return client
 }
 
 // helper function to return the bitbucket oauth2 config.
@@ -487,4 +511,10 @@ func matchingHooks(hooks []*internal.Hook, rawURL string) *internal.Hook {
 		}
 	}
 	return nil
+}
+
+func setListOptions(p *model.ListOptions) {
+	if p.PerPage > pageSize || p.PerPage == 0 {
+		p.PerPage = pageSize
+	}
 }

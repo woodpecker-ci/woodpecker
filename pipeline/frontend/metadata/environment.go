@@ -97,7 +97,7 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR", commit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_EMAIL", commit.Author.Email)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_AVATAR", commit.Author.Avatar)
-	if pipeline.Event == EventTag || pipeline.Event == EventRelease || strings.HasPrefix(pipeline.Commit.Ref, "refs/tags/") {
+	if pipeline.Event == EventTag || pipeline.Event == EventRelease || pipeline.Event == EventDeploy || strings.HasPrefix(pipeline.Commit.Ref, "refs/tags/") {
 		setNonEmptyEnvVar(params, "CI_COMMIT_TAG", strings.TrimPrefix(pipeline.Commit.Ref, "refs/tags/"))
 	}
 	if pipeline.Event == EventRelease {

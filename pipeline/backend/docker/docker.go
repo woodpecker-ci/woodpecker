@@ -37,6 +37,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -92,7 +93,9 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 	}
 
 	return &http.Client{
-		Transport:     &http.Transport{TLSClientConfig: tlsConf},
+		Transport: httputil.NewUserAgentRoundTripper(
+			&http.Transport{TLSClientConfig: tlsConf},
+			"backend-docker"),
 		CheckRedirect: client.CheckRedirect,
 	}
 }
@@ -248,14 +251,17 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+	log := log.Logger.With().Str("taskUUID", taskUUID).Str("stepUUID", step.UUID).Logger()
+	log.Trace().Msgf("wait for step %s", step.Name)
 
 	containerName := toContainerName(step)
 
 	wait, errC := e.client.ContainerWait(ctx, containerName, "")
 	select {
-	case <-wait:
-	case <-errC:
+	case resp := <-wait:
+		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
+	case err := <-errC:
+		log.Trace().Msgf("ContainerWait returned with err: %v", err)
 	}
 
 	info, err := e.client.ContainerInspect(ctx, containerName)

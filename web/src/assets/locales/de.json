@@ -142,7 +142,7 @@
                 "users": "Benutzer"
             },
             "registries": {
-                "desc": "Globale Register-Zugangsdaten können hinzugefügt werden, um für private Images für alle Pipelines zu verwenden.",
+                "desc": "Globale Registry-Zugangsdaten können hinzugefügt werden, um für private Images für alle Pipelines zu verwenden.",
                 "warning": "Diese Register-Zugangsdaten werden für alle Benutzer verfügbar sein."
             }
         }
@@ -230,7 +230,7 @@
         },
         "manual_pipeline": {
             "select_branch": "Branch auswählen",
-            "title": "Eine manuelle Pipeline ausführen",
+            "title": "Löse einen manuellen Pipeline Durchlauf aus",
             "trigger": "Pipeline ausführen",
             "variables": {
                 "add": "Variable hinzufügen",
@@ -658,11 +658,11 @@
             "address": "Adresse"
         },
         "credentials": "Register-Zugangsdaten",
-        "none": "Es gibt noch keine Register-Zugangsdaten.",
+        "none": "Es sind noch keine Registry-Zugangsdaten verfügbar.",
         "registries": "Register",
         "desc": "Register-Zugangsdaten können hinzugefügt werden, um private Images für Pipelines zu nutzen.",
         "deleted": "Register-Zugangsdaten gelöscht",
-        "save": "Register speichern",
+        "save": "Speicher Registry",
         "add": "Register hinzufügen",
         "view": "Register ansehen",
         "edit": "Register bearbeiten",
@@ -688,8 +688,8 @@
     "require_approval": {
         "forks": "Pull-Request von geforkten Repositorys",
         "require_approval_for": "Erfordert Genehmigung für",
-        "none": "Keine",
-        "none_desc": "Jedes Event erstellt Pipelines, einschließlich Pull-Requests. Diese Einstellung kann gefährlich sein und wird nur für private Instanzen empfohlen.",
+        "none": "Keine Genehmigung erforderlich",
+        "none_desc": "Diese Einstellung kann gefährlich sein und sollte nur in privaten Repositories verwendet werden, in denen allen Benutzern vertraut wird.",
         "pull_requests": "Alle Pull-Requests",
         "all_events": "Alle Ereignisse von der Forge",
         "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst.",
@@ -749,5 +749,13 @@
     "developer_settings_to_create": "Gehe zu den {0} und richte die OAuth-Anwendung ein.",
     "weblate": "unserem Weblate",
     "use_this_redirect_url_to_create": "Nutze diese Weiterleitungs-URL, um die OAuth-Anwendung zu erstellen oder zu aktualisieren.",
-    "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen."
+    "help_translating": "Du kannst auf {0} helfen, Woodpecker in deine Sprache zu übersetzen.",
+    "extensions": "Erweiterungen",
+    "extension_endpoint_placeholder": "z. B. https://example.com/api",
+    "config_extension_endpoint": "Endpunkt der Konfigurations-Erweiterung",
+    "extensions_description": "Erweiterungen sind HTTP-Dienste, die von Woodpecker anstelle der integrierten aufgerufen werden können.",
+    "extensions_signatures_public_key": "Öffentlicher Schlüssel für Signaturen",
+    "extensions_configuration_saved": "Konfiguration der Erweiterungen gespeichert",
+    "extensions_signatures_public_key_description": "Dieser öffentliche Schlüssel sollte von Ihren Erweiterungen verwendet werden, um Webhook-Aufrufe von Woodpecker zu verifizieren.",
+    "disabled": "Deaktiviert"
 }

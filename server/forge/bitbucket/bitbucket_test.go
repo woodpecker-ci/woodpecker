@@ -109,22 +109,22 @@ func TestBitbucket(t *testing.T) {
 	_, err = c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 	assert.Error(t, err)
 
-	repos, err := c.Repos(ctx, fakeUser)
+	repos, err := c.Repos(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.NoError(t, err)
 	assert.Equal(t, fakeRepo.FullName, repos[0].FullName)
 
-	_, err = c.Repos(ctx, fakeUserNoTeams)
+	_, err = c.Repos(ctx, fakeUserNoTeams, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.Error(t, err)
 
-	_, err = c.Repos(ctx, fakeUserNoRepos)
+	_, err = c.Repos(ctx, fakeUserNoRepos, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.Error(t, err)
 
-	teams, err := c.Teams(ctx, fakeUser)
+	teams, err := c.Teams(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.NoError(t, err)
 	assert.Equal(t, "ueberdev42", teams[0].Login)
 	assert.Equal(t, "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964", teams[0].Avatar)
 
-	_, err = c.Teams(ctx, fakeUserNoTeams)
+	_, err = c.Teams(ctx, fakeUserNoTeams, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.Error(t, err)
 
 	raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file")
@@ -216,6 +216,7 @@ func TestBitbucket(t *testing.T) {
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
 }
 
 var (

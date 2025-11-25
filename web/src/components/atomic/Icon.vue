@@ -27,13 +27,14 @@
   <SvgIcon v-else-if="name === 'org'" :path="mdiAccountGroupOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'cron'" :path="mdiCalendarClockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'toolbox'" :path="mdiToolboxOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'puzzle'" :path="mdiPuzzleOutline" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
     :path="mdiCloseCircle"
     size="1.3rem"
   />
-  <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-pending' || name === 'status-created'" :path="mdiRadioboxBlank" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-running' || name === 'status-started'"
     type="mdi"
@@ -155,6 +156,7 @@ import {
   mdiPlayOutline,
   mdiPlus,
   mdiPower,
+  mdiPuzzleOutline,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
   mdiShieldKeyOutline,
@@ -197,6 +199,7 @@ export type IconNames =
   | 'status-failure'
   | 'status-killed'
   | 'status-pending'
+  | 'status-created'
   | 'status-running'
   | 'status-skipped'
   | 'status-started'
@@ -242,6 +245,7 @@ export type IconNames =
   | 'org'
   | 'cron'
   | 'toolbox'
+  | 'puzzle'
   | 'forge'
   | 'fullscreen'
   | 'exit-fullscreen'

@@ -28,7 +28,7 @@ type JWTManager struct {
 	tokenDuration time.Duration
 }
 
-// UserClaims is a custom JWT claims that contains some user's information.
+// AgentTokenClaims is a custom JWT claims that contains an agent's information.
 type AgentTokenClaims struct {
 	jwt.RegisteredClaims
 	AgentID int64 `json:"agent_id"`

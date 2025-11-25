@@ -34,6 +34,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -179,7 +180,12 @@ func (c *Forgejo) Refresh(ctx context.Context, user *model.User) (bool, error) {
 }
 
 // Teams is supported by the Forgejo driver.
-func (c *Forgejo) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+func (c *Forgejo) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
@@ -235,7 +241,12 @@ func (c *Forgejo) Repo(ctx context.Context, u *model.User, remoteID model.ForgeR
 
 // Repos returns a list of all repositories for the Forgejo account, including
 // organization repositories.
-func (c *Forgejo) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *Forgejo) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
@@ -576,12 +587,13 @@ func (c *Forgejo) newClientToken(ctx context.Context, token string) (*forgejo.Cl
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
-	client, err := forgejo.NewClient(c.url, forgejo.SetToken(token), forgejo.SetHTTPClient(httpClient), forgejo.SetContext(ctx))
+	wrappedClient := httputil.WrapClient(httpClient, "forge-forgejo")
+	client, err := forgejo.NewClient(c.url, forgejo.SetToken(token), forgejo.SetHTTPClient(wrappedClient), forgejo.SetContext(ctx))
 	if err != nil &&
 		(errors.Is(err, &forgejo.ErrUnknownVersion{}) || strings.Contains(err.Error(), "Malformed version")) {
 		// we guess it's a dev forgejo version
 		log.Error().Err(err).Msgf("could not detect forgejo version, assume dev version %s", forgejoDevVersion)
-		client, err = forgejo.NewClient(c.url, forgejo.SetForgejoVersion(forgejoDevVersion), forgejo.SetToken(token), forgejo.SetHTTPClient(httpClient), forgejo.SetContext(ctx))
+		client, err = forgejo.NewClient(c.url, forgejo.SetForgejoVersion(forgejoDevVersion), forgejo.SetToken(token), forgejo.SetHTTPClient(wrappedClient), forgejo.SetContext(ctx))
 	}
 	return client, err
 }

@@ -225,3 +225,44 @@ func TestCreateFilterFunc(t *testing.T) {
 		})
 	}
 }
+
+func TestMissingRequiredLabels(t *testing.T) {
+	t.Parallel()
+
+	testdata := []struct {
+		taskLabels     map[string]string
+		requiredLabels map[string]string
+		want           bool
+	}{
+		// Required label present and matches
+		{
+			taskLabels:     map[string]string{"os": "linux"},
+			requiredLabels: map[string]string{"!os": "linux", "platform": "arm64"},
+			want:           false,
+		},
+		// Required label present but does not match
+		{
+			taskLabels:     map[string]string{"os": "windows"},
+			requiredLabels: map[string]string{"!os": "linux", "platform": "amd64"},
+			want:           true,
+		},
+		// Required label missing
+		{
+			taskLabels:     map[string]string{"arch": "amd64"},
+			requiredLabels: map[string]string{"!os": "linux"},
+			want:           true,
+		},
+		// No agent labels
+		{
+			taskLabels:     map[string]string{"os": "linux"},
+			requiredLabels: map[string]string{},
+			want:           false,
+		},
+	}
+
+	for _, tt := range testdata {
+		if got := requiredLabelsMissing(tt.taskLabels, tt.requiredLabels); got != tt.want {
+			t.Errorf("requiredLabelsMissing(%v, %v) = %v, want %v", tt.taskLabels, tt.requiredLabels, got, tt.want)
+		}
+	}
+}

@@ -28,7 +28,7 @@ const (
 	LogEntryProgress
 )
 
-// Line is a line of console output.
+// LogEntry is a line of console output.
 type LogEntry struct {
 	StepUUID string `json:"step_uuid,omitempty"`
 	Time     int64  `json:"time,omitempty"`
