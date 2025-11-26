@@ -16,7 +16,6 @@ package kubernetes
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -130,9 +129,4 @@ func TestSetupWorkflow(t *testing.T) {
 
 	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, meta_v1.GetOptions{})
 	assert.NoError(t, err, "headless service should be created during workflow setup")
-
-	svcName := fmt.Sprintf("wp-svc-%s-%s", serviceWithPorts.UUID, serviceWithPorts.Name)
-	svc, err := engine.client.CoreV1().Services(namespace).Get(context.Background(), svcName, meta_v1.GetOptions{})
-	assert.NoError(t, err, "service should be created during workflow setup")
-	assert.Equal(t, int32(serviceWithPorts.Ports[0].Number), svc.Spec.Ports[0].Port, "service port should match the defined port")
 }

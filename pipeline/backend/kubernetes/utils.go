@@ -24,8 +24,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	client_cmd "k8s.io/client-go/tools/clientcmd"
-
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 var (
@@ -103,11 +101,6 @@ func getClientInsideOfCluster() (kubernetes.Interface, error) {
 	}
 
 	return kubernetes.NewForConfig(config)
-}
-
-// Only services with ports are considered standard services other will resolve using DNS and headless service within subdomain.
-func isStandardService(step *types.Step) bool {
-	return len(step.Ports) > 0 && (step.Type == types.StepTypeService || (step.Detached && dnsPattern.FindStringIndex(step.Name) != nil))
 }
 
 func newBool(val bool) *bool {
