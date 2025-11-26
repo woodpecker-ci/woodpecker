@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -114,15 +113,15 @@ func TestHeadlessService(t *testing.T) {
 	}`
 
 	s, err := mkHeadlessService("foo", "11301")
-	assert.NoError(t, err)
+	assert.NoError(t, err, "expected no error when creating headless service")
 	j, err := json.Marshal(s)
-	assert.NoError(t, err)
-	assert.JSONEq(t, expected, string(j))
+	assert.NoError(t, err, "expected no error when marshaling headless service to JSON")
+	assert.JSONEq(t, expected, string(j), "expected headless service JSON to match")
 }
 
 func TestInvalidHeadlessService(t *testing.T) {
 	_, err := mkHeadlessService("foo", "invalid_task_uuid!")
-	assert.Error(t, err)
+	assert.Error(t, err, "expected error due to invalid task UUID")
 }
 
 func TestStartHeadlessService(t *testing.T) {
@@ -133,18 +132,18 @@ func TestStartHeadlessService(t *testing.T) {
 		}
 
 		svc, err := startHeadlessService(context.Background(), engine, "foo", "11301")
-		assert.NoError(t, err)
+		assert.NoError(t, err, "expected no error when starting headless service")
 
-		assert.NotNil(t, svc)
-		assert.Equal(t, "wp-hsvc-11301", svc.Name)
-		assert.Equal(t, "foo", svc.Namespace)
-		assert.Equal(t, v1.ServiceTypeClusterIP, svc.Spec.Type)
-		assert.Equal(t, "None", svc.Spec.ClusterIP)
+		assert.NotNil(t, svc, "expected headless service to be created")
+		assert.Equal(t, "wp-hsvc-11301", svc.Name, "expected headless service name to match")
+		assert.Equal(t, "foo", svc.Namespace, "expected headless service namespace to match")
+		assert.Equal(t, v1.ServiceTypeClusterIP, svc.Spec.Type, "expected headless service type to be ClusterIP")
+		assert.Equal(t, "None", svc.Spec.ClusterIP, "expected headless service ClusterIP to be 'None'")
 		assert.Equal(t, map[string]string{TaskUUIDLabel: "11301"}, svc.Spec.Selector)
 
 		createdSvc, err := engine.client.CoreV1().Services("foo").Get(context.Background(), "wp-hsvc-11301", meta_v1.GetOptions{})
-		assert.NoError(t, err)
-		assert.Equal(t, svc.Name, createdSvc.Name)
+		assert.NoError(t, err, "expected no error when getting the created service")
+		assert.Equal(t, svc.Name, createdSvc.Name, "expected created service name to match")
 	})
 
 	t.Run("error on invalid task UUID resulting in invalid domain-name", func(t *testing.T) {
@@ -154,7 +153,7 @@ func TestStartHeadlessService(t *testing.T) {
 		}
 
 		_, err := startHeadlessService(context.Background(), engine, "test-namespace", "invalid_task_uuid!")
-		assert.Error(t, err)
+		assert.Error(t, err, "expected error due to invalid task UUID")
 	})
 }
 
@@ -167,16 +166,19 @@ func TestStopHeadlessService(t *testing.T) {
 
 		// arrage
 		_, err := startHeadlessService(context.Background(), engine, "foo", "11301")
-		assert.NoError(t, err)
+		assert.NoError(t, err, "expected no error when starting headless service")
+
+		_, err = engine.client.CoreV1().Services("foo").Get(context.Background(), "wp-hsvc-11301", meta_v1.GetOptions{})
+		assert.NoError(t, err, "expected no error when getting the created service")
 
 		// act
 		err = stopHeadlessService(context.Background(), engine, "foo", "11301")
-		assert.NoError(t, err)
+		assert.NoError(t, err, "expected no error when deleting headless service")
 
 		// assert
 		_, err = engine.client.CoreV1().Services("foo").Get(context.Background(), "wp-hsvc-11301", meta_v1.GetOptions{})
-		assert.Error(t, err)
-		assert.True(t, err != nil)
+		assert.Error(t, err, "expected error when getting a deleted service")
+		assert.True(t, err != nil, "expected error to be non-nil")
 	})
 
 	t.Run("handles non-existent service gracefully", func(t *testing.T) {
@@ -186,7 +188,7 @@ func TestStopHeadlessService(t *testing.T) {
 		}
 
 		err := stopHeadlessService(context.Background(), engine, "foo", "nonexistent")
-		assert.NoError(t, err)
+		assert.NoError(t, err, "expected no error when deleting a non-existent service")
 	})
 
 	t.Run("error on invalid task UUID resulting in invalid domain-name", func(t *testing.T) {
@@ -196,6 +198,6 @@ func TestStopHeadlessService(t *testing.T) {
 		}
 
 		err := stopHeadlessService(context.Background(), engine, "test-namespace", "invalid_task_uuid!")
-		assert.Error(t, err)
+		assert.Error(t, err, "expected error due to invalid task UUID")
 	})
 }

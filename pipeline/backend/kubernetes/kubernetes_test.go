@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
@@ -60,7 +59,6 @@ func TestGettingConfig(t *testing.T) {
 }
 
 func TestSetupWorkflow(t *testing.T) {
-
 	namespace := "foo"
 	volumeName := "volume-name"
 	volumePath := volumeName + ":/woodpecker"
