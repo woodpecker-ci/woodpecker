@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @henkka, @mogsie, @tuxmainy
+@6543, @Javex, @anbraten, @henkka, @mogsie, @tuxmainy
 
 ### 📈 Enhancement
 
@@ -35,6 +35,10 @@
 - chore(deps): update web npm deps non-major [[#5775](https://github.com/woodpecker-ci/woodpecker/pull/5775)]
 - fix(deps): update golang-packages [[#5770](https://github.com/woodpecker-ci/woodpecker/pull/5770)]
 - fix(deps): update golang-packages [[#5765](https://github.com/woodpecker-ci/woodpecker/pull/5765)]
+
+### Misc
+
+- Clarify envvars documentation [[#5788](https://github.com/woodpecker-ci/woodpecker/pull/5788)]
 
 ## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-18
 
