@@ -88,11 +88,13 @@ type Forge interface {
 	// - Fallback to owner/name if remoteID empty
 	//
 	// Must verify user has at least read access.
+	// Caller must make sure ForgeID is set.
 	Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error)
 
 	// Repos fetches all repositories accessible to the user.
 	// Should include user's permission level in Repo.Perm.
 	// Should support pagination via ListOptions.
+	// Caller must make sure ForgeID is set.
 	Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error)
 
 	// File fetches a single file at a specific commit.

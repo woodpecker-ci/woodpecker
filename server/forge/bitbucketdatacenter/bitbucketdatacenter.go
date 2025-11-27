@@ -54,6 +54,7 @@ type Opts struct {
 }
 
 type client struct {
+	id                           int64
 	url                          string
 	urlAPI                       string
 	clientID                     string
@@ -66,8 +67,9 @@ type client struct {
 
 // New returns a Forge implementation that integrates with Bitbucket DataCenter/Server,
 // the on-premise edition of Bitbucket Cloud, formerly known as Stash.
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	config := &client{
+		id:                           id,
 		url:                          opts.URL,
 		urlAPI:                       fmt.Sprintf("%s/rest", opts.URL),
 		clientID:                     opts.OAuthClientID,
@@ -340,7 +342,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		Duration:    uint64((pipeline.Finished - pipeline.Started) * millisecondsInSecond),
 		Parent:      common.GetPipelineStatusContext(repo, pipeline, workflow),
 		DateAdded:   bb.DateTime(time.Unix(pipeline.Started, 0)),
-		Ref:         pipeline.Ref,
+		Ref:         fmt.Sprintf("refs/heads/%s", pipeline.Branch),
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
 	return err
@@ -541,7 +543,7 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 		return nil, nil, fmt.Errorf("unable to get store from context")
 	}
 
-	repo, err := _store.GetRepoForgeID(r.ForgeRemoteID)
+	repo, err := _store.GetRepoForgeID(c.id, r.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to get repo: %w", err)
 	}
