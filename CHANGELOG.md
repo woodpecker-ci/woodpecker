@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-25
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @henkka
+@6543, @anbraten, @henkka, @mogsie
 
 ### 📈 Enhancement
 
@@ -13,6 +13,8 @@
 
 ### 🐛 Bug Fixes
 
+- fix(bitbucketdatacenter): fix CI_COMMIT_PULL_REQUEST [[#5769](https://github.com/woodpecker-ci/woodpecker/pull/5769)]
+- On set/get of repo make sure forge_id is set and on fetch respected [[#5717](https://github.com/woodpecker-ci/woodpecker/pull/5717)]
 - Improve repair endpoints [[#5767](https://github.com/woodpecker-ci/woodpecker/pull/5767)]
 
 ### 📚 Documentation
