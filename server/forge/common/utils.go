@@ -74,12 +74,12 @@ func RepoUser(ctx context.Context, r *model.Repo) (*model.User, error) {
 	return user, nil
 }
 
-func RepoUserForgeID(ctx context.Context, repoForgeID model.ForgeRemoteID) (*model.User, error) {
+func RepoUserForgeID(ctx context.Context, forgeID int64, remoteID model.ForgeRemoteID) (*model.User, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		return nil, errors.New("could not get store from context")
 	}
-	r, err := _store.GetRepoForgeID(repoForgeID)
+	r, err := _store.GetRepoForgeID(forgeID, remoteID)
 	if err != nil {
 		return nil, err
 	}
