@@ -115,7 +115,8 @@ var (
 		Commit:   "3ce383490b3d90d79460c60f67ba2580acc6cc59",
 		Started:  1759825800,
 		Finished: 1759825883,
-		Ref:      "refs/heads/feature-branch",
+		Branch:   "feature-branch",
+		Ref:      "refs/pull-requests/123/from",
 		Event:    model.EventPush,
 	}
 

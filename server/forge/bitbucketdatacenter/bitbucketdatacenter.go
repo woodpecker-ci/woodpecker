@@ -342,7 +342,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		Duration:    uint64((pipeline.Finished - pipeline.Started) * millisecondsInSecond),
 		Parent:      common.GetPipelineStatusContext(repo, pipeline, workflow),
 		DateAdded:   bb.DateTime(time.Unix(pipeline.Started, 0)),
-		Ref:         pipeline.Ref,
+		Ref:         fmt.Sprintf("refs/heads/%s", pipeline.Branch),
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
 	return err
