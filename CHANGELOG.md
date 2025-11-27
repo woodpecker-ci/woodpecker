@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @henkka, @mogsie
+@6543, @anbraten, @henkka, @mogsie, @tuxmainy
 
 ### 📈 Enhancement
 
+- add events query parameter to badge url [[#5728](https://github.com/woodpecker-ci/woodpecker/pull/5728)]
 - Extract default step-builder options into server [[#5785](https://github.com/woodpecker-ci/woodpecker/pull/5785)]
 - feat: include CI_COMMIT_TAG env in deployment events [[#5773](https://github.com/woodpecker-ci/woodpecker/pull/5773)]
 
