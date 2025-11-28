@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-27
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -26,6 +26,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/docker/cli to v29.1.0+incompatible [[#5789](https://github.com/woodpecker-ci/woodpecker/pull/5789)]
 - fix(deps): update golang-packages [[#5787](https://github.com/woodpecker-ci/woodpecker/pull/5787)]
 - chore(deps): update dependency simple-icons to v15.22.0 [[#5782](https://github.com/woodpecker-ci/woodpecker/pull/5782)]
 - chore(deps): update dependency vue-tsc to v3.1.5 [[#5781](https://github.com/woodpecker-ci/woodpecker/pull/5781)]
