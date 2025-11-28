@@ -56,7 +56,6 @@ woodpecker-cli [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 
 **--token, -t**="": server auth token
 
-
 # COMMANDS
 
 ## admin
@@ -299,11 +298,11 @@ execute a local pipeline
 
 **--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags
 
-**--netrc-machine**="": 
+**--netrc-machine**="":
 
-**--netrc-password**="": 
+**--netrc-password**="":
 
-**--netrc-username**="": 
+**--netrc-username**="":
 
 **--network**="": external networks
 
@@ -393,7 +392,7 @@ execute a local pipeline
 
 **--system-platform**="": Set the metadata environment variable "CI_SYSTEM_PLATFORM".
 
-**--system-url**="": Set the metadata environment variable "CI_SYSTEM_URL". (default: https://github.com/woodpecker-ci/woodpecker)
+**--system-url**="": Set the metadata environment variable "CI_SYSTEM_URL". (default: <https://github.com/woodpecker-ci/woodpecker>)
 
 **--timeout**="": pipeline timeout (default: 1h0m0s)
 
