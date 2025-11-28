@@ -4207,6 +4207,63 @@ func (_c *MockStore_OrgUpdate_Call) RunAndReturn(run func(org *model.Org) error)
 	return _c
 }
 
+// PermDeleteByUserAndRepoIDs provides a mock function for the type MockStore
+func (_mock *MockStore) PermDeleteByUserAndRepoIDs(userID int64, repoIDs []int64) error {
+	ret := _mock.Called(userID, repoIDs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PermDeleteByUserAndRepoIDs")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(int64, []int64) error); ok {
+		r0 = returnFunc(userID, repoIDs)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_PermDeleteByUserAndRepoIDs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PermDeleteByUserAndRepoIDs'
+type MockStore_PermDeleteByUserAndRepoIDs_Call struct {
+	*mock.Call
+}
+
+// PermDeleteByUserAndRepoIDs is a helper method to define mock.On call
+//   - userID int64
+//   - repoIDs []int64
+func (_e *MockStore_Expecter) PermDeleteByUserAndRepoIDs(userID interface{}, repoIDs interface{}) *MockStore_PermDeleteByUserAndRepoIDs_Call {
+	return &MockStore_PermDeleteByUserAndRepoIDs_Call{Call: _e.mock.On("PermDeleteByUserAndRepoIDs", userID, repoIDs)}
+}
+
+func (_c *MockStore_PermDeleteByUserAndRepoIDs_Call) Run(run func(userID int64, repoIDs []int64)) *MockStore_PermDeleteByUserAndRepoIDs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 []int64
+		if args[1] != nil {
+			arg1 = args[1].([]int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_PermDeleteByUserAndRepoIDs_Call) Return(err error) *MockStore_PermDeleteByUserAndRepoIDs_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_PermDeleteByUserAndRepoIDs_Call) RunAndReturn(run func(userID int64, repoIDs []int64) error) *MockStore_PermDeleteByUserAndRepoIDs_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PermFind provides a mock function for the type MockStore
 func (_mock *MockStore) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
 	ret := _mock.Called(user, repo)
