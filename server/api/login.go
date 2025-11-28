@@ -314,6 +314,8 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		return err
 	}
 
+	allowedRepoIDs := map[int64]bool{}
+
 	for _, forgeRepo := range repos {
 		// make sure forgeID is set
 		forgeRepo.ForgeID = forgeID
@@ -337,6 +339,26 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		perm.UserID = user.ID
 		perm.Synced = time.Now().Unix()
 		if err := _store.PermUpsert(perm); err != nil {
+			return err
+		}
+
+		allowedRepoIDs[dbRepo.ID] = true
+	}
+
+	currentRepos, err := _store.RepoList(user, false, true, nil)
+	if err != nil {
+		return err
+	}
+
+	toDelete := make([]int64, 0)
+	for _, r := range currentRepos {
+		if !allowedRepoIDs[r.ID] {
+			toDelete = append(toDelete, r.ID)
+		}
+	}
+
+	if len(toDelete) > 0 {
+		if err := _store.PermDeleteByUserAndRepoIDs(user.ID, toDelete); err != nil {
 			return err
 		}
 	}

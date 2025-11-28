@@ -104,6 +104,7 @@ type Store interface {
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
 	PermUpsert(perm *model.Perm) error
+	PermDeleteByUserAndRepoIDs(userID int64, repoIDs []int64) error
 
 	// Configs
 	ConfigsForPipeline(pipelineID int64) ([]*model.Config, error)

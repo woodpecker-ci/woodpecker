@@ -83,3 +83,12 @@ func userPushOrAdminCondition(userID int64) builder.Cond {
 func userIDAndRepoIDCond(perm *model.Perm) builder.Cond {
 	return builder.Eq{"user_id": perm.UserID, "repo_id": perm.RepoID}
 }
+
+// PermDeleteByUserAndRepoIDs deletes permission rows for a user for the given repo IDs.
+func (s storage) PermDeleteByUserAndRepoIDs(userID int64, repoIDs []int64) error {
+	if len(repoIDs) == 0 {
+		return nil
+	}
+	_, err := s.engine.In("repo_id", repoIDs).And("user_id = ?", userID).Delete(new(model.Perm))
+	return err
+}
