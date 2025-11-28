@@ -84,11 +84,17 @@ func userIDAndRepoIDCond(perm *model.Perm) builder.Cond {
 	return builder.Eq{"user_id": perm.UserID, "repo_id": perm.RepoID}
 }
 
-// PermDeleteByUserAndRepoIDs deletes permission rows for a user for the given repo IDs.
-func (s storage) PermDeleteByUserAndRepoIDs(userID int64, repoIDs []int64) error {
-	if len(repoIDs) == 0 {
-		return nil
+// PermPrune deletes all permission rows for a user
+// where the repo_id is NOT IN the provided keepRepoIDs list. If keepRepoIDs
+// is empty, all permissions for the user are deleted.
+func (s storage) PermPrune(userID int64, keepRepoIDs []int64) error {
+	if len(keepRepoIDs) == 0 {
+		_, err := s.engine.Where(builder.Eq{"user_id": userID}).Delete(new(model.Perm))
+		return err
 	}
-	_, err := s.engine.In("repo_id", repoIDs).And("user_id = ?", userID).Delete(new(model.Perm))
+
+	_, err := s.engine.Where(builder.Eq{"user_id": userID}).
+		And(builder.NotIn("repo_id", keepRepoIDs)).
+		Delete(new(model.Perm))
 	return err
 }
