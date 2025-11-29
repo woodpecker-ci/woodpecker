@@ -314,6 +314,8 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		return err
 	}
 
+	var repoIDs []int64
+
 	for _, forgeRepo := range repos {
 		// make sure forgeID is set
 		forgeRepo.ForgeID = forgeID
@@ -339,6 +341,12 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		if err := _store.PermUpsert(perm); err != nil {
 			return err
 		}
+
+		repoIDs = append(repoIDs, dbRepo.ID)
+	}
+
+	if err := _store.PermPrune(user.ID, repoIDs); err != nil {
+		return err
 	}
 
 	return nil
