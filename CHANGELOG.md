@@ -6,6 +6,10 @@
 
 @6543, @Javex, @anbraten, @henkka, @mogsie, @qwerty287, @tuxmainy
 
+### 🔒 Security
+
+- fix: updateRepoPermissions to cleanup old permissions [[#5790](https://github.com/woodpecker-ci/woodpecker/pull/5790)]
+
 ### 📈 Enhancement
 
 - add events query parameter to badge url [[#5728](https://github.com/woodpecker-ci/woodpecker/pull/5728)]
