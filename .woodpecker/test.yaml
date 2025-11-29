@@ -55,7 +55,7 @@ steps:
   lint:
     depends_on:
       - vendor
-    image: *golang_image
+    image: golangci/golangci-lint:v2.6.2
     commands:
       - make lint
     when: *when
