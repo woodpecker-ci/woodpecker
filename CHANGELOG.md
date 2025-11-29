@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Javex, @anbraten, @henkka, @mogsie, @tuxmainy
+@6543, @Javex, @anbraten, @henkka, @mogsie, @qwerty287, @tuxmainy
 
 ### 📈 Enhancement
 
@@ -44,6 +44,7 @@
 
 ### Misc
 
+- Use golangci docker image [[#5797](https://github.com/woodpecker-ci/woodpecker/pull/5797)]
 - Clarify envvars documentation [[#5788](https://github.com/woodpecker-ci/woodpecker/pull/5788)]
 
 ## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-18
