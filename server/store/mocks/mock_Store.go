@@ -1822,8 +1822,8 @@ func (_c *MockStore_GetPipeline_Call) RunAndReturn(run func(n int64) (*model.Pip
 }
 
 // GetPipelineBadge provides a mock function for the type MockStore
-func (_mock *MockStore) GetPipelineBadge(repo *model.Repo, s string) (*model.Pipeline, error) {
-	ret := _mock.Called(repo, s)
+func (_mock *MockStore) GetPipelineBadge(repo *model.Repo, s string, webhookEvents []model.WebhookEvent) (*model.Pipeline, error) {
+	ret := _mock.Called(repo, s, webhookEvents)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetPipelineBadge")
@@ -1831,18 +1831,18 @@ func (_mock *MockStore) GetPipelineBadge(repo *model.Repo, s string) (*model.Pip
 
 	var r0 *model.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) (*model.Pipeline, error)); ok {
-		return returnFunc(repo, s)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string, []model.WebhookEvent) (*model.Pipeline, error)); ok {
+		return returnFunc(repo, s, webhookEvents)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) *model.Pipeline); ok {
-		r0 = returnFunc(repo, s)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string, []model.WebhookEvent) *model.Pipeline); ok {
+		r0 = returnFunc(repo, s, webhookEvents)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, string) error); ok {
-		r1 = returnFunc(repo, s)
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, string, []model.WebhookEvent) error); ok {
+		r1 = returnFunc(repo, s, webhookEvents)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1857,11 +1857,12 @@ type MockStore_GetPipelineBadge_Call struct {
 // GetPipelineBadge is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - s string
-func (_e *MockStore_Expecter) GetPipelineBadge(repo interface{}, s interface{}) *MockStore_GetPipelineBadge_Call {
-	return &MockStore_GetPipelineBadge_Call{Call: _e.mock.On("GetPipelineBadge", repo, s)}
+//   - webhookEvents []model.WebhookEvent
+func (_e *MockStore_Expecter) GetPipelineBadge(repo interface{}, s interface{}, webhookEvents interface{}) *MockStore_GetPipelineBadge_Call {
+	return &MockStore_GetPipelineBadge_Call{Call: _e.mock.On("GetPipelineBadge", repo, s, webhookEvents)}
 }
 
-func (_c *MockStore_GetPipelineBadge_Call) Run(run func(repo *model.Repo, s string)) *MockStore_GetPipelineBadge_Call {
+func (_c *MockStore_GetPipelineBadge_Call) Run(run func(repo *model.Repo, s string, webhookEvents []model.WebhookEvent)) *MockStore_GetPipelineBadge_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *model.Repo
 		if args[0] != nil {
@@ -1871,9 +1872,14 @@ func (_c *MockStore_GetPipelineBadge_Call) Run(run func(repo *model.Repo, s stri
 		if args[1] != nil {
 			arg1 = args[1].(string)
 		}
+		var arg2 []model.WebhookEvent
+		if args[2] != nil {
+			arg2 = args[2].([]model.WebhookEvent)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -1884,7 +1890,7 @@ func (_c *MockStore_GetPipelineBadge_Call) Return(pipeline *model.Pipeline, err 
 	return _c
 }
 
-func (_c *MockStore_GetPipelineBadge_Call) RunAndReturn(run func(repo *model.Repo, s string) (*model.Pipeline, error)) *MockStore_GetPipelineBadge_Call {
+func (_c *MockStore_GetPipelineBadge_Call) RunAndReturn(run func(repo *model.Repo, s string, webhookEvents []model.WebhookEvent) (*model.Pipeline, error)) *MockStore_GetPipelineBadge_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2397,8 +2403,8 @@ func (_c *MockStore_GetRepoCount_Call) RunAndReturn(run func() (int64, error)) *
 }
 
 // GetRepoForgeID provides a mock function for the type MockStore
-func (_mock *MockStore) GetRepoForgeID(forgeRemoteID model.ForgeRemoteID) (*model.Repo, error) {
-	ret := _mock.Called(forgeRemoteID)
+func (_mock *MockStore) GetRepoForgeID(n int64, forgeRemoteID model.ForgeRemoteID) (*model.Repo, error) {
+	ret := _mock.Called(n, forgeRemoteID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetRepoForgeID")
@@ -2406,18 +2412,18 @@ func (_mock *MockStore) GetRepoForgeID(forgeRemoteID model.ForgeRemoteID) (*mode
 
 	var r0 *model.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(model.ForgeRemoteID) (*model.Repo, error)); ok {
-		return returnFunc(forgeRemoteID)
+	if returnFunc, ok := ret.Get(0).(func(int64, model.ForgeRemoteID) (*model.Repo, error)); ok {
+		return returnFunc(n, forgeRemoteID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(model.ForgeRemoteID) *model.Repo); ok {
-		r0 = returnFunc(forgeRemoteID)
+	if returnFunc, ok := ret.Get(0).(func(int64, model.ForgeRemoteID) *model.Repo); ok {
+		r0 = returnFunc(n, forgeRemoteID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(model.ForgeRemoteID) error); ok {
-		r1 = returnFunc(forgeRemoteID)
+	if returnFunc, ok := ret.Get(1).(func(int64, model.ForgeRemoteID) error); ok {
+		r1 = returnFunc(n, forgeRemoteID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2430,19 +2436,25 @@ type MockStore_GetRepoForgeID_Call struct {
 }
 
 // GetRepoForgeID is a helper method to define mock.On call
+//   - n int64
 //   - forgeRemoteID model.ForgeRemoteID
-func (_e *MockStore_Expecter) GetRepoForgeID(forgeRemoteID interface{}) *MockStore_GetRepoForgeID_Call {
-	return &MockStore_GetRepoForgeID_Call{Call: _e.mock.On("GetRepoForgeID", forgeRemoteID)}
+func (_e *MockStore_Expecter) GetRepoForgeID(n interface{}, forgeRemoteID interface{}) *MockStore_GetRepoForgeID_Call {
+	return &MockStore_GetRepoForgeID_Call{Call: _e.mock.On("GetRepoForgeID", n, forgeRemoteID)}
 }
 
-func (_c *MockStore_GetRepoForgeID_Call) Run(run func(forgeRemoteID model.ForgeRemoteID)) *MockStore_GetRepoForgeID_Call {
+func (_c *MockStore_GetRepoForgeID_Call) Run(run func(n int64, forgeRemoteID model.ForgeRemoteID)) *MockStore_GetRepoForgeID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 model.ForgeRemoteID
+		var arg0 int64
 		if args[0] != nil {
-			arg0 = args[0].(model.ForgeRemoteID)
+			arg0 = args[0].(int64)
+		}
+		var arg1 model.ForgeRemoteID
+		if args[1] != nil {
+			arg1 = args[1].(model.ForgeRemoteID)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -2453,7 +2465,7 @@ func (_c *MockStore_GetRepoForgeID_Call) Return(repo *model.Repo, err error) *Mo
 	return _c
 }
 
-func (_c *MockStore_GetRepoForgeID_Call) RunAndReturn(run func(forgeRemoteID model.ForgeRemoteID) (*model.Repo, error)) *MockStore_GetRepoForgeID_Call {
+func (_c *MockStore_GetRepoForgeID_Call) RunAndReturn(run func(n int64, forgeRemoteID model.ForgeRemoteID) (*model.Repo, error)) *MockStore_GetRepoForgeID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2583,8 +2595,8 @@ func (_c *MockStore_GetRepoName_Call) RunAndReturn(run func(s string) (*model.Re
 }
 
 // GetRepoNameFallback provides a mock function for the type MockStore
-func (_mock *MockStore) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
-	ret := _mock.Called(remoteID, fullName)
+func (_mock *MockStore) GetRepoNameFallback(forgeID int64, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+	ret := _mock.Called(forgeID, remoteID, fullName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetRepoNameFallback")
@@ -2592,18 +2604,18 @@ func (_mock *MockStore) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullNa
 
 	var r0 *model.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(model.ForgeRemoteID, string) (*model.Repo, error)); ok {
-		return returnFunc(remoteID, fullName)
+	if returnFunc, ok := ret.Get(0).(func(int64, model.ForgeRemoteID, string) (*model.Repo, error)); ok {
+		return returnFunc(forgeID, remoteID, fullName)
 	}
-	if returnFunc, ok := ret.Get(0).(func(model.ForgeRemoteID, string) *model.Repo); ok {
-		r0 = returnFunc(remoteID, fullName)
+	if returnFunc, ok := ret.Get(0).(func(int64, model.ForgeRemoteID, string) *model.Repo); ok {
+		r0 = returnFunc(forgeID, remoteID, fullName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(model.ForgeRemoteID, string) error); ok {
-		r1 = returnFunc(remoteID, fullName)
+	if returnFunc, ok := ret.Get(1).(func(int64, model.ForgeRemoteID, string) error); ok {
+		r1 = returnFunc(forgeID, remoteID, fullName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2616,25 +2628,31 @@ type MockStore_GetRepoNameFallback_Call struct {
 }
 
 // GetRepoNameFallback is a helper method to define mock.On call
+//   - forgeID int64
 //   - remoteID model.ForgeRemoteID
 //   - fullName string
-func (_e *MockStore_Expecter) GetRepoNameFallback(remoteID interface{}, fullName interface{}) *MockStore_GetRepoNameFallback_Call {
-	return &MockStore_GetRepoNameFallback_Call{Call: _e.mock.On("GetRepoNameFallback", remoteID, fullName)}
+func (_e *MockStore_Expecter) GetRepoNameFallback(forgeID interface{}, remoteID interface{}, fullName interface{}) *MockStore_GetRepoNameFallback_Call {
+	return &MockStore_GetRepoNameFallback_Call{Call: _e.mock.On("GetRepoNameFallback", forgeID, remoteID, fullName)}
 }
 
-func (_c *MockStore_GetRepoNameFallback_Call) Run(run func(remoteID model.ForgeRemoteID, fullName string)) *MockStore_GetRepoNameFallback_Call {
+func (_c *MockStore_GetRepoNameFallback_Call) Run(run func(forgeID int64, remoteID model.ForgeRemoteID, fullName string)) *MockStore_GetRepoNameFallback_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 model.ForgeRemoteID
+		var arg0 int64
 		if args[0] != nil {
-			arg0 = args[0].(model.ForgeRemoteID)
+			arg0 = args[0].(int64)
 		}
-		var arg1 string
+		var arg1 model.ForgeRemoteID
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(model.ForgeRemoteID)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2645,7 +2663,7 @@ func (_c *MockStore_GetRepoNameFallback_Call) Return(repo *model.Repo, err error
 	return _c
 }
 
-func (_c *MockStore_GetRepoNameFallback_Call) RunAndReturn(run func(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)) *MockStore_GetRepoNameFallback_Call {
+func (_c *MockStore_GetRepoNameFallback_Call) RunAndReturn(run func(forgeID int64, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)) *MockStore_GetRepoNameFallback_Call {
 	_c.Call.Return(run)
 	return _c
 }

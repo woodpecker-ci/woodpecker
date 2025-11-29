@@ -36,6 +36,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -47,6 +48,7 @@ const (
 )
 
 type Gitea struct {
+	id                int64
 	url               string
 	oAuthClientID     string
 	oAuthClientSecret string
@@ -66,8 +68,9 @@ type Opts struct {
 
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	return &Gitea{
+		id:                id,
 		url:               opts.URL,
 		oAuthClientID:     opts.OAuthClientID,
 		oAuthClientSecret: opts.OAuthClientSecret,
@@ -182,24 +185,31 @@ func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams is supported by the Gitea driver.
 func (c *Gitea) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	orgs, _, err := client.ListMyOrgs(
-		gitea.ListOrgsOptions{
-			ListOptions: gitea.ListOptions{
-				Page:     p.Page,
-				PageSize: c.perPage(ctx, p.PerPage),
+	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
+		orgs, _, err := client.ListMyOrgs(
+			gitea.ListOrgsOptions{
+				ListOptions: gitea.ListOptions{
+					Page:     page,
+					PageSize: c.perPage(ctx),
+				},
 			},
-		},
-	)
-	teams := make([]*model.Team, 0, len(orgs))
-	for _, org := range orgs {
-		teams = append(teams, toTeam(org, c.url))
-	}
-	return teams, err
+		)
+		teams := make([]*model.Team, 0, len(orgs))
+		for _, org := range orgs {
+			teams = append(teams, toTeam(org, c.url))
+		}
+		return teams, err
+	}, -1)
 }
 
 // TeamPerm is not supported by the Gitea driver.
@@ -236,22 +246,27 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRem
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
 func (c *Gitea) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	repos, _, err := client.ListMyRepos(
-		gitea.ListReposOptions{
-			ListOptions: gitea.ListOptions{
-				Page:     p.Page,
-				PageSize: c.perPage(ctx, p.PerPage),
+	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
+		repos, _, err := client.ListMyRepos(
+			gitea.ListReposOptions{
+				ListOptions: gitea.ListOptions{
+					Page:     page,
+					PageSize: c.perPage(ctx),
+				},
 			},
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
+		)
+		return repos, err
+	}, -1)
 
 	result := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {
@@ -403,7 +418,7 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{
 			ListOptions: gitea.ListOptions{
 				Page:     page,
-				PageSize: c.perPage(ctx, c.pageSize),
+				PageSize: c.perPage(ctx),
 			},
 		})
 		return hooks, err
@@ -601,12 +616,13 @@ func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
-	client, err := gitea.NewClient(c.url, gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
+	wrappedClient := httputil.WrapClient(httpClient, "forge-gitea")
+	client, err := gitea.NewClient(c.url, gitea.SetToken(token), gitea.SetHTTPClient(wrappedClient), gitea.SetContext(ctx))
 	if err != nil &&
 		(errors.Is(err, &gitea.ErrUnknownVersion{}) || strings.Contains(err.Error(), "Malformed version")) {
 		// we guess it's a dev gitea version
 		log.Error().Err(err).Msgf("could not detect gitea version, assume dev version %s", giteaDevVersion)
-		client, err = gitea.NewClient(c.url, gitea.SetGiteaVersion(giteaDevVersion), gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
+		client, err = gitea.NewClient(c.url, gitea.SetGiteaVersion(giteaDevVersion), gitea.SetToken(token), gitea.SetHTTPClient(wrappedClient), gitea.SetContext(ctx))
 	}
 	return client, err
 }
@@ -641,7 +657,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return []string{}, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -677,7 +693,7 @@ func (c *Gitea) getTagCommitAndMessage(ctx context.Context, repo *model.Repo, ta
 		return nil, "", fmt.Errorf("could not get store from context")
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, "", err
 	}
@@ -707,7 +723,7 @@ func (c *Gitea) getCommitFromSHAStore(ctx context.Context, repo *model.Repo, sha
 		return nil, fmt.Errorf("could not get store from context")
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -742,7 +758,7 @@ func (c *Gitea) getCommitFromSHA(ctx context.Context, user *model.User, repo *mo
 	}, nil
 }
 
-func (c *Gitea) perPage(ctx context.Context, customPerPage int) int {
+func (c *Gitea) perPage(ctx context.Context) int {
 	if c.pageSize == 0 {
 		client, err := c.newClientToken(ctx, "")
 		if err != nil {
@@ -755,11 +771,5 @@ func (c *Gitea) perPage(ctx context.Context, customPerPage int) int {
 		}
 		c.pageSize = api.MaxResponseItems
 	}
-
-	pageSize := customPerPage
-	if pageSize == 0 || pageSize > c.pageSize {
-		pageSize = c.pageSize
-	}
-
-	return pageSize
+	return c.pageSize
 }

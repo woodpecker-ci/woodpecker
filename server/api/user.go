@@ -131,6 +131,9 @@ func GetRepos(c *gin.Context) {
 
 		var repos []*model.Repo
 		for _, r := range _repos {
+			// make sure forgeID is set
+			r.ForgeID = user.ForgeID
+
 			if r.Perm.Push && server.Config.Permissions.OwnersAllowlist.IsAllowed(r) {
 				if active[r.ForgeRemoteID] != nil {
 					existingRepo := active[r.ForgeRemoteID]

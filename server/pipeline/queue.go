@@ -45,7 +45,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 		if err != nil {
 			return err
 		}
-		task.Dependencies = taskIDs(item.DependsOn, pipelineItems)
+		task.Dependencies = getTaskDependencies(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
 
@@ -63,9 +63,9 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
 }
 
-func taskIDs(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIDs []string) {
+func getTaskDependencies(dependsOn []string, items []*stepbuilder.Item) (taskIDs []string) {
 	for _, dep := range dependsOn {
-		for _, pipelineItem := range pipelineItems {
+		for _, pipelineItem := range items {
 			if pipelineItem.Workflow.Name == dep {
 				taskIDs = append(taskIDs, fmt.Sprint(pipelineItem.Workflow.ID))
 			}

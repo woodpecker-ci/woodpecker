@@ -47,7 +47,7 @@
     },
     {
       "name": "Gitea Create Pull Request",
-      "docs": "https://codeberg.org/JohnWalkerx/gitea-pull-request-create-plugin/raw/branch/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-community/gitea-pull-request-create-plugin/raw/branch/main/docs.md",
       "verified": false
     },
     {
@@ -137,7 +137,7 @@
     },
     {
       "name": "NixOS Remote Builder",
-      "docs": "https://codeberg.org/JohnWalkerx/nix-remote-builder-plugin/raw/branch/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-community/nix-remote-builder-plugin/raw/branch/main/docs.md",
       "verified": false
     },
     {

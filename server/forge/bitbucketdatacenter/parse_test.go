@@ -20,10 +20,12 @@ func Test_parseHook(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Event-Key", "pr:opened")
 
-		result, err := parseHook(req, "https://bitbucket.example.com")
+		result, curCommit, prevCommit, err := parseHook(req, "https://bitbucket.example.com")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+		assert.Empty(t, curCommit)
+		assert.Empty(t, prevCommit)
 		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
@@ -40,10 +42,12 @@ func Test_parseHook(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Event-Key", "pr:opened")
 
-		result, err := parseHook(req, "https://bitbucket.example.com")
+		result, curCommit, prevCommit, err := parseHook(req, "https://bitbucket.example.com")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+		assert.Empty(t, curCommit)
+		assert.Empty(t, prevCommit)
 		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
@@ -60,7 +64,7 @@ func Test_parseHook(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Event-Key", "repo:refs_changed")
 
-		result, err := parseHook(req, "https://bitbucket.example.com")
+		result, curCommit, prevCommit, err := parseHook(req, "https://bitbucket.example.com")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
@@ -68,6 +72,8 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)
+		assert.Equal(t, curCommit, "76797d54bca87db6d1e3e82ee40622c7908aa514")
+		assert.Equal(t, prevCommit, "e0e15221b987fd8296141c0faa6a79f7c86ca4ce")
 		assert.Equal(t, "DEV/deployment-automation", result.Repo.FullName)
 		assert.Equal(t, "76797d54bca87db6d1e3e82ee40622c7908aa514", result.Pipeline.Commit.SHA)
 		assert.Equal(t, model.EventPush, result.Pipeline.Event)
@@ -80,10 +86,12 @@ func Test_parseHook(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Event-Key", "pr:merged")
 
-		result, err := parseHook(req, "https://bitbucket.example.com")
+		result, curCommit, prevCommit, err := parseHook(req, "https://bitbucket.example.com")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
+		assert.Empty(t, curCommit)
+		assert.Empty(t, prevCommit)
 		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)

@@ -291,7 +291,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	err = updateRepoPermissions(c, user, _store, _forge)
+	err = updateRepoPermissions(c, user, _store, _forge, forgeID)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
@@ -303,7 +303,7 @@ func HandleAuth(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
-func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge) error {
+func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {
 	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
 		return _forge.Repos(c, user, &model.ListOptions{
 			Page:    page,
@@ -315,7 +315,10 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 	}
 
 	for _, forgeRepo := range repos {
-		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
+		// make sure forgeID is set
+		forgeRepo.ForgeID = forgeID
+
+		dbRepo, err := _store.GetRepoForgeID(forgeID, forgeRepo.ForgeRemoteID)
 		if err != nil && errors.Is(err, types.RecordNotExist) {
 			continue
 		}

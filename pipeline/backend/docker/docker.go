@@ -37,6 +37,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -92,7 +93,9 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 	}
 
 	return &http.Client{
-		Transport:     &http.Transport{TLSClientConfig: tlsConf},
+		Transport: httputil.NewUserAgentRoundTripper(
+			&http.Transport{TLSClientConfig: tlsConf},
+			"backend-docker"),
 		CheckRedirect: client.CheckRedirect,
 	}
 }

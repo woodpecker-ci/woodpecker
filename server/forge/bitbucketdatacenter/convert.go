@@ -111,6 +111,19 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	return pipeline
 }
 
+func convertGetCommitRange(ev *bb.RepositoryPushEvent) (currCommit, prevCommit string) {
+	if len(ev.Changes) == 0 {
+		return "", ""
+	}
+	change := ev.Changes[0]
+	if change.FromHash == "0000000000000000000000000000000000000000" {
+		return change.ToHash, ""
+	} else if change.ToHash == "0000000000000000000000000000000000000000" {
+		return "", change.FromHash
+	}
+	return change.ToHash, change.FromHash
+}
+
 func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit: &model.Commit{
@@ -121,7 +134,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Branch:       ev.PullRequest.Source.DisplayID,
 		AuthorAvatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:       ev.Actor.Name,
-		Ref:          ev.PullRequest.Source.ID,
+		Ref:          fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
 		PullRequest:  convertPullRequest(&ev.PullRequest),
 		ForgeURL:     fmt.Sprintf("%s/projects/%s/repos/%s/pull-requests/%d", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.ID),
 		Refspec:      fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
