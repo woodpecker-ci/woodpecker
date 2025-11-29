@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency prettier to v3.7.3 [[#5800](https://github.com/woodpecker-ci/woodpecker/pull/5800)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.2 [[#5795](https://github.com/woodpecker-ci/woodpecker/pull/5795)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1 [[#5794](https://github.com/woodpecker-ci/woodpecker/pull/5794)]
 - chore(deps): update web npm deps non-major [[#5792](https://github.com/woodpecker-ci/woodpecker/pull/5792)]
