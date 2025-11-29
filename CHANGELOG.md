@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.1 [[#5793](https://github.com/woodpecker-ci/woodpecker/pull/5793)]
 - fix(deps): update module github.com/docker/cli to v29.1.0+incompatible [[#5789](https://github.com/woodpecker-ci/woodpecker/pull/5789)]
 - fix(deps): update golang-packages [[#5787](https://github.com/woodpecker-ci/woodpecker/pull/5787)]
 - chore(deps): update dependency simple-icons to v15.22.0 [[#5782](https://github.com/woodpecker-ci/woodpecker/pull/5782)]
