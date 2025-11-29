@@ -164,7 +164,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, nil)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
-		_store.On("PermPrune", mock.Anything, []int64{}).Return(nil)
+		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -197,7 +197,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 		_store.On("OrgGet", org.ID).Return(org, nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
-		_store.On("PermPrune", mock.Anything, []int64{}).Return(nil)
+		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -293,7 +293,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.RecordNotExist)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
-		_store.On("PermPrune", mock.Anything, []int64{}).Return(nil)
+		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -328,7 +328,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(org, nil)
 		_store.On("OrgUpdate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
-		_store.On("PermPrune", mock.Anything, []int64{}).Return(nil)
+		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -363,7 +363,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgGet", user.OrgID).Return(org, nil)
 		_store.On("OrgUpdate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
-		_store.On("PermPrune", mock.Anything, []int64{}).Return(nil)
+		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
