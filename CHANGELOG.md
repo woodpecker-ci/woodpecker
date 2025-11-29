@@ -24,6 +24,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency prettier to v3.7.3 [[#5799](https://github.com/woodpecker-ci/woodpecker/pull/5799)]
 - chore(deps): update docs npm deps non-major [[#5791](https://github.com/woodpecker-ci/woodpecker/pull/5791)]
 - chore(deps): lock file maintenance [[#5784](https://github.com/woodpecker-ci/woodpecker/pull/5784)]
 - chore(deps): update dependency isomorphic-dompurify to v2.33.0 [[#5778](https://github.com/woodpecker-ci/woodpecker/pull/5778)]
