@@ -73,7 +73,7 @@ steps:
   lint-license-header:
     image: *golang_image
     commands:
-      - go install github.com/google/addlicense@latest # cspell:words addlicense
+      - make install-addlicense # cspell:words addlicense
       - 'addlicense -check -ignore "vendor/**" **/*.go'
     when: *when
 
