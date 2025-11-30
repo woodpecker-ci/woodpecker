@@ -78,7 +78,6 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Could not fetch repository from forge.")
 		return
 	}
-	from.ForgeID = user.ForgeID
 	if !from.Perm.Admin {
 		c.String(http.StatusForbidden, "User has to be a admin of this repository")
 		return
@@ -88,6 +87,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
+	from.ForgeID = user.ForgeID
 	if enabledOnce {
 		repo.Update(from)
 	} else {
@@ -96,7 +96,6 @@ func PostRepo(c *gin.Context) {
 		repo.AllowPull = server.Config.Pipeline.DefaultAllowPullRequests
 		repo.AllowDeploy = false
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
-		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
 	}
 	repo.IsActive = true
 	repo.UserID = user.ID
