@@ -24,6 +24,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency yaml to v2.8.2 [[#5803](https://github.com/woodpecker-ci/woodpecker/pull/5803)]
 - chore(deps): update dependency prettier to v3.7.3 [[#5799](https://github.com/woodpecker-ci/woodpecker/pull/5799)]
 - chore(deps): update docs npm deps non-major [[#5791](https://github.com/woodpecker-ci/woodpecker/pull/5791)]
 - chore(deps): lock file maintenance [[#5784](https://github.com/woodpecker-ci/woodpecker/pull/5784)]
