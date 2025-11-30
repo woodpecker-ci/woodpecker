@@ -1,5 +1,63 @@
 # Changelog
 
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-30
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @Javex, @anbraten, @henkka, @mogsie, @qwerty287, @tuxmainy
+
+### 🔒 Security
+
+- fix: updateRepoPermissions to cleanup old permissions [[#5790](https://github.com/woodpecker-ci/woodpecker/pull/5790)]
+
+### 📈 Enhancement
+
+- add events query parameter to badge url [[#5728](https://github.com/woodpecker-ci/woodpecker/pull/5728)]
+- Extract default step-builder options into server [[#5785](https://github.com/woodpecker-ci/woodpecker/pull/5785)]
+- feat: include CI_COMMIT_TAG env in deployment events [[#5773](https://github.com/woodpecker-ci/woodpecker/pull/5773)]
+
+### 🐛 Bug Fixes
+
+- fix(bitbucketdatacenter): fix CI_COMMIT_PULL_REQUEST [[#5769](https://github.com/woodpecker-ci/woodpecker/pull/5769)]
+- On set/get of repo make sure forge_id is set and on fetch respected [[#5717](https://github.com/woodpecker-ci/woodpecker/pull/5717)]
+- Improve repair endpoints [[#5767](https://github.com/woodpecker-ci/woodpecker/pull/5767)]
+
+### 📚 Documentation
+
+- chore(deps): update dependency yaml to v2.8.2 [[#5803](https://github.com/woodpecker-ci/woodpecker/pull/5803)]
+- chore(deps): update dependency prettier to v3.7.3 [[#5799](https://github.com/woodpecker-ci/woodpecker/pull/5799)]
+- chore(deps): update docs npm deps non-major [[#5791](https://github.com/woodpecker-ci/woodpecker/pull/5791)]
+- chore(deps): lock file maintenance [[#5784](https://github.com/woodpecker-ci/woodpecker/pull/5784)]
+- chore(deps): update dependency isomorphic-dompurify to v2.33.0 [[#5778](https://github.com/woodpecker-ci/woodpecker/pull/5778)]
+- chore(deps): update docs npm deps non-major [[#5774](https://github.com/woodpecker-ci/woodpecker/pull/5774)]
+
+### 📦️ Dependency
+
+- chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.3 [[#5804](https://github.com/woodpecker-ci/woodpecker/pull/5804)]
+- fix(deps): update dependency simple-icons to v16 [[#5802](https://github.com/woodpecker-ci/woodpecker/pull/5802)]
+- fix(deps): update module github.com/docker/cli to v29.1.1+incompatible [[#5801](https://github.com/woodpecker-ci/woodpecker/pull/5801)]
+- chore(deps): update dependency prettier to v3.7.3 [[#5800](https://github.com/woodpecker-ci/woodpecker/pull/5800)]
+- chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.2 [[#5795](https://github.com/woodpecker-ci/woodpecker/pull/5795)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1 [[#5794](https://github.com/woodpecker-ci/woodpecker/pull/5794)]
+- chore(deps): update web npm deps non-major [[#5792](https://github.com/woodpecker-ci/woodpecker/pull/5792)]
+- chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.1 [[#5793](https://github.com/woodpecker-ci/woodpecker/pull/5793)]
+- fix(deps): update module github.com/docker/cli to v29.1.0+incompatible [[#5789](https://github.com/woodpecker-ci/woodpecker/pull/5789)]
+- fix(deps): update golang-packages [[#5787](https://github.com/woodpecker-ci/woodpecker/pull/5787)]
+- chore(deps): update dependency simple-icons to v15.22.0 [[#5782](https://github.com/woodpecker-ci/woodpecker/pull/5782)]
+- chore(deps): update dependency vue-tsc to v3.1.5 [[#5781](https://github.com/woodpecker-ci/woodpecker/pull/5781)]
+- chore(deps): update dependency @types/lodash to v4.17.21 [[#5780](https://github.com/woodpecker-ci/woodpecker/pull/5780)]
+- chore(deps): update dependency vue-i18n to v11.2.1 [[#5779](https://github.com/woodpecker-ci/woodpecker/pull/5779)]
+- chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.46.0 [[#5776](https://github.com/woodpecker-ci/woodpecker/pull/5776)]
+- chore(deps): update web npm deps non-major [[#5775](https://github.com/woodpecker-ci/woodpecker/pull/5775)]
+- fix(deps): update golang-packages [[#5770](https://github.com/woodpecker-ci/woodpecker/pull/5770)]
+- fix(deps): update golang-packages [[#5765](https://github.com/woodpecker-ci/woodpecker/pull/5765)]
+
+### Misc
+
+- Split make install targets [[#5796](https://github.com/woodpecker-ci/woodpecker/pull/5796)]
+- Use golangci docker image [[#5797](https://github.com/woodpecker-ci/woodpecker/pull/5797)]
+- Clarify envvars documentation [[#5788](https://github.com/woodpecker-ci/woodpecker/pull/5788)]
+
 ## [3.12.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.12.0) - 2025-11-18
 
 ### ❤️ Thanks to all contributors! ❤️
