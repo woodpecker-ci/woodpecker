@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-29
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/docker/cli to v29.1.1+incompatible [[#5801](https://github.com/woodpecker-ci/woodpecker/pull/5801)]
 - chore(deps): update dependency prettier to v3.7.3 [[#5800](https://github.com/woodpecker-ci/woodpecker/pull/5800)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.2 [[#5795](https://github.com/woodpecker-ci/woodpecker/pull/5795)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1 [[#5794](https://github.com/woodpecker-ci/woodpecker/pull/5794)]
