@@ -27,9 +27,9 @@ var webUIRoot string // do not forget to set it at build time
 
 func HTTPFS() (http.FileSystem, error) {
 	if stat, err := os.Stat(webUIRoot); err != nil {
-		return nil, fmt.Errorf("compiled in webui root path '%s' does not exist: %w", webUIRoot, err)
+		return nil, fmt.Errorf("compiled in WebUI root path '%s' does not exist: %w", webUIRoot, err)
 	} else if !stat.IsDir() {
-		return nil, fmt.Errorf("compiled in webui root path '%s' exist but is no directory", webUIRoot)
+		return nil, fmt.Errorf("compiled in WebUI root path '%s' exist but is no directory", webUIRoot)
 	}
 	return http.Dir(webUIRoot), nil
 }
