@@ -40,5 +40,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf(md)
+	fmt.Print(md)
 }
