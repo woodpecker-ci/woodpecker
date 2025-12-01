@@ -56,6 +56,7 @@
 
 ### Misc
 
+- Makefile: add target to generate man pages [[#5810](https://github.com/woodpecker-ci/woodpecker/pull/5810)]
 - Split make install targets [[#5796](https://github.com/woodpecker-ci/woodpecker/pull/5796)]
 - Use golangci docker image [[#5797](https://github.com/woodpecker-ci/woodpecker/pull/5797)]
 - Clarify envvars documentation [[#5788](https://github.com/woodpecker-ci/woodpecker/pull/5788)]
