@@ -5,7 +5,7 @@ If you repackage it, we encourage to build from source, witch requires internet 
 We also for offline builds provide a tarball with all dependencies vendored and WebUI prebuild
 on the [release page](https://github.com/woodpecker-ci/woodpecker/releases).
 
-## Distribute WebUI on own directory.
+## Distribute WebUI on own directory
 
 If you want to not embed the WebUI into the binary, you can compile a custom WebUI root path into the binary.
 
