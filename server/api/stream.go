@@ -18,6 +18,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -82,6 +83,7 @@ func EventStreamSSE(c *gin.Context) {
 	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
+	requestCtx := c.Request.Context()
 
 	defer func() {
 		cancel(nil)
@@ -111,7 +113,7 @@ func EventStreamSSE(c *gin.Context) {
 
 	for {
 		select {
-		case <-rw.CloseNotify():
+		case <-requestCtx.Done():
 			return
 		case <-ctx.Done():
 			return
@@ -203,6 +205,7 @@ func LogStreamSSE(c *gin.Context) {
 	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
+	requestCtx := c.Request.Context()
 
 	log.Debug().Msg("log stream: connection opened")
 
@@ -250,8 +253,6 @@ func LogStreamSSE(c *gin.Context) {
 			log.Error().Err(err).Msg("tail of logs failed")
 		}
 
-		logWriteStringErr(io.WriteString(rw, "event: error\ndata: eof\n\n"))
-
 		cancel(err)
 	}()
 
@@ -263,8 +264,6 @@ func LogStreamSSE(c *gin.Context) {
 		log.Debug().Msgf("log stream: reconnect: last-event-id: %d", last)
 	}
 
-	// retry: 10000\n
-
 	for {
 		select {
 		// after 1 hour of idle (no response) end the stream.
@@ -272,9 +271,15 @@ func LogStreamSSE(c *gin.Context) {
 		// and can be removed once the code is more mature.
 		case <-time.After(time.Hour):
 			return
-		case <-rw.CloseNotify():
-			return
-		case <-ctx.Done():
+		case <-ctx.Done(): // Monitor if the "tail" context is canceled.
+			if err := context.Cause(ctx); errors.Is(err, context.Canceled) {
+				log.Debug().Msg("log stream: eof")
+				logWriteStringErr(io.WriteString(rw, "event: eof\ndata: eof\n\n"))
+				flusher.Flush()
+				return
+			}
+		case <-requestCtx.Done(): // Monitor the request context for cancellation when the client has gone away.
+			log.Debug().Msg("log stream: closed, client has gone away")
 			return
 		case <-time.After(time.Second * 30):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))

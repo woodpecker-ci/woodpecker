@@ -109,6 +109,19 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	return pipeline
 }
 
+func convertGetCommitRange(ev *bb.RepositoryPushEvent) (currCommit, prevCommit string) {
+	if len(ev.Changes) == 0 {
+		return "", ""
+	}
+	change := ev.Changes[0]
+	if change.FromHash == "0000000000000000000000000000000000000000" {
+		return change.ToHash, ""
+	} else if change.ToHash == "0000000000000000000000000000000000000000" {
+		return "", change.FromHash
+	}
+	return change.ToHash, change.FromHash
+}
+
 func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit:    ev.PullRequest.Source.Latest,
@@ -119,7 +132,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,
 		Timestamp: time.Time(ev.Date).UTC().Unix(),
-		Ref:       ev.PullRequest.Source.ID,
+		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
 		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
 		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 		FromFork:  ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,

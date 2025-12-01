@@ -3,26 +3,11 @@
 Woodpecker provides a [Helm chart](https://github.com/woodpecker-ci/helm) for Kubernetes environments:
 
 ```bash
-helm install woodpecker oci://ghcr.io/woodpecker-ci/helm/woodpecker
+helm repo add woodpecker oci://ghcr.io/woodpecker-ci/helm
+helm install woodpecker woodpecker/woodpecker
 ```
 
-## Configuration
-
-To fetch all configurable options with detailed comments:
-
-```bash
-helm show values oci://ghcr.io/woodpecker-ci/helm/woodpecker > values.yaml
-```
-
-Install using custom values:
-
-```bash
-helm install woodpecker \
-  oci://ghcr.io/woodpecker-ci/helm/woodpecker \
-  -f values.yaml
-```
-
-### Metrics
+## Metrics
 
 To enable metrics gathering, set the following in values.yml:
 

@@ -54,6 +54,7 @@ type Opts struct {
 }
 
 type client struct {
+	id                           int64
 	url                          string
 	urlAPI                       string
 	clientID                     string
@@ -66,8 +67,9 @@ type client struct {
 
 // New returns a Forge implementation that integrates with Bitbucket DataCenter/Server,
 // the on-premise edition of Bitbucket Cloud, formerly known as Stash.
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	config := &client{
+		id:                           id,
 		url:                          opts.URL,
 		urlAPI:                       fmt.Sprintf("%s/rest", opts.URL),
 		clientID:                     opts.OAuthClientID,
@@ -340,7 +342,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		Duration:    uint64((pipeline.Finished - pipeline.Started) * millisecondsInSecond),
 		Parent:      common.GetPipelineStatusContext(repo, pipeline, workflow),
 		DateAdded:   bb.DateTime(time.Unix(pipeline.Started, 0)),
-		Ref:         pipeline.Ref,
+		Ref:         fmt.Sprintf("refs/heads/%s", pipeline.Branch),
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
 	return err
@@ -499,7 +501,7 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 }
 
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	hook, err := parseHook(r, c.url)
+	hook, currCommit, prevCommit, err := parseHook(r, c.url)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to parse hook: %w", err)
 	}
@@ -518,7 +520,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 
 	switch e := hook.Event.(type) {
 	case *bb.RepositoryPushEvent:
-		pipe, err = c.updatePipelineFromCommit(ctx, user, repo, hook.Pipeline)
+		pipe, err = c.updatePipelineFromCommits(ctx, user, repo, hook.Pipeline, currCommit, prevCommit)
 	case *bb.PullRequestEvent:
 		pipe, err = c.updatePipelineFromPullRequest(ctx, user, repo, hook.Pipeline, e.PullRequest.ID)
 	}
@@ -541,7 +543,7 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 		return nil, nil, fmt.Errorf("unable to get store from context")
 	}
 
-	repo, err := _store.GetRepoForgeID(r.ForgeRemoteID)
+	repo, err := _store.GetRepoForgeID(c.id, r.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to get repo: %w", err)
 	}
@@ -558,7 +560,7 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 	return user, repo, nil
 }
 
-func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline) (*model.Pipeline, error) {
+func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, currCommit, prevCommit string) (*model.Pipeline, error) {
 	if p == nil {
 		return nil, nil
 	}
@@ -574,9 +576,15 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 	}
 	p.Message = commit.Message
 
-	opts := &bb.ListOptions{}
+	opts := &bb.CompareChangesOptions{}
+	if currCommit != "" {
+		opts.From = currCommit
+	}
+	if prevCommit != "" {
+		opts.To = prevCommit
+	}
 	for {
-		changes, resp, err := bc.Projects.ListChanges(ctx, r.Owner, r.Name, p.Commit, opts)
+		changes, resp, err := bc.Projects.CompareChanges(ctx, r.Owner, r.Name, opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to list commit changes: %w", err)
 		}
