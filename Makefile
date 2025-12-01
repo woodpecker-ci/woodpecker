@@ -385,6 +385,6 @@ man-server: ## Generate man pages for server
 	mkdir -p dist/ && CGO_ENABLED=0 go run -tags man go.woodpecker-ci.org/woodpecker/v3/cmd/server > dist/woodpecker-server.man.1 && gzip -9 -f dist/woodpecker-server.man.1
 
 .PHONY: man
-man: man-cli man-agent man-server ##v Generate all man pages
+man: man-cli man-agent man-server ## Generate all man pages
 
 endif
