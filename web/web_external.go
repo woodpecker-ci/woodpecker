@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !external_web
+//go:build external_web
 
 package web
 
 import (
-	"embed"
+	"fmt"
 	"io"
-	"io/fs"
 	"net/http"
+	"os"
 )
 
-//go:embed dist/*
-var webFiles embed.FS
+var webUIRoot string // do not forget to set it at build time
 
 func HTTPFS() (http.FileSystem, error) {
-	httpFS, err := fs.Sub(webFiles, "dist")
-	if err != nil {
-		return nil, err
+	if stat, err := os.Stat(webUIRoot); err != nil {
+		return nil, fmt.Errorf("compiled in webui root path '%s' does not exist: %w", webUIRoot, err)
+	} else if !stat.IsDir() {
+		return nil, fmt.Errorf("compiled in webui root path '%s' exist but is no directory", webUIRoot)
 	}
-	return http.FS(httpFS), nil
+	return http.Dir(webUIRoot), nil
 }
 
 func Lookup(path string) (buf []byte, err error) {
