@@ -19,6 +19,8 @@ import (
 	"fmt"
 	net_http "net/http"
 
+	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -68,9 +70,13 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 		return nil, fmt.Errorf("failed to fetch config via http from endpoint %s (status: %d): %w", h.endpoint, status, err)
 	}
 
-	// handle 204 - no new config available, return old config with error
+	// handle 204 - no new config available, return old config without error
 	if status == net_http.StatusNoContent {
-		return oldConfigData, fmt.Errorf("config endpoint returned 204 No Content, using fallback config")
+		log.Debug().
+			Str("endpoint", h.endpoint).
+			Str("repo", repo.FullName).
+			Msg("config endpoint returned 204 No Content, using fallback config")
+		return oldConfigData, nil
 	}
 
 	// unexpected non-success status code
