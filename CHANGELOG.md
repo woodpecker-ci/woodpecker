@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Javex, @anbraten, @henkka, @mogsie, @qwerty287, @tuxmainy
+@6543, @Javex, @anbraten, @henkka, @mogsie, @qwerty287, @sugar700, @tuxmainy
 
 ### 🔒 Security
 
@@ -24,6 +24,7 @@
 
 ### 📚 Documentation
 
+- Update link for Codeberg Pages Deploy plugin [[#5811](https://github.com/woodpecker-ci/woodpecker/pull/5811)]
 - chore(deps): lock file maintenance [[#5808](https://github.com/woodpecker-ci/woodpecker/pull/5808)]
 - chore(deps): update dependency yaml to v2.8.2 [[#5803](https://github.com/woodpecker-ci/woodpecker/pull/5803)]
 - chore(deps): update dependency prettier to v3.7.3 [[#5799](https://github.com/woodpecker-ci/woodpecker/pull/5799)]
