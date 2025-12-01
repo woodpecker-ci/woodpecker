@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-11-30
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -24,6 +24,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5808](https://github.com/woodpecker-ci/woodpecker/pull/5808)]
 - chore(deps): update dependency yaml to v2.8.2 [[#5803](https://github.com/woodpecker-ci/woodpecker/pull/5803)]
 - chore(deps): update dependency prettier to v3.7.3 [[#5799](https://github.com/woodpecker-ci/woodpecker/pull/5799)]
 - chore(deps): update docs npm deps non-major [[#5791](https://github.com/woodpecker-ci/woodpecker/pull/5791)]
@@ -33,6 +34,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.3.0 [[#5807](https://github.com/woodpecker-ci/woodpecker/pull/5807)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.3 [[#5804](https://github.com/woodpecker-ci/woodpecker/pull/5804)]
 - fix(deps): update dependency simple-icons to v16 [[#5802](https://github.com/woodpecker-ci/woodpecker/pull/5802)]
 - fix(deps): update module github.com/docker/cli to v29.1.1+incompatible [[#5801](https://github.com/woodpecker-ci/woodpecker/pull/5801)]
