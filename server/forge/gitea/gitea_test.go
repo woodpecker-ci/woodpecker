@@ -32,7 +32,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	forge, _ := New(0, Opts{
+	forge, _ := New(1, Opts{
 		URL:        "http://localhost:8080",
 		SkipVerify: true,
 	})
@@ -47,7 +47,7 @@ func Test_gitea(t *testing.T) {
 
 	s := httptest.NewServer(fixtures.Handler())
 	defer s.Close()
-	c, _ := New(0, Opts{
+	c, _ := New(1, Opts{
 		URL:        s.URL,
 		SkipVerify: true,
 	})
@@ -56,7 +56,7 @@ func Test_gitea(t *testing.T) {
 	ctx := store.InjectToContext(t.Context(), mockStore)
 
 	t.Run("netrc with user token", func(t *testing.T) {
-		forge, _ := New(0, Opts{})
+		forge, _ := New(1, Opts{})
 		netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 		assert.Equal(t, "gitea.com", netrc.Machine)
 		assert.Equal(t, fakeUser.Login, netrc.Login)
@@ -64,7 +64,7 @@ func Test_gitea(t *testing.T) {
 		assert.Equal(t, model.ForgeTypeGitea, netrc.Type)
 	})
 	t.Run("netrc with machine account", func(t *testing.T) {
-		forge, _ := New(0, Opts{})
+		forge, _ := New(1, Opts{})
 		netrc, _ := forge.Netrc(nil, fakeRepo)
 		assert.Equal(t, "gitea.com", netrc.Machine)
 		assert.Empty(t, netrc.Login)

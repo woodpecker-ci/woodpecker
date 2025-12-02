@@ -27,7 +27,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	forge, err := New(0, Opts{
+	forge, err := New(1, Opts{
 		URL:               "http://localhost:8080",
 		Username:          "0ZXh0IjoiI",
 		Password:          "I1NiIsInR5",
@@ -39,6 +39,7 @@ func TestNew(t *testing.T) {
 	cl, ok := forge.(*client)
 	assert.True(t, ok)
 	assert.Equal(t, &client{
+		forgeID:      1,
 		url:          "http://localhost:8080",
 		urlAPI:       "http://localhost:8080/rest",
 		username:     "0ZXh0IjoiI",

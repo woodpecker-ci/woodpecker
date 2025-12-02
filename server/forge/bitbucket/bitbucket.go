@@ -50,7 +50,7 @@ type Opts struct {
 }
 
 type config struct {
-	id            int64
+	forgeID       int64
 	api           string
 	url           string
 	oAuthClientID string
@@ -61,7 +61,7 @@ type config struct {
 // repository hosting service at https://bitbucket.org
 func New(id int64, opts *Opts) (forge.Forge, error) {
 	return &config{
-		id:            id,
+		forgeID:       id,
 		api:           DefaultAPI,
 		url:           DefaultURL,
 		oAuthClientID: opts.OAuthClientID,
@@ -414,7 +414,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		pl.Commit = commit
 	}
 
-	u, err := common.RepoUserForgeID(ctx, c.id, repo.ForgeRemoteID)
+	u, err := common.RepoUserForgeID(ctx, c.forgeID, repo.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -513,7 +513,7 @@ func (c *config) getCommit(ctx context.Context, repo *model.Repo, sha string) (*
 		return nil, fmt.Errorf("could not get store from context")
 	}
 
-	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.forgeID, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
