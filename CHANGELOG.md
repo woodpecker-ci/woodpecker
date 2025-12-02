@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-01
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -35,6 +35,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.3.1 [[#5812](https://github.com/woodpecker-ci/woodpecker/pull/5812)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.3.0 [[#5807](https://github.com/woodpecker-ci/woodpecker/pull/5807)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.3 [[#5804](https://github.com/woodpecker-ci/woodpecker/pull/5804)]
 - fix(deps): update dependency simple-icons to v16 [[#5802](https://github.com/woodpecker-ci/woodpecker/pull/5802)]
