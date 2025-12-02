@@ -60,6 +60,7 @@
 
 ### Misc
 
+- fix: Reintroduce stop all pods on workflow [[#5815](https://github.com/woodpecker-ci/woodpecker/pull/5815)]
 - Makefile: add target to generate man pages [[#5810](https://github.com/woodpecker-ci/woodpecker/pull/5810)]
 - Split make install targets [[#5796](https://github.com/woodpecker-ci/woodpecker/pull/5796)]
 - Use golangci docker image [[#5797](https://github.com/woodpecker-ci/woodpecker/pull/5797)]
