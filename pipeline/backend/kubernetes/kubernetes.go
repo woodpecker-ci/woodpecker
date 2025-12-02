@@ -455,6 +455,15 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
+	for _, stage := range conf.Stages {
+		for _, step := range stage.Steps {
+			err := stopPod(ctx, e, step, defaultDeleteOptions)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
