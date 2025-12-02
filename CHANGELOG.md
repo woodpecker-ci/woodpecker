@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Javex, @anbraten, @henkka, @mogsie, @qwerty287, @sugar700, @tuxmainy
+@6543, @Javex, @MartinSchmidt, @anbraten, @henkka, @mogsie, @qwerty287, @sugar700, @tuxmainy
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Add support for headless Kubernetes services [[#5764](https://github.com/woodpecker-ci/woodpecker/pull/5764)]
 - server/forge: rename var to be more descriptive and test value [[#5806](https://github.com/woodpecker-ci/woodpecker/pull/5806)]
 - add events query parameter to badge url [[#5728](https://github.com/woodpecker-ci/woodpecker/pull/5728)]
 - Extract default step-builder options into server [[#5785](https://github.com/woodpecker-ci/woodpecker/pull/5785)]
