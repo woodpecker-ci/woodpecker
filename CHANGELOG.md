@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- server/forge: rename var to be more descriptive and test value [[#5806](https://github.com/woodpecker-ci/woodpecker/pull/5806)]
 - add events query parameter to badge url [[#5728](https://github.com/woodpecker-ci/woodpecker/pull/5728)]
 - Extract default step-builder options into server [[#5785](https://github.com/woodpecker-ci/woodpecker/pull/5785)]
 - feat: include CI_COMMIT_TAG env in deployment events [[#5773](https://github.com/woodpecker-ci/woodpecker/pull/5773)]
