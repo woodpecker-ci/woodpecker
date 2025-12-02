@@ -41,7 +41,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 )
 
 const (
@@ -221,38 +220,23 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	if e.config.EnableNamespacePerOrg {
+		log.Trace().Str("taskUUID", taskUUID).Msgf("Ensure organization namespace: %s", namespace)
 		err := mkNamespace(ctx, e.client.CoreV1().Namespaces(), namespace)
 		if err != nil {
 			return err
 		}
 	}
 
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating workflow volume")
 	_, err := startVolume(ctx, e, conf.Volume, namespace)
 	if err != nil {
 		return err
 	}
 
-	var extraHosts []types.HostAlias
-	for _, stage := range conf.Stages {
-		for _, step := range stage.Steps {
-			if isService(step) {
-				svc, err := startService(ctx, e, step)
-				if err != nil {
-					return &pipelineErrors.ErrInvalidWorkflowSetup{
-						Err:  err,
-						Step: step,
-					}
-				}
-				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
-				extraHosts = append(extraHosts, hostAlias)
-			}
-		}
-	}
-	log.Trace().Msgf("adding extra hosts: %v", extraHosts)
-	for _, stage := range conf.Stages {
-		for _, step := range stage.Steps {
-			step.ExtraHosts = extraHosts
-		}
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating workflow headless service")
+	_, err = startHeadlessService(ctx, e, namespace, taskUUID)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -471,23 +455,16 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
-	for _, stage := range conf.Stages {
-		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, defaultDeleteOptions)
-			if err != nil {
-				return err
-			}
+	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
-			if isService(step) {
-				err := stopService(ctx, e, step, defaultDeleteOptions)
-				if err != nil {
-					return err
-				}
-			}
-		}
+	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
+	err := stopHeadlessService(ctx, e, namespace, taskUUID)
+	if err != nil {
+		return err
 	}
 
-	err := stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow volume")
+	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
 	if err != nil {
 		return err
 	}
