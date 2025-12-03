@@ -56,6 +56,7 @@ type Opts struct {
 
 // Gitlab implements "Forge" interface.
 type GitLab struct {
+	id                int64
 	url               string
 	oAuthClientID     string
 	oAuthClientSecret string
@@ -67,8 +68,9 @@ type GitLab struct {
 
 // New returns a Forge implementation that integrates with Gitlab, an open
 // source Git service. See https://gitlab.com
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	return &GitLab{
+		id:                id,
 		url:               opts.URL,
 		oAuthClientID:     opts.OAuthClientID,
 		oAuthClientSecret: opts.OAuthClientSecret,
@@ -204,8 +206,8 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 		ListOptions: gitlab.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage,
+			Page:    int64(p.Page),
+			PerPage: int64(perPage),
 		},
 		AllAvailable:   gitlab.Ptr(false),
 		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
@@ -246,7 +248,7 @@ func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, forgeRem
 	return repo, err
 }
 
-func (g *GitLab) getInheritedProjectMember(ctx context.Context, client *gitlab.Client, forgeRemoteID model.ForgeRemoteID, owner, name string, userID int) (*gitlab.ProjectMember, error) {
+func (g *GitLab) getInheritedProjectMember(ctx context.Context, client *gitlab.Client, forgeRemoteID model.ForgeRemoteID, owner, name string, userID int64) (*gitlab.ProjectMember, error) {
 	if forgeRemoteID.IsValid() {
 		intID, err := strconv.Atoi(string(forgeRemoteID))
 		if err != nil {
@@ -277,7 +279,7 @@ func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.Forg
 		return nil, err
 	}
 
-	projectMember, err := g.getInheritedProjectMember(ctx, client, remoteID, owner, name, intUserID)
+	projectMember, err := g.getInheritedProjectMember(ctx, client, remoteID, owner, name, int64(intUserID))
 	if err != nil {
 		return nil, err
 	}
@@ -299,8 +301,8 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 
 	opts := &gitlab.ListProjectsOptions{
 		ListOptions: gitlab.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage,
+			Page:    int64(p.Page),
+			PerPage: int64(perPage),
 		},
 		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
@@ -320,7 +322,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 	repos := make([]*model.Repo, 0, len(projects))
 
 	for i := range projects {
-		projectMember, _, err := client.ProjectMembers.GetInheritedProjectMember(projects[i].ID, intUserID, gitlab.WithContext(ctx))
+		projectMember, _, err := client.ProjectMembers.GetInheritedProjectMember(projects[i].ID, int64(intUserID), gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -350,7 +352,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 	state := "opened"
 	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
-		ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage},
+		ListOptions: gitlab.ListOptions{Page: int64(p.Page), PerPage: int64(p.PerPage)},
 		State:       &state,
 	})
 	if err != nil {
@@ -360,7 +362,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(pullRequests[i].ID)),
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].ID))),
 			Title: pullRequests[i].Title,
 		}
 	}
@@ -547,8 +549,10 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	}
 
 	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
-		PerPage: defaultPerPage,
-		Page:    1,
+		ListOptions: gitlab.ListOptions{
+			PerPage: defaultPerPage,
+			Page:    1,
+		},
 	}
 	for {
 		hooks, resp, err := client.Projects.ListProjectHooks(_repo.ID, listProjectHooksOptions, gitlab.WithContext(ctx))
@@ -591,7 +595,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	}
 
 	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID,
-		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage}},
+		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: int64(p.Page), PerPage: int64(p.PerPage)}},
 		gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -687,7 +691,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	if err != nil {
 		return nil, err
 	}
-	var gid int
+	var gid int64
 	for _, group := range groups {
 		if group.Name == owner {
 			gid = group.ID
@@ -706,7 +710,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	}
 
 	for i := 1; true; i++ {
-		opts.Page = i
+		opts.Page = int64(i)
 		members, _, err := client.Groups.ListAllGroupMembers(gid, opts, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
@@ -717,7 +721,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 			}
 		}
 
-		if len(members) < opts.PerPage {
+		if len(members) < int(opts.PerPage) {
 			break
 		}
 	}
@@ -775,14 +779,14 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
-func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, mergeID, milestoneID int) (*model.Pipeline, error) {
+func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, mergeID, milestoneID int64) (*model.Pipeline, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
 		return pipeline, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(g.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}

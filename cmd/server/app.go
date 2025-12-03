@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2025 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,31 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !generate && !man
-
 package main
 
 import (
-	"context"
-	"os"
+	"github.com/urfave/cli/v3"
 
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/rs/zerolog/log"
-
-	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
-func main() {
-	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
-		log.Info().Msg("termination signal is received, shutting down server")
-	})
-
-	app := genApp()
-
-	setupOpenAPIStaticConfig()
-
-	if err := app.Run(ctx, os.Args); err != nil {
-		log.Error().Err(err).Msgf("error running server")
+func genApp() *cli.Command {
+	app := &cli.Command{}
+	app.Name = "woodpecker-server"
+	app.Version = version.String()
+	app.Usage = "woodpecker server"
+	app.Action = run
+	app.Commands = []*cli.Command{
+		{
+			Name:   "ping",
+			Usage:  "ping the server",
+			Action: pinger,
+		},
 	}
+	app.Flags = flags
+
+	return app
 }

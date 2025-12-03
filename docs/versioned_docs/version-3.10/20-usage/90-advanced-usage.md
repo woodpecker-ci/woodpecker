@@ -114,7 +114,7 @@ steps:
   - name: debug
     image: bash
     commands:
-      - source envvars
+      - source ./envvars
       - echo $FOO
 ```
 
