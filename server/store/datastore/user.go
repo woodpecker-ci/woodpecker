@@ -75,6 +75,7 @@ func (s storage) CreateUser(user *model.User) error {
 			return fmt.Errorf("failed to create new org: %w", err)
 		}
 	}
+
 	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
 	_, err = sess.Insert(user)

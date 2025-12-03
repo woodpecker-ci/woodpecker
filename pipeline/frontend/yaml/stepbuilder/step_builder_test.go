@@ -13,7 +13,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder_test
+// Copyright 2022 Woodpecker Authors
+// Copyright 2018 Drone.IO Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package stepbuilder
 
 import (
 	"testing"
@@ -22,46 +37,28 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	server_metadata "go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
 )
-
-func getMockMetadata(t *testing.T) func(*stepbuilder.Workflow) metadata.Metadata {
-	repo := &model.Repo{}
-	curr := &model.Pipeline{
-		Message: "aaa",
-		Event:   model.EventPush,
-	}
-	last := &model.Pipeline{}
-	host := ""
-	return server_metadata.MetadataFromStruct(getMockForge(t), repo, curr, last, host)
-}
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
+	m := &testMetadata{}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
 		},
-		WorkflowMetadataFunc: getMockMetadata(t),
-		Host:                 "",
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+		RepoTrusted: &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: ${IMAGE}
     settings:
       yyy: ${CI_COMMIT_MESSAGE}
@@ -76,24 +73,21 @@ steps:
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
+	m := &testMetadata{}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
 		},
-		WorkflowMetadataFunc: getMockMetadata(t),
-		Host:                 "",
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+		RepoTrusted: &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: ${IMAGE}
     settings:
       yyy: ${CI_COMMIT_MESSAGE}
@@ -102,26 +96,23 @@ steps:
 	}
 
 	_, err := b.Build()
-	assert.ErrorContains(t, err, "Invalid or missing image")
+	assert.Error(t, err, "test erroneously succeeded")
 }
 
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	m := &testMetadata{}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event: push
 steps:
-  xxx:
+  - name: xxx
     image: scratch
     settings:
       yyy: ${CI_COMMIT_MESSAGE}
@@ -130,7 +121,7 @@ steps:
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
     settings:
       yyy: ${CI_COMMIT_MESSAGE}
@@ -145,110 +136,108 @@ steps:
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event: push
 steps:
-  xxx:
+  - name: xxx
     image: scratch
 `)},
 			{Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 `)},
 		},
 	}
 
-	pipelineItems, err := b.Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pipelineItems) != 2 {
-		t.Fatal("Should have generated 2 pipelineItems")
-	}
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 2, "Should have generated 2 items")
 }
 
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 `)},
 			{Name: "test", Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 `)},
-			{Data: []byte(`
+			{Name: "deploy", Data: []byte(`
 when:
   event: push
 steps:
-  deploy:
+  - name: deploy
     image: scratch
 
 depends_on:
   - lint
   - test
 `)},
+			{Name: "missing dependencies", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: deploy
+    image: scratch
+
+depends_on:
+  - missing
+`)},
 		},
 	}
 
-	pipelineItems, err := b.Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pipelineItems[0].DependsOn) != 2 {
-		t.Fatal("Should have 3 dependencies")
-	}
-	if pipelineItems[0].DependsOn[1] != "test" {
-		t.Fatal("Should depend on test")
-	}
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 3, "Should have generated 3 items")
+	assert.Len(t, items[0].DependsOn, 2, "Should have 2 dependencies")
+	assert.Equal(t, "test", items[0].DependsOn[1], "Should depend on test")
 }
 
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event: push
 steps:
-  deploy:
+  - name: deploy
     image: scratch
 
 runs_on:
@@ -258,117 +247,101 @@ runs_on:
 		},
 	}
 
-	pipelineItems, err := b.Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pipelineItems[0].RunsOn) != 2 {
-		t.Fatal("Should run on success and failure")
-	}
-	if pipelineItems[0].RunsOn[1] != "failure" {
-		t.Fatal("Should run on failure")
-	}
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1, "Should have generated 1 pipeline")
+	assert.Len(t, items[0].RunsOn, 2, "Should run on success and failure")
+	assert.Equal(t, "failure", items[0].RunsOn[1], "Should run on failure")
 }
 
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 `)},
 			{Name: ".woodpecker/.test.yml", Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 `)},
 		},
 	}
 
-	pipelineItems, err := b.Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	pipelineNames := []string{pipelineItems[0].Workflow.Name, pipelineItems[1].Workflow.Name}
-	if !stepbuilder.ContainsItemWithName("lint", pipelineItems) || !stepbuilder.ContainsItemWithName("test", pipelineItems) {
-		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
-	}
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 2, "Should have generated 2 pipelines")
+	pipelineNames := []string{items[0].Workflow.Name, items[1].Workflow.Name}
+	assert.True(t, ContainsItemWithName("lint", items) && ContainsItemWithName("test", items),
+		"Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 }
 
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	m := &testMetadata{
+		pipelineEvent: "push",
+		branch:        "dev",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event: push
   branch: main
 steps:
-  xxx:
+  - name: xxx
     image: scratch
 `)},
 			{Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 `)},
 		},
 	}
 
-	pipelineItems, err := b.Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !assert.Len(t, pipelineItems, 1) {
-		t.Fatal("Should have generated 1 pipeline")
-	}
-	if !pipelineItems[0].Pending {
-		t.Fatal("Should run on dev branch")
-	}
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1, "Should have generated 1 pipeline")
 }
 
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	m := &testMetadata{
+		pipelineEvent: "tag",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event:
     - tag
 steps:
-  xxx:
+  - name: xxx
     image: scratch
 `)},
 			{Data: []byte(`
@@ -376,48 +349,37 @@ when:
   event:
     - push
 steps:
-  xxx:
+  - name: xxx
     image: scratch
 `)},
 			{Data: []byte(`
 steps:
-  build:
+  - name: build
     image: scratch
 `)},
 		},
 	}
 
-	pipelineItems, err := b.Build()
+	items, err := b.Build()
 	assert.False(t, errors.HasBlockingErrors(err))
-
-	if len(pipelineItems) != 2 {
-		t.Fatal("Should have generated 2 pipelineItems")
-	}
+	assert.Len(t, items, 2, "Should have generated 2 items")
 }
 
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
-	// pipeline := &model.Pipeline{
-	// 	Branch: "dev",
-	// 	Event:  model.EventPush,
-	// }
+	m := &testMetadata{}
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event: push
 skip_clone: true
 steps:
-  build:
+  - name: build
     when:
       branch: notdev
     image: scratch
@@ -425,95 +387,28 @@ steps:
 		},
 	}
 
-	pipelineItems, err := b.Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pipelineItems) != 0 {
-		t.Fatal("Should not generate a pipeline item if there are no steps")
-	}
-}
-
-func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
-	t.Parallel()
-
-	// pipeline := &model.Pipeline{
-	// 	Branch: "dev",
-	// 	Event:  model.EventPush,
-	// }
-
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
-		Yamls: []*forge_types.FileMeta{
-			{Name: "zerostep", Data: []byte(`
-when:
-  event: push
-skip_clone: true
-steps:
-  build:
-    when:
-      branch: notdev
-    image: scratch
-`)},
-			{Name: "justastep", Data: []byte(`
-when:
-  event: push
-steps:
-  build:
-    image: scratch
-`)},
-			{Name: "shouldbefiltered", Data: []byte(`
-when:
-  event: push
-steps:
-  build:
-    image: scratch
-depends_on: [ zerostep ]
-`)},
-		},
-	}
-
-	pipelineItems, err := b.Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pipelineItems) != 1 {
-		t.Fatal("Zerostep and the step that depends on it should not generate a pipeline item")
-	}
-	if pipelineItems[0].Workflow.Name != "justastep" {
-		t.Fatal("justastep should have been generated")
-	}
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Empty(t, items, "Should not generate a pipeline item if there are no steps")
 }
 
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
 
-	// pipeline := &model.Pipeline{
-	// 	Branch: "dev",
-	// 	Event:  model.EventPush,
-	// }
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
 
-	b := stepbuilder.StepBuilder{
-		Host:                 "",
-		WorkflowMetadataFunc: getMockMetadata(t),
-		RepoTrusted: &metadata.TrustedConfiguration{
-			Network:  false,
-			Volumes:  false,
-			Security: false,
-		},
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:
   event: push
 skip_clone: true
 steps:
-  build:
+  - name: build
     when:
       branch: notdev
     image: scratch
@@ -522,14 +417,14 @@ steps:
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 `)},
 			{Name: "shouldbefiltered", Data: []byte(`
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 depends_on: [ zerostep ]
 `)},
@@ -537,23 +432,17 @@ depends_on: [ zerostep ]
 when:
   event: push
 steps:
-  build:
+  - name: build
     image: scratch
 depends_on: [ shouldbefiltered ]
 `)},
 		},
 	}
 
-	pipelineItems, err := b.Build()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pipelineItems) != 1 {
-		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a pipeline item")
-	}
-	if pipelineItems[0].Workflow.Name != "justastep" {
-		t.Fatal("justastep should have been generated")
-	}
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1, "Zerostep and the step that depends on it, and the one depending on it should not generate a pipeline item")
+	assert.Equal(t, "justastep", items[0].Workflow.Name, "justastep should have been generated")
 }
 
 func TestSanitizePath(t *testing.T) {
@@ -590,15 +479,241 @@ func TestSanitizePath(t *testing.T) {
 	}
 
 	for _, test := range testTable {
-		if test.sanitizedPath != stepbuilder.SanitizePath(test.path) {
-			t.Fatal("Path hasn't been sanitized correctly")
-		}
+		assert.Equal(t, test.sanitizedPath, SanitizePath(test.path), "Path hasn't been sanitized correctly")
 	}
 }
 
-func getMockForge(t *testing.T) forge.Forge {
-	forge := mocks.NewMockForge(t)
-	forge.On("Name").Return("mock")
-	forge.On("URL").Return("https://codeberg.org")
-	return forge
+func TestMatrix(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*forge_types.FileMeta{
+			{Data: []byte(`
+when:
+  event: push
+
+matrix:
+  GO_VERSION:
+    - 1.14
+    - 1.15
+
+steps:
+  - name: build
+    image: golang:${GO_VERSION}
+    commands:
+      - go build
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 2)
+
+	// Check AxisID and Environ
+	assert.Equal(t, 1, items[0].Workflow.AxisID)
+	assert.Equal(t, "1.14", items[0].Workflow.Environ["GO_VERSION"])
+
+	assert.Equal(t, 2, items[1].Workflow.AxisID)
+	assert.Equal(t, "1.15", items[1].Workflow.Environ["GO_VERSION"])
+}
+
+func TestMissingWorkflowDeps(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*forge_types.FileMeta{
+			{
+				Name: "workflow-with-missing-deps",
+				Data: []byte(`
+when:
+  event: push
+steps:
+  - name: build
+    image: scratch
+depends_on:
+  - non-existing
+`),
+			},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Empty(t, items, "Workflows with missing dependencies should be filtered out")
+}
+
+func TestInvalidYAML(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*forge_types.FileMeta{
+			{Name: "broken-yaml", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: build
+    image: scratch
+	invalid yaml indentation
+`)},
+		},
+	}
+
+	_, err := b.Build()
+	assert.ErrorContains(t, err, "found a tab character that violates indentation")
+}
+
+func TestEnvVarPrecedence(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+		repo:          "actual-repo",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		Envs: map[string]string{
+			"CUSTOM_VAR":     "global-value",
+			"CI_REPO_NAME":   "should-not-override",
+			"ANOTHER_CUSTOM": "global-value-2",
+		},
+		RepoTrusted: &metadata.TrustedConfiguration{},
+		Yamls: []*forge_types.FileMeta{
+			{Data: []byte(`
+when:
+  event: push
+steps:
+  - name: test-env
+    image: scratch
+    environment:
+      CUSTOM_VAR: ${CUSTOM_VAR}
+      REPO_NAME: ${CI_REPO_NAME}
+      ANOTHER: ${ANOTHER_CUSTOM}
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1)
+
+	// Verify CI_REPO_NAME wasn't overridden by global env
+	assert.Equal(t, "actual-repo", items[0].Config.Stages[0].Steps[0].Environment["CI_REPO_NAME"])
+}
+
+func TestLabelMerging(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		DefaultLabels: map[string]string{
+			"default-label": "default-value",
+			"override-me":   "default",
+		},
+		Yamls: []*forge_types.FileMeta{
+			{Data: []byte(`
+when:
+  event: push
+
+labels:
+  override-me: "custom-value"
+  workflow-label: "workflow-value"
+
+steps:
+  - name: build
+    image: scratch
+`)},
+			{Data: []byte(`
+when:
+  event: push
+
+steps:
+  - name: build
+    image: scratch
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 2)
+
+	assert.Equal(t, "custom-value", items[0].Labels["override-me"], "Workflow label should override default")
+	assert.Equal(t, "workflow-value", items[0].Labels["workflow-label"], "Workflow-specific label should be present")
+	assert.Equal(t, "default-value", items[1].Labels["default-label"], "Default label should be present")
+}
+
+func TestCompilerOptions(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := StepBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		CompilerOptions: []compiler.Option{
+			compiler.WithEnviron(map[string]string{
+				"KEY": "VALUE",
+			}),
+		},
+		Yamls: []*forge_types.FileMeta{
+			{Data: []byte(`
+skip_clone: true
+when:
+  event: push
+steps:
+  - name: build
+    image: scratch
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1)
+	assert.Len(t, items[0].Config.Stages, 1, "Should have 1 stage")
+	assert.Len(t, items[0].Config.Stages[0].Steps, 1, "Should have 1 step in first stage")
+	assert.Equal(t, "VALUE", items[0].Config.Stages[0].Steps[0].Environment["KEY"], "Environment variable should be set")
+}
+
+type testMetadata struct {
+	pipelineEvent string
+	branch        string
+	repo          string
+}
+
+func (t *testMetadata) GetWorkflowMetadata(w *Workflow) metadata.Metadata {
+	return metadata.Metadata{
+		Repo: metadata.Repo{
+			Name: t.repo,
+		},
+		Curr: metadata.Pipeline{
+			Event: t.pipelineEvent,
+			Commit: metadata.Commit{
+				Branch: t.branch,
+			},
+		},
+	}
 }

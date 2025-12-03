@@ -94,19 +94,14 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 
 	maps.Copy(envs, currentPipeline.AdditionalVariables)
 
-	workflowMetadataFunc := metadata.MetadataFromStruct(forge, repo, currentPipeline, prev, server.Config.Server.Host)
+	serverMetadata := metadata.NewServerMetadata(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
 	b := stepbuilder.StepBuilder{
-		// Repo:                 repo,
-		// Curr:                 currentPipeline,
-		// Prev:                 prev,
-		// Forge:                forge,
-		WorkflowMetadataFunc: workflowMetadataFunc,
-		Envs:                 envs,
-		Host:                 server.Config.Server.Host,
-		Yamls:                yamls,
-		TrustedClonePlugins:  append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
-		PrivilegedPlugins:    server.Config.Pipeline.PrivilegedPlugins,
+		GetWorkflowMetadata: serverMetadata.GetWorkflowMetadata,
+		Envs:                envs,
+		Yamls:               yamls,
+		TrustedClonePlugins: append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
+		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
 		RepoTrusted: &pipeline_metadata.TrustedConfiguration{
 			Network:  repo.Trusted.Network,
 			Volumes:  repo.Trusted.Volumes,

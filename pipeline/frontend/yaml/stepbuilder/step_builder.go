@@ -24,6 +24,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"go.uber.org/multierr"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
@@ -36,17 +37,16 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 )
 
-// StepBuilder Takes the hook data and the yaml and returns in internal data model.
+// StepBuilder Takes the hook data and the yaml and returns the internal data model.
 type StepBuilder struct {
-	Yamls                []*forge_types.FileMeta
-	CompilerOptions      []compiler.Option
-	WorkflowMetadataFunc func(*Workflow) metadata.Metadata
-	RepoTrusted          *metadata.TrustedConfiguration
-	TrustedClonePlugins  []string
-	PrivilegedPlugins    []string
-	Host                 string
-	Envs                 map[string]string
-	DefaultLabels        map[string]string
+	Yamls               []*forge_types.FileMeta
+	Envs                map[string]string
+	DefaultLabels       map[string]string
+	RepoTrusted         *metadata.TrustedConfiguration
+	TrustedClonePlugins []string
+	PrivilegedPlugins   []string
+	CompilerOptions     []compiler.Option
+	GetWorkflowMetadata func(workflow *Workflow) metadata.Metadata
 }
 
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -95,7 +95,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	items = filterItemsWithMissingDependencies(items)
 
 	// check if at least one step can start if slice is not empty
-	if len(items) > 0 && !stepListContainsItemsToRun(items) {
+	if len(items) > 0 && !workflowListContainsItemsToRun(items) {
 		return nil, fmt.Errorf("pipeline has no steps to run")
 	}
 
@@ -103,12 +103,17 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := b.WorkflowMetadataFunc(workflow)
+	workflowMetadata := b.GetWorkflowMetadata(workflow)
+	environ := b.environmentVariables(workflowMetadata, axis)
 
-	environ := map[string]string{}
-	maps.Copy(environ, b.Envs)                     // global environment data
-	maps.Copy(environ, workflowMetadata.Environ()) // workflow environment data like CI_REPO_NAME
-	maps.Copy(environ, axis)
+	// add global environment variables for substituting
+	for k, v := range b.Envs {
+		if _, exists := environ[k]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[k] = v
+	}
 
 	// substitute vars
 	substituted, err := metadata.EnvVarSubst(data, environ)
@@ -153,7 +158,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, d
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
-	ir, err := b.compileWorkflow(parsed, environ, workflowMetadata, workflow.ID)
+	ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
 	if err != nil {
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
@@ -175,19 +180,51 @@ func (b *StepBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, d
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
 
-	item.Labels = workflowMetadata.Labels(item.Labels)
-
-	for stageI := range item.Config.Stages {
-		for stepI := range item.Config.Stages[stageI].Steps {
-			item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
-			// item.Config.Stages[stageI].Steps[stepI].OrgID = b.Repo.OrgID // TODO
+	// "woodpecker-ci.org" namespace is reserved for internal use
+	for key := range item.Labels {
+		if strings.HasPrefix(key, pipeline.InternalLabelPrefix) {
+			log.Debug().Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
+			delete(item.Labels, key)
 		}
 	}
+
+	// TODO: handle labels for steps
+	// Add Woodpecker managed labels to the pipeline
+	// item.Labels[pipeline.LabelForgeRemoteID] = b.Forge.Name()
+	// item.Labels[pipeline.LabelRepoForgeID] = string(b.Repo.ForgeRemoteID)
+	// item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
+	// item.Labels[pipeline.LabelRepoName] = b.Repo.Name
+	// item.Labels[pipeline.LabelRepoFullName] = b.Repo.FullName
+	// item.Labels[pipeline.LabelBranch] = b.Repo.Branch
+	// item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(b.Repo.OrgID, 10)
+
+	// for stageI := range item.Config.Stages {
+	// 	for stepI := range item.Config.Stages[stageI].Steps {
+	// 		item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+	// 		item.Config.Stages[stageI].Steps[stepI].OrgID = b.Repo.OrgID
+	// 	}
+	// }
 
 	return item, errorsAndWarnings
 }
 
-func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
+func workflowListContainsItemsToRun(items []*Item) bool {
+	// for i := range items {
+	// 	if items[i].Workflow.State == model.StatusPending {
+	// 		return true
+	// 	}
+	// }
+	// return false
+	return true // TODO: is this util even necessary
+}
+
+func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
+	environ := metadata.Environ()
+	maps.Copy(environ, axis)
+	return environ
+}
+
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	options := []compiler.Option{}
 	options = append(options,
 		compiler.WithEnviron(environ),
@@ -204,6 +241,9 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 		compiler.WithMetadata(metadata),
 		compiler.WithTrustedSecurity(b.RepoTrusted.Security),
 	)
+
+	// by adding the passed in options last, we allow them
+	// to override any of the default options set above
 	options = append(options, b.CompilerOptions...)
 
 	return compiler.New(options...).Compile(parsed)

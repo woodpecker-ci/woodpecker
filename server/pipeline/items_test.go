@@ -5,11 +5,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -57,7 +55,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 		},
 	}}
 
-	s := mocks.NewStore(t)
+	s := store_mocks.NewMockStore(t)
 	s.On("WorkflowLoad", mock.Anything).Return(workflow, nil)
 
 	pipeline = applyWorkflowsFromStepBuilder(s, pipeline, pipelineItems)

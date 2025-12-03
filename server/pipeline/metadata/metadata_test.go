@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func TestMetadataFromStruct(t *testing.T) {
+func TestGetWorkflowMetadata(t *testing.T) {
 	forge := mocks.NewMockForge(t)
 	forge.On("Name").Return("gitea")
 	forge.On("URL").Return("https://gitea.com")
@@ -92,7 +92,7 @@ func TestMetadataFromStruct(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL)(testCase.workflow)
+			result := NewServerMetadata(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL).GetWorkflowMetadata(testCase.workflow)
 			assert.EqualValues(t, testCase.expectedMetadata, result)
 			assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
 		})

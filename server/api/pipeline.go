@@ -460,7 +460,7 @@ func GetPipelineMetadata(c *gin.Context) {
 		return
 	}
 
-	m := metadata.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, server.Config.Server.Host)(nil)
+	m := metadata.NewServerMetadata(forge, repo, currentPipeline, prevPipeline, server.Config.Server.Host).GetWorkflowMetadata(nil)
 	c.JSON(http.StatusOK, m)
 }
 
