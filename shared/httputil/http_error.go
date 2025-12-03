@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package httputil
 
 import (
 	"context"
@@ -26,8 +26,8 @@ import (
 	"syscall"
 )
 
-// enhanceHTTPError adds detailed context to HTTP errors to help with debugging.
-func enhanceHTTPError(err error, method, endpoint string) error {
+// EnhanceHTTPError adds detailed context to HTTP errors to help with debugging.
+func EnhanceHTTPError(err error, method, endpoint string) error {
 	if err == nil {
 		return nil
 	}

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package httputil
 
 import (
 	"context"
@@ -122,7 +122,7 @@ func TestEnhanceHTTPError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := enhanceHTTPError(tt.err, tt.method, tt.endpoint)
+			got := EnhanceHTTPError(tt.err, tt.method, tt.endpoint)
 
 			if tt.want == "" {
 				if got != nil {
@@ -158,7 +158,7 @@ func TestEnhanceHTTPErrorPreservesOriginal(t *testing.T) {
 	originalErr := io.EOF
 	endpoint := "https://example.com/api"
 
-	enhanced := enhanceHTTPError(originalErr, "POST", endpoint)
+	enhanced := EnhanceHTTPError(originalErr, "POST", endpoint)
 
 	// the io.EOF error should be wrapped inside the enhanced error
 	if !errors.Is(enhanced, originalErr) {
