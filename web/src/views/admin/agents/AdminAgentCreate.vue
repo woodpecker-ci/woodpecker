@@ -4,7 +4,7 @@
       <Button :text="$t('admin.settings.agents.show')" start-icon="back" :to="{ name: 'admin-settings-agents' }" />
     </template>
 
-    <AgentForm v-model="agent" is-editing-agent :is-saving="isSaving" @save="createAgent" @cancel="$router.back()" />
+    <AgentForm v-model="agent" :is-saving="isSaving" @save="createAgent" @cancel="$router.back()" />
   </Settings>
 </template>
 

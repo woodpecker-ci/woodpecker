@@ -7,12 +7,14 @@
     <AgentForm
       v-if="agent"
       v-model="agent"
-      is-editing-agent
+      is-editing
       :is-saving="isSaving"
       @save="saveAgent"
       @cancel="$router.back()"
     />
-    <!-- TODO: show loading spinner -->
+    <div v-else class="flex">
+      <Icon name="spinner" class="animate-spin" />
+    </div>
   </Settings>
 </template>
 
@@ -36,7 +38,7 @@ const route = useRoute();
 
 const agentId = computed(() => Number.parseInt(route.params.agentId.toString(), 10));
 
-const { data: agent, refetch: reloadAgent } = await useAsyncData(apiClient.getAgent, [agentId]);
+const { data: agent, refetch: reloadAgent } = useAsyncData(computed(() => () => apiClient.getAgent(agentId.value)));
 
 const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!agent.value) {

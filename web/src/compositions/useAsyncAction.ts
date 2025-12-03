@@ -1,5 +1,5 @@
 import type { MaybeRef } from 'vue';
-import { computed, ref, unref, watch } from 'vue';
+import { computed, isRef, ref, unref, watch } from 'vue';
 
 export function useAsyncAction<T extends unknown[]>(
   action: (...a: T) => void | Promise<void>,
@@ -31,9 +31,8 @@ export function useAsyncAction<T extends unknown[]>(
   };
 }
 
-export async function useAsyncData<A extends unknown[], R>(
-  action: (...a: A) => Promise<R>,
-  args: { [K in keyof A]: MaybeRef<A[K]> },
+export function useAsyncData<R>(
+  action: MaybeRef<() => Promise<R>>,
   options: { immediate?: boolean; onError?: (error: unknown) => void } = { immediate: true },
 ) {
   const isLoading = ref(false);
@@ -48,8 +47,7 @@ export async function useAsyncData<A extends unknown[], R>(
     isLoading.value = true;
     error.value = null;
     try {
-      const unwrappedArgs = args.map((a) => unref(a)) as A;
-      data.value = await action(...unwrappedArgs);
+      data.value = await unref(action)();
     } catch (_error) {
       console.error(_error);
       options.onError?.(_error);
@@ -59,10 +57,12 @@ export async function useAsyncData<A extends unknown[], R>(
     }
   }
 
-  watch(args, doFetch);
+  if (isRef(action)) {
+    watch(action, doFetch);
+  }
 
   if (options.immediate) {
-    await doFetch();
+    void doFetch();
   }
 
   return {

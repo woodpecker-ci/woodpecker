@@ -12,7 +12,7 @@
       />
     </InputField>
 
-    <template v-if="isEditingAgent">
+    <template v-if="isEditing">
       <InputField v-slot="{ id }" :label="$t('admin.settings.agents.token')">
         <TextField :id="id" v-model="agent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
       </InputField>
@@ -68,7 +68,7 @@
         :is-loading="isSaving"
         type="submit"
         color="green"
-        :text="isEditingAgent ? $t('admin.settings.agents.save') : $t('admin.settings.agents.add')"
+        :text="isEditing ? $t('admin.settings.agents.save') : $t('admin.settings.agents.add')"
       />
     </div>
   </form>
@@ -86,7 +86,7 @@ import type { Agent } from '~/lib/api/types';
 
 const props = defineProps<{
   modelValue: Partial<Agent>;
-  isEditingAgent: boolean;
+  isEditing?: boolean;
   isSaving: boolean;
 }>();
 

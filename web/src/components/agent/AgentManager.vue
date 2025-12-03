@@ -22,7 +22,7 @@
     <AgentForm
       v-else
       v-model="selectedAgent"
-      :is-editing-agent="isEditingAgent"
+      :isEditing="isEditingAgent"
       :is-saving="isSaving"
       @save="saveAgent"
       @cancel="selectedAgent = undefined"

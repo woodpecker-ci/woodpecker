@@ -190,7 +190,6 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'settings',
-        name: 'org-settings',
         component: (): Component => import('~/views/org/settings/OrgSettingsWrapper.vue'),
         meta: { authentication: 'required' },
         props: true,
