@@ -61,7 +61,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	repo, err := _store.GetRepoForgeID(forgeRemoteID)
+	repo, err := _store.GetRepoForgeID(user.ForgeID, forgeRemoteID)
 	enabledOnce := err == nil // if there's no error, the repo was found and enabled once already
 	if enabledOnce && repo.IsActive {
 		c.String(http.StatusConflict, "Repository is already active.")
@@ -87,6 +87,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
+	from.ForgeID = user.ForgeID
 	if enabledOnce {
 		repo.Update(from)
 	} else {
@@ -95,7 +96,6 @@ func PostRepo(c *gin.Context) {
 		repo.AllowPull = server.Config.Pipeline.DefaultAllowPullRequests
 		repo.AllowDeploy = false
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
-		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
 	}
 	repo.IsActive = true
 	repo.UserID = user.ID
@@ -540,6 +540,7 @@ func MoveRepo(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	from.ForgeID = repo.ForgeID
 	if !from.Perm.Admin {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -697,6 +698,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
 		return err
 	}
+	from.ForgeID = repo.ForgeID
 
 	if repo.FullName != from.FullName {
 		// create a redirection
