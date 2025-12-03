@@ -259,8 +259,24 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'agents',
-        name: 'admin-settings-agents',
-        component: (): Component => import('~/views/admin/AdminAgents.vue'),
+        component: (): Component => import('~/components/layout/RouteWrapper.vue'),
+        children: [
+          {
+            path: '',
+            name: 'admin-settings-agents',
+            component: (): Component => import('~/views/admin/agents/AdminAgents.vue'),
+          },
+          {
+            path: ':agentId',
+            name: 'admin-settings-agent',
+            component: (): Component => import('~/views/admin/agents/AdminAgent.vue'),
+          },
+          {
+            path: 'create',
+            name: 'admin-settings-agents-create',
+            component: (): Component => import('~/views/admin/agents/AdminAgentCreate.vue'),
+          },
+        ],
       },
       {
         path: 'queue',
