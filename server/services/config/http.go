@@ -67,7 +67,7 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 
 	status, err := h.client.Send(ctx, net_http.MethodPost, h.endpoint, body, response)
 	if err != nil && status != 204 {
-		return nil, fmt.Errorf("failed to fetch config via http from endpoint %s (status: %d): %w", h.endpoint, status, err)
+		return nil, fmt.Errorf("failed to fetch config via http (status: %d): %w", status, err)
 	}
 
 	// handle 204 - no new config available, return old config without error
