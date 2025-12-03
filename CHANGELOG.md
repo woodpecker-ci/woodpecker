@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-02
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -37,6 +37,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5816](https://github.com/woodpecker-ci/woodpecker/pull/5816)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.3.1 [[#5812](https://github.com/woodpecker-ci/woodpecker/pull/5812)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.3.0 [[#5807](https://github.com/woodpecker-ci/woodpecker/pull/5807)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.3 [[#5804](https://github.com/woodpecker-ci/woodpecker/pull/5804)]
@@ -60,7 +61,6 @@
 
 ### Misc
 
-- fix: Reintroduce stop all pods on workflow [[#5815](https://github.com/woodpecker-ci/woodpecker/pull/5815)]
 - Makefile: add target to generate man pages [[#5810](https://github.com/woodpecker-ci/woodpecker/pull/5810)]
 - Split make install targets [[#5796](https://github.com/woodpecker-ci/woodpecker/pull/5796)]
 - Use golangci docker image [[#5797](https://github.com/woodpecker-ci/woodpecker/pull/5797)]
