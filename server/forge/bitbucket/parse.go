@@ -36,22 +36,23 @@ const (
 	stateDeclined    = "DECLINED"
 )
 
-// parseHook parses a Bitbucket hook from an http.Request request and returns
+// parseHook parses a Bitbucket hook from an http.Request request and returns Pull Request,
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func parseHook(r *http.Request) (*internal.PullRequestHook, *model.Repo, *model.Pipeline, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	hookType := r.Header.Get(hookEvent)
 	switch hookType {
 	case hookPush:
-		return parsePushHook(payload)
+		r, pl, err := parsePushHook(payload)
+		return nil, r, pl, err
 	case hookPullCreated, hookPullUpdated, hookPullMerged, hookPullDeclined:
 		return parsePullHook(payload)
 	default:
-		return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
+		return nil, nil, nil, &types.ErrIgnoreEvent{Event: hookType}
 	}
 }
 
@@ -74,14 +75,14 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	return nil, nil, &types.ErrIgnoreEvent{Event: "push", Reason: "BB reports no Changes"}
 }
 
-// parsePullHook parses a pull request hook and returns the Repo and Pipeline
+// parsePullHook parses a pull request hook and returns the Pull Request, Repo and Pipeline
 // details.
-func parsePullHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
+func parsePullHook(payload []byte) (*internal.PullRequestHook, *model.Repo, *model.Pipeline, error) {
 	hook := internal.PullRequestHook{}
 
 	if err := json.Unmarshal(payload, &hook); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPullHook(&hook), nil
+	return &hook, convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPullHook(&hook), nil
 }

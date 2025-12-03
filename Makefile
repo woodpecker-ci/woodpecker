@@ -1,7 +1,7 @@
 # renovate: datasource=github-releases depName=mvdan/gofumpt
 GOFUMPT_VERSION := v0.9.2
 # renovate: datasource=github-releases depName=golangci/golangci-lint
-GOLANGCI_LINT_VERSION := v2.6.0
+GOLANGCI_LINT_VERSION := v2.6.2
 # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
 XGO_VERSION := go-1.25.x
 
@@ -102,7 +102,7 @@ vendor: ## Update the vendor directory
 	go mod tidy
 	go mod vendor
 
-format: install-tools ## Format source code
+format: install-gofumpt ## Format source code
 	@gofumpt -extra -w .
 
 .PHONY: clean
@@ -118,15 +118,15 @@ clean-all: clean ## Clean all artifacts
 	rm -rf docs/docs/40-cli.md docs/openapi.json
 
 .PHONY: generate
-generate: install-tools generate-openapi ## Run all code generations
+generate: install-mockery generate-openapi ## Run all code generations
 	mockery
 	CGO_ENABLED=0 go generate ./...
 
-generate-openapi: install-tools ## Run openapi code generation and format it
+generate-openapi: ## Run openapi code generation and format it
 	CGO_ENABLED=0 go run github.com/swaggo/swag/cmd/swag fmt --exclude pipeline/rpc/proto
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
-generate-license-header: install-tools
+generate-license-header: install-addlicense
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
 
 check-xgo: ## Check if xgo is installed
@@ -134,25 +134,35 @@ check-xgo: ## Check if xgo is installed
 		$(GO) install src.techknowlogick.com/xgo@latest; \
 	fi
 
-install-tools: ## Install development tools
+install-golangci-lint:
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) ; \
-	fi ; \
-	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+	fi
+
+install-gofumpt:
+	@hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION); \
-	fi ; \
-	hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+	fi
+
+install-addlicense:
+	@hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/google/addlicense@latest; \
-	fi ; \
-	hash mockery > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+	fi
+
+install-mockery:
+	@hash mockery > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/vektra/mockery/v3@latest; \
-	fi ; \
-	hash protoc-gen-go > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+	fi
+
+install-protoc-gen-go:
+	@hash protoc-gen-go > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install google.golang.org/protobuf/cmd/protoc-gen-go@latest; \
 	fi ; \
 	hash protoc-gen-go-grpc > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest; \
 	fi
+
+install-tools: install-golangci-lint install-gofumpt install-addlicense install-mockery install-protoc-gen-go ## Install development tools
 
 ui-dependencies: ## Install UI dependencies
 	(cd web/; pnpm install --frozen-lockfile)
@@ -160,7 +170,7 @@ ui-dependencies: ## Install UI dependencies
 ##@ Test
 
 .PHONY: lint
-lint: install-tools ## Lint code
+lint: install-golangci-lint ## Lint code
 	@echo "Running golangci-lint"
 	golangci-lint run
 

@@ -33,7 +33,7 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, "issue:created")
 
-		r, b, err := parseHook(req)
+		_, r, b, err := parseHook(req)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
@@ -45,7 +45,7 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullCreated)
 
-		_, _, err := parseHook(req)
+		_, _, _, err := parseHook(req)
 		assert.Error(t, err)
 	})
 
@@ -55,8 +55,9 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullCreated)
 
-		r, b, err := parseHook(req)
+		pr, r, b, err := parseHook(req)
 		assert.NoError(t, err)
+		assert.NotNil(t, pr)
 		assert.Equal(t, "user_name/repo_name", r.FullName)
 		assert.Equal(t, model.EventPull, b.Event)
 		assert.Equal(t, "d3022fc0ca3d", b.Commit)
@@ -68,8 +69,9 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullMerged)
 
-		r, b, err := parseHook(req)
+		pr, r, b, err := parseHook(req)
 		assert.NoError(t, err)
+		assert.NotNil(t, pr)
 		assert.Equal(t, "anbraten/test-2", r.FullName)
 		assert.Equal(t, model.EventPullClosed, b.Event)
 		assert.Equal(t, "006704dbeab2", b.Commit)
@@ -81,8 +83,9 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullDeclined)
 
-		r, b, err := parseHook(req)
+		pr, r, b, err := parseHook(req)
 		assert.NoError(t, err)
+		assert.NotNil(t, pr)
 		assert.Equal(t, "anbraten/test-2", r.FullName)
 		assert.Equal(t, model.EventPullClosed, b.Event)
 		assert.Equal(t, "f90e18fc9d45", b.Commit)
@@ -94,7 +97,7 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPush)
 
-		_, _, err := parseHook(req)
+		_, _, _, err := parseHook(req)
 		assert.Error(t, err)
 	})
 
@@ -104,7 +107,7 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPush)
 
-		r, b, err := parseHook(req)
+		_, r, b, err := parseHook(req)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
@@ -116,8 +119,9 @@ func Test_parseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPush)
 
-		r, b, err := parseHook(req)
+		pr, r, b, err := parseHook(req)
 		assert.NoError(t, err)
+		assert.Nil(t, pr)
 		assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 		assert.Equal(t, "https://bitbucket.org/martinherren1984/publictestrepo", r.Clone)
 		assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)

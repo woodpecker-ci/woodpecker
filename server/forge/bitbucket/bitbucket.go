@@ -50,6 +50,7 @@ type Opts struct {
 }
 
 type config struct {
+	id            int64
 	api           string
 	url           string
 	oAuthClientID string
@@ -58,8 +59,9 @@ type config struct {
 
 // New returns a new forge Configuration for integrating with the Bitbucket
 // repository hosting service at https://bitbucket.org
-func New(opts *Opts) (forge.Forge, error) {
+func New(id int64, opts *Opts) (forge.Forge, error) {
 	return &config{
+		id:            id,
 		api:           DefaultAPI,
 		url:           DefaultURL,
 		oAuthClientID: opts.OAuthClientID,
@@ -400,14 +402,35 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	repo, pl, err := parseHook(req)
+	pr, repo, pl, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	u, err := common.RepoUserForgeID(ctx, repo.ForgeRemoteID)
+	u, err := common.RepoUserForgeID(ctx, c.id, repo.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	switch pl.Event {
+	case model.EventPush:
+		// List only the latest push changes
+		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
+		if err != nil {
+			return nil, nil, err
+		}
+	case model.EventPull:
+		client := c.newClient(ctx, u)
+
+		if pr == nil {
+			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
+		}
+
+		// List all changes between source & destination branch
+		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.PullRequest.Source.Branch.Name, pr.PullRequest.Dest.Branch.Name))
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
