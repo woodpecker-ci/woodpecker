@@ -1,7 +1,7 @@
 <template>
-  <Settings :title="$t('admin.settings.agents.agents')" :description="$t('admin.settings.agents.desc')">
+  <Settings :title="$t('agents')" :description="$t('agents_server_desc')">
     <template #headerActions>
-      <Button :text="$t('admin.settings.agents.add')" start-icon="plus" :to="{ name: 'admin-settings-agent-create' }" />
+      <Button :text="$t('add_agent')" start-icon="plus" :to="{ name: 'admin-settings-agent-create' }" />
     </template>
 
     <AgentList
@@ -38,16 +38,16 @@ const { resetPage, data: agents, loading } = usePagination((page: number) => api
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (agent: Agent) => {
   // eslint-disable-next-line no-alert
-  if (!confirm(t('admin.settings.agents.delete_confirm'))) {
+  if (!confirm(t('agent_delete_confirm'))) {
     return;
   }
 
   await apiClient.deleteAgent(agent);
-  notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
+  notifications.notify({ title: t('agent_deleted'), type: 'success' });
   await resetPage();
 });
 
 useInterval(resetPage, 5 * 1000, { immediate: false });
 
-useWPTitle(computed(() => [t('admin.settings.agents.agents'), t('admin.settings.settings')]));
+useWPTitle(computed(() => [t('agents'), t('settings')]));
 </script>

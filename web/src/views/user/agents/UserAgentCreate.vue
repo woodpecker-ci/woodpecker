@@ -1,14 +1,14 @@
 <template>
-  <Settings :title="$t('admin.settings.agents.agents')" :description="$t('admin.settings.agents.desc')">
+  <Settings :title="$t('agents')" :description="$t('agents_user_desc')">
     <template #headerActions>
-      <Button :text="$t('admin.settings.agents.show')" start-icon="back" :to="{ name: 'user-settings-agents' }" />
+      <Button :text="$t('show_agents')" start-icon="back" :to="{ name: 'user-agents' }" />
     </template>
 
     <AgentForm
       v-model="agent"
       :is-saving="isSaving"
       @save="createAgent"
-      @cancel="$router.replace({ name: 'user-settings-agents' })"
+      @cancel="$router.replace({ name: 'user-agents' })"
     />
   </Settings>
 </template>
@@ -51,12 +51,12 @@ const { doSubmit: createAgent, isLoading: isSaving } = useAsyncAction(async () =
   const createdAgent = await apiClient.createOrgAgent(user.org_id, agent.value);
 
   notifications.notify({
-    title: t('admin.settings.agents.created'),
+    title: t('agent_created'),
     type: 'success',
   });
 
-  await router.push({ name: 'user-settings-agent', params: { agentId: createdAgent.id } });
+  await router.push({ name: 'user-agent', params: { agentId: createdAgent.id } });
 });
 
-useWPTitle(computed(() => [t('admin.settings.agents.agents'), t('admin.settings.settings'), t('create')]));
+useWPTitle(computed(() => [t('agents'), t('settings'), t('create')]));
 </script>

@@ -1,7 +1,7 @@
 <template>
-  <Settings :title="$t('admin.settings.agents.agents')" :description="$t('admin.settings.agents.desc')">
+  <Settings :title="$t('agents')" :description="$t('agents_org_desc')">
     <template #headerActions>
-      <Button :text="$t('admin.settings.agents.show')" start-icon="back" :to="{ name: 'org-settings-agents' }" />
+      <Button :text="$t('show_agents')" start-icon="back" :to="{ name: 'org-settings-agents' }" />
     </template>
 
     <AgentForm
@@ -63,12 +63,12 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
   await apiClient.updateOrgAgent(org.value.id, agent.value);
 
   notifications.notify({
-    title: t('admin.settings.agents.saved'),
+    title: t('agent_saved'),
     type: 'success',
   });
 
   await reloadAgent();
 });
 
-useWPTitle(computed(() => [t('admin.settings.agents.agents'), t('admin.settings.settings'), agent.value?.name ?? '']));
+useWPTitle(computed(() => [t('agents'), t('settings'), agent.value?.name ?? '']));
 </script>

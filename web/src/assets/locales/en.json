@@ -285,9 +285,6 @@
       },
       "registries": {
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
-      },
-      "agents": {
-        "desc": "Agents registered for this organization."
       }
     }
   },
@@ -302,56 +299,6 @@
       "registries": {
         "desc": "Global registry credentials can be added to use private images for all pipelines.",
         "warning": "These registry credentials are available to all users."
-      },
-      "agents": {
-        "agents": "Agents",
-        "desc": "Agents registered on this server.",
-        "none": "There are no agents yet.",
-        "id": "ID",
-        "add": "Add agent",
-        "save": "Save agent",
-        "show": "Show agents",
-        "created": "Agent created",
-        "saved": "Agent saved",
-        "deleted": "Agent deleted",
-        "name": {
-          "name": "Name",
-          "placeholder": "Name of the agent"
-        },
-        "no_schedule": {
-          "name": "Disable agent",
-          "placeholder": "Stop agent from taking new tasks"
-        },
-        "token": "Token",
-        "platform": {
-          "platform": "Platform",
-          "badge": "platform"
-        },
-        "backend": {
-          "backend": "Backend",
-          "badge": "backend"
-        },
-        "capacity": {
-          "capacity": "Capacity",
-          "desc": "The maximum amount of parallel pipelines executed by this agent.",
-          "badge": "capacity"
-        },
-        "custom_labels": {
-          "custom_labels": "Custom Labels",
-          "desc": "The custom labels set by the agent admin on agent startup."
-        },
-        "org": {
-          "badge": "org"
-        },
-        "version": "Version",
-        "last_contact": {
-          "last_contact": "Last contact",
-          "badge": "last contact"
-        },
-        "never": "Never",
-        "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
-        "edit_agent": "Edit agent",
-        "delete_agent": "Delete agent"
       },
       "queue": {
         "queue": "Queue",
@@ -448,9 +395,6 @@
         "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
-      },
-      "agents": {
-        "desc": "Agents registered to your account repos."
       }
     }
   },
@@ -589,5 +533,34 @@
   "help_translating": "You can help translate Woodpecker into your language on {0}.",
   "weblate": "our Weblate",
   "disabled": "Disabled",
-  "create": "Create"
+  "create": "Create",
+  "agents_org_desc": "Agents registered for this organization.",
+  "agents": "Agents",
+  "agents_server_desc": "Agents registered on this server.",
+  "no_agents": "There are no agents yet.",
+  "id": "ID",
+  "add_agent": "Add agent",
+  "save_agent": "Save agent",
+  "show_agents": "Show agents",
+  "agent_created": "Agent created",
+  "agent_saved": "Agent saved",
+  "agent_deleted": "Agent deleted",
+  "name": "Name",
+  "agent_name_placeholder": "Name of the agent",
+  "agent_no_schedule":  "Disable agent",
+  "agent_no_schedule_placeholder": "Stop agent from taking new tasks",
+  "token": "Token",
+  "platform": "Platform",
+  "backend": "Backend",
+  "capacity": "Capacity",
+  "capacity_desc": "The maximum amount of parallel pipelines executed by this agent.",
+  "custom_labels": "Custom Labels",
+  "custom_labels_desc": "The custom labels set by the agent admin on agent startup.",
+  "version": "Version",
+  "last_contact": "Last contact",
+  "never": "Never",
+  "agent_delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
+  "edit_agent": "Edit agent",
+  "delete_agent": "Delete agent",
+  "agents_user_desc": "Agents registered to your account repos."
 }

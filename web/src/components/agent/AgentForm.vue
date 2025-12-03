@@ -1,62 +1,60 @@
 <template>
   <form @submit.prevent="$emit('save')">
-    <InputField v-slot="{ id }" :label="$t('admin.settings.agents.name.name')">
-      <TextField :id="id" v-model="agent.name" :placeholder="$t('admin.settings.agents.name.placeholder')" required />
+    <InputField v-slot="{ id }" :label="$t('name')">
+      <TextField :id="id" v-model="agent.name" :placeholder="$t('agent_name_placeholder')" required />
     </InputField>
 
-    <InputField :label="$t('admin.settings.agents.no_schedule.name')">
+    <InputField :label="$t('agent_no_schedule')">
       <Checkbox
         :model-value="agent.no_schedule || false"
-        :label="$t('admin.settings.agents.no_schedule.placeholder')"
+        :label="$t('agent_no_schedule_placeholder')"
         @update:model-value="updateAgent({ no_schedule: $event })"
       />
     </InputField>
 
     <template v-if="isEditing">
-      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.token')">
-        <TextField :id="id" v-model="agent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
+      <InputField v-slot="{ id }" :label="$t('token')">
+        <TextField :id="id" v-model="agent.token" :placeholder="$t('token')" disabled />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.id')">
+      <InputField v-slot="{ id }" :label="$t('id')">
         <TextField :id="id" :model-value="agent.id?.toString()" disabled />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.backend.backend')" :docs-url="backendDocsUrl">
+      <InputField v-slot="{ id }" :label="$t('backend')" :docs-url="backendDocsUrl">
         <TextField :id="id" v-model="agent.backend" disabled />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.platform.platform')">
+      <InputField v-slot="{ id }" :label="$t('platform')">
         <TextField :id="id" v-model="agent.platform" disabled />
       </InputField>
 
       <InputField
         v-if="agent.custom_labels && Object.keys(agent.custom_labels).length > 0"
         v-slot="{ id }"
-        :label="$t('admin.settings.agents.custom_labels.custom_labels')"
+        :label="$t('custom_labels')"
       >
-        <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.custom_labels.desc') }}</span>
+        <span class="text-wp-text-alt-100">{{ $t('custom_labels_desc') }}</span>
         <TextField :id="id" :model-value="formatCustomLabels(agent.custom_labels)" disabled />
       </InputField>
 
       <InputField
         v-slot="{ id }"
-        :label="$t('admin.settings.agents.capacity.capacity')"
+        :label="$t('capacity')"
         docs-url="docs/administration/configuration/agent#max_workflows"
       >
-        <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.capacity.desc') }}</span>
+        <span class="text-wp-text-alt-100">{{ $t('capacity_desc') }}</span>
         <TextField :id="id" :model-value="agent.capacity?.toString()" disabled />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.version')">
+      <InputField v-slot="{ id }" :label="$t('version')">
         <TextField :id="id" :model-value="agent.version" disabled />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.last_contact.last_contact')">
+      <InputField v-slot="{ id }" :label="$t('last_contact')">
         <TextField
           :id="id"
-          :model-value="
-            agent.last_contact ? date.timeAgo(agent.last_contact * 1000) : $t('admin.settings.agents.never')
-          "
+          :model-value="agent.last_contact ? date.timeAgo(agent.last_contact * 1000) : $t('never')"
           disabled
         />
       </InputField>
@@ -68,7 +66,7 @@
         :is-loading="isSaving"
         type="submit"
         color="green"
-        :text="isEditing ? $t('admin.settings.agents.save') : $t('admin.settings.agents.add')"
+        :text="isEditing ? $t('save_agent') : $t('add_agent')"
       />
     </div>
   </form>
