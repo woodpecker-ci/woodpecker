@@ -1,7 +1,7 @@
 <template>
   <Settings :title="$t('admin.settings.agents.agents')" :description="$t('admin.settings.agents.desc')">
     <template #headerActions>
-      <Button :text="$t('admin.settings.agents.add')" start-icon="plus" :to="{ name: 'admin-settings-agent-create' }" />
+      <Button :text="$t('admin.settings.agents.add')" start-icon="plus" :to="{ name: 'org-settings-agent-create' }" />
     </template>
 
     <AgentList
@@ -9,7 +9,7 @@
       :agents="agents"
       :is-deleting="isDeleting"
       is-admin
-      @edit="$router.push({ name: 'admin-settings-agent', params: { agentId: $event.id } })"
+      @edit="$router.push({ name: 'org-settings-agent', params: { agentId: $event.id } })"
       @delete="deleteAgent"
     />
   </Settings>
@@ -24,6 +24,7 @@ import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import { useInterval } from '~/compositions/useInterval';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
@@ -34,7 +35,13 @@ const notifications = useNotifications();
 const { t } = useI18n();
 const apiClient = useApiClient();
 
-const { resetPage, data: agents, loading } = usePagination((page: number) => apiClient.getAgents({ page }));
+const org = requiredInject('org');
+
+const {
+  resetPage,
+  data: agents,
+  loading,
+} = usePagination((page: number) => apiClient.getOrgAgents(org.value.id, { page }));
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (agent: Agent) => {
   // eslint-disable-next-line no-alert
@@ -42,7 +49,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (a
     return;
   }
 
-  await apiClient.deleteAgent(agent);
+  await apiClient.deleteOrgAgent(org.value.id, agent);
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
   await resetPage();
 });

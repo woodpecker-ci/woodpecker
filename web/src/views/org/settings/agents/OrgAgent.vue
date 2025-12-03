@@ -1,7 +1,7 @@
 <template>
   <Settings :title="$t('admin.settings.agents.agents')" :description="$t('admin.settings.agents.desc')">
     <template #headerActions>
-      <Button :text="$t('admin.settings.agents.show')" start-icon="back" :to="{ name: 'admin-settings-agents' }" />
+      <Button :text="$t('admin.settings.agents.show')" start-icon="back" :to="{ name: 'org-settings-agents' }" />
     </template>
 
     <AgentForm
@@ -10,7 +10,7 @@
       is-editing
       :is-saving="isSaving"
       @save="saveAgent"
-      @cancel="$router.replace({ name: 'admin-settings-agents' })"
+      @cancel="$router.push({ name: 'org-settings-agents' })"
     />
     <div v-else class="flex justify-center">
       <Icon name="spinner" class="animate-spin" />
@@ -29,6 +29,7 @@ import Icon from '~/components/atomic/Icon.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction, useAsyncData } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Agent } from '~/lib/api/types';
@@ -37,6 +38,8 @@ const notifications = useNotifications();
 const { t } = useI18n();
 const apiClient = useApiClient();
 const route = useRoute();
+
+const org = requiredInject('org');
 
 const agentId = computed(() => Number.parseInt(route.params.agentId.toString(), 10));
 
@@ -57,7 +60,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     throw new Error("Unexpected: Can't get agent");
   }
 
-  await apiClient.updateAgent(agent.value);
+  await apiClient.updateOrgAgent(org.value.id, agent.value);
 
   notifications.notify({
     title: t('admin.settings.agents.saved'),

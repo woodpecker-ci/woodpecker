@@ -1,14 +1,14 @@
 <template>
   <Settings :title="$t('admin.settings.agents.agents')" :description="$t('admin.settings.agents.desc')">
     <template #headerActions>
-      <Button :text="$t('admin.settings.agents.show')" start-icon="back" :to="{ name: 'admin-settings-agents' }" />
+      <Button :text="$t('admin.settings.agents.show')" start-icon="back" :to="{ name: 'org-settings-agents' }" />
     </template>
 
     <AgentForm
       v-model="agent"
       :is-saving="isSaving"
       @save="createAgent"
-      @cancel="$router.replace({ name: 'admin-settings-agents' })"
+      @cancel="$router.replace({ name: 'org-settings-agents' })"
     />
   </Settings>
 </template>
@@ -23,6 +23,7 @@ import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Agent } from '~/lib/api/types';
@@ -37,19 +38,21 @@ const agent = ref<Partial<Agent>>({
   no_schedule: false,
 });
 
+const org = requiredInject('org');
+
 const { doSubmit: createAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!agent.value) {
     throw new Error("Unexpected: Can't get agent");
   }
 
-  const createdAgent = await apiClient.createAgent(agent.value);
+  const createdAgent = await apiClient.createOrgAgent(org.value.id, agent.value);
 
   notifications.notify({
     title: t('admin.settings.agents.created'),
     type: 'success',
   });
 
-  await router.replace({ name: 'admin-settings-agent', params: { agentId: createdAgent.id } });
+  await router.replace({ name: 'org-settings-agent', params: { agentId: createdAgent.id } });
 });
 
 useWPTitle(computed(() => [t('admin.settings.agents.agents'), t('admin.settings.settings'), t('create')]));

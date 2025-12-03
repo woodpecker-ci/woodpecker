@@ -213,9 +213,24 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'agents',
-            name: 'org-settings-agents',
-            component: (): Component => import('~/views/org/settings/OrgAgents.vue'),
-            props: true,
+            component: (): Component => import('~/components/layout/RouteWrapper.vue'),
+            children: [
+              {
+                path: '',
+                name: 'org-settings-agents',
+                component: (): Component => import('~/views/org/settings/agents/OrgAgents.vue'),
+              },
+              {
+                path: ':agentId',
+                name: 'org-settings-agent',
+                component: (): Component => import('~/views/org/settings/agents/OrgAgent.vue'),
+              },
+              {
+                path: 'create',
+                name: 'org-settings-agent-create',
+                component: (): Component => import('~/views/org/settings/agents/OrgAgentCreate.vue'),
+              },
+            ],
           },
         ],
       },
@@ -277,7 +292,7 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'create',
-            name: 'admin-settings-agents-create',
+            name: 'admin-settings-agent-create',
             component: (): Component => import('~/views/admin/agents/AdminAgentCreate.vue'),
           },
         ],
@@ -344,9 +359,24 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'agents',
-        name: 'user-agents',
-        component: (): Component => import('~/views/user/UserAgents.vue'),
-        props: true,
+        component: (): Component => import('~/components/layout/RouteWrapper.vue'),
+        children: [
+          {
+            path: '',
+            name: 'user-agents',
+            component: (): Component => import('~/views/user/agents/UserAgents.vue'),
+          },
+          {
+            path: ':agentId',
+            name: 'user-agent',
+            component: (): Component => import('~/views/user/agents/UserAgent.vue'),
+          },
+          {
+            path: 'create',
+            name: 'user-agent-create',
+            component: (): Component => import('~/views/user/agents/UserAgentCreate.vue'),
+          },
+        ],
       },
     ],
   },
