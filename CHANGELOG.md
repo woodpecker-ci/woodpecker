@@ -61,6 +61,7 @@
 
 ### Misc
 
+- Extract interval into composition [[#5818](https://github.com/woodpecker-ci/woodpecker/pull/5818)]
 - Fix outdated Makefile target [[#5817](https://github.com/woodpecker-ci/woodpecker/pull/5817)]
 - Makefile: add target to generate man pages [[#5810](https://github.com/woodpecker-ci/woodpecker/pull/5810)]
 - Split make install targets [[#5796](https://github.com/woodpecker-ci/woodpecker/pull/5796)]
