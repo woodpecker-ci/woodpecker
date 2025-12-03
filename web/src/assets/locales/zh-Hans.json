@@ -202,7 +202,7 @@
         "branches": "分支",
         "deploy_pipeline": {
             "enter_target": "目标部署环境",
-            "title": "触发当前流水线 #{pipelineId} 的部署事件",
+            "title": "触发当前流水线 #{pipelineId} 的部署",
             "trigger": "部署",
             "variables": {
                 "add": "添加变量",
@@ -676,5 +676,6 @@
     "forge_delete_confirm": "您真的想要删除这个仓库吗？这将也会删除与此仓库相关的所有仓库、用户和管道。",
     "no_forges": "还没有配置任何代码托管平台.",
     "developer_settings": "开发者设置",
-    "delete_forge": "删除代码托管平台"
+    "delete_forge": "删除代码托管平台",
+    "login_to_woodpecker_with": "登录 Woodpecker 使用"
 }

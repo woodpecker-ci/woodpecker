@@ -233,7 +233,7 @@ build-tarball: ## Build tar archive
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
 
-release-frontend: build-frontend ## Build frontend
+release-frontend: build-ui ## Build frontend
 
 cross-compile-server: ## Cross compile the server
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
@@ -370,5 +370,21 @@ generate-docs: ## Generate docs (currently only for the cli)
 .PHONY: build-docs
 build-docs: generate-docs docs-dependencies ## Build the docs
 	(cd docs/; pnpm build)
+
+##@ Man Pages
+.PHONY: man-cli
+man-cli: ## Generate man pages for cli
+	mkdir -p dist/ && CGO_ENABLED=0 go run -tags man cmd/cli/man.go cmd/cli/app.go > dist/woodpecker-cli.man.1 && gzip -9 -f dist/woodpecker-cli.man.1
+
+.PHONY: man-agent
+man-agent: ## Generate man pages for agent
+	mkdir -p dist/ && CGO_ENABLED=0 go run -tags man cmd/agent/man.go > dist/woodpecker-agent.man.1 && gzip -9 -f dist/woodpecker-agent.man.1
+
+.PHONY: man-server
+man-server: ## Generate man pages for server
+	mkdir -p dist/ && CGO_ENABLED=0 go run -tags man go.woodpecker-ci.org/woodpecker/v3/cmd/server > dist/woodpecker-server.man.1 && gzip -9 -f dist/woodpecker-server.man.1
+
+.PHONY: man
+man: man-cli man-agent man-server ## Generate all man pages
 
 endif

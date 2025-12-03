@@ -54,7 +54,7 @@ type Opts struct {
 }
 
 type client struct {
-	id                           int64
+	forgeID                      int64
 	url                          string
 	urlAPI                       string
 	clientID                     string
@@ -69,7 +69,7 @@ type client struct {
 // the on-premise edition of Bitbucket Cloud, formerly known as Stash.
 func New(id int64, opts Opts) (forge.Forge, error) {
 	config := &client{
-		id:                           id,
+		forgeID:                      id,
 		url:                          opts.URL,
 		urlAPI:                       fmt.Sprintf("%s/rest", opts.URL),
 		clientID:                     opts.OAuthClientID,
@@ -543,7 +543,7 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 		return nil, nil, fmt.Errorf("unable to get store from context")
 	}
 
-	repo, err := _store.GetRepoForgeID(c.id, r.ForgeRemoteID)
+	repo, err := _store.GetRepoForgeID(c.forgeID, r.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to get repo: %w", err)
 	}
