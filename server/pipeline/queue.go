@@ -20,13 +20,13 @@ import (
 	"fmt"
 	"maps"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*builder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if !item.Pending {
@@ -63,7 +63,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
 }
 
-func getTaskDependencies(dependsOn []string, items []*stepbuilder.Item) (taskIDs []string) {
+func getTaskDependencies(dependsOn []string, items []*builder.Item) (taskIDs []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range items {
 			if pipelineItem.Workflow.Name == dep {

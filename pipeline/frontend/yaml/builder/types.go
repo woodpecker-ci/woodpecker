@@ -1,4 +1,4 @@
-package stepbuilder
+package builder
 
 import (
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"

@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
@@ -44,7 +44,7 @@ func NewServerMetadata(forge metadata.ServerForge, repo *model.Repo, pipeline, p
 }
 
 // GetWorkflowMetadata return the metadata from a pipeline will run with.
-func (s *ServerMetadata) GetWorkflowMetadata(workflow *stepbuilder.Workflow) metadata.Metadata {
+func (s *ServerMetadata) GetWorkflowMetadata(workflow *builder.Workflow) metadata.Metadata {
 	host := s.sysURL
 	uri, err := url.Parse(s.sysURL)
 	if err == nil {

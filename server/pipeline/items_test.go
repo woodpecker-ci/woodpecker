@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -30,8 +30,8 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 		ID: 1,
 	}
 
-	pipelineItems := []*stepbuilder.Item{{
-		Workflow: &stepbuilder.Workflow{
+	pipelineItems := []*builder.Item{{
+		Workflow: &builder.Workflow{
 			ID:  1,
 			PID: 1,
 		},
@@ -58,7 +58,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	s := store_mocks.NewMockStore(t)
 	s.On("WorkflowLoad", mock.Anything).Return(workflow, nil)
 
-	pipeline = applyWorkflowsFromStepBuilder(s, pipeline, pipelineItems)
+	pipeline = applyWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems)
 	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}

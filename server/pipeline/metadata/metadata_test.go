@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -35,7 +35,7 @@ func TestGetWorkflowMetadata(t *testing.T) {
 		forge            metadata.ServerForge
 		repo             *model.Repo
 		pipeline, prev   *model.Pipeline
-		workflow         *stepbuilder.Workflow
+		workflow         *builder.Workflow
 		sysURL           string
 		expectedMetadata metadata.Metadata
 		expectedEnviron  map[string]string
@@ -61,7 +61,7 @@ func TestGetWorkflowMetadata(t *testing.T) {
 			repo:     &model.Repo{FullName: "testUser/testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
 			pipeline: &model.Pipeline{Number: 3, ChangedFiles: []string{"test.go", "markdown file.md"}},
 			prev:     &model.Pipeline{Number: 2},
-			workflow: &stepbuilder.Workflow{Name: "hello"},
+			workflow: &builder.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
 				Forge: metadata.Forge{Type: "gitea", URL: "https://gitea.com"},

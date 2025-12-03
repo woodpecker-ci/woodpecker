@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package builder
 
 import (
 	"fmt"
@@ -37,8 +37,8 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 )
 
-// StepBuilder Takes the hook data and the yaml and returns the internal data model.
-type StepBuilder struct {
+// PipelineBuilder Takes the yaml configs and some metadata and returns the internal data model to execute a pipeline.
+type PipelineBuilder struct {
 	Yamls               []*forge_types.FileMeta
 	Envs                map[string]string
 	DefaultLabels       map[string]string
@@ -49,7 +49,7 @@ type StepBuilder struct {
 	GetWorkflowMetadata func(workflow *Workflow) metadata.Metadata
 }
 
-func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
+func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	b.Yamls = forge_types.SortByName(b.Yamls)
 
 	pidSequence := 1
@@ -66,8 +66,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 		for i, axis := range axes {
 			workflow := &Workflow{
-				PID: pidSequence,
-				// State:   model.StatusPending,
+				PID:     pidSequence,
 				Environ: axis,
 				Name:    SanitizePath(y.Name),
 			}
@@ -95,14 +94,14 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	items = filterItemsWithMissingDependencies(items)
 
 	// check if at least one step can start if slice is not empty
-	if len(items) > 0 && !workflowListContainsItemsToRun(items) {
+	if len(items) > 0 {
 		return nil, fmt.Errorf("pipeline has no steps to run")
 	}
 
 	return items, errorsAndWarnings
 }
 
-func (b *StepBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
+func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
 	workflowMetadata := b.GetWorkflowMetadata(workflow)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
@@ -208,23 +207,13 @@ func (b *StepBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, d
 	return item, errorsAndWarnings
 }
 
-func workflowListContainsItemsToRun(items []*Item) bool {
-	// for i := range items {
-	// 	if items[i].Workflow.State == model.StatusPending {
-	// 		return true
-	// 	}
-	// }
-	// return false
-	return true // TODO: is this util even necessary
-}
-
-func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
+func (b *PipelineBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	maps.Copy(environ, axis)
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
+func (b *PipelineBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	options := []compiler.Option{}
 	options = append(options,
 		compiler.WithEnviron(environ),
