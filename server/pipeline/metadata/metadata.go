@@ -19,8 +19,8 @@ import (
 	"net/url"
 	"strings"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )

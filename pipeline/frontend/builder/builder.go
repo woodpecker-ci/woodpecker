@@ -34,12 +34,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
-	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 )
 
 // PipelineBuilder Takes the yaml configs and some metadata and returns the internal data model to execute a pipeline.
 type PipelineBuilder struct {
-	Yamls               []*forge_types.FileMeta
+	Yamls               []*YamlFile
 	Envs                map[string]string
 	DefaultLabels       map[string]string
 	RepoTrusted         *metadata.TrustedConfiguration
@@ -50,7 +49,7 @@ type PipelineBuilder struct {
 }
 
 func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
-	b.Yamls = forge_types.SortByName(b.Yamls)
+	b.Yamls = SortYamlFilesByName(b.Yamls)
 
 	pidSequence := 1
 

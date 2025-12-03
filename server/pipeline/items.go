@@ -23,8 +23,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	pipeline_metadata "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -34,7 +34,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
@@ -95,6 +95,14 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	maps.Copy(envs, currentPipeline.AdditionalVariables)
 
 	serverMetadata := metadata.NewServerMetadata(forge, repo, currentPipeline, prev, server.Config.Server.Host)
+
+	yamls := make([]*builder.YamlFile, 0, len(forgeYamls))
+	for _, forgeYaml := range forgeYamls {
+		yamls = append(yamls, &builder.YamlFile{
+			Name: forgeYaml.Name,
+			Data: forgeYaml.Data,
+		})
+	}
 
 	b := builder.PipelineBuilder{
 		GetWorkflowMetadata: serverMetadata.GetWorkflowMetadata,
@@ -160,7 +168,7 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 }
 
 // applyWorkflowsFromPipelineBuilder is the link between pipeline representation in "pipeline package" and server
-// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
+// to be specific this func currently is used to convert the pipeline.Item list (crafted by PipelineBuilder.Build()) into
 // a pipeline that can be stored in the database by the server.
 func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) *model.Pipeline {
 	var pidSequence int

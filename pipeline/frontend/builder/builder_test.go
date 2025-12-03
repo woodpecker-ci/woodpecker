@@ -23,7 +23,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
-	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {
@@ -38,7 +37,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 			"IMAGE": "scratch",
 		},
 		RepoTrusted: &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -67,7 +66,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 			"NO_IMAGE": "scratch",
 		},
 		RepoTrusted: &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -92,7 +91,7 @@ func TestMultilineEnvsubst(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -128,7 +127,7 @@ func TestMultiPipeline(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -161,7 +160,7 @@ func TestDependsOn(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Name: "lint", Data: []byte(`
 when:
   event: push
@@ -217,7 +216,7 @@ func TestRunsOn(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -249,7 +248,7 @@ func TestPipelineName(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 when:
   event: push
@@ -286,7 +285,7 @@ func TestBranchFilter(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -320,7 +319,7 @@ func TestRootWhenFilter(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event:
@@ -358,7 +357,7 @@ func TestZeroSteps(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -387,7 +386,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Name: "zerostep", Data: []byte(`
 when:
   event: push
@@ -478,7 +477,7 @@ func TestMatrix(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -517,7 +516,7 @@ func TestMissingWorkflowDeps(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{
 				Name: "workflow-with-missing-deps",
 				Data: []byte(`
@@ -546,7 +545,7 @@ func TestInvalidYAML(t *testing.T) {
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Name: "broken-yaml", Data: []byte(`
 when:
   event: push
@@ -578,7 +577,7 @@ func TestEnvVarPrecedence(t *testing.T) {
 			"ANOTHER_CUSTOM": "global-value-2",
 		},
 		RepoTrusted: &metadata.TrustedConfiguration{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -615,7 +614,7 @@ func TestLabelMerging(t *testing.T) {
 			"default-label": "default-value",
 			"override-me":   "default",
 		},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -663,7 +662,7 @@ func TestCompilerOptions(t *testing.T) {
 				"KEY": "VALUE",
 			}),
 		},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 skip_clone: true
 when:

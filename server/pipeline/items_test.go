@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/builder"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"

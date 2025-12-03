@@ -28,15 +28,6 @@ func SanitizePath(path string) string {
 	return path
 }
 
-func stepListContainsItemsToRun(items []*Item) bool {
-	for i := range items {
-		if items[i].Pending {
-			return true
-		}
-	}
-	return false
-}
-
 func filterItemsWithMissingDependencies(items []*Item) []*Item {
 	itemsToRemove := make([]*Item, 0)
 
