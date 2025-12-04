@@ -1,0 +1,84 @@
+# -------------- Build frontend --------------
+FROM --platform=$BUILDPLATFORM docker.io/node:24-alpine AS web-build
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /src
+
+COPY web/package.json web/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY web/ ./
+RUN pnpm build
+
+# -------------- Prepare user --------------
+
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.25 AS prepare
+
+RUN groupadd -g 1000 woodpecker && \
+    useradd -u 1000 -g 1000 woodpecker && \
+    mkdir -p /var/lib/woodpecker && \
+    chown -R woodpecker:woodpecker /var/lib/woodpecker
+
+# -------------- Build backend --------------
+
+FROM --platform=$BUILDPLATFORM docker.io/techknowlogick/xgo:go-1.25.x AS build
+
+ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
+ARG TAGS="sqlite sqlite_unlock_notify"
+ARG VERSION="next"
+
+WORKDIR /src
+COPY . .
+COPY --from=web-build /src/dist ./web/dist
+
+RUN xgo -go go-1.25.x \
+    -dest /build \
+    -tags "netgo osusergo grpcnotrace ${TAGS}" \
+    -ldflags '-linkmode external -X go.woodpecker-ci.org/woodpecker/v3/version.Version=${VERSION} -s -w -extldflags "-static"' \
+    -targets "${TARGETOS}/${TARGETARCH}" \
+    -out woodpecker-server \
+    -pkg cmd/server . && \
+    ls -la /build/
+
+# -------------- Alpine final image --------------
+FROM docker.io/alpine:3.22 AS alpine-final
+ARG TARGETOS TARGETARCH
+
+RUN apk add -U --no-cache ca-certificates && \
+    adduser -u 1000 -g 1000 woodpecker -D && \
+    mkdir -p /var/lib/woodpecker && \
+    chown -R woodpecker:woodpecker /var/lib/woodpecker
+
+# from here both final images are identical
+ENV GODEBUG=netdns=go \
+    WOODPECKER_IN_CONTAINER=true \
+    XDG_CACHE_HOME=/var/lib/woodpecker \
+    XDG_DATA_HOME=/var/lib/woodpecker
+
+EXPOSE 8000 9000 80 443
+COPY --from=build /build/woodpecker-server-* /bin/woodpecker-server
+USER woodpecker
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
+ENTRYPOINT ["/bin/woodpecker-server"]
+
+# -------------- Scratch final image --------------
+FROM scratch AS final
+ARG TARGETOS TARGETARCH
+
+COPY --from=prepare /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=prepare /etc/passwd /etc/passwd
+COPY --from=prepare /etc/group /etc/group
+COPY --from=prepare --chown=woodpecker:woodpecker /var/lib/woodpecker /var/lib/woodpecker
+
+# from here both final images are identical
+ENV GODEBUG=netdns=go \
+    WOODPECKER_IN_CONTAINER=true \
+    XDG_CACHE_HOME=/var/lib/woodpecker \
+    XDG_DATA_HOME=/var/lib/woodpecker
+
+EXPOSE 8000 9000 80 443
+COPY --from=build /build/woodpecker-server-* /bin/woodpecker-server
+USER woodpecker
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
+ENTRYPOINT ["/bin/woodpecker-server"]
