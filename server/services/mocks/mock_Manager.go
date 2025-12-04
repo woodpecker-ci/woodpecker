@@ -12,6 +12,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/environment"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/parameter"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
 )
@@ -324,6 +325,59 @@ func (_c *MockManager_ForgeFromUser_Call) Return(forge1 forge.Forge, err error) 
 }
 
 func (_c *MockManager_ForgeFromUser_Call) RunAndReturn(run func(user *model.User) (forge.Forge, error)) *MockManager_ForgeFromUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParameterServiceFromRepo provides a mock function for the type MockManager
+func (_mock *MockManager) ParameterServiceFromRepo(repo *model.Repo) parameter.Service {
+	ret := _mock.Called(repo)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterServiceFromRepo")
+	}
+
+	var r0 parameter.Service
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo) parameter.Service); ok {
+		r0 = returnFunc(repo)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(parameter.Service)
+		}
+	}
+	return r0
+}
+
+// MockManager_ParameterServiceFromRepo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterServiceFromRepo'
+type MockManager_ParameterServiceFromRepo_Call struct {
+	*mock.Call
+}
+
+// ParameterServiceFromRepo is a helper method to define mock.On call
+//   - repo *model.Repo
+func (_e *MockManager_Expecter) ParameterServiceFromRepo(repo interface{}) *MockManager_ParameterServiceFromRepo_Call {
+	return &MockManager_ParameterServiceFromRepo_Call{Call: _e.mock.On("ParameterServiceFromRepo", repo)}
+}
+
+func (_c *MockManager_ParameterServiceFromRepo_Call) Run(run func(repo *model.Repo)) *MockManager_ParameterServiceFromRepo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockManager_ParameterServiceFromRepo_Call) Return(service parameter.Service) *MockManager_ParameterServiceFromRepo_Call {
+	_c.Call.Return(service)
+	return _c
+}
+
+func (_c *MockManager_ParameterServiceFromRepo_Call) RunAndReturn(run func(repo *model.Repo) parameter.Service) *MockManager_ParameterServiceFromRepo_Call {
 	_c.Call.Return(run)
 	return _c
 }

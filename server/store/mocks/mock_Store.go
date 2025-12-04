@@ -4207,6 +4207,506 @@ func (_c *MockStore_OrgUpdate_Call) RunAndReturn(run func(org *model.Org) error)
 	return _c
 }
 
+// ParameterCreate provides a mock function for the type MockStore
+func (_mock *MockStore) ParameterCreate(repo *model.Repo, parameter *model.Parameter) error {
+	ret := _mock.Called(repo, parameter)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterCreate")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Parameter) error); ok {
+		r0 = returnFunc(repo, parameter)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_ParameterCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterCreate'
+type MockStore_ParameterCreate_Call struct {
+	*mock.Call
+}
+
+// ParameterCreate is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - parameter *model.Parameter
+func (_e *MockStore_Expecter) ParameterCreate(repo interface{}, parameter interface{}) *MockStore_ParameterCreate_Call {
+	return &MockStore_ParameterCreate_Call{Call: _e.mock.On("ParameterCreate", repo, parameter)}
+}
+
+func (_c *MockStore_ParameterCreate_Call) Run(run func(repo *model.Repo, parameter *model.Parameter)) *MockStore_ParameterCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 *model.Parameter
+		if args[1] != nil {
+			arg1 = args[1].(*model.Parameter)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ParameterCreate_Call) Return(err error) *MockStore_ParameterCreate_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_ParameterCreate_Call) RunAndReturn(run func(repo *model.Repo, parameter *model.Parameter) error) *MockStore_ParameterCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParameterDelete provides a mock function for the type MockStore
+func (_mock *MockStore) ParameterDelete(repo *model.Repo, s string) error {
+	ret := _mock.Called(repo, s)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterDelete")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) error); ok {
+		r0 = returnFunc(repo, s)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_ParameterDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterDelete'
+type MockStore_ParameterDelete_Call struct {
+	*mock.Call
+}
+
+// ParameterDelete is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - s string
+func (_e *MockStore_Expecter) ParameterDelete(repo interface{}, s interface{}) *MockStore_ParameterDelete_Call {
+	return &MockStore_ParameterDelete_Call{Call: _e.mock.On("ParameterDelete", repo, s)}
+}
+
+func (_c *MockStore_ParameterDelete_Call) Run(run func(repo *model.Repo, s string)) *MockStore_ParameterDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ParameterDelete_Call) Return(err error) *MockStore_ParameterDelete_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_ParameterDelete_Call) RunAndReturn(run func(repo *model.Repo, s string) error) *MockStore_ParameterDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParameterDeleteByID provides a mock function for the type MockStore
+func (_mock *MockStore) ParameterDeleteByID(repo *model.Repo, n int64) error {
+	ret := _mock.Called(repo, n)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterDeleteByID")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, int64) error); ok {
+		r0 = returnFunc(repo, n)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_ParameterDeleteByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterDeleteByID'
+type MockStore_ParameterDeleteByID_Call struct {
+	*mock.Call
+}
+
+// ParameterDeleteByID is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - n int64
+func (_e *MockStore_Expecter) ParameterDeleteByID(repo interface{}, n interface{}) *MockStore_ParameterDeleteByID_Call {
+	return &MockStore_ParameterDeleteByID_Call{Call: _e.mock.On("ParameterDeleteByID", repo, n)}
+}
+
+func (_c *MockStore_ParameterDeleteByID_Call) Run(run func(repo *model.Repo, n int64)) *MockStore_ParameterDeleteByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ParameterDeleteByID_Call) Return(err error) *MockStore_ParameterDeleteByID_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_ParameterDeleteByID_Call) RunAndReturn(run func(repo *model.Repo, n int64) error) *MockStore_ParameterDeleteByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParameterFind provides a mock function for the type MockStore
+func (_mock *MockStore) ParameterFind(repo *model.Repo, s string) (*model.Parameter, error) {
+	ret := _mock.Called(repo, s)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterFind")
+	}
+
+	var r0 *model.Parameter
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) (*model.Parameter, error)); ok {
+		return returnFunc(repo, s)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) *model.Parameter); ok {
+		r0 = returnFunc(repo, s)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Parameter)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, string) error); ok {
+		r1 = returnFunc(repo, s)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_ParameterFind_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterFind'
+type MockStore_ParameterFind_Call struct {
+	*mock.Call
+}
+
+// ParameterFind is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - s string
+func (_e *MockStore_Expecter) ParameterFind(repo interface{}, s interface{}) *MockStore_ParameterFind_Call {
+	return &MockStore_ParameterFind_Call{Call: _e.mock.On("ParameterFind", repo, s)}
+}
+
+func (_c *MockStore_ParameterFind_Call) Run(run func(repo *model.Repo, s string)) *MockStore_ParameterFind_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ParameterFind_Call) Return(parameter *model.Parameter, err error) *MockStore_ParameterFind_Call {
+	_c.Call.Return(parameter, err)
+	return _c
+}
+
+func (_c *MockStore_ParameterFind_Call) RunAndReturn(run func(repo *model.Repo, s string) (*model.Parameter, error)) *MockStore_ParameterFind_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParameterFindByID provides a mock function for the type MockStore
+func (_mock *MockStore) ParameterFindByID(repo *model.Repo, n int64) (*model.Parameter, error) {
+	ret := _mock.Called(repo, n)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterFindByID")
+	}
+
+	var r0 *model.Parameter
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, int64) (*model.Parameter, error)); ok {
+		return returnFunc(repo, n)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, int64) *model.Parameter); ok {
+		r0 = returnFunc(repo, n)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Parameter)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, int64) error); ok {
+		r1 = returnFunc(repo, n)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_ParameterFindByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterFindByID'
+type MockStore_ParameterFindByID_Call struct {
+	*mock.Call
+}
+
+// ParameterFindByID is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - n int64
+func (_e *MockStore_Expecter) ParameterFindByID(repo interface{}, n interface{}) *MockStore_ParameterFindByID_Call {
+	return &MockStore_ParameterFindByID_Call{Call: _e.mock.On("ParameterFindByID", repo, n)}
+}
+
+func (_c *MockStore_ParameterFindByID_Call) Run(run func(repo *model.Repo, n int64)) *MockStore_ParameterFindByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ParameterFindByID_Call) Return(parameter *model.Parameter, err error) *MockStore_ParameterFindByID_Call {
+	_c.Call.Return(parameter, err)
+	return _c
+}
+
+func (_c *MockStore_ParameterFindByID_Call) RunAndReturn(run func(repo *model.Repo, n int64) (*model.Parameter, error)) *MockStore_ParameterFindByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParameterFindByNameAndBranch provides a mock function for the type MockStore
+func (_mock *MockStore) ParameterFindByNameAndBranch(repo *model.Repo, s string, s1 string) (*model.Parameter, error) {
+	ret := _mock.Called(repo, s, s1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterFindByNameAndBranch")
+	}
+
+	var r0 *model.Parameter
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string, string) (*model.Parameter, error)); ok {
+		return returnFunc(repo, s, s1)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string, string) *model.Parameter); ok {
+		r0 = returnFunc(repo, s, s1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Parameter)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, string, string) error); ok {
+		r1 = returnFunc(repo, s, s1)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_ParameterFindByNameAndBranch_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterFindByNameAndBranch'
+type MockStore_ParameterFindByNameAndBranch_Call struct {
+	*mock.Call
+}
+
+// ParameterFindByNameAndBranch is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - s string
+//   - s1 string
+func (_e *MockStore_Expecter) ParameterFindByNameAndBranch(repo interface{}, s interface{}, s1 interface{}) *MockStore_ParameterFindByNameAndBranch_Call {
+	return &MockStore_ParameterFindByNameAndBranch_Call{Call: _e.mock.On("ParameterFindByNameAndBranch", repo, s, s1)}
+}
+
+func (_c *MockStore_ParameterFindByNameAndBranch_Call) Run(run func(repo *model.Repo, s string, s1 string)) *MockStore_ParameterFindByNameAndBranch_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ParameterFindByNameAndBranch_Call) Return(parameter *model.Parameter, err error) *MockStore_ParameterFindByNameAndBranch_Call {
+	_c.Call.Return(parameter, err)
+	return _c
+}
+
+func (_c *MockStore_ParameterFindByNameAndBranch_Call) RunAndReturn(run func(repo *model.Repo, s string, s1 string) (*model.Parameter, error)) *MockStore_ParameterFindByNameAndBranch_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParameterList provides a mock function for the type MockStore
+func (_mock *MockStore) ParameterList(repo *model.Repo) ([]*model.Parameter, error) {
+	ret := _mock.Called(repo)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterList")
+	}
+
+	var r0 []*model.Parameter
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo) ([]*model.Parameter, error)); ok {
+		return returnFunc(repo)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo) []*model.Parameter); ok {
+		r0 = returnFunc(repo)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Parameter)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo) error); ok {
+		r1 = returnFunc(repo)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_ParameterList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterList'
+type MockStore_ParameterList_Call struct {
+	*mock.Call
+}
+
+// ParameterList is a helper method to define mock.On call
+//   - repo *model.Repo
+func (_e *MockStore_Expecter) ParameterList(repo interface{}) *MockStore_ParameterList_Call {
+	return &MockStore_ParameterList_Call{Call: _e.mock.On("ParameterList", repo)}
+}
+
+func (_c *MockStore_ParameterList_Call) Run(run func(repo *model.Repo)) *MockStore_ParameterList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ParameterList_Call) Return(parameters []*model.Parameter, err error) *MockStore_ParameterList_Call {
+	_c.Call.Return(parameters, err)
+	return _c
+}
+
+func (_c *MockStore_ParameterList_Call) RunAndReturn(run func(repo *model.Repo) ([]*model.Parameter, error)) *MockStore_ParameterList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParameterUpdate provides a mock function for the type MockStore
+func (_mock *MockStore) ParameterUpdate(repo *model.Repo, parameter *model.Parameter) error {
+	ret := _mock.Called(repo, parameter)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterUpdate")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Parameter) error); ok {
+		r0 = returnFunc(repo, parameter)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_ParameterUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParameterUpdate'
+type MockStore_ParameterUpdate_Call struct {
+	*mock.Call
+}
+
+// ParameterUpdate is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - parameter *model.Parameter
+func (_e *MockStore_Expecter) ParameterUpdate(repo interface{}, parameter interface{}) *MockStore_ParameterUpdate_Call {
+	return &MockStore_ParameterUpdate_Call{Call: _e.mock.On("ParameterUpdate", repo, parameter)}
+}
+
+func (_c *MockStore_ParameterUpdate_Call) Run(run func(repo *model.Repo, parameter *model.Parameter)) *MockStore_ParameterUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 *model.Parameter
+		if args[1] != nil {
+			arg1 = args[1].(*model.Parameter)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ParameterUpdate_Call) Return(err error) *MockStore_ParameterUpdate_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_ParameterUpdate_Call) RunAndReturn(run func(repo *model.Repo, parameter *model.Parameter) error) *MockStore_ParameterUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PermFind provides a mock function for the type MockStore
 func (_mock *MockStore) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
 	ret := _mock.Called(user, repo)
