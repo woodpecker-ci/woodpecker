@@ -233,7 +233,7 @@ build-tarball: ## Build tar archive
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
 
-release-frontend: build-frontend ## Build frontend
+release-frontend: build-ui ## Build frontend
 
 cross-compile-server: ## Cross compile the server
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
