@@ -342,9 +342,10 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 func (q *fifo) resubmitExpiredPipelines() {
 	for taskID, taskState := range q.running {
 		if time.Now().After(taskState.deadline) {
+			log.Info().Msgf("queue: resubmitting expired task %s", taskID)
+			taskState.error = context.DeadlineExceeded
 			q.pending.PushFront(taskState.item)
 			delete(q.running, taskID)
-			taskState.error = context.DeadlineExceeded
 			close(taskState.done)
 		}
 	}
