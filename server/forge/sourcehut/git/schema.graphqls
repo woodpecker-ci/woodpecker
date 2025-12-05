@@ -1,0 +1,760 @@
+# This schema definition is available in the public domain, or under the terms
+# of CC-0, at your choice.
+scalar Cursor
+scalar Time
+scalar Upload
+
+"""
+URL from which some secondary data may be retrieved. You must provide the
+same Authentication header to this address as you did to the GraphQL resolver
+which provided it. The URL is not guaranteed to be consistent for an extended
+length of time; applications should submit a new GraphQL query each time they
+wish to access the data at the provided URL.
+"""
+scalar URL
+
+"Used to provide a human-friendly description of an access scope"
+directive @scopehelp(details: String!) on ENUM_VALUE
+
+"""
+This is used to decorate fields which are only accessible with a personal
+access token, and are not available to clients using OAuth 2.0 access tokens.
+"""
+directive @private on FIELD_DEFINITION
+
+# For internal use
+directive @internal on FIELD_DEFINITION
+directive @anoninternal on FIELD_DEFINITION
+
+enum AccessScope {
+  PROFILE      @scopehelp(details: "profile information")
+  REPOSITORIES @scopehelp(details: "repository metadata")
+  OBJECTS      @scopehelp(details: "git objects & references")
+  ACLS         @scopehelp(details: "access control lists")
+}
+
+enum AccessKind {
+  RO @scopehelp(details: "read")
+  RW @scopehelp(details: "read and write")
+}
+
+"""
+Decorates fields for which access requires a particular OAuth 2.0 scope with
+read or write access.
+"""
+directive @access(scope: AccessScope!, kind: AccessKind!) on FIELD_DEFINITION
+
+# https://semver.org
+type Version {
+  major: Int!
+  minor: Int!
+  patch: Int!
+
+  """
+  If this API version is scheduled for deprecation, this is the date on which
+  it will stop working; or null if this API version is not scheduled for
+  deprecation.
+  """
+  deprecationDate: Time
+
+  "Optional features"
+  features: Features!
+
+  "Config settings"
+  settings: Settings!
+}
+
+"Describes the status of optional features"
+type Features {
+  artifacts: Boolean!
+}
+
+"Instance specific settings"
+type Settings {
+  sshUser: String!
+}
+
+enum AccessMode {
+  "Read-only"
+  RO
+  "Read/write"
+  RW
+}
+
+enum Visibility {
+  "Visible to everyone, listed on your profile"
+  PUBLIC
+  "Visible to everyone (if they know the URL), not listed on your profile"
+  UNLISTED
+  "Not visible to anyone except those explicitly added to the access list"
+  PRIVATE
+}
+
+interface Entity {
+  id: Int!
+  created: Time!
+  updated: Time!
+  """
+  The canonical name of this entity. For users, this is their username
+  prefixed with '~'. Additional entity types will be supported in the future.
+  """
+  canonicalName: String!
+
+  "Returns a specific repository owned by the entity."
+  repository(name: String!): Repository @access(scope: REPOSITORIES, kind: RO)
+
+  "Returns a list of repositories owned by the entity."
+  repositories(cursor: Cursor, filter: Filter): RepositoryCursor! @access(scope: REPOSITORIES, kind: RO)
+}
+
+type User implements Entity {
+  id: Int!
+  created: Time!
+  updated: Time!
+  canonicalName: String!
+  username: String!
+  email: String!
+  url: String
+  location: String
+  bio: String
+
+  repository(name: String!): Repository @access(scope: REPOSITORIES, kind: RO)
+  repositories(cursor: Cursor, filter: Filter): RepositoryCursor! @access(scope: REPOSITORIES, kind: RO)
+}
+
+type Repository {
+  id: Int!
+  created: Time!
+  updated: Time!
+  owner: Entity! @access(scope: PROFILE, kind: RO)
+  name: String!
+  description: String
+  visibility: Visibility!
+
+  """
+  The repository's custom README, if set.
+
+  NOTICE: This returns unsanitized HTML. It is the client's responsibility to
+  sanitize this for display on the web, if so desired.
+  """
+  readme: String
+
+  "The access that applies to this user for this repository"
+  access: AccessMode! @access(scope: ACLS, kind: RO)
+
+  # Only available to the repository owner
+  acls(cursor: Cursor): ACLCursor! @access(scope: ACLS, kind: RO)
+
+  ## Plumbing API:
+
+  """
+  Returns any number of git objects by their IDs.
+  """
+  objects(ids: [String!]): [Object]! @access(scope: OBJECTS, kind: RO)
+  """
+  Returns a specific git object by its ID.
+  """
+  object(id: String!): Object @access(scope: OBJECTS, kind: RO)
+
+  """
+  Enumerates references on this repository.
+  """
+  references(cursor: Cursor): ReferenceCursor! @access(scope: OBJECTS, kind: RO)
+  """
+  Returns a reference by its fully qualified name, e.g. refs/heads/master.
+  """
+  reference(name: String!): Reference @access(scope: OBJECTS, kind: RO)
+
+  ## Porcelain API:
+
+  # NOTE: revspecs are git-compatible, e.g. "HEAD~4", "master", "9790b10")
+
+  "The HEAD reference for this repository (equivalent to the default branch)"
+  HEAD: Reference @access(scope: OBJECTS, kind: RO)
+
+  """
+  Returns a list of comments sorted by committer time (similar to `git log`'s
+  default ordering).
+
+  If `from` is specified, it is interpreted as a revspec to start logging
+  from. A clever reader may notice that using commits[-1].from + "^" as the
+  from parameter is equivalent to passing the cursor to the next call.
+  """
+  log(cursor: Cursor, from: String): CommitCursor! @access(scope: OBJECTS, kind: RO)
+
+  "Returns a tree entry for a given path, at the given revspec."
+  path(revspec: String = "HEAD", path: String!): TreeEntry @access(scope: OBJECTS, kind: RO)
+
+  "Returns the commit for a given revspec."
+  revparse_single(revspec: String!): Commit @access(scope: OBJECTS, kind: RO)
+
+  ## For internal use
+  repoPath: String! @anoninternal
+}
+
+# For internal use
+type Redirect {
+  created: Time!
+  name: String!
+  owner: Entity!
+  originalPath: String!
+  repository: Repository
+}
+
+type OAuthClient {
+  uuid: String!
+}
+
+enum WebhookEvent {
+  # User webhooks only
+  REPO_CREATED
+  REPO_UPDATE
+  REPO_DELETED
+
+  # Git webhooks only
+  GIT_PRE_RECEIVE
+  GIT_POST_RECEIVE
+}
+
+interface WebhookSubscription {
+  id: Int!
+  events: [WebhookEvent!]!
+  query: String!
+  url: String!
+
+  """
+  If this webhook was registered by an authorized OAuth 2.0 client, this
+  field is non-null.
+  """
+  client: OAuthClient @private
+
+  "All deliveries which have been sent to this webhook."
+  deliveries(cursor: Cursor): WebhookDeliveryCursor!
+
+  "Returns a sample payload for this subscription, for testing purposes"
+  sample(event: WebhookEvent!): String!
+}
+
+type UserWebhookSubscription implements WebhookSubscription {
+  id: Int!
+  events: [WebhookEvent!]!
+  query: String!
+  url: String!
+  client: OAuthClient @private
+  deliveries(cursor: Cursor): WebhookDeliveryCursor!
+  sample(event: WebhookEvent!): String!
+}
+
+type GitWebhookSubscription implements WebhookSubscription {
+  id: Int!
+  events: [WebhookEvent!]!
+  query: String!
+  url: String!
+  client: OAuthClient @private
+  deliveries(cursor: Cursor): WebhookDeliveryCursor!
+  sample(event: WebhookEvent!): String!
+}
+
+type WebhookDelivery {
+  uuid: String!
+  date: Time!
+  event: WebhookEvent!
+  subscription: WebhookSubscription!
+  requestBody: String!
+
+  """
+  These details are provided only after a response is received from the
+  remote server. If a response is sent whose Content-Type is not text/*, or
+  cannot be decoded as UTF-8, the response body will be null. It will be
+  truncated after 64 KiB.
+  """
+  responseBody: String
+  responseHeaders: String
+  responseStatus: Int
+}
+
+interface WebhookPayload {
+  uuid: String!
+  event: WebhookEvent!
+  date: Time!
+}
+
+type RepositoryEvent implements WebhookPayload {
+  uuid: String!
+  event: WebhookEvent!
+  date: Time!
+
+  repository: Repository!
+}
+
+type UpdatedRef {
+  # Is null when pushing a new reference
+  ref: Reference
+  # Is null when pushing a new reference
+  old: Object
+  # Is null when deleting a reference
+  new: Object
+
+  """
+  Note: this only returns up to the most recent 50 commits included in the
+  update, i.e. old..new or new~50..new, whichever has fewer commits.
+  """
+  log: CommitCursor
+
+  """
+  Difference from old..new in the unified diff format.
+
+  This field is null if the diff requires more than one second to prepare.
+  """
+  diff: String
+}
+
+"""
+This event is used for pre-receive and post-receive git hooks.
+"""
+type GitEvent implements WebhookPayload {
+  uuid: String!
+  event: WebhookEvent!
+  date: Time!
+
+  repository: Repository! @access(scope: REPOSITORIES, kind: RO)
+  pusher: Entity! @access(scope: PROFILE, kind: RO)
+  updates: [UpdatedRef]! @access(scope: OBJECTS, kind: RO)
+}
+
+"""
+A cursor for enumerating a list of repositories
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type RepositoryCursor {
+  results: [Repository!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating access control list entries
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type ACLCursor {
+  results: [ACL!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating a list of references
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type ReferenceCursor {
+  results: [Reference!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating commits
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type CommitCursor {
+  results: [Commit!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating tree entries
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type TreeEntryCursor {
+  results: [TreeEntry!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating artifacts
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type ArtifactCursor {
+  results: [Artifact!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating a list of webhook deliveries
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type WebhookDeliveryCursor {
+  results: [WebhookDelivery!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating a list of webhook subscriptions
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type WebhookSubscriptionCursor {
+  results: [WebhookSubscription!]!
+  cursor: Cursor
+}
+
+type ACL {
+  id: Int!
+  created: Time!
+  repository: Repository!
+  entity: Entity! @access(scope: PROFILE, kind: RO)
+  mode: AccessMode
+}
+
+"Arbitrary file attached to a git repository"
+type Artifact {
+  id: Int!
+  created: Time!
+  filename: String!
+  checksum: String!
+  size: Int!
+  url: URL!
+}
+
+type Reference {
+  name: String!
+  target: String!
+  follow: Object
+
+  artifact(filename: String!): Artifact
+  artifacts(cursor: Cursor): ArtifactCursor!
+}
+
+enum ObjectType {
+  COMMIT
+  TREE
+  BLOB
+  TAG
+}
+
+interface Object {
+  type: ObjectType!
+  id: String!
+  shortId: String!
+}
+
+type Signature {
+  name: String!
+  email: String!
+  time: Time!
+}
+
+type Trailer {
+  name: String!
+  value: String!
+}
+
+type Commit implements Object {
+  type: ObjectType!
+  id: String!
+  shortId: String!
+  author: Signature!
+  committer: Signature!
+  message: String!
+  tree: Tree!
+  parents: [Commit!]!
+  diff: String!
+  trailers: [Trailer!]!
+}
+
+type Tree implements Object {
+  type: ObjectType!
+  id: String!
+  shortId: String!
+  # TODO: add globbing
+  entries(cursor: Cursor): TreeEntryCursor!
+
+  entry(path: String): TreeEntry
+}
+
+type TreeEntry {
+  id: String!
+  name: String!
+  object: Object!
+  "Unix-style file mode, i.e. 0755 or 0644 (octal)"
+  mode: Int!
+}
+
+interface Blob {
+  id: String!
+  type: ObjectType!
+  content: URL!
+  "Size of the blob in bytes"
+  size: Int!
+}
+
+type TextBlob implements Object & Blob {
+  type: ObjectType!
+  id: String!
+  shortId: String!
+  content: URL!
+  "Size of the blob in bytes"
+  size: Int!
+
+  """
+  Returns up to 128 KiB of text content. Use the content field if you need more.
+  """
+  text: String!
+}
+
+type BinaryBlob implements Object & Blob {
+  type: ObjectType!
+  id: String!
+  shortId: String!
+  content: URL!
+  "Size of the blob in bytes"
+  size: Int!
+
+  """
+  Returns up to 32 KiB of binary content.
+
+  Notice: this field is deprecated. Prefer to use the content field.
+  """
+  base64: String!
+}
+
+"""
+An annotated git tag.
+"""
+type Tag implements Object {
+  type: ObjectType!
+  id: String!
+  shortId: String!
+  target: Object!
+  name: String!
+  tagger: Signature!
+  message: String!
+}
+
+input Filter {
+  "Number of results to return."
+  count: Int = 20
+
+  """
+  Search terms. The exact meaning varies by usage, but generally these are
+  compatible with the web UI's search syntax.
+  """
+  search: String
+}
+
+type Query {
+  "Returns API version information."
+  version: Version!
+
+  "Returns the authenticated user."
+  me: User! @access(scope: PROFILE, kind: RO)
+
+  "Returns a specific user."
+  user(username: String!): User @access(scope: PROFILE, kind: RO)
+
+  """
+  Returns repositories that the authenticated user has access to.
+
+  NOTE: in this version of the API, only repositories owned by the
+  authenticated user are returned, but in the future the default behavior
+  will be to return all repositories that the user either (1) has been given
+  explicit access to via ACLs or (2) has implicit access to either by
+  ownership or group membership.
+  """
+  repositories(cursor: Cursor, filter: Filter): RepositoryCursor @access(scope: REPOSITORIES, kind: RO)
+
+  """
+  Returns a list of user webhook subscriptions. For clients
+  authenticated with a personal access token, this returns all webhooks
+  configured by all GraphQL clients for your account. For clients
+  authenticated with an OAuth 2.0 access token, this returns only webhooks
+  registered for your client.
+  """
+  userWebhooks(cursor: Cursor): WebhookSubscriptionCursor!
+
+  "Returns details of a user webhook subscription by its ID."
+  userWebhook(id: Int!): WebhookSubscription
+
+  """
+  Returns a list of git webhook subscriptions associated with a repository. For
+  clients authenticated with a personal access token, this returns all webhooks
+  configured by all GraphQL clients for your account. For clients authenticated
+  with an OAuth 2.0 access token, this returns only webhooks registered for
+  your client.
+  """
+  gitWebhooks(repositoryID: Int!, cursor: Cursor): WebhookSubscriptionCursor!
+
+  "Returns details of a git webhook subscription by its ID."
+  gitWebhook(id: Int!): WebhookSubscription
+
+  """
+  Returns information about the webhook currently being processed. This is
+  not valid during normal queries over HTTP, and will return an error if used
+  outside of a webhook context.
+  """
+  webhook: WebhookPayload!
+
+  ## Internal use
+
+  # Looks up a repository by its path on disk
+  repositoryByDiskPath(path: String!): Repository @anoninternal
+
+  # Looks up a redirect by its (original) path on disk
+  redirectByDiskPath(path: String!): Redirect @anoninternal
+}
+
+input RepoInput {
+  # Omit these fields to leave them unchanged, or set them to null to clear
+  # their value.
+  name: String
+  description: String
+  visibility: Visibility
+
+  """
+  Updates the custom README associated with this repository. Note that the
+  provided HTML will be sanitized when displayed on the web; see
+  https://man.sr.ht/markdown/#post-processing
+  """
+  readme: String
+
+  """
+  Updates the repository HEAD reference, which serves as the default branch.
+  Must be a valid branch name.
+  """
+  HEAD: String
+}
+
+input UserWebhookInput {
+  url: String!
+  events: [WebhookEvent!]!
+  query: String!
+}
+
+input GitWebhookInput {
+  repositoryID: Int!
+
+  url: String!
+  events: [WebhookEvent!]!
+  query: String!
+}
+
+input UpdatedRefInput {
+  ref: String!
+  old: String!
+  new: String!
+}
+
+input GitEventInput {
+  repositoryID: Int!
+  event: WebhookEvent!
+  updates: [UpdatedRefInput]!
+}
+
+type Mutation {
+  """
+  Creates a new git repository. If the cloneUrl parameter is specified, the
+  repository will be cloned from the given URL.
+  """
+  createRepository(name: String!, visibility: Visibility!, description: String, cloneUrl: String): Repository @access(scope: REPOSITORIES, kind: RW)
+
+  "Updates the metadata for a git repository"
+  updateRepository(id: Int!, input: RepoInput!): Repository @access(scope: REPOSITORIES, kind: RW)
+
+  "Deletes a git repository"
+  deleteRepository(id: Int!): Repository @access(scope: REPOSITORIES, kind: RW)
+
+  "Adds or updates a user in the access control list"
+  updateACL(repoId: Int!, mode: AccessMode!, entity: ID!): ACL! @access(scope: ACLS, kind: RW)
+
+  "Deletes an entry from the access control list"
+  deleteACL(id: Int!): ACL @access(scope: ACLS, kind: RW)
+
+  """
+  Uploads an artifact. revspec must match a specific git tag, and the
+  filename must be unique among artifacts for this repository.
+  """
+  uploadArtifact(repoId: Int!, revspec: String!, file: Upload!): Artifact! @access(scope: OBJECTS, kind: RW)
+
+  "Deletes an artifact."
+  deleteArtifact(id: Int!): Artifact @access(scope: OBJECTS, kind: RW)
+
+  """
+  Creates a new user webhook subscription. When an event from the
+  provided list of events occurs, the 'query' parameter (a GraphQL query)
+  will be evaluated and the results will be sent to the provided URL as the
+  body of an HTTP POST request. The list of events must include at least one
+  event, and no duplicates.
+
+  This query is evaluated in the webhook context, such that query { webhook }
+  may be used to access details of the event which trigged the webhook. The
+  query may not make any mutations.
+  """
+  createUserWebhook(config: UserWebhookInput!): WebhookSubscription!
+
+  """
+  Deletes a user webhook. Any events already queued may still be
+  delivered after this request completes. Clients authenticated with a
+  personal access token may delete any webhook registered for their account,
+  but authorized OAuth 2.0 clients may only delete their own webhooks.
+  Manually deleting a webhook configured by a third-party client may cause
+  unexpected behavior with the third-party integration.
+  """
+  deleteUserWebhook(id: Int!): WebhookSubscription!
+
+  """
+  Creates a git webhook. When an event from the provided list of events occurs,
+  the 'query' parameter (a GraphQL query) will be evaluated and the results
+  will be sent to the provided URL as the body of an HTTP POST request. The
+  list of events must include at least one event, and no duplicates.
+
+  This query is evaluated in the webhook context, such that query { webhook }
+  may be used to access details of the event which trigged the webhook. The
+  query may not make any mutations.
+  """
+  createGitWebhook(config: GitWebhookInput!): WebhookSubscription!
+
+  """
+  Deletes a git webhook. Any events already queued may still be delivered after
+  this request completes. Clients authenticated with a personal access token
+  may delete any webhook registered for their account, but authorized OAuth 2.0
+  clients may only delete their own webhooks. Manually deleting a webhook
+  configured by a third-party client may cause unexpected behavior with the
+  third-party integration.
+  """
+  deleteGitWebhook(id: Int!): WebhookSubscription!
+
+  ###                                               ###
+  ### The following resolvers are for internal use. ###
+  ###                                               ###
+
+  """
+  Deletes the authenticated user's account. Internal use only.
+  """
+  deleteUser: Int! @internal
+
+  """
+  Delivers git webhooks. If it returns false, the push event should be
+  rejected. Invoked by git.sr.ht-update-hook.
+  """
+  deliverGitHook(input: GitEventInput!): Boolean! @internal
+}

@@ -15,6 +15,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitea"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/sourcehut"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -34,6 +35,8 @@ func Forge(forge *model.Forge) (forge.Forge, error) {
 		return setupForgejo(forge)
 	case model.ForgeTypeBitbucketDatacenter:
 		return setupBitbucketDatacenter(forge)
+	case model.ForgeTypeSourceHut:
+		return setupSourceHut(forge)
 	default:
 		return nil, fmt.Errorf("forge not configured")
 	}
@@ -186,6 +189,54 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Bool("oauth-enable-project-admin-scope", opts.OAuthEnableProjectAdminScope).
 		Msg("setting up forge")
 	return bitbucketdatacenter.New(forge.ID, opts)
+}
+
+func setupSourceHut(forge *model.Forge) (forge.Forge, error) {
+	server, err := url.Parse(forge.URL)
+	if err != nil {
+		return nil, err
+	}
+
+	metaURL, ok := forge.AdditionalOptions["meta-url"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing meta-url")
+	}
+
+	gitURL, ok := forge.AdditionalOptions["git-url"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing git-url")
+	}
+
+	listsURL, ok := forge.AdditionalOptions["lists-url"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing lists-url")
+	}
+
+	opts := sourcehut.Opts{
+		URL:               strings.TrimRight(server.String(), "/"),
+		MetaURL:           metaURL,
+		GitURL:            gitURL,
+		ListsURL:          listsURL,
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
+		SkipVerify:        forge.SkipVerify,
+		OAuth2URL:         metaURL,
+	}
+	if len(opts.URL) == 0 {
+		return nil, fmt.Errorf("WOODPECKER_SOURCEHUT_URL must be set")
+	}
+	log.Debug().
+		Str("url", opts.URL).
+		Str("meta-url", opts.MetaURL).
+		Str("git-url", opts.GitURL).
+		Str("lists-url", opts.ListsURL).
+		Str("oauth2-url", opts.OAuth2URL).
+		Bool("skip-verify", opts.SkipVerify).
+		Bool("oauth-client-id-set", opts.OAuthClientID != "").
+		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
+		Str("type", string(forge.Type)).
+		Msg("setting up forge")
+	return sourcehut.New(forge.ID, opts)
 }
 
 func setupAddon(forge *model.Forge) (forge.Forge, error) {

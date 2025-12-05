@@ -156,6 +156,23 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.AdditionalOptions["git-username"] = c.String("bitbucket-dc-git-username")
 		_forge.AdditionalOptions["git-password"] = c.String("bitbucket-dc-git-password")
 		_forge.AdditionalOptions["oauth-enable-project-admin-scope"] = c.Bool("bitbucket-dc-oauth-enable-oauth2-scope-project-admin")
+	case c.Bool("sourcehut"):
+		_forge.Type = model.ForgeTypeSourceHut
+		if _forge.URL == "" {
+			_forge.URL = "https://sourcehut.org"
+		}
+		_forge.AdditionalOptions["meta-url"] = c.String("sourcehut-meta-url")
+		if _forge.AdditionalOptions["meta-url"].(string) == "" {
+			_forge.AdditionalOptions["meta-url"] = "https://meta.sr.ht"
+		}
+		_forge.AdditionalOptions["git-url"] = c.String("sourcehut-git-url")
+		if _forge.AdditionalOptions["git-url"].(string) == "" {
+			_forge.AdditionalOptions["git-url"] = "https://git.sr.ht"
+		}
+		_forge.AdditionalOptions["lists-url"] = c.String("sourcehut-lists-url")
+		if _forge.AdditionalOptions["lists-url"].(string) == "" {
+			_forge.AdditionalOptions["lists-url"] = "https://lists.sr.ht"
+		}
 	default:
 		return errors.New("forge not configured")
 	}
