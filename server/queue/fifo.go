@@ -344,6 +344,7 @@ func (q *fifo) resubmitExpiredPipelines() {
 		if time.Now().After(taskState.deadline) {
 			q.pending.PushFront(taskState.item)
 			delete(q.running, taskID)
+			taskState.error = context.DeadlineExceeded
 			close(taskState.done)
 		}
 	}
