@@ -26,6 +26,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#5829](https://github.com/woodpecker-ci/woodpecker/pull/5829)]
 - Update link for Codeberg Pages Deploy plugin [[#5811](https://github.com/woodpecker-ci/woodpecker/pull/5811)]
 - chore(deps): lock file maintenance [[#5808](https://github.com/woodpecker-ci/woodpecker/pull/5808)]
 - chore(deps): update dependency yaml to v2.8.2 [[#5803](https://github.com/woodpecker-ci/woodpecker/pull/5803)]
