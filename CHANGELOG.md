@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/alpine docker tag to v3.23 [[#5830](https://github.com/woodpecker-ci/woodpecker/pull/5830)]
 - chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.4.4 [[#5828](https://github.com/woodpecker-ci/woodpecker/pull/5828)]
 - chore(deps): update dependency golang to v1.25.5 [[#5827](https://github.com/woodpecker-ci/woodpecker/pull/5827)]
 - fix(deps): update golang-packages [[#5816](https://github.com/woodpecker-ci/woodpecker/pull/5816)]
