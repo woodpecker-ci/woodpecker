@@ -447,7 +447,7 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 		}
 	}, -1)
 	if err != nil {
-		// ignore HTTP/404, which means that the repository is already deleted on github
+		// ignore HTTP/404, which means that the repository is already deleted on gitea
 		// so we don't need to remove any hooks, just go out
 		errorResponse, isErrorResponse := err.(*ErrorResponse)
 		if isErrorResponse && errorResponse.Response.StatusCode == 404 {
