@@ -65,6 +65,7 @@
 
 ### Misc
 
+- fix(queue): force agent cancellation on lease expiration [[#5823](https://github.com/woodpecker-ci/woodpecker/pull/5823)]
 - Extract interval into composition [[#5818](https://github.com/woodpecker-ci/woodpecker/pull/5818)]
 - Fix outdated Makefile target [[#5817](https://github.com/woodpecker-ci/woodpecker/pull/5817)]
 - Makefile: add target to generate man pages [[#5810](https://github.com/woodpecker-ci/woodpecker/pull/5810)]
