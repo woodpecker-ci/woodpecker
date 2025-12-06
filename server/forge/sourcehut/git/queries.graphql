@@ -1,0 +1,138 @@
+query GetRepos($cursor: Cursor) {
+  me {
+    repositories(cursor: $cursor) {
+      results {
+        ... repoDetails
+      }
+      cursor
+    }
+  }
+
+  version { ... versionDetails }
+}
+
+query GetRepo($owner: String!, $repoName: String!) {
+  user(username: $owner) {
+    repository(name: $repoName) {
+      ... repoDetails
+    }
+  }
+
+  version { ... versionDetails }
+}
+
+query GetReferences($owner: String!, $repoName: String!, $cursor: Cursor) {
+  user(username: $owner) {
+    repository(name: $repoName) {
+      references(cursor: $cursor) {
+        results {
+          name
+        }
+        cursor
+      }
+    }
+  }
+}
+
+query GetHead($owner: String!, $repoName: String!, $ref: String!) {
+  user(username: $owner) {
+    repository(name: $repoName) {
+      reference(name: $ref) {
+        follow {
+          id
+        }
+      }
+    }
+  }
+}
+
+query GetDir($owner: String!, $repoName: String!, $path: String!) {
+  user(username: $owner) {
+    repository(name: $repoName) {
+      path(path: $path) {
+        name
+
+        object {
+          __typename
+          ... on Tree {
+            entries {
+              results {
+                name
+                object {
+                  __typename
+                  ... on Blob {
+                    content
+                  }
+                }
+              }
+              cursor
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetFile($owner: String!, $repoName: String!, $path: String!) {
+  user(username: $owner) {
+    repository(name: $repoName) {
+      path(path: $path) {
+        name
+
+        object {
+          __typename
+          ... on Blob {
+            content
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetPushWebhooks($repoID: Int!) {
+  gitWebhooks(repositoryID: $repoID) {
+    results {
+      id
+    }
+  }
+}
+
+mutation RegisterPushWebhook($repoID: Int!, $payload: String!, $url: String!) {
+  createGitWebhook(config: {
+    repositoryID: $repoID,
+    url: $url,
+    events: [GIT_POST_RECEIVE],
+    query: $payload,
+  }) {
+    id
+  }
+}
+
+mutation UnregisterPushWebhook($id: Int!) {
+  deleteGitWebhook(id: $id) {
+    id
+  }
+}
+
+fragment repoDetails on Repository {
+  id
+  name
+  visibility
+  owner {
+    canonicalName
+  }
+  access
+
+  HEAD {
+    name
+  }
+}
+
+# Needed to construct SSH clone URLs for git repositories
+fragment versionDetails on Version {
+  settings {
+    sshUser
+  }
+}
