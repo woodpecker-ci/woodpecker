@@ -66,6 +66,24 @@ type Opts struct {
 	SkipVerify        bool   // Skip ssl verification.
 }
 
+// Encapsulate error as given by gitea implementation
+// but also hold the original response of the error
+type ErrorResponse struct {
+	Err      error
+	Response *gitea.Response
+}
+
+func (e *ErrorResponse) Error() string {
+	return e.Err.Error()
+}
+
+func NewErrorResponse(err error, resp *gitea.Response) *ErrorResponse {
+	return &ErrorResponse{
+		Err:      err,
+		Response: resp,
+	}
+}
+
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
 func New(id int64, opts Opts) (forge.Forge, error) {
@@ -415,15 +433,27 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 	}
 
 	hooks, err := shared_utils.Paginate(func(page int) ([]*gitea.Hook, error) {
-		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{
+		hooks, resp, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{
 			ListOptions: gitea.ListOptions{
 				Page:     page,
 				PageSize: c.perPage(ctx),
 			},
 		})
-		return hooks, err
+
+		if err != nil {
+			return hooks, NewErrorResponse(err, resp)
+		} else {
+			return hooks, err
+		}
 	}, -1)
 	if err != nil {
+		// ignore HTTP/404, which means that the repository is already deleted on github
+		// so we don't need to remove any hooks, just go out
+		errorResponse, isErrorResponse := err.(*ErrorResponse)
+		if isErrorResponse && errorResponse.Response.StatusCode == 404 {
+			return nil
+		}
+
 		return err
 	}
 
