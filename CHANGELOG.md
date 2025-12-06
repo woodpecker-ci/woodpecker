@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit non-major [[#5836](https://github.com/woodpecker-ci/woodpecker/pull/5836)]
 - chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.22.0 [[#5833](https://github.com/woodpecker-ci/woodpecker/pull/5833)]
 - chore(deps): update dependency golangci/golangci-lint to v2.7.1 [[#5832](https://github.com/woodpecker-ci/woodpecker/pull/5832)]
 - chore(deps): update docker.io/alpine docker tag to v3.23 [[#5830](https://github.com/woodpecker-ci/woodpecker/pull/5830)]
