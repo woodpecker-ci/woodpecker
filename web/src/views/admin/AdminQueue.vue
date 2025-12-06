@@ -63,7 +63,12 @@
             </div>
             <div class="ml-auto flex items-center gap-2">
               <span class="flex gap-2">
-                <Badge v-if="task.agent_name" :label="$t('admin.settings.queue.agent')" :value="task.agent_name" />
+                <RouterLink
+                  v-if="task.agent_name"
+                  :to="{ name: 'admin-settings-agent', params: { agentId: task.agent_id } }"
+                >
+                  <Badge :label="$t('admin.settings.queue.agent')" :value="task.agent_name" />
+                </RouterLink>
                 <Badge
                   v-if="task.dependencies"
                   :label="$t('admin.settings.queue.waiting_for')"

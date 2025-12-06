@@ -17,7 +17,7 @@
       v-if="useConfig().userRegisteredAgents"
       icon="agent"
       :to="{ name: 'org-settings-agents' }"
-      :title="$t('admin.settings.agents.agents')"
+      :title="$t('agents')"
     />
 
     <router-view />

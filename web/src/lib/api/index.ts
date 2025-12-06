@@ -342,12 +342,12 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/orgs/${orgId}/agents`, agent) as Promise<Agent>;
   }
 
-  async updateOrgAgent(orgId: number, agentId: number, agent: Partial<Agent>): Promise<Agent> {
-    return this._patch(`/api/orgs/${orgId}/agents/${agentId}`, agent) as Promise<Agent>;
+  async updateOrgAgent(orgId: number, agent: Agent): Promise<Agent> {
+    return this._patch(`/api/orgs/${orgId}/agents/${agent.id}`, agent) as Promise<Agent>;
   }
 
-  async deleteOrgAgent(orgId: number, agentId: number): Promise<unknown> {
-    return this._delete(`/api/orgs/${orgId}/agents/${agentId}`);
+  async deleteOrgAgent(orgId: number, agent: Agent): Promise<unknown> {
+    return this._delete(`/api/orgs/${orgId}/agents/${agent.id}`);
   }
 
   async getForges(opts?: PaginationOptions): Promise<Forge[] | null> {

@@ -7,12 +7,7 @@
     <Tab icon="secret" :to="{ name: 'user-secrets' }" :title="$t('secrets.secrets')" />
     <Tab icon="docker" :to="{ name: 'user-registries' }" :title="$t('registries.registries')" />
     <Tab icon="console" :to="{ name: 'user-cli-and-api' }" :title="$t('user.settings.cli_and_api.cli_and_api')" />
-    <Tab
-      v-if="useConfig().userRegisteredAgents"
-      icon="agent"
-      :to="{ name: 'user-agents' }"
-      :title="$t('admin.settings.agents.agents')"
-    />
+    <Tab v-if="useConfig().userRegisteredAgents" icon="agent" :to="{ name: 'user-agents' }" :title="$t('agents')" />
 
     <router-view />
   </Scaffold>

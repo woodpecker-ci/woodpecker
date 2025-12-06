@@ -78,6 +78,9 @@ export function usePagination<T, S = unknown>(
     useInfiniteScroll(scrollElement, nextPage, { distance: 10 });
   }
 
+  /** Resets the pagination to page 1 and loads the data.
+   * If the current page is already 1, it will reload the data.
+   */
   async function resetPage() {
     const _page = page.value;
 
