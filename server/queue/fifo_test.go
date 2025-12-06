@@ -91,6 +91,41 @@ func TestFifoExpire(t *testing.T) {
 	assert.Len(t, info.Pending, 1, "expect task re-added to pending queue")
 }
 
+func TestFifoWaitOnExpireReturnsError(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	q.extension = 0
+
+	dummyTask := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, dummyTask, got)
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- q.Wait(ctx, got.ID)
+	}()
+
+	waitForProcess()
+
+	select {
+	case werr := <-errCh:
+		assert.Error(t, werr, "expected Wait to return error when lease expires")
+	case <-time.After(2 * time.Second):
+		t.Fatal("timeout waiting for Wait to return after lease expiration")
+	}
+
+	info := q.Info(ctx)
+	assert.Len(t, info.Pending, 1, "expect task re-added to pending queue after expiration")
+}
+
 func TestFifoWait(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
