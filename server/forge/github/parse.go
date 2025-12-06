@@ -98,22 +98,21 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 	}
 
 	pipeline := &model.Pipeline{
-		Event:    model.EventPush,
-		Commit:   hook.GetHeadCommit().GetID(),
-		Ref:      hook.GetRef(),
-		ForgeURL: hook.GetHeadCommit().GetURL(),
-		Branch:   strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
-		Message:  hook.GetHeadCommit().GetMessage(),
-		Email:    hook.GetHeadCommit().GetAuthor().GetEmail(),
-		Avatar:   hook.GetSender().GetAvatarURL(),
-		Author:   hook.GetSender().GetLogin(),
-		Sender:   hook.GetSender().GetLogin(),
+		Event: model.EventPush,
+		Commit: &model.Commit{
+			SHA:      hook.GetHeadCommit().GetID(),
+			Author:   convertCommitAuthor(hook.GetHeadCommit().GetAuthor()),
+			Message:  hook.GetHeadCommit().GetMessage(),
+			ForgeURL: hook.GetHeadCommit().GetURL(),
+		},
+		Ref:          hook.GetRef(),
+		ForgeURL:     hook.GetHeadCommit().GetURL(),
+		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
+		AuthorAvatar: hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
 	}
 	repo := convertRepoHook(hook.GetRepo())
 
-	if len(pipeline.Author) == 0 {
-		pipeline.Author = hook.GetHeadCommit().GetAuthor().GetLogin()
-	}
 	if strings.HasPrefix(pipeline.Ref, "refs/tags/") {
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!
@@ -133,20 +132,23 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 // If the commit type is unsupported nil values are returned.
 func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline) {
 	pipeline := &model.Pipeline{
-		Event:      model.EventDeploy,
-		Commit:     hook.GetDeployment().GetSHA(),
-		ForgeURL:   hook.GetDeployment().GetURL(),
-		Message:    hook.GetDeployment().GetDescription(),
-		Ref:        hook.GetDeployment().GetRef(),
-		Branch:     hook.GetDeployment().GetRef(),
-		Avatar:     hook.GetSender().GetAvatarURL(),
-		Author:     hook.GetSender().GetLogin(),
-		Sender:     hook.GetSender().GetLogin(),
-		DeployTo:   hook.GetDeployment().GetEnvironment(),
-		DeployTask: hook.GetDeployment().GetTask(),
+		Event: model.EventDeploy,
+		Commit: &model.Commit{
+			SHA: hook.GetDeployment().GetSHA(),
+		},
+		ForgeURL:     hook.GetDeployment().GetURL(),
+		Ref:          hook.GetDeployment().GetRef(),
+		Branch:       hook.GetDeployment().GetRef(),
+		AuthorAvatar: hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
+		Deployment: &model.Deployment{
+			Target:      hook.GetDeployment().GetEnvironment(),
+			Task:        hook.GetDeployment().GetTask(),
+			Description: hook.GetDeployment().GetDescription(),
+		},
 	}
 	// if the ref is a sha or short sha we need to manually construct the ref.
-	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
+	if strings.HasPrefix(pipeline.Commit.SHA, pipeline.Ref) || pipeline.Commit.SHA == pipeline.Ref {
 		pipeline.Branch = hook.GetRepo().GetDefaultBranch()
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
 	}
@@ -190,27 +192,22 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		}
 	}
 
-	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
-
 	pipeline := &model.Pipeline{
 		Event:       event,
 		EventReason: []string{eventAction},
-		Commit:      hook.GetPullRequest().GetHead().GetSHA(),
-		ForgeURL:    hook.GetPullRequest().GetHTMLURL(),
-		Ref:         fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
-		Branch:      hook.GetPullRequest().GetBase().GetRef(),
-		Message:     hook.GetPullRequest().GetTitle(),
-		Author:      hook.GetPullRequest().GetUser().GetLogin(),
-		Avatar:      hook.GetPullRequest().GetUser().GetAvatarURL(),
-		Title:       hook.GetPullRequest().GetTitle(),
-		Sender:      hook.GetSender().GetLogin(),
+		Commit: &model.Commit{
+			SHA: hook.GetPullRequest().GetHead().GetSHA(),
+		},
+		ForgeURL:     hook.GetPullRequest().GetHTMLURL(),
+		Ref:          fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
+		Branch:       hook.GetPullRequest().GetBase().GetRef(),
+		AuthorAvatar: hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
 		Refspec: fmt.Sprintf(refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
-		PullRequestLabels:    convertLabels(hook.GetPullRequest().Labels),
-		PullRequestMilestone: hook.GetPullRequest().GetMilestone().GetTitle(),
-		FromFork:             fromFork,
+		PullRequest: convertPullRequest(hook.GetPullRequest()),
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
@@ -218,7 +215,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 
 	// normalize label events to match other forges
 	if eventAction == actionLabeled || eventAction == actionUnlabeled {
-		if len(pipeline.PullRequestLabels) == 0 {
+		if len(pipeline.PullRequest.Labels) == 0 {
 			pipeline.EventReason = []string{labelCleared}
 		} else {
 			pipeline.EventReason = []string{labelUpdated}
@@ -241,16 +238,25 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 	}
 
 	pipeline := &model.Pipeline{
-		Event:        model.EventRelease,
-		ForgeURL:     hook.GetRelease().GetHTMLURL(),
-		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
-		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
-		Message:      fmt.Sprintf("created release %s", name),
-		Author:       hook.GetRelease().GetAuthor().GetLogin(),
-		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),
-		Sender:       hook.GetSender().GetLogin(),
-		IsPrerelease: hook.GetRelease().GetPrerelease(),
+		Event:    model.EventRelease,
+		ForgeURL: hook.GetRelease().GetHTMLURL(),
+		Ref:      fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
+		Branch:   hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
+		Release: &model.Release{
+			Title:        name,
+			IsPrerelease: hook.GetRelease().GetPrerelease(),
+		},
+		TagTitle:     hook.GetRelease().GetTagName(),
+		AuthorAvatar: hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
 	}
 
 	return convertRepo(hook.GetRepo()), pipeline
+}
+
+func convertCommitAuthor(u *github.CommitAuthor) model.CommitAuthor {
+	return model.CommitAuthor{
+		Name:  u.GetName(),
+		Email: u.GetEmail(),
+	}
 }
