@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Javex, @MartinSchmidt, @anbraten, @gsaslis, @henkka, @mogsie, @qwerty287, @sugar700, @tuxmainy
+@6543, @Javex, @MartinSchmidt, @anbraten, @gsaslis, @henkka, @mogsie, @qwerty287, @sloonz, @sugar700, @tuxmainy
 
 ### 🔒 Security
 
@@ -65,6 +65,7 @@
 
 ### Misc
 
+- Send configuration as part of the request for external configuration [[#5831](https://github.com/woodpecker-ci/woodpecker/pull/5831)]
 - fix(queue): force agent cancellation on lease expiration [[#5823](https://github.com/woodpecker-ci/woodpecker/pull/5823)]
 - Extract interval into composition [[#5818](https://github.com/woodpecker-ci/woodpecker/pull/5818)]
 - Fix outdated Makefile target [[#5817](https://github.com/woodpecker-ci/woodpecker/pull/5817)]
