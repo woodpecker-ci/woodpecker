@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package builder
 
 import (
 	"testing"
@@ -23,30 +23,21 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
+	m := &testMetadata{}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
 		},
 		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
-		},
-		Prev: &model.Pipeline{},
-		Host: "",
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -66,21 +57,16 @@ steps:
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
+	m := &testMetadata{}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
 		},
 		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
-		},
-		Prev: &model.Pipeline{},
-		Host: "",
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -100,17 +86,12 @@ steps:
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: `aaa
-bbb`,
-		},
-		Prev: &model.Pipeline{},
-		Host: "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -139,16 +120,14 @@ steps:
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		Repo:        &model.Repo{},
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		},
-		Prev: &model.Pipeline{},
-		Host: "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -174,16 +153,14 @@ steps:
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		Repo:        &model.Repo{},
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		},
-		Prev: &model.Pipeline{},
-		Host: "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Name: "lint", Data: []byte(`
 when:
   event: push
@@ -232,16 +209,14 @@ depends_on:
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		},
-		Prev: &model.Pipeline{},
-		Host: "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -258,6 +233,7 @@ runs_on:
 
 	items, err := b.Build()
 	assert.NoError(t, err)
+	assert.Len(t, items, 1, "Should have generated 1 pipeline")
 	assert.Len(t, items[0].RunsOn, 2, "Should run on success and failure")
 	assert.Equal(t, "failure", items[0].RunsOn[1], "Should run on failure")
 }
@@ -265,16 +241,14 @@ runs_on:
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{Config: ".woodpecker"},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		},
-		Prev: &model.Pipeline{},
-		Host: "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 when:
   event: push
@@ -294,25 +268,24 @@ steps:
 
 	items, err := b.Build()
 	assert.NoError(t, err)
+	assert.Len(t, items, 2, "Should have generated 2 pipelines")
 	pipelineNames := []string{items[0].Workflow.Name, items[1].Workflow.Name}
-	assert.True(t, containsItemWithName("lint", items) && containsItemWithName("test", items),
+	assert.True(t, ContainsItemWithName("lint", items) && ContainsItemWithName("test", items),
 		"Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 }
 
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr: &model.Pipeline{
-			Branch: "dev",
-			Event:  model.EventPush,
-		},
-		Prev: &model.Pipeline{},
-		Host: "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{
+		pipelineEvent: "push",
+		branch:        "dev",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -334,20 +307,19 @@ steps:
 	items, err := b.Build()
 	assert.NoError(t, err)
 	assert.Len(t, items, 1, "Should have generated 1 pipeline")
-	assert.Equal(t, model.StatusPending, items[0].Workflow.State, "Should run on dev branch")
 }
 
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: "tag"},
-		Prev:        &model.Pipeline{},
-		Host:        "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{
+		pipelineEvent: "tag",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event:
@@ -380,19 +352,12 @@ steps:
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
-	pipeline := &model.Pipeline{
-		Branch: "dev",
-		Event:  model.EventPush,
-	}
+	m := &testMetadata{}
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr:        pipeline,
-		Prev:        &model.Pipeline{},
-		Host:        "",
-		Yamls: []*forge_types.FileMeta{
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -414,19 +379,14 @@ steps:
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
 
-	pipeline := &model.Pipeline{
-		Branch: "dev",
-		Event:  model.EventPush,
+	m := &testMetadata{
+		pipelineEvent: "push",
 	}
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr:        pipeline,
-		Prev:        &model.Pipeline{},
-		Host:        "",
-		Yamls: []*forge_types.FileMeta{
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Name: "zerostep", Data: []byte(`
 when:
   event: push
@@ -510,14 +470,14 @@ func TestSanitizePath(t *testing.T) {
 func TestMatrix(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
-		Host:        "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -551,14 +511,12 @@ steps:
 func TestMissingWorkflowDeps(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
-		Host:        "",
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{
 				Name: "workflow-with-missing-deps",
 				Data: []byte(`
@@ -582,13 +540,12 @@ depends_on:
 func TestInvalidYAML(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       nil,
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
-		Yamls: []*forge_types.FileMeta{
+	m := &testMetadata{}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
 			{Name: "broken-yaml", Data: []byte(`
 when:
   event: push
@@ -607,21 +564,20 @@ steps:
 func TestEnvVarPrecedence(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge: getMockForge(t),
+	m := &testMetadata{
+		pipelineEvent: "push",
+		repo:          "actual-repo",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
 		Envs: map[string]string{
 			"CUSTOM_VAR":     "global-value",
 			"CI_REPO_NAME":   "should-not-override",
 			"ANOTHER_CUSTOM": "global-value-2",
 		},
 		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{Name: "actual-repo"},
-		Curr: &model.Pipeline{
-			Event:   model.EventPush,
-			Message: "test",
-		},
-		Prev: &model.Pipeline{},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -647,17 +603,18 @@ steps:
 func TestLabelMerging(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{Name: "test-repo"},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		DefaultLabels: map[string]string{
 			"default-label": "default-value",
 			"override-me":   "default",
 		},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 when:
   event: push
@@ -693,18 +650,19 @@ steps:
 func TestCompilerOptions(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
-		Forge:       getMockForge(t),
-		RepoTrusted: &metadata.TrustedConfiguration{},
-		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
 		CompilerOptions: []compiler.Option{
 			compiler.WithEnviron(map[string]string{
 				"KEY": "VALUE",
 			}),
 		},
-		Yamls: []*forge_types.FileMeta{
+		Yamls: []*YamlFile{
 			{Data: []byte(`
 skip_clone: true
 when:
@@ -724,9 +682,22 @@ steps:
 	assert.Equal(t, "VALUE", items[0].Config.Stages[0].Steps[0].Environment["KEY"], "Environment variable should be set")
 }
 
-func getMockForge(t *testing.T) forge.Forge {
-	forge := mocks.NewMockForge(t)
-	forge.On("Name").Return("mock")
-	forge.On("URL").Return("https://codeberg.org")
-	return forge
+type testMetadata struct {
+	pipelineEvent string
+	branch        string
+	repo          string
+}
+
+func (t *testMetadata) GetWorkflowMetadata(w *Workflow) metadata.Metadata {
+	return metadata.Metadata{
+		Repo: metadata.Repo{
+			Name: t.repo,
+		},
+		Curr: metadata.Pipeline{
+			Event: t.pipelineEvent,
+			Commit: metadata.Commit{
+				Branch: t.branch,
+			},
+		},
+	}
 }
