@@ -372,6 +372,13 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	client := c.newClientToken(ctx, u.AccessToken)
 	hooks, _, err := client.Repositories.ListHooks(ctx, r.Owner, r.Name, nil)
 	if err != nil {
+		// ignore HTTP/404, which means that the repository is already deleted on github
+		// so we don't need to remove any hooks, just go out
+		githubErr, isGithubErrorResponse := err.(*github.ErrorResponse)
+		if isGithubErrorResponse && githubErr.Response.StatusCode == 404 {
+			return nil
+		}
+
 		return err
 	}
 	match := matchingHooks(hooks, link)
