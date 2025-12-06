@@ -69,17 +69,14 @@ type Opts struct {
 // Encapsulate error as given by gitea implementation
 // but also hold the original response of the error
 type ErrorResponse struct {
-	Err      error
-	Response *gitea.Response
-}
+	error
 
-func (e *ErrorResponse) Error() string {
-	return e.Err.Error()
+	Response *gitea.Response
 }
 
 func NewErrorResponse(err error, resp *gitea.Response) *ErrorResponse {
 	return &ErrorResponse{
-		Err:      err,
+		error:    err,
 		Response: resp,
 	}
 }
