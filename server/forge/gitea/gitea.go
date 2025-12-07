@@ -67,7 +67,7 @@ type Opts struct {
 }
 
 // Encapsulate error as given by gitea implementation
-// but also hold the original response of the error
+// but also hold the original response of the error.
 type ErrorResponse struct {
 	error
 
@@ -446,8 +446,8 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 	if err != nil {
 		// ignore HTTP/404, which means that the repository is already deleted on gitea
 		// so we don't need to remove any hooks, just go out
-		errorResponse, isErrorResponse := err.(*ErrorResponse)
-		if isErrorResponse && errorResponse.Response.StatusCode == 404 {
+		var _errr *ErrorResponse
+		if errors.As(err, &_errr) && _errr.Response.StatusCode == 404 {
 			return nil
 		}
 
