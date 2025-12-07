@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-06
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.7.0 [[#5840](https://github.com/woodpecker-ci/woodpecker/pull/5840)]
 - fix(deps): update module github.com/google/go-github/v79 to v80 [[#5838](https://github.com/woodpecker-ci/woodpecker/pull/5838)]
 - chore(deps): update pre-commit non-major [[#5836](https://github.com/woodpecker-ci/woodpecker/pull/5836)]
 - chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.22.0 [[#5833](https://github.com/woodpecker-ci/woodpecker/pull/5833)]
