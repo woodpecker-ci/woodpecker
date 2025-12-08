@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#5837](https://github.com/woodpecker-ci/woodpecker/pull/5837)]
 - chore(deps): update dependency golangci/golangci-lint to v2.7.2 [[#5845](https://github.com/woodpecker-ci/woodpecker/pull/5845)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.7.2 [[#5846](https://github.com/woodpecker-ci/woodpecker/pull/5846)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.7.0 [[#5840](https://github.com/woodpecker-ci/woodpecker/pull/5840)]
