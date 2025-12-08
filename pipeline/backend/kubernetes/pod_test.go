@@ -120,6 +120,18 @@ func TestStepLabel(t *testing.T) {
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
+func TestPodHostnameSanitized(t *testing.T) {
+	pod, err := mkPod(&types.Step{
+		Name:        "Update repos",
+		Image:       "alpine:latest",
+		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
+		WorkingDir:  "/woodpecker/src",
+		Environment: map[string]string{},
+	}, &config{Namespace: "woodpecker"}, "wp-01he8bebctabr3kgk0qj36d2me-1", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "update-repos", pod.Spec.Hostname)
+}
+
 func TestTinyPod(t *testing.T) {
 	const expected = `
 	{

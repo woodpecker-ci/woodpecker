@@ -184,7 +184,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		ServiceAccountName: options.ServiceAccountName,
 		PriorityClassName:  config.PriorityClassName,
 		HostAliases:        hostAliases(step.ExtraHosts),
-		Hostname:           step.Name,
+		Hostname:           getHostnameOrEmpty(step.Name),
 		Subdomain:          subdomain,
 		DNSConfig:          dnsConfig(config.GetNamespace(step.OrgID), subdomain),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
