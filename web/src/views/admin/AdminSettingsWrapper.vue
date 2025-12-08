@@ -9,7 +9,7 @@
     <Tab icon="repo" :to="{ name: 'admin-settings-repos' }" :title="$t('admin.settings.repos.repos')" />
     <Tab icon="user" :to="{ name: 'admin-settings-users' }" :title="$t('admin.settings.users.users')" />
     <Tab icon="org" :to="{ name: 'admin-settings-orgs' }" :title="$t('admin.settings.orgs.orgs')" />
-    <Tab icon="agent" :to="{ name: 'admin-settings-agents' }" :title="$t('admin.settings.agents.agents')" />
+    <Tab icon="agent" :to="{ name: 'admin-settings-agents' }" :title="$t('agents')" />
     <Tab icon="tray-full" :to="{ name: 'admin-settings-queue' }" :title="$t('admin.settings.queue.queue')" />
     <Tab icon="forge" :to="{ name: 'admin-settings-forges' }" :title="$t('forges')" />
 

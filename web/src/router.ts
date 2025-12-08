@@ -9,12 +9,12 @@ import useUserConfig from '~/compositions/useUserConfig';
 const { rootPath } = useConfig();
 const routes: RouteRecordRaw[] = [
   {
-    path: `${rootPath}/`,
+    path: '/',
     name: 'home',
-    redirect: `${rootPath}/repos`,
+    redirect: { name: 'repos' },
   },
   {
-    path: `${rootPath}/repos`,
+    path: '/repos',
     component: (): Component => import('~/views/RouterView.vue'),
     children: [
       {
@@ -178,7 +178,7 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: `${rootPath}/orgs/:orgId`,
+    path: '/orgs/:orgId',
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
     children: [
@@ -190,11 +190,15 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'settings',
-        name: 'org-settings',
         component: (): Component => import('~/views/org/settings/OrgSettingsWrapper.vue'),
         meta: { authentication: 'required' },
         props: true,
         children: [
+          {
+            path: '',
+            name: 'org-settings',
+            redirect: { name: 'org-settings-secrets' },
+          },
           {
             path: 'secrets',
             name: 'org-settings-secrets',
@@ -209,21 +213,36 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'agents',
-            name: 'org-settings-agents',
-            component: (): Component => import('~/views/org/settings/OrgAgents.vue'),
-            props: true,
+            component: (): Component => import('~/components/layout/RouteWrapper.vue'),
+            children: [
+              {
+                path: '',
+                name: 'org-settings-agents',
+                component: (): Component => import('~/views/org/settings/agents/OrgAgents.vue'),
+              },
+              {
+                path: ':agentId',
+                name: 'org-settings-agent',
+                component: (): Component => import('~/views/org/settings/agents/OrgAgent.vue'),
+              },
+              {
+                path: 'create',
+                name: 'org-settings-agent-create',
+                component: (): Component => import('~/views/org/settings/agents/OrgAgentCreate.vue'),
+              },
+            ],
           },
         ],
       },
     ],
   },
   {
-    path: `${rootPath}/org/:orgName/:pathMatch(.*)*`,
+    path: '/org/:orgName/:pathMatch(.*)*',
     component: (): Component => import('~/views/org/OrgDeprecatedRedirect.vue'),
     props: true,
   },
   {
-    path: `${rootPath}/admin`,
+    path: '/admin',
     component: (): Component => import('~/views/admin/AdminSettingsWrapper.vue'),
     meta: { authentication: 'required' },
     children: [
@@ -259,8 +278,24 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'agents',
-        name: 'admin-settings-agents',
-        component: (): Component => import('~/views/admin/AdminAgents.vue'),
+        component: (): Component => import('~/components/layout/RouteWrapper.vue'),
+        children: [
+          {
+            path: '',
+            name: 'admin-settings-agents',
+            component: (): Component => import('~/views/admin/agents/AdminAgents.vue'),
+          },
+          {
+            path: ':agentId',
+            name: 'admin-settings-agent',
+            component: (): Component => import('~/views/admin/agents/AdminAgent.vue'),
+          },
+          {
+            path: 'create',
+            name: 'admin-settings-agent-create',
+            component: (): Component => import('~/views/admin/agents/AdminAgentCreate.vue'),
+          },
+        ],
       },
       {
         path: 'queue',
@@ -270,7 +305,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'forges',
         component: (): Component => import('~/components/layout/RouteWrapper.vue'),
-        props: true,
         children: [
           {
             path: '',
@@ -294,7 +328,7 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: `${rootPath}/user`,
+    path: '/user',
     component: (): Component => import('~/views/user/UserWrapper.vue'),
     meta: { authentication: 'required' },
     props: true,
@@ -325,39 +359,54 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'agents',
-        name: 'user-agents',
-        component: (): Component => import('~/views/user/UserAgents.vue'),
-        props: true,
+        component: (): Component => import('~/components/layout/RouteWrapper.vue'),
+        children: [
+          {
+            path: '',
+            name: 'user-agents',
+            component: (): Component => import('~/views/user/agents/UserAgents.vue'),
+          },
+          {
+            path: ':agentId',
+            name: 'user-agent',
+            component: (): Component => import('~/views/user/agents/UserAgent.vue'),
+          },
+          {
+            path: 'create',
+            name: 'user-agent-create',
+            component: (): Component => import('~/views/user/agents/UserAgentCreate.vue'),
+          },
+        ],
       },
     ],
   },
   {
-    path: `${rootPath}/login`,
+    path: '/login',
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
     props: true,
   },
   {
-    path: `${rootPath}/cli/auth`,
+    path: '/cli/auth',
     component: (): Component => import('~/views/cli/Auth.vue'),
     meta: { authentication: 'required' },
   },
 
   // TODO: deprecated routes => remove after some time
   {
-    path: `${rootPath}/:ownerOrOrgId`,
+    path: '/:ownerOrOrgId',
     redirect: (route) => ({ name: 'org', params: route.params }),
   },
   {
-    path: `${rootPath}/:repoOwner/:repoName/:pathMatch(.*)*`,
+    path: '/:repoOwner/:repoName/:pathMatch(.*)*',
     component: (): Component => import('~/views/repo/RepoDeprecatedRedirect.vue'),
     props: true,
   },
 
   // not found handler
   {
-    path: `${rootPath}/:pathMatch(.*)*`,
+    path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: (): Component => import('~/views/NotFound.vue'),
   },
@@ -365,7 +414,7 @@ const routes: RouteRecordRaw[] = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes: routes.map((r) => ({ ...r, path: `${rootPath}${r.path}` })),
 });
 
 router.beforeEach(async (to, _, next) => {
