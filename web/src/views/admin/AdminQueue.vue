@@ -96,7 +96,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AdminQueueStats from '~/components/admin/settings/queue/AdminQueueStats.vue';
@@ -107,6 +107,7 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { useInterval } from '~/compositions/useInterval';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { QueueInfo } from '~/lib/api/types';
@@ -162,19 +163,7 @@ async function resumeQueue() {
   });
 }
 
-const reloadInterval = ref<number>();
-onMounted(async () => {
-  await loadQueueInfo();
-  reloadInterval.value = window.setInterval(async () => {
-    await loadQueueInfo();
-  }, 5000);
-});
-
-onBeforeUnmount(() => {
-  if (reloadInterval.value) {
-    window.clearInterval(reloadInterval.value);
-  }
-});
+useInterval(loadQueueInfo, 5 * 1000);
 
 useWPTitle(computed(() => [t('admin.settings.queue.queue'), t('admin.settings.settings')]));
 </script>

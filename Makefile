@@ -1,7 +1,7 @@
 # renovate: datasource=github-releases depName=mvdan/gofumpt
 GOFUMPT_VERSION := v0.9.2
 # renovate: datasource=github-releases depName=golangci/golangci-lint
-GOLANGCI_LINT_VERSION := v2.6.2
+GOLANGCI_LINT_VERSION := v2.7.2
 # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
 XGO_VERSION := go-1.25.x
 
@@ -233,7 +233,7 @@ build-tarball: ## Build tar archive
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
 
-release-frontend: build-frontend ## Build frontend
+release-frontend: build-ui ## Build frontend
 
 cross-compile-server: ## Cross compile the server
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
