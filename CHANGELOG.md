@@ -20,12 +20,14 @@
 
 ### 🐛 Bug Fixes
 
+- Send configuration as part of the request for external configuration [[#5831](https://github.com/woodpecker-ci/woodpecker/pull/5831)]
 - fix(bitbucketdatacenter): fix CI_COMMIT_PULL_REQUEST [[#5769](https://github.com/woodpecker-ci/woodpecker/pull/5769)]
 - On set/get of repo make sure forge_id is set and on fetch respected [[#5717](https://github.com/woodpecker-ci/woodpecker/pull/5717)]
 - Improve repair endpoints [[#5767](https://github.com/woodpecker-ci/woodpecker/pull/5767)]
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5847](https://github.com/woodpecker-ci/woodpecker/pull/5847)]
 - chore(deps): update docs npm deps non-major [[#5829](https://github.com/woodpecker-ci/woodpecker/pull/5829)]
 - Update link for Codeberg Pages Deploy plugin [[#5811](https://github.com/woodpecker-ci/woodpecker/pull/5811)]
 - chore(deps): lock file maintenance [[#5808](https://github.com/woodpecker-ci/woodpecker/pull/5808)]
@@ -73,7 +75,6 @@
 
 ### Misc
 
-- Send configuration as part of the request for external configuration [[#5831](https://github.com/woodpecker-ci/woodpecker/pull/5831)]
 - fix(queue): force agent cancellation on lease expiration [[#5823](https://github.com/woodpecker-ci/woodpecker/pull/5823)]
 - Extract interval into composition [[#5818](https://github.com/woodpecker-ci/woodpecker/pull/5818)]
 - Fix outdated Makefile target [[#5817](https://github.com/woodpecker-ci/woodpecker/pull/5817)]
