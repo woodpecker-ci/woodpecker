@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency golangci/golangci-lint to v2.7.2 [[#5845](https://github.com/woodpecker-ci/woodpecker/pull/5845)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.7.2 [[#5846](https://github.com/woodpecker-ci/woodpecker/pull/5846)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.7.0 [[#5840](https://github.com/woodpecker-ci/woodpecker/pull/5840)]
 - fix(deps): update module github.com/google/go-github/v79 to v80 [[#5838](https://github.com/woodpecker-ci/woodpecker/pull/5838)]
