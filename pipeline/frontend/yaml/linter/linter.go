@@ -29,7 +29,7 @@ import (
 )
 
 // networkModeNone is a const we use to check to allow to drop network completely
-// this should be exempt from privileged action as it makes the container even more unprivileged
+// this should be exempt from privileged action as it makes the container even more unprivileged.
 const networkModeNone = "none"
 
 // A Linter lints a pipeline configuration.
