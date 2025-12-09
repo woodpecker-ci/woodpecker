@@ -12,6 +12,7 @@ export interface InjectKeys {
   'org-permissions': Ref<OrgPermissions>;
   pipeline: Ref<Pipeline>;
   'pipeline-configs': Ref<PipelineConfig[] | undefined>;
+  'pipeline-variables': Ref<Record<string, string>>;
   tabs: Ref<Tab[]>;
   pipelines: Ref<Pipeline[]>;
 }
