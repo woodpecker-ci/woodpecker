@@ -33,6 +33,9 @@ var (
 
 	// ErrAgentMissMatch indicates a task is assigned to a different agent.
 	ErrAgentMissMatch = errors.New("task assigned to different agent")
+
+	// ErrTaskExpired indicates a running task exceeded its lease/deadline and was resubmitted.
+	ErrTaskExpired = errors.New("queue: task expired")
 )
 
 // InfoT provides runtime information.
