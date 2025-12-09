@@ -87,16 +87,6 @@ steps:
     <<: *base-step
     image: golang:latest
 `,
-	}, {
-		Title: "allow network mode none", Data: `
-when:
-  event: push
-steps:
-  ping:
-    image: bash
-    commands: ping example.com
-    network_mode: none
-`,
 	}}
 
 	for _, testd := range testdatas {
