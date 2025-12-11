@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-09
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -41,6 +41,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5851](https://github.com/woodpecker-ci/woodpecker/pull/5851)]
 - fix(deps): update golang-packages [[#5849](https://github.com/woodpecker-ci/woodpecker/pull/5849)]
 - chore(deps): update web npm deps non-major [[#5837](https://github.com/woodpecker-ci/woodpecker/pull/5837)]
 - chore(deps): update dependency golangci/golangci-lint to v2.7.2 [[#5845](https://github.com/woodpecker-ci/woodpecker/pull/5845)]
