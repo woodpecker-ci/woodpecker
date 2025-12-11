@@ -57,20 +57,13 @@ func (h *httpExtension) RegistryListPipeline(ctx context.Context, repo *model.Re
 	}
 
 	status, err := h.client.Send(ctx, net_http.MethodPost, h.endpoint, body, response)
-	if err != nil {
+	if err != nil && status != net_http.StatusNoContent {
 		return nil, fmt.Errorf("failed to fetch registries via http (%d) %w", status, err)
 	}
 
-	switch status {
-	case net_http.StatusNoContent:
+	if status != net_http.StatusOK {
 		// 204 No Content means no additional registries
 		return nil, nil
-	case net_http.StatusOK:
-		// 200 OK means registries are returned
-		// This case exists to ensure processing continues below
-	default:
-		// in the unexpected case where client.Send is successful, but returns an unexpected status code
-		return nil, fmt.Errorf("unexpected status code %d from registry extension", status)
 	}
 
 	registries := make([]*model.Registry, len(response.Registries))

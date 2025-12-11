@@ -52,16 +52,16 @@ func (w *withExtension) RegistryListPipeline(ctx context.Context, repo *model.Re
 		return baseRegistries, nil
 	}
 
-	// Merge registries, with base registries taking priority (no duplicates by address)
-	exists := make(map[string]struct{}, len(baseRegistries))
-	for _, reg := range baseRegistries {
+	// Merge registries, with extension registries taking priority (no duplicates by address)
+	exists := make(map[string]struct{}, len(extensionRegistries))
+	for _, reg := range extensionRegistries {
 		exists[reg.Address] = struct{}{}
 	}
 
 	merged := make([]*model.Registry, 0, len(baseRegistries)+len(extensionRegistries))
-	merged = append(merged, baseRegistries...)
+	merged = append(merged, extensionRegistries...)
 
-	for _, reg := range extensionRegistries {
+	for _, reg := range baseRegistries {
 		if _, ok := exists[reg.Address]; ok {
 			continue
 		}
