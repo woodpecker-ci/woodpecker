@@ -15,6 +15,7 @@
 package registry
 
 import (
+	"context"
 	"errors"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -42,8 +43,8 @@ func (c *combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*mode
 	return c.dbRegistry.RegistryList(repo, p)
 }
 
-func (c *combined) RegistryListPipeline(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
-	dbRegistries, err := c.dbRegistry.RegistryListPipeline(repo, pipeline)
+func (c *combined) RegistryListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
+	dbRegistries, err := c.dbRegistry.RegistryListPipeline(ctx, repo, pipeline)
 	if err != nil {
 		return nil, err
 	}

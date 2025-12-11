@@ -5,6 +5,8 @@
 package mocks
 
 import (
+	"context"
+
 	mock "github.com/stretchr/testify/mock"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -871,8 +873,8 @@ func (_c *MockService_RegistryList_Call) RunAndReturn(run func(repo *model.Repo,
 }
 
 // RegistryListPipeline provides a mock function for the type MockService
-func (_mock *MockService) RegistryListPipeline(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
-	ret := _mock.Called(repo, pipeline)
+func (_mock *MockService) RegistryListPipeline(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
+	ret := _mock.Called(context1, repo, pipeline)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RegistryListPipeline")
@@ -880,18 +882,18 @@ func (_mock *MockService) RegistryListPipeline(repo *model.Repo, pipeline *model
 
 	var r0 []*model.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) ([]*model.Registry, error)); ok {
-		return returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline) ([]*model.Registry, error)); ok {
+		return returnFunc(context1, repo, pipeline)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) []*model.Registry); ok {
-		r0 = returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline) []*model.Registry); ok {
+		r0 = returnFunc(context1, repo, pipeline)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.Pipeline) error); ok {
-		r1 = returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.Repo, *model.Pipeline) error); ok {
+		r1 = returnFunc(context1, repo, pipeline)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -904,25 +906,31 @@ type MockService_RegistryListPipeline_Call struct {
 }
 
 // RegistryListPipeline is a helper method to define mock.On call
+//   - context1 context.Context
 //   - repo *model.Repo
 //   - pipeline *model.Pipeline
-func (_e *MockService_Expecter) RegistryListPipeline(repo interface{}, pipeline interface{}) *MockService_RegistryListPipeline_Call {
-	return &MockService_RegistryListPipeline_Call{Call: _e.mock.On("RegistryListPipeline", repo, pipeline)}
+func (_e *MockService_Expecter) RegistryListPipeline(context1 interface{}, repo interface{}, pipeline interface{}) *MockService_RegistryListPipeline_Call {
+	return &MockService_RegistryListPipeline_Call{Call: _e.mock.On("RegistryListPipeline", context1, repo, pipeline)}
 }
 
-func (_c *MockService_RegistryListPipeline_Call) Run(run func(repo *model.Repo, pipeline *model.Pipeline)) *MockService_RegistryListPipeline_Call {
+func (_c *MockService_RegistryListPipeline_Call) Run(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline)) *MockService_RegistryListPipeline_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Repo
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*model.Repo)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *model.Pipeline
+		var arg1 *model.Repo
 		if args[1] != nil {
-			arg1 = args[1].(*model.Pipeline)
+			arg1 = args[1].(*model.Repo)
+		}
+		var arg2 *model.Pipeline
+		if args[2] != nil {
+			arg2 = args[2].(*model.Pipeline)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -933,7 +941,7 @@ func (_c *MockService_RegistryListPipeline_Call) Return(registrys []*model.Regis
 	return _c
 }
 
-func (_c *MockService_RegistryListPipeline_Call) RunAndReturn(run func(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error)) *MockService_RegistryListPipeline_Call {
+func (_c *MockService_RegistryListPipeline_Call) RunAndReturn(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error)) *MockService_RegistryListPipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }

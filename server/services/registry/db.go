@@ -15,6 +15,8 @@
 package registry
 
 import (
+	"context"
+
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
@@ -36,7 +38,7 @@ func (d *db) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Regi
 	return d.store.RegistryList(repo, false, p)
 }
 
-func (d *db) RegistryListPipeline(repo *model.Repo, _ *model.Pipeline) ([]*model.Registry, error) {
+func (d *db) RegistryListPipeline(_ context.Context, repo *model.Repo, _ *model.Pipeline) ([]*model.Registry, error) {
 	r, err := d.store.RegistryList(repo, true, &model.ListOptions{All: true})
 	if err != nil {
 		return nil, err

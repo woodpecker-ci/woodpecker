@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -127,7 +128,7 @@ steps:
 	mockManager.On("SecretServiceFromRepo", mock.Anything).Return(secretService, nil)
 
 	registryService := registry_service_mocks.NewMockService(t)
-	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything).Return([]*model.Registry{
+	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything, mock.Anything).Return([]*model.Registry{
 		{
 			Address:  "docker.io",
 			Username: "user",
@@ -138,7 +139,7 @@ steps:
 
 	mockManager.On("EnvironmentService").Return(nil, nil)
 
-	pipelineItems, err := parsePipeline(forge, store, pipeline, user, repo, yamls, envs)
+	pipelineItems, err := parsePipeline(context.Background(), forge, store, pipeline, user, repo, yamls, envs)
 	assert.NoError(t, err)
 
 	assert.Len(t, pipelineItems, 1)

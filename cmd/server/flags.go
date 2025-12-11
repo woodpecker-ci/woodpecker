@@ -279,6 +279,11 @@ var flags = append([]cli.Flag{
 		Usage:   "url used for calling configuration service endpoint",
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_REGISTRY_SERVICE_ENDPOINT"),
+		Name:    "registry-service-endpoint",
+		Usage:   "url used for calling registry service endpoint",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
 		Name:    "extensions-allowed-hosts",
 		Usage:   "Hosts that are allowed to be contacted by extensions",
