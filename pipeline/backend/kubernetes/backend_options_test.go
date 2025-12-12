@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -36,6 +38,19 @@ func Test_parseBackendOptions(t *testing.T) {
 						"annotations":        map[string]string{"apps.kubernetes.io/pod-index": "0"},
 						"tolerations": []map[string]any{
 							{"key": "net-port", "value": "100Mbit", "effect": TaintEffectNoSchedule},
+						},
+						"affinity": map[string]any{
+							"podAffinity": map[string]any{
+								"requiredDuringSchedulingIgnoredDuringExecution": []map[string]any{
+									{
+										"labelSelector": map[string]any{},
+										"matchLabelKeys": []string{
+											"woodpecker-ci.org/task-uuid",
+										},
+										"topologyKey": "kubernetes.io/hostname",
+									},
+								},
+							},
 						},
 						"resources": map[string]any{
 							"requests": map[string]string{"memory": "128Mi", "cpu": "1000m"},
@@ -81,6 +96,19 @@ func Test_parseBackendOptions(t *testing.T) {
 				Labels:             map[string]string{"app": "test"},
 				Annotations:        map[string]string{"apps.kubernetes.io/pod-index": "0"},
 				Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
+				Affinity: &v1.Affinity{
+					PodAffinity: &v1.PodAffinity{
+						RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+							{
+								LabelSelector: &metav1.LabelSelector{},
+								MatchLabelKeys: []string{
+									"woodpecker-ci.org/task-uuid",
+								},
+								TopologyKey: "kubernetes.io/hostname",
+							},
+						},
+					},
+				},
 				Resources: Resources{
 					Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
 					Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
