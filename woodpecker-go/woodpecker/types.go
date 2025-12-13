@@ -78,15 +78,23 @@ type (
 		NetrcTrustedPlugins          []string             `json:"netrc_trusted"`
 	}
 
+	TrustedConfigurationPatch struct {
+		Network  *bool `json:"network"`
+		Volumes  *bool `json:"volumes"`
+		Security *bool `json:"security"`
+	}
+
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
-		Config          *string       `json:"config_file,omitempty"`
-		IsTrusted       *bool         `json:"trusted,omitempty"`
-		RequireApproval *ApprovalMode `json:"require_approval,omitempty"`
-		Timeout         *int64        `json:"timeout,omitempty"`
-		Visibility      *string       `json:"visibility"`
-		AllowPull       *bool         `json:"allow_pr,omitempty"`
-		PipelineCounter *int          `json:"pipeline_counter,omitempty"`
+		Config *string `json:"config_file,omitempty"`
+		// Deprecated: use Trusted (broken - only exists for backwards compatibility)
+		IsTrusted       *bool                      `json:"-,omitempty"`
+		Trusted         *TrustedConfigurationPatch `json:"trusted,omitempty"`
+		RequireApproval *ApprovalMode              `json:"require_approval,omitempty"`
+		Timeout         *int64                     `json:"timeout,omitempty"`
+		Visibility      *string                    `json:"visibility"`
+		AllowPull       *bool                      `json:"allow_pr,omitempty"`
+		PipelineCounter *int                       `json:"pipeline_counter,omitempty"`
 	}
 
 	PipelineError struct {
