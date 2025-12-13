@@ -352,7 +352,8 @@
                 "type": "Syntax",
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
-                "type_url": "URL"
+                "type_url": "URL",
+                "events": "Events"
             },
             "crons": {
                 "add": "Cron hinzufügen",
