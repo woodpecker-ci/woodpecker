@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Public key endpoint [[#5860](https://github.com/woodpecker-ci/woodpecker/pull/5860)]
 - Allow untrusted repo to still drop network for steps [[#5820](https://github.com/woodpecker-ci/woodpecker/pull/5820)]
 - Add support for headless Kubernetes services [[#5764](https://github.com/woodpecker-ci/woodpecker/pull/5764)]
 - server/forge: rename var to be more descriptive and test value [[#5806](https://github.com/woodpecker-ci/woodpecker/pull/5806)]
@@ -29,14 +30,11 @@
 ### 📚 Documentation
 
 - chore(deps): update docs npm deps non-major [[#5855](https://github.com/woodpecker-ci/woodpecker/pull/5855)]
-- chore(deps): lock file maintenance [[#5847](https://github.com/woodpecker-ci/woodpecker/pull/5847)]
 - chore(deps): update docs npm deps non-major [[#5829](https://github.com/woodpecker-ci/woodpecker/pull/5829)]
 - Update link for Codeberg Pages Deploy plugin [[#5811](https://github.com/woodpecker-ci/woodpecker/pull/5811)]
-- chore(deps): lock file maintenance [[#5808](https://github.com/woodpecker-ci/woodpecker/pull/5808)]
 - chore(deps): update dependency yaml to v2.8.2 [[#5803](https://github.com/woodpecker-ci/woodpecker/pull/5803)]
 - chore(deps): update dependency prettier to v3.7.3 [[#5799](https://github.com/woodpecker-ci/woodpecker/pull/5799)]
 - chore(deps): update docs npm deps non-major [[#5791](https://github.com/woodpecker-ci/woodpecker/pull/5791)]
-- chore(deps): lock file maintenance [[#5784](https://github.com/woodpecker-ci/woodpecker/pull/5784)]
 - chore(deps): update dependency isomorphic-dompurify to v2.33.0 [[#5778](https://github.com/woodpecker-ci/woodpecker/pull/5778)]
 - chore(deps): update docs npm deps non-major [[#5774](https://github.com/woodpecker-ci/woodpecker/pull/5774)]
 
@@ -47,6 +45,7 @@
 - fix(deps): update golang-packages [[#5856](https://github.com/woodpecker-ci/woodpecker/pull/5856)]
 - fix(deps): update golang-packages [[#5851](https://github.com/woodpecker-ci/woodpecker/pull/5851)]
 - fix(deps): update golang-packages [[#5849](https://github.com/woodpecker-ci/woodpecker/pull/5849)]
+- chore(deps): lock file maintenance [[#5847](https://github.com/woodpecker-ci/woodpecker/pull/5847)]
 - chore(deps): update web npm deps non-major [[#5837](https://github.com/woodpecker-ci/woodpecker/pull/5837)]
 - chore(deps): update dependency golangci/golangci-lint to v2.7.2 [[#5845](https://github.com/woodpecker-ci/woodpecker/pull/5845)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.7.2 [[#5846](https://github.com/woodpecker-ci/woodpecker/pull/5846)]
@@ -61,6 +60,7 @@
 - fix(deps): update golang-packages [[#5816](https://github.com/woodpecker-ci/woodpecker/pull/5816)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.3.1 [[#5812](https://github.com/woodpecker-ci/woodpecker/pull/5812)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.3.0 [[#5807](https://github.com/woodpecker-ci/woodpecker/pull/5807)]
+- chore(deps): lock file maintenance [[#5808](https://github.com/woodpecker-ci/woodpecker/pull/5808)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.3 [[#5804](https://github.com/woodpecker-ci/woodpecker/pull/5804)]
 - fix(deps): update dependency simple-icons to v16 [[#5802](https://github.com/woodpecker-ci/woodpecker/pull/5802)]
 - fix(deps): update module github.com/docker/cli to v29.1.1+incompatible [[#5801](https://github.com/woodpecker-ci/woodpecker/pull/5801)]
@@ -71,6 +71,7 @@
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.7.1 [[#5793](https://github.com/woodpecker-ci/woodpecker/pull/5793)]
 - fix(deps): update module github.com/docker/cli to v29.1.0+incompatible [[#5789](https://github.com/woodpecker-ci/woodpecker/pull/5789)]
 - fix(deps): update golang-packages [[#5787](https://github.com/woodpecker-ci/woodpecker/pull/5787)]
+- chore(deps): lock file maintenance [[#5784](https://github.com/woodpecker-ci/woodpecker/pull/5784)]
 - chore(deps): update dependency simple-icons to v15.22.0 [[#5782](https://github.com/woodpecker-ci/woodpecker/pull/5782)]
 - chore(deps): update dependency vue-tsc to v3.1.5 [[#5781](https://github.com/woodpecker-ci/woodpecker/pull/5781)]
 - chore(deps): update dependency @types/lodash to v4.17.21 [[#5780](https://github.com/woodpecker-ci/woodpecker/pull/5780)]
