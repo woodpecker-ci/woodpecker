@@ -44,7 +44,7 @@
     "@intlify/eslint-plugin-vue-i18n": "4.1.0",
     "@intlify/unplugin-vue-i18n": "^11.0.0",
     "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "4.1.17",
+    "@tailwindcss/vite": "4.1.18",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.0.0",
     "@types/prismjs": "^1.26.5",

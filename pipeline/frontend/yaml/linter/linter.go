@@ -28,6 +28,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
+// networkModeNone is a const we use to check to allow to drop network completely
+// this should be exempt from privileged action as it makes the container even more unprivileged.
+const networkModeNone = "none"
+
 // A Linter lints a pipeline configuration.
 type Linter struct {
 	trusted             TrustedConfiguration
@@ -265,7 +269,7 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 		if len(c.ExtraHosts) != 0 {
 			errors = append(errors, "Insufficient trust level to use `extra_hosts`")
 		}
-		if len(c.NetworkMode) != 0 {
+		if len(c.NetworkMode) != 0 && c.NetworkMode != networkModeNone {
 			errors = append(errors, "Insufficient trust level to use `network_mode`")
 		}
 	}
