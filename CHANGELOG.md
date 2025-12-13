@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix CLI trusted updating [[#5861](https://github.com/woodpecker-ci/woodpecker/pull/5861)]
 - Send configuration as part of the request for external configuration [[#5831](https://github.com/woodpecker-ci/woodpecker/pull/5831)]
 - fix(bitbucketdatacenter): fix CI_COMMIT_PULL_REQUEST [[#5769](https://github.com/woodpecker-ci/woodpecker/pull/5769)]
 - On set/get of repo make sure forge_id is set and on fetch respected [[#5717](https://github.com/woodpecker-ci/woodpecker/pull/5717)]
