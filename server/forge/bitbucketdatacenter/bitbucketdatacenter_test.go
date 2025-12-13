@@ -113,7 +113,7 @@ var (
 	fakePipeline = &model.Pipeline{
 		ID:       1,
 		Number:   42,
-		Commit:   "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		Commit:   &model.Commit{SHA: "3ce383490b3d90d79460c60f67ba2580acc6cc59"},
 		Started:  1759825800,
 		Finished: 1759825883,
 		Branch:   "feature-branch",

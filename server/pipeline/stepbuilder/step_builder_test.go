@@ -41,10 +41,10 @@ func TestGlobalEnvsubst(t *testing.T) {
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
 		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
+			Commit: &model.Commit{Message: "aaa"},
+			Event:  model.EventPush,
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -75,10 +75,10 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
 		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
+			Commit: &model.Commit{Message: "aaa"},
+			Event:  model.EventPush,
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -105,10 +105,10 @@ func TestMultilineEnvsubst(t *testing.T) {
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
 		Curr: &model.Pipeline{
-			Message: `aaa
-bbb`,
+			Commit: &model.Commit{Message: `aaa
+bbb`},
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -144,9 +144,10 @@ func TestMultiPipeline(t *testing.T) {
 		Repo:        &model.Repo{},
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Curr: &model.Pipeline{
-			Event: model.EventPush,
+			Event:  model.EventPush,
+			Commit: &model.Commit{SHA: "123"},
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -179,9 +180,10 @@ func TestDependsOn(t *testing.T) {
 		Repo:        &model.Repo{},
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Curr: &model.Pipeline{
-			Event: model.EventPush,
+			Event:  model.EventPush,
+			Commit: &model.Commit{SHA: "123"},
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
@@ -237,9 +239,10 @@ func TestRunsOn(t *testing.T) {
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
 		Curr: &model.Pipeline{
-			Event: model.EventPush,
+			Event:  model.EventPush,
+			Commit: &model.Commit{SHA: "123"},
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -270,9 +273,10 @@ func TestPipelineName(t *testing.T) {
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{Config: ".woodpecker"},
 		Curr: &model.Pipeline{
-			Event: model.EventPush,
+			Event:  model.EventPush,
+			Commit: &model.Commit{SHA: "123"},
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
@@ -309,8 +313,9 @@ func TestBranchFilter(t *testing.T) {
 		Curr: &model.Pipeline{
 			Branch: "dev",
 			Event:  model.EventPush,
+			Commit: &model.Commit{SHA: "123"},
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -344,8 +349,8 @@ func TestRootWhenFilter(t *testing.T) {
 		Forge:       getMockForge(t),
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: "tag"},
-		Prev:        &model.Pipeline{},
+		Curr:        &model.Pipeline{Event: "tag", Commit: &model.Commit{SHA: "123"}},
+		Prev:        nil,
 		Host:        "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -383,6 +388,7 @@ func TestZeroSteps(t *testing.T) {
 	pipeline := &model.Pipeline{
 		Branch: "dev",
 		Event:  model.EventPush,
+		Commit: &model.Commit{SHA: "123"},
 	}
 
 	b := StepBuilder{
@@ -390,7 +396,7 @@ func TestZeroSteps(t *testing.T) {
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
 		Curr:        pipeline,
-		Prev:        &model.Pipeline{},
+		Prev:        nil,
 		Host:        "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -417,6 +423,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	pipeline := &model.Pipeline{
 		Branch: "dev",
 		Event:  model.EventPush,
+		Commit: &model.Commit{SHA: "123"},
 	}
 
 	b := StepBuilder{
@@ -424,7 +431,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
 		Curr:        pipeline,
-		Prev:        &model.Pipeline{},
+		Prev:        nil,
 		Host:        "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
@@ -514,8 +521,8 @@ func TestMatrix(t *testing.T) {
 		Forge:       getMockForge(t),
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
+		Curr:        &model.Pipeline{Event: model.EventPush, Commit: &model.Commit{SHA: "123"}},
+		Prev:        nil,
 		Host:        "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
@@ -555,8 +562,8 @@ func TestMissingWorkflowDeps(t *testing.T) {
 		Forge:       getMockForge(t),
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
+		Curr:        &model.Pipeline{Event: model.EventPush, Commit: &model.Commit{SHA: "123"}},
+		Prev:        nil,
 		Host:        "",
 		Yamls: []*forge_types.FileMeta{
 			{
@@ -586,8 +593,8 @@ func TestInvalidYAML(t *testing.T) {
 		Forge:       nil,
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
+		Curr:        &model.Pipeline{Event: model.EventPush, Commit: &model.Commit{SHA: "123"}},
+		Prev:        nil,
 		Yamls: []*forge_types.FileMeta{
 			{Name: "broken-yaml", Data: []byte(`
 when:
@@ -617,10 +624,10 @@ func TestEnvVarPrecedence(t *testing.T) {
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{Name: "actual-repo"},
 		Curr: &model.Pipeline{
-			Event:   model.EventPush,
-			Message: "test",
+			Event:  model.EventPush,
+			Commit: &model.Commit{Message: "test"},
 		},
-		Prev: &model.Pipeline{},
+		Prev: nil,
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -651,8 +658,8 @@ func TestLabelMerging(t *testing.T) {
 		Forge:       getMockForge(t),
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{Name: "test-repo"},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
+		Curr:        &model.Pipeline{Event: model.EventPush, Commit: &model.Commit{SHA: "123"}},
+		Prev:        nil,
 		DefaultLabels: map[string]string{
 			"default-label": "default-value",
 			"override-me":   "default",
@@ -697,8 +704,8 @@ func TestCompilerOptions(t *testing.T) {
 		Forge:       getMockForge(t),
 		RepoTrusted: &metadata.TrustedConfiguration{},
 		Repo:        &model.Repo{},
-		Curr:        &model.Pipeline{Event: model.EventPush},
-		Prev:        &model.Pipeline{},
+		Curr:        &model.Pipeline{Event: model.EventPush, Commit: &model.Commit{SHA: "123"}},
+		Prev:        nil,
 		CompilerOptions: []compiler.Option{
 			compiler.WithEnviron(map[string]string{
 				"KEY": "VALUE",
