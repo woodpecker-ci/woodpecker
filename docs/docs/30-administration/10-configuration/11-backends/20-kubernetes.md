@@ -145,6 +145,100 @@ steps:
             value: 'value1'
             effect: 'NoSchedule'
             tolerationSeconds: 3600
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: topology.kubernetes.io/zone
+                      operator: In
+                      values:
+                        - eu-central-1a
+                        - eu-central-1b
+```
+
+### Affinity
+
+Kubernetes [affinity and anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) rules allow you to constrain which nodes your pods can be scheduled on based on node labels, or co-locate/spread pods relative to other pods.
+
+You can configure affinity at two levels:
+
+1. **Per-step via `backend_options.kubernetes.affinity`** (shown in example above) - requires agent configuration to allow it
+2. **Agent-wide via `WOODPECKER_BACKEND_K8S_POD_AFFINITY`** - applies to all pods unless overridden
+
+#### Agent-wide affinity
+
+To apply affinity rules to all workflow pods, configure the agent with YAML-formatted affinity:
+
+```yaml
+WOODPECKER_BACKEND_K8S_POD_AFFINITY: |
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node-role.kubernetes.io/worker
+              operator: In
+              values:
+                - "true"
+```
+
+By default, per-step affinity settings are **not allowed** for security reasons. To enable them:
+
+```bash
+WOODPECKER_BACKEND_K8S_POD_AFFINITY_ALLOW_FROM_STEP: true
+```
+
+:::warning
+Enabling `WOODPECKER_BACKEND_K8S_POD_AFFINITY_ALLOW_FROM_STEP` in multi-tenant environments allows pipeline authors to control pod placement, which may have security or resource isolation implications.
+:::
+
+When per-step affinity is allowed and specified, it **replaces** the agent-wide affinity entirely (not merged).
+
+#### Example: agent affinity for co-location
+
+This example configures all workflow pods within a workflow to be co-located on the same node, while requiring other workflows run on different nodes.
+
+It uses `matchLabelKeys` to dynamically match pods with the same `woodpecker-ci.org/task-uuid`, and `mismatchLabelKeys` to separating pods with different task UUIDs:
+
+```yaml
+WOODPECKER_BACKEND_K8S_POD_AFFINITY: |
+  podAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector: {}
+      matchLabelKeys:
+        - woodpecker-ci.org/task-uuid
+      topologyKey: "kubernetes.io/hostname"
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector: {}
+      mismatchLabelKeys:
+      - woodpecker-ci.org/task-uuid
+      topologyKey: "kubernetes.io/hostname"
+```
+
+:::note
+The `matchLabelKeys` and `mismatchLabelKeys` features require Kubernetes v1.29+ (alpha with feature gate `MatchLabelKeysInPodAffinity`) or v1.33+ (beta, enabled by default). These fields allow the Kubernetes API server to dynamically populate label selectors at pod creation time, eliminating the need to hardcode values like `$(WOODPECKER_TASK_UUID)`.
+:::
+
+#### Example: Node affinity for GPU workloads
+
+Ensure a step runs only on GPU-enabled nodes:
+
+```yaml
+steps:
+  - name: train-model
+    image: tensorflow/tensorflow:latest-gpu
+    backend_options:
+      kubernetes:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: accelerator
+                      operator: In
+                      values:
+                        - nvidia-tesla-v100
 ```
 
 ### Volumes
@@ -153,7 +247,7 @@ To mount volumes a PersistentVolume (PV) and PersistentVolumeClaim (PVC) are nee
 
 Persistent volumes must be created manually. Use the Kubernetes [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) documentation as a reference.
 
-_If your PVC is not highly available or NFS-based, you may also need to integrate affinity settings to ensure that your steps are executed on the correct node._
+_If your PVC is not highly available or NFS-based, use the `affinity` settings (documented above) to ensure that your steps are executed on the correct node._
 
 NOTE: If you plan to use this volume in more than one workflow concurrently, make sure you have configured the PVC in `RWX` mode. Keep in mind that this feature must be supported by the used CSI driver:
 

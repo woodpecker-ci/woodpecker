@@ -91,6 +91,18 @@ var Flags = []cli.Flag{
 		Usage:   "whether to allow using tolerations from step's backend options",
 		Value:   true,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_AFFINITY"),
+		Name:    "backend-k8s-pod-affinity",
+		Usage:   "backend k8s Agent-wide worker pod affinity, in YAML format",
+		Value:   "",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_AFFINITY_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-pod-affinity-allow-from-step",
+		Usage:   "whether to allow using affinity from step's backend options",
+		Value:   false,
+	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"), // cspell:words secctx nonroot
 		Name:    "backend-k8s-secctx-nonroot",

@@ -19,6 +19,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v3"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
@@ -129,4 +131,47 @@ func TestSetupWorkflow(t *testing.T) {
 
 	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, meta_v1.GetOptions{})
 	assert.NoError(t, err, "headless service should be created during workflow setup")
+}
+
+func TestAffinityFromCliContext(t *testing.T) {
+	t.Setenv("WOODPECKER_BACKEND_K8S_NAMESPACE", "")
+	t.Setenv("WOODPECKER_BACKEND_K8S_POD_AFFINITY", `{
+		"podAffinity": {
+			"requiredDuringSchedulingIgnoredDuringExecution": [
+			{
+				"labelSelector": {},
+				"matchLabelKeys": [
+				"woodpecker-ci.org/task-uuid"
+				],
+				"topologyKey": "kubernetes.io/hostname"
+			}
+			]
+		}
+		}`)
+	t.Setenv("WOODPECKER_BACKEND_K8S_POD_AFFINITY_ALLOW_FROM_STEP", "false")
+
+	cmd := &cli.Command{
+		Flags: Flags,
+		Action: func(ctx context.Context, c *cli.Command) error {
+			ctx = context.WithValue(ctx, types.CliCommand, c)
+			config, err := configFromCliContext(ctx)
+
+			require.NoError(t, err)
+			require.NotNil(t, config)
+			assert.False(t, config.PodAffinityAllowFromStep)
+
+			// Verify affinity was parsed
+			require.NotNil(t, config.PodAffinity)
+			require.NotNil(t, config.PodAffinity.PodAffinity)
+			require.Len(t, config.PodAffinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution, 1)
+
+			term := config.PodAffinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0]
+			assert.Equal(t, "kubernetes.io/hostname", term.TopologyKey)
+			assert.Equal(t, []string{"woodpecker-ci.org/task-uuid"}, term.MatchLabelKeys)
+
+			return nil
+		},
+	}
+	err := cmd.Run(context.Background(), []string{"test"})
+	require.NoError(t, err)
 }

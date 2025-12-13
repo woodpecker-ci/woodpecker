@@ -16,6 +16,7 @@ type BackendOptions struct {
 	Annotations        map[string]string `mapstructure:"annotations"`
 	NodeSelector       map[string]string `mapstructure:"nodeSelector"`
 	Tolerations        []Toleration      `mapstructure:"tolerations"`
+	Affinity           *v1.Affinity      `mapstructure:"affinity"`
 	SecurityContext    *SecurityContext  `mapstructure:"securityContext"`
 	Secrets            []SecretRef       `mapstructure:"secrets"`
 }
