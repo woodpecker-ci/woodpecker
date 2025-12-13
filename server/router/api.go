@@ -243,7 +243,7 @@ func apiRoutes(e *gin.RouterGroup) {
 			forgeBase.DELETE("/:forgeId", api.DeleteForge)
 		}
 
-		apiBase.GET("/signature/public-key", session.MustUser(), api.GetSignaturePublicKey)
+		apiBase.GET("/signature/public-key", api.GetSignaturePublicKey)
 
 		apiBase.POST("/hook", api.PostHook)
 
