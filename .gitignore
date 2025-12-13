@@ -21,6 +21,9 @@ __debug_bin*
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# Generated GraphQL client code
+server/forge/sourcehut/*/gql.go
+
 ### Frontend ###
 web/dist/**
 !web/dist/.gitkeep

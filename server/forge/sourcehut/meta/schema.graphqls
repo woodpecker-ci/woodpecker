@@ -1,0 +1,1033 @@
+# This schema definition is available in the public domain, or under the terms
+# of CC-0, at your choice.
+
+scalar Cursor
+scalar Time
+
+"ISO-3166 country code"
+scalar Country
+
+"""
+This is used to decorate fields which are only accessible with a personal
+access token, and are not available to clients using OAuth 2.0 access tokens.
+"""
+directive @private on FIELD_DEFINITION
+
+"""
+Used to decorate fields which are for internal use, and are not available to
+normal API users.
+"""
+directive @internal on FIELD_DEFINITION
+
+"""
+Used to decorate fields which are for internal use, and are not available to
+normal API users.
+"""
+directive @anoninternal on FIELD_DEFINITION
+
+"""
+Used to decorate fields which are only available to admin accounts.
+"""
+directive @admin on FIELD_DEFINITION
+
+"""
+Used to provide a human-friendly description of an access scope.
+"""
+directive @scopehelp(details: String!) on ENUM_VALUE
+
+enum AccessScope {
+  AUDIT_LOG @scopehelp(details: "audit log")
+  BILLING   @scopehelp(details: "billing history")
+  PGP_KEYS  @scopehelp(details: "PGP keys")
+  SSH_KEYS  @scopehelp(details: "SSH keys")
+  PROFILE   @scopehelp(details: "profile information")
+}
+
+enum AccessKind {
+  RO @scopehelp(details: "read")
+  RW @scopehelp(details: "read and write")
+}
+
+"""
+Decorates fields for which access requires a particular OAuth 2.0 scope with
+read or write access. For the meta.sr.ht API, you have access to all public
+information without any special permissions - user profile information,
+public keys, and so on.
+"""
+directive @access(scope: AccessScope!, kind: AccessKind!) on FIELD_DEFINITION
+
+# https://semver.org
+type Version {
+  major: Int!
+  minor: Int!
+  patch: Int!
+  """
+  If this API version is scheduled for deprecation, this is the date on which
+  it will stop working; or null if this API version is not scheduled for
+  deprecation.
+  """
+  deprecationDate: Time
+}
+
+interface Entity {
+  id: Int!
+  created: Time!
+  updated: Time!
+  """
+  The canonical name of this entity. For users, this is their username
+  prefixed with '~'. Additional entity types will be supported in the future.
+  """
+  canonicalName: String!
+}
+
+enum UserType {
+  PENDING
+  USER
+  ADMIN
+  SUSPENDED
+}
+
+enum PaymentStatus {
+  "User does not pay for their account"
+  UNPAID
+  "User is paid and their payment is current"
+  CURRENT
+  "User's payment has lapsed"
+  DELINQUENT
+  "User's paid services are subsidized"
+  SUBSIDIZED
+  "User receives paid services for free"
+  FREE
+}
+
+type User implements Entity {
+  id: Int!
+  created: Time!
+  updated: Time!
+  canonicalName: String!
+  username: String!
+  email: String!
+  url: String
+  location: String
+  bio: String
+  userType: UserType!
+
+  sshKeys(cursor: Cursor): SSHKeyCursor! @access(scope: SSH_KEYS, kind: RO)
+  pgpKeys(cursor: Cursor): PGPKeyCursor! @access(scope: PGP_KEYS, kind: RO)
+
+  """
+  User's current payment status. Only available if authenticated as this user.
+  """
+  paymentStatus: PaymentStatus! @access(scope: BILLING, kind: RO)
+
+  """
+  Date at which next payment is due. Only available if authenticated as this
+  user.
+  """
+  paymentDue: Time @access(scope: BILLING, kind: RO)
+
+  """
+  Details about the user's current paid subscription. Only available if
+  authenticated as this user.
+  """
+  subscription: BillingSubscription @access(scope: BILLING, kind: RO)
+
+  """
+  Returns invoices for this user. Only available if authenticated as this user.
+  """
+  invoices(cursor: Cursor): InvoiceCursor! @access(scope: BILLING, kind: RO)
+
+  """
+  User's billing address, if applicable, for invoicing.
+  """
+  billingAddress: BillingAddress @access(scope: BILLING, kind: RO)
+
+  """
+  User's payment methods, if any.
+  """
+  paymentMethods: [PaymentMethod!]! @access(scope: BILLING, kind: RO)
+
+  """
+  The default payment method in use for automatic subscription renewals.
+  """
+  defaultPaymentMethod: PaymentMethod
+
+  ###                          ###
+  ### Internal user attributes ###
+  ###                          ###
+
+  "Returns true if this user should have access to paid services."
+  receivesPaidServices: Boolean! @private
+
+  "Notice to provide to a suspended account"
+  suspensionNotice: String @anoninternal
+}
+
+type AuditLogEntry {
+  id: Int!
+  created: Time!
+  ipAddress: String!
+  eventType: String!
+  details: String
+}
+
+type LoginSecurity {
+  "True if TOTP (time-based one time passwords) is enabled for 2FA"
+  totp: Boolean!
+}
+
+type SSHKey {
+  id: Int!
+  created: Time!
+  lastUsed: Time
+  user: User! @access(scope: PROFILE, kind: RO)
+  key: String!
+  fingerprint: String!
+  comment: String
+
+  # TODO: replace with user.username
+  username: String! @anoninternal
+}
+
+type PGPKey {
+  id: Int!
+  created: Time!
+  user: User! @access(scope: PROFILE, kind: RO)
+  key: String!
+  fingerprint: String!
+}
+
+enum Currency {
+  EUR
+  USD
+}
+
+enum PaymentInterval {
+  MONTHLY
+  ANNUALLY
+}
+
+"""
+A paid product available for purchase.
+"""
+type Product {
+  id: Int!
+  name: String!
+  prices: [ProductPrice!]!
+
+  """
+  This product has been retired and is no longer available for purchase.
+  """
+  retired: Boolean!
+
+  """
+  This price is subsidized and available to users who cannot pay the standard
+  prices.
+  """
+  subsidized: Boolean!
+}
+
+"""
+Price point for a product in a given currency.
+"""
+type ProductPrice {
+  "Applicable currency for this price"
+  currency: Currency!
+
+  """
+  Price in the smallest denomination of the currency, e.g. cents USD. Does not
+  include any applicable taxes.
+  """
+  amount: Int!
+}
+
+"""
+Billing address for invoicing.
+"""
+type BillingAddress {
+  fullName: String
+  businessName: String
+  address1: String
+  address2: String
+  city: String
+  region: String
+  postcode: String
+  "ISO 3166 two-letter country code"
+  country: Country
+  "Value-added tax number (EU)"
+  vat: String
+}
+
+type PaymentMethod {
+  id: Int!
+  created: Time!
+
+  "Currency used with this payment method"
+  currency: Currency!
+
+  "User-friendly name of this payment method (e.g. 'Visa ending in 1234')"
+  name: String!
+
+  "Expiration date of this payment method, if applicable to the type"
+  expires: Time
+}
+
+enum SubscriptionStatus {
+  """
+  This subscription is pending and will become active once the first payment is
+  successfully recieved.
+  """
+  PENDING
+  """
+  This subscription is paid but the payment has not settled. Paid services are
+  available while awaiting settlement.
+  """
+  SETTLEMENT
+  """
+  This is the user's active subscription.
+  """
+  ACTIVE
+  """
+  This subscription has been cancelled and the service term is complete.
+  """
+  INACTIVE
+}
+
+enum PaymentIntentStatus {
+  PENDING
+  CANCELLED
+  PROCESSING
+  FAILED
+  SUCCEEDED
+}
+
+type PaymentOutcome {
+  status: PaymentIntentStatus!
+  error: String
+}
+
+type BillingSubscription {
+  id: Int!
+  user: User! @access(scope: PROFILE, kind: RO)
+  created: Time!
+  updated: Time!
+  status: SubscriptionStatus!
+
+  "If true, payment is automatically renewed when term ellapses."
+  autorenew: Boolean!
+
+  currency: Currency!
+  interval: PaymentInterval!
+
+  """
+  Selected product associated with this subscription.
+  """
+  product: Product!
+
+  """
+  Shortcut to get the applicable price point for this subscription's product ID
+  and applicable currency
+  """
+  price: ProductPrice!
+
+  """
+  Total price, not including applicable taxes, in the smallest denomination of
+  the currency, e.g. cents USD.
+  """
+  subtotal: Int!
+
+  """
+  Total price, including applicable taxes, in the smallest denomination of the
+  currency, e.g. cents USD.
+  """
+  total: Int!
+
+  """
+  Status of the last attempted payment for this subscription.
+  """
+  payment: PaymentOutcome!
+}
+
+type Invoice {
+  id: Int!
+  invoiceNo: String!
+  issued: Time!
+  entity: Entity! @access(scope: PROFILE, kind: RO)
+
+  product: Product!
+  """Start of service period for which this invoice applies"""
+  serviceStart: Time!
+  """End of service period for which this invoice applies"""
+  serviceEnd: Time!
+
+  currency: Currency!
+  """
+  Amount charged denoted in the smallest denomination of the applicable
+  currency, e.g. cents USD.
+  """
+  total: Int!
+}
+
+type OAuthGrant {
+  id: Int!
+  client: OAuthClient!
+  issued: Time!
+  expires: Time!
+  tokenHash: String! @internal
+  grants: String
+}
+
+type OAuthGrantRegistration {
+  grant: OAuthGrant!
+  grants: String!
+  secret: String!
+  refreshToken: String!
+}
+
+type OAuthClient {
+  id: Int!
+  uuid: String!
+  redirectUrl: String!
+
+  name: String!
+  description: String
+  url: String
+
+  owner: Entity! @access(scope: PROFILE, kind: RO)
+}
+
+type OAuthClientRegistration {
+  client: OAuthClient!
+  secret: String!
+}
+
+type OAuthPersonalToken {
+  id: Int!
+  issued: Time!
+  expires: Time!
+  comment: String
+  grants: String
+}
+
+type OAuthPersonalTokenRegistration {
+  token: OAuthPersonalToken!
+  secret: String!
+}
+
+enum WebhookEvent {
+  "Used for user profile webhooks"
+  PROFILE_UPDATE
+  PGP_KEY_ADDED
+  PGP_KEY_REMOVED
+  SSH_KEY_ADDED
+  SSH_KEY_REMOVED
+}
+
+interface WebhookSubscription {
+  id: Int!
+  events: [WebhookEvent!]!
+  query: String!
+  url: String!
+
+  """
+  If this webhook was registered by an authorized OAuth 2.0 client, this
+  field is non-null.
+  """
+  client: OAuthClient @private
+
+  "All deliveries which have been sent to this webhook."
+  deliveries(cursor: Cursor): WebhookDeliveryCursor!
+
+  "Returns a sample payload for this subscription, for testing purposes"
+  sample(event: WebhookEvent!): String!
+}
+
+type ProfileWebhookSubscription implements WebhookSubscription {
+  id: Int!
+  events: [WebhookEvent!]!
+  query: String!
+  url: String!
+  client: OAuthClient @private
+  deliveries(cursor: Cursor): WebhookDeliveryCursor!
+  sample(event: WebhookEvent!): String!
+}
+
+type WebhookDelivery {
+  uuid: String!
+  date: Time!
+  event: WebhookEvent!
+  subscription: WebhookSubscription!
+  requestBody: String!
+
+  """
+  These details are provided only after a response is received from the
+  remote server. If a response is sent whose Content-Type is not text/*, or
+  cannot be decoded as UTF-8, the response body will be null. It will be
+  truncated after 64 KiB.
+  """
+  responseBody: String
+  responseHeaders: String
+  responseStatus: Int
+}
+
+interface WebhookPayload {
+  uuid: String!
+  event: WebhookEvent!
+  date: Time!
+}
+
+type ProfileUpdateEvent implements WebhookPayload {
+  uuid: String!
+  event: WebhookEvent!
+  date: Time!
+
+  profile: User!
+}
+
+type PGPKeyEvent implements WebhookPayload {
+  uuid: String!
+  event: WebhookEvent!
+  date: Time!
+
+  key: PGPKey!
+}
+
+type SSHKeyEvent implements WebhookPayload {
+  uuid: String!
+  event: WebhookEvent!
+  date: Time!
+
+  key: SSHKey!
+}
+
+"""
+A cursor for enumerating a list of audit log entries
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type AuditLogCursor {
+  results: [AuditLogEntry!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating a list of invoices
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type InvoiceCursor {
+  results: [Invoice!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating a list of SSH keys
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type SSHKeyCursor {
+  results: [SSHKey!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating a list of PGP keys
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type PGPKeyCursor {
+  results: [PGPKey!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating a list of webhook deliveries
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type WebhookDeliveryCursor {
+  results: [WebhookDelivery!]!
+  cursor: Cursor
+}
+
+"""
+A cursor for enumerating a list of webhook subscriptions
+
+If there are additional results available, the cursor object may be passed
+back into the same endpoint to retrieve another page. If the cursor is null,
+there are no remaining results to return.
+"""
+type WebhookSubscriptionCursor {
+  results: [WebhookSubscription!]!
+  cursor: Cursor
+}
+
+type Query {
+  "Returns API version information."
+  version: Version!
+
+  "Returns the authenticated user."
+  me: User! @access(scope: PROFILE, kind: RO)
+
+  "Returns a specific user"
+  userByName(username: String!): User @access(scope: PROFILE, kind: RO)
+  userByEmail(email: String!): User @access(scope: PROFILE, kind: RO)
+
+  "Returns a specific SSH key by its fingerprint, in hexadecimal"
+  sshKeyByFingerprint(fingerprint: String!): SSHKey @access(scope: SSH_KEYS, kind: RO)
+
+  "Returns a specific PGP key by its fingerprint, in hexadecimal."
+  pgpKeyByFingerprint(fingerprint: String!): PGPKey @access(scope: PGP_KEYS, kind: RO)
+
+  "Returns the audit log for the authenticated user."
+  auditLog(cursor: Cursor): AuditLogCursor! @access(scope: AUDIT_LOG, kind: RO)
+
+  "Returns the authenticated user's login security settings."
+  loginSecurity: LoginSecurity! @access(scope: PROFILE, kind: RO)
+
+  """
+  Returns a list of user profile webhook subscriptions. For clients
+  authenticated with a personal access token, this returns all webhooks
+  configured by all GraphQL clients for your account. For clients
+  authenticated with an OAuth 2.0 access token, this returns only webhooks
+  registered for your client.
+  """
+  profileWebhooks(cursor: Cursor): WebhookSubscriptionCursor!
+
+  "Returns details of a user profile webhook subscription by its ID."
+  profileWebhook(id: Int!): WebhookSubscription
+
+  """
+  Returns information about the webhook currently being processed. This is
+  not valid during normal queries over HTTP, and will return an error if used
+  outside of a webhook context.
+  """
+  webhook: WebhookPayload!
+
+  "Returns the current OAuth grant in use, if any"
+  myOauthGrant: OAuthGrant
+
+  "Returns OAuth grants issued for the authenticated user"
+  oauthGrants: [OAuthGrant!]! @private
+
+  "List of OAuth clients this user administrates"
+  oauthClients: [OAuthClient!]! @private
+
+  "Returns a list of personal OAuth tokens issued"
+  personalAccessTokens: [OAuthPersonalToken!]! @private
+
+  "Returns information about a subscription product available for purchase."
+  product(id: Int!): Product
+
+  "Returns a list of paid subscriptions available for purchase."
+  products: [Product!]!
+
+  ###                                               ###
+  ### The following resolvers are for internal use. ###
+  ###                                               ###
+
+  "Returns a specific user by ID"
+  userByID(id: Int!): User @anoninternal
+
+  "Returns a specific user by username"
+  user(username: String!): User @anoninternal
+
+  "Returns a specific OAuth client (by database ID)"
+  oauthClientByID(id: Int!): OAuthClient @internal
+
+  "Returns a specific OAuth client (by UUID)"
+  oauthClientByUUID(uuid: String!): OAuthClient @internal
+
+  """
+  Returns the revocation status of a given OAuth 2.0 token hash (SHA-512). If
+  the token or client ID has been revoked, this returns true, and the key
+  should not be trusted. Client ID is optional for personal access tokens.
+  """
+  tokenRevocationStatus(hash: String!, clientId: String): Boolean! @internal
+}
+
+"""
+Omit these fields to leave them unchanged, or set them to null to clear
+their value.
+"""
+input UserInput {
+  url: String
+  location: String
+  bio: String
+
+  """
+  Note: changing the user's email address will not take effect immediately;
+  the user is sent an email to confirm the change first.
+  """
+  email: String
+}
+
+input ProfileWebhookInput {
+  url: String!
+  events: [WebhookEvent!]!
+  query: String!
+}
+
+"""
+All fields are optional. If a field is omitted, it is unchanged. If a field is
+null, it is set to null.
+"""
+input BillingAddressInput {
+  fullName: String
+  businessName: String
+  address1: String
+  address2: String
+  city: String
+  region: String
+  postcode: String
+  "ISO 3166 two-letter country code"
+  country: Country
+  "Value-added tax number (EU)"
+  vat: String
+}
+
+"""
+For changing the active paid subscription's parameters. Changes apply from the
+start of the next payment term (i.e. from User.paymentDue).
+"""
+input UpdateBillingSubscriptionInput {
+  productID: Int!
+  interval: PaymentInterval!
+}
+
+input ProductPriceInput {
+  currency: Currency!
+  amount: Int!
+}
+
+type TOTPConfig {
+  """
+  List of generated recovery codes for use with TOTP.
+  """
+  recoveryCodes: [String!]!
+}
+
+type Mutation {
+  updateUser(input: UserInput): User! @access(scope: PROFILE, kind: RW)
+
+  createPGPKey(key: String!): PGPKey! @access(scope: PGP_KEYS, kind: RW)
+  deletePGPKey(id: Int!): PGPKey @access(scope: PGP_KEYS, kind: RW)
+
+  createSSHKey(key: String!): SSHKey! @access(scope: SSH_KEYS, kind: RW)
+  deleteSSHKey(id: Int!): SSHKey @access(scope: SSH_KEYS, kind: RW)
+
+  """
+  Causes the "last used" time of this SSH key to be set to the current time.
+  """
+  updateSSHKeyLastUsed(fingerprint: String!): SSHKey! @access(scope: SSH_KEYS, kind: RO) @anoninternal
+
+  """
+  Update the authenticated user's billing address.
+  """
+  updateBillingAddress(input: BillingAddressInput!): BillingAddress! @access(scope: BILLING, kind: RW)
+
+  """
+  Update an active billing subscription.
+  """
+  updateBillingSubscription(
+    subscriptionID: Int!,
+    input: UpdateBillingSubscriptionInput!,
+  ): BillingSubscription @access(scope: BILLING, kind: RW)
+
+  """
+  Cancels an active billing subscription. The changes will not take effect
+  until the end of the paid term (unless the account is past due, in which case
+  it applies immediately).
+  """
+  cancelBillingSubscription(
+    subscriptionID: Int!,
+  ): BillingSubscription @private
+
+  # TODO: Allow removal of the last payment method if the user has disabled
+  # automatic renewal (blocker: allow users to disable autorenew)
+  """
+  Removes a payment method from your account. Cannot be used to remove the last
+  payment method.
+  """
+  deletePaymentMethod(id: Int!): PaymentMethod @access(scope: BILLING, kind: RW)
+
+  """
+  Sets the user's default payment method.
+  """
+  setDefaultPaymentMethod(id: Int!): PaymentMethod @access(scope: BILLING, kind: RW)
+
+  """
+  Creates a new user profile webhook subscription. When an event from the
+  provided list of events occurs, the 'query' parameter (a GraphQL query)
+  will be evaluated and the results will be sent to the provided URL as the
+  body of an HTTP POST request. The list of events must include at least one
+  event, and no duplicates.
+
+  This query is evaluated in the webhook context, such that query { webhook }
+  may be used to access details of the event which trigged the webhook. The
+  query may not make any mutations.
+  """
+  createWebhook(config: ProfileWebhookInput!): WebhookSubscription!
+
+  """
+  Deletes a user profile webhook. Any events already queued may still be
+  delivered after this request completes. Clients authenticated with a
+  personal access token may delete any webhook registered for their account,
+  but authorized OAuth 2.0 clients may only delete their own webhooks.
+  Manually deleting a webhook configured by a third-party client may cause
+  unexpected behavior with the third-party integration.
+  """
+  deleteWebhook(id: Int!): WebhookSubscription!
+
+  ###                                               ###
+  ### The following resolvers are for admin use.    ###
+  ###                                               ###
+
+  """
+  Transfers billing details from one user account to another, returning the
+  target account.
+  """
+  billingTransfer(from: String!, to: String!): User! @admin
+
+  """
+  Grants free service to the given user ID until the provided expiration date.
+  """
+  subsidizeUser(userID: Int!, until: Time!): User! @admin
+
+  """
+  Create a new paid product.
+  """
+  createProduct(name: String!, prices: [ProductPriceInput!]!): Product! @admin
+
+  """
+  Retires a paid product.
+  """
+  retireProduct(id: Int!): Product @admin
+
+  ###                                               ###
+  ### The following resolvers are for internal use. ###
+  ###                                               ###
+
+  "Registers a new account."
+  registerAccount(email: String!,
+    username: String!,
+    password: String!,
+    pgpKey: String): User @anoninternal
+
+  "Requests a password reset. The return value is meaningless."
+  resetPassword(email: String!): Int @anoninternal
+
+  "Confirm an account registration email."
+  confirmRegistration(token: String!): User @anoninternal
+
+  "Confirm a user's change of email address"
+  confirmEmailChange(token: String!): User @anoninternal
+
+  "Confirm a user's password change"
+  confirmPasswordChange(
+    token: String!,
+    newPassword: String!,
+  ): User @anoninternal
+
+  """
+  Enables TOTP for the user account. The secret is 20 base32-encoded bytes.
+  """
+  enableTOTP(secret: String!): TOTPConfig! @internal
+
+  # TODO:
+  # - Enable TOTP via GraphQL as well
+  # - Manage logins and authentication through GraphQL more generally
+
+  """
+  Registers an OAuth client. Only OAuth 2.0 confidental clients are
+  supported.
+  """
+  registerOAuthClient(
+    redirectUri: String!,
+    clientName: String!,
+    clientDescription: String,
+    clientUrl: String): OAuthClientRegistration! @internal
+
+  """
+  Revokes this OAuth client, revoking all tokens for it and preventing future
+  use.
+  """
+  revokeOAuthClient(uuid: String!): OAuthClient @internal
+
+  "Revokes a specific OAuth grant."
+  revokeOAuthGrant(hash: String!): OAuthGrant @internal
+
+  "Issues an OAuth personal access token."
+  issuePersonalAccessToken(grants: String, comment: String):
+    OAuthPersonalTokenRegistration! @internal
+
+  "Revokes a personal access token."
+  revokePersonalAccessToken(id: Int!): OAuthPersonalToken @internal
+
+  """
+  Issues an OAuth 2.0 authorization code. Used after the user has consented
+  to the access grant request.
+  """
+  issueAuthorizationCode(clientUUID: String!, grants: String!): String! @internal
+
+  """
+  Completes the OAuth 2.0 grant process and issues an OAuth token for a
+  specific OAuth client.
+  """
+  issueOAuthGrant(authorization: String!, clientUUID: String,
+    clientSecret: String!, redirectUri: String): OAuthGrantRegistration @internal
+
+  """
+  Refreshes an existing OAuth 2.0 grant. This invalidates the previous grant
+  and returns a new one.
+  """
+  refreshOAuthGrant(refreshToken: String!, clientUUID: String!,
+    clientSecret: String!, grants: String): OAuthGrantRegistration @internal
+
+  """
+  Send a notification email.
+
+  The 'address' parameter must be a single RFC 5322 address (e.g. "Barry Gibbs
+  <bg@example.com>", or "bg@example.com"). The 'message' parameter must be a
+  RFC 5322 compliant Internet message with the special requirement that it must
+  not contain any recipients (i.e. no 'To', 'Cc', or 'Bcc' header).
+
+  The message will be signed with the site key. If the address is that of a
+  registered user it will be encrypted according to the user's privacy
+  settings.
+  """
+  sendEmail(address: String!, message: String!): Boolean! @anoninternal
+
+  """
+  Deletes the authenticated user's account.
+  """
+  deleteUser(reserve: Boolean!): Int! @internal
+
+  """
+  Orders a new paid product subscription. The new subscription is in a PENDING
+  state. The payment intent should be completed to proceed.
+  """
+  orderProductSubscription(
+    productID: Int!,
+    currency: Currency!,
+    interval: PaymentInterval!,
+    autorenew: Boolean!,
+    """
+    Optional: update the user's billing address at the same time
+    """
+    address: BillingAddressInput,
+    """
+    Optional: include this if retrying the same request
+    """
+    idempotencyKey: String,
+  ): PaymentIntent @internal
+
+  """
+  Creates a new payment intent to charge a subscription's renewal fee
+  interactively. The subscription must be past due.
+  """
+  beginSubscriptionRenewal(
+    subscriptionID: Int!,
+    """
+    Optional: include this if retrying the same request
+    """
+    idempotencyKey: String,
+  ): PaymentIntent! @internal
+
+  """
+  Finalizes a product order from the PaymentIntent ID after the user has
+  finalized their payment, returning the completed PaymentIntent.
+  """
+  finalizePaymentIntent(intentID: String!): PaymentIntent! @internal
+
+  """
+  Creates a "setup" intent for adding a new payment method to the authenticated
+  user's account.
+  """
+  createSetupIntent: SetupIntent! @internal
+
+  """
+  Finalizes a setup intent.
+  """
+  finalizeSetupIntent(intentID: String!): SetupIntent @internal
+
+  """
+  Processes payment when the user's account is past due. Returns the payment
+  intent if a payment was collected, or null if a payment was not collected but
+  the operation was successful (the latter occurs when a subscription was
+  cancelled or a subsidized user's subsidy expired, in these cases the account
+  is settled and converted to non-paying).
+  """
+  processPaymentDue: PaymentIntent @internal
+
+  """
+  Causes an invoice to be regenerated in order to issue a correction. The admin
+  is assumed to have manually made the required changes in the database.
+  """
+  reissueInvoice(id: Int!): Invoice @admin
+}
+
+# The following types are for internal use
+
+interface PaymentIntent {
+  id: String!
+  subscription: BillingSubscription!
+  billingAddress: BillingAddress!
+  idempotencyKey: String!
+
+  taxRate: Float
+  taxDue: Int!
+  totalDue: Int!
+
+  method: PaymentMethod
+  outcome: PaymentOutcome
+}
+
+type StripePaymentIntent implements PaymentIntent {
+  id: String!
+  subscription: BillingSubscription!
+  billingAddress: BillingAddress!
+  idempotencyKey: String!
+
+  totalDue: Int!
+  taxRate: Float
+  taxDue: Int!
+
+  method: PaymentMethod
+  outcome: PaymentOutcome
+
+  publicKey: String
+  clientSecret: String
+}
+
+enum SetupIntentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  CANCELLED
+}
+
+interface SetupIntent {
+  id: String!
+  status: SetupIntentStatus!
+  method: PaymentMethod
+}
+
+type StripeSetupIntent implements SetupIntent {
+  id: String!
+  status: SetupIntentStatus!
+  method: PaymentMethod
+
+  publicKey: String
+  clientSecret: String
+}

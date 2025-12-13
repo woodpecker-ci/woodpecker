@@ -118,13 +118,16 @@ clean-all: clean ## Clean all artifacts
 	rm -rf docs/docs/40-cli.md docs/openapi.json
 
 .PHONY: generate
-generate: install-mockery generate-openapi ## Run all code generations
+generate: install-mockery generate-openapi generate-sourcehut ## Run all code generations
 	mockery
 	CGO_ENABLED=0 go generate ./...
 
 generate-openapi: ## Run openapi code generation and format it
 	CGO_ENABLED=0 go run github.com/swaggo/swag/cmd/swag fmt --exclude pipeline/rpc/proto
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
+
+generate-sourcehut: ## Run sourcehut GraphQL client generation
+	CGO_ENABLED=0 go generate ./server/forge/sourcehut/...
 
 generate-license-header: install-addlicense
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go

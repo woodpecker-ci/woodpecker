@@ -390,7 +390,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Name:    "forge-url",
 		Usage:   "url of the forge",
-		Sources: cli.EnvVars("WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_FORGEJO_URL", "WOODPECKER_BITBUCKET_URL", "WOODPECKER_BITBUCKET_DC_URL"),
+		Sources: cli.EnvVars("WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_FORGEJO_URL", "WOODPECKER_BITBUCKET_URL", "WOODPECKER_BITBUCKET_DC_URL", "WOODPECKER_SOURCEHUT_URL"),
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -401,14 +401,16 @@ var flags = append([]cli.Flag{
 				"WOODPECKER_GITEA_CLIENT_FILE",
 				"WOODPECKER_FORGEJO_CLIENT_FILE",
 				"WOODPECKER_BITBUCKET_CLIENT_FILE",
-				"WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE")),
+				"WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE",
+				"WOODPECKER_SOURCEHUT_CLIENT_FILE")),
 			cli.EnvVar("WOODPECKER_FORGE_CLIENT"),
 			cli.EnvVar("WOODPECKER_GITHUB_CLIENT"),
 			cli.EnvVar("WOODPECKER_GITLAB_CLIENT"),
 			cli.EnvVar("WOODPECKER_GITEA_CLIENT"),
 			cli.EnvVar("WOODPECKER_FORGEJO_CLIENT"),
 			cli.EnvVar("WOODPECKER_BITBUCKET_CLIENT"),
-			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_ID")),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_ID"),
+			cli.EnvVar("WOODPECKER_SOURCEHUT_CLIENT")),
 		Name:  "forge-oauth-client",
 		Usage: "oauth2 client id",
 		Config: cli.StringConfig{
@@ -425,6 +427,7 @@ var flags = append([]cli.Flag{
 				"WOODPECKER_FORGEJO_SECRET_FILE",
 				"WOODPECKER_BITBUCKET_SECRET_FILE",
 				"WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE",
+				"WOODPECKER_SOURCEHUT_SECRET_FILE",
 			)),
 			cli.EnvVar("WOODPECKER_FORGE_SECRET"),
 			cli.EnvVar("WOODPECKER_GITHUB_SECRET"),
@@ -432,7 +435,8 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_GITEA_SECRET"),
 			cli.EnvVar("WOODPECKER_FORGEJO_SECRET"),
 			cli.EnvVar("WOODPECKER_BITBUCKET_SECRET"),
-			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET")),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"),
+			cli.EnvVar("WOODPECKER_SOURCEHUT_SECRET")),
 		Name:  "forge-oauth-secret",
 		Usage: "oauth2 client secret",
 		Config: cli.StringConfig{
@@ -448,7 +452,8 @@ var flags = append([]cli.Flag{
 			"WOODPECKER_GITLAB_SKIP_VERIFY",
 			"WOODPECKER_GITEA_SKIP_VERIFY",
 			"WOODPECKER_FORGEJO_SKIP_VERIFY",
-			"WOODPECKER_BITBUCKET_SKIP_VERIFY"),
+			"WOODPECKER_BITBUCKET_SKIP_VERIFY",
+			"WOODPECKER_SOURCEHUT_SKIP_VERIFY"),
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXPERT_FORGE_OAUTH_HOST"),
@@ -547,6 +552,29 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN"),
 		Name:    "bitbucket-dc-oauth-enable-oauth2-scope-project-admin",
 		Usage:   "Bitbucket DataCenter/Server oauth2 scope should be configured to include PROJECT_ADMIN configuration.",
+	},
+	//
+	// SourceHut
+	//
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_SOURCEHUT"),
+		Name:    "sourcehut",
+		Usage:   "sourcehut driver is enabled",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SOURCEHUT_META_URL"),
+		Name:    "sourcehut-meta-url",
+		Usage:   "sourcehut meta.sr.ht URL",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SOURCEHUT_GIT_URL"),
+		Name:    "sourcehut-git-url",
+		Usage:   "sourcehut git.sr.ht URL",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SOURCEHUT_LISTS_URL"),
+		Name:    "sourcehut-lists-url",
+		Usage:   "sourcehut lists.sr.ht URL",
 	},
 	//
 	// development flags

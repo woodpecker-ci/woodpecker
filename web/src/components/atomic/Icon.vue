@@ -79,6 +79,7 @@
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="1.3rem" />
   <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'sourcehut'" :path="siSourcehut.path" size="1.3rem" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -172,7 +173,7 @@ import {
   mdiTrayFull,
   mdiWrenchCogOutline,
 } from '@mdi/js';
-import { siForgejo, siGitea } from 'simple-icons';
+import { siForgejo, siGitea, siSourcehut } from 'simple-icons';
 
 import SvgIcon from './SvgIcon.vue';
 
