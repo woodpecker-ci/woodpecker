@@ -42,6 +42,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5856](https://github.com/woodpecker-ci/woodpecker/pull/5856)]
 - fix(deps): update golang-packages [[#5851](https://github.com/woodpecker-ci/woodpecker/pull/5851)]
 - fix(deps): update golang-packages [[#5849](https://github.com/woodpecker-ci/woodpecker/pull/5849)]
 - chore(deps): update web npm deps non-major [[#5837](https://github.com/woodpecker-ci/woodpecker/pull/5837)]
