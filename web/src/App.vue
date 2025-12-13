@@ -1,6 +1,6 @@
 <template>
   <div class="app bg-wp-background-100 dark:bg-wp-background-300 m-auto flex h-full w-full flex-col">
-    <router-view v-if="blank" />
+    <router-view v-if="layout === 'blank'" />
     <template v-else>
       <Navbar />
       <main class="relative flex h-full min-h-0">
@@ -42,7 +42,7 @@ apiClient.setErrorHandler((err) => {
   notify({ title: err.message || i18n.t('unknown_error'), type: 'error' });
 });
 
-const blank = computed(() => route.meta.blank);
+const layout = computed(() => route.meta.layout ?? 'default');
 
 const { locale } = useI18n();
 watch(
