@@ -42,6 +42,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#5859](https://github.com/woodpecker-ci/woodpecker/pull/5859)]
+- chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.47.0 [[#5858](https://github.com/woodpecker-ci/woodpecker/pull/5858)]
 - fix(deps): update golang-packages [[#5856](https://github.com/woodpecker-ci/woodpecker/pull/5856)]
 - fix(deps): update golang-packages [[#5851](https://github.com/woodpecker-ci/woodpecker/pull/5851)]
 - fix(deps): update golang-packages [[#5849](https://github.com/woodpecker-ci/woodpecker/pull/5849)]
