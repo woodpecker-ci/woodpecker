@@ -21,12 +21,16 @@ import (
 	"crypto/ed25519"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/yaronf/httpsign"
 
 	host_matcher "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
@@ -89,49 +93,212 @@ func NewHTTPClient(privateKey crypto.PrivateKey, allowedHostList string) (*Clien
 	}, nil
 }
 
-// Send makes an http request to the given endpoint, writing the input
-// to the request body and un-marshaling the output from the response body.
+// Send makes an http request with retry logic
 func (e *Client) Send(ctx context.Context, method, path string, in, out any) (int, error) {
+	// Maximum number of retries
+	const maxRetries = 3
+	// Initial backoff duration
+	const initialBackoff = 500 * time.Millisecond
+
+	log.Debug().Msgf("HTTP request: %s %s, retries enabled (max: %d)", method, path, maxRetries)
+
+	// Prepare request body bytes for possible retries
+	var bodyBytes []byte
+	if in != nil {
+		buf := new(bytes.Buffer)
+		if err := json.NewEncoder(buf).Encode(in); err != nil {
+			return 0, err
+		}
+		bodyBytes = buf.Bytes()
+	}
+
+	// Parse URI once
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
 	}
 
-	// if we are posting or putting data, we need to write it to the body of the request.
-	var buf io.ReadWriter
-	if in != nil {
-		buf = new(bytes.Buffer)
-		jsonErr := json.NewEncoder(buf).Encode(in)
-		if jsonErr != nil {
-			return 0, jsonErr
+	// Retry loop with exponential backoff
+	var statusCode int
+	var lastErr error
+
+	for retry := 0; retry <= maxRetries; retry++ {
+		// Check if context is already canceled
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
 		}
-	}
 
-	// creates a new http request to the endpoint.
-	req, err := http.NewRequestWithContext(ctx, method, uri.String(), buf)
-	if err != nil {
-		return 0, err
-	}
-	if in != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
+		// Create request body for this attempt
+		var body io.Reader
+		if len(bodyBytes) > 0 {
+			body = bytes.NewReader(bodyBytes)
+		}
 
-	resp, err := e.Do(req)
-	if err != nil {
-		return 0, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		body, err := io.ReadAll(resp.Body)
+		// Create new request for each attempt
+		req, err := http.NewRequestWithContext(ctx, method, uri.String(), body)
 		if err != nil {
-			return resp.StatusCode, err
+			return 0, err
+		}
+		if in != nil {
+			req.Header.Set("Content-Type", "application/json")
 		}
 
-		return resp.StatusCode, fmt.Errorf("response: %s", string(body))
+		// Send request
+		resp, err := e.Do(req)
+		if err != nil {
+			lastErr = err
+
+			// Check if this is a retryable error
+			if !isRetryableError(err) {
+				log.Error().Err(err).Msgf("HTTP request failed (not retryable): %s %s", method, path)
+				return 0, err
+			}
+
+			// If we've reached max retries, return the last error
+			if retry == maxRetries {
+				log.Error().Err(err).Msgf("HTTP request failed after %d retries: %s %s", maxRetries, method, path)
+				return 0, err
+			}
+
+			// Wait with exponential backoff before retrying
+			waitDuration := calculateBackoff(initialBackoff, retry)
+			log.Debug().Err(err).Msgf("HTTP request failed, retrying in %v (attempt %d/%d): %s %s", waitDuration, retry+1, maxRetries, method, path)
+			time.Sleep(waitDuration)
+			continue
+		}
+
+		statusCode = resp.StatusCode
+		// Read body immediately to ensure proper resource cleanup for retries
+		respBody, readErr := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if readErr != nil {
+			lastErr = readErr
+
+			// Check if this is a retryable error
+			if isRetryableError(readErr) && retry < maxRetries {
+				// Wait with exponential backoff before retrying
+				waitDuration := calculateBackoff(initialBackoff, retry)
+				log.Debug().Err(readErr).Msgf("HTTP response read failed, retrying in %v (attempt %d/%d): %s %s", waitDuration, retry+1, maxRetries, method, path)
+				time.Sleep(waitDuration)
+				continue
+			}
+			log.Error().Err(readErr).Msgf("HTTP response read failed (not retryable): %s %s", method, path)
+			return statusCode, readErr
+		}
+
+		// Check if status code is retryable
+		if isRetryableStatusCode(statusCode) {
+			lastErr = fmt.Errorf("response: %d", statusCode)
+
+			// If we've reached max retries, return the response body
+			if retry == maxRetries {
+				log.Error().Int("status", statusCode).Msgf("HTTP request failed after %d retries with status code: %s %s", maxRetries, method, path)
+				return statusCode, fmt.Errorf("response: %s", string(respBody))
+			}
+
+			// Wait with exponential backoff before retrying
+			waitDuration := calculateBackoff(initialBackoff, retry)
+			log.Debug().Int("status", statusCode).Msgf("HTTP request returned retryable status code, retrying in %v (attempt %d/%d): %s %s", waitDuration, retry+1, maxRetries, method, path)
+			time.Sleep(waitDuration)
+			continue
+		}
+
+		// If status code is client error (4xx), don't retry
+		if statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError {
+			log.Debug().Int("status", statusCode).Msgf("HTTP request returned client error (not retryable): %s %s", method, path)
+			return statusCode, fmt.Errorf("response: %s", string(respBody))
+		}
+
+		// If status code is OK (2xx), parse and return response
+		if statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices {
+			if out != nil {
+				err = json.NewDecoder(bytes.NewReader(respBody)).Decode(out)
+				// Check for EOF error during response body parsing
+				if err != nil && (errors.Is(err, io.EOF) || strings.Contains(err.Error(), "unexpected EOF")) {
+					lastErr = err
+
+					// If we've reached max retries, return the error
+					if retry == maxRetries {
+						log.Error().Err(err).Msgf("HTTP response parsing failed after %d retries: %s %s", maxRetries, method, path)
+						return statusCode, err
+					}
+
+					// Wait with exponential backoff before retrying
+					waitDuration := calculateBackoff(initialBackoff, retry)
+					log.Debug().Err(err).Msgf("HTTP response parsing failed (EOF), retrying in %v (attempt %d/%d): %s %s", waitDuration, retry+1, maxRetries, method, path)
+					time.Sleep(waitDuration)
+					continue
+				}
+				if err != nil {
+					log.Error().Err(err).Msgf("HTTP response parsing failed (not retryable): %s %s", method, path)
+					return statusCode, err
+				}
+			}
+			log.Debug().Int("status", statusCode).Msgf("HTTP request succeeded: %s %s", method, path)
+			return statusCode, nil
+		}
+
+		// For any other status code, don't retry
+		log.Error().Int("status", statusCode).Msgf("HTTP request returned unexpected status code (not retryable): %s %s", method, path)
+		return statusCode, fmt.Errorf("response: %s", string(respBody))
 	}
 
-	// if no other errors parse and return the json response.
-	err = json.NewDecoder(resp.Body).Decode(out)
-	return resp.StatusCode, err
+	return statusCode, lastErr
+}
+
+// isRetryableError checks if an error is transient and suitable for retry
+func isRetryableError(err error) bool {
+	// Check for network-related errors
+	if netErr, ok := err.(net.Error); ok {
+		// Retry on timeout errors
+		if netErr.Timeout() {
+			return true
+		}
+		// Retry on temporary errors
+		if netErr.Temporary() {
+			return true
+		}
+	}
+
+	// Check for specific error types
+	switch {
+	case errors.Is(err, net.ErrClosed),
+		errors.Is(err, io.EOF),
+		errors.Is(err, io.ErrUnexpectedEOF):
+		return true
+	}
+
+	// Check for error strings that indicate retryable conditions
+	errStr := err.Error()
+	return strings.Contains(errStr, "connection refused") ||
+		strings.Contains(errStr, "connection reset by peer") ||
+		strings.Contains(errStr, "no such host") ||
+		strings.Contains(errStr, "TLS handshake timeout")
+}
+
+// isRetryableStatusCode checks if an HTTP status code is suitable for retry
+func isRetryableStatusCode(statusCode int) bool {
+	// Retry on server errors (5xx)
+	return statusCode >= http.StatusInternalServerError && statusCode < http.StatusNetworkAuthenticationRequired
+}
+
+// calculateBackoff calculates the backoff duration with exponential growth
+func calculateBackoff(initialBackoff time.Duration, retry int) time.Duration {
+	// Cap the maximum backoff to 5 seconds
+	maxBackoff := 5 * time.Second
+
+	// Use bitwise left shift for exponential backoff to avoid float64 precision issues
+	// Limit retry to prevent integer overflow
+	if retry >= 30 { // time.Duration is int64, so 2^30 is safe
+		return maxBackoff
+	}
+
+	backoff := initialBackoff << retry
+
+	// Ensure backoff doesn't exceed maxBackoff or become negative due to overflow
+	if backoff <= 0 || backoff > maxBackoff {
+		backoff = maxBackoff
+	}
+
+	return backoff
 }
