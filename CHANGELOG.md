@@ -42,6 +42,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#5864](https://github.com/woodpecker-ci/woodpecker/pull/5864)]
 - chore(deps): update dependency @types/node to v24.10.4 [[#5863](https://github.com/woodpecker-ci/woodpecker/pull/5863)]
 - chore(deps): update web npm deps non-major [[#5859](https://github.com/woodpecker-ci/woodpecker/pull/5859)]
 - chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.47.0 [[#5858](https://github.com/woodpecker-ci/woodpecker/pull/5858)]
