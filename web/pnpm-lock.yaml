@@ -52,7 +52,7 @@ importers:
         version: 7.7.3
       simple-icons:
         specifier: ^16.0.0
-        version: 16.1.0
+        version: 16.2.0
       tailwindcss:
         specifier: '4'
         version: 4.1.18
@@ -68,7 +68,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^6.0.0
-        version: 6.6.1(@vue/compiler-sfc@3.5.25)(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.15(@types/node@24.10.4)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)(stylus@0.57.0)(yaml@2.8.2))
+        version: 6.7.0(@vue/compiler-sfc@3.5.25)(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.15(@types/node@24.10.4)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)(stylus@0.57.0)(yaml@2.8.2))
       '@eslint/js':
         specifier: ^9.17.0
         version: 9.39.2
@@ -162,8 +162,8 @@ packages:
   '@acemir/cssom@0.9.28':
     resolution: {integrity: sha512-LuS6IVEivI75vKN8S04qRD+YySP0RmU/cV8UNukhQZvprxF+76Z43TNo/a08eCodaGhT1Us8etqS1ZRY9/Or0A==}
 
-  '@antfu/eslint-config@6.6.1':
-    resolution: {integrity: sha512-ZOdoVhZHu1FMOYJcqPNyFvkoRlfI1qnaMUxQuB3C0MbamgkpOsuKtWQlcqDTeVDEUiXnfcE/XpFP+ZOQDS6I3A==}
+  '@antfu/eslint-config@6.7.0':
+    resolution: {integrity: sha512-kB9u2IDhqCjLzAzDUb9nqoCTAQ4weJxCyLdfSXzucl4csw8CJ9U6KJSnQyFd+abl4UE6uUoKPiWcE5aCSCWSxg==}
     hasBin: true
     peerDependencies:
       '@eslint-react/eslint-plugin': ^2.0.1
@@ -1658,8 +1658,8 @@ packages:
     peerDependencies:
       eslint: '>=8.45.0'
 
-  eslint-plugin-pnpm@1.4.2:
-    resolution: {integrity: sha512-em/HEUlud5G3G4VZe2dhgsLm2ey6CG+Y+Lq3fS/RsbnmKhi+D+LcLz31GphTJhizCoKl2oAVndMltOHbuBYe+A==}
+  eslint-plugin-pnpm@1.4.3:
+    resolution: {integrity: sha512-wdWrkWN5mxRgEADkQvxwv0xA+0++/hYDD5OyXTL6UqPLUPdcCFQJO61NO7IKhEqb3GclWs02OoFs1METN+a3zQ==}
     peerDependencies:
       eslint: ^9.0.0
 
@@ -2490,8 +2490,8 @@ packages:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
 
-  pnpm-workspace-yaml@1.4.2:
-    resolution: {integrity: sha512-L2EKuOeV8aSt3z0RNtdwkg96BHV4WRN9pN2oTHKkMQQRxVEHFXPTbB+nly6ip1qV+JQM6qBebSiMgPRBx8S0Vw==}
+  pnpm-workspace-yaml@1.4.3:
+    resolution: {integrity: sha512-Q8B3SWuuISy/Ciag4DFP7MCrJX07wfaekcqD2o/msdIj4x8Ql3bZ/NEKOXV7mTVh7m1YdiFWiMi9xH+0zuEGHw==}
 
   postcss-safe-parser@6.0.0:
     resolution: {integrity: sha512-FARHN8pwH+WiS2OPCxJI8FuRJpTVnn6ZNFiqAM2aeW2LwTHWWmWgIyKC6cUo0L8aeKiF/14MNvnpls6R2PBeMQ==}
@@ -2682,8 +2682,8 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  simple-icons@16.1.0:
-    resolution: {integrity: sha512-fL95b22MWTn3y+zQ/QC9oKqJ6mXXNwm35oy5XMVPdvJZGfGNWDMMb33kfqm50OuRKNcdjbk7HQ73NdWcvaBXIQ==}
+  simple-icons@16.2.0:
+    resolution: {integrity: sha512-SCV4cAX8O2M2WQ3QJm+3k4QdcUIJiBiwKNViQiOwPjWbFWgypzelviW+Bp0A2ij6r/DIEZpTTDcLgD/BE4aexQ==}
     engines: {node: '>=0.12.18'}
 
   sisteransi@1.0.5:
@@ -3128,7 +3128,7 @@ snapshots:
 
   '@acemir/cssom@0.9.28': {}
 
-  '@antfu/eslint-config@6.6.1(@vue/compiler-sfc@3.5.25)(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.15(@types/node@24.10.4)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)(stylus@0.57.0)(yaml@2.8.2))':
+  '@antfu/eslint-config@6.7.0(@vue/compiler-sfc@3.5.25)(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.15(@types/node@24.10.4)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)(stylus@0.57.0)(yaml@2.8.2))':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 0.11.0
@@ -3152,7 +3152,7 @@ snapshots:
       eslint-plugin-n: 17.23.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       eslint-plugin-no-only-tests: 3.3.0
       eslint-plugin-perfectionist: 4.15.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      eslint-plugin-pnpm: 1.4.2(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-pnpm: 1.4.3(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-regexp: 2.10.0(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-toml: 0.12.0(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-unicorn: 62.0.0(eslint@9.39.2(jiti@2.6.1))
@@ -4601,13 +4601,13 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-pnpm@1.4.2(eslint@9.39.2(jiti@2.6.1)):
+  eslint-plugin-pnpm@1.4.3(eslint@9.39.2(jiti@2.6.1)):
     dependencies:
       empathic: 2.0.0
       eslint: 9.39.2(jiti@2.6.1)
       jsonc-eslint-parser: 2.4.2
       pathe: 2.0.3
-      pnpm-workspace-yaml: 1.4.2
+      pnpm-workspace-yaml: 1.4.3
       tinyglobby: 0.2.15
       yaml: 2.8.2
       yaml-eslint-parser: 1.3.2
@@ -5620,7 +5620,7 @@ snapshots:
 
   pluralize@8.0.0: {}
 
-  pnpm-workspace-yaml@1.4.2:
+  pnpm-workspace-yaml@1.4.3:
     dependencies:
       yaml: 2.8.2
 
@@ -5763,7 +5763,7 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  simple-icons@16.1.0: {}
+  simple-icons@16.2.0: {}
 
   sisteransi@1.0.5: {}
 
