@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-13
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -30,6 +30,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/node to v24.10.4 [[#5862](https://github.com/woodpecker-ci/woodpecker/pull/5862)]
 - chore(deps): update docs npm deps non-major [[#5855](https://github.com/woodpecker-ci/woodpecker/pull/5855)]
 - chore(deps): update docs npm deps non-major [[#5829](https://github.com/woodpecker-ci/woodpecker/pull/5829)]
 - Update link for Codeberg Pages Deploy plugin [[#5811](https://github.com/woodpecker-ci/woodpecker/pull/5811)]
