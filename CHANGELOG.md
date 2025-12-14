@@ -42,6 +42,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @intlify/unplugin-vue-i18n to v11.0.3 [[#5866](https://github.com/woodpecker-ci/woodpecker/pull/5866)]
 - chore(deps): update dependency @antfu/eslint-config to v6.7.1 [[#5865](https://github.com/woodpecker-ci/woodpecker/pull/5865)]
 - chore(deps): update web npm deps non-major [[#5864](https://github.com/woodpecker-ci/woodpecker/pull/5864)]
 - chore(deps): update dependency @types/node to v24.10.4 [[#5863](https://github.com/woodpecker-ci/woodpecker/pull/5863)]
