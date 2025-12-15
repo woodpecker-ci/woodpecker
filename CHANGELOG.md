@@ -30,6 +30,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5868](https://github.com/woodpecker-ci/woodpecker/pull/5868)]
 - chore(deps): update dependency @types/node to v24.10.4 [[#5862](https://github.com/woodpecker-ci/woodpecker/pull/5862)]
 - chore(deps): update docs npm deps non-major [[#5855](https://github.com/woodpecker-ci/woodpecker/pull/5855)]
 - chore(deps): update docs npm deps non-major [[#5829](https://github.com/woodpecker-ci/woodpecker/pull/5829)]
