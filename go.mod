@@ -16,14 +16,14 @@ require (
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.1.2+incompatible
+	github.com/docker/cli v29.1.3+incompatible
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
-	github.com/expr-lang/expr v1.17.6
+	github.com/expr-lang/expr v1.17.7
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/gdgvda/cron v0.5.0
+	github.com/gdgvda/cron v0.6.0
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/gitsight/go-vcsurl v1.0.1
@@ -56,7 +56,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.4.1
 	github.com/zalando/go-keyring v0.2.6
-	gitlab.com/gitlab-org/api/client-go v1.8.1
+	gitlab.com/gitlab-org/api/client-go v1.8.2
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.46.0
 	golang.org/x/net v0.48.0
@@ -65,7 +65,7 @@ require (
 	golang.org/x/term v0.38.0
 	golang.org/x/text v0.32.0
 	google.golang.org/grpc v1.77.0
-	google.golang.org/protobuf v1.36.10
+	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.34.3
 	k8s.io/apimachinery v0.34.3
