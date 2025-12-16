@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Javex, @MartinSchmidt, @anbraten, @gsaslis, @henkka, @mogsie, @qwerty287, @sloonz, @sugar700, @tuxmainy
+@6543, @Javex, @MartinSchmidt, @anbraten, @gsaslis, @henkka, @mogsie, @qwerty287, @sloonz, @sugar700, @tuxmainy, @xoxys
 
 ### 🔒 Security
 
@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- Make disabled checkboxes match overall style [[#5869](https://github.com/woodpecker-ci/woodpecker/pull/5869)]
 - Fix CLI trusted updating [[#5861](https://github.com/woodpecker-ci/woodpecker/pull/5861)]
 - Send configuration as part of the request for external configuration [[#5831](https://github.com/woodpecker-ci/woodpecker/pull/5831)]
 - fix(bitbucketdatacenter): fix CI_COMMIT_PULL_REQUEST [[#5769](https://github.com/woodpecker-ci/woodpecker/pull/5769)]
