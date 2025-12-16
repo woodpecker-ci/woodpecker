@@ -72,7 +72,7 @@ func (w *withExtension) RegistryListPipeline(ctx context.Context, repo *model.Re
 	return merged, nil
 }
 
-// All other methods delegate to the base service
+// All other methods delegate to the base service.
 
 func (w *withExtension) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
 	return w.base.RegistryFind(repo, addr)
