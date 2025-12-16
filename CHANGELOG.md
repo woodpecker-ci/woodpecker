@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-15
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -43,6 +43,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5870](https://github.com/woodpecker-ci/woodpecker/pull/5870)]
 - fix(deps): update module github.com/gdgvda/cron to v0.6.0 [[#5867](https://github.com/woodpecker-ci/woodpecker/pull/5867)]
 - chore(deps): update dependency @intlify/unplugin-vue-i18n to v11.0.3 [[#5866](https://github.com/woodpecker-ci/woodpecker/pull/5866)]
 - chore(deps): update dependency @antfu/eslint-config to v6.7.1 [[#5865](https://github.com/woodpecker-ci/woodpecker/pull/5865)]
