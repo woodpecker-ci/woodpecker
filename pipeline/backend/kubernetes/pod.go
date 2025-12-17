@@ -474,9 +474,13 @@ func toleration(backendToleration Toleration) v1.Toleration {
 }
 
 func affinity(stepAffinity, agentAffinity *v1.Affinity, allowFromStep bool) *v1.Affinity {
-	if allowFromStep && stepAffinity != nil {
-		log.Trace().Msg("using affinity from step backend options")
-		return stepAffinity
+	if stepAffinity != nil {
+		if allowFromStep {
+			log.Trace().Msg("using affinity from step backend options")
+			return stepAffinity
+		} else {
+			log.Debug().Msg("Step affinity is disallowed by instance configuration, ignoring it")
+		}
 	}
 
 	if agentAffinity != nil {
@@ -484,6 +488,7 @@ func affinity(stepAffinity, agentAffinity *v1.Affinity, allowFromStep bool) *v1.
 		return agentAffinity
 	}
 
+	log.Trace().Msg("no affinity configured")
 	return nil
 }
 
