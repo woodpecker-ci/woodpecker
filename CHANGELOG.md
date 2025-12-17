@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- feat(kubernetes): add support for pod affinity and anti-affinity configurations [[#5854](https://github.com/woodpecker-ci/woodpecker/pull/5854)]
 - Public key endpoint [[#5860](https://github.com/woodpecker-ci/woodpecker/pull/5860)]
 - Allow untrusted repo to still drop network for steps [[#5820](https://github.com/woodpecker-ci/woodpecker/pull/5820)]
 - Add support for headless Kubernetes services [[#5764](https://github.com/woodpecker-ci/woodpecker/pull/5764)]
