@@ -189,6 +189,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		DNSConfig:          dnsConfig(config.GetNamespace(step.OrgID), subdomain),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
+		Affinity:           affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
 
@@ -470,6 +471,25 @@ func toleration(backendToleration Toleration) v1.Toleration {
 		Effect:            v1.TaintEffect(backendToleration.Effect),
 		TolerationSeconds: backendToleration.TolerationSeconds,
 	}
+}
+
+func affinity(stepAffinity, agentAffinity *v1.Affinity, allowFromStep bool) *v1.Affinity {
+	if stepAffinity != nil {
+		if allowFromStep {
+			log.Trace().Msg("using affinity from step backend options")
+			return stepAffinity
+		} else {
+			log.Debug().Msg("Step affinity is disallowed by instance configuration, ignoring it")
+		}
+	}
+
+	if agentAffinity != nil {
+		log.Trace().Msg("using affinity from agent configuration")
+		return agentAffinity
+	}
+
+	log.Trace().Msg("no affinity configured")
+	return nil
 }
 
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
