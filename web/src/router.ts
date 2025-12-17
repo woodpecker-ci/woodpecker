@@ -8,7 +8,7 @@ import useUserConfig from '~/compositions/useUserConfig';
 
 declare module 'vue-router' {
   interface RouteMeta {
-    authentication?: 'required' | 'none';
+    authentication?: 'required' | 'guest-only';
     repoHeader?: true;
     layout?: 'default' | 'blank';
   }
@@ -28,11 +28,13 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'repos',
         component: (): Component => import('~/views/Repos.vue'),
+        meta: { authentication: 'required' },
       },
       {
         path: 'add',
         name: 'repo-add',
         component: (): Component => import('~/views/RepoAdd.vue'),
+        meta: { authentication: 'required' },
       },
       {
         path: ':repoId',
@@ -338,7 +340,7 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
-    meta: { layout: 'blank', authentication: 'none' },
+    meta: { layout: 'blank', authentication: 'guest-only' },
   },
   {
     path: '/cli/auth',
@@ -372,18 +374,20 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, _, next) => {
-  const { isAuthenticated } = useAuthentication();
   const authenticationMode = to.matched.toReversed().find((record) => record.meta.authentication != null)
     ?.meta.authentication;
 
   const config = useUserConfig();
   const { redirectUrl } = config.userConfig.value;
+
   // redirect to saved url when not on login page
-  if (redirectUrl !== '' && authenticationMode !== 'none') {
+  if (redirectUrl !== '' && authenticationMode !== 'guest-only') {
     config.setUserConfig('redirectUrl', '');
     next(redirectUrl);
     return;
   }
+
+  const { isAuthenticated } = useAuthentication();
 
   if (authenticationMode === 'required' && !isAuthenticated) {
     config.setUserConfig('redirectUrl', to.fullPath);
@@ -391,7 +395,7 @@ router.beforeEach(async (to, _, next) => {
     return;
   }
 
-  if (authenticationMode === 'none' && isAuthenticated) {
+  if (authenticationMode === 'guest-only' && isAuthenticated) {
     next({ name: 'home' });
     return;
   }
