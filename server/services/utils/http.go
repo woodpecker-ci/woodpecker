@@ -30,6 +30,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/yaronf/httpsign"
 
@@ -122,6 +123,12 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	var statusCode int
 	var lastErr error
 
+	// Create backoff configuration
+	backoffConfig := backoff.NewExponentialBackOff()
+	backoffConfig.InitialInterval = initialBackoff
+	backoffConfig.MaxInterval = 5 * time.Second
+	// No MaxElapsedTime, we'll handle max retries ourselves
+
 	for retry := 0; retry <= maxRetries; retry++ {
 		// Check if context is already canceled
 		if ctx.Err() != nil {
@@ -161,7 +168,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 			}
 
 			// Wait with exponential backoff before retrying
-			waitDuration := calculateBackoff(initialBackoff, retry)
+			waitDuration := backoffConfig.NextBackOff()
 			log.Debug().Err(err).Msgf("HTTP request failed, retrying in %v (attempt %d/%d): %s %s", waitDuration, retry+1, maxRetries, method, path)
 			time.Sleep(waitDuration)
 			continue
@@ -177,7 +184,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 			// Check if this is a retryable error
 			if isRetryableError(readErr) && retry < maxRetries {
 				// Wait with exponential backoff before retrying
-				waitDuration := calculateBackoff(initialBackoff, retry)
+				waitDuration := backoffConfig.NextBackOff()
 				log.Debug().Err(readErr).Msgf("HTTP response read failed, retrying in %v (attempt %d/%d): %s %s", waitDuration, retry+1, maxRetries, method, path)
 				time.Sleep(waitDuration)
 				continue
@@ -197,7 +204,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 			}
 
 			// Wait with exponential backoff before retrying
-			waitDuration := calculateBackoff(initialBackoff, retry)
+			waitDuration := backoffConfig.NextBackOff()
 			log.Debug().Int("status", statusCode).Msgf("HTTP request returned retryable status code, retrying in %v (attempt %d/%d): %s %s", waitDuration, retry+1, maxRetries, method, path)
 			time.Sleep(waitDuration)
 			continue
@@ -224,7 +231,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 					}
 
 					// Wait with exponential backoff before retrying
-					waitDuration := calculateBackoff(initialBackoff, retry)
+					waitDuration := backoffConfig.NextBackOff()
 					log.Debug().Err(err).Msgf("HTTP response parsing failed (EOF), retrying in %v (attempt %d/%d): %s %s", waitDuration, retry+1, maxRetries, method, path)
 					time.Sleep(waitDuration)
 					continue
@@ -280,25 +287,4 @@ func isRetryableError(err error) bool {
 func isRetryableStatusCode(statusCode int) bool {
 	// Retry on server errors (5xx)
 	return statusCode >= http.StatusInternalServerError && statusCode < http.StatusNetworkAuthenticationRequired
-}
-
-// calculateBackoff calculates the backoff duration with exponential growth
-func calculateBackoff(initialBackoff time.Duration, retry int) time.Duration {
-	// Cap the maximum backoff to 5 seconds
-	maxBackoff := 5 * time.Second
-
-	// Use bitwise left shift for exponential backoff to avoid float64 precision issues
-	// Limit retry to prevent integer overflow
-	if retry >= 30 { // time.Duration is int64, so 2^30 is safe
-		return maxBackoff
-	}
-
-	backoff := initialBackoff << retry
-
-	// Ensure backoff doesn't exceed maxBackoff or become negative due to overflow
-	if backoff <= 0 || backoff > maxBackoff {
-		backoff = maxBackoff
-	}
-
-	return backoff
 }
