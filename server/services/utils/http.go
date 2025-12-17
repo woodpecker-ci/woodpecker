@@ -17,19 +17,81 @@ package utils
 import (
 	"bytes"
 	"context"
+	"crypto"
 	"crypto/ed25519"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/yaronf/httpsign"
+
+	host_matcher "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 )
+
+type Client struct {
+	*httpsign.Client
+}
+
+func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*httpsign.Client, error) {
+	timeout := 10 * time.Second //nolint:mnd
+
+	if allowedHostListValue == "" {
+		allowedHostListValue = host_matcher.MatchBuiltinExternal
+	}
+	allowedHostMatcher := host_matcher.ParseHostMatchList("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS", allowedHostListValue)
+
+	pubKeyID := "woodpecker-ci-extensions"
+
+	ed25519Key, ok := privateKey.(ed25519.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("invalid private key type")
+	}
+
+	signer, err := httpsign.NewEd25519Signer(ed25519Key,
+		httpsign.NewSignConfig(),
+		httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
+	if err != nil {
+		return nil, err
+	}
+
+	// Create base transport with custom User-Agent
+	baseTransport := httputil.NewUserAgentRoundTripper(
+		&http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+			DialContext:     host_matcher.NewDialContext("extensions", allowedHostMatcher),
+		},
+		"server-extensions",
+	)
+
+	client := http.Client{
+		Timeout:   timeout,
+		Transport: baseTransport,
+	}
+
+	config := httpsign.NewClientConfig().SetSignatureName(pubKeyID).SetSigner(signer)
+
+	return httpsign.NewClient(client, config), nil
+}
+
+func NewHTTPClient(privateKey crypto.PrivateKey, allowedHostList string) (*Client, error) {
+	client, err := getHTTPClient(privateKey, allowedHostList)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{
+		Client: client,
+	}, nil
+}
 
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and un-marshaling the output from the response body.
-func Send(ctx context.Context, method, path string, privateKey ed25519.PrivateKey, in, out any) (int, error) {
+func (e *Client) Send(ctx context.Context, method, path string, in, out any) (int, error) {
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
@@ -54,18 +116,13 @@ func Send(ctx context.Context, method, path string, privateKey ed25519.PrivateKe
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	client, err := signClient(privateKey)
-	if err != nil {
-		return 0, err
-	}
-
-	resp, err := client.Do(req)
+	resp, err := e.Do(req)
 	if err != nil {
 		return 0, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return resp.StatusCode, err
@@ -77,16 +134,4 @@ func Send(ctx context.Context, method, path string, privateKey ed25519.PrivateKe
 	// if no other errors parse and return the json response.
 	err = json.NewDecoder(resp.Body).Decode(out)
 	return resp.StatusCode, err
-}
-
-func signClient(privateKey ed25519.PrivateKey) (*httpsign.Client, error) {
-	pubKeyID := "woodpecker-ci-extensions"
-
-	signer, err := httpsign.NewEd25519Signer(privateKey,
-		httpsign.NewSignConfig(),
-		httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
-	if err != nil {
-		return nil, err
-	}
-	return httpsign.NewDefaultClient(httpsign.NewClientConfig().SetSignatureName(pubKeyID).SetSigner(signer)), nil // sign requests, don't verify responses
 }

@@ -21,9 +21,12 @@ import (
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
+
+const taskUUID = "11301"
 
 func TestPodName(t *testing.T) {
 	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0"})
@@ -50,11 +53,11 @@ func TestStepToPodName(t *testing.T) {
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService, Ports: []types.Port{{Number: 5432}}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
 	// Detached service
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true, Ports: []types.Port{{Number: 5432}}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
 	// Detached long running container
@@ -71,11 +74,13 @@ func TestPodMeta(t *testing.T) {
 		Image:       "postgres:16",
 		WorkingDir:  "/woodpecker/src",
 		Environment: map[string]string{"CI": "woodpecker"},
+		Ports:       []types.Port{{Number: 5432}},
 	}, &config{
 		Namespace: "woodpecker",
-	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", meta.Labels[ServiceLabel])
+	assert.EqualValues(t, taskUUID, meta.Labels[TaskUUIDLabel])
 
 	// Detached service
 	meta, err = podMeta(&types.Step{
@@ -85,9 +90,10 @@ func TestPodMeta(t *testing.T) {
 		Image:       "postgres:16",
 		WorkingDir:  "/woodpecker/src",
 		Environment: map[string]string{"CI": "woodpecker"},
+		Ports:       []types.Port{{Number: 5432}},
 	}, &config{
 		Namespace: "woodpecker",
-	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", meta.Labels[ServiceLabel])
 
@@ -101,7 +107,7 @@ func TestPodMeta(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "", meta.Labels[ServiceLabel])
 }
@@ -115,6 +121,18 @@ func TestStepLabel(t *testing.T) {
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
+func TestPodHostnameSanitized(t *testing.T) {
+	pod, err := mkPod(&types.Step{
+		Name:        "Update repos",
+		Image:       "alpine:latest",
+		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
+		WorkingDir:  "/woodpecker/src",
+		Environment: map[string]string{},
+	}, &config{Namespace: "woodpecker"}, "wp-01he8bebctabr3kgk0qj36d2me-1", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "update-repos", pod.Spec.Hostname)
+}
+
 func TestTinyPod(t *testing.T) {
 	const expected = `
 	{
@@ -123,7 +141,8 @@ func TestTinyPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "build-via-gradle",
-				"woodpecker-ci.org/step": "build-via-gradle"
+				"woodpecker-ci.org/step": "build-via-gradle",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -168,7 +187,12 @@ func TestTinyPod(t *testing.T) {
 					]
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "build-via-gradle"
 		},
 		"status": {}
 	}`
@@ -185,7 +209,7 @@ func TestTinyPod(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -205,7 +229,8 @@ func TestFullPod(t *testing.T) {
 				"app": "test",
 				"part-of": "woodpecker-ci",
 				"step": "go-test",
-				"woodpecker-ci.org/step": "go-test"
+				"woodpecker-ci.org/step": "go-test",
+				"woodpecker-ci.org/task-uuid": "11301"
 			},
 			"annotations": {
 				"apps.kubernetes.io/pod-index": "0",
@@ -332,7 +357,11 @@ func TestFullPod(t *testing.T) {
 						"cf.v6"
 					]
 				}
-			]
+			],
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "go-test"
 		},
 		"status": {}
 	}`
@@ -391,19 +420,22 @@ func TestFullPod(t *testing.T) {
 		PodTolerationsAllowFromStep: true,
 		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
 		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
-		Labels:             map[string]string{"part-of": "woodpecker-ci"},
-		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
-		NodeSelector:       map[string]string{"storage": "ssd"},
-		RuntimeClassName:   &runtimeClass,
-		ServiceAccountName: "wp-svc-acc",
-		Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
-		Resources: Resources{
-			Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
-			Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
-		},
-		SecurityContext: &secCtx,
-	})
+	},
+		"wp-01he8bebctabr3kgk0qj36d2me-0",
+		"linux/amd64",
+		BackendOptions{
+			Labels:             map[string]string{"part-of": "woodpecker-ci"},
+			Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
+			NodeSelector:       map[string]string{"storage": "ssd"},
+			RuntimeClassName:   &runtimeClass,
+			ServiceAccountName: "wp-svc-acc",
+			Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
+			Resources: Resources{
+				Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+				Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+			},
+			SecurityContext: &secCtx,
+		}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -425,7 +457,7 @@ func TestPodPrivilege(t *testing.T) {
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
 		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 			SecurityContext: &secCtx,
-		})
+		}, "11301")
 	}
 
 	// securty context is requesting user and group 101 (non-root)
@@ -504,7 +536,8 @@ func TestScratchPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "curl-google",
-				"woodpecker-ci.org/step": "curl-google"
+				"woodpecker-ci.org/step": "curl-google",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -520,7 +553,12 @@ func TestScratchPod(t *testing.T) {
 					"resources": {}
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "curl-google"
 		},
 		"status": {}
 	}`
@@ -532,7 +570,7 @@ func TestScratchPod(t *testing.T) {
 		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -550,7 +588,8 @@ func TestSecrets(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "test-secrets",
-				"woodpecker-ci.org/step": "test-secrets"
+				"woodpecker-ci.org/step": "test-secrets",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -618,7 +657,12 @@ func TestSecrets(t *testing.T) {
 					]
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "test-secrets"
 		},
 		"status": {}
 	}`
@@ -652,7 +696,7 @@ func TestSecrets(t *testing.T) {
 				Target: SecretTarget{File: "~/.docker/config.json"},
 			},
 		},
-	})
+	}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -670,7 +714,8 @@ func TestPodTolerations(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
-				"woodpecker-ci.org/step": "toleration-test"
+				"woodpecker-ci.org/step": "toleration-test",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -693,7 +738,12 @@ func TestPodTolerations(t *testing.T) {
 					"value": "qux",
 					"effect": "NoExecute"
 				}
-			]
+			],
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "toleration-test"
 		},
 		"status": {}
 	}`
@@ -711,7 +761,7 @@ func TestPodTolerations(t *testing.T) {
 		Namespace:                   "woodpecker",
 		PodTolerations:              globalTolerations,
 		PodTolerationsAllowFromStep: false,
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -729,7 +779,8 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
-				"woodpecker-ci.org/step": "toleration-test"
+				"woodpecker-ci.org/step": "toleration-test",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -740,7 +791,12 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 					"resources": {}
 				}
 			],
-			"restartPolicy": "Never"
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "toleration-test"
 		},
 		"status": {}
 	}`
@@ -751,7 +807,8 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
-				"woodpecker-ci.org/step": "toleration-test"
+				"woodpecker-ci.org/step": "toleration-test",
+				"woodpecker-ci.org/task-uuid": "11301"
 			}
 		},
 		"spec": {
@@ -769,7 +826,12 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 					"value": "value",
 					"effect": "NoSchedule"
 				}
-			]
+			],
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "toleration-test"
 		},
 		"status": {}
 	}`
@@ -789,7 +851,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 		PodTolerationsAllowFromStep: false,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		Tolerations: stepTolerations,
-	})
+	}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -803,7 +865,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 		PodTolerationsAllowFromStep: true,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		Tolerations: stepTolerations,
-	})
+	}, taskUUID)
 	assert.NoError(t, err)
 
 	podJSON, err = json.Marshal(pod)
@@ -842,4 +904,308 @@ func TestStepSecret(t *testing.T) {
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(secretJSON), expected)
+}
+
+func TestPodAffinity(t *testing.T) {
+	const expected = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "affinity-test",
+				"woodpecker-ci.org/step": "affinity-test",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never",
+			"affinity": {
+				"podAffinity": {
+					"requiredDuringSchedulingIgnoredDuringExecution": [
+						{
+							"labelSelector": {},
+							"matchLabelKeys": ["woodpecker-ci.org/task-uuid"],
+							"topologyKey": "kubernetes.io/hostname"
+						}
+					]
+				}
+			},
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "affinity-test"
+		},
+		"status": {}
+	}`
+
+	agentAffinity := &v1.Affinity{
+		PodAffinity: &v1.PodAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+				{
+					LabelSelector:  &meta_v1.LabelSelector{},
+					MatchLabelKeys: []string{"woodpecker-ci.org/task-uuid"},
+					TopologyKey:    "kubernetes.io/hostname",
+				},
+			},
+		},
+	}
+
+	pod, err := mkPod(&types.Step{
+		Name:  "affinity-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}, &config{
+		Namespace:                "woodpecker",
+		PodAffinity:              agentAffinity,
+		PodAffinityAllowFromStep: false,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestPodAffinityAllowFromStep(t *testing.T) {
+	const expectedDisallow = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "affinity-test",
+				"woodpecker-ci.org/step": "affinity-test",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "affinity-test"
+		},
+		"status": {}
+	}`
+	const expectedAllow = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "affinity-test",
+				"woodpecker-ci.org/step": "affinity-test",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never",
+			"affinity": {
+				"podAntiAffinity": {
+					"preferredDuringSchedulingIgnoredDuringExecution": [
+						{
+							"weight": 100,
+							"podAffinityTerm": {
+								"labelSelector": {
+									"matchLabels": {
+										"app": "woodpecker"
+									}
+								},
+								"topologyKey": "kubernetes.io/hostname"
+							}
+						}
+					]
+				}
+			},
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "affinity-test"
+		},
+		"status": {}
+	}`
+
+	stepAffinity := &v1.Affinity{
+		PodAntiAffinity: &v1.PodAntiAffinity{
+			PreferredDuringSchedulingIgnoredDuringExecution: []v1.WeightedPodAffinityTerm{
+				{
+					Weight: 100,
+					PodAffinityTerm: v1.PodAffinityTerm{
+						LabelSelector: &meta_v1.LabelSelector{
+							MatchLabels: map[string]string{
+								"app": "woodpecker",
+							},
+						},
+						TopologyKey: "kubernetes.io/hostname",
+					},
+				},
+			},
+		},
+	}
+
+	step := &types.Step{
+		Name:  "affinity-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}
+
+	pod, err := mkPod(step, &config{
+		Namespace:                "woodpecker",
+		PodAffinity:              nil,
+		PodAffinityAllowFromStep: false,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Affinity: stepAffinity,
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expectedDisallow)
+
+	pod, err = mkPod(step, &config{
+		Namespace:                "woodpecker",
+		PodAffinity:              nil,
+		PodAffinityAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Affinity: stepAffinity,
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err = json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja = jsonassert.New(t)
+	ja.Assertf(string(podJSON), expectedAllow)
+}
+
+func TestPodAffinityStepOverridesAgent(t *testing.T) {
+	const expected = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "affinity-test",
+				"woodpecker-ci.org/step": "affinity-test",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never",
+			"affinity": {
+				"nodeAffinity": {
+					"requiredDuringSchedulingIgnoredDuringExecution": {
+						"nodeSelectorTerms": [
+							{
+								"matchExpressions": [
+									{
+										"key": "disk-type",
+										"operator": "In",
+										"values": ["ssd"]
+									}
+								]
+							}
+						]
+					}
+				}
+			},
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "affinity-test"
+		},
+		"status": {}
+	}`
+
+	agentAffinity := &v1.Affinity{
+		NodeAffinity: &v1.NodeAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: &v1.NodeSelector{
+				NodeSelectorTerms: []v1.NodeSelectorTerm{
+					{
+						MatchExpressions: []v1.NodeSelectorRequirement{
+							{
+								Key:      "topology.kubernetes.io/zone",
+								Operator: v1.NodeSelectorOpIn,
+								Values:   []string{"eu-central-1a"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	stepAffinity := &v1.Affinity{
+		NodeAffinity: &v1.NodeAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: &v1.NodeSelector{
+				NodeSelectorTerms: []v1.NodeSelectorTerm{
+					{
+						MatchExpressions: []v1.NodeSelectorRequirement{
+							{
+								Key:      "disk-type",
+								Operator: v1.NodeSelectorOpIn,
+								Values:   []string{"ssd"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	pod, err := mkPod(&types.Step{
+		Name:  "affinity-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}, &config{
+		Namespace:                "woodpecker",
+		PodAffinity:              agentAffinity,
+		PodAffinityAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Affinity: stepAffinity,
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
 }

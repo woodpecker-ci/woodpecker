@@ -1,0 +1,591 @@
+{
+    "repo": {
+        "deploy_pipeline": {
+            "trigger": "Ausrolln",
+            "variables": {
+                "delete": "Variable löschn",
+                "title": "Zusätzliche Pipeline-Variabln",
+                "desc": "Gib extra Variabln o de wo in deina Pipeline verwendt wern. Variabln mit'm gleichn Nama wern überschriebn.",
+                "name": "Variabl-Nama",
+                "value": "Variabl-Wert"
+            },
+            "title": "Deployment füa aktuelle Pipeline #{pipelineId} lostreten",
+            "enter_target": "Zielumgebung füas Deployment",
+            "enter_task": "Deployment-Aufgab"
+        },
+        "enable": {
+            "success": "Repo is jez o",
+            "enable": "Oschoidn",
+            "enabled": "Is scho o",
+            "disabled": "Is aus"
+        },
+        "visibility": {
+            "public": {
+                "public": "Für olle",
+                "desc": "Jeda ko dei Repo seng, a ohne dass er eigloggt is."
+            },
+            "visibility": "Wer kos seng",
+            "private": {
+                "private": "Privat",
+                "desc": "Nur du und de andern Besitzer vom Repo kennan des seng."
+            },
+            "internal": {
+                "internal": "Intern",
+                "desc": "Nur eigloggte Leit vo da Woodpecker-Instanz kennan des seng."
+            }
+        },
+        "pipeline": {
+            "pipelines_for": "Pipelines fia Branch \"{branch}\"",
+            "pipelines_for_pr": "Pipelines fia Pull Request #{index}",
+            "exit_code": "Exit-Code {exitCode}",
+            "loading": "Lod grod…",
+            "no_logs": "Koane Logs",
+            "pipeline": "Pipeline #{pipelineId}",
+            "log_title": "Step-Logs",
+            "log_download_error": "Beim Runterladn vom Log-File is wos schiaf ganga",
+            "protected": {
+                "decline": "Oblehnen",
+                "awaits": "De Pipeline dritschld auf Freigab von am Maintainer!",
+                "approve": "Freigem",
+                "declined": "De Pipeline wurad obglehnt!",
+                "approve_success": "Pipeline freigem",
+                "decline_success": "Pipeline obglehnt"
+            },
+            "tasks": "Aufgabn",
+            "config": "Einstellung",
+            "files": "Gänderte Datein",
+            "no_pipelines": "Do san no koane Pipelines gstartet worn.",
+            "no_pipeline_steps": "Koane Pipeline-Schrid do!",
+            "step_not_started": "Der Schrid hod no ned ogfangd.",
+            "log_delete_confirm": "Wuisd du wirkli de Step-Logs löschn?",
+            "log_delete_error": "'Da ganze Bus is hi!'",
+            "actions": {
+                "cancel": "Abbrechn",
+                "restart": "Neistarten",
+                "canceled": "Der Schrid wurad abbrocha.",
+                "cancel_success": "Pipeline abbrocha",
+                "deploy": "Ausrolln",
+                "restart_success": "Pipeline neigstartet",
+                "log_download": "Runterladn",
+                "log_delete": "Löschn",
+                "log_auto_scroll": "Automatisch scrollen oschoidn",
+                "log_auto_scroll_off": "Automatisch scrollen ausschoidn"
+            },
+            "event": {
+                "push": "Push",
+                "tag": "Tag",
+                "pr": "Pull Request",
+                "pr_closed": "Pull Request g'merged/zuagmacht",
+                "pr_metadata": "Pull Request-Metadaten gändert",
+                "deploy": "Deploy",
+                "cron": "Cron",
+                "manual": "Vo Hand",
+                "release": "Release"
+            },
+            "status": {
+                "status": "Status: {status}",
+                "blocked": "blockiert",
+                "pending": "dritschld",
+                "running": "lafts",
+                "started": "gstartet",
+                "skipped": "übersprungen",
+                "success": "hods gschafft",
+                "declined": "obglehnt",
+                "error": "Fella",
+                "failure": "is schiaf ganga",
+                "killed": "obgwürgt"
+            },
+            "errors": "Fella",
+            "warnings": "Warnunga",
+            "show_errors": "Fella zoang",
+            "we_got_some_errors": "Oh na, do hamma aba sauba z diaf ins glas gschaud!",
+            "duration": "Pipeline-Dauer: {duration}",
+            "created": "Erstäid: {created}",
+            "debug": {
+                "title": "Debug",
+                "download_metadata": "Metadaten runterladn",
+                "metadata_download_error": "Fella beim Runterladn vo de Metadaten",
+                "metadata_download_successful": "Metadaten erfoigreich runtergladen",
+                "no_permission": "Du deafst de Debug-Infos ned oseng",
+                "metadata_exec_title": "Pipeline lokal neistarten",
+                "metadata_exec_desc": "Load de Metadaten vo dera Pipeline runter um se lokal laufa zu lassn. So kost Probleme fixen und Änderunga testn bevors'd sie commitest. De Woodpecker CLI muas lokal in da gleichn Version wia da Server sei."
+            },
+            "view": "Pipeline oschaun"
+        },
+        "manual_pipeline": {
+            "title": "Pipeline vo Hand starten",
+            "trigger": "Pipeline loslassn",
+            "select_branch": "Branch auswähln",
+            "variables": {
+                "delete": "Variable löschn",
+                "title": "Zusätzliche Pipeline-Variabln",
+                "desc": "Gib extra Variabln o de wo in deina Pipeline verwendt wern. Variabln mid'm gleichn Nama wern überschriebn.",
+                "name": "Variabl-Nama",
+                "value": "Variabl-Wert"
+            },
+            "show_pipelines": "Pipelines zoang"
+        },
+        "activity": "Ois da Reih nach",
+        "branches": "Branches",
+        "pull_requests": "Pull Requests",
+        "add": "Repo dazua doa",
+        "user_none": "De Organisation/da User hod no koane Projekte",
+        "not_allowed": "Du deafst do ned nei",
+        "open_in_forge": "Repo in da Forge aufmacha",
+        "settings": {
+            "not_allowed": "Du deafst de Eistellunga von dem Repo ned ändarn",
+            "general": {
+                "general": "Repo",
+                "project": "Repo-Eistellunga",
+                "save": "Eistellunga speichan",
+                "success": "Repo-Eistellunga gändert",
+                "pipeline_path": {
+                    "path": "Pipeline-Pfad",
+                    "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+                    "desc": "Pfad zu deina Pipeline-Config (zum Beispui {0}). Ordner soin mit am {1} aufhörn.",
+                    "desc_path_example": "mei/pfad/"
+                },
+                "allow_pr": {
+                    "allow": "Pull Requests erlaubn",
+                    "desc": "Pipelines bei Pull Requests erlaubn."
+                },
+                "allow_deploy": {
+                    "allow": "Deployments erlaubn",
+                    "desc": "Deployments füa erfoigreiche Pipelines erlaubn. Olle Leit mit Push-Rechte kennan des auslösn, also aufpassn!"
+                },
+                "netrc_only_trusted": {
+                    "netrc_only_trusted": "Vatrauenswürdige Clone-Plugins",
+                    "desc": "Plugins de wo Zuagriff auf netrc-Credentials kriagn zum Repos vo da Forge klonen oda eineschiabm."
+                },
+                "trusted": {
+                    "trusted": "Vatrauenswürdig",
+                    "network": {
+                        "network": "Netzwerk",
+                        "desc": "Pipeline-Container kriagn Zuagriff auf Netzwerk-Privilegien wia DNS ändern."
+                    },
+                    "volumes": {
+                        "volumes": "Volumes",
+                        "desc": "Pipeline-Container derfa Volumes mounten."
+                    },
+                    "security": {
+                        "security": "Sicherheit",
+                        "desc": "Pipeline-Container kriagn Zuagriff auf Sicherheits-Privilegien."
+                    }
+                },
+                "timeout": {
+                    "timeout": "Zeitlimit",
+                    "minutes": "Minutn"
+                },
+                "cancel_prev": {
+                    "cancel": "Vorherige Pipelines bleim losn",
+                    "desc": "Ausgwäids Events brechan dritschlde oder los glaffane Pipelines vom gleichn Event und Quain o."
+                }
+            },
+            "crons": {
+                "crons": "Crons",
+                "desc": "Cron-Jobs kennan verwendt wern zum Pipelines regelmäßig los laffa losn.",
+                "show": "Crons zoang",
+                "add": "Cron dazua doa",
+                "none": "Do gibts no koane Crons.",
+                "save": "Cron speichan",
+                "created": "Cron erstäid",
+                "saved": "Cron gspeichert",
+                "deleted": "Cron glöscht",
+                "next_exec": "Nächste Ausführung",
+                "not_executed_yet": "No nia gloffa",
+                "run": "Jez starten",
+                "branch": {
+                    "title": "Branch",
+                    "placeholder": "Branch (nimmt Standard-Branch wenns la is)"
+                },
+                "name": {
+                    "name": "Nama",
+                    "placeholder": "Nama vom Cron-Job"
+                },
+                "schedule": {
+                    "title": "Zeitplan (basiert auf UTC)",
+                    "placeholder": "Zeitplan"
+                },
+                "edit": "Cron endan",
+                "delete": "Cron löschn"
+            },
+            "badge": {
+                "badge": "Plakettl",
+                "type": "Syntax",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branch"
+            },
+            "actions": {
+                "actions": "Aktiona",
+                "repair": {
+                    "repair": "Repo rebarieren",
+                    "success": "Repo rebariert"
+                },
+                "disable": {
+                    "disable": "Repo abschoidn",
+                    "success": "Repo abgschoidn"
+                },
+                "enable": {
+                    "enable": "Repo oschoidn",
+                    "success": "Repo ogschoidn"
+                },
+                "delete": {
+                    "delete": "Repo löschn",
+                    "confirm": "Ois is weg noch da Aktion!\n\nWuisd du wirkli weida macha?",
+                    "success": "Repo glöscht"
+                }
+            }
+        }
+    },
+    "admin": {
+        "settings": {
+            "repos": {
+                "repos": "Repos",
+                "desc": "Repos de wo auf dem Server ogschoidn san oda warn.",
+                "none": "Do gibts no koane Repos.",
+                "view": "Repo oschaun",
+                "settings": "Repo-Eistellunga",
+                "disabled": "ab gschoidn",
+                "repair": {
+                    "repair": "Olle rebarieren",
+                    "success": "Repos rebariert"
+                }
+            },
+            "agents": {
+                "created": "Agent erstäid",
+                "saved": "Agent gspeichert",
+                "deleted": "Agent glöscht",
+                "name": {
+                    "name": "Nama",
+                    "placeholder": "Nama vom Agent"
+                },
+                "agents": "Agents",
+                "desc": "Agents de wo auf dem Server registriert san.",
+                "none": "Do gibts no koane Agents.",
+                "id": "ID",
+                "add": "Agent dazua doa",
+                "save": "Agent speichan",
+                "show": "Agents zoang",
+                "no_schedule": {
+                    "name": "Agent abschoidn",
+                    "placeholder": "Agent griagt koane neien Aufgabn mehr"
+                },
+                "token": "Token",
+                "platform": {
+                    "platform": "Plattform",
+                    "badge": "plattform"
+                },
+                "backend": {
+                    "backend": "Backend",
+                    "badge": "backend"
+                },
+                "capacity": {
+                    "capacity": "Kapazität",
+                    "desc": "Maximale Anzoi vo gleichzeidige Pipelines de wo der Agent ausführt.",
+                    "badge": "kapazität"
+                },
+                "custom_labels": {
+                    "custom_labels": "Eigene Labels",
+                    "desc": "De eigenen Labels de wo vom Agent-Admin beim Starten gsetzt worn san."
+                },
+                "org": {
+                    "badge": "org"
+                },
+                "version": "Version",
+                "last_contact": {
+                    "last_contact": "z'letzt gesng",
+                    "badge": "z'letzt gesng"
+                },
+                "never": "Nia",
+                "delete_confirm": "Wuisd du wirkli den Agent löschn? Er ko dann nahad nimmer mid'm Server obandln.",
+                "edit_agent": "Agent beabadn",
+                "delete_agent": "Agent löschn"
+            },
+            "settings": "Admin-Eistellunga",
+            "not_allowed": "Du deafst de Server-Eistellunga ned ändarn",
+            "secrets": {
+                "desc": "Globale Secrets kennan in de Pipelines vo olle Repos verwendt wern.",
+                "warning": "De Secrets san füa olle User verfügbar."
+            },
+            "registries": {
+                "desc": "Globale Registry-Credentials kennan dann dazuagfügt wern zum private Images füa olle Pipelines verwenden.",
+                "warning": "De Registry-Credentials san füa olle User verfügbar."
+            },
+            "queue": {
+                "queue": "Warteschlong",
+                "desc": "Aufgabn de wo drauf wartn dass de Agents se ausführn.",
+                "pause": "Pausieren",
+                "resume": "Weida macha",
+                "paused": "Warteschlong is pausiert",
+                "resumed": "Warteschlong laft wieda",
+                "tasks": "Aufgabn",
+                "task_running": "Aufgab lafts grod",
+                "task_pending": "Aufgab dritschld",
+                "task_waiting_on_deps": "Aufgab dritschld auf n Vorarbeida",
+                "agent": "agent",
+                "waiting_for": "dritschld auf",
+                "stats": {
+                    "completed_count": "Fertige Aufgabn",
+                    "worker_count": "Frei",
+                    "running_count": "Am Laufa",
+                    "pending_count": "Dritschld",
+                    "waiting_on_deps_count": "Dritschld auf n Vorarbeida"
+                }
+            },
+            "users": {
+                "users": "Benutzer",
+                "desc": "Benutzer de wo auf dem Server registriert san.",
+                "login": "Login",
+                "email": "E-Mail",
+                "avatar_url": "Avatar-URL",
+                "save": "Benutzer speichan",
+                "cancel": "Abbrechn",
+                "show": "Benutzer zoang",
+                "add": "Benutzer dazua doa",
+                "none": "Do gibts no koane Benutzer.",
+                "delete_confirm": "Wuisd du wirkli den Benutzer löschn? Des löscht a olle Repos de wo dem Benutzer ghörn.",
+                "deleted": "Benutzer glöscht",
+                "created": "Benutzer erstäid",
+                "saved": "Benutzer gspeichert",
+                "admin": {
+                    "admin": "Admin",
+                    "placeholder": "Benutzer is a Admin"
+                },
+                "delete_user": "Benutzer löschn",
+                "edit_user": "Benutzer beabadn"
+            },
+            "orgs": {
+                "desc": "Organisationen de wo Repos auf dem Server ham.",
+                "none": "Do gibts no koane Organisationen.",
+                "orgs": "Organisationen",
+                "org_settings": "Organisations-Eistellunga",
+                "delete_org": "Organisation löschn",
+                "deleted": "Organisation glöscht",
+                "delete_confirm": "Wuisd du wirkli de Organisation löschn? Des löscht a olle Repos de wo da Organisation ghörn.",
+                "view": "Organisation oschaun"
+            }
+        }
+    },
+    "secrets": {
+        "name": "Nama",
+        "secrets": "Secrets",
+        "desc": "Secrets kennan in olle Pipelines vo dem Repo verwendt wern.",
+        "none": "Do gibts no koane Secrets.",
+        "add": "Secret dazua doa",
+        "save": "Secret speichan",
+        "show": "Secrets zoang",
+        "value": "Wert",
+        "delete_confirm": "Wuisd du wirkli des Secret löschn?",
+        "deleted": "Secret glöscht",
+        "created": "Secret erstäid",
+        "saved": "Secret gspeichert",
+        "plugins": {
+            "images": "Nur verfügbar füa de folgenden Plugins",
+            "desc": "Liste vo Plugin-Images wo des Secret verfügbar is. Leer lassn zum olle Plugins und normale Steps erlaubn."
+        },
+        "events": {
+            "events": "Verfügbar bei de folgenden Events",
+            "warning": "Aufpassn: Secrets bei Pull Requests freigem ko gfährlich sei, weil böswillige Leit mid am bösen Pull Request dei Secrets klaubn kennan."
+        },
+        "edit": "Secret beabadn",
+        "delete": "Secret löschn"
+    },
+    "info": "Info",
+    "cli_login_failed": "CLI-Login is schiaf ganga",
+    "cli_login_denied": "CLI-Login wurad obglehnt",
+    "return_to_cli": "Du kost jez den Tab zua macha und zruck zur CLI gehn.",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "addon": "Addon",
+    "forge_type": "Forge-Typ",
+    "oauth_client_id": "OAuth Client ID",
+    "merge_ref_desc": "Ref zum füa de Merge-Basis verwenden. Des wird verwendt zum Diff füa Pull Requests bestimma.",
+    "public_only": "Nur öffentliche",
+    "public_only_desc": "Nur öffentliche Repos zoang.",
+    "git_username": "Git-Benutzername",
+    "repositories": {
+        "title": "Repositorys",
+        "all": {
+            "title": "Olle Repositorys",
+            "desc": "Repositorys sortiert noch da letzten Pipeline"
+        },
+        "last": {
+            "title": "Letztns ogschaut",
+            "desc": "De wo'd zuletzt dro waren, sortiert noch da Zeit"
+        }
+    },
+    "cancel": "Los ma's bleim",
+    "login_to_woodpecker_with": "Bei Woodpecker eilogga mid",
+    "login": "Eilogga",
+    "repos": "Repositorys",
+    "docs": "Doku",
+    "api": "API",
+    "logout": "Auslogga",
+    "search": "Suacha…",
+    "username": "Benutzanama",
+    "password": "Passwort",
+    "back": "Zruck",
+    "unknown_error": "Irgendwos is schiaf ganga",
+    "documentation_for": "Doku füa \"{topic}\"",
+    "pipeline_feed": "Pipeline-Gschichtn",
+    "empty_list": "Koane {entity} gfundn!",
+    "not_found": {
+        "not_found": "Oha, 404! Entweder ham mas vazapft oda du host di vatippt :-/",
+        "back_home": "Zruck zur Hauptseitn"
+    },
+    "errors": {
+        "not_found": "Server findt des ned wos'd wuisd"
+    },
+    "time": {
+        "not_started": "hod no ned ogfangd",
+        "just_now": "grod eben"
+    },
+    "org": {
+        "settings": {
+            "not_allowed": "Du deafst de Eistellunga vo dera Organisation ned ändarn",
+            "secrets": {
+                "desc": "Organisations-Secrets kennan in de Pipelines vo olle Repos vo da Organisation verwendt wern."
+            },
+            "registries": {
+                "desc": "Organisations-Registry-Credentials kennan dazuagfügt wern zum private Images fia olle Pipelines vo ana Organisation verwenden."
+            },
+            "agents": {
+                "desc": "Agents de wo fia de Organisation registriert san."
+            }
+        }
+    },
+    "user": {
+        "settings": {
+            "settings": "Benutzer-Eistellunga",
+            "general": {
+                "general": "Konto",
+                "language": "Sproch",
+                "theme": {
+                    "theme": "Design",
+                    "light": "Hell",
+                    "dark": "Dunkel",
+                    "auto": "Automatisch"
+                }
+            },
+            "secrets": {
+                "desc": "User-Secrets kennan in de Pipelines vo olle Repos vom User verwendt wern."
+            },
+            "registries": {
+                "desc": "User-Registry-Credentials kennan dann dazuagfügt wern zum private Images füa olle persönlichen Pipelines verwenden."
+            },
+            "cli_and_api": {
+                "cli_and_api": "CLI & API",
+                "desc": "Persönlicher Access-Token, CLI und API-Verwendung",
+                "token": "Persönlicher Access-Token",
+                "api_usage": "Beispui API-Verwendung",
+                "cli_usage": "Beispui CLI-Verwendung",
+                "download_cli": "CLI runterladn",
+                "reset_token": "Token zrucksetzen",
+                "swagger_ui": "Swagger UI"
+            },
+            "agents": {
+                "desc": "Agents de wo füa dei Account-Repos registriert san."
+            }
+        }
+    },
+    "registries": {
+        "registries": "Registries",
+        "credentials": "Registry-Credentials",
+        "desc": "Registry-Credentials kennan dann dazuagfügt wern zum private Images füa Pipelines verwenden.",
+        "none": "Do gibts no koane Registry-Credentials.",
+        "address": {
+            "address": "Adress",
+            "desc": "Registry-Adress (z.B. docker.io)"
+        },
+        "show": "Registries zoang",
+        "save": "Registry speichan",
+        "add": "Registry dazua doa",
+        "view": "Registry oschaun",
+        "edit": "Registry beabadn",
+        "delete": "Registry löschn",
+        "delete_confirm": "Wuisd du wirkli de Registry löschn?",
+        "created": "Registry-Credentials erstäid",
+        "saved": "Registry-Credentials gspeichert",
+        "deleted": "Registry-Credentials glöscht"
+    },
+    "default": "standard",
+    "running_version": "Du host Woodpecker {0} am Laufa",
+    "update_woodpecker": "Bitte update dei Woodpecker-Instanz auf {0}",
+    "global_level_secret": "globales Secret",
+    "org_level_secret": "Organisations-Secret",
+    "login_to_cli": "Bei da CLI eilogga",
+    "login_to_cli_description": "Wennd weitermachst, wirst bei da CLI eigloggt.",
+    "abort": "Abbrechn",
+    "cli_login_success": "CLI-Login hot klappt",
+    "settings": "Eistellunga",
+    "oauth_error": "Fella bei da OAuth-Authentifizierung",
+    "internal_error": "Interner Fella is passiert",
+    "registration_closed": "De Registrierung is zua",
+    "access_denied": "Du deafst auf de Instanz ned zuagreifen",
+    "org_access_denied": "Du deafst auf de Organisation ned zuagreifen",
+    "invalid_state": "Da OAuth-State is ungültig",
+    "extensions": "Erweiterunga",
+    "extensions_description": "Erweiterunga san HTTP-Services de wo von Woodpecker aufgruafa wern kennan anstatt de mitglifadn zu nutzn.",
+    "extension_endpoint_placeholder": "z.B. https://example.com/api",
+    "config_extension_endpoint": "Config-Erweiterungs-Endpunkt",
+    "extensions_signatures_public_key": "Öffentlicher Schlüssl fia Signaturen",
+    "extensions_signatures_public_key_description": "Der öffentliche Schlüssl soi vo deine Erweiterunga verwendt wern zum Webhook-Aufruaf vo Woodpecker verifizieren.",
+    "extensions_configuration_saved": "Erweiterunga-Konfiguration gspeichert",
+    "require_approval": {
+        "desc": "Vahindere dass böswillige Pipelines Secrets ausplaudern oda schädliche Sachen macha durch Freigab vor da Ausführung.",
+        "require_approval_for": "Freigab-Anforderunga",
+        "none": "Koane",
+        "none_desc": "Jeds Event lösd'd Pipelines aus, a Pull Requests. De Eistellung ko gfährlich sei und is nur füa private Instanzen empfohln.",
+        "forks": "Pull Request von am geforkten Repo",
+        "pull_requests": "Olle Pull Requests",
+        "all_events": "Olle Events vo da Forge",
+        "allowed_users": {
+            "allowed_users": "Erlaubte Benutzer",
+            "desc": "Pipelines de wo vo de aufglisteten Benutzer erstäid worn san brauchan koan Pasierschein A38."
+        }
+    },
+    "no_search_results": "Nix gfundn",
+    "forges": "Forges",
+    "forges_desc": "Forges konfigurieren de wo Repos hostn füa de wo Woodpecker laufa soi.",
+    "add_forge": "Forge dazua doa",
+    "show_forges": "Forges zoang",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "oauth_client_secret": "OAuth Client Secret",
+    "oauth_host": "OAuth Host",
+    "merge_ref": "Merge Ref",
+    "git_username_desc": "Benutzername fia'n Git-User.",
+    "git_password": "Git-Passwort",
+    "git_password_desc": "Passwort oda persönlicher Access-Token fia'n Git-User.",
+    "executable": "Ausführbare Datei",
+    "executable_desc": "Pfad zur Addon-Executable.",
+    "save": "Speichan",
+    "add": "Dazua doa",
+    "skip_verify": "SSL-Überprüfung überspringen",
+    "skip_verify_desc": "SSL-Überprüfung füa de API-Verbindung überspringen. Des is ned empfohln füan Produktiv-Einsatz.",
+    "url": "URL",
+    "forge_managed_by_env": "De primäre Forge wird über Umgebungsvariabln verwaltet. Olle Änderunga an dera Forge wern bei am Neustart zruckgsetzt.",
+    "oauth_redirect_url": "OAuth Redirect-URL",
+    "forge_created": "Forge erstäid",
+    "advanced_options": "Erweiterte Optionen",
+    "leave_empty_to_keep_current_value": "Leer lassn zum aktuellen Wert behalten",
+    "forge_deleted": "Forge glöscht",
+    "forge_delete_confirm": "Wuisd du wirkli de Forge löschn? Des löscht a olle Repos, User und Pipelines de wo zu dera Forge ghörn.",
+    "edit_forge": "Forge beabadn",
+    "delete_forge": "Forge löschn",
+    "no_forges": "Do gibts no koane Forges.",
+    "use_this_redirect_url_to_create": "Verwend de Redirect-URL zum de OAuth-Anwendung erstellen oda aktualisieren.",
+    "developer_settings_to_create": "Geh zu de {0} und richt de OAuth-Anwendung ei.",
+    "developer_settings": "Developer-Eistellunga",
+    "public_url_for_oauth_if": "Öffentliche URL füa OAuth falls anders ois URL ({0})",
+    "forge_saved": "Forge gspeichert",
+    "fullscreen": "Vollbild",
+    "exit_fullscreen": "Vollbild verlassn",
+    "help_translating": "Du kost helfa Woodpecker in dei Sproch zu übersetzen auf {0}.",
+    "weblate": "unserm Weblate",
+    "disabled": "Abgschoidn"
+}

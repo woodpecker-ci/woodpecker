@@ -20,7 +20,10 @@
                 "desc": "Обработчики, зарегистрированные на этом сервере.",
                 "edit_agent": "Редактировать обработчик",
                 "id": "ID",
-                "last_contact": "Последняя активность",
+                "last_contact": {
+                    "badge": "доступен",
+                    "last_contact": "Последняя связь"
+                },
                 "name": {
                     "name": "Название",
                     "placeholder": "Название обработчика"
@@ -263,7 +266,8 @@
                 "push": "Новый коммит",
                 "tag": "Тег",
                 "pr_closed": "Запрос на слияние удовлетворён/закрыт",
-                "release": "Релиз"
+                "release": "Релиз",
+                "pr_metadata": "Изменены метаданные запроса на слияние"
             },
             "exit_code": "Код завершения {exitCode}",
             "files": "Изменённые файлы",
@@ -316,7 +320,8 @@
                 "metadata_download_error": "Ошибка загрузки метаданных",
                 "no_permission": "У вас нет доступа к отладочной информации",
                 "metadata_exec_title": "Перезапустить конвейер локально"
-            }
+            },
+            "view": "Посмотреть конвейер"
         },
         "pull_requests": "Запросы на слияние",
         "settings": {
@@ -346,7 +351,8 @@
                 "type": "Синтаксис",
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
-                "type_url": "URL"
+                "type_url": "URL",
+                "events": "События"
             },
             "crons": {
                 "add": "Добавить задачу cron",
@@ -733,5 +739,13 @@
     "weblate": "нашем Weblate",
     "help_translating": "Вы можете помочь с переводом Woodpecker на свой язык на {0}.",
     "use_this_redirect_url_to_create": "Используйте эту URL перенаправления для создания или обновления приложения OAuth.",
-    "developer_settings_to_create": "Перейдите в {0} и настройте приложение OAuth."
+    "developer_settings_to_create": "Перейдите в {0} и настройте приложение OAuth.",
+    "extensions": "Расширения",
+    "extensions_description": "Расширения — это HTTP-службы, которые Woodpecker может вызывать вместо использования встроенных служб.",
+    "extension_endpoint_placeholder": "например, https://example.com/api",
+    "extensions_signatures_public_key": "Открытый ключ для подписей",
+    "extensions_signatures_public_key_description": "Этот открытый ключ должен использоваться вашими расширениями для проверки запросов, отправляемых Woodpecker.",
+    "extensions_configuration_saved": "Настройки расширений сохранены",
+    "disabled": "Отключено",
+    "config_extension_endpoint": "Адрес конфигурации расширения"
 }

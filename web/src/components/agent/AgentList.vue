@@ -3,25 +3,25 @@
     <ListItem
       v-for="agent in agents"
       :key="agent.id"
-      class="bg-wp-background-200! dark:bg-wp-background-100! items-center"
+      class="bg-wp-background-200! dark:bg-wp-background-100! items-center gap-2"
     >
       <span>{{ agent.name || `Agent ${agent.id}` }}</span>
-      <span class="ml-auto">
-        <span class="hidden space-x-2 md:inline-block">
-          <Badge
-            v-if="isAdmin === true && agent.org_id !== -1"
-            :label="$t('admin.settings.agents.org.badge')"
-            :value="agent.org_id"
-          />
-          <Badge v-if="agent.platform" :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
-          <Badge v-if="agent.backend" :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
-          <Badge v-if="agent.capacity" :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
-        </span>
-        <span class="ml-2">{{
-          agent.last_contact ? date.timeAgo(agent.last_contact * 1000) : $t('admin.settings.agents.never')
-        }}</span>
+      <span class="ml-auto flex gap-2">
+        <Badge v-if="agent.no_schedule" :value="$t('disabled')" />
+        <Badge
+          v-if="isAdmin === true && agent.org_id !== -1"
+          :label="$t('admin.settings.agents.org.badge')"
+          :value="agent.org_id"
+        />
+        <Badge v-if="agent.platform" :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
+        <Badge v-if="agent.backend" :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
+        <Badge v-if="agent.capacity" :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
+        <Badge
+          :label="$t('admin.settings.agents.last_contact.badge')"
+          :value="agent.last_contact ? date.timeAgo(agent.last_contact * 1000) : $t('admin.settings.agents.never')"
+        />
       </span>
-      <div class="ml-auto flex items-center gap-2">
+      <div class="ml-2 flex items-center gap-2">
         <IconButton
           icon="edit"
           :title="$t('admin.settings.agents.edit_agent')"

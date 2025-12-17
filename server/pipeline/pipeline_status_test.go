@@ -29,7 +29,7 @@ import (
 )
 
 func mockStorePipeline(t *testing.T) store.Store {
-	s := mocks.NewStore(t)
+	s := mocks.NewMockStore(t)
 	s.On("UpdatePipeline", mock.Anything).Return(nil)
 	return s
 }

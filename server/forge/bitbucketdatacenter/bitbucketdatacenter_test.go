@@ -21,12 +21,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestNew(t *testing.T) {
-	forge, err := New(Opts{
+	forge, err := New(1, Opts{
 		URL:               "http://localhost:8080",
 		Username:          "0ZXh0IjoiI",
 		Password:          "I1NiIsInR5",
@@ -38,6 +39,7 @@ func TestNew(t *testing.T) {
 	cl, ok := forge.(*client)
 	assert.True(t, ok)
 	assert.Equal(t, &client{
+		forgeID:      1,
 		url:          "http://localhost:8080",
 		urlAPI:       "http://localhost:8080/rest",
 		username:     "0ZXh0IjoiI",
@@ -55,6 +57,9 @@ func TestBitbucketDC(t *testing.T) {
 	c := &client{
 		urlAPI: s.URL,
 	}
+
+	server.Config.Server.StatusContext = "ci/woodpecker"
+	server.Config.Server.StatusContextFormat = "{{ .context }}/{{ .event }}/{{ .workflow }}"
 
 	ctx := t.Context()
 
@@ -86,9 +91,40 @@ func TestBitbucketDC(t *testing.T) {
 		Name:   "~ORG",
 		IsUser: true,
 	}, org)
+
+	// Execute the Status method
+	err = c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
+	assert.NoError(t, err)
 }
 
-var fakeUser = &model.User{
-	AccessToken: "fake",
-	Expiry:      time.Now().Add(1 * time.Hour).Unix(),
-}
+var (
+	fakeUser = &model.User{
+		AccessToken: "fake",
+		Expiry:      time.Now().Add(1 * time.Hour).Unix(),
+	}
+
+	fakeRepo = &model.Repo{
+		ID:     1,
+		Owner:  "test-owner",
+		Name:   "test-repo",
+		Branch: "main",
+	}
+
+	fakePipeline = &model.Pipeline{
+		ID:       1,
+		Number:   42,
+		Commit:   "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		Started:  1759825800,
+		Finished: 1759825883,
+		Branch:   "feature-branch",
+		Ref:      "refs/pull-requests/123/from",
+		Event:    model.EventPush,
+	}
+
+	fakeWorkflow = &model.Workflow{
+		ID:    1,
+		PID:   1,
+		Name:  "build",
+		State: model.StatusSuccess,
+	}
+)

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 //go:build !cgo
-// +build !cgo
 
 package datastore
 
@@ -22,7 +21,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Supported database drivers
+// Supported database drivers.
 const (
 	DriverMysql    = "mysql"
 	DriverPostgres = "postgres"

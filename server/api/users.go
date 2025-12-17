@@ -16,15 +16,21 @@ package api
 
 import (
 	"encoding/base32"
+	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/securecookie"
+	"github.com/google/tink/go/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
+
+const defaultForgeID = 1
 
 // GetUsers
 //
@@ -56,8 +62,23 @@ func GetUsers(c *gin.Context) {
 //	@Tags			Users
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			login			path	string	true	"the user's login name"
+//	@Param			forge_id		query	string	true	"specify forge (else default will be used)"
+//	@Param			forge_remote_id	query	string	false	"specify user id at forge (else fallback to login)"
 func GetUser(c *gin.Context) {
-	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
+	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(defaultForgeID)), 10, 64)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
+
+	var user *model.User
+
+	if forgeRemoteID.IsValid() {
+		user, err = store.FromContext(c).GetUserByRemoteID(forgeID, forgeRemoteID)
+	} else {
+		user, err = store.FromContext(c).GetUserByLogin(forgeID, c.Param("login"))
+	}
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -87,14 +108,26 @@ func PatchUser(c *gin.Context) {
 		return
 	}
 
-	user, err := _store.GetUserLogin(c.Param("login"))
-	if err != nil {
+	if in.ForgeID < defaultForgeID {
+		in.ForgeID = defaultForgeID
+	}
+
+	user, err := store.FromContext(c).GetUserByRemoteID(in.ForgeID, in.ForgeRemoteID)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		handleDBError(c, err)
 		return
 	}
 
-	// TODO: allow to change login (currently used as primary key)
+	if user == nil {
+		user, err = _store.GetUserByLogin(in.ForgeID, c.Param("login"))
+		if err != nil {
+			handleDBError(c, err)
+			return
+		}
+	}
+
 	// TODO: disallow to change login, email, avatar if the user is using oauth
+	user.Login = in.Login
 	user.Email = in.Email
 	user.Avatar = in.Avatar
 	user.Admin = in.Admin
@@ -130,9 +163,9 @@ func PostUser(c *gin.Context) {
 		Email:  in.Email,
 		Avatar: in.Avatar,
 		Hash: base32.StdEncoding.EncodeToString(
-			securecookie.GenerateRandomKey(32),
+			random.GetRandomBytes(32),
 		),
-		ForgeID:       1,                        // TODO: replace with forge id when multiple forges are supported
+		ForgeID:       in.ForgeID,
 		ForgeRemoteID: model.ForgeRemoteID("0"), // TODO: search for the user in the forge and get the remote id
 	}
 	if err = user.Validate(); err != nil {
@@ -156,10 +189,25 @@ func PostUser(c *gin.Context) {
 //	@Tags			Users
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			login			path	string	true	"the user's login name"
+//	@Param			forge_id		query	string	true	"specify forge (else default will be used)"
+//	@Param			forge_remote_id	query	string	false	"specify user id at forge (else fallback to login)"
 func DeleteUser(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	user, err := _store.GetUserLogin(c.Param("login"))
+	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(defaultForgeID)), 10, 64)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
+
+	var user *model.User
+
+	if forgeRemoteID.IsValid() {
+		user, err = store.FromContext(c).GetUserByRemoteID(forgeID, forgeRemoteID)
+	} else {
+		user, err = store.FromContext(c).GetUserByLogin(forgeID, c.Param("login"))
+	}
 	if err != nil {
 		handleDBError(c, err)
 		return

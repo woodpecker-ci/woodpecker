@@ -152,11 +152,45 @@ func TestRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, false, false)
-	assert.NoError(t, err)
-	assert.Len(t, repos, 2)
-	assert.Equal(t, repo1.ID, repos[0].ID)
-	assert.Equal(t, repo2.ID, repos[1].ID)
+	tests := []struct {
+		name     string
+		filter   *model.RepoFilter
+		expected []string
+	}{
+		{
+			name:     "no filter",
+			filter:   nil,
+			expected: []string{"test", "test"},
+		},
+		{
+			name: "filter by name 'test'",
+			filter: &model.RepoFilter{
+				Name: "test",
+			},
+			expected: []string{"test", "test"},
+		},
+		{
+			name: "filter by name 'hello-world'",
+			filter: &model.RepoFilter{
+				Name: "hello-world",
+			},
+			expected: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repos, err := store.RepoList(user, false, false, tt.filter)
+			assert.NoError(t, err)
+			assert.Len(t, repos, len(tt.expected))
+
+			names := []string{}
+			for _, repo := range repos {
+				names = append(names, repo.Name)
+			}
+			assert.ElementsMatch(t, tt.expected, names)
+		})
+	}
 }
 
 func TestOwnedRepoList(t *testing.T) {
@@ -208,7 +242,7 @@ func TestOwnedRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, true, false)
+	repos, err := store.RepoList(user, true, false, nil)
 	assert.NoError(t, err)
 	assert.Len(t, repos, 2)
 	assert.Equal(t, repo1.ID, repos[0].ID)
@@ -220,22 +254,25 @@ func TestRepoCount(t *testing.T) {
 	defer closer()
 
 	repo1 := &model.Repo{
-		Owner:    "bradrydzewski",
-		Name:     "test",
-		FullName: "bradrydzewski/test",
-		IsActive: true,
+		ForgeRemoteID: "A",
+		Owner:         "bradrydzewski",
+		Name:          "test",
+		FullName:      "bradrydzewski/test",
+		IsActive:      true,
 	}
 	repo2 := &model.Repo{
-		Owner:    "test",
-		Name:     "test",
-		FullName: "test/test",
-		IsActive: true,
+		ForgeRemoteID: "B",
+		Owner:         "test",
+		Name:          "test",
+		FullName:      "test/test",
+		IsActive:      true,
 	}
 	repo3 := &model.Repo{
-		Owner:    "test",
-		Name:     "test-ui",
-		FullName: "test/test-ui",
-		IsActive: false,
+		ForgeRemoteID: "C",
+		Owner:         "test",
+		Name:          "test-ui",
+		FullName:      "test/test-ui",
+		IsActive:      false,
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
@@ -263,10 +300,12 @@ func TestRepoCrud(t *testing.T) {
 	defer closer()
 
 	repo := model.Repo{
-		UserID:   1,
-		FullName: "bradrydzewski/test",
-		Owner:    "bradrydzewski",
-		Name:     "test",
+		ForgeID:       1,
+		ForgeRemoteID: "bradrydzewskitest",
+		UserID:        1,
+		FullName:      "bradrydzewski/test",
+		Owner:         "bradrydzewski",
+		Name:          "test",
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
 	pipeline := model.Pipeline{
@@ -279,10 +318,12 @@ func TestRepoCrud(t *testing.T) {
 
 	// create unrelated
 	repoUnrelated := model.Repo{
-		UserID:   2,
-		FullName: "x/x",
-		Owner:    "x",
-		Name:     "x",
+		ForgeRemoteID: "xx",
+		ForgeID:       1,
+		UserID:        2,
+		FullName:      "x/x",
+		Owner:         "x",
+		Name:          "x",
 	}
 	assert.NoError(t, store.CreateRepo(&repoUnrelated))
 	pipelineUnrelated := model.Pipeline{
@@ -316,6 +357,7 @@ func TestRepoRedirection(t *testing.T) {
 
 	repo := model.Repo{
 		UserID:        1,
+		ForgeID:       1,
 		ForgeRemoteID: "1",
 		FullName:      "bradrydzewski/test",
 		Owner:         "bradrydzewski",
@@ -338,20 +380,21 @@ func TestRepoRedirection(t *testing.T) {
 	}))
 
 	// test redirection from old repo name
-	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test")
+	repoFromStore, err := store.GetRepoNameFallback(0, "1", "bradrydzewski/test")
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repoUpdated.FullName)
 
 	// test getting repo without forge ID (use name fallback)
 	repo = model.Repo{
-		UserID:   1,
-		FullName: "bradrydzewski/test-no-forge-id",
-		Owner:    "bradrydzewski",
-		Name:     "test-no-forge-id",
+		UserID:        1,
+		ForgeRemoteID: "bradrydzewski/test-no-forge-id",
+		FullName:      "bradrydzewski/test-no-forge-id",
+		Owner:         "bradrydzewski",
+		Name:          "test-no-forge-id",
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
 
-	repoFromStore, err = store.GetRepoNameFallback("", "bradrydzewski/test-no-forge-id")
+	repoFromStore, err = store.GetRepoNameFallback(0, "", "bradrydzewski/test-no-forge-id")
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repo.FullName)
 }

@@ -37,16 +37,114 @@ import (
 // GetQueueInfo
 //
 //	@Summary		Get pipeline queue information
-//	@Description	TODO: link the InfoT response object - this is blocked, until the `swaggo/swag` tool dependency is v1.18.12 or newer
+//	@Description	Returns pipeline queue information with agent details
 //	@Router			/queue/info [get]
 //	@Produce		json
-//	@Success		200	{object}	map[string]string
+//	@Success		200	{object}	QueueInfo
 //	@Tags			Pipeline queues
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetQueueInfo(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK,
-		server.Config.Services.Queue.Info(c),
-	)
+	info := server.Config.Services.Queue.Info(c)
+	_store := store.FromContext(c)
+
+	// Create a map to store agent names by ID
+	agentNameMap := make(map[int64]string)
+
+	// Process tasks and add agent names
+	pendingWithAgents, err := processQueueTasks(_store, info.Pending, agentNameMap)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	waitingWithAgents, err := processQueueTasks(_store, info.WaitingOnDeps, agentNameMap)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	runningWithAgents, err := processQueueTasks(_store, info.Running, agentNameMap)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Create response with agent-enhanced tasks
+	response := model.QueueInfo{
+		Pending:       pendingWithAgents,
+		WaitingOnDeps: waitingWithAgents,
+		Running:       runningWithAgents,
+		Stats: struct {
+			WorkerCount        int `json:"worker_count"`
+			PendingCount       int `json:"pending_count"`
+			WaitingOnDepsCount int `json:"waiting_on_deps_count"`
+			RunningCount       int `json:"running_count"`
+		}{
+			WorkerCount:        info.Stats.Workers,
+			PendingCount:       info.Stats.Pending,
+			WaitingOnDepsCount: info.Stats.WaitingOnDeps,
+			RunningCount:       info.Stats.Running,
+		},
+		Paused: info.Paused,
+	}
+
+	c.IndentedJSON(http.StatusOK, response)
+}
+
+// getAgentName finds an agent's name, utilizing a map as a cache.
+func getAgentName(store store.Store, agentNameMap map[int64]string, agentID int64) (string, bool) {
+	// 1. Check the cache first.
+	name, exists := agentNameMap[agentID]
+	if exists {
+		return name, true
+	}
+
+	// 2. If not in cache, query the store.
+	agent, err := store.AgentFind(agentID)
+	if err != nil || agent == nil {
+		// Agent not found or an error occurred.
+		return "", false
+	}
+
+	// 3. Found the agent, update the cache and return the name.
+	if agent.Name != "" {
+		agentNameMap[agentID] = agent.Name
+		return agent.Name, true
+	}
+
+	return "", false
+}
+
+// processQueueTasks converts tasks to QueueTask structs and adds agent names.
+func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[int64]string) ([]model.QueueTask, error) {
+	result := make([]model.QueueTask, 0, len(tasks))
+
+	for _, task := range tasks {
+		taskResponse := model.QueueTask{
+			Task: *task,
+		}
+
+		if task.AgentID != 0 {
+			name, ok := getAgentName(store, agentNameMap, task.AgentID)
+			if !ok {
+				return nil, fmt.Errorf("agent not found for task %s", task.ID)
+			}
+
+			taskResponse.AgentName = name
+		}
+
+		if task.PipelineID != 0 {
+			p, err := store.GetPipeline(task.PipelineID)
+			if err != nil {
+				return nil, fmt.Errorf("pipeline not found for task %s", task.ID)
+			}
+
+			taskResponse.PipelineNumber = p.Number
+		}
+
+		result = append(result, taskResponse)
+	}
+	return result, nil
 }
 
 // PauseQueue
@@ -229,7 +327,7 @@ func PostHook(c *gin.Context) {
 	// 5. Check if pull requests are allowed for this repo
 	//
 
-	if (pipelineFromForge.Event == model.EventPull || pipelineFromForge.Event == model.EventPullClosed) && !repo.AllowPull {
+	if pipelineFromForge.IsPullRequest() && !repo.AllowPull {
 		log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
 		c.Status(http.StatusNoContent)
 		return
@@ -249,13 +347,12 @@ func PostHook(c *gin.Context) {
 
 func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
 	if t.Get("repo-forge-remote-id") != "" {
-		// TODO: use both the forge ID and repo forge remote ID
-		/*forgeID, err := strconv.ParseInt(t.Get("forge-id"), 10, 64)
+		forgeID, err := strconv.ParseInt(t.Get("forge-id"), 10, 64)
 		if err != nil {
 			return nil, err
-		}*/
+		}
 
-		return store.GetRepoForgeID(model.ForgeRemoteID(t.Get("repo-forge-remote-id")))
+		return store.GetRepoForgeID(forgeID, model.ForgeRemoteID(t.Get("repo-forge-remote-id")))
 	}
 
 	// get the repo by the repo-id

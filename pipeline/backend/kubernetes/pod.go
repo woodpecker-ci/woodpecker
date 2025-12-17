@@ -36,11 +36,12 @@ const (
 	// This will be removed in the future.
 	StepLabelLegacy       = "step"
 	StepLabel             = "woodpecker-ci.org/step"
+	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
 	podPrefix             = "wp-"
 	defaultFSGroup  int64 = 1000
 )
 
-func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
+func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*v1.Pod, error) {
 	var err error
 
 	nsp := newNativeSecretsProcessor(config, options.Secrets)
@@ -49,12 +50,12 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	meta, err := podMeta(step, config, options, podName)
+	meta, err := podMeta(step, config, options, podName, taskUUID)
 	if err != nil {
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options, nsp)
+	spec, err := podSpec(step, config, options, nsp, taskUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (meta_v1.ObjectMeta, error) {
+func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (meta_v1.ObjectMeta, error) {
 	var err error
 	meta := meta_v1.ObjectMeta{
 		Name:        podName,
@@ -92,7 +93,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 		Annotations: podAnnotations(config, options),
 	}
 
-	meta.Labels, err = podLabels(step, config, options)
+	meta.Labels, err = podLabels(step, config, options, taskUUID)
 	if err != nil {
 		return meta, err
 	}
@@ -100,7 +101,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	return meta, nil
 }
 
-func podLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
+func podLabels(step *types.Step, config *config, options BackendOptions, taskUUID string) (map[string]string, error) {
 	var err error
 	labels := make(map[string]string)
 
@@ -141,6 +142,10 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 		return labels, err
 	}
 
+	if len(taskUUID) > 0 {
+		labels[TaskUUIDLabel] = taskUUID
+	}
+
 	return labels, nil
 }
 
@@ -167,16 +172,24 @@ func podAnnotations(config *config, options BackendOptions) map[string]string {
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
-	var err error
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor, taskUUID string) (v1.PodSpec, error) {
+	subdomain, err := subdomain(taskUUID)
+	if err != nil {
+		return v1.PodSpec{}, err
+	}
+
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
 		PriorityClassName:  config.PriorityClassName,
 		HostAliases:        hostAliases(step.ExtraHosts),
+		Hostname:           getHostnameOrEmpty(step.Name),
+		Subdomain:          subdomain,
+		DNSConfig:          dnsConfig(config.GetNamespace(step.OrgID), subdomain),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
+		Affinity:           affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
 
@@ -460,6 +473,25 @@ func toleration(backendToleration Toleration) v1.Toleration {
 	}
 }
 
+func affinity(stepAffinity, agentAffinity *v1.Affinity, allowFromStep bool) *v1.Affinity {
+	if stepAffinity != nil {
+		if allowFromStep {
+			log.Trace().Msg("using affinity from step backend options")
+			return stepAffinity
+		} else {
+			log.Debug().Msg("Step affinity is disallowed by instance configuration, ignoring it")
+		}
+	}
+
+	if agentAffinity != nil {
+		log.Trace().Msg("using affinity from agent configuration")
+		return agentAffinity
+	}
+
+	log.Trace().Msg("no affinity configured")
+	return nil
+}
+
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
 		nonRoot             *bool
@@ -598,13 +630,19 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
+func dnsConfig(namespace, subdomain string) *v1.PodDNSConfig {
+	return &v1.PodDNSConfig{
+		Searches: []string{fmt.Sprintf("%s.%s.svc.cluster.local", subdomain, namespace)},
+	}
+}
+
+func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions, taskUUID string) (*v1.Pod, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
 	engineConfig := engine.getConfig()
-	pod, err := mkPod(step, engineConfig, podName, engine.goos, options)
+	pod, err := mkPod(step, engineConfig, podName, engine.goos, options, taskUUID)
 	if err != nil {
 		return nil, err
 	}

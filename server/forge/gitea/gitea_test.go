@@ -28,11 +28,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitea/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestNew(t *testing.T) {
-	forge, _ := New(Opts{
+	forge, _ := New(1, Opts{
 		URL:        "http://localhost:8080",
 		SkipVerify: true,
 	})
@@ -47,16 +47,16 @@ func Test_gitea(t *testing.T) {
 
 	s := httptest.NewServer(fixtures.Handler())
 	defer s.Close()
-	c, _ := New(Opts{
+	c, _ := New(1, Opts{
 		URL:        s.URL,
 		SkipVerify: true,
 	})
 
-	mockStore := mocks_store.NewStore(t)
+	mockStore := store_mocks.NewMockStore(t)
 	ctx := store.InjectToContext(t.Context(), mockStore)
 
 	t.Run("netrc with user token", func(t *testing.T) {
-		forge, _ := New(Opts{})
+		forge, _ := New(1, Opts{})
 		netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 		assert.Equal(t, "gitea.com", netrc.Machine)
 		assert.Equal(t, fakeUser.Login, netrc.Login)
@@ -64,7 +64,7 @@ func Test_gitea(t *testing.T) {
 		assert.Equal(t, model.ForgeTypeGitea, netrc.Type)
 	})
 	t.Run("netrc with machine account", func(t *testing.T) {
-		forge, _ := New(Opts{})
+		forge, _ := New(1, Opts{})
 		netrc, _ := forge.Netrc(nil, fakeRepo)
 		assert.Equal(t, "gitea.com", netrc.Machine)
 		assert.Empty(t, netrc.Login)
@@ -87,7 +87,7 @@ func Test_gitea(t *testing.T) {
 	})
 
 	t.Run("repository list", func(t *testing.T) {
-		repos, err := c.Repos(ctx, fakeUser)
+		repos, err := c.Repos(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
 		assert.NoError(t, err)
 		assert.Equal(t, fakeRepo.ForgeRemoteID, repos[0].ForgeRemoteID)
 		assert.Equal(t, fakeRepo.Owner, repos[0].Owner)
@@ -95,7 +95,7 @@ func Test_gitea(t *testing.T) {
 		assert.Equal(t, fakeRepo.Owner+"/"+fakeRepo.Name, repos[0].FullName)
 	})
 	t.Run("not found error", func(t *testing.T) {
-		_, err := c.Repos(ctx, fakeUserNoRepos)
+		_, err := c.Repos(ctx, fakeUserNoRepos, &model.ListOptions{Page: 1, PerPage: 10})
 		assert.Error(t, err)
 	})
 
@@ -125,7 +125,7 @@ func Test_gitea(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullRequest)
-		mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)
+		mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(fakeRepo, nil)
 		mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
 		r, b, err := c.Hook(ctx, req)
 		assert.NotNil(t, r)

@@ -45,9 +45,9 @@ func (mode ApprovalMode) Valid() bool {
 type Repo struct {
 	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
 	UserID  int64 `json:"-"                               xorm:"INDEX 'user_id'"`
-	ForgeID int64 `json:"forge_id,omitempty"              xorm:"forge_id"`
+	ForgeID int64 `json:"forge_id,omitempty"              xorm:"UNIQUE(forge) forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
-	ForgeRemoteID                ForgeRemoteID        `json:"forge_remote_id"                 xorm:"forge_remote_id"`
+	ForgeRemoteID                ForgeRemoteID        `json:"forge_remote_id"                 xorm:"UNIQUE(forge) forge_remote_id"`
 	OrgID                        int64                `json:"org_id"                          xorm:"INDEX 'org_id'"`
 	Owner                        string               `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
 	Name                         string               `json:"name"                            xorm:"UNIQUE(name) 'name'"`
@@ -72,11 +72,16 @@ type Repo struct {
 	Perm                         *Perm                `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
+	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 } //	@name	Repo
 
 // TableName return database table name for xorm.
 func (Repo) TableName() string {
 	return "repos"
+}
+
+type RepoFilter struct {
+	Name string
 }
 
 func (r *Repo) ResetVisibility() {
@@ -91,11 +96,11 @@ func ParseRepo(str string) (user, repo string, err error) {
 	before, after, _ := strings.Cut(str, "/")
 	if before == "" || after == "" {
 		err = fmt.Errorf("invalid or missing repository (e.g. octocat/hello-world)")
-		return
+		return user, repo, err
 	}
 	user = before
 	repo = after
-	return
+	return user, repo, err
 }
 
 // Update updates the repository with values from the given Repo.
@@ -138,6 +143,7 @@ type RepoPatch struct {
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`
 	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
+	ConfigExtensionEndpoint      *string                    `json:"config_extension_endpoint,omitempty"`
 } //	@name	RepoPatch
 
 type ForgeRemoteID string

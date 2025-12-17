@@ -280,7 +280,7 @@ func TestCompilerCompile(t *testing.T) {
 				Name:     "step",
 				Image:    "bash",
 				Commands: []string{"env"},
-				Environment: yaml_base_types.EnvironmentMap{
+				Environment: map[string]any{
 					"MISSING": map[string]any{"from_secret": "missing"},
 				},
 			}}}},
@@ -375,7 +375,7 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 				Name:     "step",
 				Image:    "bash",
 				Commands: []string{"env"},
-				Environment: yaml_base_types.EnvironmentMap{
+				Environment: map[string]any{
 					"SECRET": map[string]any{"from_secret": "secret_name"},
 				},
 			}}}},
@@ -465,6 +465,12 @@ func TestSecretMatch(t *testing.T) {
 			name:   "pull close should match pull",
 			secret: Secret{Events: []string{"pull_request"}},
 			event:  "pull_request_closed",
+			match:  true,
+		},
+		{
+			name:   "pull metadata change should match pull",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request_metadata",
 			match:  true,
 		},
 	}

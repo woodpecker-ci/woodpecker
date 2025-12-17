@@ -2,9 +2,9 @@ package pipeline
 
 import (
 	"context"
-	"errors"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -49,12 +49,6 @@ func TestPipelinePurge(t *testing.T) {
 			wantDelete: 2,
 		},
 		{
-			name:    "error on invalid duration",
-			repoID:  1,
-			args:    []string{"purge", "--older-than", "invalid", "repo/name"},
-			wantErr: errors.New("time: invalid duration \"invalid\""),
-		},
-		{
 			name:   "continue on 422 error",
 			repoID: 1,
 			args:   []string{"purge", "--older-than", "1h", "repo/name"},
@@ -76,7 +70,7 @@ func TestPipelinePurge(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockClient := mocks.NewClient(t)
+			mockClient := mocks.NewMockClient(t)
 			mockClient.On("RepoLookup", mock.Anything).Maybe().Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
 			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(func(_ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
@@ -108,7 +102,7 @@ func TestPipelinePurge(t *testing.T) {
 			command := pipelinePurgeCmd
 			command.Writer = io.Discard
 			command.Action = func(_ context.Context, c *cli.Command) error {
-				err := pipelinePurge(c, mockClient)
+				err := pipelinePurge(c, mockClient, time.Unix(1, 1))
 
 				if tt.wantErr != nil {
 					assert.EqualError(t, err, tt.wantErr.Error())
