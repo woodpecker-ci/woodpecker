@@ -23,6 +23,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix some ListItems and Queue view background in dark mode [[#5878](https://github.com/woodpecker-ci/woodpecker/pull/5878)]
 - Make disabled checkboxes match overall style [[#5869](https://github.com/woodpecker-ci/woodpecker/pull/5869)]
 - Fix CLI trusted updating [[#5861](https://github.com/woodpecker-ci/woodpecker/pull/5861)]
 - Send configuration as part of the request for external configuration [[#5831](https://github.com/woodpecker-ci/woodpecker/pull/5831)]
