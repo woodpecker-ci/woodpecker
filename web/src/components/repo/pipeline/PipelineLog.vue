@@ -7,7 +7,7 @@
     }"
   >
     <div
-class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0"
+      class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0"
       :class="{
         'md:rounded-md!': !fullscreen,
       }"
@@ -78,7 +78,7 @@ class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0"
           </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
-            class="align-top break-words whitespace-pre-wrap"
+            class="wrap-break-words align-top whitespace-pre-wrap"
             :class="{
               'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
               'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
