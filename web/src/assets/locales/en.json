@@ -179,7 +179,8 @@
         "type_url": "URL",
         "type_markdown": "Markdown",
         "type_html": "HTML",
-        "branch": "Branch"
+        "branch": "Branch",
+        "events": "Events"
       },
       "actions": {
         "actions": "Actions",

@@ -308,3 +308,17 @@ type Dir struct {
 	Type string `json:"type"`
 	Size uint   `json:"size"`
 }
+
+type DiffStatResp struct {
+	Next   *string `json:"next"`
+	Values []*Diff `json:"values"`
+}
+
+type Diff struct {
+	Old *DiffFile `json:"old"`
+	New *DiffFile `json:"new"`
+}
+
+type DiffFile struct {
+	Path string `json:"path"`
+}

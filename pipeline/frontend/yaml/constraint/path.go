@@ -22,14 +22,15 @@ import (
 	"gopkg.in/yaml.v3"
 
 	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
 )
 
 // Path defines a runtime constrain for exclude & include paths.
 type Path struct {
-	Include       []string               `yaml:"include,omitempty"`
-	Exclude       []string               `yaml:"exclude,omitempty"`
-	IgnoreMessage string                 `yaml:"ignore_message,omitempty"`
-	OnEmpty       yamlBaseTypes.BoolTrue `yaml:"on_empty,omitempty"`
+	Include       []string              `yaml:"include,omitempty"`
+	Exclude       []string              `yaml:"exclude,omitempty"`
+	IgnoreMessage string                `yaml:"ignore_message,omitempty"`
+	OnEmpty       optional.Option[bool] `yaml:"on_empty,omitempty"`
 }
 
 // UnmarshalYAML unmarshal the constraint.
@@ -38,7 +39,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include"`
 		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude"`
 		IgnoreMessage string                      `yaml:"ignore_message"`
-		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty"`
+		OnEmpty       optional.Option[bool]       `yaml:"on_empty"`
 	}{}
 
 	var out2 yamlBaseTypes.StringOrSlice
@@ -67,18 +68,24 @@ func (c Path) MarshalYAML() (any, error) {
 	// if only Include is set return simple syntax
 	if len(c.Exclude) == 0 &&
 		len(c.IgnoreMessage) == 0 &&
-		c.OnEmpty.Bool() {
+		c.OnEmpty.ValueOrDefault(true) {
 		if len(c.Include) == 0 {
 			return nil, nil
 		}
 		return yamlBaseTypes.StringOrSlice(c.Include), nil
 	}
+
+	// clean up on_empty if true make it none as we will default to true
+	if c.OnEmpty.ValueOrDefault(true) {
+		c.OnEmpty = optional.None[bool]()
+	}
+
 	// we can not return type Path as it would lead to infinite recursion :/
 	return struct {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
 		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
 		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
-		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
+		OnEmpty       optional.Option[bool]       `yaml:"on_empty,omitempty"`
 	}{
 		Include:       c.Include,
 		Exclude:       c.Exclude,
@@ -97,7 +104,7 @@ func (c *Path) Match(v []string, message string) bool {
 
 	// return value based on 'on_empty', if there are no commit files (empty commit)
 	if len(v) == 0 {
-		return c.OnEmpty.Bool()
+		return c.OnEmpty.ValueOrDefault(true)
 	}
 
 	if len(c.Exclude) > 0 && c.Excludes(v) {

@@ -34,6 +34,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -45,6 +46,7 @@ const (
 )
 
 type Forgejo struct {
+	id                int64
 	url               string
 	oauth2URL         string
 	oAuthClientID     string
@@ -64,12 +66,13 @@ type Opts struct {
 
 // New returns a Forge implementation that integrates with Forgejo,
 // an open source Git service written in Go. See https://forgejo.org/
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	if opts.OAuth2URL == "" {
 		opts.OAuth2URL = opts.URL
 	}
 
 	return &Forgejo{
+		id:                id,
 		url:               opts.URL,
 		oauth2URL:         opts.OAuth2URL,
 		oAuthClientID:     opts.OAuthClientID,
@@ -586,12 +589,13 @@ func (c *Forgejo) newClientToken(ctx context.Context, token string) (*forgejo.Cl
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
-	client, err := forgejo.NewClient(c.url, forgejo.SetToken(token), forgejo.SetHTTPClient(httpClient), forgejo.SetContext(ctx))
+	wrappedClient := httputil.WrapClient(httpClient, "forge-forgejo")
+	client, err := forgejo.NewClient(c.url, forgejo.SetToken(token), forgejo.SetHTTPClient(wrappedClient), forgejo.SetContext(ctx))
 	if err != nil &&
 		(errors.Is(err, &forgejo.ErrUnknownVersion{}) || strings.Contains(err.Error(), "Malformed version")) {
 		// we guess it's a dev forgejo version
 		log.Error().Err(err).Msgf("could not detect forgejo version, assume dev version %s", forgejoDevVersion)
-		client, err = forgejo.NewClient(c.url, forgejo.SetForgejoVersion(forgejoDevVersion), forgejo.SetToken(token), forgejo.SetHTTPClient(httpClient), forgejo.SetContext(ctx))
+		client, err = forgejo.NewClient(c.url, forgejo.SetForgejoVersion(forgejoDevVersion), forgejo.SetToken(token), forgejo.SetHTTPClient(wrappedClient), forgejo.SetContext(ctx))
 	}
 	return client, err
 }
@@ -626,7 +630,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		return []string{}, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -663,7 +667,7 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 		return "", nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return "", err
 	}

@@ -36,6 +36,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -47,6 +48,7 @@ const (
 )
 
 type Gitea struct {
+	id                int64
 	url               string
 	oAuthClientID     string
 	oAuthClientSecret string
@@ -66,8 +68,9 @@ type Opts struct {
 
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	return &Gitea{
+		id:                id,
 		url:               opts.URL,
 		oAuthClientID:     opts.OAuthClientID,
 		oAuthClientSecret: opts.OAuthClientSecret,
@@ -593,12 +596,13 @@ func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
-	client, err := gitea.NewClient(c.url, gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
+	wrappedClient := httputil.WrapClient(httpClient, "forge-gitea")
+	client, err := gitea.NewClient(c.url, gitea.SetToken(token), gitea.SetHTTPClient(wrappedClient), gitea.SetContext(ctx))
 	if err != nil &&
 		(errors.Is(err, &gitea.ErrUnknownVersion{}) || strings.Contains(err.Error(), "Malformed version")) {
 		// we guess it's a dev gitea version
 		log.Error().Err(err).Msgf("could not detect gitea version, assume dev version %s", giteaDevVersion)
-		client, err = gitea.NewClient(c.url, gitea.SetGiteaVersion(giteaDevVersion), gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
+		client, err = gitea.NewClient(c.url, gitea.SetGiteaVersion(giteaDevVersion), gitea.SetToken(token), gitea.SetHTTPClient(wrappedClient), gitea.SetContext(ctx))
 	}
 	return client, err
 }
@@ -633,7 +637,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return []string{}, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -670,7 +674,7 @@ func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName s
 		return "", nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return "", err
 	}

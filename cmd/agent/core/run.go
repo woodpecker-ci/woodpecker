@@ -29,7 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
-func RunAgent(ctx context.Context, backends []backend.Backend) {
+func GenApp(backends []backend.Backend) *cli.Command {
 	app := &cli.Command{}
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()
@@ -47,6 +47,11 @@ func RunAgent(ctx context.Context, backends []backend.Backend) {
 		agentFlags = utils.MergeSlices(agentFlags, b.Flags())
 	}
 	app.Flags = agentFlags
+	return app
+}
+
+func RunAgent(ctx context.Context, backends []backend.Backend) {
+	app := GenApp(backends)
 
 	if err := app.Run(ctx, os.Args); err != nil {
 		log.Fatal().Err(err).Msg("error running agent") //nolint:forbidigo
