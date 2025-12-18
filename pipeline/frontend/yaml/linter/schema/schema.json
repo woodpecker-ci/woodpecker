@@ -98,7 +98,7 @@
       ]
     },
     "clone_settings": {
-      "description": "Change the settings of your clone plugin. Read more: https://woodpecker-ci.org/plugins/Git%20Clone",
+      "description": "Change the settings of your clone plugin. Read more: https://woodpecker-ci.org/plugins/git-clone",
       "type": "object",
       "properties": {
         "depth": {
@@ -503,7 +503,17 @@
       }
     },
     "event_enum": {
-      "enum": ["push", "pull_request", "pull_request_closed", "tag", "deployment", "cron", "manual", "release"]
+      "enum": [
+        "push",
+        "pull_request",
+        "pull_request_closed",
+        "pull_request_metadata",
+        "tag",
+        "deployment",
+        "cron",
+        "manual",
+        "release"
+      ]
     },
     "event_constraint_list": {
       "oneOf": [
@@ -646,11 +656,19 @@
             "type": ["boolean", "string", "number"]
           }
         },
+        "tolerations": {
+          "description": "The tolerations section defines a list of references to the native Kubernetes tolerations. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#tolerations",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step_backend_kubernetes_toleration_object"
+          },
+          "minLength": 1
+        },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
         },
         "runtimeClassName": {
-          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#runtimeclassname",
           "type": "string"
         },
         "secrets": {
@@ -664,7 +682,7 @@
       }
     },
     "step_backend_kubernetes_resources": {
-      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#job-specific-configuration",
+      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
       "type": "object",
       "properties": {
         "requests": {
@@ -676,7 +694,7 @@
       }
     },
     "step_backend_kubernetes_security_context": {
-      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#securitycontext",
+      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
       "type": "object",
       "properties": {
         "privileged": {
@@ -703,7 +721,7 @@
       }
     },
     "step_backend_kubernetes_secprofile": {
-      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#job-specific-configuration",
+      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
       "type": "object",
       "properties": {
         "type": {
@@ -722,7 +740,7 @@
       }
     },
     "step_backend_kubernetes_service_account": {
-      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#serviceaccountname",
+      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#service-account",
       "type": "object",
       "properties": {
         "requests": {
@@ -782,6 +800,27 @@
           }
         }
       ]
+    },
+    "step_backend_kubernetes_toleration_object": {
+      "description": "Toleration entry for the kubernetes backend.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "effect": {
+          "type": "string"
+        },
+        "tolerationSeconds": {
+          "type": "integer"
+        }
+      }
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",

@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/securecookie"
+	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
 	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -56,8 +57,8 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	xorm := store.XORM{
 		Log:             c.Bool("db-log"),
 		ShowSQL:         c.Bool("db-log-sql"),
-		MaxOpenConns:    int(c.Int("db-max-open-connections")),
-		MaxIdleConns:    int(c.Int("db-max-idle-connections")),
+		MaxOpenConns:    c.Int("db-max-open-connections"),
+		MaxIdleConns:    c.Int("db-max-idle-connections"),
 		ConnMaxLifetime: c.Duration("db-max-connection-timeout"),
 	}
 
@@ -125,6 +126,8 @@ func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
+	case "addon":
+		return addon.Load(c.String("log-store-file-path"))
 	default:
 		return s, nil
 	}
@@ -136,7 +139,7 @@ func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
 	if errors.Is(err, types.RecordNotExist) {
 		jwtSecret := base32.StdEncoding.EncodeToString(
-			securecookie.GenerateRandomKey(32),
+			random.GetRandomBytes(32),
 		)
 		err = _store.ServerConfigSet(jwtSecretID, jwtSecret)
 		if err != nil {
@@ -180,6 +183,13 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	// Pull requests
 	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")
 
+	// Approval mode
+	approvalMode := model.ApprovalMode(c.String("default-approval-mode"))
+	if !approvalMode.Valid() {
+		return fmt.Errorf("approval mode %s is not valid", approvalMode)
+	}
+	server.Config.Pipeline.DefaultApprovalMode = approvalMode
+
 	// Cloning
 	server.Config.Pipeline.DefaultClonePlugin = c.String("default-clone-plugin")
 	server.Config.Pipeline.TrustedClonePlugins = c.StringSlice("plugins-trusted-clone")
@@ -189,11 +199,15 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
 	events := make([]model.WebhookEvent, 0, len(_events))
 	for _, v := range _events {
-		events = append(events, model.WebhookEvent(v))
+		e := model.WebhookEvent(v)
+		if err := e.Validate(); err != nil {
+			return err
+		}
+		events = append(events, e)
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
-	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
-	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
+	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
 
 	_labels := c.StringSlice("default-workflow-labels")
 	labels := make(map[string]string, len(_labels))

@@ -43,11 +43,12 @@
           <span :title="pipelineEventTitle">
             <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
             <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
+            <Icon v-else-if="pipeline.event === 'pull_request_metadata'" name="pull-request-metadata" />
             <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
             <Icon v-else-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" />
-            <Icon v-else-if="pipeline.event === 'cron'" name="push" />
+            <Icon v-else-if="pipeline.event === 'cron'" name="branch" />
             <Icon v-else-if="pipeline.event === 'manual'" name="manual-pipeline" />
-            <Icon v-else name="push" />
+            <Icon v-else name="branch" />
           </span>
           <span class="truncate">{{ prettyRef }}</span>
         </div>
@@ -57,7 +58,12 @@
           <span class="truncate">{{ pipeline.commit.slice(0, 10) }}</span>
         </div>
 
-        <div class="flex min-w-0 items-center space-x-2" :title="$t('repo.pipeline.duration')">
+        <div
+          class="flex min-w-0 items-center space-x-2"
+          :title="
+            durationElapsed > 0 ? $t('repo.pipeline.duration', { duration: durationAsNumber(durationElapsed) }) : ''
+          "
+        >
           <Icon name="duration" />
           <span class="truncate">{{ duration }}</span>
         </div>
@@ -80,6 +86,7 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import { pipelineStatusColors } from '~/components/repo/pipeline/pipeline-status';
 import PipelineRunningIcon from '~/components/repo/pipeline/PipelineRunningIcon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
+import { useDate } from '~/compositions/useDate';
 import usePipeline from '~/compositions/usePipeline';
 import type { Pipeline } from '~/lib/api/types';
 
@@ -88,9 +95,10 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { durationAsNumber } = useDate();
 
 const pipeline = toRef(props, 'pipeline');
-const { since, duration, message, shortMessage, prettyRef, created } = usePipeline(pipeline);
+const { since, duration, durationElapsed, message, shortMessage, prettyRef, created } = usePipeline(pipeline);
 
 const pipelineEventTitle = computed(() => {
   switch (pipeline.value.event) {
@@ -98,6 +106,8 @@ const pipelineEventTitle = computed(() => {
       return t('repo.pipeline.event.pr');
     case 'pull_request_closed':
       return t('repo.pipeline.event.pr_closed');
+    case 'pull_request_metadata':
+      return t('repo.pipeline.event.pr_metadata');
     case 'deployment':
       return t('repo.pipeline.event.deploy');
     case 'tag':

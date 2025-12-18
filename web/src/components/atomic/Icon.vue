@@ -2,9 +2,10 @@
 <template>
   <SvgIcon v-if="name === 'duration'" :path="mdiTimerOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'since'" :path="mdiClockTimeEightOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'push'" :path="mdiSourceBranch" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'branch'" :path="mdiSourceBranch" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request-closed'" :path="mdiSourceMerge" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'pull-request-metadata'" :path="mdiPencilOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'manual-pipeline'" :path="mdiGestureTap" size="1.3rem" />
   <SvgIcon v-else-if="name === 'tag'" :path="mdiTagOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="1.3rem" />
@@ -17,13 +18,23 @@
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'list-group'" :path="mdiFormatListGroup" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'secret'" :path="mdiShieldKeyOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'console'" :path="mdiConsole" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'agent'" :path="mdiPlayNetworkOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'info'" :path="mdiInformationSlabCircleOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'user'" :path="mdiAccountOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'org'" :path="mdiAccountGroupOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'cron'" :path="mdiCalendarClockOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'toolbox'" :path="mdiToolboxOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'puzzle'" :path="mdiPuzzleOutline" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
     :path="mdiCloseCircle"
     size="1.3rem"
   />
-  <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-pending' || name === 'status-created'" :path="mdiRadioboxBlank" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-running' || name === 'status-started'"
     type="mdi"
@@ -49,6 +60,17 @@
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'dots'" :path="mdiDotsVertical" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file-cog-outline'" :path="mdiFileCogOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file-edit-outline'" :path="mdiFileEditOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder'" :path="mdiFolderOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder-open'" :path="mdiFolderOpenOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file'" :path="mdiFileOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'forge'" :path="mdiCodeBraces" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'fullscreen'" :path="mdiFullscreen" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'exit-fullscreen'" :path="mdiFullscreenExit" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -79,31 +101,49 @@
   </svg>
 
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
+
+  <div v-else>{{ throwNotFound() }}</div>
 </template>
 
 <script lang="ts" setup>
 import {
+  mdiAccountGroupOutline,
+  mdiAccountOutline,
   mdiAlarm,
   mdiAlertCircle,
   mdiArrowLeft,
   mdiBitbucket,
+  mdiBugOutline,
+  mdiCalendarClockOutline,
   mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
   mdiClose,
   mdiCloseCircle,
+  mdiCodeBraces,
   mdiCog,
   mdiCogOutline,
+  mdiConsole,
+  mdiDocker,
   mdiDotsVertical,
   mdiDownloadOutline,
   mdiEyeOffOutline,
   mdiEyeOutline,
+  mdiFileCogOutline,
+  mdiFileEditOutline,
+  mdiFileOutline,
+  mdiFolderOpenOutline,
+  mdiFolderOutline,
   mdiFormatListBulleted,
+  mdiFormatListGroup,
+  mdiFullscreen,
+  mdiFullscreenExit,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
   mdiGitlab,
   mdiHelpCircle,
+  mdiInformationSlabCircleOutline,
   mdiLockOpenOutline,
   mdiLockOutline,
   mdiMinusCircle,
@@ -112,11 +152,14 @@ import {
   mdiPencilOutline,
   mdiPlay,
   mdiPlayCircle,
+  mdiPlayNetworkOutline,
   mdiPlayOutline,
   mdiPlus,
   mdiPower,
+  mdiPuzzleOutline,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
+  mdiShieldKeyOutline,
   mdiSourceBranch,
   mdiSourceCommit,
   mdiSourceMerge,
@@ -124,7 +167,9 @@ import {
   mdiStopCircle,
   mdiTagOutline,
   mdiTimerOutline,
+  mdiToolboxOutline,
   mdiTrashCanOutline,
+  mdiTrayFull,
   mdiWrenchCogOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
@@ -134,9 +179,10 @@ import SvgIcon from './SvgIcon.vue';
 export type IconNames =
   | 'duration'
   | 'since'
-  | 'push'
+  | 'branch'
   | 'pull-request'
   | 'pull-request-closed'
+  | 'pull-request-metadata'
   | 'manual-pipeline'
   | 'tag'
   | 'deployment'
@@ -153,6 +199,7 @@ export type IconNames =
   | 'status-failure'
   | 'status-killed'
   | 'status-pending'
+  | 'status-created'
   | 'status-running'
   | 'status-skipped'
   | 'status-started'
@@ -164,7 +211,6 @@ export type IconNames =
   | 'forgejo'
   | 'question'
   | 'list'
-  | 'loading'
   | 'plus'
   | 'blank'
   | 'heal'
@@ -183,9 +229,35 @@ export type IconNames =
   | 'spinner'
   | 'visibility-private'
   | 'visibility-internal'
-  | 'dots';
+  | 'dots'
+  | 'tray-full'
+  | 'file-cog-outline'
+  | 'file-edit-outline'
+  | 'bug-outline'
+  | 'list-group'
+  | 'secret'
+  | 'docker'
+  | 'console'
+  | 'agent'
+  | 'info'
+  | 'repo'
+  | 'user'
+  | 'org'
+  | 'cron'
+  | 'toolbox'
+  | 'puzzle'
+  | 'forge'
+  | 'fullscreen'
+  | 'exit-fullscreen'
+  | 'folder'
+  | 'folder-open'
+  | 'file';
 
-defineProps<{
+const props = defineProps<{
   name: IconNames;
 }>();
+
+function throwNotFound() {
+  throw new Error(`Icon "${props.name}" not found`);
+}
 </script>

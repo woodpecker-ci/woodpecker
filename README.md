@@ -49,7 +49,7 @@ Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.
 
 ## Installation & Resources
 
-Woodpecker can be installed in various ways (see the [Installation Instructions](https://woodpecker-ci.org/docs/administration/getting-started)) and runs with SQLite as database by default.
+Woodpecker can be installed in various ways (see the [Installation Instructions](https://woodpecker-ci.org/docs/administration/general)) and runs with SQLite as database by default.
 It requires around 100 MB of RAM (Server) and 30 MB (Agent) at runtime in idle mode.
 
 ## Support

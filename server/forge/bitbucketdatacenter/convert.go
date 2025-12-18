@@ -109,12 +109,25 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	return pipeline
 }
 
+func convertGetCommitRange(ev *bb.RepositoryPushEvent) (currCommit, prevCommit string) {
+	if len(ev.Changes) == 0 {
+		return "", ""
+	}
+	change := ev.Changes[0]
+	if change.FromHash == "0000000000000000000000000000000000000000" {
+		return change.ToHash, ""
+	} else if change.ToHash == "0000000000000000000000000000000000000000" {
+		return "", change.FromHash
+	}
+	return change.ToHash, change.FromHash
+}
+
 func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit:    ev.PullRequest.Source.Latest,
 		Branch:    ev.PullRequest.Source.DisplayID,
 		Title:     ev.PullRequest.Title,
-		Message:   "",
+		Message:   ev.PullRequest.Title,
 		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,

@@ -15,7 +15,7 @@
           <span class="text-wp-text-100">{{ repo.full_name }}</span>
           <span v-if="repo.active" class="text-wp-text-alt-100 ml-auto">{{ $t('repo.enable.enabled') }}</span>
           <div v-else class="ml-auto flex items-center">
-            <Badge v-if="repo.id" class="md:display-unset mr-2 hidden" :label="$t('repo.enable.disabled')" />
+            <Badge v-if="repo.id" class="md:display-unset mr-2 hidden" :value="$t('repo.enable.disabled')" />
             <Button
               :text="$t('repo.enable.enable')"
               :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -46,6 +46,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRouteBack } from '~/compositions/useRouteBack';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Repo } from '~/lib/api/types';
 
 const router = useRouter();
@@ -74,4 +75,6 @@ const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(a
 });
 
 const goBack = useRouteBack({ name: 'repos' });
+
+useWPTitle(computed(() => [i18n.t('repo.add')]));
 </script>

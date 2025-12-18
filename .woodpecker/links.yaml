@@ -4,7 +4,7 @@ when:
 
 steps:
   - name: links
-    image: docker.io/lycheeverse/lychee:0.15.1
+    image: docker.io/lycheeverse/lychee:0.22.0
     failure: ignore
     depends_on: []
     commands:
@@ -14,14 +14,14 @@ steps:
       - echo -e "\nLast checked:$(date)" >> links.md
 
   - name: Update issue
-    image: docker.io/alpine:3.21
+    image: docker.io/alpine:3.23
     depends_on: links
     environment:
       GITHUB_TOKEN:
         from_secret: github_token
     commands:
       - apk add -q --no-cache jq curl
-      - export ISSUE_NUMBER=4514
+      - export ISSUE_NUMBER=5326
       - export DESCRIPTION=$(cat links.md)
       - |
         curl -X PATCH \

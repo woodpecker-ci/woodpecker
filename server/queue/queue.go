@@ -33,6 +33,9 @@ var (
 
 	// ErrAgentMissMatch indicates a task is assigned to a different agent.
 	ErrAgentMissMatch = errors.New("task assigned to different agent")
+
+	// ErrTaskExpired indicates a running task exceeded its lease/deadline and was resubmitted.
+	ErrTaskExpired = errors.New("queue: task expired")
 )
 
 // InfoT provides runtime information.
@@ -47,7 +50,7 @@ type InfoT struct {
 		Running       int `json:"running_count"`
 	} `json:"stats"`
 	Paused bool `json:"paused"`
-} //	@name InfoT
+} //	@name	InfoT
 
 func (t *InfoT) String() string {
 	var sb strings.Builder
@@ -67,19 +70,14 @@ func (t *InfoT) String() string {
 	return sb.String()
 }
 
-// Filter filters tasks in the queue. If the Filter returns false,
+// FilterFn filters tasks in the queue. If the Filter returns false,
 // the Task is skipped and not returned to the subscriber.
 // The int return value represents the matching score (higher is better).
 type FilterFn func(*model.Task) (bool, int)
 
-//go:generate mockery --name Queue --output mocks --case underscore --note "+build test"
-
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
 type Queue interface {
-	// Push pushes a task to the tail of this queue.
-	Push(c context.Context, task *model.Task) error
-
 	// PushAtOnce pushes multiple tasks to the tail of this queue.
 	PushAtOnce(c context.Context, tasks []*model.Task) error
 
@@ -97,9 +95,6 @@ type Queue interface {
 
 	// ErrorAtOnce signals multiple done are complete with an error.
 	ErrorAtOnce(c context.Context, ids []string, err error) error
-
-	// Evict removes a pending task from the queue.
-	Evict(c context.Context, id string) error
 
 	// EvictAtOnce removes multiple pending tasks from the queue.
 	EvictAtOnce(c context.Context, ids []string) error

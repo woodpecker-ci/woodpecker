@@ -7,9 +7,9 @@ when:
       - .woodpecker/binaries.yaml
 
 variables:
-  - &golang_image 'docker.io/golang:1.24'
-  - &node_image 'docker.io/node:23-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.24.x'
+  - &golang_image 'docker.io/golang:1.25'
+  - &node_image 'docker.io/node:24-alpine'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.25.x'
 
 # cspell:words bindata netgo
 
@@ -38,7 +38,7 @@ steps:
       - apt install -y tree
       - make cross-compile-server
     environment:
-      PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
+      PLATFORMS: linux|arm64/v8;linux|amd64;linux|riscv64;windows|amd64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       ARCHIVE_IT: '1'
 
@@ -99,7 +99,7 @@ steps:
   release:
     depends_on:
       - checksums
-    image: woodpeckerci/plugin-release:0.2.4
+    image: woodpeckerci/plugin-release:0.2.6
     settings:
       api_key:
         from_secret: github_token

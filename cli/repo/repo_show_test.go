@@ -48,7 +48,7 @@ func TestRepoShow(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockClient := mocks.NewClient(t)
+			mockClient := mocks.NewMockClient(t)
 			mockClient.On("Repo", tt.repoID).Return(tt.mockRepo, tt.mockError).Maybe()
 			mockClient.On("RepoLookup", "owner/repo").Return(tt.mockRepo, nil).Maybe()
 
@@ -66,7 +66,7 @@ func TestRepoShow(t *testing.T) {
 				return nil
 			}
 
-			_ = command.Run(context.Background(), tt.args)
+			_ = command.Run(t.Context(), tt.args)
 		})
 	}
 }

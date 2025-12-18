@@ -358,7 +358,7 @@
                 "pipeline_path": {
                     "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml",
                     "desc": "Ruta a la configuración de su pipeline (por ejemplo {0}). Las carpetas deben terminar en {1}.",
-                    "desc_path_example": "my/path/",
+                    "desc_path_example": "mi/directorie/",
                     "path": "Pasos del pipeline"
                 },
                 "project": "Configuración del proyecto",
@@ -374,7 +374,13 @@
                 },
                 "trusted": {
                     "desc": "Los contenedores de pipeline subyacentes obtienen acceso a capacidades escaladas como el montaje de volúmenes.",
-                    "trusted": "Confiado"
+                    "trusted": "Confiado",
+                    "volumes": {
+                        "volumes": "Volúmenes"
+                    },
+                    "security": {
+                        "security": "Seguridad"
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -390,6 +396,9 @@
                         "public": "Público"
                     },
                     "visibility": "Visibilidad del proyecto"
+                },
+                "allow_deploy": {
+                    "allow": "Permitir despliegues"
                 }
             },
             "not_allowed": "No tienes acceso a las configuraciónes del repositorio",
@@ -455,8 +464,18 @@
             }
         }
     },
-    "repos": "Repos",
-    "repositories": "Repositorios",
+    "repos": "Repositorios",
+    "repositories": {
+        "title": "Repositorios",
+        "all": {
+            "title": "Todos los repositorios",
+            "desc": "Repositorios ordenados por última creación de flujo"
+        },
+        "last": {
+            "title": "Última visita",
+            "desc": "Repositorios visitados recientemente ordenados por tiempo de acceso"
+        }
+    },
     "running_version": "Está ejecutando Woodpecker {0}",
     "search": "Buscar…",
     "time": {
@@ -525,9 +544,26 @@
         }
     },
     "username": "Nombre de usuario",
-    "welcome": "Bienvenidos a Woodpecker",
-    "empty_list": "¡No {entidad} encontrado!",
+    "welcome": "Bienvenido a Woodpecker",
+    "empty_list": "¡No se ha encontrado {entidad}!",
     "org_level_secret": "secreto de organización",
     "global_level_secret": "secreto global",
-    "login_with": "Inicia sesión con {forge}"
+    "login_with": "Iniciar sesión con {forge}",
+    "extensions": "Extensiones",
+    "extensions_configuration_saved": "Configuración de extensiones guardada",
+    "require_approval": {
+        "require_approval_for": "Requisitos aprobados",
+        "allowed_users": {
+            "allowed_users": "Usuarios permitidos"
+        }
+    },
+    "no_search_results": "No se han encontrado resultados",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "public_only": "Solo público",
+    "extensions_signatures_public_key": "Clave pública para la firma",
+    "login_to_woodpecker_with": "Iniciar sesión en Woodpecker con"
 }

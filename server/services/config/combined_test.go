@@ -15,7 +15,6 @@
 package config_test
 
 import (
-	"context"
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
@@ -35,6 +34,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
 )
 
 func TestFetchFromConfigService(t *testing.T) {
@@ -186,13 +186,19 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	httpFetcher := config.NewHTTP(ts.URL+"/", privEd25519Key)
+
+	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	httpFetcher := config.NewHTTP(ts.URL+"/", client)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: tt.name, Config: tt.repoConfig} // Using test name as repo name to provide different responses in mock server
 
-			f := new(mocks.Forge)
+			f := new(mocks.MockForge)
 			dirs := map[string][]*forge_types.FileMeta{}
 			for _, file := range tt.files {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
@@ -218,7 +224,7 @@ func TestFetchFromConfigService(t *testing.T) {
 			forgeFetcher := config.NewForge(time.Second*3, 3)
 			configFetcher := config.NewCombined(forgeFetcher, httpFetcher)
 			files, err := configFetcher.Fetch(
-				context.Background(),
+				t.Context(),
 				f,
 				&model.User{AccessToken: "xxx"},
 				repo,

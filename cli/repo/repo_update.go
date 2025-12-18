@@ -32,8 +32,21 @@ var repoUpdateCmd = &cli.Command{
 	Action:    repoUpdate,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
-			Name:  "trusted",
-			Usage: "repository is trusted",
+			Name:  "trusted-security",
+			Usage: "repository is security trusted",
+		},
+		&cli.BoolFlag{
+			Name:  "trusted-volumes",
+			Usage: "repository is volumes trusted",
+		},
+		&cli.BoolFlag{
+			Name:  "trusted-network",
+			Usage: "repository is network trusted",
+		},
+		&cli.BoolFlag{
+			Name:   "trusted", // TODO: remove in next release
+			Usage:  "repository is trusted",
+			Hidden: true,
 		},
 		&cli.BoolFlag{
 			Name:   "gated", // TODO: remove in next release
@@ -81,15 +94,36 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		visibility      = c.String("visibility")
 		config          = c.String("config")
 		timeout         = c.Duration("timeout")
-		trusted         = c.Bool("trusted")
 		requireApproval = c.String("require-approval")
-		pipelineCounter = int(c.Int("pipeline-counter"))
+		pipelineCounter = c.Int("pipeline-counter")
 		unsafe          = c.Bool("unsafe")
 	)
 
 	patch := new(woodpecker.RepoPatch)
+	// TODO remove in next release
 	if c.IsSet("trusted") {
-		patch.IsTrusted = &trusted
+		trusted := c.Bool("trusted")
+		patch.Trusted = &woodpecker.TrustedConfigurationPatch{
+			Network:  &trusted,
+			Security: &trusted,
+			Volumes:  &trusted,
+		}
+	}
+	if c.IsSet("trusted-security") || c.IsSet("trusted-network") || c.IsSet("trusted-volumes") {
+		patch.Trusted = new(woodpecker.TrustedConfigurationPatch)
+
+		if c.IsSet("trusted-security") {
+			t := c.Bool("trusted-security")
+			patch.Trusted.Security = &t
+		}
+		if c.IsSet("trusted-network") {
+			t := c.Bool("trusted-network")
+			patch.Trusted.Security = &t
+		}
+		if c.IsSet("trusted-volumes") {
+			t := c.Bool("trusted-volumes")
+			patch.Trusted.Security = &t
+		}
 	}
 
 	// TODO: remove in next release

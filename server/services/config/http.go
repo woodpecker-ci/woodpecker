@@ -16,7 +16,6 @@ package config
 
 import (
 	"context"
-	"crypto/ed25519"
 	"fmt"
 	net_http "net/http"
 
@@ -27,8 +26,8 @@ import (
 )
 
 type http struct {
-	endpoint   string
-	privateKey ed25519.PrivateKey
+	endpoint string
+	client   *utils.Client
 }
 
 // configData same as forge.FileMeta but with json tags and string data.
@@ -38,17 +37,18 @@ type configData struct {
 }
 
 type requestStructure struct {
-	Repo     *model.Repo     `json:"repo"`
-	Pipeline *model.Pipeline `json:"pipeline"`
-	Netrc    *model.Netrc    `json:"netrc"`
+	Repo          *model.Repo     `json:"repo"`
+	Pipeline      *model.Pipeline `json:"pipeline"`
+	Netrc         *model.Netrc    `json:"netrc"`
+	Configuration []*configData   `json:"configuration"`
 }
 
 type responseStructure struct {
 	Configs []*configData `json:"configs"`
 }
 
-func NewHTTP(endpoint string, privateKey ed25519.PrivateKey) Service {
-	return &http{endpoint, privateKey}
+func NewHTTP(endpoint string, client *utils.Client) Service {
+	return &http{endpoint, client}
 }
 
 func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
@@ -57,14 +57,20 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 		return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
 	}
 
-	response := new(responseStructure)
-	body := requestStructure{
-		Repo:     repo,
-		Pipeline: pipeline,
-		Netrc:    netrc,
+	configuration := make([]*configData, len(oldConfigData))
+	for i, oldConfig := range oldConfigData {
+		configuration[i] = &configData{Name: oldConfig.Name, Data: string(oldConfig.Data)}
 	}
 
-	status, err := utils.Send(ctx, net_http.MethodPost, h.endpoint, h.privateKey, body, response)
+	response := new(responseStructure)
+	body := requestStructure{
+		Repo:          repo,
+		Pipeline:      pipeline,
+		Netrc:         netrc,
+		Configuration: configuration,
+	}
+
+	status, err := h.client.Send(ctx, net_http.MethodPost, h.endpoint, body, response)
 	if err != nil && status != 204 {
 		return nil, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
 	}

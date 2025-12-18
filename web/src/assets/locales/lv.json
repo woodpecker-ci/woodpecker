@@ -192,7 +192,7 @@
         "branches": "Atzari",
         "deploy_pipeline": {
             "enter_target": "Mērķa uzstādīšanas vide",
-            "title": "Iniciēt uzstādīšanas notikumu šim konvejerdarbam #{pipelineId}",
+            "title": "Iniciēt uzstādīšanu šim konvejerdarbam #{pipelineId}",
             "trigger": "Uzstādīt",
             "variables": {
                 "add": "Pievienot mainīgo",
@@ -364,10 +364,10 @@
                     "cancel": "Atcelt iepriekšējos konvejerdarbus",
                     "desc": "Iespējojot šo pazīmi, tiks atcelti visi iepriekšējie konvejerdarbi, kuriem sakrīt notikums un konteksts."
                 },
-                "general": "Pamata",
+                "general": "Projekts",
                 "netrc_only_trusted": {
                     "desc": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem (ieteicams).",
-                    "netrc_only_trusted": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem"
+                    "netrc_only_trusted": "Papildus uzticamie klonēšanas spraudņiem"
                 },
                 "pipeline_path": {
                     "default": "Pēc noklusējuma: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
@@ -381,7 +381,7 @@
                     "protected": "Aizsargāts"
                 },
                 "save": "Saglabāt iestatījumus",
-                "success": "Repozitorija iestatījumi tika saglabāti",
+                "success": "Projekta iestatījumi tika saglabāti",
                 "timeout": {
                     "minutes": "minūtes",
                     "timeout": "Noildze"
@@ -406,7 +406,7 @@
                     "visibility": "Projekta redzamība"
                 },
                 "allow_deploy": {
-                    "desc": "Atļaut publicēšanu no veiksmīgiem konvejerdarbiem. Lietot tikai ja Jūs uzticaties visiem lietotājiem ar push permisijām.",
+                    "desc": "Atļaut publicēšanu no veiksmīgiem konvejerdarbiem. Lietojiet tikai, ja uzticaties visiem lietotājiem ar iesūtīšanas tiesībām.",
                     "allow": "Atļaut publicēšanu"
                 }
             },
@@ -456,10 +456,35 @@
             },
             "settings": "Iestatījumi"
         },
-        "user_none": "Šai organizācijai/lietotājam pagaidām nav neviena projekta."
+        "user_none": "Šai organizācijai/lietotājam pagaidām nav neviena projekta.",
+        "visibility": {
+            "visibility": "Projekta redzamība",
+            "public": {
+                "public": "Publisks",
+                "desc": "Jebkurš var redzēt šo projektu bez autentifikācijas."
+            },
+            "private": {
+                "private": "Privāts",
+                "desc": "Tikai repozitorija dalībnieki var redzēt šo projektu."
+            },
+            "internal": {
+                "internal": "Iekšējs",
+                "desc": "Visi autentificētie lietotāji šajā serverī var redzēt šo projektu."
+            }
+        }
     },
     "repos": "Repozitorijas",
-    "repositories": "Repozitoriji",
+    "repositories": {
+        "all": {
+            "desc": "Repozitoriji sakārtoti pēc pēdējā konvejerdarba izveides laika",
+            "title": "Visi repozitoriji"
+        },
+        "title": "Repozitoriji",
+        "last": {
+            "title": "Pēdējo reizi aplūkots",
+            "desc": "Visbiežāk skatītie repozitoriji sakārtoti pēc pēdējā aplūkošanas laika"
+        }
+    },
     "running_version": "Tiek izmantota Woodpecker {0}",
     "search": "Meklēt…",
     "time": {
@@ -469,7 +494,8 @@
         "not_started": "nav uzsākts",
         "sec_short": "sek.",
         "template": "YYYY. [gada] D. MMMM, HH:mm z",
-        "weeks_short": "ned."
+        "weeks_short": "ned.",
+        "just_now": "tikko"
     },
     "unknown_error": "Notika neparedzēta kļūda",
     "update_woodpecker": "Lūdzu atjauniniet Woodpecker instanci uz {0}",

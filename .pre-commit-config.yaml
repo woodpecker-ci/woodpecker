@@ -5,34 +5,37 @@ repos:
       - id: check-hooks-apply
       - id: check-useless-excludes
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: end-of-file-fixer
+        exclude: '\.sql$'
       - id: trailing-whitespace
+        exclude: ^docs/versioned_docs/.+/40-cli.md$
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.64.7
+    rev: v2.7.2
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.44.0
+    rev: v0.47.0
     hooks:
       - id: markdownlint
         exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
+        language_version: 22.15.1
   - repo: https://github.com/mrtazz/checkmake
     rev: 0.2.2
     hooks:
       - id: checkmake
         exclude: '^docker/Dockerfile.make$' # actually a Dockerfile and not a makefile
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.13.1-beta
+    rev: v2.14.0
     hooks:
       - id: hadolint
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.5.3
+    rev: v3.7.4
     hooks:
       - id: prettier
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.36.1
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args: [--strict, -c=.yamllint.yaml]
