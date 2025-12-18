@@ -23,6 +23,7 @@
 
 ### 🐛 Bug Fixes
 
+- Remove rounded corners in fullscreen log view [[#5879](https://github.com/woodpecker-ci/woodpecker/pull/5879)]
 - Fix some ListItems and Queue view background in dark mode [[#5878](https://github.com/woodpecker-ci/woodpecker/pull/5878)]
 - Make disabled checkboxes match overall style [[#5869](https://github.com/woodpecker-ci/woodpecker/pull/5869)]
 - Fix CLI trusted updating [[#5861](https://github.com/woodpecker-ci/woodpecker/pull/5861)]
