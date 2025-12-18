@@ -7,9 +7,9 @@
     }"
   >
     <div
-      class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0 md:rounded-md!"
+class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0"
       :class="{
-        'md:rounded-none!': fullscreen,
+        'md:rounded-md!': !fullscreen,
       }"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
