@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-18
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -24,6 +24,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(datastore): fix pagination bug in workflowsDelete skipping records [[#5881](https://github.com/woodpecker-ci/woodpecker/pull/5881)]
 - Remove rounded corners in fullscreen log view [[#5879](https://github.com/woodpecker-ci/woodpecker/pull/5879)]
 - Fix some ListItems and Queue view background in dark mode [[#5878](https://github.com/woodpecker-ci/woodpecker/pull/5878)]
 - Make disabled checkboxes match overall style [[#5869](https://github.com/woodpecker-ci/woodpecker/pull/5869)]
