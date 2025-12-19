@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Update quic-go/qpack & quic-go/quic-go [[#5885](https://github.com/woodpecker-ci/woodpecker/pull/5885)]
 - fix: updateRepoPermissions to cleanup old permissions [[#5790](https://github.com/woodpecker-ci/woodpecker/pull/5790)]
 
 ### 📈 Enhancement
