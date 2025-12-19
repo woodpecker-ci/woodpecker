@@ -94,12 +94,14 @@ func NewHTTPClient(privateKey crypto.PrivateKey, allowedHostList string) (*Clien
 	}, nil
 }
 
-// Send makes an http request with retry logic
+// Send makes an http request with retry logic.
 func (e *Client) Send(ctx context.Context, method, path string, in, out any) (int, error) {
 	// Maximum number of retries
 	const maxRetries = 3
 	// Initial backoff duration
 	const initialBackoff = 500 * time.Millisecond
+	// Maximum backoff interval
+	const maxBackoffInterval = 5 * time.Second
 
 	log.Debug().Msgf("HTTP request: %s %s, retries enabled (max: %d)", method, path, maxRetries)
 
@@ -126,7 +128,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	// Create backoff configuration
 	backoffConfig := backoff.NewExponentialBackOff()
 	backoffConfig.InitialInterval = initialBackoff
-	backoffConfig.MaxInterval = 5 * time.Second
+	backoffConfig.MaxInterval = maxBackoffInterval
 	// No MaxElapsedTime, we'll handle max retries ourselves
 
 	for retry := 0; retry <= maxRetries; retry++ {
@@ -253,16 +255,13 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	return statusCode, lastErr
 }
 
-// isRetryableError checks if an error is transient and suitable for retry
+// isRetryableError checks if an error is transient and suitable for retry.
 func isRetryableError(err error) bool {
 	// Check for network-related errors
-	if netErr, ok := err.(net.Error); ok {
+	var netErr net.Error
+	if errors.As(err, &netErr) {
 		// Retry on timeout errors
 		if netErr.Timeout() {
-			return true
-		}
-		// Retry on temporary errors
-		if netErr.Temporary() {
 			return true
 		}
 	}
@@ -283,7 +282,7 @@ func isRetryableError(err error) bool {
 		strings.Contains(errStr, "TLS handshake timeout")
 }
 
-// isRetryableStatusCode checks if an HTTP status code is suitable for retry
+// isRetryableStatusCode checks if an HTTP status code is suitable for retry.
 func isRetryableStatusCode(statusCode int) bool {
 	// Retry on server errors (5xx)
 	return statusCode >= http.StatusInternalServerError && statusCode < http.StatusNetworkAuthenticationRequired
