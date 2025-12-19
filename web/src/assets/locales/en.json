@@ -49,7 +49,7 @@
         "value": "Variable value"
       },
       "show_pipelines": "Show pipelines",
-      "no_workflows": "No workflows to run were found."
+      "no_manual_workflows": "There were no workflows you can run manually, or your filters exclude all of them."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
