@@ -96,7 +96,7 @@ async function triggerManualPipeline() {
   emit('close');
 
   if (typeof pipeline == 'string') {
-    // if this is a string there is no workflow to run with the 'manual' event
+    // if this is a string (http 204) there is no workflow to run with the 'manual' event
 
     await router.push({
       name: 'repo',
