@@ -123,7 +123,6 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	// Result type for backoff.Retry
 	type result struct {
 		statusCode int
-		err        error
 	}
 
 	// Execute with backoff retry
@@ -209,7 +208,6 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 			log.Debug().Err(err).Msgf("HTTP request failed, retrying in %v: %s %s", delay, method, path)
 		}),
 	)
-
 	if err != nil {
 		return res.statusCode, err
 	}
