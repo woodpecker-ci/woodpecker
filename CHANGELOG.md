@@ -50,6 +50,7 @@
 
 ### 📦️ Dependency
 
+- Migrate to maintained tink-go [[#5886](https://github.com/woodpecker-ci/woodpecker/pull/5886)]
 - chore(deps): update web npm deps non-major [[#5887](https://github.com/woodpecker-ci/woodpecker/pull/5887)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.10.0 [[#5888](https://github.com/woodpecker-ci/woodpecker/pull/5888)]
 - fix(deps): update golang-packages [[#5877](https://github.com/woodpecker-ci/woodpecker/pull/5877)]
