@@ -27,7 +27,7 @@
             :key="forge.id"
             :start-icon="forge.type === 'addon' ? 'repo' : forge.type"
             class="whitespace-normal!"
-            @click="doLogin(forge.id)"
+            @click="authenticate(forge.id)"
           >
             <div class="mr-2 w-4">
               <img
@@ -50,7 +50,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
@@ -62,17 +62,11 @@ import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Forge } from '~/lib/api/types';
 
 const route = useRoute();
-const router = useRouter();
-const authentication = useAuthentication();
+const { authenticate } = useAuthentication();
 const i18n = useI18n();
 const apiClient = useApiClient();
 
 const forges = ref<Forge[]>([]);
-
-function doLogin(forgeId?: number) {
-  const url = typeof route.query.url === 'string' ? route.query.url : '';
-  authentication.authenticate(url, forgeId);
-}
 
 const authErrorMessages = {
   oauth_error: i18n.t('oauth_error'),
@@ -88,11 +82,6 @@ const errorDescription = ref<string>(route.query.error_description as string);
 const errorUri = ref<string>(route.query.error_uri as string);
 
 onMounted(async () => {
-  if (authentication.isAuthenticated) {
-    await router.replace({ name: 'home' });
-    return;
-  }
-
   forges.value = (await apiClient.getForges()) ?? [];
 
   if (route.query.error) {

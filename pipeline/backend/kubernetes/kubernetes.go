@@ -30,7 +30,6 @@ import (
 	backoff "github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
@@ -39,6 +38,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // To authenticate to GCP K8s clusters
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+	"sigs.k8s.io/yaml"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -71,6 +71,8 @@ type config struct {
 	PodNodeSelector             map[string]string
 	PodTolerationsAllowFromStep bool
 	PodTolerations              []Toleration
+	PodAffinity                 *v1.Affinity
+	PodAffinityAllowFromStep    bool
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 	NativeSecretsAllowFromStep  bool
@@ -115,6 +117,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
 				PodTolerationsAllowFromStep: c.Bool("backend-k8s-pod-tolerations-allow-from-step"),
 				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
+				PodAffinityAllowFromStep:    c.Bool("backend-k8s-pod-affinity-allow-from-step"),
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
@@ -144,6 +147,12 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			if podTolerations := c.String("backend-k8s-pod-tolerations"); podTolerations != "" {
 				if err := yaml.Unmarshal([]byte(podTolerations), &config.PodTolerations); err != nil {
 					log.Error().Err(err).Msgf("could not unmarshal pod tolerations '%s'", podTolerations)
+					return nil, err
+				}
+			}
+			if podAffinity := c.String("backend-k8s-pod-affinity"); podAffinity != "" {
+				if err := yaml.Unmarshal([]byte(podAffinity), &config.PodAffinity); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal pod affinity '%s'", podAffinity)
 					return nil, err
 				}
 			}
