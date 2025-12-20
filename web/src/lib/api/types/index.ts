@@ -2,6 +2,7 @@ export * from './agent';
 export * from './cron';
 export * from './forge';
 export * from './org';
+export * from './parameter';
 export * from './pipeline';
 export * from './pipelineConfig';
 export * from './pull_request';
