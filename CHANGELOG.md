@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-19
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -37,7 +37,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5868](https://github.com/woodpecker-ci/woodpecker/pull/5868)]
 - chore(deps): update dependency @types/node to v24.10.4 [[#5862](https://github.com/woodpecker-ci/woodpecker/pull/5862)]
 - chore(deps): update docs npm deps non-major [[#5855](https://github.com/woodpecker-ci/woodpecker/pull/5855)]
 - chore(deps): update docs npm deps non-major [[#5829](https://github.com/woodpecker-ci/woodpecker/pull/5829)]
@@ -50,9 +49,12 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#5887](https://github.com/woodpecker-ci/woodpecker/pull/5887)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.10.0 [[#5888](https://github.com/woodpecker-ci/woodpecker/pull/5888)]
 - fix(deps): update golang-packages [[#5877](https://github.com/woodpecker-ci/woodpecker/pull/5877)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.9.0 [[#5873](https://github.com/woodpecker-ci/woodpecker/pull/5873)]
 - fix(deps): update golang-packages [[#5870](https://github.com/woodpecker-ci/woodpecker/pull/5870)]
+- chore(deps): lock file maintenance [[#5868](https://github.com/woodpecker-ci/woodpecker/pull/5868)]
 - fix(deps): update module github.com/gdgvda/cron to v0.6.0 [[#5867](https://github.com/woodpecker-ci/woodpecker/pull/5867)]
 - chore(deps): update dependency @intlify/unplugin-vue-i18n to v11.0.3 [[#5866](https://github.com/woodpecker-ci/woodpecker/pull/5866)]
 - chore(deps): update dependency @antfu/eslint-config to v6.7.1 [[#5865](https://github.com/woodpecker-ci/woodpecker/pull/5865)]
