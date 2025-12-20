@@ -25,6 +25,7 @@
 
 ### 🐛 Bug Fixes
 
+- Do not run crons for disabled repos [[#5884](https://github.com/woodpecker-ci/woodpecker/pull/5884)]
 - Show warning if there is no workflow to run [[#5883](https://github.com/woodpecker-ci/woodpecker/pull/5883)]
 - fix(datastore): fix pagination bug in workflowsDelete skipping records [[#5881](https://github.com/woodpecker-ci/woodpecker/pull/5881)]
 - Remove rounded corners in fullscreen log view [[#5879](https://github.com/woodpecker-ci/woodpecker/pull/5879)]
