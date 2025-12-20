@@ -98,10 +98,6 @@ func NewHTTPClient(privateKey crypto.PrivateKey, allowedHostList string) (*Clien
 func (e *Client) Send(ctx context.Context, method, path string, in, out any) (int, error) {
 	// Maximum number of retries
 	const maxRetries = 3
-	// Initial backoff duration
-	const initialBackoff = 500 * time.Millisecond
-	// Maximum backoff interval
-	const maxBackoffInterval = 5 * time.Second
 
 	log.Debug().Msgf("HTTP request: %s %s, retries enabled (max: %d)", method, path, maxRetries)
 
@@ -123,8 +119,6 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 
 	// Create backoff configuration
 	exponentialBackoff := backoff.NewExponentialBackOff()
-	exponentialBackoff.InitialInterval = initialBackoff
-	exponentialBackoff.MaxInterval = maxBackoffInterval
 
 	// Result type for backoff.Retry
 	type result struct {
