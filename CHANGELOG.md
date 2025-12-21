@@ -51,6 +51,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vue-i18n to v11.2.7 [[#5892](https://github.com/woodpecker-ci/woodpecker/pull/5892)]
 - chore(deps): update dependency vue-tsc to v3.2.0 [[#5891](https://github.com/woodpecker-ci/woodpecker/pull/5891)]
 - Migrate to maintained tink-go [[#5886](https://github.com/woodpecker-ci/woodpecker/pull/5886)]
 - chore(deps): update web npm deps non-major [[#5887](https://github.com/woodpecker-ci/woodpecker/pull/5887)]
