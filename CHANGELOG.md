@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-20
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
