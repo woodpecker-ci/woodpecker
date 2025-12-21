@@ -240,7 +240,8 @@
                 "value": "Variablenwert",
                 "delete": "Variable löschen"
             },
-            "show_pipelines": "Pipelines anzeigen"
+            "show_pipelines": "Pipelines anzeigen",
+            "no_manual_workflows": "Es wurden keine manuell ausführbaren Workflows gefunden, oder alle wurden gefiltert."
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
         "open_in_forge": "Repository in der Forge öffnen",
