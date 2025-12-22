@@ -216,7 +216,7 @@ func PatchCron(c *gin.Context) {
 		}
 		cron.NextExec = nextExec.Unix()
 	}
-	if in.Name != nil {
+	if in.Name != nil && *in.Name != "" {
 		cron.Name = *in.Name
 	}
 	if in.Enabled != nil {
