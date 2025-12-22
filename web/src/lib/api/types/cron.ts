@@ -4,4 +4,5 @@ export interface Cron {
   branch: string;
   schedule: string;
   next_exec: number;
+  variables: Record<string, string>;
 }

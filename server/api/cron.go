@@ -128,6 +128,7 @@ func PostCron(c *gin.Context) {
 		CreatorID: user.ID,
 		Schedule:  in.Schedule,
 		Branch:    in.Branch,
+		Variables: in.Variables,
 	}
 	if err := cron.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
@@ -217,6 +218,9 @@ func PatchCron(c *gin.Context) {
 	}
 	if in.Name != "" {
 		cron.Name = in.Name
+	}
+	if in.Variables != nil {
+		cron.Variables = in.Variables
 	}
 	cron.CreatorID = user.ID
 

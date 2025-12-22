@@ -29,6 +29,7 @@ type Cron struct {
 	Schedule  string `json:"schedule"   xorm:"schedule NOT NULL"` //	@weekly,	3min, ...
 	Created   int64  `json:"created"    xorm:"created NOT NULL DEFAULT 0"`
 	Branch    string `json:"branch"     xorm:"branch"`
+	Variables map[string]string `json:"variables" xorm:"json 'variables'"`
 } //	@name	Cron
 
 // TableName returns the database table name for xorm.
