@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-21
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -39,6 +39,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5895](https://github.com/woodpecker-ci/woodpecker/pull/5895)]
 - chore(deps): update dependency @types/node to v24.10.4 [[#5862](https://github.com/woodpecker-ci/woodpecker/pull/5862)]
 - chore(deps): update docs npm deps non-major [[#5855](https://github.com/woodpecker-ci/woodpecker/pull/5855)]
 - chore(deps): update docs npm deps non-major [[#5829](https://github.com/woodpecker-ci/woodpecker/pull/5829)]
@@ -51,6 +52,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/tink-crypto/tink-go/v2 to v2.6.0 [[#5894](https://github.com/woodpecker-ci/woodpecker/pull/5894)]
 - chore(deps): update dependency @antfu/eslint-config to v6.7.2 [[#5893](https://github.com/woodpecker-ci/woodpecker/pull/5893)]
 - chore(deps): update dependency vue-i18n to v11.2.7 [[#5892](https://github.com/woodpecker-ci/woodpecker/pull/5892)]
 - chore(deps): update dependency vue-tsc to v3.2.0 [[#5891](https://github.com/woodpecker-ci/woodpecker/pull/5891)]
