@@ -75,7 +75,7 @@
           />
         </InputField>
 
-        <Checkbox v-model="selectedCron.enabled || true" :label="$t('repo.settings.crons.enabled')" />
+        <Checkbox v-model="selectedCronEnabled" :label="$t('repo.settings.crons.enabled')" />
 
         <InputField v-slot="{ id }" :label="$t('repo.settings.crons.branch.title')">
           <TextField
@@ -151,6 +151,15 @@ const repo = requiredInject('repo');
 const selectedCron = ref<Partial<Cron>>();
 const isEditingCron = computed(() => !!selectedCron.value?.id);
 const date = useDate();
+
+const selectedCronEnabled = computed<boolean>({
+  async set(_enabled) {
+    selectedCron.value!.enabled = _enabled;
+  },
+  get() {
+    return selectedCron.value!.enabled !== undefined ? selectedCron.value!.enabled : true;
+  },
+});
 
 async function loadCrons(page: number): Promise<Cron[] | null> {
   return apiClient.getCronList(repo.value.id, { page });

@@ -60,4 +60,4 @@ type CronPatch struct {
 	Schedule *string `json:"schedule"`
 	Branch   *string `json:"branch"`
 	Enabled  *bool   `json:"enabled"`
-} //	@name	Cron
+} //	@name	CronPatch
