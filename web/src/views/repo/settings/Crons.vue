@@ -11,12 +11,7 @@
         :text="$t('repo.settings.crons.show')"
         @click="selectedCron = undefined"
       />
-      <Button
-        v-else
-        start-icon="plus"
-        :text="$t('repo.settings.crons.add')"
-        @click="selectedCron = { enabled: true }"
-      />
+      <Button v-else start-icon="plus" :text="$t('repo.settings.crons.add')" @click="selectedCron = {}" />
     </template>
 
     <div v-if="!selectedCron" class="text-wp-text-100 space-y-4">
