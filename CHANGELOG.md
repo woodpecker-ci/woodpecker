@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Add background to status icons [[#5880](https://github.com/woodpecker-ci/woodpecker/pull/5880)]
 - Fix dead page and cleanup router [[#5519](https://github.com/woodpecker-ci/woodpecker/pull/5519)]
 - feat(kubernetes): add support for pod affinity and anti-affinity configurations [[#5854](https://github.com/woodpecker-ci/woodpecker/pull/5854)]
 - Public key endpoint [[#5860](https://github.com/woodpecker-ci/woodpecker/pull/5860)]
@@ -39,7 +40,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5895](https://github.com/woodpecker-ci/woodpecker/pull/5895)]
 - chore(deps): update dependency @types/node to v24.10.4 [[#5862](https://github.com/woodpecker-ci/woodpecker/pull/5862)]
 - chore(deps): update docs npm deps non-major [[#5855](https://github.com/woodpecker-ci/woodpecker/pull/5855)]
 - chore(deps): update docs npm deps non-major [[#5829](https://github.com/woodpecker-ci/woodpecker/pull/5829)]
@@ -52,6 +52,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#5895](https://github.com/woodpecker-ci/woodpecker/pull/5895)]
 - fix(deps): update module github.com/tink-crypto/tink-go/v2 to v2.6.0 [[#5894](https://github.com/woodpecker-ci/woodpecker/pull/5894)]
 - chore(deps): update dependency @antfu/eslint-config to v6.7.2 [[#5893](https://github.com/woodpecker-ci/woodpecker/pull/5893)]
 - chore(deps): update dependency vue-i18n to v11.2.7 [[#5892](https://github.com/woodpecker-ci/woodpecker/pull/5892)]
