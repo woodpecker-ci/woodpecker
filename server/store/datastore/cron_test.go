@@ -63,6 +63,7 @@ func TestCronListNextExecute(t *testing.T) {
 	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "none", RepoID: repo1.ID, NextExec: now + 1000}))
 	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "test", RepoID: repo1.ID, NextExec: now + 2000}))
 	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "disabled-repo", RepoID: repo2.ID, NextExec: now}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "disabled-cron", RepoID: repo1.ID, NextExec: now, Enabled: false}))
 
 	jobs, err = store.CronListNextExecute(now, 10)
 	assert.NoError(t, err)
