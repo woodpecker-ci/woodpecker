@@ -11,12 +11,7 @@
         :text="$t('repo.settings.crons.show')"
         @click="selectedCron = undefined"
       />
-      <Button
-        v-else
-        start-icon="plus"
-        :text="$t('repo.settings.crons.add')"
-        @click="selectedCron = { variables: {} }"
-      />
+      <Button v-else start-icon="plus" :text="$t('repo.settings.crons.add')" @click="selectedCron = {}" />
     </template>
 
     <div v-if="!selectedCron" class="text-wp-text-100 space-y-4">
@@ -109,7 +104,7 @@
           <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
           <KeyValueEditor
             :id="id"
-            v-model="selectedCron.variables"
+            v-model="selectedCronVariables"
             :key-placeholder="$t('repo.manual_pipeline.variables.name')"
             :value-placeholder="$t('repo.manual_pipeline.variables.value')"
             :delete-title="$t('repo.manual_pipeline.variables.delete')"
@@ -162,6 +157,15 @@ const repo = requiredInject('repo');
 const selectedCron = ref<Partial<Cron>>();
 const isEditingCron = computed(() => !!selectedCron.value?.id);
 const date = useDate();
+
+const selectedCronVariables = computed<Record<string, string>>({
+  async set(_vars) {
+    selectedCron.value!.variables = _vars;
+  },
+  get() {
+    return selectedCron.value!.variables !== undefined ? selectedCron.value!.variables : {};
+  },
+});
 
 async function loadCrons(page: number): Promise<Cron[] | null> {
   return apiClient.getCronList(repo.value.id, { page });

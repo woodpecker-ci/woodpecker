@@ -21,14 +21,14 @@ import (
 )
 
 type Cron struct {
-	ID        int64  `json:"id"         xorm:"pk autoincr 'id'"`
-	Name      string `json:"name"       xorm:"name UNIQUE(s) INDEX"`
-	RepoID    int64  `json:"repo_id"    xorm:"repo_id UNIQUE(s) INDEX"`
-	CreatorID int64  `json:"creator_id" xorm:"creator_id INDEX"`
-	NextExec  int64  `json:"next_exec"  xorm:"next_exec"`
-	Schedule  string `json:"schedule"   xorm:"schedule NOT NULL"` //	@weekly,	3min, ...
-	Created   int64  `json:"created"    xorm:"created NOT NULL DEFAULT 0"`
-	Branch    string `json:"branch"     xorm:"branch"`
+	ID        int64             `json:"id"         xorm:"pk autoincr 'id'"`
+	Name      string            `json:"name"       xorm:"name UNIQUE(s) INDEX"`
+	RepoID    int64             `json:"repo_id"    xorm:"repo_id UNIQUE(s) INDEX"`
+	CreatorID int64             `json:"creator_id" xorm:"creator_id INDEX"`
+	NextExec  int64             `json:"next_exec"  xorm:"next_exec"`
+	Schedule  string            `json:"schedule"   xorm:"schedule NOT NULL"` //	@weekly,	3min, ...
+	Created   int64             `json:"created"    xorm:"created NOT NULL DEFAULT 0"`
+	Branch    string            `json:"branch"     xorm:"branch"`
 	Variables map[string]string `json:"variables" xorm:"json 'variables'"`
 } //	@name	Cron
 
