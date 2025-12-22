@@ -50,7 +50,7 @@ func (s storage) CronDelete(repo *model.Repo, id int64) error {
 // CronListNextExecute returns limited number of jobs with NextExec being less or equal to the provided unix timestamp.
 func (s storage) CronListNextExecute(nextExec, limit int64) ([]*model.Cron, error) {
 	crons := make([]*model.Cron, 0, limit)
-	return crons, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&crons)
+	return crons, s.engine.Join("INNER", "repos", "repos.id = crons.repo_id").Where(builder.Lte{"next_exec": nextExec}).And(builder.Eq{"repos.active": true}).Limit(int(limit)).Find(&crons)
 }
 
 // CronGetLock try to get a lock by updating NextExec.
