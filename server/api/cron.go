@@ -221,6 +221,15 @@ func PatchCron(c *gin.Context) {
 	}
 	if in.Enabled != nil {
 		cron.Enabled = *in.Enabled
+		// if we re-enable a cron we have to calc NextExec because it was not while disabled
+		if cron.Enabled {
+			nextExec, err := cronScheduler.CalcNewNext(*in.Schedule, time.Now())
+			if err != nil {
+				c.String(http.StatusInternalServerError, "Cron schedule could not parsed: %s", err)
+				return
+			}
+			cron.NextExec = nextExec.Unix()
+		}
 	}
 	cron.CreatorID = user.ID
 
