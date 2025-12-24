@@ -3,5 +3,6 @@ export interface Cron {
   name: string;
   branch: string;
   schedule: string;
+  enabled: boolean;
   next_exec: number;
 }
