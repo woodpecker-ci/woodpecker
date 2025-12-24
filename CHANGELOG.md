@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Allow to disable a cron [[#5896](https://github.com/woodpecker-ci/woodpecker/pull/5896)]
 - Add background to status icons [[#5880](https://github.com/woodpecker-ci/woodpecker/pull/5880)]
 - Fix dead page and cleanup router [[#5519](https://github.com/woodpecker-ci/woodpecker/pull/5519)]
 - feat(kubernetes): add support for pod affinity and anti-affinity configurations [[#5854](https://github.com/woodpecker-ci/woodpecker/pull/5854)]
