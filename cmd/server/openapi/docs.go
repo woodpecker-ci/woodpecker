@@ -4722,6 +4722,12 @@ const docTemplate = `{
                 "schedule": {
                     "description": "@weekly,\t3min, ...",
                     "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
