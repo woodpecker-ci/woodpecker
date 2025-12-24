@@ -50,7 +50,8 @@
             "title": "Executar um pipeline manual",
             "trigger": "Executar pipeline",
             "select_branch": "Selecionar branch",
-            "show_pipelines": "Mostrar pipelines"
+            "show_pipelines": "Mostrar pipelines",
+            "no_manual_workflows": "Não havia fluxos de trabalho executáveis manualmente, ou o filtro os excluía todos."
         },
         "not_allowed": "Você não está autorizado a acessar este repositório",
         "open_in_forge": "Abrir repositório na forja",

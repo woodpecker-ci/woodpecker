@@ -2681,7 +2681,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Cron"
+                            "$ref": "#/definitions/CronPatch"
                         }
                     }
                 ],
@@ -4707,6 +4707,9 @@ const docTemplate = `{
                 "creator_id": {
                     "type": "integer"
                 },
+                "enabled": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -4721,6 +4724,23 @@ const docTemplate = `{
                 },
                 "schedule": {
                     "description": "@weekly,\t3min, ...",
+                    "type": "string"
+                }
+            }
+        },
+        "CronPatch": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schedule": {
                     "type": "string"
                 }
             }

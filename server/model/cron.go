@@ -29,6 +29,7 @@ type Cron struct {
 	Schedule  string `json:"schedule"   xorm:"schedule NOT NULL"` //	@weekly,	3min, ...
 	Created   int64  `json:"created"    xorm:"created NOT NULL DEFAULT 0"`
 	Branch    string `json:"branch"     xorm:"branch"`
+	Enabled   bool   `json:"enabled"    xorm:"enabled NOT NULL DEFAULT TRUE"`
 } //	@name	Cron
 
 // TableName returns the database table name for xorm.
@@ -53,3 +54,10 @@ func (c *Cron) Validate() error {
 
 	return nil
 }
+
+type CronPatch struct {
+	Name     *string `json:"name"`
+	Schedule *string `json:"schedule"`
+	Branch   *string `json:"branch"`
+	Enabled  *bool   `json:"enabled"`
+} //	@name	CronPatch
