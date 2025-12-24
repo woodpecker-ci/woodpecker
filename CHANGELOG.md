@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-22
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -52,6 +52,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module google.golang.org/grpc to v1.78.0 [[#5901](https://github.com/woodpecker-ci/woodpecker/pull/5901)]
 - chore(deps): lock file maintenance [[#5895](https://github.com/woodpecker-ci/woodpecker/pull/5895)]
 - fix(deps): update module github.com/tink-crypto/tink-go/v2 to v2.6.0 [[#5894](https://github.com/woodpecker-ci/woodpecker/pull/5894)]
 - chore(deps): update dependency @antfu/eslint-config to v6.7.2 [[#5893](https://github.com/woodpecker-ci/woodpecker/pull/5893)]
