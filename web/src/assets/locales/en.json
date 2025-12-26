@@ -167,7 +167,8 @@
           "placeholder": "Schedule"
         },
         "edit": "Edit cron",
-        "delete": "Delete cron"
+        "delete": "Delete cron",
+        "enabled": "Enabled"
       },
       "badge": {
         "badge": "Badge",
