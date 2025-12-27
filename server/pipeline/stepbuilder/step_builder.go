@@ -162,12 +162,12 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 
 	// checking if filtered.
 	if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {
-		log.Debug().Str("pipeline", workflow.Name).Msg(
+		log.Info().Str("pipeline", workflow.Name).Msg(
 			"marked as skipped, does not match metadata",
 		)
 		return nil, nil
 	} else if err != nil {
-		log.Debug().Str("pipeline", workflow.Name).Msg(
+		log.Warn().Str("pipeline", workflow.Name).Msg(
 			"pipeline config could not be parsed",
 		)
 		return nil, multierr.Append(errorsAndWarnings, err)
