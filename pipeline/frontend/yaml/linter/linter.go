@@ -127,8 +127,8 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
 			linterErr = multierr.Append(linterErr,
 				newLinterError(
-					"Specified clone image does not match allow list, netrc is not injected",
-					config.File, fmt.Sprintf("clone.%s", container.Name), true),
+					"Specified clone image does not match allow list",
+					config.File, fmt.Sprintf("clone.%s", container.Name), false),
 			)
 		}
 	}
