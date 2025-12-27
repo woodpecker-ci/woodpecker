@@ -27,35 +27,17 @@ All official default images, are saved in [shared/constant/constant.go](https://
 ### Server
 
 ```sh
-### build web component
-make vendor
-cd web/
-pnpm install --frozen-lockfile
-pnpm build
-cd ..
-
-### define the platforms to build for (e.g. linux/amd64)
-# (the | is not a typo here)
-export PLATFORMS='linux|amd64'
-make cross-compile-server
-
-### build the image
-docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.server.multiarch.rootless --push .
+export PLATFORMS='linux/amd64' # supported 'linux/amd64,linux/arm/v7,linux/arm64,linux/ppc64le,linux/riscv64'
+export TAG='username/repo:tag' # Your image name
+docker buildx build . --platform $PLATFORMS -t $TAG -f docker/Dockerfile.server --push # This will push the image to the registry, use --load to load it only locally (only single arch allowed)
 ```
-
-:::info
-The `cross-compile-server` rule makes use of `xgo`, a go cross-compiler. You need to be on a `amd64` host to do this, as `xgo` is only available for `amd64` (see [xgo#213](https://github.com/techknowlogick/xgo/issues/213)).
-You can try to use the `build-server` rule instead, however this one fails for some OS (e.g. macOS).
-:::
 
 ### Agent
 
 ```sh
-### build the agent
-make build-agent
-
-### build the image
-docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.agent.multiarch --push .
+export PLATFORMS='linux/amd64' # supported 'linux/386,linux/amd64,freebsd/amd64,openbsd/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,openbsd/arm64,freebsd/arm64,linux/ppc64le,linux/riscv64,linux/s390x'
+export TAG='username/repo:tag' # Your image name
+docker buildx build . --platform $PLATFORMS -t $TAG -f docker/Dockerfile.agent.multiarch --load # This will push the image to the registry, use --load to load it only locally (only single arch allowed)
 ```
 
 ### CLI
