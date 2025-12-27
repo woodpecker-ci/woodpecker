@@ -42,10 +42,6 @@ class Request {
   repo: Repo;
   pipeline: Pipeline;
   netrc: Netrc;
-  configuration: {
-    name: string; // filename of the configuration file
-    data: string; // content of the configuration file
-  }[];
 }
 ```
 
@@ -56,12 +52,15 @@ Checkout the following models for more information:
 - [netrc model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/netrc.go)
 
 :::tip
-The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) API to get more information about the repository.
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to fetch files or other information (like changed files, issues) from the repository using the forge api or even clone the repository.
 :::
 
 Example request:
 
 ```json
+// Please check the latest structure in the models mentioned above.
+// This example is likely outdated.
+
 {
   "repo": {
     "id": 100,
@@ -123,12 +122,12 @@ Example request:
     "updated_at": 0,
     "verified": false
   },
-  "configs": [
-    {
-      "name": ".woodpecker.yaml",
-      "data": "steps:\n  - name: backend\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yaml)\"\n"
-    }
-  ]
+  "netrc": {
+    "machine": "myforge.com",
+    "login": "myUser",
+    "password": "myPassword",
+    "type": "forge"
+  }
 }
 ```
 
