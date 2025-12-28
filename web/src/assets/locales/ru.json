@@ -381,7 +381,8 @@
                     "placeholder": "Расписание",
                     "title": "Расписание (по UTC)"
                 },
-                "show": "Показать задачи cron"
+                "show": "Показать задачи cron",
+                "enabled": "Включено"
             },
             "general": {
                 "allow_pr": {
