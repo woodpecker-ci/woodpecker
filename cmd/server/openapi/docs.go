@@ -4748,6 +4748,12 @@ const docTemplate = `{
                 },
                 "schedule": {
                     "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
