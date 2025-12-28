@@ -5,4 +5,5 @@ export interface Cron {
   schedule: string;
   enabled: boolean;
   next_exec: number;
+  variables: Record<string, string>;
 }

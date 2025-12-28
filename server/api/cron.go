@@ -128,6 +128,7 @@ func PostCron(c *gin.Context) {
 		CreatorID: user.ID,
 		Schedule:  in.Schedule,
 		Branch:    in.Branch,
+		Variables: in.Variables,
 		Enabled:   in.Enabled,
 	}
 	if err := cron.Validate(); err != nil {
@@ -230,6 +231,9 @@ func PatchCron(c *gin.Context) {
 			}
 			cron.NextExec = nextExec.Unix()
 		}
+	}
+	if in.Variables != nil {
+		cron.Variables = in.Variables
 	}
 	cron.CreatorID = user.ID
 
