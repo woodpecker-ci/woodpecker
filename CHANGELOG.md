@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-27
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2025-12-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -54,6 +54,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.3.0 [[#5905](https://github.com/woodpecker-ci/woodpecker/pull/5905)]
 - chore(deps): update web npm deps non-major [[#5903](https://github.com/woodpecker-ci/woodpecker/pull/5903)]
 - fix(deps): update module google.golang.org/grpc to v1.78.0 [[#5901](https://github.com/woodpecker-ci/woodpecker/pull/5901)]
 - chore(deps): lock file maintenance [[#5895](https://github.com/woodpecker-ci/woodpecker/pull/5895)]
