@@ -5265,6 +5265,9 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
@@ -5361,6 +5364,9 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
@@ -5407,6 +5413,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "registry_extension_endpoint": {
+                    "type": "string"
                 },
                 "require_approval": {
                     "type": "string"

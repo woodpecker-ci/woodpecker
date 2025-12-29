@@ -35,15 +35,23 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-func setupRegistryService(store store.Store, dockerConfig string) registry.Service {
+func setupRegistryService(store store.Store, dockerConfig, endpoint string, client *utils.Client) registry.Service {
+	var service registry.Service
 	if dockerConfig != "" {
-		return registry.NewCombined(
+		service = registry.NewCombined(
 			registry.NewDB(store),
 			registry.NewFilesystem(dockerConfig),
 		)
+	} else {
+		service = registry.NewDB(store)
 	}
 
-	return registry.NewDB(store)
+	// Wrap with global HTTP extension if configured
+	if endpoint != "" {
+		service = registry.NewWithExtension(service, registry.NewHTTP(endpoint, client))
+	}
+
+	return service
 }
 
 func setupSecretService(store store.Store) secret.Service {
