@@ -80,6 +80,20 @@ func repoOutput(c *cli.Command, repos []*woodpecker.Repo, fd ...io.Writer) error
 		if err := tmpl.Execute(out, repos); err != nil {
 			return err
 		}
+	case "go-format":
+		if len(outOpt) < 1 {
+			return fmt.Errorf("%w: missing template", output.ErrOutputOptionRequired)
+		}
+
+		tmpl, err := template.New("_").Parse(outOpt[0] + "\n")
+		if err != nil {
+			return err
+		}
+		for _, r := range repos {
+			if err := tmpl.Execute(out, r); err != nil {
+				return err
+			}
+		}
 	case "table":
 		fallthrough
 	default:
