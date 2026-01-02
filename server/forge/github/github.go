@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v76/github"
+	"github.com/google/go-github/v80/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -37,6 +37,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -62,8 +63,9 @@ type Opts struct {
 
 // New returns a Forge implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
-func New(opts Opts) (forge.Forge, error) {
+func New(id int64, opts Opts) (forge.Forge, error) {
 	r := &client{
+		id:         id,
 		API:        defaultAPI,
 		url:        defaultURL,
 		Client:     opts.OAuthClientID,
@@ -82,6 +84,7 @@ func New(opts Opts) (forge.Forge, error) {
 }
 
 type client struct {
+	id         int64
 	url        string
 	API        string
 	Client     string
@@ -469,15 +472,22 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
+
+	// Get the oauth2 transport to set custom base
+	tp, _ := tc.Transport.(*oauth2.Transport)
+
+	baseTransport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+	}
 	if c.SkipVerify {
-		tp, _ := tc.Transport.(*oauth2.Transport)
-		tp.Base = &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
+		baseTransport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
 		}
 	}
+
+	// Wrap the base transport with User-Agent support
+	tp.Base = httputil.NewUserAgentRoundTripper(baseTransport, "forge-github")
+
 	client := github.NewClient(tc)
 	client.BaseURL, _ = url.Parse(c.API)
 	return client
@@ -543,7 +553,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, &github.RepoStatus{
+	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, github.RepoStatus{
 		Context:     github.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 		State:       github.Ptr(convertStatus(workflow.State)),
 		Description: github.Ptr(common.GetPipelineStatusDescription(workflow.State)),
@@ -633,9 +643,9 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		if err != nil {
 			return nil, nil, err
 		}
-	} else if pipeline.Event == model.EventPush {
+	} else if pipeline != nil && pipeline.Event == model.EventPush {
 		// GitHub has removed commit summaries from Events API payloads from 7th October 2025 onwards.
-		pipeline, err = c.loadChangedFilesFromCommits(ctx, repo, pipeline, prevCommit, currCommit)
+		pipeline, err = c.loadChangedFilesFromCommits(ctx, repo, pipeline, currCommit, prevCommit)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -651,7 +661,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return pipeline, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -689,7 +699,7 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		return "", nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return "", err
 	}
@@ -744,7 +754,7 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 		log.Trace().Msg("GitHub tag event, fetching changed files using current commit")
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(c.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -760,7 +770,7 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 	if prev == "" {
 		opts := &github.ListOptions{Page: 1}
 		for opts.Page > 0 {
-			commit, resp, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, curr, &github.ListOptions{})
+			commit, resp, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, curr, opts)
 			if err != nil {
 				return nil, err
 			}

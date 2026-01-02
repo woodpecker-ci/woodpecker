@@ -30,7 +30,6 @@ import (
 	backoff "github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
@@ -39,9 +38,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // To authenticate to GCP K8s clusters
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+	"sigs.k8s.io/yaml"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 )
 
 const (
@@ -72,6 +71,8 @@ type config struct {
 	PodNodeSelector             map[string]string
 	PodTolerationsAllowFromStep bool
 	PodTolerations              []Toleration
+	PodAffinity                 *v1.Affinity
+	PodAffinityAllowFromStep    bool
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 	NativeSecretsAllowFromStep  bool
@@ -116,6 +117,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
 				PodTolerationsAllowFromStep: c.Bool("backend-k8s-pod-tolerations-allow-from-step"),
 				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
+				PodAffinityAllowFromStep:    c.Bool("backend-k8s-pod-affinity-allow-from-step"),
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
@@ -145,6 +147,12 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			if podTolerations := c.String("backend-k8s-pod-tolerations"); podTolerations != "" {
 				if err := yaml.Unmarshal([]byte(podTolerations), &config.PodTolerations); err != nil {
 					log.Error().Err(err).Msgf("could not unmarshal pod tolerations '%s'", podTolerations)
+					return nil, err
+				}
+			}
+			if podAffinity := c.String("backend-k8s-pod-affinity"); podAffinity != "" {
+				if err := yaml.Unmarshal([]byte(podAffinity), &config.PodAffinity); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal pod affinity '%s'", podAffinity)
 					return nil, err
 				}
 			}
@@ -221,38 +229,23 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	if e.config.EnableNamespacePerOrg {
+		log.Trace().Str("taskUUID", taskUUID).Msgf("Ensure organization namespace: %s", namespace)
 		err := mkNamespace(ctx, e.client.CoreV1().Namespaces(), namespace)
 		if err != nil {
 			return err
 		}
 	}
 
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating workflow volume")
 	_, err := startVolume(ctx, e, conf.Volume, namespace)
 	if err != nil {
 		return err
 	}
 
-	var extraHosts []types.HostAlias
-	for _, stage := range conf.Stages {
-		for _, step := range stage.Steps {
-			if isService(step) {
-				svc, err := startService(ctx, e, step)
-				if err != nil {
-					return &pipelineErrors.ErrInvalidWorkflowSetup{
-						Err:  err,
-						Step: step,
-					}
-				}
-				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
-				extraHosts = append(extraHosts, hostAlias)
-			}
-		}
-	}
-	log.Trace().Msgf("adding extra hosts: %v", extraHosts)
-	for _, stage := range conf.Stages {
-		for _, step := range stage.Steps {
-			step.ExtraHosts = extraHosts
-		}
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating workflow headless service")
+	_, err = startHeadlessService(ctx, e, namespace, taskUUID)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -477,17 +470,19 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 			if err != nil {
 				return err
 			}
-
-			if isService(step) {
-				err := stopService(ctx, e, step, defaultDeleteOptions)
-				if err != nil {
-					return err
-				}
-			}
 		}
 	}
 
-	err := stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
+	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
+	err := stopHeadlessService(ctx, e, namespace, taskUUID)
+	if err != nil {
+		return err
+	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow volume")
+	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
 	if err != nil {
 		return err
 	}

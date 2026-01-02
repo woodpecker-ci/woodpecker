@@ -70,6 +70,8 @@
           />
         </InputField>
 
+        <Checkbox v-model="selectedCronEnabled" :label="$t('repo.settings.crons.enabled')" />
+
         <InputField v-slot="{ id }" :label="$t('repo.settings.crons.branch.title')">
           <TextField
             :id="id"
@@ -100,6 +102,18 @@
           <span v-else class="text-wp-text-100">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </div>
 
+        <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
+          <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
+          <KeyValueEditor
+            :id="id"
+            v-model="selectedCronVariables"
+            :key-placeholder="$t('repo.manual_pipeline.variables.name')"
+            :value-placeholder="$t('repo.manual_pipeline.variables.value')"
+            :delete-title="$t('repo.manual_pipeline.variables.delete')"
+            @update:is-valid="isVariablesValid = $event"
+          />
+        </InputField>
+
         <div class="flex gap-2">
           <Button type="button" color="gray" :text="$t('cancel')" @click="selectedCron = undefined" />
           <Button
@@ -107,6 +121,7 @@
             color="green"
             :is-loading="isSaving"
             :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
+            :disabled="!isFormValid"
           />
         </div>
       </form>
@@ -122,7 +137,9 @@ import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
+import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -144,9 +161,33 @@ const selectedCron = ref<Partial<Cron>>();
 const isEditingCron = computed(() => !!selectedCron.value?.id);
 const date = useDate();
 
+const selectedCronVariables = computed<Record<string, string>>({
+  async set(_vars) {
+    selectedCron.value!.variables = _vars;
+  },
+  get() {
+    return selectedCron.value!.variables !== undefined ? selectedCron.value!.variables : {};
+  },
+});
+
+const selectedCronEnabled = computed<boolean>({
+  async set(_enabled) {
+    selectedCron.value!.enabled = _enabled;
+  },
+  get() {
+    return selectedCron.value!.enabled !== undefined ? selectedCron.value!.enabled : true;
+  },
+});
+
 async function loadCrons(page: number): Promise<Cron[] | null> {
   return apiClient.getCronList(repo.value.id, { page });
 }
+
+const isVariablesValid = ref(true);
+
+const isFormValid = computed(() => {
+  return isVariablesValid.value;
+});
 
 const { resetPage, data: crons, loading } = usePagination(loadCrons, () => !selectedCron.value);
 

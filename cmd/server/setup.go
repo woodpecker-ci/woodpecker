@@ -25,8 +25,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"

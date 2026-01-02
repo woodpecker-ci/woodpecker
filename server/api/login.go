@@ -15,7 +15,6 @@
 package api
 
 import (
-	"context"
 	"encoding/base32"
 	"errors"
 	"fmt"
@@ -25,8 +24,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -211,6 +210,7 @@ func HandleAuth(c *gin.Context) {
 		// insert the user into the database
 		if err := _store.CreateUser(user); err != nil {
 			log.Error().Err(err).Msgf("cannot insert %s", user.Login)
+			log.Trace().Msgf("user was: %#v", user)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
@@ -301,7 +301,7 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	if !server.Config.Server.AsyncRepositoryUpdate || noStoredRepositories {
-		if err := updateRepoPermissions(c, user, _store, _forge); err != nil {
+		if err := updateRepoPermissions(c, user, _store, _forge, forgeID); err != nil {
 			if err != nil {
 				log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
 			}
@@ -310,7 +310,7 @@ func HandleAuth(c *gin.Context) {
 		}
 	} else {
 		go func() {
-			if err := updateRepoPermissions(c, user, _store, _forge); err != nil {
+			if err := updateRepoPermissions(c, user, _store, _forge, forgeID); err != nil {
 				log.Error().Err(err).Msgf("could not update repo permissions for user %s in background", user.Login)
 			}
 		}()
@@ -320,7 +320,7 @@ func HandleAuth(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
-func updateRepoPermissions(c context.Context, user *model.User, _store store.Store, _forge forge.Forge) error {
+func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {
 	start := time.Now()
 	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
 		return _forge.Repos(c, user, &model.ListOptions{
@@ -332,8 +332,13 @@ func updateRepoPermissions(c context.Context, user *model.User, _store store.Sto
 		return err
 	}
 
+	var repoIDs []int64
+
 	for _, forgeRepo := range repos {
-		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
+		// make sure forgeID is set
+		forgeRepo.ForgeID = forgeID
+
+		dbRepo, err := _store.GetRepoForgeID(forgeID, forgeRepo.ForgeRemoteID)
 		if err != nil && errors.Is(err, types.RecordNotExist) {
 			continue
 		}
@@ -354,6 +359,12 @@ func updateRepoPermissions(c context.Context, user *model.User, _store store.Sto
 		if err := _store.PermUpsert(perm); err != nil {
 			return err
 		}
+
+		repoIDs = append(repoIDs, dbRepo.ID)
+	}
+
+	if err := _store.PermPrune(user.ID, repoIDs); err != nil {
+		return err
 	}
 
 	log.Debug().Msgf("update repo permissions for user %s in %dms", user.Login, time.Since(start).Milliseconds())

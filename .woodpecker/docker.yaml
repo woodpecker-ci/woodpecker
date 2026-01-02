@@ -1,6 +1,6 @@
 variables:
   - &golang_image 'docker.io/golang:1.25'
-  - &node_image 'docker.io/node:23-alpine'
+  - &node_image 'docker.io/node:24-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.25.x'
   - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:6.0.3'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
@@ -44,6 +44,8 @@ when:
   - event: push
     branch: ${CI_REPO_DEFAULT_BRANCH}
     path: *when_path
+  - event: pull_request_metadata
+    evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
 
 steps:
   vendor:
@@ -52,7 +54,7 @@ steps:
     commands:
       - go mod vendor
     when:
-      - event: pull_request
+      - event: [pull_request, pull_request_metadata]
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
@@ -72,7 +74,7 @@ steps:
       - pnpm install --frozen-lockfile
       - pnpm build
     when:
-      - event: pull_request
+      - event: [pull_request, pull_request_metadata]
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
@@ -95,7 +97,7 @@ steps:
       PLATFORMS: linux|amd64
       TAGS: sqlite sqlite_unlock_notify netgo
     when:
-      - event: pull_request
+      - event: [pull_request, pull_request_metadata]
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
@@ -131,7 +133,7 @@ steps:
       logins: *publish_logins
     when: &when-preview
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
+      event: [pull_request, pull_request_metadata]
 
   build-server-dryrun:
     depends_on:
@@ -304,6 +306,19 @@ steps:
   #########
   # C L I #
   #########
+
+  build-cli-alpine-preview:
+    depends_on:
+      - vendor
+    image: *buildx_plugin
+    settings:
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
+      build_args: *build_args
+      logins: *publish_logins
+    when: *when-preview
 
   build-cli-dryrun:
     depends_on:

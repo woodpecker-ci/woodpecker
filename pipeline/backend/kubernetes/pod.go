@@ -55,7 +55,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options, nsp)
+	spec, err := podSpec(step, config, options, nsp, taskUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -172,16 +172,24 @@ func podAnnotations(config *config, options BackendOptions) map[string]string {
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
-	var err error
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor, taskUUID string) (v1.PodSpec, error) {
+	subdomain, err := subdomain(taskUUID)
+	if err != nil {
+		return v1.PodSpec{}, err
+	}
+
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
 		PriorityClassName:  config.PriorityClassName,
 		HostAliases:        hostAliases(step.ExtraHosts),
+		Hostname:           getHostnameOrEmpty(step.Name),
+		Subdomain:          subdomain,
+		DNSConfig:          dnsConfig(config.GetNamespace(step.OrgID), subdomain),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
+		Affinity:           affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
 
@@ -465,6 +473,25 @@ func toleration(backendToleration Toleration) v1.Toleration {
 	}
 }
 
+func affinity(stepAffinity, agentAffinity *v1.Affinity, allowFromStep bool) *v1.Affinity {
+	if stepAffinity != nil {
+		if allowFromStep {
+			log.Trace().Msg("using affinity from step backend options")
+			return stepAffinity
+		} else {
+			log.Debug().Msg("Step affinity is disallowed by instance configuration, ignoring it")
+		}
+	}
+
+	if agentAffinity != nil {
+		log.Trace().Msg("using affinity from agent configuration")
+		return agentAffinity
+	}
+
+	log.Trace().Msg("no affinity configured")
+	return nil
+}
+
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
 		nonRoot             *bool
@@ -601,6 +628,12 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 		})
 	}
 	return ev
+}
+
+func dnsConfig(namespace, subdomain string) *v1.PodDNSConfig {
+	return &v1.PodDNSConfig{
+		Searches: []string{fmt.Sprintf("%s.%s.svc.cluster.local", subdomain, namespace)},
+	}
 }
 
 func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions, taskUUID string) (*v1.Pod, error) {

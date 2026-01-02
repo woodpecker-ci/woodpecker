@@ -40,7 +40,12 @@ func Handler() http.Handler {
 	e.GET("/2.0/user/permissions/repositories", getPermissions)
 	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
 	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
+	e.GET("/2.0/repositories/:owner/:name/diffstat/:commit", getCommitDiffstat)
 	return e
+}
+
+func getCommitDiffstat(c *gin.Context) {
+	c.String(http.StatusOK, diffStatPayload)
 }
 
 func getOauth(c *gin.Context) {
@@ -433,6 +438,21 @@ const pullRequestsPayload = `
 		"pagelen": 10,
     "size": 2,
     "page": 1
+}
+`
+
+const diffStatPayload = `
+{
+    "values": [
+        {
+            "old": {
+                "path": "main.go"
+            },
+            "new": {
+                "path": "main.go"
+            }
+        }
+    ]
 }
 `
 
