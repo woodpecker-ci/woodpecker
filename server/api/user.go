@@ -191,7 +191,7 @@ func RefreshRepos(c *gin.Context) {
 		return
 	}
 
-	if err := updateRepoPermissions(c, user, _store, _forge); err != nil {
+	if err := updateRepoPermissions(c, user, _store, _forge, user.ForgeID); err != nil {
 		log.Error().Err(err).Msgf("Can't update repo permissions for user %s in forge %s", user.Login, _forge.Name())
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
