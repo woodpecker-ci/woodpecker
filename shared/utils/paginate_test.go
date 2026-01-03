@@ -50,7 +50,7 @@ func TestPaginate(t *testing.T) {
 			limit:    -1,
 			pages:    [][]int{{11, 12, 13}, {21, 22, 23}, {31, 32}},
 			expected: []int{11, 12, 13, 21, 22, 23, 31, 32},
-			apiCalls: 3,
+			apiCalls: 4, // extra page is fetched to confirm no more pages
 		},
 		{
 			name:     "zero limit",
