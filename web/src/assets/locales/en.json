@@ -465,6 +465,7 @@
     "show": "Show secrets",
     "name": "Name",
     "value": "Value",
+    "note": "Note",
     "delete_confirm": "Do you really want to delete this secret?",
     "deleted": "Secret deleted",
     "created": "Secret created",

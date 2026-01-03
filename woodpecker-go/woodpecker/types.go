@@ -183,6 +183,7 @@ type (
 		Value  string   `json:"value,omitempty"`
 		Images []string `json:"images"`
 		Events []string `json:"events"`
+		Note   string   `json:"note"`
 	}
 
 	// Feed represents an item in the user's feed or timeline.
