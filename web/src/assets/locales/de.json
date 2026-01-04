@@ -382,7 +382,8 @@
                     "placeholder": "Zeitplan",
                     "title": "Zeitplan (basierend auf UTC)"
                 },
-                "show": "Crons anzeigen"
+                "show": "Crons anzeigen",
+                "enabled": "Aktiviert"
             },
             "general": {
                 "allow_pr": {
