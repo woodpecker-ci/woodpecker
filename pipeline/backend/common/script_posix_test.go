@@ -29,6 +29,7 @@ func TestGenerateScriptPosix(t *testing.T) {
 		{
 			from: []string{"echo ${PATH}", "go build", "go test"},
 			want: `
+set -e
 if [ -n "$CI_NETRC_MACHINE" ]; then
 cat <<EOF > $HOME/.netrc
 machine $CI_NETRC_MACHINE

@@ -48,6 +48,7 @@ func generateScriptPosix(commands []string, workDir string) string {
 // setupScriptProto is a helper script this is added to the step script to ensure
 // a minimum set of environment variables are set correctly.
 const setupScriptProto = `
+set -e
 if [ -n "$CI_NETRC_MACHINE" ]; then
 cat <<EOF > $HOME/.netrc
 machine $CI_NETRC_MACHINE
