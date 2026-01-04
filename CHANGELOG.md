@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-02
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -57,6 +57,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.4.0 [[#5915](https://github.com/woodpecker-ci/woodpecker/pull/5915)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.33 [[#5910](https://github.com/woodpecker-ci/woodpecker/pull/5910)]
 - chore(deps): lock file maintenance [[#5913](https://github.com/woodpecker-ci/woodpecker/pull/5913)]
 - chore(deps): lock file maintenance [[#5907](https://github.com/woodpecker-ci/woodpecker/pull/5907)]
