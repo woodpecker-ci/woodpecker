@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-04
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -43,6 +43,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5916](https://github.com/woodpecker-ci/woodpecker/pull/5916)]
 - docs: add BunnyCDN Cache Purge Plugin [[#5906](https://github.com/woodpecker-ci/woodpecker/pull/5906)]
 - chore(deps): update dependency isomorphic-dompurify to v2.35.0 [[#5904](https://github.com/woodpecker-ci/woodpecker/pull/5904)]
 - chore(deps): update dependency @types/node to v24.10.4 [[#5862](https://github.com/woodpecker-ci/woodpecker/pull/5862)]
