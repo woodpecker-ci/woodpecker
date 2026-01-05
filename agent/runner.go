@@ -70,6 +70,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
+	workflow.Config.Timeout = workflow.Timeout
+
 	repoName := extractRepositoryName(workflow.Config)       // hack
 	pipelineNumber := extractPipelineNumber(workflow.Config) // hack
 
@@ -154,7 +156,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 
 	state.Finished = time.Now().Unix()
 
-	if errors.Is(err, pipeline.ErrCancel) {
+	if errors.Is(err, pipeline.ErrCancel) && runnerCtx.Err() == nil {
 		canceled = true
 	} else if canceled {
 		err = errors.Join(err, pipeline.ErrCancel)
@@ -181,10 +183,14 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 	if doneCtx.Err() != nil {
 		doneCtx = shutdownCtx
 	}
-	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
-		logger.Error().Err(err).Msg("updating workflow status failed")
+	if runnerCtx.Err() == nil || canceled {
+		if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
+			logger.Error().Err(err).Msg("updating workflow status failed")
+		} else {
+			logger.Debug().Msg("updating workflow status complete")
+		}
 	} else {
-		logger.Debug().Msg("updating workflow status complete")
+		logger.Info().Msg("skipping workflow status update due to agent shutdown")
 	}
 
 	return nil

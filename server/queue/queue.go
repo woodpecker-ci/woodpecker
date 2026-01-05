@@ -113,6 +113,9 @@ type Queue interface {
 
 	// KickAgentWorkers kicks all workers for a given agent.
 	KickAgentWorkers(agentID int64)
+
+	// SetStore sets the store for the queue.
+	SetStore(s store.Store)
 }
 
 // Config holds the configuration for the queue.

@@ -46,8 +46,13 @@ import (
 const (
 	EngineName = "kubernetes"
 	// TODO: 5 seconds is against best practice, k3s didn't work otherwise
-	defaultResyncDuration = 5 * time.Second
-	maxRetryDuration      = 1 * time.Minute
+	defaultResyncDuration          = 5 * time.Second
+	maxRetryDuration               = 1 * time.Minute
+	defaultStateCleanupInterval    = 5 * time.Minute
+	leaderElectionLeaseDuration    = 15 * time.Second
+	leaderElectionRenewDeadline    = 10 * time.Second
+	leaderElectionRetryPeriod      = 2 * time.Second
+	leaderElectionResourceLockName = "woodpecker-state-cleanup"
 )
 
 var defaultDeleteOptions = newDefaultDeleteOptions()
@@ -77,6 +82,7 @@ type config struct {
 	SecurityContext             SecurityContextConfig
 	NativeSecretsAllowFromStep  bool
 	PriorityClassName           string
+	StateRecoveryEnabled        bool
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -124,6 +130,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					FSGroup:      newInt64(defaultFSGroup),
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
+				StateRecoveryEnabled:       c.Bool("backend-k8s-state-recovery"),
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -171,6 +178,10 @@ func New() types.Backend {
 
 func (e *kube) Name() string {
 	return EngineName
+}
+
+func (e *kube) SupportsStateRecovery() bool {
+	return e.config != nil && e.config.StateRecoveryEnabled
 }
 
 func (e *kube) IsAvailable(context.Context) bool {
@@ -228,11 +239,38 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
+	timeout := time.Hour
+	if conf.Timeout > 0 {
+		timeout = time.Duration(conf.Timeout) * time.Minute
+	}
+
+	if e.config.StateRecoveryEnabled {
+		if remainingTimeout, err := e.getRemainingTimeout(ctx, taskUUID, namespace); err == nil && remainingTimeout > 0 {
+			log.Info().
+				Str("taskUUID", taskUUID).
+				Dur("original", timeout).
+				Dur("remaining", time.Duration(remainingTimeout)*time.Second).
+				Msg("using remaining timeout from resumed workflow")
+			timeout = time.Duration(remainingTimeout) * time.Second
+		} else if err != nil {
+			log.Debug().Err(err).Str("taskUUID", taskUUID).Msg("failed to get remaining timeout, using original")
+		}
+	}
+
 	if e.config.EnableNamespacePerOrg {
 		log.Trace().Str("taskUUID", taskUUID).Msgf("Ensure organization namespace: %s", namespace)
 		err := mkNamespace(ctx, e.client.CoreV1().Namespaces(), namespace)
 		if err != nil {
 			return err
+		}
+	}
+
+	// Create state ConfigMap first if state recovery is enabled
+	if e.config.StateRecoveryEnabled {
+		log.Trace().Str("taskUUID", taskUUID).Msg("Creating workflow state ConfigMap")
+		if err := e.createWorkflowState(ctx, conf, taskUUID, timeout); err != nil {
+			log.Error().Err(err).Str("taskUUID", taskUUID).Msg("failed to create workflow state ConfigMap")
+			// Don't fail the workflow setup - state recovery is best-effort
 		}
 	}
 
@@ -485,6 +523,13 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
 	if err != nil {
 		return err
+	}
+
+	if e.config.StateRecoveryEnabled {
+		log.Trace().Str("taskUUID", taskUUID).Msg("deleting workflow state ConfigMap")
+		if err := e.deleteWorkflowState(ctx, taskUUID, namespace); err != nil {
+			log.Warn().Err(err).Str("taskUUID", taskUUID).Msg("failed to delete workflow state ConfigMap")
+		}
 	}
 
 	return nil

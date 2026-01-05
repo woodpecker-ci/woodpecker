@@ -128,4 +128,10 @@ var Flags = []cli.Flag{
 		Usage:   "which kubernetes priority class to assign to created job pods",
 		Value:   "",
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_STATE_RECOVERY"),
+		Name:    "backend-k8s-state-recovery",
+		Usage:   "enable workflow state recovery after agent restart using ConfigMaps",
+		Value:   false,
+	},
 }

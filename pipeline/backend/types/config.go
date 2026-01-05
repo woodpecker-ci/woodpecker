@@ -20,6 +20,7 @@ type Config struct {
 	Network string    `json:"network"`  // network definition
 	Volume  string    `json:"volume"`   // volume definition
 	Secrets []*Secret `json:"secrets"`  // secret definitions
+	Timeout int64     `json:"timeout"`  // workflow timeout in minutes
 }
 
 // CliCommand is the context key to pass cli context to backends if needed.

@@ -201,12 +201,18 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
+	// Trigger cleanup of expired workflow state on startup for backends that support recovery
+	if recoveryBackend, ok := backendEngine.(types.BackendRecovery); ok {
+		go recoveryBackend.CleanupExpiredStates(backendCtx)
+	}
+
 	maxWorkflows := c.Int("max-workflows")
 
 	customLabels := make(map[string]string)
 	if err := stringSliceAddToMap(c.StringSlice("labels"), customLabels); err != nil {
 		return err
 	}
+
 	if len(customLabels) != 0 {
 		log.Debug().Msgf("custom labels detected: %#v", customLabels)
 	}

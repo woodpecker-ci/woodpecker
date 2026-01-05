@@ -27,6 +27,7 @@ import (
 // WithTaskStore returns a queue that is backed by the TaskStore. This
 // ensures the task Queue can be restored when the system starts.
 func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
+	q.SetStore(s)
 	tasks, _ := s.TaskList()
 	if err := q.PushAtOnce(ctx, tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
@@ -61,14 +62,9 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*model.Task) err
 // Poll retrieves and removes a task head of this queue.
 func (q *persistentQueue) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	task, err := q.Queue.Poll(c, agentID, f)
-	if task != nil {
-		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
-		if deleteErr := q.store.TaskDelete(task.ID); deleteErr != nil {
-			log.Error().Err(deleteErr).Msgf("pull queue item: %s: failed to remove from backup", task.ID)
-		} else {
-			log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
-		}
-	}
+	// NOTE: We intentionally do NOT delete from TaskStore here.
+	// Tasks are kept in the store until Done/Error to support workflow recovery.
+	// If an agent crashes after polling, the task will be reloaded from the store on server restart.
 	return task, err
 }
 
@@ -83,6 +79,14 @@ func (q *persistentQueue) EvictAtOnce(c context.Context, ids []string) error {
 		}
 	}
 	return nil
+}
+
+// Done signals the task is complete.
+func (q *persistentQueue) Done(c context.Context, id string, exitStatus model.StatusValue) error {
+	if err := q.Queue.Done(c, id, exitStatus); err != nil {
+		return err
+	}
+	return q.store.TaskDelete(id)
 }
 
 // Error signals the task is done with an error.
@@ -104,4 +108,9 @@ func (q *persistentQueue) ErrorAtOnce(c context.Context, ids []string, err error
 		}
 	}
 	return nil
+}
+
+func (q *persistentQueue) SetStore(s store.Store) {
+	q.Queue.SetStore(s)
+	q.store = s
 }

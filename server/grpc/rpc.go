@@ -467,6 +467,11 @@ func (s *RPC) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, err
 		return -1, err
 	}
 
+	// Kick any existing workers for this agent to prevent stale connections
+	// from blocking workflow recovery when agents with stable IDs restart.
+	// Running tasks will be resubmitted when they timeout and can then be recovered.
+	s.queue.KickAgentWorkers(agent.ID)
+
 	return agent.ID, nil
 }
 
