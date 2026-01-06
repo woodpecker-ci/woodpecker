@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-05
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -43,7 +43,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5916](https://github.com/woodpecker-ci/woodpecker/pull/5916)]
 - docs: add BunnyCDN Cache Purge Plugin [[#5906](https://github.com/woodpecker-ci/woodpecker/pull/5906)]
 - chore(deps): update dependency isomorphic-dompurify to v2.35.0 [[#5904](https://github.com/woodpecker-ci/woodpecker/pull/5904)]
 - chore(deps): update dependency @types/node to v24.10.4 [[#5862](https://github.com/woodpecker-ci/woodpecker/pull/5862)]
@@ -58,6 +57,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.11.0 [[#5919](https://github.com/woodpecker-ci/woodpecker/pull/5919)]
+- chore(deps): lock file maintenance [[#5916](https://github.com/woodpecker-ci/woodpecker/pull/5916)]
 - chore(deps): update dependency simple-icons to v16.4.0 [[#5915](https://github.com/woodpecker-ci/woodpecker/pull/5915)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.33 [[#5910](https://github.com/woodpecker-ci/woodpecker/pull/5910)]
 - chore(deps): lock file maintenance [[#5913](https://github.com/woodpecker-ci/woodpecker/pull/5913)]
