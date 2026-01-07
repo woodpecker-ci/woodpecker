@@ -67,13 +67,13 @@ type RPC struct {
 
 func (g *RPC) Name() string {
 	var resp string
-	_ = g.client.Call("Plugin.Name", nil, &resp)
+	_ = g.client.Call("Plugin.Name", []byte{}, &resp)
 	return resp
 }
 
 func (g *RPC) URL() string {
 	var resp string
-	_ = g.client.Call("Plugin.URL", nil, &resp)
+	_ = g.client.Call("Plugin.URL", []byte{}, &resp)
 	return resp
 }
 
