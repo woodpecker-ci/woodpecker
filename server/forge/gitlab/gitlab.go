@@ -199,10 +199,7 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 		return nil, err
 	}
 
-	perPage := p.PerPage
-	if perPage > defaultPerPage {
-		perPage = defaultPerPage
-	}
+	perPage := min(p.PerPage, defaultPerPage)
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 		ListOptions: gitlab.ListOptions{
@@ -294,10 +291,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 		return nil, err
 	}
 
-	perPage := p.PerPage
-	if perPage > defaultPerPage {
-		perPage = defaultPerPage
-	}
+	perPage := min(p.PerPage, defaultPerPage)
 
 	opts := &gitlab.ListProjectsOptions{
 		ListOptions: gitlab.ListOptions{
