@@ -48,7 +48,8 @@
         "name": "Variable name",
         "value": "Variable value"
       },
-      "show_pipelines": "Show pipelines"
+      "show_pipelines": "Show pipelines",
+      "no_manual_workflows": "There were no manually executable workflows, or the filter exclude all of them."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
@@ -166,7 +167,8 @@
           "placeholder": "Schedule"
         },
         "edit": "Edit cron",
-        "delete": "Delete cron"
+        "delete": "Delete cron",
+        "enabled": "Enabled"
       },
       "badge": {
         "badge": "Badge",
