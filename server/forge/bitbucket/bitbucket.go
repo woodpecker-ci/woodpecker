@@ -181,6 +181,12 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
 func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	// we merge data from different sources
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	setListOptions(p)
 
 	client := c.newClient(ctx, u)
