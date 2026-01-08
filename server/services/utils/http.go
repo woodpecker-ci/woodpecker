@@ -120,16 +120,11 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	// Create backoff configuration
 	exponentialBackoff := backoff.NewExponentialBackOff()
 
-	// Result type for backoff.Retry
-	type result struct {
-		statusCode int
-	}
-
 	// Execute with backoff retry
-	res, err := backoff.Retry(ctx, func() (result, error) {
+	return backoff.Retry(ctx, func() (int, error) {
 		// Check if context is already canceled
 		if ctx.Err() != nil {
-			return result{}, ctx.Err()
+			return 0, ctx.Err()
 		}
 
 		// Create request body for this attempt
@@ -141,7 +136,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 		// Create new request for each attempt
 		req, err := http.NewRequestWithContext(ctx, method, uri.String(), body)
 		if err != nil {
-			return result{}, err
+			return 0, err
 		}
 		if in != nil {
 			req.Header.Set("Content-Type", "application/json")
@@ -153,9 +148,9 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 			// Check if this is a retryable error
 			if !isRetryableError(err) {
 				log.Error().Err(err).Msgf("HTTP request failed (not retryable): %s %s", method, path)
-				return result{}, backoff.Permanent(err)
+				return 0, backoff.Permanent(err)
 			}
-			return result{}, err
+			return 0, err
 		}
 
 		statusCode := resp.StatusCode
@@ -166,20 +161,20 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 			// Check if this is a retryable error
 			if !isRetryableError(readErr) {
 				log.Error().Err(readErr).Msgf("HTTP response read failed (not retryable): %s %s", method, path)
-				return result{statusCode: statusCode}, backoff.Permanent(readErr)
+				return statusCode, backoff.Permanent(readErr)
 			}
-			return result{statusCode: statusCode}, readErr
+			return statusCode, readErr
 		}
 
 		// Check if status code is retryable
 		if isRetryableStatusCode(statusCode) {
-			return result{statusCode: statusCode}, fmt.Errorf("response: %d", statusCode)
+			return statusCode, fmt.Errorf("response: %d", statusCode)
 		}
 
 		// If status code is client error (4xx), don't retry
 		if statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError {
 			log.Debug().Int("status", statusCode).Msgf("HTTP request returned client error (not retryable): %s %s", method, path)
-			return result{statusCode: statusCode}, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
+			return statusCode, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
 		}
 
 		// If status code is OK (2xx), parse and return response
@@ -188,31 +183,26 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 				err = json.NewDecoder(bytes.NewReader(respBody)).Decode(out)
 				// Check for EOF error during response body parsing
 				if err != nil && (errors.Is(err, io.EOF) || strings.Contains(err.Error(), "unexpected EOF")) {
-					return result{statusCode: statusCode}, err
+					return statusCode, err
 				}
 				if err != nil {
 					log.Error().Err(err).Msgf("HTTP response parsing failed (not retryable): %s %s", method, path)
-					return result{statusCode: statusCode}, backoff.Permanent(err)
+					return statusCode, backoff.Permanent(err)
 				}
 			}
 			log.Debug().Int("status", statusCode).Msgf("HTTP request succeeded: %s %s", method, path)
-			return result{statusCode: statusCode}, nil
+			return statusCode, nil
 		}
 
 		// For any other status code, don't retry
 		log.Error().Int("status", statusCode).Msgf("HTTP request returned unexpected status code (not retryable): %s %s", method, path)
-		return result{statusCode: statusCode}, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
+		return statusCode, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
 	}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries+1), // +1 for initial attempt
 		backoff.WithNotify(func(err error, delay time.Duration) {
 			// Log retry attempts
 			log.Debug().Err(err).Msgf("HTTP request failed, retrying in %v: %s %s", delay, method, path)
 		}),
 	)
-	if err != nil {
-		return res.statusCode, err
-	}
-
-	return res.statusCode, nil
 }
 
 // isRetryableError checks if an error is transient and suitable for retry.
