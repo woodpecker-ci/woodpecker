@@ -29,6 +29,7 @@
 
 ### 🐛 Bug Fixes
 
+- Revert repos pagination for GH and BB [[#5924](https://github.com/woodpecker-ci/woodpecker/pull/5924)]
 - fix: send correct argument to rpc call for name/url [[#5922](https://github.com/woodpecker-ci/woodpecker/pull/5922)]
 - fix: secrets-file flag [[#5909](https://github.com/woodpecker-ci/woodpecker/pull/5909)]
 - Do not run crons for disabled repos [[#5884](https://github.com/woodpecker-ci/woodpecker/pull/5884)]
