@@ -20,7 +20,7 @@ Start Woodpecker in Gitpod by clicking on the following badge. You can log in wi
 
 ### Install Go
 
-Install Golang (>=1.25) as described by [this guide](https://go.dev/doc/install).
+Install Golang as described by [this guide](https://go.dev/doc/install).
 
 ### Install make
 
