@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Javex, @MartinSchmidt, @abhiyerra, @anbraten, @bentasker, @gjuoun, @gsaslis, @henkka, @jolheiser, @mogsie, @qwerty287, @sloonz, @sugar700, @tuxmainy, @xoxys
+@6543, @Javex, @KhalidAlansary, @MartinSchmidt, @abhiyerra, @anbraten, @bentasker, @gjuoun, @gsaslis, @henkka, @jolheiser, @mogsie, @qwerty287, @sloonz, @sugar700, @tuxmainy, @xoxys
 
 ### 🔒 Security
 
@@ -46,6 +46,8 @@
 
 ### 📚 Documentation
 
+- fix(docs): update woodpecker-cli secret command [[#5927](https://github.com/woodpecker-ci/woodpecker/pull/5927)]
+- Update Docs and nix-flake to reflect current dev environment [[#5926](https://github.com/woodpecker-ci/woodpecker/pull/5926)]
 - Update Helm chart installation command [[#5872](https://github.com/woodpecker-ci/woodpecker/pull/5872)]
 - docs: add BunnyCDN Cache Purge Plugin [[#5906](https://github.com/woodpecker-ci/woodpecker/pull/5906)]
 - chore(deps): update dependency isomorphic-dompurify to v2.35.0 [[#5904](https://github.com/woodpecker-ci/woodpecker/pull/5904)]
