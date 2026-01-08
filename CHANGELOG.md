@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Log addon errors [[#5923](https://github.com/woodpecker-ci/woodpecker/pull/5923)]
 - Custom vars for crons [[#5897](https://github.com/woodpecker-ci/woodpecker/pull/5897)]
 - Allow to disable a cron [[#5896](https://github.com/woodpecker-ci/woodpecker/pull/5896)]
 - Add background to status icons [[#5880](https://github.com/woodpecker-ci/woodpecker/pull/5880)]
