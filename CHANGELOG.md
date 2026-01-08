@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-06
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Javex, @MartinSchmidt, @anbraten, @bentasker, @gjuoun, @gsaslis, @henkka, @mogsie, @qwerty287, @sloonz, @sugar700, @tuxmainy, @xoxys
+@6543, @Javex, @MartinSchmidt, @anbraten, @bentasker, @gjuoun, @gsaslis, @henkka, @jolheiser, @mogsie, @qwerty287, @sloonz, @sugar700, @tuxmainy, @xoxys
 
 ### 🔒 Security
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix: send correct argument to rpc call for name/url [[#5922](https://github.com/woodpecker-ci/woodpecker/pull/5922)]
 - fix: secrets-file flag [[#5909](https://github.com/woodpecker-ci/woodpecker/pull/5909)]
 - Do not run crons for disabled repos [[#5884](https://github.com/woodpecker-ci/woodpecker/pull/5884)]
 - Show warning if there is no workflow to run [[#5883](https://github.com/woodpecker-ci/woodpecker/pull/5883)]
