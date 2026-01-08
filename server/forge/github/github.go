@@ -226,22 +226,30 @@ func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeRemoteID
 // Repos returns a list of all repositories for GitHub account, including
 // organization repositories.
 func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
-	client := c.newClientToken(ctx, u.AccessToken)
-	list, _, err := client.Repositories.ListByAuthenticatedUser(ctx, &github.RepositoryListByAuthenticatedUserOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
-	})
-	if err != nil {
-		return nil, err
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	if p.Page != 1 {
+		return nil, nil
 	}
-	repos := make([]*model.Repo, 0, len(list))
-	for _, repo := range list {
-		if repo.GetArchived() {
-			continue
+
+	client := c.newClientToken(ctx, u.AccessToken)
+
+	opts := new(github.RepositoryListByAuthenticatedUserOptions)
+	opts.PerPage = 100
+	opts.Page = 1
+
+	var repos []*model.Repo
+	for opts.Page > 0 {
+		list, resp, err := client.Repositories.ListByAuthenticatedUser(ctx, opts)
+		if err != nil {
+			return nil, err
 		}
-		repos = append(repos, convertRepo(repo))
+		for _, repo := range list {
+			if repo.GetArchived() {
+				continue
+			}
+			repos = append(repos, convertRepo(repo))
+		}
+		opts.Page = resp.NextPage
 	}
 	return repos, nil
 }
@@ -301,7 +309,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 	var files []*forge_types.FileMeta
 
-	for i := 0; i < len(data); i++ {
+	for range data {
 		select {
 		case err := <-errChan:
 			return nil, err

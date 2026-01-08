@@ -67,13 +67,19 @@ type RPC struct {
 
 func (g *RPC) Name() string {
 	var resp string
-	_ = g.client.Call("Plugin.Name", nil, &resp)
+	err := g.client.Call("Plugin.Name", []byte{}, &resp)
+	if err != nil {
+		log.Error().Err(err).Msg("addon Plugin.Name call failed")
+	}
 	return resp
 }
 
 func (g *RPC) URL() string {
 	var resp string
-	_ = g.client.Call("Plugin.URL", nil, &resp)
+	err := g.client.Call("Plugin.URL", []byte{}, &resp)
+	if err != nil {
+		log.Error().Err(err).Msg("addon Plugin.URL call failed")
+	}
 	return resp
 }
 

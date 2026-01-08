@@ -38,7 +38,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/kinbiko/jsonassert v1.2.0
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/migueleliasweb/go-github-mock v1.5.0
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
@@ -56,7 +56,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.4.1
 	github.com/zalando/go-keyring v0.2.6
-	gitlab.com/gitlab-org/api/client-go v1.10.0
+	gitlab.com/gitlab-org/api/client-go v1.11.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.46.0
 	golang.org/x/net v0.48.0
@@ -127,13 +127,13 @@ require (
 	github.com/go-playground/validator/v10 v10.27.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.18.0 // indirect
-	github.com/godbus/dbus/v5 v5.2.1 // indirect
+	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-github/v73 v73.0.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
