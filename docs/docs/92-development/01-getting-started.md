@@ -34,7 +34,7 @@ Install make on:
 
 ### Install Node.js & `pnpm`
 
-Install [Node.js (>=24)](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.
+Install [Node.js](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.
 
 For dependency installation (`node_modules`) of UI and documentation of Woodpecker the package manager pnpm is used.
 [This guide](https://pnpm.io/installation) describes the installation of `pnpm`.
