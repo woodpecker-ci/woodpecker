@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"fmt"
+	"time"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -45,17 +46,12 @@ func (s storage) PermUpsert(perm *model.Perm) error {
 }
 
 func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
-	if perm.RepoID == 0 && perm.Repo == nil {
+	if perm.RepoID == 0 {
 		return fmt.Errorf("could not determine repo for permission: %v", perm)
 	}
 
-	// lookup repo based on name or forge ID if possible
-	if perm.RepoID == 0 && perm.Repo != nil {
-		r, err := s.getRepoNameFallback(sess, perm.Repo.ForgeID, perm.Repo.ForgeRemoteID, perm.Repo.FullName)
-		if err != nil {
-			return err
-		}
-		perm.RepoID = r.ID
+	if perm.UserID == 0 {
+		return fmt.Errorf("could not determine user for permission: %v", perm)
 	}
 
 	exist, err := sess.Where(userIDAndRepoIDCond(perm)).Exist(new(model.Perm))
@@ -64,9 +60,12 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 	}
 
 	if exist {
+		perm.Updated = time.Now().Unix()
 		_, err = sess.Where(userIDAndRepoIDCond(perm)).AllCols().Update(perm)
 	} else {
 		// only Insert set auto created ID back to object
+		perm.Created = time.Now().Unix()
+		perm.Updated = perm.Created
 		_, err = sess.Insert(perm)
 	}
 	return err

@@ -334,7 +334,6 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 
 		log.Debug().Msgf("synced user permission for user %s and repo %s", user.Login, dbRepo.FullName)
 		perm := forgeRepo.Perm
-		perm.Repo = dbRepo
 		perm.RepoID = dbRepo.ID
 		perm.UserID = user.ID
 		perm.Synced = time.Now().Unix()
