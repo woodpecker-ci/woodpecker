@@ -22,16 +22,19 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/internal/config"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/output"
 )
 
 // Command exports the context command set.
 var Command = &cli.Command{
-	Name:    "context",
-	Aliases: []string{"ctx"},
-	Usage:   "manage contexts",
-	Action:  listContexts,
+	Name:           "context",
+	Aliases:        []string{"ctx"},
+	Usage:          "manage contexts",
+	DefaultCommand: listCommand.Name,
+	Description:    "Contexts can be used to manage users on one or multiple servers.\nTo create a new context run the setup command",
+	Action:         listContexts,
 	Commands: []*cli.Command{
 		listCommand,
 		useCommand,
@@ -44,7 +47,13 @@ var listCommand = &cli.Command{
 	Name:    "list",
 	Aliases: []string{"ls"},
 	Usage:   "list all contexts",
-	Action:  listContexts,
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "output-no-headers",
+			Usage: "do not print headers in output",
+		},
+	}...),
+	Action: listContexts,
 }
 
 var useCommand = &cli.Command{
