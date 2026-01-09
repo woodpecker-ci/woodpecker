@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
