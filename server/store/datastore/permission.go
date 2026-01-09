@@ -63,7 +63,7 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 		perm.Updated = time.Now().Unix()
 		_, err = sess.Where(userIDAndRepoIDCond(perm)).AllCols().Update(perm)
 	} else {
-		// only Insert set auto created ID back to object
+		// insert will set auto created ID back to perm object
 		perm.Created = time.Now().Unix()
 		perm.Updated = perm.Created
 		_, err = sess.Insert(perm)
