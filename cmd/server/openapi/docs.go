@@ -5274,6 +5274,9 @@ const docTemplate = `{
                 "trusted": {
                     "$ref": "#/definitions/model.TrustedConfiguration"
                 },
+                "user_id": {
+                    "type": "integer"
+                },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
                 }
@@ -5369,6 +5372,9 @@ const docTemplate = `{
                 },
                 "trusted": {
                     "$ref": "#/definitions/model.TrustedConfiguration"
+                },
+                "user_id": {
+                    "type": "integer"
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"

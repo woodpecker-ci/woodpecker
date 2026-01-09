@@ -590,5 +590,9 @@
   "exit_fullscreen": "Exit fullscreen",
   "help_translating": "You can help translate Woodpecker into your language on {0}.",
   "weblate": "our Weblate",
-  "disabled": "Disabled"
+  "disabled": "Disabled",
+  "current_repo_user": "Current repository user: {user_id}",
+  "set_as_repo_user": "Set yourself as repository user",
+  "user_associated_to_repo": "The user account associated to the repository will be used for API requests to the forge.",
+  "repo_user_changed": "You are now the owner of this repository"
 }

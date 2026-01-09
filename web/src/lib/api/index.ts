@@ -89,6 +89,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${repoId}/repair`);
   }
 
+  async chownRepo(repoId: number): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/chown`);
+  }
+
   async createPipeline(repoId: number, options: PipelineOptions): Promise<Pipeline | string> {
     return this._post(`/api/repos/${repoId}/pipelines`, options) as Promise<Pipeline | string>;
   }
