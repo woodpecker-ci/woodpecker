@@ -191,7 +191,6 @@ func PostRepo(c *gin.Context) {
 	repo.Perm.Synced = time.Now().Unix()
 	repo.Perm.UserID = user.ID
 	repo.Perm.RepoID = repo.ID
-	repo.Perm.Repo = repo
 	err = _store.PermUpsert(repo.Perm)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -559,6 +558,9 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 	repo.Perm = from.Perm
+	repo.Perm.Synced = time.Now().Unix()
+	repo.Perm.UserID = user.ID
+	repo.Perm.RepoID = repo.ID
 	errStore = _store.PermUpsert(repo.Perm)
 	if errStore != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errStore)
@@ -714,9 +716,10 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 	}
 
 	if updatePermissions {
-		repo.Perm.Pull = from.Perm.Pull
-		repo.Perm.Push = from.Perm.Push
-		repo.Perm.Admin = from.Perm.Admin
+		repo.Perm = from.Perm
+		repo.Perm.Synced = time.Now().Unix()
+		repo.Perm.UserID = repoUser.ID
+		repo.Perm.RepoID = repo.ID
 		if err := _store.PermUpsert(repo.Perm); err != nil {
 			return err
 		}
