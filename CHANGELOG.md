@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-08
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -29,6 +29,7 @@
 
 ### 🐛 Bug Fixes
 
+- Correctly update repo permissions [[#5928](https://github.com/woodpecker-ci/woodpecker/pull/5928)]
 - Revert repos pagination for GH and BB [[#5924](https://github.com/woodpecker-ci/woodpecker/pull/5924)]
 - fix: send correct argument to rpc call for name/url [[#5922](https://github.com/woodpecker-ci/woodpecker/pull/5922)]
 - fix: secrets-file flag [[#5909](https://github.com/woodpecker-ci/woodpecker/pull/5909)]
