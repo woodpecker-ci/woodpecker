@@ -68,6 +68,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v80 to v81 [[#5946](https://github.com/woodpecker-ci/woodpecker/pull/5946)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.8.0 [[#5945](https://github.com/woodpecker-ci/woodpecker/pull/5945)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.8.0 [[#5944](https://github.com/woodpecker-ci/woodpecker/pull/5944)]
 - chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.0 [[#5943](https://github.com/woodpecker-ci/woodpecker/pull/5943)]
