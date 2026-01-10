@@ -68,6 +68,9 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-git docker tag to v2.8.0 [[#5945](https://github.com/woodpecker-ci/woodpecker/pull/5945)]
+- chore(deps): update golangci/golangci-lint docker tag to v2.8.0 [[#5944](https://github.com/woodpecker-ci/woodpecker/pull/5944)]
+- chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.0 [[#5943](https://github.com/woodpecker-ci/woodpecker/pull/5943)]
 - chore(deps): update web npm deps non-major [[#5942](https://github.com/woodpecker-ci/woodpecker/pull/5942)]
 - chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.4.2 [[#5938](https://github.com/woodpecker-ci/woodpecker/pull/5938)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.4.1 [[#5937](https://github.com/woodpecker-ci/woodpecker/pull/5937)]
