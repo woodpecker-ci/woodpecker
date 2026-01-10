@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-09
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -64,6 +64,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.3 [[#5934](https://github.com/woodpecker-ci/woodpecker/pull/5934)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.11.0 [[#5919](https://github.com/woodpecker-ci/woodpecker/pull/5919)]
 - chore(deps): lock file maintenance [[#5916](https://github.com/woodpecker-ci/woodpecker/pull/5916)]
 - chore(deps): update dependency simple-icons to v16.4.0 [[#5915](https://github.com/woodpecker-ci/woodpecker/pull/5915)]
