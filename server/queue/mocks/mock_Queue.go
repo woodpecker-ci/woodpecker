@@ -10,6 +10,7 @@ import (
 	mock "github.com/stretchr/testify/mock"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // NewMockQueue creates a new instance of MockQueue. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
@@ -632,6 +633,46 @@ func (_c *MockQueue_Resume_Call) Return() *MockQueue_Resume_Call {
 }
 
 func (_c *MockQueue_Resume_Call) RunAndReturn(run func()) *MockQueue_Resume_Call {
+	_c.Run(run)
+	return _c
+}
+
+// SetStore provides a mock function for the type MockQueue
+func (_mock *MockQueue) SetStore(s store.Store) {
+	_mock.Called(s)
+	return
+}
+
+// MockQueue_SetStore_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetStore'
+type MockQueue_SetStore_Call struct {
+	*mock.Call
+}
+
+// SetStore is a helper method to define mock.On call
+//   - s store.Store
+func (_e *MockQueue_Expecter) SetStore(s interface{}) *MockQueue_SetStore_Call {
+	return &MockQueue_SetStore_Call{Call: _e.mock.On("SetStore", s)}
+}
+
+func (_c *MockQueue_SetStore_Call) Run(run func(s store.Store)) *MockQueue_SetStore_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 store.Store
+		if args[0] != nil {
+			arg0 = args[0].(store.Store)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockQueue_SetStore_Call) Return() *MockQueue_SetStore_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockQueue_SetStore_Call) RunAndReturn(run func(s store.Store)) *MockQueue_SetStore_Call {
 	_c.Run(run)
 	return _c
 }

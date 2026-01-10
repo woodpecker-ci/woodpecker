@@ -24,12 +24,14 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestRegisterAgent(t *testing.T) {
 	t.Run("When existing agent Name is empty it should update Name with hostname from metadata", func(t *testing.T) {
 		store := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
 		storeAgent := new(model.Agent)
 		storeAgent.ID = 1337
 		updatedAgent := model.Agent{
@@ -49,8 +51,10 @@ func TestRegisterAgent(t *testing.T) {
 
 		store.On("AgentFind", int64(1337)).Once().Return(storeAgent, nil)
 		store.On("AgentUpdate", &updatedAgent).Once().Return(nil)
+		mockQueue.On("KickAgentWorkers", int64(1337)).Once().Return()
 		grpc := RPC{
 			store: store,
+			queue: mockQueue,
 		}
 		ctx := metadata.NewIncomingContext(
 			t.Context(),
@@ -71,6 +75,7 @@ func TestRegisterAgent(t *testing.T) {
 
 	t.Run("When existing agent hostname is present it should not update the hostname", func(t *testing.T) {
 		store := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
 		storeAgent := new(model.Agent)
 		storeAgent.ID = 1337
 		storeAgent.Name = "originalHostname"
@@ -91,8 +96,10 @@ func TestRegisterAgent(t *testing.T) {
 
 		store.On("AgentFind", int64(1337)).Once().Return(storeAgent, nil)
 		store.On("AgentUpdate", &updatedAgent).Once().Return(nil)
+		mockQueue.On("KickAgentWorkers", int64(1337)).Once().Return()
 		grpc := RPC{
 			store: store,
+			queue: mockQueue,
 		}
 		ctx := metadata.NewIncomingContext(
 			t.Context(),

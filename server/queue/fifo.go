@@ -25,6 +25,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
@@ -52,6 +53,7 @@ type fifo struct {
 	waitingOnDeps *list.List
 	extension     time.Duration
 	paused        bool
+	store         store.Store
 }
 
 // processTimeInterval is the time till the queue rearranges things,
@@ -248,6 +250,12 @@ func (q *fifo) KickAgentWorkers(agentID int64) {
 			delete(q.workers, worker)
 		}
 	}
+}
+
+func (q *fifo) SetStore(s store.Store) {
+	q.Lock()
+	q.store = s
+	q.Unlock()
 }
 
 // helper function that loops through the queue and attempts to

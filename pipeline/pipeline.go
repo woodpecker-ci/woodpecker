@@ -17,6 +17,7 @@ package pipeline
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -108,6 +109,10 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	defer func() {
 		ctx := runnerCtx //nolint:contextcheck
 		if ctx.Err() != nil {
+			if r.supportsStateRecovery() {
+				logger.Info().Msg("context canceled with state recovery enabled, preserving workflow state for recovery")
+				return
+			}
 			ctx = GetShutdownCtx()
 		}
 		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID); err != nil {
@@ -142,6 +147,8 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	for _, stage := range r.spec.Stages {
 		select {
 		case <-r.ctx.Done():
+			return ErrCancel
+		case <-runnerCtx.Done():
 			return ErrCancel
 		case err := <-r.execAll(stage.Steps):
 			if err != nil {
@@ -205,11 +212,13 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 					Str("step", step.Name).
 					Err(r.err).
 					Msgf("skipped due to OnFailure=%t", step.OnFailure)
+				r.recordStepSkipped(step)
 				return nil
 			case r.err == nil && !step.OnSuccess:
 				logger.Debug().
 					Str("step", step.Name).
 					Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
+				r.recordStepSkipped(step)
 				return nil
 			}
 
@@ -250,10 +259,45 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 // Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
+	status, err := r.getStepStatus(step.UUID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get step status: %w", err)
+	}
+	logger := r.MakeLogger()
+
+	switch status {
+	case backend.StatusSuccess:
+		logger.Debug().Str("step", step.Name).Msg("step already succeeded, skipping")
+		return &backend.State{Exited: true, ExitCode: 0}, nil
+
+	case backend.StatusFailed:
+		logger.Debug().Str("step", step.Name).Msg("step already failed, skipping")
+		return &backend.State{Exited: true, ExitCode: 1}, &ExitError{UUID: step.UUID, Code: 1}
+
+	case backend.StatusSkipped:
+		logger.Debug().Str("step", step.Name).Msg("step already skipped")
+		return nil, nil
+
+	case backend.StatusRunning:
+		logger.Debug().Str("step", step.Name).Msg("step still running, reconnecting")
+		return r.execReconnect(step)
+
+	default:
+		return r.execNormal(step)
+	}
+}
+
+func (r *Runtime) execNormal(step *backend.Step) (*backend.State, error) {
+	r.recordStepStarted(step)
 	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
+		r.recordStepCompleted(step, 1)
 		return nil, err
 	}
 
+	return r.tailAndWait(step)
+}
+
+func (r *Runtime) tailAndWait(step *backend.Step) (*backend.State, error) {
 	var wg sync.WaitGroup
 	if r.logger != nil {
 		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
@@ -288,6 +332,8 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		}
 		return nil, err
 	}
+
+	r.recordStepCompleted(step, waitState.ExitCode)
 
 	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
