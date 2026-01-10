@@ -48,6 +48,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/react to v19.2.8 [[#5941](https://github.com/woodpecker-ci/woodpecker/pull/5941)]
 - chore(deps): update dependency @types/node to v24.10.6 [[#5935](https://github.com/woodpecker-ci/woodpecker/pull/5935)]
 - chore(deps): update dependency @types/node to v24.10.5 [[#5933](https://github.com/woodpecker-ci/woodpecker/pull/5933)]
 - fix(docs): update woodpecker-cli secret command [[#5927](https://github.com/woodpecker-ci/woodpecker/pull/5927)]
