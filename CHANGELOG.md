@@ -47,6 +47,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/node to v24.10.5 [[#5933](https://github.com/woodpecker-ci/woodpecker/pull/5933)]
 - fix(docs): update woodpecker-cli secret command [[#5927](https://github.com/woodpecker-ci/woodpecker/pull/5927)]
 - Update Docs and nix-flake to reflect current dev environment [[#5926](https://github.com/woodpecker-ci/woodpecker/pull/5926)]
 - Update Helm chart installation command [[#5872](https://github.com/woodpecker-ci/woodpecker/pull/5872)]
