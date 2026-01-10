@@ -79,7 +79,7 @@ steps:
       - event: manual
 
   - name: deploy-preview
-    image: docker.io/woodpeckerci/plugin-surge-preview:1.4.1
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.4.2
     settings:
       path: 'docs/build/'
       surge_token:
