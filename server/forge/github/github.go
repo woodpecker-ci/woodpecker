@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v81/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
