@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Allow to add a note to secrets [[#5898](https://github.com/woodpecker-ci/woodpecker/pull/5898)]
 - Log addon errors [[#5923](https://github.com/woodpecker-ci/woodpecker/pull/5923)]
 - Custom vars for crons [[#5897](https://github.com/woodpecker-ci/woodpecker/pull/5897)]
 - Allow to disable a cron [[#5896](https://github.com/woodpecker-ci/woodpecker/pull/5896)]
