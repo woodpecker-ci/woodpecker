@@ -24,11 +24,11 @@ import (
 
 // Generate an SVG badge based on a pipeline.
 func TestGenerate(t *testing.T) {
-	assert.Equal(t, badgeNone, Generate(nil))
-	assert.Equal(t, badgeSuccess, Generate(&model.Pipeline{Status: model.StatusSuccess}))
-	assert.Equal(t, badgeFailure, Generate(&model.Pipeline{Status: model.StatusFailure}))
-	assert.Equal(t, badgeError, Generate(&model.Pipeline{Status: model.StatusError}))
-	assert.Equal(t, badgeError, Generate(&model.Pipeline{Status: model.StatusKilled}))
-	assert.Equal(t, badgeStarted, Generate(&model.Pipeline{Status: model.StatusPending}))
-	assert.Equal(t, badgeStarted, Generate(&model.Pipeline{Status: model.StatusRunning}))
+	assert.Equal(t, badgeNone, Generate("pipeline", model.StatusDeclined))
+	assert.Equal(t, badgeSuccess, Generate("pipeline", model.StatusSuccess))
+	assert.Equal(t, badgeFailure, Generate("pipeline", model.StatusFailure))
+	assert.Equal(t, badgeError, Generate("pipeline", model.StatusError))
+	assert.Equal(t, badgeError, Generate("pipeline", model.StatusKilled))
+	assert.Equal(t, badgeStarted, Generate("pipeline", model.StatusPending))
+	assert.Equal(t, badgeStarted, Generate("pipeline", model.StatusRunning))
 }

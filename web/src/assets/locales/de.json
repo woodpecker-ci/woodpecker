@@ -354,7 +354,9 @@
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
                 "type_url": "URL",
-                "events": "Events"
+                "events": "Events",
+                "workflow": "Workflow",
+                "step": "Step"
             },
             "crons": {
                 "add": "Cron hinzufügen",
