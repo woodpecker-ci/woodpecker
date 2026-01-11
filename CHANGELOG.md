@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-10
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -69,6 +69,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5956](https://github.com/woodpecker-ci/woodpecker/pull/5956)]
 - chore(deps): update dependency @types/node to v24.10.7 [[#5955](https://github.com/woodpecker-ci/woodpecker/pull/5955)]
 - fix(deps): update module github.com/google/go-github/v80 to v81 [[#5946](https://github.com/woodpecker-ci/woodpecker/pull/5946)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.8.0 [[#5945](https://github.com/woodpecker-ci/woodpecker/pull/5945)]
