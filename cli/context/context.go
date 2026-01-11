@@ -157,7 +157,7 @@ func deleteContext(_ context.Context, c *cli.Command) error {
 }
 
 func renameContext(_ context.Context, c *cli.Command) error {
-	if c.Args().Len() < 2 { // nolint:mnd // min args
+	if c.Args().Len() < 2 { //nolint:mnd // min args
 		return fmt.Errorf("both old name and new name are required")
 	}
 

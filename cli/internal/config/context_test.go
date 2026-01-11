@@ -28,14 +28,10 @@ func TestContextManagement(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Override xdg directories for testing
-	homeEnv := os.Getenv("HOME")
-	os.Setenv("HOME", tmpDir)
+	t.Setenv("HOME", tmpDir)
 	xdg.Reload()
 	contextsFile, err := xdg.ConfigFile("woodpecker/contexts.json")
 	require.NoError(t, err)
-	t.Cleanup(func() {
-		os.Setenv("HOME", homeEnv)
-	})
 
 	t.Run("LoadContexts returns empty when file doesn't exist", func(t *testing.T) {
 		contexts, err := LoadContexts()
