@@ -30,6 +30,7 @@
 
 ### 🐛 Bug Fixes
 
+- Delete/Deactivate repo ignores missing repo at forge [[#5953](https://github.com/woodpecker-ci/woodpecker/pull/5953)]
 - Correctly update repo permissions [[#5928](https://github.com/woodpecker-ci/woodpecker/pull/5928)]
 - Revert repos pagination for GH and BB [[#5924](https://github.com/woodpecker-ci/woodpecker/pull/5924)]
 - fix: send correct argument to rpc call for name/url [[#5922](https://github.com/woodpecker-ci/woodpecker/pull/5922)]
