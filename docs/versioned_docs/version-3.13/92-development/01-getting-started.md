@@ -20,7 +20,7 @@ Start Woodpecker in Gitpod by clicking on the following badge. You can log in wi
 
 ### Install Go
 
-Install Golang (>=1.20) as described by [this guide](https://go.dev/doc/install).
+Install Golang as described by [this guide](https://go.dev/doc/install).
 
 ### Install make
 
@@ -34,7 +34,7 @@ Install make on:
 
 ### Install Node.js & `pnpm`
 
-Install [Node.js (>=20)](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.
+Install [Node.js](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.
 
 For dependency installation (`node_modules`) of UI and documentation of Woodpecker the package manager pnpm is used.
 [This guide](https://pnpm.io/installation) describes the installation of `pnpm`.
