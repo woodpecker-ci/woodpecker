@@ -29,6 +29,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -457,8 +458,16 @@ func DeleteRepo(c *gin.Context) {
 	}
 
 	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
+		log.Error().Err(err).Msgf("could not deactivate repo [%d] on forge", repo.ID)
+
+		// in case we want to delete the repo on our side we should not worry to much on the forge side
+		// also if we get signalized that the repo on the forge is gone we can just ignore that
+		if errors.Is(err, forge_types.ErrRepoNotFound) || remove {
+			log.Debug().Msg("ignore deactivating repo on forge")
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 	}
 
 	if remove {

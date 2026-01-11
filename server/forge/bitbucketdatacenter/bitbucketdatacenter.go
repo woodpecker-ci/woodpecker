@@ -192,12 +192,12 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 			opts.Start = resp.NextPageStart
 		}
 		if repo == nil {
-			return nil, fmt.Errorf("unable to find repository with id: %s", rID)
+			return nil, fmt.Errorf("%w: unable to find repository with id: %s", forge_types.ErrRepoNotFound, rID)
 		}
 	} else {
 		repo, _, err = bc.Projects.GetRepository(ctx, owner, name)
 		if err != nil {
-			return nil, fmt.Errorf("unable to get repository: %w", err)
+			return nil, fmt.Errorf("%w: unable to get repository: %w", forge_types.ErrRepoNotFound, err)
 		}
 	}
 
@@ -464,6 +464,11 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return fmt.Errorf("unable to create bitbucket client: %w", err)
+	}
+
+	// check repo exists
+	if _, err := c.Repo(ctx, u, r.ForgeRemoteID, r.Owner, r.Name); err != nil {
+		return fmt.Errorf("repo online check failed: %w", err)
 	}
 
 	lu, err := url.Parse(link)
