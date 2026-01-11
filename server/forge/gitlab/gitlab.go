@@ -237,11 +237,17 @@ func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, forgeRem
 		if err != nil {
 			return nil, err
 		}
-		repo, _, err = client.Projects.GetProject(intID, nil, gitlab.WithContext(ctx))
+		repo, resp, err := client.Projects.GetProject(intID, nil, gitlab.WithContext(ctx))
+		if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, forge_types.ErrRepoNotFound)
+		}
 		return repo, err
 	}
 
-	repo, _, err = client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
+	repo, resp, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
+	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
+	}
 	return repo, err
 }
 
