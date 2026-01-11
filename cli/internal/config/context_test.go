@@ -16,9 +16,9 @@ package config
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 
+	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,15 +26,15 @@ import (
 func TestContextManagement(t *testing.T) {
 	// Create a temporary directory for test contexts
 	tmpDir := t.TempDir()
-	contextsFile := filepath.Join(tmpDir, "contexts.json")
 
-	// Override the contexts path for testing
-	originalGetContextsPath := getContextsPathFunc
-	getContextsPathFunc = func() (string, error) {
-		return contextsFile, nil
-	}
+	// Override xdg directories for testing
+	homeEnv := os.Getenv("HOME")
+	os.Setenv("HOME", tmpDir)
+	xdg.Reload()
+	contextsFile, err := xdg.ConfigFile("woodpecker/contexts.json")
+	require.NoError(t, err)
 	t.Cleanup(func() {
-		getContextsPathFunc = originalGetContextsPath
+		os.Setenv("HOME", homeEnv)
 	})
 
 	t.Run("LoadContexts returns empty when file doesn't exist", func(t *testing.T) {

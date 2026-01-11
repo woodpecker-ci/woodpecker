@@ -41,18 +41,12 @@ type Contexts struct {
 	Contexts       map[string]Context `json:"contexts"`
 }
 
-// getContextsPathFunc is a variable that holds the function to get contexts path
-// This allows tests to override it
-var getContextsPathFunc = func() (string, error) {
+func getContextsPath() (string, error) {
 	configPath, err := xdg.ConfigFile("woodpecker/contexts.json")
 	if err != nil {
 		return "", err
 	}
 	return configPath, nil
-}
-
-func getContextsPath() (string, error) {
-	return getContextsPathFunc()
 }
 
 // LoadContexts loads all contexts from the contexts file.
@@ -97,7 +91,7 @@ func SaveContexts(contexts *Contexts) error {
 		return err
 	}
 
-	// Ensure the directory exists
+	// Ensure the directory exists.
 	dir := filepath.Dir(contextsPath)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
@@ -151,7 +145,7 @@ func GetContextConfig(c *cli.Command, ctx *Context) (*Config, error) {
 }
 
 // AddOrUpdateContext adds or updates a context and optionally sets it as current.
-func AddOrUpdateContext(c *cli.Command, name string, serverURL string, token string, logLevel string, setCurrent bool) error {
+func AddOrUpdateContext(c *cli.Command, name, serverURL, token, logLevel string, setCurrent bool) error {
 	contexts, err := LoadContexts()
 	if err != nil {
 		return err
