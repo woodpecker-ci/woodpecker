@@ -5,7 +5,7 @@
   >
     <Icon
       :name="service ? 'settings' : `status-${status}`"
-      :bg-circle="true"
+      :bg-circle="['blocked', 'declined', 'error', 'failure', 'killed', 'skipped', 'success'].includes(status)"
       size="1.5rem"
       :class="{
         'text-wp-error-100': pipelineStatusColors[status] === 'red',
