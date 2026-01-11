@@ -29,12 +29,10 @@ import (
 
 // Command exports the context command set.
 var Command = &cli.Command{
-	Name:           "context",
-	Aliases:        []string{"ctx"},
-	Usage:          "manage contexts",
-	DefaultCommand: listCommand.Name,
-	Description:    "Contexts can be used to manage users on one or multiple servers.\nTo create a new context run the setup command",
-	Action:         listContexts,
+	Name:        "context",
+	Aliases:     []string{"ctx"},
+	Usage:       "manage contexts",
+	Description: "Contexts can be used to manage users on one or multiple servers.\nTo create a new context run the setup command",
 	Commands: []*cli.Command{
 		listCommand,
 		useCommand,
