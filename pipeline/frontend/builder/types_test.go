@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package builder_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 )
 
 func TestSortByName(t *testing.T) {
-	fm := []*FileMeta{
+	fm := []*builder.YamlFile{
 		{
 			Name: "a",
 		},
@@ -33,7 +34,7 @@ func TestSortByName(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, []*FileMeta{
+	assert.Equal(t, []*builder.YamlFile{
 		{
 			Name: "a",
 		},
@@ -43,5 +44,5 @@ func TestSortByName(t *testing.T) {
 		{
 			Name: "c",
 		},
-	}, SortByName(fm))
+	}, builder.SortYamlFilesByName(fm))
 }
