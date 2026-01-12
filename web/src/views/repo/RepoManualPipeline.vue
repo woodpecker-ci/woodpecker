@@ -95,12 +95,22 @@ async function triggerManualPipeline() {
 
   emit('close');
 
-  await router.push({
-    name: 'repo-pipeline',
-    params: {
-      pipelineId: pipeline.number,
-    },
-  });
+  if (typeof pipeline == 'string') {
+    // if this is a string (http 204) there is no workflow to run with the 'manual' event
+
+    await router.push({
+      name: 'repo',
+    });
+
+    notifications.notify({ type: 'warn', title: i18n.t('repo.manual_pipeline.no_manual_workflows') });
+  } else {
+    await router.push({
+      name: 'repo-pipeline',
+      params: {
+        pipelineId: pipeline.number,
+      },
+    });
+  }
 
   loading.value = false;
 }
