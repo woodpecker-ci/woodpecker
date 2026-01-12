@@ -5,7 +5,7 @@
   >
     <Icon
       :name="service ? 'settings' : `status-${status}`"
-      :bg-circle="true"
+      :bg-circle="shouldShowBgCircle"
       size="1.5rem"
       :class="{
         'text-wp-error-100': pipelineStatusColors[status] === 'red',
@@ -20,6 +20,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Icon from '~/components/atomic/Icon.vue';
@@ -27,7 +28,7 @@ import type { PipelineStatus } from '~/lib/api/types';
 
 import { pipelineStatusColors } from './pipeline-status';
 
-defineProps<{
+const { status, service } = defineProps<{
   status: PipelineStatus;
   service?: boolean;
 }>();
@@ -49,4 +50,8 @@ const statusDescriptions = {
   // eslint-disable-next-line no-unused-vars
   [_ in PipelineStatus]: string;
 };
+
+const shouldShowBgCircle = computed(() => {
+  return service ? false : ['blocked', 'declined', 'error', 'failure', 'killed', 'skipped', 'success'].includes(status);
+});
 </script>

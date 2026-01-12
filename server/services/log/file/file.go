@@ -50,6 +50,7 @@ func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 		}
 		return nil, err
 	}
+	defer file.Close()
 
 	buf := make([]byte, 0, bufio.MaxScanTokenSize)
 	s := bufio.NewScanner(file)
