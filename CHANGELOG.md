@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-11
+## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -53,6 +53,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5963](https://github.com/woodpecker-ci/woodpecker/pull/5963)]
 - chore(deps): update dependency @types/node to v24.10.7 [[#5954](https://github.com/woodpecker-ci/woodpecker/pull/5954)]
 - chore(deps): update dependency @types/react to v19.2.8 [[#5941](https://github.com/woodpecker-ci/woodpecker/pull/5941)]
 - chore(deps): update dependency @types/node to v24.10.6 [[#5935](https://github.com/woodpecker-ci/woodpecker/pull/5935)]
@@ -74,6 +75,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.12.0 [[#5962](https://github.com/woodpecker-ci/woodpecker/pull/5962)]
 - chore(deps): update dependency simple-icons to v16.5.0 [[#5957](https://github.com/woodpecker-ci/woodpecker/pull/5957)]
 - fix(deps): update golang-packages [[#5956](https://github.com/woodpecker-ci/woodpecker/pull/5956)]
 - chore(deps): update dependency @types/node to v24.10.7 [[#5955](https://github.com/woodpecker-ci/woodpecker/pull/5955)]
