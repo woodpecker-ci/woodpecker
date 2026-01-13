@@ -554,15 +554,15 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 	}
 	log.Trace().Any("repo", repo).Msg("got repo")
 
-	user, err := _store.GetUser(repo.UserID)
+	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to get user: %w", err)
 	}
-	log.Trace().Any("user", user).Msg("got user")
+	log.Trace().Any("user", repoUser).Msg("got user")
 
-	forge.Refresh(ctx, c, _store, user)
+	forge.Refresh(ctx, c, _store, repoUser)
 
-	return user, repo, nil
+	return repoUser, repo, nil
 }
 
 func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, currCommit, prevCommit string) (*model.Pipeline, error) {

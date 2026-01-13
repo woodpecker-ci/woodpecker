@@ -552,7 +552,7 @@ func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflo
 }
 
 func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
-	user, err := s.store.GetUser(repo.UserID)
+	repoUser, err := s.store.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot get user with id '%d'", repo.UserID)
 		return
@@ -564,11 +564,11 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 		return
 	}
 
-	forge.Refresh(ctx, _forge, s.store, user)
+	forge.Refresh(ctx, _forge, s.store, repoUser)
 
 	// only do status updates for parent steps
 	if workflow != nil {
-		err = _forge.Status(ctx, user, repo, pipeline, workflow)
+		err = _forge.Status(ctx, repoUser, repo, pipeline, workflow)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}

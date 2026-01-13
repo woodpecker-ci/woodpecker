@@ -296,12 +296,12 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	user, err := _store.GetUser(repo.UserID)
+	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		handleDBError(c, err)
 		return
 	}
-	forge.Refresh(c, _forge, _store, user)
+	forge.Refresh(c, _forge, _store, repoUser)
 
 	//
 	// 4. Update the repo

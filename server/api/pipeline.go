@@ -29,6 +29,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
@@ -604,7 +605,7 @@ func PostPipeline(c *gin.Context) {
 		return
 	}
 
-	user, err := _store.GetUser(repo.UserID)
+	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -617,9 +618,13 @@ func PostPipeline(c *gin.Context) {
 	}
 
 	// refresh the token to make sure, pipeline.Restart can still obtain the pipeline config if necessary again
-	refreshUserToken(c, user)
-
-	// make Deploy overridable
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(repoUser)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	forge.Refresh(c, _forge, _store, repoUser)
 
 	// make Deploy task overridable
 	pl.DeployTask = c.DefaultQuery("deploy_task", pl.DeployTask)
@@ -656,7 +661,7 @@ func PostPipeline(c *gin.Context) {
 		}
 	}
 
-	newPipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs)
+	newPipeline, err := pipeline.Restart(c, _store, pl, repoUser, repo, envs)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

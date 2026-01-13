@@ -19,13 +19,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
@@ -50,19 +46,6 @@ func handleDBError(c *gin.Context, err error) {
 		return
 	}
 	_ = c.AbortWithError(http.StatusInternalServerError, err)
-}
-
-// If the forge has a refresh token, the current access token may be stale.
-// Therefore, we should refresh prior to dispatching the job.
-func refreshUserToken(c *gin.Context, user *model.User) {
-	_store := store.FromContext(c)
-	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
-	if err != nil {
-		log.Error().Err(err).Msg("Cannot get forge from user")
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	forge.Refresh(c, _forge, _store, user)
 }
 
 // pipelineDeleteAllowed checks if the given pipeline can be deleted based on its status.

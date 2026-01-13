@@ -16,6 +16,7 @@ package forge
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -23,6 +24,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
+
+// userRefreshLocks stores per-user mutexes to prevent concurrent token refresh.
+var userRefreshLocks sync.Map
 
 // Refresher is an optional interface for OAuth token refresh support.
 //
@@ -50,12 +54,39 @@ func Refresh(c context.Context, forge Forge, _store store.Store, user *model.Use
 			return
 		}
 
-		userUpdated, err := refresher.Refresh(c, user)
+		lockValue, _ := userRefreshLocks.LoadOrStore(user.ID, &sync.Mutex{})
+		userLock := lockValue.(*sync.Mutex)
+
+		userLock.Lock()
+		defer userLock.Unlock()
+
+		// Re-fetch the user from the database after acquiring the lock to check if
+		// another goroutine already refreshed the token while we were waiting.
+		freshUser, err := _store.GetUser(user.ID)
 		if err != nil {
-			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
+			log.Error().Err(err).Msgf("failed to fetch user '%s' from store during token refresh", user.Login)
+			return
+		}
+
+		if time.Now().UTC().Unix() < (freshUser.Expiry - tokenMinTTL) {
+			// Update the passed-in user object.
+			user.AccessToken = freshUser.AccessToken
+			user.RefreshToken = freshUser.RefreshToken
+			user.Expiry = freshUser.Expiry
+			return
+		}
+
+		userUpdated, err := refresher.Refresh(c, freshUser)
+		if err != nil {
+			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", freshUser.Login)
 		} else if userUpdated {
-			if err := _store.UpdateUser(user); err != nil {
+			if err := _store.UpdateUser(freshUser); err != nil {
 				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+			} else {
+				// Update the passed-in user object.
+				user.AccessToken = freshUser.AccessToken
+				user.RefreshToken = freshUser.RefreshToken
+				user.Expiry = freshUser.Expiry
 			}
 		}
 	}
