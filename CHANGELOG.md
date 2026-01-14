@@ -160,6 +160,7 @@
 
 ### Misc
 
+- Revert "Send configuration as part of the request for external configuration" [[#5835](https://github.com/woodpecker-ci/woodpecker/pull/5835)]
 - Allow packagers to set WebUI root to custom path [[#5809](https://github.com/woodpecker-ci/woodpecker/pull/5809)]
 - fix(queue): force agent cancellation on lease expiration [[#5823](https://github.com/woodpecker-ci/woodpecker/pull/5823)]
 - Extract interval into composition [[#5818](https://github.com/woodpecker-ci/woodpecker/pull/5818)]
