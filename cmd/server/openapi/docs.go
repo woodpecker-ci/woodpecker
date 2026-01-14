@@ -4705,6 +4705,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "creator_id": {
+                    "description": "TODO: drop with next major version",
                     "type": "integer"
                 },
                 "enabled": {
