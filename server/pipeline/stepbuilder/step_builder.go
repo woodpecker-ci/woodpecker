@@ -167,7 +167,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		)
 		return nil, nil
 	} else if err != nil {
-		log.Warn().Str("pipeline", workflow.Name).Msg(
+		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"pipeline config could not be parsed",
 		)
 		return nil, multierr.Append(errorsAndWarnings, err)
