@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.13.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.1) - 2026-01-15
+
+### 📦️ Dependency
+
+- chore(deps): update pre-commit non-major [[#5949](https://github.com/woodpecker-ci/woodpecker/pull/5949)]
+
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
 
 ### ❤️ Thanks to all contributors! ❤️
