@@ -162,6 +162,7 @@ install-protoc-gen-go:
 		go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest; \
 	fi
 
+.PHONY: install-tools
 install-tools: install-golangci-lint install-gofumpt install-addlicense install-mockery install-protoc-gen-go ## Install development tools
 
 ui-dependencies: ## Install UI dependencies
@@ -233,6 +234,7 @@ build-tarball: ## Build tar archive
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
 
+.PHONY: release-frontend
 release-frontend: build-ui ## Build frontend
 
 cross-compile-server: ## Cross compile the server

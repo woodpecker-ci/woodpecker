@@ -379,7 +379,8 @@
                     "placeholder": "计划任务",
                     "title": "计划任务（基于 UTC）"
                 },
-                "show": "显示所有计划"
+                "show": "显示所有计划",
+                "enabled": "启用"
             },
             "general": {
                 "allow_pr": {
@@ -654,7 +655,8 @@
         "plugins": {
             "images": "仅适用于以下的插件",
             "desc": "该密钥生效的插件镜像列表。置空以允许所有插件和常规步骤。"
-        }
+        },
+        "note": "备注"
     },
     "no_search_results": "未找到结果",
     "org_access_denied": "您无权访问此组织",
