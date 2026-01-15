@@ -12,7 +12,7 @@ repos:
       - id: trailing-whitespace
         exclude: ^docs/versioned_docs/.+/40-cli.md$
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.7.2
+    rev: v2.8.0
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
@@ -22,7 +22,7 @@ repos:
         exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
         language_version: 22.15.1
   - repo: https://github.com/mrtazz/checkmake
-    rev: 0.2.2
+    rev: v0.3.2
     hooks:
       - id: checkmake
         exclude: '^docker/Dockerfile.make$' # actually a Dockerfile and not a makefile
@@ -31,11 +31,11 @@ repos:
     hooks:
       - id: hadolint
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.7.4
+    rev: v3.8.0
     hooks:
       - id: prettier
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args: [--strict, -c=.yamllint.yaml]
