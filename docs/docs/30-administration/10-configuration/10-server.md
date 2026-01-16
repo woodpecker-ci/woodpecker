@@ -1071,6 +1071,19 @@ Specify a configuration service endpoint, see [Configuration Extension](#externa
 
 ---
 
+### CONFIG_SERVICE_EXCLUSIVE
+
+- Name: `CONFIG_SERVICE_EXCLUSIVE`
+- Default: false
+
+Whether the forge request should be skipped for the global configuration endpoint.
+
+:::warning
+If you enable this, all repos will exclusively use the global config service endpoint. There is no possibility to directly define pipelines in the forge, except the extension handles this case itself as well.
+:::
+
+---
+
 ### EXTENSIONS_ALLOWED_HOSTS
 
 - Name: `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS`
