@@ -44,7 +44,8 @@ class Request {
   repo: Repo;
   pipeline: Pipeline;
   netrc: Netrc;
-  configuration: { // list of configurations. Not send if there was none.
+  configuration: {
+    // list of configurations. Not send if there was none.
     name: string; // filename of the configuration file
     data: string; // content of the configuration file
   }[];
