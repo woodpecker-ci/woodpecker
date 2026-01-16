@@ -123,7 +123,8 @@
                 "name": "Variabl-Nama",
                 "value": "Variabl-Wert"
             },
-            "show_pipelines": "Pipelines zoang"
+            "show_pipelines": "Pipelines zoang",
+            "no_manual_workflows": "Koane Workflows gfundn die ma von hand lafa losn ko, oder se san ausa gsiebt woan."
         },
         "activity": "Ois da Reih nach",
         "branches": "Branches",
@@ -207,7 +208,8 @@
                     "placeholder": "Zeitplan"
                 },
                 "edit": "Cron endan",
-                "delete": "Cron löschn"
+                "delete": "Cron löschn",
+                "enabled": "Eigscheudn"
             },
             "badge": {
                 "badge": "Plakettl",
@@ -215,7 +217,8 @@
                 "type_url": "URL",
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
-                "branch": "Branch"
+                "branch": "Branch",
+                "events": "Events"
             },
             "actions": {
                 "actions": "Aktiona",
@@ -390,7 +393,8 @@
             "warning": "Aufpassn: Secrets bei Pull Requests freigem ko gfährlich sei, weil böswillige Leit mid am bösen Pull Request dei Secrets klaubn kennan."
         },
         "edit": "Secret beabadn",
-        "delete": "Secret löschn"
+        "delete": "Secret löschn",
+        "note": "Notizn"
     },
     "info": "Info",
     "cli_login_failed": "CLI-Login is schiaf ganga",

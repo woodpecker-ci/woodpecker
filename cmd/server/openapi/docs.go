@@ -1729,7 +1729,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -2681,7 +2681,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Cron"
+                            "$ref": "#/definitions/CronPatch"
                         }
                     }
                 ],
@@ -3921,7 +3921,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -4113,7 +4113,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -4705,7 +4705,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "creator_id": {
+                    "description": "TODO: drop with next major version",
                     "type": "integer"
+                },
+                "enabled": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
@@ -4722,6 +4726,35 @@ const docTemplate = `{
                 "schedule": {
                     "description": "@weekly,\t3min, ...",
                     "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "CronPatch": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -5424,11 +5457,40 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "note": {
+                    "type": "string"
+                },
                 "org_id": {
                     "type": "integer"
                 },
                 "repo_id": {
                     "type": "integer"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "SecretPatch": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/WebhookEvent"
+                    }
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
                 },
                 "value": {
                     "type": "string"

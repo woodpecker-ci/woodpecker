@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -334,7 +334,6 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 
 		log.Debug().Msgf("synced user permission for user %s and repo %s", user.Login, dbRepo.FullName)
 		perm := forgeRepo.Perm
-		perm.Repo = dbRepo
 		perm.RepoID = dbRepo.ID
 		perm.UserID = user.ID
 		perm.Synced = time.Now().Unix()

@@ -41,7 +41,6 @@ func TestPermFind(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo,
 			Pull:   true,
 			Push:   false,
 			Admin:  false,
@@ -74,7 +73,6 @@ func TestPermUpsert(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo,
 			Pull:   true,
 			Push:   false,
 			Admin:  false,
@@ -97,7 +95,6 @@ func TestPermUpsert(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo,
 			Pull:   true,
 			Push:   true,
 			Admin:  true,
@@ -135,8 +132,8 @@ func TestPermPruneDeleteAll(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
 
-	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo1.ID, Repo: repo1, Pull: true}))
-	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo2.ID, Repo: repo2, Pull: true}))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo1.ID, Pull: true}))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo2.ID, Pull: true}))
 
 	_, err := store.PermFind(user, repo1)
 	assert.NoError(t, err)
@@ -174,8 +171,8 @@ func TestPermPruneKeepOne(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
 
-	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo1.ID, Repo: repo1, Pull: true}))
-	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo2.ID, Repo: repo2, Pull: true}))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo1.ID, Pull: true}))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo2.ID, Pull: true}))
 
 	_, err := store.PermFind(user, repo1)
 	assert.NoError(t, err)
