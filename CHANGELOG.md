@@ -1,9 +1,10 @@
 # Changelog
 
-## [3.13.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.1) - 2026-01-15
+## [3.13.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.1) - 2026-01-16
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.1 [[#5980](https://github.com/woodpecker-ci/woodpecker/pull/5980)]
 - chore(deps): update pre-commit non-major [[#5949](https://github.com/woodpecker-ci/woodpecker/pull/5949)]
 
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
