@@ -976,7 +976,7 @@ Supported variables:
 - Name: `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 - Default: none
 
-Specify a configuration service endpoint, see [Configuration Extension](../../20-usage/72-extensions/40-config-extension.md)
+Specify a configuration service endpoint, see [Configuration Extension](../../20-usage/72-extensions/40-configuration-extension.md)
 
 ---
 
