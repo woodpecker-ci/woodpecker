@@ -73,9 +73,6 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	name := "unknown"
-	status := model.StatusDeclined
-
 	// Events to lookup, multiple separated by comma
 	var events []model.WebhookEvent
 	eventsQuery := c.Query("events")
@@ -102,10 +99,10 @@ func GetBadge(c *gin.Context) {
 			log.Warn().Err(err).Msg("could not get last pipeline for badge")
 		}
 		pipeline = nil
-	} else {
-		name = "pipeline"
-		status = pipeline.Status
 	}
+
+	name := "pipeline"
+	status := pipeline.Status
 
 	// we serve an SVG, so set content type appropriately.
 	c.Writer.Header().Set("Content-Type", "image/svg+xml")
