@@ -321,7 +321,7 @@ const config = {
     hooks: {
       onBrokenMarkdownLinks: 'throw',
       onBrokenMarkdownImages: 'throw',
-    }
+    },
   },
   future: {
     experimental_faster: true,
