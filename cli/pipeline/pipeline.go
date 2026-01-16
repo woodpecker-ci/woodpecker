@@ -70,6 +70,20 @@ func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.W
 		if err != nil {
 			return err
 		}
+		for _, p := range pipelines {
+			if err := tmpl.Execute(out, p); err != nil {
+				return err
+			}
+		}
+	case "go-format":
+		if len(outOpt) < 1 {
+			return fmt.Errorf("%w: missing template", output.ErrOutputOptionRequired)
+		}
+
+		tmpl, err := template.New("_").Parse(outOpt[0] + "\n")
+		if err != nil {
+			return err
+		}
 		if err := tmpl.Execute(out, pipelines); err != nil {
 			return err
 		}
