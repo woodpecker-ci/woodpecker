@@ -1,6 +1,14 @@
 # Changelog
 
-## [3.13.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.1) - 2026-01-17
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-17
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 📈 Enhancement
+
+- Fix docusaurus md link deprecation [[#5979](https://github.com/woodpecker-ci/woodpecker/pull/5979)]
 
 ### 📚 Documentation
 
