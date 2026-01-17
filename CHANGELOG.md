@@ -2,6 +2,10 @@
 
 ## [3.13.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.1) - 2026-01-17
 
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#5982](https://github.com/woodpecker-ci/woodpecker/pull/5982)]
+
 ### 📦️ Dependency
 
 - chore(deps): update dependency golang to v1.25.6 [[#5981](https://github.com/woodpecker-ci/woodpecker/pull/5981)]
