@@ -73,9 +73,6 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	name := "unknown"
-	status := model.StatusDeclined
-
 	// Events to lookup, multiple separated by comma
 	var events []model.WebhookEvent
 	eventsQuery := c.Query("events")
@@ -101,11 +98,11 @@ func GetBadge(c *gin.Context) {
 		if !errors.Is(err, types.RecordNotExist) {
 			log.Warn().Err(err).Msg("could not get last pipeline for badge")
 		}
-		pipeline = nil
-	} else {
-		name = "pipeline"
-		status = pipeline.Status
+		c.String(http.StatusOK, badges.Generate("pipeline", nil))
+		return
 	}
+
+	name := "pipeline"
 
 	// we serve an SVG, so set content type appropriately.
 	c.Writer.Header().Set("Content-Type", "image/svg+xml")
@@ -114,32 +111,33 @@ func GetBadge(c *gin.Context) {
 	workflowName := c.Query("workflow")
 	if len(workflowName) != 0 {
 		name = workflowName
-		status = model.StatusDeclined
-
 		workflows, err := _store.WorkflowGetTree(pipeline)
 		if err == nil {
 			for _, wf := range workflows {
 				if wf.Name == workflowName {
 					stepName := c.Query("step")
 					if len(stepName) == 0 {
-						status = wf.State
-					} else {
-						// If step is explicitly requested
-						name = name + ": " + stepName
-						for _, s := range wf.Children {
-							if s.Name == stepName {
-								status = s.State
-								break
-							}
+						c.String(http.StatusOK, badges.Generate(name, &wf.State))
+						return
+					}
+					// If step is explicitly requested
+					name = name + ": " + stepName
+					for _, s := range wf.Children {
+						if s.Name == stepName {
+							c.String(http.StatusOK, badges.Generate(name, &s.State))
+							return
 						}
 					}
 					break
 				}
 			}
 		}
+	} else if pipeline != nil {
+		c.String(http.StatusOK, badges.Generate(name, &pipeline.Status))
+		return
 	}
 
-	c.String(http.StatusOK, badges.Generate(name, status))
+	c.String(http.StatusOK, badges.Generate(name, nil))
 }
 
 // GetCC
