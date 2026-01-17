@@ -32,7 +32,6 @@ const config = {
   url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'throw',
   onBrokenAnchors: 'throw',
   onDuplicateRoutes: 'throw',
   organizationName: 'woodpecker-ci',
@@ -319,6 +318,10 @@ const config = {
   ],
   markdown: {
     format: 'detect',
+    hooks: {
+      onBrokenMarkdownLinks: 'throw',
+      onBrokenMarkdownImages: 'throw',
+    },
   },
   future: {
     experimental_faster: true,
