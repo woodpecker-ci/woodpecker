@@ -16,6 +16,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @antfu/eslint-config to v7 [[#5985](https://github.com/woodpecker-ci/woodpecker/pull/5985)]
 - chore(deps): update web npm deps non-major [[#5984](https://github.com/woodpecker-ci/woodpecker/pull/5984)]
 - chore(deps): update dependency golang to v1.25.6 [[#5981](https://github.com/woodpecker-ci/woodpecker/pull/5981)]
 - chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.1 [[#5980](https://github.com/woodpecker-ci/woodpecker/pull/5980)]
