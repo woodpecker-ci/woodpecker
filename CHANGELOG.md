@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-17
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,6 +16,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/docker/cli to v29.1.5+incompatible [[#5986](https://github.com/woodpecker-ci/woodpecker/pull/5986)]
+- chore(deps): update dependency simple-icons to v16.6.0 [[#5987](https://github.com/woodpecker-ci/woodpecker/pull/5987)]
 - chore(deps): update dependency @antfu/eslint-config to v7 [[#5985](https://github.com/woodpecker-ci/woodpecker/pull/5985)]
 - chore(deps): update web npm deps non-major [[#5984](https://github.com/woodpecker-ci/woodpecker/pull/5984)]
 - chore(deps): update dependency golang to v1.25.6 [[#5981](https://github.com/woodpecker-ci/woodpecker/pull/5981)]
