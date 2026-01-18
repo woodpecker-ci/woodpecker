@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
@@ -66,7 +67,7 @@ steps:
       repo: foo/bar
       foo: bar
 services:
-  - name: redis
+  redis:
     image: redis
 `,
 	}, {
@@ -181,11 +182,15 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
 			want: "One or more of the specified dependencies do not exist",
 		},
+		{
+			from: "{ when: { event: push }, steps: [ { name: test, image: docker } ], services: [ { name: redis, image: redis } ] }",
+			want: "[bad_habit] Services should be defined as map not as list",
+		},
 	}
 
 	for _, test := range testdata {
 		conf, err := yaml.ParseString(test.from)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      test.from,
