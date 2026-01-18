@@ -198,10 +198,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// add services steps
-	if len(conf.Services.ContainerList) != 0 {
+	if len(conf.Services.ContainerMap) != 0 {
 		stage := new(backend_types.Stage)
 
-		for _, container := range conf.Services.ContainerList {
+		for _, container := range conf.Services.ContainerMap {
 			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {

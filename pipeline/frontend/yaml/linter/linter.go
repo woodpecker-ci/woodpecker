@@ -146,7 +146,21 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 	case "steps":
 		containers = config.Workflow.Steps.ContainerList
 	case "services":
-		containers = config.Workflow.Services.ContainerList
+		if config.Workflow.Services.WasList {
+			linterErr = multierr.Append(linterErr, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeBadHabit,
+				Message: "Services should be defined as map not as list",
+				Data: errors.BadHabitErrorData{
+					File:  config.File,
+					Field: "services",
+					Docs:  "https://woodpecker-ci.org/docs/usage/services",
+				},
+				IsWarning: true,
+			})
+		}
+		for _, v := range config.Workflow.Services.ContainerMap {
+			containers = append(containers, v)
+		}
 	}
 
 	for _, container := range containers {

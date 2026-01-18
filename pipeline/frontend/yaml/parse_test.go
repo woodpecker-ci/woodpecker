@@ -34,8 +34,11 @@ func TestParse(t *testing.T) {
 
 		assert.Equal(t, "/go", out.Workspace.Base)
 		assert.Equal(t, "src/github.com/octocat/hello-world", out.Workspace.Path)
-		assert.Equal(t, "database", out.Services.ContainerList[0].Name)
-		assert.Equal(t, "mysql", out.Services.ContainerList[0].Image)
+		for k := range out.Services.ContainerMap {
+			assert.Equal(t, k, out.Services.ContainerMap[k].Name)
+		}
+		assert.Len(t, out.Services.ContainerMap, 1)
+		assert.Equal(t, "mysql", out.Services.ContainerMap["database"].Image)
 		assert.Equal(t, "test", out.Steps.ContainerList[0].Name)
 		assert.Equal(t, "golang", out.Steps.ContainerList[0].Image)
 		assert.Equal(t, yaml_base_types.StringOrSlice{"go install", "go test"}, out.Steps.ContainerList[0].Commands)
