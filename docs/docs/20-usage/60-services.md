@@ -46,8 +46,8 @@ Service containers generally expose environment variables to customize service s
    database:
      image: mysql
 +    environment:
-+      - MYSQL_DATABASE=test
-+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
++      MYSQL_DATABASE: test
++      MYSQL_ALLOW_EMPTY_PASSWORD: yes
 
    - name: cache
      image: redis
@@ -102,8 +102,8 @@ services:
   - name: database
     image: mysql
     environment:
-      - MYSQL_DATABASE=test
-      - MYSQL_ROOT_PASSWORD=example
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: example
 steps:
   - name: get-version
     image: ubuntu
