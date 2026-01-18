@@ -184,7 +184,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "{ when: { event: push }, steps: [ { name: test, image: docker } ], services: [ { name: redis, image: redis } ] }",
-			want: "[bad_habit] Services should be defined as map not as list",
+			want: "[\"[bad_habit] Services should be defined as map not as list\"]",
 		},
 	}
 
