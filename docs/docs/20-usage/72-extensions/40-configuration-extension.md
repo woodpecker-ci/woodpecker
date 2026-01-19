@@ -126,7 +126,7 @@ Example request:
     "updated_at": 0,
     "verified": false
   },
-  "configs": [
+  "configuration": [
     {
       "name": ".woodpecker.yaml",
       "data": "steps:\n  - name: backend\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yaml)\"\n"
