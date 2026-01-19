@@ -321,8 +321,8 @@ steps:
       when:
         event: failure
 services:
-    database:
-        image: mysql
+    - name: database
+      image: mysql
 labels:
     com.example.team: frontend
     com.example.type: build
