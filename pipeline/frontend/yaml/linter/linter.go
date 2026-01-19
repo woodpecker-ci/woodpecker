@@ -235,20 +235,8 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 	return nil
 }
 
-func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) (err error) {
-	if len(c.Secrets) != 0 {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: fmt.Sprintf("%s.%s.secrets", field, c.Name),
-				Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
-			},
-		})
-	}
-
-	return err
+func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) error {
+	return nil
 }
 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
