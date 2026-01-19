@@ -169,7 +169,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	client := c.newClient(ctx, u)
 	repo, err := client.FindRepo(owner, name)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
 	}
 	perm, err := client.GetPermission(repo.FullName)
 	if err != nil {
@@ -181,6 +181,12 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
 func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	// we merge data from different sources
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	setListOptions(p)
 
 	client := c.newClient(ctx, u)
@@ -321,6 +327,11 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 // the Bitbucket repository.
 func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClient(ctx, u)
+
+	// check repo exists
+	if _, err := c.Repo(ctx, u, r.ForgeRemoteID, r.Owner, r.Name); err != nil {
+		return fmt.Errorf("repo online check failed: %w", err)
+	}
 
 	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
 		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{

@@ -199,10 +199,7 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 		return nil, err
 	}
 
-	perPage := p.PerPage
-	if perPage > defaultPerPage {
-		perPage = defaultPerPage
-	}
+	perPage := min(p.PerPage, defaultPerPage)
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 		ListOptions: gitlab.ListOptions{
@@ -240,11 +237,17 @@ func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, forgeRem
 		if err != nil {
 			return nil, err
 		}
-		repo, _, err = client.Projects.GetProject(intID, nil, gitlab.WithContext(ctx))
+		repo, resp, err := client.Projects.GetProject(intID, nil, gitlab.WithContext(ctx))
+		if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, forge_types.ErrRepoNotFound)
+		}
 		return repo, err
 	}
 
-	repo, _, err = client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
+	repo, resp, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
+	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
+	}
 	return repo, err
 }
 
@@ -294,10 +297,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 		return nil, err
 	}
 
-	perPage := p.PerPage
-	if perPage > defaultPerPage {
-		perPage = defaultPerPage
-	}
+	perPage := min(p.PerPage, defaultPerPage)
 
 	opts := &gitlab.ListProjectsOptions{
 		ListOptions: gitlab.ListOptions{

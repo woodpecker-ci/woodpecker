@@ -57,9 +57,6 @@ type (
 
 		// ACTIVE DEVELOPMENT BELOW
 
-		// Remove after v3.1.0
-		Secrets []any `yaml:"secrets,omitempty"`
-
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
 
@@ -127,8 +124,7 @@ func (c ContainerList) MarshalYAML() (any, error) {
 func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0 &&
 		len(c.Entrypoint) == 0 &&
-		len(c.Environment) == 0 &&
-		len(c.Secrets) == 0
+		len(c.Environment) == 0
 }
 
 func (c *Container) IsTrustedCloneImage(trustedClonePlugins []string) bool {

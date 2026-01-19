@@ -38,13 +38,13 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^6.0.0",
+    "@antfu/eslint-config": "^7.0.0",
     "@eslint/js": "^9.17.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.5.1",
-    "@intlify/eslint-plugin-vue-i18n": "4.1.0",
+    "@intlify/eslint-plugin-vue-i18n": "4.1.1",
     "@intlify/unplugin-vue-i18n": "^11.0.0",
     "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "4.1.17",
+    "@tailwindcss/vite": "4.1.18",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.0.0",
     "@types/prismjs": "^1.26.5",

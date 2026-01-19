@@ -178,14 +178,6 @@ func TestLintErrors(t *testing.T) {
 			want: "Specified clone image does not match allow list, netrc is not injected",
 		},
 		{
-			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",
-			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-		},
-		{
-			from: "steps: { build: { image: golang, secrets: [ 'mysql_username' ] } }",
-			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-		},
-		{
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
 			want: "One or more of the specified dependencies do not exist",
 		},
