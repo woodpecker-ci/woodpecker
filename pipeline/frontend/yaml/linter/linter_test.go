@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
@@ -185,7 +186,7 @@ func TestLintErrors(t *testing.T) {
 
 	for _, test := range testdata {
 		conf, err := yaml.ParseString(test.from)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      test.from,
