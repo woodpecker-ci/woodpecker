@@ -139,7 +139,7 @@ steps:
 
 	mockManager.On("EnvironmentService").Return(nil, nil)
 
-	pipelineItems, err := parsePipeline(context.Background(), forge, store, pipeline, user, repo, yamls, envs)
+	pipelineItems, err := parsePipeline(t.Context(), forge, store, pipeline, user, repo, yamls, envs)
 	assert.NoError(t, err)
 
 	assert.Len(t, pipelineItems, 1)
