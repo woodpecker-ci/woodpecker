@@ -15,7 +15,7 @@
         devShells.default =
           with pkgs;
           let
-            go = go_1_24;
+            go = go_1_25;
           in
           pkgs.mkShell {
             buildInputs = [
