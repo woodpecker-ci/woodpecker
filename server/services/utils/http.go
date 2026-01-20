@@ -197,7 +197,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 		// For any other status code, don't retry
 		log.Error().Int("status", statusCode).Msgf("HTTP request returned unexpected status code (not retryable): %s %s", method, path)
 		return statusCode, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
-	}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries+1), // +1 for initial attempt
+	}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries),
 		backoff.WithNotify(func(err error, delay time.Duration) {
 			// Log retry attempts
 			log.Debug().Err(err).Msgf("HTTP request failed, retrying in %v: %s %s", delay, method, path)
