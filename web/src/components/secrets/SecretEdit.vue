@@ -41,6 +41,10 @@
         <CheckboxesField v-model="innerValue.events" :options="secretEventsOptions" />
       </InputField>
 
+      <InputField v-slot="{ id }" :label="$t('secrets.note')">
+        <TextField :id="id" v-model="innerValue.note" :placeholder="$t('secrets.note')" :lines="3" />
+      </InputField>
+
       <div class="flex gap-2">
         <Button type="button" color="gray" :text="$t('cancel')" @click="$emit('cancel')" />
         <Button

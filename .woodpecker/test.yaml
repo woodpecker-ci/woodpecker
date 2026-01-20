@@ -55,7 +55,7 @@ steps:
   lint:
     depends_on:
       - vendor
-    image: golangci/golangci-lint:v2.7.2
+    image: golangci/golangci-lint:v2.8.0
     commands:
       - make lint
     when: *when
@@ -127,7 +127,7 @@ steps:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.1.6
+    image: docker.io/woodpeckerci/plugin-codecov:2.2.1
     settings:
       files:
         - agent-coverage.out

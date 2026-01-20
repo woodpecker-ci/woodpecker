@@ -8,6 +8,14 @@ steps:
 services:
   database:
     image: mysql
+    ports:
+      - 3306
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+
   cache:
     image: redis
     directory: /tmp/
+    ports:
+      - '6379'

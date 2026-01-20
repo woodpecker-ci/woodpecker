@@ -383,7 +383,7 @@
                     "title": "Zeitplan (basierend auf UTC)"
                 },
                 "show": "Crons anzeigen",
-                "enabled": "Aktiviert"
+                "enabled": "Aktiv"
             },
             "general": {
                 "allow_pr": {
@@ -647,7 +647,8 @@
         "plugins": {
             "images": "Nur für die folgenden Plugins verfügbar",
             "desc": "Liste aller Plugin-Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Plugins und allgemeine Schritte zu erlauben."
-        }
+        },
+        "note": "Notiz"
     },
     "settings": "Einstellungen",
     "oauth_error": "Fehler bei der Authentifizierung mit OAuth-Anbieter",
@@ -759,6 +760,6 @@
     "extensions_description": "Erweiterungen sind HTTP-Dienste, die von Woodpecker anstelle der integrierten aufgerufen werden können.",
     "extensions_signatures_public_key": "Öffentlicher Schlüssel für Signaturen",
     "extensions_configuration_saved": "Konfiguration der Erweiterungen gespeichert",
-    "extensions_signatures_public_key_description": "Dieser öffentliche Schlüssel sollte von Ihren Erweiterungen verwendet werden, um Webhook-Aufrufe von Woodpecker zu verifizieren.",
+    "extensions_signatures_public_key_description": "Dieser öffentliche Schlüssel sollte von deinen Erweiterungen verwendet werden, um Webhook-Aufrufe von Woodpecker zu verifizieren.",
     "disabled": "Deaktiviert"
 }
