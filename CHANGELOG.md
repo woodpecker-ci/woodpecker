@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
 - Use `NoError` for error assertion [[#5992](https://github.com/woodpecker-ci/woodpecker/pull/5992)]
 - Improve service syntax related docs and tests nits [[#5991](https://github.com/woodpecker-ci/woodpecker/pull/5991)]
 - Remove deactivated secrets type from container defintion [[#5983](https://github.com/woodpecker-ci/woodpecker/pull/5983)]
