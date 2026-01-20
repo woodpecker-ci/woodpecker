@@ -40,6 +40,16 @@ func TestRepoOutput(t *testing.T) {
 			args:     []string{"output", "--output", "go-template={{range . }}{{.Name}} {{.ForgeURL}} {{.Trusted.Network}}{{end}}"},
 			expected: "repo1 git.example.com true\n",
 		},
+		{
+			name:     "go-format output",
+			args:     []string{"output", "--output", "go-format={{.Name}} {{.ForgeURL}} {{.Trusted.Network}}"},
+			expected: "repo1 git.example.com true\n",
+		},
+		{
+			name:    "invalid go-template",
+			args:    []string{"output", "--output", "go-template={{.InvalidField}}"},
+			wantErr: true,
+		},
 	}
 
 	repos := []*woodpecker.Repo{
