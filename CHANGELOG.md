@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.2 [[#5994](https://github.com/woodpecker-ci/woodpecker/pull/5994)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.6.2 [[#5989](https://github.com/woodpecker-ci/woodpecker/pull/5989)]
 - fix(deps): update module github.com/docker/cli to v29.1.5+incompatible [[#5986](https://github.com/woodpecker-ci/woodpecker/pull/5986)]
 - chore(deps): update dependency simple-icons to v16.6.0 [[#5987](https://github.com/woodpecker-ci/woodpecker/pull/5987)]
