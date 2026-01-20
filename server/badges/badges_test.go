@@ -34,30 +34,30 @@ var (
 func TestGenerate(t *testing.T) {
 	status := model.StatusDeclined
 	badge, err := Generate("pipeline", &status)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, badgeNone, badge)
 	status = model.StatusSuccess
 	badge, err = Generate("pipeline", &status)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, badgeSuccess, badge)
 	status = model.StatusFailure
 	badge, err = Generate("pipeline", &status)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, badgeFailure, badge)
 	status = model.StatusError
 	badge, err = Generate("pipeline", &status)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, badgeError, badge)
 	status = model.StatusKilled
 	badge, err = Generate("pipeline", &status)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, badgeError, badge)
 	status = model.StatusPending
 	badge, err = Generate("pipeline", &status)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, badgeStarted, badge)
 	status = model.StatusRunning
 	badge, err = Generate("pipeline", &status)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, badgeStarted, badge)
 }
