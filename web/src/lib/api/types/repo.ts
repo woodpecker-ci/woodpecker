@@ -82,6 +82,9 @@ export interface Repo {
 
   // Endpoint for config extensions
   config_extension_endpoint: string;
+
+  // Endpoint for registry extensions
+  registry_extension_endpoint: string;
 }
 
 /* eslint-disable no-unused-vars */
@@ -113,7 +116,7 @@ export type RepoSettings = Pick<
   | 'netrc_trusted'
 >;
 
-export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint'>;
+export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'registry_extension_endpoint'>;
 
 export interface RepoPermissions {
   pull: boolean;
