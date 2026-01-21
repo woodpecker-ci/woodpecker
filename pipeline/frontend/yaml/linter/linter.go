@@ -146,10 +146,10 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 	case "steps":
 		containers = config.Workflow.Steps.ContainerList
 	case "services":
-		if config.Workflow.Services.WasList {
+		if len(config.Workflow.Services.Duplicated) != 0 {
 			linterErr = multierr.Append(linterErr, &errorTypes.PipelineError{
 				Type:    errorTypes.PipelineErrorTypeBadHabit,
-				Message: "Services should be defined as map not as list",
+				Message: "Services have duplicated names declaired, second ones are ignored and should be removed",
 				Data: errors.BadHabitErrorData{
 					File:  config.File,
 					Field: "services",

@@ -67,7 +67,7 @@ steps:
       repo: foo/bar
       foo: bar
 services:
-  redis:
+  - name: redis
     image: redis
 `,
 	}, {
@@ -181,10 +181,6 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
 			want: "One or more of the specified dependencies do not exist",
-		},
-		{
-			from: "{ when: { event: push }, steps: [ { name: test, image: docker } ], services: [ { name: redis, image: redis } ] }",
-			want: "[\"[bad_habit] Services should be defined as map not as list\"]",
 		},
 	}
 

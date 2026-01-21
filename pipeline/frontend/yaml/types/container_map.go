@@ -23,7 +23,7 @@ import (
 // ContainerMap contains collection of containers.
 type ContainerMap struct {
 	ContainerMap map[string]*Container
-	WasList      bool
+	Duplicated   []string
 }
 
 // UnmarshalYAML implements the Unmarshaler interface.
@@ -32,7 +32,6 @@ func (c *ContainerMap) UnmarshalYAML(value *yaml.Node) error {
 	switch value.Kind {
 	// We support maps ...
 	case yaml.MappingNode:
-		c.WasList = false
 		for i, n := range value.Content {
 			if i%2 == 1 {
 				container := &Container{}
@@ -52,7 +51,6 @@ func (c *ContainerMap) UnmarshalYAML(value *yaml.Node) error {
 
 	// ... and lists
 	case yaml.SequenceNode:
-		c.WasList = true
 		for i, n := range value.Content {
 			container := &Container{}
 			if err := n.Decode(container); err != nil {
@@ -63,7 +61,11 @@ func (c *ContainerMap) UnmarshalYAML(value *yaml.Node) error {
 				container.Name = fmt.Sprintf("step-%d", i)
 			}
 
-			c.ContainerMap[container.Name] = container
+			if _, exist := c.ContainerMap[container.Name]; exists {
+				c.Duplicated = append(c.Duplicated, container.Name)
+			} else {
+				c.ContainerMap[container.Name] = container
+			}
 		}
 
 	default:
