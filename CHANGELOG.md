@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @qwerty287
+@6543, @myselfghost, @qwerty287
 
 ### 📈 Enhancement
 
+- Implement retry logic in HTTP Send method [[#5857](https://github.com/woodpecker-ci/woodpecker/pull/5857)]
 - Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
 - Use `NoError` for error assertion [[#5992](https://github.com/woodpecker-ci/woodpecker/pull/5992)]
 - Improve service syntax related docs and tests nits [[#5991](https://github.com/woodpecker-ci/woodpecker/pull/5991)]
