@@ -61,7 +61,7 @@ func (c *ContainerMap) UnmarshalYAML(value *yaml.Node) error {
 				container.Name = fmt.Sprintf("step-%d", i)
 			}
 
-			if _, exist := c.ContainerMap[container.Name]; exists {
+			if _, exist := c.ContainerMap[container.Name]; exist {
 				c.Duplicated = append(c.Duplicated, container.Name)
 			} else {
 				c.ContainerMap[container.Name] = container
