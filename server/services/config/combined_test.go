@@ -188,9 +188,7 @@ func TestFetchFromConfigService(t *testing.T) {
 	defer ts.Close()
 
 	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	httpFetcher := config.NewHTTP(ts.URL+"/", client)
 

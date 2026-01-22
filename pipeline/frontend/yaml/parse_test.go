@@ -150,14 +150,10 @@ pipeline:
 `
 
 	workflow1, err := ParseString(sampleYamlPipeline)
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	assert.EqualValues(t, workflow1, workflow2)
 	assert.Len(t, workflow1.Steps.ContainerList, 1)
@@ -248,14 +244,10 @@ steps:
 
 func TestReSerialize(t *testing.T) {
 	work1, err := ParseString(sampleVarYaml)
-	if !assert.NoError(t, err) {
-		t.Fail()
-	}
+	require.NoError(t, err)
 
 	work1Bin, err := yaml.Marshal(work1)
-	if !assert.NoError(t, err) {
-		t.Fail()
-	}
+	require.NoError(t, err)
 
 	assert.EqualValues(t, `steps:
     - name: notify_fail
@@ -285,14 +277,10 @@ skip_clone: false
 `, string(work1Bin))
 
 	work2, err := ParseString(sampleYaml)
-	if !assert.NoError(t, err) {
-		t.Fail()
-	}
+	require.NoError(t, err)
 
 	workBin2, err := yaml.Marshal(work2)
-	if !assert.NoError(t, err) {
-		t.Fail()
-	}
+	require.NoError(t, err)
 
 	// TODO: fix "steps.[1].depends_on: []" to be re-serialized!
 	assert.EqualValues(t, `when:
