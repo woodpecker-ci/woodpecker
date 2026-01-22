@@ -15,8 +15,6 @@
 package badges
 
 import (
-	"fmt"
-
 	"github.com/narqo/go-badge"
 	"github.com/rs/zerolog/log"
 
@@ -26,14 +24,14 @@ import (
 // cspell:words Verdana
 
 var (
-	// Status background colors
+	// Status background colors.
 	badgeColorSuccess = "#44cc11"
 	badgeColorFailure = "#e05d44"
 	badgeColorStarted = "#dfb317"
 	badgeColorError   = "#9f9f9f"
 	badgeColorNone    = "#9f9f9f"
 
-	// Status labels
+	// Status labels.
 	badgeStatusSuccess = "success"
 	badgeStatusFailure = "failure"
 	badgeStatusStarted = "started"
@@ -68,5 +66,5 @@ func Generate(name string, status *model.StatusValue) (string, error) {
 		log.Warn().Err(err).Msg("could not render badge")
 		return "", err
 	}
-	return fmt.Sprintf("%s", bytes), nil
+	return string(bytes), nil
 }
