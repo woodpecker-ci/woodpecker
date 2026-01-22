@@ -183,7 +183,6 @@ steps:
       - go test
   build:
     image: golang
-    network_mode: container:name
     commands:
       - go build
     when:
@@ -191,7 +190,8 @@ steps:
     depends_on: []
   notify:
     image: slack
-    channel: dev
+    settings:
+      channel: dev
     when:
       event: failure
 services:
@@ -252,7 +252,7 @@ func TestReSerialize(t *testing.T) {
 		t.Fail()
 	}
 
-	workBin, err := yaml.Marshal(work1)
+	work1Bin, err := yaml.Marshal(work1)
 	if !assert.NoError(t, err) {
 		t.Fail()
 	}
@@ -282,7 +282,58 @@ func TestReSerialize(t *testing.T) {
         DRIVER: next
         PLATFORM: linux
 skip_clone: false
-`, string(workBin))
+`, string(work1Bin))
+
+	work2, err := ParseString(sampleYaml)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	workBin2, err := yaml.Marshal(work2)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	// TODO: fix "steps.[1].depends_on: []" to be re-serialized!
+	assert.EqualValues(t, `when:
+    - event:
+        - tester
+        - tester2
+    - branch: tester
+workspace:
+    base: /go
+    path: src/github.com/octocat/hello-world
+steps:
+    - name: test
+      image: golang
+      commands:
+        - go install
+        - go test
+    - name: build
+      image: golang
+      commands: go build
+      when:
+        event: push
+    - name: notify
+      image: slack
+      settings:
+        channel: dev
+      when:
+        event: failure
+services:
+    - name: database
+      image: mysql
+labels:
+    com.example.team: frontend
+    com.example.type: build
+depends_on:
+    - lint
+    - test
+runs_on:
+    - success
+    - failure
+skip_clone: false
+`, string(workBin2))
 }
 
 func TestSlice(t *testing.T) {
