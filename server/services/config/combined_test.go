@@ -28,6 +28,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/yaronf/httpsign"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
