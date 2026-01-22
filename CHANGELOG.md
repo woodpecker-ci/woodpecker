@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Use `require` to exit tests [[#5998](https://github.com/woodpecker-ci/woodpecker/pull/5998)]
 - Implement retry logic in HTTP Send method [[#5857](https://github.com/woodpecker-ci/woodpecker/pull/5857)]
 - Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
 - Use `NoError` for error assertion [[#5992](https://github.com/woodpecker-ci/woodpecker/pull/5992)]
@@ -21,7 +22,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5990](https://github.com/woodpecker-ci/woodpecker/pull/5990)]
 - chore(deps): update docs npm deps non-major [[#5982](https://github.com/woodpecker-ci/woodpecker/pull/5982)]
 
 ### 📦️ Dependency
@@ -29,6 +29,7 @@
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.16.0 [[#5995](https://github.com/woodpecker-ci/woodpecker/pull/5995)]
 - chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.2 [[#5994](https://github.com/woodpecker-ci/woodpecker/pull/5994)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.6.2 [[#5989](https://github.com/woodpecker-ci/woodpecker/pull/5989)]
+- chore(deps): lock file maintenance [[#5990](https://github.com/woodpecker-ci/woodpecker/pull/5990)]
 - fix(deps): update module github.com/docker/cli to v29.1.5+incompatible [[#5986](https://github.com/woodpecker-ci/woodpecker/pull/5986)]
 - chore(deps): update dependency simple-icons to v16.6.0 [[#5987](https://github.com/woodpecker-ci/woodpecker/pull/5987)]
 - chore(deps): update dependency @antfu/eslint-config to v7 [[#5985](https://github.com/woodpecker-ci/woodpecker/pull/5985)]
