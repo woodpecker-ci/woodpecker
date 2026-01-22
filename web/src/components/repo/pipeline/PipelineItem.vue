@@ -28,12 +28,7 @@
         <span class="md:display-unset text-wp-text-alt-100 hidden">#{{ pipeline.number }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span class="md:display-unset text-wp-text-alt-100 mx-2 hidden">-</span>
-        <span
-          class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline"
-          :title="message"
-        >
-          {{ shortMessage }}
-        </span>
+        <RenderMarkdown class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline" :title="message" :content="shortMessage" />
       </div>
 
       <div
@@ -83,6 +78,7 @@ import { useI18n } from 'vue-i18n';
 
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import { pipelineStatusColors } from '~/components/repo/pipeline/pipeline-status';
 import PipelineRunningIcon from '~/components/repo/pipeline/PipelineRunningIcon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';

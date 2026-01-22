@@ -24,9 +24,7 @@
           <span class="shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
-          <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" :title="message">{{
-            shortMessage
-          }}</span>
+          <RenderMarkdown class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" :title="message" :content="shortMessage" />
         </div>
 
         <template v-if="repoPermissions!.push && pipeline.status !== 'blocked'">
@@ -114,6 +112,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';

@@ -12,7 +12,7 @@
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         {{ repo?.owner }} / {{ repo?.name }}
       </router-link>
-      <span class="overflow-hidden text-ellipsis whitespace-nowrap" :title="message">{{ shortMessage }}</span>
+      <RenderMarkdown class="overflow-hidden text-ellipsis whitespace-nowrap" :title="message" :content="shortMessage" />
       <div class="mt-2 flex flex-col">
         <div class="flex items-center space-x-2" :title="created">
           <Icon name="since" />
@@ -31,6 +31,7 @@
 import { computed, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
+import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
 import type { PipelineFeed } from '~/lib/api/types';
