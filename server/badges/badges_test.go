@@ -15,6 +15,10 @@
 package badges
 
 import (
+	"bytes"
+	"html/template"
+	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -60,4 +64,51 @@ func TestGenerate(t *testing.T) {
 	badge, err = Generate("pipeline", &status)
 	assert.NoError(t, err)
 	assert.Equal(t, badgeStarted, badge)
+}
+
+func TestBadgeDrawerRender(t *testing.T) {
+	mockTemplate := strings.TrimSpace(`
+	{{.Subject}},{{.Status}},{{.Color}},{{with .Bounds}}{{.SubjectX}},{{.SubjectDx}},{{.StatusX}},{{.StatusDx}},{{.Dx}}{{end}}
+	`)
+	mockFontSize := 11.0
+	mockDPI := 72.0
+
+	fd, err := mustNewFontDrawer(mockFontSize, mockDPI)
+	assert.NoError(t, err)
+
+	d := &badgeDrawer{
+		fd:    fd,
+		tmpl:  template.Must(template.New("mock-template").Parse(mockTemplate)),
+		mutex: &sync.Mutex{},
+	}
+
+	output := "XXX,YYY,#c0c0c0,18,34,50,34,68"
+
+	var buf bytes.Buffer
+	assert.NoError(t, d.Render("XXX", "YYY", "#c0c0c0", &buf))
+	assert.Equal(t, buf.String(), output)
+}
+
+func TestBadgeDrawerRenderBytes(t *testing.T) {
+	mockTemplate := strings.TrimSpace(`
+	{{.Subject}},{{.Status}},{{.Color}},{{with .Bounds}}{{.SubjectX}},{{.SubjectDx}},{{.StatusX}},{{.StatusDx}},{{.Dx}}{{end}}
+	`)
+	mockFontSize := 11.0
+	mockDPI := 72.0
+
+	fd, err := mustNewFontDrawer(mockFontSize, mockDPI)
+	assert.NoError(t, err)
+
+	d := &badgeDrawer{
+		fd:    fd,
+		tmpl:  template.Must(template.New("mock-template").Parse(mockTemplate)),
+		mutex: &sync.Mutex{},
+	}
+
+	output := "XXX,YYY,#c0c0c0,18,34,50,34,68"
+
+	bytes, err := d.RenderBytes("XXX", "YYY", "#c0c0c0")
+
+	assert.NoError(t, err)
+	assert.Equal(t, string(bytes), output)
 }
