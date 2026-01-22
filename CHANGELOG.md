@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-21
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @6543, @myselfghost, @qwerty287
+
+### 🔒 Security
+
+- chore(deps): update dependency lodash to v4.17.23 [security] [[#5997](https://github.com/woodpecker-ci/woodpecker/pull/5997)]
 
 ### 📈 Enhancement
 
