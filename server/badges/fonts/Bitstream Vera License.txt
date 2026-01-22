@@ -71,8 +71,8 @@ Copyright FAQ
    2. I want to package these fonts separately for distribution and
       sale as part of a larger software package or system.  Can I do so?
 
-      Yes. A RPM or Debian package is a "larger software package" to begin 
-      with, and you aren't selling them independently by themselves. 
+      Yes. A RPM or Debian package is a "larger software package" to begin
+      with, and you aren't selling them independently by themselves.
       See 1. above.
 
    3. Are derivative works allowed?
@@ -91,7 +91,7 @@ Copyright FAQ
       opening). You must include the Bitstream copyright. Additional
       copyrights can be added, as per copyright law. Happy Font Hacking!
 
-   6. If I have improvements for Bitstream Vera, is it possible they might get 
+   6. If I have improvements for Bitstream Vera, is it possible they might get
        adopted in future versions?
 
       Yes. The contract between the Gnome Foundation and Bitstream has
@@ -110,7 +110,7 @@ Copyright FAQ
       Sure. Bundle the fonts with your software and sell your software
       with the fonts. That is the intent of the copyright.
 
-   8. If applications have built the names "Bitstream Vera" into them, 
+   8. If applications have built the names "Bitstream Vera" into them,
       can I override this somehow to use fonts of my choosing?
 
       This depends on exact details of the software. Most open source
