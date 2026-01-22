@@ -28,7 +28,11 @@
         <span class="md:display-unset text-wp-text-alt-100 hidden">#{{ pipeline.number }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span class="md:display-unset text-wp-text-alt-100 mx-2 hidden">-</span>
-        <RenderMarkdown class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline" :title="message" :content="shortMessage" />
+        <RenderMarkdown
+          class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline"
+          :title="message"
+          :content="shortMessage"
+        />
       </div>
 
       <div

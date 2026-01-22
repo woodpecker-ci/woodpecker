@@ -24,7 +24,11 @@
           <span class="shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
-          <RenderMarkdown class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" :title="message" :content="shortMessage" />
+          <RenderMarkdown
+            class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+            :title="message"
+            :content="shortMessage"
+          />
         </div>
 
         <template v-if="repoPermissions!.push && pipeline.status !== 'blocked'">

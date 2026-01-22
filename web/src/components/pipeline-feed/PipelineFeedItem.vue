@@ -12,7 +12,11 @@
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         {{ repo?.owner }} / {{ repo?.name }}
       </router-link>
-      <RenderMarkdown class="overflow-hidden text-ellipsis whitespace-nowrap" :title="message" :content="shortMessage" />
+      <RenderMarkdown
+        class="overflow-hidden text-ellipsis whitespace-nowrap"
+        :title="message"
+        :content="shortMessage"
+      />
       <div class="mt-2 flex flex-col">
         <div class="flex items-center space-x-2" :title="created">
           <Icon name="since" />
