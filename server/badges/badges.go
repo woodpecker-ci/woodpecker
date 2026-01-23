@@ -14,6 +14,8 @@
 
 package badges
 
+// cspell:words Verdana
+
 import (
 	"bytes"
 	"html/template"
@@ -109,7 +111,7 @@ func RenderBytes(subject, status string, color Color) ([]byte, error) {
 
 const (
 	dpi      = 72
-	fontsize = 11
+	fontSize = 11
 )
 
 var (
@@ -120,7 +122,7 @@ var (
 
 func initDrawer() (*badgeDrawer, error) {
 	initOnce.Do(func() {
-		fd, err := mustNewFontDrawer(fontsize, dpi)
+		fd, err := mustNewFontDrawer(fontSize, dpi)
 		if err != nil {
 			initError = err
 			return
@@ -160,20 +162,20 @@ var (
 
 func getBadgeStatus(status *model.StatusValue) (string, Color) {
 	if status == nil {
-		return badgeStatusNone, ColorLightgray
+		return badgeStatusNone, ColorLightGray
 	}
 
 	switch *status {
 	case model.StatusSuccess:
-		return badgeStatusSuccess, ColorBrightgreen
+		return badgeStatusSuccess, ColorLightGreen
 	case model.StatusFailure:
 		return badgeStatusFailure, ColorRed
 	case model.StatusPending, model.StatusRunning:
 		return badgeStatusStarted, ColorYellow
 	case model.StatusError, model.StatusKilled:
-		return badgeStatusError, ColorLightgray
+		return badgeStatusError, ColorLightGray
 	default:
-		return badgeStatusNone, ColorLightgray
+		return badgeStatusNone, ColorLightGray
 	}
 }
 

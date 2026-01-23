@@ -5,32 +5,32 @@ type Color string
 
 // ColorScheme contains named colors that could be used to render the badge.
 var ColorScheme = map[string]string{
-	"brightgreen": "#44cc11",
-	"green":       "#97ca00",
-	"yellow":      "#dfb317",
-	"yellowgreen": "#a4a61d",
-	"orange":      "#fe7d37",
-	"red":         "#e05d44",
-	"blue":        "#007ec6",
-	"grey":        "#555555",
-	"gray":        "#555555",
-	"lightgrey":   "#9f9f9f",
-	"lightgray":   "#9f9f9f",
+	"LightGreen":  "#44cc11",
+	"Green":       "#97ca00",
+	"Yellow":      "#dfb317",
+	"YellowGreen": "#a4a61d",
+	"Orange":      "#fe7d37",
+	"Red":         "#e05d44",
+	"Blue":        "#007ec6",
+	"Grey":        "#555555",
+	"Gray":        "#555555",
+	"LightGrey":   "#9f9f9f",
+	"LightGray":   "#9f9f9f",
 }
 
 // Standard colors.
 const (
-	ColorBrightgreen = Color("brightgreen")
-	ColorGreen       = Color("green")
-	ColorYellow      = Color("yellow")
-	ColorYellowgreen = Color("yellowgreen")
-	ColorOrange      = Color("orange")
-	ColorRed         = Color("red")
-	ColorBlue        = Color("blue")
-	ColorGrey        = Color("grey")
-	ColorGray        = Color("gray")
-	ColorLightgrey   = Color("lightgrey")
-	ColorLightgray   = Color("lightgray")
+	ColorLightGreen  = Color("LightGreen")
+	ColorGreen       = Color("Green")
+	ColorYellow      = Color("Yellow")
+	ColorYellowGreen = Color("YellowGreen")
+	ColorOrange      = Color("Orange")
+	ColorRed         = Color("Red")
+	ColorBlue        = Color("Blue")
+	ColorGrey        = Color("Grey")
+	ColorGray        = Color("Gray")
+	ColorLightGrey   = Color("LightGrey")
+	ColorLightGray   = Color("LightGray")
 )
 
 func (c Color) String() string {
