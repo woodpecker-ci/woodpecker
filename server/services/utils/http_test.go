@@ -34,9 +34,7 @@ func TestSignClient(t *testing.T) {
 	pubKeyID := "woodpecker-ci-extensions"
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	body := []byte("{\"foo\":\"bar\"}")
 
@@ -55,17 +53,13 @@ func TestSignClient(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(verifyHandler))
 
 	req, err := http.NewRequest("GET", server.URL+"/", bytes.NewBuffer(body))
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	req.Header.Set("Date", time.Now().Format(time.RFC3339))
 	req.Header.Set("Content-Type", "application/json")
 
 	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	rr, err := client.Do(req)
 	assert.NoError(t, err)
