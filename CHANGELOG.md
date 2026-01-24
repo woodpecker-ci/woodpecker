@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-22
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -26,6 +26,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.8.1 [[#6001](https://github.com/woodpecker-ci/woodpecker/pull/6001)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.16.0 [[#5995](https://github.com/woodpecker-ci/woodpecker/pull/5995)]
 - chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.2 [[#5994](https://github.com/woodpecker-ci/woodpecker/pull/5994)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.6.2 [[#5989](https://github.com/woodpecker-ci/woodpecker/pull/5989)]
