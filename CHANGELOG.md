@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-24
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -27,6 +27,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.17.0 [[#6005](https://github.com/woodpecker-ci/woodpecker/pull/6005)]
+- chore(deps): update dependency simple-icons to v16.6.1 [[#6004](https://github.com/woodpecker-ci/woodpecker/pull/6004)]
 - chore(deps): update web npm deps non-major [[#6003](https://github.com/woodpecker-ci/woodpecker/pull/6003)]
 - chore(deps): update docker.io/mysql docker tag to v9.6.0 [[#6002](https://github.com/woodpecker-ci/woodpecker/pull/6002)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.8.1 [[#6001](https://github.com/woodpecker-ci/woodpecker/pull/6001)]
