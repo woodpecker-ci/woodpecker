@@ -14,8 +14,11 @@
 | `agent/**`         | code only agent (remote worker) will need                      | `pipeline`, `shared`                  |
 | `cli/**`           | code only cli tool does need                                   | `pipeline`, `shared`, `woodpecker-go` |
 | `server/**`        | code only server will need                                     | `pipeline`, `shared`                  |
+| `pipeline/**`      | core ci/cd engine from parsing to execution                    | TODO                                  |
 | `shared/**`        | code shared for all three main tools (go help utils)           | only std and external libs            |
 | `woodpecker-go/**` | go client for server rest api                                  | std                                   |
+
+TODO: mv pipeline/rpc into rpc as it is not used by the engine just between server and agent
 
 ### Server
 
