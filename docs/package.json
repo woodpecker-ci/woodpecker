@@ -50,5 +50,10 @@
     "@types/react-router-dom": "^5.3.3",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "lodash": "4.17.23"
+    }
   }
 }
