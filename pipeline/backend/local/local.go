@@ -208,10 +208,7 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 		}
 	}
 
-	return &types.State{
-		Exited:   true,
-		ExitCode: state.cmd.ProcessState.ExitCode(),
-	}, err
+	return stepState, err
 }
 
 func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
