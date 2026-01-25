@@ -50,6 +50,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
+// Run executes an workflow via an backend, tracks its state and reports back the state to the server
 func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 

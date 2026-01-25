@@ -67,6 +67,8 @@ type (
 )
 
 // Peer defines a peer-to-peer connection.
+// TODO: suffix Next, Wait, Init, Done and Extend with "Workflow" for docu purpose
+// TODO: suffix Update with UpdateStepState for docu purpose
 type Peer interface {
 	// Version returns the server- & grpc-version
 	Version(c context.Context) (*Version, error)

@@ -72,19 +72,6 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f FilterFn) (*m
 	return task, err
 }
 
-// EvictAtOnce removes multiple pending tasks from the queue.
-func (q *persistentQueue) EvictAtOnce(c context.Context, ids []string) error {
-	if err := q.Queue.EvictAtOnce(c, ids); err != nil {
-		return err
-	}
-	for _, id := range ids {
-		if err := q.store.TaskDelete(id); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // Error signals the task is done with an error.
 func (q *persistentQueue) Error(c context.Context, id string, err error) error {
 	if err := q.Queue.Error(c, id, err); err != nil {
