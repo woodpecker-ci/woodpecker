@@ -179,6 +179,14 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 		return nil, err
 	}
 
+	if state.cmd == nil {
+		return nil, errors.New("exec: step command not set up")
+	}
+
+	stepState := &types.State{
+		Exited: true,
+	}
+
 	// normally we use cmd.Wait() to wait for *exec.Cmd, but cmd.StdoutPipe() tells us not
 	// as Wait() would close the io pipe even if not all logs where read and send back
 	// so we have to do use the underlying functions
@@ -190,7 +198,14 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 		if err != nil {
 			return nil, err
 		}
-		state.cmd.ProcessState = cmdState
+		if cmdState == nil {
+			return nil, errors.New("exec: cmd state after Wait() can not be nil but is")
+		}
+		stepState.ExitCode = cmdState.ExitCode()
+		// can be nil if step got canceled
+		if state.cmd != nil {
+			state.cmd.ProcessState = cmdState
+		}
 	}
 
 	return &types.State{
