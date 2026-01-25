@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-git docker tag to v2.8.1 [[#6006](https://github.com/woodpecker-ci/woodpecker/pull/6006)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.17.0 [[#6005](https://github.com/woodpecker-ci/woodpecker/pull/6005)]
 - chore(deps): update dependency simple-icons to v16.6.1 [[#6004](https://github.com/woodpecker-ci/woodpecker/pull/6004)]
 - chore(deps): update web npm deps non-major [[#6003](https://github.com/woodpecker-ci/woodpecker/pull/6003)]
