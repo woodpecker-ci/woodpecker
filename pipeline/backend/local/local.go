@@ -206,6 +206,8 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 		if state.cmd != nil {
 			state.cmd.ProcessState = cmdState
 		}
+	} else {
+		stepState.ExitCode = state.cmd.ProcessState.ExitCode()
 	}
 
 	return stepState, err
