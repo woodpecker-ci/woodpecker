@@ -177,8 +177,8 @@ func (c *client) Wait(ctx context.Context, workflowID string) (err error) {
 			// non-fatal errors
 			log.Warn().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 		default:
-			switch status.Code(err).String() {
-			case "code = Unknown desc = queue: task canceled":
+			switch {
+			case strings.Contains(err.Error(), "desc = queue: task canceled"):
 				return nil
 			default:
 				log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))

@@ -184,12 +184,7 @@ func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string)
 	}
 
 	if err := ctx.Err(); err != nil {
-		if errors.Is(err, context.Canceled) {
-			// make
-			stepState.Error = fmt.Errorf("Canceled")
-		} else {
-			stepState.Error = err
-		}
+		stepState.Error = err
 		return stepState, nil
 	}
 
