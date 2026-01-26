@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-25
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -26,12 +26,14 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#6014](https://github.com/woodpecker-ci/woodpecker/pull/6014)]
 - chore(deps): update dependency axios to v1.13.3 [[#6010](https://github.com/woodpecker-ci/woodpecker/pull/6010)]
 - chore(deps): update docs npm deps non-major [[#6000](https://github.com/woodpecker-ci/woodpecker/pull/6000)]
 - chore(deps): update docs npm deps non-major [[#5982](https://github.com/woodpecker-ci/woodpecker/pull/5982)]
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6013](https://github.com/woodpecker-ci/woodpecker/pull/6013)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.8.1 [[#6006](https://github.com/woodpecker-ci/woodpecker/pull/6006)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.17.0 [[#6005](https://github.com/woodpecker-ci/woodpecker/pull/6005)]
 - chore(deps): update dependency simple-icons to v16.6.1 [[#6004](https://github.com/woodpecker-ci/woodpecker/pull/6004)]
