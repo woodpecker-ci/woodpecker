@@ -17,6 +17,7 @@ package queue
 import (
 	"container/list"
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"sync"
@@ -124,12 +125,17 @@ func (q *fifo) Error(_ context.Context, id string, err error) error {
 
 // ErrorAtOnce signals multiple done are complete with an error.
 func (q *fifo) ErrorAtOnce(_ context.Context, ids []string, err error) error {
+	if errors.Is(err, ErrCancel) {
+		return q.finished(ids, model.StatusKilled, err)
+	}
 	return q.finished(ids, model.StatusFailure, err)
 }
 
 func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
 	q.Lock()
+	defer q.Unlock()
 
+	var errs []error
 	for _, id := range ids {
 		taskEntry, ok := q.running[id]
 		if ok {
@@ -137,32 +143,12 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 			close(taskEntry.done)
 			delete(q.running, id)
 		} else {
-			q.removeFromPending(id)
+			errs = append(errs, q.removeFromPendingAndWaiting(id))
 		}
 		q.updateDepStatusInQueue(id, exitStatus)
 	}
 
-	q.Unlock()
-	return nil
-}
-
-// EvictAtOnce removes multiple pending tasks from the queue.
-func (q *fifo) EvictAtOnce(_ context.Context, taskIDs []string) error {
-	q.Lock()
-	defer q.Unlock()
-
-	for _, id := range taskIDs {
-		var next *list.Element
-		for element := q.pending.Front(); element != nil; element = next {
-			next = element.Next()
-			task, ok := element.Value.(*model.Task)
-			if ok && task.ID == id {
-				q.pending.Remove(element)
-				return nil
-			}
-		}
-	}
-	return ErrNotFound
+	return errors.Join(errs...)
 }
 
 // Wait waits until the item is done executing.
@@ -296,9 +282,7 @@ func (q *fifo) filterWaiting() {
 	// rebuild waitingDeps
 	q.waitingOnDeps = list.New()
 	var filtered []*list.Element
-	var nextPending *list.Element
-	for element := q.pending.Front(); element != nil; element = nextPending {
-		nextPending = element.Next()
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 		if q.depsInQueue(task) {
 			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
@@ -352,9 +336,7 @@ func (q *fifo) resubmitExpiredPipelines() {
 }
 
 func (q *fifo) depsInQueue(task *model.Task) bool {
-	var next *list.Element
-	for element := q.pending.Front(); element != nil; element = next {
-		next = element.Next()
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		possibleDep, ok := element.Value.(*model.Task)
 		log.Debug().Msgf("queue: pending right now: %v", possibleDep.ID)
 		for _, dep := range task.Dependencies {
@@ -373,13 +355,13 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 }
 
 func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
-	var next *list.Element
-	for element := q.pending.Front(); element != nil; element = next {
-		next = element.Next()
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		pending, ok := element.Value.(*model.Task)
-		for _, dep := range pending.Dependencies {
-			if ok && taskID == dep {
-				pending.DepStatus[dep] = status
+		if ok {
+			for _, dep := range pending.Dependencies {
+				if taskID == dep {
+					pending.DepStatus[dep] = status
+				}
 			}
 		}
 	}
@@ -392,27 +374,42 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 		}
 	}
 
-	for element := q.waitingOnDeps.Front(); element != nil; element = next {
-		next = element.Next()
+	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
 		waiting, ok := element.Value.(*model.Task)
-		for _, dep := range waiting.Dependencies {
-			if ok && taskID == dep {
-				waiting.DepStatus[dep] = status
+		if ok {
+			for _, dep := range waiting.Dependencies {
+				if taskID == dep {
+					waiting.DepStatus[dep] = status
+				}
 			}
 		}
 	}
 }
 
-func (q *fifo) removeFromPending(taskID string) {
+// removeFromPendingAndWaiting expects the q to be currently owned e.g. locked by caller
+func (q *fifo) removeFromPendingAndWaiting(taskID string) error {
 	log.Debug().Msgf("queue: trying to remove %s", taskID)
-	var next *list.Element
-	for element := q.pending.Front(); element != nil; element = next {
-		next = element.Next()
+
+	// we assume pending first
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from pending", taskID)
-			q.pending.Remove(element)
-			return
+			_ = q.pending.Remove(element)
+			return nil
 		}
 	}
+
+	// well looks like it's waiting
+	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
+		task, _ := element.Value.(*model.Task)
+		if task.ID == taskID {
+			log.Debug().Msgf("queue: %s is removed from waitingOnDeps", taskID)
+			_ = q.waitingOnDeps.Remove(element)
+			return nil
+		}
+	}
+
+	// my bad could not be found
+	return ErrNotFound
 }
