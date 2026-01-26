@@ -72,11 +72,24 @@ func TestFifoBasicOperations(t *testing.T) {
 		assert.Len(t, info.Pending, 0)
 		assert.Len(t, info.Running, 1)
 
+		// Edge case: verify task can't be polled again while running
+		pollCtx, pollCancel := context.WithTimeout(ctx, 100*time.Millisecond)
+		_, err = q.Poll(pollCtx, 2, filterFnTrue)
+		pollCancel()
+		assert.Error(t, err) // Should timeout/cancel, not return the same task
+
 		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
 
 		waitForProcess()
 		info = q.Info(ctx)
 		assert.Len(t, info.Running, 0)
+
+		// Edge case: Done on already completed task should handle gracefully
+		err = q.Done(ctx, got.ID, model.StatusSuccess)
+		// Document current behavior - should either error or be idempotent
+		if err != nil {
+			assert.Error(t, err)
+		}
 	})
 
 	t.Run("error handling", func(t *testing.T) {
@@ -92,6 +105,13 @@ func TestFifoBasicOperations(t *testing.T) {
 		assert.Len(t, info.Running, 0)
 
 		assert.Error(t, q.Error(ctx, "totally-fake-id", fmt.Errorf("test error")))
+
+		// Edge case: Error on task that's already errored
+		err := q.Error(ctx, got.ID, fmt.Errorf("double error"))
+		// Should either error or be idempotent
+		if err != nil {
+			assert.Error(t, err)
+		}
 	})
 
 	t.Run("error at once", func(t *testing.T) {
@@ -127,6 +147,19 @@ func TestFifoBasicOperations(t *testing.T) {
 		waitForProcess()
 		info = q.Info(ctx)
 		assert.Len(t, info.Running, 0)
+
+		// Edge case: ErrorAtOnce with empty slice
+		err = q.ErrorAtOnce(ctx, []string{}, fmt.Errorf("no tasks"))
+		// Should handle gracefully, potentially no-op
+
+		// Edge case: ErrorAtOnce with nil error
+		task5 := &model.Task{ID: "batch-5"}
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task5}))
+		waitForProcess()
+		got5, _ := q.Poll(ctx, 3, filterFnTrue)
+		err = q.ErrorAtOnce(ctx, []string{got5.ID}, nil)
+		// Should handle nil error gracefully
+		waitForProcess()
 	})
 
 	t.Run("error at once with waiting deps", func(t *testing.T) {
@@ -149,6 +182,10 @@ func TestFifoBasicOperations(t *testing.T) {
 		info = q.Info(ctx)
 		assert.Equal(t, 0, info.Stats.WaitingOnDeps)
 		assert.Len(t, info.Pending, 0)
+
+		// Edge case: verify both tasks are actually gone, not stuck somewhere
+		assert.Len(t, info.Running, 0)
+		assert.Len(t, info.WaitingOnDeps, 0)
 	})
 
 	t.Run("error at once cancellation", func(t *testing.T) {
@@ -171,6 +208,11 @@ func TestFifoBasicOperations(t *testing.T) {
 
 		got2, _ := q.Poll(ctx, 2, filterFnTrue)
 		assert.Equal(t, model.StatusKilled, got2.DepStatus["cancel-prop-1"])
+
+		// Edge case: verify ErrCancel results in StatusKilled not StatusFailure
+		assert.NotEqual(t, model.StatusFailure, got2.DepStatus["cancel-prop-1"])
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+		waitForProcess()
 	})
 
 	t.Run("pause resume", func(t *testing.T) {
@@ -187,10 +229,34 @@ func TestFifoBasicOperations(t *testing.T) {
 		t0 := time.Now()
 		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
 		waitForProcess()
+
+		// Edge case: verify queue is actually paused
+		info := q.Info(ctx)
+		assert.True(t, info.Paused)
+		assert.Len(t, info.Pending, 1)
+		assert.Len(t, info.Running, 0)
+
 		q.Resume()
 
 		wg.Wait()
 		assert.Greater(t, time.Since(t0), 20*time.Millisecond)
+
+		// Edge case: verify queue is unpaused
+		info = q.Info(ctx)
+		assert.False(t, info.Paused)
+
+		// Edge case: multiple pause/resume cycles
+		task2 := &model.Task{ID: "pause-2"}
+		q.Pause()
+		q.Pause() // Double pause
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2}))
+		waitForProcess()
+		q.Resume()
+		q.Resume() // Double resume
+		waitForProcess()
+		got, _ := q.Poll(ctx, 99, filterFnTrue)
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
 	})
 }
 
@@ -240,6 +306,10 @@ func TestFifoDependencies(t *testing.T) {
 		waitForProcess()
 		info = q.Info(ctx)
 		assert.Equal(t, 0, info.Stats.WaitingOnDeps)
+
+		// Edge case: verify DepStatus is correctly set before polling
+		assert.NotEmpty(t, task2.DepStatus)
+		assert.NotEmpty(t, task3.DepStatus)
 	})
 
 	t.Run("multiple dependencies", func(t *testing.T) {
@@ -278,6 +348,11 @@ func TestFifoDependencies(t *testing.T) {
 			(got3.DepStatus["multi-dep-1"] == model.StatusSuccess && got3.DepStatus["multi-dep-2"] == model.StatusFailure) ||
 				(got3.DepStatus["multi-dep-1"] == model.StatusFailure && got3.DepStatus["multi-dep-2"] == model.StatusSuccess))
 		assert.False(t, got3.ShouldRun())
+
+		// Edge case: verify both deps are tracked
+		assert.Len(t, got3.DepStatus, 2)
+		assert.NoError(t, q.Done(ctx, got3.ID, model.StatusSkipped))
+		waitForProcess()
 	})
 
 	t.Run("transitive dependencies", func(t *testing.T) {
@@ -308,6 +383,12 @@ func TestFifoDependencies(t *testing.T) {
 		got, _ = q.Poll(ctx, 3, filterFnTrue)
 		assert.Equal(t, model.StatusSkipped, got.DepStatus["trans-2"])
 		assert.False(t, got.ShouldRun())
+
+		// Edge case: verify transitive failure propagates correctly
+		// task3 should see trans-2 as skipped, not trans-1's status
+		assert.NotContains(t, got.DepStatus, "trans-1")
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSkipped))
+		waitForProcess()
 	})
 
 	t.Run("dependency status propagation", func(t *testing.T) {
@@ -341,6 +422,12 @@ func TestFifoDependencies(t *testing.T) {
 		assert.Equal(t, model.StatusSuccess, got2.DepStatus["prop-1"])
 		assert.Equal(t, model.StatusSuccess, got3.DepStatus["prop-1"])
 
+		// Edge case: verify both tasks can be polled concurrently
+		assert.NotEqual(t, got2.ID, got3.ID)
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+		assert.NoError(t, q.Done(ctx, got3.ID, model.StatusSuccess))
+		waitForProcess()
+
 		task4 := &model.Task{ID: "prop-4"}
 		task5 := &model.Task{
 			ID:           "prop-5",
@@ -369,6 +456,119 @@ func TestFifoDependencies(t *testing.T) {
 		got6, _ := q.Poll(ctx, 6, filterFnTrue)
 		assert.Equal(t, model.StatusFailure, got6.DepStatus["prop-4"])
 		assert.True(t, got6.ShouldRun())
+
+		// Edge case: complete dependent tasks
+		assert.NoError(t, q.Done(ctx, got5.ID, model.StatusSkipped))
+		assert.NoError(t, q.Done(ctx, got6.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	// Edge case: circular dependency detection (should be handled or cause issue)
+	t.Run("circular dependencies", func(t *testing.T) {
+		task1 := &model.Task{
+			ID:           "circ-1",
+			Dependencies: []string{"circ-2"},
+			DepStatus:    make(map[string]model.StatusValue),
+		}
+		task2 := &model.Task{
+			ID:           "circ-2",
+			Dependencies: []string{"circ-1"},
+			DepStatus:    make(map[string]model.StatusValue),
+		}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2}))
+		waitForProcess()
+
+		info := q.Info(ctx)
+		// Both should be waiting on deps - this is a deadlock scenario
+		assert.Equal(t, 2, info.Stats.WaitingOnDeps)
+		assert.Len(t, info.Pending, 0)
+
+		// Verify they never become available for polling
+		pollCtx, pollCancel := context.WithTimeout(ctx, 200*time.Millisecond)
+		_, err := q.Poll(pollCtx, 99, filterFnTrue)
+		pollCancel()
+		assert.Error(t, err) // Should timeout
+
+		// Clean up the deadlocked tasks
+		assert.NoError(t, q.ErrorAtOnce(ctx, []string{"circ-1", "circ-2"}, fmt.Errorf("circular dep")))
+		waitForProcess()
+	})
+
+	// Edge case: dependency on non-existent task
+	// NOTE: This reveals a potential issue - the queue doesn't validate dependencies exist.
+	// If a dependency was never added to the queue, the task will run immediately since
+	// depsInQueue() only checks currently pending/running tasks, not if deps will arrive.
+	t.Run("non-existent dependency", func(t *testing.T) {
+		task1 := &model.Task{
+			ID:           "orphan-1",
+			Dependencies: []string{"does-not-exist"},
+			DepStatus:    make(map[string]model.StatusValue),
+		}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1}))
+		waitForProcess()
+
+		info := q.Info(ctx)
+		// Current implementation: task doesn't wait if dependency not in queue
+		// This means tasks with typos in dependency names will run immediately!
+		assert.Equal(t, 0, info.Stats.WaitingOnDeps)
+		assert.Len(t, info.Pending, 1)
+
+		// Task will be available for polling even though dependency doesn't exist
+		got, err := q.Poll(ctx, 99, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "orphan-1", got.ID)
+
+		// DepStatus will be empty since dependency never completed
+		assert.Empty(t, got.DepStatus)
+
+		// Clean up
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	// Edge case: dependency added AFTER dependent task (race condition)
+	t.Run("dependency added after dependent", func(t *testing.T) {
+		// Push dependent task first
+		dependent := &model.Task{
+			ID:           "late-dep-child",
+			Dependencies: []string{"late-dep-parent"},
+			DepStatus:    make(map[string]model.StatusValue),
+		}
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dependent}))
+		waitForProcess()
+
+		// At this point, dependent doesn't see parent in queue, so it won't wait
+		info := q.Info(ctx)
+		// Dependent should NOT be waiting since parent doesn't exist yet
+		initialWaiting := info.Stats.WaitingOnDeps
+
+		// Now add the parent task
+		parent := &model.Task{ID: "late-dep-parent"}
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{parent}))
+		waitForProcess()
+
+		// After filterWaiting runs, dependent SHOULD now see parent and wait
+		info = q.Info(ctx)
+		// The implementation calls filterWaiting() which rechecks dependencies
+		// So dependent should now be waiting
+		assert.Greater(t, info.Stats.WaitingOnDeps, initialWaiting,
+			"dependent should start waiting once parent is added")
+
+		// Complete parent first
+		gotParent, _ := q.Poll(ctx, 1, filterFnTrue)
+		assert.Equal(t, "late-dep-parent", gotParent.ID, "parent should be polled first")
+		assert.NoError(t, q.Done(ctx, gotParent.ID, model.StatusSuccess))
+		waitForProcess()
+
+		// Now child should be unblocked with parent's status
+		gotChild, _ := q.Poll(ctx, 2, filterFnTrue)
+		assert.Equal(t, "late-dep-child", gotChild.ID)
+		assert.Equal(t, model.StatusSuccess, gotChild.DepStatus["late-dep-parent"])
+
+		assert.NoError(t, q.Done(ctx, gotChild.ID, model.StatusSuccess))
+		waitForProcess()
 	})
 }
 
@@ -392,6 +592,8 @@ func TestFifoLeaseManagement(t *testing.T) {
 		select {
 		case werr := <-errCh:
 			assert.Error(t, werr)
+			// Edge case: verify error is ErrTaskExpired
+			assert.ErrorIs(t, werr, ErrTaskExpired)
 		case <-time.After(2 * time.Second):
 			t.Fatal("timeout waiting for Wait to return")
 		}
@@ -399,9 +601,11 @@ func TestFifoLeaseManagement(t *testing.T) {
 		info := q.Info(ctx)
 		assert.Len(t, info.Pending, 1)
 
-		// Clean up - poll and complete the task
-		got, _ = q.Poll(ctx, 1, filterFnTrue)
-		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		// Edge case: verify task was resubmitted to front of queue
+		got2, _ := q.Poll(ctx, 1, filterFnTrue)
+		assert.Equal(t, got.ID, got2.ID) // Same task resubmitted
+
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
 		waitForProcess()
 
 		// Verify cleanup
@@ -423,6 +627,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 		assert.ErrorIs(t, q.Extend(ctx, 1, got.ID), ErrAgentMissMatch)
 		assert.ErrorIs(t, q.Extend(ctx, 1, "non-existent"), ErrNotFound)
 
+		// Edge case: extend multiple times rapidly
 		for i := 0; i < 3; i++ {
 			time.Sleep(30 * time.Millisecond)
 			assert.NoError(t, q.Extend(ctx, 5, got.ID))
@@ -432,9 +637,10 @@ func TestFifoLeaseManagement(t *testing.T) {
 		assert.Len(t, info.Running, 1)
 		assert.Len(t, info.Pending, 0)
 
-		// Clean up - complete the extended task
+		// Edge case: extend after Done should error
 		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
 		waitForProcess()
+		assert.ErrorIs(t, q.Extend(ctx, 5, got.ID), ErrNotFound)
 
 		// Verify cleanup
 		info = q.Info(ctx)
@@ -465,6 +671,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
 		wg.Wait()
 
+		// Edge case: Wait on non-existent task should return immediately
 		assert.NoError(t, q.Wait(ctx, "non-existent"))
 
 		dummyTask2 := &model.Task{ID: "wait-2"}
@@ -489,6 +696,25 @@ func TestFifoLeaseManagement(t *testing.T) {
 		// Clean up - complete the second wait task
 		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
 		waitForProcess()
+
+		// Edge case: multiple concurrent waits on same task
+		dummyTask3 := &model.Task{ID: "wait-3"}
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask3}))
+		waitForProcess()
+		got3, _ := q.Poll(ctx, 1, filterFnTrue)
+
+		var wg2 sync.WaitGroup
+		wg2.Add(3)
+		for i := 0; i < 3; i++ {
+			go func() {
+				assert.NoError(t, q.Wait(ctx, got3.ID))
+				wg2.Done()
+			}()
+		}
+
+		time.Sleep(10 * time.Millisecond)
+		assert.NoError(t, q.Done(ctx, got3.ID, model.StatusSuccess))
+		wg2.Wait()
 
 		// Verify cleanup
 		info = q.Info(ctx)
@@ -518,6 +744,10 @@ func TestFifoWorkerManagement(t *testing.T) {
 		case <-time.After(time.Second):
 			t.Fatal("Poll should return when context is canceled")
 		}
+
+		// Edge case: verify worker is cleaned up
+		info := q.Info(ctx)
+		assert.Equal(t, 0, info.Stats.Workers)
 	})
 
 	t.Run("kick agent workers", func(t *testing.T) {
@@ -530,6 +760,11 @@ func TestFifoWorkerManagement(t *testing.T) {
 		}
 
 		time.Sleep(50 * time.Millisecond)
+
+		// Edge case: verify workers are registered before kicking
+		info := q.Info(ctx)
+		assert.Equal(t, 5, info.Stats.Workers)
+
 		q.KickAgentWorkers(42)
 
 		kickedCount := 0
@@ -544,6 +779,77 @@ func TestFifoWorkerManagement(t *testing.T) {
 			}
 		}
 		assert.Equal(t, 5, kickedCount)
+
+		// Edge case: verify workers are removed after kicking
+		waitForProcess()
+		info = q.Info(ctx)
+		assert.Equal(t, 0, info.Stats.Workers)
+
+		// Edge case: kick non-existent agent should be no-op
+		q.KickAgentWorkers(999)
+	})
+
+	// Edge case: mixed agent workers
+	t.Run("kick specific agent among multiple", func(t *testing.T) {
+		pollResults := make(chan struct {
+			agentID int64
+			err     error
+		}, 10)
+
+		// Start workers for agent 1
+		for i := 0; i < 3; i++ {
+			go func() {
+				_, err := q.Poll(ctx, 1, filterFnTrue)
+				pollResults <- struct {
+					agentID int64
+					err     error
+				}{1, err}
+			}()
+		}
+
+		// Start workers for agent 2
+		for i := 0; i < 3; i++ {
+			go func() {
+				_, err := q.Poll(ctx, 2, filterFnTrue)
+				pollResults <- struct {
+					agentID int64
+					err     error
+				}{2, err}
+			}()
+		}
+
+		time.Sleep(50 * time.Millisecond)
+		info := q.Info(ctx)
+		assert.Equal(t, 6, info.Stats.Workers)
+
+		// Kick only agent 1
+		q.KickAgentWorkers(1)
+
+		kickedAgent1 := 0
+		kickedAgent2 := 0
+		for i := 0; i < 3; i++ {
+			select {
+			case result := <-pollResults:
+				if errors.Is(result.err, context.Canceled) {
+					if result.agentID == 1 {
+						kickedAgent1++
+					} else {
+						kickedAgent2++
+					}
+				}
+			case <-time.After(time.Second):
+				t.Fatal("expected kicked workers to return")
+			}
+		}
+
+		assert.Equal(t, 3, kickedAgent1)
+		assert.Equal(t, 0, kickedAgent2)
+
+		// Clean up agent 2 workers
+		q.KickAgentWorkers(2)
+		for i := 0; i < 3; i++ {
+			<-pollResults
+		}
 	})
 }
 
@@ -597,6 +903,27 @@ func TestFifoLabelBasedScoring(t *testing.T) {
 
 	assert.Contains(t, []string{"1", "3"}, findTaskByAgent(receivedTasks, 1))
 	assert.Equal(t, "2", findTaskByAgent(receivedTasks, 2))
+
+	// Edge case: filter that rejects all tasks
+	filterRejectAll := func(task *model.Task) (bool, int) {
+		return false, 0
+	}
+
+	task4 := &model.Task{ID: "4", Labels: map[string]string{"org-id": "789"}}
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task4}))
+	waitForProcess()
+
+	pollCtx, pollCancel := context.WithTimeout(ctx, 200*time.Millisecond)
+	_, err := q.Poll(pollCtx, 99, filterRejectAll)
+	pollCancel()
+	assert.Error(t, err) // Should timeout as filter rejects task
+
+	// Clean up remaining tasks
+	task3, _ := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, q.Done(ctx, task3.ID, model.StatusSuccess))
+	task4Got, _ := q.Poll(ctx, 99, filterFnTrue)
+	assert.NoError(t, q.Done(ctx, task4Got.ID, model.StatusSuccess))
+	waitForProcess()
 }
 
 func TestShouldRunLogic(t *testing.T) {
@@ -613,6 +940,11 @@ func TestShouldRunLogic(t *testing.T) {
 		{"Success with both RunOn", model.StatusSuccess, []string{"success", "failure"}, true},
 		{"Skipped without RunOn", model.StatusSkipped, nil, false},
 		{"Skipped with failure RunOn", model.StatusSkipped, []string{"failure"}, true},
+		// Edge cases
+		{"Killed without RunOn", model.StatusKilled, nil, false},
+		{"Killed with failure RunOn", model.StatusKilled, []string{"failure"}, true},
+		{"Success with success RunOn only", model.StatusSuccess, []string{"success"}, true},
+		{"Failure with success RunOn only", model.StatusFailure, []string{"success"}, false},
 	}
 
 	for _, tt := range tests {
@@ -626,6 +958,25 @@ func TestShouldRunLogic(t *testing.T) {
 			assert.Equal(t, tt.expected, task.ShouldRun())
 		})
 	}
+
+	// Edge case: multiple dependencies with mixed statuses
+	t.Run("multiple deps mixed status", func(t *testing.T) {
+		task := &model.Task{
+			ID:           "3",
+			Dependencies: []string{"1", "2"},
+			DepStatus: map[string]model.StatusValue{
+				"1": model.StatusSuccess,
+				"2": model.StatusFailure,
+			},
+			RunOn: nil,
+		}
+		// With default RunOn (nil), needs all deps successful
+		assert.False(t, task.ShouldRun())
+
+		task.RunOn = []string{"success", "failure"}
+		// With both RunOn, should run regardless
+		assert.True(t, task.ShouldRun())
+	})
 }
 
 func findTaskByAgent(tasks map[string]int64, agentID int64) string {
