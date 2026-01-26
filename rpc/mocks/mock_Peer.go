@@ -8,7 +8,7 @@ import (
 	"context"
 
 	mock "github.com/stretchr/testify/mock"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
 // NewMockPeer creates a new instance of MockPeer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
