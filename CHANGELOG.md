@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @myselfghost, @qwerty287
+@6543, @Pnkcaht, @myselfghost, @qwerty287
 
 ### 🔒 Security
 
@@ -25,6 +25,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix docker backend to kill container on cancel [[#6018](https://github.com/woodpecker-ci/woodpecker/pull/6018)]
 - Local backend handle canceled steps case [[#6008](https://github.com/woodpecker-ci/woodpecker/pull/6008)]
 
 ### 📚 Documentation
