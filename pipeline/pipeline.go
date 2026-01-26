@@ -250,9 +250,24 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 // Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
+	// Start the step container/process.
 	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
+
+	// Always ensure the step is destroyed, regardless of how this function exits
+	// (success, error, or context cancellation).
+	//
+	// We intentionally use context.Background() to make sure cleanup is not
+	// interrupted by cancellation.
+	defer func() {
+		if err := r.engine.DestroyStep(context.Background(), step, r.taskUUID); err != nil {
+			if r.logger != nil {
+				logger := r.MakeLogger()
+				logger.Error().Err(err).Msg("failed to destroy step")
+			}
+		}
+	}()
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
@@ -273,23 +288,21 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		}()
 	}
 
-	// nothing else to do, this is a detached process.
+	// Nothing else to do, this is a detached process.
 	if step.Detached {
 		return nil, nil
 	}
 
-	// We wait until all data was logged. (Needed for some backends like local as WaitStep kills the log stream)
+	// Wait until all logs are consumed.
+	// Needed for some backends (e.g. local) where WaitStep stops the log stream.
 	wg.Wait()
 
+	// Wait for the step to finish.
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			return waitState, ErrCancel
 		}
-		return nil, err
-	}
-
-	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
 
