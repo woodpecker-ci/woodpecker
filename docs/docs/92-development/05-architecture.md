@@ -47,7 +47,8 @@
 | `agent/rpc/**` | gRPC client for agent-server communication           | `rpc`, `pipeline/backend/types`, std and external libs |
 | `cmd/agent/**` | CLI interface for starting and configuring the agent | `agent`, std and external libs                         |
 
-The agent is a remote worker that connects to the server via gRPC to receive pipeline execution instructions and report back execution state and logs. The agent polls the server's queue for new work, executes pipeline steps using the pipeline engine, and streams results back to the server.
+The agent is a remote worker that connects to the server via gRPC to receive pipeline execution instructions and report back execution state and logs.
+The agent polls the server's queue for new work, executes pipeline steps using the pipeline engine, and streams results back to the server.
 
 TODO: Review cmd/agent/core to determine if any logic should be moved into the agent package for better separation of concerns.
 
@@ -71,6 +72,9 @@ TODO: Review cmd/agent/core to determine if any logic should be moved into the a
 | `cli/update/**`          | self-updater for the CLI binary                                         | std and external libs                                                            |
 | `cmd/cli/**`             | CLI entry point and command structure                                   | `cli/**`                                                                         |
 
-The CLI provides a command-line interface for interacting with Woodpecker servers. It supports managing multiple server contexts, allowing users to work with different Woodpecker instances. Each subcommand is organized into its own package under `cli/<subcommand>/`. The `cli/exec` subcommand allows local pipeline execution for testing and development by combining pipeline parsing and execution without requiring a running server or agent.
+The CLI provides a command-line interface for interacting with Woodpecker servers.
+Each subcommand is organized into its own package under `cli/<subcommand>/`.
+
+The `cli/exec` subcommand allows local pipeline execution for testing and development by combining pipeline parsing and execution without requiring a running server or agent.
 
 - `../` = `cli/`
