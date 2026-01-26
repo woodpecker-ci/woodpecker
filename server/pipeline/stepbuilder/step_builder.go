@@ -139,7 +139,13 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &errorTypes.PipelineError{Message: err.Error(), Type: errorTypes.PipelineErrorTypeCompiler}
+		return nil, multierr.Append(
+			errorsAndWarnings,
+			&errorTypes.PipelineError{
+				Message: err.Error(),
+				Type:    errorTypes.PipelineErrorTypeCompiler,
+			},
+		)
 	}
 
 	// lint pipeline
@@ -170,7 +176,17 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"pipeline config could not be parsed",
 		)
-		return nil, multierr.Append(errorsAndWarnings, err)
+		return nil, multierr.Append(
+			errorsAndWarnings,
+			&errorTypes.PipelineError{
+				Message: fmt.Sprintf(
+					"workflow %s skipped by when condition",
+					workflow.Name,
+				),
+				Type: errorTypes.PipelineErrorTypeCompiler,
+			},
+		)
+
 	}
 
 	ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
@@ -179,7 +195,17 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	if len(ir.Stages) == 0 {
-		return nil, nil
+		return nil, multierr.Append(
+			errorsAndWarnings,
+			&errorTypes.PipelineError{
+				Message: fmt.Sprintf(
+					"workflow %s has no runnable stages",
+					workflow.Name,
+				),
+				Type: errorTypes.PipelineErrorTypeCompiler,
+			},
+		)
+
 	}
 
 	item = &Item{
