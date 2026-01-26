@@ -1,9 +1,0 @@
-skip_clone: true
-
-steps:
-  sleep_30s:
-    image: bash
-    commands:
-      - echo wait 30s
-      - sleep 30s
-      - echo wait done
