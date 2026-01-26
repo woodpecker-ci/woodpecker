@@ -88,23 +88,23 @@ func (q *fifo) Poll(c context.Context, agentID int64, filter FilterFn) (*model.T
 	q.Lock()
 	ctx, stop := context.WithCancelCause(c)
 
-	_worker := &worker{
+	w := &worker{
 		agentID: agentID,
 		channel: make(chan *model.Task, 1),
 		filter:  filter,
 		stop:    stop,
 	}
-	q.workers[_worker] = struct{}{}
+	q.workers[w] = struct{}{}
 	q.Unlock()
 
 	for {
 		select {
 		case <-ctx.Done():
 			q.Lock()
-			delete(q.workers, _worker)
+			delete(q.workers, w)
 			q.Unlock()
 			return nil, ctx.Err()
-		case t := <-_worker.channel:
+		case t := <-w.channel:
 			return t, nil
 		}
 	}
@@ -301,12 +301,10 @@ func (q *fifo) filterWaiting() {
 }
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
-	var next *list.Element
 	var bestWorker *worker
 	var bestScore int
 
-	for element := q.pending.Front(); element != nil; element = next {
-		next = element.Next()
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task := element.Value.(*model.Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
