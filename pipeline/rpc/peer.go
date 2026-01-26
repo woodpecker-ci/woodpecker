@@ -17,12 +17,9 @@ package rpc
 
 import (
 	"context"
-	"errors"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
-
-var ErrWorkflowCanceled = errors.New("workflow canceled")
 
 type (
 	// Filter defines filters for fetching items from the queue.

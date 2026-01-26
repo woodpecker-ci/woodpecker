@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -90,8 +91,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 
 	logger.Debug().Msg("received execution")
 
-	workflowCtx, cancel := context.WithTimeout(ctxMeta, timeout)
-	defer cancel()
+	workflowCtx, cancelWorkflowCtx := context.WithTimeout(ctxMeta, timeout)
+	defer cancelWorkflowCtx()
 
 	// Add sigterm support for internal context.
 	// Required when the pipeline is terminated by external signals
@@ -100,18 +101,20 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		logger.Error().Msg("Received sigterm termination signal")
 	})
 
-	canceled := false
+	canceled := atomic.Bool{}
+	canceled.Store(false)
+
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
 		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
-			if errors.Is(err, rpc.ErrWorkflowCanceled) {
-				canceled = true
+			if errors.Is(err, pipeline.ErrCancel) {
+				canceled.Store(true)
 				logger.Debug().Err(err).Msg("cancel signal received")
-				cancel()
+				cancelWorkflowCtx()
 			} else {
 				logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
-				cancel()
+				cancelWorkflowCtx()
 			}
 		} else {
 			logger.Debug().Msg("done listening for cancel signal")
@@ -161,8 +164,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 	state.Finished = time.Now().Unix()
 
 	if errors.Is(err, pipeline.ErrCancel) {
-		canceled = true
-	} else if canceled {
+		canceled.Store(true)
+	} else if canceled.Load() {
 		err = errors.Join(err, pipeline.ErrCancel)
 	}
 
@@ -172,7 +175,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 
 	logger.Debug().
 		Str("error", state.Error).
-		Bool("canceled", canceled).
+		Bool("canceled", canceled.Load()).
 		Msg("workflow finished")
 
 	logger.Debug().Msg("uploading logs and traces / states ...")

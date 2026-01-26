@@ -27,6 +27,7 @@ import (
 	"google.golang.org/grpc/status"
 	grpcproto "google.golang.org/protobuf/proto"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
@@ -179,7 +180,7 @@ func (c *client) Wait(ctx context.Context, workflowID string) (err error) {
 		default:
 			switch {
 			case strings.Contains(err.Error(), "desc = queue: task canceled"):
-				return rpc.ErrWorkflowCanceled
+				return pipeline.ErrCancel
 			default:
 				log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 				return err

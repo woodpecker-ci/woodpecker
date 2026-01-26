@@ -90,6 +90,7 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 }
 
 // Run starts the execution of a workflow and waits for it to complete.
+// TODO: here the cancle error is not propagated!
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
 	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
