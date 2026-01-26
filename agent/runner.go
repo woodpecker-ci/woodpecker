@@ -105,9 +105,14 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		logger.Debug().Msg("listen for cancel signal")
 
 		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
-			canceled = true
-			logger.Warn().Err(err).Msg("cancel signal received")
-			cancel()
+			if errors.Is(err, rpc.ErrWorkflowCanceled) {
+				canceled = true
+				logger.Debug().Err(err).Msg("cancel signal received")
+				cancel()
+			} else {
+				logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
+				cancel()
+			}
 		} else {
 			logger.Debug().Msg("done listening for cancel signal")
 		}

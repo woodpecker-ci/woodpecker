@@ -17,9 +17,12 @@ package rpc
 
 import (
 	"context"
+	"errors"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
+
+var ErrWorkflowCanceled = errors.New("workflow canceled")
 
 type (
 	// Filter defines filters for fetching items from the queue.
@@ -77,6 +80,8 @@ type Peer interface {
 	Next(c context.Context, f Filter) (*Workflow, error)
 
 	// Wait blocks until the workflow is complete
+	// Also signals via err if workflow got canceled
+	// TODO: we nee a proper api for the server to cancel a workflow not do it indirectly
 	Wait(c context.Context, workflowID string) error
 
 	// Init signals the workflow is initialized
