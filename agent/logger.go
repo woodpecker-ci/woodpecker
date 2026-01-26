@@ -20,9 +20,9 @@ import (
 
 	"github.com/rs/zerolog"
 
+	"go.woodpecker-ci.org/woodpecker/v3/agent/log"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
