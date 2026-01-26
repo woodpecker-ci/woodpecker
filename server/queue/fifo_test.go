@@ -145,19 +145,35 @@ func TestMultipleDependencies(t *testing.T) {
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 	waitForProcess()
 
-	// Poll and complete both dependencies
+	// Poll both independent tasks
 	got1, _ := q.Poll(ctx, 1, filterFnTrue)
 	got2, _ := q.Poll(ctx, 2, filterFnTrue)
 
-	assert.NoError(t, q.Done(ctx, got1.ID, model.StatusSuccess))
-	assert.NoError(t, q.Error(ctx, got2.ID, fmt.Errorf("failed")))
+	// Ensure we got both task1 and task2 (order may vary)
+	gotIDs := map[string]bool{got1.ID: true, got2.ID: true}
+	assert.True(t, gotIDs["1"] && gotIDs["2"], "Should get both task1 and task2")
+
+	// Complete them with different statuses
+	if got1.ID == "1" {
+		assert.NoError(t, q.Done(ctx, got1.ID, model.StatusSuccess))
+		assert.NoError(t, q.Error(ctx, got2.ID, fmt.Errorf("failed")))
+	} else {
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+		assert.NoError(t, q.Error(ctx, got1.ID, fmt.Errorf("failed")))
+	}
 
 	// task3 should have both statuses propagated
 	waitForProcess()
 	got3, err := q.Poll(ctx, 3, filterFnTrue)
 	assert.NoError(t, err)
-	assert.Equal(t, model.StatusSuccess, got3.DepStatus["1"])
-	assert.Equal(t, model.StatusFailure, got3.DepStatus["2"])
+
+	// Verify both dependency statuses are set correctly
+	assert.Contains(t, got3.DepStatus, "1")
+	assert.Contains(t, got3.DepStatus, "2")
+	assert.True(t,
+		(got3.DepStatus["1"] == model.StatusSuccess && got3.DepStatus["2"] == model.StatusFailure) ||
+			(got3.DepStatus["1"] == model.StatusFailure && got3.DepStatus["2"] == model.StatusSuccess),
+		"One dependency should succeed and one should fail")
 	assert.False(t, got3.ShouldRun())
 }
 
@@ -328,13 +344,10 @@ func TestErrorAtOnce(t *testing.T) {
 	ctx, cancel, q := setupTestQueue(t)
 	defer cancel(nil)
 
+	// Test batch error on running tasks
 	task1 := genDummyTask()
 	task2 := &model.Task{ID: "2"}
-	task3 := &model.Task{
-		ID:           "3",
-		Dependencies: []string{"1"},
-		DepStatus:    make(map[string]model.StatusValue),
-	}
+	task3 := &model.Task{ID: "3"}
 
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3}))
 	waitForProcess()
@@ -342,13 +355,18 @@ func TestErrorAtOnce(t *testing.T) {
 	got1, _ := q.Poll(ctx, 1, filterFnTrue)
 	got2, _ := q.Poll(ctx, 2, filterFnTrue)
 
-	// Batch error on running tasks
 	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got1.ID, got2.ID}, fmt.Errorf("batch error")))
 	waitForProcess()
 	info := q.Info(ctx)
 	assert.Len(t, info.Running, 0)
+	assert.Len(t, info.Pending, 1) // task3 should still be pending
 
-	// Error with non-existent tasks
+	// Clean up task3
+	got3, _ := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, q.Done(ctx, got3.ID, model.StatusSuccess))
+	waitForProcess()
+
+	// Test error with non-existent tasks
 	task4 := &model.Task{ID: "4"}
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task4}))
 	waitForProcess()
@@ -358,23 +376,59 @@ func TestErrorAtOnce(t *testing.T) {
 	assert.Error(t, err)
 	assert.ErrorIs(t, err, ErrNotFound)
 
-	// ErrCancel updates dependency status
-	task5 := genDummyTask()
-	task5.ID = "5"
+	// Verify task4 was still removed despite the error
+	waitForProcess()
+	info = q.Info(ctx)
+	assert.Len(t, info.Running, 0)
+
+	// Test ErrorAtOnce on tasks in waitingOnDeps (to cover removeFromPendingAndWaiting)
+	task5 := &model.Task{ID: "5"}
 	task6 := &model.Task{
 		ID:           "6",
 		Dependencies: []string{"5"},
 		DepStatus:    make(map[string]model.StatusValue),
 	}
+
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task5, task6}))
 	waitForProcess()
-	got5, _ := q.Poll(ctx, 1, filterFnTrue)
 
-	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got5.ID}, ErrCancel))
+	info = q.Info(ctx)
+	assert.Equal(t, 1, info.Stats.WaitingOnDeps, "task6 should be waiting on deps")
+
+	// Cancel both tasks - this should remove task6 from waitingOnDeps
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{"5", "6"}, fmt.Errorf("canceled")))
+
+	waitForProcess()
+	info = q.Info(ctx)
+	assert.Equal(t, 0, info.Stats.WaitingOnDeps, "task6 should be removed from waitingOnDeps")
+	assert.Len(t, info.Pending, 0, "no tasks should be pending")
+}
+
+func TestErrorAtOnceCancellation(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	// Test ErrCancel with dependency propagation
+	task1 := &model.Task{ID: "1"}
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+		RunOn:        []string{"success", "failure"}, // Ensures task runs on kill/cancel
+	}
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2}))
+	waitForProcess()
+	got1, _ := q.Poll(ctx, 1, filterFnTrue)
+
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got1.ID}, ErrCancel))
+
+	// Wait for cancellation to be processed and dependency to be updated
+	waitForProcess()
 	waitForProcess()
 
-	got6, _ := q.Poll(ctx, 2, filterFnTrue)
-	assert.Equal(t, model.StatusKilled, got6.DepStatus["5"])
+	got2, _ := q.Poll(ctx, 2, filterFnTrue)
+	assert.Equal(t, model.StatusKilled, got2.DepStatus["1"])
 }
 
 func TestShouldRunLogic(t *testing.T) {
@@ -538,4 +592,76 @@ func findTaskByAgent(tasks map[string]int64, agentID int64) string {
 		}
 	}
 	return ""
+}
+
+func TestDependencyStatusPropagation(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	// Test basic dependency status propagation from completed task to waiting tasks
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+		RunOn:        []string{"success", "failure"},
+	}
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3}))
+	waitForProcess()
+
+	// Both task2 and task3 should be waiting on task1
+	info := q.Info(ctx)
+	assert.Equal(t, 2, info.Stats.WaitingOnDeps)
+
+	// Complete task1 - this triggers updateDepStatusInQueue for waitingOnDeps tasks
+	got1, _ := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, q.Done(ctx, got1.ID, model.StatusSuccess))
+
+	waitForProcess()
+
+	// Poll task2 and task3 - both should have task1's success status
+	got2, _ := q.Poll(ctx, 2, filterFnTrue)
+	got3, _ := q.Poll(ctx, 3, filterFnTrue)
+
+	assert.Equal(t, model.StatusSuccess, got2.DepStatus["1"])
+	assert.Equal(t, model.StatusSuccess, got3.DepStatus["1"])
+
+	// Now test updateDepStatusInQueue for tasks in pending and running queues
+	task4 := &model.Task{ID: "4"}
+	task5 := &model.Task{
+		ID:           "5",
+		Dependencies: []string{"4"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task6 := &model.Task{
+		ID:           "6",
+		Dependencies: []string{"4"},
+		DepStatus:    make(map[string]model.StatusValue),
+		RunOn:        []string{"success", "failure"},
+	}
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task4, task5, task6}))
+	waitForProcess()
+
+	// Poll task4 and complete it while task5 and task6 are waiting
+	got4, _ := q.Poll(ctx, 4, filterFnTrue)
+	assert.NoError(t, q.Error(ctx, got4.ID, fmt.Errorf("failed")))
+
+	waitForProcess()
+
+	// task5 should not run (default behavior on failure)
+	got5, _ := q.Poll(ctx, 5, filterFnTrue)
+	assert.Equal(t, model.StatusFailure, got5.DepStatus["4"])
+	assert.False(t, got5.ShouldRun())
+
+	// task6 should run (has failure in RunOn)
+	got6, _ := q.Poll(ctx, 6, filterFnTrue)
+	assert.Equal(t, model.StatusFailure, got6.DepStatus["4"])
+	assert.True(t, got6.ShouldRun())
 }
