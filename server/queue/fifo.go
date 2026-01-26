@@ -18,7 +18,6 @@ import (
 	"container/list"
 	"context"
 	"errors"
-	"fmt"
 	"slices"
 	"sync"
 	"time"
@@ -58,8 +57,6 @@ type fifo struct {
 // processTimeInterval is the time till the queue rearranges things,
 // as the agent pull in 10 milliseconds we should also give them work asap.
 const processTimeInterval = 100 * time.Millisecond
-
-var ErrWorkerKicked = fmt.Errorf("worker was kicked")
 
 // NewMemoryQueue returns a new fifo queue.
 func NewMemoryQueue(ctx context.Context) Queue {
@@ -123,7 +120,8 @@ func (q *fifo) Error(_ context.Context, id string, err error) error {
 	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
-// ErrorAtOnce signals multiple done are complete with an error.
+// ErrorAtOnce signals multiple tasks are done and complete with an error.
+// If still pending they will just get removed from the queue.
 func (q *fifo) ErrorAtOnce(_ context.Context, ids []string, err error) error {
 	if errors.Is(err, ErrCancel) {
 		return q.finished(ids, model.StatusKilled, err)
@@ -131,6 +129,7 @@ func (q *fifo) ErrorAtOnce(_ context.Context, ids []string, err error) error {
 	return q.finished(ids, model.StatusFailure, err)
 }
 
+// locks the queue itself!
 func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
 	q.Lock()
 	defer q.Unlock()
@@ -354,6 +353,7 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 	return false
 }
 
+// expects the q to be currently owned e.g. locked by caller!
 func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		pending, _ := element.Value.(*model.Task)
@@ -382,7 +382,7 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 	}
 }
 
-// removeFromPendingAndWaiting expects the q to be currently owned e.g. locked by caller
+// expects the q to be currently owned e.g. locked by caller!
 func (q *fifo) removeFromPendingAndWaiting(taskID string) error {
 	log.Debug().Msgf("queue: trying to remove %s", taskID)
 
@@ -406,6 +406,6 @@ func (q *fifo) removeFromPendingAndWaiting(taskID string) error {
 		}
 	}
 
-	// my bad could not be found
+	// well it could not be found
 	return ErrNotFound
 }
