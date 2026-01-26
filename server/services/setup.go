@@ -68,6 +68,9 @@ func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, e
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, client)
+		if c.Bool("config-service-exclusive") {
+			return httpFetcher, nil
+		}
 		return config.NewCombined(configFetcher, httpFetcher), nil
 	}
 
