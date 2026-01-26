@@ -269,7 +269,7 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 	go func() {
 		select {
 		case <-ctx.Done():
-			_ = e.client.ContainerKill(context.Background(), containerName, "9")
+			_ = e.client.ContainerKill(context.Background(), containerName, "9") //nolint:contextcheck
 		case <-done:
 		}
 	}()
