@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package log_test
+package utils_test
 
 import (
 	"io"
@@ -23,7 +23,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 type testWriter struct {
@@ -61,7 +61,7 @@ func TestCopyLineByLine(t *testing.T) {
 	done := make(chan struct{})
 
 	go func() {
-		err := log.CopyLineByLine(testWriter, r, 1024)
+		err := utils.CopyLineByLine(testWriter, r, 1024)
 		assert.NoError(t, err)
 		close(done)
 	}()
@@ -118,7 +118,7 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 
 	go func() {
 		defer wg.Done()
-		err := log.CopyLineByLine(testWriter, r, 4)
+		err := utils.CopyLineByLine(testWriter, r, 4)
 		assert.NoError(t, err)
 	}()
 
@@ -161,7 +161,7 @@ func TestStringReader(t *testing.T) {
 		writes: make([]string, 0),
 	}
 
-	err := log.CopyLineByLine(testWriter, r, 1024)
+	err := utils.CopyLineByLine(testWriter, r, 1024)
 	assert.NoError(t, err)
 
 	writes := testWriter.GetWrites()
@@ -179,7 +179,7 @@ func TestCopyLineByLineNewlineCharacter(t *testing.T) {
 	done := make(chan struct{})
 
 	go func() {
-		err := log.CopyLineByLine(testWriter, r, 4)
+		err := utils.CopyLineByLine(testWriter, r, 4)
 		assert.NoError(t, err)
 		close(done)
 	}()
@@ -243,7 +243,7 @@ func TestCopyLineByLineLongLine(t *testing.T) {
 	maxSize := 10
 
 	go func() {
-		err := log.CopyLineByLine(testWriter, r, maxSize)
+		err := utils.CopyLineByLine(testWriter, r, maxSize)
 		assert.NoError(t, err)
 		close(done)
 	}()
@@ -296,7 +296,7 @@ func TestCopyLineByLineWriteChunks(t *testing.T) {
 	maxSize := 8
 
 	go func() {
-		err := log.CopyLineByLine(testWriter, r, maxSize)
+		err := utils.CopyLineByLine(testWriter, r, maxSize)
 		assert.NoError(t, err)
 		close(done)
 	}()
