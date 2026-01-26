@@ -3,8 +3,8 @@ digraph woodpecker {
     rankdir=LR;
     bgcolor="#1a1a1a";
     pad=0.5;
-    nodesep=0.8;
-    ranksep=1.2;
+    nodesep=0.6;
+    ranksep=1.8;
     splines=ortho;
 
     // Default node style
@@ -26,89 +26,19 @@ digraph woodpecker {
 
     // ========== SUBGRAPHS ==========
 
-    // Pipelines (left side, beige box)
-    subgraph cluster_pipelines {
-        label="Pipelines";
-        style=filled;
-        color="#2a2a2a";
-        fillcolor="#f5deb3";
-        fontsize=14;
-        fontcolor="#000000";
-
-        pipeline [label="pipeline/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-
-        subgraph cluster_pipeline_backend {
-            label="";
-            style=invis;
-            pipeline_backend [label="pipeline/backend/\n(docker, k8s, local)", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        }
-
-        subgraph cluster_pipeline_frontend {
-            label="";
-            style=invis;
-            pipeline_frontend [label="pipeline/frontend/\n(yaml parsing)", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        }
-    }
-
-    // Agent (left side, beige box)
-    subgraph cluster_agent {
-        label="woodpecker-agent";
-        style=filled;
-        color="#2a2a2a";
-        fillcolor="#f5deb3";
-        fontsize=14;
-        fontcolor="#000000";
-
-        cmd_agent [label="cmd/agent/", fillcolor="#c85a6e", fontcolor="#ffffff"];
-        agent [label="agent/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-    }
-
-    // CLI (top, cyan box)
-    subgraph cluster_cli {
-        label="woodpecker-cli";
-        style=filled;
-        color="#2a2a2a";
-        fillcolor="#a8dcd9";
-        fontsize=14;
-        fontcolor="#000000";
-
-        cmd_cli [label="cmd/cli/", fillcolor="#c85a6e", fontcolor="#ffffff"];
-        cli [label="cli/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        woodpecker_go [label="woodpecker-go/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-    }
-
-    // UI (top right, cyan box)
-    subgraph cluster_ui {
-        label="UI";
-        style=filled;
-        color="#2a2a2a";
-        fillcolor="#a8dcd9";
-        fontsize=14;
-        fontcolor="#000000";
-
-        web [label="web/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-    }
-
-    // GRPC (shared RPC module)
-    subgraph cluster_grpc {
-        label="GRPC";
-        style=filled;
-        color="#2a2a2a";
-        fillcolor="#a8dcd9";
-        fontsize=14;
-        fontcolor="#000000";
-
-        rpc [label="rpc/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-    }
-
-    // Server (main large box)
+    // Server (top left, organized in rows)
     subgraph cluster_server {
-        label="woodpecker-server";
+        label="Server";
         style=filled;
         color="#2a2a2a";
         fillcolor="#d4d4f7";
         fontsize=14;
         fontcolor="#000000";
+
+        // Top row: Entry point and API
+        {rank=same; cmd_server; server_router; server_api; server_web;}
+
+        cmd_server [label="cmd/server/", fillcolor="#c85a6e", fontcolor="#ffffff"];
 
         // API section
         subgraph cluster_api {
@@ -117,14 +47,30 @@ digraph woodpecker {
             color="#8a8aaa";
             fillcolor="#e8e8ff";
 
-            shared_httputil [label="shared/httputil/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-            shared_token [label="shared/token/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-            server_shared [label="server/shared/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-            server_rpc [label="server/rpc/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
             server_router [label="server/router/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
-            server_web [label="server/web/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
             server_api [label="server/api/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
+            server_web [label="server/web/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
+            server_rpc [label="server/rpc/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
         }
+
+        // Second row: Core services
+        {rank=same; server_pipeline; server_queue; server_pubsub; server_logging;}
+
+        server_pipeline [label="server/pipeline/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_queue [label="server/queue/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_pubsub [label="server/pubsub/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_logging [label="server/logging/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // Third row: Supporting services
+        {rank=same; server_cache; server_cron; server_badges; server_ccmenu;}
+
+        server_cache [label="server/cache/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_cron [label="server/cron/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_badges [label="server/badges/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_ccmenu [label="server/ccmenu/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // Fourth row: Data layer boxes
+        {rank=same; server_forge; server_store; server_model;}
 
         // Remote Gating Service (pink box)
         subgraph cluster_remote {
@@ -153,19 +99,10 @@ digraph woodpecker {
             color="#c85a6e";
             fillcolor="#f5deb3";
 
-            model [label="model/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+            server_model [label="server/model/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
         }
 
-        // Other server components
-        server_pubsub [label="server/pubsub/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_logging [label="server/logging/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_queue [label="server/queue/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_cache [label="server/cache/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_cron [label="server/cron/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-
-        cmd_server [label="cmd/server/", fillcolor="#c85a6e", fontcolor="#ffffff"];
-
-        // Extensions (bottom)
+        // Bottom: Extensions
         subgraph cluster_extensions {
             label="Extensions";
             style=filled;
@@ -174,14 +111,149 @@ digraph woodpecker {
 
             server_services [label="server/services/\n[config, secrets, registry,\nenvironment, encryption,\nlog, permissions]", fillcolor="#5a6c7d", fontcolor="#ffffff"];
         }
+
+        // Invisible edges for layout within server
+        cmd_server -> server_router [style=invis];
+        server_router -> server_api [style=invis];
+        server_api -> server_web [style=invis];
+
+        server_router -> server_pipeline [style=invis];
+        server_pipeline -> server_queue [style=invis];
+        server_queue -> server_pubsub [style=invis];
+        server_pubsub -> server_logging [style=invis];
+
+        server_pipeline -> server_cache [style=invis];
+        server_cache -> server_cron [style=invis];
+
+        server_cache -> server_forge [style=invis];
+        server_forge -> server_store [style=invis];
+        server_store -> server_model [style=invis];
+
+        server_forge -> server_services [style=invis];
+    }
+
+    // Agent
+    subgraph cluster_agent {
+        label="Agent";
+        style=filled;
+        color="#2a2a2a";
+        fillcolor="#f5deb3";
+        fontsize=14;
+        fontcolor="#000000";
+
+        {rank=same; cmd_agent; agent;}
+
+        cmd_agent [label="cmd/agent/", fillcolor="#c85a6e", fontcolor="#ffffff"];
+        agent [label="agent/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // Layout within agent
+        cmd_agent -> agent [style=invis];
+    }
+
+    // CLI
+    subgraph cluster_cli {
+        label="CLI";
+        style=filled;
+        color="#2a2a2a";
+        fillcolor="#a8dcd9";
+        fontsize=14;
+        fontcolor="#000000";
+
+        {rank=same; cmd_cli; cli; woodpecker_go;}
+
+        cmd_cli [label="cmd/cli/", fillcolor="#c85a6e", fontcolor="#ffffff"];
+        cli [label="cli/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        woodpecker_go [label="woodpecker-go/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // Layout within CLI
+        cmd_cli -> cli [style=invis];
+        cli -> woodpecker_go [style=invis];
+    }
+
+    // Pipelines (right side, beige box)
+    subgraph cluster_pipelines {
+        label="Pipelines";
+        style=filled;
+        color="#2a2a2a";
+        fillcolor="#f5deb3";
+        fontsize=14;
+        fontcolor="#000000";
+
+        pipeline [label="pipeline/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        pipeline_backend [label="pipeline/backend/\n(docker, k8s, local)", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        pipeline_frontend [label="pipeline/frontend/\n(yaml parsing)", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+    }
+
+    // UI (right side, cyan box)
+    subgraph cluster_ui {
+        label="UI";
+        style=filled;
+        color="#2a2a2a";
+        fillcolor="#a8dcd9";
+        fontsize=14;
+        fontcolor="#000000";
+
+        web [label="web/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+    }
+
+    // GRPC (right side, cyan box)
+    subgraph cluster_grpc {
+        label="GRPC";
+        style=filled;
+        color="#2a2a2a";
+        fillcolor="#a8dcd9";
+        fontsize=14;
+        fontcolor="#000000";
+
+        rpc [label="rpc/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+    }
+
+    // Shared Libs (top right, gray box)
+    subgraph cluster_shared {
+        label="Shared Libs";
+        style=filled;
+        color="#2a2a2a";
+        fillcolor="#e0e0e0";
+        fontsize=14;
+        fontcolor="#000000";
+
+        {rank=same; shared_constant; shared_httputil; shared_logger;}
+        {rank=same; shared_optional; shared_token; shared_utils;}
+
+        shared_constant [label="shared/constant/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_httputil [label="shared/httputil/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_logger [label="shared/logger/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_optional [label="shared/optional/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_token [label="shared/token/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_utils [label="shared/utils/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // Layout hints for shared libs
+        shared_constant -> shared_optional [style=invis];
+        shared_httputil -> shared_token [style=invis];
+        shared_logger -> shared_utils [style=invis];
     }
 
     // External components
     scm [label="SCM Providers", shape=ellipse, fillcolor="#e8e8e8", fontcolor="#000000"];
     database [label="Database", shape=cylinder, fillcolor="#e8e8e8", fontcolor="#000000"];
 
-    // Version (bottom left)
+    // Version (bottom right)
     version [label="version/", fillcolor="#c0c0c0", fontcolor="#000000"];
+
+    // ========== RANK CONSTRAINTS ==========
+
+    // Force vertical separation of the three main components on the left
+    // Use invisible nodes to control spacing
+    invisible_top [style=invis, width=0, height=0];
+    invisible_mid [style=invis, width=0, height=0];
+    invisible_bot [style=invis, width=0, height=0];
+
+    {rank=min; invisible_top; cmd_server;}
+    {rank=same; invisible_mid; cmd_agent;}
+    {rank=max; invisible_bot; cmd_cli;}
+
+    // Create invisible chain to force vertical ordering
+    invisible_top -> invisible_mid -> invisible_bot [style=invis];
 
     // ========== CONNECTIONS ==========
 
@@ -189,11 +261,15 @@ digraph woodpecker {
     cmd_cli -> cli;
     cli -> woodpecker_go;
     cli -> pipeline;
+    cli -> shared_httputil;
+    cli -> shared_logger;
 
     // Agent connections
     cmd_agent -> agent;
     agent -> pipeline;
     agent -> rpc;
+    agent -> shared_constant;
+    agent -> shared_utils;
 
     // Pipeline internal connections
     pipeline -> pipeline_backend;
@@ -208,26 +284,45 @@ digraph woodpecker {
     server_api -> server_store;
     server_api -> server_pubsub;
     server_api -> server_queue;
-    server_api -> model;
+    server_api -> server_model;
+    server_api -> server_pipeline;
+    server_api -> shared_httputil;
+    server_api -> shared_token;
 
     server_rpc -> agent [style=dashed, color="#9370db"];
     server_rpc -> rpc;
     server_rpc -> server_queue;
     server_rpc -> server_logging;
     server_rpc -> server_pubsub;
+    server_rpc -> server_pipeline;
 
     server_web -> web [style=dashed, color="#2e8b57"];
+    server_web -> shared_token;
 
     server_forge -> scm [style=dashed, color="#9370db"];
     server_store -> database [style=dashed, color="#9370db"];
 
+    server_pipeline -> server_forge;
+    server_pipeline -> server_model;
+    server_pipeline -> server_queue;
+    server_pipeline -> server_pubsub;
+
     // Extensions connections
     cmd_server -> server_services;
+    server_services -> server_forge;
+    server_services -> server_store;
+
+    // Shared libs usage
+    server_router -> shared_logger;
+    cmd_server -> shared_logger;
+    cmd_server -> shared_constant;
+    cmd_server -> shared_utils;
 
     // Version connections
     cmd_agent -> version;
     cmd_cli -> version;
     cmd_server -> version;
+    shared_httputil -> version;
 
     // Cross-component connections
     pipeline -> version;
