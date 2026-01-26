@@ -119,6 +119,9 @@ func (m *manager) RegistryService() registry.Service {
 
 func (m *manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
 	if repo.ConfigExtensionEndpoint != "" {
+		if repo.ConfigExtensionExclusive {
+			return config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.client)
+		}
 		return config.NewCombined(m.config, config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.client))
 	}
 

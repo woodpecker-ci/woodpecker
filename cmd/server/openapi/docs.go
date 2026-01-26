@@ -5223,6 +5223,9 @@ const docTemplate = `{
                 "config_extension_endpoint": {
                     "type": "string"
                 },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5316,6 +5319,9 @@ const docTemplate = `{
                 "config_extension_endpoint": {
                     "type": "string"
                 },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5399,6 +5405,9 @@ const docTemplate = `{
                 },
                 "config_extension_endpoint": {
                     "type": "string"
+                },
+                "config_extension_exclusive": {
+                    "type": "boolean"
                 },
                 "config_file": {
                     "type": "string"
