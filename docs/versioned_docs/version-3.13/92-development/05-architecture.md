@@ -11,10 +11,11 @@
 | package            | meaning                                                        | imports                               |
 | ------------------ | -------------------------------------------------------------- | ------------------------------------- |
 | `cmd/**`           | parse command-line args & environment to stat server/cli/agent | all other                             |
-| `agent/**`         | code only agent (remote worker) will need                      | `pipeline`, `shared`                  |
+| `agent/**`         | code only agent (remote worker) will need                      | `pipeline`, `rpc`, `shared`           |
 | `cli/**`           | code only cli tool does need                                   | `pipeline`, `shared`, `woodpecker-go` |
-| `server/**`        | code only server will need                                     | `pipeline`, `shared`                  |
-| `pipeline/**`      | core ci/cd engine from parsing to execution                    | TODO                                  |
+| `server/**`        | code only server will need                                     | `pipeline`, `rpc`, `shared`           |
+| `pipeline/**`      | core ci/cd engine from parsing to execution                    | `shared`                              |
+| `rpc/**`           | RPC interface for agent-server communication                   | `pipeline`                              |
 | `shared/**`        | code shared for all three main tools (go help utils)           | only std and external libs            |
 | `woodpecker-go/**` | go client for server rest api                                  | std                                   |
 
@@ -25,7 +26,7 @@
 | `server/api/**`      | handle web requests from `server/router`                                            | `pipeline`, `../badges`, `../ccmenu`, `../logging`, `../model`, `../pubsub`, `../queue`, `../forge`, `../shared`, `../store`, `shared`, (TODO: mv `server/router/middleware/session`) |
 | `server/badges/**`   | generate svg badges for pipelines                                                   | `../model`                                                                                                                                                                            |
 | `server/ccmenu/**`   | generate xml ccmenu for pipelines                                                   | `../model`                                                                                                                                                                            |
-| `server/grpc/**`     | gRPC server agents can connect to                                                   | `pipeline/rpc/**`, `../logging`, `../model`, `../pubsub`, `../queue`, `../forge`, `../pipeline`, `../store`                                                                           |
+| `server/grpc/**`     | gRPC server agents can connect to                                                   | `rpc`, `../logging`, `../model`, `../pubsub`, `../queue`, `../forge`, `../pipeline`, `../store`                                                                                      |
 | `server/logging/**`  | logging lib for gPRC server to stream logs while running                            | std                                                                                                                                                                                   |
 | `server/model/**`    | structs for store (db) and api (json)                                               | std                                                                                                                                                                                   |
 | `server/plugins/**`  | plugins for server                                                                  | `../model`, `../forge`                                                                                                                                                                |

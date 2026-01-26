@@ -114,7 +114,6 @@ linters:
             - pkg: go.woodpecker-ci.org/woodpecker/v3/agent
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd
-            - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline
             - pkg: go.woodpecker-ci.org/woodpecker/v3/server
             - pkg: go.woodpecker-ci.org/woodpecker/v3/web
         shared:
