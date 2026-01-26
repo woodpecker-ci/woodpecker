@@ -18,8 +18,6 @@
 | `shared/**`        | code shared for all three main tools (go help utils)           | only std and external libs            |
 | `woodpecker-go/**` | go client for server rest api                                  | std                                   |
 
-TODO: mv pipeline/rpc into rpc as it is not used by the engine just between server and agent
-
 ### Server
 
 | package              | meaning                                                                             | imports                                                                                                                                                                               |

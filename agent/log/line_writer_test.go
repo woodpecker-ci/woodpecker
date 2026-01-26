@@ -21,8 +21,8 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/agent/log"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc/mocks"
 )
 
 func TestLineWriter(t *testing.T) {
