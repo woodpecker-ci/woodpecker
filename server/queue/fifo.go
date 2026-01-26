@@ -198,11 +198,11 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	stats.Stats.Running = len(q.running)
 
 	for element := q.pending.Front(); element != nil; element = element.Next() {
-		task := element.Value.(*model.Task)
+		task, _ := element.Value.(*model.Task)
 		stats.Pending = append(stats.Pending, task)
 	}
 	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		task := element.Value.(*model.Task)
+		task, _ := element.Value.(*model.Task)
 		stats.WaitingOnDeps = append(stats.WaitingOnDeps, task)
 	}
 	for _, entry := range q.running {
@@ -286,7 +286,7 @@ func (q *fifo) filterWaiting() {
 	q.waitingOnDeps = list.New()
 	var filtered []*list.Element
 	for element := q.pending.Front(); element != nil; element = element.Next() {
-		task := element.Value.(*model.Task)
+		task, _ := element.Value.(*model.Task)
 		if q.depsInQueue(task) {
 			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
 			q.waitingOnDeps.PushBack(task)
@@ -305,7 +305,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	var bestScore int
 
 	for element := q.pending.Front(); element != nil; element = element.Next() {
-		task := element.Value.(*model.Task)
+		task, _ := element.Value.(*model.Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
 		for worker := range q.workers {
@@ -358,7 +358,7 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 // expects the q to be currently owned e.g. locked by caller!
 func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 	for element := q.pending.Front(); element != nil; element = element.Next() {
-		pending := element.Value.(*model.Task)
+		pending, _ := element.Value.(*model.Task)
 		for _, dep := range pending.Dependencies {
 			if taskID == dep {
 				pending.DepStatus[dep] = status
@@ -375,7 +375,7 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 	}
 
 	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		waiting := element.Value.(*model.Task)
+		waiting, _ := element.Value.(*model.Task)
 		for _, dep := range waiting.Dependencies {
 			if taskID == dep {
 				waiting.DepStatus[dep] = status
@@ -390,7 +390,7 @@ func (q *fifo) removeFromPendingAndWaiting(taskID string) error {
 
 	// we assume pending first
 	for element := q.pending.Front(); element != nil; element = element.Next() {
-		task := element.Value.(*model.Task)
+		task, _ := element.Value.(*model.Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from pending", taskID)
 			_ = q.pending.Remove(element)
@@ -400,7 +400,7 @@ func (q *fifo) removeFromPendingAndWaiting(taskID string) error {
 
 	// well looks like it's waiting
 	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		task := element.Value.(*model.Task)
+		task, _ := element.Value.(*model.Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from waitingOnDeps", taskID)
 			_ = q.waitingOnDeps.Remove(element)
