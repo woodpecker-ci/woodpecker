@@ -1,6 +1,6 @@
 # Architecture
 
-## Runtime Interactions
+## module Interactions
 
 ![Woodpecker architecture](./woodpecker-architecture.svg)
 
