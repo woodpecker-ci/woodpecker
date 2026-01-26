@@ -277,10 +277,8 @@ func (q *fifo) process() {
 
 func (q *fifo) filterWaiting() {
 	// resubmits all waiting tasks to pending, deps may have cleared
-	var nextWaiting *list.Element
-	for e := q.waitingOnDeps.Front(); e != nil; e = nextWaiting {
-		nextWaiting = e.Next()
-		task, _ := e.Value.(*model.Task)
+	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
+		task, _ := element.Value.(*model.Task)
 		q.pending.PushBack(task)
 	}
 
