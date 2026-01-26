@@ -108,6 +108,10 @@ linters:
         rpc:
           list-mode: lax
           files:
+            - '!**/agent/rpc/*.go'
+            - '!**/agent/rpc/**/*.go'
+            - '!**/server/rpc/*.go'
+            - '!**/server/rpc/**/*.go'
             - '**/rpc/*.go'
             - '**/rpc/**/*.go'
           deny:
