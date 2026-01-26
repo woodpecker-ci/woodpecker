@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Update Architecture: move `pipeline/rpc` => `rpc` & `server/{grpc => rpc}` [[#6012](https://github.com/woodpecker-ci/woodpecker/pull/6012)]
 - Implement retry logic in HTTP Send method [[#5857](https://github.com/woodpecker-ci/woodpecker/pull/5857)]
 - Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
 - Improve service syntax related docs and tests nits [[#5991](https://github.com/woodpecker-ci/woodpecker/pull/5991)]
