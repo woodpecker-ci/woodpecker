@@ -150,6 +150,7 @@ func TestFifoBasicOperations(t *testing.T) {
 
 		// Edge case: ErrorAtOnce with empty slice
 		err = q.ErrorAtOnce(ctx, []string{}, fmt.Errorf("no tasks"))
+		assert.NoError(t, err)
 		// Should handle gracefully, potentially no-op
 
 		// Edge case: ErrorAtOnce with nil error
@@ -158,6 +159,7 @@ func TestFifoBasicOperations(t *testing.T) {
 		waitForProcess()
 		got5, _ := q.Poll(ctx, 3, filterFnTrue)
 		err = q.ErrorAtOnce(ctx, []string{got5.ID}, nil)
+		assert.NoError(t, err)
 		// Should handle nil error gracefully
 		waitForProcess()
 	})
@@ -679,12 +681,12 @@ func TestFifoLeaseManagement(t *testing.T) {
 		waitForProcess()
 		got2, _ := q.Poll(ctx, 1, filterFnTrue)
 
-		waitCtx, waitCancel := context.WithCancel(ctx)
+		waitCtx, waitCancel := context.WithCancelCause(ctx)
 		errCh := make(chan error, 1)
 		go func() { errCh <- q.Wait(waitCtx, got2.ID) }()
 
 		time.Sleep(50 * time.Millisecond)
-		waitCancel()
+		waitCancel(nil)
 
 		select {
 		case err := <-errCh:
@@ -728,7 +730,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 	defer cancel(nil)
 
 	t.Run("poll with context cancellation", func(t *testing.T) {
-		pollCtx, pollCancel := context.WithCancel(ctx)
+		pollCtx, pollCancel := context.WithCancelCause(ctx)
 		errCh := make(chan error, 1)
 		go func() {
 			_, err := q.Poll(pollCtx, 1, filterFnTrue)
@@ -736,7 +738,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 		}()
 
 		time.Sleep(50 * time.Millisecond)
-		pollCancel()
+		pollCancel(nil)
 
 		select {
 		case err := <-errCh:
