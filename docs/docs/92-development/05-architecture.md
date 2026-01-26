@@ -1,6 +1,6 @@
 # Architecture
 
-## Package architecture
+## Runtime Interactions
 
 ![Woodpecker architecture](./woodpecker-architecture.svg)
 
