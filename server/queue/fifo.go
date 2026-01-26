@@ -356,12 +356,10 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 
 func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 	for element := q.pending.Front(); element != nil; element = element.Next() {
-		pending, ok := element.Value.(*model.Task)
-		if ok {
-			for _, dep := range pending.Dependencies {
-				if taskID == dep {
-					pending.DepStatus[dep] = status
-				}
+		pending, _ := element.Value.(*model.Task)
+		for _, dep := range pending.Dependencies {
+			if taskID == dep {
+				pending.DepStatus[dep] = status
 			}
 		}
 	}
@@ -375,12 +373,10 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 	}
 
 	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		waiting, ok := element.Value.(*model.Task)
-		if ok {
-			for _, dep := range waiting.Dependencies {
-				if taskID == dep {
-					waiting.DepStatus[dep] = status
-				}
+		waiting, _ := element.Value.(*model.Task)
+		for _, dep := range waiting.Dependencies {
+			if taskID == dep {
+				waiting.DepStatus[dep] = status
 			}
 		}
 	}
