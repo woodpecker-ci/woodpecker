@@ -266,6 +266,7 @@
     "**/node_modules/**/*",
     "cmd/server/openapi/docs.go",
     "renovate.json",
+    "**/mocks/**",
     // TODO: remove the following
     "docs/**/*.js",
     "docs/**/*.ts"
