@@ -250,11 +250,29 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	return e.client.ContainerStart(ctx, containerName, container.StartOptions{})
 }
 
+// WaitStep waits for a step container to exit.
+//
+// When the context is canceled, the container is immediately killed to prevent
+// orphaned containers from continuing to run after agent shutdown.
 func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
-	log := log.Logger.With().Str("taskUUID", taskUUID).Str("stepUUID", step.UUID).Logger()
+	log := log.Logger.With().
+		Str("taskUUID", taskUUID).
+		Str("stepUUID", step.UUID).
+		Logger()
+
 	log.Trace().Msgf("wait for step %s", step.Name)
 
 	containerName := toContainerName(step)
+	done := make(chan struct{})
+
+	// Ensure container is killed if context is canceled (SIGTERM / pipeline cancel)
+	go func() {
+		select {
+		case <-ctx.Done():
+			_ = e.client.ContainerKill(context.Background(), containerName, "9")
+		case <-done:
+		}
+	}()
 
 	wait, errC := e.client.ContainerWait(ctx, containerName, "")
 	select {
@@ -263,6 +281,9 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 	case err := <-errC:
 		log.Trace().Msgf("ContainerWait returned with err: %v", err)
 	}
+
+	// Stop cancellation watcher
+	close(done)
 
 	info, err := e.client.ContainerInspect(ctx, containerName)
 	if err != nil {
