@@ -80,7 +80,8 @@ func (q *persistentQueue) Error(c context.Context, id string, err error) error {
 	return q.store.TaskDelete(id)
 }
 
-// ErrorAtOnce signals multiple tasks are done with an error.
+// ErrorAtOnce signals multiple tasks are done and complete with an error.
+// If still pending they will just get removed from the queue.
 func (q *persistentQueue) ErrorAtOnce(c context.Context, ids []string, err error) error {
 	if err := q.Queue.ErrorAtOnce(c, ids, err); err != nil {
 		return err

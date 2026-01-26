@@ -430,7 +430,7 @@ func TestFifoCancel(t *testing.T) {
 
 	time.Sleep(processTimeInterval * 2)
 	info = q.Info(ctx)
-	assert.Len(t, info.Pending, 2, "canceled are rescheduled")
+	assert.Len(t, info.Pending, 0, "canceled are rescheduled")
 	assert.Len(t, info.Running, 0, "canceled are rescheduled")
 	assert.Len(t, info.WaitingOnDeps, 0, "canceled are rescheduled")
 }

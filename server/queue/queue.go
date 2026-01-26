@@ -36,6 +36,9 @@ var (
 
 	// ErrTaskExpired indicates a running task exceeded its lease/deadline and was resubmitted.
 	ErrTaskExpired = errors.New("queue: task expired")
+
+	// ErrWorkerKicked worker of an agent got kicked.
+	ErrWorkerKicked = errors.New("worker was kicked")
 )
 
 // InfoT provides runtime information.
@@ -94,7 +97,7 @@ type Queue interface {
 	Error(c context.Context, id string, err error) error
 
 	// ErrorAtOnce signals multiple tasks are done and complete with an error.
-	// if still pending they will just get removed from the queue.
+	// If still pending they will just get removed from the queue.
 	ErrorAtOnce(c context.Context, ids []string, err error) error
 
 	// Wait waits until the task is complete.
