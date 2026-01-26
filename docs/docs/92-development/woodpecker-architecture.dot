@@ -110,6 +110,7 @@ digraph WoodpeckerArchitecture {
 
   /* UI */
   ui_web -> srv_router [xlabel="HTTP"]
+  ui_web -> srv_api    [xlabel="REST API"]
 
   /* CLI */
   cli_cmd  -> cli_core
@@ -139,9 +140,9 @@ digraph WoodpeckerArchitecture {
   srv_forge -> ext_scm [xlabel="SCM API"]
   srv_store -> ext_db  [xlabel="SQL"]
 
-  /* Shared libs usage (directional but non-orchestrating) */
-  shared_http  -> srv_api
-  shared_token -> srv_router
-  shared_log   -> srv_grpc
-  shared_util  -> pipe_core
+  /* Shared libs usage (consumer -> library) */
+  srv_router -> shared_token
+  srv_api    -> shared_http
+  srv_grpc   -> shared_log
+  pipe_core  -> shared_util
 }
