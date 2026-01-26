@@ -3,6 +3,13 @@
 ## Package architecture
 
 ![Woodpecker architecture](./woodpecker-architecture.png)
+<!--
+  If you want to update it, first look would be to get a simple svg of all module import graphs:
+  `go run github.com/loov/goda@latest graph 'go.woodpecker-ci.org/woodpecker/v3/...' | dot -Tsvg -o graph.svg`
+
+  generate a new png via:
+  `dot -Tpng woodpecker-architecture.dot -o woodpecker-architecture.png -Gdpi=300`
+-->
 
 ## System architecture
 
