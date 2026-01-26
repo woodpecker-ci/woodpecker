@@ -10,12 +10,14 @@
 
 - chore(deps): update dependency lodash to v4.17.23 [security] [[#5997](https://github.com/woodpecker-ci/woodpecker/pull/5997)]
 
+### ✨ Features
+
+- Support exclusive extensions [[#5978](https://github.com/woodpecker-ci/woodpecker/pull/5978)]
+
 ### 📈 Enhancement
 
-- Use `require` to exit tests [[#5998](https://github.com/woodpecker-ci/woodpecker/pull/5998)]
 - Implement retry logic in HTTP Send method [[#5857](https://github.com/woodpecker-ci/woodpecker/pull/5857)]
 - Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
-- Use `NoError` for error assertion [[#5992](https://github.com/woodpecker-ci/woodpecker/pull/5992)]
 - Improve service syntax related docs and tests nits [[#5991](https://github.com/woodpecker-ci/woodpecker/pull/5991)]
 - Remove deactivated secrets type from container defintion [[#5983](https://github.com/woodpecker-ci/woodpecker/pull/5983)]
 - Fix docusaurus md link deprecation [[#5979](https://github.com/woodpecker-ci/woodpecker/pull/5979)]
@@ -26,13 +28,13 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#6014](https://github.com/woodpecker-ci/woodpecker/pull/6014)]
 - chore(deps): update dependency axios to v1.13.3 [[#6010](https://github.com/woodpecker-ci/woodpecker/pull/6010)]
 - chore(deps): update docs npm deps non-major [[#6000](https://github.com/woodpecker-ci/woodpecker/pull/6000)]
 - chore(deps): update docs npm deps non-major [[#5982](https://github.com/woodpecker-ci/woodpecker/pull/5982)]
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#6014](https://github.com/woodpecker-ci/woodpecker/pull/6014)]
 - fix(deps): update golang-packages [[#6013](https://github.com/woodpecker-ci/woodpecker/pull/6013)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.8.1 [[#6006](https://github.com/woodpecker-ci/woodpecker/pull/6006)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.17.0 [[#6005](https://github.com/woodpecker-ci/woodpecker/pull/6005)]
