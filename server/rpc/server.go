@@ -22,8 +22,8 @@ import (
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
