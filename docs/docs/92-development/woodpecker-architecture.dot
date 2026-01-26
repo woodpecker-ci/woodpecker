@@ -1,329 +1,259 @@
 digraph woodpecker {
-    // Graph attributes
-    rankdir=LR;
+    rankdir=TB;
     bgcolor="#1a1a1a";
-    pad=0.5;
-    nodesep=0.6;
-    ranksep=1.8;
+    pad=0.4;
+    nodesep=0.5;
+    ranksep=1.4;
     splines=ortho;
+    concentrate=true;
 
-    // Default node style
     node [
         shape=box,
         style="filled,rounded",
         fontname="Arial",
         fontsize=11,
-        margin=0.2,
-        penwidth=2
+        margin=0.18,
+        penwidth=1.6
     ];
 
-    // Default edge style
     edge [
-        color="#666666",
-        penwidth=2,
-        arrowsize=0.8
+        color="#6b6b6b",
+        penwidth=1.4,
+        arrowsize=0.75
     ];
 
-    // ========== SUBGRAPHS ==========
+    // =========================================================
+    // LANES (visual columns)
+    // =========================================================
+    lane_pipelines [style=invis,width=0];
+    lane_agent     [style=invis,width=0];
+    lane_cli       [style=invis,width=0];
+    lane_server    [style=invis,width=0];
+    lane_external  [style=invis,width=0];
 
-    // Server (top left, organized in rows)
-    subgraph cluster_server {
-        label="Server";
-        style=filled;
-        color="#2a2a2a";
-        fillcolor="#d4d4f7";
-        fontsize=14;
-        fontcolor="#000000";
+    lane_pipelines -> lane_agent -> lane_cli -> lane_server -> lane_external [style=invis];
 
-        // Top row: Entry point and API
-        {rank=same; cmd_server; server_router; server_api; server_web;}
-
-        cmd_server [label="cmd/server/", fillcolor="#c85a6e", fontcolor="#ffffff"];
-
-        // API section
-        subgraph cluster_api {
-            label="API";
-            style=filled;
-            color="#8a8aaa";
-            fillcolor="#e8e8ff";
-
-            server_router [label="server/router/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
-            server_api [label="server/api/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
-            server_web [label="server/web/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
-            server_rpc [label="server/rpc/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        }
-
-        // Second row: Core services
-        {rank=same; server_pipeline; server_queue; server_pubsub; server_logging;}
-
-        server_pipeline [label="server/pipeline/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_queue [label="server/queue/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_pubsub [label="server/pubsub/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_logging [label="server/logging/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-
-        // Third row: Supporting services
-        {rank=same; server_cache; server_cron; server_badges; server_ccmenu;}
-
-        server_cache [label="server/cache/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_cron [label="server/cron/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_badges [label="server/badges/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        server_ccmenu [label="server/ccmenu/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-
-        // Fourth row: Data layer boxes
-        {rank=same; server_forge; server_store; server_model;}
-
-        // Remote Gating Service (pink box)
-        subgraph cluster_remote {
-            label="Remote Gating Service";
-            style=filled;
-            color="#c85a6e";
-            fillcolor="#ffc0cb";
-
-            server_forge [label="server/forge/\n[github, gitlab, gitea,\nforgejo, bitbucket,\nbitbucket-dc, addon]", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        }
-
-        // Datastore (pink box)
-        subgraph cluster_datastore {
-            label="Datastore";
-            style=filled;
-            color="#c85a6e";
-            fillcolor="#ffc0cb";
-
-            server_store [label="server/store/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
-        }
-
-        // Models (beige box)
-        subgraph cluster_models {
-            label="Models";
-            style=filled;
-            color="#c85a6e";
-            fillcolor="#f5deb3";
-
-            server_model [label="server/model/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        }
-
-        // Bottom: Extensions
-        subgraph cluster_extensions {
-            label="Extensions";
-            style=filled;
-            color="#8a8aaa";
-            fillcolor="#d4d4f7";
-
-            server_services [label="server/services/\n[config, secrets, registry,\nenvironment, encryption,\nlog, permissions]", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        }
-
-        // Invisible edges for layout within server
-        cmd_server -> server_router [style=invis];
-        server_router -> server_api [style=invis];
-        server_api -> server_web [style=invis];
-
-        server_router -> server_pipeline [style=invis];
-        server_pipeline -> server_queue [style=invis];
-        server_queue -> server_pubsub [style=invis];
-        server_pubsub -> server_logging [style=invis];
-
-        server_pipeline -> server_cache [style=invis];
-        server_cache -> server_cron [style=invis];
-
-        server_cache -> server_forge [style=invis];
-        server_forge -> server_store [style=invis];
-        server_store -> server_model [style=invis];
-
-        server_forge -> server_services [style=invis];
-    }
-
-    // Agent
-    subgraph cluster_agent {
-        label="Agent";
-        style=filled;
-        color="#2a2a2a";
-        fillcolor="#f5deb3";
-        fontsize=14;
-        fontcolor="#000000";
-
-        {rank=same; cmd_agent; agent;}
-
-        cmd_agent [label="cmd/agent/", fillcolor="#c85a6e", fontcolor="#ffffff"];
-        agent [label="agent/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-
-        // Layout within agent
-        cmd_agent -> agent [style=invis];
-    }
-
-    // CLI
-    subgraph cluster_cli {
-        label="CLI";
-        style=filled;
-        color="#2a2a2a";
-        fillcolor="#a8dcd9";
-        fontsize=14;
-        fontcolor="#000000";
-
-        {rank=same; cmd_cli; cli; woodpecker_go;}
-
-        cmd_cli [label="cmd/cli/", fillcolor="#c85a6e", fontcolor="#ffffff"];
-        cli [label="cli/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        woodpecker_go [label="woodpecker-go/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-
-        // Layout within CLI
-        cmd_cli -> cli [style=invis];
-        cli -> woodpecker_go [style=invis];
-    }
-
-    // Pipelines (right side, beige box)
+    // =========================================================
+    // PIPELINES
+    // =========================================================
     subgraph cluster_pipelines {
         label="Pipelines";
         style=filled;
         color="#2a2a2a";
         fillcolor="#f5deb3";
         fontsize=14;
-        fontcolor="#000000";
+
+        { rank=same; lane_pipelines; pipeline; }
 
         pipeline [label="pipeline/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        pipeline_backend [label="pipeline/backend/\n(docker, k8s, local)", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        pipeline_frontend [label="pipeline/frontend/\n(yaml parsing)", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        pipeline_backend [
+            label="pipeline/backend/\n(docker, k8s, local)",
+            fillcolor="#5a6c7d", fontcolor="#ffffff"
+        ];
+        pipeline_frontend [
+            label="pipeline/frontend/\n(yaml parsing)",
+            fillcolor="#5a6c7d", fontcolor="#ffffff"
+        ];
+
+        pipeline -> pipeline_backend;
+        pipeline -> pipeline_frontend;
     }
 
-    // UI (right side, cyan box)
-    subgraph cluster_ui {
-        label="UI";
+    // =========================================================
+    // AGENT
+    // =========================================================
+    subgraph cluster_agent {
+        label="Agent";
+        style=filled;
+        color="#2a2a2a";
+        fillcolor="#f5deb3";
+        fontsize=14;
+
+        { rank=min; cmd_agent; }
+        { rank=same; lane_agent; agent; }
+
+        cmd_agent [label="cmd/agent/", fillcolor="#c85a6e", fontcolor="#ffffff"];
+        agent     [label="agent/",     fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        cmd_agent -> agent [weight=5];
+    }
+
+    // =========================================================
+    // CLI
+    // =========================================================
+    subgraph cluster_cli {
+        label="CLI";
         style=filled;
         color="#2a2a2a";
         fillcolor="#a8dcd9";
         fontsize=14;
-        fontcolor="#000000";
 
-        web [label="web/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        { rank=min; cmd_cli; }
+        { rank=same; lane_cli; cli; woodpecker_go; }
+
+        cmd_cli [label="cmd/cli/", fillcolor="#c85a6e", fontcolor="#ffffff"];
+        cli     [label="cli/",     fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        woodpecker_go [label="woodpecker-go/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        cmd_cli -> cli [weight=5];
+        cli -> woodpecker_go;
     }
 
-    // GRPC (right side, cyan box)
-    subgraph cluster_grpc {
-        label="GRPC";
+    // =========================================================
+    // SERVER
+    // =========================================================
+    subgraph cluster_server {
+        label="Server";
         style=filled;
         color="#2a2a2a";
-        fillcolor="#a8dcd9";
+        fillcolor="#d4d4f7";
         fontsize=14;
-        fontcolor="#000000";
 
-        rpc [label="rpc/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        // Entry
+        { rank=min; cmd_server; }
+
+        cmd_server [label="cmd/server/", fillcolor="#c85a6e", fontcolor="#ffffff"];
+
+        // ---- API BAND
+        { rank=same;
+          lane_server;
+          server_router;
+          server_web;
+          server_api;
+          server_rpc;
+        }
+
+        server_router [label="server/router/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
+        server_web    [label="server/web/",    fillcolor="#3a3a3a", fontcolor="#ffffff"];
+        server_api    [label="server/api/",    fillcolor="#3a3a3a", fontcolor="#ffffff"];
+        server_rpc    [label="server/rpc/",    fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // ---- CORE SERVICES
+        { rank=same;
+          server_pipeline;
+          server_queue;
+          server_pubsub;
+          server_logging;
+        }
+
+        server_pipeline [label="server/pipeline/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_queue    [label="server/queue/",    fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_pubsub   [label="server/pubsub/",   fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_logging  [label="server/logging/",  fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // ---- SUPPORTING
+        { rank=same;
+          server_cache;
+          server_cron;
+          server_badges;
+          server_ccmenu;
+        }
+
+        server_cache   [label="server/cache/",   fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_cron    [label="server/cron/",    fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_badges  [label="server/badges/",  fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        server_ccmenu  [label="server/ccmenu/",  fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // ---- DATA + REMOTE
+        { rank=same;
+          server_forge;
+          server_store;
+          server_model;
+        }
+
+        server_forge [
+            label="server/forge/\n[github, gitlab, gitea,\nforgejo, bitbucket,\nbitbucket-dc, addon]",
+            fillcolor="#5a6c7d", fontcolor="#ffffff"
+        ];
+        server_store [label="server/store/", fillcolor="#3a3a3a", fontcolor="#ffffff"];
+        server_model [label="server/model/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
+
+        // ---- EXTENSIONS
+        server_services [
+            label="server/services/\n[config, secrets, registry,\nenvironment, encryption,\nlog, permissions]",
+            fillcolor="#5a6c7d", fontcolor="#ffffff"
+        ];
+
+        // Entry wiring
+        cmd_server -> server_router [weight=6];
+        cmd_server -> server_web    [weight=6];
+        cmd_server -> server_rpc    [weight=6];
+        cmd_server -> server_services;
+
+        // API flow
+        server_router -> server_api;
+        server_router -> server_web;
+
+        server_api -> server_pipeline;
+        server_api -> server_queue;
+        server_api -> server_pubsub;
+        server_api -> server_model;
+
+        // Core flow
+        server_pipeline -> server_queue;
+        server_pipeline -> server_pubsub;
+        server_pipeline -> server_forge;
+
+        // Extensions
+        server_services -> server_store;
+        server_services -> server_forge;
     }
 
-    // Shared Libs (top right, gray box)
+    // =========================================================
+    // SHARED LIBS
+    // =========================================================
     subgraph cluster_shared {
         label="Shared Libs";
         style=filled;
         color="#2a2a2a";
         fillcolor="#e0e0e0";
         fontsize=14;
-        fontcolor="#000000";
 
-        {rank=same; shared_constant; shared_httputil; shared_logger;}
-        {rank=same; shared_optional; shared_token; shared_utils;}
+        { rank=same; shared_httputil; shared_logger; shared_constant; }
+        { rank=same; shared_token; shared_utils; shared_optional; }
 
-        shared_constant [label="shared/constant/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        shared_httputil [label="shared/httputil/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        shared_logger [label="shared/logger/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        shared_optional [label="shared/optional/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        shared_token [label="shared/token/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-        shared_utils [label="shared/utils/", fillcolor="#5a6c7d", fontcolor="#ffffff"];
-
-        // Layout hints for shared libs
-        shared_constant -> shared_optional [style=invis];
-        shared_httputil -> shared_token [style=invis];
-        shared_logger -> shared_utils [style=invis];
+        shared_httputil  [label="shared/httputil/",  fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_logger    [label="shared/logger/",    fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_constant  [label="shared/constant/",  fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_token     [label="shared/token/",     fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_utils     [label="shared/utils/",     fillcolor="#5a6c7d", fontcolor="#ffffff"];
+        shared_optional  [label="shared/optional/",  fillcolor="#5a6c7d", fontcolor="#ffffff"];
     }
 
-    // External components
-    scm [label="SCM Providers", shape=ellipse, fillcolor="#e8e8e8", fontcolor="#000000"];
-    database [label="Database", shape=cylinder, fillcolor="#e8e8e8", fontcolor="#000000"];
+    // =========================================================
+    // EXTERNAL
+    // =========================================================
+    scm [
+        label="SCM Providers",
+        shape=ellipse,
+        fillcolor="#e8e8e8",
+        fontcolor="#000000"
+    ];
 
-    // Version (bottom right)
-    version [label="version/", fillcolor="#c0c0c0", fontcolor="#000000"];
+    database [
+        label="Database",
+        shape=cylinder,
+        fillcolor="#e8e8e8",
+        fontcolor="#000000"
+    ];
 
-    // ========== RANK CONSTRAINTS ==========
+    { rank=same; lane_external; scm; database; }
 
-    // Force vertical separation of the three main components on the left
-    // Use invisible nodes to control spacing
-    invisible_top [style=invis, width=0, height=0];
-    invisible_mid [style=invis, width=0, height=0];
-    invisible_bot [style=invis, width=0, height=0];
+    server_forge -> scm      [style=dashed, minlen=3];
+    server_store -> database [style=dashed, minlen=3];
 
-    {rank=min; invisible_top; cmd_server;}
-    {rank=same; invisible_mid; cmd_agent;}
-    {rank=max; invisible_bot; cmd_cli;}
-
-    // Create invisible chain to force vertical ordering
-    invisible_top -> invisible_mid -> invisible_bot [style=invis];
-
-    // ========== CONNECTIONS ==========
-
-    // CLI connections
-    cmd_cli -> cli;
-    cli -> woodpecker_go;
+    // =========================================================
+    // CROSS-COMPONENT CONNECTIONS
+    // =========================================================
     cli -> pipeline;
-    cli -> shared_httputil;
-    cli -> shared_logger;
-
-    // Agent connections
-    cmd_agent -> agent;
     agent -> pipeline;
-    agent -> rpc;
-    agent -> shared_constant;
-    agent -> shared_utils;
-
-    // Pipeline internal connections
-    pipeline -> pipeline_backend;
-    pipeline -> pipeline_frontend;
-
-    // Server connections
-    cmd_server -> server_router;
-    cmd_server -> server_rpc;
-
-    server_router -> server_api;
-    server_router -> server_web;
-    server_api -> server_store;
-    server_api -> server_pubsub;
-    server_api -> server_queue;
-    server_api -> server_model;
-    server_api -> server_pipeline;
-    server_api -> shared_httputil;
-    server_api -> shared_token;
 
     server_rpc -> agent [style=dashed, color="#9370db"];
-    server_rpc -> rpc;
-    server_rpc -> server_queue;
-    server_rpc -> server_logging;
-    server_rpc -> server_pubsub;
-    server_rpc -> server_pipeline;
+    server_web -> web   [style=dashed, color="#2e8b57"];
 
-    server_web -> web [style=dashed, color="#2e8b57"];
-    server_web -> shared_token;
-
-    server_forge -> scm [style=dashed, color="#9370db"];
-    server_store -> database [style=dashed, color="#9370db"];
-
-    server_pipeline -> server_forge;
-    server_pipeline -> server_model;
-    server_pipeline -> server_queue;
-    server_pipeline -> server_pubsub;
-
-    // Extensions connections
-    cmd_server -> server_services;
-    server_services -> server_forge;
-    server_services -> server_store;
-
-    // Shared libs usage
-    server_router -> shared_logger;
-    cmd_server -> shared_logger;
-    cmd_server -> shared_constant;
-    cmd_server -> shared_utils;
-
-    // Version connections
-    cmd_agent -> version;
-    cmd_cli -> version;
+    // VERSION
+    version [label="version/", fillcolor="#c0c0c0"];
     cmd_server -> version;
-    shared_httputil -> version;
-
-    // Cross-component connections
-    pipeline -> version;
+    cmd_agent  -> version;
+    cmd_cli    -> version;
 }
