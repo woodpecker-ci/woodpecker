@@ -74,7 +74,15 @@ func startHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID
 	}
 
 	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Msg("creating headless service")
-	return engine.client.CoreV1().Services(namespace).Create(ctx, svc, meta_v1.CreateOptions{})
+	createdSvc, err := engine.client.CoreV1().Services(namespace).Create(ctx, svc, meta_v1.CreateOptions{})
+	if err != nil {
+		if errors.IsAlreadyExists(err) {
+			log.Debug().Str("name", svc.Name).Msg("headless service already exists, reusing for recovery")
+			return engine.client.CoreV1().Services(namespace).Get(ctx, svc.Name, meta_v1.GetOptions{})
+		}
+		return nil, err
+	}
+	return createdSvc, nil
 }
 
 func stopHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID string) error {

@@ -566,3 +566,12 @@ Secret names to pull images from private repositories. See, how to [Pull an Imag
 - Default: none, which will use the default priority class configured in Kubernetes
 
 Which [Kubernetes PriorityClass](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/priority-class-v1/) to assign to created job pods.
+
+---
+
+### BACKEND_K8S_STATE_RECOVERY
+
+- Name: `WOODPECKER_BACKEND_K8S_STATE_RECOVERY`
+- Default: `false`
+
+Enables workflow state recovery for agent restarts. When enabled, the agent stores workflow state in ConfigMaps, allowing pipelines to continue execution after agent restarts rather than failing.

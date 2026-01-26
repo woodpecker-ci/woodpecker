@@ -141,6 +141,7 @@ func TestTinyPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "build-via-gradle",
+
 				"woodpecker-ci.org/step": "build-via-gradle",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -229,6 +230,7 @@ func TestFullPod(t *testing.T) {
 				"app": "test",
 				"part-of": "woodpecker-ci",
 				"step": "go-test",
+
 				"woodpecker-ci.org/step": "go-test",
 				"woodpecker-ci.org/task-uuid": "11301"
 			},
@@ -536,6 +538,7 @@ func TestScratchPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "curl-google",
+
 				"woodpecker-ci.org/step": "curl-google",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -588,6 +591,7 @@ func TestSecrets(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "test-secrets",
+
 				"woodpecker-ci.org/step": "test-secrets",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -714,6 +718,7 @@ func TestPodTolerations(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
+
 				"woodpecker-ci.org/step": "toleration-test",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -779,6 +784,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
+
 				"woodpecker-ci.org/step": "toleration-test",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -807,6 +813,7 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "toleration-test",
+
 				"woodpecker-ci.org/step": "toleration-test",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -914,6 +921,7 @@ func TestPodAffinity(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "affinity-test",
+
 				"woodpecker-ci.org/step": "affinity-test",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -985,6 +993,7 @@ func TestPodAffinityAllowFromStep(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "affinity-test",
+
 				"woodpecker-ci.org/step": "affinity-test",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -1013,6 +1022,7 @@ func TestPodAffinityAllowFromStep(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "affinity-test",
+
 				"woodpecker-ci.org/step": "affinity-test",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
@@ -1115,6 +1125,7 @@ func TestPodAffinityStepOverridesAgent(t *testing.T) {
 			"namespace": "woodpecker",
 			"labels": {
 				"step": "affinity-test",
+
 				"woodpecker-ci.org/step": "affinity-test",
 				"woodpecker-ci.org/task-uuid": "11301"
 			}
