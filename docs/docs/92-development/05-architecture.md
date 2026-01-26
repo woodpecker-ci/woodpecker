@@ -1,6 +1,6 @@
 # Architecture
 
-## module Interactions
+## Module Interactions
 
 ![Woodpecker architecture](./woodpecker-architecture.svg)
 
