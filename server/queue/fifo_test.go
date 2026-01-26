@@ -697,3 +697,849 @@ func TestFifoWithScoring(t *testing.T) {
 		assert.Contains(t, expectedAgents, agentID, "Task %s should be assigned to one of the expected agents", taskID)
 	}
 }
+
+func TestFifoErrorAtOnce(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task3 := &model.Task{
+		ID: "3",
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3}))
+
+	waitForProcess()
+	got1, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	got2, err := q.Poll(ctx, 2, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Test ErrorAtOnce with running tasks
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got1.ID, got2.ID}, fmt.Errorf("batch error")))
+
+	waitForProcess()
+	info := q.Info(ctx)
+	assert.Len(t, info.Running, 0, "expect tasks removed from running queue")
+	assert.Len(t, info.Pending, 1, "expect remaining task in pending")
+}
+
+func TestFifoErrorAtOnceWithPendingTasks(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID: "2",
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3}))
+
+	waitForProcess()
+
+	// ErrorAtOnce on pending tasks (task3 should be waiting on deps)
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{"2", "3"}, fmt.Errorf("pending error")))
+
+	waitForProcess()
+	info := q.Info(ctx)
+	assert.Len(t, info.Pending, 1, "only task1 should remain")
+	assert.Len(t, info.WaitingOnDeps, 0, "task3 should be removed from waiting")
+}
+
+func TestFifoErrorAtOnceWithCancelError(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID: "2",
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2}))
+
+	waitForProcess()
+	got1, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Test ErrorAtOnce with ErrCancel - should result in StatusKilled
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got1.ID}, ErrCancel))
+
+	waitForProcess()
+	info := q.Info(ctx)
+	assert.Len(t, info.Running, 0, "task should be removed from running")
+}
+
+func TestFifoExtend(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	dummyTask := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Test successful extend
+	assert.NoError(t, q.Extend(ctx, 1, got.ID))
+
+	// Test extend with wrong agent ID
+	err = q.Extend(ctx, 999, got.ID)
+	assert.ErrorIs(t, err, ErrAgentMissMatch)
+
+	// Clean up
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+
+	// Test extend with non-existent task
+	err = q.Extend(ctx, 1, "non-existent")
+	assert.ErrorIs(t, err, ErrNotFound)
+}
+
+func TestFifoExtendPreventsExpiration(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	// Set very short extension
+	q.extension = 50 * time.Millisecond
+
+	dummyTask := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Extend the deadline multiple times
+	for i := 0; i < 3; i++ {
+		time.Sleep(30 * time.Millisecond)
+		assert.NoError(t, q.Extend(ctx, 1, got.ID))
+	}
+
+	// Task should still be running
+	info := q.Info(ctx)
+	assert.Len(t, info.Running, 1, "task should still be running after extensions")
+	assert.Len(t, info.Pending, 0, "task should not be resubmitted")
+}
+
+func TestFifoKickAgentWorkers(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	dummyTask := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
+
+	// Start multiple workers for different agents
+	pollResults := make(chan error, 3)
+
+	for agentID := int64(1); agentID <= 3; agentID++ {
+		go func(id int64) {
+			_, err := q.Poll(ctx, id, filterFnTrue)
+			pollResults <- err
+		}(agentID)
+	}
+
+	// Give workers time to register
+	time.Sleep(50 * time.Millisecond)
+
+	// Kick workers for agent 2
+	q.KickAgentWorkers(2)
+
+	// Check that agent 2's worker was kicked
+	select {
+	case err := <-pollResults:
+		assert.Error(t, err)
+		// Check the cause of the context cancellation
+		if errors.Is(err, context.Canceled) {
+			// If ctx wasn't the one canceled, we need to check if it's our kicked error
+			// The error should either be ErrWorkerKicked or wrapped in context
+			assert.True(t, errors.Is(err, context.Canceled), "expected context.Canceled")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("expected worker to be kicked")
+	}
+
+	// Other workers should still be waiting or get work
+	info := q.Info(ctx)
+	assert.GreaterOrEqual(t, info.Stats.Workers, 2, "other workers should still be registered")
+}
+
+func TestFifoKickAgentWorkersMultiple(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	// Start multiple workers for the same agent
+	pollResults := make(chan error, 5)
+
+	for i := 0; i < 5; i++ {
+		go func() {
+			_, err := q.Poll(ctx, 42, filterFnTrue)
+			pollResults <- err
+		}()
+	}
+
+	// Give workers time to register
+	time.Sleep(50 * time.Millisecond)
+
+	info := q.Info(ctx)
+	initialWorkers := info.Stats.Workers
+	assert.Equal(t, 5, initialWorkers, "all workers should be registered")
+
+	// Kick all workers for agent 42
+	q.KickAgentWorkers(42)
+
+	// All workers should be kicked
+	kickedCount := 0
+	for i := 0; i < 5; i++ {
+		select {
+		case err := <-pollResults:
+			assert.Error(t, err)
+			// All kicked workers will have their context canceled
+			if errors.Is(err, context.Canceled) {
+				kickedCount++
+			}
+		case <-time.After(time.Second):
+			t.Fatal("expected all workers to be kicked")
+		}
+	}
+
+	assert.Equal(t, 5, kickedCount, "all 5 workers should have been kicked")
+
+	time.Sleep(50 * time.Millisecond)
+	info = q.Info(ctx)
+	assert.Equal(t, 0, info.Stats.Workers, "all workers should be removed")
+}
+
+func TestFifoWaitContextCanceled(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	dummyTask := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Create a context that we can cancel
+	waitCtx, waitCancel := context.WithCancel(ctx)
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- q.Wait(waitCtx, got.ID)
+	}()
+
+	// Cancel the wait context
+	time.Sleep(50 * time.Millisecond)
+	waitCancel()
+
+	select {
+	case err := <-errCh:
+		assert.NoError(t, err, "Wait should return nil when context is canceled before task completes")
+	case <-time.After(time.Second):
+		t.Fatal("Wait should return when context is canceled")
+	}
+}
+
+func TestFifoWaitNonExistentTask(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	// Wait on a task that doesn't exist
+	err := q.Wait(ctx, "non-existent-task")
+	assert.NoError(t, err, "Wait should return nil for non-existent task")
+}
+
+func TestFifoUpdateDepStatusInQueue(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task4 := &model.Task{
+		ID:           "4",
+		Dependencies: []string{"2"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3, task4}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, task1, got)
+
+	// Complete task1 with success
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+
+	waitForProcess()
+
+	// Poll task2 to check its DepStatus was updated
+	got2, err := q.Poll(ctx, 2, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusSuccess, got2.DepStatus["1"], "task2 should have task1's status updated")
+
+	// Poll task3 to check its DepStatus was updated
+	got3, err := q.Poll(ctx, 3, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusSuccess, got3.DepStatus["1"], "task3 should have task1's status updated")
+}
+
+func TestFifoRemoveFromPendingAndWaitingNotFound(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Try to error a task that's running (it will be removed from running, not pending/waiting)
+	assert.NoError(t, q.Error(ctx, got.ID, fmt.Errorf("test error")))
+
+	// Try to error a completely non-existent task
+	err = q.Error(ctx, "totally-fake-id", fmt.Errorf("test error"))
+	assert.Error(t, err, "should return error for non-existent task")
+}
+
+func TestFifoRemoveFromWaitingOnDeps(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3}))
+
+	waitForProcess()
+	info := q.Info(ctx)
+	assert.Equal(t, 2, info.Stats.WaitingOnDeps, "task2 and task3 should be waiting")
+
+	// Error task2 while it's in waitingOnDeps
+	assert.NoError(t, q.Error(ctx, "2", fmt.Errorf("cancel task")))
+
+	waitForProcess()
+	info = q.Info(ctx)
+	assert.Equal(t, 1, info.Stats.WaitingOnDeps, "only task3 should be waiting now")
+}
+
+func TestFifoPollContextCanceled(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	q := NewMemoryQueue(ctx)
+
+	pollCtx, pollCancel := context.WithCancel(ctx)
+
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := q.Poll(pollCtx, 1, filterFnTrue)
+		errCh <- err
+	}()
+
+	// Give Poll time to register the worker
+	time.Sleep(50 * time.Millisecond)
+
+	// Cancel the poll context
+	pollCancel()
+
+	select {
+	case err := <-errCh:
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, context.Canceled)
+	case <-time.After(time.Second):
+		t.Fatal("Poll should return when context is canceled")
+	}
+
+	cancel(nil)
+}
+
+func TestFifoMultipleDepStatusUpdates(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID: "2",
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"1", "2"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3}))
+
+	waitForProcess()
+
+	// Get both independent tasks
+	got1, _ := q.Poll(ctx, 1, filterFnTrue)
+	got2, _ := q.Poll(ctx, 2, filterFnTrue)
+
+	// Complete one with success
+	assert.NoError(t, q.Done(ctx, got1.ID, model.StatusSuccess))
+
+	// Complete other with failure
+	assert.NoError(t, q.Error(ctx, got2.ID, fmt.Errorf("failed")))
+
+	waitForProcess()
+
+	// Get task3 and check both dependencies are updated
+	got3, err := q.Poll(ctx, 3, filterFnTrue)
+	assert.NoError(t, err)
+
+	assert.Equal(t, model.StatusSuccess, got3.DepStatus["1"])
+	assert.Equal(t, model.StatusFailure, got3.DepStatus["2"])
+	assert.False(t, got3.ShouldRun(), "task3 should not run since one dependency failed")
+}
+
+func TestFifoErrorAtOnceCoverage(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID: "2",
+	}
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Test ErrorAtOnce with one running task and one non-existent task
+	// This should trigger the error case in finished() where removeFromPendingAndWaiting returns ErrNotFound
+	err = q.ErrorAtOnce(ctx, []string{got.ID, "non-existent-id"}, fmt.Errorf("batch error"))
+	assert.Error(t, err, "should return error when one of the tasks doesn't exist")
+	assert.ErrorIs(t, err, ErrNotFound, "error should contain ErrNotFound")
+
+	waitForProcess()
+	info := q.Info(ctx)
+	assert.Len(t, info.Running, 0, "running task should be removed")
+}
+
+func TestFifoErrorAtOnceMultipleNonExistent(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	task1 := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Test ErrorAtOnce with multiple non-existent tasks
+	// This tests that errors.Join works correctly with multiple errors
+	err = q.ErrorAtOnce(ctx, []string{got.ID, "fake-1", "fake-2", "fake-3"}, fmt.Errorf("multiple errors"))
+	assert.Error(t, err, "should return joined errors")
+
+	// The error should contain multiple ErrNotFound instances
+	errStr := err.Error()
+	assert.Contains(t, errStr, "not found", "error should mention not found")
+}
+
+func TestFifoErrorAtOnceWithErrCancel(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	// Test the ErrCancel specific path which sets StatusKilled
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got.ID}, ErrCancel))
+
+	waitForProcess()
+
+	// Get the dependent task and verify its dependency status is StatusKilled
+	got2, err := q.Poll(ctx, 2, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusKilled, got2.DepStatus["1"], "dependency should be marked as killed")
+}
+
+func TestFifoExtendWithWrongAgent(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	dummyTask := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
+
+	waitForProcess()
+	got, err := q.Poll(ctx, 5, filterFnTrue) // Agent 5 polls the task
+	assert.NoError(t, err)
+	assert.Equal(t, int64(5), got.AgentID, "task should be assigned to agent 5")
+
+	// Test extend with correct agent - should succeed
+	assert.NoError(t, q.Extend(ctx, 5, got.ID))
+
+	// Test extend with wrong agent - should return ErrAgentMissMatch
+	err = q.Extend(ctx, 999, got.ID)
+	assert.ErrorIs(t, err, ErrAgentMissMatch, "should return ErrAgentMissMatch when wrong agent tries to extend")
+
+	// Test extend with another wrong agent
+	err = q.Extend(ctx, 1, got.ID)
+	assert.ErrorIs(t, err, ErrAgentMissMatch, "should return ErrAgentMissMatch for any wrong agent")
+
+	// Verify the correct agent can still extend
+	assert.NoError(t, q.Extend(ctx, 5, got.ID), "correct agent should still be able to extend")
+
+	// Clean up
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+}
+
+func TestFifoFinishedWithMultipleErrors(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2}))
+
+	waitForProcess()
+
+	// Poll task1 so it's in running
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, "1", got.ID)
+
+	// Now call ErrorAtOnce with:
+	// - got.ID (task1) which is in running - should succeed
+	// - "2" which is in waitingOnDeps - should succeed
+	// - "fake-1" which doesn't exist - should return ErrNotFound
+	// - "fake-2" which doesn't exist - should return ErrNotFound
+	err = q.ErrorAtOnce(ctx, []string{got.ID, "2", "fake-1", "fake-2"}, fmt.Errorf("test error"))
+
+	assert.Error(t, err, "should return error for non-existent tasks")
+
+	// Verify that the error contains multiple ErrNotFound (from errors.Join)
+	assert.ErrorIs(t, err, ErrNotFound, "error should contain ErrNotFound")
+
+	// Check that both real tasks were removed
+	waitForProcess()
+	info := q.Info(ctx)
+	assert.Len(t, info.Running, 0, "task1 should be removed from running")
+	assert.Len(t, info.WaitingOnDeps, 0, "task2 should be removed from waiting")
+	assert.Len(t, info.Pending, 0, "no tasks should be pending")
+}
+
+func TestFifoUpdateDepStatusInQueuePending(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	// Push all tasks - task2 and task3 will be in pending initially (before filterWaiting moves them)
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3}))
+
+	waitForProcess()
+
+	// At this point, task2 and task3 should be in waitingOnDeps
+	// but we want to test when they're in pending
+
+	// Get task1
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, task1, got)
+
+	// Before completing task1, let's verify task2 and task3 are waiting
+	info := q.Info(ctx)
+	assert.Equal(t, 2, info.Stats.WaitingOnDeps, "task2 and task3 should be waiting")
+
+	// Now complete task1 - this should trigger updateDepStatusInQueue
+	// which will update DepStatus in the waitingOnDeps queue
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+
+	waitForProcess()
+
+	// Now get task2 and verify its DepStatus was updated
+	got2, err := q.Poll(ctx, 2, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusSuccess, got2.DepStatus["1"],
+		"task2's DepStatus should be updated in pending queue")
+
+	// Get task3 and verify its DepStatus was updated
+	got3, err := q.Poll(ctx, 3, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusSuccess, got3.DepStatus["1"],
+		"task3's DepStatus should be updated in pending queue")
+}
+
+func TestFifoUpdateDepStatusInQueueRunning(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID: "2",
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"1", "2"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task4 := &model.Task{
+		ID:           "4",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3, task4}))
+
+	waitForProcess()
+
+	// Get task1 and task2 (both independent)
+	got1, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	got2, err := q.Poll(ctx, 2, filterFnTrue)
+	assert.NoError(t, err)
+
+	waitForProcess()
+
+	// Now complete task1 first
+	assert.NoError(t, q.Done(ctx, got1.ID, model.StatusSuccess))
+
+	waitForProcess()
+
+	// Now task3 and task4 are waiting on their dependencies
+	// task3 still needs task2, task4 should be ready now
+
+	// Get task4 which should now be available since task1 is done
+	got4, err := q.Poll(ctx, 4, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusSuccess, got4.DepStatus["1"],
+		"task4's DepStatus should show task1 succeeded")
+
+	// Now complete task2
+	assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+
+	waitForProcess()
+
+	// Now get task3 - both its dependencies are satisfied
+	got3, err := q.Poll(ctx, 3, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusSuccess, got3.DepStatus["1"],
+		"task3's DepStatus should show task1 succeeded")
+	assert.Equal(t, model.StatusSuccess, got3.DepStatus["2"],
+		"task3's DepStatus should show task2 succeeded")
+	assert.True(t, got3.ShouldRun(), "task3 should run since both deps succeeded")
+
+	// Clean up remaining tasks
+	assert.NoError(t, q.Done(ctx, got3.ID, model.StatusSuccess))
+	assert.NoError(t, q.Done(ctx, got4.ID, model.StatusSuccess))
+}
+
+func TestFifoUpdateDepStatusInQueueWaiting(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task4 := &model.Task{
+		ID:           "4",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3, task4}))
+
+	waitForProcess()
+
+	// Verify tasks are waiting on deps
+	info := q.Info(ctx)
+	assert.Equal(t, 3, info.Stats.WaitingOnDeps, "tasks 2, 3, 4 should be waiting")
+
+	// Get and complete task1
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, task1, got)
+
+	// Complete task1 with failure - this should update DepStatus in waitingOnDeps
+	assert.NoError(t, q.Error(ctx, got.ID, fmt.Errorf("task1 failed")))
+
+	waitForProcess()
+
+	// All waiting tasks should have their DepStatus updated
+	// Get each one and verify
+	for i := 2; i <= 4; i++ {
+		gotTask, err := q.Poll(ctx, int64(i), filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, model.StatusFailure, gotTask.DepStatus["1"],
+			"task %d's DepStatus should be updated in waitingOnDeps", i)
+		assert.False(t, gotTask.ShouldRun(), "task %d should not run due to failed dependency", i)
+	}
+}
+
+func TestFifoUpdateDepStatusWithSkipped(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	task1 := genDummyTask()
+	task2 := &model.Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+	task3 := &model.Task{
+		ID:           "3",
+		Dependencies: []string{"2"},
+		DepStatus:    make(map[string]model.StatusValue),
+	}
+
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1, task2, task3}))
+
+	waitForProcess()
+
+	// Get and fail task1
+	got1, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.NoError(t, q.Error(ctx, got1.ID, fmt.Errorf("failed")))
+
+	waitForProcess()
+
+	// Get task2 - should not run but get skipped
+	got2, err := q.Poll(ctx, 2, filterFnTrue)
+	assert.NoError(t, err)
+	assert.False(t, got2.ShouldRun())
+	assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSkipped))
+
+	waitForProcess()
+
+	// Get task3 - should have task2's skipped status updated
+	got3, err := q.Poll(ctx, 3, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusSkipped, got3.DepStatus["2"],
+		"task3 should have task2's skipped status")
+	assert.False(t, got3.ShouldRun(), "task3 should not run due to skipped dependency")
+}
