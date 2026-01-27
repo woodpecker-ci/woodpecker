@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- fix(agent): workflow runner use shutdown context [[#6021](https://github.com/woodpecker-ci/woodpecker/pull/6021)]
 - Update Architecture: move `pipeline/rpc` => `rpc` & `server/{grpc => rpc}` [[#6012](https://github.com/woodpecker-ci/woodpecker/pull/6012)]
 - Implement retry logic in HTTP Send method [[#5857](https://github.com/woodpecker-ci/woodpecker/pull/5857)]
 - Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
