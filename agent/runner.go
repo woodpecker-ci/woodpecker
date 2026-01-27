@@ -51,7 +51,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:contextcheck
+func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	log.Debug().Msg("request next execution")
 
 	// Preserve metadata AND cancellation from runnerCtx.
