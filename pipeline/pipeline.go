@@ -253,6 +253,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 		done <- g.Wait()
 		close(done)
 	}()
+
 	return done
 }
 
@@ -293,9 +294,10 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			return waitState, ErrCancel
+			waitState.Error = ErrCancel
+		} else {
+			return nil, err
 		}
-		return nil, err
 	}
 
 	if err := r.engine.DestroyStep(runnerCtx, step, r.taskUUID); err != nil {
@@ -304,6 +306,11 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.
 
 	// we update with our start time here
 	waitState.Started = startTime
+
+	// we handle cancel case
+	if ctxErr := r.ctx.Err(); ctxErr != nil && errors.Is(ctxErr, context.Canceled) {
+		waitState.Error = ErrCancel
+	}
 
 	if waitState.OOMKilled {
 		return waitState, &OomError{
