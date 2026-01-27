@@ -256,12 +256,18 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	}
 
 	// Always ensure the step is destroyed, regardless of how this function exits
-	// (success, error, or context cancellation).
+	// (success, error, or workflow cancellation).
 	//
-	// We intentionally use context.Background() to make sure cleanup is not
-	// interrupted by cancellation.
+	// Cleanup should respect the workflow lifecycle:
+	// - While the workflow is running, we use the workflow context.
+	// - If the workflow context was canceled, we fall back to a bounded shutdown
+	//   context to ensure cleanup can still complete without breaking services.
 	defer func() {
-		if err := r.engine.DestroyStep(context.Background(), step, r.taskUUID); err != nil {
+		ctx := r.ctx
+		if ctx.Err() != nil {
+			ctx = GetShutdownCtx()
+		}
+		if err := r.engine.DestroyStep(ctx, step, r.taskUUID); err != nil {
 			if r.logger != nil {
 				logger := r.MakeLogger()
 				logger.Error().Err(err).Msg("failed to destroy step")
