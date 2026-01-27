@@ -30,6 +30,7 @@ import (
 func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
 		uploads.Add(1)
+		defer uploads.Done()
 
 		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
@@ -60,7 +61,6 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 			}
 
 			stepLogger.Debug().Msg("update step status complete")
-			uploads.Done()
 		}()
 		if state.Process.Exited {
 			return nil
