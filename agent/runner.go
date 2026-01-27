@@ -178,8 +178,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	}
 
 	logger.Debug().
-		Bool("canceled", canceled.Load()).
 		Str("error", state.Error).
+		Bool("canceled", canceled.Load()).
 		Msg("workflow finished")
 
 	// Ensure all logs/traces are uploaded before finishing
