@@ -72,38 +72,38 @@ type (
 // TODO: suffix Next, Wait, Init, Done and Extend with "Workflow" for docu purpose
 // TODO: suffix Update with UpdateStepState for docu purpose
 type Peer interface {
-	// Version returns the server- & grpc-version
+	// Version returns the server- & grpc-version.
 	Version(c context.Context) (*Version, error)
 
-	// Next returns the next workflow in the queue
+	// Next blocks until it provides the next workflow to execute from the queue.
 	Next(c context.Context, f Filter) (*Workflow, error)
 
-	// Wait blocks until the workflow is complete
-	// Also signals via err if workflow got canceled
+	// Wait blocks until the workflow with the given ID is completed.
+	// Also signals via err if workflow got canceled.
 	// TODO: we nee a proper api for the server to cancel a workflow not do it indirectly
 	Wait(c context.Context, workflowID string) error
 
-	// Init signals the workflow is initialized
+	// Init signals the workflow is initialized.
 	Init(c context.Context, workflowID string, state WorkflowState) error
 
-	// Done signals the workflow has stopped.
+	// Done let agent signal to server the workflow has stopped.
 	Done(c context.Context, workflowID string, state WorkflowState) error
 
-	// Extend extends the workflow deadline
+	// Extend extends the workflow deadline.
 	Extend(c context.Context, workflowID string) error
 
-	// Update updates the step state
+	// Update let agent updates the step state at the server.
 	Update(c context.Context, workflowID string, state StepState) error
 
-	// EnqueueLog queues the step log entry for delayed sending
+	// EnqueueLog queues the step log entry for delayed sending.
 	EnqueueLog(logEntry *LogEntry)
 
-	// RegisterAgent register our agent to the server
+	// RegisterAgent register our agent to the server.
 	RegisterAgent(ctx context.Context, info AgentInfo) (int64, error)
 
-	// UnregisterAgent unregister our agent from the server
+	// UnregisterAgent unregister our agent from the server.
 	UnregisterAgent(ctx context.Context) error
 
-	// ReportHealth reports health status of the agent to the server
+	// ReportHealth reports health status of the agent to the server.
 	ReportHealth(c context.Context) error
 }

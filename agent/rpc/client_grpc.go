@@ -245,7 +245,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 	return nil
 }
 
-// Done signals the workflow has stopped.
+// Done let agent signal to server the workflow has stopped.
 func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
@@ -338,7 +338,7 @@ func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 	return nil
 }
 
-// Update updates the workflow state.
+// Update let agent updates the step state at the server.
 func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
@@ -350,6 +350,7 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	req.State.Exited = state.Exited
 	req.State.ExitCode = int32(state.ExitCode)
 	req.State.Error = state.Error
+	req.State.Canceled = state.Canceled
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {

@@ -100,7 +100,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 }
 
-// Wait blocks until the workflow with the given ID is done.
+// Wait blocks until the workflow with the given ID is completed.
 func (s *RPC) Wait(c context.Context, workflowID string) error {
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
@@ -133,7 +133,7 @@ func (s *RPC) Extend(c context.Context, workflowID string) error {
 	return s.queue.Extend(c, agent.ID, workflowID)
 }
 
-// Update updates the state of a step.
+// Update let agent updates the step state at the server.
 func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -213,7 +213,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 	return nil
 }
 
-// Init implements the rpc.Init function.
+// Init signals the workflow is initialized.
 func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {

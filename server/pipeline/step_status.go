@@ -38,6 +38,9 @@ func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) 
 		step.Started = state.Started
 		step.State = model.StatusRunning
 	}
+	if state.Canceled {
+		step.State = model.StatusKilled
+	}
 	return store.StepUpdate(step)
 }
 
