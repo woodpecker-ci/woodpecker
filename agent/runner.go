@@ -164,11 +164,6 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 			"pipeline_number": pipelineNumber,
 		}),
 	).Run(runnerCtx)
-	// If the workflow context was canceled but the pipeline returned no error,
-	// force a cancellation error so running steps are not reported as success.
-	if err == nil && workflowCtx.Err() != nil {
-		err = pipeline.ErrCancel
-	}
 
 	state.Finished = time.Now().Unix()
 
