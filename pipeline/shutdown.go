@@ -36,13 +36,3 @@ func GetShutdownCtx() context.Context {
 	}
 	return shutdownCtx
 }
-
-func CancelShutdown() {
-	shutdownCtxLock.Lock()
-	defer shutdownCtxLock.Unlock()
-	if shutdownCtxCancel == nil {
-		// we create an canceled context
-		shutdownCtx, shutdownCtxCancel = context.WithCancel(context.Background()) //nolint:forbidigo
-	}
-	shutdownCtxCancel()
-}

@@ -58,7 +58,8 @@ type Runtime struct {
 	engine  backend.Backend
 	started int64
 
-	ctx    context.Context
+	ctx context.Context
+
 	tracer Tracer
 	logger Logger
 
@@ -143,7 +144,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		select {
 		case <-r.ctx.Done():
 			return ErrCancel
-		case err := <-r.execAll(stage.Steps):
+		case err := <-r.execAll(runnerCtx, stage.Steps):
 			if err != nil {
 				r.err = err
 			}
@@ -185,7 +186,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 }
 
 // Executes a set of parallel steps.
-func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
+func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
 	logger := r.MakeLogger()
@@ -228,7 +229,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				Str("step", step.Name).
 				Msg("executing")
 
-			processState, err := r.exec(step)
+			processState, err := r.exec(runnerCtx, step)
 
 			logger.Debug().
 				Str("step", step.Name).
@@ -256,11 +257,12 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 }
 
 // Executes the step and returns the state and error.
-func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
+func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.State, error) {
 	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
 	startTime := time.Now().Unix()
+	logger := r.MakeLogger()
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
@@ -272,7 +274,6 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			logger := r.MakeLogger()
 
 			if err := r.logger(step, rc); err != nil {
 				logger.Error().Err(err).Msg("process logging failed")
@@ -297,7 +298,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, err
 	}
 
-	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID); err != nil {
+	if err := r.engine.DestroyStep(runnerCtx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
 
