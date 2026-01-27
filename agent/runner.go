@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -100,10 +99,6 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		cancelWorkflowCtx()
 	})
 
-	// canceled indicates whether the workflow was canceled remotely (UI/API).
-	// Must be atomic because it is written from a goroutine and read later.
-	var canceled atomic.Bool
-
 	// Listen for remote cancel events (UI / API).
 	// When canceled, we MUST cancel the workflow context
 	// so that pipeline execution and backend processes stop immediately.
@@ -112,7 +107,6 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
 			if errors.Is(err, pipeline.ErrCancel) {
-				canceled.Store(true)
 				logger.Debug().Err(err).Msg("cancel signal received")
 				cancelWorkflowCtx()
 			} else {
@@ -172,20 +166,16 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	state.Finished = time.Now().Unix()
 
-	// Normalize cancellation error
-	if errors.Is(err, pipeline.ErrCancel) || canceled.Load() {
-		canceled.Store(true)
-		err = pipeline.ErrCancel
-		state.Canceled = true
-	}
-
 	if err != nil {
 		state.Error = err.Error()
+		if errors.Is(err, pipeline.ErrCancel) {
+			state.Canceled = true
+		}
 	}
 
 	logger.Debug().
 		Str("error", state.Error).
-		Bool("canceled", canceled.Load()).
+		Bool("canceled", state.Canceled).
 		Msg("workflow finished")
 
 	// Ensure all logs/traces are uploaded before finishing
