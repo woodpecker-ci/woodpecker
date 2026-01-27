@@ -16,6 +16,7 @@ package agent
 
 import (
 	"context"
+	"errors"
 	"runtime"
 	"strconv"
 	"sync"
@@ -44,8 +45,9 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 			StepUUID: state.Pipeline.Step.UUID,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
-			Started:  time.Now().Unix(), // TODO: do not do this
+			Started:  state.Process.Started,
 			Finished: time.Now().Unix(),
+			Canceled: errors.Is(state.Process.Error, pipeline.ErrCancel),
 		}
 		if state.Process.Error != nil {
 			stepState.Error = state.Process.Error.Error()

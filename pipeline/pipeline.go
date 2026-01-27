@@ -160,8 +160,10 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 		return nil
 	}
 
+	// this is nil if the step was not started jet
 	if processState == nil {
 		processState = new(backend.State)
+		// and if we have an error something with the step setup/start went wrong
 		if err != nil {
 			processState.Error = err
 			processState.Exited = true
@@ -173,7 +175,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	state := new(State)
 	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
-	state.Process = processState // empty
+	state.Process = processState
 	state.Pipeline.Error = r.err
 
 	if traceErr := r.tracer.Trace(state); traceErr != nil {
@@ -232,6 +234,11 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				Str("step", step.Name).
 				Msg("complete")
 
+			// normalize context cancel error
+			if errors.Is(err, context.Canceled) {
+				err = ErrCancel
+			}
+
 			// Return the error after tracing it.
 			err = r.traceStep(processState, err, step)
 			if err != nil && step.Failure == metadata.FailureIgnore {
@@ -253,6 +260,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
+	startTime := time.Now().Unix()
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
@@ -292,6 +300,9 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
+
+	// we update with our start time here
+	waitState.Started = startTime
 
 	if waitState.OOMKilled {
 		return waitState, &OomError{
