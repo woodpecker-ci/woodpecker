@@ -42,7 +42,7 @@ func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, stat
 	if workflow.Error != "" {
 		workflow.State = model.StatusFailure
 	}
-	if workflow.State == model.StatusKilled || state.Canceled {
+	if state.Canceled {
 		workflow.State = model.StatusKilled
 	}
 	return &workflow, store.WorkflowUpdate(&workflow)
