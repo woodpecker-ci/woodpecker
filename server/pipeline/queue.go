@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"maps"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
