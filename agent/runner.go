@@ -143,12 +143,9 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	state := rpc.WorkflowState{
 		Started: time.Now().Unix(),
 	}
-
-	// Initialize workflow on the server
 	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("workflow initialization failed")
-		// Do not return here: even if init fails, we still need to run the pipeline
-		// and ensure proper cancellation, log upload, and final status reporting
+		// TODO: should we return here?
 	}
 
 	var uploads sync.WaitGroup
