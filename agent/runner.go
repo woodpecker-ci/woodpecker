@@ -56,7 +56,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	// Preserve metadata AND cancellation from runnerCtx.
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
-	ctxMeta := metadata.NewOutgoingContext(runnerCtx, meta)
+	ctxMeta := metadata.NewOutgoingContext(shutdownCtx, meta)
 
 	// Fetch next workflow from the queue
 	workflow, err := r.client.Next(runnerCtx, r.filter)
