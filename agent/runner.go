@@ -52,12 +52,12 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 }
 
 // Run executes an workflow via an backend, tracks its state and reports back the state to the server
-func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:contextcheck
+func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	log.Debug().Msg("request next execution")
 
 	// Preserve metadata AND cancellation from runnerCtx.
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
-	ctxMeta := metadata.NewOutgoingContext(runnerCtx, meta)
+	ctxMeta := metadata.NewOutgoingContext(shutdownCtx, meta)
 
 	// Fetch next workflow from the queue
 	workflow, err := r.client.Next(runnerCtx, r.filter)
@@ -94,9 +94,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 	workflowCtx, cancelWorkflowCtx := context.WithTimeout(ctxMeta, timeout)
 	defer cancelWorkflowCtx()
 
-	// Add sigterm support for internal context.
-	// Required when the pipeline is terminated by external signals
-	// like kubernetes.
+	// Handle SIGTERM (k8s, docker, system shutdown)
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
 		cancelWorkflowCtx()
