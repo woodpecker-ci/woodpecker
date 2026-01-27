@@ -152,7 +152,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("signaling workflow initialization to server failed")
 		// This should never happen, still it did so lets clean up and end
-		// tdood:
+		cancelWorkflowCtx()
+		return err
 	}
 
 	var uploads sync.WaitGroup
