@@ -174,11 +174,6 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
-	state, err := e.getStepState(taskUUID, step.UUID)
-	if err != nil {
-		return nil, err
-	}
-
 	stepState := &types.State{
 		Exited: true,
 	}
@@ -186,6 +181,11 @@ func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string)
 	if err := ctx.Err(); err != nil {
 		stepState.Error = err
 		return stepState, nil
+	}
+
+	state, err := e.getStepState(taskUUID, step.UUID)
+	if err != nil {
+		return nil, err
 	}
 
 	if state.cmd == nil {

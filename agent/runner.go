@@ -90,13 +90,14 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	// Workflow execution context.
 	// This context is the SINGLE source of truth for cancellation.
-	workflowCtx, cancelWorkflowCtx := context.WithTimeout(ctxMeta, timeout)
-	defer cancelWorkflowCtx()
+	workflowCtx, _ := context.WithTimeout(ctxMeta, timeout)
+	workflowCtx, cancelWorkflowCtx := context.WithCancelCause(workflowCtx)
+	defer cancelWorkflowCtx(nil)
 
 	// Handle SIGTERM (k8s, docker, system shutdown)
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
-		cancelWorkflowCtx()
+		cancelWorkflowCtx(pipeline.ErrCancel)
 	})
 
 	// Listen for remote cancel events (UI / API).
@@ -108,10 +109,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
 			if errors.Is(err, pipeline.ErrCancel) {
 				logger.Debug().Err(err).Msg("cancel signal received")
-				cancelWorkflowCtx()
+				cancelWorkflowCtx(pipeline.ErrCancel)
 			} else {
 				logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
-				cancelWorkflowCtx()
+				cancelWorkflowCtx(err)
 			}
 		} else {
 			// Wait returned without error, meaning the workflow finished normally
@@ -143,7 +144,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("signaling workflow initialization to server failed")
 		// This should never happen, still it did so lets clean up and end
-		cancelWorkflowCtx()
+		cancelWorkflowCtx(err)
 		return err
 	}
 
@@ -170,6 +171,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		state.Error = err.Error()
 		if errors.Is(err, pipeline.ErrCancel) {
 			state.Canceled = true
+			// cleanup joined error messages
+			state.Error = pipeline.ErrCancel.Error()
 		}
 	}
 
