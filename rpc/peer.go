@@ -42,6 +42,7 @@ type (
 		Started  int64  `json:"started"`
 		Finished int64  `json:"finished"`
 		Error    string `json:"error"`
+		Canceled bool   `json:"canceled"`
 	}
 
 	// Workflow defines the workflow execution details.
@@ -84,7 +85,7 @@ type Peer interface {
 	// Init signals the workflow is initialized
 	Init(c context.Context, workflowID string, state WorkflowState) error
 
-	// Done signals the workflow is complete
+	// Done signals the workflow has stopped.
 	Done(c context.Context, workflowID string, state WorkflowState) error
 
 	// Extend extends the workflow deadline

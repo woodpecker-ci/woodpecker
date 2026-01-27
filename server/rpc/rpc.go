@@ -286,7 +286,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	return s.updateAgentLastWork(agent)
 }
 
-// Done marks the workflow with the given ID as done.
+// Done marks the workflow with the given ID as stope.
 func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -331,20 +331,23 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
 		Str("workflow_id", strWorkflowID).Logger()
 
-	logger.Trace().Msgf("gRPC Done with state: %#v", state)
+	logger.Debug().Msgf("workflow state in store: %#v", workflow)
+	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
 	}
 
-	var queueErr error
-	if workflow.Failing() {
-		queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
-	} else {
-		queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
-	}
-	if queueErr != nil {
-		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
+	if !state.Canceled {
+		var queueErr error
+		if workflow.Failing() {
+			queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
+		} else {
+			queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
+		}
+		if queueErr != nil {
+			logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
+		}
 	}
 
 	currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline)

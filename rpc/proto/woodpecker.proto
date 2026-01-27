@@ -51,9 +51,10 @@ message StepState {
 }
 
 message WorkflowState {
-  int64  started = 4;
-  int64  finished = 5;
-  string error = 6;
+  int64  started = 1;
+  int64  finished = 2;
+  string error = 3;
+  bool   canceled = 4;
 }
 
 message LogEntry {

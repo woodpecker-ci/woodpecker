@@ -205,6 +205,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 	req.State.Started = state.Started
 	req.State.Finished = state.Finished
 	req.State.Error = state.Error
+	req.State.Canceled = state.Canceled
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
@@ -244,7 +245,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 	return nil
 }
 
-// Done signals the workflow is complete.
+// Done signals the workflow has stopped.
 func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
@@ -253,6 +254,7 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 	req.State.Started = state.Started
 	req.State.Finished = state.Finished
 	req.State.Error = state.Error
+	req.State.Canceled = state.Canceled
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {

@@ -115,6 +115,7 @@ func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*pro
 		Started:  req.GetState().GetStarted(),
 		Finished: req.GetState().GetFinished(),
 		Error:    req.GetState().GetError(),
+		Canceled: req.GetState().GetCanceled(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Done(c, req.GetId(), state)

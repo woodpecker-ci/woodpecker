@@ -122,9 +122,10 @@ func (x *StepState) GetError() string {
 
 type WorkflowState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Started       int64                  `protobuf:"varint,4,opt,name=started,proto3" json:"started,omitempty"`
-	Finished      int64                  `protobuf:"varint,5,opt,name=finished,proto3" json:"finished,omitempty"`
-	Error         string                 `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
+	Started       int64                  `protobuf:"varint,1,opt,name=started,proto3" json:"started,omitempty"`
+	Finished      int64                  `protobuf:"varint,2,opt,name=finished,proto3" json:"finished,omitempty"`
+	Error         string                 `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
+	Canceled      bool                   `protobuf:"varint,4,opt,name=canceled,proto3" json:"canceled,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -178,6 +179,13 @@ func (x *WorkflowState) GetError() string {
 		return x.Error
 	}
 	return ""
+}
+
+func (x *WorkflowState) GetCanceled() bool {
+	if x != nil {
+		return x.Canceled
+	}
+	return false
 }
 
 type LogEntry struct {
@@ -1155,11 +1163,12 @@ const file_woodpecker_proto_rawDesc = "" +
 	"\bfinished\x18\x03 \x01(\x03R\bfinished\x12\x16\n" +
 	"\x06exited\x18\x04 \x01(\bR\x06exited\x12\x1b\n" +
 	"\texit_code\x18\x05 \x01(\x05R\bexitCode\x12\x14\n" +
-	"\x05error\x18\x06 \x01(\tR\x05error\"[\n" +
-	"\rWorkflowState\x12\x18\n" +
-	"\astarted\x18\x04 \x01(\x03R\astarted\x12\x1a\n" +
-	"\bfinished\x18\x05 \x01(\x03R\bfinished\x12\x14\n" +
 	"\x05error\x18\x06 \x01(\tR\x05error\"w\n" +
+	"\rWorkflowState\x12\x18\n" +
+	"\astarted\x18\x01 \x01(\x03R\astarted\x12\x1a\n" +
+	"\bfinished\x18\x02 \x01(\x03R\bfinished\x12\x14\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error\x12\x1a\n" +
+	"\bcanceled\x18\x04 \x01(\bR\bcanceled\"w\n" +
 	"\bLogEntry\x12\x1b\n" +
 	"\tstep_uuid\x18\x01 \x01(\tR\bstepUuid\x12\x12\n" +
 	"\x04time\x18\x02 \x01(\x03R\x04time\x12\x12\n" +

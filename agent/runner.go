@@ -179,6 +179,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 	if errors.Is(err, pipeline.ErrCancel) || canceled.Load() {
 		canceled.Store(true)
 		err = pipeline.ErrCancel
+		state.Canceled = true
 	}
 
 	if err != nil {
