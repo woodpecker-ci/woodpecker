@@ -20,9 +20,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
@@ -62,9 +63,7 @@ func TestRegisterAgent(t *testing.T) {
 			Backend:  "backend",
 			Capacity: 2,
 		})
-		if !assert.NoError(t, err) {
-			return
-		}
+		require.NoError(t, err)
 
 		assert.EqualValues(t, 1337, agentID)
 	})
@@ -104,9 +103,7 @@ func TestRegisterAgent(t *testing.T) {
 			Backend:  "backend",
 			Capacity: 2,
 		})
-		if !assert.NoError(t, err) {
-			return
-		}
+		require.NoError(t, err)
 
 		assert.EqualValues(t, 1337, agentID)
 	})

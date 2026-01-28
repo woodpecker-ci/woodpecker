@@ -215,7 +215,6 @@ The Webhook tokens have been changed for enhanced security and therefore existin
   Image pull secrets must now be set explicitly via env var `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES` ([#4005](https://github.com/woodpecker-ci/woodpecker/pull/4005))
 
 - Webhook signatures now use the `rfc9421` protocol
-- Replaced `configs` object by `netrc` in external configuration APIs
 
 - Git is now the only officially supported SCM.
   No others were supported previously, but the existence of the env var `CI_REPO_SCM` indicated that others might be.

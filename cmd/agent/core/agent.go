@@ -43,7 +43,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
@@ -296,7 +296,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 					return nil
 				}
 
-				log.Debug().Msg("polling new steps")
+				log.Debug().Msg("polling new workflow")
 				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
 					log.Error().Err(err).Msg("runner error, retrying...")
 					// Check if context is canceled
