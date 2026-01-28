@@ -15,62 +15,58 @@
 
 package rpc
 
-import (
-	"context"
+import "context"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-)
-
-type (
-	// Filter defines filters for fetching items from the queue.
-	Filter struct {
-		Labels map[string]string `json:"labels"`
-	}
-
-	// StepState defines the step state.
-	StepState struct {
-		StepUUID string `json:"step_uuid"`
-		Started  int64  `json:"started"`
-		Finished int64  `json:"finished"`
-		Exited   bool   `json:"exited"`
-		ExitCode int    `json:"exit_code"`
-		Error    string `json:"error"`
-		Canceled bool   `json:"canceled"`
-	}
-
-	// WorkflowState defines the workflow state.
-	WorkflowState struct {
-		Started  int64  `json:"started"`
-		Finished int64  `json:"finished"`
-		Error    string `json:"error"`
-		Canceled bool   `json:"canceled"`
-	}
-
-	// Workflow defines the workflow execution details.
-	Workflow struct {
-		ID      string          `json:"id"`
-		Config  *backend.Config `json:"config"`
-		Timeout int64           `json:"timeout"`
-	}
-
-	Version struct {
-		GrpcVersion   int32  `json:"grpc_version,omitempty"`
-		ServerVersion string `json:"server_version,omitempty"`
-	}
-
-	// AgentInfo represents all the metadata that should be known about an agent.
-	AgentInfo struct {
-		Version      string            `json:"version"`
-		Platform     string            `json:"platform"`
-		Backend      string            `json:"backend"`
-		Capacity     int               `json:"capacity"`
-		CustomLabels map[string]string `json:"custom_labels"`
-	}
-)
-
-// Peer defines a peer-to-peer connection.
-// TODO: suffix Next, Wait, Init, Done and Extend with "Workflow" for docu purpose
-// TODO: suffix Update with UpdateStepState for docu purpose
+// Peer defines the bidirectional communication interface between Woodpecker agents and servers.
+//
+// # Architecture and Implementations
+//
+// The Peer interface is implemented differently on each side of the communication:
+//
+//   - Agent side: Implemented by agent/rpc/client_grpc.go's client struct, which wraps
+//     a gRPC client connection to make RPC calls to the server.
+//
+//   - Server side: Implemented by server/rpc/rpc.go's RPC struct, which contains the
+//     business logic and is wrapped by server/rpc/server.go's WoodpeckerServer struct
+//     to handle incoming gRPC requests.
+//
+// # Thread Safety and Concurrency
+//
+//   - Implementations must be safe for concurrent calls across different workflows
+//   - The same Peer instance may be called concurrently from multiple goroutines
+//   - Each workflow is identified by a unique workflowID string
+//   - Implementations must properly isolate workflow state using workflowID
+//
+// # Error Handling Conventions
+//
+//   - Methods return errors for communication failures, validation errors, or server-side issues
+//   - Errors should not be used for bussines logic
+//   - Network/transport errors should be retried by the caller when appropriate
+//   - Nil error indicates successful operation
+//   - Context cancellation should return nil or context.Canceled, not a custom error
+//   - Business logic errors (e.g., workflow not found) return specific error types
+//
+// # Intended Execution Flow
+//
+//  1. Agent Lifecycle:
+//     - Version() checks compatibility with server
+//     - RegisterAgent() announces agent availability
+//     - ReportHealth() periodically confirms agent is alive
+//     - UnregisterAgent() gracefully disconnects agent
+//
+//  2. Workflow Execution (may happen concurrently for multiple workflows):
+//     - Next() blocks until server assigns a workflow
+//     - Init() signals workflow execution has started
+//     - Wait() (in background goroutine) monitors for cancellation signals
+//     - Update() reports step state changes as workflow progresses
+//     - EnqueueLog() streams log output from steps
+//     - Extend() extends workflow timeout if needed so queue does not reschedule it as retry
+//     - Done() signals workflow has completed
+//
+//  3. Cancellation Flow:
+//     - Server can cancel workflow by releasing Wait() with canceled=true
+//     - Agent detects cancellation from Wait() return value
+//     - Agent stops workflow execution and calls Done() with canceled state
 type Peer interface {
 	// Version returns the server- & grpc-version.
 	Version(c context.Context) (*Version, error)
