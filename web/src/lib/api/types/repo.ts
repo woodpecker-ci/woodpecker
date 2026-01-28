@@ -118,7 +118,10 @@ export type RepoSettings = Pick<
   | 'netrc_trusted'
 >;
 
-export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'config_extension_exclusive' | 'registry_extension_endpoint'>;
+export type ExtensionSettings = Pick<
+  Repo,
+  'config_extension_endpoint' | 'config_extension_exclusive' | 'registry_extension_endpoint'
+>;
 
 export interface RepoPermissions {
   pull: boolean;
