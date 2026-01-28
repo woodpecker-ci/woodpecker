@@ -50,7 +50,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-// Run executes an workflow via an backend, tracks its state and reports back the state to the server
+// Run executes an workflow via an backend, tracks its state and reports back the state to the server.
 func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	log.Debug().Msg("request next execution")
 
@@ -90,7 +90,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	// Workflow execution context.
 	// This context is the SINGLE source of truth for cancellation.
-	workflowCtx, _ := context.WithTimeout(ctxMeta, timeout)
+	workflowCtx, _ := context.WithTimeout(ctxMeta, timeout) //nolint:govet
 	workflowCtx, cancelWorkflowCtx := context.WithCancelCause(workflowCtx)
 	defer cancelWorkflowCtx(nil)
 

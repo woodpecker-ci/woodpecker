@@ -31,7 +31,7 @@ func GetShutdownCtx() context.Context {
 	shutdownCtxLock.Lock()
 	defer shutdownCtxLock.Unlock()
 	if shutdownCtx == nil {
-		shutdownCtx, _ = context.WithTimeout(context.Background(), shutdownTimeout)
+		shutdownCtx, _ = context.WithTimeout(context.Background(), shutdownTimeout) //nolint:govet
 	}
 	return shutdownCtx
 }

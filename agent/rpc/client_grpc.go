@@ -188,7 +188,6 @@ func (c *client) Wait(ctx context.Context, workflowID string) (canceled bool, er
 			return false, ctx.Err()
 		}
 	}
-	return false, nil
 }
 
 // Init signals the workflow is initialized.

@@ -259,7 +259,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 
 // Executes the step and returns the state and error.
 func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.State, error) {
-	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
+	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil { //nolint:contextcheck
 		return nil, err
 	}
 	startTime := time.Now().Unix()
@@ -267,7 +267,7 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
-		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
+		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 		if err != nil {
 			return nil, err
 		}
@@ -291,7 +291,7 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.
 	// We wait until all data was logged. (Needed for some backends like local as WaitStep kills the log stream)
 	wg.Wait()
 
-	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
+	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			waitState.Error = ErrCancel
