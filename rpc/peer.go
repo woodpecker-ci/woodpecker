@@ -92,7 +92,7 @@ type Peer interface {
 	//   - This is a long-polling operation that may block for extended periods
 	//   - Implementations MUST check context regularly (not just at entry)
 	//   - When context is canceled, must return nil workflow and nil error
-	//   - Server may send keepalives or periodically return nil to allow reconnection
+	//   - Server may send keep-alive signals or periodically return nil to allow reconnection
 	//
 	// Returns:
 	//   - Workflow object with ID, Config, and Timeout if work is available
@@ -285,7 +285,7 @@ type Peer interface {
 	//   - Prove agent is still alive and responsive
 	//   - Allow server to detect dead or stuck agents
 	//   - Update agent's "last seen" timestamp in database
-	//   - Provide application-level keepalive beyond network keepalives
+	//   - Provide application-level keepalive beyond network keep-alive signals
 	//
 	// Health reporting helps the server:
 	//   - Mark unresponsive agents as offline
