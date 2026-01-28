@@ -39,7 +39,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 
 	// Prepare commands
 	// TODO: support `entrypoint` from pipeline config
-	args, err := e.genCmdByShell(step.Image, step.Commands, state.baseDir)
+	args, err := e.genCmdByShell(step.Image, step.Commands)
 	if err != nil {
 		return fmt.Errorf("could not convert commands into args: %w", err)
 	}
@@ -77,7 +77,7 @@ func checkShellExistence(shell string) error {
 	return err
 }
 
-func (e *local) genCmdByShell(shell string, cmdList []string, baseDir string) (args []string, err error) {
+func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
 	}
@@ -116,7 +116,7 @@ func (e *local) genCmdByShell(shell string, cmdList []string, baseDir string) (a
 			script += fmt.Sprintf("@%s\n", cmd)
 			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
-		cmd, err := os.CreateTemp(baseDir, "*.cmd")
+		cmd, err := os.CreateTemp(e.tempDir, "*.cmd")
 		if err != nil {
 			return nil, err
 		}
