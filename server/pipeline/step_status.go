@@ -16,31 +16,55 @@
 package pipeline
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"time"
+
+	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) error {
-	if state.Exited {
+	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", *step, state)
+
+	// only set start time if not set once
+	if step.Started == 0 {
+		step.Started = state.Started
+	}
+
+	switch {
+	// if exited or having error
+	case state.Exited, state.Error != "":
+
 		step.Finished = state.Finished
 		step.ExitCode = state.ExitCode
 		step.Error = state.Error
-		step.State = model.StatusSuccess
-		if state.ExitCode != 0 || state.Error != "" {
-			step.State = model.StatusFailure
+
+		step.State = model.StatusFailure
+		if state.ExitCode == 0 && state.Error == "" {
+			step.State = model.StatusSuccess
 		}
-		if state.ExitCode == pipeline.ExitCodeKilled {
-			step.State = model.StatusKilled
+
+		// if timestamps are missing we fix them with approximations
+		// this should never happen but better have something
+		if step.Started == 0 {
+			step.Started = time.Now().Unix()
 		}
-	} else if step.Finished == 0 {
-		step.Started = state.Started
+		if step.Finished == 0 {
+			step.Finished = time.Now().Unix()
+		}
+
+		// we have no exited, error and finished so we assume it is currently running
+	case step.Finished == 0:
 		step.State = model.StatusRunning
 	}
+
+	// if we have an explicit cancel we know the state
 	if state.Canceled {
 		step.State = model.StatusKilled
 	}
+
 	return store.StepUpdate(step)
 }
 
