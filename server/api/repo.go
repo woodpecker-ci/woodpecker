@@ -56,6 +56,8 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, user)
+
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
 	if !forgeRemoteID.IsValid() {
 		c.String(http.StatusBadRequest, "No forge_remote_id provided")
@@ -388,6 +390,8 @@ func GetRepoBranches(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, repoUser)
+
 	branches, err := _forge.Branches(c, repoUser, repo, session.Pagination(c))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to load branches")
@@ -456,6 +460,8 @@ func DeleteRepo(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+
+	forge.Refresh(c, _forge, _store, user)
 
 	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
 		log.Error().Err(err).Msgf("could not deactivate repo [%d] on forge", repo.ID)
@@ -529,6 +535,8 @@ func MoveRepo(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+
+	forge.Refresh(c, _forge, _store, user)
 
 	to, exists := c.GetQuery("to")
 	if !exists {
