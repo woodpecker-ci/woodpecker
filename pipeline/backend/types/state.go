@@ -23,7 +23,7 @@ type State struct {
 	// Container exited, true or false
 	Exited bool `json:"exited"`
 	// Container is oom killed, true or false
-	// TODO: well known errors as string enums into ./errors.go
+	// TODO (6024): well known errors as string enum into ./errors.go
 	OOMKilled bool `json:"oom_killed"`
 	// Container error
 	Error error
