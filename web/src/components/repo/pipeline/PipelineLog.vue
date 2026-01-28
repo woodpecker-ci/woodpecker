@@ -260,9 +260,9 @@ const flushLogs = debounce((scroll: boolean) => {
 
   if (route.hash.length > 0) {
     nextTick(() => document.getElementById(route.hash.substring(1))?.scrollIntoView());
-    } else if (scroll && autoFollow.value) {
-      scrollDown();
-    }
+  } else if (scroll && autoFollow.value) {
+    scrollDown();
+  }
 }, 500);
 
 async function download() {
