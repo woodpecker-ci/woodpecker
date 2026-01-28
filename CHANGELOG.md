@@ -39,6 +39,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.21.0 [[#6028](https://github.com/woodpecker-ci/woodpecker/pull/6028)]
 - fix(deps): update golang-packages [[#6026](https://github.com/woodpecker-ci/woodpecker/pull/6026)]
 - chore(deps): lock file maintenance [[#6014](https://github.com/woodpecker-ci/woodpecker/pull/6014)]
 - fix(deps): update golang-packages [[#6013](https://github.com/woodpecker-ci/woodpecker/pull/6013)]
