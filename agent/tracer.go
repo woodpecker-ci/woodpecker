@@ -46,11 +46,13 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
 			Started:  state.Process.Started,
-			Finished: time.Now().Unix(),
 			Canceled: errors.Is(state.Process.Error, pipeline.ErrCancel),
 		}
 		if state.Process.Error != nil {
 			stepState.Error = state.Process.Error.Error()
+		}
+		if state.Process.Exited {
+			stepState.Finished = time.Now().Unix()
 		}
 
 		defer func() {
