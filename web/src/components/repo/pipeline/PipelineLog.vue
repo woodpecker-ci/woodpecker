@@ -175,17 +175,13 @@ const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
-const autoFollow = ref(true);
 
-function isScrolledToBottom(el: HTMLElement, threshold = 5): boolean {
-  return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-}
-
-function onScroll() {
-  const el = consoleElement.value as HTMLElement | undefined;
-  if (!el) return;
-
-  autoFollow.value = isScrolledToBottom(el);
+function isScrolledToBottom(): boolean {
+  if (!consoleElement.value) {
+    return false;
+  }
+  // we use 5 as threshold
+  return consoleElement.value.scrollHeight - consoleElement.value.scrollTop - consoleElement.value.clientHeight < 5;
 }
 
 function isSelected(line: LogLine): boolean {
@@ -260,7 +256,7 @@ const flushLogs = debounce((scroll: boolean) => {
 
   if (route.hash.length > 0) {
     nextTick(() => document.getElementById(route.hash.substring(1))?.scrollIntoView());
-  } else if (scroll && autoFollow.value) {
+  } else if (scroll && isScrolledToBottom()) {
     scrollDown();
   }
 }, 500);
@@ -372,12 +368,10 @@ function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | un
 
 onMounted(async () => {
   await loadLogs();
-  consoleElement.value?.addEventListener('scroll', onScroll);
 });
 
 onBeforeUnmount(() => {
   stream.value?.close();
-  consoleElement.value?.removeEventListener('scroll', onScroll);
 });
 
 watch(stepSlug, async () => {
@@ -386,7 +380,7 @@ watch(stepSlug, async () => {
 
 watch(step, async (newStep, oldStep) => {
   if (oldStep?.name === newStep?.name) {
-    if (oldStep?.finished !== newStep?.finished && autoFollow.value) {
+    if (oldStep?.finished !== newStep?.finished && isScrolledToBottom()) {
       scrollDown();
     }
 
