@@ -27,6 +27,7 @@
 
 ### 🐛 Bug Fixes
 
+- Local backend: cleanup generated script for cmd.exe shell [[#6029](https://github.com/woodpecker-ci/woodpecker/pull/6029)]
 - Local backend: setup clone step respects context [[#6030](https://github.com/woodpecker-ci/woodpecker/pull/6030)]
 - Fix: Agent now gracefully handles running containers when killed [[#6018](https://github.com/woodpecker-ci/woodpecker/pull/6018)]
 - Local backend handle canceled steps case [[#6008](https://github.com/woodpecker-ci/woodpecker/pull/6008)]
