@@ -17,11 +17,13 @@ package queue
 
 import (
 	"context"
+	"errors"
 
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // WithTaskStore returns a queue that is backed by the TaskStore. This
@@ -77,7 +79,15 @@ func (q *persistentQueue) Error(c context.Context, id string, err error) error {
 	if err := q.Queue.Error(c, id, err); err != nil {
 		return err
 	}
-	return q.store.TaskDelete(id)
+
+	// Attempt to delete from store, but don't fail if task was already removed
+	if deleteErr := q.store.TaskDelete(id); deleteErr != nil {
+		if !errors.Is(deleteErr, types.RecordNotExist) {
+			return deleteErr
+		}
+		log.Debug().Msgf("task %s already removed from store", id)
+	}
+	return nil
 }
 
 // ErrorAtOnce signals multiple tasks are done and complete with an error.
