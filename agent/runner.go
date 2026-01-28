@@ -94,15 +94,17 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	workflowCtx, cancelWorkflowCtx := context.WithCancelCause(workflowCtx)
 	defer cancelWorkflowCtx(nil)
 
-	// Handle SIGTERM (k8s, docker, system shutdown)
+	// Add sigterm support for internal context.
+	// Required to be able to terminate the running workflow by external signals.
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
+		// WithContextSigtermCallback would cancel the context too, but  we want our own custom error
 		cancelWorkflowCtx(pipeline.ErrCancel)
 	})
 
 	// Listen for remote cancel events (UI / API).
 	// When canceled, we MUST cancel the workflow context
-	// so that pipeline execution and backend processes stop immediately.
+	// so that workflow execution stop immediately.
 	go func() {
 		logger.Debug().Msg("listening for cancel signal")
 
@@ -194,6 +196,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("failed to update workflow status")
+	} else {
+		logger.Debug().Msg("signaling workflow stopped done")
 	}
 
 	return nil
