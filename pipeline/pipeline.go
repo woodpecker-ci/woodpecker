@@ -51,13 +51,17 @@ type (
 	}
 )
 
-// Runtime is a configuration runtime.
+// Runtime represents a workflow state executed by a specific backend.
+// Each workflow gets its own state configuration at runtime.
 type Runtime struct {
 	err     error
 	spec    *backend.Config
 	engine  backend.Backend
 	started int64
 
+	// The context a workflow is being executed with.
+	// All normal (non cleanup) operations must use this.
+	// Cleanup operations should use the runnerCtx passed to Run()
 	ctx context.Context
 
 	tracer Tracer

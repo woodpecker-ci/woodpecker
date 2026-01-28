@@ -148,7 +148,7 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 	return w, nil
 }
 
-// Wait blocks until the workflow is complete.
+// Wait blocks until the workflow with the given ID is marked as completed or canceled by the server.
 func (c *client) Wait(ctx context.Context, workflowID string) (canceled bool, err error) {
 	retry := c.newBackOff()
 	req := new(proto.WaitRequest)
