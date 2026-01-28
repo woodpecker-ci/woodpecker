@@ -146,11 +146,8 @@ type RepoPatch struct {
 	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
 	ConfigExtensionEndpoint      *string                    `json:"config_extension_endpoint,omitempty"`
-<<<<<<< HEAD
-	RegistryExtensionEndpoint    *string                    `json:"registry_extension_endpoint,omitempty"`
-=======
 	ConfigExtensionExclusive     *bool                      `json:"config_extension_exclusive"`
->>>>>>> main
+	RegistryExtensionEndpoint    *string                    `json:"registry_extension_endpoint,omitempty"`
 } //	@name	RepoPatch
 
 type ForgeRemoteID string
