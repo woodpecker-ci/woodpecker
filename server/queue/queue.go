@@ -101,6 +101,7 @@ type Queue interface {
 	ErrorAtOnce(c context.Context, ids []string, err error) error
 
 	// Wait waits until the task is complete.
+	// Used to let agents wait for cancel signals from server side.
 	Wait(c context.Context, id string) error
 
 	// Info returns internal queue information.

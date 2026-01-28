@@ -101,6 +101,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 }
 
 // Wait blocks until the workflow with the given ID is completed.
+// Used to let agents wait for cancel signals from server side.
 func (s *RPC) Wait(c context.Context, workflowID string) error {
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {

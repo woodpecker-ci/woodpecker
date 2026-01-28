@@ -80,8 +80,7 @@ type Peer interface {
 
 	// Wait blocks until the workflow with the given ID is completed.
 	// Also signals via err if workflow got canceled.
-	// TODO: we nee a proper api for the server to cancel a workflow not do it indirectly
-	Wait(c context.Context, workflowID string) error
+	Wait(c context.Context, workflowID string) (canceled bool, err error)
 
 	// Init signals the workflow is initialized.
 	Init(c context.Context, workflowID string, state WorkflowState) error

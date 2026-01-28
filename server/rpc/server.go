@@ -17,6 +17,7 @@ package grpc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/prometheus/client_golang/prometheus"
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
@@ -130,10 +131,18 @@ func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*pro
 
 // Wait blocks until the workflow is complete.
 // Also signals via err if workflow got canceled.
-func (s *WoodpeckerServer) Wait(c context.Context, req *proto.WaitRequest) (*proto.Empty, error) {
-	res := new(proto.Empty)
-	err := s.peer.Wait(c, req.GetId())
-	return res, err
+func (s *WoodpeckerServer) Wait(c context.Context, req *proto.WaitRequest) (*proto.WaitResponse, error) {
+	res := new(proto.WaitResponse)
+	res.Canceled = false
+	if err := s.peer.Wait(c, req.GetId()); err != nil {
+		// we explicit send a cancel signal
+		if errors.Is(err, queue.ErrCancel) {
+			res.Canceled = true
+			return res, nil
+		}
+		return res, err
+	}
+	return res, nil
 }
 
 // Extend extends the workflow deadline.

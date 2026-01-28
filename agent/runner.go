@@ -106,17 +106,16 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	// When canceled, we MUST cancel the workflow context
 	// so that workflow execution stop immediately.
 	go func() {
-		logger.Debug().Msg("listening for cancel signal")
+		logger.Debug().Msg("start listening for server side cancel signal")
 
-		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
-			if errors.Is(err, pipeline.ErrCancel) {
-				logger.Debug().Err(err).Msg("cancel signal received")
-				cancelWorkflowCtx(pipeline.ErrCancel)
-			} else {
-				logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
-				cancelWorkflowCtx(err)
-			}
+		if canceled, err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
+			logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
+			cancelWorkflowCtx(err)
 		} else {
+			if canceled {
+				logger.Debug().Err(err).Msg("server side cancel signal  received")
+				cancelWorkflowCtx(pipeline.ErrCancel)
+			}
 			// Wait returned without error, meaning the workflow finished normally
 			logger.Debug().Msg("cancel listener exited normally")
 		}
