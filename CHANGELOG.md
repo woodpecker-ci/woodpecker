@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-27
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -27,7 +27,8 @@
 
 ### 🐛 Bug Fixes
 
-- Fix docker backend to kill container on cancel [[#6018](https://github.com/woodpecker-ci/woodpecker/pull/6018)]
+- Local backend: setup clone step respects context [[#6030](https://github.com/woodpecker-ci/woodpecker/pull/6030)]
+- Fix: Agent now gracefully handles running containers when killed [[#6018](https://github.com/woodpecker-ci/woodpecker/pull/6018)]
 - Local backend handle canceled steps case [[#6008](https://github.com/woodpecker-ci/woodpecker/pull/6008)]
 
 ### 📚 Documentation
