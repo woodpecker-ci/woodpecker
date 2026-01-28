@@ -526,6 +526,8 @@
   "extension_endpoint_placeholder": "e.g. https://example.com/api",
   "config_extension_endpoint": "Config extension endpoint",
   "registry_extension_endpoint": "Registry extension endpoint",
+  "config_extension_exclusive": "Exclusive",
+  "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
   "extensions_signatures_public_key": "Public key for signatures",
   "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
   "extensions_configuration_saved": "Extensions configuration saved",

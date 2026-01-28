@@ -50,9 +50,7 @@ func createSQLiteDB(t *testing.T) string {
 	dbF, err := os.ReadFile(sqliteDB)
 	require.NoError(t, err)
 
-	if !assert.NoError(t, os.WriteFile(tmpF.Name(), dbF, 0o644)) {
-		t.FailNow()
-	}
+	require.NoError(t, os.WriteFile(tmpF.Name(), dbF, 0o644))
 	return tmpF.Name()
 }
 

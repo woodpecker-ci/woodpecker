@@ -591,5 +591,7 @@
     "exit_fullscreen": "Vollbild verlassn",
     "help_translating": "Du kost helfa Woodpecker in dei Sproch zu übersetzen auf {0}.",
     "weblate": "unserm Weblate",
-    "disabled": "Abgschoidn"
+    "disabled": "Abgschoidn",
+    "config_extension_exclusive": "Ganz Alloa",
+    "config_extension_exclusive_desc": "Wenn ogschoid, werdn alle anderen konfigurations Möglichkeitn überganga, a de Forge."
 }

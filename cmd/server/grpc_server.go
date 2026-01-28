@@ -24,9 +24,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
-	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v3/server/grpc"
+	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v3/server/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 

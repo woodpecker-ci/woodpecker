@@ -73,6 +73,7 @@ type Repo struct {
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
+	ConfigExtensionExclusive     bool                 `json:"config_extension_exclusive"      xorm:"DEFAULT FALSE 'config_extension_exclusive'"`
 	RegistryExtensionEndpoint    string               `json:"registry_extension_endpoint"     xorm:"varchar(500) 'registry_extension_endpoint'"`
 } //	@name	Repo
 
@@ -145,7 +146,11 @@ type RepoPatch struct {
 	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
 	ConfigExtensionEndpoint      *string                    `json:"config_extension_endpoint,omitempty"`
+<<<<<<< HEAD
 	RegistryExtensionEndpoint    *string                    `json:"registry_extension_endpoint,omitempty"`
+=======
+	ConfigExtensionExclusive     *bool                      `json:"config_extension_exclusive"`
+>>>>>>> main
 } //	@name	RepoPatch
 
 type ForgeRemoteID string

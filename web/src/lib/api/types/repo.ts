@@ -83,6 +83,8 @@ export interface Repo {
   // Endpoint for config extensions
   config_extension_endpoint: string;
 
+  config_extension_exclusive: boolean;
+
   // Endpoint for registry extensions
   registry_extension_endpoint: string;
 }
@@ -116,7 +118,11 @@ export type RepoSettings = Pick<
   | 'netrc_trusted'
 >;
 
+<<<<<<< HEAD
 export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'registry_extension_endpoint'>;
+=======
+export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'config_extension_exclusive'>;
+>>>>>>> main
 
 export interface RepoPermissions {
   pull: boolean;
