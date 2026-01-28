@@ -103,17 +103,27 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 // Wait blocks until the workflow with the given ID is completed.
 // Used to let agents wait for cancel signals from server side.
-func (s *RPC) Wait(c context.Context, workflowID string) error {
+func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err error) {
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if err := s.checkAgentPermissionByWorkflow(c, agent, workflowID, nil, nil); err != nil {
-		return err
+		return false, err
 	}
 
-	return s.queue.Wait(c, workflowID)
+	if err := s.queue.Wait(c, workflowID); err != nil {
+		if errors.Is(err, queue.ErrCancel) {
+			// we explicit send a cancel signal
+			return true, nil
+		}
+		// unknown error happened
+		return false, err
+	}
+
+	// workflow finished and on issues appeared
+	return false, nil
 }
 
 // Extend extends the lease for the workflow with the given ID.
