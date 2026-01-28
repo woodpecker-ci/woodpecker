@@ -300,6 +300,8 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.
 		}
 	}
 
+	// It is important to use the runnerCtx here because
+	// in case the workflow was canceled we still have the docker daemon to stop the container.
 	if err := r.engine.DestroyStep(runnerCtx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
