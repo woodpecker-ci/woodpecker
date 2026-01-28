@@ -580,6 +580,9 @@ func TestFifoLeaseManagement(t *testing.T) {
 
 	t.Run("lease expiration", func(t *testing.T) {
 		q.extension = 0
+		t.Cleanup(func() {
+			q.extension = 50 * time.Millisecond
+		})
 		dummyTask := &model.Task{ID: "lease-exp-1"}
 		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
 
