@@ -18,6 +18,7 @@ package queue
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 
@@ -80,7 +81,6 @@ func (q *persistentQueue) Error(c context.Context, id string, err error) error {
 		return err
 	}
 
-	// Attempt to delete from store, but don't fail if task was already removed
 	if deleteErr := q.store.TaskDelete(id); deleteErr != nil {
 		if !errors.Is(deleteErr, types.RecordNotExist) {
 			return deleteErr
@@ -96,10 +96,16 @@ func (q *persistentQueue) ErrorAtOnce(c context.Context, ids []string, err error
 	if err := q.Queue.ErrorAtOnce(c, ids, err); err != nil {
 		return err
 	}
+
+	var errs []error
 	for _, id := range ids {
-		if err := q.store.TaskDelete(id); err != nil {
-			return err
+		if deleteErr := q.store.TaskDelete(id); deleteErr != nil && !errors.Is(deleteErr, types.RecordNotExist) {
+			errs = append(errs, fmt.Errorf("task id [%s]: %w", id, deleteErr))
 		}
+	}
+
+	if len(errs) != 0 {
+		return fmt.Errorf("failed to delete tasks from persistent store: %w", errors.Join(errs...))
 	}
 	return nil
 }
