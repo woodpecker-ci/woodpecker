@@ -20,7 +20,7 @@
 - fix(agent): workflow runner use shutdown context [[#6021](https://github.com/woodpecker-ci/woodpecker/pull/6021)]
 - Update Architecture: move `pipeline/rpc` => `rpc` & `server/{grpc => rpc}` [[#6012](https://github.com/woodpecker-ci/woodpecker/pull/6012)]
 - Implement retry logic in HTTP Send method [[#5857](https://github.com/woodpecker-ci/woodpecker/pull/5857)]
-- Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
+- CLI: Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
 - Improve service syntax related docs and tests nits [[#5991](https://github.com/woodpecker-ci/woodpecker/pull/5991)]
 - Remove deactivated secrets type from container defintion [[#5983](https://github.com/woodpecker-ci/woodpecker/pull/5983)]
 - Fix docusaurus md link deprecation [[#5979](https://github.com/woodpecker-ci/woodpecker/pull/5979)]
@@ -30,7 +30,7 @@
 - Local backend: cleanup generated script for cmd.exe shell [[#6029](https://github.com/woodpecker-ci/woodpecker/pull/6029)]
 - Local backend: setup clone step respects context [[#6030](https://github.com/woodpecker-ci/woodpecker/pull/6030)]
 - Fix: Agent now gracefully handles running containers when killed [[#6018](https://github.com/woodpecker-ci/woodpecker/pull/6018)]
-- Local backend handle canceled steps case [[#6008](https://github.com/woodpecker-ci/woodpecker/pull/6008)]
+- Local backend: handle canceled steps case [[#6008](https://github.com/woodpecker-ci/woodpecker/pull/6008)]
 
 ### 📚 Documentation
 
