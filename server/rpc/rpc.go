@@ -53,7 +53,7 @@ type RPC struct {
 }
 
 // Next blocks until it provides the next workflow to execute.
-// TODO (6038): Server does not release waiting agents on graceful shutdown
+// TODO (6038): Server does not release waiting agents on graceful shutdown.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
