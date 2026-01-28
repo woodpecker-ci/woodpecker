@@ -95,7 +95,7 @@ type Peer interface {
 	//   - Server may send keep-alive signals or periodically return nil to allow reconnection
 	//
 	// Returns:
-	//   - Workflow object with ID, Config, and Timeout if work is available
+	//   - Workflow object with ID, Config, and Workflow.Timeout if work is available
 	//   - nil, nil if context is canceled or no work available (retry expected)
 	//   - nil, error if a non-retryable error occurs
 	Next(c context.Context, f Filter) (*Workflow, error)
@@ -172,18 +172,23 @@ type Peer interface {
 	//   - error if communication fails or server rejects the state
 	Done(c context.Context, workflowID string, state WorkflowState) error
 
-	// Extend extends the execution deadline for the workflow with the given ID.
+	// Extend extends the timeout for the workflow with the given ID in the task queue.
 	//
-	// Workflows have a timeout (specified in Workflow.Timeout from Next()). Agents should
-	// call Extend() periodically (e.g. constant.TaskTimeout / 3) to signal the workflow is still
-	// actively executing and prevent premature timeout.
+	// Agents must call Extend() regularly (e.g., every constant.TaskTimeout / 3) to signal
+	// that the workflow is still actively executing and prevent premature timeout.
 	//
-	// This acts as a heartbeat mechanism to detect stuck workflow executions. If an agent dies or
-	// becomes unresponsive, the server will eventually timeout the workflow after the
-	// deadline expires without extension.
+	// If agents don't call Extend periodically, the workflow will be rescheduled to a new
+	// agent after the timeout period expires (specified in constant.TaskTimeout).
+	//
+	// This acts as a heartbeat mechanism to detect stuck workflow executions. If an agent
+	// dies or becomes unresponsive, the server will eventually timeout the workflow and
+	// reassign it.
+	//
+	// IMPORTANT: Don't confuse this with Workflow.Timeout returned by Next() - they serve
+	// different purposes!
 	//
 	// Returns:
-	//   - nil on success (deadline was extended)
+	//   - nil on success (timeout was extended)
 	//   - error if communication fails or workflow is not found
 	Extend(c context.Context, workflowID string) error
 
