@@ -31,7 +31,7 @@ func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) 
 		if state.ExitCode != 0 || state.Error != "" {
 			step.State = model.StatusFailure
 		}
-		if state.ExitCode == pipeline.ExitCodeKilled {
+		if state.ExitCode == pipeline.ExitCodeKilled || state.Error == pipeline.ErrCancel.Error() {
 			step.State = model.StatusKilled
 		}
 	} else if step.Finished == 0 {

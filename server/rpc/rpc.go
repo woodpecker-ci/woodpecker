@@ -353,7 +353,8 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 	s.completeChildrenIfParentCompleted(workflow)
 
-	if !model.IsThereRunningStage(currentPipeline.Workflows) {
+	if !model.IsThereRunningStage(currentPipeline.Workflows) &&
+		currentPipeline.Status != model.StatusKilled {
 		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
 			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
 		}

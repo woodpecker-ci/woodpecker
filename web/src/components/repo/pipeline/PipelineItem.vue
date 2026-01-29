@@ -34,6 +34,13 @@
         >
           {{ shortMessage }}
         </span>
+        <span
+          v-if="pipeline.status === 'killed' && pipeline.cancel_reason"
+          class="text-wp-text-alt-100 ml-2 overflow-hidden text-ellipsis whitespace-nowrap text-xs"
+          :title="pipeline.cancel_reason"
+        >
+          ({{ pipeline.cancel_reason }})
+        </span>
       </div>
 
       <div

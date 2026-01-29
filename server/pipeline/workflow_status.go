@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -40,7 +41,11 @@ func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, stat
 		workflow.State = model.WorkflowStatus(workflow.Children)
 	}
 	if workflow.Error != "" {
-		workflow.State = model.StatusFailure
+		if workflow.Error == pipeline.ErrCancel.Error() {
+			workflow.State = model.StatusKilled
+		} else {
+			workflow.State = model.StatusFailure
+		}
 	}
 	return &workflow, store.WorkflowUpdate(&workflow)
 }

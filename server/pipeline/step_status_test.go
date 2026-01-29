@@ -106,6 +106,30 @@ func TestUpdateStepStatusExited(t *testing.T) {
 	assert.EqualValues(t, "an error", step.Error)
 }
 
+func TestUpdateStepStatusExitedErrorCancelled(t *testing.T) {
+	t.Parallel()
+
+	// step in db before update
+	step := &model.Step{Started: 42}
+
+	// advertised step status
+	state := rpc.StepState{
+		Started:  int64(42),
+		Exited:   true,
+		Finished: int64(34),
+		Error:    pipeline.ErrCancel.Error(),
+	}
+
+	err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, model.StatusKilled, step.State)
+	assert.EqualValues(t, 42, step.Started)
+	assert.EqualValues(t, 34, step.Finished)
+	assert.EqualValues(t, 0, step.ExitCode)
+	assert.EqualValues(t, pipeline.ErrCancel.Error(), step.Error)
+}
+
 func TestUpdateStepStatusExitedButNot137(t *testing.T) {
 	t.Parallel()
 
