@@ -165,7 +165,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 		return nil
 	}
 
-	// this is nil if the step was not started jet
+	// this is nil if the step was not started yet
 	if processState == nil {
 		processState = new(backend.State)
 		// and if we have an error something with the step setup/start went wrong
