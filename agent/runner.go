@@ -144,7 +144,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("signaling workflow initialization to server failed")
-		// This should never happen, still it did so lets clean up and end
+		// We have an error, maybe the server is currently unreachable or other server-side errors occurred.
+		// So let's clean up and end this not yet started workflow run.
 		cancelWorkflowCtx(err)
 		return err
 	}
