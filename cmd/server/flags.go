@@ -276,7 +276,12 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_SERVICE_ENDPOINT"),
 		Name:    "config-service-endpoint",
-		Usage:   "url used for calling configuration service endpoint",
+		Usage:   "url used for calling global configuration service endpoint",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_CONFIG_SERVICE_EXCLUSIVE"),
+		Name:    "config-service-exclusive",
+		Usage:   "whether global configuration service endpoint should be exclusive (skip forge)",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
