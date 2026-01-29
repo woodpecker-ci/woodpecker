@@ -29,6 +29,7 @@
               class="overflow-hidden pl-1 text-ellipsis whitespace-nowrap"
               :title="message"
               :content="shortMessage"
+              inline
             />
           </div>
 

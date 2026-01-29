@@ -28,6 +28,7 @@
             class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
             :title="message"
             :content="shortMessage"
+            inline
           />
         </div>
 

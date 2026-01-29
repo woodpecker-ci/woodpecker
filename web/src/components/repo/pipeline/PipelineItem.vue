@@ -32,6 +32,7 @@
           class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline"
           :title="message"
           :content="shortMessage"
+          inline
         />
       </div>
 

@@ -16,6 +16,7 @@
         class="overflow-hidden text-ellipsis whitespace-nowrap"
         :title="message"
         :content="shortMessage"
+        inline
       />
       <div class="mt-2 flex flex-col">
         <div class="flex items-center space-x-2" :title="created">
