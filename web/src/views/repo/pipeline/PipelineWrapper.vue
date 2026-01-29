@@ -76,7 +76,7 @@
           <span>{{ duration }}</span>
         </div>
         <div v-if="pipeline.status === 'killed' && pipeline.cancel_reason" class="flex shrink-0 items-center gap-2">
-          <Icon name="info-circle-outline" />
+          <Icon name="status-killed" />
           <span class="truncate" :title="pipeline.cancel_reason">{{ pipeline.cancel_reason }}</span>
         </div>
       </div>
