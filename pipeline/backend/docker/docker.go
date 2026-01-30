@@ -21,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/containerd/errdefs"
 	"github.com/docker/docker/api/types/container"
@@ -42,7 +41,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-var containerKillTimeout = time.Second
+var containerKillTimeout = 1 // seconds
 
 type docker struct {
 	client client.APIClient
@@ -308,8 +307,9 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 
 	containerName := toContainerName(step)
 
-	softKillCtx, _ := context.WithTimeout(ctx, containerKillTimeout) //nolint:govet
-	if err := e.client.ContainerKill(softKillCtx, containerName, ""); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+	if err := e.client.ContainerStop(ctx, containerName, container.StopOptions{
+		Timeout: &containerKillTimeout,
+	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		return err
 	}
 
