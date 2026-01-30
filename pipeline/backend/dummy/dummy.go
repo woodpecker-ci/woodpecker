@@ -200,7 +200,7 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID stri
 
 	_, exist := e.kv.Load("task_" + taskUUID)
 	if !exist {
-		return fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
+		return nil
 	}
 
 	// check state
