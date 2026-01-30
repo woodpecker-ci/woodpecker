@@ -113,7 +113,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 			cancelWorkflowCtx(err)
 		} else {
 			if canceled {
-				logger.Debug().Err(err).Msg("server side cancel signal  received")
+				logger.Debug().Err(err).Msg("server side cancel signal received")
 				cancelWorkflowCtx(pipeline.ErrCancel)
 			}
 			// Wait returned without error, meaning the workflow finished normally
