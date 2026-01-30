@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/containerd/errdefs"
 	"github.com/docker/docker/api/types/container"
@@ -40,6 +41,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
+
+var containerKillTimeout = time.Second
 
 type docker struct {
 	client client.APIClient
@@ -305,6 +308,12 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 
 	containerName := toContainerName(step)
 
+	softKillCtx, _ := context.WithTimeout(ctx, containerKillTimeout) //nolint:govet
+	if err := e.client.ContainerKill(softKillCtx, containerName, ""); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		return err
+	}
+
+	// if soft kill did now work just force kill it
 	if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		return err
 	}
@@ -349,8 +358,13 @@ func isErrContainerNotFoundOrNotRunning(err error) bool {
 	// Error response from daemon: Cannot kill container: ...: No such container: ...
 	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
 	// Error response from podman daemon: can only kill running containers. ... is in state exited
+	// Error response from daemon: removal of container ... is already in progress
 	// Error: No such container: ...
-	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running") || strings.Contains(err.Error(), "can only kill running containers"))
+	return err != nil &&
+		(strings.Contains(err.Error(), "No such container") ||
+			strings.Contains(err.Error(), "is not running") ||
+			strings.Contains(err.Error(), "can only kill running containers") ||
+			(strings.Contains(err.Error(), "removal of container") && strings.Contains(err.Error(), "is already in progress")))
 }
 
 // normalizeArchType converts the arch type reported by docker info into
