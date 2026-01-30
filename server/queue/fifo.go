@@ -134,7 +134,7 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 	q.Lock()
 	defer q.Unlock()
 
-	// it's  an external error so we wrap it
+	// it's an external error so we wrap it
 	err = NewErrExternal(err)
 
 	var errs []error

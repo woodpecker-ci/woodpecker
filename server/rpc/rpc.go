@@ -119,7 +119,7 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 			return true, nil
 		}
 		if errors.Is(err, new(queue.ErrExternal)) {
-			// we do not have to give back the error an agent already told us
+			// we do not have to give back the same error the agent already told us
 			return false, nil
 		}
 		return false, err
