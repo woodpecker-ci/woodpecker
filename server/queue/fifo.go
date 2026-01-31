@@ -157,6 +157,7 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 }
 
 // Wait waits until the item is done executing.
+// Also signals via error ErrCancel if workflow got canceled.
 func (q *fifo) Wait(ctx context.Context, taskID string) error {
 	q.Lock()
 	state := q.running[taskID]

@@ -16,6 +16,7 @@ package agent
 
 import (
 	"context"
+	"errors"
 	"runtime"
 	"strconv"
 	"sync"
@@ -30,6 +31,7 @@ import (
 func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
 		uploads.Add(1)
+		defer uploads.Done()
 
 		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
@@ -43,11 +45,14 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 			StepUUID: state.Pipeline.Step.UUID,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
-			Started:  time.Now().Unix(), // TODO: do not do this
-			Finished: time.Now().Unix(),
+			Started:  state.Process.Started,
+			Canceled: errors.Is(state.Process.Error, pipeline.ErrCancel),
 		}
 		if state.Process.Error != nil {
 			stepState.Error = state.Process.Error.Error()
+		}
+		if state.Process.Exited {
+			stepState.Finished = time.Now().Unix()
 		}
 
 		defer func() {
@@ -60,7 +65,6 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 			}
 
 			stepLogger.Debug().Msg("update step status complete")
-			uploads.Done()
 		}()
 		if state.Process.Exited {
 			return nil

@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -51,6 +50,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
+// Run executes a workflow using a backend, tracks its state and reports the state back to the server.
 func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	log.Debug().Msg("request next execution")
 
@@ -90,34 +90,32 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	// Workflow execution context.
 	// This context is the SINGLE source of truth for cancellation.
-	workflowCtx, cancel := context.WithTimeout(ctxMeta, timeout)
-	defer cancel()
+	workflowCtx, _ := context.WithTimeout(ctxMeta, timeout) //nolint:govet
+	workflowCtx, cancelWorkflowCtx := context.WithCancelCause(workflowCtx)
+	defer cancelWorkflowCtx(nil)
 
-	// Handle SIGTERM (k8s, docker, system shutdown)
+	// Add sigterm support for internal context.
+	// Required to be able to terminate the running workflow by external signals.
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
-		cancel()
+		// WithContextSigtermCallback would cancel the context too, but  we want our own custom error
+		cancelWorkflowCtx(pipeline.ErrCancel)
 	})
-
-	// canceled indicates whether the workflow was canceled remotely (UI/API).
-	// Must be atomic because it is written from a goroutine and read later.
-	var canceled atomic.Bool
 
 	// Listen for remote cancel events (UI / API).
 	// When canceled, we MUST cancel the workflow context
-	// so that pipeline execution and backend processes stop immediately.
+	// so that workflow execution stop immediately.
 	go func() {
-		logger.Debug().Msg("listening for cancel signal")
+		logger.Debug().Msg("start listening for server side cancel signal")
 
-		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
-			logger.Warn().Err(err).Msg("cancel signal received from server")
-
-			// Mark workflow as canceled (thread-safe)
-			canceled.Store(true)
-
-			// Propagate cancellation to pipeline + backend
-			cancel()
+		if canceled, err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
+			logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
+			cancelWorkflowCtx(err)
 		} else {
+			if canceled {
+				logger.Debug().Err(err).Msg("server side cancel signal received")
+				cancelWorkflowCtx(pipeline.ErrCancel)
+			}
 			// Wait returned without error, meaning the workflow finished normally
 			logger.Debug().Msg("cancel listener exited normally")
 		}
@@ -143,9 +141,13 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	state := rpc.WorkflowState{
 		Started: time.Now().Unix(),
 	}
+
 	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
-		logger.Error().Err(err).Msg("workflow initialization failed")
-		// TODO: should we return here?
+		logger.Error().Err(err).Msg("signaling workflow initialization to server failed")
+		// We have an error, maybe the server is currently unreachable or other server-side errors occurred.
+		// So let's clean up and end this not yet started workflow run.
+		cancelWorkflowCtx(err)
+		return err
 	}
 
 	var uploads sync.WaitGroup
@@ -167,19 +169,18 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	state.Finished = time.Now().Unix()
 
-	// Normalize cancellation error
-	if errors.Is(err, pipeline.ErrCancel) || canceled.Load() {
-		canceled.Store(true)
-		err = pipeline.ErrCancel
-	}
-
 	if err != nil {
 		state.Error = err.Error()
+		if errors.Is(err, pipeline.ErrCancel) {
+			state.Canceled = true
+			// cleanup joined error messages
+			state.Error = pipeline.ErrCancel.Error()
+		}
 	}
 
 	logger.Debug().
 		Str("error", state.Error).
-		Bool("canceled", canceled.Load()).
+		Bool("canceled", state.Canceled).
 		Msg("workflow finished")
 
 	// Ensure all logs/traces are uploaded before finishing
@@ -195,6 +196,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("failed to update workflow status")
+	} else {
+		logger.Debug().Msg("signaling workflow stopped done")
 	}
 
 	return nil

@@ -623,20 +623,29 @@ func (_c *MockPeer_Version_Call) RunAndReturn(run func(c context.Context) (*rpc.
 }
 
 // Wait provides a mock function for the type MockPeer
-func (_mock *MockPeer) Wait(c context.Context, workflowID string) error {
+func (_mock *MockPeer) Wait(c context.Context, workflowID string) (bool, error) {
 	ret := _mock.Called(c, workflowID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Wait")
 	}
 
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) error); ok {
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return returnFunc(c, workflowID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) bool); ok {
 		r0 = returnFunc(c, workflowID)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(bool)
 	}
-	return r0
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(c, workflowID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
 // MockPeer_Wait_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Wait'
@@ -669,12 +678,12 @@ func (_c *MockPeer_Wait_Call) Run(run func(c context.Context, workflowID string)
 	return _c
 }
 
-func (_c *MockPeer_Wait_Call) Return(err error) *MockPeer_Wait_Call {
-	_c.Call.Return(err)
+func (_c *MockPeer_Wait_Call) Return(canceled bool, err error) *MockPeer_Wait_Call {
+	_c.Call.Return(canceled, err)
 	return _c
 }
 
-func (_c *MockPeer_Wait_Call) RunAndReturn(run func(c context.Context, workflowID string) error) *MockPeer_Wait_Call {
+func (_c *MockPeer_Wait_Call) RunAndReturn(run func(c context.Context, workflowID string) (bool, error)) *MockPeer_Wait_Call {
 	_c.Call.Return(run)
 	return _c
 }

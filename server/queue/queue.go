@@ -101,6 +101,7 @@ type Queue interface {
 	ErrorAtOnce(c context.Context, ids []string, err error) error
 
 	// Wait waits until the task is complete.
+	// Also signals via error ErrCancel if workflow got canceled.
 	Wait(c context.Context, id string) error
 
 	// Info returns internal queue information.

@@ -51,14 +51,19 @@ type (
 	}
 )
 
-// Runtime is a configuration runtime.
+// Runtime represents a workflow state executed by a specific backend.
+// Each workflow gets its own state configuration at runtime.
 type Runtime struct {
 	err     error
 	spec    *backend.Config
 	engine  backend.Backend
 	started int64
 
-	ctx    context.Context
+	// The context a workflow is being executed with.
+	// All normal (non cleanup) operations must use this.
+	// Cleanup operations should use the runnerCtx passed to Run()
+	ctx context.Context
+
 	tracer Tracer
 	logger Logger
 
@@ -143,7 +148,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		select {
 		case <-r.ctx.Done():
 			return ErrCancel
-		case err := <-r.execAll(stage.Steps):
+		case err := <-r.execAll(runnerCtx, stage.Steps):
 			if err != nil {
 				r.err = err
 			}
@@ -160,8 +165,10 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 		return nil
 	}
 
+	// this is nil if the step was not started yet
 	if processState == nil {
 		processState = new(backend.State)
+		// and if we have an error something with the step setup/start went wrong
 		if err != nil {
 			processState.Error = err
 			processState.Exited = true
@@ -173,7 +180,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	state := new(State)
 	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
-	state.Process = processState // empty
+	state.Process = processState
 	state.Pipeline.Error = r.err
 
 	if traceErr := r.tracer.Trace(state); traceErr != nil {
@@ -183,7 +190,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 }
 
 // Executes a set of parallel steps.
-func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
+func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
 	logger := r.MakeLogger()
@@ -226,11 +233,16 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				Str("step", step.Name).
 				Msg("executing")
 
-			processState, err := r.exec(step)
+			processState, err := r.exec(runnerCtx, step)
 
 			logger.Debug().
 				Str("step", step.Name).
 				Msg("complete")
+
+			// normalize context cancel error
+			if errors.Is(err, context.Canceled) {
+				err = ErrCancel
+			}
 
 			// Return the error after tracing it.
 			err = r.traceStep(processState, err, step)
@@ -245,18 +257,21 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 		done <- g.Wait()
 		close(done)
 	}()
+
 	return done
 }
 
 // Executes the step and returns the state and error.
-func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
-	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
+func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.State, error) {
+	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil { //nolint:contextcheck
 		return nil, err
 	}
+	startTime := time.Now().Unix()
+	logger := r.MakeLogger()
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
-		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
+		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 		if err != nil {
 			return nil, err
 		}
@@ -264,7 +279,6 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			logger := r.MakeLogger()
 
 			if err := r.logger(step, rc); err != nil {
 				logger.Error().Err(err).Msg("process logging failed")
@@ -281,16 +295,27 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	// We wait until all data was logged. (Needed for some backends like local as WaitStep kills the log stream)
 	wg.Wait()
 
-	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
+	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			return waitState, ErrCancel
+			waitState.Error = ErrCancel
+		} else {
+			return nil, err
 		}
+	}
+
+	// It is important to use the runnerCtx here because
+	// in case the workflow was canceled we still have the docker daemon to stop the container.
+	if err := r.engine.DestroyStep(runnerCtx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
 
-	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID); err != nil {
-		return nil, err
+	// we update with our start time here
+	waitState.Started = startTime
+
+	// we handle cancel case
+	if ctxErr := r.ctx.Err(); ctxErr != nil && errors.Is(ctxErr, context.Canceled) {
+		waitState.Error = ErrCancel
 	}
 
 	if waitState.OOMKilled {

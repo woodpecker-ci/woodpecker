@@ -59,6 +59,7 @@ func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.P
 	return &WoodpeckerServer{peer: peer}
 }
 
+// Version returns the server- & grpc-version.
 func (s *WoodpeckerServer) Version(_ context.Context, _ *proto.Empty) (*proto.VersionResponse, error) {
 	return &proto.VersionResponse{
 		GrpcVersion:   proto.Version,
@@ -66,6 +67,7 @@ func (s *WoodpeckerServer) Version(_ context.Context, _ *proto.Empty) (*proto.Ve
 	}, nil
 }
 
+// Next blocks until it provides the next workflow to execute from the queue.
 func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextResponse, error) {
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
@@ -85,6 +87,7 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 	return res, err
 }
 
+// Init let agent signals to server the workflow is initialized.
 func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*proto.Empty, error) {
 	state := rpc.WorkflowState{
 		Started:  req.GetState().GetStarted(),
@@ -96,6 +99,7 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 	return res, err
 }
 
+// Update let agent updates the step state at the server.
 func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
 	state := rpc.StepState{
 		StepUUID: req.GetState().GetStepUuid(),
@@ -104,29 +108,36 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 		Exited:   req.GetState().GetExited(),
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
+		Canceled: req.GetState().GetCanceled(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Update(c, req.GetId(), state)
 	return res, err
 }
 
+// Done let agent signal to server the workflow has stopped.
 func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
 	state := rpc.WorkflowState{
 		Started:  req.GetState().GetStarted(),
 		Finished: req.GetState().GetFinished(),
 		Error:    req.GetState().GetError(),
+		Canceled: req.GetState().GetCanceled(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Done(c, req.GetId(), state)
 	return res, err
 }
 
-func (s *WoodpeckerServer) Wait(c context.Context, req *proto.WaitRequest) (*proto.Empty, error) {
-	res := new(proto.Empty)
-	err := s.peer.Wait(c, req.GetId())
+// Wait blocks until the workflow is complete.
+// Also signals via err if workflow got canceled.
+func (s *WoodpeckerServer) Wait(c context.Context, req *proto.WaitRequest) (*proto.WaitResponse, error) {
+	res := new(proto.WaitResponse)
+	canceled, err := s.peer.Wait(c, req.GetId())
+	res.Canceled = canceled
 	return res, err
 }
 
+// Extend extends the workflow deadline.
 func (s *WoodpeckerServer) Extend(c context.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.Extend(c, req.GetId())
@@ -170,6 +181,7 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 	return res, err
 }
 
+// RegisterAgent register our agent to the server.
 func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterAgentRequest) (*proto.RegisterAgentResponse, error) {
 	res := new(proto.RegisterAgentResponse)
 	agentInfo := req.GetInfo()
@@ -184,11 +196,13 @@ func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterA
 	return res, err
 }
 
+// UnregisterAgent unregister our agent from the server.
 func (s *WoodpeckerServer) UnregisterAgent(ctx context.Context, _ *proto.Empty) (*proto.Empty, error) {
 	err := s.peer.UnregisterAgent(ctx)
 	return new(proto.Empty), err
 }
 
+// ReportHealth reports health status of the agent to the server.
 func (s *WoodpeckerServer) ReportHealth(c context.Context, req *proto.ReportHealthRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.ReportHealth(c, req.GetStatus())
