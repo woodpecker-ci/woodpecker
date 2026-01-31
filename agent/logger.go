@@ -36,6 +36,7 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 			Logger()
 
 		uploads.Add(1)
+		defer uploads.Done()
 
 		var secrets []string
 		for _, secret := range workflow.Config.Secrets {
@@ -50,8 +51,6 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 		}
 
 		logger.Debug().Msg("log stream copied, close ...")
-		uploads.Done()
-
 		return nil
 	}
 }
