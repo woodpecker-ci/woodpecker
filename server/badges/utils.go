@@ -1,3 +1,7 @@
+// Copyright 2026 Woodpecker Authors
+// Copyright 2023 The narqo/go-badge Authors. All rights reserved.
+// SPDX-License-Identifier: MIT.
+
 package badges
 
 import (

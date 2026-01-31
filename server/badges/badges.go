@@ -82,22 +82,13 @@ func (d *badgeDrawer) RenderBytes(subject, status string, color Color) ([]byte, 
 	return buf.Bytes(), err
 }
 
-// shield.io uses Verdana.ttf to measure text width with an extra 10px.
-// As we use Vera.ttf, we have to tune this value a little.
+// shields.io uses Verdana.ttf to measure text width with an extra 10px.
+// As we use DejaVuSans.ttf, we have to tune this value a little.
 const extraDx = 13
 
 func (d *badgeDrawer) measureString(s string) float64 {
 	SHIFT := 6
 	return float64(d.fd.MeasureString(s)>>SHIFT) + extraDx
-}
-
-// Render renders a badge of the given color, with given subject and status to w.
-func Render(subject, status string, color Color, w io.Writer) error {
-	drawer, err := initDrawer()
-	if err != nil {
-		return err
-	}
-	return drawer.Render(subject, status, color, w)
 }
 
 // RenderBytes renders a badge of the given color, with given subject and status to bytes.
@@ -138,7 +129,7 @@ func initDrawer() (*badgeDrawer, error) {
 }
 
 func mustNewFontDrawer(size, dpi float64) (*font.Drawer, error) {
-	ttf, err := truetype.Parse(fonts.VeraSans)
+	ttf, err := truetype.Parse(fonts.DejaVuSans)
 	if err != nil {
 		return nil, err
 	}
