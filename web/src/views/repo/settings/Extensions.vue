@@ -9,6 +9,13 @@
       </InputField>
       <InputField :label="$t('config_extension_endpoint')" docs-url="docs/usage/extensions/configuration-extension">
         <TextField v-model="extensions.config_extension_endpoint" :placeholder="$t('extension_endpoint_placeholder')" />
+
+        <Checkbox
+          v-model="extensions.config_extension_exclusive"
+          class="pt-3"
+          :label="$t('config_extension_exclusive')"
+          :description="$t('config_extension_exclusive_desc')"
+        />
       </InputField>
 
       <Button :is-loading="isSaving" color="green" type="submit" :text="$t('save')" />
@@ -22,6 +29,7 @@ import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -48,6 +56,7 @@ onMounted(async () => {
 
 const extensions = ref<ExtensionSettings>({
   config_extension_endpoint: repo.value.config_extension_endpoint,
+  config_extension_exclusive: repo.value.config_extension_exclusive,
 });
 
 const { doSubmit: saveExtensions, isLoading: isSaving } = useAsyncAction(async () => {
