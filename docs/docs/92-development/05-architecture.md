@@ -1,8 +1,16 @@
 # Architecture
 
-## Package architecture
+## Module Interactions
 
-![Woodpecker architecture](./woodpecker-architecture.png)
+![Woodpecker architecture](./woodpecker-architecture.svg)
+
+<!--
+  If you want to update it, first look would be to get a simple svg of all module import graphs:
+  `go run github.com/loov/goda@latest graph 'go.woodpecker-ci.org/woodpecker/v3/...' | dot -Tsvg -o graph.svg`
+
+  generate a new png via:
+  `dot -Tsvg woodpecker-architecture.dot -o woodpecker-architecture.svg`
+-->
 
 ## System architecture
 

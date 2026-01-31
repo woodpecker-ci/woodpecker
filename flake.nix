@@ -45,6 +45,9 @@
               protoc-gen-go
               protoc-gen-go-grpc
               gcc
+
+              # docs
+              graphviz
             ];
             CFLAGS = "-I${pkgs.glibc.dev}/include";
             LDFLAGS = "-L${pkgs.glibc}/lib";
