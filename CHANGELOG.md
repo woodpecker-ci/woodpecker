@@ -42,6 +42,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @vueuse/core to v14.2.0 [[#6048](https://github.com/woodpecker-ci/woodpecker/pull/6048)]
 - fix(deps): update dependency vue-router to v5 [[#6046](https://github.com/woodpecker-ci/woodpecker/pull/6046)]
 - chore(deps): update dependency vue-tsc to v3.2.4 [[#6044](https://github.com/woodpecker-ci/woodpecker/pull/6044)]
 - fix(deps): update golang-packages [[#6042](https://github.com/woodpecker-ci/woodpecker/pull/6042)]
