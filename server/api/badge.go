@@ -93,17 +93,56 @@ func GetBadge(c *gin.Context) {
 		}
 	}
 
+	name := "pipeline"
+	var status *model.StatusValue = nil
+
 	pipeline, err := _store.GetPipelineBadge(repo, branch, events)
 	if err != nil {
 		if !errors.Is(err, types.RecordNotExist) {
 			log.Warn().Err(err).Msg("could not get last pipeline for badge")
 		}
-		pipeline = nil
+	} else {
+		status = &pipeline.Status
 	}
 
 	// we serve an SVG, so set content type appropriately.
 	c.Writer.Header().Set("Content-Type", "image/svg+xml")
-	c.String(http.StatusOK, badges.Generate(pipeline))
+
+	// Allow workflow (and step) specific badges
+	workflowName := c.Query("workflow")
+	if len(workflowName) != 0 {
+		name = workflowName
+		status = nil
+
+		workflows, err := _store.WorkflowGetTree(pipeline)
+		if err == nil {
+			for _, wf := range workflows {
+				if wf.Name == workflowName {
+					stepName := c.Query("step")
+					if len(stepName) == 0 {
+						status = &wf.State
+						break
+					}
+					// If step is explicitly requested
+					name = name + ": " + stepName
+					for _, s := range wf.Children {
+						if s.Name == stepName {
+							status = &s.State
+							break
+						}
+					}
+					break
+				}
+			}
+		}
+	}
+
+	badge, err := badges.Generate(name, status)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to generate badge.")
+	} else {
+		c.String(http.StatusOK, badge)
+	}
 }
 
 // GetCC

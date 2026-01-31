@@ -177,7 +177,9 @@
         "type_markdown": "Markdown",
         "type_html": "HTML",
         "branch": "Branch",
-        "events": "Events"
+        "events": "Events",
+        "workflow": "Workflow",
+        "step": "Step"
       },
       "actions": {
         "actions": "Actions",
