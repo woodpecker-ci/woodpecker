@@ -225,9 +225,7 @@
         "deploy": "Deploy",
         "restart_success": "Pipeline restarted",
         "log_download": "Download",
-        "log_delete": "Delete",
-        "log_auto_scroll": "Enable automatic scrolling",
-        "log_auto_scroll_off": "Disable automatic scrolling"
+        "log_delete": "Delete"
       },
       "protected": {
         "awaits": "This pipeline is awaiting approval from a maintainer!",
