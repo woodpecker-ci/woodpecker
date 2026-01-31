@@ -51,6 +51,7 @@ import (
 // Error Handling:
 // - types.ErrIgnoreEvent: Skippable webhook events
 // - types.RecordNotExist: Resource not found
+// - types.ErrNotImplemented: Can be used to signal it's not supported
 // - nil Repo/Pipeline: "No action needed" (not an error).
 type Forge interface {
 	// Name returns the unique identifier of this forge driver.
