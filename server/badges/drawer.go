@@ -71,7 +71,7 @@ func (d *badgeDrawer) RenderBytes(subject, status string, color Color) ([]byte, 
 
 // shields.io uses Verdana.ttf to measure text width with an extra 10px.
 // As we use DejaVuSans.ttf, we have to tune this value a little.
-const extraDx = 13
+const extraDx = 5
 
 func (d *badgeDrawer) measureString(s string) float64 {
 	SHIFT := 6
