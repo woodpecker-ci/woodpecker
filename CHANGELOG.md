@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-01-31
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Pnkcaht, @myselfghost, @qwerty287
+@6543, @CrimsonFez, @Pnkcaht, @myselfghost, @qwerty287
 
 ### 🔒 Security
 
@@ -36,6 +36,7 @@
 
 ### 📚 Documentation
 
+- Add Buildah plugin link [[#6050](https://github.com/woodpecker-ci/woodpecker/pull/6050)]
 - chore(deps): update docs npm deps non-major [[#6045](https://github.com/woodpecker-ci/woodpecker/pull/6045)]
 - Add Homebrew package [[#6037](https://github.com/woodpecker-ci/woodpecker/pull/6037)]
 - chore(deps): update dependency axios to v1.13.3 [[#6010](https://github.com/woodpecker-ci/woodpecker/pull/6010)]
