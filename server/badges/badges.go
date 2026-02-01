@@ -153,20 +153,20 @@ var (
 
 func getBadgeStatus(status *model.StatusValue) (string, Color) {
 	if status == nil {
-		return badgeStatusNone, ColorLightGray
+		return badgeStatusNone, ColorGray
 	}
 
 	switch *status {
 	case model.StatusSuccess:
-		return badgeStatusSuccess, ColorLightGreen
+		return badgeStatusSuccess, ColorGreen
 	case model.StatusFailure:
 		return badgeStatusFailure, ColorRed
 	case model.StatusPending, model.StatusRunning:
 		return badgeStatusStarted, ColorYellow
 	case model.StatusError, model.StatusKilled:
-		return badgeStatusError, ColorLightGray
+		return badgeStatusError, ColorGray
 	default:
-		return badgeStatusNone, ColorLightGray
+		return badgeStatusNone, ColorGray
 	}
 }
 
