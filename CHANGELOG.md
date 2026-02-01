@@ -45,6 +45,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.7.0 [[#6051](https://github.com/woodpecker-ci/woodpecker/pull/6051)]
 - fix(deps): update module github.com/google/go-github/v81 to v82 [[#6047](https://github.com/woodpecker-ci/woodpecker/pull/6047)]
 - chore(deps): update dependency @vueuse/core to v14.2.0 [[#6048](https://github.com/woodpecker-ci/woodpecker/pull/6048)]
 - fix(deps): update dependency vue-router to v5 [[#6046](https://github.com/woodpecker-ci/woodpecker/pull/6046)]
