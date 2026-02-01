@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @Pnkcaht, @myselfghost, @qwerty287
+@6543, @CrimsonFez, @Pnkcaht, @TumbleOwlee, @myselfghost, @qwerty287
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Per-Workflow and Per-Workflow-Step badge generation [[#5977](https://github.com/woodpecker-ci/woodpecker/pull/5977)]
 - Render MD in pipeline titles [[#5999](https://github.com/woodpecker-ci/woodpecker/pull/5999)]
 - Simplify and Fix server task queue [[#6017](https://github.com/woodpecker-ci/woodpecker/pull/6017)]
 - fix(agent): workflow runner use shutdown context [[#6021](https://github.com/woodpecker-ci/woodpecker/pull/6021)]
