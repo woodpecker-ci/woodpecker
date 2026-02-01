@@ -244,7 +244,7 @@
             "no_manual_workflows": "Es wurden keine manuell ausführbaren Workflows gefunden, oder alle wurden gefiltert."
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
-        "open_in_forge": "Repository in der Forge öffnen",
+        "open_in_forge": "Repository in der Code-Plattform öffnen",
         "pipeline": {
             "actions": {
                 "cancel": "Abbrechen",
@@ -396,7 +396,7 @@
                 },
                 "general": "Projekt",
                 "netrc_only_trusted": {
-                    "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
+                    "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Code-Plattform zu klonen oder zu pushen.",
                     "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
                 },
                 "pipeline_path": {
@@ -695,7 +695,7 @@
         "none": "Keine Genehmigung erforderlich",
         "none_desc": "Diese Einstellung kann gefährlich sein und sollte nur in privaten Repositories verwendet werden, in denen allen Benutzern vertraut wird.",
         "pull_requests": "Alle Pull-Requests",
-        "all_events": "Alle Ereignisse von der Forge",
+        "all_events": "Alle Ereignisse von der Code-Plattform",
         "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst.",
         "allowed_users": {
             "desc": "Pipelines von diesen Benutzern erfordern nie eine Genehmigung.",
@@ -763,5 +763,5 @@
     "extensions_signatures_public_key_description": "Dieser öffentliche Schlüssel sollte von deinen Erweiterungen verwendet werden, um Webhook-Aufrufe von Woodpecker zu verifizieren.",
     "disabled": "Deaktiviert",
     "config_extension_exclusive": "Exklusiv",
-    "config_extension_exclusive_desc": "Eine exklusive Erweiterung wird alle anderen Möglichkeiten, die Konfiguration zu laden, überspringen, einschließlich der Forge."
+    "config_extension_exclusive_desc": "Eine exklusive Erweiterung wird alle anderen Möglichkeiten, die Konfiguration zu laden, überspringen, einschließlich der Code-Plattform."
 }
