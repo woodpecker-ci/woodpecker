@@ -351,7 +351,9 @@
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
                 "type_url": "URL",
-                "events": "事件"
+                "events": "事件",
+                "step": "步骤",
+                "workflow": "工作流"
             },
             "crons": {
                 "add": "创建计划",
