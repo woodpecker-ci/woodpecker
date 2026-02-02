@@ -396,7 +396,9 @@ func GetRepoBranches(c *gin.Context) {
 	forge.Refresh(c, _forge, _store, repoUser)
 
 	branches, err := _forge.Branches(c, repoUser, repo, session.Pagination(c))
-	if err != nil {
+	if errors.Is(err, forge_types.ErrNotImplemented) {
+		log.Warn().Msg("Could not fetch repo branch list as forge adapter did not implement it")
+	} else if err != nil {
 		log.Error().Err(err).Msg("failed to load branches")
 		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
 		return
@@ -435,7 +437,9 @@ func GetRepoPullRequests(c *gin.Context) {
 	forge.Refresh(c, _forge, _store, repoUser)
 
 	prs, err := _forge.PullRequests(c, repoUser, repo, session.Pagination(c))
-	if err != nil {
+	if errors.Is(err, forge_types.ErrNotImplemented) {
+		log.Warn().Msg("Could not fetch repo pull-request list as forge adapter did not implement it")
+	} else if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

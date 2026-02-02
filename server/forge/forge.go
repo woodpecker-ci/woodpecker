@@ -77,9 +77,11 @@ type Forge interface {
 	Auth(ctx context.Context, token, secret string) (string, error)
 
 	// Teams fetches all team/organization memberships for a user.
-	// May return empty slice if forge doesn't support teams/organizations.
 	// Used to determine if an user is member of an team/organization.
 	// Should support pagination via ListOptions.
+	//
+	// Errors:
+	//  - Expect types.ErrNotImplemented to be returned if forge doesn't support teams/organizations.
 	Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error)
 
 	// Repo fetches a single repository.
@@ -106,6 +108,9 @@ type Forge interface {
 	// Dir fetches all files in a directory at a specific commit.
 	// Supports pipeline configurations split across multiple files.
 	// Should return files only.
+	//
+	// Errors:
+	//  - Expect types.ErrNotImplemented to be returned
 	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, dirName string) ([]*types.FileMeta, error)
 
 	// Status sends workflow status updates to the forge.
@@ -129,13 +134,20 @@ type Forge interface {
 
 	// Branches returns all branch names in the repository.
 	// Should support pagination via ListOptions.
+	//
+	// Errors:
+	//  - Expect types.ErrNotImplemented to be returned
 	Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error)
 
 	// BranchHead returns the latest commit SHA for a branch.
+	// Is essential for cron feature to work.
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error)
 
 	// PullRequests returns all open pull requests.
 	// Should support pagination via ListOptions.
+	//
+	// Errors:
+	//  - Expect types.ErrNotImplemented to be returned
 	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error)
 
 	// Hook parses incoming webhook and returns pipeline data.
@@ -158,6 +170,9 @@ type Forge interface {
 
 	// OrgMembership checks if user is member of organization and their permission.
 	// Should return (Member: false, Admin: false) if not a member.
+	//
+	// Errors:
+	//  - Expect types.ErrNotImplemented to be returned
 	OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error)
 
 	// Org fetches organization details.

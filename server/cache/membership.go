@@ -16,12 +16,15 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/jellydator/ttlcache/v3"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
@@ -56,7 +59,10 @@ func (c *membershipCache) Get(ctx context.Context, _forge forge.Forge, u *model.
 	}
 
 	perm, err := _forge.OrgMembership(ctx, u, org)
-	if err != nil {
+	if errors.Is(err, forge_types.ErrNotImplemented) {
+		log.Warn().Msg("Could not check user org membership as forge adapter did not implement it")
+		return &model.OrgPerm{}, nil
+	} else if err != nil {
 		return nil, err
 	}
 	c.cache.Set(key, perm, c.ttl)
