@@ -110,7 +110,7 @@ type Forge interface {
 	// Should return files only.
 	//
 	// Errors:
-	//  - Expect types.ErrNotImplemented to be returned
+	//  - Expect types.ErrNotImplemented to be returned if not supported by the forge
 	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, dirName string) ([]*types.FileMeta, error)
 
 	// Status sends workflow status updates to the forge.
@@ -136,7 +136,7 @@ type Forge interface {
 	// Should support pagination via ListOptions.
 	//
 	// Errors:
-	//  - Expect types.ErrNotImplemented to be returned
+	//  - Expect types.ErrNotImplemented to be returned if not supported by the forge
 	Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error)
 
 	// BranchHead returns the latest commit SHA for a branch.
@@ -147,7 +147,7 @@ type Forge interface {
 	// Should support pagination via ListOptions.
 	//
 	// Errors:
-	//  - Expect types.ErrNotImplemented to be returned
+	//  - Expect types.ErrNotImplemented to be returned if not supported by the forge
 	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error)
 
 	// Hook parses incoming webhook and returns pipeline data.
@@ -172,7 +172,7 @@ type Forge interface {
 	// Should return (Member: false, Admin: false) if not a member.
 	//
 	// Errors:
-	//  - Expect types.ErrNotImplemented to be returned
+	//  - Expect types.ErrNotImplemented to be returned if not supported by the forge
 	OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error)
 
 	// Org fetches organization details.
