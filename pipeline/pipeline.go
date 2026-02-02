@@ -160,7 +160,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 
 // Updates the current status of a step.
 // If processState is nil, we assume the step did not start.
-// If step did not started and err exists, it's a step-start/-setup issue and step is done.
+// If step did not started and err exists, it's a step start issue and step is done.
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
 	if r.tracer == nil {
 		// no tracer nothing to trace :)
@@ -172,7 +172,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	state.Pipeline.Step = step
 	state.Pipeline.Error = r.err
 
-	// and if we have an error something with the step setup/start went wrong
+	// We have an error while starting the step
 	if processState == nil && err != nil {
 		state.Process = backend.State{
 			Error:     err,
