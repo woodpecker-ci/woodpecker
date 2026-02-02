@@ -178,7 +178,6 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 			Error:     err,
 			Exited:    true,
 			OOMKilled: false,
-			ExitCode:  126, // command invoked cannot be executed.
 		}
 	} else if processState != nil {
 		state.Process = *processState
