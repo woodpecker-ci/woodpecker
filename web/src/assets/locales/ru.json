@@ -353,7 +353,9 @@
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
                 "type_url": "URL",
-                "events": "События"
+                "events": "События",
+                "workflow": "Рабочий процесс",
+                "step": "Шаг"
             },
             "crons": {
                 "add": "Добавить задачу cron",
