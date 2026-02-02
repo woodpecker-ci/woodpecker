@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-01
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -37,6 +37,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#6054](https://github.com/woodpecker-ci/woodpecker/pull/6054)]
 - Add Buildah plugin link [[#6050](https://github.com/woodpecker-ci/woodpecker/pull/6050)]
 - chore(deps): update docs npm deps non-major [[#6045](https://github.com/woodpecker-ci/woodpecker/pull/6045)]
 - Add Homebrew package [[#6037](https://github.com/woodpecker-ci/woodpecker/pull/6037)]
@@ -46,6 +47,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.25.0 [[#6053](https://github.com/woodpecker-ci/woodpecker/pull/6053)]
 - chore(deps): update dependency simple-icons to v16.7.0 [[#6051](https://github.com/woodpecker-ci/woodpecker/pull/6051)]
 - fix(deps): update module github.com/google/go-github/v81 to v82 [[#6047](https://github.com/woodpecker-ci/woodpecker/pull/6047)]
 - chore(deps): update dependency @vueuse/core to v14.2.0 [[#6048](https://github.com/woodpecker-ci/woodpecker/pull/6048)]
