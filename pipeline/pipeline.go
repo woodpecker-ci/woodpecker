@@ -47,7 +47,7 @@ type (
 		}
 
 		// Current process state.
-		Process *backend.State
+		Process backend.State
 	}
 )
 
@@ -127,7 +127,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 			state := new(State)
 			state.Pipeline.Step = stepErr.Step
 			state.Pipeline.Error = stepErr.Err
-			state.Process = &backend.State{
+			state.Process = backend.State{
 				Error:    stepErr.Err,
 				Exited:   true,
 				ExitCode: 1,
@@ -159,29 +159,30 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 }
 
 // Updates the current status of a step.
+// If processState is nil, we assume the step did not start.
+// If step did not started and err exists, it's a step-start/-setup issue and step is done.
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
 	if r.tracer == nil {
 		// no tracer nothing to trace :)
 		return nil
 	}
 
-	// this is nil if the step was not started yet
-	if processState == nil {
-		processState = new(backend.State)
-		// and if we have an error something with the step setup/start went wrong
-		if err != nil {
-			processState.Error = err
-			processState.Exited = true
-			processState.OOMKilled = false
-			processState.ExitCode = 126 // command invoked cannot be executed.
-		}
-	}
-
 	state := new(State)
 	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
-	state.Process = processState
 	state.Pipeline.Error = r.err
+
+	// and if we have an error something with the step setup/start went wrong
+	if processState == nil && err != nil {
+		state.Process = backend.State{
+			Error:     err,
+			Exited:    true,
+			OOMKilled: false,
+			ExitCode:  126, // command invoked cannot be executed.
+		}
+	} else if processState != nil {
+		state.Process = *processState
+	}
 
 	if traceErr := r.tracer.Trace(state); traceErr != nil {
 		return traceErr
