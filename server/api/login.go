@@ -145,7 +145,7 @@ func HandleAuth(c *gin.Context) {
 				PerPage: perPage,
 			})
 			if errors.Is(terr, forge_types.ErrNotImplemented) {
-				log.Warn().Msg("Could not fetch membership of user as forge adapter did not implement it")
+				log.Debug().Msg("Could not fetch membership of user as forge adapter did not implement it")
 			} else if terr != nil {
 				log.Error().Err(terr).Msgf("cannot verify team membership for %s", userFromForge.Login)
 				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")

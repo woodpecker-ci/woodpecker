@@ -60,7 +60,7 @@ func (c *membershipCache) Get(ctx context.Context, _forge forge.Forge, u *model.
 
 	perm, err := _forge.OrgMembership(ctx, u, org)
 	if errors.Is(err, forge_types.ErrNotImplemented) {
-		log.Warn().Msg("Could not check user org membership as forge adapter did not implement it")
+		log.Debug().Msg("Could not check user org membership as forge adapter did not implement it")
 		return &model.OrgPerm{}, nil
 	} else if err != nil {
 		return nil, err
