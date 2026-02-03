@@ -41,7 +41,7 @@
             "loading": "Lod grod…",
             "no_logs": "Koane Logs",
             "pipeline": "Pipeline #{pipelineId}",
-            "log_title": "Step-Logs",
+            "log_title": "Schrid-Logs",
             "log_download_error": "Beim Runterladn vom Log-File is wos schiaf ganga",
             "protected": {
                 "decline": "Oblehnen",
@@ -57,7 +57,7 @@
             "no_pipelines": "Do san no koane Pipelines gstartet worn.",
             "no_pipeline_steps": "Koane Pipeline-Schrid do!",
             "step_not_started": "Der Schrid hod no ned ogfangd.",
-            "log_delete_confirm": "Wuisd du wirkli de Step-Logs löschn?",
+            "log_delete_confirm": "Wuisd du wirkli de Schrid-Logs löschn?",
             "log_delete_error": "'Da ganze Bus is hi!'",
             "actions": {
                 "cancel": "Abbrechn",
@@ -218,7 +218,9 @@
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
                 "branch": "Branch",
-                "events": "Events"
+                "events": "Events",
+                "step": "Schrid",
+                "workflow": "Workflow"
             },
             "actions": {
                 "actions": "Aktiona",
@@ -386,7 +388,7 @@
         "saved": "Secret gspeichert",
         "plugins": {
             "images": "Nur verfügbar füa de folgenden Plugins",
-            "desc": "Liste vo Plugin-Images wo des Secret verfügbar is. Leer lassn zum olle Plugins und normale Steps erlaubn."
+            "desc": "Liste vo Plugin-Images wo des Secret verfügbar is. Leer lassn zum olle Plugins und normale Schrid erlaubn."
         },
         "events": {
             "events": "Verfügbar bei de folgenden Events",
