@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @Pnkcaht, @TumbleOwlee, @myselfghost, @qwerty287
+@6543, @CrimsonFez, @Pnkcaht, @TumbleOwlee, @myselfghost, @qwerty287, @stardothosting
 
 ### 🔒 Security
 
@@ -30,6 +30,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix OAuth token refresh in webhook handling for Bitbucket and GitHub [[#6059](https://github.com/woodpecker-ci/woodpecker/pull/6059)]
 - Refresh token before forge calls [[#6035](https://github.com/woodpecker-ci/woodpecker/pull/6035)]
 - Local backend: cleanup generated script for cmd.exe shell [[#6029](https://github.com/woodpecker-ci/woodpecker/pull/6029)]
 - Local backend: setup clone step respects context [[#6030](https://github.com/woodpecker-ci/woodpecker/pull/6030)]
