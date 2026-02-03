@@ -39,6 +39,7 @@
 
 ### 📚 Documentation
 
+- Update Module Interaction Diagram [[#6019](https://github.com/woodpecker-ci/woodpecker/pull/6019)]
 - Add Buildah plugin link [[#6050](https://github.com/woodpecker-ci/woodpecker/pull/6050)]
 - chore(deps): update docs npm deps non-major [[#6045](https://github.com/woodpecker-ci/woodpecker/pull/6045)]
 - Add Homebrew package [[#6037](https://github.com/woodpecker-ci/woodpecker/pull/6037)]
