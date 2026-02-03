@@ -32,6 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
@@ -421,6 +422,14 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	u, err := common.RepoUserForgeID(ctx, c.forgeID, repo.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with "OAuth2 access token expired" error.
+	_store, ok := store.TryFromContext(ctx)
+	if ok {
+		forge.Refresh(ctx, c, _store, u)
 	}
 
 	switch pl.Event {
