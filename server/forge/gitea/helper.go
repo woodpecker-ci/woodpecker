@@ -64,7 +64,7 @@ func toPerm(from *gitea.Permission) *model.Perm {
 // toTeam converts a Gitea team to a Woodpecker team.
 func toTeam(from *gitea.Organization, link string) *model.Team {
 	return &model.Team{
-		Login:  from.UserName,
+		Login:  from.Name,
 		Avatar: expandAvatar(link, from.AvatarURL),
 	}
 }
