@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Document required forge methods [[#6049](https://github.com/woodpecker-ci/woodpecker/pull/6049)]
 - Dynamic log following [[#6036](https://github.com/woodpecker-ci/woodpecker/pull/6036)]
 - Per-Workflow and Per-Workflow-Step badge generation [[#5977](https://github.com/woodpecker-ci/woodpecker/pull/5977)]
 - Render MD in pipeline titles [[#5999](https://github.com/woodpecker-ci/woodpecker/pull/5999)]
