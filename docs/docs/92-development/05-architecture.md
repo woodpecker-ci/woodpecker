@@ -8,7 +8,7 @@
   To update the graph, first look at a simple svg of all module imports:
   `go run github.com/loov/goda@latest graph 'go.woodpecker-ci.org/woodpecker/v3/...' | dot -Tsvg -o graph.svg`
 
-  generate a new png via:
+  generate a new svg of the graph using:
   `dot -Tsvg woodpecker-architecture.dot -o woodpecker-architecture.svg`
 -->
 
