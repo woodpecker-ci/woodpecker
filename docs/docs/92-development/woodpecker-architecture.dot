@@ -30,6 +30,16 @@ digraph WoodpeckerArchitecture {
     ui_web [label="web/"]
   }
 
+  /* ===================== SDK ===================== */
+  subgraph cluster_sdk {
+    label="SDK (woodpecker-go)"
+    fillcolor="#e8f5e9"
+    fontcolor="black"
+    style="rounded,filled"
+
+    sdk [label="woodpecker-go"]
+  }
+
   /* ===================== CLI ===================== */
   subgraph cluster_cli {
     label="woodpecker-cli"
@@ -39,7 +49,6 @@ digraph WoodpeckerArchitecture {
 
     cli_cmd  [label="cmd/cli/"]
     cli_core [label="cli/"]
-    cli_sdk  [label="woodpecker-go/"]
   }
 
   /* ===================== Agent ===================== */
@@ -114,8 +123,8 @@ digraph WoodpeckerArchitecture {
 
   /* CLI */
   cli_cmd  -> cli_core
-  cli_core -> cli_sdk
-  cli_sdk  -> srv_api [xlabel="REST API"]
+  cli_core -> sdk
+  sdk      -> srv_api [xlabel="REST API"]
 
   /* Agent */
   agent_cmd  -> agent_core
