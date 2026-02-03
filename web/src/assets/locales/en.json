@@ -177,7 +177,9 @@
         "type_markdown": "Markdown",
         "type_html": "HTML",
         "branch": "Branch",
-        "events": "Events"
+        "events": "Events",
+        "workflow": "Workflow",
+        "step": "Step"
       },
       "actions": {
         "actions": "Actions",
@@ -225,9 +227,7 @@
         "deploy": "Deploy",
         "restart_success": "Pipeline restarted",
         "log_download": "Download",
-        "log_delete": "Delete",
-        "log_auto_scroll": "Enable automatic scrolling",
-        "log_auto_scroll_off": "Disable automatic scrolling"
+        "log_delete": "Delete"
       },
       "protected": {
         "awaits": "This pipeline is awaiting approval from a maintainer!",
@@ -525,6 +525,8 @@
   "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
   "extension_endpoint_placeholder": "e.g. https://example.com/api",
   "config_extension_endpoint": "Config extension endpoint",
+  "config_extension_exclusive": "Exclusive",
+  "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
   "extensions_signatures_public_key": "Public key for signatures",
   "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
   "extensions_configuration_saved": "Extensions configuration saved",

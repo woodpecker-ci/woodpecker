@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"

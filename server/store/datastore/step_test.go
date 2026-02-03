@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -48,9 +49,7 @@ func TestStepFind(t *testing.T) {
 	assert.NoError(t, sess.Close())
 
 	step, err := store.StepFind(&model.Pipeline{ID: 1000}, 1)
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 	assert.Equal(t, steps[0], step)
 }
 
