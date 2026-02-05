@@ -167,8 +167,8 @@ func TestFifoBasicOperations(t *testing.T) {
 		// Context cancellation should cause Wait to return (internal error handling)
 		select {
 		case err := <-waitDone2:
-			// Wait returns nil when context is cancelled (normal behavior)
-			assert.NoError(t, err, "Wait should return nil when context is cancelled")
+			// Wait returns nil when context is canceled (normal behavior)
+			assert.NoError(t, err, "Wait should return nil when context is canceled")
 		case <-time.After(time.Second):
 			t.Fatal("Wait should return when context is canceled")
 		}
