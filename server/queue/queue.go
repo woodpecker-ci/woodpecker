@@ -41,6 +41,33 @@ var (
 	ErrWorkerKicked = errors.New("worker was kicked")
 )
 
+// ErrExternal wraps an external error
+type ErrExternal struct {
+	err error
+}
+
+func (e *ErrExternal) Error() string {
+	return "external error: " + e.err.Error()
+}
+
+// Unwrap allows errors.Is and errors.As to work with the wrapped error
+func (e *ErrExternal) Unwrap() error {
+	return e.err
+}
+
+// Is allows errors.Is to match against ErrExternal types
+func (e *ErrExternal) Is(target error) bool {
+	_, ok := target.(*ErrExternal)
+	return ok
+}
+
+func NewErrExternal(err error) error {
+	if err == nil {
+		return nil
+	}
+	return &ErrExternal{err: err}
+}
+
 // InfoT provides runtime information.
 type InfoT struct {
 	Pending       []*model.Task `json:"pending"`
