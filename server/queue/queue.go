@@ -47,7 +47,7 @@ type ErrExternal struct {
 }
 
 func (e *ErrExternal) Error() string {
-	return "external error: " + e.err.Error()
+	return fmt.Sprintf("external error: %s", e.err)
 }
 
 // Unwrap allows errors.Is and errors.As to work with the wrapped error
