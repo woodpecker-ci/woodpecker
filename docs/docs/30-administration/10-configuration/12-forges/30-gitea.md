@@ -33,7 +33,25 @@ To configure the Docker network if the network's name is `gitea`, configure it l
 
 ## Registration
 
+### User OAuth Application
+
 Register your application with Gitea to create your client id and secret. You can find the OAuth applications settings of Gitea at `https://gitea.<host>/user/settings/`. It is very important that authorization callback URL matches your http(s) scheme and hostname exactly with `https://<host>/authorize` as the path.
+
+### System-wide OAuth Application
+
+If you are the administrator of both Gitea and Woodpecker, you may prefer to use a system-wide OAuth application instead of a user-level application. System-wide applications are managed at the Gitea site administrator level and are visible to all users.
+
+To create a system-wide OAuth application in Gitea:
+
+1. Navigate to the site administration settings at `https://gitea.<host>/admin/settings/applications`
+2. Create a new OAuth2 application under the "OAuth2 Applications" section
+3. Configure the application with the same settings as above (callback URL, etc.)
+4. Use the generated client id and secret for Woodpecker configuration
+
+System-wide applications are particularly useful for:
+- Shared CI/CD environments where multiple users need Woodpecker access
+- Organizations that want centralized control over OAuth applications
+- Preventing user-level application quotas from affecting CI/CD operations
 
 If you run the Woodpecker CI server on the same host as the Gitea instance, you might also need to allow local connections in Gitea, since version `v1.16`. Otherwise webhooks will fail. Add the following lines to your Gitea configuration (usually at `/etc/gitea/conf/app.ini`).
 
