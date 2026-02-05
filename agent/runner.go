@@ -94,6 +94,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	workflowCtx, cancelWorkflowCtx := context.WithCancelCause(workflowCtx)
 	defer cancelWorkflowCtx(nil)
 
+	// recoveryManager is declared here so the cancel listener can mark it as canceled.
+	// It will be initialized later after workflow state is set up.
+	var recoveryManager *pipeline.RecoveryManager
+
 	// Add sigterm support for internal context.
 	// Required to be able to terminate the running workflow by external signals.
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
@@ -113,10 +117,12 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 			cancelWorkflowCtx(err)
 		} else {
 			if canceled {
-				logger.Debug().Err(err).Msg("server side cancel signal received")
+				logger.Debug().Msg("server side cancel signal received")
+				if recoveryManager != nil {
+					recoveryManager.SetCanceled()
+				}
 				cancelWorkflowCtx(pipeline.ErrCancel)
 			}
-			// Wait returned without error, meaning the workflow finished normally
 			logger.Debug().Msg("cancel listener exited normally")
 		}
 	}()
@@ -150,6 +156,13 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		return err
 	}
 
+	// Initialize recovery manager; if not enabled on server, it will be a no-op
+	recoveryManager = pipeline.NewRecoveryManager(r.client, workflow.ID, true)
+	if err := recoveryManager.InitRecoveryState(runnerCtx, workflow.Config, int64(timeout.Seconds())); err != nil {
+		logger.Warn().Err(err).Msg("failed to initialize recovery state, continuing without recovery")
+		recoveryManager = pipeline.NewRecoveryManager(nil, workflow.ID, false)
+	}
+
 	var uploads sync.WaitGroup
 
 	// Run pipeline
@@ -160,6 +173,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
 		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
 		pipeline.WithBackend(*r.backend),
+		pipeline.WithRecoveryManager(recoveryManager),
 		pipeline.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,
@@ -187,6 +201,14 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	logger.Debug().Msg("waiting for logs and traces upload")
 	uploads.Wait()
 	logger.Debug().Msg("logs and traces uploaded")
+
+	// If preserving for recovery (context canceled, recovery enabled, not user cancel),
+	// skip marking as done. The workflow will be picked up by a new agent after restart.
+	preserving := runnerCtx.Err() != nil && recoveryManager != nil && recoveryManager.Enabled() && !recoveryManager.WasCanceled() && errors.Is(err, pipeline.ErrCancel)
+	if preserving {
+		logger.Info().Msg("preserving workflow for recovery, not marking as done")
+		return nil
+	}
 
 	// Update workflow state
 	doneCtx := runnerCtx

@@ -167,3 +167,12 @@ type Backend interface {
 type BackendInfo struct {
 	Platform string
 }
+
+// Reconnector is an optional interface that backends can implement to support
+// reconnecting to running steps after agent restart.
+type Reconnector interface {
+	// Reconnect attempts to reconnect to a running step.
+	// Returns nil if reconnection is possible, error otherwise.
+	// After successful reconnect, TailStep and WaitStep can be used normally.
+	Reconnect(ctx context.Context, step *Step, taskUUID string) error
+}

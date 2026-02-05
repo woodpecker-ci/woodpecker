@@ -593,6 +593,15 @@ var flags = append([]cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
+	//
+	// recovery options
+	//
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_RECOVERY_ENABLED"),
+		Name:    "recovery-enabled",
+		Usage:   "Enable pipeline recovery state tracking, allowing agents to resume workflows after restart",
+		Value:   false,
+	},
 }, logger.GlobalLoggerFlags...)
 
 // If woodpecker is running inside a container the default value for

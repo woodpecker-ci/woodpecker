@@ -37,7 +37,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
+func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store, recoveryEnabled bool) proto.WoodpeckerServer {
 	pipelineTime := prometheus_auto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
@@ -49,12 +49,13 @@ func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.P
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
-		store:         store,
-		queue:         queue,
-		pubsub:        pubsub,
-		logger:        logger,
-		pipelineTime:  pipelineTime,
-		pipelineCount: pipelineCount,
+		store:           store,
+		queue:           queue,
+		pubsub:          pubsub,
+		logger:          logger,
+		pipelineTime:    pipelineTime,
+		pipelineCount:   pipelineCount,
+		recoveryEnabled: recoveryEnabled,
 	}
 	return &WoodpeckerServer{peer: peer}
 }
@@ -206,5 +207,34 @@ func (s *WoodpeckerServer) UnregisterAgent(ctx context.Context, _ *proto.Empty) 
 func (s *WoodpeckerServer) ReportHealth(c context.Context, req *proto.ReportHealthRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.ReportHealth(c, req.GetStatus())
+	return res, err
+}
+
+func (s *WoodpeckerServer) InitWorkflowRecovery(c context.Context, req *proto.InitWorkflowRecoveryRequest) (*proto.Empty, error) {
+	res := new(proto.Empty)
+	err := s.peer.InitWorkflowRecovery(c, req.GetWorkflowId(), req.GetStepUuids(), req.GetTimeoutSeconds())
+	return res, err
+}
+
+func (s *WoodpeckerServer) GetWorkflowRecoveryStates(c context.Context, req *proto.GetWorkflowRecoveryStatesRequest) (*proto.GetWorkflowRecoveryStatesResponse, error) {
+	states, err := s.peer.GetWorkflowRecoveryStates(c, req.GetWorkflowId())
+	if err != nil {
+		return nil, err
+	}
+
+	protoStates := make([]*proto.StepRecoveryState, 0, len(states))
+	for stepUUID, state := range states {
+		protoStates = append(protoStates, &proto.StepRecoveryState{
+			StepUuid: stepUUID,
+			Status:   proto.RecoveryStatus(state.Status),
+			ExitCode: int32(state.ExitCode),
+		})
+	}
+	return &proto.GetWorkflowRecoveryStatesResponse{States: protoStates}, nil
+}
+
+func (s *WoodpeckerServer) UpdateStepRecoveryState(c context.Context, req *proto.UpdateStepRecoveryStateRequest) (*proto.Empty, error) {
+	res := new(proto.Empty)
+	err := s.peer.UpdateStepRecoveryState(c, req.GetWorkflowId(), req.GetStepUuid(), rpc.RecoveryStatus(req.GetStatus()), int(req.GetExitCode()))
 	return res, err
 }

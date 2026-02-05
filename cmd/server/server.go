@@ -134,6 +134,28 @@ func run(ctx context.Context, c *cli.Command) error {
 		return nil
 	})
 
+	// Start recovery state cleanup task
+	if server.Config.Pipeline.RecoveryEnabled {
+		serviceWaitingGroup.Go(func() error {
+			log.Info().Msg("starting recovery state cleanup service ...")
+			ticker := time.NewTicker(time.Minute * 5)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					log.Info().Msg("recovery state cleanup service stopped")
+					return nil
+				case <-ticker.C:
+					if err := _store.RecoveryStateCleanExpired(); err != nil {
+						log.Error().Err(err).Msg("failed to clean expired recovery states")
+					} else {
+						log.Trace().Msg("cleaned expired recovery states")
+					}
+				}
+			}
+		})
+	}
+
 	// start the grpc server
 	serviceWaitingGroup.Go(func() error {
 		log.Info().Msg("starting grpc server ...")

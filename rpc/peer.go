@@ -17,6 +17,23 @@ package rpc
 
 import "context"
 
+// RecoveryStatus represents the recovery state of a step.
+type RecoveryStatus int
+
+// RecoveryState represents the recovery state for a step.
+type RecoveryState struct {
+	Status   RecoveryStatus `json:"status"`
+	ExitCode int            `json:"exit_code"`
+}
+
+const (
+	RecoveryStatusPending RecoveryStatus = iota
+	RecoveryStatusRunning
+	RecoveryStatusSuccess
+	RecoveryStatusFailed
+	RecoveryStatusSkipped
+)
+
 // Peer defines the bidirectional communication interface between Woodpecker agents and servers.
 //
 // # Architecture and Implementations
@@ -302,4 +319,18 @@ type Peer interface {
 	//   - nil on success
 	//   - error if communication fails
 	ReportHealth(c context.Context) error
+
+	// InitWorkflowRecovery initializes recovery state for all steps in a workflow.
+	// This creates server-side state tracking for each step, enabling recovery
+	// after agent restart by knowing which steps completed, failed, or were running.
+	InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) error
+
+	// GetWorkflowRecoveryStates retrieves all recovery states for a workflow.
+	// Returns a map from step UUID to RecoveryState, allowing the agent to
+	// determine which steps need re-execution after restart.
+	GetWorkflowRecoveryStates(ctx context.Context, workflowID string) (map[string]*RecoveryState, error)
+
+	// UpdateStepRecoveryState updates the recovery state for a specific step.
+	// Called as steps transition through running, success, failed states.
+	UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status RecoveryStatus, exitCode int) error
 }
