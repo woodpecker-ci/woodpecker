@@ -118,10 +118,7 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 			// we explicit send a cancel signal
 			return true, nil
 		}
-		if errors.Is(err, new(queue.ErrExternal)) {
-			// we do not have to give back the error an agent already told us
-			return false, nil
-		}
+		// unknown error happened
 		return false, err
 	}
 

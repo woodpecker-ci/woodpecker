@@ -169,7 +169,9 @@ func (q *fifo) Wait(ctx context.Context, taskID string) error {
 		select {
 		case <-ctx.Done():
 		case <-state.done:
-			return state.error
+			if !errors.Is(state.error, new(ErrExternal)) {
+				return state.error
+			}
 		}
 	}
 	return nil
