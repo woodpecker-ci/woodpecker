@@ -4,19 +4,19 @@ go 1.25.0
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
-	code.gitea.io/sdk/gitea v0.22.1
+	code.gitea.io/sdk/gitea v0.23.2
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 v2.2.0
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
-	github.com/bmatcuk/doublestar/v4 v4.9.1
+	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/charmbracelet/huh v0.8.0
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.1.3+incompatible
+	github.com/docker/cli v29.2.1+incompatible
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/docker/go-units v0.5.0
@@ -28,16 +28,17 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/go-viper/mapstructure/v2 v2.4.0
-	github.com/golang-jwt/jwt/v5 v5.3.0
-	github.com/google/go-github/v80 v80.0.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+	github.com/google/go-github/v82 v82.0.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.7.0
 	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/json-iterator/go v1.1.12
 	github.com/kinbiko/jsonassert v1.2.0
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.1
 	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/migueleliasweb/go-github-mock v1.5.0
 	github.com/moby/term v0.5.2
@@ -52,18 +53,19 @@ require (
 	github.com/swaggo/swag v1.16.6
 	github.com/tink-crypto/tink-go/v2 v2.6.0
 	github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482
-	github.com/urfave/cli/v3 v3.6.1
+	github.com/urfave/cli/v3 v3.6.2
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.4.1
 	github.com/zalando/go-keyring v0.2.6
-	gitlab.com/gitlab-org/api/client-go v1.11.0
+	gitlab.com/gitlab-org/api/client-go v1.27.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/crypto v0.46.0
-	golang.org/x/net v0.48.0
+	golang.org/x/crypto v0.47.0
+	golang.org/x/image v0.35.0
+	golang.org/x/net v0.49.0
 	golang.org/x/oauth2 v0.34.0
 	golang.org/x/sync v0.19.0
-	golang.org/x/term v0.38.0
-	golang.org/x/text v0.32.0
+	golang.org/x/term v0.39.0
+	golang.org/x/text v0.33.0
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
@@ -212,10 +214,10 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.20.0 // indirect
-	golang.org/x/mod v0.30.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
-	golang.org/x/tools v0.39.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

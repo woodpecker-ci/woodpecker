@@ -351,7 +351,9 @@
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
                 "type_url": "URL",
-                "events": "事件"
+                "events": "事件",
+                "step": "步骤",
+                "workflow": "工作流"
             },
             "crons": {
                 "add": "创建计划",
@@ -379,7 +381,8 @@
                     "placeholder": "计划任务",
                     "title": "计划任务（基于 UTC）"
                 },
-                "show": "显示所有计划"
+                "show": "显示所有计划",
+                "enabled": "启用"
             },
             "general": {
                 "allow_pr": {
@@ -654,7 +657,8 @@
         "plugins": {
             "images": "仅适用于以下的插件",
             "desc": "该密钥生效的插件镜像列表。置空以允许所有插件和常规步骤。"
-        }
+        },
+        "note": "备注"
     },
     "no_search_results": "未找到结果",
     "org_access_denied": "您无权访问此组织",
@@ -740,5 +744,7 @@
     "git_password_desc": "Git 用户的密码或通行密钥（personal access token）。",
     "executable": "可执行文件",
     "executable_desc": "Addon 的可执行文件的路径。",
-    "developer_settings_to_create": "前往 {0} 并设置 OAuth 应用。"
+    "developer_settings_to_create": "前往 {0} 并设置 OAuth 应用。",
+    "config_extension_exclusive": "独占",
+    "config_extension_exclusive_desc": "启用后，将跳过所有其他代码托管平台的配置获取方式。"
 }

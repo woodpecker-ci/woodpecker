@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v82/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -209,15 +209,21 @@ func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeRemoteID
 		if err != nil {
 			return nil, err
 		}
-		repo, _, err := client.Repositories.GetByID(ctx, intID)
+		repo, resp, err := client.Repositories.GetByID(ctx, intID)
 		if err != nil {
+			if resp != nil && resp.StatusCode == http.StatusNotFound {
+				return nil, errors.Join(err, forge_types.ErrRepoNotFound)
+			}
 			return nil, err
 		}
 		return convertRepo(repo), nil
 	}
 
-	repo, _, err := client.Repositories.Get(ctx, owner, name)
+	repo, resp, err := client.Repositories.Get(ctx, owner, name)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, forge_types.ErrRepoNotFound)
+		}
 		return nil, err
 	}
 	return convertRepo(repo), nil
@@ -378,7 +384,14 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 // the GitHub repository.
 func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClientToken(ctx, u.AccessToken)
-	hooks, _, err := client.Repositories.ListHooks(ctx, r.Owner, r.Name, nil)
+
+	// make sure a repo rename does not trick us
+	forgeRepo, err := c.Repo(ctx, u, r.ForgeRemoteID, r.Owner, r.Name)
+	if err != nil {
+		return err
+	}
+
+	hooks, _, err := client.Repositories.ListHooks(ctx, forgeRepo.Owner, forgeRepo.Name, nil)
 	if err != nil {
 		return err
 	}
@@ -386,7 +399,7 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	if match == nil {
 		return nil
 	}
-	_, err = client.Repositories.DeleteHook(ctx, r.Owner, r.Name, *match.ID)
+	_, err = client.Repositories.DeleteHook(ctx, forgeRepo.Owner, forgeRepo.Name, *match.ID)
 	return err
 }
 
@@ -679,6 +692,11 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return nil, err
 	}
 
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with an authentication error.
+	forge.Refresh(ctx, c, _store, user)
+
 	gh := c.newClientToken(ctx, user.AccessToken)
 	fileList := make([]string, 0, 16)
 
@@ -716,6 +734,11 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	if err != nil {
 		return "", err
 	}
+
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with an authentication error.
+	forge.Refresh(ctx, c, _store, user)
 
 	gh := c.newClientToken(ctx, user.AccessToken)
 
@@ -771,6 +794,11 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 	if err != nil {
 		return nil, err
 	}
+
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with an authentication error.
+	forge.Refresh(ctx, c, _store, user)
 
 	gh := c.newClientToken(ctx, user.AccessToken)
 	fileList := make([]string, 0, 16)

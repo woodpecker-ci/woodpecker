@@ -177,7 +177,9 @@
         "type_markdown": "Markdown",
         "type_html": "HTML",
         "branch": "Branch",
-        "events": "Events"
+        "events": "Events",
+        "workflow": "Workflow",
+        "step": "Step"
       },
       "actions": {
         "actions": "Actions",
@@ -465,6 +467,7 @@
     "show": "Show secrets",
     "name": "Name",
     "value": "Value",
+    "note": "Note",
     "delete_confirm": "Do you really want to delete this secret?",
     "deleted": "Secret deleted",
     "created": "Secret created",
@@ -524,6 +527,8 @@
   "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
   "extension_endpoint_placeholder": "e.g. https://example.com/api",
   "config_extension_endpoint": "Config extension endpoint",
+  "config_extension_exclusive": "Exclusive",
+  "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
   "extensions_signatures_public_key": "Public key for signatures",
   "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
   "extensions_configuration_saved": "Extensions configuration saved",

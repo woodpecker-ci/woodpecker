@@ -5,7 +5,7 @@ filename: mock_{{.InterfaceName}}.go
 pkgname: mocks
 recursive: true
 packages:
-  go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc:
+  go.woodpecker-ci.org/woodpecker/v3/rpc:
     config:
       recursive: false
   go.woodpecker-ci.org/woodpecker/v3/server/forge:

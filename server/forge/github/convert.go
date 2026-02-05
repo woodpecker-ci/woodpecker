@@ -18,7 +18,7 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v82/github"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -101,11 +101,11 @@ func convertRepo(from *github.Repository) *model.Repo {
 
 // convertPerm is a helper function used to convert a GitHub repository
 // permissions to the common Woodpecker permissions structure.
-func convertPerm(perm map[string]bool) *model.Perm {
+func convertPerm(perm *github.RepositoryPermissions) *model.Perm {
 	return &model.Perm{
-		Admin: perm["admin"],
-		Push:  perm["push"],
-		Pull:  perm["pull"],
+		Admin: perm.GetAdmin(),
+		Push:  perm.GetPush(),
+		Pull:  perm.GetPull(),
 	}
 }
 

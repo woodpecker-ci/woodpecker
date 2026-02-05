@@ -25,7 +25,12 @@
         <template v-if="lastPipeline">
           <div class="flex min-w-0 flex-1 items-center gap-x-1">
             <PipelineStatusIcon v-if="lastPipeline" :status="lastPipeline.status" />
-            <span class="overflow-hidden pl-1 text-ellipsis whitespace-nowrap">{{ shortMessage }}</span>
+            <RenderMarkdown
+              class="overflow-hidden pl-1 text-ellipsis whitespace-nowrap"
+              :title="message"
+              :content="shortMessage"
+              inline
+            />
           </div>
 
           <div class="ml-auto flex shrink-0 items-center gap-x-1">
@@ -46,6 +51,7 @@
 import { computed } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
+import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
 import type { Repo } from '~/lib/api/types';
@@ -56,5 +62,5 @@ const props = defineProps<{
 }>();
 
 const lastPipeline = computed(() => props.repo.last_pipeline);
-const { since, shortMessage } = usePipeline(lastPipeline);
+const { since, shortMessage, message } = usePipeline(lastPipeline);
 </script>

@@ -1729,7 +1729,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -3921,7 +3921,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -4113,7 +4113,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -4705,6 +4705,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "creator_id": {
+                    "description": "TODO: drop with next major version",
                     "type": "integer"
                 },
                 "enabled": {
@@ -5222,6 +5223,9 @@ const docTemplate = `{
                 "config_extension_endpoint": {
                     "type": "string"
                 },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5318,6 +5322,9 @@ const docTemplate = `{
                 "config_extension_endpoint": {
                     "type": "string"
                 },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5405,6 +5412,9 @@ const docTemplate = `{
                 "config_extension_endpoint": {
                     "type": "string"
                 },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5462,11 +5472,40 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "note": {
+                    "type": "string"
+                },
                 "org_id": {
                     "type": "integer"
                 },
                 "repo_id": {
                     "type": "integer"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "SecretPatch": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/WebhookEvent"
+                    }
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
                 },
                 "value": {
                     "type": "string"
