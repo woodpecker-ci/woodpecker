@@ -198,6 +198,74 @@ func (_c *MockPeer_Extend_Call) RunAndReturn(run func(c context.Context, workflo
 	return _c
 }
 
+// GetWorkflowRecoveryStates provides a mock function for the type MockPeer
+func (_mock *MockPeer) GetWorkflowRecoveryStates(ctx context.Context, workflowID string) (map[string]*rpc.RecoveryState, error) {
+	ret := _mock.Called(ctx, workflowID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetWorkflowRecoveryStates")
+	}
+
+	var r0 map[string]*rpc.RecoveryState
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (map[string]*rpc.RecoveryState, error)); ok {
+		return returnFunc(ctx, workflowID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) map[string]*rpc.RecoveryState); ok {
+		r0 = returnFunc(ctx, workflowID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]*rpc.RecoveryState)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, workflowID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockPeer_GetWorkflowRecoveryStates_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWorkflowRecoveryStates'
+type MockPeer_GetWorkflowRecoveryStates_Call struct {
+	*mock.Call
+}
+
+// GetWorkflowRecoveryStates is a helper method to define mock.On call
+//   - ctx context.Context
+//   - workflowID string
+func (_e *MockPeer_Expecter) GetWorkflowRecoveryStates(ctx interface{}, workflowID interface{}) *MockPeer_GetWorkflowRecoveryStates_Call {
+	return &MockPeer_GetWorkflowRecoveryStates_Call{Call: _e.mock.On("GetWorkflowRecoveryStates", ctx, workflowID)}
+}
+
+func (_c *MockPeer_GetWorkflowRecoveryStates_Call) Run(run func(ctx context.Context, workflowID string)) *MockPeer_GetWorkflowRecoveryStates_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPeer_GetWorkflowRecoveryStates_Call) Return(stringToRecoveryState map[string]*rpc.RecoveryState, err error) *MockPeer_GetWorkflowRecoveryStates_Call {
+	_c.Call.Return(stringToRecoveryState, err)
+	return _c
+}
+
+func (_c *MockPeer_GetWorkflowRecoveryStates_Call) RunAndReturn(run func(ctx context.Context, workflowID string) (map[string]*rpc.RecoveryState, error)) *MockPeer_GetWorkflowRecoveryStates_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Init provides a mock function for the type MockPeer
 func (_mock *MockPeer) Init(c context.Context, workflowID string, state rpc.WorkflowState) error {
 	ret := _mock.Called(c, workflowID, state)
@@ -257,6 +325,75 @@ func (_c *MockPeer_Init_Call) Return(err error) *MockPeer_Init_Call {
 }
 
 func (_c *MockPeer_Init_Call) RunAndReturn(run func(c context.Context, workflowID string, state rpc.WorkflowState) error) *MockPeer_Init_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// InitWorkflowRecovery provides a mock function for the type MockPeer
+func (_mock *MockPeer) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) error {
+	ret := _mock.Called(ctx, workflowID, stepUUIDs, timeoutSeconds)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InitWorkflowRecovery")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, int64) error); ok {
+		r0 = returnFunc(ctx, workflowID, stepUUIDs, timeoutSeconds)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPeer_InitWorkflowRecovery_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InitWorkflowRecovery'
+type MockPeer_InitWorkflowRecovery_Call struct {
+	*mock.Call
+}
+
+// InitWorkflowRecovery is a helper method to define mock.On call
+//   - ctx context.Context
+//   - workflowID string
+//   - stepUUIDs []string
+//   - timeoutSeconds int64
+func (_e *MockPeer_Expecter) InitWorkflowRecovery(ctx interface{}, workflowID interface{}, stepUUIDs interface{}, timeoutSeconds interface{}) *MockPeer_InitWorkflowRecovery_Call {
+	return &MockPeer_InitWorkflowRecovery_Call{Call: _e.mock.On("InitWorkflowRecovery", ctx, workflowID, stepUUIDs, timeoutSeconds)}
+}
+
+func (_c *MockPeer_InitWorkflowRecovery_Call) Run(run func(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64)) *MockPeer_InitWorkflowRecovery_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		var arg3 int64
+		if args[3] != nil {
+			arg3 = args[3].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPeer_InitWorkflowRecovery_Call) Return(err error) *MockPeer_InitWorkflowRecovery_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPeer_InitWorkflowRecovery_Call) RunAndReturn(run func(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) error) *MockPeer_InitWorkflowRecovery_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -556,6 +693,81 @@ func (_c *MockPeer_Update_Call) Return(err error) *MockPeer_Update_Call {
 }
 
 func (_c *MockPeer_Update_Call) RunAndReturn(run func(c context.Context, workflowID string, state rpc.StepState) error) *MockPeer_Update_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateStepRecoveryState provides a mock function for the type MockPeer
+func (_mock *MockPeer) UpdateStepRecoveryState(ctx context.Context, workflowID string, stepUUID string, status rpc.RecoveryStatus, exitCode int) error {
+	ret := _mock.Called(ctx, workflowID, stepUUID, status, exitCode)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateStepRecoveryState")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, rpc.RecoveryStatus, int) error); ok {
+		r0 = returnFunc(ctx, workflowID, stepUUID, status, exitCode)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPeer_UpdateStepRecoveryState_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateStepRecoveryState'
+type MockPeer_UpdateStepRecoveryState_Call struct {
+	*mock.Call
+}
+
+// UpdateStepRecoveryState is a helper method to define mock.On call
+//   - ctx context.Context
+//   - workflowID string
+//   - stepUUID string
+//   - status rpc.RecoveryStatus
+//   - exitCode int
+func (_e *MockPeer_Expecter) UpdateStepRecoveryState(ctx interface{}, workflowID interface{}, stepUUID interface{}, status interface{}, exitCode interface{}) *MockPeer_UpdateStepRecoveryState_Call {
+	return &MockPeer_UpdateStepRecoveryState_Call{Call: _e.mock.On("UpdateStepRecoveryState", ctx, workflowID, stepUUID, status, exitCode)}
+}
+
+func (_c *MockPeer_UpdateStepRecoveryState_Call) Run(run func(ctx context.Context, workflowID string, stepUUID string, status rpc.RecoveryStatus, exitCode int)) *MockPeer_UpdateStepRecoveryState_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 rpc.RecoveryStatus
+		if args[3] != nil {
+			arg3 = args[3].(rpc.RecoveryStatus)
+		}
+		var arg4 int
+		if args[4] != nil {
+			arg4 = args[4].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPeer_UpdateStepRecoveryState_Call) Return(err error) *MockPeer_UpdateStepRecoveryState_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPeer_UpdateStepRecoveryState_Call) RunAndReturn(run func(ctx context.Context, workflowID string, stepUUID string, status rpc.RecoveryStatus, exitCode int) error) *MockPeer_UpdateStepRecoveryState_Call {
 	_c.Call.Return(run)
 	return _c
 }

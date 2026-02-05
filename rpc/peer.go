@@ -64,6 +64,23 @@ type (
 		Capacity     int               `json:"capacity"`
 		CustomLabels map[string]string `json:"custom_labels"`
 	}
+
+	// RecoveryStatus represents the recovery state of a step.
+	RecoveryStatus int
+
+	// RecoveryState represents the recovery state for a step.
+	RecoveryState struct {
+		Status   RecoveryStatus `json:"status"`
+		ExitCode int            `json:"exit_code"`
+	}
+)
+
+const (
+	RecoveryStatusPending RecoveryStatus = iota
+	RecoveryStatusRunning
+	RecoveryStatusSuccess
+	RecoveryStatusFailed
+	RecoveryStatusSkipped
 )
 
 // Peer defines a peer-to-peer connection.
@@ -100,4 +117,13 @@ type Peer interface {
 
 	// ReportHealth reports health status of the agent to the server
 	ReportHealth(c context.Context) error
+
+	// InitWorkflowRecovery initializes recovery state for all steps in a workflow
+	InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) error
+
+	// GetWorkflowRecoveryStates retrieves all recovery states for a workflow
+	GetWorkflowRecoveryStates(ctx context.Context, workflowID string) (map[string]*RecoveryState, error)
+
+	// UpdateStepRecoveryState updates the recovery state for a specific step
+	UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status RecoveryStatus, exitCode int) error
 }

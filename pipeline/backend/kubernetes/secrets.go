@@ -290,6 +290,11 @@ func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) er
 	log.Trace().Msgf("creating secret: %s", secret.Name)
 	_, err = engine.client.CoreV1().Secrets(engine.config.GetNamespace(step.OrgID)).Create(ctx, secret, meta_v1.CreateOptions{})
 	if err != nil {
+		if errors.IsAlreadyExists(err) {
+			// Secret already exists (recovery scenario), ignore
+			log.Trace().Msgf("secret already exists, reusing: %s", secret.Name)
+			return nil
+		}
 		return err
 	}
 	return nil
@@ -321,6 +326,11 @@ func startStepSecret(ctx context.Context, e *kube, step *types.Step) error {
 	log.Trace().Msgf("creating secret: %s", secret.Name)
 	_, err = e.client.CoreV1().Secrets(e.config.GetNamespace(step.OrgID)).Create(ctx, secret, meta_v1.CreateOptions{})
 	if err != nil {
+		if errors.IsAlreadyExists(err) {
+			// Secret already exists (recovery scenario), ignore
+			log.Trace().Msgf("secret already exists, reusing: %s", secret.Name)
+			return nil
+		}
 		return err
 	}
 	return nil

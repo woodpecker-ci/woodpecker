@@ -363,7 +363,35 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of pod: %s", podName)
 
-	up := make(chan bool)
+	up := make(chan bool, 1) // buffered to avoid blocking in handlers
+
+	checkPodReady := func(pod *v1.Pod) {
+		if pod.Name == podName {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
+				select {
+				case up <- true:
+				default:
+				}
+				return
+			}
+			switch pod.Status.Phase {
+			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
+				select {
+				case up <- true:
+				default:
+				}
+			}
+		}
+	}
+
+	podAdded := func(obj any) {
+		pod, ok := obj.(*v1.Pod)
+		if !ok {
+			log.Error().Msgf("could not parse pod: %v", obj)
+			return
+		}
+		checkPodReady(pod)
+	}
 
 	podUpdated := func(_, newPod any) {
 		pod, ok := newPod.(*v1.Pod)
@@ -371,21 +399,13 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
-
-		if pod.Name == podName {
-			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				up <- true
-			}
-			switch pod.Status.Phase {
-			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
-				up <- true
-			}
-		}
+		checkPodReady(pod)
 	}
 
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
+			AddFunc:    podAdded,
 			UpdateFunc: podUpdated,
 		},
 	); err != nil {
@@ -487,5 +507,22 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		return err
 	}
 
+	return nil
+}
+
+// Reconnect attempts to reconnect to a running pod.
+func (e *kube) Reconnect(ctx context.Context, step *types.Step, taskUUID string) error {
+	name, err := podName(step)
+	if err != nil {
+		return fmt.Errorf("pod name error: %w", err)
+	}
+
+	namespace := e.config.GetNamespace(step.OrgID)
+	_, err = e.client.CoreV1().Pods(namespace).Get(ctx, name, meta_v1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("pod %s not found: %w", name, err)
+	}
+
+	log.Debug().Str("taskUUID", taskUUID).Str("pod", name).Msg("reconnected to existing pod")
 	return nil
 }
