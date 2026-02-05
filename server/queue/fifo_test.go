@@ -114,6 +114,24 @@ func TestFifoBasicOperations(t *testing.T) {
 		}
 	})
 
+	t.Run("internal error pass-through", func(t *testing.T) {
+		// Test that internal queue errors (like ErrNotFound) are NOT wrapped with ErrExternal
+		// Internal errors should pass through unchanged so the queue layer can handle them
+
+		// Attempt to error a non-existent task - should trigger internal ErrNotFound
+		err := q.ErrorAtOnce(ctx, []string{"non-existent-task-id"}, fmt.Errorf("some error"))
+		assert.Error(t, err)
+		// Internal errors like ErrNotFound should pass through unwrapped
+		assert.ErrorIs(t, err, ErrNotFound, "internal queue errors should not be wrapped")
+		assert.False(t, errors.Is(err, new(ErrExternal)), "internal errors should not be marked as external")
+
+		// Verify similar behavior with multiple non-existent IDs
+		err = q.ErrorAtOnce(ctx, []string{"fake-1", "fake-2", "fake-3"}, fmt.Errorf("batch error"))
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, ErrNotFound, "batch internal errors should not be wrapped")
+		assert.False(t, errors.Is(err, new(ErrExternal)), "batch internal errors should not be external")
+	})
+
 	t.Run("error at once", func(t *testing.T) {
 		task1 := &model.Task{ID: "batch-1"}
 		task2 := &model.Task{ID: "batch-2"}
