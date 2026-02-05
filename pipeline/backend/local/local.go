@@ -171,8 +171,17 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 	}
 }
 
-func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
+func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+
+	stepState := &types.State{
+		Exited: true,
+	}
+
+	if err := ctx.Err(); err != nil {
+		stepState.Error = err
+		return stepState, nil
+	}
 
 	state, err := e.getStepState(taskUUID, step.UUID)
 	if err != nil {
@@ -181,10 +190,6 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 
 	if state.cmd == nil {
 		return nil, errors.New("exec: step command not set up")
-	}
-
-	stepState := &types.State{
-		Exited: true,
 	}
 
 	// normally we use cmd.Wait() to wait for *exec.Cmd, but cmd.StdoutPipe() tells us not
