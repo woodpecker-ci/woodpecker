@@ -51,7 +51,6 @@ when:
     evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
 
 steps:
-
   ###############
   # S e r v e r #
   ###############
@@ -65,7 +64,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
     when: &when-preview
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: [pull_request, pull_request_metadata]
@@ -105,7 +104,7 @@ steps:
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
     when: *when-publish-next
 
   release-server:
@@ -128,7 +127,7 @@ steps:
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
     when: *when-release
 
   #############
@@ -144,7 +143,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
       build_args_from_env: *build_args_from_env
     when: *when-preview
 
@@ -191,7 +190,7 @@ steps:
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
       build_args_from_env: *build_args_from_env
     when: *when-publish-next
 
@@ -224,7 +223,7 @@ steps:
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
       build_args_from_env: *build_args_from_env
     when: *when-release
 
@@ -241,7 +240,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
       build_args_from_env: *build_args_from_env
     when: *when-preview
 
@@ -285,7 +284,7 @@ steps:
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
       build_args_from_env: *build_args_from_env
     when: *when-publish-next
 
@@ -318,6 +317,6 @@ steps:
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args:
-        TARGET_BASE: "alpine"
+        TARGET_BASE: 'alpine'
       build_args_from_env: *build_args_from_env
     when: *when-release
