@@ -90,8 +90,8 @@
                 }}</router-link
               >
             </template>
-            <template v-else-if="pipeline.cancel_info.cancel_by_user">
-              {{ $t('repo.pipeline.cancel_info.cancel_by_user', { user: pipeline.cancel_info.cancel_by_user }) }}
+            <template v-else-if="pipeline.cancel_info.canceled_by_user">
+              {{ $t('repo.pipeline.cancel_info.canceled_by_user', { user: pipeline.cancel_info.canceled_by_user }) }}
             </template>
           </span>
         </div>
