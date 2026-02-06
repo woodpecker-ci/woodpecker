@@ -50,7 +50,8 @@
             "title": "Executar um pipeline manual",
             "trigger": "Executar pipeline",
             "select_branch": "Selecionar branch",
-            "show_pipelines": "Mostrar pipelines"
+            "show_pipelines": "Mostrar pipelines",
+            "no_manual_workflows": "Não havia fluxos de trabalho executáveis manualmente, ou o filtro os excluía todos."
         },
         "not_allowed": "Você não está autorizado a acessar este repositório",
         "open_in_forge": "Abrir repositório na forja",
@@ -175,7 +176,8 @@
                     "title": "Programação (com base no UTC)",
                     "placeholder": "Programação"
                 },
-                "edit": "Editar cron"
+                "edit": "Editar cron",
+                "enabled": "Habilitado"
             },
             "actions": {
                 "repair": {
@@ -222,7 +224,9 @@
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
                 "branch": "Branch",
-                "events": "Eventos"
+                "events": "Eventos",
+                "workflow": "Fluxo de trabalho",
+                "step": "Etapa"
             }
         },
         "user_none": "Esta organização/usuário ainda não tem projeto",
@@ -654,7 +658,8 @@
         "created": "Segredo criado",
         "saved": "Segredo salvo",
         "desc": "Segredos podem ser usados em todos os pipelines deste repositório.",
-        "delete": "Excluir segredo"
+        "delete": "Excluir segredo",
+        "note": "Nota"
     },
     "require_approval": {
         "allowed_users": {
@@ -741,5 +746,7 @@
     "extensions_signatures_public_key": "Chave pública para assinaturas",
     "extensions_signatures_public_key_description": "Esta chave pública deve ser usada por suas extensões para verificar se o chamadas de webhook do Woodpecker.",
     "extensions_configuration_saved": "Configuração de extensões salva",
-    "disabled": "Desativado"
+    "disabled": "Desativado",
+    "config_extension_exclusive": "Exclusiva",
+    "config_extension_exclusive_desc": "Se habilitada, essa opção ignorará todas as outras formas de obter configurações, incluindo a forja."
 }

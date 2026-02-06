@@ -28,6 +28,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
+// networkModeNone is a const we use to check to allow to drop network completely
+// this should be exempt from privileged action as it makes the container even more unprivileged.
+const networkModeNone = "none"
+
 // A Linter lints a pipeline configuration.
 type Linter struct {
 	trusted             TrustedConfiguration
@@ -231,20 +235,8 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 	return nil
 }
 
-func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) (err error) {
-	if len(c.Secrets) != 0 {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: fmt.Sprintf("%s.%s.secrets", field, c.Name),
-				Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
-			},
-		})
-	}
-
-	return err
+func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) error {
+	return nil
 }
 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
@@ -265,7 +257,7 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 		if len(c.ExtraHosts) != 0 {
 			errors = append(errors, "Insufficient trust level to use `extra_hosts`")
 		}
-		if len(c.NetworkMode) != 0 {
+		if len(c.NetworkMode) != 0 && c.NetworkMode != networkModeNone {
 			errors = append(errors, "Insufficient trust level to use `network_mode`")
 		}
 	}

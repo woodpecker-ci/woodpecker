@@ -7,7 +7,10 @@
     }"
   >
     <div
-      class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0 md:rounded-md!"
+      class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0"
+      :class="{
+        'md:rounded-md!': !fullscreen,
+      }"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -75,7 +78,7 @@
           </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
-            class="align-top break-words whitespace-pre-wrap"
+            class="wrap-break-words align-top whitespace-pre-wrap"
             :class="{
               'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
               'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
@@ -174,7 +177,7 @@ const hasLogs = computed(
     // we do not have logs for skipped steps
     repo?.value && pipeline.value && step.value && step.value.state !== 'skipped',
 );
-const autoScroll = useStorage('woodpecker:log-auto-scroll', false);
+const autoScroll = useStorage('woodpecker:log-auto-scroll', true);
 const showActions = ref(false);
 const downloadInProgress = ref(false);
 const ansiUp = ref(new AnsiUp());
@@ -183,6 +186,14 @@ const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
+
+function isScrolledToBottom(): boolean {
+  if (!consoleElement.value) {
+    return false;
+  }
+  // we use 5 as threshold
+  return consoleElement.value.scrollHeight - consoleElement.value.scrollTop - consoleElement.value.clientHeight < 5;
+}
 
 function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
@@ -256,7 +267,7 @@ const flushLogs = debounce((scroll: boolean) => {
 
   if (route.hash.length > 0) {
     nextTick(() => document.getElementById(route.hash.substring(1))?.scrollIntoView());
-  } else if (scroll && autoScroll.value) {
+  } else if (scroll && autoScroll.value && isScrolledToBottom()) {
     scrollDown();
   }
 }, 500);
@@ -380,7 +391,7 @@ watch(stepSlug, async () => {
 
 watch(step, async (newStep, oldStep) => {
   if (oldStep?.name === newStep?.name) {
-    if (oldStep?.finished !== newStep?.finished && autoScroll.value) {
+    if (oldStep?.finished !== newStep?.finished && autoScroll.value && isScrolledToBottom()) {
       scrollDown();
     }
 

@@ -24,11 +24,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/tink/go/subtle/random"
 	"github.com/rs/zerolog/log"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -54,6 +55,8 @@ func PostRepo(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+
+	forge.Refresh(c, _forge, _store, user)
 
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
 	if !forgeRemoteID.IsValid() {
@@ -191,7 +194,6 @@ func PostRepo(c *gin.Context) {
 	repo.Perm.Synced = time.Now().Unix()
 	repo.Perm.UserID = user.ID
 	repo.Perm.RepoID = repo.ID
-	repo.Perm.Repo = repo
 	err = _store.PermUpsert(repo.Perm)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -286,6 +288,9 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.ConfigExtensionEndpoint != nil {
 		repo.ConfigExtensionEndpoint = *in.ConfigExtensionEndpoint
+	}
+	if in.ConfigExtensionExclusive != nil {
+		repo.ConfigExtensionExclusive = *in.ConfigExtensionExclusive
 	}
 
 	err := _store.UpdateRepo(repo)
@@ -388,8 +393,12 @@ func GetRepoBranches(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, repoUser)
+
 	branches, err := _forge.Branches(c, repoUser, repo, session.Pagination(c))
-	if err != nil {
+	if errors.Is(err, forge_types.ErrNotImplemented) {
+		log.Debug().Msg("Could not fetch repo branch list as forge adapter did not implement it")
+	} else if err != nil {
 		log.Error().Err(err).Msg("failed to load branches")
 		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
 		return
@@ -428,7 +437,9 @@ func GetRepoPullRequests(c *gin.Context) {
 	forge.Refresh(c, _forge, _store, repoUser)
 
 	prs, err := _forge.PullRequests(c, repoUser, repo, session.Pagination(c))
-	if err != nil {
+	if errors.Is(err, forge_types.ErrNotImplemented) {
+		log.Debug().Msg("Could not fetch repo pull-request list as forge adapter did not implement it")
+	} else if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -457,9 +468,19 @@ func DeleteRepo(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, user)
+
 	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
+		log.Error().Err(err).Msgf("could not deactivate repo [%d] on forge", repo.ID)
+
+		// in case we want to delete the repo on our side we should not worry to much on the forge side
+		// also if we get signalized that the repo on the forge is gone we can just ignore that
+		if errors.Is(err, forge_types.ErrRepoNotFound) || remove {
+			log.Debug().Msg("ignore deactivating repo on forge")
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 	}
 
 	if remove {
@@ -522,6 +543,8 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, user)
+
 	to, exists := c.GetQuery("to")
 	if !exists {
 		err := fmt.Errorf("missing required to query value")
@@ -559,6 +582,9 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 	repo.Perm = from.Perm
+	repo.Perm.Synced = time.Now().Unix()
+	repo.Perm.UserID = user.ID
+	repo.Perm.RepoID = repo.ID
 	errStore = _store.PermUpsert(repo.Perm)
 	if errStore != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errStore)
@@ -714,9 +740,10 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 	}
 
 	if updatePermissions {
-		repo.Perm.Pull = from.Perm.Pull
-		repo.Perm.Push = from.Perm.Push
-		repo.Perm.Admin = from.Perm.Admin
+		repo.Perm = from.Perm
+		repo.Perm.Synced = time.Now().Unix()
+		repo.Perm.UserID = repoUser.ID
+		repo.Perm.RepoID = repo.ID
 		if err := _store.PermUpsert(repo.Perm); err != nil {
 			return err
 		}
