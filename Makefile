@@ -402,11 +402,16 @@ sbom: sbom-trivy sbom-syft sbom-calc sbom-clean ## Generate SBOM (runs all SBOM 
 .PHONY: sbom-trivy
 sbom-trivy: ## Generate base SBOMs with Trivy (license information)
 	@mkdir -p dist
+	@# Check if node_modules exist
+	@if [ ! -d web/node_modules ]; then \
+		echo "Error: WebUI node_modules not found. Run 'make build-ui' first."; \
+		exit 1; \
+	fi
 	@echo "=== Generating base SBOM with license information ==="
 	trivy fs --scanners license --license-full --format spdx-json -o ${DIST_DIR}/base.go.spdx.json go.mod
 	@echo ""
 	@echo "=== Generating WebUI SBOM ==="
-	trivy fs --scanners license --license-full --format spdx-json -o ${DIST_DIR}/webui.spdx.json web/pnpm-lock.yaml
+	trivy fs --scanners license --license-full --format spdx-json -o ${DIST_DIR}/webui.spdx.json web/
 
 .PHONY: sbom-syft
 sbom-syft: ## Generate binary-specific dependency lists with Syft

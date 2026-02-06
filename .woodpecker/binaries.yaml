@@ -78,11 +78,13 @@ steps:
       - make bundle
 
   build-sbom-trivy: # same as make sbom-trivy
+    depends_on:
+      - build-web
     image: ghcr.io/aquasecurity/trivy
     commands:
       - mkdir -p dist
       - trivy fs --scanners license --license-full --format spdx-json -o dist/base.go.spdx.json go.mod
-      - trivy fs --scanners license --license-full --format spdx-json -o dist/webui.spdx.json web/pnpm-lock.yaml
+      - trivy fs --scanners license --license-full --format spdx-json -o dist/webui.spdx.json web/
 
   build-sbom-syft: # same as make sbom-syft
     depends_on:
