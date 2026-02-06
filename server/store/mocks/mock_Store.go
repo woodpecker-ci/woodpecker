@@ -1949,7 +1949,7 @@ func (_c *MockStore_GetPipelineCount_Call) RunAndReturn(run func() (int64, error
 }
 
 // GetPipelineLast provides a mock function for the type MockStore
-func (_mock *MockStore) GetPipelineLast(repo *model.Repo, s string) (*model.Pipeline, error) {
+func (_mock *MockStore) GetPipelineLastByBranch(repo *model.Repo, s string) (*model.Pipeline, error) {
 	ret := _mock.Called(repo, s)
 
 	if len(ret) == 0 {
@@ -1984,7 +1984,7 @@ type MockStore_GetPipelineLast_Call struct {
 // GetPipelineLast is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - s string
-func (_e *MockStore_Expecter) GetPipelineLast(repo interface{}, s interface{}) *MockStore_GetPipelineLast_Call {
+func (_e *MockStore_Expecter) GetPipelineLastByBranch(repo interface{}, s interface{}) *MockStore_GetPipelineLast_Call {
 	return &MockStore_GetPipelineLast_Call{Call: _e.mock.On("GetPipelineLast", repo, s)}
 }
 

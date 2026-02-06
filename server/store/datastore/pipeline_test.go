@@ -99,7 +99,7 @@ func TestPipelines(t *testing.T) {
 	assert.Equal(t, pipeline2.RepoID, GetPipeline.RepoID)
 	assert.Equal(t, pipeline2.Number, GetPipeline.Number)
 
-	GetPipeline, err3 = store.GetPipelineLast(&model.Repo{ID: repo.ID}, pipeline2.Branch)
+	GetPipeline, err3 = store.GetPipelineLastByBranch(&model.Repo{ID: repo.ID}, pipeline2.Branch)
 	assert.NoError(t, err3)
 	assert.Equal(t, pipeline2.ID, GetPipeline.ID)
 	assert.Equal(t, pipeline2.RepoID, GetPipeline.RepoID)
