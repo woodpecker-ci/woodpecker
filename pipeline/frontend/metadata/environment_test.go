@@ -20,14 +20,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEnvVarSubst(t *testing.T) {
-	result, err := EnvVarSubst(`steps:
-		step1:
-			image: ${HELLO_IMAGE}
-			command: echo ${NEWLINE}`, map[string]string{"HELLO_IMAGE": "hello-world", "NEWLINE": "some env\nwith newline"})
-	assert.NoError(t, err)
-	assert.EqualValues(t, `steps:
-		step1:
-			image: hello-world
-			command: echo "some env\nwith newline"`, result)
+func TestEnviron(t *testing.T) {
+	m := Metadata{
+		Sys: System{Name: "wp"},
+		Curr: Pipeline{
+			Event: EventRelease,
+			Commit: Commit{
+				IsPrerelease: true,
+			},
+		},
+		Prev: Pipeline{
+			Event: EventPullMetadata,
+			Commit: Commit{
+				Refspec: "branch-a:branch-b",
+			},
+		},
+	}
+
+	envs := m.Environ()
+	assert.Equal(t, "wp", envs["CI"])
+	assert.Equal(t, "release", envs["CI_PIPELINE_EVENT"])
+	assert.Equal(t, "pull_request_metadata", envs["CI_PREV_PIPELINE_EVENT"])
+	assert.Equal(t, "true", envs["CI_COMMIT_PRERELEASE"])
+	assert.Equal(t, "branch-a", envs["CI_PREV_COMMIT_SOURCE_BRANCH"])
+	assert.Equal(t, "branch-b", envs["CI_PREV_COMMIT_TARGET_BRANCH"])
+
 }
