@@ -53,6 +53,7 @@ type RPC struct {
 }
 
 // Next blocks until it provides the next workflow to execute.
+// TODO (6038): Server does not release waiting agents on graceful shutdown.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
@@ -100,18 +101,29 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 }
 
-// Wait blocks until the workflow with the given ID is done.
-func (s *RPC) Wait(c context.Context, workflowID string) error {
+// Wait blocks until the workflow with the given ID is completed or got canceled.
+// Used to let agents wait for cancel signals from server side.
+func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err error) {
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if err := s.checkAgentPermissionByWorkflow(c, agent, workflowID, nil, nil); err != nil {
-		return err
+		return false, err
 	}
 
-	return s.queue.Wait(c, workflowID)
+	if err := s.queue.Wait(c, workflowID); err != nil {
+		if errors.Is(err, queue.ErrCancel) {
+			// we explicit send a cancel signal
+			return true, nil
+		}
+		// unknown error happened
+		return false, err
+	}
+
+	// workflow finished and on issues appeared
+	return false, nil
 }
 
 // Extend extends the lease for the workflow with the given ID.
@@ -133,7 +145,7 @@ func (s *RPC) Extend(c context.Context, workflowID string) error {
 	return s.queue.Extend(c, agent.ID, workflowID)
 }
 
-// Update updates the state of a step.
+// Update let agent updates the step state at the server.
 func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -213,7 +225,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 	return nil
 }
 
-// Init implements the rpc.Init function.
+// Init signals the workflow is initialized.
 func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -286,7 +298,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	return s.updateAgentLastWork(agent)
 }
 
-// Done marks the workflow with the given ID as done.
+// Done marks the workflow with the given ID as stope.
 func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -331,20 +343,23 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
 		Str("workflow_id", strWorkflowID).Logger()
 
-	logger.Trace().Msgf("gRPC Done with state: %#v", state)
+	logger.Debug().Msgf("workflow state in store: %#v", workflow)
+	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
 	}
 
-	var queueErr error
-	if workflow.Failing() {
-		queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
-	} else {
-		queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
-	}
-	if queueErr != nil {
-		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
+	if !state.Canceled {
+		var queueErr error
+		if workflow.Failing() {
+			queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
+		} else {
+			queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
+		}
+		if queueErr != nil {
+			logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
+		}
 	}
 
 	currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline)
