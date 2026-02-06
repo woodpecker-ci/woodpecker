@@ -31,6 +31,7 @@
 
 ### 🐛 Bug Fixes
 
+- Don't propagate workflow error from agent back to agent [[#6056](https://github.com/woodpecker-ci/woodpecker/pull/6056)]
 - Fix pipeline cancellation status handling and step state synchronization [[#6011](https://github.com/woodpecker-ci/woodpecker/pull/6011)]
 - Add retry logic for CreatePipeline with backoff [[#6067](https://github.com/woodpecker-ci/woodpecker/pull/6067)]
 - Fix OAuth token refresh in webhook handling for Bitbucket and GitHub [[#6059](https://github.com/woodpecker-ci/woodpecker/pull/6059)]
