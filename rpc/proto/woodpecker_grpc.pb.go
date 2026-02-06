@@ -56,7 +56,7 @@ type WoodpeckerClient interface {
 	Version(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*VersionResponse, error)
 	Next(ctx context.Context, in *NextRequest, opts ...grpc.CallOption) (*NextResponse, error)
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error)
-	Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*Empty, error)
+	Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*WaitResponse, error)
 	Done(ctx context.Context, in *DoneRequest, opts ...grpc.CallOption) (*Empty, error)
 	Extend(ctx context.Context, in *ExtendRequest, opts ...grpc.CallOption) (*Empty, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Empty, error)
@@ -104,9 +104,9 @@ func (c *woodpeckerClient) Init(ctx context.Context, in *InitRequest, opts ...gr
 	return out, nil
 }
 
-func (c *woodpeckerClient) Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*WaitResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
+	out := new(WaitResponse)
 	err := c.cc.Invoke(ctx, Woodpecker_Wait_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ type WoodpeckerServer interface {
 	Version(context.Context, *Empty) (*VersionResponse, error)
 	Next(context.Context, *NextRequest) (*NextResponse, error)
 	Init(context.Context, *InitRequest) (*Empty, error)
-	Wait(context.Context, *WaitRequest) (*Empty, error)
+	Wait(context.Context, *WaitRequest) (*WaitResponse, error)
 	Done(context.Context, *DoneRequest) (*Empty, error)
 	Extend(context.Context, *ExtendRequest) (*Empty, error)
 	Update(context.Context, *UpdateRequest) (*Empty, error)
@@ -220,7 +220,7 @@ func (UnimplementedWoodpeckerServer) Next(context.Context, *NextRequest) (*NextR
 func (UnimplementedWoodpeckerServer) Init(context.Context, *InitRequest) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method Init not implemented")
 }
-func (UnimplementedWoodpeckerServer) Wait(context.Context, *WaitRequest) (*Empty, error) {
+func (UnimplementedWoodpeckerServer) Wait(context.Context, *WaitRequest) (*WaitResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Wait not implemented")
 }
 func (UnimplementedWoodpeckerServer) Done(context.Context, *DoneRequest) (*Empty, error) {

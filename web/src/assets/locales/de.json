@@ -167,7 +167,7 @@
     },
     "org": {
         "settings": {
-            "not_allowed": "Du darfst nicht auf die Einstellungen dieser Organisation nicht zugreifen",
+            "not_allowed": "Du darfst nicht auf die Einstellungen dieser Organisation zugreifen",
             "secrets": {
                 "add": "Geheimnis hinzufügen",
                 "created": "Organisations-Geheimnis erstellt",
@@ -195,7 +195,7 @@
                 "desc": "Zugangsdaten zum Register der Organisation können für private Images aller Pipelines der Organisation verwendet werden."
             },
             "agents": {
-                "desc": "Agents registriert für diese Organisation."
+                "desc": "Agenten registriert für diese Organisation."
             }
         }
     },
@@ -354,7 +354,9 @@
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
                 "type_url": "URL",
-                "events": "Events"
+                "events": "Events",
+                "workflow": "Workflow",
+                "step": "Schritt"
             },
             "crons": {
                 "add": "Cron hinzufügen",
@@ -763,5 +765,5 @@
     "extensions_signatures_public_key_description": "Dieser öffentliche Schlüssel sollte von deinen Erweiterungen verwendet werden, um Webhook-Aufrufe von Woodpecker zu verifizieren.",
     "disabled": "Deaktiviert",
     "config_extension_exclusive": "Exklusiv",
-    "config_extension_exclusive_desc": "Eine exklusive Erweiterung wird alle anderen Möglichkeiten, die Konfiguration zu laden, überspringen, einschließlich der Code-Plattform."
+    "config_extension_exclusive_desc": "Wenn aktiviert, werden alle anderen Möglichkeiten zum Laden der Konfiguration, einschließlich der Code-Plattform, übersprungen."
 }
