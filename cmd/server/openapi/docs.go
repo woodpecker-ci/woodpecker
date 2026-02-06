@@ -6015,7 +6015,7 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "user_cancel",
-                "superseded"
+                "superseded_by"
             ],
             "x-enum-varnames": [
                 "CancelReasonUserCancel",
