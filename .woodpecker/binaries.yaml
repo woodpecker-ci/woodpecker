@@ -79,6 +79,7 @@ steps:
 
   build-sbom-trivy: # same as make sbom-trivy
     depends_on:
+      - vendor
       - build-web
     image: ghcr.io/aquasecurity/trivy
     commands:
