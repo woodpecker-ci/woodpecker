@@ -27,6 +27,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -99,7 +100,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
 		// WithContextSigtermCallback would cancel the context too, but  we want our own custom error
-		cancelWorkflowCtx(pipeline.ErrCancel)
+		cancelWorkflowCtx(pipeline_errors.ErrCancel)
 	})
 
 	// Listen for remote cancel events (UI / API).
@@ -114,7 +115,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		} else {
 			if canceled {
 				logger.Debug().Err(err).Msg("server side cancel signal received")
-				cancelWorkflowCtx(pipeline.ErrCancel)
+				cancelWorkflowCtx(pipeline_errors.ErrCancel)
 			}
 			// Wait returned without error, meaning the workflow finished normally
 			logger.Debug().Msg("cancel listener exited normally")
@@ -171,10 +172,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	if err != nil {
 		state.Error = err.Error()
-		if errors.Is(err, pipeline.ErrCancel) {
+		if errors.Is(err, pipeline_errors.ErrCancel) {
 			state.Canceled = true
 			// cleanup joined error messages
-			state.Error = pipeline.ErrCancel.Error()
+			state.Error = pipeline_errors.ErrCancel.Error()
 		}
 	}
 

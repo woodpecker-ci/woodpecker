@@ -27,7 +27,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
@@ -122,7 +122,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 
 	r.started = time.Now().Unix()
 	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
-		var stepErr *pipelineErrors.ErrInvalidWorkflowSetup
+		var stepErr *pipeline_errors.ErrInvalidWorkflowSetup
 		if errors.As(err, &stepErr) {
 			state := new(State)
 			state.Pipeline.Step = stepErr.Step
@@ -147,7 +147,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	for _, stage := range r.spec.Stages {
 		select {
 		case <-r.ctx.Done():
-			return ErrCancel
+			return pipeline_errors.ErrCancel
 		case err := <-r.execAll(runnerCtx, stage.Steps):
 			if err != nil {
 				r.err = err
@@ -244,7 +244,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 
 				// normalize context cancel error
 				if errors.Is(err, context.Canceled) {
-					err = ErrCancel
+					err = pipeline_errors.ErrCancel
 				}
 
 				// Return the error after tracing it.
@@ -326,7 +326,7 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			waitState.Error = ErrCancel
+			waitState.Error = pipeline_errors.ErrCancel
 		} else {
 			return nil, err
 		}
@@ -343,16 +343,16 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 
 	// we handle cancel case
 	if ctxErr := r.ctx.Err(); ctxErr != nil && errors.Is(ctxErr, context.Canceled) {
-		waitState.Error = ErrCancel
+		waitState.Error = pipeline_errors.ErrCancel
 	}
 
 	if waitState.OOMKilled {
-		return waitState, &OomError{
+		return waitState, &pipeline_errors.OomError{
 			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
 	} else if waitState.ExitCode != 0 {
-		return waitState, &ExitError{
+		return waitState, &pipeline_errors.ExitError{
 			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}

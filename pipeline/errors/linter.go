@@ -18,8 +18,6 @@ import (
 	"errors"
 
 	"go.uber.org/multierr"
-
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 )
 
 type LinterErrorData struct {
@@ -39,8 +37,8 @@ type BadHabitErrorData struct {
 	Docs  string `json:"docs"`
 }
 
-func GetLinterData(e *types.PipelineError) *LinterErrorData {
-	if e.Type != types.PipelineErrorTypeLinter {
+func GetLinterData(e *PipelineError) *LinterErrorData {
+	if e.Type != PipelineErrorTypeLinter {
 		return nil
 	}
 
@@ -51,16 +49,16 @@ func GetLinterData(e *types.PipelineError) *LinterErrorData {
 	return nil
 }
 
-func GetPipelineErrors(err error) []*types.PipelineError {
-	var pipelineErrors []*types.PipelineError
+func GetPipelineErrors(err error) []*PipelineError {
+	var pipelineErrors []*PipelineError
 	for _, _err := range multierr.Errors(err) {
-		var err *types.PipelineError
+		var err *PipelineError
 		if errors.As(_err, &err) {
 			pipelineErrors = append(pipelineErrors, err)
 		} else {
-			pipelineErrors = append(pipelineErrors, &types.PipelineError{
+			pipelineErrors = append(pipelineErrors, &PipelineError{
 				Message: _err.Error(),
-				Type:    types.PipelineErrorTypeGeneric,
+				Type:    PipelineErrorTypeGeneric,
 			})
 		}
 	}
