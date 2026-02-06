@@ -315,7 +315,7 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 	if err := e.client.ContainerStop(ctx, containerName, container.StopOptions{
 		Timeout: &containerKillTimeout,
 	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-		// we do not return error jet as we try to kill it first
+		// we do not return error yet as we try to kill it first
 		stopErr = fmt.Errorf("could not stop container '%s': %w", step.Name, err)
 	}
 
