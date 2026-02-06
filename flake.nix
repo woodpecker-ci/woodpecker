@@ -48,6 +48,9 @@
 
               # docs
               graphviz
+
+              # sbom
+              syft
             ];
             CFLAGS = "-I${pkgs.glibc.dev}/include";
             LDFLAGS = "-L${pkgs.glibc}/lib";
