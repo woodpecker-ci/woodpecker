@@ -4678,6 +4678,20 @@ const docTemplate = `{
                 }
             }
         },
+        "CancelInfo": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "reason": {
+                    "$ref": "#/definitions/model.CancelReason"
+                }
+            }
+        },
         "Config": {
             "type": "object",
             "properties": {
@@ -4982,8 +4996,8 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
-                "cancel_reason": {
-                    "type": "string"
+                "cancel_info": {
+                    "$ref": "#/definitions/CancelInfo"
                 },
                 "changed_files": {
                     "type": "array",
@@ -5995,6 +6009,17 @@ const docTemplate = `{
                 "RequireApprovalForks",
                 "RequireApprovalPullRequests",
                 "RequireApprovalAllEvents"
+            ]
+        },
+        "model.CancelReason": {
+            "type": "string",
+            "enum": [
+                "user_cancel",
+                "superseded"
+            ],
+            "x-enum-varnames": [
+                "CancelReasonUserCancel",
+                "CancelReasonSuperseded"
             ]
         },
         "model.ForgeType": {

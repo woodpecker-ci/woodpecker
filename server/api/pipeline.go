@@ -493,7 +493,12 @@ func CancelPipeline(c *gin.Context) {
 		return
 	}
 
-	if err := pipeline.Cancel(c, _forge, _store, repo, user, pl, fmt.Sprintf("Canceled by user %s", user.Login)); err != nil {
+	if err := pipeline.Cancel(c, _forge, _store, repo, user, pl, &model.CancelInfo{
+		Reason: model.CancelReasonUserCancel,
+		Data: map[string]string{
+			"user": user.Login,
+		},
+	}); err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.Status(http.StatusNoContent)

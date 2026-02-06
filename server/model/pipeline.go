@@ -48,7 +48,7 @@ type Pipeline struct {
 	ForgeURL             string                 `json:"forge_url"               xorm:"forge_url"`
 	Reviewer             string                 `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed             int64                  `json:"reviewed"                xorm:"reviewed"`
-	CancelReason         string                 `json:"cancel_reason,omitempty" xorm:"cancel_reason"`
+	CancelInfo           *CancelInfo            `json:"cancel_info,omitempty"   xorm:"json 'cancel_info'"`
 	Workflows            []*Workflow            `json:"workflows,omitempty"     xorm:"-"`
 	ChangedFiles         []string               `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables  map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
@@ -86,3 +86,15 @@ type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name	PipelineOptions
+
+type CancelReason string
+
+const (
+	CancelReasonUserCancel CancelReason = "user_cancel"
+	CancelReasonSuperseded CancelReason = "superseded_by"
+)
+
+type CancelInfo struct {
+	Reason CancelReason      `json:"reason"`
+	Data   map[string]string `json:"data,omitempty"`
+} //	@name	CancelInfo

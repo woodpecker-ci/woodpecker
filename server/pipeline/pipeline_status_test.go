@@ -94,11 +94,14 @@ func TestUpdateToStatusKilled(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now().Unix()
-	message := "Unit tests status"
+	cancelInfo := &model.CancelInfo{
+		Reason: "Unit tests status",
+	}
 
-	pipeline, _ := UpdateToStatusKilled(mockStorePipeline(t), model.Pipeline{}, message)
+	pipeline, _ := UpdateToStatusKilled(mockStorePipeline(t), model.Pipeline{}, cancelInfo)
 
 	assert.Equal(t, model.StatusKilled, pipeline.Status)
-	assert.Equal(t, message, pipeline.CancelReason)
+	assert.NotNil(t, pipeline.CancelInfo)
+	assert.Equal(t, "Unit tests status", pipeline.CancelInfo.Reason)
 	assert.LessOrEqual(t, now, pipeline.Finished)
 }

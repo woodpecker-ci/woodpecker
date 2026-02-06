@@ -7,6 +7,11 @@ export interface PipelineError<D = unknown> {
   is_warning: boolean;
 }
 
+export interface CancelInfo {
+  reason: string;
+  data?: Record<string, string>;
+}
+
 // A pipeline for a repository.
 export interface Pipeline {
   id: number;
@@ -81,6 +86,8 @@ export interface Pipeline {
   reviewed_by: string;
 
   reviewed: number;
+
+  cancel_info?: CancelInfo;
 
   // The steps associated with this pipeline.
   // A pipeline will have multiple steps if a matrix pipeline was used or if a rebuild was requested.

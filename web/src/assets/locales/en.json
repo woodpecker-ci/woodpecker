@@ -269,6 +269,10 @@
       "we_got_some_errors": "Oh no, an error occurred!",
       "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
+      "cancel_info": {
+        "superseded_by": "Superseded by pipeline #{pipeline_number}",
+        "user_cancel": "Canceled by {user}"
+      },
       "debug": {
         "title": "Debug",
         "download_metadata": "Download metadata",
