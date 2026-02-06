@@ -389,75 +389,88 @@ man-server: ## Generate man pages for server
 .PHONY: man
 man: man-cli man-agent man-server ## Generate all man pages
 
+##@ SBOM
 .PHONY: sbom
-sbom: ## Generate sbom
-	@# Check if binaries exist
-	@if [ ! -f dist/cli/linux_amd64/woodpecker-cli ]; then \
-		echo "Error: CLI binary not found. Run 'make release-cli' first."; \
-		exit 1; \
-	fi
-	@if [ ! -f dist/agent/linux_amd64/woodpecker-agent ]; then \
-		echo "Error: Agent binary not found. Run 'make release-agent' first."; \
-		exit 1; \
-	fi
-	@if [ ! -f dist/server/linux_amd64/woodpecker-server ]; then \
-		echo "Error: Server binary not found. Run 'make release-server' first."; \
-		exit 1; \
-	fi
-	@echo "=== Generating base SBOM with license information ==="
-	trivy fs --scanners license --license-full --format spdx-json -o base.go.spdx.json go.mod
-	@echo ""
-	@echo "=== Generating binary-specific dependency lists ==="
-	syft scan file:dist/cli/linux_amd64/woodpecker-cli -o spdx-json       > cli-deps.spdx.json
-	syft scan file:dist/agent/linux_amd64/woodpecker-agent -o spdx-json   > agent-deps.spdx.json
-	syft scan file:dist/server/linux_amd64/woodpecker-server -o spdx-json > server-deps.spdx.json
-	@echo ""
-	@echo "=== Filtering base SBOM for each binary ==="
-	@# Filter CLI
-	jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .name]) as $$deps | $$base | .packages |= map(select(.name as $$n | $$deps | contains([$$n]))) | .name = "woodpecker-cli"' \
-		base.go.spdx.json cli-deps.spdx.json > cli.spdx.json
-	@# Filter Agent
-	jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .name]) as $$deps | $$base | .packages |= map(select(.name as $$n | $$deps | contains([$$n]))) | .name = "woodpecker-agent"' \
-		base.go.spdx.json agent-deps.spdx.json > agent.spdx.json
-	@# Filter Server
-	jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .name]) as $$deps | $$base | .packages |= map(select(.name as $$n | $$deps | contains([$$n]))) | .name = "woodpecker-server"' \
-		base.go.spdx.json server-deps.spdx.json > server-go.spdx.json
-	@echo ""
-	@echo "=== Generating WebUI SBOM ==="
-	trivy fs --scanners license --license-full --format spdx-json -o webui.spdx.json web/pnpm-lock.yaml
-	@echo ""
-	@echo "=== Combining Server + WebUI ==="
-	jq -s '{SPDXID: "SPDXRef-DOCUMENT", spdxVersion: .[0].spdxVersion, creationInfo: .[0].creationInfo, name: "woodpecker-server", dataLicense: .[0].dataLicense, documentNamespace: (.[0].documentNamespace | sub("server"; "server-combined")), packages: (.[0].packages + .[1].packages), relationships: (.[0].relationships + .[1].relationships)}' \
-		server-go.spdx.json webui.spdx.json > server.spdx.json
-	@echo ""
-	@echo "=== Package Counts ==="
-	@echo "Base (all go.mod):  $$(jq '.packages | length' base.go.spdx.json) packages"
-	@echo "CLI binary:         $$(jq '.packages | length' cli.spdx.json) packages"
-	@echo "Agent binary:       $$(jq '.packages | length' agent.spdx.json) packages"
-	@echo "Server binary (Go): $$(jq '.packages | length' server-go.spdx.json) packages"
-	@echo "Server WebUI:       $$(jq '.packages | length' webui.spdx.json) packages"
-	@echo "Server (combined):  $$(jq '.packages | length' server.spdx.json) packages"
-	@echo ""
-	@echo "=== License Coverage ==="
-	@echo "Server with licenses: $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' server.spdx.json)/$$(jq '.packages | length' server.spdx.json)"
-	@echo "Agent with licenses:  $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' agent.spdx.json)/$$(jq '.packages | length' agent.spdx.json)"
-	@echo "CLI with licenses:    $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' cli.spdx.json)/$$(jq '.packages | length' cli.spdx.json)"
-	@echo ""
-	@echo "=== License Distribution (Server) ==="
-	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' server.spdx.json
-	@echo ""
-	@echo "=== License Distribution (Agent) ==="
-	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' agent.spdx.json
-	@echo ""
-	@echo "=== License Distribution (CLI) ==="
-	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' cli.spdx.json
-	@echo ""
-	@echo "=== Files Generated ==="
-	@echo "  - cli.spdx.json"
-	@echo "  - agent.spdx.json"
-	@echo "  - server.spdx.json"
-	@rm -f cli-deps.spdx.json agent-deps.spdx.json server-deps.spdx.json server-go.spdx.json base.go.spdx.json webui.spdx.json
+sbom: sbom-trivy sbom-syft sbom-calc ## Generate SBOM (runs all SBOM subtargets)
 	@echo ""
 	@echo "✓ SBOM generation complete!"
+	@echo ""
+	@echo "=== Files Generated ==="
+	@echo "  - ${DIST_DIR}/cli.spdx.json"
+	@echo "  - ${DIST_DIR}/agent.spdx.json"
+	@echo "  - ${DIST_DIR}/server.spdx.json"
+
+.PHONY: sbom-trivy
+sbom-trivy: ## Generate base SBOMs with Trivy (license information)
+	@mkdir -p dist
+	@echo "=== Generating base SBOM with license information ==="
+	trivy fs --scanners license --license-full --format spdx-json -o ${DIST_DIR}/base.go.spdx.json go.mod
+	@echo ""
+	@echo "=== Generating WebUI SBOM ==="
+	trivy fs --scanners license --license-full --format spdx-json -o ${DIST_DIR}/webui.spdx.json web/pnpm-lock.yaml
+
+.PHONY: sbom-syft
+sbom-syft: ## Generate binary-specific dependency lists with Syft
+	@mkdir -p dist
+	@# Check if binaries exist
+	@if [ ! -f ${DIST_DIR}/cli/linux_amd64/woodpecker-cli ]; then \
+		echo "Error: CLI binary not found. Run 'make build' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f ${DIST_DIR}/agent/linux_amd64/woodpecker-agent ]; then \
+		echo "Error: Agent binary not found. Run 'make build' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f ${DIST_DIR}/server/linux_amd64/woodpecker-server ]; then \
+		echo "Error: Server binary not found. Run 'make build' first."; \
+		exit 1; \
+	fi
+	@echo "=== Generating binary-specific dependency lists ==="
+	syft scan file:${DIST_DIR}/cli/linux_amd64/woodpecker-cli -o spdx-json       > ${DIST_DIR}/cli-deps.spdx.json
+	syft scan file:${DIST_DIR}/agent/linux_amd64/woodpecker-agent -o spdx-json   > ${DIST_DIR}/agent-deps.spdx.json
+	syft scan file:${DIST_DIR}/server/linux_amd64/woodpecker-server -o spdx-json > ${DIST_DIR}/server-deps.spdx.json
+
+.PHONY: sbom-calc
+sbom-calc: ## Calculate and filter final SBOMs with jq
+	@mkdir -p dist
+	@echo "=== Filtering base SBOM for each binary ==="
+	@# Filter CLI
+	@jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .name]) as $$deps | $$base | .packages |= map(select(.name as $$n | $$deps | contains([$$n]))) | .name = "woodpecker-cli"' \
+		${DIST_DIR}/base.go.spdx.json ${DIST_DIR}/cli-deps.spdx.json > ${DIST_DIR}/cli.spdx.json
+	@# Filter Agent
+	@jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .name]) as $$deps | $$base | .packages |= map(select(.name as $$n | $$deps | contains([$$n]))) | .name = "woodpecker-agent"' \
+		${DIST_DIR}/base.go.spdx.json ${DIST_DIR}/agent-deps.spdx.json > ${DIST_DIR}/agent.spdx.json
+	@# Filter Server
+	@jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .name]) as $$deps | $$base | .packages |= map(select(.name as $$n | $$deps | contains([$$n]))) | .name = "woodpecker-server"' \
+		${DIST_DIR}/base.go.spdx.json ${DIST_DIR}/server-deps.spdx.json > ${DIST_DIR}/server-go.spdx.json
+	@echo ""
+	@echo "=== Combining Server + WebUI ==="
+	@jq -s '{SPDXID: "SPDXRef-DOCUMENT", spdxVersion: .[0].spdxVersion, creationInfo: .[0].creationInfo, name: "woodpecker-server", dataLicense: .[0].dataLicense, documentNamespace: (.[0].documentNamespace | sub("server"; "server-combined")), packages: (.[0].packages + .[1].packages), relationships: (.[0].relationships + .[1].relationships)}' \
+		${DIST_DIR}/server-go.spdx.json ${DIST_DIR}/webui.spdx.json > ${DIST_DIR}/server.spdx.json
+	@echo ""
+	@echo "=== Package Counts ==="
+	@echo "Base (all go.mod):  $$(jq '.packages | length' ${DIST_DIR}/base.go.spdx.json) packages"
+	@echo "CLI binary:         $$(jq '.packages | length' ${DIST_DIR}/cli.spdx.json) packages"
+	@echo "Agent binary:       $$(jq '.packages | length' ${DIST_DIR}/agent.spdx.json) packages"
+	@echo "Server binary (Go): $$(jq '.packages | length' ${DIST_DIR}/server-go.spdx.json) packages"
+	@echo "Server WebUI:       $$(jq '.packages | length' ${DIST_DIR}/webui.spdx.json) packages"
+	@echo "Server (combined):  $$(jq '.packages | length' ${DIST_DIR}/server.spdx.json) packages"
+	@echo ""
+	@echo "=== License Coverage ==="
+	@echo "CLI with licenses:    $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' ${DIST_DIR}/cli.spdx.json)/$$(jq '.packages | length' ${DIST_DIR}/cli.spdx.json)"
+	@echo "Agent with licenses:  $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' ${DIST_DIR}/agent.spdx.json)/$$(jq '.packages | length' ${DIST_DIR}/agent.spdx.json)"
+	@echo "Server with licenses: $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' ${DIST_DIR}/server.spdx.json)/$$(jq '.packages | length' ${DIST_DIR}/server.spdx.json)"
+	@echo ""
+	@echo "=== License Distribution (Server) ==="
+	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' ${DIST_DIR}/server.spdx.json
+	@echo ""
+	@echo "=== License Distribution (Agent) ==="
+	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' ${DIST_DIR}/agent.spdx.json
+	@echo ""
+	@echo "=== License Distribution (CLI) ==="
+	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' ${DIST_DIR}/cli.spdx.json
+	@echo ""
+	@echo "=== Cleaning up intermediate files ==="
+	@rm -f ${DIST_DIR}/cli-deps.spdx.json ${DIST_DIR}/agent-deps.spdx.json ${DIST_DIR}/server-deps.spdx.json ${DIST_DIR}/server-go.spdx.json
 
 endif
