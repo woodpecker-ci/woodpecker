@@ -42,7 +42,7 @@ type Agent struct {
 	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
 	// RepoID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
 	RepoID int64 `json:"repo_id"       xorm:"INDEX 'repo_id'"`
-} //	@name Agent
+} //	@name	Agent
 
 const (
 	IDNotSet = -1

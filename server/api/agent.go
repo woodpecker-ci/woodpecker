@@ -415,15 +415,15 @@ func DeleteOrgAgent(c *gin.Context) {
 
 // PostRepoAgent
 //
-//	@Summary	Create a new repository-scoped agent
-//	@Description Creates a new agent with a random token, scoped to the specified repository
-//	@Router		/repos/{repo_id}/agents [post]
-//	@Produce	json
-//	@Success	200	{object}	Agent
-//	@Tags		Agents
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository's id"
-//	@Param		agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
+//	@Summary		Create a new repository-scoped agent
+//	@Description	Creates a new agent with a random token, scoped to the specified repository
+//	@Router			/repos/{repo_id}/agents [post]
+//	@Produce		json
+//	@Success		200	{object}	Agent
+//	@Tags			Agents
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			repo_id			path	int		true	"the repository's id"
+//	@Param			agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
 func PostRepoAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
@@ -459,7 +459,7 @@ func PostRepoAgent(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{array}	Agent
 //	@Tags		Agents
-//	@Param		Authorization	header	string	true	"Insert your personal access token"				default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository's id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)

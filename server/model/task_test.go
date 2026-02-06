@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
@@ -36,13 +37,12 @@ func TestTask_GetLabels(t *testing.T) {
 		task := &Task{}
 		repo := &Repo{}
 
-		err := task.ApplyLabelsFromRepo(repo)
-
-		assert.NoError(t, err)
+		require.NoError(t, task.ApplyLabelsFromRepo(repo))
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
 			pipeline.LabelFilterRepo: "",
 			pipeline.LabelFilterOrg:  "0",
+			pipeline.LabelRepoID:     "0",
 		}, task.Labels)
 	})
 
@@ -54,13 +54,12 @@ func TestTask_GetLabels(t *testing.T) {
 			OrgID:    456,
 		}
 
-		err := task.ApplyLabelsFromRepo(repo)
-
-		assert.NoError(t, err)
+		require.NoError(t, task.ApplyLabelsFromRepo(repo))
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
 			pipeline.LabelFilterRepo: "test/repo",
 			pipeline.LabelFilterOrg:  "456",
+			pipeline.LabelRepoID:     "123",
 		}, task.Labels)
 	})
 
@@ -76,14 +75,13 @@ func TestTask_GetLabels(t *testing.T) {
 			OrgID:    456,
 		}
 
-		err := task.ApplyLabelsFromRepo(repo)
-
-		assert.NoError(t, err)
+		require.NoError(t, task.ApplyLabelsFromRepo(repo))
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
 			"existing":               "label",
 			pipeline.LabelFilterRepo: "test/repo",
 			pipeline.LabelFilterOrg:  "456",
+			pipeline.LabelRepoID:     "123",
 		}, task.Labels)
 	})
 }
