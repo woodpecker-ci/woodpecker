@@ -54,10 +54,7 @@
 ### 📦️ Dependency
 
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.28.0 [[#6069](https://github.com/woodpecker-ci/woodpecker/pull/6069)]
-- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.27.0 [[#6065](https://github.com/woodpecker-ci/woodpecker/pull/6065)]
-- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.26.0 [[#6063](https://github.com/woodpecker-ci/woodpecker/pull/6063)]
 - fix(deps): update golang-packages [[#6058](https://github.com/woodpecker-ci/woodpecker/pull/6058)]
-- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.25.0 [[#6053](https://github.com/woodpecker-ci/woodpecker/pull/6053)]
 - chore(deps): lock file maintenance [[#6054](https://github.com/woodpecker-ci/woodpecker/pull/6054)]
 - chore(deps): update dependency simple-icons to v16.7.0 [[#6051](https://github.com/woodpecker-ci/woodpecker/pull/6051)]
 - fix(deps): update module github.com/google/go-github/v81 to v82 [[#6047](https://github.com/woodpecker-ci/woodpecker/pull/6047)]
@@ -66,27 +63,26 @@
 - chore(deps): update dependency vue-tsc to v3.2.4 [[#6044](https://github.com/woodpecker-ci/woodpecker/pull/6044)]
 - fix(deps): update golang-packages [[#6042](https://github.com/woodpecker-ci/woodpecker/pull/6042)]
 - fix(deps): update golang-packages [[#6040](https://github.com/woodpecker-ci/woodpecker/pull/6040)]
-- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.21.0 [[#6028](https://github.com/woodpecker-ci/woodpecker/pull/6028)]
 - fix(deps): update golang-packages [[#6026](https://github.com/woodpecker-ci/woodpecker/pull/6026)]
 - chore(deps): lock file maintenance [[#6014](https://github.com/woodpecker-ci/woodpecker/pull/6014)]
 - fix(deps): update golang-packages [[#6013](https://github.com/woodpecker-ci/woodpecker/pull/6013)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.8.1 [[#6006](https://github.com/woodpecker-ci/woodpecker/pull/6006)]
-- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.17.0 [[#6005](https://github.com/woodpecker-ci/woodpecker/pull/6005)]
 - chore(deps): update dependency simple-icons to v16.6.1 [[#6004](https://github.com/woodpecker-ci/woodpecker/pull/6004)]
 - chore(deps): update web npm deps non-major [[#6003](https://github.com/woodpecker-ci/woodpecker/pull/6003)]
 - chore(deps): update docker.io/mysql docker tag to v9.6.0 [[#6002](https://github.com/woodpecker-ci/woodpecker/pull/6002)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.8.1 [[#6001](https://github.com/woodpecker-ci/woodpecker/pull/6001)]
-- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.16.0 [[#5995](https://github.com/woodpecker-ci/woodpecker/pull/5995)]
 - chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.2 [[#5994](https://github.com/woodpecker-ci/woodpecker/pull/5994)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.6.2 [[#5989](https://github.com/woodpecker-ci/woodpecker/pull/5989)]
 - chore(deps): lock file maintenance [[#5990](https://github.com/woodpecker-ci/woodpecker/pull/5990)]
 - fix(deps): update module github.com/docker/cli to v29.1.5+incompatible [[#5986](https://github.com/woodpecker-ci/woodpecker/pull/5986)]
-- chore(deps): update dependency simple-icons to v16.6.0 [[#5987](https://github.com/woodpecker-ci/woodpecker/pull/5987)]
 - chore(deps): update dependency @antfu/eslint-config to v7 [[#5985](https://github.com/woodpecker-ci/woodpecker/pull/5985)]
 - chore(deps): update web npm deps non-major [[#5984](https://github.com/woodpecker-ci/woodpecker/pull/5984)]
 - chore(deps): update dependency golang to v1.25.6 [[#5981](https://github.com/woodpecker-ci/woodpecker/pull/5981)]
-- chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.2.1 [[#5980](https://github.com/woodpecker-ci/woodpecker/pull/5980)]
 - chore(deps): update pre-commit non-major [[#5949](https://github.com/woodpecker-ci/woodpecker/pull/5949)]
+
+### Misc
+
+- Ignore mocks for coverage [[#6074](https://github.com/woodpecker-ci/woodpecker/pull/6074)]
 
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
 
