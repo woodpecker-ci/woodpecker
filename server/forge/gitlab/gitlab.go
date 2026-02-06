@@ -362,8 +362,10 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].ID))),
-			Title: pullRequests[i].Title,
+			Index:    model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].ID))),
+			Title:    pullRequests[i].Title,
+			Labels:   pullRequests[i].Labels,
+			FromFork: pullRequests[i].TargetProjectID != pullRequests[i].SourceProjectID,
 		}
 	}
 	return result, err
@@ -379,7 +381,7 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	if err != nil {
 		return nil, err
 	}
-	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
+	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit.SHA}, gitlab.WithContext(ctx))
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{fileName}})
 	}
@@ -402,7 +404,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 	opts := &gitlab.ListTreeOptions{
 		ListOptions: gitlab.ListOptions{PerPage: defaultPerPage},
 		Path:        &path,
-		Ref:         &pipeline.Commit,
+		Ref:         &pipeline.Commit.SHA,
 		Recursive:   gitlab.Ptr(false),
 	}
 
@@ -450,7 +452,7 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
+	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit.SHA, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(workflow.State),
 		Description: gitlab.Ptr(common.GetPipelineStatusDescription(workflow.State)),
 		TargetURL:   gitlab.Ptr(common.GetPipelineStatusURL(repo, pipeline, workflow)),
@@ -629,6 +631,8 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	return &model.Commit{
 		SHA:      b.Commit.ID,
 		ForgeURL: b.Commit.WebURL,
+		Message:  b.Commit.Message,
+		Author:   model.CommitAuthor{Name: b.Commit.AuthorName, Email: b.Commit.AuthorEmail},
 	}, nil
 }
 
@@ -667,7 +671,16 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
 	case *gitlab.ReleaseEvent:
-		return convertReleaseHook(event)
+		repo, pipeline, err := convertReleaseHook(event)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if pipeline, err = g.loadReleaseAuthor(ctx, repo, pipeline); err != nil {
+			return nil, nil, err
+		}
+
+		return repo, pipeline, nil
 	default:
 		return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType)}
 	}
@@ -824,8 +837,46 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		if err != nil {
 			return nil, err
 		}
-		pipeline.PullRequestMilestone = milestone.Title
+		pipeline.PullRequest.Milestone = milestone.Title
 	}
+
+	return pipeline, nil
+}
+
+func (g *GitLab) loadReleaseAuthor(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return pipeline, nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(g.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	release, _, err := client.Releases.GetRelease(_repo.ID, strings.TrimPrefix(pipeline.Ref, "refs/tags/"), gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	pipeline.Author = release.Author.Username
+	pipeline.AuthorAvatar = release.Author.AvatarURL
 
 	return pipeline, nil
 }
