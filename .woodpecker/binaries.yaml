@@ -77,6 +77,33 @@ steps:
     commands:
       - make bundle
 
+  build-sbom-trivy: # same as make sbom-trivy
+    image: ghcr.io/aquasecurity/trivy
+    commands:
+      - trivy fs --scanners license --license-full --format spdx-json -o dist/base.go.spdx.json go.mod
+      - trivy fs --scanners license --license-full --format spdx-json -o dist/webui.spdx.json web/pnpm-lock.yaml
+
+  build-sbom-syft: # same as make sbom-syft
+    depends_on:
+      - cross-compile-server
+      - build-agent
+      - build-cli
+    image: *golang_image
+    commands:
+      - curl -sSfL https://get.anchore.io/syft | sh -s -- -b /usr/local/bin
+      - syft scan file:dist/server/linux_amd64/woodpecker-server -o spdx-json > dist/server-deps.spdx.json
+      - syft scan file:dist/agent/linux_amd64/woodpecker-agent -o spdx-json   > dist/agent-deps.spdx.json
+      - syft scan file:dist/cli/linux_amd64/woodpecker-cli -o spdx-json       > dist/cli-deps.spdx.json
+
+  build-sbom:
+    depends_on:
+      - build-sbom-trivy
+      - build-sbom-syft
+    image: *golang_image
+    commands:
+      - apt update; apt install -y jq
+      - make sbom-calc sbom-clean
+
   checksums:
     depends_on:
       - cross-compile-server
@@ -84,6 +111,7 @@ steps:
       - build-cli
       - build-deb-rpm
       - build-tarball
+      - build-sbom
     image: *golang_image
     commands:
       - make release-checksums
@@ -108,6 +136,7 @@ steps:
         - dist/*.zip
         - dist/*.deb
         - dist/*.rpm
+        - dist/*.spdx.json
         - dist/checksums.txt
       title: ${CI_COMMIT_TAG##v}
     when:
