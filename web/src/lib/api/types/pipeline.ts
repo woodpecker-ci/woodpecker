@@ -92,6 +92,8 @@ export interface Pipeline {
   workflows?: PipelineWorkflow[];
 
   changed_files?: string[];
+
+  cancel_info: CancelInfo;
 }
 
 export type PipelineStatus =

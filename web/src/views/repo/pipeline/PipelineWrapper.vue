@@ -87,8 +87,7 @@
                 class="hover:underline"
                 >{{
                   $t('repo.pipeline.cancel_info.superseded_by', { pipelineId: pipeline.cancel_info.superseded_by })
-                }}</router-link
-              >
+                }}</router-link>
             </template>
             <template v-else-if="pipeline.cancel_info.canceled_by_user">
               {{ $t('repo.pipeline.cancel_info.canceled_by_user', { user: pipeline.cancel_info.canceled_by_user }) }}

@@ -89,5 +89,5 @@ type PipelineOptions struct {
 
 type CancelInfo struct {
 	CanceledByUser string `json:"canceled_by_user,omitempty"`
-	SupersededBy int64  `json:"superseded_by,omitempty"`
+	SupersededBy   int64  `json:"superseded_by,omitempty"`
 } //	@name	CancelInfo
