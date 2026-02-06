@@ -83,6 +83,7 @@
 
 ### Misc
 
+- Add some tests [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
 - Ignore mocks for coverage [[#6074](https://github.com/woodpecker-ci/woodpecker/pull/6074)]
 
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
