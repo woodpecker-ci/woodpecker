@@ -25,7 +25,7 @@ type (
 		Workspace Workspace         `yaml:"workspace,omitempty"`
 		Clone     ContainerList     `yaml:"clone,omitempty"`
 		Steps     ContainerList     `yaml:"steps,omitempty"`
-		Services  ContainerList     `yaml:"services,omitempty"`
+		Services  ContainerMap      `yaml:"services,omitempty"`
 		Labels    map[string]string `yaml:"labels,omitempty"`
 		DependsOn []string          `yaml:"depends_on,omitempty"`
 		RunsOn    []string          `yaml:"runs_on,omitempty"`
