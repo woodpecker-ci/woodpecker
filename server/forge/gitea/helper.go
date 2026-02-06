@@ -64,7 +64,7 @@ func toPerm(from *gitea.Permission) *model.Perm {
 // toTeam converts a Gitea team to a Woodpecker team.
 func toTeam(from *gitea.Organization, link string) *model.Team {
 	return &model.Team{
-		Login:  from.UserName,
+		Login:  from.Name,
 		Avatar: expandAvatar(link, from.AvatarURL),
 	}
 }
@@ -150,8 +150,17 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	)
 
 	event := model.EventPull
-	if hook.Action == actionClose {
+	switch hook.Action {
+	case actionClose:
 		event = model.EventPullClosed
+	case actionEdited,
+		actionLabelUpdate,
+		actionLabelCleared,
+		actionMilestoned,
+		actionDeMilestoned,
+		actionAssigned,
+		actionUnAssigned:
+		event = model.EventPullMetadata
 	}
 
 	pipeline := &model.Pipeline{
@@ -170,11 +179,23 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
-		FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+		PullRequestLabels:    convertLabels(hook.PullRequest.Labels),
+		PullRequestMilestone: convertMilestone(hook.PullRequest.Milestone),
+		FromFork:             hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+	}
+
+	if pipeline.Event == model.EventPullMetadata {
+		pipeline.EventReason = []string{hook.Action}
 	}
 
 	return pipeline
+}
+
+func convertMilestone(milestone *gitea.Milestone) string {
+	if milestone == nil || milestone.ID == 0 {
+		return ""
+	}
+	return milestone.Title
 }
 
 func pipelineFromRelease(hook *releaseHook) *model.Pipeline {

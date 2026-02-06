@@ -15,7 +15,6 @@
 package cron
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -23,19 +22,19 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
-	mocks_forge "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	mocks_manager "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestCreatePipeline(t *testing.T) {
-	_manager := mocks_manager.NewManager(t)
-	_forge := mocks_forge.NewForge(t)
-	store := mocks_store.NewStore(t)
-	ctx := context.Background()
+	_manager := manager_mocks.NewMockManager(t)
+	_forge := forge_mocks.NewMockForge(t)
+	store := store_mocks.NewMockStore(t)
+	ctx := t.Context()
 
-	creator := &model.User{
+	repoUser := &model.User{
 		ID:    1,
 		Login: "user1",
 	}
@@ -45,12 +44,13 @@ func TestCreatePipeline(t *testing.T) {
 		Owner:    "owner1",
 		FullName: "repo1/owner1",
 		Branch:   "default",
+		UserID:   repoUser.ID,
 	}
 
 	// mock things
 	store.On("GetRepo", mock.Anything).Return(repo1, nil)
-	store.On("GetUser", mock.Anything).Return(creator, nil)
-	_forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return(&model.Commit{
+	store.On("GetUser", mock.Anything).Return(repoUser, nil)
+	_forge.On("BranchHead", mock.Anything, repoUser, repo1, "default").Return(&model.Commit{
 		ForgeURL: "https://example.com/sha1",
 		SHA:      "sha1",
 	}, nil)

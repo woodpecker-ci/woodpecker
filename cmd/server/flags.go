@@ -21,6 +21,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
+	host_matcher "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
@@ -126,16 +127,25 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_ADMIN"),
 		Name:    "admin",
 		Usage:   "list of admin users",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ORGS"),
 		Name:    "orgs",
 		Usage:   "list of approved organizations",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_REPO_OWNERS"),
 		Name:    "repo-owners",
 		Usage:   "Repositories by those owners will be allowed to be used in woodpecker",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_OPEN"),
@@ -153,11 +163,20 @@ var flags = append([]cli.Flag{
 		Usage:   "The default value for allowing pull requests on a repo.",
 		Value:   true,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_APPROVAL_MODE"),
+		Name:    "default-approval-mode",
+		Usage:   "The default value for allowing pull requests on a repo.",
+		Value:   "forks",
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"),
 		Name:    "default-cancel-previous-pipeline-events",
 		Usage:   "List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.",
 		Value:   []string{"push", "pull_request"},
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_PLUGIN", "WOODPECKER_DEFAULT_CLONE_IMAGE"),
@@ -166,13 +185,13 @@ var flags = append([]cli.Flag{
 		Usage:   "The default docker image to be used when cloning the repo",
 		Value:   constant.DefaultClonePlugin,
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"),
 		Name:    "default-pipeline-timeout",
 		Usage:   "The default time in minutes for a repo in minutes before a pipeline gets killed",
 		Value:   60,
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_MAX_PIPELINE_TIMEOUT"),
 		Name:    "max-pipeline-timeout",
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
@@ -182,6 +201,9 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_WORKFLOW_LABELS"),
 		Name:    "default-workflow-labels",
 		Usage:   "The default label filter to set for workflows that has no label filter set. By default workflows will be allowed to run on any agent, if not specified in the workflow.",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_SESSION_EXPIRES"),
@@ -193,16 +215,25 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "plugins-privileged",
 		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 		Name:    "plugins-trusted-clone",
 		Usage:   "Plugins which are trusted to handle Git credentials in clone steps",
 		Value:   constant.TrustedClonePlugins,
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUME"),
 		Name:    "volume",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DOCKER_CONFIG"),
@@ -211,10 +242,16 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ENVIRONMENT"),
 		Name:    "environment",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_NETWORK"),
 		Name:    "network",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -239,7 +276,18 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_SERVICE_ENDPOINT"),
 		Name:    "config-service-endpoint",
-		Usage:   "url used for calling configuration service endpoint",
+		Usage:   "url used for calling global configuration service endpoint",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_CONFIG_SERVICE_EXCLUSIVE"),
+		Name:    "config-service-exclusive",
+		Usage:   "whether global configuration service endpoint should be exclusive (skip forge)",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
+		Name:    "extensions-allowed-hosts",
+		Usage:   "Hosts that are allowed to be contacted by extensions",
+		Value:   host_matcher.MatchBuiltinExternal,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DATABASE_DRIVER"),
@@ -300,13 +348,13 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE"),
 		Name:    "log-store",
-		Usage:   "log store to use ('database' or 'file')",
+		Usage:   "log store to use ('database', 'addon' or 'file')",
 		Value:   "database",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FILE_PATH"),
 		Name:    "log-store-file-path",
-		Usage:   "directory used for file based log storage",
+		Usage:   "directory used for file based log storage or addon executable file path",
 	},
 	//
 	// backend options for pipeline compiler
@@ -499,6 +547,11 @@ var flags = append([]cli.Flag{
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},
+	},
+	&cli.BoolFlag{ // TODO: Remove this feature flag in next major version
+		Sources: cli.EnvVars("WOODPECKER_BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN"),
+		Name:    "bitbucket-dc-oauth-enable-oauth2-scope-project-admin",
+		Usage:   "Bitbucket DataCenter/Server oauth2 scope should be configured to include PROJECT_ADMIN configuration.",
 	},
 	//
 	// development flags

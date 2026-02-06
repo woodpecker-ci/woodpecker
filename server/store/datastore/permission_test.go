@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestPermFind(t *testing.T) {
@@ -40,7 +41,6 @@ func TestPermFind(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo,
 			Pull:   true,
 			Push:   false,
 			Admin:  false,
@@ -73,7 +73,6 @@ func TestPermUpsert(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo,
 			Pull:   true,
 			Push:   false,
 			Admin:  false,
@@ -96,7 +95,6 @@ func TestPermUpsert(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo,
 			Pull:   true,
 			Push:   true,
 			Admin:  true,
@@ -109,4 +107,84 @@ func TestPermUpsert(t *testing.T) {
 	assert.True(t, perm.Pull)
 	assert.True(t, perm.Push)
 	assert.True(t, perm.Admin)
+}
+
+func TestPermPruneDeleteAll(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
+	defer closer()
+
+	user := &model.User{ID: 1}
+
+	repo1 := &model.Repo{
+		UserID:        1,
+		FullName:      "woodpecker-ci/woodpecker1",
+		Owner:         "woodpecker-ci",
+		Name:          "repo1",
+		ForgeRemoteID: "101",
+	}
+	repo2 := &model.Repo{
+		UserID:        1,
+		FullName:      "woodpecker-ci/woodpecker2",
+		Owner:         "woodpecker",
+		Name:          "repo2",
+		ForgeRemoteID: "102",
+	}
+	assert.NoError(t, store.CreateRepo(repo1))
+	assert.NoError(t, store.CreateRepo(repo2))
+
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo1.ID, Pull: true}))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo2.ID, Pull: true}))
+
+	_, err := store.PermFind(user, repo1)
+	assert.NoError(t, err)
+	_, err = store.PermFind(user, repo2)
+	assert.NoError(t, err)
+
+	assert.NoError(t, store.PermPrune(user.ID, []int64{}))
+
+	_, err = store.PermFind(user, repo1)
+	assert.ErrorIs(t, err, types.RecordNotExist)
+	_, err = store.PermFind(user, repo2)
+	assert.ErrorIs(t, err, types.RecordNotExist)
+}
+
+func TestPermPruneKeepOne(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
+	defer closer()
+
+	user := &model.User{ID: 1}
+
+	repo1 := &model.Repo{
+		UserID:        1,
+		FullName:      "woodpecker-ci/woodpecker1",
+		Owner:         "woodpecker-ci",
+		Name:          "repo1",
+		ForgeRemoteID: "101",
+	}
+	repo2 := &model.Repo{
+		UserID:        1,
+		FullName:      "woodpecker-ci/woodpecker2",
+		Owner:         "woodpecker",
+		Name:          "repo2",
+		ForgeRemoteID: "102",
+	}
+	assert.NoError(t, store.CreateRepo(repo1))
+	assert.NoError(t, store.CreateRepo(repo2))
+
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo1.ID, Pull: true}))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo2.ID, Pull: true}))
+
+	_, err := store.PermFind(user, repo1)
+	assert.NoError(t, err)
+	_, err = store.PermFind(user, repo2)
+	assert.NoError(t, err)
+
+	// Prune everything EXCEPT repo2
+	assert.NoError(t, store.PermPrune(user.ID, []int64{repo2.ID}))
+
+	_, err = store.PermFind(user, repo1)
+	assert.ErrorIs(t, err, types.RecordNotExist)
+
+	_, err = store.PermFind(user, repo2)
+	assert.NoError(t, err)
 }

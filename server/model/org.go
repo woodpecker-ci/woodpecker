@@ -22,7 +22,7 @@ type Org struct {
 	IsUser  bool   `json:"is_user"            xorm:"is_user"`
 	// if name lookup has to check for membership or not
 	Private bool `json:"-"                    xorm:"private"`
-} //	@name Org
+} //	@name	Org
 
 // TableName return database table name for xorm.
 func (Org) TableName() string {

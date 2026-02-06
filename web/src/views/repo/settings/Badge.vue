@@ -30,6 +30,21 @@
     <InputField v-slot="{ id }" :label="$t('repo.settings.badge.branch')">
       <SelectField :id="id" v-model="branch" :options="branches" required />
     </InputField>
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.events')">
+      <CheckboxesField
+        :id="id"
+        v-model="events"
+        :options="badgeEventsOptions"
+        :disabled="isDisabled"
+        @update:model-value="eventsChanged"
+      />
+    </InputField>
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.workflow')">
+      <TextField :id="id" v-model="workflow" />
+    </InputField>
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.step')">
+      <TextField :id="id" v-model="step" />
+    </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
       <div>
@@ -41,36 +56,35 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import { computed, inject, onMounted, ref, watch } from 'vue';
-import type { Ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import type { SelectOption } from '~/components/form/form.types';
+import CheckboxesField from '~/components/form/CheckboxesField.vue';
+import type { CheckboxOption, SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
+import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
-import type { Repo } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
+import { WebhookEvents } from '~/lib/api/types';
 
 const apiClient = useApiClient();
-const repo = inject<Ref<Repo>>('repo');
+const repo = requiredInject('repo');
 
 const badgeType = useStorage('woodpecker:last-badge-type', 'markdown');
-
-if (!repo) {
-  throw new Error('Unexpected: "repo" should be provided at this place');
-}
 
 const defaultBranch = computed(() => repo.value.default_branch);
 const branches = ref<SelectOption[]>([]);
 const branch = ref<string>('');
+const events = ref<string[]>([WebhookEvents.Push]);
+const workflow = ref<string>('');
+const step = ref<string>('');
 
 async function loadBranches() {
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
-  }
-
   branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
     .map((b) => ({
       value: b,
@@ -87,19 +101,36 @@ const baseUrl = `${window.location.protocol}//${window.location.hostname}${
   window.location.port ? `:${window.location.port}` : ''
 }`;
 const { rootPath } = useConfig();
-const badgeUrl = computed(
-  () => `${rootPath}/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
-);
+const badgeUrl = computed(() => {
+  const params = [];
+
+  if (branch.value !== '') {
+    params.push(`branch=${encodeURIComponent(branch.value)}`);
+  }
+
+  if (events.value.length > 0) {
+    // dont set events parameters, if only WebhookEvents.Push is selected, as this is the default behaviour
+    if (events.value.length !== 1 || events.value.at(0) !== WebhookEvents.Push) {
+      params.push(`events=${encodeURIComponent(events.value.join(','))}`);
+    }
+  }
+
+  if (workflow.value.trim().length > 0) {
+    params.push(`workflow=${encodeURIComponent(workflow.value.trim())}`);
+
+    if (step.value.trim().length > 0) {
+      params.push(`step=${encodeURIComponent(step.value.trim())}`);
+    }
+  }
+
+  return `${rootPath}/api/badges/${repo.value.id}/status.svg${params.length > 0 ? `?${params.join('&')}` : ''}`;
+});
 const repoUrl = computed(
   () =>
     `${rootPath}/repos/${repo.value.id}${branch.value !== '' ? `/branches/${encodeURIComponent(branch.value)}` : ''}`,
 );
 
 const badgeContent = computed(() => {
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
-  }
-
   if (badgeType.value === 'url') {
     return `${baseUrl}${badgeUrl.value}`;
   }
@@ -109,7 +140,7 @@ const badgeContent = computed(() => {
   }
 
   if (badgeType.value === 'html') {
-    return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${badgeUrl.value}" alt="status-badge" />\n</a>`;
+    return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${badgeUrl.value.replace('&', '&amp;')}" alt="status-badge" />\n</a>`;
   }
 
   return '';
@@ -121,5 +152,38 @@ onMounted(() => {
 
 watch(repo, () => {
   loadBranches();
+});
+
+const { t } = useI18n();
+
+const badgeEventsOptions: CheckboxOption[] = [
+  { value: WebhookEvents.Push, text: t('repo.pipeline.event.push'), description: t('default') },
+  { value: WebhookEvents.Tag, text: t('repo.pipeline.event.tag') },
+  { value: WebhookEvents.Release, text: t('repo.pipeline.event.release') },
+  { value: WebhookEvents.PullRequest, text: t('repo.pipeline.event.pr') },
+  { value: WebhookEvents.PullRequestClosed, text: t('repo.pipeline.event.pr_closed') },
+  { value: WebhookEvents.PullRequestMetadata, text: t('repo.pipeline.event.pr_metadata') },
+  { value: WebhookEvents.Deploy, text: t('repo.pipeline.event.deploy') },
+  { value: WebhookEvents.Cron, text: t('repo.pipeline.event.cron') },
+  { value: WebhookEvents.Manual, text: t('repo.pipeline.event.manual') },
+];
+
+useWPTitle(computed(() => [t('repo.settings.badge.badge'), repo.value.full_name]));
+
+function eventsChanged() {
+  if (events.value.length === 0) {
+    events.value.push(WebhookEvents.Push);
+  }
+}
+
+const isDisabled = computed(() => {
+  return (option: CheckboxOption) => {
+    if (events.value.length === 1 && events.value[0] === WebhookEvents.Push) {
+      // disable Push checkbox if only Push is selected because it's the default
+      return option.value === WebhookEvents.Push;
+    } else {
+      return false;
+    }
+  };
 });
 </script>

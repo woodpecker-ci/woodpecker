@@ -1,0 +1,10 @@
+{
+  "key": "ci/woodpecker/push/build",
+  "state": "SUCCESSFUL",
+  "url": "/repos/1/pipeline/42/1",
+  "dateAdded": 1759825800000,
+  "description": "Pipeline was successful",
+  "duration": 83000,
+  "parent": "ci/woodpecker/push/build",
+  "ref": "refs/heads/feature-branch"
+}

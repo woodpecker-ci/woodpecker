@@ -18,6 +18,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
@@ -69,7 +71,7 @@ func TestParse(t *testing.T) {
 		assert.Empty(t, out.Steps.ContainerList[0].When.Constraints)
 		assert.Equal(t, "notify_success", out.Steps.ContainerList[1].Name)
 		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[1].Image)
-		assert.Equal(t, yaml_base_types.StringOrSlice{"success"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
+		assert.Equal(t, yaml_base_types.StringOrSlice{"push"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
 	})
 }
 
@@ -148,14 +150,10 @@ pipeline:
 `
 
 	workflow1, err := ParseString(sampleYamlPipeline)
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	assert.EqualValues(t, workflow1, workflow2)
 	assert.Len(t, workflow1.Steps.ContainerList, 1)
@@ -170,9 +168,6 @@ when:
     - tester2
   - branch:
     - tester
-build:
-  context: .
-  dockerfile: Dockerfile
 workspace:
   path: src/github.com/octocat/hello-world
   base: /go
@@ -184,14 +179,15 @@ steps:
       - go test
   build:
     image: golang
-    network_mode: container:name
     commands:
       - go build
     when:
       event: push
+    depends_on: []
   notify:
     image: slack
-    channel: dev
+    settings:
+      channel: dev
     when:
       event: failure
 services:
@@ -217,38 +213,129 @@ steps:
 `
 
 var sampleVarYaml = `
-_slack: &SLACK
+variables: &SLACK
   image: plugins/slack
 steps:
   notify_fail: *SLACK
   notify_success:
     << : *SLACK
     when:
-      event: success
+      event: push
+  echo:
+    when:
+    - path: wow.sh
+      repo: "test"
+      branch:
+        exclude: main
+    - path:
+      - test.yaml
+      - test.zig
+    - path:
+        exclude: a
+        on_empty: true
+    - ref: ref/tags/v1
+      path:
+  env:
+    image: print
+    environment:
+      DRIVER: next
+      PLATFORM: linux
 `
 
-var sampleSliceYaml = `
+func TestReSerialize(t *testing.T) {
+	work1, err := ParseString(sampleVarYaml)
+	require.NoError(t, err)
+
+	work1Bin, err := yaml.Marshal(work1)
+	require.NoError(t, err)
+
+	assert.EqualValues(t, `steps:
+    - name: notify_fail
+      image: plugins/slack
+    - name: notify_success
+      image: plugins/slack
+      when:
+        event: push
+    - name: echo
+      when:
+        - repo: test
+          branch:
+            exclude: main
+          path: wow.sh
+        - path:
+            - test.yaml
+            - test.zig
+        - path:
+            exclude: a
+        - ref: ref/tags/v1
+    - name: env
+      image: print
+      environment:
+        DRIVER: next
+        PLATFORM: linux
+skip_clone: false
+`, string(work1Bin))
+
+	work2, err := ParseString(sampleYaml)
+	require.NoError(t, err)
+
+	workBin2, err := yaml.Marshal(work2)
+	require.NoError(t, err)
+
+	// TODO: fix "steps.[1].depends_on: []" to be re-serialized!
+	assert.EqualValues(t, `when:
+    - event:
+        - tester
+        - tester2
+    - branch: tester
+workspace:
+    base: /go
+    path: src/github.com/octocat/hello-world
 steps:
-  nil_slice:
-    image: plugins/slack
-  empty_slice:
-    image: plugins/slack
-    depends_on: []
-`
+    - name: test
+      image: golang
+      commands:
+        - go install
+        - go test
+    - name: build
+      image: golang
+      commands: go build
+      when:
+        event: push
+    - name: notify
+      image: slack
+      settings:
+        channel: dev
+      when:
+        event: failure
+services:
+    - name: database
+      image: mysql
+labels:
+    com.example.team: frontend
+    com.example.type: build
+depends_on:
+    - lint
+    - test
+runs_on:
+    - success
+    - failure
+skip_clone: false
+`, string(workBin2))
+}
 
 func TestSlice(t *testing.T) {
-	t.Run("should marshal a not set slice to nil", func(t *testing.T) {
-		out, err := ParseString(sampleSliceYaml)
-		assert.NoError(t, err)
+	out, err := ParseString(sampleYaml)
+	require.NoError(t, err)
 
+	t.Run("should marshal a not set slice to nil", func(t *testing.T) {
+		assert.Equal(t, "test", out.Steps.ContainerList[0].Name)
 		assert.Nil(t, out.Steps.ContainerList[0].DependsOn)
 		assert.Empty(t, out.Steps.ContainerList[0].DependsOn)
 	})
 
 	t.Run("should marshal an empty slice", func(t *testing.T) {
-		out, err := ParseString(sampleSliceYaml)
-		assert.NoError(t, err)
-
+		assert.Equal(t, "build", out.Steps.ContainerList[1].Name)
 		assert.NotNil(t, out.Steps.ContainerList[1].DependsOn)
 		assert.Empty(t, (out.Steps.ContainerList[1].DependsOn))
 	})

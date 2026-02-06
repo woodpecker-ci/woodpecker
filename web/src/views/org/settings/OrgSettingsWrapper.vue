@@ -14,7 +14,7 @@
     <Tab icon="secret" :to="{ name: 'org-settings-secrets' }" :title="$t('secrets.secrets')" />
     <Tab icon="docker" :to="{ name: 'org-settings-registries' }" :title="$t('registries.registries')" />
     <Tab
-      v-if="useConfig().userRegisteredAgents"
+      v-if="userRegisteredAgents"
       icon="agent"
       :to="{ name: 'org-settings-agents' }"
       :title="$t('admin.settings.agents.agents')"
@@ -32,7 +32,7 @@ import { useRouter } from 'vue-router';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import useConfig from '~/compositions/useConfig';
-import { inject } from '~/compositions/useInjectProvide';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';
 
@@ -40,8 +40,10 @@ const notifications = useNotifications();
 const router = useRouter();
 const i18n = useI18n();
 
-const org = inject('org');
-const orgPermissions = inject('org-permissions');
+const { userRegisteredAgents } = useConfig();
+
+const org = requiredInject('org');
+const orgPermissions = requiredInject('org-permissions');
 
 onMounted(async () => {
   if (!orgPermissions.value?.admin) {

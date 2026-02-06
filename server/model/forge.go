@@ -30,12 +30,12 @@ type Forge struct {
 	ID                int64          `json:"id"                           xorm:"pk autoincr 'id'"`
 	Type              ForgeType      `json:"type"                         xorm:"VARCHAR(250)"`
 	URL               string         `json:"url"                          xorm:"VARCHAR(500) 'url'"`
-	Client            string         `json:"client,omitempty"             xorm:"VARCHAR(250)"`
-	ClientSecret      string         `json:"-"                            xorm:"VARCHAR(250)"` // do not expose client secret
+	OAuthClientID     string         `json:"client,omitempty"             xorm:"VARCHAR(250) 'oauth_client_id'"`
+	OAuthClientSecret string         `json:"-"                            xorm:"VARCHAR(250) 'oauth_client_secret'"` // do not expose client secret
 	SkipVerify        bool           `json:"skip_verify,omitempty"        xorm:"bool"`
 	OAuthHost         string         `json:"oauth_host,omitempty"         xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
 	AdditionalOptions map[string]any `json:"additional_options,omitempty" xorm:"json"`
-} //	@name Forge
+} //	@name	Forge
 
 // TableName returns the database table name for xorm.
 func (Forge) TableName() string {
@@ -52,3 +52,9 @@ func (f *Forge) PublicCopy() *Forge {
 
 	return forge
 }
+
+// ForgeWithOAuthClientSecret allows to update the client secret.
+type ForgeWithOAuthClientSecret struct {
+	Forge
+	OAuthClientSecret string `json:"oauth_client_secret"`
+} //	@name	ForgeWithOAuthClientSecret

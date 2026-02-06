@@ -16,14 +16,15 @@ package woodpecker
 
 // Event values.
 const (
-	EventPush       = "push"
-	EventPull       = "pull_request"
-	EventPullClosed = "pull_request_closed"
-	EventTag        = "tag"
-	EventRelease    = "release"
-	EventDeploy     = "deployment"
-	EventCron       = "cron"
-	EventManual     = "manual"
+	EventPush         = "push"
+	EventPull         = "pull_request"
+	EventPullClosed   = "pull_request_closed"
+	EventPullMetadata = "pull_request_metadata"
+	EventTag          = "tag"
+	EventRelease      = "release"
+	EventDeploy       = "deployment"
+	EventCron         = "cron"
+	EventManual       = "manual"
 )
 
 // Status values.
@@ -59,3 +60,5 @@ const (
 	StepTypeCommands StepType = "commands"
 	StepTypeCache    StepType = "cache"
 )
+
+const defaultForgeID = 1

@@ -126,8 +126,8 @@ func SetPerm() gin.HandlerFunc {
 				_repo, err := _forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 				if err == nil {
 					log.Debug().Msgf("synced user permission for %s %s", user.Login, repo.FullName)
+					_repo.ForgeID = user.ForgeID
 					perm = _repo.Perm
-					perm.Repo = repo
 					perm.RepoID = repo.ID
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()

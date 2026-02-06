@@ -22,20 +22,22 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/containerd/errdefs"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/api/types/volume"
+	"github.com/docker/docker/client"
+	json_message "github.com/docker/docker/pkg/jsonmessage"
+	std_copy "github.com/docker/docker/pkg/stdcopy"
 	tls_config "github.com/docker/go-connections/tlsconfig"
-	"github.com/moby/moby/client"
-	json_message "github.com/moby/moby/pkg/jsonmessage"
-	std_copy "github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -91,7 +93,9 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 	}
 
 	return &http.Client{
-		Transport:     &http.Transport{TLSClientConfig: tlsConf},
+		Transport: httputil.NewUserAgentRoundTripper(
+			&http.Transport{TLSClientConfig: tlsConf},
+			"backend-docker"),
 		CheckRedirect: client.CheckRedirect,
 	}
 }
@@ -145,7 +149,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
-		Name:   conf.Volume.Name,
+		Name:   conf.Volume,
 		Driver: volumeDriver,
 	})
 	if err != nil {
@@ -156,7 +160,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	if e.info.OSType == "windows" {
 		networkDriver = networkDriverNAT
 	}
-	_, err = e.client.NetworkCreate(ctx, conf.Network.Name, network.CreateOptions{
+	_, err = e.client.NetworkCreate(ctx, conf.Network, network.CreateOptions{
 		Driver:     networkDriver,
 		EnableIPv6: &e.config.enableIPv6,
 	})
@@ -204,7 +208,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
 
 	_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
-	if client.IsErrNotFound(err) {
+	if errdefs.IsNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
 		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
@@ -247,14 +251,17 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+	log := log.Logger.With().Str("taskUUID", taskUUID).Str("stepUUID", step.UUID).Logger()
+	log.Trace().Msgf("wait for step %s", step.Name)
 
 	containerName := toContainerName(step)
 
 	wait, errC := e.client.ContainerWait(ctx, containerName, "")
 	select {
-	case <-wait:
-	case <-errC:
+	case resp := <-wait:
+		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
+	case err := <-errC:
+		log.Trace().Msgf("ContainerWait returned with err: %v", err)
 	}
 
 	info, err := e.client.ContainerInspect(ctx, containerName)
@@ -323,11 +330,11 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, task
 			}
 		}
 	}
-	if err := e.client.VolumeRemove(ctx, conf.Volume.Name, true); err != nil {
-		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume.Name)
+	if err := e.client.VolumeRemove(ctx, conf.Volume, true); err != nil {
+		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume)
 	}
-	if err := e.client.NetworkRemove(ctx, conf.Network.Name); err != nil {
-		log.Error().Err(err).Msgf("could not remove network '%s'", conf.Network.Name)
+	if err := e.client.NetworkRemove(ctx, conf.Network); err != nil {
+		log.Error().Err(err).Msgf("could not remove network '%s'", conf.Network)
 	}
 	return nil
 }

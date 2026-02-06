@@ -22,6 +22,7 @@
       v-if="!selectedRegistry"
       v-model="registries"
       :is-deleting="isDeleting"
+      :loading="loading"
       @edit="editRegistry"
       @delete="deleteRegistry"
     />
@@ -50,6 +51,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Registry } from '~/lib/api/types';
 
 const emptyRegistry: Partial<Registry> = {
@@ -69,7 +71,7 @@ async function loadRegistries(page: number): Promise<Registry[] | null> {
   return apiClient.getGlobalRegistryList({ page });
 }
 
-const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
+const { resetPage, data: registries, loading } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
 const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedRegistry.value) {
@@ -86,13 +88,13 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
     type: 'success',
   });
   selectedRegistry.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
   await apiClient.deleteGlobalRegistry(_registry.address);
   notifications.notify({ title: i18n.t('registries.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editRegistry(registry: Registry) {
@@ -102,4 +104,6 @@ function editRegistry(registry: Registry) {
 function showAddRegistry() {
   selectedRegistry.value = cloneDeep(emptyRegistry);
 }
+
+useWPTitle(computed(() => [i18n.t('registries.registries'), i18n.t('admin.settings.settings')]));
 </script>

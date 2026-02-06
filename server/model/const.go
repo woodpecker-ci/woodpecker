@@ -20,17 +20,18 @@ import (
 	"fmt"
 )
 
-type WebhookEvent string //	@name WebhookEvent
+type WebhookEvent string //	@name	WebhookEvent
 
 const (
-	EventPush       WebhookEvent = "push"
-	EventPull       WebhookEvent = "pull_request"
-	EventPullClosed WebhookEvent = "pull_request_closed"
-	EventTag        WebhookEvent = "tag"
-	EventRelease    WebhookEvent = "release"
-	EventDeploy     WebhookEvent = "deployment"
-	EventCron       WebhookEvent = "cron"
-	EventManual     WebhookEvent = "manual"
+	EventPush         WebhookEvent = "push"
+	EventPull         WebhookEvent = "pull_request"
+	EventPullClosed   WebhookEvent = "pull_request_closed"
+	EventPullMetadata WebhookEvent = "pull_request_metadata"
+	EventTag          WebhookEvent = "tag"
+	EventRelease      WebhookEvent = "release"
+	EventDeploy       WebhookEvent = "deployment"
+	EventCron         WebhookEvent = "cron"
+	EventManual       WebhookEvent = "manual"
 )
 
 type WebhookEventList []WebhookEvent
@@ -43,7 +44,7 @@ var ErrInvalidWebhookEvent = errors.New("invalid webhook event")
 
 func (s WebhookEvent) Validate() error {
 	switch s {
-	case EventPush, EventPull, EventPullClosed, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
+	case EventPush, EventPull, EventPullClosed, EventPullMetadata, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidWebhookEvent, s)
@@ -51,7 +52,7 @@ func (s WebhookEvent) Validate() error {
 }
 
 // StatusValue represent pipeline states woodpecker know.
-type StatusValue string //	@name StatusValue
+type StatusValue string //	@name	StatusValue
 
 const (
 	StatusSkipped  StatusValue = "skipped"  // skipped as another step failed
@@ -78,7 +79,7 @@ func (s StatusValue) Validate() error {
 }
 
 // RepoVisibility represent to what state a repo in woodpecker is visible to others.
-type RepoVisibility string //	@name RepoVisibility
+type RepoVisibility string //	@name	RepoVisibility
 
 const (
 	VisibilityPublic   RepoVisibility = "public"

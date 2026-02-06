@@ -26,10 +26,9 @@ import (
 )
 
 var secretUpdateCmd = &cli.Command{
-	Name:      "update",
-	Usage:     "update a secret",
-	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    secretUpdate,
+	Name:   "update",
+	Usage:  "update a secret",
+	Action: secretUpdate,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "name",
@@ -42,10 +41,16 @@ var secretUpdateCmd = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:  "event",
 			Usage: "secret limited to these events",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringSliceFlag{
 			Name:  "image",
 			Usage: "secret limited to these images",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 	},
 }

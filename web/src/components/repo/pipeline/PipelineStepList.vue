@@ -1,7 +1,7 @@
 <template>
   <div class="text-wp-text-100 flex w-full flex-col gap-2 pb-2 md:w-3/12 md:max-w-md md:min-w-xs">
     <div
-      class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 flex shrink-0 flex-wrap justify-between gap-1 rounded-md border p-4"
+      class="border-wp-background-400 dark:border-wp-background-100 bg-wp-background-200 flex shrink-0 flex-wrap justify-between gap-1 rounded-md border p-4"
     >
       <div class="flex shrink-0 items-center space-x-1">
         <div class="flex items-center">
@@ -11,7 +11,13 @@
         <span>{{ pipeline.author }}</span>
       </div>
       <a
-        v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
+        v-if="
+          // eslint-disable vue/html-indent
+          pipeline.event === 'pull_request' ||
+          pipeline.event === 'pull_request_closed' ||
+          pipeline.event === 'pull_request_metadata'
+          // eslint-enable vue/html-indent
+        "
         class="text-wp-link-100 hover:text-wp-link-200 flex min-w-0 items-center space-x-1"
         :href="pipeline.forge_url"
       >
@@ -59,7 +65,7 @@
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
-          class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 rounded-md border p-2 shadow-sm"
+          class="border-wp-background-400 dark:border-wp-background-100 bg-wp-background-200 rounded-md border p-2"
         >
           <div class="flex flex-col gap-2">
             <div v-if="workflow.environ" class="flex flex-wrap justify-end gap-x-1 gap-y-2 pt-1 pr-1 text-xs">
@@ -71,7 +77,7 @@
               v-if="!singleConfig"
               type="button"
               :title="workflow.name"
-              class="hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 flex cursor-pointer items-center gap-2 rounded-md px-1 py-2"
+              class="hover:bg-wp-control-neutral-200 flex cursor-pointer items-center gap-2 rounded-md px-1 py-2"
               @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
             >
               <Icon
@@ -94,12 +100,14 @@
           >
             <button
               v-for="step in workflow.children"
+              ref="steps"
               :key="step.pid"
+              :data-step-id="step.pid"
               type="button"
               :title="step.name"
-              class="hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 flex w-full cursor-pointer items-center gap-2 rounded-md border-2 border-transparent p-2"
+              class="hover:bg-wp-control-neutral-200 flex w-full cursor-pointer items-center gap-2 rounded-md border-2 border-transparent p-2"
               :class="{
-                'bg-wp-background-300 dark:bg-wp-background-400': selectedStepId && selectedStepId === step.pid,
+                'bg-wp-control-neutral-200': selectedStepId && selectedStepId === step.pid,
                 'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
               }"
               @click="$emit('update:selected-step-id', step.pid)"
@@ -116,17 +124,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref, toRef } from 'vue';
-import type { Ref } from 'vue';
+import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import usePipeline from '~/compositions/usePipeline';
 import { StepType } from '~/lib/api/types';
-import type { Pipeline, PipelineConfig, PipelineStep } from '~/lib/api/types';
+import type { Pipeline, PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -140,7 +148,7 @@ defineEmits<{
 const pipeline = toRef(props, 'pipeline');
 const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
-const pipelineConfigs = inject<Ref<PipelineConfig[]>>('pipeline-configs');
+const pipelineConfigs = requiredInject('pipeline-configs');
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
   pipeline.value.workflows && pipeline.value.workflows.length > 1
@@ -159,4 +167,18 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
 const singleConfig = computed(
   () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length === 1,
 );
+
+const steps = useTemplateRef('steps');
+watch(selectedStepId, async (newSelectedStepId, oldSelectedStepId) => {
+  if (!oldSelectedStepId && newSelectedStepId) {
+    await nextTick();
+    const step = steps.value?.find((s) => s.dataset.stepId === newSelectedStepId.toString());
+    if (step) {
+      step.scrollIntoView({
+        behavior: 'auto',
+        block: 'start',
+      });
+    }
+  }
+});
 </script>

@@ -1,8 +1,7 @@
 {
   "cancel": "Cancel",
-  "login_with": "Login with {forge}",
+  "login_to_woodpecker_with": "Login to Woodpecker with",
   "login": "Login",
-  "welcome": "Welcome to Woodpecker",
   "repos": "Repos",
   "repositories": {
     "title": "Repositories",
@@ -49,7 +48,8 @@
         "name": "Variable name",
         "value": "Variable value"
       },
-      "show_pipelines": "Show pipelines"
+      "show_pipelines": "Show pipelines",
+      "no_manual_workflows": "There were no manually executable workflows, or the filter exclude all of them."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
@@ -167,7 +167,8 @@
           "placeholder": "Schedule"
         },
         "edit": "Edit cron",
-        "delete": "Delete cron"
+        "delete": "Delete cron",
+        "enabled": "Enabled"
       },
       "badge": {
         "badge": "Badge",
@@ -175,7 +176,10 @@
         "type_url": "URL",
         "type_markdown": "Markdown",
         "type_html": "HTML",
-        "branch": "Branch"
+        "branch": "Branch",
+        "events": "Events",
+        "workflow": "Workflow",
+        "step": "Step"
       },
       "actions": {
         "actions": "Actions",
@@ -240,6 +244,7 @@
         "tag": "Tag",
         "pr": "Pull Request",
         "pr_closed": "Pull Request merged/closed",
+        "pr_metadata": "Pull Request metadata changed",
         "deploy": "Deploy",
         "cron": "Cron",
         "manual": "Manual",
@@ -262,7 +267,7 @@
       "warnings": "Warnings",
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, an error occurred!",
-      "duration": "Pipeline duration",
+      "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
       "debug": {
         "title": "Debug",
@@ -270,9 +275,10 @@
         "metadata_download_error": "Error downloading metadata",
         "metadata_download_successful": "Metadata downloaded successfully",
         "no_permission": "You are not allowed to access the debug information",
-        "metadata_exec_title": "Rerun pipeline locally",
-        "metadata_exec_desc": "Download this pipeline's metadata to run it locally. This allows you to troubleshoot issues and test changes before committing them. `woodpecker-cli` matching the Woodpecker Server version must be installed locally."
-      }
+        "metadata_exec_title": "Re-run pipeline locally",
+        "metadata_exec_desc": "Download the metadata of this pipeline to run it locally. This allows you to fix problems and test changes before committing them. The Woodpecker CLI must be installed locally in the same version as the server."
+      },
+      "view": "View pipeline"
     }
   },
   "org": {
@@ -291,6 +297,7 @@
   },
   "admin": {
     "settings": {
+      "settings": "Admin Settings",
       "not_allowed": "You are not allowed to access server settings",
       "secrets": {
         "desc": "Global secrets can be used in the pipelines of all repositories.",
@@ -341,7 +348,10 @@
           "badge": "org"
         },
         "version": "Version",
-        "last_contact": "Last contact",
+        "last_contact": {
+          "last_contact": "Last contact",
+          "badge": "last contact"
+        },
         "never": "Never",
         "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
         "edit_agent": "Edit agent",
@@ -457,6 +467,7 @@
     "show": "Show secrets",
     "name": "Name",
     "value": "Value",
+    "note": "Note",
     "delete_confirm": "Do you really want to delete this secret?",
     "deleted": "Secret deleted",
     "created": "Secret created",
@@ -512,6 +523,15 @@
   "access_denied": "You are not allowed to access this instance",
   "org_access_denied": "You are not allowed to access this organization",
   "invalid_state": "The OAuth state is invalid",
+  "extensions": "Extensions",
+  "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
+  "extension_endpoint_placeholder": "e.g. https://example.com/api",
+  "config_extension_endpoint": "Config extension endpoint",
+  "config_extension_exclusive": "Exclusive",
+  "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
+  "extensions_signatures_public_key": "Public key for signatures",
+  "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
+  "extensions_configuration_saved": "Extensions configuration saved",
   "require_approval": {
     "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution.",
     "require_approval_for": "Approval requirements",
@@ -525,5 +545,55 @@
       "desc": "Pipelines created by the listed users never require approval."
     }
   },
-  "no_search_results": "No results found"
+  "no_search_results": "No results found",
+  "forges": "Forges",
+  "forges_desc": "Configure forges hosting repositories Woodpecker should run for.",
+  "add_forge": "Add forge",
+  "show_forges": "Show forges",
+  "github": "GitHub",
+  "gitlab": "GitLab",
+  "bitbucket": "Bitbucket",
+  "bitbucket_dc": "Bitbucket Data Center",
+  "gitea": "Gitea",
+  "forgejo": "Forgejo",
+  "addon": "Addon",
+  "forge_type": "Forge type",
+  "oauth_client_id": "OAuth Client ID",
+  "oauth_client_secret": "OAuth Client Secret",
+  "oauth_host": "OAuth host",
+  "merge_ref": "Merge ref",
+  "merge_ref_desc": "Ref to use for merge base. This is used to determine the diff for pull requests.",
+  "public_only": "Public only",
+  "public_only_desc": "Only show public repositories.",
+  "git_username": "Git username",
+  "git_username_desc": "Username for the Git user.",
+  "git_password": "Git password",
+  "git_password_desc": "Password or personal access token for the Git user.",
+  "executable": "Executable",
+  "executable_desc": "Path to the addon executable.",
+  "save": "Save",
+  "add": "Add",
+  "skip_verify": "Skip SSL verification",
+  "skip_verify_desc": "Skip SSL verification for the API connection. This is not recommended for production use.",
+  "url": "URL",
+  "forge_managed_by_env": "The primary forge is managed by environment variables. Any changes to this forge will be reverted on a restart.",
+  "oauth_redirect_url": "OAuth redirect URL",
+  "forge_created": "Forge created",
+  "advanced_options": "Advanced options",
+  "leave_empty_to_keep_current_value": "Leave empty to keep current value",
+  "forge_deleted": "Forge deleted",
+  "forge_delete_confirm": "Do you really want to delete this forge? This will also delete all repositories, users and pipelines related to this forge.",
+  "edit_forge": "Edit forge",
+  "delete_forge": "Delete forge",
+  "no_forges": "There are no forges yet.",
+  "use_this_redirect_url_to_create": "Use this redirect URL to create or update the OAuth application.",
+  "developer_settings_to_create": "Go to the {0} and set up the OAuth application.",
+  "developer_settings": "developer settings",
+  "public_url_for_oauth_if": "Public URL for OAuth if different from URL ({0})",
+  "forge_saved": "Forge saved",
+  "fullscreen": "Fullscreen",
+  "exit_fullscreen": "Exit fullscreen",
+  "help_translating": "You can help translate Woodpecker into your language on {0}.",
+  "weblate": "our Weblate",
+  "disabled": "Disabled"
 }

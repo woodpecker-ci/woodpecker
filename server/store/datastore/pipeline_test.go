@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -206,13 +207,11 @@ func TestPipelineIncrement(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo))
 	defer closer()
 
-	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1"}))
-	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 2, Owner: "2", Name: "2", FullName: "2/2"}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1", ForgeRemoteID: "1"}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 2, Owner: "2", Name: "2", FullName: "2/2", ForgeRemoteID: "2"}))
 
 	pipelineA := &model.Pipeline{RepoID: 1}
-	if !assert.NoError(t, store.CreatePipeline(pipelineA)) {
-		return
-	}
+	require.NoError(t, store.CreatePipeline(pipelineA))
 	assert.EqualValues(t, 1, pipelineA.Number)
 
 	pipelineB := &model.Pipeline{RepoID: 1}

@@ -36,7 +36,7 @@ func TestLogging(t *testing.T) {
 	)
 
 	ctx, cancel := context.WithCancelCause(
-		context.Background(),
+		t.Context(),
 	)
 
 	receiver := make(LogChan, 10)

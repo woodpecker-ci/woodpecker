@@ -39,6 +39,9 @@ var pipelineCreateCmd = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:  "var",
 			Usage: "key=value",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 	}...),
 }

@@ -15,7 +15,6 @@
 package config_test
 
 import (
-	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -284,7 +283,7 @@ func TestFetch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
-			f := new(mocks.Forge)
+			f := new(mocks.MockForge)
 			dirs := map[string][]*forge_types.FileMeta{}
 			for _, file := range tt.files {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Once().Return(file.data, nil)
@@ -310,7 +309,7 @@ func TestFetch(t *testing.T) {
 				3,
 			)
 			files, err := configFetcher.Fetch(
-				context.Background(),
+				t.Context(),
 				f,
 				&model.User{AccessToken: "xxx"},
 				repo,

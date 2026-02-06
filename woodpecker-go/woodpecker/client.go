@@ -23,6 +23,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker/httputil"
 )
 
 const (
@@ -50,12 +52,14 @@ type client struct {
 
 // New returns a client at the specified url.
 func New(uri string) Client {
-	return &client{http.DefaultClient, strings.TrimSuffix(uri, "/")}
+	wrappedClient := httputil.WrapClient(http.DefaultClient, "go-client")
+	return &client{wrappedClient, strings.TrimSuffix(uri, "/")}
 }
 
 // NewClient returns a client at the specified url.
 func NewClient(uri string, cli *http.Client) Client {
-	return &client{cli, strings.TrimSuffix(uri, "/")}
+	wrappedClient := httputil.WrapClient(cli, "go-client")
+	return &client{wrappedClient, strings.TrimSuffix(uri, "/")}
 }
 
 // SetClient sets the http.Client.

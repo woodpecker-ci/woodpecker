@@ -226,7 +226,7 @@
                 "value": "Valeur de la variable",
                 "delete": "Supprimer la variable"
             },
-            "show_pipelines": "Afficher les pieplines"
+            "show_pipelines": "Afficher les pipelines"
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
         "open_in_forge": "Ouvrir le dépôt dans la forge",
@@ -490,7 +490,16 @@
         }
     },
     "repos": "Dépôt",
-    "repositories": "Dépôts",
+    "repositories": {
+        "title": "Dépôts",
+        "all": {
+            "title": "Tout les dépôts",
+            "desc": "Dépôts classés par date de création du dernier pipeline"
+        },
+        "last": {
+            "title": "Dernière visite"
+        }
+    },
     "running_version": "Vous utilisez Woodpecker {0}",
     "search": "Rechercher…",
     "time": {

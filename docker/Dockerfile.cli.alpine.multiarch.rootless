@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/golang:1.24 AS build
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.25 AS build
 
 WORKDIR /src
 COPY . .
@@ -7,7 +7,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-cli
 
-FROM docker.io/alpine:3.21
+FROM docker.io/alpine:3.23
 
 WORKDIR /woodpecker
 

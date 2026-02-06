@@ -665,7 +665,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Forge"
+                            "$ref": "#/definitions/ForgeWithOAuthClientSecret"
                         }
                     }
                 ],
@@ -774,7 +774,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Forge"
+                            "$ref": "#/definitions/ForgeWithOAuthClientSecret"
                         }
                     }
                 ],
@@ -907,42 +907,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/org/lookup/{org_full_name}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organizations"
-                ],
-                "summary": "Lookup an organization by full name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the organizations full name / slug",
-                        "name": "org_full_name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Org"
-                        }
-                    }
-                }
-            }
-        },
         "/orgs": {
             "get": {
                 "description": "Returns all registered orgs in the system. Requires admin rights.",
@@ -985,6 +949,42 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/Org"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/lookup/{org_full_name}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orgs"
+                ],
+                "summary": "Lookup an organization by full name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the organizations full name / slug",
+                        "name": "org_full_name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Org"
                         }
                     }
                 }
@@ -1729,7 +1729,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -1777,7 +1777,7 @@ const docTemplate = `{
         },
         "/queue/info": {
             "get": {
-                "description": "TODO: link the InfoT response object - this is blocked, until the ` + "`" + `swaggo/swag` + "`" + ` tool dependency is v1.18.12 or newer",
+                "description": "Returns pipeline queue information with agent details",
                 "produces": [
                     "application/json"
                 ],
@@ -1799,10 +1799,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/QueueInfo"
                         }
                     }
                 }
@@ -2684,7 +2681,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Cron"
+                            "$ref": "#/definitions/CronPatch"
                         }
                     }
                 ],
@@ -3924,7 +3921,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -4116,7 +4113,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -4298,6 +4295,12 @@ const docTemplate = `{
                         "description": "query all repos, including inactive ones",
                         "name": "all",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter repos by name",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4473,6 +4476,19 @@ const docTemplate = `{
                         "name": "login",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify forge (else default will be used)",
+                        "name": "forge_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify user id at forge (else fallback to login)",
+                        "name": "forge_remote_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4508,6 +4524,19 @@ const docTemplate = `{
                         "name": "login",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify forge (else default will be used)",
+                        "name": "forge_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify user id at forge (else fallback to login)",
+                        "name": "forge_remote_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4676,7 +4705,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "creator_id": {
+                    "description": "TODO: drop with next major version",
                     "type": "integer"
+                },
+                "enabled": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
@@ -4693,6 +4726,35 @@ const docTemplate = `{
                 "schedule": {
                     "description": "@weekly,\t3min, ...",
                     "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "CronPatch": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -4764,6 +4826,37 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "oauth_host": {
+                    "description": "public url for oauth if different from url",
+                    "type": "string"
+                },
+                "skip_verify": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.ForgeType"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "ForgeWithOAuthClientSecret": {
+            "type": "object",
+            "properties": {
+                "additional_options": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "client": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "oauth_client_secret": {
+                    "type": "string"
                 },
                 "oauth_host": {
                     "description": "public url for oauth if different from url",
@@ -4916,6 +5009,12 @@ const docTemplate = `{
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
                 },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "finished": {
                     "type": "integer"
                 },
@@ -4945,6 +5044,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "pr_milestone": {
+                    "type": "string"
                 },
                 "ref": {
                     "type": "string"
@@ -5016,6 +5118,49 @@ const docTemplate = `{
                 }
             }
         },
+        "QueueInfo": {
+            "type": "object",
+            "properties": {
+                "paused": {
+                    "type": "boolean"
+                },
+                "pending": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
+                },
+                "running": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
+                },
+                "stats": {
+                    "type": "object",
+                    "properties": {
+                        "pending_count": {
+                            "type": "integer"
+                        },
+                        "running_count": {
+                            "type": "integer"
+                        },
+                        "waiting_on_deps_count": {
+                            "type": "integer"
+                        },
+                        "worker_count": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "waiting_on_deps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QueueTask"
+                    }
+                }
+            }
+        },
         "Registry": {
             "type": "object",
             "properties": {
@@ -5074,6 +5219,12 @@ const docTemplate = `{
                 },
                 "clone_url_ssh": {
                     "type": "string"
+                },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
+                "config_extension_exclusive": {
+                    "type": "boolean"
                 },
                 "config_file": {
                     "type": "string"
@@ -5165,6 +5316,12 @@ const docTemplate = `{
                 "clone_url_ssh": {
                     "type": "string"
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5246,6 +5403,12 @@ const docTemplate = `{
                         "$ref": "#/definitions/WebhookEvent"
                     }
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5303,11 +5466,40 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "note": {
+                    "type": "string"
+                },
                 "org_id": {
                     "type": "integer"
                 },
                 "repo_id": {
                     "type": "integer"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "SecretPatch": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/WebhookEvent"
+                    }
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
                 },
                 "value": {
                     "type": "string"
@@ -5340,6 +5532,18 @@ const docTemplate = `{
                 "StatusSkipped": "skipped as another step failed",
                 "StatusSuccess": "successfully finished"
             },
+            "x-enum-descriptions": [
+                "skipped as another step failed",
+                "pending to be executed",
+                "currently running",
+                "successfully finished",
+                "failed to finish (exit code != 0)",
+                "killed by user",
+                "error with the config / while parsing / some other system problem",
+                "waiting for approval",
+                "blocked and declined",
+                "created / internal use only"
+            ],
             "x-enum-varnames": [
                 "StatusSkipped",
                 "StatusPending",
@@ -5438,6 +5642,18 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
+                },
                 "run_on": {
                     "type": "array",
                     "items": {
@@ -5464,6 +5680,9 @@ const docTemplate = `{
                 "forge_id": {
                     "type": "integer"
                 },
+                "forge_remote_id": {
+                    "type": "string"
+                },
                 "id": {
                     "description": "the id for this user.\n\nrequired: true",
                     "type": "integer"
@@ -5484,6 +5703,7 @@ const docTemplate = `{
                 "push",
                 "pull_request",
                 "pull_request_closed",
+                "pull_request_metadata",
                 "tag",
                 "release",
                 "deployment",
@@ -5494,6 +5714,7 @@ const docTemplate = `{
                 "EventPush",
                 "EventPull",
                 "EventPullClosed",
+                "EventPullMetadata",
                 "EventTag",
                 "EventRelease",
                 "EventDeploy",
@@ -5540,6 +5761,9 @@ const docTemplate = `{
                     }
                 },
                 "message": {
+                    "type": "string"
+                },
+                "milestone": {
                     "type": "string"
                 },
                 "ref": {
@@ -5596,6 +5820,12 @@ const docTemplate = `{
         "metadata.Pipeline": {
             "type": "object",
             "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
                 "commit": {
                     "$ref": "#/definitions/metadata.Commit"
                 },
@@ -5607,6 +5837,12 @@ const docTemplate = `{
                 },
                 "event": {
                     "type": "string"
+                },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "finished": {
                     "type": "integer"
@@ -5745,6 +5981,12 @@ const docTemplate = `{
                 "RequireApprovalNone": "require approval for no events",
                 "RequireApprovalPullRequests": "require approval for all PRs"
             },
+            "x-enum-descriptions": [
+                "require approval for no events",
+                "require approval for PRs from forks (default)",
+                "require approval for all PRs",
+                "require approval for all external events"
+            ],
             "x-enum-varnames": [
                 "RequireApprovalNone",
                 "RequireApprovalForks",
@@ -5772,6 +6014,59 @@ const docTemplate = `{
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
             ]
+        },
+        "model.QueueTask": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "integer"
+                },
+                "agent_name": {
+                    "type": "string"
+                },
+                "dep_status": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/StatusValue"
+                    }
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "pipeline_number": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
+                },
+                "run_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "model.TrustedConfiguration": {
             "type": "object",
@@ -5879,6 +6174,13 @@ const docTemplate = `{
                 "PipelineErrorTypeGeneric": "some generic error",
                 "PipelineErrorTypeLinter": "some error with the config syntax"
             },
+            "x-enum-descriptions": [
+                "some error with the config syntax",
+                "using some deprecated feature",
+                "some error with the config semantics",
+                "some generic error",
+                "some bad-habit error"
+            ],
             "x-enum-varnames": [
                 "PipelineErrorTypeLinter",
                 "PipelineErrorTypeDeprecation",
