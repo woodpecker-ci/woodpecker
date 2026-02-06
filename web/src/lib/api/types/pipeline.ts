@@ -9,7 +9,7 @@ export interface PipelineError<D = unknown> {
 
 export interface CancelInfo {
   canceled_by_user: string;
-  superseded_by: number
+  superseded_by: number;
 }
 
 // A pipeline for a repository.
