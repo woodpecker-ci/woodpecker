@@ -4681,7 +4681,7 @@ const docTemplate = `{
         "CancelInfo": {
             "type": "object",
             "properties": {
-                "cancel_by_user": {
+                "canceled_by_user": {
                     "type": "string"
                 },
                 "superseded_by": {
