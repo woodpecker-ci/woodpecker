@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build !generate && !man
+
 package main
 
 import (
@@ -20,11 +22,9 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v3"
 
-	_ "go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 func main() {
@@ -32,21 +32,9 @@ func main() {
 		log.Info().Msg("termination signal is received, shutting down server")
 	})
 
-	app := cli.Command{}
-	app.Name = "woodpecker-server"
-	app.Version = version.String()
-	app.Usage = "woodpecker server"
-	app.Action = run
-	app.Commands = []*cli.Command{
-		{
-			Name:   "ping",
-			Usage:  "ping the server",
-			Action: pinger,
-		},
-	}
-	app.Flags = flags
+	app := genApp()
 
-	setupSwaggerStaticConfig()
+	setupOpenAPIStaticConfig()
 
 	if err := app.Run(ctx, os.Args); err != nil {
 		log.Error().Err(err).Msgf("error running server")

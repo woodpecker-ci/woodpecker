@@ -11,6 +11,6 @@ contents:
   - src: ./dist/agent/linux_amd64/woodpecker-agent
     dst: /usr/local/bin/woodpecker-agent
   - src: ./nfpm/woodpecker-agent.service
-    dst: /usr/local/lib/systemd/system/
+    dst: /usr/local/lib/systemd/system/woodpecker-agent.service
   - src: ./nfpm/woodpecker-agent.env.example
-    dst: /etc/woodpecker/
+    dst: /etc/woodpecker/woodpecker-agent.env.example

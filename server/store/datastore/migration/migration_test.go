@@ -15,8 +15,9 @@
 package migration
 
 import (
-	"context"
+	"database/sql"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,12 +26,14 @@ import (
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 )
 
 const (
-	sqliteDB = "./test-files/sqlite.db"
+	sqliteDB     = "./test-files/sqlite.db"
+	postgresDump = "./test-files/postgres.sql"
 )
 
 func testDriver() string {
@@ -43,60 +46,113 @@ func testDriver() string {
 
 func createSQLiteDB(t *testing.T) string {
 	tmpF, err := os.CreateTemp("./test-files", "tmp_")
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 	dbF, err := os.ReadFile(sqliteDB)
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 
-	if !assert.NoError(t, os.WriteFile(tmpF.Name(), dbF, 0o644)) {
-		t.FailNow()
-	}
+	require.NoError(t, os.WriteFile(tmpF.Name(), dbF, 0o644))
 	return tmpF.Name()
 }
 
-func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
+func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) {
 	driver := testDriver()
 	var err error
 	closeDB = func() {}
 	switch driver {
 	case "sqlite3":
 		config := ":memory:"
-		if !new {
+		if !initNewDB {
 			config = createSQLiteDB(t)
 			closeDB = func() {
 				_ = os.Remove(config)
 			}
 		}
 		engine, err = xorm.NewEngine(driver, config)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
-		return
-	case "mysql", "postgres":
+		require.NoError(t, err)
+		return engine, closeDB
+	case "mysql":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
-		if !new {
+		if !initNewDB {
 			t.Logf("do not have dump to test against")
 			t.SkipNow()
 		}
 		engine, err = xorm.NewEngine(driver, config)
-		if !assert.NoError(t, err) {
-			t.FailNow()
+		require.NoError(t, err)
+		return engine, closeDB
+	case "postgres":
+		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
+		closeDB = func() {
+			cleanPostgresDB(t, config)
 		}
-		return
+		if !initNewDB {
+			restorePostgresDump(t, config)
+		}
+		engine, err = xorm.NewEngine(driver, config)
+		require.NoError(t, err)
+		return engine, closeDB
 	default:
 		t.Errorf("unsupported driver: %s", driver)
 		t.FailNow()
 	}
-	return
+	return engine, closeDB
+}
+
+// restorePostgresDump only supports dumps generated with `pg_dump --inserts`.
+func restorePostgresDump(t *testing.T, config string) {
+	dump, err := os.ReadFile(postgresDump)
+	require.NoError(t, err)
+
+	db, err := sql.Open("postgres", config)
+	require.NoError(t, err)
+	defer db.Close()
+
+	// clean dump
+	lines := strings.Split(string(dump), "\n")
+	newLines := make([]string, 0, len(lines))
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		switch {
+		case line == "",
+			strings.HasPrefix(line, "\\"),
+			strings.HasPrefix(line, "--"):
+			continue
+		}
+		newLines = append(newLines, line)
+	}
+
+	for _, stmt := range strings.Split(strings.Join(newLines, "\n"), ";") {
+		if stmt == "" {
+			continue
+		}
+
+		_, err = db.Exec(stmt)
+		if err != nil {
+			t.Logf("Failed to execute statement: %s", stmt[:min(len(stmt), 100)])
+			require.NoErrorf(t, err, "could not load postgres dump")
+		}
+	}
+}
+
+func cleanPostgresDB(t *testing.T, config string) {
+	db, err := sql.Open("postgres", config)
+	require.NoError(t, err)
+	defer db.Close()
+
+	// Drop and recreate the public schema
+	// This removes all tables, indexes, constraints, sequences, etc.
+	_, err = db.Exec(`
+		DROP SCHEMA public CASCADE;
+		CREATE SCHEMA public;
+		GRANT ALL ON SCHEMA public TO postgres;
+		GRANT ALL ON SCHEMA public TO public;
+	`)
+	require.NoError(t, err)
 }
 
 func TestMigrate(t *testing.T) {
 	// init new db
 	engine, closeDB := testDB(t, true)
-	assert.NoError(t, Migrate(context.Background(), engine, true))
+	assert.NoError(t, Migrate(t.Context(), engine, true))
 	closeDB()
 
 	dbType := engine.Dialect().URI().DBType
@@ -107,6 +163,6 @@ func TestMigrate(t *testing.T) {
 
 	// migrate old db
 	engine, closeDB = testDB(t, false)
-	assert.NoError(t, Migrate(context.Background(), engine, true))
+	assert.NoError(t, Migrate(t.Context(), engine, true))
 	closeDB()
 }

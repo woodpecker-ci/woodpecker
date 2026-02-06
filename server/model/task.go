@@ -16,19 +16,26 @@ package model
 
 import (
 	"fmt"
+	"slices"
 	"strings"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 // Task defines scheduled pipeline Task.
 type Task struct {
 	ID           string                 `json:"id"           xorm:"PK UNIQUE 'id'"`
+	PID          int                    `json:"pid"          xorm:"'pid'"`
+	Name         string                 `json:"name"         xorm:"'name'"`
 	Data         []byte                 `json:"-"            xorm:"LONGBLOB 'data'"`
 	Labels       map[string]string      `json:"labels"       xorm:"json 'labels'"`
 	Dependencies []string               `json:"dependencies" xorm:"json 'dependencies'"`
 	RunOn        []string               `json:"run_on"       xorm:"json 'run_on'"`
 	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'dependencies_status'"`
 	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
-} //	@name Task
+	PipelineID   int64                  `json:"pipeline_id"  xorm:"'pipeline_id'"`
+	RepoID       int64                  `json:"repo_id"      xorm:"'repo_id'"`
+} //	@name	Task
 
 // TableName return database table name for xorm.
 func (Task) TableName() string {
@@ -48,9 +55,9 @@ func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 	if t.Labels == nil {
 		t.Labels = make(map[string]string)
 	}
-	t.Labels["repo"] = r.FullName
-	t.Labels[agentFilterRepoID] = fmt.Sprint(r.ID)
-	t.Labels[agentFilterOrgID] = fmt.Sprint(r.OrgID)
+	t.Labels[pipeline.LabelFilterRepo] = r.FullName
+	t.Labels[pipeline.LabelRepoID] = fmt.Sprintf("%d", r.ID)
+	t.Labels[pipeline.LabelFilterOrg] = fmt.Sprintf("%d", r.OrgID)
 	return nil
 }
 
@@ -82,12 +89,7 @@ func (t *Task) ShouldRun() bool {
 }
 
 func (t *Task) runsOnFailure() bool {
-	for _, status := range t.RunOn {
-		if status == string(StatusFailure) {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(t.RunOn, string(StatusFailure))
 }
 
 func (t *Task) runsOnSuccess() bool {
@@ -95,10 +97,5 @@ func (t *Task) runsOnSuccess() bool {
 		return true
 	}
 
-	for _, status := range t.RunOn {
-		if status == string(StatusSuccess) {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(t.RunOn, string(StatusSuccess))
 }

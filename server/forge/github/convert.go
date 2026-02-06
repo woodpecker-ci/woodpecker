@@ -18,9 +18,9 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v66/github"
+	"github.com/google/go-github/v82/github"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 const (
@@ -94,7 +94,6 @@ func convertRepo(from *github.Repository) *model.Repo {
 		Owner:         from.GetOwner().GetLogin(),
 		Avatar:        from.GetOwner().GetAvatarURL(),
 		Perm:          convertPerm(from.GetPermissions()),
-		SCMKind:       model.RepoGit,
 		PREnabled:     true,
 	}
 	return repo
@@ -102,11 +101,11 @@ func convertRepo(from *github.Repository) *model.Repo {
 
 // convertPerm is a helper function used to convert a GitHub repository
 // permissions to the common Woodpecker permissions structure.
-func convertPerm(perm map[string]bool) *model.Perm {
+func convertPerm(perm *github.RepositoryPermissions) *model.Perm {
 	return &model.Perm{
-		Admin: perm["admin"],
-		Push:  perm["push"],
-		Pull:  perm["pull"],
+		Admin: perm.GetAdmin(),
+		Push:  perm.GetPush(),
+		Pull:  perm.GetPull(),
 	}
 }
 
@@ -152,7 +151,6 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		Clone:         eventRepo.GetCloneURL(),
 		CloneSSH:      eventRepo.GetSSHURL(),
 		Branch:        eventRepo.GetDefaultBranch(),
-		SCMKind:       model.RepoGit,
 		PREnabled:     true,
 	}
 	if repo.FullName == "" {

@@ -1,16 +1,17 @@
 <template>
-  <div v-for="option in options" :key="option.value" class="flex items-center mb-2">
+  <div v-for="option in options" :key="option.value" class="mb-2 flex items-center">
     <input
       :id="`radio-${id}-${option.value}`"
       type="radio"
-      class="radio relative flex-shrink-0 border bg-wp-control-neutral-100 border-wp-control-neutral-200 cursor-pointer rounded-full w-5 h-5 checked:bg-wp-control-ok-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300"
+      class="radio border-wp-control-neutral-200 disabled:border-wp-control-neutral-200 disabled:bg-wp-control-neutral-100 dark:disabled:bg-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-full border"
       :value="option.value"
-      :checked="innerValue.includes(option.value)"
+      :checked="innerValue?.includes(option.value)"
+      :disabled="disabled || false"
       @click="innerValue = option.value"
     />
-    <div class="flex flex-col ml-4">
-      <label class="cursor-pointer text-wp-text-100" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
-      <span v-if="option.description" class="text-sm text-wp-text-alt-100">{{ option.description }}</span>
+    <div class="ml-4 flex flex-col">
+      <label class="text-wp-text-100 cursor-pointer" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
+      <span v-if="option.description" class="text-wp-text-alt-100 text-sm">{{ option.description }}</span>
     </div>
   </div>
 </template>
@@ -23,6 +24,7 @@ import type { RadioOption } from './form.types';
 const props = defineProps<{
   modelValue: string;
   options: RadioOption[];
+  disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -41,7 +43,11 @@ const id = (Math.random() + 1).toString(36).substring(7);
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .radio {
+  width: 1.3rem;
+  height: 1.3rem;
   appearance: none;
   outline: 0;
   cursor: pointer;
@@ -54,13 +60,16 @@ const id = (Math.random() + 1).toString(36).substring(7);
   display: block;
   top: 50%;
   left: 50%;
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: white;
   transform: translate(-50%, -50%);
   opacity: 0;
-  @apply dark:bg-white;
+}
+
+.radio:disabled::before {
+  border-color: var(--wp-text-alt-100);
 }
 
 .radio:checked::before {

@@ -14,7 +14,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
@@ -22,10 +22,10 @@ func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
 }
 
 func checkForUpdate(ctx context.Context, versionURL string, force bool) (*NewVersion, error) {
-	log.Debug().Msgf("Current version: %s", version.String())
+	log.Debug().Msgf("current version: %s", version.String())
 
 	if (version.String() == "dev" || strings.HasPrefix(version.String(), "next-")) && !force {
-		log.Debug().Msgf("Skipping update check for development & next versions")
+		log.Debug().Msgf("skipping update check for development/next versions")
 		return nil, nil
 	}
 
@@ -61,11 +61,11 @@ func checkForUpdate(ctx context.Context, versionURL string, force bool) (*NewVer
 
 	// using the latest release
 	if installedVersion == upstreamVersion && !force {
-		log.Debug().Msgf("No new version available")
+		log.Debug().Msgf("no new version available")
 		return nil, nil
 	}
 
-	log.Debug().Msgf("New version available: %s", upstreamVersion)
+	log.Debug().Msgf("new version available: %s", upstreamVersion)
 
 	assetURL := fmt.Sprintf(githubBinaryURL, upstreamVersion, runtime.GOOS, runtime.GOARCH)
 	return &NewVersion{
@@ -75,7 +75,7 @@ func checkForUpdate(ctx context.Context, versionURL string, force bool) (*NewVer
 }
 
 func downloadNewVersion(ctx context.Context, downloadURL string) (string, error) {
-	log.Debug().Msgf("Downloading new version from %s ...", downloadURL)
+	log.Debug().Msgf("downloading new version from %s ...", downloadURL)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
 	if err != nil {
@@ -102,13 +102,13 @@ func downloadNewVersion(ctx context.Context, downloadURL string) (string, error)
 		return "", err
 	}
 
-	log.Debug().Msgf("New version downloaded to %s", file.Name())
+	log.Debug().Msgf("new version downloaded to %s", file.Name())
 
 	return file.Name(), nil
 }
 
 func extractNewVersion(tarFilePath string) (string, error) {
-	log.Debug().Msgf("Extracting new version from %s ...", tarFilePath)
+	log.Debug().Msgf("extracting new version from %s ...", tarFilePath)
 
 	tarFile, err := os.Open(tarFilePath)
 	if err != nil {
@@ -132,7 +132,7 @@ func extractNewVersion(tarFilePath string) (string, error) {
 		return "", err
 	}
 
-	log.Debug().Msgf("New version extracted to %s", tmpDir)
+	log.Debug().Msgf("new version extracted to %s", tmpDir)
 
 	return path.Join(tmpDir, "woodpecker-cli"), nil
 }

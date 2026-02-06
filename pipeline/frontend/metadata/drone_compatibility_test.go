@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
 func TestSetDroneEnvironOnPull(t *testing.T) {
@@ -59,7 +59,6 @@ CI_REPO_CLONE_URL=https://codeberg.org/Epsilon_02/todo-checker.git
 CI_REPO_DEFAULT_BRANCH=main
 CI_REPO_NAME=todo-checker
 CI_REPO_OWNER=Epsilon_02
-CI_REPO_SCM=git
 CI_STEP_NAME=wp_01h1z7v5d1tskaqjexw0ng6w7d_0_step_3
 CI_STEP_STARTED=1685749339
 CI_SYSTEM_PLATFORM=linux/amd64
@@ -164,7 +163,6 @@ CI_REPO_NAME=woodpecker-test
 CI_REPO_OWNER=test
 CI_REPO_PRIVATE=false
 CI_REPO_REMOTE_ID=4
-CI_REPO_SCM=git
 CI_REPO_TRUSTED=false
 CI_REPO_TRUSTED_NETWORK=false
 CI_REPO_TRUSTED_VOLUMES=false

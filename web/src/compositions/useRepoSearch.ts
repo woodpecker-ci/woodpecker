@@ -1,5 +1,6 @@
 import Fuse from 'fuse.js';
-import { computed, type Ref } from 'vue';
+import { computed } from 'vue';
+import type { Ref } from 'vue';
 
 import type { Repo } from '~/lib/api/types';
 
@@ -16,7 +17,7 @@ function repoCompare(a: Repo, b: Repo) {
 export function useRepoSearch(repos: Ref<Repo[] | undefined>, search: Ref<string>) {
   const searchIndex = computed(
     () =>
-      new Fuse(repos.value || [], {
+      new Fuse(repos.value ?? [], {
         includeScore: true,
         keys: ['name', 'owner'],
         threshold: 0.4,

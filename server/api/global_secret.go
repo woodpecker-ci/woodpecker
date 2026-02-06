@@ -19,9 +19,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 )
 
 // GetGlobalSecretList
@@ -89,6 +89,7 @@ func PostGlobalSecret(c *gin.Context) {
 		Value:  in.Value,
 		Events: in.Events,
 		Images: in.Images,
+		Note:   in.Note,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusBadRequest, "Error inserting global secret. %s", err)
@@ -110,13 +111,13 @@ func PostGlobalSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Secrets
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		secret			path	string	true	"the secret's name"
-//	@Param		secretData		body	Secret	true	"the secret's data"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		secret			path	string		true	"the secret's name"
+//	@Param		secretData		body	SecretPatch	true	"the secret's data"
 func PatchGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 
-	in := new(model.Secret)
+	in := new(model.SecretPatch)
 	err := c.Bind(in)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing secret. %s", err)
@@ -129,14 +130,17 @@ func PatchGlobalSecret(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
-	if in.Value != "" {
-		secret.Value = in.Value
+	if in.Value != nil && *in.Value != "" {
+		secret.Value = *in.Value
 	}
 	if in.Events != nil {
 		secret.Events = in.Events
 	}
 	if in.Images != nil {
 		secret.Images = in.Images
+	}
+	if in.Note != nil {
+		secret.Note = *in.Note
 	}
 
 	if err := secret.Validate(); err != nil {

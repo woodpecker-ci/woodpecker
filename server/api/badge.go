@@ -21,16 +21,17 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/badges"
-	"go.woodpecker-ci.org/woodpecker/v2/server/ccmenu"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/badges"
+	"go.woodpecker-ci.org/woodpecker/v3/server/ccmenu"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // GetBadge
@@ -72,17 +73,78 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	pipeline, err := _store.GetPipelineLast(repo, branch)
+	// Events to lookup, multiple separated by comma
+	var events []model.WebhookEvent
+	eventsQuery := c.Query("events")
+	// If none given, fallback to default "push"
+	if len(eventsQuery) == 0 {
+		events = []model.WebhookEvent{model.EventPush}
+	} else {
+		strEvents := strings.Split(eventsQuery, ",")
+		events = make([]model.WebhookEvent, len(strEvents))
+		for i, strEvent := range strEvents {
+			event := model.WebhookEvent(strEvent)
+			if err := event.Validate(); err == nil {
+				events[i] = event
+			} else {
+				_ = c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+		}
+	}
+
+	name := "pipeline"
+	var status *model.StatusValue = nil
+
+	pipeline, err := _store.GetPipelineBadge(repo, branch, events)
 	if err != nil {
 		if !errors.Is(err, types.RecordNotExist) {
 			log.Warn().Err(err).Msg("could not get last pipeline for badge")
 		}
-		pipeline = nil
+	} else {
+		status = &pipeline.Status
 	}
 
 	// we serve an SVG, so set content type appropriately.
 	c.Writer.Header().Set("Content-Type", "image/svg+xml")
-	c.String(http.StatusOK, badges.Generate(pipeline))
+
+	// Allow workflow (and step) specific badges
+	workflowName := c.Query("workflow")
+	if len(workflowName) != 0 {
+		name = workflowName
+		status = nil
+
+		workflows, err := _store.WorkflowGetTree(pipeline)
+		if err == nil {
+			for _, wf := range workflows {
+				if wf.Name == workflowName {
+					stepName := c.Query("step")
+					if len(stepName) == 0 {
+						if status == nil || wf.Failing() {
+							status = &wf.State
+						}
+						continue
+					}
+					// If step is explicitly requested
+					name = workflowName + ": " + stepName
+					for _, s := range wf.Children {
+						if s.Name == stepName {
+							if status == nil || s.Failing() {
+								status = &s.State
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	badge, err := badges.Generate(name, status)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to generate badge.")
+	} else {
+		c.String(http.StatusOK, badge)
+	}
 }
 
 // GetCC

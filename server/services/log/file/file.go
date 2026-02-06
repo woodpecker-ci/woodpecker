@@ -10,9 +10,9 @@ import (
 
 	logger "github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 )
 
 const (
@@ -29,7 +29,7 @@ func NewLogStore(base string) (log.Service, error) {
 		return nil, fmt.Errorf("file storage base path is required")
 	}
 	if _, err := os.Stat(base); err != nil && os.IsNotExist(err) {
-		err = os.MkdirAll(base, 0o600)
+		err = os.MkdirAll(base, 0o700)
 		if err != nil {
 			return nil, err
 		}
@@ -50,6 +50,7 @@ func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 		}
 		return nil, err
 	}
+	defer file.Close()
 
 	buf := make([]byte, 0, bufio.MaxScanTokenSize)
 	s := bufio.NewScanner(file)
@@ -102,3 +103,5 @@ func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) erro
 func (l logStore) LogDelete(step *model.Step) error {
 	return os.Remove(l.filePath(step.ID))
 }
+
+func (l logStore) StepFinished(_ *model.Step) {}

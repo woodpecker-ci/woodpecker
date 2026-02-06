@@ -1,3 +1,5 @@
+import type { Pipeline } from './pipeline';
+
 // A version control repository.
 export interface Repo {
   // Is the repo currently active or not
@@ -65,14 +67,23 @@ export interface Repo {
 
   visibility: RepoVisibility;
 
-  last_pipeline: number;
+  last_pipeline_number?: number;
 
-  gated: boolean;
+  last_pipeline?: Pipeline;
+
+  require_approval: RepoRequireApproval;
+
+  approval_allowed_users: string[];
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
 
-  netrc_only_trusted: boolean;
+  netrc_trusted: string[];
+
+  // Endpoint for config extensions
+  config_extension_endpoint: string;
+
+  config_extension_exclusive: boolean;
 }
 
 /* eslint-disable no-unused-vars */
@@ -80,6 +91,13 @@ export enum RepoVisibility {
   Public = 'public',
   Private = 'private',
   Internal = 'internal',
+}
+
+export enum RepoRequireApproval {
+  None = 'none',
+  Forks = 'forks',
+  PullRequests = 'pull_requests',
+  AllEvents = 'all_events',
 }
 /* eslint-enable */
 
@@ -89,12 +107,15 @@ export type RepoSettings = Pick<
   | 'timeout'
   | 'visibility'
   | 'trusted'
-  | 'gated'
+  | 'require_approval'
+  | 'approval_allowed_users'
   | 'allow_pr'
   | 'allow_deploy'
   | 'cancel_previous_pipeline_events'
-  | 'netrc_only_trusted'
+  | 'netrc_trusted'
 >;
+
+export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'config_extension_exclusive'>;
 
 export interface RepoPermissions {
   pull: boolean;

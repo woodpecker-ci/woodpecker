@@ -26,12 +26,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func setupRegistryService(store store.Store, dockerConfig string) registry.Service {
@@ -57,16 +58,19 @@ func setupSecretService(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Command, privateSignatureKey ed25519.PrivateKey) (config.Service, error) {
+func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, error) {
 	timeout := c.Duration("forge-timeout")
 	retries := c.Uint("forge-retry")
 	if retries == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGE_RETRY can not be 0")
 	}
-	configFetcher := config.NewForge(timeout, uint(retries))
+	configFetcher := config.NewForge(timeout, retries)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey)
+		httpFetcher := config.NewHTTP(endpoint, client)
+		if c.Bool("config-service-exclusive") {
+			return httpFetcher, nil
+		}
 		return config.NewCombined(configFetcher, httpFetcher), nil
 	}
 
@@ -115,8 +119,8 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.AdditionalOptions = make(map[string]any)
 	}
 
-	_forge.Client = strings.TrimSpace(c.String("forge-oauth-client"))
-	_forge.ClientSecret = strings.TrimSpace(c.String("forge-oauth-secret"))
+	_forge.OAuthClientID = strings.TrimSpace(c.String("forge-oauth-client"))
+	_forge.OAuthClientSecret = strings.TrimSpace(c.String("forge-oauth-secret"))
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
 	_forge.OAuthHost = c.String("forge-oauth-host")
@@ -154,6 +158,7 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.Type = model.ForgeTypeBitbucketDatacenter
 		_forge.AdditionalOptions["git-username"] = c.String("bitbucket-dc-git-username")
 		_forge.AdditionalOptions["git-password"] = c.String("bitbucket-dc-git-password")
+		_forge.AdditionalOptions["oauth-enable-project-admin-scope"] = c.Bool("bitbucket-dc-oauth-enable-oauth2-scope-project-admin")
 	default:
 		return errors.New("forge not configured")
 	}

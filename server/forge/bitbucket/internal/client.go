@@ -26,7 +26,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
 
-	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
@@ -47,6 +47,7 @@ const (
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
+	pathDiffStat      = "%s/2.0/repositories/%s/%s/diffstat/%s?%s"
 	pageSize          = 100
 )
 
@@ -115,7 +116,7 @@ func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
 			return nil, err
 		}
 		return resp.Values, nil
-	})
+	}, -1)
 }
 
 func (c *Client) FindHook(owner, name, id string) (*Hook, error) {
@@ -183,7 +184,7 @@ func (c *Client) ListPermissionsAll() ([]*RepoPerm, error) {
 			return nil, err
 		}
 		return resp.Values, nil
-	})
+	}, -1)
 }
 
 func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, error) {
@@ -233,6 +234,42 @@ func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRe
 	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name, opts.Encode())
 	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out.Values, err
+}
+
+func (c *Client) ListChangedFiles(owner, name, ref string) (result []string, err error) {
+	paths := make(map[string]struct{})
+	opts := &ListOpts{Page: 1, PageLen: pageSize}
+	for {
+		var resp DiffStatResp
+		uri := fmt.Sprintf(pathDiffStat, c.base, owner, name, ref, opts.Encode())
+		if _, err = c.do(uri, http.MethodGet, nil, &resp); err != nil {
+			return nil, err
+		}
+
+		for _, diff := range resp.Values {
+			if diff == nil {
+				continue
+			}
+
+			if diff.Old != nil {
+				paths[diff.Old.Path] = struct{}{}
+			}
+			if diff.New != nil {
+				paths[diff.New.Path] = struct{}{}
+			}
+		}
+
+		if resp.Next == nil {
+			break
+		}
+		opts.Page++
+	}
+
+	result = make([]string, 0, len(paths))
+	for path := range paths {
+		result = append(result, path)
+	}
+	return result, err
 }
 
 func (c *Client) GetWorkspace(name string) (*Workspace, error) {

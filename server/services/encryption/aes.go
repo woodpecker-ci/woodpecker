@@ -19,10 +19,10 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/google/tink/go/subtle/random"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/encryption/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 type aesEncryptionService struct {

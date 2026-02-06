@@ -16,11 +16,12 @@ package datastore
 
 import (
 	"fmt"
+	"time"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
@@ -45,17 +46,12 @@ func (s storage) PermUpsert(perm *model.Perm) error {
 }
 
 func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
-	if perm.RepoID == 0 && perm.Repo == nil {
+	if perm.RepoID == 0 {
 		return fmt.Errorf("could not determine repo for permission: %v", perm)
 	}
 
-	// lookup repo based on name or forge ID if possible
-	if perm.RepoID == 0 && perm.Repo != nil {
-		r, err := s.getRepoNameFallback(sess, perm.Repo.ForgeRemoteID, perm.Repo.FullName)
-		if err != nil {
-			return err
-		}
-		perm.RepoID = r.ID
+	if perm.UserID == 0 {
+		return fmt.Errorf("could not determine user for permission: %v", perm)
 	}
 
 	exist, err := sess.Where(userIDAndRepoIDCond(perm)).Exist(new(model.Perm))
@@ -64,9 +60,12 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 	}
 
 	if exist {
+		perm.Updated = time.Now().Unix()
 		_, err = sess.Where(userIDAndRepoIDCond(perm)).AllCols().Update(perm)
 	} else {
-		// only Insert set auto created ID back to object
+		// insert will set auto created ID back to perm object
+		perm.Created = time.Now().Unix()
+		perm.Updated = perm.Created
 		_, err = sess.Insert(perm)
 	}
 	return err
@@ -82,4 +81,19 @@ func userPushOrAdminCondition(userID int64) builder.Cond {
 
 func userIDAndRepoIDCond(perm *model.Perm) builder.Cond {
 	return builder.Eq{"user_id": perm.UserID, "repo_id": perm.RepoID}
+}
+
+// PermPrune deletes all permission rows for a user
+// where the repo_id is NOT IN the provided keepRepoIDs list. If keepRepoIDs
+// is empty, all permissions for the user are deleted.
+func (s storage) PermPrune(userID int64, keepRepoIDs []int64) error {
+	if len(keepRepoIDs) == 0 {
+		_, err := s.engine.Where(builder.Eq{"user_id": userID}).Delete(new(model.Perm))
+		return err
+	}
+
+	_, err := s.engine.Where(builder.Eq{"user_id": userID}).
+		And(builder.NotIn("repo_id", keepRepoIDs)).
+		Delete(new(model.Perm))
+	return err
 }

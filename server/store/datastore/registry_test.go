@@ -20,8 +20,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestRegistryFind(t *testing.T) {
@@ -114,9 +114,7 @@ func TestRegistryDelete(t *testing.T) {
 		Username: "foo",
 		Password: "bar",
 	}
-	if !assert.NoError(t, store.RegistryCreate(reg1)) {
-		return
-	}
+	require.NoError(t, store.RegistryCreate(reg1))
 
 	assert.NoError(t, store.RegistryDelete(reg1))
 	assert.ErrorIs(t, store.RegistryDelete(reg1), types.RecordNotExist)

@@ -3,13 +3,14 @@ package setup
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/setup/ui"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal/config"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/setup/ui"
 )
 
 // Command exports the setup command.
@@ -20,28 +21,41 @@ var Command = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "server",
-			Usage: "The URL of the woodpecker server",
+			Usage: "URL of the woodpecker server",
 		},
 		&cli.StringFlag{
 			Name:  "token",
-			Usage: "The token to authenticate with the woodpecker server",
+			Usage: "token to authenticate with the woodpecker server",
+		},
+		&cli.StringFlag{
+			Name:    "context",
+			Aliases: []string{"ctx"},
+			Usage:   "name for the context (defaults to 'default')",
 		},
 	},
 	Action: setup,
 }
 
 func setup(ctx context.Context, c *cli.Command) error {
-	_config, err := config.Get(ctx, c, c.String("config"))
+	contextName := c.String("context")
+	if contextName == "" {
+		contextName = "default"
+	}
+
+	// Check if context already exists
+	contexts, err := config.LoadContexts()
 	if err != nil {
 		return err
-	} else if _config != nil {
-		setupAgain, err := ui.Confirm("The woodpecker-cli was already configured. Do you want to configure it again?")
+	}
+
+	if existingCtx, exists := contexts.Contexts[contextName]; exists {
+		setupAgain, err := ui.Confirm(fmt.Sprintf("Context '%s' already exists (server: %s). Do you want to reconfigure it?", contextName, existingCtx.ServerURL))
 		if err != nil {
 			return err
 		}
 
 		if !setupAgain {
-			log.Info().Msg("Configuration skipped")
+			log.Info().Msg("configuration skipped")
 			return nil
 		}
 	}
@@ -78,16 +92,13 @@ func setup(ctx context.Context, c *cli.Command) error {
 		}
 	}
 
-	err = config.Save(ctx, c, c.String("config"), &config.Config{
-		ServerURL: serverURL,
-		Token:     token,
-		LogLevel:  "info",
-	})
+	// Save as context
+	err = config.AddOrUpdateContext(c, contextName, serverURL, token, "info", true)
 	if err != nil {
 		return err
 	}
 
-	log.Info().Msg("The woodpecker-cli has been successfully setup")
+	log.Info().Msgf("Context '%s' has been successfully created and set as current", contextName)
 
 	return nil
 }

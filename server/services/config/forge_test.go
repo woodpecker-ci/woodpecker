@@ -15,7 +15,6 @@
 package config_test
 
 import (
-	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -24,10 +23,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
 )
 
 func TestFetch(t *testing.T) {
@@ -284,7 +283,7 @@ func TestFetch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
-			f := new(mocks.Forge)
+			f := new(mocks.MockForge)
 			dirs := map[string][]*forge_types.FileMeta{}
 			for _, file := range tt.files {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Once().Return(file.data, nil)
@@ -310,9 +309,9 @@ func TestFetch(t *testing.T) {
 				3,
 			)
 			files, err := configFetcher.Fetch(
-				context.Background(),
+				t.Context(),
 				f,
-				&model.User{Token: "xxx"},
+				&model.User{AccessToken: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 				nil,

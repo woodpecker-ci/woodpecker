@@ -19,9 +19,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 )
 
 // GetGlobalRegistryList
@@ -32,7 +32,7 @@ import (
 //	@Success	200	{array}	Registry
 //	@Tags		Registries
 //	@Param		Authorization	header	string	true	"Insert your personal access token"				default(Bearer <personal access token>)
-//	@Param		page				query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetGlobalRegistryList(c *gin.Context) {
 	registryService := server.Config.Services.Manager.RegistryService()
@@ -57,7 +57,7 @@ func GetGlobalRegistryList(c *gin.Context) {
 //	@Success	200	{object}	Registry
 //	@Tags		Registries
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		registry			path	string	true	"the registry's name"
+//	@Param		registry		path	string	true	"the registry's name"
 func GetGlobalRegistry(c *gin.Context) {
 	addr := c.Param("registry")
 	registryService := server.Config.Services.Manager.RegistryService()
@@ -76,8 +76,8 @@ func GetGlobalRegistry(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Registries
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		registry			body	Registry	true	"the registry object data"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		registry		body	Registry	true	"the registry object data"
 func PostGlobalRegistry(c *gin.Context) {
 	in := new(model.Registry)
 	if err := c.Bind(in); err != nil {
@@ -109,8 +109,8 @@ func PostGlobalRegistry(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Registries
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		registry			path	string		true	"the registry's name"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		registry		path	string		true	"the registry's name"
 //	@Param		registryData	body	Registry	true	"the registry's data"
 func PatchGlobalRegistry(c *gin.Context) {
 	addr := c.Param("registry")
@@ -158,7 +158,7 @@ func PatchGlobalRegistry(c *gin.Context) {
 //	@Success	204
 //	@Tags		Registries
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		registry			path		string	true	"the registry's name"
+//	@Param		registry		path	string	true	"the registry's name"
 func DeleteGlobalRegistry(c *gin.Context) {
 	addr := c.Param("registry")
 	registryService := server.Config.Services.Manager.RegistryService()

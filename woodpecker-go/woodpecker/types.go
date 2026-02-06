@@ -14,50 +14,87 @@
 
 package woodpecker
 
+type ApprovalMode string
+
+var (
+	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
+	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks
+	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs (default)
+	RequireApprovalAllEvents    ApprovalMode = "all_events"    // require approval for all events
+)
+
+func (mode ApprovalMode) Valid() bool {
+	switch mode {
+	case RequireApprovalNone,
+		RequireApprovalForks,
+		RequireApprovalPullRequests,
+		RequireApprovalAllEvents:
+		return true
+	default:
+		return false
+	}
+}
+
 type (
 	// User represents a user account.
 	User struct {
-		ID     int64  `json:"id"`
-		Login  string `json:"login"`
-		Email  string `json:"email"`
-		Avatar string `json:"avatar_url"`
-		Active bool   `json:"active"`
-		Admin  bool   `json:"admin"`
+		ID            int64  `json:"id"`
+		ForgeID       int64  `json:"forge_id"`
+		ForgeRemoteID string `json:"forge_remote_id"`
+		Login         string `json:"login"`
+		Email         string `json:"email"`
+		Avatar        string `json:"avatar_url"`
+		Active        bool   `json:"active"`
+		Admin         bool   `json:"admin"`
+	}
+
+	TrustedConfiguration struct {
+		Network  bool `json:"network"`
+		Volumes  bool `json:"volumes"`
+		Security bool `json:"security"`
 	}
 
 	// Repo represents a repository.
 	Repo struct {
-		ID                           int64    `json:"id,omitempty"`
-		ForgeRemoteID                string   `json:"forge_remote_id"`
-		Owner                        string   `json:"owner"`
-		Name                         string   `json:"name"`
-		FullName                     string   `json:"full_name"`
-		Avatar                       string   `json:"avatar_url,omitempty"`
-		ForgeURL                     string   `json:"forge_url,omitempty"`
-		Clone                        string   `json:"clone_url,omitempty"`
-		DefaultBranch                string   `json:"default_branch,omitempty"`
-		SCMKind                      string   `json:"scm,omitempty"`
-		Timeout                      int64    `json:"timeout,omitempty"`
-		Visibility                   string   `json:"visibility"`
-		IsSCMPrivate                 bool     `json:"private"`
-		IsTrusted                    bool     `json:"trusted"`
-		IsGated                      bool     `json:"gated"`
-		IsActive                     bool     `json:"active"`
-		AllowPullRequests            bool     `json:"allow_pr"`
-		Config                       string   `json:"config_file"`
-		CancelPreviousPipelineEvents []string `json:"cancel_previous_pipeline_events"`
-		NetrcOnlyTrusted             bool     `json:"netrc_only_trusted"`
+		ID                           int64                `json:"id,omitempty"`
+		ForgeRemoteID                string               `json:"forge_remote_id"`
+		Owner                        string               `json:"owner"`
+		Name                         string               `json:"name"`
+		FullName                     string               `json:"full_name"`
+		Avatar                       string               `json:"avatar_url,omitempty"`
+		ForgeURL                     string               `json:"forge_url,omitempty"`
+		Clone                        string               `json:"clone_url,omitempty"`
+		Branch                       string               `json:"default_branch,omitempty"`
+		SCMKind                      string               `json:"scm,omitempty"`
+		Timeout                      int64                `json:"timeout,omitempty"`
+		Visibility                   string               `json:"visibility"`
+		IsSCMPrivate                 bool                 `json:"private"`
+		Trusted                      TrustedConfiguration `json:"trusted"`
+		RequireApproval              ApprovalMode         `json:"require_approval"`
+		IsActive                     bool                 `json:"active"`
+		AllowPull                    bool                 `json:"allow_pr"`
+		Config                       string               `json:"config_file"`
+		CancelPreviousPipelineEvents []string             `json:"cancel_previous_pipeline_events"`
+		NetrcTrustedPlugins          []string             `json:"netrc_trusted"`
+	}
+
+	TrustedConfigurationPatch struct {
+		Network  *bool `json:"network"`
+		Volumes  *bool `json:"volumes"`
+		Security *bool `json:"security"`
 	}
 
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
-		Config          *string `json:"config_file,omitempty"`
-		IsTrusted       *bool   `json:"trusted,omitempty"`
-		IsGated         *bool   `json:"gated,omitempty"`
-		Timeout         *int64  `json:"timeout,omitempty"`
-		Visibility      *string `json:"visibility"`
-		AllowPull       *bool   `json:"allow_pr,omitempty"`
-		PipelineCounter *int    `json:"pipeline_counter,omitempty"`
+		Config *string `json:"config_file,omitempty"`
+		// Deprecated: use Trusted (broken - only exists for backwards compatibility)
+		IsTrusted       *bool                      `json:"-,omitempty"`
+		Trusted         *TrustedConfigurationPatch `json:"trusted,omitempty"`
+		RequireApproval *ApprovalMode              `json:"require_approval,omitempty"`
+		Timeout         *int64                     `json:"timeout,omitempty"`
+		Visibility      *string                    `json:"visibility"`
+		AllowPull       *bool                      `json:"allow_pr,omitempty"`
+		PipelineCounter *int                       `json:"pipeline_counter,omitempty"`
 	}
 
 	PipelineError struct {
@@ -69,32 +106,33 @@ type (
 
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID        int64            `json:"id"`
-		Number    int64            `json:"number"`
-		Parent    int64            `json:"parent"`
-		Event     string           `json:"event"`
-		Status    string           `json:"status"`
-		Errors    []*PipelineError `json:"errors"`
-		Created   int64            `json:"created_at"`
-		Updated   int64            `json:"updated_at"`
-		Started   int64            `json:"started_at"`
-		Finished  int64            `json:"finished_at"`
-		Deploy    string           `json:"deploy_to"`
-		Commit    string           `json:"commit"`
-		Branch    string           `json:"branch"`
-		Ref       string           `json:"ref"`
-		Refspec   string           `json:"refspec"`
-		Title     string           `json:"title"`
-		Message   string           `json:"message"`
-		Timestamp int64            `json:"timestamp"`
-		Sender    string           `json:"sender"`
-		Author    string           `json:"author"`
-		Avatar    string           `json:"author_avatar"`
-		Email     string           `json:"author_email"`
-		ForgeURL  string           `json:"forge_url"`
-		Reviewer  string           `json:"reviewed_by"`
-		Reviewed  int64            `json:"reviewed_at"`
-		Workflows []*Workflow      `json:"workflows,omitempty"`
+		ID          int64            `json:"id"`
+		Number      int64            `json:"number"`
+		Parent      int64            `json:"parent"`
+		Event       string           `json:"event"`
+		EventReason []string         `json:"event_reason"`
+		Status      string           `json:"status"`
+		Errors      []*PipelineError `json:"errors"`
+		Created     int64            `json:"created"`
+		Updated     int64            `json:"updated"`
+		Started     int64            `json:"started"`
+		Finished    int64            `json:"finished"`
+		Deploy      string           `json:"deploy_to"`
+		Commit      string           `json:"commit"`
+		Branch      string           `json:"branch"`
+		Ref         string           `json:"ref"`
+		Refspec     string           `json:"refspec"`
+		Title       string           `json:"title"`
+		Message     string           `json:"message"`
+		Timestamp   int64            `json:"timestamp"`
+		Sender      string           `json:"sender"`
+		Author      string           `json:"author"`
+		Avatar      string           `json:"author_avatar"`
+		Email       string           `json:"author_email"`
+		ForgeURL    string           `json:"forge_url"`
+		Reviewer    string           `json:"reviewed_by"`
+		Reviewed    int64            `json:"reviewed"`
+		Workflows   []*Workflow      `json:"workflows,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
@@ -104,8 +142,8 @@ type (
 		Name     string            `json:"name"`
 		State    string            `json:"state"`
 		Error    string            `json:"error,omitempty"`
-		Started  int64             `json:"start_time,omitempty"`
-		Stopped  int64             `json:"end_time,omitempty"`
+		Started  int64             `json:"started,omitempty"`
+		Stopped  int64             `json:"finished,omitempty"`
 		AgentID  int64             `json:"agent_id,omitempty"`
 		Platform string            `json:"platform,omitempty"`
 		Environ  map[string]string `json:"environ,omitempty"`
@@ -121,8 +159,8 @@ type (
 		State    string   `json:"state"`
 		Error    string   `json:"error,omitempty"`
 		ExitCode int      `json:"exit_code"`
-		Started  int64    `json:"start_time,omitempty"`
-		Stopped  int64    `json:"end_time,omitempty"`
+		Started  int64    `json:"started,omitempty"`
+		Stopped  int64    `json:"finished,omitempty"`
 		Type     StepType `json:"type,omitempty"`
 	}
 
@@ -145,6 +183,7 @@ type (
 		Value  string   `json:"value,omitempty"`
 		Images []string `json:"images"`
 		Events []string `json:"events"`
+		Note   string   `json:"note"`
 	}
 
 	// Feed represents an item in the user's feed or timeline.

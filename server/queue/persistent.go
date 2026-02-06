@@ -17,12 +17,14 @@ package queue
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // WithTaskStore returns a queue that is backed by the TaskStore. This
@@ -38,20 +40,6 @@ func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
 type persistentQueue struct {
 	Queue
 	store store.Store
-}
-
-// Push pushes a task to the tail of this queue.
-func (q *persistentQueue) Push(c context.Context, task *model.Task) error {
-	if err := q.store.TaskInsert(task); err != nil {
-		return err
-	}
-	err := q.Queue.Push(c, task)
-	if err != nil {
-		if err2 := q.store.TaskDelete(task.ID); err2 != nil {
-			err = errors.Wrapf(err, "delete task '%s' failed: %v", task.ID, err2)
-		}
-	}
-	return err
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
@@ -87,45 +75,37 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f FilterFn) (*m
 	return task, err
 }
 
-// Evict removes a pending task from the queue.
-func (q *persistentQueue) Evict(c context.Context, id string) error {
-	err := q.Queue.Evict(c, id)
-	if err == nil {
-		return q.store.TaskDelete(id)
-	}
-	return err
-}
-
-// EvictAtOnce removes multiple pending tasks from the queue.
-func (q *persistentQueue) EvictAtOnce(c context.Context, ids []string) error {
-	if err := q.Queue.EvictAtOnce(c, ids); err != nil {
-		return err
-	}
-	for _, id := range ids {
-		if err := q.store.TaskDelete(id); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // Error signals the task is done with an error.
 func (q *persistentQueue) Error(c context.Context, id string, err error) error {
 	if err := q.Queue.Error(c, id, err); err != nil {
 		return err
 	}
-	return q.store.TaskDelete(id)
+
+	if deleteErr := q.store.TaskDelete(id); deleteErr != nil {
+		if !errors.Is(deleteErr, types.RecordNotExist) {
+			return deleteErr
+		}
+		log.Debug().Msgf("task %s already removed from store", id)
+	}
+	return nil
 }
 
-// ErrorAtOnce signals multiple tasks are done with an error.
+// ErrorAtOnce signals multiple tasks are done and complete with an error.
+// If still pending they will just get removed from the queue.
 func (q *persistentQueue) ErrorAtOnce(c context.Context, ids []string, err error) error {
 	if err := q.Queue.ErrorAtOnce(c, ids, err); err != nil {
 		return err
 	}
+
+	var errs []error
 	for _, id := range ids {
-		if err := q.store.TaskDelete(id); err != nil {
-			return err
+		if deleteErr := q.store.TaskDelete(id); deleteErr != nil && !errors.Is(deleteErr, types.RecordNotExist) {
+			errs = append(errs, fmt.Errorf("task id [%s]: %w", id, deleteErr))
 		}
+	}
+
+	if len(errs) != 0 {
+		return fmt.Errorf("failed to delete tasks from persistent store: %w", errors.Join(errs...))
 	}
 	return nil
 }

@@ -18,17 +18,19 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"maps"
 
 	"github.com/rs/zerolog/log"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	pipeline_metadata "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
@@ -49,10 +51,34 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
+	var secrets []compiler.Secret
+	for _, sec := range secs {
+		var events []string
+		for _, event := range sec.Events {
+			events = append(events, string(event))
+		}
+
+		secrets = append(secrets, compiler.Secret{
+			Name:           sec.Name,
+			Value:          sec.Value,
+			AllowedPlugins: sec.Images,
+			Events:         events,
+		})
+	}
+
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
+	}
+
+	var registries []compiler.Registry
+	for _, reg := range regs {
+		registries = append(registries, compiler.Registry{
+			Hostname: reg.Address,
+			Username: reg.Username,
+			Password: reg.Password,
+		})
 	}
 
 	if envs == nil {
@@ -67,25 +93,45 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		}
 	}
 
-	for k, v := range currentPipeline.AdditionalVariables {
-		envs[k] = v
-	}
+	maps.Copy(envs, currentPipeline.AdditionalVariables)
 
 	b := stepbuilder.StepBuilder{
-		Repo:  repo,
-		Curr:  currentPipeline,
-		Prev:  prev,
-		Netrc: netrc,
-		Secs:  secs,
-		Regs:  regs,
-		Envs:  envs,
-		Host:  server.Config.Server.Host,
-		Yamls: yamls,
-		Forge: forge,
-		ProxyOpts: compiler.ProxyOptions{
-			NoProxy:    server.Config.Pipeline.Proxy.No,
-			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
-			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
+		Repo:                repo,
+		Curr:                currentPipeline,
+		Prev:                prev,
+		Envs:                envs,
+		Host:                server.Config.Server.Host,
+		Yamls:               yamls,
+		Forge:               forge,
+		TrustedClonePlugins: append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
+		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
+		RepoTrusted: &pipeline_metadata.TrustedConfiguration{
+			Network:  repo.Trusted.Network,
+			Volumes:  repo.Trusted.Volumes,
+			Security: repo.Trusted.Security,
+		},
+		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
+		CompilerOptions: []compiler.Option{
+			compiler.WithLocal(false),
+			compiler.WithRegistry(registries...),
+			compiler.WithSecret(secrets...),
+			compiler.WithProxy(compiler.ProxyOptions{
+				NoProxy:    server.Config.Pipeline.Proxy.No,
+				HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
+				HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
+			}),
+			compiler.WithVolumes(server.Config.Pipeline.Volumes...),
+			compiler.WithNetworks(server.Config.Pipeline.Networks...),
+			compiler.WithOption(
+				compiler.WithNetrc(
+					netrc.Login,
+					netrc.Password,
+					netrc.Machine,
+				),
+				repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
+			),
+			compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
+			compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
 		},
 	}
 	return b.Build()

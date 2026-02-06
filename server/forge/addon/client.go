@@ -25,9 +25,10 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
 // make sure RPC implements forge.Forge.
@@ -40,8 +41,8 @@ func Load(file string) (forge.Forge, error) {
 			pluginKey: &Plugin{},
 		},
 		Cmd: exec.Command(file),
-		Logger: &clientLogger{
-			logger: log.With().Str("addon", file).Logger(),
+		Logger: &logger.AddonClientLogger{
+			Logger: log.With().Str("addon", file).Logger(),
 		},
 	})
 	// TODO: defer client.Kill()
@@ -66,13 +67,19 @@ type RPC struct {
 
 func (g *RPC) Name() string {
 	var resp string
-	_ = g.client.Call("Plugin.Name", nil, &resp)
+	err := g.client.Call("Plugin.Name", []byte{}, &resp)
+	if err != nil {
+		log.Error().Err(err).Msg("addon Plugin.Name call failed")
+	}
 	return resp
 }
 
 func (g *RPC) URL() string {
 	var resp string
-	_ = g.client.Call("Plugin.URL", nil, &resp)
+	err := g.client.Call("Plugin.URL", []byte{}, &resp)
+	if err != nil {
+		log.Error().Err(err).Msg("addon Plugin.URL call failed")
+	}
 	return resp
 }
 
@@ -108,8 +115,11 @@ func (g *RPC) Auth(_ context.Context, token, secret string) (string, error) {
 	return resp, g.client.Call("Plugin.Auth", args, &resp)
 }
 
-func (g *RPC) Teams(_ context.Context, u *model.User) ([]*model.Team, error) {
-	args, err := json.Marshal(modelUserFromModel(u))
+func (g *RPC) Teams(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+	args, err := json.Marshal(&argumentsTeams{
+		U: modelUserFromModel(u),
+		P: p,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -139,16 +149,19 @@ func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteI
 		return nil, err
 	}
 
-	var resp *modelRepo
-	err = json.Unmarshal(jsonResp, resp)
+	var resp modelRepo
+	err = json.Unmarshal(jsonResp, &resp)
 	if err != nil {
 		return nil, err
 	}
 	return resp.asModel(), nil
 }
 
-func (g *RPC) Repos(_ context.Context, u *model.User) ([]*model.Repo, error) {
-	args, err := json.Marshal(modelUserFromModel(u))
+func (g *RPC) Repos(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	args, err := json.Marshal(&argumentsRepos{
+		U: modelUserFromModel(u),
+		P: p,
+	})
 	if err != nil {
 		return nil, err
 	}

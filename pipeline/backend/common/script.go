@@ -18,9 +18,9 @@ import (
 	"encoding/base64"
 )
 
-func GenerateContainerConf(commands []string, goos, workDir string) (env map[string]string, entry []string) {
+func GenerateContainerConf(commands []string, osType, workDir string) (env map[string]string, entry []string) {
 	env = make(map[string]string)
-	if goos == "windows" {
+	if osType == "windows" {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands, workDir)))
 		env["SHELL"] = "powershell.exe"
 		// cspell:disable-next-line

@@ -1,6 +1,9 @@
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 const (
 	pathGlobalRegistries = "%s/api/registries"
@@ -16,10 +19,11 @@ func (c *client) GlobalRegistry(registry string) (*Registry, error) {
 }
 
 // GlobalRegistryList returns a list of all global registries.
-func (c *client) GlobalRegistryList() ([]*Registry, error) {
+func (c *client) GlobalRegistryList(opt RegistryListOptions) ([]*Registry, error) {
 	var out []*Registry
-	uri := fmt.Sprintf(pathGlobalRegistries, c.addr)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathGlobalRegistries, c.addr))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

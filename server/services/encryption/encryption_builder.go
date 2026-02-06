@@ -18,8 +18,8 @@ import (
 	"errors"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/encryption/types"
-	storeTypes "go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
+	storeTypes "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (b builder) getService(keyType string) (types.EncryptionService, error) {
@@ -62,12 +62,12 @@ func (b builder) detectKeyType() (string, error) {
 }
 
 func (b builder) serviceBuilder(keyType string) (types.EncryptionServiceBuilder, error) {
-	switch {
-	case keyType == keyTypeTink:
+	switch keyType {
+	case keyTypeTink:
 		return newTink(b.c, b.store), nil
-	case keyType == keyTypeRaw:
+	case keyTypeRaw:
 		return newAES(b.c, b.store), nil
-	case keyType == keyTypeNone:
+	case keyTypeNone:
 		return &noEncryptionBuilder{}, nil
 	}
 	return nil, fmt.Errorf(errMessageTemplateUnsupportedKeyType, keyType)

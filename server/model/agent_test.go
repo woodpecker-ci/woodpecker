@@ -18,6 +18,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 func TestGenerateNewAgentToken(t *testing.T) {
@@ -36,60 +38,29 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			agentFilterRepoID: "0",
-			agentFilterOrgID:  "0",
+			pipeline.LabelFilterOrg: "0",
 		}, filters)
 	})
 
 	t.Run("GlobalAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  IDNotSet,
-			RepoID: IDNotSet,
+			OrgID: IDNotSet,
 		}
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			agentFilterOrgID:  "*",
-			agentFilterRepoID: "*",
+			pipeline.LabelFilterOrg: "*",
 		}, filters)
 	})
 
 	t.Run("OrgAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  123,
-			RepoID: IDNotSet,
+			OrgID: 123,
 		}
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			agentFilterOrgID:  "123",
-			agentFilterRepoID: "*",
-		}, filters)
-	})
-
-	t.Run("RepoAgent", func(t *testing.T) {
-		agent := &Agent{
-			OrgID:  IDNotSet,
-			RepoID: 456,
-		}
-		filters, err := agent.GetServerLabels()
-		assert.NoError(t, err)
-		assert.Equal(t, map[string]string{
-			agentFilterRepoID: "456",
-			agentFilterOrgID:  "*",
-		}, filters)
-	})
-
-	t.Run("OrgAndRepoAgent", func(t *testing.T) {
-		agent := &Agent{
-			OrgID:  123,
-			RepoID: 456,
-		}
-		filters, err := agent.GetServerLabels()
-		assert.NoError(t, err)
-		assert.Equal(t, map[string]string{
-			agentFilterOrgID:  "123",
-			agentFilterRepoID: "456",
+			pipeline.LabelFilterOrg: "123",
 		}, filters)
 	})
 }
@@ -105,8 +76,7 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 
 	t.Run("GlobalAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  IDNotSet,
-			RepoID: IDNotSet,
+			OrgID: IDNotSet,
 		}
 
 		assert.True(t, agent.CanAccessRepo(repo))
@@ -114,33 +84,7 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 
 	t.Run("OrgAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  12,
-			RepoID: IDNotSet,
-		}
-		assert.True(t, agent.CanAccessRepo(repo))
-		assert.False(t, agent.CanAccessRepo(otherRepo))
-	})
-
-	t.Run("RepoAgent", func(t *testing.T) {
-		agent := &Agent{
-			OrgID:  12,
-			RepoID: 123,
-		}
-		assert.True(t, agent.CanAccessRepo(repo))
-		assert.False(t, agent.CanAccessRepo(otherRepo))
-	})
-
-	t.Run("OrgAndRepoAgent", func(t *testing.T) {
-		agent := &Agent{
-			OrgID:  12,
-			RepoID: 456,
-		}
-		assert.False(t, agent.CanAccessRepo(repo))
-		assert.False(t, agent.CanAccessRepo(otherRepo))
-
-		agent = &Agent{
-			OrgID:  12,
-			RepoID: 123,
+			OrgID: 12,
 		}
 		assert.True(t, agent.CanAccessRepo(repo))
 		assert.False(t, agent.CanAccessRepo(otherRepo))

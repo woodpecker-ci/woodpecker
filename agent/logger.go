@@ -20,10 +20,11 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/agent/log"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
 func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
@@ -35,6 +36,7 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 			Logger()
 
 		uploads.Add(1)
+		defer uploads.Done()
 
 		var secrets []string
 		for _, secret := range workflow.Config.Secrets {
@@ -44,13 +46,11 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 		logger.Debug().Msg("log stream opened")
 
 		logStream := log.NewLineWriter(r.client, step.UUID, secrets...)
-		if err := log.CopyLineByLine(logStream, rc, pipeline.MaxLogLineLength); err != nil {
+		if err := pipeline_utils.CopyLineByLine(logStream, rc, pipeline.MaxLogLineLength); err != nil {
 			logger.Error().Err(err).Msg("copy limited logStream part")
 		}
 
 		logger.Debug().Msg("log stream copied, close ...")
-		uploads.Done()
-
 		return nil
 	}
 }

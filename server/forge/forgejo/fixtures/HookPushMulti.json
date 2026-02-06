@@ -1,0 +1,184 @@
+{
+  "ref": "refs/heads/main",
+  "before": "6efcf5b7c98f3e7a491675164b7a2e7acac27941",
+  "after": "29be01c073851cf0db0c6a466e396b725a670453",
+  "compare_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/compare/6efcf5b7c98f3e7a491675164b7a2e7acac27941...29be01c073851cf0db0c6a466e396b725a670453",
+  "commits": [
+    {
+      "id": "29be01c073851cf0db0c6a466e396b725a670453",
+      "message": "add some text\n",
+      "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29be01c073851cf0db0c6a466e396b725a670453",
+      "author": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "committer": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "verification": null,
+      "timestamp": "2024-02-22T00:18:07+01:00",
+      "added": [],
+      "removed": [],
+      "modified": ["aaa"]
+    },
+    {
+      "id": "29cd95250404bd007c13b03eabe521196bab98a5",
+      "message": "rm a a file\n",
+      "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29cd95250404bd007c13b03eabe521196bab98a5",
+      "author": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "committer": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "verification": null,
+      "timestamp": "2024-02-22T00:17:49+01:00",
+      "added": [],
+      "removed": ["aa"],
+      "modified": []
+    },
+    {
+      "id": "93787b87b3134d0d62c7a24c1ea5b1b6fd17ca91",
+      "message": "add some a files\n",
+      "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/93787b87b3134d0d62c7a24c1ea5b1b6fd17ca91",
+      "author": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "committer": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "verification": null,
+      "timestamp": "2024-02-22T00:17:33+01:00",
+      "added": ["aa", "aaa"],
+      "removed": [],
+      "modified": []
+    }
+  ],
+  "total_commits": 3,
+  "head_commit": {
+    "id": "29be01c073851cf0db0c6a466e396b725a670453",
+    "message": "add some text\n",
+    "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29be01c073851cf0db0c6a466e396b725a670453",
+    "author": {
+      "name": "6543",
+      "email": "6543@obermui.de",
+      "username": "test-user"
+    },
+    "committer": {
+      "name": "6543",
+      "email": "6543@obermui.de",
+      "username": "test-user"
+    },
+    "verification": null,
+    "timestamp": "2024-02-22T00:18:07+01:00",
+    "added": [],
+    "removed": [],
+    "modified": ["aaa"]
+  },
+  "repository": {
+    "id": 6,
+    "owner": {
+      "id": 2,
+      "login": "Test-CI",
+      "login_name": "",
+      "full_name": "",
+      "email": "",
+      "avatar_url": "http://127.0.0.1:3000/avatars/5b0a83c2185b3cb1ebceb11062d6c2eb",
+      "language": "",
+      "is_admin": false,
+      "last_login": "0001-01-01T00:00:00Z",
+      "created": "2023-07-31T19:13:48+02:00",
+      "restricted": false,
+      "active": false,
+      "prohibit_login": false,
+      "location": "",
+      "website": "",
+      "description": "",
+      "visibility": "public",
+      "followers_count": 0,
+      "following_count": 0,
+      "starred_repos_count": 0,
+      "username": "Test-CI"
+    },
+    "name": "multi-line-secrets",
+    "full_name": "Test-CI/multi-line-secrets",
+    "description": "",
+    "empty": false,
+    "private": false,
+    "fork": false,
+    "template": false,
+    "parent": null,
+    "mirror": false,
+    "size": 35,
+    "language": "",
+    "languages_url": "http://127.0.0.1:3000/api/v1/repos/Test-CI/multi-line-secrets/languages",
+    "html_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets",
+    "url": "http://127.0.0.1:3000/api/v1/repos/Test-CI/multi-line-secrets",
+    "link": "",
+    "ssh_url": "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
+    "clone_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
+    "original_url": "",
+    "website": "",
+    "watchers_count": 2,
+    "open_issues_count": 1,
+    "default_branch": "main",
+    "archived": false,
+    "created_at": "2023-10-31T19:53:15+01:00",
+    "updated_at": "2023-11-02T06:16:34+01:00",
+    "archived_at": "1970-01-01T01:00:00+01:00",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "has_issues": true,
+    "internal_tracker": {
+      "enable_time_tracker": true,
+      "allow_only_contributors_to_track_time": true,
+      "enable_issue_dependencies": true
+    },
+    "avatar_url": "",
+    "object_format_name": ""
+  },
+  "pusher": {
+    "id": 1,
+    "login": "test-user",
+    "login_name": "",
+    "full_name": "",
+    "email": "test@noreply.localhost",
+    "avatar_url": "http://127.0.0.1:3000/avatars/dd46a756faad4727fb679320751f6dea",
+    "is_admin": false,
+    "last_login": "0001-01-01T00:00:00Z",
+    "created": "2023-07-31T19:13:05+02:00",
+    "prohibit_login": false,
+    "description": "",
+    "visibility": "public",
+    "username": "test-user"
+  },
+  "sender": {
+    "id": 1,
+    "login": "test-user",
+    "login_name": "",
+    "full_name": "",
+    "email": "test@noreply.localhost",
+    "avatar_url": "http://127.0.0.1:3000/avatars/dd46a756faad4727fb679320751f6dea",
+    "is_admin": false,
+    "last_login": "0001-01-01T00:00:00Z",
+    "created": "2023-07-31T19:13:05+02:00",
+    "prohibit_login": false,
+    "description": "",
+    "visibility": "public",
+    "username": "test-user"
+  }
+}

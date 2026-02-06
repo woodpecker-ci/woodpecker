@@ -14,9 +14,7 @@
 
 package registry
 
-import "go.woodpecker-ci.org/woodpecker/v2/server/model"
-
-//go:generate mockery --name Service --output mocks --case underscore
+import "go.woodpecker-ci.org/woodpecker/v3/server/model"
 
 // Service defines a service for managing registries.
 type Service interface {

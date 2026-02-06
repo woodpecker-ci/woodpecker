@@ -18,7 +18,9 @@ import (
 	"encoding/base32"
 	"fmt"
 
-	"github.com/gorilla/securecookie"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 type Agent struct {
@@ -43,9 +45,7 @@ type Agent struct {
 } //	@name Agent
 
 const (
-	IDNotSet          = -1
-	agentFilterOrgID  = "org-id"
-	agentFilterRepoID = "repo-id"
+	IDNotSet = -1
 )
 
 // TableName return database table name for xorm.
@@ -58,7 +58,7 @@ func (a *Agent) IsSystemAgent() bool {
 }
 
 func GenerateNewAgentToken() string {
-	return base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32))
+	return base32.StdEncoding.EncodeToString(random.GetRandomBytes(32))
 }
 
 func (a *Agent) GetServerLabels() (map[string]string, error) {
@@ -66,14 +66,14 @@ func (a *Agent) GetServerLabels() (map[string]string, error) {
 
 	// enforce filters for user and organization agents
 	if a.OrgID != IDNotSet {
-		filters[agentFilterOrgID] = fmt.Sprintf("%d", a.OrgID)
+		filters[pipeline.LabelFilterOrg] = fmt.Sprintf("%d", a.OrgID)
 	} else {
-		filters[agentFilterOrgID] = "*"
+		filters[pipeline.LabelFilterOrg] = "*"
 	}
 	if a.RepoID != IDNotSet {
-		filters[agentFilterRepoID] = fmt.Sprintf("%d", a.RepoID)
+		filters[pipeline.LabelRepoID] = fmt.Sprintf("%d", a.RepoID)
 	} else {
-		filters[agentFilterRepoID] = "*"
+		filters[pipeline.LabelRepoID] = "*"
 	}
 
 	return filters, nil
