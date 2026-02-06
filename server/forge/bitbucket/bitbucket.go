@@ -430,6 +430,14 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with "OAuth2 access token expired" error.
+	_store, ok := store.TryFromContext(ctx)
+	if ok {
+		forge.Refresh(ctx, c, _store, u)
+	}
+
 	switch pl.Event {
 	case model.EventPush:
 		// List only the latest push changes

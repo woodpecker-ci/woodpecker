@@ -601,7 +601,7 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 	org, _, orgErr := client.GetOrg(owner)
 	if orgErr == nil && org != nil {
 		return &model.Org{
-			Name:    org.UserName,
+			Name:    org.Name,
 			Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
 		}, nil
 	}

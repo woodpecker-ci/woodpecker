@@ -188,12 +188,12 @@ func Test_toPerm(t *testing.T) {
 
 func Test_toTeam(t *testing.T) {
 	from := &gitea.Organization{
-		UserName:  "woodpecker",
+		Name:      "woodpecker",
 		AvatarURL: "/avatars/1",
 	}
 
 	to := toTeam(from, "http://localhost:80")
-	assert.Equal(t, from.UserName, to.Login)
+	assert.Equal(t, from.Name, to.Login)
 	assert.Equal(t, "http://localhost:80/avatars/1", to.Avatar)
 }
 

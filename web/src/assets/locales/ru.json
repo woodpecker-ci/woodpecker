@@ -353,7 +353,9 @@
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
                 "type_url": "URL",
-                "events": "События"
+                "events": "События",
+                "workflow": "Рабочий процесс",
+                "step": "Шаг"
             },
             "crons": {
                 "add": "Добавить задачу cron",
@@ -750,5 +752,7 @@
     "extensions_signatures_public_key_description": "Этот открытый ключ должен использоваться вашими расширениями для проверки запросов, отправляемых Woodpecker.",
     "extensions_configuration_saved": "Настройки расширений сохранены",
     "disabled": "Отключено",
-    "config_extension_endpoint": "Адрес конфигурации расширения"
+    "config_extension_endpoint": "Адрес конфигурации расширения",
+    "config_extension_exclusive_desc": "Отключает все другие способы получения конфигурации, в том числе от платформы.",
+    "config_extension_exclusive": "Эксклюзивно"
 }

@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v81/github"
+	"github.com/google/go-github/v82/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -695,6 +695,11 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return nil, err
 	}
 
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with an authentication error.
+	forge.Refresh(ctx, c, _store, user)
+
 	gh := c.newClientToken(ctx, user.AccessToken)
 	fileList := make([]string, 0, 16)
 
@@ -731,6 +736,11 @@ func (c *client) getCommitAndMessageFromTag(ctx context.Context, repo *model.Rep
 	if err != nil {
 		return nil, err
 	}
+
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with an authentication error.
+	forge.Refresh(ctx, c, _store, user)
 
 	gh := c.newClientToken(ctx, user.AccessToken)
 
@@ -812,6 +822,11 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 	if err != nil {
 		return nil, err
 	}
+
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with an authentication error.
+	forge.Refresh(ctx, c, _store, user)
 
 	gh := c.newClientToken(ctx, user.AccessToken)
 	fileList := make([]string, 0, 16)
