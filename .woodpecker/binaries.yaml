@@ -8,7 +8,7 @@ when:
 
 variables:
   - &golang_image 'docker.io/golang:1.25'
-  - &node_image 'docker.io/node:23-alpine'
+  - &node_image 'docker.io/node:24-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.25.x'
 
 # cspell:words bindata netgo

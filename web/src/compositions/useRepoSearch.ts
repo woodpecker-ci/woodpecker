@@ -17,7 +17,7 @@ function repoCompare(a: Repo, b: Repo) {
 export function useRepoSearch(repos: Ref<Repo[] | undefined>, search: Ref<string>) {
   const searchIndex = computed(
     () =>
-      new Fuse(repos.value || [], {
+      new Fuse(repos.value ?? [], {
         includeScore: true,
         keys: ['name', 'owner'],
         threshold: 0.4,

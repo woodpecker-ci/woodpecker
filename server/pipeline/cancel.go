@@ -39,31 +39,17 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return &ErrNotFound{Msg: err.Error()}
 	}
 
-	// First cancel/evict steps in the queue in one go
-	var (
-		stepsToCancel []string
-		stepsToEvict  []string
-	)
-	for _, workflow := range workflows {
-		if workflow.State == model.StatusRunning {
-			stepsToCancel = append(stepsToCancel, fmt.Sprint(workflow.ID))
-		}
-		if workflow.State == model.StatusPending {
-			stepsToEvict = append(stepsToEvict, fmt.Sprint(workflow.ID))
+	// First cancel/evict workflows in the queue in one go
+	var workflowsToCancel []string
+	for _, w := range workflows {
+		if w.State == model.StatusRunning || w.State == model.StatusPending {
+			workflowsToCancel = append(workflowsToCancel, fmt.Sprint(w.ID))
 		}
 	}
 
-	if len(stepsToEvict) != 0 {
-		if err := server.Config.Services.Queue.EvictAtOnce(ctx, stepsToEvict); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", stepsToEvict)
-		}
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, stepsToEvict, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", stepsToEvict)
-		}
-	}
-	if len(stepsToCancel) != 0 {
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, stepsToCancel, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", stepsToCancel)
+	if len(workflowsToCancel) != 0 {
+		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, workflowsToCancel, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", workflowsToCancel)
 		}
 	}
 

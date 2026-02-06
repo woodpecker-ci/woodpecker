@@ -19,15 +19,13 @@ import (
 	"maps"
 	"path"
 	"slices"
-	"strings"
 
-	"github.com/bmatcuk/doublestar/v4"
 	"github.com/expr-lang/expr"
-	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
 )
 
 type (
@@ -38,38 +36,18 @@ type (
 	}
 
 	Constraint struct {
-		Ref      List
-		Repo     List
-		Instance List
-		Platform List
-		Branch   List
-		Cron     List
-		Status   List
-		Matrix   Map
-		Local    yamlBaseTypes.BoolTrue
-		Path     Path
-		Evaluate string `yaml:"evaluate,omitempty"`
-		Event    yamlBaseTypes.StringOrSlice
-	}
-
-	// List defines a runtime constraint for exclude & include string slices.
-	List struct {
-		Include []string
-		Exclude []string
-	}
-
-	// Map defines a runtime constraint for exclude & include map strings.
-	Map struct {
-		Include map[string]string
-		Exclude map[string]string
-	}
-
-	// Path defines a runtime constrain for exclude & include paths.
-	Path struct {
-		Include       []string
-		Exclude       []string
-		IgnoreMessage string                 `yaml:"ignore_message,omitempty"`
-		OnEmpty       yamlBaseTypes.BoolTrue `yaml:"on_empty,omitempty"`
+		Ref      List                        `yaml:"ref,omitempty"`
+		Repo     List                        `yaml:"repo,omitempty"`
+		Instance List                        `yaml:"instance,omitempty"`
+		Platform List                        `yaml:"platform,omitempty"`
+		Branch   List                        `yaml:"branch,omitempty"`
+		Cron     List                        `yaml:"cron,omitempty"`
+		Status   List                        `yaml:"status,omitempty"`
+		Matrix   Map                         `yaml:"matrix,omitempty"`
+		Local    optional.Option[bool]       `yaml:"local,omitempty"`
+		Path     Path                        `yaml:"path,omitempty"`
+		Evaluate string                      `yaml:"evaluate,omitempty"`
+		Event    yamlBaseTypes.StringOrSlice `yaml:"event,omitempty"`
 	}
 )
 
@@ -125,7 +103,7 @@ func (when *When) IncludesStatusSuccess() bool {
 // False if (any) non local.
 func (when *When) IsLocal() bool {
 	for _, c := range when.Constraints {
-		if !c.Local.Bool() {
+		if !c.Local.ValueOrDefault(true) {
 			return false
 		}
 	}
@@ -151,6 +129,25 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+// MarshalYAML implements custom Yaml marshaling.
+func (when When) MarshalYAML() (any, error) {
+	// clean up local if true make it none as we will default to true
+	for i := range when.Constraints {
+		if when.Constraints[i].Local.ValueOrDefault(true) {
+			when.Constraints[i].Local = optional.None[bool]()
+		}
+	}
+
+	switch len(when.Constraints) {
+	case 0:
+		return nil, nil
+	case 1:
+		return when.Constraints[0], nil
+	default:
+		return when.Constraints, nil
+	}
 }
 
 // Match returns true if all constraints match the given input. If a single
@@ -203,204 +200,4 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 	}
 
 	return match, nil
-}
-
-// IsEmpty return true if a constraint has no conditions.
-func (c List) IsEmpty() bool {
-	return len(c.Include) == 0 && len(c.Exclude) == 0
-}
-
-// Match returns true if the string matches the include patterns and does not
-// match any of the exclude patterns.
-func (c *List) Match(v string) bool {
-	if c.Excludes(v) {
-		return false
-	}
-	if c.Includes(v) {
-		return true
-	}
-	if len(c.Include) == 0 {
-		return true
-	}
-	return false
-}
-
-// Includes returns true if the string matches the include patterns.
-func (c *List) Includes(v string) bool {
-	for _, pattern := range c.Include {
-		if ok, _ := doublestar.Match(pattern, v); ok {
-			return true
-		}
-	}
-	return false
-}
-
-// Excludes returns true if the string matches the exclude patterns.
-func (c *List) Excludes(v string) bool {
-	for _, pattern := range c.Exclude {
-		if ok, _ := doublestar.Match(pattern, v); ok {
-			return true
-		}
-	}
-	return false
-}
-
-// UnmarshalYAML unmarshal the constraint.
-func (c *List) UnmarshalYAML(value *yaml.Node) error {
-	out1 := struct {
-		Include yamlBaseTypes.StringOrSlice
-		Exclude yamlBaseTypes.StringOrSlice
-	}{}
-
-	var out2 yamlBaseTypes.StringOrSlice
-
-	err1 := value.Decode(&out1)
-	err2 := value.Decode(&out2)
-
-	c.Exclude = out1.Exclude
-	c.Include = append( //nolint:gocritic
-		out1.Include,
-		out2...,
-	)
-
-	if err1 != nil && err2 != nil {
-		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("could not parse condition: %s: %w", y, multierr.Append(err1, err2))
-	}
-
-	return nil
-}
-
-// Match returns true if the params matches the include key values and does not
-// match any of the exclude key values.
-func (c *Map) Match(params map[string]string) bool {
-	// when no includes or excludes automatically match
-	if len(c.Include) == 0 && len(c.Exclude) == 0 {
-		return true
-	}
-
-	// Exclusions are processed first. So we can include everything and then
-	// selectively include others.
-	if len(c.Exclude) != 0 {
-		var matches int
-
-		for key, val := range c.Exclude {
-			if ok, _ := doublestar.Match(val, params[key]); ok {
-				matches++
-			}
-		}
-		if matches == len(c.Exclude) {
-			return false
-		}
-	}
-	for key, val := range c.Include {
-		if ok, _ := doublestar.Match(val, params[key]); !ok {
-			return false
-		}
-	}
-	return true
-}
-
-// UnmarshalYAML unmarshal the constraint map.
-func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
-	out1 := struct {
-		Include map[string]string
-		Exclude map[string]string
-	}{
-		Include: map[string]string{},
-		Exclude: map[string]string{},
-	}
-
-	out2 := map[string]string{}
-
-	_ = unmarshal(&out1) // it contains include and exclude statement
-	_ = unmarshal(&out2) // it contains no include/exclude statement, assume include as default
-
-	c.Include = out1.Include
-	c.Exclude = out1.Exclude
-	for k, v := range out2 {
-		c.Include[k] = v
-	}
-	return nil
-}
-
-// UnmarshalYAML unmarshal the constraint.
-func (c *Path) UnmarshalYAML(value *yaml.Node) error {
-	out1 := struct {
-		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
-		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
-		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
-		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
-	}{}
-
-	var out2 yamlBaseTypes.StringOrSlice
-
-	err1 := value.Decode(&out1)
-	err2 := value.Decode(&out2)
-
-	c.Exclude = out1.Exclude
-	c.IgnoreMessage = out1.IgnoreMessage
-	c.OnEmpty = out1.OnEmpty
-	c.Include = append( //nolint:gocritic
-		out1.Include,
-		out2...,
-	)
-
-	if err1 != nil && err2 != nil {
-		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("could not parse condition: %s", y)
-	}
-
-	return nil
-}
-
-// Match returns true if file paths in string slice matches the include and not exclude patterns
-// or if commit message contains ignore message.
-func (c *Path) Match(v []string, message string) bool {
-	// ignore file pattern matches if the commit message contains a pattern
-	if len(c.IgnoreMessage) > 0 && strings.Contains(strings.ToLower(message), strings.ToLower(c.IgnoreMessage)) {
-		return true
-	}
-
-	// return value based on 'on_empty', if there are no commit files (empty commit)
-	if len(v) == 0 {
-		return c.OnEmpty.Bool()
-	}
-
-	if len(c.Exclude) > 0 && c.Excludes(v) {
-		return false
-	}
-	if len(c.Include) > 0 && !c.Includes(v) {
-		return false
-	}
-	return true
-}
-
-// Includes returns true if the string matches any of the include patterns.
-func (c *Path) Includes(v []string) bool {
-	for _, pattern := range c.Include {
-		for _, file := range v {
-			if ok, _ := doublestar.Match(pattern, file); ok {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// Excludes returns true if all of the strings match any of the exclude patterns.
-func (c *Path) Excludes(v []string) bool {
-	for _, file := range v {
-		matched := false
-		for _, pattern := range c.Exclude {
-			if ok, _ := doublestar.Match(pattern, file); ok {
-				matched = true
-				break
-			}
-		}
-		if !matched {
-			return false
-		}
-	}
-	return true
 }

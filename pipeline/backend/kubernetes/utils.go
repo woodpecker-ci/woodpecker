@@ -24,18 +24,38 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	client_cmd "k8s.io/client-go/tools/clientcmd"
-
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
+
+const maxDNSLabelLen = 63
 
 var (
 	dnsPattern = regexp.MustCompile(`^[a-z0-9]` + // must start with
 		`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
 		`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
 	)
+	dnsLabelPattern         = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)
 	dnsDisallowedCharacters = regexp.MustCompile(`[^-^.a-z0-9]+`)
 	ErrDNSPatternInvalid    = errors.New("name is not a valid kubernetes DNS name")
 )
+
+func getHostnameOrEmpty(name string) string {
+	clean, _ := toDNSName(name)
+	if clean == "" {
+		clean = strings.ToLower(name)
+	}
+	clean = strings.ReplaceAll(clean, ".", "-")
+
+	if len(clean) > maxDNSLabelLen {
+		clean = clean[:maxDNSLabelLen]
+	}
+
+	clean = strings.Trim(clean, "-")
+
+	if dnsLabelPattern.MatchString(clean) {
+		return clean
+	}
+	return ""
+}
 
 func dnsName(i string) (string, error) {
 	res := strings.ToLower(strings.ReplaceAll(i, "_", "-"))
@@ -103,10 +123,6 @@ func getClientInsideOfCluster() (kubernetes.Interface, error) {
 	}
 
 	return kubernetes.NewForConfig(config)
-}
-
-func isService(step *types.Step) bool {
-	return step.Type == types.StepTypeService || (step.Detached && dnsPattern.FindStringIndex(step.Name) != nil)
 }
 
 func newBool(val bool) *bool {

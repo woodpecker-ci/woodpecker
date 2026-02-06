@@ -32,6 +32,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -49,6 +51,7 @@ type Opts struct {
 }
 
 type config struct {
+	forgeID       int64
 	api           string
 	url           string
 	oAuthClientID string
@@ -57,8 +60,9 @@ type config struct {
 
 // New returns a new forge Configuration for integrating with the Bitbucket
 // repository hosting service at https://bitbucket.org
-func New(opts *Opts) (forge.Forge, error) {
+func New(id int64, opts *Opts) (forge.Forge, error) {
 	return &config{
+		forgeID:       id,
 		api:           DefaultAPI,
 		url:           DefaultURL,
 		oAuthClientID: opts.OAuthClientID,
@@ -166,7 +170,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	client := c.newClient(ctx, u)
 	repo, err := client.FindRepo(owner, name)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
 	}
 	perm, err := client.GetPermission(repo.FullName)
 	if err != nil {
@@ -178,6 +182,12 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
 func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	// we merge data from different sources
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	setListOptions(p)
 
 	client := c.newClient(ctx, u)
@@ -319,6 +329,11 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClient(ctx, u)
 
+	// check repo exists
+	if _, err := c.Repo(ctx, u, r.ForgeRemoteID, r.Owner, r.Name); err != nil {
+		return fmt.Errorf("repo online check failed: %w", err)
+	}
+
 	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
 		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{
 			Page: page,
@@ -399,14 +414,43 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	repo, pl, err := parseHook(req)
+	pr, repo, pl, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	u, err := common.RepoUserForgeID(ctx, repo.ForgeRemoteID)
+	u, err := common.RepoUserForgeID(ctx, c.forgeID, repo.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with "OAuth2 access token expired" error.
+	_store, ok := store.TryFromContext(ctx)
+	if ok {
+		forge.Refresh(ctx, c, _store, u)
+	}
+
+	switch pl.Event {
+	case model.EventPush:
+		// List only the latest push changes
+		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
+		if err != nil {
+			return nil, nil, err
+		}
+	case model.EventPull:
+		client := c.newClient(ctx, u)
+
+		if pr == nil {
+			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
+		}
+
+		// List all changes between source & destination branch
+		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.PullRequest.Source.Branch.Name, pr.PullRequest.Dest.Branch.Name))
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
@@ -449,7 +493,7 @@ func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client 
 
 // helper function to return the bitbucket oauth2 client.
 func (c *config) newClientToken(ctx context.Context, accessToken, refreshToken string) *internal.Client {
-	return internal.NewClientToken(
+	client := internal.NewClientToken(
 		ctx,
 		c.api,
 		accessToken,
@@ -459,6 +503,8 @@ func (c *config) newClientToken(ctx context.Context, accessToken, refreshToken s
 			RefreshToken: refreshToken,
 		},
 	)
+	client.Client = httputil.WrapClient(client.Client, "forge-bitbucket")
+	return client
 }
 
 // helper function to return the bitbucket oauth2 config.

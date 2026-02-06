@@ -146,8 +146,8 @@ func TestRepoList(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo3))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1},
-		{UserID: user.ID, Repo: repo2},
+		{UserID: user.ID, RepoID: repo1.ID},
+		{UserID: user.ID, RepoID: repo2.ID},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
@@ -234,10 +234,10 @@ func TestOwnedRepoList(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo4))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
-		{UserID: user.ID, Repo: repo2, Push: false, Admin: true},
-		{UserID: user.ID, Repo: repo3},
-		{UserID: user.ID, Repo: repo4},
+		{UserID: user.ID, RepoID: repo1.ID, Push: true, Admin: false},
+		{UserID: user.ID, RepoID: repo2.ID, Push: false, Admin: true},
+		{UserID: user.ID, RepoID: repo3.ID},
+		{UserID: user.ID, RepoID: repo4.ID},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
@@ -380,7 +380,7 @@ func TestRepoRedirection(t *testing.T) {
 	}))
 
 	// test redirection from old repo name
-	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test")
+	repoFromStore, err := store.GetRepoNameFallback(0, "1", "bradrydzewski/test")
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repoUpdated.FullName)
 
@@ -394,7 +394,7 @@ func TestRepoRedirection(t *testing.T) {
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
 
-	repoFromStore, err = store.GetRepoNameFallback("", "bradrydzewski/test-no-forge-id")
+	repoFromStore, err = store.GetRepoNameFallback(0, "", "bradrydzewski/test-no-forge-id")
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repo.FullName)
 }

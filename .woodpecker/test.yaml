@@ -55,7 +55,7 @@ steps:
   lint:
     depends_on:
       - vendor
-    image: *golang_image
+    image: golangci/golangci-lint:v2.8.0
     commands:
       - make lint
     when: *when
@@ -73,7 +73,7 @@ steps:
   lint-license-header:
     image: *golang_image
     commands:
-      - go install github.com/google/addlicense@latest # cspell:words addlicense
+      - make install-addlicense # cspell:words addlicense
       - 'addlicense -check -ignore "vendor/**" **/*.go'
     when: *when
 
@@ -127,7 +127,7 @@ steps:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.1.6
+    image: docker.io/woodpeckerci/plugin-codecov:2.2.2
     settings:
       files:
         - agent-coverage.out
@@ -151,7 +151,7 @@ services:
     when: *when
 
   mysql:
-    image: docker.io/mysql:9.4.0
+    image: docker.io/mysql:9.6.0
     ports: ['3306']
     environment:
       MYSQL_DATABASE: test

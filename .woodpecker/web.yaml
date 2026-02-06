@@ -5,7 +5,7 @@ when:
       - release/*
 
 variables:
-  - &node_image 'docker.io/node:23-alpine'
+  - &node_image 'docker.io/node:24-alpine'
   - &when
     path:
       # related config files
