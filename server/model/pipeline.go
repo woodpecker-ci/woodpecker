@@ -88,6 +88,6 @@ type PipelineOptions struct {
 } //	@name	PipelineOptions
 
 type CancelInfo struct {
-	CancelByUser string `json:"cancel_by_user,omitempty"`
+	CanceledByUser string `json:"canceled_by_user,omitempty"`
 	SupersededBy int64  `json:"superseded_by,omitempty"`
 } //	@name	CancelInfo
