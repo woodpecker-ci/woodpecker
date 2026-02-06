@@ -49,8 +49,8 @@
               # docs
               graphviz
 
-              # sbom
-              syft
+              # security / sbom
+              trivy
             ];
             CFLAGS = "-I${pkgs.glibc.dev}/include";
             LDFLAGS = "-L${pkgs.glibc}/lib";
