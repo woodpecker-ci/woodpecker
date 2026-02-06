@@ -29,7 +29,7 @@ import (
 )
 
 // Cancel the pipeline and returns the status.
-func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *model.Repo, user *model.User, pipeline *model.Pipeline) error {
+func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *model.Repo, user *model.User, pipeline *model.Pipeline, cancelReason string) error {
 	if pipeline.Status != model.StatusRunning && pipeline.Status != model.StatusPending && pipeline.Status != model.StatusBlocked {
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
@@ -70,7 +70,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		}
 	}
 
-	killedPipeline, err := UpdateToStatusKilled(store, *pipeline)
+	killedPipeline, err := UpdateToStatusKilled(store, *pipeline, cancelReason)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
@@ -133,7 +133,7 @@ func cancelPreviousPipelines(
 			continue
 		}
 
-		if err = Cancel(ctx, _forge, _store, repo, user, active); err != nil {
+		if err = Cancel(ctx, _forge, _store, repo, user, active, fmt.Sprintf("Superseded by pipeline #%d", pipeline.Number)); err != nil {
 			log.Error().
 				Err(err).
 				Str("ref", active.Ref).

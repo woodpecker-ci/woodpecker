@@ -48,6 +48,7 @@ type Pipeline struct {
 	ForgeURL             string                 `json:"forge_url"               xorm:"forge_url"`
 	Reviewer             string                 `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed             int64                  `json:"reviewed"                xorm:"reviewed"`
+	CancelReason         string                 `json:"cancel_reason,omitempty" xorm:"cancel_reason"`
 	Workflows            []*Workflow            `json:"workflows,omitempty"     xorm:"-"`
 	ChangedFiles         []string               `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables  map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
