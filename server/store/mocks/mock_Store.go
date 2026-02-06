@@ -2090,12 +2090,12 @@ func (_c *MockStore_GetPipelineLastByBranch_Call) RunAndReturn(run func(repo *mo
 	return _c
 }
 
-// GetPipelineLastByPull provides a mock function for the type MockStore
-func (_mock *MockStore) GetPipelineLastByPull(repo *model.Repo, s string) (*model.Pipeline, error) {
+// GetPipelineLastByForgeURL provides a mock function for the type MockStore
+func (_mock *MockStore) GetPipelineLastByForgeURL(repo *model.Repo, s string) (*model.Pipeline, error) {
 	ret := _mock.Called(repo, s)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetPipelineLastByPull")
+		panic("no return value specified for GetPipelineLastByForgeURL")
 	}
 
 	var r0 *model.Pipeline
@@ -2118,19 +2118,19 @@ func (_mock *MockStore) GetPipelineLastByPull(repo *model.Repo, s string) (*mode
 	return r0, r1
 }
 
-// MockStore_GetPipelineLastByPull_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPipelineLastByPull'
-type MockStore_GetPipelineLastByPull_Call struct {
+// MockStore_GetPipelineLastByForgeURL_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPipelineLastByForgeURL'
+type MockStore_GetPipelineLastByForgeURL_Call struct {
 	*mock.Call
 }
 
-// GetPipelineLastByPull is a helper method to define mock.On call
+// GetPipelineLastByForgeURL is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - s string
-func (_e *MockStore_Expecter) GetPipelineLastByPull(repo interface{}, s interface{}) *MockStore_GetPipelineLastByPull_Call {
-	return &MockStore_GetPipelineLastByPull_Call{Call: _e.mock.On("GetPipelineLastByPull", repo, s)}
+func (_e *MockStore_Expecter) GetPipelineLastByForgeURL(repo interface{}, s interface{}) *MockStore_GetPipelineLastByForgeURL_Call {
+	return &MockStore_GetPipelineLastByForgeURL_Call{Call: _e.mock.On("GetPipelineLastByForgeURL", repo, s)}
 }
 
-func (_c *MockStore_GetPipelineLastByPull_Call) Run(run func(repo *model.Repo, s string)) *MockStore_GetPipelineLastByPull_Call {
+func (_c *MockStore_GetPipelineLastByForgeURL_Call) Run(run func(repo *model.Repo, s string)) *MockStore_GetPipelineLastByForgeURL_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *model.Repo
 		if args[0] != nil {
@@ -2148,12 +2148,12 @@ func (_c *MockStore_GetPipelineLastByPull_Call) Run(run func(repo *model.Repo, s
 	return _c
 }
 
-func (_c *MockStore_GetPipelineLastByPull_Call) Return(pipeline *model.Pipeline, err error) *MockStore_GetPipelineLastByPull_Call {
+func (_c *MockStore_GetPipelineLastByForgeURL_Call) Return(pipeline *model.Pipeline, err error) *MockStore_GetPipelineLastByForgeURL_Call {
 	_c.Call.Return(pipeline, err)
 	return _c
 }
 
-func (_c *MockStore_GetPipelineLastByPull_Call) RunAndReturn(run func(repo *model.Repo, s string) (*model.Pipeline, error)) *MockStore_GetPipelineLastByPull_Call {
+func (_c *MockStore_GetPipelineLastByForgeURL_Call) RunAndReturn(run func(repo *model.Repo, s string) (*model.Pipeline, error)) *MockStore_GetPipelineLastByForgeURL_Call {
 	_c.Call.Return(run)
 	return _c
 }

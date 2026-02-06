@@ -56,6 +56,7 @@ func TestPipelines(t *testing.T) {
 		RepoID: repo.ID,
 		Status: model.StatusSuccess,
 		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		Event:  model.EventPush,
 		Branch: "some-branch",
 	}
 	err = store.CreatePipeline(&pipeline)
@@ -76,10 +77,9 @@ func TestPipelines(t *testing.T) {
 
 	// update pipeline
 	pipeline.Status = model.StatusRunning
-	err1 := store.UpdatePipeline(&pipeline)
-	GetPipeline, err2 := store.GetPipeline(pipeline.ID)
-	assert.NoError(t, err1)
-	assert.NoError(t, err2)
+	require.NoError(t, store.UpdatePipeline(&pipeline))
+	GetPipeline, err1 := store.GetPipeline(pipeline.ID)
+	require.NoError(t, err1)
 	assert.Equal(t, pipeline.ID, GetPipeline.ID)
 	assert.Equal(t, pipeline.RepoID, GetPipeline.RepoID)
 	assert.Equal(t, pipeline.Status, GetPipeline.Status)
@@ -91,38 +91,37 @@ func TestPipelines(t *testing.T) {
 		Event:  model.EventPush,
 		Branch: "main",
 	}
-	err2 = store.CreatePipeline(pipeline2, []*model.Step{}...)
-	assert.NoError(t, err2)
+	require.NoError(t, store.CreatePipeline(pipeline2, []*model.Step{}...))
 	GetPipeline, err3 := store.GetPipelineNumber(&model.Repo{ID: 1}, pipeline2.Number)
-	assert.NoError(t, err3)
+	require.NoError(t, err3)
 	assert.Equal(t, pipeline2.ID, GetPipeline.ID)
 	assert.Equal(t, pipeline2.RepoID, GetPipeline.RepoID)
 	assert.Equal(t, pipeline2.Number, GetPipeline.Number)
 
-	GetPipeline, err3 = store.GetPipelineLastByBranch(&model.Repo{ID: repo.ID}, pipeline2.Branch)
-	assert.NoError(t, err3)
+	GetPipeline, err4 := store.GetPipelineLastByBranch(&model.Repo{ID: repo.ID}, pipeline2.Branch)
+	require.NoError(t, err4)
 	assert.Equal(t, pipeline2.ID, GetPipeline.ID)
 	assert.Equal(t, pipeline2.RepoID, GetPipeline.RepoID)
 	assert.Equal(t, pipeline2.Number, GetPipeline.Number)
 	assert.Equal(t, pipeline2.Status, GetPipeline.Status)
 
 	pipeline3 := &model.Pipeline{
-		RepoID: repo.ID,
-		Status: model.StatusRunning,
-		Branch: "main",
-		Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
+		RepoID:   repo.ID,
+		Status:   model.StatusRunning,
+		Branch:   "main",
+		Event:    model.EventPull,
+		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144aa",
+		ForgeURL: "example.com/id3",
 	}
-	err1 = store.CreatePipeline(pipeline3, []*model.Step{}...)
-	assert.NoError(t, err1)
+	require.NoError(t, store.CreatePipeline(pipeline3))
 
-	GetPipeline, err4 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.ID)
-	assert.NoError(t, err4)
-	assert.Equal(t, pipeline2.ID, GetPipeline.ID)
-	assert.Equal(t, pipeline2.RepoID, GetPipeline.RepoID)
-	assert.Equal(t, pipeline2.Number, GetPipeline.Number)
-	assert.Equal(t, pipeline2.Status, GetPipeline.Status)
-	assert.Equal(t, pipeline2.Branch, GetPipeline.Branch)
-	assert.Equal(t, pipeline2.Commit, GetPipeline.Commit)
+	GetPipeline, err5 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.ID)
+	require.NoError(t, err5)
+	assert.EqualValues(t, pipeline2, GetPipeline)
+
+	GetPipeline, err6 := store.GetPipelineLastByForgeURL(&model.Repo{ID: 1}, pipeline3.ForgeURL)
+	require.NoError(t, err6)
+	assert.EqualValues(t, pipeline3, GetPipeline)
 }
 
 func TestPipelineListFilter(t *testing.T) {

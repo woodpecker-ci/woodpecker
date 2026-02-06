@@ -56,7 +56,7 @@ func (s storage) GetPipelineLastByBranch(repo *model.Repo, branch string) (*mode
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineLastByPull(repo *model.Repo, forgeURL string) (*model.Pipeline, error) {
+func (s storage) GetPipelineLastByForgeURL(repo *model.Repo, forgeURL string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
