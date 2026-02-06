@@ -44,5 +44,4 @@ func TestEnviron(t *testing.T) {
 	assert.Equal(t, "true", envs["CI_COMMIT_PRERELEASE"])
 	assert.Equal(t, "branch-a", envs["CI_PREV_COMMIT_SOURCE_BRANCH"])
 	assert.Equal(t, "branch-b", envs["CI_PREV_COMMIT_TARGET_BRANCH"])
-
 }

@@ -21,31 +21,31 @@ import (
 )
 
 func TestParseOutputOptions(t *testing.T) {
-		t.Parallel()
+	t.Parallel()
 
 	testCases := []struct {
-		in string
-		out string
+		in   string
+		out  string
 		opts []string
 	}{
-	{
-		in: "output",
-		out: "output",
-	},
-	{
-		in: "output=a",
-		out: "output",
-		opts: []string{"a"},
-	},
-	{
-		in: "output=",
-		out: "output",
-	},
-	{
-		in: "output=a,b",
-		out: "output",
-		opts: []string{"a", "b"},
-	},
+		{
+			in:  "output",
+			out: "output",
+		},
+		{
+			in:   "output=a",
+			out:  "output",
+			opts: []string{"a"},
+		},
+		{
+			in:  "output=",
+			out: "output",
+		},
+		{
+			in:   "output=a,b",
+			out:  "output",
+			opts: []string{"a", "b"},
+		},
 	}
 
 	for _, tc := range testCases {
