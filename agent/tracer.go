@@ -24,13 +24,13 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
-func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) tracing.TraceFunc {
 	return func(state *state.State) error {
 		uploads.Add(1)
 		defer uploads.Done()

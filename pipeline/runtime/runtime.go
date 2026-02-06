@@ -21,8 +21,9 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 )
 
 // Runtime represents a workflow state executed by a specific backend.
@@ -38,8 +39,8 @@ type Runtime struct {
 	// Cleanup operations should use the runnerCtx passed to Run()
 	ctx context.Context
 
-	tracer pipeline.Tracer
-	logger pipeline.Logger
+	tracer tracing.Tracer
+	logger logging.Logger
 
 	taskUUID string
 

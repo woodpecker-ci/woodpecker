@@ -45,7 +45,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -321,7 +323,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 
 	return pipeline_runtime.New(compiled,
 		pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
-		pipeline_runtime.WithTracer(pipeline.DefaultTracer),
+		pipeline_runtime.WithTracer(tracing.DefaultTracer),
 		pipeline_runtime.WithLogger(defaultLogger),
 		pipeline_runtime.WithBackend(backendEngine),
 		pipeline_runtime.WithDescription(map[string]string{
@@ -349,7 +351,7 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
+var defaultLogger = logging.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
 	logWriter := NewLineWriter(step.Name, step.UUID)
 	return pipeline_utils.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
 })
