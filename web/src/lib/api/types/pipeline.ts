@@ -8,8 +8,8 @@ export interface PipelineError<D = unknown> {
 }
 
 export interface CancelInfo {
-  reason: string;
-  data?: Record<string, string>;
+  canceled_by_user: string;
+  superseded_by: number
 }
 
 // A pipeline for a repository.
@@ -86,8 +86,6 @@ export interface Pipeline {
   reviewed_by: string;
 
   reviewed: number;
-
-  cancel_info?: CancelInfo;
 
   // The steps associated with this pipeline.
   // A pipeline will have multiple steps if a matrix pipeline was used or if a rebuild was requested.
