@@ -3,9 +3,10 @@
 :root,
 :root[data-theme='light'] {
   --wp-background-100: var(--color-white);
-  --wp-background-200: var(--color-gray-100);
+  --wp-background-200: var(--color-gray-50);
   --wp-background-300: var(--color-gray-200);
   --wp-background-400: var(--color-gray-300);
+  --wp-background-500: var(--color-gray-400);
 
   --wp-text-100: var(--color-gray-600);
   --wp-text-200: var(--color-gray-700);
@@ -16,9 +17,9 @@
   --wp-primary-300: var(--color-int-wp-primary-500);
   --wp-primary-text-100: var(--color-white);
 
-  --wp-control-neutral-100: var(--color-white);
-  --wp-control-neutral-200: var(--color-gray-300);
-  --wp-control-neutral-300: var(--color-gray-400);
+  --wp-control-neutral-100: var(--color-gray-100);
+  --wp-control-neutral-200: var(--color-gray-200);
+  --wp-control-neutral-300: var(--color-gray-300);
 
   --wp-control-info-100: var(--color-int-wp-control-info-100);
   --wp-control-info-200: var(--color-int-wp-control-info-200);
@@ -57,10 +58,11 @@
 }
 
 :root[data-theme='dark'] {
-  --wp-background-100: var(--color-int-wp-secondary-300);
+  --wp-background-100: var(--color-int-wp-secondary-200);
   --wp-background-200: var(--color-int-wp-secondary-400);
   --wp-background-300: var(--color-int-wp-secondary-500);
   --wp-background-400: var(--color-int-wp-secondary-600);
+  --wp-background-500: var(--color-int-wp-secondary-800);
 
   --wp-text-100: var(--color-gray-300);
   --wp-text-200: var(--color-gray-200);
@@ -71,9 +73,9 @@
   --wp-primary-300: var(--color-int-wp-secondary-600);
   --wp-primary-text-100: var(--color-gray-300);
 
-  --wp-control-neutral-100: var(--color-int-wp-secondary-300);
-  --wp-control-neutral-200: var(--color-int-wp-secondary-600);
-  --wp-control-neutral-300: var(--color-int-wp-secondary-700);
+  --wp-control-neutral-100: var(--color-int-wp-secondary-400);
+  --wp-control-neutral-200: var(--color-int-wp-secondary-300);
+  --wp-control-neutral-300: var(--color-int-wp-secondary-200);
 
   --wp-control-info-100: var(--color-int-wp-control-info-dark-100);
   --wp-control-info-200: var(--color-int-wp-control-info-dark-200);

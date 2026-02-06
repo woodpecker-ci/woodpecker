@@ -13,6 +13,7 @@
       v-if="!selectedSecret"
       v-model="secrets"
       :is-deleting="isDeleting"
+      :loading="loading"
       @edit="editSecret"
       @delete="deleteSecret"
     />
@@ -41,6 +42,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import { WebhookEvents } from '~/lib/api/types';
 import type { Secret } from '~/lib/api/types';
 
@@ -70,7 +72,7 @@ async function loadSecrets(page: number): Promise<Secret[] | null> {
   return apiClient.getOrgSecretList(user.org_id, { page });
 }
 
-const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+const { resetPage, data: secrets, loading } = usePagination(loadSecrets, () => !selectedSecret.value);
 
 const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedSecret.value) {
@@ -87,13 +89,13 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     type: 'success',
   });
   selectedSecret.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
   await apiClient.deleteOrgSecret(user.org_id, _secret.name);
   notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editSecret(secret: Secret) {
@@ -103,4 +105,6 @@ function editSecret(secret: Secret) {
 function showAddSecret() {
   selectedSecret.value = cloneDeep(emptySecret);
 }
+
+useWPTitle(computed(() => [i18n.t('secrets.secrets'), i18n.t('user.settings.settings')]));
 </script>

@@ -1,7 +1,6 @@
 package update
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -24,7 +23,7 @@ func TestCheckForUpdate(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
 
-	newVersion, err := checkForUpdate(context.Background(), ts.URL+"/version.json", false)
+	newVersion, err := checkForUpdate(t.Context(), ts.URL+"/version.json", false)
 	if err != nil {
 		t.Fatalf("Failed to check for updates: %v", err)
 	}
@@ -48,7 +47,7 @@ func TestDownloadNewVersion(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
 
-	file, err := downloadNewVersion(context.Background(), ts.URL+downloadFilePath)
+	file, err := downloadNewVersion(t.Context(), ts.URL+downloadFilePath)
 	if err != nil {
 		t.Fatalf("Failed to download new version: %v", err)
 	}

@@ -17,4 +17,4 @@ package model
 type PullRequest struct {
 	Index ForgeRemoteID `json:"index"`
 	Title string        `json:"title"`
-} //	@name PullRequest
+} //	@name	PullRequest

@@ -93,19 +93,13 @@ func GetForge(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Forge
 //	@Tags		Forges
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forgeId			path	int		true	"the forge's id"
-//	@Param		forgeData		body	Forge	true	"the forge's data"
+//	@Param		Authorization	header	string						true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		forgeId			path	int							true	"the forge's id"
+//	@Param		forgeData		body	ForgeWithOAuthClientSecret	true	"the forge's data"
 func PatchForge(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	// use this struct to allow updating the client secret
-	type ForgeWithClientSecret struct {
-		model.Forge
-		ClientSecret string `json:"client_secret"`
-	}
-
-	in := &ForgeWithClientSecret{}
+	in := &model.ForgeWithOAuthClientSecret{}
 	err := c.Bind(in)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -125,12 +119,12 @@ func PatchForge(c *gin.Context) {
 	}
 	forge.URL = in.URL
 	forge.Type = in.Type
-	forge.Client = in.Client
+	forge.OAuthClientID = in.OAuthClientID
 	forge.OAuthHost = in.OAuthHost
 	forge.SkipVerify = in.SkipVerify
 	forge.AdditionalOptions = in.AdditionalOptions
-	if in.ClientSecret != "" {
-		forge.ClientSecret = in.ClientSecret
+	if in.OAuthClientSecret != "" {
+		forge.OAuthClientSecret = in.OAuthClientSecret
 	}
 
 	err = _store.ForgeUpdate(forge)
@@ -150,10 +144,10 @@ func PatchForge(c *gin.Context) {
 //	@Produce		json
 //	@Success		200	{object}	Forge
 //	@Tags			Forges
-//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			forge			body	Forge	true	"the forge's data (only 'name' and 'no_schedule' are read)"
+//	@Param			Authorization	header	string						true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			forge			body	ForgeWithOAuthClientSecret	true	"the forge's data (only 'name' and 'no_schedule' are read)"
 func PostForge(c *gin.Context) {
-	in := &model.Forge{}
+	in := &model.ForgeWithOAuthClientSecret{}
 	err := c.Bind(in)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
@@ -163,8 +157,8 @@ func PostForge(c *gin.Context) {
 	forge := &model.Forge{
 		URL:               in.URL,
 		Type:              in.Type,
-		Client:            in.Client,
-		ClientSecret:      in.ClientSecret,
+		OAuthClientID:     in.OAuthClientID,
+		OAuthClientSecret: in.OAuthClientSecret,
 		OAuthHost:         in.OAuthHost,
 		SkipVerify:        in.SkipVerify,
 		AdditionalOptions: in.AdditionalOptions,

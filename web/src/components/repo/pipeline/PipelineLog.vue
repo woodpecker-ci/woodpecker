@@ -1,7 +1,16 @@
 <template>
-  <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
+  <div
+    v-if="pipeline"
+    class="fixed top-0 left-0 flex h-full w-full flex-col pt-10 md:pt-0"
+    :class="{
+      'md:absolute': !fullscreen,
+    }"
+  >
     <div
-      class="code-box-log flex grow flex-col overflow-hidden p-0! shadow-sm md:mt-0 md:rounded-md!"
+      class="code-box-log flex grow flex-col overflow-hidden p-0! md:mt-0"
+      :class="{
+        'md:rounded-md!': !fullscreen,
+      }"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -14,6 +23,12 @@
         </span>
 
         <div class="ml-auto flex flex-row items-center gap-x-2">
+          <IconButton
+            :title="fullscreen ? $t('exit_fullscreen') : $t('fullscreen')"
+            class="hidden! hover:bg-white/10! md:flex!"
+            :icon="fullscreen ? 'exit-fullscreen' : 'fullscreen'"
+            @click="fullscreen = !fullscreen"
+          />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs"
             :is-loading="downloadInProgress"
@@ -63,7 +78,7 @@
           </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
-            class="align-top break-words whitespace-pre-wrap"
+            class="wrap-break-words align-top whitespace-pre-wrap"
             :class="{
               'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
               'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
@@ -111,16 +126,16 @@ import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
 import { debounce } from 'lodash';
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
-import type { Ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
-import type { Pipeline, PipelineStep, PipelineWorkflow, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 
 interface LogLine {
   index: number;
@@ -143,8 +158,8 @@ const notifications = useNotifications();
 const i18n = useI18n();
 const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
-const repo = inject<Ref<Repo>>('repo');
-const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+const repo = requiredInject('repo');
+const repoPermissions = requiredInject('repo-permissions');
 const apiClient = useApiClient();
 const route = useRoute();
 
@@ -154,6 +169,7 @@ const step = computed(() => pipeline.value && findStep(pipeline.value.workflows 
 const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();
+const fullscreen = ref(false);
 
 const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(
@@ -161,7 +177,7 @@ const hasLogs = computed(
     // we do not have logs for skipped steps
     repo?.value && pipeline.value && step.value && step.value.state !== 'skipped',
 );
-const autoScroll = useStorage('woodpecker:log-auto-scroll', false);
+const autoScroll = useStorage('woodpecker:log-auto-scroll', true);
 const showActions = ref(false);
 const downloadInProgress = ref(false);
 const ansiUp = ref(new AnsiUp());
@@ -170,6 +186,14 @@ const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
+
+function isScrolledToBottom(): boolean {
+  if (!consoleElement.value) {
+    return false;
+  }
+  // we use 5 as threshold
+  return consoleElement.value.scrollHeight - consoleElement.value.scrollTop - consoleElement.value.clientHeight < 5;
+}
 
 function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
@@ -243,7 +267,7 @@ const flushLogs = debounce((scroll: boolean) => {
 
   if (route.hash.length > 0) {
     nextTick(() => document.getElementById(route.hash.substring(1))?.scrollIntoView());
-  } else if (scroll && autoScroll.value) {
+  } else if (scroll && autoScroll.value && isScrolledToBottom()) {
     scrollDown();
   }
 }, 500);
@@ -284,10 +308,6 @@ async function download() {
 async function loadLogs() {
   if (loadedStepSlug.value === stepSlug.value) {
     return;
-  }
-
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
   log.value = undefined;
@@ -371,7 +391,7 @@ watch(stepSlug, async () => {
 
 watch(step, async (newStep, oldStep) => {
   if (oldStep?.name === newStep?.name) {
-    if (oldStep?.finished !== newStep?.finished && autoScroll.value) {
+    if (oldStep?.finished !== newStep?.finished && autoScroll.value && isScrolledToBottom()) {
       scrollDown();
     }
 

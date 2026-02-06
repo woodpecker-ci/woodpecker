@@ -18,31 +18,34 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	"codeberg.org/6543/xyaml"
 	"github.com/drone/envsubst"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
+	backend_docker "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
+	backend_kubernetes "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
+	backend_local "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
-	pipelineLog "go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
+	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
@@ -53,13 +56,13 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
+	Flags:     utils.MergeSlices(flags, backend_docker.Flags, backend_kubernetes.Flags, backend_local.Flags),
 }
 
 var backends = []backend_types.Backend{
-	kubernetes.New(),
-	docker.New(),
-	local.New(),
+	backend_kubernetes.New(),
+	backend_docker.New(),
+	backend_local.New(),
 }
 
 func run(ctx context.Context, c *cli.Command) error {
@@ -74,11 +77,14 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	} else {
 		repoPath, _ = filepath.Abs(filepath.Dir(dir))
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
 	}
+
+	var execErr error
+
 	// TODO: respect depends_on and do parallel runs with output to multiple _windows_ e.g. tmux like
-	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
+	walkErr := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
@@ -86,13 +92,23 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
-			_ = runExec(ctx, c, path, repoPath, false) // TODO: should we drop errors or store them and report back?
+			err := runExec(ctx, c, path, repoPath, false)
+			if err != nil {
+				fmt.Print(err)
+				execErr = multierr.Append(execErr, err)
+			}
 			fmt.Println("")
 			return nil
 		}
 
 		return nil
 	})
+
+	if walkErr != nil {
+		return walkErr
+	}
+
+	return execErr
 }
 
 func execFile(ctx context.Context, c *cli.Command, file string) error {
@@ -102,7 +118,7 @@ func execFile(ctx context.Context, c *cli.Command, file string) error {
 	} else {
 		repoPath, _ = filepath.Abs(filepath.Dir(file))
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
 	}
 	return runExec(ctx, c, file, repoPath, true)
@@ -112,6 +128,11 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string, singleE
 	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
+	}
+
+	// if we use the local backend we should signal to run at $repoPath
+	if c.String("backend-engine") == "local" {
+		backend_local.CLIWorkaroundExecAtDir = repoPath
 	}
 
 	axes, err := matrix.ParseString(string(dat))
@@ -146,13 +167,32 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	}
 
 	environ := metadata.Environ()
+	maps.Copy(environ, metadata.Workflow.Matrix)
 	var secrets []compiler.Secret
-	for key, val := range metadata.Workflow.Matrix {
-		environ[key] = val
+	for key, val := range c.StringMap("secrets") {
 		secrets = append(secrets, compiler.Secret{
 			Name:  key,
 			Value: val,
 		})
+	}
+	if secretsFile := c.String("secrets-file"); secretsFile != "" {
+		fileContent, err := os.ReadFile(secretsFile)
+		if err != nil {
+			return err
+		}
+
+		var m map[string]string
+		err = xyaml.Unmarshal(fileContent, &m)
+		if err != nil {
+			return err
+		}
+
+		for key, val := range m {
+			secrets = append(secrets, compiler.Secret{
+				Name:  key,
+				Value: val,
+			})
+		}
 	}
 
 	pipelineEnv := make(map[string]string)
@@ -310,5 +350,5 @@ func convertPathForWindows(path string) string {
 
 var defaultLogger = pipeline.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
 	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipelineLog.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
+	return pipeline_utils.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
 })

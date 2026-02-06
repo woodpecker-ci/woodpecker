@@ -17,28 +17,30 @@ package bitbucket
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestNew(t *testing.T) {
-	forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
+	forge, _ := New(1, &Opts{OAuthClientID: "4vyW6b49Z", OAuthClientSecret: "a5012f6c6"})
 
 	f, _ := forge.(*config)
 	assert.Equal(t, DefaultURL, f.url)
-	assert.Equal(t, DefaultAPI, f.API)
-	assert.Equal(t, "4vyW6b49Z", f.Client)
-	assert.Equal(t, "a5012f6c6", f.Secret)
+	assert.Equal(t, DefaultAPI, f.api)
+	assert.Equal(t, "4vyW6b49Z", f.oAuthClientID)
+	assert.Equal(t, "a5012f6c6", f.oAuthSecret)
 }
 
 func TestBitbucket(t *testing.T) {
@@ -46,11 +48,11 @@ func TestBitbucket(t *testing.T) {
 
 	s := httptest.NewServer(fixtures.Handler())
 	defer s.Close()
-	c := &config{url: s.URL, API: s.URL}
+	c := &config{url: s.URL, api: s.URL}
 
-	ctx := context.Background()
+	ctx := t.Context()
 
-	forge, _ := New(&Opts{})
+	forge, _ := New(1, &Opts{})
 	netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 	assert.Equal(t, "bitbucket.org", netrc.Machine)
 	assert.Equal(t, "x-token-auth", netrc.Login)
@@ -107,22 +109,22 @@ func TestBitbucket(t *testing.T) {
 	_, err = c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 	assert.Error(t, err)
 
-	repos, err := c.Repos(ctx, fakeUser)
+	repos, err := c.Repos(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.NoError(t, err)
 	assert.Equal(t, fakeRepo.FullName, repos[0].FullName)
 
-	_, err = c.Repos(ctx, fakeUserNoTeams)
+	_, err = c.Repos(ctx, fakeUserNoTeams, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.Error(t, err)
 
-	_, err = c.Repos(ctx, fakeUserNoRepos)
+	_, err = c.Repos(ctx, fakeUserNoRepos, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.Error(t, err)
 
-	teams, err := c.Teams(ctx, fakeUser)
+	teams, err := c.Teams(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.NoError(t, err)
 	assert.Equal(t, "ueberdev42", teams[0].Login)
 	assert.Equal(t, "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964", teams[0].Avatar)
 
-	_, err = c.Teams(ctx, fakeUserNoTeams)
+	_, err = c.Teams(ctx, fakeUserNoTeams, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.Error(t, err)
 
 	raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file")
@@ -204,10 +206,17 @@ func TestBitbucket(t *testing.T) {
 	req.Header = http.Header{}
 	req.Header.Set(hookEvent, hookPush)
 
+	mockStore := store_mocks.NewMockStore(t)
+	ctx = store.InjectToContext(ctx, mockStore)
+	mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
+	mockStore.On("GetRepoForgeID", mock.Anything, mock.Anything).Return(fakeRepoFromHook, nil)
+
 	r, b, err := c.Hook(ctx, req)
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
+	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
 }
 
 var (
@@ -268,6 +277,13 @@ var (
 		Owner:    "test_name",
 		Name:     "hook_empty",
 		FullName: "test_name/hook_empty",
+	}
+
+	fakeRepoFromHook = &model.Repo{
+		Owner:    "martinherren1984",
+		Name:     "publictestrepo",
+		FullName: "martinherren1984/publictestrepo",
+		UserID:   1,
 	}
 
 	fakePipeline = &model.Pipeline{

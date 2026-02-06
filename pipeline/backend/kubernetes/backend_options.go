@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"github.com/go-viper/mapstructure/v2"
+	v1 "k8s.io/api/core/v1"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -15,6 +16,7 @@ type BackendOptions struct {
 	Annotations        map[string]string `mapstructure:"annotations"`
 	NodeSelector       map[string]string `mapstructure:"nodeSelector"`
 	Tolerations        []Toleration      `mapstructure:"tolerations"`
+	Affinity           *v1.Affinity      `mapstructure:"affinity"`
 	SecurityContext    *SecurityContext  `mapstructure:"securityContext"`
 	Secrets            []SecretRef       `mapstructure:"secrets"`
 }
@@ -50,13 +52,14 @@ const (
 )
 
 type SecurityContext struct {
-	Privileged      *bool       `mapstructure:"privileged"`
-	RunAsNonRoot    *bool       `mapstructure:"runAsNonRoot"`
-	RunAsUser       *int64      `mapstructure:"runAsUser"`
-	RunAsGroup      *int64      `mapstructure:"runAsGroup"`
-	FSGroup         *int64      `mapstructure:"fsGroup"`
-	SeccompProfile  *SecProfile `mapstructure:"seccompProfile"`
-	ApparmorProfile *SecProfile `mapstructure:"apparmorProfile"`
+	Privileged          *bool                      `mapstructure:"privileged"`
+	RunAsNonRoot        *bool                      `mapstructure:"runAsNonRoot"`
+	RunAsUser           *int64                     `mapstructure:"runAsUser"`
+	RunAsGroup          *int64                     `mapstructure:"runAsGroup"`
+	FSGroup             *int64                     `mapstructure:"fsGroup"`
+	FsGroupChangePolicy *v1.PodFSGroupChangePolicy `mapstructure:"fsGroupChangePolicy"`
+	SeccompProfile      *SecProfile                `mapstructure:"seccompProfile"`
+	ApparmorProfile     *SecProfile                `mapstructure:"apparmorProfile"`
 }
 
 type SecProfile struct {

@@ -47,7 +47,7 @@ func (o *Table) Columns() (cols []string) {
 		cols = append(cols, c)
 	}
 	sort.Strings(cols)
-	return
+	return cols
 }
 
 // AddFieldAlias overrides the field name to allow custom column headers.

@@ -2,7 +2,7 @@
   <router-link
     v-if="repo"
     :to="{ name: 'repo', params: { repoId: repo.id } }"
-    class="border-wp-background-400 bg-wp-background-100 hover:bg-wp-background-300 dark:bg-wp-background-200 dark:hover:bg-wp-background-300 flex cursor-pointer flex-col overflow-hidden rounded-md border p-4 hover:shadow-md"
+    class="border-wp-background-400 dark:border-wp-background-100 bg-wp-background-200 dark:bg-wp-background-200 hover:bg-wp-control-neutral-100 dark:hover:bg-wp-control-neutral-200 flex cursor-pointer flex-col overflow-hidden rounded-md border p-4"
   >
     <div class="grid grid-cols-[auto_1fr] items-center gap-y-4">
       <div class="text-wp-text-100 text-lg">{{ `${repo.owner} / ${repo.name}` }}</div>
@@ -25,7 +25,12 @@
         <template v-if="lastPipeline">
           <div class="flex min-w-0 flex-1 items-center gap-x-1">
             <PipelineStatusIcon v-if="lastPipeline" :status="lastPipeline.status" />
-            <span class="overflow-hidden pl-1 text-ellipsis whitespace-nowrap">{{ shortMessage }}</span>
+            <RenderMarkdown
+              class="overflow-hidden pl-1 text-ellipsis whitespace-nowrap"
+              :title="message"
+              :content="shortMessage"
+              inline
+            />
           </div>
 
           <div class="ml-auto flex shrink-0 items-center gap-x-1">
@@ -46,6 +51,7 @@
 import { computed } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
+import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
 import type { Repo } from '~/lib/api/types';
@@ -56,5 +62,5 @@ const props = defineProps<{
 }>();
 
 const lastPipeline = computed(() => props.repo.last_pipeline);
-const { since, shortMessage } = usePipeline(lastPipeline);
+const { since, shortMessage, message } = usePipeline(lastPipeline);
 </script>

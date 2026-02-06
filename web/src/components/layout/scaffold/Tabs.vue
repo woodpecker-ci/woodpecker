@@ -10,7 +10,7 @@
       :exact-active-class="tab.matchChildren ? '' : 'border-wp-text-100!'"
     >
       <span
-        class="hover:bg-wp-background-200 dark:hover:bg-wp-background-100 flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1"
+        class="hover:bg-wp-control-neutral-100 dark:hover:bg-wp-control-neutral-200 flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1"
       >
         <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="shrink-0" />
         <span>{{ tab.title }}</span>
@@ -24,7 +24,7 @@
 
       <div
         v-if="isDropdownOpen"
-        class="tabs-dropdown border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 absolute z-20 mt-1 rounded-md border shadow-lg"
+        class="tabs-dropdown border-wp-background-400 dark:border-wp-background-100 bg-wp-background-100 dark:bg-wp-background-200 dark:shadow-wp-background-500 absolute z-20 mt-1 rounded-md border shadow-lg"
         :class="[visibleTabs.length === 0 ? 'left-0' : 'right-0']"
       >
         <router-link
@@ -35,7 +35,7 @@
           @click="isDropdownOpen = false"
         >
           <span
-            class="hover:bg-wp-background-200 dark:hover:bg-wp-background-100 flex w-full min-w-20 flex-row gap-2 rounded-md px-2 py-1"
+            class="hover:bg-wp-control-neutral-100 dark:hover:bg-wp-control-neutral-200 flex w-full min-w-20 flex-row gap-2 rounded-md px-2 py-1"
           >
             <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="shrink-0" />
             <span>{{ tab.title }}</span>

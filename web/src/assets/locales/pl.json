@@ -155,7 +155,13 @@
                 "show": "Pokaż sekrety",
                 "value": "Wartość"
             },
-            "settings": "Ustawienia"
+            "settings": "Ustawienia",
+            "agents": {
+                "desc": "Agenty zarejestrowane dla tej organizacji."
+            },
+            "registries": {
+                "desc": "Można dodać dane rejestrów organizacji, aby używać prywatnych obrazów dla wszystkich potoków organizacji."
+            }
         }
     },
     "password": "Hasło",
@@ -173,8 +179,10 @@
                 "desc": "Zdefiniuj dodatkowe zmienne użyte w twoim potoku. Zmienne o tej samej nazwie zostaną nadpisane.",
                 "name": "Nazwa zmiennej",
                 "title": "Dodatkowe zmienne potoku",
-                "value": "Wartość zmiennej"
-            }
+                "value": "Wartość zmiennej",
+                "delete": "Usuń zmienną"
+            },
+            "enter_task": "Zadanie wdrażania"
         },
         "enable": {
             "enable": "Aktywuj",
@@ -193,8 +201,10 @@
                 "desc": "Zdefiniuj dodatkowe zmienne użyte w twoim potoku. Zmienne o tej samej nazwie zostaną nadpisane.",
                 "name": "Nazwa zmiennej",
                 "title": "Dodatkowe zmienne potoku",
-                "value": "Wartość zmiennej"
-            }
+                "value": "Wartość zmiennej",
+                "delete": "Delete variable"
+            },
+            "show_pipelines": "Pokaż potoki"
         },
         "not_allowed": "Nie masz pozwolenia na dostęp do tego repozytorium",
         "open_in_forge": "Otwórz repozytorium w systemie kontroli wersji",
@@ -208,7 +218,8 @@
                 "log_auto_scroll_off": "Wyłącz automatyczne przewijanie",
                 "log_download": "Pobierz",
                 "restart": "Uruchom ponownie",
-                "restart_success": "Uruchomiono potok ponownie"
+                "restart_success": "Uruchomiono potok ponownie",
+                "log_delete": "Usuń"
             },
             "config": "Konfiguracja",
             "event": {
@@ -217,7 +228,10 @@
                 "manual": "Ręcznie",
                 "pr": "Pull Request",
                 "push": "Push",
-                "tag": "Tag"
+                "tag": "Tag",
+                "release": "Wydanie",
+                "pr_closed": "Pull Request scalony/zamknięty",
+                "pr_metadata": "Zmieniono metadane Pull Requesta"
             },
             "exit_code": "Kod wyjścia {exitCode}",
             "files": "Zmodyfikowane pliki ({files})",
@@ -252,7 +266,26 @@
             },
             "step_not_started": "Ten krok jeszcze się nie rozpoczął.",
             "tasks": "Zadania",
-            "log_title": "Logi"
+            "log_title": "Logi",
+            "we_got_some_errors": "Ojej, coś poszło nie tak!",
+            "no_logs": "Brak logów",
+            "log_delete_confirm": "Czy na pewno chcesz usunąć logi kroku?",
+            "errors": "Błędy",
+            "duration": "Czas trwania potoku: {duration}",
+            "show_errors": "Pokaż błędy",
+            "created": "Utworzono: {created}",
+            "debug": {
+                "metadata_exec_desc": "Pobierz metadane tego potoku, aby uruchomić go lokalnie. Pozwala to na naprawę problemów i testowanie zmian przed ich zatwierdzeniem. Woodpecker CLI musi być zainstalowane lokalnie w tej samej wersji co serwer.",
+                "download_metadata": "Pobierz metadane",
+                "metadata_download_error": "Błąd podczas pobierania metadanych",
+                "no_permission": "Nie masz pozwolenia na dostęp do informacji debugowania",
+                "metadata_exec_title": "Uruchom potok ponownie lokalnie",
+                "title": "Debugowanie",
+                "metadata_download_successful": "Pomyślnie pobrano metadane"
+            },
+            "view": "Zobacz potok",
+            "log_delete_error": "Błąd podczas usuwania logów kroku",
+            "warnings": "Ostrzeżenia"
         },
         "pull_requests": "Pull requesty",
         "settings": {
@@ -345,7 +378,19 @@
                 },
                 "trusted": {
                     "desc": "Kontenery potoku otrzymają dostęp do podwyższonych operacji, takich jak montowanie woluminów.",
-                    "trusted": "Zaufany"
+                    "trusted": "Zaufany",
+                    "network": {
+                        "network": "Sieć",
+                        "desc": "Kontenery potoku otrzymują dostęp do uprawnień sieciowych, takich jak zmiana DNS."
+                    },
+                    "volumes": {
+                        "desc": "Kontenery potoku mogą montować woluminy.",
+                        "volumes": "Woluminy"
+                    },
+                    "security": {
+                        "security": "Bezpieczeństwo",
+                        "desc": "Kontenery potoku otrzymują dostęp do uprawnień bezpieczeństwa."
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -361,6 +406,10 @@
                         "public": "Publiczny"
                     },
                     "visibility": "Widoczność projektu"
+                },
+                "allow_deploy": {
+                    "allow": "Zezwól na wdrożenia",
+                    "desc": "Zezwól na wdrożenia dla udanych potoków. Wszyscy użytkownicy z uprawnieniami do push mogą je wyzwalać, więc używaj ostrożnie."
                 }
             },
             "not_allowed": "Nie masz pozwolenia na dostęp do ustawień tego repozytorium",
@@ -409,10 +458,35 @@
             },
             "settings": "Ustawienia"
         },
-        "user_none": "Ta organizacja / użytkownik nie ma jeszcze żadnych projektów."
+        "user_none": "Ta organizacja / użytkownik nie ma jeszcze żadnych projektów.",
+        "visibility": {
+            "private": {
+                "desc": "Tylko ty i inni właściciele repozytorium mogą zobaczyć ten projekt.",
+                "private": "Prywatny"
+            },
+            "visibility": "Widoczność projektu",
+            "public": {
+                "public": "Publiczny",
+                "desc": "Każdy może zobaczyć twój projekt bez logowania."
+            },
+            "internal": {
+                "internal": "Wewnętrzny",
+                "desc": "Tylko zalogowani użytkownicy instancji Woodpecker mogą zobaczyć ten projekt."
+            }
+        }
     },
     "repos": "Repozytoria",
-    "repositories": "Repozytoria",
+    "repositories": {
+        "title": "Repozytoria",
+        "all": {
+            "title": "Wszystkie repozytoria",
+            "desc": "Repozytoria posortowane według ostatniego utworzenia potoku"
+        },
+        "last": {
+            "title": "Ostatnio odwiedzone",
+            "desc": "Ostatnio odwiedzone repozytoria posortowane według czasu dostępu"
+        }
+    },
     "search": "Szukaj…",
     "time": {
         "days_short": "d",
@@ -421,7 +495,8 @@
         "not_started": "jeszcze nie rozpoczęto",
         "sec_short": "sek",
         "template": "DD.MM.YYYY, HH:mm z",
-        "weeks_short": "tyg"
+        "weeks_short": "tyg",
+        "just_now": "przed chwilą"
     },
     "unknown_error": "Wystąpił nieznany błąd",
     "url": "URL",
@@ -466,5 +541,6 @@
     "username": "Nazwa użytkownika",
     "welcome": "Witamy w Woodpecker",
     "empty_list": "Nie znaleziono {entity}!",
-    "api": "API"
+    "api": "API",
+    "login_to_woodpecker_with": "Zaloguj się do Woodpecker za pomocą"
 }

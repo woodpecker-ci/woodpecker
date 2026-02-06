@@ -44,10 +44,16 @@ var secretUpdateCmd = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:  "event",
 			Usage: "limit secret to these event",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringSliceFlag{
 			Name:  "image",
 			Usage: "limit secret to these image",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 	},
 }

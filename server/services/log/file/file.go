@@ -50,6 +50,7 @@ func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 		}
 		return nil, err
 	}
+	defer file.Close()
 
 	buf := make([]byte, 0, bufio.MaxScanTokenSize)
 	s := bufio.NewScanner(file)
@@ -102,3 +103,5 @@ func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) erro
 func (l logStore) LogDelete(step *model.Step) error {
 	return os.Remove(l.filePath(step.ID))
 }
+
+func (l logStore) StepFinished(_ *model.Step) {}

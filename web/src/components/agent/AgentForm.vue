@@ -52,7 +52,7 @@
       <InputField
         v-slot="{ id }"
         :label="$t('admin.settings.agents.capacity.capacity')"
-        docs-url="docs/next/administration/agent-config#woodpecker_max_workflows"
+        docs-url="docs/administration/configuration/agent#max_workflows"
       >
         <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.capacity.desc') }}</span>
         <TextField :id="id" :model-value="agent.capacity?.toString()" disabled />
@@ -62,7 +62,7 @@
         <TextField :id="id" :model-value="agent.version" disabled />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.last_contact')">
+      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.last_contact.last_contact')">
         <TextField
           :id="id"
           :model-value="
@@ -115,7 +115,7 @@ const agent = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-const baseDocsUrl = 'https://woodpecker-ci.org/docs/next/administration/backends/';
+const baseDocsUrl = 'https://woodpecker-ci.org/docs/administration/configuration/backends/';
 
 const backendDocsUrl = computed(() => {
   let backendUrlSuffix = agent.value.backend?.toLowerCase();

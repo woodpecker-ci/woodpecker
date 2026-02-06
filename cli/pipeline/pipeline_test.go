@@ -41,6 +41,11 @@ func TestPipelineOutput(t *testing.T) {
 			expected: "1 success main\n",
 		},
 		{
+			name:     "go-format output",
+			args:     []string{"output", "--output", "go-format={{.Number}} {{.Status}} {{.Branch}}"},
+			expected: "1 success main\n",
+		},
+		{
 			name:    "invalid go-template",
 			args:    []string{"output", "--output", "go-template={{.InvalidField}}"},
 			wantErr: true,
@@ -80,7 +85,7 @@ func TestPipelineOutput(t *testing.T) {
 				},
 			}
 
-			_ = command.Run(context.Background(), tt.args)
+			_ = command.Run(t.Context(), tt.args)
 		})
 	}
 }

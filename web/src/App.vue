@@ -1,6 +1,6 @@
 <template>
-  <div class="app bg-wp-background-200 dark:bg-wp-background-100 m-auto flex h-full w-full flex-col">
-    <router-view v-if="blank" />
+  <div class="app bg-wp-background-100 dark:bg-wp-background-300 m-auto flex h-full w-full flex-col">
+    <router-view v-if="layout === 'blank'" />
     <template v-else>
       <Navbar />
       <main class="relative flex h-full min-h-0">
@@ -8,7 +8,9 @@
           <router-view />
         </div>
         <transition name="slide-right">
-          <PipelineFeedSidebar class="absolute top-0 right-0 bottom-0 w-full max-w-80 border-l shadow-md xl:max-w-96" />
+          <PipelineFeedSidebar
+            class="dark:shadow-wp-background-500 absolute top-0 right-0 bottom-0 w-full max-w-80 border-l shadow-lg xl:max-w-96"
+          />
         </transition>
       </main>
     </template>
@@ -40,7 +42,7 @@ apiClient.setErrorHandler((err) => {
   notify({ title: err.message || i18n.t('unknown_error'), type: 'error' });
 });
 
-const blank = computed(() => route.meta.blank);
+const layout = computed(() => route.meta.layout ?? 'default');
 
 const { locale } = useI18n();
 watch(
@@ -56,6 +58,10 @@ watch(
 .app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#scroll-component {
+  scrollbar-gutter: stable;
 }
 
 .slide-right-enter-active,

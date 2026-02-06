@@ -28,27 +28,31 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 type workflowState struct {
-	stepCMDs        map[string]*exec.Cmd
+	stepState       sync.Map // map of *stepState
 	baseDir         string
 	homeDir         string
 	workspaceDir    string
 	pluginGitBinary string
 }
 
+type stepState struct {
+	cmd    *exec.Cmd
+	output io.ReadCloser
+}
+
 type local struct {
 	tempDir         string
 	workflows       sync.Map
-	output          io.ReadCloser
 	pluginGitBinary string
 	os, arch        string
 }
+
+var CLIWorkaroundExecAtDir string // To handle edge case for running local backend via cli exec
 
 // New returns a new local Backend.
 func New() types.Backend {
@@ -89,7 +93,6 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	}, nil
 }
 
-// SetupWorkflow the pipeline environment.
 func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
@@ -99,30 +102,45 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	}
 
 	state := &workflowState{
-		stepCMDs:     make(map[string]*exec.Cmd),
-		baseDir:      baseDir,
-		workspaceDir: filepath.Join(baseDir, "workspace"),
-		homeDir:      filepath.Join(baseDir, "home"),
+		baseDir: baseDir,
+		homeDir: filepath.Join(baseDir, "home"),
 	}
+	e.workflows.Store(taskUUID, state)
 
 	if err := os.Mkdir(state.homeDir, 0o700); err != nil {
 		return err
 	}
 
-	if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
-		return err
+	// normal workspace setup case
+	if CLIWorkaroundExecAtDir == "" {
+		state.workspaceDir = filepath.Join(baseDir, "workspace")
+		if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+			return err
+		}
+	} else
+	// setup workspace via internal flag signaled from cli exec to a specific dir
+	{
+		state.workspaceDir = CLIWorkaroundExecAtDir
+		if stat, err := os.Stat(CLIWorkaroundExecAtDir); os.IsNotExist(err) {
+			log.Debug().Msgf("create workspace directory '%s' set by internal flag", CLIWorkaroundExecAtDir)
+			if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+				return err
+			}
+		} else if !stat.IsDir() {
+			//nolint:forbidigo
+			log.Fatal().Msg("This should never happen! internalExecDir was set to an non directory path!")
+		}
 	}
 
-	e.saveState(taskUUID, state)
+	e.workflows.Store(taskUUID, state)
 
 	return nil
 }
 
-// StartStep the pipeline step.
 func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	state, err := e.getState(taskUUID)
+	state, err := e.getWorkflowState(taskUUID)
 	if err != nil {
 		return err
 	}
@@ -153,134 +171,152 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 	}
 }
 
-// execCommands use step.Image as shell and run the commands in it.
-func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	// Prepare commands
-	// TODO: support `entrypoint` from pipeline config
-	args, err := e.genCmdByShell(step.Image, step.Commands)
-	if err != nil {
-		return fmt.Errorf("could not convert commands into args: %w", err)
-	}
-
-	// Use "image name" as run command (indicate shell)
-	cmd := exec.CommandContext(ctx, step.Image, args...)
-	cmd.Env = env
-	cmd.Dir = state.workspaceDir
-
-	// Get output and redirect Stderr to Stdout
-	e.output, _ = cmd.StdoutPipe()
-	cmd.Stderr = cmd.Stdout
-
-	if e.os == "windows" {
-		// we get non utf8 output from windows so just sanitize it
-		// TODO: remove hack
-		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
-	}
-
-	state.stepCMDs[step.UUID] = cmd
-
-	return cmd.Start()
-}
-
-// execPlugin use step.Image as exec binary.
-func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	binary, err := exec.LookPath(step.Image)
-	if err != nil {
-		return fmt.Errorf("lookup plugin binary: %w", err)
-	}
-
-	cmd := exec.CommandContext(ctx, binary)
-	cmd.Env = env
-	cmd.Dir = state.workspaceDir
-
-	// Get output and redirect Stderr to Stdout
-	e.output, _ = cmd.StdoutPipe()
-	cmd.Stderr = cmd.Stdout
-
-	state.stepCMDs[step.UUID] = cmd
-
-	return cmd.Start()
-}
-
-// WaitStep for the pipeline step to complete and returns
-// the completion results.
-func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
+func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
-	state, err := e.getState(taskUUID)
+	stepState := &types.State{
+		Exited: true,
+	}
+
+	if err := ctx.Err(); err != nil {
+		stepState.Error = err
+		return stepState, nil
+	}
+
+	state, err := e.getStepState(taskUUID, step.UUID)
 	if err != nil {
 		return nil, err
 	}
 
-	cmd, ok := state.stepCMDs[step.UUID]
-	if !ok {
-		return nil, fmt.Errorf("step cmd for %s not found", step.UUID)
+	if state.cmd == nil {
+		return nil, errors.New("exec: step command not set up")
 	}
 
-	err = cmd.Wait()
-	ExitCode := 0
-
-	var execExitError *exec.ExitError
-	if errors.As(err, &execExitError) {
-		ExitCode = execExitError.ExitCode()
-		// Non-zero exit code is a pipeline failure, but not an agent error.
-		err = nil
+	// normally we use cmd.Wait() to wait for *exec.Cmd, but cmd.StdoutPipe() tells us not
+	// as Wait() would close the io pipe even if not all logs where read and send back
+	// so we have to do use the underlying functions
+	if state.cmd.Process == nil {
+		return nil, errors.New("exec: not started")
+	}
+	if state.cmd.ProcessState == nil {
+		cmdState, err := state.cmd.Process.Wait()
+		if err != nil {
+			return nil, err
+		}
+		if cmdState == nil {
+			return nil, errors.New("exec: cmd state after Wait() can not be nil but is")
+		}
+		stepState.ExitCode = cmdState.ExitCode()
+		// can be nil if step got canceled
+		if state.cmd != nil {
+			state.cmd.ProcessState = cmdState
+		}
+	} else {
+		stepState.ExitCode = state.cmd.ProcessState.ExitCode()
 	}
 
-	return &types.State{
-		Exited:   true,
-		ExitCode: ExitCode,
-	}, err
+	return stepState, err
 }
 
-// TailStep the pipeline step logs.
 func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
-	return e.output, nil
+	state, err := e.getStepState(taskUUID, step.UUID)
+	if err != nil {
+		return nil, err
+	} else if state.output == nil {
+		return nil, ErrStepReaderNotFound
+	}
+	return state.output, nil
 }
 
-func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
-	// WaitStep already waits for the command to finish, so there is nothing to do here.
-	return nil
-}
-
-// DestroyWorkflow the pipeline environment.
-func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
-
-	state, err := e.getState(taskUUID)
+func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
+	state, err := e.getStepState(taskUUID, step.UUID)
 	if err != nil {
 		return err
 	}
+
+	// As WaitStep can not use cmd.Wait() witch ensures the process already finished and
+	// the io pipe is closed on process end, we make sure it is done.
+	if state.output != nil {
+		_ = state.output.Close()
+		state.output = nil
+	}
+	if state.cmd != nil {
+		_ = state.cmd.Cancel()
+		state.cmd = nil
+	}
+	workflowState, err := e.getWorkflowState(taskUUID)
+	if err != nil {
+		return err
+	}
+
+	workflowState.stepState.Delete(step.UUID)
+	return nil
+}
+
+func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
+
+	state, err := e.getWorkflowState(taskUUID)
+	if err != nil {
+		return err
+	}
+
+	// clean up steps not cleaned up because of context cancel or detached function
+	state.stepState.Range(func(_, value any) bool {
+		if state, ok := value.(*stepState); ok && state != nil {
+			if state.output != nil {
+				_ = state.output.Close()
+				state.output = nil
+			}
+			if state.cmd != nil {
+				_ = state.cmd.Cancel()
+				state.cmd = nil
+			}
+		}
+		return true
+	})
 
 	err = os.RemoveAll(state.baseDir)
 	if err != nil {
 		return err
 	}
 
-	e.deleteState(taskUUID)
+	// hint for the gc to clean stuff
+	state.stepState.Clear()
+	e.workflows.Delete(taskUUID)
 
 	return err
 }
 
-func (e *local) getState(taskUUID string) (*workflowState, error) {
+func (e *local) getWorkflowState(taskUUID string) (*workflowState, error) {
 	state, ok := e.workflows.Load(taskUUID)
 	if !ok {
 		return nil, ErrWorkflowStateNotFound
 	}
 
 	s, ok := state.(*workflowState)
-	if !ok {
+	if !ok || s == nil {
 		return nil, fmt.Errorf("could not parse state: %v", state)
 	}
 
 	return s, nil
 }
 
-func (e *local) saveState(taskUUID string, state *workflowState) {
-	e.workflows.Store(taskUUID, state)
-}
+func (e *local) getStepState(taskUUID, stepUUID string) (*stepState, error) {
+	wState, err := e.getWorkflowState(taskUUID)
+	if err != nil {
+		return nil, err
+	}
 
-func (e *local) deleteState(taskUUID string) {
-	e.workflows.Delete(taskUUID)
+	state, ok := wState.stepState.Load(stepUUID)
+	if !ok {
+		return nil, ErrStepStateNotFound
+	}
+
+	s, ok := state.(*stepState)
+	if !ok || s == nil {
+		return nil, fmt.Errorf("could not parse state: %v", state)
+	}
+
+	return s, nil
 }

@@ -1,7 +1,7 @@
 <template>
   <Scaffold enable-tabs>
     <template #title>
-      {{ $t('settings') }}
+      {{ $t('admin.settings.settings') }}
     </template>
     <Tab icon="info" :to="{ name: 'admin-settings' }" :title="$t('info')" />
     <Tab icon="secret" :to="{ name: 'admin-settings-secrets' }" :title="$t('secrets.secrets')" />
@@ -11,6 +11,7 @@
     <Tab icon="org" :to="{ name: 'admin-settings-orgs' }" :title="$t('admin.settings.orgs.orgs')" />
     <Tab icon="agent" :to="{ name: 'admin-settings-agents' }" :title="$t('admin.settings.agents.agents')" />
     <Tab icon="tray-full" :to="{ name: 'admin-settings-queue' }" :title="$t('admin.settings.queue.queue')" />
+    <Tab icon="forge" :to="{ name: 'admin-settings-forges' }" :title="$t('forges')" />
 
     <router-view />
   </Scaffold>

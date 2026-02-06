@@ -8,7 +8,7 @@ import { WoodpeckerPlugin } from '../types';
 import { IconPlugin, IconVerified } from './Icons';
 
 function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
-  const pluginUrl = `/plugins/${plugin.name}`;
+  const pluginUrl = `/plugins/${plugin.slug}`;
 
   return (
     <a href={pluginUrl} className="card shadow--md wp-plugin-card">

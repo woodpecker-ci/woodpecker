@@ -13,10 +13,10 @@
       <ListItem
         v-for="repo in repos"
         :key="repo.id"
-        class="bg-wp-background-200 dark:bg-wp-background-100! items-center gap-2"
+        class="bg-wp-background-200 dark:bg-wp-background-200! items-center gap-2"
       >
         <span>{{ repo.full_name }}</span>
-        <div class="ml-auto flex items-center">
+        <div class="ml-auto flex items-center gap-2">
           <Badge
             v-if="!repo.active"
             class="md:display-unset mr-2 hidden"
@@ -37,16 +37,21 @@
         </div>
       </ListItem>
 
-      <div v-if="repos?.length === 0" class="ml-2">{{ $t('admin.settings.repos.none') }}</div>
+      <div v-if="loading" class="flex justify-center">
+        <Icon name="spinner" class="animate-spin" />
+      </div>
+      <div v-else-if="repos?.length === 0" class="ml-2">{{ $t('admin.settings.repos.none') }}</div>
     </div>
   </Settings>
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -54,6 +59,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
@@ -64,10 +70,12 @@ async function loadRepos(page: number): Promise<Repo[] | null> {
   return apiClient.getAllRepos({ page });
 }
 
-const { data: repos } = usePagination(loadRepos);
+const { data: repos, loading } = usePagination(loadRepos);
 
 const { doSubmit: repairRepos, isLoading: isRepairingRepos } = useAsyncAction(async () => {
   await apiClient.repairAllRepos();
   notifications.notify({ title: i18n.t('admin.settings.repos.repair.success'), type: 'success' });
 });
+
+useWPTitle(computed(() => [i18n.t('admin.settings.repos.repos'), i18n.t('admin.settings.settings')]));
 </script>

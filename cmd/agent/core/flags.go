@@ -67,6 +67,9 @@ var flags = []cli.Flag{
 		Name:    "labels",
 		Aliases: []string{"filter"}, // remove in v4.x
 		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_MAX_WORKFLOWS", "WOODPECKER_MAX_PROCS"), // cspell:words PROCS

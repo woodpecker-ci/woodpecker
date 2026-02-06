@@ -402,97 +402,6 @@ woodpecker_waiting_steps 0
 woodpecker_worker_count 4
 ```
 
-## External Configuration API
-
-To provide additional management and preprocessing capabilities for pipeline configurations Woodpecker supports an HTTP API which can be enabled to call an external config service.
-Before the run or restart of any pipeline Woodpecker will make a POST request to an external HTTP API sending the current repository, build information and all current config files retrieved from the repository. The external API can then send back new pipeline configurations that will be used immediately or respond with `HTTP 204` to tell the system to use the existing configuration.
-
-Every request sent by Woodpecker is signed using a [http-signature](https://datatracker.ietf.org/doc/html/rfc9421) by a private key (ed25519) generated on the first start of the Woodpecker server. You can get the public key for the verification of the http-signature from `http(s)://your-woodpecker-server/api/signature/public-key`.
-
-A simplistic example configuration service can be found here: [https://github.com/woodpecker-ci/example-config-service](https://github.com/woodpecker-ci/example-config-service)
-
-:::warning
-You need to trust the external config service as it is getting secret information about the repository and pipeline and has the ability to change pipeline configs that could run malicious tasks.
-:::
-
-### Configuration
-
-```ini title="Server"
-WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
-```
-
-#### Example request made by Woodpecker
-
-```json
-{
-  "repo": {
-    "id": 100,
-    "uid": "",
-    "user_id": 0,
-    "namespace": "",
-    "name": "woodpecker-test-pipe",
-    "slug": "",
-    "scm": "git",
-    "git_http_url": "",
-    "git_ssh_url": "",
-    "link": "",
-    "default_branch": "",
-    "private": true,
-    "visibility": "private",
-    "active": true,
-    "config": "",
-    "trusted": false,
-    "protected": false,
-    "ignore_forks": false,
-    "ignore_pulls": false,
-    "cancel_pulls": false,
-    "timeout": 60,
-    "counter": 0,
-    "synced": 0,
-    "created": 0,
-    "updated": 0,
-    "version": 0
-  },
-  "pipeline": {
-    "author": "myUser",
-    "author_avatar": "https://myforge.com/avatars/d6b3f7787a685fcdf2a44e2c685c7e03",
-    "author_email": "my@email.com",
-    "branch": "main",
-    "changed_files": ["some-file-name.txt"],
-    "commit": "2fff90f8d288a4640e90f05049fe30e61a14fd50",
-    "created_at": 0,
-    "deploy_to": "",
-    "enqueued_at": 0,
-    "error": "",
-    "event": "push",
-    "finished_at": 0,
-    "id": 0,
-    "link_url": "https://myforge.com/myUser/woodpecker-testpipe/commit/2fff90f8d288a4640e90f05049fe30e61a14fd50",
-    "message": "test old config\n",
-    "number": 0,
-    "parent": 0,
-    "ref": "refs/heads/main",
-    "refspec": "",
-    "clone_url": "",
-    "reviewed_at": 0,
-    "reviewed_by": "",
-    "sender": "myUser",
-    "signed": false,
-    "started_at": 0,
-    "status": "",
-    "timestamp": 1645962783,
-    "title": "",
-    "updated_at": 0,
-    "verified": false
-  },
-  "netrc": {
-    "machine": "https://example.com",
-    "login": "user",
-    "password": "password"
-  }
-}
-```
-
 #### Example response structure
 
 ```json
@@ -808,6 +717,15 @@ The default setting for allowing pull requests on a repo.
 
 ---
 
+### DEFAULT_APPROVAL_MODE
+
+- Name: `WOODPECKER_DEFAULT_APPROVAL_MODE`
+- Default: `forks`
+
+The default setting for the approval mode on a repo. Possible values: `none`, `forks`, `pull_requests` or `all_events`.
+
+---
+
 ### DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS
 
 - Name: `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`
@@ -1058,7 +976,29 @@ Supported variables:
 - Name: `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 - Default: none
 
-Specify a configuration service endpoint, see [Configuration Extension](#external-configuration-api)
+Specify a configuration service endpoint, see [Configuration Extension](../../20-usage/72-extensions/40-configuration-extension.md)
+
+---
+
+### CONFIG_SERVICE_EXCLUSIVE
+
+- Name: `CONFIG_SERVICE_EXCLUSIVE`
+- Default: false
+
+Whether the forge request should be skipped for the global configuration endpoint.
+
+:::warning
+If you enable this, all repos will exclusively use the global config service endpoint. There is no possibility to directly define pipelines in the forge, except the extension handles this case itself as well.
+:::
+
+---
+
+### EXTENSIONS_ALLOWED_HOSTS
+
+- Name: `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS`
+- Default: `external`
+
+Comma-separated list of hosts that are allowed to be contacted by extensions. Possible values are `loopback`, `private`, `external`, `*` or CIDR list.
 
 ---
 
@@ -1103,7 +1043,11 @@ Disable version check in admin web UI.
 - Name: `WOODPECKER_LOG_STORE`
 - Default: `database`
 
-Where to store logs. Possible values: `database` or `file`.
+Where to store logs. Possible values:
+
+- `database`: stores the logs in the database
+- `file`: stores logs in JSON files on the files system
+- `addon`: uses an [addon](./100-addons.md#log) to store logs
 
 ---
 
@@ -1112,7 +1056,10 @@ Where to store logs. Possible values: `database` or `file`.
 - Name: `WOODPECKER_LOG_STORE_FILE_PATH`
 - Default: none
 
-Directory to store logs in if [`WOODPECKER_LOG_STORE`](#log_store) is `file`.
+If [`WOODPECKER_LOG_STORE`](#log_store) is:
+
+- `file`: Directory to store logs in
+- `addon`: The path to the addon executable
 
 ---
 

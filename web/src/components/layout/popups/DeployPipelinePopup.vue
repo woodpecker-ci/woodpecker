@@ -1,6 +1,6 @@
 <template>
   <Popup :open="open" @close="$emit('close')">
-    <Panel v-if="!loading">
+    <Panel v-if="!loading" class="bg-wp-background-100 dark:bg-wp-background-300">
       <form @submit.prevent="triggerDeployPipeline">
         <span class="text-wp-text-100 text-xl">{{
           $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber })
@@ -39,7 +39,7 @@ import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { inject } from '~/compositions/useInjectProvide';
+import { requiredInject } from '~/compositions/useInjectProvide';
 
 const props = defineProps<{
   open: boolean;
@@ -51,7 +51,7 @@ const emit = defineEmits<{
 }>();
 
 const apiClient = useApiClient();
-const repo = inject('repo');
+const repo = requiredInject('repo');
 const router = useRouter();
 
 const payload = ref<{

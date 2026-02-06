@@ -22,28 +22,40 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v70/github"
+	"github.com/google/go-github/v82/github"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
 	hookField = "payload"
 
-	actionOpen     = "opened"
-	actionClose    = "closed"
-	actionSync     = "synchronize"
-	actionReleased = "released"
+	actionOpen             = "opened"
+	actionReopen           = "reopened"
+	actionClose            = "closed"
+	actionSync             = "synchronize"
+	actionReleased         = "released"
+	actionAssigned         = "assigned"
+	actionConvertedToDraft = "converted_to_draft"
+	actionDemilestoned     = "demilestoned"
+	actionEdited           = "edited"
+	actionLabeled          = "labeled"
+	actionLocked           = "locked"
+	actionMilestoned       = "milestoned"
+	actionReadyForReview   = "ready_for_review"
+	actionUnassigned       = "unassigned"
+	actionUnlabeled        = "unlabeled"
+	actionUnlocked         = "unlocked"
 
-	stateOpen  = "open"
-	stateClose = "closed"
+	labelCleared = "label_cleared"
+	labelUpdated = "label_updated"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
+func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Repo, _ *model.Pipeline, currCommit, prevCommit string, _ error) {
 	var reader io.Reader = r.Body
 
 	if payload := r.FormValue(hookField); payload != "" {
@@ -52,51 +64,52 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 
 	raw, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, "", "", err
 	}
 
 	payload, err := github.ParseWebHook(github.WebHookType(r), raw)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, "", "", err
 	}
 
 	switch hook := payload.(type) {
 	case *github.PushEvent:
-		repo, pipeline := parsePushHook(hook)
-		return nil, repo, pipeline, nil
+		repo, pipeline, curr, prev := parsePushHook(hook)
+		return nil, repo, pipeline, curr, prev, nil
 	case *github.DeploymentEvent:
 		repo, pipeline := parseDeployHook(hook)
-		return nil, repo, pipeline, nil
+		return nil, repo, pipeline, "", "", nil
 	case *github.PullRequestEvent:
-		return parsePullHook(hook, merge)
+		pr, repo, pipeline, err := parsePullHook(hook, merge)
+		return pr, repo, pipeline, "", "", err
 	case *github.ReleaseEvent:
 		repo, pipeline := parseReleaseHook(hook)
-		return nil, repo, pipeline, nil
+		return nil, repo, pipeline, "", "", nil
 	default:
-		return nil, nil, nil, &types.ErrIgnoreEvent{Event: github.Stringify(hook)}
+		return nil, nil, nil, "", "", &types.ErrIgnoreEvent{Event: github.Stringify(hook)}
 	}
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
+func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, curr, prev string) {
 	if hook.Deleted != nil && *hook.Deleted {
-		return nil, nil
+		return nil, nil, "", ""
 	}
 
 	pipeline := &model.Pipeline{
-		Event:        model.EventPush,
-		Commit:       hook.GetHeadCommit().GetID(),
-		Ref:          hook.GetRef(),
-		ForgeURL:     hook.GetHeadCommit().GetURL(),
-		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
-		Message:      hook.GetHeadCommit().GetMessage(),
-		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
-		Avatar:       hook.GetSender().GetAvatarURL(),
-		Author:       hook.GetSender().GetLogin(),
-		Sender:       hook.GetSender().GetLogin(),
-		ChangedFiles: getChangedFilesFromCommits(hook.Commits),
+		Event:    model.EventPush,
+		Commit:   hook.GetHeadCommit().GetID(),
+		Ref:      hook.GetRef(),
+		ForgeURL: hook.GetHeadCommit().GetURL(),
+		Branch:   strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
+		Message:  hook.GetHeadCommit().GetMessage(),
+		Email:    hook.GetHeadCommit().GetAuthor().GetEmail(),
+		Avatar:   hook.GetSender().GetAvatarURL(),
+		Author:   hook.GetSender().GetLogin(),
+		Sender:   hook.GetSender().GetLogin(),
 	}
+	repo := convertRepoHook(hook.GetRepo())
 
 	if len(pipeline.Author) == 0 {
 		pipeline.Author = hook.GetHeadCommit().GetAuthor().GetLogin()
@@ -105,15 +118,15 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!
 		pipeline.Event = model.EventTag
-		pipeline.ChangedFiles = nil
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
 		// as pipeline's branch so that we can filter events base on it
 		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
 			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
 		}
+		return repo, pipeline, "", ""
 	}
 
-	return convertRepoHook(hook.GetRepo()), pipeline
+	return repo, pipeline, hook.GetHeadCommit().GetID(), hook.GetBefore()
 }
 
 // parseDeployHook parses a deployment and returns the Repo and Pipeline details.
@@ -148,37 +161,68 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
 func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
-	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync && hook.GetAction() != actionClose {
-		return nil, nil, nil, nil
-	}
-
 	event := model.EventPull
-	if hook.GetPullRequest().GetState() == stateClose {
+	eventAction := ""
+
+	switch hook.GetAction() {
+	case actionOpen, actionReopen, actionSync:
+		// default case nothing to do
+	case actionClose:
 		event = model.EventPullClosed
+	case actionAssigned,
+		actionConvertedToDraft,
+		actionDemilestoned,
+		actionEdited,
+		actionLabeled,
+		actionLocked,
+		actionMilestoned,
+		actionReadyForReview,
+		actionUnassigned,
+		actionUnlabeled,
+		actionUnlocked:
+		// metadata pull events
+		event = model.EventPullMetadata
+		eventAction = common.NormalizeEventReason(hook.GetAction())
+	default:
+		return nil, nil, nil, &types.ErrIgnoreEvent{
+			Event:  string(model.EventPullMetadata),
+			Reason: fmt.Sprintf("action %s is not supported", hook.GetAction()),
+		}
 	}
 
 	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
 
 	pipeline := &model.Pipeline{
-		Event:    event,
-		Commit:   hook.GetPullRequest().GetHead().GetSHA(),
-		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
-		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
-		Branch:   hook.GetPullRequest().GetBase().GetRef(),
-		Message:  hook.GetPullRequest().GetTitle(),
-		Author:   hook.GetPullRequest().GetUser().GetLogin(),
-		Avatar:   hook.GetPullRequest().GetUser().GetAvatarURL(),
-		Title:    hook.GetPullRequest().GetTitle(),
-		Sender:   hook.GetSender().GetLogin(),
+		Event:       event,
+		EventReason: []string{eventAction},
+		Commit:      hook.GetPullRequest().GetHead().GetSHA(),
+		ForgeURL:    hook.GetPullRequest().GetHTMLURL(),
+		Ref:         fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
+		Branch:      hook.GetPullRequest().GetBase().GetRef(),
+		Message:     hook.GetPullRequest().GetTitle(),
+		Author:      hook.GetPullRequest().GetUser().GetLogin(),
+		Avatar:      hook.GetPullRequest().GetUser().GetAvatarURL(),
+		Title:       hook.GetPullRequest().GetTitle(),
+		Sender:      hook.GetSender().GetLogin(),
 		Refspec: fmt.Sprintf(refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
-		PullRequestLabels: convertLabels(hook.GetPullRequest().Labels),
-		FromFork:          fromFork,
+		PullRequestLabels:    convertLabels(hook.GetPullRequest().Labels),
+		PullRequestMilestone: hook.GetPullRequest().GetMilestone().GetTitle(),
+		FromFork:             fromFork,
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
+	}
+
+	// normalize label events to match other forges
+	if eventAction == actionLabeled || eventAction == actionUnlabeled {
+		if len(pipeline.PullRequestLabels) == 0 {
+			pipeline.EventReason = []string{labelCleared}
+		} else {
+			pipeline.EventReason = []string{labelUpdated}
+		}
 	}
 
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil
@@ -209,15 +253,4 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 	}
 
 	return convertRepo(hook.GetRepo()), pipeline
-}
-
-func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {
-	// assume a capacity of 4 changed files per commit
-	files := make([]string, 0, len(commits)*4)
-	for _, cm := range commits {
-		files = append(files, cm.Added...)
-		files = append(files, cm.Removed...)
-		files = append(files, cm.Modified...)
-	}
-	return utils.DeduplicateStrings(files)
 }

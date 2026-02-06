@@ -18,7 +18,7 @@ import (
 	"encoding/base32"
 	"fmt"
 
-	"github.com/gorilla/securecookie"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
@@ -42,7 +42,7 @@ type Agent struct {
 	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
 	// Server side enforced agent filters
 	Filters map[string]string `json:"filters" xorm:"'filters' json"`
-} //	@name Agent
+} //	@name	Agent
 
 const (
 	IDNotSet = -1
@@ -58,7 +58,7 @@ func (a *Agent) IsSystemAgent() bool {
 }
 
 func GenerateNewAgentToken() string {
-	return base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32))
+	return base32.StdEncoding.EncodeToString(random.GetRandomBytes(32))
 }
 
 func (a *Agent) GetServerLabels() (map[string]string, error) {

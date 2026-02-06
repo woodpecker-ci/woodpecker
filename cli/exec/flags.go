@@ -47,22 +47,41 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUMES"),
 		Name:    "volumes",
 		Usage:   "pipeline volumes",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_NETWORKS"),
 		Name:    "network",
 		Usage:   "external networks",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "plugins-privileged",
 		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND"),
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
+	},
+	&cli.StringMapFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRETS"),
+		Name:    "secrets",
+		Usage:   "map of secrets, ex. 'secret=\"val\",secret2=\"value2\"'",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRETS_FILE"),
+		Name:    "secrets-file",
+		Usage:   "path to yaml file with secrets map",
 	},
 
 	//
@@ -193,22 +212,22 @@ var flags = []cli.Flag{
 		Name:    "repo-trusted-security",
 		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_SECURITY\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_NUMBER"),
 		Name:    "pipeline-number",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_NUMBER\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_PARENT"),
 		Name:    "pipeline-parent",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_PARENT\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_CREATED"),
 		Name:    "pipeline-created",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_CREATED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_STARTED"),
 		Name:    "pipeline-started",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_STARTED\".",
@@ -284,28 +303,36 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_LABELS"),
 		Name:    "commit-pull-labels",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_LABELS\".",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_MILESTONE"),
+		Name:    "commit-pull-milestone",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_MILESTONE\".",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("CI_COMMIT_PRERELEASE"),
 		Name:    "commit-release-is-pre",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PRERELEASE\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_NUMBER"),
 		Name:    "prev-pipeline-number",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_NUMBER\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_CREATED"),
 		Name:    "prev-pipeline-created",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_CREATED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_STARTED"),
 		Name:    "prev-pipeline-started",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_STARTED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_FINISHED"),
 		Name:    "prev-pipeline-finished",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_FINISHED\".",
@@ -380,7 +407,7 @@ var flags = []cli.Flag{
 		Name:    "workflow-name",
 		Usage:   "Set the metadata environment variable \"CI_WORKFLOW_NAME\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_WORKFLOW_NUMBER"),
 		Name:    "workflow-number",
 		Usage:   "Set the metadata environment variable \"CI_WORKFLOW_NUMBER\".",
@@ -389,6 +416,9 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_ENV"),
 		Name:    "env",
 		Usage:   "Set the metadata environment variable \"CI_ENV\".",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_FORGE_TYPE"),

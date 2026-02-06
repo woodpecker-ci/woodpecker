@@ -32,7 +32,6 @@ const config = {
   url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'throw',
   onBrokenAnchors: 'throw',
   onDuplicateRoutes: 'throw',
   organizationName: 'woodpecker-ci',
@@ -169,10 +168,6 @@ const config = {
               label: 'Bluesky',
               href: 'https://bsky.app/profile/woodpecker-ci.org',
             },
-            {
-              label: 'X',
-              href: 'https://twitter.com/woodpeckerci',
-            },
           ],
         },
         {
@@ -214,6 +209,9 @@ const config = {
         'ini',
         'nix',
         'uri',
+        // php is currently needed for redocusaurus
+        // https://github.com/rohit-gohri/redocusaurus/issues/388
+        'php',
       ],
     },
     announcementBar: {
@@ -320,9 +318,14 @@ const config = {
   ],
   markdown: {
     format: 'detect',
+    hooks: {
+      onBrokenMarkdownLinks: 'throw',
+      onBrokenMarkdownImages: 'throw',
+    },
   },
   future: {
     experimental_faster: true,
+    v4: true,
   },
 } satisfies Config;
 
