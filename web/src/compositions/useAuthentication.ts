@@ -1,5 +1,4 @@
 import useConfig from '~/compositions/useConfig';
-import useUserConfig from '~/compositions/useUserConfig';
 
 export default () =>
   ({
@@ -7,11 +6,7 @@ export default () =>
 
     user: useConfig().user,
 
-    authenticate(url?: string, forgeId?: number) {
-      if (url !== undefined) {
-        const config = useUserConfig();
-        config.setUserConfig('redirectUrl', url);
-      }
-      window.location.href = `${useConfig().rootPath}/authorize?${forgeId !== undefined ? `forgeId=${forgeId}` : ''}`;
+    authenticate(forgeId?: number) {
+      window.location.href = `${useConfig().rootPath}/authorize?${forgeId !== undefined ? `forge_id=${forgeId}` : ''}`;
     },
   }) as const;

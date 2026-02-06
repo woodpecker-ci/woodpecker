@@ -19,9 +19,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 )
 
 // GetOrgSecret
@@ -99,6 +99,7 @@ func PostOrgSecret(c *gin.Context) {
 		Value:  in.Value,
 		Events: in.Events,
 		Images: in.Images,
+		Note:   in.Note,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", org.ID, err)
@@ -120,15 +121,15 @@ func PostOrgSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Organization secrets
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id			path	string	true	"the org's id"
-//	@Param		secret			path	string	true	"the secret's name"
-//	@Param		secretData		body	Secret	true	"the update secret data"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string		true	"the org's id"
+//	@Param		secret			path	string		true	"the secret's name"
+//	@Param		secretData		body	SecretPatch	true	"the update secret data"
 func PatchOrgSecret(c *gin.Context) {
 	org := session.Org(c)
 	name := c.Param("secret")
 
-	in := new(model.Secret)
+	in := new(model.SecretPatch)
 	if err := c.Bind(in); err != nil {
 		c.String(http.StatusBadRequest, "Error parsing secret. %s", err)
 		return
@@ -140,14 +141,17 @@ func PatchOrgSecret(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
-	if in.Value != "" {
-		secret.Value = in.Value
+	if in.Value != nil && *in.Value != "" {
+		secret.Value = *in.Value
 	}
 	if in.Events != nil {
 		secret.Events = in.Events
 	}
 	if in.Images != nil {
 		secret.Images = in.Images
+	}
+	if in.Note != nil {
+		secret.Note = *in.Note
 	}
 
 	if err := secret.Validate(); err != nil {

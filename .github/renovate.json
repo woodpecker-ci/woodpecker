@@ -2,11 +2,10 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>woodpecker-ci/renovate-config"],
   "automergeType": "pr",
-  "enabledManagers": ["woodpecker"],
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["shared/constant/constant.go"],
+      "managerFilePatterns": ["/^shared/constant/constant.go$/"],
       "matchStrings": [
         "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultClonePlugin = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
       ],

@@ -22,12 +22,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	cronScheduler "go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	cronScheduler "go.woodpecker-ci.org/woodpecker/v3/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // GetCron
@@ -128,6 +128,8 @@ func PostCron(c *gin.Context) {
 		CreatorID: user.ID,
 		Schedule:  in.Schedule,
 		Branch:    in.Branch,
+		Variables: in.Variables,
+		Enabled:   in.Enabled,
 	}
 	if err := cron.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
@@ -164,10 +166,10 @@ func PostCron(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Cron
 //	@Tags		Repository cron jobs
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		cron			path	string	true	"the cron job id"
-//	@Param		cronJob			body	Cron	true	"the cron job data"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
+//	@Param		cron			path	string		true	"the cron job id"
+//	@Param		cronJob			body	CronPatch	true	"the cron job data"
 func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -185,7 +187,7 @@ func PatchCron(c *gin.Context) {
 		return
 	}
 
-	in := new(model.Cron)
+	in := new(model.CronPatch)
 	err = c.Bind(in)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing request. %s", err)
@@ -197,26 +199,41 @@ func PatchCron(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
-	if in.Branch != "" {
+	if in.Branch != nil && *in.Branch != "" {
 		// check if branch exists on forge
-		_, err := _forge.BranchHead(c, user, repo, in.Branch)
+		_, err := _forge.BranchHead(c, user, repo, *in.Branch)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
 		}
-		cron.Branch = in.Branch
+		cron.Branch = *in.Branch
 	}
-	if in.Schedule != "" {
-		cron.Schedule = in.Schedule
-		nextExec, err := cronScheduler.CalcNewNext(in.Schedule, time.Now())
+	if in.Schedule != nil && *in.Schedule != "" {
+		cron.Schedule = *in.Schedule
+		nextExec, err := cronScheduler.CalcNewNext(*in.Schedule, time.Now())
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 			return
 		}
 		cron.NextExec = nextExec.Unix()
 	}
-	if in.Name != "" {
-		cron.Name = in.Name
+	if in.Name != nil && *in.Name != "" {
+		cron.Name = *in.Name
+	}
+	if in.Enabled != nil {
+		cron.Enabled = *in.Enabled
+		// if we re-enable a cron we have to calc NextExec because it was not while disabled
+		if cron.Enabled {
+			nextExec, err := cronScheduler.CalcNewNext(*in.Schedule, time.Now())
+			if err != nil {
+				c.String(http.StatusInternalServerError, "Cron schedule could not parsed: %s", err)
+				return
+			}
+			cron.NextExec = nextExec.Unix()
+		}
+	}
+	if in.Variables != nil {
+		cron.Variables = in.Variables
 	}
 	cron.CreatorID = user.ID
 

@@ -22,7 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	prometheus_http "github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 )
 
 // errInvalidToken is returned when the api request token is invalid.

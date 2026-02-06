@@ -20,10 +20,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 //
@@ -57,7 +57,7 @@ func GetAgents(c *gin.Context) {
 //	@Success	200	{object}	Agent
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int		true	"the agent's id"
+//	@Param		agent_id		path	int		true	"the agent's id"
 func GetAgent(c *gin.Context) {
 	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
@@ -81,7 +81,7 @@ func GetAgent(c *gin.Context) {
 //	@Success	200	{array}	Task
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int		true	"the agent's id"
+//	@Param		agent_id		path	int		true	"the agent's id"
 func GetAgentTasks(c *gin.Context) {
 	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
@@ -114,7 +114,7 @@ func GetAgentTasks(c *gin.Context) {
 //	@Success	200	{object}	Agent
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int		true	"the agent's id"
+//	@Param		agent_id		path	int		true	"the agent's id"
 //	@Param		agentData		body	Agent	true	"the agent's data"
 func PatchAgent(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -156,14 +156,14 @@ func PatchAgent(c *gin.Context) {
 
 // PostAgent
 //
-//	@Summary	Create a new agent
-//	@Description Creates a new agent with a random token
-//	@Router		/agents [post]
-//	@Produce	json
-//	@Success	200	{object}	Agent
-//	@Tags		Agents
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
+//	@Summary		Create a new agent
+//	@Description	Creates a new agent with a random token
+//	@Router			/agents [post]
+//	@Produce		json
+//	@Success		200	{object}	Agent
+//	@Tags			Agents
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
 func PostAgent(c *gin.Context) {
 	in := &model.Agent{}
 	err := c.Bind(in)
@@ -196,7 +196,7 @@ func PostAgent(c *gin.Context) {
 //	@Success	200
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int		true	"the agent's id"
+//	@Param		agent_id		path	int		true	"the agent's id"
 func DeleteAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -237,15 +237,15 @@ func DeleteAgent(c *gin.Context) {
 
 // PostOrgAgent
 //
-//	@Summary	Create a new organization-scoped agent
-//	@Description Creates a new agent with a random token, scoped to the specified organization
-//	@Router		/orgs/{org_id}/agents [post]
-//	@Produce	json
-//	@Success	200	{object}	Agent
-//	@Tags		Agents
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id			path	int		true	"the organization's id"
-//	@Param		agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
+//	@Summary		Create a new organization-scoped agent
+//	@Description	Creates a new agent with a random token, scoped to the specified organization
+//	@Router			/orgs/{org_id}/agents [post]
+//	@Produce		json
+//	@Success		200	{object}	Agent
+//	@Tags			Agents
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			org_id			path	int		true	"the organization's id"
+//	@Param			agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
 func PostOrgAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
@@ -286,7 +286,7 @@ func PostOrgAgent(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{array}	Agent
 //	@Tags		Agents
-//	@Param		Authorization	header	string	true	"Insert your personal access token"				default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_id			path	int		true	"the organization's id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)

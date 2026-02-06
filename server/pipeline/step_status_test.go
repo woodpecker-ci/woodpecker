@@ -1,5 +1,4 @@
 // Copyright 2022 Woodpecker Authors
-// Copyright 2019 mhmxs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,238 +16,241 @@ package pipeline
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func mockStoreStep(t *testing.T) store.Store {
-	s := mocks.NewStore(t)
+	s := mocks.NewMockStore(t)
 	s.On("StepUpdate", mock.Anything).Return(nil)
 	return s
 }
 
-func TestUpdateStepStatusNotExited(t *testing.T) {
-	t.Parallel()
-	// step in db before update
-	step := &model.Step{}
-
-	// advertised step status
-	state := rpc.StepState{
-		Started: int64(42),
-		Exited:  false,
-		// Dummy data
-		Finished: int64(1),
-		ExitCode: pipeline.ExitCodeKilled,
-		Error:    "not an error",
-	}
-
-	err := UpdateStepStatus(mockStoreStep(t), step, state)
-	assert.NoError(t, err)
-	assert.EqualValues(t, model.StatusRunning, step.State)
-	assert.EqualValues(t, 42, step.Started)
-	assert.EqualValues(t, 0, step.Finished)
-	assert.EqualValues(t, 0, step.ExitCode)
-	assert.EqualValues(t, "", step.Error)
-}
-
-func TestUpdateStepStatusNotExitedButStopped(t *testing.T) {
+func TestUpdateStepStatus(t *testing.T) {
 	t.Parallel()
 
-	// step in db before update
-	step := &model.Step{Started: 42, Finished: 64, State: model.StatusKilled}
+	t.Run("Pending", func(t *testing.T) {
+		t.Parallel()
 
-	// advertised step status
-	state := rpc.StepState{
-		Exited: false,
-		// Dummy data
-		Finished: int64(1),
-		ExitCode: pipeline.ExitCodeKilled,
-		Error:    "not an error",
-	}
+		t.Run("TransitionToRunning", func(t *testing.T) {
+			t.Parallel()
 
-	err := UpdateStepStatus(mockStoreStep(t), step, state)
-	assert.NoError(t, err)
-	assert.EqualValues(t, model.StatusKilled, step.State)
-	assert.EqualValues(t, 42, step.Started)
-	assert.EqualValues(t, 64, step.Finished)
-	assert.EqualValues(t, 0, step.ExitCode)
-	assert.EqualValues(t, "", step.Error)
-}
+			t.Run("WithStartTime", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusPending}
+				state := rpc.StepState{Started: 42, Finished: 0}
 
-func TestUpdateStepStatusExited(t *testing.T) {
-	t.Parallel()
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
 
-	// step in db before update
-	step := &model.Step{Started: 42}
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusRunning, step.State)
+				assert.Equal(t, int64(42), step.Started)
+				assert.Equal(t, int64(0), step.Finished)
+			})
 
-	// advertised step status
-	state := rpc.StepState{
-		Started:  int64(42),
-		Exited:   true,
-		Finished: int64(34),
-		ExitCode: pipeline.ExitCodeKilled,
-		Error:    "an error",
-	}
+			t.Run("WithoutStartTime", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusPending}
+				state := rpc.StepState{Started: 0, Finished: 0}
 
-	err := UpdateStepStatus(mockStoreStep(t), step, state)
-	assert.NoError(t, err)
-	assert.EqualValues(t, model.StatusKilled, step.State)
-	assert.EqualValues(t, 42, step.Started)
-	assert.EqualValues(t, 34, step.Finished)
-	assert.EqualValues(t, pipeline.ExitCodeKilled, step.ExitCode)
-	assert.EqualValues(t, "an error", step.Error)
-}
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
 
-func TestUpdateStepStatusExitedButNot137(t *testing.T) {
-	t.Parallel()
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusRunning, step.State)
+				assert.Greater(t, step.Started, int64(0))
+			})
+		})
 
-	// step in db before update
-	step := &model.Step{Started: 42}
+		t.Run("DirectToSuccess", func(t *testing.T) {
+			t.Parallel()
 
-	// advertised step status
-	state := rpc.StepState{
-		Started:  int64(42),
-		Exited:   true,
-		Finished: int64(34),
-		Error:    "an error",
-	}
+			t.Run("WithFinishTime", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusPending}
+				state := rpc.StepState{Started: 42, Exited: true, Finished: 100, ExitCode: 0, Error: ""}
 
-	err := UpdateStepStatus(mockStoreStep(t), step, state)
-	assert.NoError(t, err)
-	assert.EqualValues(t, model.StatusFailure, step.State)
-	assert.EqualValues(t, 42, step.Started)
-	assert.EqualValues(t, 34, step.Finished)
-	assert.EqualValues(t, 0, step.ExitCode)
-	assert.EqualValues(t, "an error", step.Error)
-}
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
 
-func TestUpdateStepStatusExitedWithCode(t *testing.T) {
-	t.Parallel()
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusSuccess, step.State)
+				assert.Equal(t, int64(42), step.Started)
+				assert.Equal(t, int64(100), step.Finished)
+			})
 
-	// advertised step status
-	state := rpc.StepState{
-		Started:  int64(42),
-		Exited:   true,
-		Finished: int64(34),
-		ExitCode: 1,
-		Error:    "an error",
-	}
-	step := &model.Step{}
-	err := UpdateStepStatus(mockStoreStep(t), step, state)
-	assert.NoError(t, err)
+			t.Run("WithoutFinishTime", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusPending}
+				state := rpc.StepState{Started: 42, Exited: true, Finished: 0, ExitCode: 0, Error: ""}
 
-	assert.Equal(t, model.StatusFailure, step.State)
-	assert.Equal(t, 1, step.ExitCode)
-}
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
 
-func TestUpdateStepToStatusStarted(t *testing.T) {
-	t.Parallel()
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusSuccess, step.State)
+				assert.Greater(t, step.Finished, int64(0))
+			})
+		})
 
-	state := rpc.StepState{Started: int64(42)}
-	step, _ := UpdateStepToStatusStarted(mockStoreStep(t), model.Step{}, state)
+		t.Run("DirectToFailure", func(t *testing.T) {
+			t.Parallel()
 
-	assert.Equal(t, model.StatusRunning, step.State)
-	assert.EqualValues(t, 42, step.Started)
+			t.Run("WithExitCode", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusPending}
+				state := rpc.StepState{Started: 42, Exited: true, Finished: 34, ExitCode: 1, Error: "an error"}
+
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusFailure, step.State)
+				assert.Equal(t, 1, step.ExitCode)
+				assert.Equal(t, "an error", step.Error)
+			})
+		})
+	})
+
+	t.Run("Running", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("ToSuccess", func(t *testing.T) {
+			t.Parallel()
+
+			t.Run("WithFinishTime", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusRunning, Started: 42}
+				state := rpc.StepState{Exited: true, Finished: 100, ExitCode: 0, Error: ""}
+
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusSuccess, step.State)
+				assert.Equal(t, int64(100), step.Finished)
+			})
+
+			t.Run("WithoutFinishTime", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusRunning, Started: 42}
+				state := rpc.StepState{Exited: true, Finished: 0, ExitCode: 0, Error: ""}
+
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusSuccess, step.State)
+				assert.Greater(t, step.Finished, int64(0))
+			})
+		})
+
+		t.Run("ToFailure", func(t *testing.T) {
+			t.Parallel()
+
+			t.Run("WithExitCode137", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusRunning, Started: 42}
+				state := rpc.StepState{Exited: true, Finished: 34, ExitCode: pipeline.ExitCodeKilled, Error: "an error"}
+
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusFailure, step.State)
+				assert.Equal(t, int64(34), step.Finished)
+				assert.Equal(t, pipeline.ExitCodeKilled, step.ExitCode)
+			})
+
+			t.Run("WithError", func(t *testing.T) {
+				t.Parallel()
+				step := &model.Step{State: model.StatusRunning, Started: 42}
+				state := rpc.StepState{Exited: true, Finished: 34, ExitCode: 0, Error: "an error"}
+
+				err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+				assert.NoError(t, err)
+				assert.Equal(t, model.StatusFailure, step.State)
+				assert.Equal(t, "an error", step.Error)
+			})
+		})
+
+		t.Run("StillRunning", func(t *testing.T) {
+			t.Parallel()
+			step := &model.Step{State: model.StatusRunning, Started: 42}
+			state := rpc.StepState{Exited: false, Finished: 0}
+
+			err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+			assert.NoError(t, err)
+			assert.Equal(t, model.StatusRunning, step.State)
+			assert.Equal(t, int64(0), step.Finished)
+		})
+	})
+
+	t.Run("Canceled", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("WithoutFinishTime", func(t *testing.T) {
+			t.Parallel()
+			step := &model.Step{State: model.StatusRunning, Started: 42}
+			state := rpc.StepState{Canceled: true}
+
+			err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+			assert.NoError(t, err)
+			assert.Equal(t, model.StatusKilled, step.State)
+			assert.Greater(t, step.Finished, int64(0))
+		})
+
+		t.Run("WithExitedAndFinishTime", func(t *testing.T) {
+			t.Parallel()
+			step := &model.Step{State: model.StatusRunning, Started: 42}
+			state := rpc.StepState{Canceled: true, Exited: true, Finished: 100, ExitCode: 1, Error: "canceled"}
+
+			err := UpdateStepStatus(mockStoreStep(t), step, state)
+
+			assert.NoError(t, err)
+			assert.Equal(t, model.StatusKilled, step.State)
+			assert.Equal(t, int64(100), step.Finished)
+			assert.Equal(t, 1, step.ExitCode)
+			assert.Equal(t, "canceled", step.Error)
+		})
+	})
+
+	t.Run("TerminalState", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusKilled, Started: 42, Finished: 64}
+		state := rpc.StepState{Exited: false}
+
+		err := UpdateStepStatus(mocks.NewMockStore(t), step, state)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "does not expect rpc state updates")
+		assert.Equal(t, model.StatusKilled, step.State)
+	})
 }
 
 func TestUpdateStepToStatusSkipped(t *testing.T) {
 	t.Parallel()
 
-	step, _ := UpdateStepToStatusSkipped(mockStoreStep(t), model.Step{}, int64(1))
+	t.Run("NotStarted", func(t *testing.T) {
+		t.Parallel()
 
-	assert.Equal(t, model.StatusSkipped, step.State)
-	assert.EqualValues(t, 0, step.Finished)
-}
+		step, err := UpdateStepToStatusSkipped(mockStoreStep(t), model.Step{}, int64(1))
 
-func TestUpdateStepToStatusSkippedButStarted(t *testing.T) {
-	t.Parallel()
+		assert.NoError(t, err)
+		assert.Equal(t, model.StatusSkipped, step.State)
+		assert.Equal(t, int64(0), step.Finished)
+	})
 
-	step := &model.Step{
-		Started: int64(42),
-	}
+	t.Run("AlreadyStarted", func(t *testing.T) {
+		t.Parallel()
 
-	step, _ = UpdateStepToStatusSkipped(mockStoreStep(t), *step, int64(1))
+		step, err := UpdateStepToStatusSkipped(mockStoreStep(t), model.Step{Started: 42}, int64(100))
 
-	assert.Equal(t, model.StatusSuccess, step.State)
-	assert.EqualValues(t, 1, step.Finished)
-}
-
-func TestUpdateStepStatusToDoneSkipped(t *testing.T) {
-	t.Parallel()
-
-	state := rpc.StepState{
-		Finished: int64(34),
-	}
-
-	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
-
-	assert.Equal(t, model.StatusSkipped, step.State)
-	assert.EqualValues(t, 34, step.Finished)
-	assert.Empty(t, step.Error)
-	assert.Equal(t, 0, step.ExitCode)
-}
-
-func TestUpdateStepStatusToDoneSuccess(t *testing.T) {
-	t.Parallel()
-
-	state := rpc.StepState{
-		Started:  int64(42),
-		Finished: int64(34),
-	}
-
-	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
-
-	assert.Equal(t, model.StatusSuccess, step.State)
-	assert.EqualValues(t, 34, step.Finished)
-	assert.Empty(t, step.Error)
-	assert.Equal(t, 0, step.ExitCode)
-}
-
-func TestUpdateStepStatusToDoneFailureWithError(t *testing.T) {
-	t.Parallel()
-
-	state := rpc.StepState{Error: "an error"}
-
-	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
-
-	assert.Equal(t, model.StatusFailure, step.State)
-}
-
-func TestUpdateStepStatusToDoneFailureWithExitCode(t *testing.T) {
-	t.Parallel()
-
-	state := rpc.StepState{ExitCode: 43}
-
-	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
-
-	assert.Equal(t, model.StatusFailure, step.State)
-}
-
-func TestUpdateStepToStatusKilledStarted(t *testing.T) {
-	t.Parallel()
-
-	now := time.Now().Unix()
-
-	step, _ := UpdateStepToStatusKilled(mockStoreStep(t), model.Step{})
-
-	assert.Equal(t, model.StatusKilled, step.State)
-	assert.LessOrEqual(t, now, step.Finished)
-	assert.Equal(t, step.Finished, step.Started)
-	assert.Equal(t, 137, step.ExitCode)
-}
-
-func TestUpdateStepToStatusKilledNotStarted(t *testing.T) {
-	t.Parallel()
-
-	step, _ := UpdateStepToStatusKilled(mockStoreStep(t), model.Step{Started: int64(1)})
-
-	assert.EqualValues(t, 1, step.Started)
+		assert.NoError(t, err)
+		assert.Equal(t, model.StatusSuccess, step.State)
+		assert.Equal(t, int64(100), step.Finished)
+	})
 }

@@ -23,7 +23,7 @@ import (
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func convertStatus(status model.StatusValue) bb.BuildStatusState {
@@ -56,7 +56,6 @@ func convertRepo(from *bb.Repository, perm *model.Perm, branch string) *model.Re
 		Name:          from.Slug,
 		Owner:         from.Project.Key,
 		Branch:        branch,
-		SCMKind:       model.RepoGit,
 		IsSCMPrivate:  true, // Since we have to use Netrc it has to always be private :/ TODO: Is this really true?
 		FullName:      fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
 		Perm:          perm,
@@ -110,12 +109,25 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	return pipeline
 }
 
+func convertGetCommitRange(ev *bb.RepositoryPushEvent) (currCommit, prevCommit string) {
+	if len(ev.Changes) == 0 {
+		return "", ""
+	}
+	change := ev.Changes[0]
+	if change.FromHash == "0000000000000000000000000000000000000000" {
+		return change.ToHash, ""
+	} else if change.ToHash == "0000000000000000000000000000000000000000" {
+		return "", change.FromHash
+	}
+	return change.ToHash, change.FromHash
+}
+
 func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit:    ev.PullRequest.Source.Latest,
 		Branch:    ev.PullRequest.Source.DisplayID,
 		Title:     ev.PullRequest.Title,
-		Message:   "",
+		Message:   ev.PullRequest.Title,
 		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,
@@ -123,6 +135,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
 		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
 		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
+		FromFork:  ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
 	}
 
 	if ev.EventKey == bb.EventKeyPullRequestMerged || ev.EventKey == bb.EventKeyPullRequestDeclined || ev.EventKey == bb.EventKeyPullRequestDeleted {
@@ -168,7 +181,19 @@ func convertListOptions(p *model.ListOptions) bb.ListOptions {
 }
 
 func updateUserCredentials(u *model.User, t *oauth2.Token) {
-	u.Token = t.AccessToken
-	u.Secret = t.RefreshToken
+	u.AccessToken = t.AccessToken
+	u.RefreshToken = t.RefreshToken
 	u.Expiry = t.Expiry.UTC().Unix()
+}
+
+func convertProjectsToTeams(projects []*bb.Project, client *bb.Client) []*model.Team {
+	teams := make([]*model.Team, 0)
+	for _, project := range projects {
+		team := &model.Team{
+			Login:  project.Key,
+			Avatar: fmt.Sprintf("%s/projects/%s/avatar.png", client.BaseURL, project.Key),
+		}
+		teams = append(teams, team)
+	}
+	return teams
 }

@@ -6,6 +6,7 @@ ignore-from-file:
   - .gitignore
   - server/store/datastore/migration/test-files/.gitignore
   - web/.gitignore
+  - web/.yamlignore
 
 rules:
   line-length: disable

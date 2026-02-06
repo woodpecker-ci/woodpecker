@@ -3,14 +3,14 @@ tasks:
     env:
       WOODPECKER_OPEN: true
       WOODPECKER_ADMIN: woodpecker
-      WOODPECKER_HOST: http://host.docker.internal:8000
       WOODPECKER_EXPERT_WEBHOOK_HOST: http://host.docker.internal:8000
       WOODPECKER_AGENT_SECRET: '1234'
       WOODPECKER_GITEA: true
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
     init: |
-      GO_VERSION=1.22
+      # renovate: datasource=golang-version depName=golang
+      GO_VERSION=1.25.6
       rm -rf ~/go
       curl -fsSL https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz | tar xzs -C ~/
       go mod tidy
@@ -26,7 +26,7 @@ tasks:
         || echo WOODPECKER_HOST=$(gp url 8000) >> .env
       gp sync-await gitea
       gp sync-done woodpecker-server
-      go run go.woodpecker-ci.org/woodpecker/v2/cmd/server
+      go run go.woodpecker-ci.org/woodpecker/v3/cmd/server
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
@@ -35,7 +35,7 @@ tasks:
       WOODPECKER_HEALTHCHECK: false
     command: |
       gp sync-await woodpecker-server
-      go run go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+      go run go.woodpecker-ci.org/woodpecker/v3/cmd/agent
   - name: Gitea
     command: |
       export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yaml -p woodpecker"
@@ -112,9 +112,10 @@ vscode:
     - 'EditorConfig.EditorConfig'
     - 'dbaeumer.vscode-eslint'
     - 'esbenp.prettier-vscode'
-    - 'voorjaar.windicss-intellisense'
+    - 'bradlc.vscode-tailwindcss'
     - 'Vue.volar'
     - 'redhat.vscode-yaml'
     - 'davidanson.vscode-markdownlint'
     - 'streetsidesoftware.code-spell-checker'
+    - 'stivo.tailwind-fold'
     # cSpell:enable

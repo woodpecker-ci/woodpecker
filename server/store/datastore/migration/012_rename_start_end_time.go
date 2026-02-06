@@ -21,26 +21,17 @@ import (
 	"xorm.io/xorm"
 )
 
-type stepV012 struct {
-	Finished int64 `xorm:"stopped"`
-}
-
-func (stepV012) TableName() string {
-	return "steps"
-}
-
-type workflowV012 struct {
-	Finished int64 `xorm:"stopped"`
-}
-
-func (workflowV012) TableName() string {
-	return "workflows"
-}
-
 var renameStartEndTime = xormigrate.Migration{
 	ID: "rename-start-end-time",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(stepV012), new(workflowV012)); err != nil {
+		type steps struct {
+			Finished int64 `xorm:"stopped"`
+		}
+		type workflows struct {
+			Finished int64 `xorm:"stopped"`
+		}
+
+		if err := sess.Sync(new(steps), new(workflows)); err != nil {
 			return fmt.Errorf("sync models failed: %w", err)
 		}
 

@@ -8,6 +8,7 @@ declare global {
     WOODPECKER_CSRF: string | undefined;
     WOODPECKER_ROOT_PATH: string | undefined;
     WOODPECKER_ENABLE_SWAGGER: boolean | undefined;
+    WOODPECKER_USER_REGISTERED_AGENTS: boolean | undefined;
   }
 }
 
@@ -18,4 +19,5 @@ export default () => ({
   csrf: window.WOODPECKER_CSRF ?? null,
   rootPath: window.WOODPECKER_ROOT_PATH ?? '',
   enableSwagger: window.WOODPECKER_ENABLE_SWAGGER === true || false,
+  userRegisteredAgents: window.WOODPECKER_USER_REGISTERED_AGENTS || false,
 });

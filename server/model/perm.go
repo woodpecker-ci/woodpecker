@@ -19,14 +19,13 @@ package model
 type Perm struct {
 	UserID  int64 `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'user_id'"`
 	RepoID  int64 `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'repo_id'"`
-	Repo    *Repo `json:"-"       xorm:"-"`
 	Pull    bool  `json:"pull"    xorm:"pull"`
 	Push    bool  `json:"push"    xorm:"push"`
 	Admin   bool  `json:"admin"   xorm:"admin"`
 	Synced  int64 `json:"synced"  xorm:"synced"`
 	Created int64 `json:"created" xorm:"created"`
 	Updated int64 `json:"updated" xorm:"updated"`
-} //	@name Perm
+} //	@name	Perm
 
 // TableName return database table name for xorm.
 func (Perm) TableName() string {
@@ -37,4 +36,4 @@ func (Perm) TableName() string {
 type OrgPerm struct {
 	Member bool `json:"member"`
 	Admin  bool `json:"admin"`
-} //	@name OrgPerm
+} //	@name	OrgPerm

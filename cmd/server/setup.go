@@ -25,24 +25,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
+	"github.com/tink-crypto/tink-go/v2/subtle/random"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/setup"
-	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services"
-	logService "go.woodpecker-ci.org/woodpecker/v2/server/services/log"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/log/file"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
+	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services"
+	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/file"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 const (
@@ -56,8 +57,8 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	xorm := store.XORM{
 		Log:             c.Bool("db-log"),
 		ShowSQL:         c.Bool("db-log-sql"),
-		MaxOpenConns:    int(c.Int("db-max-open-connections")),
-		MaxIdleConns:    int(c.Int("db-max-idle-connections")),
+		MaxOpenConns:    c.Int("db-max-open-connections"),
+		MaxIdleConns:    c.Int("db-max-idle-connections"),
 		ConnMaxLifetime: c.Duration("db-max-connection-timeout"),
 	}
 
@@ -84,10 +85,14 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 		Config: datasource,
 		XORM:   xorm,
 	}
-	log.Trace().Msgf("setup datastore: %#v", *opts)
+	log.Debug().Str("driver", driver).Any("xorm", xorm).Msg("setting up datastore")
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
 		return nil, fmt.Errorf("could not open datastore: %w", err)
+	}
+
+	if err = store.Ping(); err != nil {
+		return nil, err
 	}
 
 	if err := store.Migrate(ctx, c.Bool("migrations-allow-long")); err != nil {
@@ -121,6 +126,8 @@ func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
+	case "addon":
+		return addon.Load(c.String("log-store-file-path"))
 	default:
 		return s, nil
 	}
@@ -132,7 +139,7 @@ func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
 	if errors.Is(err, types.RecordNotExist) {
 		jwtSecret := base32.StdEncoding.EncodeToString(
-			securecookie.GenerateRandomKey(32),
+			random.GetRandomBytes(32),
 		)
 		err = _store.ServerConfigSet(jwtSecretID, jwtSecret)
 		if err != nil {
@@ -167,8 +174,21 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 		return fmt.Errorf("could not setup log store: %w", err)
 	}
 
+	// agents
+	server.Config.Agent.DisableUserRegisteredAgentRegistration = c.Bool("disable-user-agent-registration")
+
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+
+	// Pull requests
+	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")
+
+	// Approval mode
+	approvalMode := model.ApprovalMode(c.String("default-approval-mode"))
+	if !approvalMode.Valid() {
+		return fmt.Errorf("approval mode %s is not valid", approvalMode)
+	}
+	server.Config.Pipeline.DefaultApprovalMode = approvalMode
 
 	// Cloning
 	server.Config.Pipeline.DefaultClonePlugin = c.String("default-clone-plugin")
@@ -179,11 +199,26 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
 	events := make([]model.WebhookEvent, 0, len(_events))
 	for _, v := range _events {
-		events = append(events, model.WebhookEvent(v))
+		e := model.WebhookEvent(v)
+		if err := e.Validate(); err != nil {
+			return err
+		}
+		events = append(events, e)
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
-	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
-	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
+	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
+
+	_labels := c.StringSlice("default-workflow-labels")
+	labels := make(map[string]string, len(_labels))
+	for _, v := range _labels {
+		name, value, ok := strings.Cut(v, "=")
+		if !ok {
+			return fmt.Errorf("invalid label filter: %s", v)
+		}
+		labels[name] = value
+	}
+	server.Config.Pipeline.DefaultWorkflowLabels = labels
 
 	// backend options for pipeline compiler
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")

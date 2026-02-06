@@ -30,7 +30,8 @@ import (
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 // NewClient returns a new client from the CLI context.
@@ -72,22 +73,26 @@ func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 
 	trans, _ := client.Transport.(*oauth2.Transport)
 
+	var baseTransport http.RoundTripper
 	if len(socks) != 0 && !socksOff {
 		dialer, err := proxy.SOCKS5("tcp", socks, nil, proxy.Direct)
 		if err != nil {
 			return nil, err
 		}
-		trans.Base = &http.Transport{
+		baseTransport = &http.Transport{
 			TLSClientConfig: tlsConfig,
 			Proxy:           http.ProxyFromEnvironment,
 			Dial:            dialer.Dial,
 		}
 	} else {
-		trans.Base = &http.Transport{
+		baseTransport = &http.Transport{
 			TLSClientConfig: tlsConfig,
 			Proxy:           http.ProxyFromEnvironment,
 		}
 	}
+
+	// Wrap the base transport with User-Agent support
+	trans.Base = httputil.NewUserAgentRoundTripper(baseTransport, "cli")
 
 	return woodpecker.NewClient(server, client), nil
 }

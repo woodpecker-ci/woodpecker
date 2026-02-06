@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 )
@@ -32,7 +32,7 @@ func testDriverConfig() (driver, config string) {
 		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
 		config = os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 	}
-	return
+	return driver, config
 }
 
 // newTestStore creates a new database connection for testing purposes.
@@ -40,9 +40,7 @@ func testDriverConfig() (driver, config string) {
 // environment variables, with fallback to in-memory sqlite.
 func newTestStore(t *testing.T, tables ...any) (*storage, func()) {
 	engine, err := xorm.NewEngine(testDriverConfig())
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 
 	for _, table := range tables {
 		if err := engine.Sync(table); err != nil {

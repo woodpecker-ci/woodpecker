@@ -19,82 +19,79 @@ import (
 	"testing"
 	"time"
 
-	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestCC(t *testing.T) {
-	g := goblin.Goblin(t)
-	g.Describe("CC", func() {
-		g.It("Should create a project", func() {
-			now := time.Now().Unix()
-			nowFmt := time.Unix(now, 0).Format(time.RFC3339)
-			r := &model.Repo{
-				FullName: "foo/bar",
-			}
-			b := &model.Pipeline{
-				Status:  model.StatusSuccess,
-				Number:  1,
-				Started: now,
-			}
-			cc := New(r, b, "http://localhost/foo/bar/1")
+	t.Run("create a project", func(t *testing.T) {
+		now := time.Now().Unix()
+		nowFmt := time.Unix(now, 0).Format(time.RFC3339)
+		r := &model.Repo{
+			FullName: "foo/bar",
+		}
+		b := &model.Pipeline{
+			Status:  model.StatusSuccess,
+			Number:  1,
+			Started: now,
+		}
+		cc := New(r, b, "http://localhost/foo/bar/1")
 
-			g.Assert(cc.Project.Name).Equal("foo/bar")
-			g.Assert(cc.Project.Activity).Equal("Sleeping")
-			g.Assert(cc.Project.LastBuildStatus).Equal("Success")
-			g.Assert(cc.Project.LastBuildLabel).Equal("1")
-			g.Assert(cc.Project.LastBuildTime).Equal(nowFmt)
-			g.Assert(cc.Project.WebURL).Equal("http://localhost/foo/bar/1")
-		})
+		assert.Equal(t, "foo/bar", cc.Project.Name)
+		assert.Equal(t, "Sleeping", cc.Project.Activity)
+		assert.Equal(t, "Success", cc.Project.LastBuildStatus)
+		assert.Equal(t, "1", cc.Project.LastBuildLabel)
+		assert.Equal(t, nowFmt, cc.Project.LastBuildTime)
+		assert.Equal(t, "http://localhost/foo/bar/1", cc.Project.WebURL)
+	})
 
-		g.It("Should properly label exceptions", func() {
-			r := &model.Repo{FullName: "foo/bar"}
-			b := &model.Pipeline{
-				Status:  model.StatusError,
-				Number:  1,
-				Started: 1257894000,
-			}
-			cc := New(r, b, "http://localhost/foo/bar/1")
-			g.Assert(cc.Project.LastBuildStatus).Equal("Exception")
-			g.Assert(cc.Project.Activity).Equal("Sleeping")
-		})
+	t.Run("properly label exceptions", func(t *testing.T) {
+		r := &model.Repo{FullName: "foo/bar"}
+		b := &model.Pipeline{
+			Status:  model.StatusError,
+			Number:  1,
+			Started: 1257894000,
+		}
+		cc := New(r, b, "http://localhost/foo/bar/1")
+		assert.Equal(t, "Exception", cc.Project.LastBuildStatus)
+		assert.Equal(t, "Sleeping", cc.Project.Activity)
+	})
 
-		g.It("Should properly label success", func() {
-			r := &model.Repo{FullName: "foo/bar"}
-			b := &model.Pipeline{
-				Status:  model.StatusSuccess,
-				Number:  1,
-				Started: 1257894000,
-			}
-			cc := New(r, b, "http://localhost/foo/bar/1")
-			g.Assert(cc.Project.LastBuildStatus).Equal("Success")
-			g.Assert(cc.Project.Activity).Equal("Sleeping")
-		})
+	t.Run("properly label success", func(t *testing.T) {
+		r := &model.Repo{FullName: "foo/bar"}
+		b := &model.Pipeline{
+			Status:  model.StatusSuccess,
+			Number:  1,
+			Started: 1257894000,
+		}
+		cc := New(r, b, "http://localhost/foo/bar/1")
+		assert.Equal(t, "Success", cc.Project.LastBuildStatus)
+		assert.Equal(t, "Sleeping", cc.Project.Activity)
+	})
 
-		g.It("Should properly label failure", func() {
-			r := &model.Repo{FullName: "foo/bar"}
-			b := &model.Pipeline{
-				Status:  model.StatusFailure,
-				Number:  1,
-				Started: 1257894000,
-			}
-			cc := New(r, b, "http://localhost/foo/bar/1")
-			g.Assert(cc.Project.LastBuildStatus).Equal("Failure")
-			g.Assert(cc.Project.Activity).Equal("Sleeping")
-		})
+	t.Run("properly label failure", func(t *testing.T) {
+		r := &model.Repo{FullName: "foo/bar"}
+		b := &model.Pipeline{
+			Status:  model.StatusFailure,
+			Number:  1,
+			Started: 1257894000,
+		}
+		cc := New(r, b, "http://localhost/foo/bar/1")
+		assert.Equal(t, "Failure", cc.Project.LastBuildStatus)
+		assert.Equal(t, "Sleeping", cc.Project.Activity)
+	})
 
-		g.It("Should properly label running", func() {
-			r := &model.Repo{FullName: "foo/bar"}
-			b := &model.Pipeline{
-				Status:  model.StatusRunning,
-				Number:  1,
-				Started: 1257894000,
-			}
-			cc := New(r, b, "http://localhost/foo/bar/1")
-			g.Assert(cc.Project.Activity).Equal("Building")
-			g.Assert(cc.Project.LastBuildStatus).Equal("Unknown")
-			g.Assert(cc.Project.LastBuildLabel).Equal("Unknown")
-		})
+	t.Run("properly label running", func(t *testing.T) {
+		r := &model.Repo{FullName: "foo/bar"}
+		b := &model.Pipeline{
+			Status:  model.StatusRunning,
+			Number:  1,
+			Started: 1257894000,
+		}
+		cc := New(r, b, "http://localhost/foo/bar/1")
+		assert.Equal(t, "Building", cc.Project.Activity)
+		assert.Equal(t, "Unknown", cc.Project.LastBuildStatus)
+		assert.Equal(t, "Unknown", cc.Project.LastBuildLabel)
 	})
 }

@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestCronCreate(t *testing.T) {
@@ -43,8 +43,13 @@ func TestCronCreate(t *testing.T) {
 }
 
 func TestCronListNextExecute(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Cron))
+	store, closer := newTestStore(t, new(model.Cron), new(model.Repo))
 	defer closer()
+
+	repo1 := &model.Repo{Name: "aaaa", Owner: "a", FullName: "a/aaaa", ForgeRemoteID: "1", IsActive: true}
+	repo2 := &model.Repo{Name: "bbbb", Owner: "a", FullName: "a/bbbb", ForgeRemoteID: "2", IsActive: false}
+	assert.NoError(t, store.CreateRepo(repo1))
+	assert.NoError(t, store.CreateRepo(repo2))
 
 	jobs, err := store.CronListNextExecute(0, 10)
 	assert.NoError(t, err)
@@ -52,11 +57,13 @@ func TestCronListNextExecute(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "some", RepoID: 1, NextExec: now}))
-	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "aaaa", RepoID: 1, NextExec: now}))
-	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "bbbb", RepoID: 1, NextExec: now}))
-	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "none", RepoID: 1, NextExec: now + 1000}))
-	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "test", RepoID: 1, NextExec: now + 2000}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "some", RepoID: repo1.ID, NextExec: now, Enabled: true}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "aaaa", RepoID: repo1.ID, NextExec: now, Enabled: true}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "bbbb", RepoID: repo1.ID, NextExec: now, Enabled: true}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "none", RepoID: repo1.ID, NextExec: now + 1000, Enabled: true}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "test", RepoID: repo1.ID, NextExec: now + 2000, Enabled: true}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "disabled-repo", RepoID: repo2.ID, NextExec: now, Enabled: true}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Schedule: "@every 1h", Name: "disabled-cron", RepoID: repo1.ID, NextExec: now, Enabled: false}))
 
 	jobs, err = store.CronListNextExecute(now, 10)
 	assert.NoError(t, err)

@@ -33,7 +33,7 @@ func TestPubsub(t *testing.T) {
 	)
 
 	ctx, cancel := context.WithCancelCause(
-		context.Background(),
+		t.Context(),
 	)
 
 	broker := New()

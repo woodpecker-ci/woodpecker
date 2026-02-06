@@ -23,7 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 )
 
 func Test_custom_file_returns_OK_and_empty_content_and_fitting_mimetype(t *testing.T) {

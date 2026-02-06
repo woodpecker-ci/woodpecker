@@ -1,15 +1,16 @@
 <template>
-  <div class="flex items-center mb-2">
+  <div class="mb-2 flex items-center">
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox flex-shrink-0 relative border bg-wp-control-neutral-100 border-wp-control-neutral-200 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-wp-control-ok-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300"
+      class="checkbox border-wp-control-neutral-200 disabled:border-wp-control-neutral-200 disabled:bg-wp-control-neutral-100 dark:disabled:bg-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-md border transition-colors duration-150"
       :checked="innerValue"
+      :disabled="disabled || false"
       @click="innerValue = !innerValue"
     />
-    <div class="flex flex-col ml-4">
-      <label class="cursor-pointer text-wp-text-100" :for="`checkbox-${id}`">{{ label }}</label>
-      <span v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</span>
+    <div class="ml-4 flex flex-col">
+      <label class="text-wp-text-100 cursor-pointer" :for="`checkbox-${id}`">{{ label }}</label>
+      <span v-if="description" class="text-wp-text-alt-100 text-sm">{{ description }}</span>
     </div>
   </div>
 </template>
@@ -21,6 +22,7 @@ const props = defineProps<{
   modelValue: boolean;
   label: string;
   description?: string;
+  disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -39,7 +41,11 @@ const id = (Math.random() + 1).toString(36).substring(7);
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .checkbox {
+  width: 1.3rem;
+  height: 1.3rem;
   appearance: none;
   outline: 0;
   cursor: pointer;
@@ -52,14 +58,17 @@ const id = (Math.random() + 1).toString(36).substring(7);
   display: block;
   top: 50%;
   left: 50%;
-  width: 8px;
-  height: 14px;
+  width: 0.5rem;
+  height: 1rem;
   border-style: solid;
   border-color: white;
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
-  @apply dark:border-white;
+}
+
+.checkbox:disabled::before {
+  border-color: var(--wp-text-alt-100);
 }
 
 .checkbox:checked::before {

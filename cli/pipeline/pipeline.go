@@ -22,8 +22,10 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/output"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline/deploy"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 // Command exports the pipeline command set.
@@ -31,33 +33,31 @@ var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
 	Commands: []*cli.Command{
-		pipelineListCmd,
-		pipelineLastCmd,
-		pipelineLogsCmd,
-		pipelineInfoCmd,
-		pipelineStopCmd,
-		pipelineStartCmd,
 		pipelineApproveCmd,
-		pipelineDeclineCmd,
-		pipelineQueueCmd,
-		pipelineKillCmd,
-		pipelinePsCmd,
 		pipelineCreateCmd,
+		pipelineDeclineCmd,
+		deploy.Command,
+		pipelineKillCmd,
+		pipelineLastCmd,
+		buildPipelineListCmd(),
+		log.Command,
+		pipelinePsCmd,
+		pipelinePurgeCmd,
+		pipelineQueueCmd,
+		pipelineShowCmd,
+		pipelineStartCmd,
+		pipelineStopCmd,
 	},
 }
 
-func pipelineOutput(c *cli.Command, resources []woodpecker.Pipeline, fd ...io.Writer) error {
+func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.Writer) error {
 	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("output-no-headers")
 
 	var out io.Writer
-	switch len(fd) {
-	case 0:
-		out = os.Stdout
-	case 1:
+	out = os.Stdout
+	if len(fd) > 0 {
 		out = fd[0]
-	default:
-		out = os.Stdout
 	}
 
 	switch outFmt {
@@ -70,8 +70,22 @@ func pipelineOutput(c *cli.Command, resources []woodpecker.Pipeline, fd ...io.Wr
 		if err != nil {
 			return err
 		}
-		if err := tmpl.Execute(out, resources); err != nil {
+		if err := tmpl.Execute(out, pipelines); err != nil {
 			return err
+		}
+	case "go-format":
+		if len(outOpt) < 1 {
+			return fmt.Errorf("%w: missing template", output.ErrOutputOptionRequired)
+		}
+
+		tmpl, err := template.New("_").Parse(outOpt[0] + "\n")
+		if err != nil {
+			return err
+		}
+		for _, p := range pipelines {
+			if err := tmpl.Execute(out, p); err != nil {
+				return err
+			}
 		}
 	case "table":
 		fallthrough
@@ -85,7 +99,7 @@ func pipelineOutput(c *cli.Command, resources []woodpecker.Pipeline, fd ...io.Wr
 		if !noHeader {
 			table.WriteHeader(cols)
 		}
-		for _, resource := range resources {
+		for _, resource := range pipelines {
 			if err := table.Write(cols, resource); err != nil {
 				return err
 			}

@@ -15,4 +15,4 @@ A few important time points:
 
 ## Differences to Drone
 
-Woodpecker is a community-focused software that still stay free and open source forever, while Drone is managed by [Harness](https://harness.io/) and published under [Polyform Small Business](https://polyformproject.org/licenses/small-business/1.0.0/) license.
+Woodpecker is a community-focused software that will stay free and open source forever, while Drone is managed by [Harness](https://harness.io/) and published under [Polyform Small Business](https://polyformproject.org/licenses/small-business/1.0.0/) license.

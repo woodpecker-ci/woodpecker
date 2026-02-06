@@ -27,7 +27,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // checkGitCloneCap check if we have the git binary on hand.
@@ -47,7 +47,7 @@ func (e *local) loadClone() {
 }
 
 // setupClone prepare the clone environment before exec.
-func (e *local) setupClone(state *workflowState) error {
+func (e *local) setupClone(ctx context.Context, state *workflowState) error {
 	if e.pluginGitBinary != "" {
 		state.pluginGitBinary = e.pluginGitBinary
 		return nil
@@ -58,20 +58,16 @@ func (e *local) setupClone(state *workflowState) error {
 	if e.os == "windows" {
 		state.pluginGitBinary += ".exe"
 	}
-	return e.downloadLatestGitPluginBinary(state.pluginGitBinary)
+	return e.downloadLatestGitPluginBinary(ctx, state.pluginGitBinary)
 }
 
 // execClone executes a clone-step locally.
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	if scm := step.Environment["CI_REPO_SCM"]; scm != "git" {
-		return fmt.Errorf("local backend can only clone from git repos, but this repo use '%s'", scm)
-	}
-
 	if err := checkGitCloneCap(); err != nil {
 		return fmt.Errorf("check for git clone capabilities failed: %w", err)
 	}
 
-	if err := e.setupClone(state); err != nil {
+	if err := e.setupClone(ctx, state); err != nil {
 		return fmt.Errorf("setup clone step failed: %w", err)
 	}
 
@@ -104,11 +100,19 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
-	// Get output and redirect Stderr to Stdout
-	e.output, _ = cmd.StdoutPipe()
-	cmd.Stderr = cmd.Stdout
+	reader, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
 
-	state.stepCMDs[step.UUID] = cmd
+	// Save state
+	state.stepState.Store(step.UUID, &stepState{
+		cmd:    cmd,
+		output: reader,
+	})
+
+	// Get output and redirect Stderr to Stdout
+	cmd.Stderr = cmd.Stdout
 
 	return cmd.Start()
 }
@@ -133,7 +137,7 @@ func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, erro
 
 // downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch
 // and saves it to dest.
-func (e *local) downloadLatestGitPluginBinary(dest string) error {
+func (e *local) downloadLatestGitPluginBinary(ctx context.Context, dest string) error {
 	type asset struct {
 		Name               string
 		BrowserDownloadURL string `json:"browser_download_url"`
@@ -144,7 +148,7 @@ func (e *local) downloadLatestGitPluginBinary(dest string) error {
 	}
 
 	// get latest release
-	req, _ := http.NewRequest(http.MethodGet, "https://api.github.com/repos/woodpecker-ci/plugin-git/releases/latest", nil)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/repos/woodpecker-ci/plugin-git/releases/latest", nil)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	resp, err := http.DefaultClient.Do(req)
@@ -160,11 +164,15 @@ func (e *local) downloadLatestGitPluginBinary(dest string) error {
 
 	for _, at := range rel.Assets {
 		if strings.Contains(at.Name, e.os) && strings.Contains(at.Name, e.arch) {
-			resp2, err := http.Get(at.BrowserDownloadURL)
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, at.BrowserDownloadURL, nil)
+			if err != nil {
+				return err
+			}
+			assetResp, err := http.DefaultClient.Do(req)
 			if err != nil {
 				return fmt.Errorf("could not download plugin-git: %w", err)
 			}
-			defer resp2.Body.Close()
+			defer assetResp.Body.Close()
 
 			file, err := os.Create(dest)
 			if err != nil {
@@ -172,7 +180,7 @@ func (e *local) downloadLatestGitPluginBinary(dest string) error {
 			}
 			defer file.Close()
 
-			if _, err := io.Copy(file, resp2.Body); err != nil {
+			if _, err := io.Copy(file, assetResp.Body); err != nil {
 				return fmt.Errorf("could not download plugin-git: %w", err)
 			}
 			if err := os.Chmod(dest, 0o755); err != nil {

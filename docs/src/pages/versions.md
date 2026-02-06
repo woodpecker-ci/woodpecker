@@ -33,6 +33,24 @@ Here you can find documentation for previous versions of Woodpecker.
 
 |         |            |                                                                                       |
 | ------- | ---------- | ------------------------------------------------------------------------------------- |
+| 3.12.0  | 2025-11-18 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.12.0/docs/docs/)  |
+| 3.11.0  | 2025-10-19 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.11.0/docs/docs/)  |
+| 3.10.0  | 2025-09-28 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.10.0/docs/docs/)  |
+| 3.9.0   | 2025-08-20 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.9.0/docs/docs/)   |
+| 3.8.0   | 2025-07-05 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.8.0/docs/docs/)   |
+| 3.7.0   | 2025-06-06 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.7.0/docs/docs/)   |
+| 3.6.0   | 2025-05-06 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.6.0/docs/docs/)   |
+| 3.5.0   | 2025-04-02 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.5.0/docs/docs/)   |
+| 3.4.0   | 2025-03-17 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.4.0/docs/docs/)   |
+| 3.3.0   | 2025-03-04 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.3.0/docs/docs/)   |
+| 3.2.0   | 2025-02-26 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.2.0/docs/docs/)   |
+| 3.1.0   | 2025-02-13 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.1.0/docs/docs/)   |
+| 3.0.0   | 2025-01-11 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v3.0.0/docs/docs/)   |
+| 2.8.3   | 2025-01-11 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.8.3/docs/docs/)   |
+| 2.8.2   | 2024-12-19 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.8.2/docs/docs/)   |
+| 2.8.1   | 2024-12-13 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.8.1/docs/docs/)   |
+| 2.8.0   | 2024-11-28 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.8.0/docs/docs/)   |
+| 2.7.3   | 2024-11-05 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.7.3/docs/docs/)   |
 | 2.7.2   | 2024-11-03 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.7.2/docs/docs/)   |
 | 2.7.1   | 2024-09-07 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.7.1/docs/docs/)   |
 | 2.7.0   | 2024-07-18 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.7.0/docs/docs/)   |

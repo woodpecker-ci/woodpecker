@@ -1,7 +1,7 @@
 variables:
-  - &golang_image 'docker.io/golang:1.23'
-  - &node_image 'docker.io/node:23-alpine'
-  - &alpine_image 'docker.io/alpine:3.20'
+  - &golang_image 'docker.io/golang:1.25'
+  - &node_image 'docker.io/node:24-alpine'
+  - &alpine_image 'docker.io/alpine:3.23'
   - path: &when_path
       - 'docs/**'
       - '.woodpecker/docs.yaml'
@@ -31,36 +31,55 @@ when:
       - <<: *docker_path
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
-      - renovate/*
   - event: pull_request_closed
     path: *when_path
   - event: manual
     evaluate: 'TASK == "docs"'
 
 steps:
-  build-cli:
-    image: *golang_image
-    commands:
-      - make docs
-    when:
-      - path: *when_path
-        event: [tag, pull_request, push]
-      - event: manual
-
-  build:
+  - name: install-dependencies
     image: *node_image
     directory: docs/
     commands:
       - corepack enable
       - pnpm install --frozen-lockfile
+    when:
+      - path: *when_path
+        event: [tag, pull_request, push]
+      - event: manual
+
+  - name: format-check
+    image: *node_image
+    directory: docs/
+    commands:
+      - corepack enable
+      - pnpm format:check
+    when:
+      - path: *when_path
+        event: pull_request
+
+  - name: build-cli
+    image: *golang_image
+    commands:
+      - make generate-docs
+    when:
+      - path: *when_path
+        event: [tag, pull_request, push]
+      - event: manual
+
+  - name: build
+    image: *node_image
+    directory: docs/
+    commands:
+      - corepack enable
       - pnpm build
     when:
       - path: *when_path
         event: [tag, pull_request, push]
       - event: manual
 
-  deploy-preview:
-    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.2
+  - name: deploy-preview
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.4.2
     settings:
       path: 'docs/build/'
       surge_token:
@@ -69,13 +88,14 @@ steps:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
     when:
-      event: [pull_request, pull_request_closed]
-      path: *when_path
+      - event: [pull_request, pull_request_closed]
+        path: *when_path
 
-  deploy-prepare:
+  - name: deploy-prepare
     image: *alpine_image
-    secrets:
-      - BOT_PRIVATE_KEY
+    environment:
+      BOT_PRIVATE_KEY:
+        from_secret: BOT_PRIVATE_KEY
     commands:
       - apk add openssh-client git
       - mkdir -p $HOME/.ssh
@@ -92,7 +112,7 @@ steps:
       - event: [manual, tag]
 
   # update latest and next version
-  version-next:
+  - name: version-next
     image: *alpine_image
     commands:
       - apk add jq
@@ -103,7 +123,7 @@ steps:
         path: *docker_path
         branch: ${CI_REPO_DEFAULT_BRANCH}
 
-  version-release:
+  - name: version-release
     image: *alpine_image
     commands:
       - apk add jq
@@ -113,7 +133,7 @@ steps:
     when:
       - event: tag
 
-  copy-files:
+  - name: copy-files
     image: *alpine_image
     commands:
       - apk add rsync
@@ -125,10 +145,11 @@ steps:
         branch: ${CI_REPO_DEFAULT_BRANCH}
       - event: manual
 
-  deploy:
+  - name: deploy
     image: *alpine_image
-    secrets:
-      - BOT_PRIVATE_KEY
+    environment:
+      BOT_PRIVATE_KEY:
+        from_secret: BOT_PRIVATE_KEY
     commands:
       - apk add openssh-client rsync git
       - mkdir -p $HOME/.ssh

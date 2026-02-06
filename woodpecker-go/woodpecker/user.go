@@ -1,13 +1,33 @@
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 const (
 	pathSelf  = "%s/api/user"
 	pathRepos = "%s/api/user/repos"
 	pathUsers = "%s/api/users"
-	pathUser  = "%s/api/users/%s"
+	pathUser  = "%s/api/users/%s?forge_id=%d"
 )
+
+type RepoListOptions struct {
+	All bool // query all repos, including inactive ones
+}
+
+type UserListOptions struct {
+	ListOptions
+}
+
+// QueryEncode returns the URL query parameters for the RepoListOptions.
+func (opt *RepoListOptions) QueryEncode() string {
+	query := make(url.Values)
+	if opt.All {
+		query.Add("all", "true")
+	}
+	return query.Encode()
+}
 
 // Self returns the currently authenticated user.
 func (c *client) Self() (*User, error) {
@@ -18,18 +38,22 @@ func (c *client) Self() (*User, error) {
 }
 
 // User returns a user by login.
-func (c *client) User(login string) (*User, error) {
+// It is recommended to specify forgeID (default is 1).
+func (c *client) User(login string, forgeID ...int64) (*User, error) {
 	out := new(User)
-	uri := fmt.Sprintf(pathUser, c.addr, login)
-	err := c.get(uri, out)
+	if len(forgeID) == 0 {
+		forgeID = []int64{defaultForgeID}
+	}
+	err := c.get(fmt.Sprintf(pathUser, c.addr, login, forgeID[0]), out)
 	return out, err
 }
 
 // UserList returns a list of all registered users.
-func (c *client) UserList() ([]*User, error) {
+func (c *client) UserList(opt UserListOptions) ([]*User, error) {
 	var out []*User
-	uri := fmt.Sprintf(pathUsers, c.addr)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathUsers, c.addr))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 
@@ -43,33 +67,30 @@ func (c *client) UserPost(in *User) (*User, error) {
 
 // UserPatch updates a user account.
 func (c *client) UserPatch(in *User) (*User, error) {
+	if in.ForgeID < defaultForgeID {
+		in.ForgeID = defaultForgeID
+	}
 	out := new(User)
-	uri := fmt.Sprintf(pathUser, c.addr, in.Login)
+	uri := fmt.Sprintf(pathUser, c.addr, in.Login, in.ForgeID)
 	err := c.patch(uri, in, out)
 	return out, err
 }
 
 // UserDel deletes a user account.
-func (c *client) UserDel(login string) error {
-	uri := fmt.Sprintf(pathUser, c.addr, login)
-	err := c.delete(uri)
-	return err
+// It is recommended to specify forgeID (default is 1).
+func (c *client) UserDel(login string, forgeID ...int64) error {
+	if len(forgeID) == 0 {
+		forgeID = []int64{defaultForgeID}
+	}
+	return c.delete(fmt.Sprintf(pathUser, c.addr, login, forgeID[0]))
 }
 
 // RepoList returns a list of all repositories to which
 // the user has explicit access in the host system.
-func (c *client) RepoList() ([]*Repo, error) {
+func (c *client) RepoList(opt RepoListOptions) ([]*Repo, error) {
 	var out []*Repo
-	uri := fmt.Sprintf(pathRepos, c.addr)
-	err := c.get(uri, &out)
-	return out, err
-}
-
-// RepoListOpts returns a list of all repositories to which
-// the user has explicit access in the host system.
-func (c *client) RepoListOpts(all bool) ([]*Repo, error) {
-	var out []*Repo
-	uri := fmt.Sprintf(pathRepos+"?all=%v", c.addr, all)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepos, c.addr))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }

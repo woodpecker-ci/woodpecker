@@ -23,6 +23,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker/httputil"
 )
 
 const (
@@ -34,6 +36,15 @@ const (
 	// pathVersion        = "%s/version"
 )
 
+type ClientError struct {
+	StatusCode int
+	Message    string
+}
+
+func (e *ClientError) Error() string {
+	return fmt.Sprintf("client error %d: %s", e.StatusCode, e.Message)
+}
+
 type client struct {
 	client *http.Client
 	addr   string
@@ -41,12 +52,14 @@ type client struct {
 
 // New returns a client at the specified url.
 func New(uri string) Client {
-	return &client{http.DefaultClient, strings.TrimSuffix(uri, "/")}
+	wrappedClient := httputil.WrapClient(http.DefaultClient, "go-client")
+	return &client{wrappedClient, strings.TrimSuffix(uri, "/")}
 }
 
 // NewClient returns a client at the specified url.
 func NewClient(uri string, cli *http.Client) Client {
-	return &client{cli, strings.TrimSuffix(uri, "/")}
+	wrappedClient := httputil.WrapClient(cli, "go-client")
+	return &client{wrappedClient, strings.TrimSuffix(uri, "/")}
 }
 
 // SetClient sets the http.Client.
@@ -140,7 +153,10 @@ func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	if resp.StatusCode > http.StatusPartialContent {
 		defer resp.Body.Close()
 		out, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))
+		return nil, &ClientError{
+			StatusCode: resp.StatusCode,
+			Message:    string(out),
+		}
 	}
 	return resp.Body, nil
 }

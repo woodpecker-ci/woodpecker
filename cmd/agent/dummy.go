@@ -13,11 +13,10 @@
 // limitations under the License.
 
 //go:build test
-// +build test
 
 package main
 
-import "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
+import "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
 
 func init() { //nolint:gochecknoinits
 	backends = append(backends, dummy.New())
