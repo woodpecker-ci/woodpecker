@@ -7,7 +7,10 @@ variables:
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
-  - &build_args 'CI_COMMIT_SHA=${CI_COMMIT_SHA},CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH},CI_COMMIT_TAG=${CI_COMMIT_TAG}'
+  - build_args_from_env: &build_args_from_env
+    - CI_COMMIT_SHA
+    - CI_COMMIT_BRANCH
+    - CI_COMMIT_TAG
 
   # cspell:words woodpeckerbot netgo
 
@@ -48,103 +51,31 @@ when:
     evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
 
 steps:
-  vendor:
-    image: *golang_image
-    pull: true
-    commands:
-      - go mod vendor
-    when:
-      - event: [pull_request, pull_request_metadata]
-        evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      - event: pull_request
-        path: *when_path
-      - branch:
-          - ${CI_REPO_DEFAULT_BRANCH}
-        event: [push, tag]
-        path: *when_path
 
   ###############
   # S e r v e r #
   ###############
-  build-web:
-    image: *node_image
-    directory: web/
-    commands:
-      - corepack enable
-      - pnpm install --frozen-lockfile
-      - pnpm build
-    when:
-      - event: [pull_request, pull_request_metadata]
-        evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      - event: pull_request
-        path: *when_path
-      - branch:
-          - ${CI_REPO_DEFAULT_BRANCH}
-        event: [push, tag]
-        path: *when_path
-
-  cross-compile-server-preview:
-    depends_on:
-      - vendor
-      - build-web
-    image: *xgo_image
-    pull: true
-    commands:
-      - apt update
-      - apt install -y tree
-      - make cross-compile-server
-    environment:
-      PLATFORMS: linux|amd64
-      TAGS: sqlite sqlite_unlock_notify netgo
-    when:
-      - event: [pull_request, pull_request_metadata]
-        evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      - event: pull_request
-        path: *when_path
-
-  cross-compile-server:
-    depends_on:
-      - vendor
-      - build-web
-    image: *xgo_image
-    pull: true
-    commands:
-      - apt update
-      - apt install -y tree
-      - make cross-compile-server
-    environment:
-      PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64
-      TAGS: sqlite sqlite_unlock_notify netgo
-    when:
-      branch:
-        - ${CI_REPO_DEFAULT_BRANCH}
-      event: [push, tag]
-      path: *when_path
 
   publish-server-alpine-preview:
-    depends_on:
-      - cross-compile-server-preview
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
+      dockerfile: docker/Dockerfile.server
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
+      build_args:
+        TARGET_BASE: "alpine"
     when: &when-preview
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: [pull_request, pull_request_metadata]
 
   build-server-dryrun:
-    depends_on:
-      - vendor
-      - build-web
-      - cross-compile-server-preview
     image: *buildx_plugin
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.multiarch.rootless
+      dockerfile: docker/Dockerfile.server
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when: &when-dryrun
@@ -153,12 +84,10 @@ steps:
         path: *when_path
 
   publish-next-server:
-    depends_on:
-      - cross-compile-server
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.multiarch.rootless
+      dockerfile: docker/Dockerfile.server
       platforms: *platforms_server
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
@@ -168,24 +97,22 @@ steps:
       path: *when_path
 
   publish-next-server-alpine:
-    depends_on:
-      - cross-compile-server
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
+      dockerfile: docker/Dockerfile.server
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
+      build_args:
+        TARGET_BASE: "alpine"
     when: *when-publish-next
 
   release-server:
-    depends_on:
-      - cross-compile-server
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.multiarch.rootless
+      dockerfile: docker/Dockerfile.server
       platforms: *platforms_server
       tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
@@ -193,15 +120,15 @@ steps:
       event: tag
 
   release-server-alpine:
-    depends_on:
-      - cross-compile-server
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
+      dockerfile: docker/Dockerfile.server
       platforms: *platforms_alpine
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
+      build_args:
+        TARGET_BASE: "alpine"
     when: *when-release
 
   #############
@@ -209,46 +136,43 @@ steps:
   #############
 
   publish-agent-preview-alpine:
-    depends_on:
-      - vendor
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      dockerfile: docker/Dockerfile.agent
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
-      build_args: *build_args
       logins: *publish_logins
+      build_args:
+        TARGET_BASE: "alpine"
+      build_args_from_env: *build_args_from_env
     when: *when-preview
 
   build-agent-dryrun:
-    depends_on:
-      - vendor
     image: *buildx_plugin
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent.multiarch
+      dockerfile: docker/Dockerfile.agent
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
-      build_args: *build_args
+      build_args_from_env: *build_args_from_env
     when: *when-dryrun
 
   publish-next-agent:
     depends_on:
-      - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on publish-next-server as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - publish-next-server
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.multiarch
+      dockerfile: docker/Dockerfile.agent
       platforms: *platforms_release
       buildkit_oci_max_parallelism: 6
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
-      build_args: *build_args
+      build_args_from_env: *build_args_from_env
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -256,51 +180,52 @@ steps:
 
   publish-next-agent-alpine:
     depends_on:
-      - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on publish-next-server-alpine as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - publish-next-server-alpine
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      dockerfile: docker/Dockerfile.agent
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
-      build_args: *build_args
+      build_args:
+        TARGET_BASE: "alpine"
+      build_args_from_env: *build_args_from_env
     when: *when-publish-next
 
   release-agent:
     depends_on:
-      - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on release-server as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - release-server
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.multiarch
+      dockerfile: docker/Dockerfile.agent
       platforms: *platforms_release
       buildkit_oci_max_parallelism: 6
       tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
-      build_args: *build_args
+      build_args_from_env: *build_args_from_env
     when: *when-release
 
   release-agent-alpine:
     depends_on:
-      - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on release-server-alpine as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - release-server-alpine
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      dockerfile: docker/Dockerfile.agent
       platforms: *platforms_alpine
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
-      build_args: *build_args
+      build_args:
+        TARGET_BASE: "alpine"
+      build_args_from_env: *build_args_from_env
     when: *when-release
 
   #########
@@ -308,93 +233,91 @@ steps:
   #########
 
   build-cli-alpine-preview:
-    depends_on:
-      - vendor
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
+      dockerfile: docker/Dockerfile.cli
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
-      build_args: *build_args
       logins: *publish_logins
+      build_args:
+        TARGET_BASE: "alpine"
+      build_args_from_env: *build_args_from_env
     when: *when-preview
 
   build-cli-dryrun:
-    depends_on:
-      - vendor
     image: *buildx_plugin
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.multiarch.rootless
+      dockerfile: docker/Dockerfile.cli
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
-      build_args: *build_args
+      build_args_from_env: *build_args_from_env
     when: *when-dryrun
 
   publish-next-cli:
     depends_on:
-      - vendor
       # we also depend on publish-next-agent as we would have to hight
       # ram usage otherwise
       - publish-next-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.multiarch.rootless
+      dockerfile: docker/Dockerfile.cli
       platforms: *platforms_release
       buildkit_oci_max_parallelism: 6
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
-      build_args: *build_args
+      build_args_from_env: *build_args_from_env
     when: *when-publish-next
 
   publish-next-cli-alpine:
     depends_on:
-      - vendor
       # we also depend on publish-next-agent as we would have to hight
       # ram usage otherwise
-      - publish-next-agent
+      - publish-next-agent-alpine
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
+      dockerfile: docker/Dockerfile.cli
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
-      build_args: *build_args
+      build_args:
+        TARGET_BASE: "alpine"
+      build_args_from_env: *build_args_from_env
     when: *when-publish-next
 
   release-cli:
     depends_on:
-      - vendor
       # we also depend on release-agent as we would have to hight
       # ram usage otherwise
       - release-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.multiarch.rootless
+      dockerfile: docker/Dockerfile.cli
       platforms: *platforms_release
       buildkit_oci_max_parallelism: 6
       tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
-      build_args: *build_args
+      build_args_from_env: *build_args_from_env
     when: *when-release
 
   release-cli-alpine:
     depends_on:
-      - vendor
       # we also depend on release-agent as we would have to hight
       # ram usage otherwise
-      - release-agent
+      - release-agent-alpine
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
+      dockerfile: docker/Dockerfile.cli
       platforms: *platforms_alpine
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
-      build_args: *build_args
+      build_args:
+        TARGET_BASE: "alpine"
+      build_args_from_env: *build_args_from_env
     when: *when-release
