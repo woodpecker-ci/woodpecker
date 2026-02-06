@@ -4982,6 +4982,9 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
+                "cancel_reason": {
+                    "type": "string"
+                },
                 "changed_files": {
                     "type": "array",
                     "items": {
