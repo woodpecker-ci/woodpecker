@@ -796,6 +796,8 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		return nil, err
 	}
 
+	forge.Refresh(ctx, g, _store, user)
+
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
 		return nil, err
