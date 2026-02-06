@@ -134,10 +134,7 @@ func cancelPreviousPipelines(
 		}
 
 		if err = Cancel(ctx, _forge, _store, repo, user, active, &model.CancelInfo{
-			Reason: model.CancelReasonSuperseded,
-			Data: map[string]string{
-				"pipeline_number": fmt.Sprint(pipeline.Number),
-			},
+			SupersededBy: pipeline.Number,
 		}); err != nil {
 			log.Error().
 				Err(err).

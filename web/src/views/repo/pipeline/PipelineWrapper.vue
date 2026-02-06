@@ -81,18 +81,14 @@
         <div v-if="pipeline.status === 'killed' && pipeline.cancel_info" class="flex shrink-0 items-center gap-2">
           <Icon name="status-killed" />
           <span class="truncate">
-            <template v-if="pipeline.cancel_info.reason === 'superseded_by'">
+            <template v-if="pipeline.cancel_info.superseded_by">
               <router-link
-                :to="{ name: 'repo-pipeline', params: { pipelineId: pipeline.cancel_info.data.pipeline_number } }"
+                :to="{ name: 'repo-pipeline', params: { pipelineId: pipeline.cancel_info.superseded_by } }"
                 class="hover:underline"
-                >{{ $t('repo.pipeline.cancel_info.superseded_by', pipeline.cancel_info.data) }}</router-link
-              >
+                >{{ $t('repo.pipeline.cancel_info.superseded_by', pipeline.cancel_info.superseded_by) }}</router-link>
             </template>
-            <template v-else-if="pipeline.cancel_info.reason === 'user_cancel'">
-              {{ $t('repo.pipeline.cancel_info.user_cancel', pipeline.cancel_info.data) }}
-            </template>
-            <template v-else>
-              {{ pipeline.cancel_info.reason }}
+            <template v-else-if="pipeline.cancel_info.cancel_by_user">
+              {{ $t('repo.pipeline.cancel_info.cancel_by_user', pipeline.cancel_info.cancel_by_user) }}
             </template>
           </span>
         </div>

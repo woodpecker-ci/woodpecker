@@ -4681,14 +4681,11 @@ const docTemplate = `{
         "CancelInfo": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "cancel_by_user": {
+                    "type": "string"
                 },
-                "reason": {
-                    "$ref": "#/definitions/model.CancelReason"
+                "superseded_by": {
+                    "type": "integer"
                 }
             }
         },
@@ -6009,17 +6006,6 @@ const docTemplate = `{
                 "RequireApprovalForks",
                 "RequireApprovalPullRequests",
                 "RequireApprovalAllEvents"
-            ]
-        },
-        "model.CancelReason": {
-            "type": "string",
-            "enum": [
-                "user_cancel",
-                "superseded_by"
-            ],
-            "x-enum-varnames": [
-                "CancelReasonUserCancel",
-                "CancelReasonSuperseded"
             ]
         },
         "model.ForgeType": {

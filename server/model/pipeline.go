@@ -87,14 +87,7 @@ type PipelineOptions struct {
 	Variables map[string]string `json:"variables"`
 } //	@name	PipelineOptions
 
-type CancelReason string
-
-const (
-	CancelReasonUserCancel CancelReason = "user_cancel"
-	CancelReasonSuperseded CancelReason = "superseded_by"
-)
-
 type CancelInfo struct {
-	Reason CancelReason      `json:"reason"`
-	Data   map[string]string `json:"data,omitempty"`
+	CancelByUser string `json:"cancel_by_user,omitempty"`
+	SupersededBy int64  `json:"superseded_by,omitempty"`
 } //	@name	CancelInfo

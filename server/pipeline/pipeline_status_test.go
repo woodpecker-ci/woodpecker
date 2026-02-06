@@ -95,13 +95,13 @@ func TestUpdateToStatusKilled(t *testing.T) {
 
 	now := time.Now().Unix()
 	cancelInfo := &model.CancelInfo{
-		Reason: "Unit tests status",
+		SupersededBy: 2,
 	}
 
 	pipeline, _ := UpdateToStatusKilled(mockStorePipeline(t), model.Pipeline{}, cancelInfo)
 
 	assert.Equal(t, model.StatusKilled, pipeline.Status)
 	assert.NotNil(t, pipeline.CancelInfo)
-	assert.Equal(t, "Unit tests status", pipeline.CancelInfo.Reason)
+	assert.EqualValues(t, 2, pipeline.CancelInfo.SupersededBy)
 	assert.LessOrEqual(t, now, pipeline.Finished)
 }
