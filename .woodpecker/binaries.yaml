@@ -80,6 +80,7 @@ steps:
   build-sbom-trivy: # same as make sbom-trivy
     image: ghcr.io/aquasecurity/trivy
     commands:
+      - mkdir -p dist
       - trivy fs --scanners license --license-full --format spdx-json -o dist/base.go.spdx.json go.mod
       - trivy fs --scanners license --license-full --format spdx-json -o dist/webui.spdx.json web/pnpm-lock.yaml
 
