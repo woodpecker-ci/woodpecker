@@ -45,6 +45,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
+	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
 	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -318,12 +319,12 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		fmt.Printf("ctrl+c received, terminating current pipeline '%s'\n", confStr)
 	})
 
-	return pipeline.New(compiled,
-		pipeline.WithContext(pipelineCtx), //nolint:contextcheck
-		pipeline.WithTracer(pipeline.DefaultTracer),
-		pipeline.WithLogger(defaultLogger),
-		pipeline.WithBackend(backendEngine),
-		pipeline.WithDescription(map[string]string{
+	return pipeline_runtime.New(compiled,
+		pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
+		pipeline_runtime.WithTracer(pipeline.DefaultTracer),
+		pipeline_runtime.WithLogger(defaultLogger),
+		pipeline_runtime.WithBackend(backendEngine),
+		pipeline_runtime.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
 	).Run(ctx)

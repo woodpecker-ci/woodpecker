@@ -25,9 +25,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -154,14 +154,14 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	var uploads sync.WaitGroup
 
 	// Run pipeline
-	err = pipeline.New(
+	err = pipeline_runtime.New(
 		workflow.Config,
-		pipeline.WithContext(workflowCtx),
-		pipeline.WithTaskUUID(fmt.Sprint(workflow.ID)),
-		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
-		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
-		pipeline.WithBackend(*r.backend),
-		pipeline.WithDescription(map[string]string{
+		pipeline_runtime.WithContext(workflowCtx),
+		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
+		pipeline_runtime.WithLogger(r.createLogger(logger, &uploads, workflow)),
+		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
+		pipeline_runtime.WithBackend(*r.backend),
+		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,
 			"pipeline_number": pipelineNumber,
