@@ -270,7 +270,7 @@
       "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
       "cancel_info": {
-        "superseded_by": "Superseded by pipeline #{pipeline_number}",
+        "superseded_by": "Superseded by pipeline #{pipelineId}",
         "cancel_by_user": "Canceled by {user}"
       },
       "debug": {

@@ -85,10 +85,10 @@
               <router-link
                 :to="{ name: 'repo-pipeline', params: { pipelineId: pipeline.cancel_info.superseded_by } }"
                 class="hover:underline"
-                >{{ $t('repo.pipeline.cancel_info.superseded_by', pipeline.cancel_info.superseded_by) }}</router-link>
+                >{{ $t('repo.pipeline.cancel_info.superseded_by', { pipelineId: pipeline.cancel_info.superseded_by }) }}</router-link>
             </template>
             <template v-else-if="pipeline.cancel_info.cancel_by_user">
-              {{ $t('repo.pipeline.cancel_info.cancel_by_user', pipeline.cancel_info.cancel_by_user) }}
+              {{ $t('repo.pipeline.cancel_info.cancel_by_user', { user: pipeline.cancel_info.cancel_by_user }) }}
             </template>
           </span>
         </div>
