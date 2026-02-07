@@ -11,6 +11,7 @@ variables:
         - 'pipeline/schema/**'
         # tools updates
         - Makefile
+        - 'codecov.yaml'
       event: pull_request
 
 when:
