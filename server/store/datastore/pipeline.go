@@ -56,16 +56,6 @@ func (s storage) GetPipelineLastByBranch(repo *model.Repo, branch string) (*mode
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineLastByForgeURL(repo *model.Repo, forgeURL string) (*model.Pipeline, error) {
-	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.
-		Desc("number").
-		Where(builder.Eq{"repo_id": repo.ID, "forge_url": forgeURL}.And(
-			builder.In("event", model.EventPull, model.EventPullClosed, model.EventPullMetadata),
-		)).
-		Get(pipeline))
-}
-
 func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.

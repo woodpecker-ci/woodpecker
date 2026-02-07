@@ -74,8 +74,6 @@ type Store interface {
 	GetPipelineBadge(*model.Repo, string, []model.WebhookEvent) (*model.Pipeline, error)
 	// GetPipelineLastByBranch gets the last pipeline for the branch.
 	GetPipelineLastByBranch(*model.Repo, string) (*model.Pipeline, error)
-	// GetPipelineLastByForgeURL gets the last pipeline of an pull by forgeURL.
-	GetPipelineLastByForgeURL(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository

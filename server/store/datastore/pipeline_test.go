@@ -118,10 +118,6 @@ func TestPipelines(t *testing.T) {
 	GetPipeline, err5 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.ID)
 	require.NoError(t, err5)
 	assert.EqualValues(t, pipeline2, GetPipeline)
-
-	GetPipeline, err6 := store.GetPipelineLastByForgeURL(&model.Repo{ID: 1}, pipeline3.ForgeURL)
-	require.NoError(t, err6)
-	assert.EqualValues(t, pipeline3, GetPipeline)
 }
 
 func TestPipelineListFilter(t *testing.T) {
