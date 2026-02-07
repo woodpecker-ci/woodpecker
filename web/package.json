@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.0.0",
-    "@eslint/js": "^9.17.0",
+    "@eslint/js": "^10.0.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.5.1",
     "@intlify/eslint-plugin-vue-i18n": "4.1.1",
     "@intlify/unplugin-vue-i18n": "^11.0.0",
@@ -54,7 +54,7 @@
     "@vue/compiler-sfc": "^3.5.18",
     "@vue/test-utils": "^2.4.6",
     "dotenv": "^17.2.0",
-    "eslint": "^9.17.0",
+    "eslint": "^10.0.0",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-vue-scoped-css": "^2.9.0",
     "jsdom": "^28.0.0",
