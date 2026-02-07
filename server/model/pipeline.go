@@ -48,6 +48,7 @@ type Pipeline struct {
 	ForgeURL             string                  `json:"forge_url"               xorm:"forge_url"`
 	Reviewer             string                  `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed             int64                   `json:"reviewed"                xorm:"reviewed"`
+	CancelInfo           *CancelInfo             `json:"cancel_info,omitempty"   xorm:"json 'cancel_info'"`
 	Workflows            []*Workflow             `json:"workflows,omitempty"     xorm:"-"`
 	ChangedFiles         []string                `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables  map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
@@ -85,3 +86,8 @@ type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name	PipelineOptions
+
+type CancelInfo struct {
+	CanceledByUser string `json:"canceled_by_user,omitempty"`
+	SupersededBy   int64  `json:"superseded_by,omitempty"`
+} //	@name	CancelInfo
