@@ -54,6 +54,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency jsdom to v28 [[#6082](https://github.com/woodpecker-ci/woodpecker/pull/6082)]
 - chore(deps): update web npm deps non-major [[#6081](https://github.com/woodpecker-ci/woodpecker/pull/6081)]
 - chore(deps): update dependency golang to v1.25.7 [[#6080](https://github.com/woodpecker-ci/woodpecker/pull/6080)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.28.0 [[#6069](https://github.com/woodpecker-ci/woodpecker/pull/6069)]
