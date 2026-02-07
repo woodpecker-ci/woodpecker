@@ -29,6 +29,22 @@
         @click="activateRepo"
       />
 
+      <div v-if="user && repo.user_id !== user?.id">
+        <p>
+          <span>{{ $t('current_repo_user', { user_id: repo.user_id }) }}</span>
+          <span>{{ $t('user_associated_to_repo') }}</span>
+        </p>
+
+        <Button
+          class="my-1 mr-4"
+          color="blue"
+          start-icon="turn-off"
+          :is-loading="isChowningRepo"
+          :text="$t('set_as_repo_user')"
+          @click="chownRepo"
+        />
+      </div>
+
       <Button
         class="my-1 mr-4"
         color="red"
@@ -50,6 +66,7 @@ import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import useAuthentication from '~/compositions/useAuthentication';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
@@ -58,6 +75,7 @@ const apiClient = useApiClient();
 const router = useRouter();
 const notifications = useNotifications();
 const i18n = useI18n();
+const { user } = useAuthentication();
 
 const repo = requiredInject('repo');
 
@@ -87,6 +105,11 @@ const { doSubmit: deactivateRepo, isLoading: isDeactivatingRepo } = useAsyncActi
   await apiClient.deleteRepo(repo.value.id, false);
   notifications.notify({ title: i18n.t('repo.settings.actions.disable.success'), type: 'success' });
   await router.replace({ name: 'repos' });
+});
+
+const { doSubmit: chownRepo, isLoading: isChowningRepo } = useAsyncAction(async () => {
+  await apiClient.chownRepo(repo.value.id);
+  notifications.notify({ title: i18n.t('repo_user_changed'), type: 'success' });
 });
 
 const isActive = computed(() => repo?.value.active);
