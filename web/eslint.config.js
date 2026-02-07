@@ -95,6 +95,7 @@ export default antfu(
         },
       ],
       'vue/singleline-html-element-content-newline': ['off'],
+      'no-useless-assignment': ['off'],
     },
   },
 
