@@ -48,7 +48,7 @@ func (s storage) GetPipelineBadge(repo *model.Repo, branch string, events []mode
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
+func (s storage) GetPipelineLastByBranch(repo *model.Repo, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
