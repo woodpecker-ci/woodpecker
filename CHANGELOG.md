@@ -32,6 +32,7 @@
 
 ### 🐛 Bug Fixes
 
+- Detached or service steps report back too [[#6039](https://github.com/woodpecker-ci/woodpecker/pull/6039)]
 - Don't propagate workflow error from agent back to agent [[#6056](https://github.com/woodpecker-ci/woodpecker/pull/6056)]
 - Fix pipeline cancellation status handling and step state synchronization [[#6011](https://github.com/woodpecker-ci/woodpecker/pull/6011)]
 - Add retry logic for CreatePipeline with backoff [[#6067](https://github.com/woodpecker-ci/woodpecker/pull/6067)]
