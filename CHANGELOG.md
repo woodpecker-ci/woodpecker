@@ -45,6 +45,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency isomorphic-dompurify to v2.36.0 [[#6086](https://github.com/woodpecker-ci/woodpecker/pull/6086)]
 - fix(deps): update docs npm deps non-major [[#6052](https://github.com/woodpecker-ci/woodpecker/pull/6052)]
 - Update Module Interaction Diagram [[#6019](https://github.com/woodpecker-ci/woodpecker/pull/6019)]
 - Add Buildah plugin link [[#6050](https://github.com/woodpecker-ci/woodpecker/pull/6050)]
