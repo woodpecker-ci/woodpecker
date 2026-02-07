@@ -322,7 +322,11 @@
                 "no_permission": "У вас нет доступа к отладочной информации",
                 "metadata_exec_title": "Перезапустить конвейер локально"
             },
-            "view": "Посмотреть конвейер"
+            "view": "Посмотреть конвейер",
+            "cancel_info": {
+                "canceled_by_user": "Отменено {user}",
+                "superseded_by": "Заменено конвейером #{pipelineId}"
+            }
         },
         "pull_requests": "Запросы на слияние",
         "settings": {
