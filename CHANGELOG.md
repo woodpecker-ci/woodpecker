@@ -44,6 +44,7 @@
 
 ### 📚 Documentation
 
+- fix(deps): update docs npm deps non-major [[#6052](https://github.com/woodpecker-ci/woodpecker/pull/6052)]
 - Update Module Interaction Diagram [[#6019](https://github.com/woodpecker-ci/woodpecker/pull/6019)]
 - Add Buildah plugin link [[#6050](https://github.com/woodpecker-ci/woodpecker/pull/6050)]
 - chore(deps): update docs npm deps non-major [[#6045](https://github.com/woodpecker-ci/woodpecker/pull/6045)]
@@ -54,6 +55,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @antfu/eslint-config to v7.3.0 [[#6084](https://github.com/woodpecker-ci/woodpecker/pull/6084)]
 - chore(deps): update dependency jsdom to v28 [[#6082](https://github.com/woodpecker-ci/woodpecker/pull/6082)]
 - chore(deps): update web npm deps non-major [[#6081](https://github.com/woodpecker-ci/woodpecker/pull/6081)]
 - chore(deps): update dependency golang to v1.25.7 [[#6080](https://github.com/woodpecker-ci/woodpecker/pull/6080)]
