@@ -231,6 +231,9 @@ func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (
 func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
 	state, err := e.getStepState(taskUUID, step.UUID)
 	if err != nil {
+		if errors.Is(err, ErrStepStateNotFound) {
+			return nil
+		}
 		return err
 	}
 
