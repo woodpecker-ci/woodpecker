@@ -45,6 +45,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency axios to v1.13.5 [[#6090](https://github.com/woodpecker-ci/woodpecker/pull/6090)]
 - chore(deps): update docs npm deps non-major [[#6088](https://github.com/woodpecker-ci/woodpecker/pull/6088)]
 - chore(deps): update dependency isomorphic-dompurify to v2.36.0 [[#6086](https://github.com/woodpecker-ci/woodpecker/pull/6086)]
 - fix(deps): update docs npm deps non-major [[#6052](https://github.com/woodpecker-ci/woodpecker/pull/6052)]
