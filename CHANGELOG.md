@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-07
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -57,6 +57,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @types/node to v24.10.12 [[#6087](https://github.com/woodpecker-ci/woodpecker/pull/6087)]
 - chore(deps): update eslint monorepo to v10 (major) [[#6083](https://github.com/woodpecker-ci/woodpecker/pull/6083)]
 - chore(deps): update dependency @antfu/eslint-config to v7.3.0 [[#6084](https://github.com/woodpecker-ci/woodpecker/pull/6084)]
 - chore(deps): update dependency jsdom to v28 [[#6082](https://github.com/woodpecker-ci/woodpecker/pull/6082)]
