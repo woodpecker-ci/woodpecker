@@ -57,6 +57,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.8.0 [[#6089](https://github.com/woodpecker-ci/woodpecker/pull/6089)]
 - chore(deps): update dependency @types/node to v24.10.12 [[#6087](https://github.com/woodpecker-ci/woodpecker/pull/6087)]
 - chore(deps): update eslint monorepo to v10 (major) [[#6083](https://github.com/woodpecker-ci/woodpecker/pull/6083)]
 - chore(deps): update dependency @antfu/eslint-config to v7.3.0 [[#6084](https://github.com/woodpecker-ci/woodpecker/pull/6084)]
