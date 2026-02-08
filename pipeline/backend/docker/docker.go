@@ -16,6 +16,8 @@ package docker
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -35,11 +37,14 @@ import (
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
+
+var containerKillTimeout = 5 // seconds
 
 type docker struct {
 	client client.APIClient
@@ -304,13 +309,24 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
 	containerName := toContainerName(step)
+	var stopErr error
 
-	if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-		return err
+	// we first signal to the container to stop ...
+	if err := e.client.ContainerStop(ctx, containerName, container.StopOptions{
+		Timeout: &containerKillTimeout,
+	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		// we do not return error yet as we try to kill it first
+		stopErr = fmt.Errorf("could not stop container '%s': %w", step.Name, err)
 	}
 
+	// ... and if stop does not work just force kill it
+	if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		return errors.Join(stopErr, fmt.Errorf("could not kill container '%s': %w", step.Name, err))
+	}
+
+	// now we clean up files left
 	if err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-		return err
+		return fmt.Errorf("could not remove container '%s': %w", step.Name, err)
 	}
 
 	return nil
@@ -319,17 +335,20 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
+	errWG := errgroup.Group{}
+
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			containerName := toContainerName(step)
-			if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-				log.Error().Err(err).Msgf("could not kill container '%s'", step.Name)
-			}
-			if err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-				log.Error().Err(err).Msgf("could not remove container '%s'", step.Name)
-			}
+			errWG.Go(func() error {
+				return e.DestroyStep(ctx, step, taskUUID)
+			})
 		}
 	}
+
+	if err := errWG.Wait(); err != nil {
+		log.Error().Err(err).Msgf("could not destroy all containers")
+	}
+
 	if err := e.client.VolumeRemove(ctx, conf.Volume, true); err != nil {
 		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume)
 	}
@@ -349,8 +368,13 @@ func isErrContainerNotFoundOrNotRunning(err error) bool {
 	// Error response from daemon: Cannot kill container: ...: No such container: ...
 	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
 	// Error response from podman daemon: can only kill running containers. ... is in state exited
+	// Error response from daemon: removal of container ... is already in progress
 	// Error: No such container: ...
-	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running") || strings.Contains(err.Error(), "can only kill running containers"))
+	return err != nil &&
+		(strings.Contains(err.Error(), "No such container") ||
+			strings.Contains(err.Error(), "is not running") ||
+			strings.Contains(err.Error(), "can only kill running containers") ||
+			(strings.Contains(err.Error(), "removal of container") && strings.Contains(err.Error(), "is already in progress")))
 }
 
 // normalizeArchType converts the arch type reported by docker info into
