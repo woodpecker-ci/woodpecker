@@ -208,7 +208,6 @@ type Store interface {
 	RecoveryStateCreate(workflowID string, stepUUIDs []string, agentID, expiresAt int64) error
 	RecoveryStateGetAll(workflowID string) ([]*model.StepRecoveryState, error)
 	RecoveryStateUpdate(state *model.StepRecoveryState) error
-	RecoveryStateDelete(workflowID string) error
 	RecoveryStateCleanExpired() error
 
 	// Store operations

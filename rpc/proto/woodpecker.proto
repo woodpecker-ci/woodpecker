@@ -37,8 +37,7 @@ service Woodpecker {
   rpc ReportHealth    (ReportHealthRequest)  returns (Empty) {}
 
   // Recovery methods for agent workflow recovery
-  rpc InitWorkflowRecovery    (InitWorkflowRecoveryRequest)    returns (Empty) {}
-  rpc GetWorkflowRecoveryStates (GetWorkflowRecoveryStatesRequest) returns (GetWorkflowRecoveryStatesResponse) {}
+  rpc InitWorkflowRecovery    (InitWorkflowRecoveryRequest)    returns (InitWorkflowRecoveryResponse) {}
   rpc UpdateStepRecoveryState (UpdateStepRecoveryStateRequest) returns (Empty) {}
 }
 
@@ -191,17 +190,13 @@ message InitWorkflowRecoveryRequest {
   int64 timeout_seconds = 3;
 }
 
-message GetWorkflowRecoveryStatesRequest {
-  string workflow_id = 1;
-}
-
 message StepRecoveryState {
   string step_uuid = 1;
   RecoveryStatus status = 2;
   int32 exit_code = 3;
 }
 
-message GetWorkflowRecoveryStatesResponse {
+message InitWorkflowRecoveryResponse {
   repeated StepRecoveryState states = 1;
 }
 

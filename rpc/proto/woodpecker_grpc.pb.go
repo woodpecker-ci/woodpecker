@@ -34,20 +34,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Woodpecker_Version_FullMethodName                   = "/proto.Woodpecker/Version"
-	Woodpecker_Next_FullMethodName                      = "/proto.Woodpecker/Next"
-	Woodpecker_Init_FullMethodName                      = "/proto.Woodpecker/Init"
-	Woodpecker_Wait_FullMethodName                      = "/proto.Woodpecker/Wait"
-	Woodpecker_Done_FullMethodName                      = "/proto.Woodpecker/Done"
-	Woodpecker_Extend_FullMethodName                    = "/proto.Woodpecker/Extend"
-	Woodpecker_Update_FullMethodName                    = "/proto.Woodpecker/Update"
-	Woodpecker_Log_FullMethodName                       = "/proto.Woodpecker/Log"
-	Woodpecker_RegisterAgent_FullMethodName             = "/proto.Woodpecker/RegisterAgent"
-	Woodpecker_UnregisterAgent_FullMethodName           = "/proto.Woodpecker/UnregisterAgent"
-	Woodpecker_ReportHealth_FullMethodName              = "/proto.Woodpecker/ReportHealth"
-	Woodpecker_InitWorkflowRecovery_FullMethodName      = "/proto.Woodpecker/InitWorkflowRecovery"
-	Woodpecker_GetWorkflowRecoveryStates_FullMethodName = "/proto.Woodpecker/GetWorkflowRecoveryStates"
-	Woodpecker_UpdateStepRecoveryState_FullMethodName   = "/proto.Woodpecker/UpdateStepRecoveryState"
+	Woodpecker_Version_FullMethodName                 = "/proto.Woodpecker/Version"
+	Woodpecker_Next_FullMethodName                    = "/proto.Woodpecker/Next"
+	Woodpecker_Init_FullMethodName                    = "/proto.Woodpecker/Init"
+	Woodpecker_Wait_FullMethodName                    = "/proto.Woodpecker/Wait"
+	Woodpecker_Done_FullMethodName                    = "/proto.Woodpecker/Done"
+	Woodpecker_Extend_FullMethodName                  = "/proto.Woodpecker/Extend"
+	Woodpecker_Update_FullMethodName                  = "/proto.Woodpecker/Update"
+	Woodpecker_Log_FullMethodName                     = "/proto.Woodpecker/Log"
+	Woodpecker_RegisterAgent_FullMethodName           = "/proto.Woodpecker/RegisterAgent"
+	Woodpecker_UnregisterAgent_FullMethodName         = "/proto.Woodpecker/UnregisterAgent"
+	Woodpecker_ReportHealth_FullMethodName            = "/proto.Woodpecker/ReportHealth"
+	Woodpecker_InitWorkflowRecovery_FullMethodName    = "/proto.Woodpecker/InitWorkflowRecovery"
+	Woodpecker_UpdateStepRecoveryState_FullMethodName = "/proto.Woodpecker/UpdateStepRecoveryState"
 )
 
 // WoodpeckerClient is the client API for Woodpecker service.
@@ -68,8 +67,7 @@ type WoodpeckerClient interface {
 	UnregisterAgent(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	ReportHealth(ctx context.Context, in *ReportHealthRequest, opts ...grpc.CallOption) (*Empty, error)
 	// Recovery methods for agent workflow recovery
-	InitWorkflowRecovery(ctx context.Context, in *InitWorkflowRecoveryRequest, opts ...grpc.CallOption) (*Empty, error)
-	GetWorkflowRecoveryStates(ctx context.Context, in *GetWorkflowRecoveryStatesRequest, opts ...grpc.CallOption) (*GetWorkflowRecoveryStatesResponse, error)
+	InitWorkflowRecovery(ctx context.Context, in *InitWorkflowRecoveryRequest, opts ...grpc.CallOption) (*InitWorkflowRecoveryResponse, error)
 	UpdateStepRecoveryState(ctx context.Context, in *UpdateStepRecoveryStateRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
@@ -191,20 +189,10 @@ func (c *woodpeckerClient) ReportHealth(ctx context.Context, in *ReportHealthReq
 	return out, nil
 }
 
-func (c *woodpeckerClient) InitWorkflowRecovery(ctx context.Context, in *InitWorkflowRecoveryRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) InitWorkflowRecovery(ctx context.Context, in *InitWorkflowRecoveryRequest, opts ...grpc.CallOption) (*InitWorkflowRecoveryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
+	out := new(InitWorkflowRecoveryResponse)
 	err := c.cc.Invoke(ctx, Woodpecker_InitWorkflowRecovery_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *woodpeckerClient) GetWorkflowRecoveryStates(ctx context.Context, in *GetWorkflowRecoveryStatesRequest, opts ...grpc.CallOption) (*GetWorkflowRecoveryStatesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetWorkflowRecoveryStatesResponse)
-	err := c.cc.Invoke(ctx, Woodpecker_GetWorkflowRecoveryStates_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -239,8 +227,7 @@ type WoodpeckerServer interface {
 	UnregisterAgent(context.Context, *Empty) (*Empty, error)
 	ReportHealth(context.Context, *ReportHealthRequest) (*Empty, error)
 	// Recovery methods for agent workflow recovery
-	InitWorkflowRecovery(context.Context, *InitWorkflowRecoveryRequest) (*Empty, error)
-	GetWorkflowRecoveryStates(context.Context, *GetWorkflowRecoveryStatesRequest) (*GetWorkflowRecoveryStatesResponse, error)
+	InitWorkflowRecovery(context.Context, *InitWorkflowRecoveryRequest) (*InitWorkflowRecoveryResponse, error)
 	UpdateStepRecoveryState(context.Context, *UpdateStepRecoveryStateRequest) (*Empty, error)
 	mustEmbedUnimplementedWoodpeckerServer()
 }
@@ -285,11 +272,8 @@ func (UnimplementedWoodpeckerServer) UnregisterAgent(context.Context, *Empty) (*
 func (UnimplementedWoodpeckerServer) ReportHealth(context.Context, *ReportHealthRequest) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReportHealth not implemented")
 }
-func (UnimplementedWoodpeckerServer) InitWorkflowRecovery(context.Context, *InitWorkflowRecoveryRequest) (*Empty, error) {
+func (UnimplementedWoodpeckerServer) InitWorkflowRecovery(context.Context, *InitWorkflowRecoveryRequest) (*InitWorkflowRecoveryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method InitWorkflowRecovery not implemented")
-}
-func (UnimplementedWoodpeckerServer) GetWorkflowRecoveryStates(context.Context, *GetWorkflowRecoveryStatesRequest) (*GetWorkflowRecoveryStatesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetWorkflowRecoveryStates not implemented")
 }
 func (UnimplementedWoodpeckerServer) UpdateStepRecoveryState(context.Context, *UpdateStepRecoveryStateRequest) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateStepRecoveryState not implemented")
@@ -531,24 +515,6 @@ func _Woodpecker_InitWorkflowRecovery_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_GetWorkflowRecoveryStates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetWorkflowRecoveryStatesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WoodpeckerServer).GetWorkflowRecoveryStates(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Woodpecker_GetWorkflowRecoveryStates_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WoodpeckerServer).GetWorkflowRecoveryStates(ctx, req.(*GetWorkflowRecoveryStatesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Woodpecker_UpdateStepRecoveryState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateStepRecoveryStateRequest)
 	if err := dec(in); err != nil {
@@ -621,10 +587,6 @@ var Woodpecker_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InitWorkflowRecovery",
 			Handler:    _Woodpecker_InitWorkflowRecovery_Handler,
-		},
-		{
-			MethodName: "GetWorkflowRecoveryStates",
-			Handler:    _Woodpecker_GetWorkflowRecoveryStates_Handler,
 		},
 		{
 			MethodName: "UpdateStepRecoveryState",

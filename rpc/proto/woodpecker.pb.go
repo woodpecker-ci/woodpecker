@@ -1319,50 +1319,6 @@ func (x *InitWorkflowRecoveryRequest) GetTimeoutSeconds() int64 {
 	return 0
 }
 
-type GetWorkflowRecoveryStatesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkflowId    string                 `protobuf:"bytes,1,opt,name=workflow_id,json=workflowId,proto3" json:"workflow_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetWorkflowRecoveryStatesRequest) Reset() {
-	*x = GetWorkflowRecoveryStatesRequest{}
-	mi := &file_woodpecker_proto_msgTypes[23]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetWorkflowRecoveryStatesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetWorkflowRecoveryStatesRequest) ProtoMessage() {}
-
-func (x *GetWorkflowRecoveryStatesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[23]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetWorkflowRecoveryStatesRequest.ProtoReflect.Descriptor instead.
-func (*GetWorkflowRecoveryStatesRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{23}
-}
-
-func (x *GetWorkflowRecoveryStatesRequest) GetWorkflowId() string {
-	if x != nil {
-		return x.WorkflowId
-	}
-	return ""
-}
-
 type StepRecoveryState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	StepUuid      string                 `protobuf:"bytes,1,opt,name=step_uuid,json=stepUuid,proto3" json:"step_uuid,omitempty"`
@@ -1374,7 +1330,7 @@ type StepRecoveryState struct {
 
 func (x *StepRecoveryState) Reset() {
 	*x = StepRecoveryState{}
-	mi := &file_woodpecker_proto_msgTypes[24]
+	mi := &file_woodpecker_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1386,7 +1342,7 @@ func (x *StepRecoveryState) String() string {
 func (*StepRecoveryState) ProtoMessage() {}
 
 func (x *StepRecoveryState) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[24]
+	mi := &file_woodpecker_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1399,7 +1355,7 @@ func (x *StepRecoveryState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StepRecoveryState.ProtoReflect.Descriptor instead.
 func (*StepRecoveryState) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{24}
+	return file_woodpecker_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *StepRecoveryState) GetStepUuid() string {
@@ -1423,28 +1379,28 @@ func (x *StepRecoveryState) GetExitCode() int32 {
 	return 0
 }
 
-type GetWorkflowRecoveryStatesResponse struct {
+type InitWorkflowRecoveryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	States        []*StepRecoveryState   `protobuf:"bytes,1,rep,name=states,proto3" json:"states,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetWorkflowRecoveryStatesResponse) Reset() {
-	*x = GetWorkflowRecoveryStatesResponse{}
-	mi := &file_woodpecker_proto_msgTypes[25]
+func (x *InitWorkflowRecoveryResponse) Reset() {
+	*x = InitWorkflowRecoveryResponse{}
+	mi := &file_woodpecker_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetWorkflowRecoveryStatesResponse) String() string {
+func (x *InitWorkflowRecoveryResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetWorkflowRecoveryStatesResponse) ProtoMessage() {}
+func (*InitWorkflowRecoveryResponse) ProtoMessage() {}
 
-func (x *GetWorkflowRecoveryStatesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[25]
+func (x *InitWorkflowRecoveryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_woodpecker_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1455,12 +1411,12 @@ func (x *GetWorkflowRecoveryStatesResponse) ProtoReflect() protoreflect.Message 
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetWorkflowRecoveryStatesResponse.ProtoReflect.Descriptor instead.
-func (*GetWorkflowRecoveryStatesResponse) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{25}
+// Deprecated: Use InitWorkflowRecoveryResponse.ProtoReflect.Descriptor instead.
+func (*InitWorkflowRecoveryResponse) Descriptor() ([]byte, []int) {
+	return file_woodpecker_proto_rawDescGZIP(), []int{24}
 }
 
-func (x *GetWorkflowRecoveryStatesResponse) GetStates() []*StepRecoveryState {
+func (x *InitWorkflowRecoveryResponse) GetStates() []*StepRecoveryState {
 	if x != nil {
 		return x.States
 	}
@@ -1479,7 +1435,7 @@ type UpdateStepRecoveryStateRequest struct {
 
 func (x *UpdateStepRecoveryStateRequest) Reset() {
 	*x = UpdateStepRecoveryStateRequest{}
-	mi := &file_woodpecker_proto_msgTypes[26]
+	mi := &file_woodpecker_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1491,7 +1447,7 @@ func (x *UpdateStepRecoveryStateRequest) String() string {
 func (*UpdateStepRecoveryStateRequest) ProtoMessage() {}
 
 func (x *UpdateStepRecoveryStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[26]
+	mi := &file_woodpecker_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1504,7 +1460,7 @@ func (x *UpdateStepRecoveryStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateStepRecoveryStateRequest.ProtoReflect.Descriptor instead.
 func (*UpdateStepRecoveryStateRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{26}
+	return file_woodpecker_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *UpdateStepRecoveryStateRequest) GetWorkflowId() string {
@@ -1624,15 +1580,12 @@ const file_woodpecker_proto_rawDesc = "" +
 	"workflowId\x12\x1d\n" +
 	"\n" +
 	"step_uuids\x18\x02 \x03(\tR\tstepUuids\x12'\n" +
-	"\x0ftimeout_seconds\x18\x03 \x01(\x03R\x0etimeoutSeconds\"C\n" +
-	" GetWorkflowRecoveryStatesRequest\x12\x1f\n" +
-	"\vworkflow_id\x18\x01 \x01(\tR\n" +
-	"workflowId\"|\n" +
+	"\x0ftimeout_seconds\x18\x03 \x01(\x03R\x0etimeoutSeconds\"|\n" +
 	"\x11StepRecoveryState\x12\x1b\n" +
 	"\tstep_uuid\x18\x01 \x01(\tR\bstepUuid\x12-\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x15.proto.RecoveryStatusR\x06status\x12\x1b\n" +
-	"\texit_code\x18\x03 \x01(\x05R\bexitCode\"U\n" +
-	"!GetWorkflowRecoveryStatesResponse\x120\n" +
+	"\texit_code\x18\x03 \x01(\x05R\bexitCode\"P\n" +
+	"\x1cInitWorkflowRecoveryResponse\x120\n" +
 	"\x06states\x18\x01 \x03(\v2\x18.proto.StepRecoveryStateR\x06states\"\xaa\x01\n" +
 	"\x1eUpdateStepRecoveryStateRequest\x12\x1f\n" +
 	"\vworkflow_id\x18\x01 \x01(\tR\n" +
@@ -1645,7 +1598,7 @@ const file_woodpecker_proto_rawDesc = "" +
 	"\x10RECOVERY_RUNNING\x10\x01\x12\x14\n" +
 	"\x10RECOVERY_SUCCESS\x10\x02\x12\x13\n" +
 	"\x0fRECOVERY_FAILED\x10\x03\x12\x14\n" +
-	"\x10RECOVERY_SKIPPED\x10\x042\xd2\x06\n" +
+	"\x10RECOVERY_SKIPPED\x10\x042\xf7\x05\n" +
 	"\n" +
 	"Woodpecker\x121\n" +
 	"\aVersion\x12\f.proto.Empty\x1a\x16.proto.VersionResponse\"\x00\x121\n" +
@@ -1658,9 +1611,8 @@ const file_woodpecker_proto_rawDesc = "" +
 	"\x03Log\x12\x11.proto.LogRequest\x1a\f.proto.Empty\"\x00\x12L\n" +
 	"\rRegisterAgent\x12\x1b.proto.RegisterAgentRequest\x1a\x1c.proto.RegisterAgentResponse\"\x00\x12/\n" +
 	"\x0fUnregisterAgent\x12\f.proto.Empty\x1a\f.proto.Empty\"\x00\x12:\n" +
-	"\fReportHealth\x12\x1a.proto.ReportHealthRequest\x1a\f.proto.Empty\"\x00\x12J\n" +
-	"\x14InitWorkflowRecovery\x12\".proto.InitWorkflowRecoveryRequest\x1a\f.proto.Empty\"\x00\x12p\n" +
-	"\x19GetWorkflowRecoveryStates\x12'.proto.GetWorkflowRecoveryStatesRequest\x1a(.proto.GetWorkflowRecoveryStatesResponse\"\x00\x12P\n" +
+	"\fReportHealth\x12\x1a.proto.ReportHealthRequest\x1a\f.proto.Empty\"\x00\x12a\n" +
+	"\x14InitWorkflowRecovery\x12\".proto.InitWorkflowRecoveryRequest\x1a#.proto.InitWorkflowRecoveryResponse\"\x00\x12P\n" +
 	"\x17UpdateStepRecoveryState\x12%.proto.UpdateStepRecoveryStateRequest\x1a\f.proto.Empty\"\x002C\n" +
 	"\x0eWoodpeckerAuth\x121\n" +
 	"\x04Auth\x12\x12.proto.AuthRequest\x1a\x13.proto.AuthResponse\"\x00B.Z,go.woodpecker-ci.org/woodpecker/v3/rpc/protob\x06proto3"
@@ -1678,51 +1630,50 @@ func file_woodpecker_proto_rawDescGZIP() []byte {
 }
 
 var file_woodpecker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_woodpecker_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_woodpecker_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_woodpecker_proto_goTypes = []any{
-	(RecoveryStatus)(0),                       // 0: proto.RecoveryStatus
-	(*StepState)(nil),                         // 1: proto.StepState
-	(*WorkflowState)(nil),                     // 2: proto.WorkflowState
-	(*LogEntry)(nil),                          // 3: proto.LogEntry
-	(*Filter)(nil),                            // 4: proto.Filter
-	(*Workflow)(nil),                          // 5: proto.Workflow
-	(*NextRequest)(nil),                       // 6: proto.NextRequest
-	(*InitRequest)(nil),                       // 7: proto.InitRequest
-	(*WaitRequest)(nil),                       // 8: proto.WaitRequest
-	(*DoneRequest)(nil),                       // 9: proto.DoneRequest
-	(*ExtendRequest)(nil),                     // 10: proto.ExtendRequest
-	(*UpdateRequest)(nil),                     // 11: proto.UpdateRequest
-	(*LogRequest)(nil),                        // 12: proto.LogRequest
-	(*Empty)(nil),                             // 13: proto.Empty
-	(*ReportHealthRequest)(nil),               // 14: proto.ReportHealthRequest
-	(*AgentInfo)(nil),                         // 15: proto.AgentInfo
-	(*RegisterAgentRequest)(nil),              // 16: proto.RegisterAgentRequest
-	(*VersionResponse)(nil),                   // 17: proto.VersionResponse
-	(*NextResponse)(nil),                      // 18: proto.NextResponse
-	(*RegisterAgentResponse)(nil),             // 19: proto.RegisterAgentResponse
-	(*WaitResponse)(nil),                      // 20: proto.WaitResponse
-	(*AuthRequest)(nil),                       // 21: proto.AuthRequest
-	(*AuthResponse)(nil),                      // 22: proto.AuthResponse
-	(*InitWorkflowRecoveryRequest)(nil),       // 23: proto.InitWorkflowRecoveryRequest
-	(*GetWorkflowRecoveryStatesRequest)(nil),  // 24: proto.GetWorkflowRecoveryStatesRequest
-	(*StepRecoveryState)(nil),                 // 25: proto.StepRecoveryState
-	(*GetWorkflowRecoveryStatesResponse)(nil), // 26: proto.GetWorkflowRecoveryStatesResponse
-	(*UpdateStepRecoveryStateRequest)(nil),    // 27: proto.UpdateStepRecoveryStateRequest
-	nil,                                       // 28: proto.Filter.LabelsEntry
-	nil,                                       // 29: proto.AgentInfo.CustomLabelsEntry
+	(RecoveryStatus)(0),                    // 0: proto.RecoveryStatus
+	(*StepState)(nil),                      // 1: proto.StepState
+	(*WorkflowState)(nil),                  // 2: proto.WorkflowState
+	(*LogEntry)(nil),                       // 3: proto.LogEntry
+	(*Filter)(nil),                         // 4: proto.Filter
+	(*Workflow)(nil),                       // 5: proto.Workflow
+	(*NextRequest)(nil),                    // 6: proto.NextRequest
+	(*InitRequest)(nil),                    // 7: proto.InitRequest
+	(*WaitRequest)(nil),                    // 8: proto.WaitRequest
+	(*DoneRequest)(nil),                    // 9: proto.DoneRequest
+	(*ExtendRequest)(nil),                  // 10: proto.ExtendRequest
+	(*UpdateRequest)(nil),                  // 11: proto.UpdateRequest
+	(*LogRequest)(nil),                     // 12: proto.LogRequest
+	(*Empty)(nil),                          // 13: proto.Empty
+	(*ReportHealthRequest)(nil),            // 14: proto.ReportHealthRequest
+	(*AgentInfo)(nil),                      // 15: proto.AgentInfo
+	(*RegisterAgentRequest)(nil),           // 16: proto.RegisterAgentRequest
+	(*VersionResponse)(nil),                // 17: proto.VersionResponse
+	(*NextResponse)(nil),                   // 18: proto.NextResponse
+	(*RegisterAgentResponse)(nil),          // 19: proto.RegisterAgentResponse
+	(*WaitResponse)(nil),                   // 20: proto.WaitResponse
+	(*AuthRequest)(nil),                    // 21: proto.AuthRequest
+	(*AuthResponse)(nil),                   // 22: proto.AuthResponse
+	(*InitWorkflowRecoveryRequest)(nil),    // 23: proto.InitWorkflowRecoveryRequest
+	(*StepRecoveryState)(nil),              // 24: proto.StepRecoveryState
+	(*InitWorkflowRecoveryResponse)(nil),   // 25: proto.InitWorkflowRecoveryResponse
+	(*UpdateStepRecoveryStateRequest)(nil), // 26: proto.UpdateStepRecoveryStateRequest
+	nil,                                    // 27: proto.Filter.LabelsEntry
+	nil,                                    // 28: proto.AgentInfo.CustomLabelsEntry
 }
 var file_woodpecker_proto_depIdxs = []int32{
-	28, // 0: proto.Filter.labels:type_name -> proto.Filter.LabelsEntry
+	27, // 0: proto.Filter.labels:type_name -> proto.Filter.LabelsEntry
 	4,  // 1: proto.NextRequest.filter:type_name -> proto.Filter
 	2,  // 2: proto.InitRequest.state:type_name -> proto.WorkflowState
 	2,  // 3: proto.DoneRequest.state:type_name -> proto.WorkflowState
 	1,  // 4: proto.UpdateRequest.state:type_name -> proto.StepState
 	3,  // 5: proto.LogRequest.logEntries:type_name -> proto.LogEntry
-	29, // 6: proto.AgentInfo.customLabels:type_name -> proto.AgentInfo.CustomLabelsEntry
+	28, // 6: proto.AgentInfo.customLabels:type_name -> proto.AgentInfo.CustomLabelsEntry
 	15, // 7: proto.RegisterAgentRequest.info:type_name -> proto.AgentInfo
 	5,  // 8: proto.NextResponse.workflow:type_name -> proto.Workflow
 	0,  // 9: proto.StepRecoveryState.status:type_name -> proto.RecoveryStatus
-	25, // 10: proto.GetWorkflowRecoveryStatesResponse.states:type_name -> proto.StepRecoveryState
+	24, // 10: proto.InitWorkflowRecoveryResponse.states:type_name -> proto.StepRecoveryState
 	0,  // 11: proto.UpdateStepRecoveryStateRequest.status:type_name -> proto.RecoveryStatus
 	13, // 12: proto.Woodpecker.Version:input_type -> proto.Empty
 	6,  // 13: proto.Woodpecker.Next:input_type -> proto.NextRequest
@@ -1736,26 +1687,24 @@ var file_woodpecker_proto_depIdxs = []int32{
 	13, // 21: proto.Woodpecker.UnregisterAgent:input_type -> proto.Empty
 	14, // 22: proto.Woodpecker.ReportHealth:input_type -> proto.ReportHealthRequest
 	23, // 23: proto.Woodpecker.InitWorkflowRecovery:input_type -> proto.InitWorkflowRecoveryRequest
-	24, // 24: proto.Woodpecker.GetWorkflowRecoveryStates:input_type -> proto.GetWorkflowRecoveryStatesRequest
-	27, // 25: proto.Woodpecker.UpdateStepRecoveryState:input_type -> proto.UpdateStepRecoveryStateRequest
-	21, // 26: proto.WoodpeckerAuth.Auth:input_type -> proto.AuthRequest
-	17, // 27: proto.Woodpecker.Version:output_type -> proto.VersionResponse
-	18, // 28: proto.Woodpecker.Next:output_type -> proto.NextResponse
-	13, // 29: proto.Woodpecker.Init:output_type -> proto.Empty
-	20, // 30: proto.Woodpecker.Wait:output_type -> proto.WaitResponse
-	13, // 31: proto.Woodpecker.Done:output_type -> proto.Empty
-	13, // 32: proto.Woodpecker.Extend:output_type -> proto.Empty
-	13, // 33: proto.Woodpecker.Update:output_type -> proto.Empty
-	13, // 34: proto.Woodpecker.Log:output_type -> proto.Empty
-	19, // 35: proto.Woodpecker.RegisterAgent:output_type -> proto.RegisterAgentResponse
-	13, // 36: proto.Woodpecker.UnregisterAgent:output_type -> proto.Empty
-	13, // 37: proto.Woodpecker.ReportHealth:output_type -> proto.Empty
-	13, // 38: proto.Woodpecker.InitWorkflowRecovery:output_type -> proto.Empty
-	26, // 39: proto.Woodpecker.GetWorkflowRecoveryStates:output_type -> proto.GetWorkflowRecoveryStatesResponse
-	13, // 40: proto.Woodpecker.UpdateStepRecoveryState:output_type -> proto.Empty
-	22, // 41: proto.WoodpeckerAuth.Auth:output_type -> proto.AuthResponse
-	27, // [27:42] is the sub-list for method output_type
-	12, // [12:27] is the sub-list for method input_type
+	26, // 24: proto.Woodpecker.UpdateStepRecoveryState:input_type -> proto.UpdateStepRecoveryStateRequest
+	21, // 25: proto.WoodpeckerAuth.Auth:input_type -> proto.AuthRequest
+	17, // 26: proto.Woodpecker.Version:output_type -> proto.VersionResponse
+	18, // 27: proto.Woodpecker.Next:output_type -> proto.NextResponse
+	13, // 28: proto.Woodpecker.Init:output_type -> proto.Empty
+	20, // 29: proto.Woodpecker.Wait:output_type -> proto.WaitResponse
+	13, // 30: proto.Woodpecker.Done:output_type -> proto.Empty
+	13, // 31: proto.Woodpecker.Extend:output_type -> proto.Empty
+	13, // 32: proto.Woodpecker.Update:output_type -> proto.Empty
+	13, // 33: proto.Woodpecker.Log:output_type -> proto.Empty
+	19, // 34: proto.Woodpecker.RegisterAgent:output_type -> proto.RegisterAgentResponse
+	13, // 35: proto.Woodpecker.UnregisterAgent:output_type -> proto.Empty
+	13, // 36: proto.Woodpecker.ReportHealth:output_type -> proto.Empty
+	25, // 37: proto.Woodpecker.InitWorkflowRecovery:output_type -> proto.InitWorkflowRecoveryResponse
+	13, // 38: proto.Woodpecker.UpdateStepRecoveryState:output_type -> proto.Empty
+	22, // 39: proto.WoodpeckerAuth.Auth:output_type -> proto.AuthResponse
+	26, // [26:40] is the sub-list for method output_type
+	12, // [12:26] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -1772,7 +1721,7 @@ func file_woodpecker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_woodpecker_proto_rawDesc), len(file_woodpecker_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   29,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

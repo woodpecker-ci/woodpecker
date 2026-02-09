@@ -543,8 +543,8 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 	}
 }
 
-// InitWorkflowRecovery initializes recovery state for all steps in a workflow.
-func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (err error) {
+// InitWorkflowRecovery initializes recovery state for all steps in a workflow and returns current states.
+func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*rpc.RecoveryState, error) {
 	retry := c.newBackOff()
 	req := &proto.InitWorkflowRecoveryRequest{
 		WorkflowId:     workflowID,
@@ -552,54 +552,15 @@ func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, st
 		TimeoutSeconds: timeoutSeconds,
 	}
 
-	for {
-		_, err = c.client.InitWorkflowRecovery(ctx, req)
-		if err == nil {
-			return nil
-		}
-		log.Error().Err(err).Msgf("grpc error: InitWorkflowRecovery(): code: %v", status.Code(err))
-
-		switch status.Code(err) {
-		case codes.Canceled:
-			if ctx.Err() != nil {
-				return nil
-			}
-			return err
-		case
-			codes.Aborted,
-			codes.DataLoss,
-			codes.DeadlineExceeded,
-			codes.Internal,
-			codes.Unavailable:
-			// non-fatal errors
-		default:
-			return err
-		}
-
-		select {
-		case <-time.After(retry.NextBackOff()):
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
-}
-
-// GetWorkflowRecoveryStates retrieves all recovery states for a workflow.
-func (c *client) GetWorkflowRecoveryStates(ctx context.Context, workflowID string) (map[string]*rpc.RecoveryState, error) {
-	retry := c.newBackOff()
-	req := &proto.GetWorkflowRecoveryStatesRequest{
-		WorkflowId: workflowID,
-	}
-
-	var res *proto.GetWorkflowRecoveryStatesResponse
+	var res *proto.InitWorkflowRecoveryResponse
 	var err error
 
 	for {
-		res, err = c.client.GetWorkflowRecoveryStates(ctx, req)
+		res, err = c.client.InitWorkflowRecovery(ctx, req)
 		if err == nil {
 			break
 		}
-		log.Error().Err(err).Msgf("grpc error: GetWorkflowRecoveryStates(): code: %v", status.Code(err))
+		log.Error().Err(err).Msgf("grpc error: InitWorkflowRecovery(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case codes.Canceled:

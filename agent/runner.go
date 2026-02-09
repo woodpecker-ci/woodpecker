@@ -202,11 +202,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	uploads.Wait()
 	logger.Debug().Msg("logs and traces uploaded")
 
-	// If preserving for recovery (context canceled, recovery enabled, not user cancel),
+	// If workflow is recoverable (context canceled, recovery enabled, not user cancel),
 	// skip marking as done. The workflow will be picked up by a new agent after restart.
-	preserving := runnerCtx.Err() != nil && recoveryManager != nil && recoveryManager.Enabled() && !recoveryManager.WasCanceled() && errors.Is(err, pipeline.ErrCancel)
-	if preserving {
-		logger.Info().Msg("preserving workflow for recovery, not marking as done")
+	if recoveryManager != nil && recoveryManager.IsRecoverable(runnerCtx) {
+		logger.Info().Msg("workflow is recoverable, not marking as done")
 		return nil
 	}
 

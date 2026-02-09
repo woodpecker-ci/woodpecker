@@ -24,8 +24,7 @@ import (
 
 // RecoveryClient defines the interface for recovery state communication.
 type RecoveryClient interface {
-	InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) error
-	GetWorkflowRecoveryStates(ctx context.Context, workflowID string) (map[string]*rpc.RecoveryState, error)
+	InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*rpc.RecoveryState, error)
 	UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status rpc.RecoveryStatus, exitCode int) error
 }
 
@@ -55,14 +54,9 @@ func (m *RecoveryManager) InitRecoveryState(ctx context.Context, config *backend
 		return nil
 	}
 
-	// Create recovery states (idempotent - skips if already exists)
+	// Create recovery states (idempotent) and load current states in a single RPC
 	stepUUIDs := collectStepUUIDs(config)
-	if err := m.client.InitWorkflowRecovery(ctx, m.workflowID, stepUUIDs, timeoutSeconds); err != nil {
-		return err
-	}
-
-	// Load all states into cache (single RPC call)
-	states, err := m.client.GetWorkflowRecoveryStates(ctx, m.workflowID)
+	states, err := m.client.InitWorkflowRecovery(ctx, m.workflowID, stepUUIDs, timeoutSeconds)
 	if err != nil {
 		return err
 	}
@@ -109,13 +103,10 @@ func (m *RecoveryManager) MarkStepFailed(ctx context.Context, step *backend.Step
 	return m.client.UpdateStepRecoveryState(ctx, m.workflowID, step.UUID, rpc.RecoveryStatusFailed, exitCode)
 }
 
-// MarkStepSkipped marks a step as skipped.
-func (m *RecoveryManager) MarkStepSkipped(ctx context.Context, step *backend.Step) error {
-	if !m.enabled || m.client == nil {
-		return nil
-	}
-
-	return m.client.UpdateStepRecoveryState(ctx, m.workflowID, step.UUID, rpc.RecoveryStatusSkipped, 0)
+// IsRecoverable returns true if the workflow can be recovered by another agent
+// (context canceled with recovery enabled, but not canceled by user/API).
+func (m *RecoveryManager) IsRecoverable(ctx context.Context) bool {
+	return ctx.Err() != nil && m.enabled && !m.canceled.Load()
 }
 
 // ShouldSkipStep determines if a step should be skipped based on its recovery state.

@@ -657,25 +657,21 @@ func (s *RPC) updateAgentLastWork(agent *model.Agent) error {
 	return nil
 }
 
-// InitWorkflowRecovery initializes recovery state for all steps in a workflow.
-func (s *RPC) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) error {
+// InitWorkflowRecovery initializes recovery state for all steps in a workflow
+// and returns the current states.
+func (s *RPC) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*rpc.RecoveryState, error) {
 	if !s.recoveryEnabled {
-		return ErrRecoveryDisabled
+		return nil, ErrRecoveryDisabled
 	}
 
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	expiresAt := time.Now().Add(time.Duration(timeoutSeconds) * time.Second).Unix()
-	return s.store.RecoveryStateCreate(workflowID, stepUUIDs, agent.ID, expiresAt)
-}
-
-// GetWorkflowRecoveryStates retrieves all recovery states for a workflow.
-func (s *RPC) GetWorkflowRecoveryStates(ctx context.Context, workflowID string) (map[string]*rpc.RecoveryState, error) {
-	if !s.recoveryEnabled {
-		return nil, ErrRecoveryDisabled
+	if err := s.store.RecoveryStateCreate(workflowID, stepUUIDs, agent.ID, expiresAt); err != nil {
+		return nil, err
 	}
 
 	states, err := s.store.RecoveryStateGetAll(workflowID)
@@ -704,7 +700,6 @@ func (s *RPC) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID 
 		StepUUID:   stepUUID,
 		Status:     int(status),
 		ExitCode:   exitCode,
-		UpdatedAt:  time.Now().Unix(),
 	}
 
 	if status == rpc.RecoveryStatusRunning {

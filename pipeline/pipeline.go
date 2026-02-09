@@ -114,8 +114,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 
 	defer func() {
 		// Skip destroying workflow if recovery is enabled and context was canceled but NOT by user.
-		userCanceled := r.recoveryManager.WasCanceled()
-		if runnerCtx.Err() != nil && r.recoveryManager.Enabled() && !userCanceled {
+		if r.recoveryManager.IsRecoverable(runnerCtx) {
 			logger.Info().Msg("skipping workflow destruction, preserving for recovery")
 			return
 		}
@@ -302,13 +301,13 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 					err = ErrCancel
 				}
 
-				// Check if we're preserving for recovery
-				preserving := r.ctx.Err() != nil && r.recoveryManager.Enabled() && !r.recoveryManager.WasCanceled()
+				// Check if workflow is recoverable
+				recoverable := r.recoveryManager.IsRecoverable(r.ctx)
 
 				// Update recovery state based on step result
 				if r.recoveryManager.Enabled() {
-					if preserving {
-						logger.Debug().Str("step", step.Name).Msg("preserving step state for recovery")
+					if recoverable {
+						logger.Debug().Str("step", step.Name).Msg("workflow is recoverable, not updating step state")
 					} else if processState != nil && processState.ExitCode == 0 && err == nil {
 						if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil {
 							logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as success")
@@ -324,8 +323,8 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 					}
 				}
 
-				// Skip tracing if preserving for recovery
-				if !preserving {
+				// Skip tracing if workflow is recoverable
+				if !recoverable {
 					err = r.traceStep(processState, err, step)
 				}
 				if err != nil && step.Failure == metadata.FailureIgnore {
@@ -409,6 +408,11 @@ func (r *Runtime) execReconnected(step *backend.Step) error {
 		return err
 	}
 
+	return exitError(step, waitState)
+}
+
+// exitError returns an OomError or ExitError based on the wait state, or nil if the step succeeded.
+func exitError(step *backend.Step, waitState *backend.State) error {
 	if waitState.OOMKilled {
 		return &OomError{
 			UUID: step.UUID,
@@ -489,17 +493,5 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 		waitState.Error = ErrCancel
 	}
 
-	if waitState.OOMKilled {
-		return waitState, &OomError{
-			UUID: step.UUID,
-			Code: waitState.ExitCode,
-		}
-	} else if waitState.ExitCode != 0 {
-		return waitState, &ExitError{
-			UUID: step.UUID,
-			Code: waitState.ExitCode,
-		}
-	}
-
-	return waitState, nil
+	return waitState, exitError(step, waitState)
 }

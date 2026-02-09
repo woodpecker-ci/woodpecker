@@ -67,12 +67,6 @@ func (s storage) RecoveryStateUpdate(state *model.StepRecoveryState) error {
 	return err
 }
 
-// RecoveryStateDelete deletes all recovery states for a workflow.
-func (s storage) RecoveryStateDelete(workflowID string) error {
-	_, err := s.engine.Where("workflow_id = ?", workflowID).Delete(new(model.StepRecoveryState))
-	return err
-}
-
 // RecoveryStateCleanExpired removes expired recovery states.
 func (s storage) RecoveryStateCleanExpired() error {
 	_, err := s.engine.Where("expires_at < ?", time.Now().Unix()).Delete(new(model.StepRecoveryState))

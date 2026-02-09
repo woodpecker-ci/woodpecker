@@ -210,14 +210,8 @@ func (s *WoodpeckerServer) ReportHealth(c context.Context, req *proto.ReportHeal
 	return res, err
 }
 
-func (s *WoodpeckerServer) InitWorkflowRecovery(c context.Context, req *proto.InitWorkflowRecoveryRequest) (*proto.Empty, error) {
-	res := new(proto.Empty)
-	err := s.peer.InitWorkflowRecovery(c, req.GetWorkflowId(), req.GetStepUuids(), req.GetTimeoutSeconds())
-	return res, err
-}
-
-func (s *WoodpeckerServer) GetWorkflowRecoveryStates(c context.Context, req *proto.GetWorkflowRecoveryStatesRequest) (*proto.GetWorkflowRecoveryStatesResponse, error) {
-	states, err := s.peer.GetWorkflowRecoveryStates(c, req.GetWorkflowId())
+func (s *WoodpeckerServer) InitWorkflowRecovery(c context.Context, req *proto.InitWorkflowRecoveryRequest) (*proto.InitWorkflowRecoveryResponse, error) {
+	states, err := s.peer.InitWorkflowRecovery(c, req.GetWorkflowId(), req.GetStepUuids(), req.GetTimeoutSeconds())
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +224,7 @@ func (s *WoodpeckerServer) GetWorkflowRecoveryStates(c context.Context, req *pro
 			ExitCode: int32(state.ExitCode),
 		})
 	}
-	return &proto.GetWorkflowRecoveryStatesResponse{States: protoStates}, nil
+	return &proto.InitWorkflowRecoveryResponse{States: protoStates}, nil
 }
 
 func (s *WoodpeckerServer) UpdateStepRecoveryState(c context.Context, req *proto.UpdateStepRecoveryStateRequest) (*proto.Empty, error) {
