@@ -45,7 +45,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#6093](https://github.com/woodpecker-ci/woodpecker/pull/6093)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.54.0 [[#6091](https://github.com/woodpecker-ci/woodpecker/pull/6091)]
 - chore(deps): update dependency axios to v1.13.5 [[#6090](https://github.com/woodpecker-ci/woodpecker/pull/6090)]
 - chore(deps): update docs npm deps non-major [[#6088](https://github.com/woodpecker-ci/woodpecker/pull/6088)]
@@ -61,6 +60,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#6093](https://github.com/woodpecker-ci/woodpecker/pull/6093)]
 - fix(deps): update golang-packages [[#6092](https://github.com/woodpecker-ci/woodpecker/pull/6092)]
 - chore(deps): update dependency simple-icons to v16.8.0 [[#6089](https://github.com/woodpecker-ci/woodpecker/pull/6089)]
 - chore(deps): update dependency @types/node to v24.10.12 [[#6087](https://github.com/woodpecker-ci/woodpecker/pull/6087)]
