@@ -134,7 +134,7 @@ func convertUser(from *internal.Account, token *oauth2.Token, email string) *mod
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
-		Email: email,
+		Email:         email,
 	}
 }
 
