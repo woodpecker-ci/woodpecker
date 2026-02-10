@@ -256,16 +256,12 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 					return nil
 				} else if r.recoveryManager.ShouldReconnect(recoveryState) {
 					// Attempt to reconnect to a running step
-					if reconnector, ok := r.engine.(backend.Reconnector); ok {
-						reconnectErr := reconnector.Reconnect(r.ctx, step, r.taskUUID)
-						if reconnectErr == nil {
-							logger.Info().Str("step", step.Name).Msg("reconnecting to existing step")
-							return r.execReconnected(step)
-						}
-						logger.Debug().Err(reconnectErr).Str("step", step.Name).Msg("cannot reconnect, re-executing step")
-					} else {
-						logger.Debug().Str("step", step.Name).Msg("backend does not support reconnection, re-executing step")
+					reconnectErr := r.engine.Reconnect(r.ctx, step, r.taskUUID)
+					if reconnectErr == nil {
+						logger.Info().Str("step", step.Name).Msg("reconnecting to existing step")
+						return r.execReconnected(step)
 					}
+					logger.Debug().Err(reconnectErr).Str("step", step.Name).Msg("cannot reconnect, re-executing step")
 				}
 
 				// Mark step as running in recovery state

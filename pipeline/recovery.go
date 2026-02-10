@@ -50,7 +50,7 @@ func NewRecoveryManager(client RecoveryClient, workflowID string, enabled bool) 
 // On first run, creates recovery states for all steps.
 // On agent restart, loads existing states into cache.
 func (m *RecoveryManager) InitRecoveryState(ctx context.Context, config *backend.Config, timeoutSeconds int64) error {
-	if !m.enabled || m.client == nil {
+	if !m.enabled {
 		return nil
 	}
 
@@ -78,7 +78,7 @@ func (m *RecoveryManager) GetStepState(step *backend.Step) *rpc.RecoveryState {
 
 // MarkStepRunning marks a step as running.
 func (m *RecoveryManager) MarkStepRunning(ctx context.Context, step *backend.Step) error {
-	if !m.enabled || m.client == nil {
+	if !m.enabled {
 		return nil
 	}
 
@@ -87,7 +87,7 @@ func (m *RecoveryManager) MarkStepRunning(ctx context.Context, step *backend.Ste
 
 // MarkStepSuccess marks a step as successfully completed.
 func (m *RecoveryManager) MarkStepSuccess(ctx context.Context, step *backend.Step) error {
-	if !m.enabled || m.client == nil {
+	if !m.enabled {
 		return nil
 	}
 
@@ -96,7 +96,7 @@ func (m *RecoveryManager) MarkStepSuccess(ctx context.Context, step *backend.Ste
 
 // MarkStepFailed marks a step as failed.
 func (m *RecoveryManager) MarkStepFailed(ctx context.Context, step *backend.Step, exitCode int) error {
-	if !m.enabled || m.client == nil {
+	if !m.enabled {
 		return nil
 	}
 

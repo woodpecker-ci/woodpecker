@@ -161,18 +161,15 @@ type Backend interface {
 	// This function may be called concurrently for different workflows
 	// and must be thread-safe.
 	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+
+	// Reconnect attempts to reconnect to a running step after agent restart.
+	// Returns nil if reconnection is possible, error otherwise.
+	// After successful reconnect, TailStep and WaitStep can be used normally.
+	// Backends that do not support reconnection should return an error.
+	Reconnect(ctx context.Context, step *Step, taskUUID string) error
 }
 
 // BackendInfo represents the reported information of a loaded backend.
 type BackendInfo struct {
 	Platform string
-}
-
-// Reconnector is an optional interface that backends can implement to support
-// reconnecting to running steps after agent restart.
-type Reconnector interface {
-	// Reconnect attempts to reconnect to a running step.
-	// Returns nil if reconnection is possible, error otherwise.
-	// After successful reconnect, TailStep and WaitStep can be used normally.
-	Reconnect(ctx context.Context, step *Step, taskUUID string) error
 }

@@ -94,17 +94,27 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	workflowCtx, cancelWorkflowCtx := context.WithCancelCause(workflowCtx)
 	defer cancelWorkflowCtx(nil)
 
-	// recoveryManager is declared here so the cancel listener can mark it as canceled.
-	// It will be initialized later after workflow state is set up.
-	var recoveryManager *pipeline.RecoveryManager
-
-	// Add sigterm support for internal context.
-	// Required to be able to terminate the running workflow by external signals.
+	// Handle SIGTERM (k8s, docker, system shutdown)
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
 		// WithContextSigtermCallback would cancel the context too, but  we want our own custom error
 		cancelWorkflowCtx(pipeline.ErrCancel)
 	})
+
+	state := rpc.WorkflowState{
+		Started: time.Now().Unix(),
+	}
+	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
+		logger.Error().Err(err).Msg("workflow initialization failed")
+		// TODO: should we return here?
+	}
+
+	// Initialize recovery manager before launching goroutines that reference it
+	recoveryManager := pipeline.NewRecoveryManager(r.client, workflow.ID, true)
+	if err := recoveryManager.InitRecoveryState(runnerCtx, workflow.Config, int64(timeout.Seconds())); err != nil {
+		logger.Warn().Err(err).Msg("failed to initialize recovery state, continuing without recovery")
+		recoveryManager = pipeline.NewRecoveryManager(r.client, workflow.ID, false)
+	}
 
 	// Listen for remote cancel events (UI / API).
 	// When canceled, we MUST cancel the workflow context
@@ -118,9 +128,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		} else {
 			if canceled {
 				logger.Debug().Msg("server side cancel signal received")
-				if recoveryManager != nil {
-					recoveryManager.SetCanceled()
-				}
+				recoveryManager.SetCanceled()
 				cancelWorkflowCtx(pipeline.ErrCancel)
 			}
 			logger.Debug().Msg("cancel listener exited normally")
@@ -143,25 +151,6 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 			}
 		}
 	}()
-
-	state := rpc.WorkflowState{
-		Started: time.Now().Unix(),
-	}
-
-	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
-		logger.Error().Err(err).Msg("signaling workflow initialization to server failed")
-		// We have an error, maybe the server is currently unreachable or other server-side errors occurred.
-		// So let's clean up and end this not yet started workflow run.
-		cancelWorkflowCtx(err)
-		return err
-	}
-
-	// Initialize recovery manager; if not enabled on server, it will be a no-op
-	recoveryManager = pipeline.NewRecoveryManager(r.client, workflow.ID, true)
-	if err := recoveryManager.InitRecoveryState(runnerCtx, workflow.Config, int64(timeout.Seconds())); err != nil {
-		logger.Warn().Err(err).Msg("failed to initialize recovery state, continuing without recovery")
-		recoveryManager = pipeline.NewRecoveryManager(nil, workflow.ID, false)
-	}
 
 	var uploads sync.WaitGroup
 
@@ -204,7 +193,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	// If workflow is recoverable (context canceled, recovery enabled, not user cancel),
 	// skip marking as done. The workflow will be picked up by a new agent after restart.
-	if recoveryManager != nil && recoveryManager.IsRecoverable(runnerCtx) {
+	if recoveryManager.IsRecoverable(runnerCtx) {
 		logger.Info().Msg("workflow is recoverable, not marking as done")
 		return nil
 	}

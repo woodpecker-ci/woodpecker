@@ -216,6 +216,10 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID stri
 	return nil
 }
 
+func (e *dummy) Reconnect(_ context.Context, _ *backend.Step, _ string) error {
+	return fmt.Errorf("reconnect not supported")
+}
+
 func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
