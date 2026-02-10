@@ -320,7 +320,11 @@
             "duration": "流水线耗时：{duration}",
             "log_delete_confirm": "您确定要删除步骤日志吗？",
             "log_delete_error": "删除步骤日志时发生了错误",
-            "view": "查看流水线"
+            "view": "查看流水线",
+            "cancel_info": {
+                "superseded_by": "#{pipelineId} 流水线已被取消",
+                "canceled_by_user": "{user} 已取消"
+            }
         },
         "pull_requests": "合并请求",
         "settings": {
