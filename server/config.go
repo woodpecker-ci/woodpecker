@@ -77,8 +77,7 @@ var Config = struct {
 		PrivilegedPlugins                   []string
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
-		RecoveryEnabled                     bool
-		Proxy                               struct {
+		Proxy struct {
 			No    string
 			HTTP  string
 			HTTPS string

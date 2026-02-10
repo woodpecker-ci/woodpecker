@@ -257,7 +257,7 @@ func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string
 }
 
 func (e *local) Reconnect(_ context.Context, _ *types.Step, _ string) error {
-	return fmt.Errorf("reconnect not supported")
+	return types.ErrWorkflowRecoveryNotSupported
 }
 
 func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {

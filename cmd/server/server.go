@@ -135,7 +135,7 @@ func run(ctx context.Context, c *cli.Command) error {
 	})
 
 	// Start recovery state cleanup task
-	if server.Config.Pipeline.RecoveryEnabled {
+	if c.Bool("recovery-enabled") {
 		serviceWaitingGroup.Go(func() error {
 			log.Info().Msg("starting recovery state cleanup service ...")
 			ticker := time.NewTicker(time.Minute * 5)
