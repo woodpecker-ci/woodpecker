@@ -20,7 +20,6 @@ import (
 	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
@@ -348,7 +347,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 				err = multierr.Append(err, &pipeline_errors.PipelineError{
 					Type:    pipeline_errors.PipelineErrorTypeBadHabit,
 					Message: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
-					Data: errors.BadHabitErrorData{
+					Data: pipeline_errors.BadHabitErrorData{
 						File:  config.File,
 						Field: field,
 						Docs:  "https://woodpecker-ci.org/docs/usage/linter#event-filter-for-all-steps",
