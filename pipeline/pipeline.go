@@ -255,8 +255,8 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				return err
 			}
 
-			// we report all errors till setup happened
-			// afterwards they just ged dropped
+			// Report all errors until the setup happened.
+			// Afterwards errors will be dropped.
 			if step.Detached {
 				var wg sync.WaitGroup
 				wg.Add(1)
