@@ -37,6 +37,20 @@ services:
       - 51820/udp
 ```
 
+## Stopping
+
+Services once not needed anymore get **SIGTERM** signal. If they don't honor it they will just get killed via **SIGKILL**.
+If you have services that don't gracefully stop and it does not matter, just ignore the failure:
+
+```diff
+ services:
+   - name: database
+     image: mysql
++    failure: ignore # we don't care how mysql exits
+     ports:
+       - 3306
+```
+
 ## Configuration
 
 Service containers generally expose environment variables to customize service startup such as default usernames, passwords and ports. Please see the official image documentation to learn more.
