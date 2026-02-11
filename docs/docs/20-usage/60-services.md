@@ -39,8 +39,8 @@ services:
 
 ## Stopping
 
-Services that are no longer needed receive a **SIGTERM** signal. If they don't respond to it, they will be forcibly terminated with **SIGKILL**.
-If you have services that don't shut down gracefully and it doesn't matter, you can simply ignore the failure:
+Services that are no longer needed receive a **SIGTERM** signal. If they do not respond, they are forcibly terminated with **SIGKILL**.
+If there are services that do not shut down properly and this doesn't matter, you can simply ignore the error:
 
 ```diff
  services:
