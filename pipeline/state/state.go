@@ -14,6 +14,10 @@
 
 package state
 
+import (
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+)
+
 type (
 	// State defines the pipeline and process state.
 	State struct {
