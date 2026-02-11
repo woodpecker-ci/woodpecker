@@ -37,6 +37,7 @@ func Handler() http.Handler {
 	e.POST("/2.0/repositories/:owner/:name/commit/:commit/statuses/build", createRepoStatus)
 	e.GET("/2.0/repositories/:owner", getUserRepos)
 	e.GET("/2.0/user/", getUser)
+	e.GET("/2.0/user/emails", getEmails)
 	e.GET("/2.0/user/permissions/repositories", getPermissions)
 	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
 	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
@@ -176,6 +177,15 @@ func getUser(c *gin.Context) {
 		c.String(http.StatusNotFound, "")
 	default:
 		c.String(http.StatusOK, userPayload)
+	}
+}
+
+func getEmails(c *gin.Context) {
+	switch c.Request.Header.Get("Authorization") {
+	case "Bearer user_not_found", "Bearer a87ff679":
+		c.String(http.StatusNotFound, "")
+	default:
+		c.String(http.StatusOK, emailsPayload)
 	}
 }
 
@@ -486,6 +496,21 @@ const userRepoPayload = `
       "is_private": true
     }
   ]
+}
+`
+
+const emailsPayload = `
+{
+  "pagelen": 10,
+  "values": [
+    {
+      "email": "test@example.com",
+      "is_confirmed": true,
+      "is_primary": true
+  	}
+  ],
+  "page": 1,
+  "size": 1
 }
 `
 
