@@ -61,6 +61,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.9.0 [[#6108](https://github.com/woodpecker-ci/woodpecker/pull/6108)]
 - fix(deps): update golang-packages [[#6104](https://github.com/woodpecker-ci/woodpecker/pull/6104)]
 - fix(deps): update golang-packages [[#6098](https://github.com/woodpecker-ci/woodpecker/pull/6098)]
 - chore(deps): lock file maintenance [[#6093](https://github.com/woodpecker-ci/woodpecker/pull/6093)]
