@@ -149,7 +149,7 @@ When running Woodpecker on systems with SELinux enabled (such as RHEL, CentOS, F
 
 If SELinux is blocking access, you may see errors like:
 
-```
+```text
 permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock
 ```
 

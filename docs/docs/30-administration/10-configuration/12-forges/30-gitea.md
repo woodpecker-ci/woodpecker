@@ -49,6 +49,7 @@ To create a system-wide OAuth application in Gitea:
 4. Use the generated client id and secret for Woodpecker configuration
 
 System-wide applications are particularly useful for:
+
 - Shared CI/CD environments where multiple users need Woodpecker access
 - Organizations that want centralized control over OAuth applications
 - Preventing user-level application quotas from affecting CI/CD operations
