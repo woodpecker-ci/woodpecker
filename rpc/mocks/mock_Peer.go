@@ -8,6 +8,7 @@ import (
 	"context"
 
 	mock "github.com/stretchr/testify/mock"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
@@ -262,23 +263,23 @@ func (_c *MockPeer_Init_Call) RunAndReturn(run func(c context.Context, workflowI
 }
 
 // InitWorkflowRecovery provides a mock function for the type MockPeer
-func (_mock *MockPeer) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*rpc.RecoveryState, error) {
+func (_mock *MockPeer) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error) {
 	ret := _mock.Called(ctx, workflowID, stepUUIDs, timeoutSeconds)
 
 	if len(ret) == 0 {
 		panic("no return value specified for InitWorkflowRecovery")
 	}
 
-	var r0 map[string]*rpc.RecoveryState
+	var r0 map[string]*types.RecoveryState
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, int64) (map[string]*rpc.RecoveryState, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, int64) (map[string]*types.RecoveryState, error)); ok {
 		return returnFunc(ctx, workflowID, stepUUIDs, timeoutSeconds)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, int64) map[string]*rpc.RecoveryState); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, int64) map[string]*types.RecoveryState); ok {
 		r0 = returnFunc(ctx, workflowID, stepUUIDs, timeoutSeconds)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(map[string]*rpc.RecoveryState)
+			r0 = ret.Get(0).(map[string]*types.RecoveryState)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string, []string, int64) error); ok {
@@ -331,12 +332,12 @@ func (_c *MockPeer_InitWorkflowRecovery_Call) Run(run func(ctx context.Context, 
 	return _c
 }
 
-func (_c *MockPeer_InitWorkflowRecovery_Call) Return(stringToRecoveryState map[string]*rpc.RecoveryState, err error) *MockPeer_InitWorkflowRecovery_Call {
+func (_c *MockPeer_InitWorkflowRecovery_Call) Return(stringToRecoveryState map[string]*types.RecoveryState, err error) *MockPeer_InitWorkflowRecovery_Call {
 	_c.Call.Return(stringToRecoveryState, err)
 	return _c
 }
 
-func (_c *MockPeer_InitWorkflowRecovery_Call) RunAndReturn(run func(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*rpc.RecoveryState, error)) *MockPeer_InitWorkflowRecovery_Call {
+func (_c *MockPeer_InitWorkflowRecovery_Call) RunAndReturn(run func(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error)) *MockPeer_InitWorkflowRecovery_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -641,7 +642,7 @@ func (_c *MockPeer_Update_Call) RunAndReturn(run func(c context.Context, workflo
 }
 
 // UpdateStepRecoveryState provides a mock function for the type MockPeer
-func (_mock *MockPeer) UpdateStepRecoveryState(ctx context.Context, workflowID string, stepUUID string, status rpc.RecoveryStatus, exitCode int) error {
+func (_mock *MockPeer) UpdateStepRecoveryState(ctx context.Context, workflowID string, stepUUID string, status types.RecoveryStatus, exitCode int) error {
 	ret := _mock.Called(ctx, workflowID, stepUUID, status, exitCode)
 
 	if len(ret) == 0 {
@@ -649,7 +650,7 @@ func (_mock *MockPeer) UpdateStepRecoveryState(ctx context.Context, workflowID s
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, rpc.RecoveryStatus, int) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, types.RecoveryStatus, int) error); ok {
 		r0 = returnFunc(ctx, workflowID, stepUUID, status, exitCode)
 	} else {
 		r0 = ret.Error(0)
@@ -666,13 +667,13 @@ type MockPeer_UpdateStepRecoveryState_Call struct {
 //   - ctx context.Context
 //   - workflowID string
 //   - stepUUID string
-//   - status rpc.RecoveryStatus
+//   - status types.RecoveryStatus
 //   - exitCode int
 func (_e *MockPeer_Expecter) UpdateStepRecoveryState(ctx interface{}, workflowID interface{}, stepUUID interface{}, status interface{}, exitCode interface{}) *MockPeer_UpdateStepRecoveryState_Call {
 	return &MockPeer_UpdateStepRecoveryState_Call{Call: _e.mock.On("UpdateStepRecoveryState", ctx, workflowID, stepUUID, status, exitCode)}
 }
 
-func (_c *MockPeer_UpdateStepRecoveryState_Call) Run(run func(ctx context.Context, workflowID string, stepUUID string, status rpc.RecoveryStatus, exitCode int)) *MockPeer_UpdateStepRecoveryState_Call {
+func (_c *MockPeer_UpdateStepRecoveryState_Call) Run(run func(ctx context.Context, workflowID string, stepUUID string, status types.RecoveryStatus, exitCode int)) *MockPeer_UpdateStepRecoveryState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -686,9 +687,9 @@ func (_c *MockPeer_UpdateStepRecoveryState_Call) Run(run func(ctx context.Contex
 		if args[2] != nil {
 			arg2 = args[2].(string)
 		}
-		var arg3 rpc.RecoveryStatus
+		var arg3 types.RecoveryStatus
 		if args[3] != nil {
-			arg3 = args[3].(rpc.RecoveryStatus)
+			arg3 = args[3].(types.RecoveryStatus)
 		}
 		var arg4 int
 		if args[4] != nil {
@@ -710,7 +711,7 @@ func (_c *MockPeer_UpdateStepRecoveryState_Call) Return(err error) *MockPeer_Upd
 	return _c
 }
 
-func (_c *MockPeer_UpdateStepRecoveryState_Call) RunAndReturn(run func(ctx context.Context, workflowID string, stepUUID string, status rpc.RecoveryStatus, exitCode int) error) *MockPeer_UpdateStepRecoveryState_Call {
+func (_c *MockPeer_UpdateStepRecoveryState_Call) RunAndReturn(run func(ctx context.Context, workflowID string, stepUUID string, status types.RecoveryStatus, exitCode int) error) *MockPeer_UpdateStepRecoveryState_Call {
 	_c.Call.Return(run)
 	return _c
 }

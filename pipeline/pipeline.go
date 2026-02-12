@@ -256,7 +256,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 					return nil
 				} else if r.recoveryManager.ShouldReconnect(recoveryState) {
 					// Attempt to reconnect to a running step
-					reconnectErr := r.engine.Reconnect(r.ctx, step, r.taskUUID)
+					reconnectErr := r.engine.Reconnect(r.ctx, step, r.taskUUID) //nolint:contextcheck
 					if reconnectErr == nil {
 						logger.Info().Str("step", step.Name).Msg("reconnecting to existing step")
 						return r.execReconnected(step)
@@ -265,7 +265,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				}
 
 				// Mark step as running in recovery state
-				if err := r.recoveryManager.MarkStepRunning(r.ctx, step); err != nil {
+				if err := r.recoveryManager.MarkStepRunning(r.ctx, step); err != nil { //nolint:contextcheck
 					logger.Warn().Err(err).Str("step", step.Name).Msg("failed to mark step as running")
 				}
 			}
@@ -298,22 +298,23 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				}
 
 				// Check if workflow is recoverable
-				recoverable := r.recoveryManager.IsRecoverable(r.ctx)
+				recoverable := r.recoveryManager.IsRecoverable(r.ctx) //nolint:contextcheck
 
 				// Update recovery state based on step result
 				if r.recoveryManager.Enabled() {
-					if recoverable {
+					switch {
+					case recoverable:
 						logger.Debug().Str("step", step.Name).Msg("workflow is recoverable, not updating step state")
-					} else if processState != nil && processState.ExitCode == 0 && err == nil {
-						if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil {
+					case processState != nil && processState.ExitCode == 0 && err == nil:
+						if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil { //nolint:contextcheck
 							logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as success")
 						}
-					} else {
+					default:
 						exitCode := 1
 						if processState != nil {
 							exitCode = processState.ExitCode
 						}
-						if markErr := r.recoveryManager.MarkStepFailed(r.ctx, step, exitCode); markErr != nil {
+						if markErr := r.recoveryManager.MarkStepFailed(r.ctx, step, exitCode); markErr != nil { //nolint:contextcheck
 							logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as failed")
 						}
 					}

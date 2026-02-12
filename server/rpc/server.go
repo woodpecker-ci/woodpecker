@@ -22,6 +22,7 @@ import (
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
@@ -229,6 +230,6 @@ func (s *WoodpeckerServer) InitWorkflowRecovery(c context.Context, req *proto.In
 
 func (s *WoodpeckerServer) UpdateStepRecoveryState(c context.Context, req *proto.UpdateStepRecoveryStateRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
-	err := s.peer.UpdateStepRecoveryState(c, req.GetWorkflowId(), req.GetStepUuid(), rpc.RecoveryStatus(req.GetStatus()), int(req.GetExitCode()))
+	err := s.peer.UpdateStepRecoveryState(c, req.GetWorkflowId(), req.GetStepUuid(), types.RecoveryStatus(req.GetStatus()), int(req.GetExitCode()))
 	return res, err
 }

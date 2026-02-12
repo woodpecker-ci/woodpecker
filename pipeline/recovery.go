@@ -19,13 +19,13 @@ import (
 	"sync/atomic"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 )
 
 // RecoveryClient defines the interface for recovery state communication.
 type RecoveryClient interface {
-	InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*rpc.RecoveryState, error)
-	UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status rpc.RecoveryStatus, exitCode int) error
+	InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error)
+	UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status types.RecoveryStatus, exitCode int) error
 }
 
 // RecoveryManager manages the recovery state for pipeline steps.
@@ -33,8 +33,8 @@ type RecoveryManager struct {
 	client     RecoveryClient
 	workflowID string
 	enabled    bool
-	stateCache map[string]*rpc.RecoveryState // step UUID -> state (loaded once)
-	canceled   atomic.Bool                   // set when workflow is canceled by user/API
+	stateCache map[string]*types.RecoveryState // step UUID -> state (loaded once)
+	canceled   atomic.Bool                     // set when workflow is canceled by user/API
 }
 
 // NewRecoveryManager creates a new RecoveryManager.
@@ -65,15 +65,15 @@ func (m *RecoveryManager) InitRecoveryState(ctx context.Context, config *backend
 }
 
 // GetStepState retrieves the recovery state for a step from cache.
-func (m *RecoveryManager) GetStepState(step *backend.Step) *rpc.RecoveryState {
+func (m *RecoveryManager) GetStepState(step *backend.Step) *types.RecoveryState {
 	if !m.enabled || m.stateCache == nil {
-		return &rpc.RecoveryState{Status: rpc.RecoveryStatusPending}
+		return &types.RecoveryState{Status: types.RecoveryStatusPending}
 	}
 
 	if state, ok := m.stateCache[step.UUID]; ok {
 		return state
 	}
-	return &rpc.RecoveryState{Status: rpc.RecoveryStatusPending}
+	return &types.RecoveryState{Status: types.RecoveryStatusPending}
 }
 
 // MarkStepRunning marks a step as running.
@@ -82,7 +82,7 @@ func (m *RecoveryManager) MarkStepRunning(ctx context.Context, step *backend.Ste
 		return nil
 	}
 
-	return m.client.UpdateStepRecoveryState(ctx, m.workflowID, step.UUID, rpc.RecoveryStatusRunning, 0)
+	return m.client.UpdateStepRecoveryState(ctx, m.workflowID, step.UUID, types.RecoveryStatusRunning, 0)
 }
 
 // MarkStepSuccess marks a step as successfully completed.
@@ -91,7 +91,7 @@ func (m *RecoveryManager) MarkStepSuccess(ctx context.Context, step *backend.Ste
 		return nil
 	}
 
-	return m.client.UpdateStepRecoveryState(ctx, m.workflowID, step.UUID, rpc.RecoveryStatusSuccess, 0)
+	return m.client.UpdateStepRecoveryState(ctx, m.workflowID, step.UUID, types.RecoveryStatusSuccess, 0)
 }
 
 // MarkStepFailed marks a step as failed.
@@ -100,7 +100,7 @@ func (m *RecoveryManager) MarkStepFailed(ctx context.Context, step *backend.Step
 		return nil
 	}
 
-	return m.client.UpdateStepRecoveryState(ctx, m.workflowID, step.UUID, rpc.RecoveryStatusFailed, exitCode)
+	return m.client.UpdateStepRecoveryState(ctx, m.workflowID, step.UUID, types.RecoveryStatusFailed, exitCode)
 }
 
 // IsRecoverable returns true if the workflow can be recovered by another agent
@@ -111,7 +111,7 @@ func (m *RecoveryManager) IsRecoverable(ctx context.Context) bool {
 
 // ShouldSkipStep determines if a step should be skipped based on its recovery state.
 // Returns true if the step was already completed (success, failed, or skipped).
-func (m *RecoveryManager) ShouldSkipStep(step *backend.Step) (bool, *rpc.RecoveryState) {
+func (m *RecoveryManager) ShouldSkipStep(step *backend.Step) (bool, *types.RecoveryState) {
 	if !m.enabled {
 		return false, nil
 	}
@@ -119,7 +119,7 @@ func (m *RecoveryManager) ShouldSkipStep(step *backend.Step) (bool, *rpc.Recover
 	state := m.GetStepState(step)
 
 	switch state.Status {
-	case rpc.RecoveryStatusSuccess, rpc.RecoveryStatusFailed, rpc.RecoveryStatusSkipped:
+	case types.RecoveryStatusSuccess, types.RecoveryStatusFailed, types.RecoveryStatusSkipped:
 		return true, state
 	default:
 		return false, state
@@ -128,11 +128,11 @@ func (m *RecoveryManager) ShouldSkipStep(step *backend.Step) (bool, *rpc.Recover
 
 // ShouldReconnect determines if we should attempt to reconnect to a running step.
 // This is only applicable for backends that support reconnection (Docker, Kubernetes).
-func (m *RecoveryManager) ShouldReconnect(state *rpc.RecoveryState) bool {
+func (m *RecoveryManager) ShouldReconnect(state *types.RecoveryState) bool {
 	if state == nil {
 		return false
 	}
-	return state.Status == rpc.RecoveryStatusRunning
+	return state.Status == types.RecoveryStatusRunning
 }
 
 // Enabled returns whether recovery is enabled.

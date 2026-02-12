@@ -15,23 +15,10 @@
 
 package rpc
 
-import "context"
+import (
+	"context"
 
-// RecoveryStatus represents the recovery state of a step.
-type RecoveryStatus int
-
-// RecoveryState represents the recovery state for a step.
-type RecoveryState struct {
-	Status   RecoveryStatus `json:"status"`
-	ExitCode int            `json:"exit_code"`
-}
-
-const (
-	RecoveryStatusPending RecoveryStatus = iota
-	RecoveryStatusRunning
-	RecoveryStatusSuccess
-	RecoveryStatusFailed
-	RecoveryStatusSkipped
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 )
 
 // Peer defines the bidirectional communication interface between Woodpecker agents and servers.
@@ -324,9 +311,9 @@ type Peer interface {
 	// and returns current states. This creates server-side state tracking for each
 	// step, enabling recovery after agent restart by knowing which steps completed,
 	// failed, or were running.
-	InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*RecoveryState, error)
+	InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error)
 
 	// UpdateStepRecoveryState updates the recovery state for a specific step.
 	// Called as steps transition through running, success, failed states.
-	UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status RecoveryStatus, exitCode int) error
+	UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status types.RecoveryStatus, exitCode int) error
 }

@@ -28,6 +28,7 @@ import (
 	grpcproto "google.golang.org/protobuf/proto"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 )
@@ -544,7 +545,7 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 }
 
 // InitWorkflowRecovery initializes recovery state for all steps in a workflow and returns current states.
-func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*rpc.RecoveryState, error) {
+func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error) {
 	retry := c.newBackOff()
 	req := &proto.InitWorkflowRecoveryRequest{
 		WorkflowId:     workflowID,
@@ -586,10 +587,10 @@ func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, st
 		}
 	}
 
-	result := make(map[string]*rpc.RecoveryState, len(res.GetStates()))
+	result := make(map[string]*types.RecoveryState, len(res.GetStates()))
 	for _, state := range res.GetStates() {
-		result[state.GetStepUuid()] = &rpc.RecoveryState{
-			Status:   rpc.RecoveryStatus(state.GetStatus()),
+		result[state.GetStepUuid()] = &types.RecoveryState{
+			Status:   types.RecoveryStatus(state.GetStatus()),
 			ExitCode: int(state.GetExitCode()),
 		}
 	}
@@ -597,7 +598,7 @@ func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, st
 }
 
 // UpdateStepRecoveryState updates the recovery state for a specific step.
-func (c *client) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, recoveryStatus rpc.RecoveryStatus, exitCode int) (err error) {
+func (c *client) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, recoveryStatus types.RecoveryStatus, exitCode int) (err error) {
 	retry := c.newBackOff()
 	req := &proto.UpdateStepRecoveryStateRequest{
 		WorkflowId: workflowID,

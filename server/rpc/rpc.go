@@ -29,6 +29,7 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -659,7 +660,7 @@ func (s *RPC) updateAgentLastWork(agent *model.Agent) error {
 
 // InitWorkflowRecovery initializes recovery state for all steps in a workflow
 // and returns the current states.
-func (s *RPC) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*rpc.RecoveryState, error) {
+func (s *RPC) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error) {
 	if !s.recoveryEnabled {
 		return nil, ErrRecoveryDisabled
 	}
@@ -679,10 +680,10 @@ func (s *RPC) InitWorkflowRecovery(ctx context.Context, workflowID string, stepU
 		return nil, err
 	}
 
-	result := make(map[string]*rpc.RecoveryState, len(states))
+	result := make(map[string]*types.RecoveryState, len(states))
 	for _, state := range states {
-		result[state.StepUUID] = &rpc.RecoveryState{
-			Status:   rpc.RecoveryStatus(state.Status),
+		result[state.StepUUID] = &types.RecoveryState{
+			Status:   types.RecoveryStatus(state.Status),
 			ExitCode: state.ExitCode,
 		}
 	}
@@ -690,7 +691,7 @@ func (s *RPC) InitWorkflowRecovery(ctx context.Context, workflowID string, stepU
 }
 
 // UpdateStepRecoveryState updates the recovery state for a specific step.
-func (s *RPC) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status rpc.RecoveryStatus, exitCode int) error {
+func (s *RPC) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status types.RecoveryStatus, exitCode int) error {
 	if !s.recoveryEnabled {
 		return ErrRecoveryDisabled
 	}
@@ -702,9 +703,10 @@ func (s *RPC) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID 
 		ExitCode:   exitCode,
 	}
 
-	if status == rpc.RecoveryStatusRunning {
+	switch status {
+	case types.RecoveryStatusRunning:
 		state.StartedAt = time.Now().Unix()
-	} else if status == rpc.RecoveryStatusSuccess || status == rpc.RecoveryStatusFailed {
+	case types.RecoveryStatusSuccess, types.RecoveryStatusFailed:
 		state.FinishedAt = time.Now().Unix()
 	}
 
