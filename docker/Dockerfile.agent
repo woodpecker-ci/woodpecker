@@ -1,0 +1,55 @@
+ARG TARGET_BASE=scratch
+
+# -------------- Prepare scratch user --------------
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.25 AS prepare
+
+RUN groupadd -g 1000 woodpecker && \
+    useradd -u 1000 -g 1000 woodpecker && \
+    mkdir -p /etc/woodpecker
+
+# -------------- Build --------------
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.25 AS build
+
+RUN groupadd -g 1000 woodpecker && \
+  useradd -u 1000 -g 1000 woodpecker && \
+  mkdir -p /etc/woodpecker
+
+WORKDIR /src
+COPY . .
+ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
+
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    make build-agent
+
+# -------------- Alpine base --------------
+FROM docker.io/alpine:3.23 AS alpine-base
+
+RUN apk add -U --no-cache ca-certificates && \
+    adduser -u 1000 -g 1000 woodpecker -D && \
+    mkdir -p /etc/woodpecker && \
+    chown -R woodpecker:woodpecker /etc/woodpecker
+
+# -------------- Scratch base --------------
+FROM scratch AS scratch-base
+
+COPY --from=prepare /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=prepare /etc/passwd /etc/passwd
+COPY --from=prepare /etc/group /etc/group
+COPY --from=prepare --chown=woodpecker:woodpecker /etc/woodpecker /etc/woodpecker
+
+# -------------- Final image --------------
+FROM ${TARGET_BASE}-base AS final
+
+COPY --from=build /src/dist/woodpecker-agent /bin/
+
+ENV GODEBUG=netdns=go
+# Internal setting do NOT change! Signals that woodpecker is running inside a container
+ENV WOODPECKER_IN_CONTAINER=true
+
+EXPOSE 3000
+
+USER woodpecker
+
+HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
+ENTRYPOINT ["/bin/woodpecker-agent"]
