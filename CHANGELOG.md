@@ -46,6 +46,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#6109](https://github.com/woodpecker-ci/woodpecker/pull/6109)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.54.0 [[#6091](https://github.com/woodpecker-ci/woodpecker/pull/6091)]
 - chore(deps): update dependency axios to v1.13.5 [[#6090](https://github.com/woodpecker-ci/woodpecker/pull/6090)]
 - chore(deps): update docs npm deps non-major [[#6088](https://github.com/woodpecker-ci/woodpecker/pull/6088)]
