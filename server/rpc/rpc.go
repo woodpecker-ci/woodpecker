@@ -29,6 +29,7 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -43,13 +44,17 @@ import (
 // updateAgentLastWorkDelay the delay before the LastWork info should be updated.
 const updateAgentLastWorkDelay = time.Minute
 
+// ErrRecoveryDisabled is returned when recovery is not enabled on the server.
+var ErrRecoveryDisabled = errors.New("pipeline recovery is not enabled on this server")
+
 type RPC struct {
-	queue         queue.Queue
-	pubsub        *pubsub.Publisher
-	logger        logging.Log
-	store         store.Store
-	pipelineTime  *prometheus.GaugeVec
-	pipelineCount *prometheus.CounterVec
+	queue           queue.Queue
+	pubsub          *pubsub.Publisher
+	logger          logging.Log
+	store           store.Store
+	pipelineTime    *prometheus.GaugeVec
+	pipelineCount   *prometheus.CounterVec
+	recoveryEnabled bool
 }
 
 // Next blocks until it provides the next workflow to execute.
@@ -651,4 +656,59 @@ func (s *RPC) updateAgentLastWork(agent *model.Agent) error {
 	}
 
 	return nil
+}
+
+// InitWorkflowRecovery initializes recovery state for all steps in a workflow
+// and returns the current states.
+func (s *RPC) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error) {
+	if !s.recoveryEnabled {
+		return nil, ErrRecoveryDisabled
+	}
+
+	agent, err := s.getAgentFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	expiresAt := time.Now().Add(time.Duration(timeoutSeconds) * time.Second).Unix()
+	if err := s.store.RecoveryStateCreate(workflowID, stepUUIDs, agent.ID, expiresAt); err != nil {
+		return nil, err
+	}
+
+	states, err := s.store.RecoveryStateGetAll(workflowID)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]*types.RecoveryState, len(states))
+	for _, state := range states {
+		result[state.StepUUID] = &types.RecoveryState{
+			Status:   types.RecoveryStatus(state.Status),
+			ExitCode: state.ExitCode,
+		}
+	}
+	return result, nil
+}
+
+// UpdateStepRecoveryState updates the recovery state for a specific step.
+func (s *RPC) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status types.RecoveryStatus, exitCode int) error {
+	if !s.recoveryEnabled {
+		return ErrRecoveryDisabled
+	}
+
+	state := &model.StepRecoveryState{
+		WorkflowID: workflowID,
+		StepUUID:   stepUUID,
+		Status:     int(status),
+		ExitCode:   exitCode,
+	}
+
+	switch status {
+	case types.RecoveryStatusRunning:
+		state.StartedAt = time.Now().Unix()
+	case types.RecoveryStatusSuccess, types.RecoveryStatusFailed:
+		state.FinishedAt = time.Now().Unix()
+	}
+
+	return s.store.RecoveryStateUpdate(state)
 }

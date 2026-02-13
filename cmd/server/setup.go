@@ -208,7 +208,6 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
 	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
 	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
-
 	_labels := c.StringSlice("default-workflow-labels")
 	labels := make(map[string]string, len(_labels))
 	for _, v := range _labels {

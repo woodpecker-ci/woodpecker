@@ -204,6 +204,12 @@ type Store interface {
 	// Org repos
 	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
 
+	// Recovery State
+	RecoveryStateCreate(workflowID string, stepUUIDs []string, agentID, expiresAt int64) error
+	RecoveryStateGetAll(workflowID string) ([]*model.StepRecoveryState, error)
+	RecoveryStateUpdate(state *model.StepRecoveryState) error
+	RecoveryStateCleanExpired() error
+
 	// Store operations
 	Ping() error
 	Close() error
