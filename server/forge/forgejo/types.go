@@ -28,7 +28,8 @@ type pushHook struct {
 
 	Repo *forgejo.Repository `json:"repository"`
 
-	Commits []forgejo.PayloadCommit `json:"commits"`
+	TotalCommits int                     `json:"total_commits"`
+	Commits      []forgejo.PayloadCommit `json:"commits"`
 
 	HeadCommit forgejo.PayloadCommit `json:"head_commit"`
 

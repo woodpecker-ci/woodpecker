@@ -53,7 +53,7 @@ func TestConfig(t *testing.T) {
 	pipeline := &model.Pipeline{
 		RepoID: repo.ID,
 		Status: model.StatusRunning,
-		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144ac"},
 	}
 	assert.NoError(t, store.CreatePipeline(pipeline))
 

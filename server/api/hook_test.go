@@ -56,6 +56,7 @@ func TestHook(t *testing.T) {
 		ID:     123,
 		RepoID: repo.ID,
 		Event:  model.EventPush,
+		Commit: &model.Commit{},
 	}
 
 	repoToken := token.New(token.HookToken)

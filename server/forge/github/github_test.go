@@ -122,11 +122,21 @@ func TestHook(t *testing.T) {
 	// Mock GitHub API for changed files
 	mockedHTTPClient := gh_mock.NewMockedHTTPClient(
 		gh_mock.WithRequestMatch(
-			gh_mock.GetReposCommitsByOwnerByRepoByRef,
+			gh_mock.EndpointPattern{
+				Pattern: "/repos/6543/hello-world/commits/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+				Method:  "GET",
+			},
 			github.RepositoryCommit{
 				Files: []*github.CommitFile{
 					{Filename: github.Ptr("README.md")},
 					{Filename: github.Ptr("main.go")},
+				},
+				Commit: &github.Commit{
+					SHA:     github.Ptr("0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"),
+					Message: github.Ptr("Update the README with new information"),
+					Author: &github.CommitAuthor{
+						Name: github.Ptr("baxterthehacker"),
+					},
 				},
 			},
 		),
@@ -143,6 +153,21 @@ func TestHook(t *testing.T) {
 			[]*github.CommitFile{
 				{Filename: github.Ptr("README.md")},
 				{Filename: github.Ptr("main.go")},
+			},
+		),
+		gh_mock.WithRequestMatch(
+			gh_mock.EndpointPattern{
+				Pattern: "/repos/6543/hello-world/commits/9049f1265b7d61be4a8904a9a27120d2064dab3b",
+				Method:  "GET",
+			},
+			github.RepositoryCommit{
+				Files: []*github.CommitFile{
+					{Filename: github.Ptr("go.mod")},
+				},
+				Commit: &github.Commit{
+					SHA:     github.Ptr("9049f1265b7d61be4a8904a9a27120d2064dab3b"),
+					Message: github.Ptr("Update gomod"),
+				},
 			},
 		),
 	)
@@ -192,12 +217,12 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
-		assert.Equal(t, "366701fde727cb7a9e7f21eb88264f59f6f9b89c", pipeline.Commit)
-		assert.Equal(t, "Fix multiline secrets replacer (#700)\n\n* Fix multiline secrets replacer\r\n\r\n* Add tests", pipeline.Message)
+		assert.Equal(t, "366701fde727cb7a9e7f21eb88264f59f6f9b89c", pipeline.Commit.SHA)
+		assert.Equal(t, "Fix multiline secrets replacer (#700)\n\n* Fix multiline secrets replacer\r\n\r\n* Add tests", pipeline.Commit.Message)
 		assert.Equal(t, "https://github.com/woodpecker-ci/woodpecker/commit/366701fde727cb7a9e7f21eb88264f59f6f9b89c", pipeline.ForgeURL)
 		assert.Equal(t, "6543", pipeline.Author)
-		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
-		assert.Equal(t, "admin@philipp.info", pipeline.Email)
+		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.AuthorAvatar)
+		assert.Equal(t, "admin@philipp.info", pipeline.Commit.Author.Email)
 		assert.Equal(t, []string{"main.go"}, pipeline.ChangedFiles)
 	})
 
@@ -217,12 +242,12 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/pull/1/head", pipeline.Ref)
 		assert.Equal(t, "changes:main", pipeline.Refspec)
-		assert.Equal(t, "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c", pipeline.Commit)
-		assert.Equal(t, "Update the README with new information", pipeline.Message)
-		assert.Equal(t, "Update the README with new information", pipeline.Title)
-		assert.Equal(t, "baxterthehacker", pipeline.Author)
-		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.Avatar)
-		assert.Equal(t, "octocat", pipeline.Sender)
+		assert.Equal(t, "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c", pipeline.Commit.SHA)
+		assert.Equal(t, "Update the README with new information", pipeline.PullRequest.Title)
+		assert.Equal(t, "Update the README with new information", pipeline.Commit.Message)
+		assert.Equal(t, "baxterthehacker", pipeline.Commit.Author.Name)
+		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.AuthorAvatar)
+		assert.Equal(t, "octocat", pipeline.Author)
 		assert.Equal(t, []string{"README.md", "main.go"}, pipeline.ChangedFiles)
 	})
 
@@ -241,11 +266,11 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, model.EventDeploy, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
-		assert.Equal(t, "9049f1265b7d61be4a8904a9a27120d2064dab3b", pipeline.Commit)
-		assert.Equal(t, "", pipeline.Message)
+		assert.Equal(t, "9049f1265b7d61be4a8904a9a27120d2064dab3b", pipeline.Commit.SHA)
+		assert.Equal(t, "Update gomod", pipeline.Commit.Message)
 		assert.Equal(t, "https://api.github.com/repos/baxterthehacker/public-repo/deployments/710692", pipeline.ForgeURL)
 		assert.Equal(t, "baxterthehacker", pipeline.Author)
-		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.Avatar)
+		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.AuthorAvatar)
 	})
 
 	t.Run("convert tag from webhook", func(t *testing.T) {
@@ -263,12 +288,12 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/tags/the-tag-v1", pipeline.Ref)
-		assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit)
-		assert.Equal(t, "Update .woodpecker.yml", pipeline.Message)
+		assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit.SHA)
+		assert.Equal(t, "Update .woodpecker.yml", pipeline.Commit.Message)
 		assert.Equal(t, "https://github.com/6543/test_ci_tmp/commit/67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.ForgeURL)
 		assert.Equal(t, "6543", pipeline.Author)
-		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
-		assert.Equal(t, "6543@obermui.de", pipeline.Email)
+		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.AuthorAvatar)
+		assert.Equal(t, "6543@obermui.de", pipeline.Commit.Author.Email)
 		assert.Empty(t, pipeline.ChangedFiles)
 	})
 }

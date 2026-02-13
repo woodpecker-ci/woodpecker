@@ -55,7 +55,7 @@ func TestPipelines(t *testing.T) {
 	pipeline = model.Pipeline{
 		RepoID: repo.ID,
 		Status: model.StatusSuccess,
-		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144ac"},
 		Event:  model.EventPush,
 		Branch: "some-branch",
 	}
@@ -63,7 +63,7 @@ func TestPipelines(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotZero(t, pipeline.ID)
 	assert.EqualValues(t, 1, pipeline.Number)
-	assert.Equal(t, "85f8c029b902ed9400bc600bac301a0aadb144ac", pipeline.Commit)
+	assert.Equal(t, "85f8c029b902ed9400bc600bac301a0aadb144ac", pipeline.Commit.SHA)
 
 	count, err = store.GetPipelineCount()
 	assert.NoError(t, err)
@@ -106,11 +106,11 @@ func TestPipelines(t *testing.T) {
 	assert.Equal(t, pipeline2.Status, GetPipeline.Status)
 
 	pipeline3 := &model.Pipeline{
-		RepoID:   repo.ID,
-		Status:   model.StatusRunning,
-		Branch:   "main",
+		RepoID: repo.ID,
+		Status: model.StatusRunning,
+		Branch: "main",
+		Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144ac"},
 		Event:    model.EventPull,
-		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144aa",
 		ForgeURL: "example.com/id3",
 	}
 	require.NoError(t, store.CreatePipeline(pipeline3))
