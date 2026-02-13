@@ -5,9 +5,14 @@
       <span class="ml-auto flex gap-2">
         <Badge v-if="agent.no_schedule" :value="$t('disabled')" />
         <Badge
-          v-if="isAdmin === true && agent.org_id !== -1"
+          v-if="isAdmin === true && agent.org_id !== -1 && agent.repo_id === -1"
           :label="$t('admin.settings.agents.org.badge')"
           :value="agent.org_id"
+        />
+        <Badge
+          v-if="isAdmin === true && agent.org_id !== -1"
+          :label="$t('admin.settings.agents.repo.badge')"
+          :value="agent.repo_id"
         />
         <Badge v-if="agent.platform" :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
         <Badge v-if="agent.backend" :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
