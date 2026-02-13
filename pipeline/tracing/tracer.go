@@ -12,30 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package tracing
 
 import (
 	"strconv"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
 
 // Tracer handles process tracing.
 type Tracer interface {
-	Trace(*State) error
+	Trace(*state.State) error
 }
 
 // TraceFunc type is an adapter to allow the use of ordinary
 // functions as a Tracer.
-type TraceFunc func(*State) error
+type TraceFunc func(*state.State) error
 
 // Trace calls f(state).
-func (f TraceFunc) Trace(state *State) error {
+func (f TraceFunc) Trace(state *state.State) error {
 	return f(state)
 }
 
 // DefaultTracer provides a tracer that updates the CI_ environment
 // variables to include the correct timestamp and status.
 // TODO: find either a new home or better name for this.
-var DefaultTracer = TraceFunc(func(state *State) error {
+var DefaultTracer = TraceFunc(func(state *state.State) error {
 	if state.Process.Exited {
 		return nil
 	}
