@@ -233,23 +233,43 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				Str("step", step.Name).
 				Msg("executing")
 
-			processState, err := r.exec(runnerCtx, step)
+			// setup exec func in a way it can be detached if needed
+			// wg will signal once
+			execAndTrace := func(wg *sync.WaitGroup) error {
+				processState, err := r.exec(runnerCtx, step, wg)
 
-			logger.Debug().
-				Str("step", step.Name).
-				Msg("complete")
+				logger.Debug().
+					Str("step", step.Name).
+					Msg("complete")
 
-			// normalize context cancel error
-			if errors.Is(err, context.Canceled) {
-				err = ErrCancel
+				// normalize context cancel error
+				if errors.Is(err, context.Canceled) {
+					err = ErrCancel
+				}
+
+				// Return the error after tracing it.
+				err = r.traceStep(processState, err, step)
+				if err != nil && step.Failure == metadata.FailureIgnore {
+					return nil
+				}
+				return err
 			}
 
-			// Return the error after tracing it.
-			err = r.traceStep(processState, err, step)
-			if err != nil && step.Failure == metadata.FailureIgnore {
-				return nil
+			// Report all errors until the setup happened.
+			// Afterwards errors will be dropped.
+			if step.Detached {
+				var wg sync.WaitGroup
+				wg.Add(1)
+				var setupErr error
+				go func() {
+					setupErr = execAndTrace(&wg)
+				}()
+				wg.Wait()
+				return setupErr
 			}
-			return err
+
+			// run blocking
+			return execAndTrace(nil)
 		})
 	}
 
@@ -262,7 +282,13 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 }
 
 // Executes the step and returns the state and error.
-func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.State, error) {
+func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *sync.WaitGroup) (*backend.State, error) {
+	defer func() {
+		if setupWg != nil {
+			setupWg.Done()
+		}
+	}()
+
 	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil { //nolint:contextcheck
 		return nil, err
 	}
@@ -287,9 +313,11 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step) (*backend.
 		}()
 	}
 
-	// nothing else to do, this is a detached process.
-	if step.Detached {
-		return nil, nil
+	// nothing else to block for detached process.
+	if setupWg != nil {
+		setupWg.Done()
+		// set to nil so the setupWg.Done in defer does not call it a second time
+		setupWg = nil
 	}
 
 	// We wait until all data was logged. (Needed for some backends like local as WaitStep kills the log stream)

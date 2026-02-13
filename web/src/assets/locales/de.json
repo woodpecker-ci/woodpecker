@@ -323,7 +323,11 @@
                 "metadata_exec_title": "Pipeline lokal erneut ausführen",
                 "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst. Das Woodpecker-CLI muss in der zum Server passenden Version lokal installiert sein."
             },
-            "view": "Pipeline anzeigen"
+            "view": "Pipeline anzeigen",
+            "cancel_info": {
+                "superseded_by": "Ersetzt durch #{pipelineId}",
+                "canceled_by_user": "Abgebrochen von {user}"
+            }
         },
         "pull_requests": "Pull-Requests",
         "settings": {

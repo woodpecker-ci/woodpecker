@@ -231,7 +231,7 @@ func DeletePipeline(c *gin.Context) {
 func GetPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	if c.Param("number") == "latest" {
-		GetPipelineLast(c)
+		GetPipelineLastByBranch(c)
 		return
 	}
 
@@ -255,12 +255,12 @@ func GetPipeline(c *gin.Context) {
 	c.JSON(http.StatusOK, pl.ToAPIModel())
 }
 
-func GetPipelineLast(c *gin.Context) {
+func GetPipelineLastByBranch(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	branch := c.DefaultQuery("branch", repo.Branch)
 
-	pl, err := _store.GetPipelineLast(repo, branch)
+	pl, err := _store.GetPipelineLastByBranch(repo, branch)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -493,7 +493,9 @@ func CancelPipeline(c *gin.Context) {
 		return
 	}
 
-	if err := pipeline.Cancel(c, _forge, _store, repo, user, pl); err != nil {
+	if err := pipeline.Cancel(c, _forge, _store, repo, user, pl, &model.CancelInfo{
+		CanceledByUser: user.Login,
+	}); err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.Status(http.StatusNoContent)

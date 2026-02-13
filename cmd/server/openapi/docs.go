@@ -4684,6 +4684,17 @@ const docTemplate = `{
                 }
             }
         },
+        "CancelInfo": {
+            "type": "object",
+            "properties": {
+                "canceled_by_user": {
+                    "type": "string"
+                },
+                "superseded_by": {
+                    "type": "integer"
+                }
+            }
+        },
         "Config": {
             "type": "object",
             "properties": {
@@ -5011,6 +5022,9 @@ const docTemplate = `{
                 },
                 "branch": {
                     "type": "string"
+                },
+                "cancel_info": {
+                    "$ref": "#/definitions/CancelInfo"
                 },
                 "changed_files": {
                     "type": "array",

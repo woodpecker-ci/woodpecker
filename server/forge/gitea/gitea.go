@@ -679,6 +679,8 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
+	forge.Refresh(ctx, c, _store, user)
+
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
@@ -714,6 +716,8 @@ func (c *Gitea) getTagCommitAndMessage(ctx context.Context, repo *model.Repo, ta
 	if err != nil {
 		return nil, "", err
 	}
+
+	forge.Refresh(ctx, c, _store, user)
 
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
