@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-12
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -63,6 +63,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module google.golang.org/grpc to v1.79.0 [[#6117](https://github.com/woodpecker-ci/woodpecker/pull/6117)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.31.0 [[#6110](https://github.com/woodpecker-ci/woodpecker/pull/6110)]
 - chore(deps): update dependency golangci/golangci-lint to v2.9.0 [[#6107](https://github.com/woodpecker-ci/woodpecker/pull/6107)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.9.0 [[#6108](https://github.com/woodpecker-ci/woodpecker/pull/6108)]
