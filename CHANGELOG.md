@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Refactor pipeline engine [[#6073](https://github.com/woodpecker-ci/woodpecker/pull/6073)]
 - Fix/selinux docs [[#6066](https://github.com/woodpecker-ci/woodpecker/pull/6066)]
 - Added cancel info so one can see why it was cancelled [[#6072](https://github.com/woodpecker-ci/woodpecker/pull/6072)]
 - Document required forge methods [[#6049](https://github.com/woodpecker-ci/woodpecker/pull/6049)]
