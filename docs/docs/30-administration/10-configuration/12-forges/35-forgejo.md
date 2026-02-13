@@ -54,6 +54,8 @@ System-wide applications are particularly useful for:
 - Organizations that want centralized control over OAuth applications
 - Preventing user-level application quotas from affecting CI/CD operations
 
+### Local Connections
+
 If you run the Woodpecker CI server on the same host as the Forgejo instance, you might also need to allow local connections in Forgejo. Otherwise webhooks will fail. Add the following lines to your Forgejo configuration (usually at `/etc/forgejo/conf/app.ini`).
 
 ```ini

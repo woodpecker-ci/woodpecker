@@ -54,6 +54,8 @@ System-wide applications are particularly useful for:
 - Organizations that want centralized control over OAuth applications
 - Preventing user-level application quotas from affecting CI/CD operations
 
+### Local Connections
+
 If you run the Woodpecker CI server on the same host as the Gitea instance, you might also need to allow local connections in Gitea, since version `v1.16`. Otherwise webhooks will fail. Add the following lines to your Gitea configuration (usually at `/etc/gitea/conf/app.ini`).
 
 ```ini
