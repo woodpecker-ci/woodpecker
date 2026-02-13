@@ -16,6 +16,7 @@ services:
 
   cache:
     image: redis
+    failure: ignore
     directory: /tmp/
     ports:
       - '6379'

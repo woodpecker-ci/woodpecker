@@ -102,7 +102,21 @@ func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	if err != nil {
 		return nil, redirectURL, err
 	}
-	return convertUser(curr, token), redirectURL, nil
+
+	emails, err := client.ListEmail()
+	if err != nil {
+		return nil, redirectURL, err
+	}
+
+	primaryEmail := ""
+	for _, e := range emails.Values {
+		if e.IsPrimary {
+			primaryEmail = e.Email
+			break
+		}
+	}
+
+	return convertUser(curr, token, primaryEmail), redirectURL, nil
 }
 
 // Auth uses the Bitbucket oauth2 access token and refresh token to authenticate

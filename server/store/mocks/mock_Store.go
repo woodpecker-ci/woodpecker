@@ -1948,74 +1948,6 @@ func (_c *MockStore_GetPipelineCount_Call) RunAndReturn(run func() (int64, error
 	return _c
 }
 
-// GetPipelineLast provides a mock function for the type MockStore
-func (_mock *MockStore) GetPipelineLast(repo *model.Repo, s string) (*model.Pipeline, error) {
-	ret := _mock.Called(repo, s)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetPipelineLast")
-	}
-
-	var r0 *model.Pipeline
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) (*model.Pipeline, error)); ok {
-		return returnFunc(repo, s)
-	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) *model.Pipeline); ok {
-		r0 = returnFunc(repo, s)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Pipeline)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, string) error); ok {
-		r1 = returnFunc(repo, s)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_GetPipelineLast_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPipelineLast'
-type MockStore_GetPipelineLast_Call struct {
-	*mock.Call
-}
-
-// GetPipelineLast is a helper method to define mock.On call
-//   - repo *model.Repo
-//   - s string
-func (_e *MockStore_Expecter) GetPipelineLast(repo interface{}, s interface{}) *MockStore_GetPipelineLast_Call {
-	return &MockStore_GetPipelineLast_Call{Call: _e.mock.On("GetPipelineLast", repo, s)}
-}
-
-func (_c *MockStore_GetPipelineLast_Call) Run(run func(repo *model.Repo, s string)) *MockStore_GetPipelineLast_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Repo
-		if args[0] != nil {
-			arg0 = args[0].(*model.Repo)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_GetPipelineLast_Call) Return(pipeline *model.Pipeline, err error) *MockStore_GetPipelineLast_Call {
-	_c.Call.Return(pipeline, err)
-	return _c
-}
-
-func (_c *MockStore_GetPipelineLast_Call) RunAndReturn(run func(repo *model.Repo, s string) (*model.Pipeline, error)) *MockStore_GetPipelineLast_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // GetPipelineLastBefore provides a mock function for the type MockStore
 func (_mock *MockStore) GetPipelineLastBefore(repo *model.Repo, s string, n int64) (*model.Pipeline, error) {
 	ret := _mock.Called(repo, s, n)
@@ -2086,6 +2018,74 @@ func (_c *MockStore_GetPipelineLastBefore_Call) Return(pipeline *model.Pipeline,
 }
 
 func (_c *MockStore_GetPipelineLastBefore_Call) RunAndReturn(run func(repo *model.Repo, s string, n int64) (*model.Pipeline, error)) *MockStore_GetPipelineLastBefore_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetPipelineLastByBranch provides a mock function for the type MockStore
+func (_mock *MockStore) GetPipelineLastByBranch(repo *model.Repo, s string) (*model.Pipeline, error) {
+	ret := _mock.Called(repo, s)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPipelineLastByBranch")
+	}
+
+	var r0 *model.Pipeline
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) (*model.Pipeline, error)); ok {
+		return returnFunc(repo, s)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, string) *model.Pipeline); ok {
+		r0 = returnFunc(repo, s)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Pipeline)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, string) error); ok {
+		r1 = returnFunc(repo, s)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_GetPipelineLastByBranch_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPipelineLastByBranch'
+type MockStore_GetPipelineLastByBranch_Call struct {
+	*mock.Call
+}
+
+// GetPipelineLastByBranch is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - s string
+func (_e *MockStore_Expecter) GetPipelineLastByBranch(repo interface{}, s interface{}) *MockStore_GetPipelineLastByBranch_Call {
+	return &MockStore_GetPipelineLastByBranch_Call{Call: _e.mock.On("GetPipelineLastByBranch", repo, s)}
+}
+
+func (_c *MockStore_GetPipelineLastByBranch_Call) Run(run func(repo *model.Repo, s string)) *MockStore_GetPipelineLastByBranch_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_GetPipelineLastByBranch_Call) Return(pipeline *model.Pipeline, err error) *MockStore_GetPipelineLastByBranch_Call {
+	_c.Call.Return(pipeline, err)
+	return _c
+}
+
+func (_c *MockStore_GetPipelineLastByBranch_Call) RunAndReturn(run func(repo *model.Repo, s string) (*model.Pipeline, error)) *MockStore_GetPipelineLastByBranch_Call {
 	_c.Call.Return(run)
 	return _c
 }

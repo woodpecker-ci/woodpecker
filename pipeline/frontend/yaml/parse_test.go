@@ -53,6 +53,11 @@ func TestParse(t *testing.T) {
 		assert.False(t, out.SkipClone)
 	})
 
+	t.Run("Should fail on invalid yaml", func(t *testing.T) {
+		_, err := ParseString("notvalid")
+		assert.Error(t, err)
+	})
+
 	t.Run("Should handle simple yaml anchors", func(t *testing.T) {
 		out, err := ParseString(simpleYamlAnchors)
 		assert.NoError(t, err)
