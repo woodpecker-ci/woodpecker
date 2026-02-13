@@ -63,6 +63,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#6116](https://github.com/woodpecker-ci/woodpecker/pull/6116)]
 - fix(deps): update module google.golang.org/grpc to v1.79.0 [[#6117](https://github.com/woodpecker-ci/woodpecker/pull/6117)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.31.0 [[#6110](https://github.com/woodpecker-ci/woodpecker/pull/6110)]
 - chore(deps): update dependency golangci/golangci-lint to v2.9.0 [[#6107](https://github.com/woodpecker-ci/woodpecker/pull/6107)]
