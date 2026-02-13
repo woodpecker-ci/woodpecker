@@ -103,7 +103,7 @@ func (s StatusValue) Validate() error {
 	}
 }
 
-// Running returns true if the process state is pending or running.
+// Merge merges two status values.
 func (s StatusValue) Merge(t StatusValue) StatusValue {
 	// TODO optimize this
 	return statusPriorityOrder[min(slices.Index(statusPriorityOrder, s), slices.Index(statusPriorityOrder, t))]
