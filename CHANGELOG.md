@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @myselfghost, @qwerty287, @stardothosting
+@6543, @CrimsonFez, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @mehrdadbn9, @myselfghost, @qwerty287, @stardothosting
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Fix/selinux docs [[#6066](https://github.com/woodpecker-ci/woodpecker/pull/6066)]
 - Added cancel info so one can see why it was cancelled [[#6072](https://github.com/woodpecker-ci/woodpecker/pull/6072)]
 - Document required forge methods [[#6049](https://github.com/woodpecker-ci/woodpecker/pull/6049)]
 - Dynamic log following [[#6036](https://github.com/woodpecker-ci/woodpecker/pull/6036)]
