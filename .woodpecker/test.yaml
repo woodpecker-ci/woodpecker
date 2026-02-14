@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'docker.io/golang:1.25'
+  - &golang_image 'docker.io/golang:1.26'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yaml'
