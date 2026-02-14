@@ -4,7 +4,7 @@ when:
 
 steps:
   - name: links
-    image: docker.io/lycheeverse/lychee:0.22.0
+    image: docker.io/lycheeverse/lychee:0.23.0
     failure: ignore
     depends_on: []
     commands:
