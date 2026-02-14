@@ -65,6 +65,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update postgres docker tag to v18.2 [[#6124](https://github.com/woodpecker-ci/woodpecker/pull/6124)]
 - chore(deps): update docker.io/golang docker tag to v1.26 [[#6121](https://github.com/woodpecker-ci/woodpecker/pull/6121)]
 - chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.23.0 [[#6122](https://github.com/woodpecker-ci/woodpecker/pull/6122)]
 - chore(deps): update web npm deps non-major [[#6116](https://github.com/woodpecker-ci/woodpecker/pull/6116)]
