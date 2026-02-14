@@ -65,6 +65,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/golang docker tag to v1.26 [[#6121](https://github.com/woodpecker-ci/woodpecker/pull/6121)]
 - chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.23.0 [[#6122](https://github.com/woodpecker-ci/woodpecker/pull/6122)]
 - chore(deps): update web npm deps non-major [[#6116](https://github.com/woodpecker-ci/woodpecker/pull/6116)]
 - fix(deps): update module google.golang.org/grpc to v1.79.0 [[#6117](https://github.com/woodpecker-ci/woodpecker/pull/6117)]
