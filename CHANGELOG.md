@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-13
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -65,6 +65,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.23.0 [[#6122](https://github.com/woodpecker-ci/woodpecker/pull/6122)]
 - chore(deps): update web npm deps non-major [[#6116](https://github.com/woodpecker-ci/woodpecker/pull/6116)]
 - fix(deps): update module google.golang.org/grpc to v1.79.0 [[#6117](https://github.com/woodpecker-ci/woodpecker/pull/6117)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.31.0 [[#6110](https://github.com/woodpecker-ci/woodpecker/pull/6110)]
