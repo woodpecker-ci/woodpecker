@@ -134,6 +134,9 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 	q.Lock()
 	defer q.Unlock()
 
+	// it's an external error so we wrap it
+	err = NewErrExternal(err)
+
 	var errs []error
 	// we first process the tasks itself
 	for _, id := range ids {
@@ -166,7 +169,10 @@ func (q *fifo) Wait(ctx context.Context, taskID string) error {
 		select {
 		case <-ctx.Done():
 		case <-state.done:
-			return state.error
+			// only return queue errors and no workflow errors
+			if !errors.Is(state.error, new(ErrExternal)) {
+				return state.error
+			}
 		}
 	}
 	return nil

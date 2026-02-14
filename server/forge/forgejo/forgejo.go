@@ -652,6 +652,8 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		return nil, err
 	}
 
+	forge.Refresh(ctx, c, _store, user)
+
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
@@ -688,6 +690,8 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 	if err != nil {
 		return "", err
 	}
+
+	forge.Refresh(ctx, c, _store, user)
 
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
