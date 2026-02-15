@@ -120,7 +120,10 @@ func GetBadge(c *gin.Context) {
 				if wf.Name == workflowName {
 					stepName := c.Query("step")
 					if len(stepName) == 0 {
-						if status == nil || wf.Failing() {
+						if status != nil {
+							merged := status.Merge(wf.State)
+							status = &merged
+						} else {
 							status = &wf.State
 						}
 						continue
@@ -129,9 +132,12 @@ func GetBadge(c *gin.Context) {
 					name = workflowName + ": " + stepName
 					for _, s := range wf.Children {
 						if s.Name == stepName {
-							if status == nil || s.Failing() {
-								status = &s.State
-							}
+							if status != nil {
+							merged := status.Merge(s.State)
+							status = &merged
+						} else {
+							status = &s.State
+						}
 						}
 					}
 				}

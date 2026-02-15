@@ -63,9 +63,7 @@ func PipelineStatus(workflows []*Workflow) StatusValue {
 	status := StatusSuccess
 
 	for _, p := range workflows {
-		if p.Failing() {
-			status = p.State
-		}
+		status = status.Merge(p.State)
 	}
 
 	return status
@@ -76,10 +74,7 @@ func WorkflowStatus(steps []*Step) StatusValue {
 	status := StatusSuccess
 
 	for _, p := range steps {
-		if p.Failing() {
-			status = p.State
-			break
-		}
+		status = status.Merge(p.State)
 	}
 
 	return status
