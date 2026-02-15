@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-14
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -66,6 +66,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6126](https://github.com/woodpecker-ci/woodpecker/pull/6126)]
 - chore(deps): update golang-lang [[#6123](https://github.com/woodpecker-ci/woodpecker/pull/6123)]
 - chore(deps): update postgres docker tag to v18.2 [[#6124](https://github.com/woodpecker-ci/woodpecker/pull/6124)]
 - chore(deps): update docker.io/golang docker tag to v1.26 [[#6121](https://github.com/woodpecker-ci/woodpecker/pull/6121)]
