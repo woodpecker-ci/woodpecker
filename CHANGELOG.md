@@ -48,6 +48,7 @@
 
 ### 📚 Documentation
 
+- Add deprecation policy [[#6068](https://github.com/woodpecker-ci/woodpecker/pull/6068)]
 - chore(deps): lock file maintenance [[#6128](https://github.com/woodpecker-ci/woodpecker/pull/6128)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.55.0 [[#6125](https://github.com/woodpecker-ci/woodpecker/pull/6125)]
 - document how to ignore failure on services [[#6106](https://github.com/woodpecker-ci/woodpecker/pull/6106)]
