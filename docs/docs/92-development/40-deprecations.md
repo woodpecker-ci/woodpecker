@@ -35,9 +35,9 @@ New syntax: `environment: { TOKEN: { from_secret: token } }`
 
 ### Implementation Checklist
 
-When deprecating pipeline config syntax:
+When deprecating pipeline configuration syntax, ensure the following:
 
 - [ ] Add linter warning in `/pipeline/frontend/yaml/linter/`
-- [ ] Change json schema in `/pipeline/frontend/yaml/linter/schema`
+- [ ] Update JSON schema in `/pipeline/frontend/yaml/linter/schema`
 - [ ] Add test cases for deprecated syntax
-- [ ] Update documentation with new syntax
+- [ ] Update documentation to reflect the new syntax
