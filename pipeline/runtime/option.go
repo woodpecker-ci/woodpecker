@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package runtime
 
 import (
 	"context"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 )
 
 // Option configures a runtime option.
@@ -31,14 +34,14 @@ func WithBackend(backend backend.Backend) Option {
 }
 
 // WithLogger returns an option configured with a runtime logger.
-func WithLogger(logger Logger) Option {
+func WithLogger(logger logging.Logger) Option {
 	return func(r *Runtime) {
 		r.logger = logger
 	}
 }
 
 // WithTracer returns an option configured with a runtime tracer.
-func WithTracer(tracer Tracer) Option {
+func WithTracer(tracer tracing.Tracer) Option {
 	return func(r *Runtime) {
 		r.tracer = tracer
 	}
@@ -64,7 +67,7 @@ func WithTaskUUID(uuid string) Option {
 }
 
 // WithRecoveryManager returns an option configured with a recovery manager.
-func WithRecoveryManager(rm *RecoveryManager) Option {
+func WithRecoveryManager(rm *pipeline.RecoveryManager) Option {
 	return func(r *Runtime) {
 		r.recoveryManager = rm
 	}
