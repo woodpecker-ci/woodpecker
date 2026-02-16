@@ -12,25 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package logging
 
 import (
-	"testing"
+	"io"
 
-	"github.com/stretchr/testify/assert"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
-func TestExitError(t *testing.T) {
-	err := ExitError{
-		UUID: "14534321",
-		Code: 255,
-	}
-	assert.Equal(t, "uuid=14534321: exit code 255", err.Error())
-}
-
-func TestOomError(t *testing.T) {
-	err := OomError{
-		UUID: "14534321",
-	}
-	assert.Equal(t, "uuid=14534321: received oom kill", err.Error())
-}
+// Logger handles the process logging.
+type Logger func(*backend.Step, io.ReadCloser) error
