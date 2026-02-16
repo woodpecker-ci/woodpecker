@@ -28,10 +28,10 @@ Pipeline configuration (YAML syntax) changes follow a strict deprecation process
 Old syntax: `secrets: [token]`
 New syntax: `environment: { TOKEN: { from_secret: token } }`
 
-- v2.5.0: Add deprecation warning in linter, both work
-- v2.6-2.9: Warning continues, both still work
-- v3.0.0: Error in linter, old syntax fails (BREAKING)
-- v3.1.0: Remove old code paths, simplify parser
+- **v2.5.0:** Deprecation warning added in linter; both syntaxes work
+- **v2.6-2.9:** Warning persists; both syntaxes remain functional
+- **v3.0.0:** Linter error; old syntax fails (breaking change)
+- **v3.1.0:** Deprecated code paths removed; parser simplified
 
 ### Implementation Checklist
 
