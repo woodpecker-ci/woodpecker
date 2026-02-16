@@ -2,26 +2,26 @@
 
 ## Pipeline Configuration Changes
 
-Pipeline configuration (YAML syntax) changes follow a strict deprecation process to give users time to migrate.
+Pipeline configuration (YAML syntax) changes follow a strict deprecation process to ensure users have sufficient time to migrate.
 
 ### Process Timeline
 
 1. **Minor Version N.x - Add Deprecation Warning**
-   - Linter shows warning (not error)
-   - Old syntax still works
-   - Documentation updated to show new syntax
-   - Warning message explains what to change
+   - Linter shows a warning (not an error)
+   - Old syntax remains functional
+   - Documentation is updated to reflect the new syntax
+   - Warning message includes guidance on required changes
 
 2. **Major Version (N+1).0 - Warning Becomes Error**
-   - Linter shows error (pipeline fails)
-   - Old syntax no longer works
-   - Breaking change documented in migration guide
-   - Users MUST update their configs
+   - Linter issues an error (pipeline fails)
+   - Old syntax is no longer supported
+   - Breaking change is documented in the migration guide
+   - Users **must** update their configurations
 
 3. **Minor Version (N+1).x - Code Cleanup**
-   - Remove deprecated code paths
-   - Simplify/refactor implementation
-   - Parser no longer recognizes old syntax
+   - Deprecated code paths are removed
+   - Implementation is simplified/refactored
+   - Parser no longer recognizes the old syntax
 
 ### Example
 
