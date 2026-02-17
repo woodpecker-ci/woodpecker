@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-16
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -68,6 +68,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.35.0 [[#6129](https://github.com/woodpecker-ci/woodpecker/pull/6129)]
 - chore(deps): update web npm deps non-major [[#6127](https://github.com/woodpecker-ci/woodpecker/pull/6127)]
 - fix(deps): update golang-packages [[#6126](https://github.com/woodpecker-ci/woodpecker/pull/6126)]
 - chore(deps): update golang-lang [[#6123](https://github.com/woodpecker-ci/woodpecker/pull/6123)]
