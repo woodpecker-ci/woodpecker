@@ -52,15 +52,57 @@ func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
 }
 
 func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow) error {
-	for i := range workflows {
+	workflowMap := make(map[string]int64, len(workflows))
+
+	for _, wf := range workflows {
 		// only Insert on single object ref set auto created ID back to object
-		if err := s.stepCreate(sess, workflows[i].Children); err != nil {
+		if err := s.stepCreate(sess, wf.Children); err != nil {
 			return err
 		}
-		if _, err := sess.Insert(workflows[i]); err != nil {
+		if _, err := sess.Insert(wf); err != nil {
 			return err
+		}
+
+		workflowMap[wf.Name] = wf.ID
+	}
+
+	for _, wf := range workflows {
+		if len(wf.DependsOnNames) > 0 {
+			ids := make([]int64, 0, len(wf.DependsOnNames))
+			for _, name := range wf.DependsOnNames {
+				if id, ok := workflowMap[name]; ok {
+					ids = append(ids, id)
+				}
+			}
+			wf.DependsOn = ids
+
+			if _, err := sess.ID(wf.ID).Cols("depends_on").Update(wf); err != nil {
+				return err
+			}
+		}
+
+		stepMap := make(map[string]int64, len(wf.Children))
+		for _, child := range wf.Children {
+			stepMap[child.Name] = child.ID
+		}
+
+		for _, step := range wf.Children {
+			if len(step.DependsOnNames) > 0 {
+				ids := make([]int64, 0, len(step.DependsOnNames))
+				for _, name := range step.DependsOnNames {
+					if id, ok := stepMap[name]; ok {
+						ids = append(ids, id)
+					}
+				}
+				step.DependsOn = ids
+
+				if _, err := sess.ID(step.ID).Cols("depends_on").Update(step); err != nil {
+					return err
+				}
+			}
 		}
 	}
+
 	return nil
 }
 

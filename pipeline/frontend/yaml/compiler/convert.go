@@ -177,6 +177,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		Networks:       networks,
 		DNS:            container.DNS,
 		DNSSearch:      container.DNSSearch,
+		DependsOn:      container.DependsOn,
 		AuthConfig:     authConfig,
 		OnSuccess:      onSuccess,
 		OnFailure:      onFailure,

@@ -71,15 +71,17 @@ func TestWorkflowGetTree(t *testing.T) {
 				PipelineID: 1,
 				PID:        2,
 				PPID:       1,
+				Name:       "test",
 				State:      "success",
 			},
 			{
-				UUID:       "2bf387f7-2913-4907-814c-c9ada88707c0",
-				PipelineID: 1,
-				PID:        3,
-				PPID:       1,
-				Name:       "build",
-				State:      "success",
+				UUID:           "2bf387f7-2913-4907-814c-c9ada88707c0",
+				PipelineID:     1,
+				PID:            3,
+				PPID:           1,
+				Name:           "build",
+				DependsOnNames: []string{"test"},
+				State:          "success",
 			},
 		},
 	}
@@ -93,6 +95,7 @@ func TestWorkflowGetTree(t *testing.T) {
 	assert.Len(t, workflowGet.Children, 2)
 	assert.Equal(t, 2, workflowGet.Children[0].PID)
 	assert.Equal(t, 3, workflowGet.Children[1].PID)
+	assert.EqualValues(t, []int64{workflowGet.Children[0].ID}, workflowGet.Children[1].DependsOn)
 }
 
 func TestWorkflowUpdate(t *testing.T) {

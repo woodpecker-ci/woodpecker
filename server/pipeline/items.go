@@ -180,14 +180,15 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 			for _, step := range stage.Steps {
 				pidSequence++
 				step := &model.Step{
-					Name:       step.Name,
-					UUID:       step.UUID,
-					PipelineID: pipeline.ID,
-					PID:        pidSequence,
-					PPID:       item.Workflow.PID,
-					State:      model.StatusPending,
-					Failure:    step.Failure,
-					Type:       model.StepType(step.Type),
+					Name:           step.Name,
+					UUID:           step.UUID,
+					PipelineID:     pipeline.ID,
+					PID:            pidSequence,
+					PPID:           item.Workflow.PID,
+					State:          model.StatusPending,
+					Failure:        step.Failure,
+					Type:           model.StepType(step.Type),
+					DependsOnNames: step.DependsOn,
 				}
 				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped
@@ -202,6 +203,7 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 			item.Workflow.State = model.StatusBlocked
 		}
 		item.Workflow.PipelineID = pipeline.ID
+		item.Workflow.DependsOnNames = item.DependsOn
 		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
 	}
 

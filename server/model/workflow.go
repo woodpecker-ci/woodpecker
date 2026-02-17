@@ -17,19 +17,21 @@ package model
 
 // Workflow represents a workflow in the pipeline.
 type Workflow struct {
-	ID         int64             `json:"id"                   xorm:"pk autoincr 'id'"`
-	PipelineID int64             `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
-	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'pid'"`
-	Name       string            `json:"name"                 xorm:"name"`
-	State      StatusValue       `json:"state"                xorm:"state"`
-	Error      string            `json:"error,omitempty"      xorm:"TEXT 'error'"`
-	Started    int64             `json:"started,omitempty"    xorm:"started"`
-	Finished   int64             `json:"finished,omitempty"   xorm:"finished"`
-	AgentID    int64             `json:"agent_id,omitempty"   xorm:"agent_id"`
-	Platform   string            `json:"platform,omitempty"   xorm:"platform"`
-	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'environ'"`
-	AxisID     int               `json:"-"                    xorm:"axis_id"`
-	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
+	ID             int64             `json:"id"                   xorm:"pk autoincr 'id'"`
+	PipelineID     int64             `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
+	PID            int               `json:"pid"                  xorm:"UNIQUE(s) 'pid'"`
+	Name           string            `json:"name"                 xorm:"name"`
+	State          StatusValue       `json:"state"                xorm:"state"`
+	Error          string            `json:"error,omitempty"      xorm:"TEXT 'error'"`
+	Started        int64             `json:"started,omitempty"    xorm:"started"`
+	Finished       int64             `json:"finished,omitempty"   xorm:"finished"`
+	AgentID        int64             `json:"agent_id,omitempty"   xorm:"agent_id"`
+	Platform       string            `json:"platform,omitempty"   xorm:"platform"`
+	Environ        map[string]string `json:"environ,omitempty"    xorm:"json 'environ'"`
+	DependsOn      []int64           `json:"depends_on,omitempty" xorm:"json 'depends_on'"`
+	DependsOnNames []string          `json:"-"                    xorm:"-"`
+	AxisID         int               `json:"-"                    xorm:"axis_id"`
+	Children       []*Step           `json:"children,omitempty"   xorm:"-"`
 }
 
 // TableName return database table name for xorm.

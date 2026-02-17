@@ -26,19 +26,21 @@ const (
 
 // Step represents a process in the pipeline.
 type Step struct {
-	ID         int64       `json:"id"                   xorm:"pk autoincr 'id'"`
-	UUID       string      `json:"uuid"                 xorm:"INDEX 'uuid'"`
-	PipelineID int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
-	PID        int         `json:"pid"                  xorm:"UNIQUE(s) 'pid'"`
-	PPID       int         `json:"ppid"                 xorm:"ppid"`
-	Name       string      `json:"name"                 xorm:"name"`
-	State      StatusValue `json:"state"                xorm:"state"`
-	Error      string      `json:"error,omitempty"      xorm:"TEXT 'error'"`
-	Failure    string      `json:"-"                    xorm:"failure"`
-	ExitCode   int         `json:"exit_code"            xorm:"exit_code"`
-	Started    int64       `json:"started,omitempty"    xorm:"started"`
-	Finished   int64       `json:"finished,omitempty"   xorm:"finished"`
-	Type       StepType    `json:"type,omitempty"       xorm:"type"`
+	ID             int64       `json:"id"                   xorm:"pk autoincr 'id'"`
+	UUID           string      `json:"uuid"                 xorm:"INDEX 'uuid'"`
+	PipelineID     int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
+	PID            int         `json:"pid"                  xorm:"UNIQUE(s) 'pid'"`
+	PPID           int         `json:"ppid"                 xorm:"ppid"`
+	Name           string      `json:"name"                 xorm:"name"`
+	State          StatusValue `json:"state"                xorm:"state"`
+	Error          string      `json:"error,omitempty"      xorm:"TEXT 'error'"`
+	Failure        string      `json:"-"                    xorm:"failure"`
+	ExitCode       int         `json:"exit_code"            xorm:"exit_code"`
+	Started        int64       `json:"started,omitempty"    xorm:"started"`
+	Finished       int64       `json:"finished,omitempty"   xorm:"finished"`
+	Type           StepType    `json:"type,omitempty"       xorm:"type"`
+	DependsOn      []int64     `json:"depends_on,omitempty" xorm:"json 'depends_on'"`
+	DependsOnNames []string    `json:"-"                    xorm:"-"`
 } //	@name	Step
 
 // TableName return database table name for xorm.
