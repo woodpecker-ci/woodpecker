@@ -858,6 +858,13 @@ The default time for a repo in minutes before a pipeline gets killed
 
 The maximum time in minutes you can set in the repo settings before a pipeline gets killed
 
+### LOG_LEVEL_PIPELINE_SKIPS
+
+- Name: `WOODPECKER_LOG_LEVEL_PIPELINE_SKIPS`
+- Default: `debug`
+
+The log level for pipeline lifecycle events (skip-ci, filtered, blocked). Possible values are `trace`, `debug`, `info`, `warn` and `error`
+
 ---
 
 ### SESSION_EXPIRES
