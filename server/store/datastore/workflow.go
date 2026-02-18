@@ -52,7 +52,8 @@ func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
 }
 
 func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow) error {
-	workflowMap := make(map[string]int64, len(workflows))
+	// matrix workflows will have same name, so will have multiple IDs
+	workflowMap := make(map[string][]int64, len(workflows))
 
 	for _, wf := range workflows {
 		// only Insert on single object ref set auto created ID back to object
@@ -63,16 +64,14 @@ func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow
 			return err
 		}
 
-		workflowMap[wf.Name] = wf.ID
+		workflowMap[wf.Name] = append(workflowMap[wf.Name], wf.ID)
 	}
 
 	for _, wf := range workflows {
 		if len(wf.DependsOnNames) > 0 {
 			ids := make([]int64, 0, len(wf.DependsOnNames))
 			for _, name := range wf.DependsOnNames {
-				if id, ok := workflowMap[name]; ok {
-					ids = append(ids, id)
-				}
+				ids = append(ids, workflowMap[name]...)
 			}
 			wf.DependsOn = ids
 

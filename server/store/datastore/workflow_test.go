@@ -98,6 +98,96 @@ func TestWorkflowGetTree(t *testing.T) {
 	assert.EqualValues(t, []int64{workflowGet.Children[0].ID}, workflowGet.Children[1].DependsOn)
 }
 
+func TestWorkflowGetTreeMatrix(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline), new(model.Workflow))
+	defer closer()
+
+	buildAxis1 := &model.Workflow{
+		PipelineID: 1,
+		PID:        1,
+		Name:       "build",
+		AxisID:     1,
+		Children: []*model.Step{
+			{
+				UUID:       "aaaaaaaa-0001-0001-0001-000000000001",
+				PipelineID: 1,
+				PID:        2,
+				PPID:       1,
+				Name:       "compile-linux-amd64",
+				State:      "pending",
+			},
+			{
+				UUID:           "aaaaaaaa-0001-0001-0001-000000000002",
+				PipelineID:     1,
+				PID:            3,
+				PPID:           1,
+				Name:           "strip-binary",
+				DependsOnNames: []string{"compile-linux-amd64"},
+				State:          "pending",
+			},
+		},
+	}
+	buildAxis2 := &model.Workflow{
+		PipelineID: 1,
+		PID:        4,
+		Name:       "build",
+		AxisID:     2,
+		Children: []*model.Step{
+			{
+				UUID:       "bbbbbbbb-0002-0002-0002-000000000001",
+				PipelineID: 1,
+				PID:        5,
+				PPID:       4,
+				Name:       "compile-linux-arm64",
+				State:      "pending",
+			},
+			{
+				UUID:           "bbbbbbbb-0002-0002-0002-000000000002",
+				PipelineID:     1,
+				PID:            6,
+				PPID:           4,
+				Name:           "strip-binary",
+				DependsOnNames: []string{"compile-linux-arm64"},
+				State:          "pending",
+			},
+		},
+	}
+	deploy := &model.Workflow{
+		PipelineID:     1,
+		PID:            7,
+		Name:           "deploy",
+		DependsOnNames: []string{"build"},
+		Children: []*model.Step{
+			{
+				UUID:       "cccccccc-0003-0003-0003-000000000001",
+				PipelineID: 1,
+				PID:        8,
+				PPID:       7,
+				Name:       "deploy",
+				State:      "pending",
+			},
+		},
+	}
+
+	assert.NoError(t, store.WorkflowsCreate([]*model.Workflow{buildAxis1, buildAxis2, deploy}))
+
+	workflowsGet, err := store.WorkflowGetTree(&model.Pipeline{ID: 1})
+	assert.NoError(t, err)
+	assert.Len(t, workflowsGet, 3)
+
+	// deploy should depend on both build axis IDs
+	var deployWF *model.Workflow
+	for _, wf := range workflowsGet {
+		if wf.Name == "deploy" {
+			deployWF = wf
+		}
+	}
+	assert.NotNil(t, deployWF)
+	assert.Len(t, deployWF.DependsOn, 2, "deploy should depend on both matrix axes of build")
+	assert.Contains(t, deployWF.DependsOn, buildAxis1.ID)
+	assert.Contains(t, deployWF.DependsOn, buildAxis2.ID)
+}
+
 func TestWorkflowUpdate(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline), new(model.Workflow))
 	defer closer()
