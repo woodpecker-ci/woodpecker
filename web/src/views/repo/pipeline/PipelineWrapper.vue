@@ -78,6 +78,21 @@
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
+        <div v-if="pipeline.status === 'killed' && pipeline.cancel_info" class="flex shrink-0 items-center gap-2">
+          <Icon name="status-killed" />
+          <span class="truncate">
+            <router-link
+              v-if="pipeline.cancel_info.superseded_by"
+              :to="{ name: 'repo-pipeline', params: { pipelineId: pipeline.cancel_info.superseded_by } }"
+              class="hover:underline"
+            >
+              {{ $t('repo.pipeline.cancel_info.superseded_by', { pipelineId: pipeline.cancel_info.superseded_by }) }}
+            </router-link>
+            <template v-else-if="pipeline.cancel_info.canceled_by_user">
+              {{ $t('repo.pipeline.cancel_info.canceled_by_user', { user: pipeline.cancel_info.canceled_by_user }) }}
+            </template>
+          </span>
+        </div>
       </div>
     </template>
 

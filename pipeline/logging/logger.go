@@ -1,4 +1,4 @@
-// Copyright 2024 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package output
+package logging
 
 import (
-	"errors"
-	"strings"
+	"io"
+
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
-var ErrOutputOptionRequired = errors.New("output option required")
-
-func ParseOutputOptions(out string) (string, []string) {
-	out, opt, found := strings.Cut(out, "=")
-
-	if !found {
-		return out, nil
-	}
-
-	var optList []string
-
-	if opt != "" {
-		optList = strings.Split(opt, ",")
-	}
-
-	return out, optList
-}
+// Logger handles the process logging.
+type Logger func(*backend.Step, io.ReadCloser) error

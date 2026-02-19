@@ -7,9 +7,9 @@ when:
       - .woodpecker/binaries.yaml
 
 variables:
-  - &golang_image 'docker.io/golang:1.25'
+  - &golang_image 'docker.io/golang:1.26'
   - &node_image 'docker.io/node:24-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.25.x'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.26.x'
 
 # cspell:words bindata netgo
 

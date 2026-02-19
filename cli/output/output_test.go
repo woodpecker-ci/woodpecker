@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package output
 
 import (
 	"testing"
@@ -20,17 +20,37 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExitError(t *testing.T) {
-	err := ExitError{
-		UUID: "14534321",
-		Code: 255,
-	}
-	assert.Equal(t, "uuid=14534321: exit code 255", err.Error())
-}
+func TestParseOutputOptions(t *testing.T) {
+	t.Parallel()
 
-func TestOomError(t *testing.T) {
-	err := OomError{
-		UUID: "14534321",
+	testCases := []struct {
+		in   string
+		out  string
+		opts []string
+	}{
+		{
+			in:  "output",
+			out: "output",
+		},
+		{
+			in:   "output=a",
+			out:  "output",
+			opts: []string{"a"},
+		},
+		{
+			in:  "output=",
+			out: "output",
+		},
+		{
+			in:   "output=a,b",
+			out:  "output",
+			opts: []string{"a", "b"},
+		},
 	}
-	assert.Equal(t, "uuid=14534321: received oom kill", err.Error())
+
+	for _, tc := range testCases {
+		out, opts := ParseOutputOptions(tc.in)
+		assert.Equal(t, tc.out, out)
+		assert.Equal(t, tc.opts, opts)
+	}
 }
