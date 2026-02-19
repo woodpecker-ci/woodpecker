@@ -5017,7 +5017,7 @@ const docTemplate = `{
                 "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.PipelineError"
+                        "$ref": "#/definitions/errors.PipelineError"
                     }
                 },
                 "event": {
@@ -5745,6 +5745,52 @@ const docTemplate = `{
                 "EventManual"
             ]
         },
+        "errors.PipelineError": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "is_warning": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/errors.PipelineErrorType"
+                }
+            }
+        },
+        "errors.PipelineErrorType": {
+            "type": "string",
+            "enum": [
+                "linter",
+                "deprecation",
+                "compiler",
+                "generic",
+                "bad_habit"
+            ],
+            "x-enum-comments": {
+                "PipelineErrorTypeBadHabit": "some bad-habit error",
+                "PipelineErrorTypeCompiler": "some error with the config semantics",
+                "PipelineErrorTypeDeprecation": "using some deprecated feature",
+                "PipelineErrorTypeGeneric": "some generic error",
+                "PipelineErrorTypeLinter": "some error with the config syntax"
+            },
+            "x-enum-descriptions": [
+                "some error with the config syntax",
+                "using some deprecated feature",
+                "some error with the config semantics",
+                "some generic error",
+                "some bad-habit error"
+            ],
+            "x-enum-varnames": [
+                "PipelineErrorTypeLinter",
+                "PipelineErrorTypeDeprecation",
+                "PipelineErrorTypeCompiler",
+                "PipelineErrorTypeGeneric",
+                "PipelineErrorTypeBadHabit"
+            ]
+        },
         "metadata.Author": {
             "type": "object",
             "properties": {
@@ -6165,52 +6211,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/StatusValue"
                 }
             }
-        },
-        "types.PipelineError": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "is_warning": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/types.PipelineErrorType"
-                }
-            }
-        },
-        "types.PipelineErrorType": {
-            "type": "string",
-            "enum": [
-                "linter",
-                "deprecation",
-                "compiler",
-                "generic",
-                "bad_habit"
-            ],
-            "x-enum-comments": {
-                "PipelineErrorTypeBadHabit": "some bad-habit error",
-                "PipelineErrorTypeCompiler": "some error with the config semantics",
-                "PipelineErrorTypeDeprecation": "using some deprecated feature",
-                "PipelineErrorTypeGeneric": "some generic error",
-                "PipelineErrorTypeLinter": "some error with the config syntax"
-            },
-            "x-enum-descriptions": [
-                "some error with the config syntax",
-                "using some deprecated feature",
-                "some error with the config semantics",
-                "some generic error",
-                "some bad-habit error"
-            ],
-            "x-enum-varnames": [
-                "PipelineErrorTypeLinter",
-                "PipelineErrorTypeDeprecation",
-                "PipelineErrorTypeCompiler",
-                "PipelineErrorTypeGeneric",
-                "PipelineErrorTypeBadHabit"
-            ]
         }
     }
 }`

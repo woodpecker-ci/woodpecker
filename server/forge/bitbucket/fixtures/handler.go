@@ -230,162 +230,162 @@ const tokenNotFoundPayload = `
 
 const repoPayload = `
 {
-  "full_name": "test_name/repo_name",
-  "scm": "git",
-  "is_private": true
+	"full_name": "test_name/repo_name",
+	"scm": "git",
+	"is_private": true
 }
 `
 
 const permissionRepoPayload = `
 {
-  "full_name": "test_name/%s",
-  "scm": "git",
-  "is_private": true
+	"full_name": "test_name/%s",
+	"scm": "git",
+	"is_private": true
 }
 `
 
 const repoPayloadFromHook = `
 {
-  "type": "repository",
-  "full_name": "martinherren1984/publictestrepo",
-  "links": {
-    "self": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo"
-    },
-    "html": {
-      "href": "https://bitbucket.org/martinherren1984/publictestrepo"
-    },
-    "avatar": {
-      "href": "https://bytebucket.org/ravatar/%7B898477b2-a080-4089-b385-597a783db392%7D?ts=default"
-    },
-    "pullrequests": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/pullrequests"
-    },
-    "commits": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits"
-    },
-    "forks": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/forks"
-    },
-    "watchers": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/watchers"
-    },
-    "branches": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches"
-    },
-    "tags": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/tags"
-    },
-    "downloads": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/downloads"
-    },
-    "source": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/src"
-    },
-    "clone": [
-      {
-        "name": "https",
-        "href": "https://bitbucket.org/martinherren1984/publictestrepo.git"
-      },
-      {
-        "name": "ssh",
-        "href": "git@bitbucket.org:martinherren1984/publictestrepo.git"
-      }
-    ],
-    "hooks": {
-      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/hooks"
-    }
-  },
-  "name": "PublicTestRepo",
-  "slug": "publictestrepo",
-  "description": "",
-  "scm": "git",
-  "website": null,
-  "owner": {
-    "display_name": "Martin Herren",
-    "links": {
-      "self": {
-        "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
-      },
-      "avatar": {
-        "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
-      },
-      "html": {
-        "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
-      }
-    },
-    "type": "user",
-    "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
-    "account_id": "5cf8e3a9678ca90f8e7cc8a8",
-    "nickname": "Martin Herren"
-  },
-  "workspace": {
-    "type": "workspace",
-    "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
-    "name": "Martin Herren",
-    "slug": "martinherren1984",
-    "links": {
-      "avatar": {
-        "href": "https://bitbucket.org/workspaces/martinherren1984/avatar/?ts=1658761964"
-      },
-      "html": {
-        "href": "https://bitbucket.org/martinherren1984/"
-      },
-      "self": {
-        "href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984"
-      }
-    }
-  },
-  "is_private": false,
-  "project": {
-    "type": "project",
-    "key": "PUB",
-    "uuid": "{2cede481-f59e-49ec-88d0-a85629b7925d}",
-    "name": "PublicTestProject",
-    "links": {
-      "self": {
-        "href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984/projects/PUB"
-      },
-      "html": {
-        "href": "https://bitbucket.org/martinherren1984/workspace/projects/PUB"
-      },
-      "avatar": {
-        "href": "https://bitbucket.org/martinherren1984/workspace/projects/PUB/avatar/32?ts=1658768453"
-      }
-    }
-  },
-  "fork_policy": "allow_forks",
-  "created_on": "2022-07-25T17:01:20.950706+00:00",
-  "updated_on": "2022-09-07T20:19:30.622886+00:00",
-  "size": 85955,
-  "language": "",
-  "uuid": "{898477b2-a080-4089-b385-597a783db392}",
-  "mainbranch": {
-    "name": "master",
-    "type": "branch"
-  },
-  "override_settings": {
-    "default_merge_strategy": true,
-    "branching_model": true
-  },
-  "parent": null,
-  "enforced_signed_commits": null,
-  "has_issues": false,
-  "has_wiki": false
+	"type": "repository",
+	"full_name": "martinherren1984/publictestrepo",
+	"links": {
+		"self": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo"
+		},
+		"html": {
+			"href": "https://bitbucket.org/martinherren1984/publictestrepo"
+		},
+		"avatar": {
+			"href": "https://bytebucket.org/ravatar/%7B898477b2-a080-4089-b385-597a783db392%7D?ts=default"
+		},
+		"pullrequests": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/pullrequests"
+		},
+		"commits": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits"
+		},
+		"forks": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/forks"
+		},
+		"watchers": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/watchers"
+		},
+		"branches": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches"
+		},
+		"tags": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/tags"
+		},
+		"downloads": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/downloads"
+		},
+		"source": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/src"
+		},
+		"clone": [
+			{
+				"name": "https",
+				"href": "https://bitbucket.org/martinherren1984/publictestrepo.git"
+			},
+			{
+				"name": "ssh",
+				"href": "git@bitbucket.org:martinherren1984/publictestrepo.git"
+			}
+		],
+		"hooks": {
+			"href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/hooks"
+		}
+	},
+	"name": "PublicTestRepo",
+	"slug": "publictestrepo",
+	"description": "",
+	"scm": "git",
+	"website": null,
+	"owner": {
+		"display_name": "Martin Herren",
+		"links": {
+			"self": {
+				"href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
+			},
+			"avatar": {
+				"href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
+			},
+			"html": {
+				"href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
+			}
+		},
+		"type": "user",
+		"uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+		"account_id": "5cf8e3a9678ca90f8e7cc8a8",
+		"nickname": "Martin Herren"
+	},
+	"workspace": {
+		"type": "workspace",
+		"uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+		"name": "Martin Herren",
+		"slug": "martinherren1984",
+		"links": {
+			"avatar": {
+				"href": "https://bitbucket.org/workspaces/martinherren1984/avatar/?ts=1658761964"
+			},
+			"html": {
+				"href": "https://bitbucket.org/martinherren1984/"
+			},
+			"self": {
+				"href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984"
+			}
+		}
+	},
+	"is_private": false,
+	"project": {
+		"type": "project",
+		"key": "PUB",
+		"uuid": "{2cede481-f59e-49ec-88d0-a85629b7925d}",
+		"name": "PublicTestProject",
+		"links": {
+			"self": {
+				"href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984/projects/PUB"
+			},
+			"html": {
+				"href": "https://bitbucket.org/martinherren1984/workspace/projects/PUB"
+			},
+			"avatar": {
+				"href": "https://bitbucket.org/martinherren1984/workspace/projects/PUB/avatar/32?ts=1658768453"
+			}
+		}
+	},
+	"fork_policy": "allow_forks",
+	"created_on": "2022-07-25T17:01:20.950706+00:00",
+	"updated_on": "2022-09-07T20:19:30.622886+00:00",
+	"size": 85955,
+	"language": "",
+	"uuid": "{898477b2-a080-4089-b385-597a783db392}",
+	"mainbranch": {
+		"name": "master",
+		"type": "branch"
+	},
+	"override_settings": {
+		"default_merge_strategy": true,
+		"branching_model": true
+	},
+	"parent": null,
+	"enforced_signed_commits": null,
+	"has_issues": false,
+	"has_wiki": false
 }
 `
 
 const repoHookPayload = `
 {
-  "pagelen": 10,
-  "values": [
-  	{
-  	  "uuid": "{afe61e14-2c5f-49e8-8b68-ad1fb55fc052}",
-  	  "url": "http://127.0.0.1"
-  	}
-  ],
-  "page": 1,
-  "size": 1
+	"pagelen": 10,
+	"values": [
+		{
+			"uuid": "{afe61e14-2c5f-49e8-8b68-ad1fb55fc052}",
+			"url": "http://127.0.0.1"
+		}
+	],
+	"page": 1,
+	"size": 1
 }
 `
 
@@ -393,109 +393,109 @@ const repoFilePayload = "dummy payload"
 
 const repoDirPayload = `
 {
-    "pagelen": 10,
-    "page": 1,
-    "values": [
-        {
-            "path": "README.md",
-            "type": "commit_file"
-        },
-        {
-            "path": "test",
-            "type": "commit_directory"
-        },
-        {
-            "path": ".gitignore",
-            "type": "commit_file"
-        }
-    ]
+		"pagelen": 10,
+		"page": 1,
+		"values": [
+				{
+						"path": "README.md",
+						"type": "commit_file"
+				},
+				{
+						"path": "test",
+						"type": "commit_directory"
+				},
+				{
+						"path": ".gitignore",
+						"type": "commit_file"
+				}
+		]
 }
 `
 
 const branchCommitsPayload = `
 {
-    "values": [
-        {
-            "hash": "branch_head_name",
+		"values": [
+				{
+						"hash": "branch_head_name",
 						"links": {
 							"html": {
 								"href": "https://bitbucket.org/commitlink"
 							}
 						}
-        },
-        {
-            "hash": "random1"
-        },
-        {
-            "hash": "random2"
-        }
-    ]
+				},
+				{
+						"hash": "random1"
+				},
+				{
+						"hash": "random2"
+				}
+		]
 }
 `
 
 const pullRequestsPayload = `
 {
-		 "values": [
-        {
-            "id": 123,
+		"values": [
+				{
+						"id": 123,
 						"title": "PRs title"
-        },
-        {
-            "id": 456,
+				},
+				{
+						"id": 456,
 						"title": "Another PRs title"
-        }
-    ],
+				}
+		],
 		"pagelen": 10,
-    "size": 2,
-    "page": 1
+		"size": 2,
+		"page": 1
 }
 `
 
 const diffStatPayload = `
 {
-    "values": [
-        {
-            "old": {
-                "path": "main.go"
-            },
-            "new": {
-                "path": "main.go"
-            }
-        }
-    ]
+		"values": [
+				{
+						"old": {
+								"path": "main.go"
+						},
+						"new": {
+								"path": "main.go"
+						}
+				}
+		]
 }
 `
 
 const userPayload = `
 {
 	"uuid": "{4d8c0f46-cd62-4b77-b0cf-faa3e4d932c6}",
-  "username": "superman",
-  "links": {
-    "avatar": {
-      "href": "http:\/\/i.imgur.com\/ZygP55A.jpg"
-    }
-  },
-  "type": "user"
+	"username": "superman",
+	"links": {
+		"avatar": {
+			"href": "http:\/\/i.imgur.com\/ZygP55A.jpg"
+		}
+	},
+	"type": "user"
 }
 `
 
 const userRepoPayload = `
 {
-  "page": 1,
-  "pagelen": 10,
-  "size": 1,
-  "values": [
-    {
-      "links": {
-        "avatar": {
-            "href": "http:\/\/i.imgur.com\/ZygP55A.jpg"
-        }
-      },
-      "full_name": "test_name/repo_name",
-      "scm": "git",
-      "is_private": true
-    }
-  ]
+	"page": 1,
+	"pagelen": 10,
+	"size": 1,
+	"values": [
+		{
+			"links": {
+				"avatar": {
+						"href": "http:\/\/i.imgur.com\/ZygP55A.jpg"
+				}
+			},
+			"full_name": "test_name/repo_name",
+			"scm": "git",
+			"is_private": true
+		}
+	]
 }
 `
 
@@ -517,59 +517,59 @@ const emailsPayload = `
 const workspacesPayload = `
 {
 	"page": 1,
-  "pagelen": 100,
+	"pagelen": 100,
 	"size": 1,
-  "values": [
-    {
+	"values": [
+		{
 			"type": "workspace",
 			"uuid": "{c7a04a76-fa20-43e4-dc42-a7506db4c95b}",
 			"name": "Ueber Dev",
 			"slug": "ueberdev42",
-      "links": {
+			"links": {
 				"avatar": {
-				  "href": "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964"
-			  },
-			  "html": {
-				  "href": "https://bitbucket.org/ueberdev42/"
-			  },
-			  "self": {
-				  "href": "https://api.bitbucket.org/2.0/workspaces/ueberdev42"
-			  }
-      }
-    }
-  ]
+					"href": "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964"
+				},
+				"html": {
+					"href": "https://bitbucket.org/ueberdev42/"
+				},
+				"self": {
+					"href": "https://api.bitbucket.org/2.0/workspaces/ueberdev42"
+				}
+			}
+		}
+	]
 }
 `
 
 const permissionsPayLoad = `
 {
-  "pagelen": 100,
+	"pagelen": 100,
 	"page": 1,
-  "values": [
-    {
-      "repository": {
-        "full_name": "test_name/repo_name"
-      },
-      "permission": "read"
-    },
+	"values": [
 		{
-      "repository": {
-        "full_name": "test_name/permission_read"
-      },
-      "permission": "read"
-    },
+			"repository": {
+				"full_name": "test_name/repo_name"
+			},
+			"permission": "read"
+		},
 		{
-      "repository": {
-        "full_name": "test_name/permission_write"
-      },
-      "permission": "write"
-    },
+			"repository": {
+				"full_name": "test_name/permission_read"
+			},
+			"permission": "read"
+		},
 		{
-      "repository": {
-        "full_name": "test_name/permission_admin"
-      },
-      "permission": "admin"
-    }
-  ]
+			"repository": {
+				"full_name": "test_name/permission_write"
+			},
+			"permission": "write"
+		},
+		{
+			"repository": {
+				"full_name": "test_name/permission_admin"
+			},
+			"permission": "admin"
+		}
+	]
 }
 `
