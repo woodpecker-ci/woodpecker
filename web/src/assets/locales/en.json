@@ -359,7 +359,14 @@
         "never": "Never",
         "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
         "edit_agent": "Edit agent",
-        "delete_agent": "Delete agent"
+        "delete_agent": "Delete agent",
+        "filters": {
+          "name": "Filters",
+          "desc": "Server side enforced labels of agents to filter workflows",
+          "key": "Label name ...",
+          "value": "Filter value ...",
+          "delete": "Delete filter"
+        }
       },
       "queue": {
         "queue": "Queue",
