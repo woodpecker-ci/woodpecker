@@ -165,7 +165,7 @@ type Backend interface {
 	// Reconnect attempts to reconnect to a running step after agent restart.
 	// Returns nil if reconnection is possible, error otherwise.
 	// After successful reconnect, TailStep and WaitStep can be used normally.
-	// Backends that do not support reconnection should return an error.
+	// Backends that do not support reconnection should return ErrWorkflowRecoveryNotSupported.
 	Reconnect(ctx context.Context, step *Step, taskUUID string) error
 }
 

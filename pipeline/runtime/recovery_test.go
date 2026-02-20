@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package runtime
 
 import (
 	"context"
@@ -32,11 +32,11 @@ type mockRecoveryClient struct {
 	updateErr  error
 
 	// Track calls for assertions
-	initCalled      bool
-	initWorkflowID  string
-	initStepUUIDs   []string
-	initTimeout     int64
-	updateCalls     []updateCall
+	initCalled     bool
+	initWorkflowID string
+	initStepUUIDs  []string
+	initTimeout    int64
+	updateCalls    []updateCall
 }
 
 type updateCall struct {
@@ -138,9 +138,9 @@ func TestInitRecoveryState(t *testing.T) {
 
 func TestShouldSkipStep(t *testing.T) {
 	tests := []struct {
-		name       string
-		status     types.RecoveryStatus
-		wantSkip   bool
+		name     string
+		status   types.RecoveryStatus
+		wantSkip bool
 	}{
 		{"Pending", types.RecoveryStatusPending, false},
 		{"Running", types.RecoveryStatusRunning, false},

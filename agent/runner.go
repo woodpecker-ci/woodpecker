@@ -25,7 +25,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
@@ -108,14 +107,14 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	}
 	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("workflow initialization failed")
-		// TODO: should we return here?
+		return err
 	}
 
 	// Initialize recovery manager before launching goroutines that reference it
-	recoveryManager := pipeline.NewRecoveryManager(r.client, workflow.ID, true)
+	recoveryManager := pipeline_runtime.NewRecoveryManager(r.client, workflow.ID, true)
 	if err := recoveryManager.InitRecoveryState(runnerCtx, workflow.Config, int64(timeout.Seconds())); err != nil {
 		logger.Warn().Err(err).Msg("failed to initialize recovery state, continuing without recovery")
-		recoveryManager = pipeline.NewRecoveryManager(r.client, workflow.ID, false)
+		recoveryManager = pipeline_runtime.NewRecoveryManager(r.client, workflow.ID, false)
 	}
 
 	// Listen for remote cancel events (UI / API).

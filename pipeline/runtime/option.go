@@ -17,7 +17,6 @@ package runtime
 import (
 	"context"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
@@ -67,7 +66,7 @@ func WithTaskUUID(uuid string) Option {
 }
 
 // WithRecoveryManager returns an option configured with a recovery manager.
-func WithRecoveryManager(rm *pipeline.RecoveryManager) Option {
+func WithRecoveryManager(rm *RecoveryManager) Option {
 	return func(r *Runtime) {
 		r.recoveryManager = rm
 	}

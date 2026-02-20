@@ -21,7 +21,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
@@ -42,7 +41,7 @@ type Runtime struct {
 
 	tracer          tracing.Tracer
 	logger          logging.Logger
-	recoveryManager *pipeline.RecoveryManager
+	recoveryManager *RecoveryManager
 
 	taskUUID string
 
@@ -57,7 +56,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	r.spec = spec
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
-	r.recoveryManager = pipeline.NewRecoveryManager(nil, "", false)
+	r.recoveryManager = NewRecoveryManager(nil, "", false)
 	for _, opts := range opts {
 		opts(r)
 	}
