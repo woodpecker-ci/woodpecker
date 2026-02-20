@@ -15,13 +15,14 @@
 package datastore
 
 import (
-	"context"
-	"strings"
+	"fmt"
+	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff/v5"
+	"github.com/rs/zerolog/log"
 	"xorm.io/builder"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -131,80 +132,82 @@ func (s storage) GetPipelineCount() (int64, error) {
 	return s.engine.Count(new(model.Pipeline))
 }
 
-// CreatePipeline creates a new pipeline with retry logic for unique constraint errors.
+// createPipelineSQLiteLock is needed for CreatePipeline if sqlite is used
+// as sqlite don't support to upgrade the transaction lock to be exclusive and xorm don't support EXCLUSIVE transactions jet.
+var createPipelineSQLiteLock = &sync.Mutex{}
+
 func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Step) error {
-	// Maximum number of retries
-	const maxRetries = 3
-
-	// Create backoff configuration
-	exponentialBackoff := backoff.NewExponentialBackOff()
-
-	// Execute with backoff retry
-	_, err := backoff.Retry(context.Background(), func() (struct{}, error) {
-		sess := s.engine.NewSession()
-		defer sess.Close()
-		if err := sess.Begin(); err != nil {
-			return struct{}{}, err
-		}
-
-		repoExist, err := sess.Where("id = ?", pipeline.RepoID).Exist(&model.Repo{})
-		if err != nil {
-			return struct{}{}, err
-		}
-
-		if !repoExist {
-			return struct{}{}, ErrorRepoNotExist{RepoID: pipeline.RepoID}
-		}
-
-		// calc pipeline number
-		var number int64
-		if _, err := sess.Select("MAX(number)").
-			Table(new(model.Pipeline)).
-			Where("repo_id = ?", pipeline.RepoID).
-			Get(&number); err != nil {
-			return struct{}{}, err
-		}
-		pipeline.Number = number + 1
-
-		pipeline.Created = time.Now().UTC().Unix()
-		// only Insert set auto created ID back to object
-		if _, err := sess.Insert(pipeline); err != nil {
-			if isUniqueConstraintError(err) {
-				return struct{}{}, err
-			}
-			return struct{}{}, backoff.Permanent(err)
-		}
-
-		for i := range stepList {
-			stepList[i].PipelineID = pipeline.ID
-			// only Insert set auto created ID back to object
-			if _, err := sess.Insert(stepList[i]); err != nil {
-				if isUniqueConstraintError(err) {
-					return struct{}{}, err
-				}
-				return struct{}{}, backoff.Permanent(err)
-			}
-		}
-
-		return struct{}{}, sess.Commit()
-	}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries))
-
-	return err
-}
-
-// isUniqueConstraintError checks if an error is a unique constraint violation error.
-func isUniqueConstraintError(err error) bool {
-	if err == nil {
-		return false
+	// TODO: xorm do not allow us to start an `EXCLUSIVE` transaction so we have to do it on our own
+	if s.engine.Dialect().URI().DBType == schemas.SQLITE {
+		createPipelineSQLiteLock.Lock()
+		defer createPipelineSQLiteLock.Unlock()
+	}
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
 	}
 
-	errStr := err.Error()
-	// Check for common unique constraint error patterns across different databases
-	return strings.Contains(errStr, "duplicate key") ||
-		strings.Contains(errStr, "Duplicate entry") ||
-		strings.Contains(errStr, "UNIQUE constraint failed") ||
-		strings.Contains(errStr, "unique constraint") ||
-		strings.Contains(errStr, "UNIQUE violation")
+	repoExist, err := sess.Where("id = ?", pipeline.RepoID).Exist(&model.Repo{})
+	if err != nil {
+		return err
+	}
+
+	if !repoExist {
+		return ErrorRepoNotExist{RepoID: pipeline.RepoID}
+	}
+
+	// get write lock
+	// TODO: upstream that to xorm
+	switch s.engine.Dialect().URI().DBType {
+	case schemas.SQLITE:
+		// we have an exclusive lock via createPipelineSQLiteLock already
+
+	case schemas.MYSQL:
+		if _, err := sess.Exec("LOCK TABLE `pipelines` WRITE"); err != nil {
+			return fmt.Errorf("could not exclusive lock table 'pipelines': %w", err)
+		}
+		// session end does not unlock so we have to
+		defer func() {
+			if _, err := sess.Exec("UNLOCK TABLES"); err != nil {
+				log.Error().Err(err).Msg("Could not unlock table 'pipelines' after inserting new pipeline")
+			}
+		}()
+
+	case schemas.POSTGRES:
+		if _, err := sess.Exec("LOCK TABLE `pipelines` IN EXCLUSIVE MODE"); err != nil {
+			return fmt.Errorf("could not exclusive lock table 'pipelines': %w", err)
+		}
+
+	default:
+		return fmt.Errorf("unsupported schema %s detected", s.engine.Dialect().URI().DBType)
+	}
+
+	// calc pipeline number
+	var currMaxNumber int64
+	if _, err := sess.Select("MAX(number)").
+		Table(new(model.Pipeline)).
+		Where("repo_id = ?", pipeline.RepoID).
+		Get(&currMaxNumber); err != nil {
+		return err
+	}
+	pipeline.Number = currMaxNumber + 1
+
+	pipeline.Created = time.Now().UTC().Unix()
+	// only Insert set auto created ID back to object
+	if _, err := sess.Insert(pipeline); err != nil {
+		return err
+	}
+
+	for i := range stepList {
+		stepList[i].PipelineID = pipeline.ID
+		// only Insert set auto created ID back to object
+		if _, err := sess.Insert(stepList[i]); err != nil {
+			return err
+		}
+	}
+
+	return sess.Commit()
 }
 
 func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
