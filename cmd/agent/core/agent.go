@@ -304,7 +304,9 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				log.Debug().Msg("polling new workflow")
 				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
 					if singleWorkflow {
+						log.Error().Err(err).Msg("runner done with error")
 						ctxCancel(nil)
+						return nil
 					}
 					log.Error().Err(err).Msg("runner error, retrying...")
 					// Check if context is canceled
@@ -331,7 +333,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 
 	if singleWorkflow {
 		log.Info().Msgf(
-			"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up in single workflow mode",
+			"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running in single workflow mode",
 			version.String(), backendEngine.Name(), engInfo.Platform)
 	} else {
 		log.Info().Msgf(
