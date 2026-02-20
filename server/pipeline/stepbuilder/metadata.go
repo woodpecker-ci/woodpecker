@@ -83,7 +83,6 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 		Curr:     metadataPipelineFromModelPipeline(pipeline, true),
 		Prev:     metadataPipelineFromModelPipeline(prev, false),
 		Workflow: fWorkflow,
-		Step:     metadata.Step{},
 		Sys: metadata.System{
 			Name:     "woodpecker",
 			URL:      sysURL,
