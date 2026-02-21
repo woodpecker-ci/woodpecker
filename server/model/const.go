@@ -18,7 +18,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"slices"
 )
 
 type WebhookEvent string //	@name	WebhookEvent
@@ -68,30 +67,6 @@ const (
 	StatusCreated  StatusValue = "created"  // created / internal use only
 )
 
-// list of statuses by their priority. Most important is on top.
-var statusPriorityOrder = []StatusValue{
-	// blocked, declined and created cannot appear in the
-	// same workflow/pipeline at the same time
-	StatusDeclined,
-	StatusBlocked,
-	StatusCreated,
-
-	// errors have highest priority.
-	StatusError,
-
-	// skipped and killed cannot appear together with running/pending.
-	StatusKilled,
-	StatusSkipped,
-
-	// running states
-	StatusRunning,
-	StatusPending,
-
-	// finished states
-	StatusFailure,
-	StatusSuccess,
-}
-
 var ErrInvalidStatusValue = errors.New("invalid status value")
 
 func (s StatusValue) Validate() error {
@@ -101,12 +76,6 @@ func (s StatusValue) Validate() error {
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidStatusValue, s)
 	}
-}
-
-// Merge merges two status values.
-func (s StatusValue) Merge(t StatusValue) StatusValue {
-	// TODO optimize this
-	return statusPriorityOrder[min(slices.Index(statusPriorityOrder, s), slices.Index(statusPriorityOrder, t))]
 }
 
 // RepoVisibility represent to what state a repo in woodpecker is visible to others.

@@ -57,25 +57,3 @@ func IsThereRunningStage(workflows []*Workflow) bool {
 	}
 	return false
 }
-
-// PipelineStatus determine pipeline status based on corresponding workflow list.
-func PipelineStatus(workflows []*Workflow) StatusValue {
-	status := StatusSuccess
-
-	for _, p := range workflows {
-		status = status.Merge(p.State)
-	}
-
-	return status
-}
-
-// WorkflowStatus determine workflow status based on corresponding step list.
-func WorkflowStatus(steps []*Step) StatusValue {
-	status := StatusSuccess
-
-	for _, p := range steps {
-		status = status.Merge(p.State)
-	}
-
-	return status
-}
