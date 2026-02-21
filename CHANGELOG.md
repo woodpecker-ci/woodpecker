@@ -48,6 +48,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#6137](https://github.com/woodpecker-ci/woodpecker/pull/6137)]
 - Add deprecation policy [[#6068](https://github.com/woodpecker-ci/woodpecker/pull/6068)]
 - chore(deps): lock file maintenance [[#6128](https://github.com/woodpecker-ci/woodpecker/pull/6128)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.55.0 [[#6125](https://github.com/woodpecker-ci/woodpecker/pull/6125)]
@@ -68,6 +69,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vue-tsc to v3.2.5 [[#6141](https://github.com/woodpecker-ci/woodpecker/pull/6141)]
 - fix(deps): update module github.com/google/go-github/v82 to v83 [[#6140](https://github.com/woodpecker-ci/woodpecker/pull/6140)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.10.1 [[#6139](https://github.com/woodpecker-ci/woodpecker/pull/6139)]
 - chore(deps): update web npm deps non-major [[#6136](https://github.com/woodpecker-ci/woodpecker/pull/6136)]
