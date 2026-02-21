@@ -55,7 +55,7 @@
     "overrides": {
       "lodash": "^4.17.23",
       "fast-xml-parser": "^5.3.4",
-      "ajv": "^6.14.0",
+      "ajv": "^8.0.0",
       "minimatch": "^10.2.1"
     }
   }
