@@ -88,7 +88,7 @@ type (
 	RepoPatch struct {
 		Config *string `json:"config_file,omitempty"`
 		// Deprecated: use Trusted (broken - only exists for backwards compatibility)
-		IsTrusted       *bool                      `json:"-,omitempty"`
+		IsTrusted       *bool                      `json:"-"`
 		Trusted         *TrustedConfigurationPatch `json:"trusted,omitempty"`
 		RequireApproval *ApprovalMode              `json:"require_approval,omitempty"`
 		Timeout         *int64                     `json:"timeout,omitempty"`
