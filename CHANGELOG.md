@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-20
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -68,6 +68,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#6136](https://github.com/woodpecker-ci/woodpecker/pull/6136)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.39.0 [[#6134](https://github.com/woodpecker-ci/woodpecker/pull/6134)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.36.0 [[#6131](https://github.com/woodpecker-ci/woodpecker/pull/6131)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.35.0 [[#6129](https://github.com/woodpecker-ci/woodpecker/pull/6129)]
