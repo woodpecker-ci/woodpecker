@@ -68,6 +68,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v82 to v83 [[#6140](https://github.com/woodpecker-ci/woodpecker/pull/6140)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.10.1 [[#6139](https://github.com/woodpecker-ci/woodpecker/pull/6139)]
 - chore(deps): update web npm deps non-major [[#6136](https://github.com/woodpecker-ci/woodpecker/pull/6136)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.39.0 [[#6134](https://github.com/woodpecker-ci/woodpecker/pull/6134)]
