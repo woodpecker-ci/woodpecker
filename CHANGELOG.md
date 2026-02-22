@@ -35,6 +35,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fully merge statuses [[#6119](https://github.com/woodpecker-ci/woodpecker/pull/6119)]
 - Only set tag env on tags [[#6142](https://github.com/woodpecker-ci/woodpecker/pull/6142)]
 - Fix BB email [[#6102](https://github.com/woodpecker-ci/woodpecker/pull/6102)]
 - Detached or service steps report back too [[#6039](https://github.com/woodpecker-ci/woodpecker/pull/6039)]
