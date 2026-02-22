@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-21
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -71,6 +71,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.40.1 [[#6148](https://github.com/woodpecker-ci/woodpecker/pull/6148)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.10.1 [[#6138](https://github.com/woodpecker-ci/woodpecker/pull/6138)]
 - chore(deps): update dependency vue-tsc to v3.2.5 [[#6141](https://github.com/woodpecker-ci/woodpecker/pull/6141)]
 - fix(deps): update module github.com/google/go-github/v82 to v83 [[#6140](https://github.com/woodpecker-ci/woodpecker/pull/6140)]
