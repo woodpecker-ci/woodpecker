@@ -35,6 +35,7 @@
 
 ### 🐛 Bug Fixes
 
+- Only set tag env on tags [[#6142](https://github.com/woodpecker-ci/woodpecker/pull/6142)]
 - Fix BB email [[#6102](https://github.com/woodpecker-ci/woodpecker/pull/6102)]
 - Detached or service steps report back too [[#6039](https://github.com/woodpecker-ci/woodpecker/pull/6039)]
 - Don't propagate workflow error from agent back to agent [[#6056](https://github.com/woodpecker-ci/woodpecker/pull/6056)]
@@ -49,7 +50,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#6149](https://github.com/woodpecker-ci/woodpecker/pull/6149)]
 - chore(deps): update dependency isomorphic-dompurify to v3 [[#6147](https://github.com/woodpecker-ci/woodpecker/pull/6147)]
 - chore(deps): update docs npm deps non-major [[#6137](https://github.com/woodpecker-ci/woodpecker/pull/6137)]
 - Add deprecation policy [[#6068](https://github.com/woodpecker-ci/woodpecker/pull/6068)]
@@ -72,6 +72,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#6149](https://github.com/woodpecker-ci/woodpecker/pull/6149)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.40.1 [[#6148](https://github.com/woodpecker-ci/woodpecker/pull/6148)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.10.1 [[#6138](https://github.com/woodpecker-ci/woodpecker/pull/6138)]
 - chore(deps): update dependency vue-tsc to v3.2.5 [[#6141](https://github.com/woodpecker-ci/woodpecker/pull/6141)]
