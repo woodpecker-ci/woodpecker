@@ -16,9 +16,11 @@ package forge
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"golang.org/x/sync/singleflight"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -38,7 +40,22 @@ type Refresher interface {
 	Refresh(ctx context.Context, u *model.User) (bool, error)
 }
 
-func Refresh(c context.Context, forge Forge, _store store.Store, user *model.User) {
+// refreshGroup deduplicates concurrent token refresh calls per user.
+// When multiple goroutines try to refresh the same user's token simultaneously
+// (e.g., from concurrent API requests), only one refresh executes and the
+// others wait for its result. This prevents race conditions with single-use
+// refresh tokens (e.g., Forgejo with InvalidateRefreshTokens=true).
+var refreshGroup singleflight.Group
+
+// refreshResult carries token data through singleflight so waiting goroutines
+// can update their own *model.User copies.
+type refreshResult struct {
+	AccessToken  string
+	RefreshToken string
+	Expiry       int64
+}
+
+func Refresh(ctx context.Context, forge Forge, _store store.Store, user *model.User) {
 	// Remaining ttl of 30 minutes (1800 seconds) until a token is refreshed.
 	const tokenMinTTL = 1800
 
@@ -50,13 +67,35 @@ func Refresh(c context.Context, forge Forge, _store store.Store, user *model.Use
 			return
 		}
 
-		userUpdated, err := refresher.Refresh(c, user)
+		key := fmt.Sprintf("refresh-%d", user.ID)
+		result, err, _ := refreshGroup.Do(key, func() (interface{}, error) {
+			userUpdated, err := refresher.Refresh(ctx, user)
+			if err != nil {
+				return nil, err
+			}
+			if userUpdated {
+				if err := _store.UpdateUser(user); err != nil {
+					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+				}
+			}
+			return &refreshResult{
+				AccessToken:  user.AccessToken,
+				RefreshToken: user.RefreshToken,
+				Expiry:       user.Expiry,
+			}, nil
+		})
 		if err != nil {
 			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
-		} else if userUpdated {
-			if err := _store.UpdateUser(user); err != nil {
-				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-			}
+			return
+		}
+
+		// Copy fresh tokens into the caller's user object. This is necessary
+		// because waiting goroutines have their own *model.User copies that
+		// weren't passed to refresher.Refresh().
+		if r, ok := result.(*refreshResult); ok {
+			user.AccessToken = r.AccessToken
+			user.RefreshToken = r.RefreshToken
+			user.Expiry = r.Expiry
 		}
 	}
 }
