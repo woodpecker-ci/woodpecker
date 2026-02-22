@@ -33,6 +33,10 @@ import (
 func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w *metadata.Workflow) (*metadata.Metadata, error) {
 	m := &metadata.Metadata{}
 
+	if w != nil {
+		m.Workflow = *w
+	}
+
 	if c.IsSet("metadata-file") {
 		metadataFile, err := os.Open(c.String("metadata-file"))
 		if err != nil {
@@ -146,10 +150,6 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	// Forge
 	metadataFileAndOverrideOrDefault(c, "forge-type", func(s string) { m.Forge.Type = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "forge-url", func(s string) { m.Forge.URL = s }, c.String)
-
-	if w != nil {
-		m.Workflow = *w
-	}
 
 	return m, nil
 }
