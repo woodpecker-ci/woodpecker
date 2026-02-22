@@ -26,7 +26,7 @@ func TestEnviron(t *testing.T) {
 		Curr: Pipeline{
 			Event: EventRelease,
 			Commit: Commit{
-				Ref: "refs/tags/v1.2.3",
+				Ref:          "refs/tags/v1.2.3",
 				IsPrerelease: true,
 			},
 		},
@@ -54,7 +54,7 @@ func TestEnviron(t *testing.T) {
 			Event: EventPull,
 			Commit: Commit{
 				ChangedFiles: []string{"readme", "license"},
-				Refspec: "branch-a:branch-b",
+				Refspec:      "branch-a:branch-b",
 			},
 		},
 		Prev: Pipeline{
