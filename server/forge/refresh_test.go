@@ -81,7 +81,10 @@ func TestRefresh_ExpiredToken(t *testing.T) {
 	user := expiredUser(1)
 
 	mockRefresher.On("Refresh", mock.Anything, user).Return(true, nil).Run(func(args mock.Arguments) {
-		u := args.Get(1).(*model.User)
+		u, ok := args.Get(1).(*model.User)
+		if !ok {
+			return
+		}
 		u.AccessToken = "new-access-token"
 		u.RefreshToken = "new-refresh-token"
 		u.Expiry = time.Now().UTC().Unix() + 3600
@@ -127,7 +130,10 @@ func TestRefresh_ConcurrentRefreshSerialized(t *testing.T) {
 		refreshCount.Add(1)
 		// Simulate network latency so concurrent callers overlap
 		time.Sleep(50 * time.Millisecond)
-		u := args.Get(1).(*model.User)
+		u, ok := args.Get(1).(*model.User)
+		if !ok {
+			return
+		}
 		u.AccessToken = "new-access-token"
 		u.RefreshToken = "new-refresh-token"
 		u.Expiry = time.Now().UTC().Unix() + 3600

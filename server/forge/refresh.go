@@ -68,7 +68,7 @@ func Refresh(ctx context.Context, forge Forge, _store store.Store, user *model.U
 		}
 
 		key := fmt.Sprintf("refresh-%d", user.ID)
-		result, err, _ := refreshGroup.Do(key, func() (interface{}, error) {
+		result, err, _ := refreshGroup.Do(key, func() (any, error) {
 			userUpdated, err := refresher.Refresh(ctx, user)
 			if err != nil {
 				return nil, err
