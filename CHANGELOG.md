@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-22
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -51,6 +51,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#6152](https://github.com/woodpecker-ci/woodpecker/pull/6152)]
 - chore(deps): update dependency isomorphic-dompurify to v3 [[#6147](https://github.com/woodpecker-ci/woodpecker/pull/6147)]
 - chore(deps): update docs npm deps non-major [[#6137](https://github.com/woodpecker-ci/woodpecker/pull/6137)]
 - Add deprecation policy [[#6068](https://github.com/woodpecker-ci/woodpecker/pull/6068)]
@@ -73,6 +74,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.41.0 [[#6151](https://github.com/woodpecker-ci/woodpecker/pull/6151)]
 - chore(deps): lock file maintenance [[#6149](https://github.com/woodpecker-ci/woodpecker/pull/6149)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.40.1 [[#6148](https://github.com/woodpecker-ci/woodpecker/pull/6148)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.10.1 [[#6138](https://github.com/woodpecker-ci/woodpecker/pull/6138)]
