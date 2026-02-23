@@ -262,7 +262,7 @@ type Peer interface {
 	// Returns:
 	//   - agentID: Unique identifier for this agent (use in subsequent calls)
 	//   - error: If registration fails
-	RegisterAgent(ctx context.Context, info AgentInfo) (int64, error)
+	RegisterAgent(ctx context.Context, info AgentInfo) (AgentConfig, error)
 
 	// UnregisterAgent removes this agent from the server's registry.
 	//

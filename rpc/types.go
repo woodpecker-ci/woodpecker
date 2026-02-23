@@ -63,4 +63,9 @@ type (
 		Capacity     int               `json:"capacity"`
 		CustomLabels map[string]string `json:"custom_labels"`
 	}
+
+	AgentConfig struct {
+		AgentID         int64 `json:"agent_id"`
+		RecoveryEnabled bool  `json:"recovery_enabled"`
+	}
 )

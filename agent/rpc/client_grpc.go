@@ -483,7 +483,7 @@ func (c *client) sendLogs(ctx context.Context, entries []*proto.LogEntry) error 
 	return nil
 }
 
-func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
+func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (rpc.AgentConfig, error) {
 	req := new(proto.RegisterAgentRequest)
 	req.Info = &proto.AgentInfo{
 		Platform:     info.Platform,
@@ -494,7 +494,14 @@ func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, 
 	}
 
 	res, err := c.client.RegisterAgent(ctx, req)
-	return res.GetAgentId(), err
+	if err != nil {
+		return rpc.AgentConfig{}, err
+	}
+	protoConfig := res.GetConfig()
+	return rpc.AgentConfig{
+		AgentID:         protoConfig.GetAgentId(),
+		RecoveryEnabled: protoConfig.GetRecoveryEnabled(),
+	}, nil
 }
 
 func (c *client) UnregisterAgent(ctx context.Context) error {

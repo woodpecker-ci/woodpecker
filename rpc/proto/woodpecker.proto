@@ -80,6 +80,11 @@ message Workflow {
   bytes payload = 3;
 }
 
+message AgentConfig {
+  int64 agent_id = 1;
+  bool recovery_enabled = 2;
+}
+
 //
 // Request types
 //
@@ -148,7 +153,7 @@ message NextResponse {
 }
 
 message RegisterAgentResponse {
-  int64 agent_id = 1;
+  AgentConfig config = 1;
 }
 
 message WaitResponse {

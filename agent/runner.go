@@ -34,20 +34,22 @@ import (
 )
 
 type Runner struct {
-	client   rpc.Peer
-	filter   rpc.Filter
-	hostname string
-	counter  *State
-	backend  *backend.Backend
+	client          rpc.Peer
+	filter          rpc.Filter
+	hostname        string
+	counter         *State
+	backend         *backend.Backend
+	recoveryEnabled bool
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend, recoveryEnabled bool) Runner {
 	return Runner{
-		client:   workEngine,
-		filter:   f,
-		hostname: h,
-		counter:  state,
-		backend:  backend,
+		client:          workEngine,
+		filter:          f,
+		hostname:        h,
+		counter:         state,
+		backend:         backend,
+		recoveryEnabled: recoveryEnabled,
 	}
 }
 
@@ -111,7 +113,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	}
 
 	// Initialize recovery manager before launching goroutines that reference it
-	recoveryManager := pipeline_runtime.NewRecoveryManager(r.client, workflow.ID, true)
+	recoveryManager := pipeline_runtime.NewRecoveryManager(r.client, workflow.ID, r.recoveryEnabled)
 	if err := recoveryManager.InitRecoveryState(runnerCtx, workflow.Config, int64(timeout.Seconds())); err != nil {
 		logger.Warn().Err(err).Msg("failed to initialize recovery state, continuing without recovery")
 		recoveryManager = pipeline_runtime.NewRecoveryManager(r.client, workflow.ID, false)

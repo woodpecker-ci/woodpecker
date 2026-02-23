@@ -185,17 +185,23 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 
 // RegisterAgent register our agent to the server.
 func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterAgentRequest) (*proto.RegisterAgentResponse, error) {
-	res := new(proto.RegisterAgentResponse)
 	agentInfo := req.GetInfo()
-	agentID, err := s.peer.RegisterAgent(c, rpc.AgentInfo{
+	agentConfig, err := s.peer.RegisterAgent(c, rpc.AgentInfo{
 		Version:      agentInfo.GetVersion(),
 		Platform:     agentInfo.GetPlatform(),
 		Backend:      agentInfo.GetBackend(),
 		Capacity:     int(agentInfo.GetCapacity()),
 		CustomLabels: agentInfo.GetCustomLabels(),
 	})
-	res.AgentId = agentID
-	return res, err
+	if err != nil {
+		return nil, err
+	}
+	return &proto.RegisterAgentResponse{
+		Config: &proto.AgentConfig{
+			AgentId:         agentConfig.AgentID,
+			RecoveryEnabled: agentConfig.RecoveryEnabled,
+		},
+	}, nil
 }
 
 // UnregisterAgent unregister our agent from the server.

@@ -464,10 +464,10 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 	return nil
 }
 
-func (s *RPC) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
+func (s *RPC) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (rpc.AgentConfig, error) {
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
-		return -1, err
+		return rpc.AgentConfig{}, err
 	}
 
 	if agent.Name == "" {
@@ -484,10 +484,13 @@ func (s *RPC) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, err
 
 	err = s.store.AgentUpdate(agent)
 	if err != nil {
-		return -1, err
+		return rpc.AgentConfig{}, err
 	}
 
-	return agent.ID, nil
+	return rpc.AgentConfig{
+		AgentID:         agent.ID,
+		RecoveryEnabled: s.recoveryEnabled,
+	}, nil
 }
 
 // UnregisterAgent removes the agent from the database.
