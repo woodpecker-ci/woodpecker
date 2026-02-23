@@ -331,15 +331,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		})
 	}
 
-	if singleWorkflow {
-		log.Info().Msgf(
-			"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running in single workflow mode",
-			version.String(), backendEngine.Name(), engInfo.Platform)
-	} else {
-		log.Info().Msgf(
-			"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-			version.String(), backendEngine.Name(), engInfo.Platform, maxWorkflows)
-	}
+	log.Info().Str("version", version.String()).Str("backend", backendEngine.Name()).Str("platform", engInfo.Platform).Int("parallel workflows", maxWorkflows).Bool("single workflow", singleWorkflow).Msg(
+		"starting Woodpecker agent")
 
 	return serviceWaitingGroup.Wait()
 }

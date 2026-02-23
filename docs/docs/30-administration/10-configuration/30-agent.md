@@ -153,7 +153,7 @@ Configures the number of parallel workflows.
 - Name: `WOODPECKER_AGENT_SINGLE_WORKFLOW`
 - Default: `false`
 
-Configures the agent to exit(shutdown) after first workflow. When configured, `WOODPECKER_MAX_WORKFLOWS` is forced to 1.
+Configures the agent to exit (shutdown) after first workflow. When configured, `WOODPECKER_MAX_WORKFLOWS` is forced to 1.
 
 ---
 
