@@ -18,6 +18,7 @@ package server
 import (
 	"time"
 
+	"github.com/rs/zerolog"
 	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -77,6 +78,7 @@ var Config = struct {
 		PrivilegedPlugins                   []string
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
+		LogLevelForSkips                    zerolog.Level
 		Proxy                               struct {
 			No    string
 			HTTP  string

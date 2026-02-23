@@ -35,6 +35,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -161,7 +162,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 
 	// checking if filtered.
 	if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {
-		log.Debug().Str("pipeline", workflow.Name).Msg(
+		log.WithLevel(server.Config.Pipeline.LogLevelForSkips).Str("pipeline", workflow.Name).Msg(
 			"marked as skipped, does not match metadata",
 		)
 		return nil, nil

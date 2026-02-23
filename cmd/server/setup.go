@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 	"github.com/urfave/cli/v3"
@@ -259,6 +260,13 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
 	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
 	server.Config.Pipeline.PrivilegedPlugins = c.StringSlice("plugins-privileged")
+
+	// set log level for pipeline lifecycle events (skip-ci, filtered, blocked)
+	eventLogLevel, err := zerolog.ParseLevel(c.String("log-level-pipeline-skips"))
+	if err != nil {
+		return fmt.Errorf("invalid pipeline-event-log-level: %w", err)
+	}
+	server.Config.Pipeline.LogLevelForSkips = eventLogLevel
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

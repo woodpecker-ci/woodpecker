@@ -197,6 +197,12 @@ var flags = append([]cli.Flag{
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_LEVEL_PIPELINE_SKIPS"),
+		Name:    "log-level-pipeline-skips",
+		Usage:   "log level for pipeline lifecycle events (skip-ci, filtered, blocked). one of: trace, debug, info, warn, error",
+		Value:   "debug",
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_WORKFLOW_LABELS"),
 		Name:    "default-workflow-labels",

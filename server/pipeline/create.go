@@ -48,7 +48,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			if len(ref) == 0 {
 				ref = pipeline.Ref
 			}
-			log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
+			log.WithLevel(server.Config.Pipeline.LogLevelForSkips).Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
 			return nil, ErrFiltered
 		}
 	}
@@ -80,7 +80,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
 	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
-		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		log.WithLevel(server.Config.Pipeline.LogLevelForSkips).Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		if err := _store.DeletePipeline(pipeline); err != nil {
 			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
 		}
@@ -100,7 +100,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	if len(pipelineItems) == 0 {
-		log.Debug().Str("repo", repo.FullName).Msg(ErrFiltered.Error())
+		log.WithLevel(server.Config.Pipeline.LogLevelForSkips).Str("repo", repo.FullName).Msg(ErrFiltered.Error())
 		if err := _store.DeletePipeline(pipeline); err != nil {
 			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete empty pipeline")
 		}
