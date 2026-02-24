@@ -317,7 +317,7 @@
         "failure": {
           "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
           "type": "string",
-          "enum": ["fail", "ignore"],
+          "enum": ["fail", "ignore", "cancel"],
           "default": "fail"
         },
         "backend_options": {

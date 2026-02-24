@@ -40,7 +40,7 @@ type Step struct {
 	OnFailure      bool              `json:"on_failure,omitempty"`
 	OnSuccess      bool              `json:"on_success,omitempty"`
 	Failure        string            `json:"failure,omitempty"`
-	AuthConfig     Auth              `json:"auth_config,omitempty"`
+	AuthConfig     Auth              `json:"auth_config"`
 	NetworkMode    string            `json:"network_mode,omitempty"`
 	Ports          []Port            `json:"ports,omitempty"`
 	BackendOptions map[string]any    `json:"backend_options,omitempty"`

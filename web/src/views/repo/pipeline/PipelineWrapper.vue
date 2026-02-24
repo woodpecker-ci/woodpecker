@@ -91,6 +91,9 @@
             <template v-else-if="pipeline.cancel_info.canceled_by_user">
               {{ $t('repo.pipeline.cancel_info.canceled_by_user', { user: pipeline.cancel_info.canceled_by_user }) }}
             </template>
+            <template v-else-if="pipeline.cancel_info.canceled_by_step">
+              {{ $t('repo.pipeline.cancel_info.canceled_by_step', { user: pipeline.cancel_info.canceled_by_step }) }}
+            </template>
           </span>
         </div>
       </div>
