@@ -15,7 +15,7 @@
         devShells.default =
           with pkgs;
           let
-            go = go_1_24;
+            go = go_1_25;
           in
           pkgs.mkShell {
             buildInputs = [
@@ -45,6 +45,9 @@
               protoc-gen-go
               protoc-gen-go-grpc
               gcc
+
+              # docs
+              graphviz
             ];
             CFLAGS = "-I${pkgs.glibc.dev}/include";
             LDFLAGS = "-L${pkgs.glibc}/lib";

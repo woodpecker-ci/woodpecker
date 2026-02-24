@@ -20,8 +20,7 @@ import (
 	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
-	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
@@ -235,20 +234,8 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 	return nil
 }
 
-func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) (err error) {
-	if len(c.Secrets) != 0 {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: fmt.Sprintf("%s.%s.secrets", field, c.Name),
-				Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
-			},
-		})
-	}
-
-	return err
+func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) error {
+	return nil
 }
 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
@@ -357,10 +344,10 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 				}
 			}
 			if field != "" {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeBadHabit,
+				err = multierr.Append(err, &pipeline_errors.PipelineError{
+					Type:    pipeline_errors.PipelineErrorTypeBadHabit,
 					Message: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
-					Data: errors.BadHabitErrorData{
+					Data: pipeline_errors.BadHabitErrorData{
 						File:  config.File,
 						Field: field,
 						Docs:  "https://woodpecker-ci.org/docs/usage/linter#event-filter-for-all-steps",

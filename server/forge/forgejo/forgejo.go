@@ -227,15 +227,21 @@ func (c *Forgejo) Repo(ctx context.Context, u *model.User, remoteID model.ForgeR
 		if err != nil {
 			return nil, err
 		}
-		repo, _, err := client.GetRepoByID(intID)
+		repo, resp, err := client.GetRepoByID(intID)
 		if err != nil {
+			if resp != nil && resp.StatusCode == http.StatusNotFound {
+				return nil, errors.Join(err, forge_types.ErrRepoNotFound)
+			}
 			return nil, err
 		}
 		return toRepo(repo), nil
 	}
 
-	repo, _, err := client.GetRepo(owner, name)
+	repo, resp, err := client.GetRepo(owner, name)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, forge_types.ErrRepoNotFound)
+		}
 		return nil, err
 	}
 	return toRepo(repo), nil
@@ -412,8 +418,14 @@ func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, 
 		return err
 	}
 
+	// make sure a repo rename does not trick us
+	forgeRepo, err := c.Repo(ctx, u, r.ForgeRemoteID, r.Owner, r.Name)
+	if err != nil {
+		return err
+	}
+
 	hooks, err := shared_utils.Paginate(func(page int) ([]*forgejo.Hook, error) {
-		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, forgejo.ListHooksOptions{
+		hooks, _, err := client.ListRepoHooks(forgeRepo.Owner, forgeRepo.Name, forgejo.ListHooksOptions{
 			ListOptions: forgejo.ListOptions{
 				Page:     page,
 				PageSize: c.perPage(ctx),
@@ -427,7 +439,7 @@ func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, 
 
 	hook := matchingHooks(hooks, link)
 	if hook != nil {
-		_, err := client.DeleteRepoHook(r.Owner, r.Name, hook.ID)
+		_, err := client.DeleteRepoHook(forgeRepo.Owner, forgeRepo.Name, hook.ID)
 		return err
 	}
 
@@ -640,6 +652,8 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		return nil, err
 	}
 
+	forge.Refresh(ctx, c, _store, user)
+
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
@@ -676,6 +690,8 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 	if err != nil {
 		return "", err
 	}
+
+	forge.Refresh(ctx, c, _store, user)
 
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {

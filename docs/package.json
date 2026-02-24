@@ -16,15 +16,15 @@
     "format:check": "prettier -c ."
   },
   "dependencies": {
-    "@docusaurus/core": "^3.9.1",
-    "@docusaurus/faster": "^3.9.1",
-    "@docusaurus/plugin-content-blog": "^3.9.1",
-    "@docusaurus/preset-classic": "^3.9.1",
-    "@easyops-cn/docusaurus-search-local": "^0.52.1",
+    "@docusaurus/core": "^3.9.2",
+    "@docusaurus/faster": "^3.9.2",
+    "@docusaurus/plugin-content-blog": "^3.9.2",
+    "@docusaurus/preset-classic": "^3.9.2",
+    "@easyops-cn/docusaurus-search-local": "^0.55.0",
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "redocusaurus": "^2.5.0"
   },
   "browserslist": {
@@ -40,15 +40,23 @@
     ]
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.9.1",
+    "@docusaurus/module-type-aliases": "^3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
-    "@docusaurus/types": "^3.9.1",
+    "@docusaurus/types": "^3.9.2",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
-    "@types/node": "^24.0.0",
-    "@types/react": "^19.2.0",
+    "@types/node": "^25.1.0",
+    "@types/react": "^19.2.10",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "lodash": "^4.17.23",
+      "fast-xml-parser": "^5.3.4",
+      "ajv": "^6.14.0",
+      "minimatch": "^10.2.1"
+    }
   }
 }

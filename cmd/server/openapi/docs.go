@@ -1729,7 +1729,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -2681,7 +2681,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Cron"
+                            "$ref": "#/definitions/CronPatch"
                         }
                     }
                 ],
@@ -3921,7 +3921,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -4113,7 +4113,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Secret"
+                            "$ref": "#/definitions/SecretPatch"
                         }
                     }
                 ],
@@ -4678,6 +4678,17 @@ const docTemplate = `{
                 }
             }
         },
+        "CancelInfo": {
+            "type": "object",
+            "properties": {
+                "canceled_by_user": {
+                    "type": "string"
+                },
+                "superseded_by": {
+                    "type": "integer"
+                }
+            }
+        },
         "Config": {
             "type": "object",
             "properties": {
@@ -4705,7 +4716,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "creator_id": {
+                    "description": "TODO: drop with next major version",
                     "type": "integer"
+                },
+                "enabled": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
@@ -4722,6 +4737,35 @@ const docTemplate = `{
                 "schedule": {
                     "description": "@weekly,\t3min, ...",
                     "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "CronPatch": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -4949,6 +4993,9 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
+                "cancel_info": {
+                    "$ref": "#/definitions/CancelInfo"
+                },
                 "changed_files": {
                     "type": "array",
                     "items": {
@@ -4970,7 +5017,7 @@ const docTemplate = `{
                 "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.PipelineError"
+                        "$ref": "#/definitions/errors.PipelineError"
                     }
                 },
                 "event": {
@@ -5190,6 +5237,9 @@ const docTemplate = `{
                 "config_extension_endpoint": {
                     "type": "string"
                 },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5283,6 +5333,9 @@ const docTemplate = `{
                 "config_extension_endpoint": {
                     "type": "string"
                 },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5367,6 +5420,9 @@ const docTemplate = `{
                 "config_extension_endpoint": {
                     "type": "string"
                 },
+                "config_extension_exclusive": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5424,11 +5480,40 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "note": {
+                    "type": "string"
+                },
                 "org_id": {
                     "type": "integer"
                 },
                 "repo_id": {
                     "type": "integer"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "SecretPatch": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/WebhookEvent"
+                    }
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
                 },
                 "value": {
                     "type": "string"
@@ -5649,6 +5734,52 @@ const docTemplate = `{
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
+            ]
+        },
+        "errors.PipelineError": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "is_warning": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/errors.PipelineErrorType"
+                }
+            }
+        },
+        "errors.PipelineErrorType": {
+            "type": "string",
+            "enum": [
+                "linter",
+                "deprecation",
+                "compiler",
+                "generic",
+                "bad_habit"
+            ],
+            "x-enum-comments": {
+                "PipelineErrorTypeBadHabit": "some bad-habit error",
+                "PipelineErrorTypeCompiler": "some error with the config semantics",
+                "PipelineErrorTypeDeprecation": "using some deprecated feature",
+                "PipelineErrorTypeGeneric": "some generic error",
+                "PipelineErrorTypeLinter": "some error with the config syntax"
+            },
+            "x-enum-descriptions": [
+                "some error with the config syntax",
+                "using some deprecated feature",
+                "some error with the config semantics",
+                "some generic error",
+                "some bad-habit error"
+            ],
+            "x-enum-varnames": [
+                "PipelineErrorTypeLinter",
+                "PipelineErrorTypeDeprecation",
+                "PipelineErrorTypeCompiler",
+                "PipelineErrorTypeGeneric",
+                "PipelineErrorTypeBadHabit"
             ]
         },
         "metadata.Author": {
@@ -6071,52 +6202,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/StatusValue"
                 }
             }
-        },
-        "types.PipelineError": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "is_warning": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/types.PipelineErrorType"
-                }
-            }
-        },
-        "types.PipelineErrorType": {
-            "type": "string",
-            "enum": [
-                "linter",
-                "deprecation",
-                "compiler",
-                "generic",
-                "bad_habit"
-            ],
-            "x-enum-comments": {
-                "PipelineErrorTypeBadHabit": "some bad-habit error",
-                "PipelineErrorTypeCompiler": "some error with the config semantics",
-                "PipelineErrorTypeDeprecation": "using some deprecated feature",
-                "PipelineErrorTypeGeneric": "some generic error",
-                "PipelineErrorTypeLinter": "some error with the config syntax"
-            },
-            "x-enum-descriptions": [
-                "some error with the config syntax",
-                "using some deprecated feature",
-                "some error with the config semantics",
-                "some generic error",
-                "some bad-habit error"
-            ],
-            "x-enum-varnames": [
-                "PipelineErrorTypeLinter",
-                "PipelineErrorTypeDeprecation",
-                "PipelineErrorTypeCompiler",
-                "PipelineErrorTypeGeneric",
-                "PipelineErrorTypeBadHabit"
-            ]
         }
     }
 }`

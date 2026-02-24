@@ -24,9 +24,12 @@
           <span class="shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
-          <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" :title="message">{{
-            shortMessage
-          }}</span>
+          <RenderMarkdown
+            class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+            :title="message"
+            :content="shortMessage"
+            inline
+          />
         </div>
 
         <template v-if="repoPermissions!.push && pipeline.status !== 'blocked'">
@@ -75,6 +78,21 @@
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
+        <div v-if="pipeline.status === 'killed' && pipeline.cancel_info" class="flex shrink-0 items-center gap-2">
+          <Icon name="status-killed" />
+          <span class="truncate">
+            <router-link
+              v-if="pipeline.cancel_info.superseded_by"
+              :to="{ name: 'repo-pipeline', params: { pipelineId: pipeline.cancel_info.superseded_by } }"
+              class="hover:underline"
+            >
+              {{ $t('repo.pipeline.cancel_info.superseded_by', { pipelineId: pipeline.cancel_info.superseded_by }) }}
+            </router-link>
+            <template v-else-if="pipeline.cancel_info.canceled_by_user">
+              {{ $t('repo.pipeline.cancel_info.canceled_by_user', { user: pipeline.cancel_info.canceled_by_user }) }}
+            </template>
+          </span>
+        </div>
       </div>
     </template>
 
@@ -114,6 +132,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';

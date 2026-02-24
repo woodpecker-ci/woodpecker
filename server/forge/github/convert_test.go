@@ -18,7 +18,7 @@ package github
 import (
 	"testing"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v83/github"
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -54,10 +54,10 @@ func Test_convertRepoList(t *testing.T) {
 			},
 			HTMLURL:  github.Ptr("https://github.com/octocat/hello-world"),
 			CloneURL: github.Ptr("https://github.com/octocat/hello-world.git"),
-			Permissions: map[string]bool{
-				"push":  true,
-				"pull":  true,
-				"admin": true,
+			Permissions: &github.RepositoryPermissions{
+				Admin: github.Ptr(true),
+				Push:  github.Ptr(true),
+				Pull:  github.Ptr(true),
 			},
 		},
 	}
@@ -81,10 +81,10 @@ func Test_convertRepo(t *testing.T) {
 			AvatarURL: github.Ptr("http://..."),
 			Login:     github.Ptr("octocat"),
 		},
-		Permissions: map[string]bool{
-			"push":  true,
-			"pull":  true,
-			"admin": true,
+		Permissions: &github.RepositoryPermissions{
+			Admin: github.Ptr(true),
+			Push:  github.Ptr(true),
+			Pull:  github.Ptr(true),
 		},
 	}
 
@@ -101,10 +101,10 @@ func Test_convertRepo(t *testing.T) {
 
 func Test_convertPerm(t *testing.T) {
 	from := &github.Repository{
-		Permissions: map[string]bool{
-			"admin": true,
-			"push":  true,
-			"pull":  true,
+		Permissions: &github.RepositoryPermissions{
+			Admin: github.Ptr(true),
+			Push:  github.Ptr(true),
+			Pull:  github.Ptr(true),
 		},
 	}
 

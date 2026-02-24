@@ -41,7 +41,7 @@
             "loading": "Lod grod…",
             "no_logs": "Koane Logs",
             "pipeline": "Pipeline #{pipelineId}",
-            "log_title": "Step-Logs",
+            "log_title": "Schrid-Logs",
             "log_download_error": "Beim Runterladn vom Log-File is wos schiaf ganga",
             "protected": {
                 "decline": "Oblehnen",
@@ -57,7 +57,7 @@
             "no_pipelines": "Do san no koane Pipelines gstartet worn.",
             "no_pipeline_steps": "Koane Pipeline-Schrid do!",
             "step_not_started": "Der Schrid hod no ned ogfangd.",
-            "log_delete_confirm": "Wuisd du wirkli de Step-Logs löschn?",
+            "log_delete_confirm": "Wuisd du wirkli de Schrid-Logs löschn?",
             "log_delete_error": "'Da ganze Bus is hi!'",
             "actions": {
                 "cancel": "Abbrechn",
@@ -123,7 +123,8 @@
                 "name": "Variabl-Nama",
                 "value": "Variabl-Wert"
             },
-            "show_pipelines": "Pipelines zoang"
+            "show_pipelines": "Pipelines zoang",
+            "no_manual_workflows": "Koane Workflows gfundn die ma von hand lafa losn ko, oder se san ausa gsiebt woan."
         },
         "activity": "Ois da Reih nach",
         "branches": "Branches",
@@ -207,7 +208,8 @@
                     "placeholder": "Zeitplan"
                 },
                 "edit": "Cron endan",
-                "delete": "Cron löschn"
+                "delete": "Cron löschn",
+                "enabled": "Eigscheudn"
             },
             "badge": {
                 "badge": "Plakettl",
@@ -215,7 +217,10 @@
                 "type_url": "URL",
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
-                "branch": "Branch"
+                "branch": "Branch",
+                "events": "Events",
+                "step": "Schrid",
+                "workflow": "Workflow"
             },
             "actions": {
                 "actions": "Aktiona",
@@ -383,14 +388,15 @@
         "saved": "Secret gspeichert",
         "plugins": {
             "images": "Nur verfügbar füa de folgenden Plugins",
-            "desc": "Liste vo Plugin-Images wo des Secret verfügbar is. Leer lassn zum olle Plugins und normale Steps erlaubn."
+            "desc": "Liste vo Plugin-Images wo des Secret verfügbar is. Leer lassn zum olle Plugins und normale Schrid erlaubn."
         },
         "events": {
             "events": "Verfügbar bei de folgenden Events",
             "warning": "Aufpassn: Secrets bei Pull Requests freigem ko gfährlich sei, weil böswillige Leit mid am bösen Pull Request dei Secrets klaubn kennan."
         },
         "edit": "Secret beabadn",
-        "delete": "Secret löschn"
+        "delete": "Secret löschn",
+        "note": "Notizn"
     },
     "info": "Info",
     "cli_login_failed": "CLI-Login is schiaf ganga",
@@ -587,5 +593,7 @@
     "exit_fullscreen": "Vollbild verlassn",
     "help_translating": "Du kost helfa Woodpecker in dei Sproch zu übersetzen auf {0}.",
     "weblate": "unserm Weblate",
-    "disabled": "Abgschoidn"
+    "disabled": "Abgschoidn",
+    "config_extension_exclusive": "Ganz Alloa",
+    "config_extension_exclusive_desc": "Wenn ogschoid, werdn alle anderen konfigurations Möglichkeitn überganga, a de Forge."
 }

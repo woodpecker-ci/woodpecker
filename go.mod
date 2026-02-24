@@ -4,42 +4,41 @@ go 1.25.0
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
-	code.gitea.io/sdk/gitea v0.22.1
+	code.gitea.io/sdk/gitea v0.23.2
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 v2.2.0
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
-	github.com/bmatcuk/doublestar/v4 v4.9.1
+	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/charmbracelet/huh v0.8.0
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.1.3+incompatible
+	github.com/docker/cli v29.2.1+incompatible
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
-	github.com/expr-lang/expr v1.17.7
+	github.com/expr-lang/expr v1.17.8
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gdgvda/cron v0.6.0
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/go-viper/mapstructure/v2 v2.4.0
-	github.com/golang-jwt/jwt/v5 v5.3.0
-	github.com/google/go-github/v80 v80.0.0
-	github.com/google/tink/go v1.7.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
+	github.com/google/go-github/v83 v83.0.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.7.0
 	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/json-iterator/go v1.1.12
 	github.com/kinbiko/jsonassert v1.2.0
-	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/lib/pq v1.11.2
+	github.com/mattn/go-sqlite3 v1.14.34
 	github.com/migueleliasweb/go-github-mock v1.5.0
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
@@ -51,25 +50,27 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
+	github.com/tink-crypto/tink-go/v2 v2.6.0
 	github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482
-	github.com/urfave/cli/v3 v3.6.1
+	github.com/urfave/cli/v3 v3.6.2
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.4.1
 	github.com/zalando/go-keyring v0.2.6
-	gitlab.com/gitlab-org/api/client-go v1.9.1
+	gitlab.com/gitlab-org/api/client-go v1.41.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/crypto v0.46.0
-	golang.org/x/net v0.48.0
-	golang.org/x/oauth2 v0.34.0
+	golang.org/x/crypto v0.48.0
+	golang.org/x/image v0.36.0
+	golang.org/x/net v0.50.0
+	golang.org/x/oauth2 v0.35.0
 	golang.org/x/sync v0.19.0
-	golang.org/x/term v0.38.0
-	golang.org/x/text v0.32.0
-	google.golang.org/grpc v1.77.0
+	golang.org/x/term v0.40.0
+	golang.org/x/text v0.34.0
+	google.golang.org/grpc v1.79.1
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.35.0
-	k8s.io/apimachinery v0.35.0
-	k8s.io/client-go v0.35.0
+	k8s.io/api v0.35.1
+	k8s.io/apimachinery v0.35.1
+	k8s.io/client-go v0.35.1
 	sigs.k8s.io/yaml v1.6.0
 	src.techknowlogick.com/xormigrate v1.7.1
 	xorm.io/builder v0.3.13
@@ -77,7 +78,7 @@ require (
 )
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/42wim/httpsig v1.2.3 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
@@ -127,13 +128,13 @@ require (
 	github.com/go-playground/validator/v10 v10.27.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.18.0 // indirect
-	github.com/godbus/dbus/v5 v5.2.0 // indirect
+	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-github/v73 v73.0.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -184,8 +185,8 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	github.com/quic-go/qpack v0.5.1 // indirect
-	github.com/quic-go/quic-go v0.55.0 // indirect
+	github.com/quic-go/qpack v0.6.0 // indirect
+	github.com/quic-go/quic-go v0.57.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
@@ -205,19 +206,18 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.54.0 // indirect
-	go.opentelemetry.io/otel v1.38.0 // indirect
+	go.opentelemetry.io/otel v1.39.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.28.0 // indirect
-	go.opentelemetry.io/otel/metric v1.38.0 // indirect
-	go.opentelemetry.io/otel/trace v1.38.0 // indirect
+	go.opentelemetry.io/otel/metric v1.39.0 // indirect
+	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.20.0 // indirect
-	golang.org/x/mod v0.30.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/mod v0.32.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
-	golang.org/x/tools v0.39.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20251022142026-3a174f9686a8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
+	golang.org/x/tools v0.41.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gotest.tools/v3 v3.5.2 // indirect

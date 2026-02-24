@@ -40,7 +40,7 @@ type requestStructure struct {
 	Repo          *model.Repo     `json:"repo"`
 	Pipeline      *model.Pipeline `json:"pipeline"`
 	Netrc         *model.Netrc    `json:"netrc"`
-	Configuration []*configData   `json:"configuration"`
+	Configuration []*configData   `json:"configuration,omitempty"`
 }
 
 type responseStructure struct {

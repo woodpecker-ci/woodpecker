@@ -28,8 +28,8 @@ import (
 	grpcproto "google.golang.org/protobuf/proto"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 )
 
 const (
@@ -148,15 +148,16 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 	return w, nil
 }
 
-// Wait blocks until the workflow is complete.
-func (c *client) Wait(ctx context.Context, workflowID string) (err error) {
+// Wait blocks until the workflow with the given ID is marked as completed or canceled by the server.
+func (c *client) Wait(ctx context.Context, workflowID string) (canceled bool, err error) {
 	retry := c.newBackOff()
 	req := new(proto.WaitRequest)
 	req.Id = workflowID
 	for {
-		_, err = c.client.Wait(ctx, req)
+		resp, err := c.client.Wait(ctx, req)
 		if err == nil {
-			break
+			// wait block was released normally as expected by server
+			return resp.GetCanceled(), nil
 		}
 
 		switch status.Code(err) {
@@ -164,10 +165,10 @@ func (c *client) Wait(ctx context.Context, workflowID string) (err error) {
 			if ctx.Err() != nil {
 				// expected as context was canceled
 				log.Debug().Err(err).Msgf("grpc error: wait(): context canceled")
-				return nil
+				return false, nil
 			}
 			log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
-			return err
+			return false, err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -178,16 +179,15 @@ func (c *client) Wait(ctx context.Context, workflowID string) (err error) {
 			log.Warn().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 		default:
 			log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
-			return err
+			return false, err
 		}
 
 		select {
 		case <-time.After(retry.NextBackOff()):
 		case <-ctx.Done():
-			return ctx.Err()
+			return false, ctx.Err()
 		}
 	}
-	return nil
 }
 
 // Init signals the workflow is initialized.
@@ -199,6 +199,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 	req.State.Started = state.Started
 	req.State.Finished = state.Finished
 	req.State.Error = state.Error
+	req.State.Canceled = state.Canceled
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
@@ -238,7 +239,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 	return nil
 }
 
-// Done signals the workflow is complete.
+// Done let agent signal to server the workflow has stopped.
 func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
@@ -247,6 +248,7 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 	req.State.Started = state.Started
 	req.State.Finished = state.Finished
 	req.State.Error = state.Error
+	req.State.Canceled = state.Canceled
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
@@ -330,7 +332,7 @@ func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 	return nil
 }
 
-// Update updates the workflow state.
+// Update let agent updates the step state at the server.
 func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
@@ -342,6 +344,7 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	req.State.Exited = state.Exited
 	req.State.ExitCode = int32(state.ExitCode)
 	req.State.Error = state.Error
+	req.State.Canceled = state.Canceled
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
