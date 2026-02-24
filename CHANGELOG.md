@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-23
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -13,12 +13,11 @@
 
 ### ✨ Features
 
-- Support exclusive extensions [[#5978](https://github.com/woodpecker-ci/woodpecker/pull/5978)]
+- Support exclusive config extensions [[#5978](https://github.com/woodpecker-ci/woodpecker/pull/5978)]
 
 ### 📈 Enhancement
 
 - Refactor pipeline engine [[#6073](https://github.com/woodpecker-ci/woodpecker/pull/6073)]
-- Fix/selinux docs [[#6066](https://github.com/woodpecker-ci/woodpecker/pull/6066)]
 - Added cancel info so one can see why it was cancelled [[#6072](https://github.com/woodpecker-ci/woodpecker/pull/6072)]
 - Document required forge methods [[#6049](https://github.com/woodpecker-ci/woodpecker/pull/6049)]
 - Dynamic log following [[#6036](https://github.com/woodpecker-ci/woodpecker/pull/6036)]
@@ -31,13 +30,12 @@
 - CLI: Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
 - Improve service syntax related docs and tests nits [[#5991](https://github.com/woodpecker-ci/woodpecker/pull/5991)]
 - Remove deactivated secrets type from container defintion [[#5983](https://github.com/woodpecker-ci/woodpecker/pull/5983)]
-- Fix docusaurus md link deprecation [[#5979](https://github.com/woodpecker-ci/woodpecker/pull/5979)]
 
 ### 🐛 Bug Fixes
 
 - Fully merge statuses [[#6119](https://github.com/woodpecker-ci/woodpecker/pull/6119)]
 - Only set tag env on tags [[#6142](https://github.com/woodpecker-ci/woodpecker/pull/6142)]
-- Fix BB email [[#6102](https://github.com/woodpecker-ci/woodpecker/pull/6102)]
+- Fix bitbucket email [[#6102](https://github.com/woodpecker-ci/woodpecker/pull/6102)]
 - Detached or service steps report back too [[#6039](https://github.com/woodpecker-ci/woodpecker/pull/6039)]
 - Don't propagate workflow error from agent back to agent [[#6056](https://github.com/woodpecker-ci/woodpecker/pull/6056)]
 - Fix pipeline cancellation status handling and step state synchronization [[#6011](https://github.com/woodpecker-ci/woodpecker/pull/6011)]
@@ -51,12 +49,12 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#6152](https://github.com/woodpecker-ci/woodpecker/pull/6152)]
 - chore(deps): update dependency isomorphic-dompurify to v3 [[#6147](https://github.com/woodpecker-ci/woodpecker/pull/6147)]
 - chore(deps): update docs npm deps non-major [[#6137](https://github.com/woodpecker-ci/woodpecker/pull/6137)]
 - Add deprecation policy [[#6068](https://github.com/woodpecker-ci/woodpecker/pull/6068)]
 - chore(deps): lock file maintenance [[#6128](https://github.com/woodpecker-ci/woodpecker/pull/6128)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.55.0 [[#6125](https://github.com/woodpecker-ci/woodpecker/pull/6125)]
+- Improve selinux docs [[#6066](https://github.com/woodpecker-ci/woodpecker/pull/6066)]
 - document how to ignore failure on services [[#6106](https://github.com/woodpecker-ci/woodpecker/pull/6106)]
 - chore(deps): update docs npm deps non-major [[#6109](https://github.com/woodpecker-ci/woodpecker/pull/6109)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.54.0 [[#6091](https://github.com/woodpecker-ci/woodpecker/pull/6091)]
@@ -70,11 +68,13 @@
 - Add Homebrew package [[#6037](https://github.com/woodpecker-ci/woodpecker/pull/6037)]
 - chore(deps): update dependency axios to v1.13.3 [[#6010](https://github.com/woodpecker-ci/woodpecker/pull/6010)]
 - chore(deps): update docs npm deps non-major [[#6000](https://github.com/woodpecker-ci/woodpecker/pull/6000)]
+- Fix docusaurus md link deprecation [[#5979](https://github.com/woodpecker-ci/woodpecker/pull/5979)]
 - chore(deps): update docs npm deps non-major [[#5982](https://github.com/woodpecker-ci/woodpecker/pull/5982)]
 
 ### 📦️ Dependency
 
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.41.0 [[#6151](https://github.com/woodpecker-ci/woodpecker/pull/6151)]
+- chore(deps): lock file maintenance [[#6152](https://github.com/woodpecker-ci/woodpecker/pull/6152)]
 - chore(deps): lock file maintenance [[#6149](https://github.com/woodpecker-ci/woodpecker/pull/6149)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.40.1 [[#6148](https://github.com/woodpecker-ci/woodpecker/pull/6148)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.10.1 [[#6138](https://github.com/woodpecker-ci/woodpecker/pull/6138)]
@@ -126,6 +126,7 @@
 
 ### Misc
 
+- Remove fixed badge width in UI [[#6157](https://github.com/woodpecker-ci/woodpecker/pull/6157)]
 - Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
 - Improve packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
 - Add some tests [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
