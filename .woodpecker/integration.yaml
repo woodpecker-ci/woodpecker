@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'docker.io/golang:1.24'
+  - &golang_image 'docker.io/golang:1.26'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/integration.yaml'
@@ -15,46 +15,23 @@ when:
     path: *when_path
 
 steps:
-  - name: vendor
-    image: *golang_image
-    commands:
-      - go mod vendor
-    when:
-      path:
-        - <<: *when_path
-        - '.woodpecker/**'
-
   - name: integration
     image: *golang_image
-    depends_on:
-      - vendor
     commands:
       - go test -race -cover -coverprofile integration.out -timeout 60s -tags 'test' ./test/integration/...
     when:
       - path: *when_path
 
-  - name: codecov
-    image: docker.io/woodpeckerci/plugin-codecov:2.1.6
-    depends_on:
-      - integration
-    settings:
-      files:
-        - integration.out
-      token:
-        from_secret: codecov_token
-    when:
-      - path: *when_path
-    failure: ignore
-
 services:
   gitea:
-    image: docker.io/postgres:17
-    ports: ['8000']
+    image: docker.io/gitea/gitea:1.25.4
+    ports:
+      - '8000'
     environment:
       USER_UID: 1000
       USER_GID: 1000
       # GITEA__server__DOMAIN: gitea.local.self
-      GITEA__server__ROOT_URL: https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}
+      GITEA__server__ROOT_URL: http://gitea:8000/
       GITEA__database__DB_TYPE: sqlite
       GITEA__database__HOST: gitea-database:5432
       GITEA__database__NAME: gitea
