@@ -181,7 +181,7 @@
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
-          "type": "string"
+          "$ref": "#/definitions/event_constraint_list"
         },
         "cron": {
           "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",
@@ -420,7 +420,7 @@
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
-          "type": "string"
+          "$ref": "#/definitions/event_constraint_list"
         },
         "cron": {
           "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",

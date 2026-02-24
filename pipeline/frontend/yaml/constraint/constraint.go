@@ -42,7 +42,7 @@ type (
 		Platform List                        `yaml:"platform,omitempty"`
 		Branch   List                        `yaml:"branch,omitempty"`
 		Cron     List                        `yaml:"cron,omitempty"`
-		Status   List                        `yaml:"status,omitempty"`
+		Status   []string                    `yaml:"status,omitempty"`
 		Matrix   Map                         `yaml:"matrix,omitempty"`
 		Local    optional.Option[bool]       `yaml:"local,omitempty"`
 		Path     Path                        `yaml:"path,omitempty"`
@@ -77,7 +77,7 @@ func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]
 
 func (when *When) IncludesStatusFailure() bool {
 	for _, c := range when.Constraints {
-		if c.Status.Includes("failure") {
+		if slices.Contains(c.Status, "failure") {
 			return true
 		}
 	}
@@ -93,7 +93,7 @@ func (when *When) IncludesStatusSuccess() bool {
 		return true
 	}
 	for _, c := range when.Constraints {
-		if len(c.Status.Include) == 0 || c.Status.Includes("success") {
+		if len(c.Status) == 0 || slices.Contains(c.Status, "failure") {
 			return true
 		}
 	}
