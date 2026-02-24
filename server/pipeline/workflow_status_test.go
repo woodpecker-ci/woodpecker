@@ -69,6 +69,110 @@ func TestWorkflowStatus(t *testing.T) {
 			},
 			e: model.StatusFailure,
 		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusPending,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusPending,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusPending,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusPending,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusRunning,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusRunning,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusRunning,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusRunning,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusRunning,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusRunning,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusRunning,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusRunning,
+		},
 	}
 	for _, tt := range tests {
 		assert.Equal(t, tt.e, WorkflowStatus(tt.s))

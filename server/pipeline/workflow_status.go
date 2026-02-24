@@ -25,7 +25,7 @@ func WorkflowStatus(steps []*model.Step) model.StatusValue {
 	status := model.StatusSuccess
 
 	for _, p := range steps {
-		if p.Failure == model.FailureFail {
+		if p.Failure == model.FailureFail || !p.Failing() {
 			status = MergeStatusValues(status, p.State)
 		}
 	}
