@@ -199,23 +199,23 @@ func TestIsRecoverable(t *testing.T) {
 
 	t.Run("canceled context with recovery enabled returns true", func(t *testing.T) {
 		mgr := NewRecoveryManager(nil, "wf-1", true)
-		ctx, cancel := context.WithCancel(t.Context())
-		cancel()
+		ctx, cancel := context.WithCancelCause(t.Context())
+		cancel(nil)
 		assert.True(t, mgr.IsRecoverable(ctx))
 	})
 
 	t.Run("canceled context with recovery disabled returns false", func(t *testing.T) {
 		mgr := NewRecoveryManager(nil, "wf-1", false)
-		ctx, cancel := context.WithCancel(t.Context())
-		cancel()
+		ctx, cancel := context.WithCancelCause(t.Context())
+		cancel(nil)
 		assert.False(t, mgr.IsRecoverable(ctx))
 	})
 
 	t.Run("canceled context with user cancel returns false", func(t *testing.T) {
 		mgr := NewRecoveryManager(nil, "wf-1", true)
 		mgr.SetCanceled()
-		ctx, cancel := context.WithCancel(t.Context())
-		cancel()
+		ctx, cancel := context.WithCancelCause(t.Context())
+		cancel(nil)
 		assert.False(t, mgr.IsRecoverable(ctx))
 	})
 }
