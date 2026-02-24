@@ -25,6 +25,56 @@ import (
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
+func TestWorkflowStatus(t *testing.T) {
+	tests := []struct {
+		s []*model.Step
+		e model.StatusValue
+	}{
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusFailure,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusSuccess,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusSuccess,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusFailure,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusFailure,
+		},
+	}
+	for _, tt := range tests {
+		assert.Equal(t, tt.e, WorkflowStatus(tt.s))
+	}
+}
+
 func TestUpdateWorkflowStatusToRunning(t *testing.T) {
 	t.Run("should update workflow to running status", func(t *testing.T) {
 		workflow := model.Workflow{
