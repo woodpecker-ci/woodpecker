@@ -28,7 +28,7 @@ func NewWoodpeckerClient(baseURL, token string) *WoodpeckerClient {
 }
 
 // doRequest performs an HTTP request with authentication
-func (c *WoodpeckerClient) doRequest(method, path string, body interface{}) (*http.Response, error) {
+func (c *WoodpeckerClient) doRequest(method, path string, body any) (*http.Response, error) {
 	var bodyReader io.Reader
 	if body != nil {
 		jsonData, err := json.Marshal(body)
@@ -54,7 +54,7 @@ func (c *WoodpeckerClient) doRequest(method, path string, body interface{}) (*ht
 }
 
 // GetRepos fetches the list of repositories
-func (c *WoodpeckerClient) GetRepos() ([]map[string]interface{}, error) {
+func (c *WoodpeckerClient) GetRepos() ([]map[string]any, error) {
 	resp, err := c.doRequest("GET", "/api/repos", nil)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (c *WoodpeckerClient) GetRepos() ([]map[string]interface{}, error) {
 		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
-	var repos []map[string]interface{}
+	var repos []map[string]any
 	if err := json.NewDecoder(resp.Body).Decode(&repos); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
@@ -92,7 +92,7 @@ func (c *WoodpeckerClient) ActivateRepo(owner, name string) error {
 }
 
 // GetPipeline fetches a specific pipeline
-func (c *WoodpeckerClient) GetPipeline(owner, name string, pipelineID int) (map[string]interface{}, error) {
+func (c *WoodpeckerClient) GetPipeline(owner, name string, pipelineID int) (map[string]any, error) {
 	path := fmt.Sprintf("/api/repos/%s/%s/pipelines/%d", owner, name, pipelineID)
 	resp, err := c.doRequest("GET", path, nil)
 	if err != nil {
@@ -105,7 +105,7 @@ func (c *WoodpeckerClient) GetPipeline(owner, name string, pipelineID int) (map[
 		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
-	var pipeline map[string]interface{}
+	var pipeline map[string]any
 	if err := json.NewDecoder(resp.Body).Decode(&pipeline); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
@@ -114,7 +114,7 @@ func (c *WoodpeckerClient) GetPipeline(owner, name string, pipelineID int) (map[
 }
 
 // TriggerPipeline manually triggers a pipeline
-func (c *WoodpeckerClient) TriggerPipeline(owner, name, branch string) (map[string]interface{}, error) {
+func (c *WoodpeckerClient) TriggerPipeline(owner, name, branch string) (map[string]any, error) {
 	path := fmt.Sprintf("/api/repos/%s/%s/pipelines", owner, name)
 	body := map[string]string{
 		"branch": branch,
@@ -131,12 +131,109 @@ func (c *WoodpeckerClient) TriggerPipeline(owner, name, branch string) (map[stri
 		return nil, fmt.Errorf("failed to trigger pipeline: status %d, body: %s", resp.StatusCode, string(respBody))
 	}
 
-	var pipeline map[string]interface{}
+	var pipeline map[string]any
 	if err := json.NewDecoder(resp.Body).Decode(&pipeline); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	return pipeline, nil
+}
+
+// CancelPipeline cancels a running pipeline
+func (c *WoodpeckerClient) CancelPipeline(owner, name string, pipelineID int) error {
+	path := fmt.Sprintf("/api/repos/%s/%s/pipelines/%d/cancel", owner, name, pipelineID)
+	resp, err := c.doRequest("POST", path, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to cancel pipeline: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	return nil
+}
+
+// GetPipelines fetches all pipelines for a repository
+func (c *WoodpeckerClient) GetPipelines(owner, name string) ([]map[string]any, error) {
+	path := fmt.Sprintf("/api/repos/%s/%s/pipelines", owner, name)
+	resp, err := c.doRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var pipelines []map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&pipelines); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return pipelines, nil
+}
+
+// GetPipelineSteps fetches all steps for a pipeline
+func (c *WoodpeckerClient) GetPipelineSteps(owner, name string, pipelineID int) ([]map[string]any, error) {
+	path := fmt.Sprintf("/api/repos/%s/%s/pipelines/%d", owner, name, pipelineID)
+	resp, err := c.doRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var pipeline map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&pipeline); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	// Extract steps/workflows from pipeline
+	// TODO: Adjust based on actual API response structure
+	steps, ok := pipeline["steps"].([]any)
+	if !ok {
+		return nil, fmt.Errorf("steps not found in pipeline response")
+	}
+
+	result := make([]map[string]any, len(steps))
+	for i, step := range steps {
+		result[i] = step.(map[string]any)
+	}
+
+	return result, nil
+}
+
+// GetPipelineLogs fetches logs for a pipeline
+func (c *WoodpeckerClient) GetPipelineLogs(owner, name string, pipelineID int) (string, error) {
+	// TODO: Implement based on actual Woodpecker API
+	// This might require iterating through workflow steps and fetching logs for each
+	path := fmt.Sprintf("/api/repos/%s/%s/pipelines/%d/logs", owner, name, pipelineID)
+	resp, err := c.doRequest("GET", path, nil)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("failed to get logs: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	logs, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read logs: %w", err)
+	}
+
+	return string(logs), nil
 }
 
 // WaitForPipelineComplete waits for a pipeline to complete (success or failure)

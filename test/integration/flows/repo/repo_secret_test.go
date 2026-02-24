@@ -1,7 +1,7 @@
-package integration
+package repo_test
 
 import "testing"
 
-func TestSecretInjected(t *testing.T) {
+func TestFlow_SecretInjected(t *testing.T) {
 	// TODO: check if a secret was injected into the pipeline config
 }

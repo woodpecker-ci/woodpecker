@@ -13,10 +13,11 @@ type Command struct {
 	env map[string]string
 }
 
-func NewTask(cmdName string, args ...string) *Command {
+func NewCommand(cmdName string, args ...string) *Command {
 	cmd := exec.Command(cmdName, args...)
 	return &Command{
 		cmd: cmd,
+		env: make(map[string]string),
 	}
 }
 
