@@ -27,7 +27,7 @@ import (
 )
 
 // EnhanceHTTPError adds detailed context to HTTP errors to help with debugging.
-func EnhanceHTTPError(err error, method, endpoint string) error {
+func EnhanceHTTPError(err error, method) error {
 	if err == nil {
 		return nil
 	}
