@@ -59,7 +59,7 @@ func EnhanceHTTPError(err error, method, endpoint string) error {
 	}
 
 	// check for net package errors
-	// dns error hadling
+	// dns error handling
 	var dnsErr *net.DNSError
 	if errors.As(err, &dnsErr) {
 		if dnsErr.IsNotFound {
@@ -71,7 +71,7 @@ func EnhanceHTTPError(err error, method, endpoint string) error {
 		return fmt.Errorf("DNS error: %s: %w", baseMsg, err)
 	}
 
-	// op error hadling
+	// op error handling
 	var opErr *net.OpError
 	if errors.As(err, &opErr) {
 		// connection refused
