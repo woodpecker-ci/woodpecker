@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/google/tink/go/tink"
+	"github.com/tink-crypto/tink-go/v2/tink"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"

@@ -17,7 +17,7 @@ package queue
 import (
 	"container/list"
 	"context"
-	"fmt"
+	"errors"
 	"slices"
 	"sync"
 	"time"
@@ -58,8 +58,6 @@ type fifo struct {
 // as the agent pull in 10 milliseconds we should also give them work asap.
 const processTimeInterval = 100 * time.Millisecond
 
-var ErrWorkerKicked = fmt.Errorf("worker was kicked")
-
 // NewMemoryQueue returns a new fifo queue.
 func NewMemoryQueue(ctx context.Context) Queue {
 	q := &fifo{
@@ -90,23 +88,23 @@ func (q *fifo) Poll(c context.Context, agentID int64, filter FilterFn) (*model.T
 	q.Lock()
 	ctx, stop := context.WithCancelCause(c)
 
-	_worker := &worker{
+	w := &worker{
 		agentID: agentID,
 		channel: make(chan *model.Task, 1),
 		filter:  filter,
 		stop:    stop,
 	}
-	q.workers[_worker] = struct{}{}
+	q.workers[w] = struct{}{}
 	q.Unlock()
 
 	for {
 		select {
 		case <-ctx.Done():
 			q.Lock()
-			delete(q.workers, _worker)
+			delete(q.workers, w)
 			q.Unlock()
 			return nil, ctx.Err()
-		case t := <-_worker.channel:
+		case t := <-w.channel:
 			return t, nil
 		}
 	}
@@ -122,50 +120,47 @@ func (q *fifo) Error(_ context.Context, id string, err error) error {
 	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
-// ErrorAtOnce signals multiple done are complete with an error.
+// ErrorAtOnce signals multiple tasks are done and complete with an error.
+// If still pending they will just get removed from the queue.
 func (q *fifo) ErrorAtOnce(_ context.Context, ids []string, err error) error {
+	if errors.Is(err, ErrCancel) {
+		return q.finished(ids, model.StatusKilled, err)
+	}
 	return q.finished(ids, model.StatusFailure, err)
 }
 
+// locks the queue itself!
 func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
 	q.Lock()
+	defer q.Unlock()
 
+	// it's an external error so we wrap it
+	err = NewErrExternal(err)
+
+	var errs []error
+	// we first process the tasks itself
 	for _, id := range ids {
-		taskEntry, ok := q.running[id]
-		if ok {
+		if taskEntry, ok := q.running[id]; ok {
 			taskEntry.error = err
 			close(taskEntry.done)
 			delete(q.running, id)
 		} else {
-			q.removeFromPending(id)
+			errs = append(errs, q.removeFromPendingAndWaiting(id))
 		}
+	}
+
+	// next we aim for there dependencies
+	// we do this because in our ids list there could be tasks and its dependencies
+	// so not to mess things up
+	for _, id := range ids {
 		q.updateDepStatusInQueue(id, exitStatus)
 	}
 
-	q.Unlock()
-	return nil
-}
-
-// EvictAtOnce removes multiple pending tasks from the queue.
-func (q *fifo) EvictAtOnce(_ context.Context, taskIDs []string) error {
-	q.Lock()
-	defer q.Unlock()
-
-	for _, id := range taskIDs {
-		var next *list.Element
-		for element := q.pending.Front(); element != nil; element = next {
-			next = element.Next()
-			task, ok := element.Value.(*model.Task)
-			if ok && task.ID == id {
-				q.pending.Remove(element)
-				return nil
-			}
-		}
-	}
-	return ErrNotFound
+	return errors.Join(errs...)
 }
 
 // Wait waits until the item is done executing.
+// Also signals via error ErrCancel if workflow got canceled.
 func (q *fifo) Wait(ctx context.Context, taskID string) error {
 	q.Lock()
 	state := q.running[taskID]
@@ -174,7 +169,10 @@ func (q *fifo) Wait(ctx context.Context, taskID string) error {
 		select {
 		case <-ctx.Done():
 		case <-state.done:
-			return state.error
+			// only return queue errors and no workflow errors
+			if !errors.Is(state.error, new(ErrExternal)) {
+				return state.error
+			}
 		}
 	}
 	return nil
@@ -286,19 +284,15 @@ func (q *fifo) process() {
 
 func (q *fifo) filterWaiting() {
 	// resubmits all waiting tasks to pending, deps may have cleared
-	var nextWaiting *list.Element
-	for e := q.waitingOnDeps.Front(); e != nil; e = nextWaiting {
-		nextWaiting = e.Next()
-		task, _ := e.Value.(*model.Task)
+	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
+		task, _ := element.Value.(*model.Task)
 		q.pending.PushBack(task)
 	}
 
 	// rebuild waitingDeps
 	q.waitingOnDeps = list.New()
 	var filtered []*list.Element
-	var nextPending *list.Element
-	for element := q.pending.Front(); element != nil; element = nextPending {
-		nextPending = element.Next()
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 		if q.depsInQueue(task) {
 			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
@@ -314,12 +308,10 @@ func (q *fifo) filterWaiting() {
 }
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
-	var next *list.Element
 	var bestWorker *worker
 	var bestScore int
 
-	for element := q.pending.Front(); element != nil; element = next {
-		next = element.Next()
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
@@ -342,6 +334,8 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 func (q *fifo) resubmitExpiredPipelines() {
 	for taskID, taskState := range q.running {
 		if time.Now().After(taskState.deadline) {
+			log.Info().Msgf("queue: resubmitting expired task %s", taskID)
+			taskState.error = ErrTaskExpired
 			q.pending.PushFront(taskState.item)
 			delete(q.running, taskID)
 			close(taskState.done)
@@ -350,9 +344,7 @@ func (q *fifo) resubmitExpiredPipelines() {
 }
 
 func (q *fifo) depsInQueue(task *model.Task) bool {
-	var next *list.Element
-	for element := q.pending.Front(); element != nil; element = next {
-		next = element.Next()
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		possibleDep, ok := element.Value.(*model.Task)
 		log.Debug().Msgf("queue: pending right now: %v", possibleDep.ID)
 		for _, dep := range task.Dependencies {
@@ -370,13 +362,12 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 	return false
 }
 
+// expects the q to be currently owned e.g. locked by caller!
 func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
-	var next *list.Element
-	for element := q.pending.Front(); element != nil; element = next {
-		next = element.Next()
-		pending, ok := element.Value.(*model.Task)
+	for element := q.pending.Front(); element != nil; element = element.Next() {
+		pending, _ := element.Value.(*model.Task)
 		for _, dep := range pending.Dependencies {
-			if ok && taskID == dep {
+			if taskID == dep {
 				pending.DepStatus[dep] = status
 			}
 		}
@@ -390,27 +381,40 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 		}
 	}
 
-	for element := q.waitingOnDeps.Front(); element != nil; element = next {
-		next = element.Next()
-		waiting, ok := element.Value.(*model.Task)
+	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
+		waiting, _ := element.Value.(*model.Task)
 		for _, dep := range waiting.Dependencies {
-			if ok && taskID == dep {
+			if taskID == dep {
 				waiting.DepStatus[dep] = status
 			}
 		}
 	}
 }
 
-func (q *fifo) removeFromPending(taskID string) {
+// expects the q to be currently owned e.g. locked by caller!
+func (q *fifo) removeFromPendingAndWaiting(taskID string) error {
 	log.Debug().Msgf("queue: trying to remove %s", taskID)
-	var next *list.Element
-	for element := q.pending.Front(); element != nil; element = next {
-		next = element.Next()
+
+	// we assume pending first
+	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from pending", taskID)
-			q.pending.Remove(element)
-			return
+			_ = q.pending.Remove(element)
+			return nil
 		}
 	}
+
+	// well looks like it's waiting
+	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
+		task, _ := element.Value.(*model.Task)
+		if task.ID == taskID {
+			log.Debug().Msgf("queue: %s is removed from waitingOnDeps", taskID)
+			_ = q.waitingOnDeps.Remove(element)
+			return nil
+		}
+	}
+
+	// well it could not be found
+	return ErrNotFound
 }

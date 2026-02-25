@@ -3,7 +3,7 @@ arch: amd64
 platform: linux
 version: ${VERSION_NUMBER}
 description: Woodpecker CLI
-homepage: https://github.com/woodpecker-ci/woodpecker
+homepage: https://woodpecker-ci.org/
 license: Apache 2.0
 maintainer: Woodpecker Authors <maintainer@woodpecker-ci.org>
 section: utils

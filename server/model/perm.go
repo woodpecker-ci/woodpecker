@@ -19,7 +19,6 @@ package model
 type Perm struct {
 	UserID  int64 `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'user_id'"`
 	RepoID  int64 `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'repo_id'"`
-	Repo    *Repo `json:"-"       xorm:"-"`
 	Pull    bool  `json:"pull"    xorm:"pull"`
 	Push    bool  `json:"push"    xorm:"push"`
 	Admin   bool  `json:"admin"   xorm:"admin"`

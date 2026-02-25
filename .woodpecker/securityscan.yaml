@@ -5,7 +5,7 @@ when:
       - ${CI_REPO_DEFAULT_BRANCH}
 
 variables:
-  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.4.3
+  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.4.4
 
 steps:
   backend:
@@ -34,6 +34,7 @@ steps:
 services:
   server:
     image: *trivy_plugin
+    failure: ignore # as we don't care about the exit code
     settings:
       service: true
       db-repository: mirror.gcr.io/aquasec/trivy-db:2

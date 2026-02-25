@@ -4,7 +4,7 @@ when:
 
 steps:
   - name: links
-    image: docker.io/lycheeverse/lychee:0.15.1
+    image: docker.io/lycheeverse/lychee:0.23.0
     failure: ignore
     depends_on: []
     commands:
@@ -14,7 +14,7 @@ steps:
       - echo -e "\nLast checked:$(date)" >> links.md
 
   - name: Update issue
-    image: docker.io/alpine:3.22
+    image: docker.io/alpine:3.23
     depends_on: links
     environment:
       GITHUB_TOKEN:

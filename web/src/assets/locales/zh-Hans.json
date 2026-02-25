@@ -20,12 +20,15 @@
                 "desc": "注册到此服务器的 Agents。",
                 "edit_agent": "编辑 Agent",
                 "id": "ID",
-                "last_contact": "最后访问",
+                "last_contact": {
+                    "last_contact": "上次通信",
+                    "badge": "上次通信"
+                },
                 "name": {
                     "name": "名称",
                     "placeholder": "Agent 名称"
                 },
-                "never": "绝不",
+                "never": "从未",
                 "no_schedule": {
                     "name": "禁用 Agent",
                     "placeholder": "阻止 Agent 接受新任务"
@@ -96,7 +99,7 @@
                 "add": "添加密钥",
                 "created": "全局密钥已创建",
                 "deleted": "全局密钥已删除",
-                "desc": "全局密钥可以当做环境变量传给任意仓库的各个流水线步骤。",
+                "desc": "全局密钥可用于任意仓库的各个流水线。",
                 "events": {
                     "events": "对以下事件可用",
                     "pr_warning": "慎选这个选项：用户可以提交一个恶意推送请求以暴露你的密钥。"
@@ -113,7 +116,7 @@
                 "secrets": "密钥",
                 "show": "显示所有密钥",
                 "value": "值",
-                "warning": "该密钥对所有服务器用户可用。"
+                "warning": "该密钥对所有用户可用。"
             },
             "settings": "设置",
             "users": {
@@ -167,7 +170,7 @@
                 "add": "添加密钥",
                 "created": "组织密钥已创建",
                 "deleted": "组织密钥已删除",
-                "desc": "组织密钥可以被当做环境变量传递给该组织的所有仓库的各个流水线步骤。",
+                "desc": "组织密钥可用于该组织所有仓库的各个流水线。",
                 "events": {
                     "events": "对以下事件可用",
                     "pr_warning": "慎选这个选项：用户可以提交一个恶意推送请求以暴露你的密钥。"
@@ -234,25 +237,26 @@
                 "value": "变量值",
                 "delete": "删除变量"
             },
-            "show_pipelines": "查看流水线"
+            "show_pipelines": "查看流水线",
+            "no_manual_workflows": "无手动触发的工作流，或已被全部筛选。"
         },
         "not_allowed": "你没有权限访问这个仓库",
-        "open_in_forge": "在版本控制系统中打开",
+        "open_in_forge": "在代码托管平台中打开",
         "pipeline": {
             "actions": {
                 "cancel": "取消",
                 "cancel_success": "流水线已被取消",
                 "canceled": "该步骤已被取消。",
                 "deploy": "部署",
-                "log_auto_scroll": "自动滚动",
-                "log_auto_scroll_off": "关闭自动滚动",
+                "log_auto_scroll": "启用自动滚动",
+                "log_auto_scroll_off": "禁用自动滚动",
                 "log_download": "下载",
                 "restart": "重启",
                 "restart_success": "流水线已重启",
                 "log_delete": "删除"
             },
             "config": "配置",
-            "errors": "错误 ({count})",
+            "errors": "错误",
             "event": {
                 "cron": "计划任务",
                 "deploy": "部署",
@@ -261,12 +265,13 @@
                 "push": "推送",
                 "tag": "标签",
                 "release": "发布",
-                "pr_closed": "拉取请求已合并/关闭"
+                "pr_closed": "拉取请求已合并/关闭",
+                "pr_metadata": "拉取请求元数据已改变"
             },
             "exit_code": "退出代码 {exitCode}",
-            "files": "修改的文件（{files}）",
+            "files": "修改的文件",
             "loading": "载入中…",
-            "log_download_error": "下载日志文件中发生了错误",
+            "log_download_error": "下载日志文件时发生了错误",
             "log_title": "步骤日志",
             "no_files": "没有文件修改。",
             "no_pipeline_steps": "没有流水线步骤可用！",
@@ -299,8 +304,8 @@
             },
             "step_not_started": "该步骤尚未启动。",
             "tasks": "任务",
-            "warnings": "警告 ({count})",
-            "we_got_some_errors": "哦不，我们遇到了一些错误！",
+            "warnings": "警告",
+            "we_got_some_errors": "哦不，发生了一些错误！",
             "no_logs": "无日志",
             "created": "创建于：{created}",
             "debug": {
@@ -314,14 +319,19 @@
             },
             "duration": "流水线耗时：{duration}",
             "log_delete_confirm": "您确定要删除步骤日志吗？",
-            "log_delete_error": "删除步骤日志时发生了错误"
+            "log_delete_error": "删除步骤日志时发生了错误",
+            "view": "查看流水线",
+            "cancel_info": {
+                "superseded_by": "#{pipelineId} 已取消",
+                "canceled_by_user": "{user} 已取消"
+            }
         },
         "pull_requests": "合并请求",
         "settings": {
             "actions": {
                 "actions": "操作",
                 "delete": {
-                    "confirm": "该操作将会删除所有数据！！！\n\n你确定真的要继续吗？",
+                    "confirm": "该操作将会删除所有数据！\n\n你确定真的要继续吗？",
                     "delete": "删除仓库",
                     "success": "仓库已删除"
                 },
@@ -344,7 +354,10 @@
                 "type": "语法",
                 "type_html": "HTML",
                 "type_markdown": "Markdown",
-                "type_url": "URL"
+                "type_url": "URL",
+                "events": "事件",
+                "step": "步骤",
+                "workflow": "工作流"
             },
             "crons": {
                 "add": "创建计划",
@@ -372,21 +385,22 @@
                     "placeholder": "计划任务",
                     "title": "计划任务（基于 UTC）"
                 },
-                "show": "显示所有计划"
+                "show": "显示所有计划",
+                "enabled": "启用"
             },
             "general": {
                 "allow_pr": {
                     "allow": "允许拉取请求",
-                    "desc": "运行拉取请求中的流水线。"
+                    "desc": "允许运行拉取请求中的流水线。"
                 },
                 "cancel_prev": {
                     "cancel": "取消之前的流水线",
-                    "desc": "启用后，启动新触发的管道之前会取消相同事件和上下文的挂起和正在运行的管道。"
+                    "desc": "启用后，启动新触发的流水线之前会取消相同事件和上下文的挂起和正在运行的流水线。"
                 },
-                "general": "基本设置",
+                "general": "项目",
                 "netrc_only_trusted": {
-                    "desc": "仅将 .netrc 提供的凭据注入受信任的容器（推荐）。",
-                    "netrc_only_trusted": "仅将 .netrc 提供的凭据注入受信任的容器"
+                    "desc": "可获取用于克隆或推送仓库至代码托管平台的 netrc 凭证的插件。",
+                    "netrc_only_trusted": "自定义信任的插件"
                 },
                 "pipeline_path": {
                     "default": "默认: .woodpecker/*.yml -> .woodpecker.yml",
@@ -400,7 +414,7 @@
                     "protected": "受保护"
                 },
                 "save": "保存设置",
-                "success": "仓库设置已更新",
+                "success": "项目设置已更新",
                 "timeout": {
                     "minutes": "分钟",
                     "timeout": "流水线最大执行时长"
@@ -491,7 +505,7 @@
         "visibility": {
             "visibility": "项目可见性",
             "public": {
-                "desc": "任何无需登录的用户均可以看到你的项目。",
+                "desc": "任何用户无需登录即可看到你的项目。",
                 "public": "公共的"
             },
             "private": {
@@ -549,7 +563,7 @@
                 "token": "个人访问令牌"
             },
             "general": {
-                "general": "基本设置",
+                "general": "账户设置",
                 "language": "语言",
                 "theme": {
                     "auto": "自动",
@@ -562,7 +576,7 @@
                 "add": "添加密钥",
                 "created": "已创建用户密钥",
                 "deleted": "已删除用户密钥",
-                "desc": "用户密钥可以在运行时作为环境变量传递到所有用户的存储库的各个流水线步骤。",
+                "desc": "用户密钥可用于该用户所有仓库的各个流水线。",
                 "events": {
                     "events": "对以下事件可用",
                     "pr_warning": "慎选这个选项：用户可以提交一个恶意推送请求以暴露你的密钥。"
@@ -614,12 +628,16 @@
     "login_with": "使用 {forge} 登录",
     "require_approval": {
         "allowed_users": {
-            "allowed_users": "已允许的用户"
+            "allowed_users": "已允许的用户",
+            "desc": "由列表中用户创建的流水线无需批准。"
         },
         "none": "无",
         "none_desc": "所有事件都会触发管道，包括拉取请求。此设置可能很危险，仅建议用于私有实例。",
         "pull_requests": "所有拉取请求",
-        "forks": "从已 fork 的仓库进行 Pull request"
+        "forks": "从已 fork 的仓库进行 Pull request",
+        "desc": "通过执行前批准以防止恶意流水线暴露密钥或运行有害的任务。",
+        "require_approval_for": "批准要求",
+        "all_events": "代码托管平台的所有事件"
     },
     "secrets": {
         "secrets": "密钥",
@@ -635,13 +653,16 @@
         "deleted": "密钥已删除",
         "delete_confirm": "您确实要删除这个密钥吗？",
         "events": {
-            "events": "适用于以下事件"
+            "events": "适用于以下事件",
+            "warning": "向所有拉取请求暴露密钥可能导致密钥被恶意拉取请求窃取。"
         },
         "none": "目前没有密钥。",
         "desc": "密钥可以被用于这个仓库的所有流水线中。",
         "plugins": {
-            "images": "仅适用于以下的插件"
-        }
+            "images": "仅适用于以下的插件",
+            "desc": "该密钥生效的插件镜像列表。置空以允许所有插件和常规步骤。"
+        },
+        "note": "备注"
     },
     "no_search_results": "未找到结果",
     "org_access_denied": "您无权访问此组织",
@@ -673,9 +694,61 @@
     "oauth_error": "与 OAuth 提供商进行身份验证时出错",
     "public_url_for_oauth_if": "如果用于 OAuth 的对外可访问地址与当前系统的基础 URL 不同，请在({0})填入",
     "edit_forge": "编辑代码托管平台",
-    "forge_delete_confirm": "您真的想要删除这个仓库吗？这将也会删除与此仓库相关的所有仓库、用户和管道。",
+    "forge_delete_confirm": "您真的想要删除这个代码托管平台吗？这将也会删除与此代码托管平台相关的所有仓库、用户和流水线。",
     "no_forges": "还没有配置任何代码托管平台.",
     "developer_settings": "开发者设置",
     "delete_forge": "删除代码托管平台",
-    "login_to_woodpecker_with": "登录 Woodpecker 使用"
+    "login_to_woodpecker_with": "登录 Woodpecker 使用",
+    "extensions": "扩展程序",
+    "extensions_description": "扩展程序是可被 Woodpecker 调用的 HTTP 服务。",
+    "extension_endpoint_placeholder": "e.g. https://example.com/api",
+    "config_extension_endpoint": "配置扩展程序端点",
+    "extensions_signatures_public_key": "用于签名的公钥",
+    "extensions_signatures_public_key_description": "扩展程序应使用此公钥检验请求是否由 Woodpecker 发起。",
+    "extensions_configuration_saved": "扩展程序配置已保存",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "save": "保存",
+    "add": "添加",
+    "skip_verify": "跳过 SSL 验证",
+    "skip_verify_desc": "为 API 请求跳过 SSL 验证。不建议用于生产环境。",
+    "forge_created": "已创建代码托管平台",
+    "advanced_options": "高级选项",
+    "leave_empty_to_keep_current_value": "置空以保留原值",
+    "forge_deleted": "已删除代码托管平台",
+    "oauth_redirect_url": "OAuth 重定向 URL",
+    "forge_managed_by_env": "主要代码托管平台由环境变量控制。任何主要代码托管平台的更改将在重启时重置。",
+    "use_this_redirect_url_to_create": "用这个重定向 URL 来创建或更新 OAuth 应用。",
+    "forge_saved": "已保存代码托管平台",
+    "fullscreen": "全屏",
+    "exit_fullscreen": "退出全屏",
+    "help_translating": "您可以在 {0} 帮助翻译 Woodpecker 为您的语言。",
+    "weblate": "我们的 Weblate",
+    "disabled": "禁用",
+    "forges": "代码托管平台",
+    "forges_desc": "配置 Woodpecker 为其工作的代码托管平台。",
+    "add_forge": "添加代码托管平台",
+    "show_forges": "显示代码托管平台",
+    "addon": "Addon",
+    "forge_type": "代码托管平台类型",
+    "oauth_client_id": "OAuth Client ID",
+    "oauth_client_secret": "OAuth Client Secret",
+    "oauth_host": "OAuth host",
+    "merge_ref": "合并 ref",
+    "merge_ref_desc": "用于合并的 ref。这被用于确定拉取请求的 diff。",
+    "public_only": "仅公开",
+    "public_only_desc": "仅显示公开仓库。",
+    "git_username": "Git 用户名",
+    "git_username_desc": "Git 用户的用户名。",
+    "git_password": "Git 密码",
+    "git_password_desc": "Git 用户的密码或通行密钥（personal access token）。",
+    "executable": "可执行文件",
+    "executable_desc": "Addon 的可执行文件的路径。",
+    "developer_settings_to_create": "前往 {0} 并设置 OAuth 应用。",
+    "config_extension_exclusive": "独占",
+    "config_extension_exclusive_desc": "启用后，将跳过所有其他代码托管平台的配置获取方式。"
 }

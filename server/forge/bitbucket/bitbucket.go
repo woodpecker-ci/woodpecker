@@ -32,6 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
@@ -101,7 +102,21 @@ func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	if err != nil {
 		return nil, redirectURL, err
 	}
-	return convertUser(curr, token), redirectURL, nil
+
+	emails, err := client.ListEmail()
+	if err != nil {
+		return nil, redirectURL, err
+	}
+
+	primaryEmail := ""
+	for _, e := range emails.Values {
+		if e.IsPrimary {
+			primaryEmail = e.Email
+			break
+		}
+	}
+
+	return convertUser(curr, token, primaryEmail), redirectURL, nil
 }
 
 // Auth uses the Bitbucket oauth2 access token and refresh token to authenticate
@@ -169,7 +184,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	client := c.newClient(ctx, u)
 	repo, err := client.FindRepo(owner, name)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
 	}
 	perm, err := client.GetPermission(repo.FullName)
 	if err != nil {
@@ -181,6 +196,12 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
 func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+	// we paginate internally (https://github.com/woodpecker-ci/woodpecker/issues/5667)
+	// we merge data from different sources
+	if p.Page != 1 {
+		return nil, nil
+	}
+
 	setListOptions(p)
 
 	client := c.newClient(ctx, u)
@@ -322,6 +343,11 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClient(ctx, u)
 
+	// check repo exists
+	if _, err := c.Repo(ctx, u, r.ForgeRemoteID, r.Owner, r.Name); err != nil {
+		return fmt.Errorf("repo online check failed: %w", err)
+	}
+
 	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
 		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{
 			Page: page,
@@ -410,6 +436,14 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	u, err := common.RepoUserForgeID(ctx, c.forgeID, repo.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with "OAuth2 access token expired" error.
+	_store, ok := store.TryFromContext(ctx)
+	if ok {
+		forge.Refresh(ctx, c, _store, u)
 	}
 
 	switch pl.Event {

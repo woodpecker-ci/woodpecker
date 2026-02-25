@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
@@ -178,14 +179,6 @@ func TestLintErrors(t *testing.T) {
 			want: "Specified clone image does not match allow list, netrc is not injected",
 		},
 		{
-			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",
-			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-		},
-		{
-			from: "steps: { build: { image: golang, secrets: [ 'mysql_username' ] } }",
-			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-		},
-		{
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
 			want: "One or more of the specified dependencies do not exist",
 		},
@@ -193,7 +186,7 @@ func TestLintErrors(t *testing.T) {
 
 	for _, test := range testdata {
 		conf, err := yaml.ParseString(test.from)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      test.from,

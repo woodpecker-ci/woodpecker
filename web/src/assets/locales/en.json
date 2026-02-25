@@ -48,7 +48,8 @@
         "name": "Variable name",
         "value": "Variable value"
       },
-      "show_pipelines": "Show pipelines"
+      "show_pipelines": "Show pipelines",
+      "no_manual_workflows": "There were no manually executable workflows, or the filter exclude all of them."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
@@ -166,7 +167,8 @@
           "placeholder": "Schedule"
         },
         "edit": "Edit cron",
-        "delete": "Delete cron"
+        "delete": "Delete cron",
+        "enabled": "Enabled"
       },
       "badge": {
         "badge": "Badge",
@@ -175,7 +177,9 @@
         "type_markdown": "Markdown",
         "type_html": "HTML",
         "branch": "Branch",
-        "events": "Events"
+        "events": "Events",
+        "workflow": "Workflow",
+        "step": "Step"
       },
       "actions": {
         "actions": "Actions",
@@ -265,6 +269,10 @@
       "we_got_some_errors": "Oh no, an error occurred!",
       "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
+      "cancel_info": {
+        "superseded_by": "Superseded by #{pipelineId}",
+        "canceled_by_user": "Canceled by {user}"
+      },
       "debug": {
         "title": "Debug",
         "download_metadata": "Download metadata",
@@ -463,6 +471,7 @@
     "show": "Show secrets",
     "name": "Name",
     "value": "Value",
+    "note": "Note",
     "delete_confirm": "Do you really want to delete this secret?",
     "deleted": "Secret deleted",
     "created": "Secret created",
@@ -522,6 +531,8 @@
   "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
   "extension_endpoint_placeholder": "e.g. https://example.com/api",
   "config_extension_endpoint": "Config extension endpoint",
+  "config_extension_exclusive": "Exclusive",
+  "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
   "extensions_signatures_public_key": "Public key for signatures",
   "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
   "extensions_configuration_saved": "Extensions configuration saved",

@@ -29,14 +29,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
-	config_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
-	registry_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
-	secret_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -239,6 +235,43 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 			assert.Equal(t, http.StatusNotFound, w.Code)
 		})
+	})
+}
+
+func TestCancelPipeline(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	t.Run("should cancel running pipeline", func(t *testing.T) {
+		runningPipeline := &model.Pipeline{
+			ID:     2,
+			Number: 2,
+			Status: model.StatusRunning,
+		}
+
+		fakeRepo := &model.Repo{ID: 1}
+		fakeUser := &model.User{Login: "testuser"}
+
+		mockForge := forge_mocks.NewMockForge(t)
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("GetPipelineNumber", fakeRepo, int64(2)).Return(runningPipeline, nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{}, nil)
+		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
+
+		mockManager := manager_mocks.NewMockManager(t)
+		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
+		server.Config.Services.Manager = mockManager
+		server.Config.Services.Pubsub = pubsub.New()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Set("repo", fakeRepo)
+		c.Set("user", fakeUser)
+		c.Params = gin.Params{{Key: "number", Value: "2"}}
+
+		CancelPipeline(c)
+
+		assert.Equal(t, http.StatusNoContent, c.Writer.Status())
 	})
 }
 

@@ -53,6 +53,11 @@ func TestParse(t *testing.T) {
 		assert.False(t, out.SkipClone)
 	})
 
+	t.Run("Should fail on invalid yaml", func(t *testing.T) {
+		_, err := ParseString("notvalid")
+		assert.Error(t, err)
+	})
+
 	t.Run("Should handle simple yaml anchors", func(t *testing.T) {
 		out, err := ParseString(simpleYamlAnchors)
 		assert.NoError(t, err)
@@ -150,14 +155,10 @@ pipeline:
 `
 
 	workflow1, err := ParseString(sampleYamlPipeline)
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
 
 	assert.EqualValues(t, workflow1, workflow2)
 	assert.Len(t, workflow1.Steps.ContainerList, 1)
@@ -183,7 +184,6 @@ steps:
       - go test
   build:
     image: golang
-    network_mode: container:name
     commands:
       - go build
     when:
@@ -191,7 +191,8 @@ steps:
     depends_on: []
   notify:
     image: slack
-    channel: dev
+    settings:
+      channel: dev
     when:
       event: failure
 services:
@@ -248,14 +249,10 @@ steps:
 
 func TestReSerialize(t *testing.T) {
 	work1, err := ParseString(sampleVarYaml)
-	if !assert.NoError(t, err) {
-		t.Fail()
-	}
+	require.NoError(t, err)
 
-	workBin, err := yaml.Marshal(work1)
-	if !assert.NoError(t, err) {
-		t.Fail()
-	}
+	work1Bin, err := yaml.Marshal(work1)
+	require.NoError(t, err)
 
 	assert.EqualValues(t, `steps:
     - name: notify_fail
@@ -282,7 +279,54 @@ func TestReSerialize(t *testing.T) {
         DRIVER: next
         PLATFORM: linux
 skip_clone: false
-`, string(workBin))
+`, string(work1Bin))
+
+	work2, err := ParseString(sampleYaml)
+	require.NoError(t, err)
+
+	workBin2, err := yaml.Marshal(work2)
+	require.NoError(t, err)
+
+	// TODO: fix "steps.[1].depends_on: []" to be re-serialized!
+	assert.EqualValues(t, `when:
+    - event:
+        - tester
+        - tester2
+    - branch: tester
+workspace:
+    base: /go
+    path: src/github.com/octocat/hello-world
+steps:
+    - name: test
+      image: golang
+      commands:
+        - go install
+        - go test
+    - name: build
+      image: golang
+      commands: go build
+      when:
+        event: push
+    - name: notify
+      image: slack
+      settings:
+        channel: dev
+      when:
+        event: failure
+services:
+    - name: database
+      image: mysql
+labels:
+    com.example.team: frontend
+    com.example.type: build
+depends_on:
+    - lint
+    - test
+runs_on:
+    - success
+    - failure
+skip_clone: false
+`, string(workBin2))
 }
 
 func TestSlice(t *testing.T) {

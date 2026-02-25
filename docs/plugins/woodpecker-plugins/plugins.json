@@ -299,6 +299,16 @@
       "name": "Github Comment",
       "docs": "https://raw.githubusercontent.com/yyewolf/woodpecker-plugins/refs/heads/main/github-comment/docs.md",
       "verified": false
+    },
+    {
+      "name": "BunnyCDN Cache Purge",
+      "docs": "https://codeberg.org/bentasker/woodpecker-ci-bunnycdn-cache-flush/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Buildah",
+      "docs": "https://raw.githubusercontent.com/404systems/plugin-buildah/refs/heads/main/docs.md",
+      "verified": false
     }
   ]
 }
