@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-24
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @mehrdadbn9, @myselfghost, @qwerty287, @stardothosting
+@6543, @CrimsonFez, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @mehrdadbn9, @myers, @myselfghost, @qwerty287, @stardothosting
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Remove fixed badge width in UI [[#6157](https://github.com/woodpecker-ci/woodpecker/pull/6157)]
 - Refactor pipeline engine [[#6073](https://github.com/woodpecker-ci/woodpecker/pull/6073)]
 - Added cancel info so one can see why it was cancelled [[#6072](https://github.com/woodpecker-ci/woodpecker/pull/6072)]
 - Document required forge methods [[#6049](https://github.com/woodpecker-ci/woodpecker/pull/6049)]
@@ -33,6 +34,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix OAuth token refresh race condition with singleflight [[#6153](https://github.com/woodpecker-ci/woodpecker/pull/6153)]
 - Fully merge statuses [[#6119](https://github.com/woodpecker-ci/woodpecker/pull/6119)]
 - Only set tag env on tags [[#6142](https://github.com/woodpecker-ci/woodpecker/pull/6142)]
 - Fix bitbucket email [[#6102](https://github.com/woodpecker-ci/woodpecker/pull/6102)]
@@ -73,6 +75,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.42.0 [[#6159](https://github.com/woodpecker-ci/woodpecker/pull/6159)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.41.0 [[#6151](https://github.com/woodpecker-ci/woodpecker/pull/6151)]
 - chore(deps): lock file maintenance [[#6152](https://github.com/woodpecker-ci/woodpecker/pull/6152)]
 - chore(deps): lock file maintenance [[#6149](https://github.com/woodpecker-ci/woodpecker/pull/6149)]
@@ -126,7 +129,6 @@
 
 ### Misc
 
-- Remove fixed badge width in UI [[#6157](https://github.com/woodpecker-ci/woodpecker/pull/6157)]
 - Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
 - Improve packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
 - Add some tests [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
