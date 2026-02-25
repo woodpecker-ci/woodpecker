@@ -25,6 +25,160 @@ import (
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
+func TestWorkflowStatus(t *testing.T) {
+	tests := []struct {
+		s []*model.Step
+		e model.StatusValue
+	}{
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusFailure,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusSuccess,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusSuccess,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusFailure,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusFailure,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusPending,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusPending,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusPending,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusSuccess,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusPending,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusRunning,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusRunning,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusRunning,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusRunning,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusRunning,
+					Failure: model.FailureIgnore,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureFail,
+				},
+			},
+			e: model.StatusRunning,
+		},
+		{
+			s: []*model.Step{
+				{
+					State:   model.StatusRunning,
+					Failure: model.FailureFail,
+				},
+				{
+					State:   model.StatusPending,
+					Failure: model.FailureIgnore,
+				},
+			},
+			e: model.StatusRunning,
+		},
+	}
+	for _, tt := range tests {
+		assert.Equal(t, tt.e, WorkflowStatus(tt.s))
+	}
+}
+
 func TestUpdateWorkflowStatusToRunning(t *testing.T) {
 	t.Run("should update workflow to running status", func(t *testing.T) {
 		workflow := model.Workflow{
