@@ -98,7 +98,7 @@ func (when *When) IncludesStatusSuccess() bool {
 		return true
 	}
 	for _, c := range when.Constraints {
-		if len(c.Status) == 0 || slices.Contains(c.Status, statusFailure) {
+		if len(c.Status) == 0 || slices.Contains(c.Status, statusSuccess) {
 			return true
 		}
 	}
