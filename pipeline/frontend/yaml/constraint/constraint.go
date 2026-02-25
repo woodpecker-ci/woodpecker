@@ -30,7 +30,7 @@ import (
 
 const (
 	statusFailure = "failure"
-	// statusSuccess = "success"
+	statusSuccess = "success"
 )
 
 type (
