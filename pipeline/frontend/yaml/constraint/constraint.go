@@ -28,6 +28,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
 )
 
+const (
+	statusFailure = "failure"
+	// statusSuccess = "success"
+)
+
 type (
 	// When defines a set of runtime constraints.
 	When struct {
@@ -77,7 +82,7 @@ func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]
 
 func (when *When) IncludesStatusFailure() bool {
 	for _, c := range when.Constraints {
-		if slices.Contains(c.Status, "failure") {
+		if slices.Contains(c.Status, statusFailure) {
 			return true
 		}
 	}
@@ -93,7 +98,7 @@ func (when *When) IncludesStatusSuccess() bool {
 		return true
 	}
 	for _, c := range when.Constraints {
-		if len(c.Status) == 0 || slices.Contains(c.Status, "failure") {
+		if len(c.Status) == 0 || slices.Contains(c.Status, statusFailure) {
 			return true
 		}
 	}
