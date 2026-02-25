@@ -130,7 +130,7 @@
 ### Misc
 
 - Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
-- Improve packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
+- Improve Debian packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
 - Add some tests [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
 - Ignore mocks for coverage [[#6074](https://github.com/woodpecker-ci/woodpecker/pull/6074)]
 
