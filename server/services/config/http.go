@@ -81,7 +81,7 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 
 	// unexpected non-success status code
 	if status != net_http.StatusOK {
-		return oldConfigData, fmt.Errorf("unexpected status code %d from config endpoint %s (expected 200 or 204)", status, h.endpoint)
+		return oldConfigData, fmt.Errorf("unexpected status code %d from config endpoint (expected 200 or 204)", status)
 	}
 
 	fileMetaList := make([]*types.FileMeta, len(response.Configs))
