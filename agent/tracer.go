@@ -24,12 +24,14 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
-func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
-	return func(state *pipeline.State) error {
+func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) tracing.TraceFunc {
+	return func(state *state.State) error {
 		uploads.Add(1)
 		defer uploads.Done()
 
@@ -46,7 +48,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
 			Started:  state.Process.Started,
-			Canceled: errors.Is(state.Process.Error, pipeline.ErrCancel),
+			Canceled: errors.Is(state.Process.Error, pipeline_errors.ErrCancel),
 		}
 		if state.Process.Error != nil {
 			stepState.Error = state.Process.Error.Error()

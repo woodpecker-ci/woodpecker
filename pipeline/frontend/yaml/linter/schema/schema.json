@@ -181,7 +181,7 @@
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
-          "type": "string"
+          "$ref": "#/definitions/constraint_list"
         },
         "cron": {
           "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",
@@ -420,7 +420,7 @@
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
-          "type": "string"
+          "$ref": "#/definitions/constraint_list"
         },
         "cron": {
           "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",
@@ -878,6 +878,12 @@
         },
         "volumes": {
           "$ref": "#/definitions/step_volumes"
+        },
+        "failure": {
+          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/services#stopping",
+          "type": "string",
+          "enum": ["fail", "ignore"],
+          "default": "fail"
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
