@@ -43,7 +43,10 @@ steps:
     commands:
       - echo "test"
     when:
-      ref: 'refs/tags/v**'
+      - ref: 'refs/tags/v**'
+      - ref:
+          include: 'refs/tags/v**'
+          exclude: 'refs/tags/v1.**'
 
   when-status:
     image: alpine
