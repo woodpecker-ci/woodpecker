@@ -35,6 +35,7 @@
 
 ### 🐛 Bug Fixes
 
+- Update schema [[#6156](https://github.com/woodpecker-ci/woodpecker/pull/6156)]
 - Fix OAuth token refresh race condition with singleflight [[#6153](https://github.com/woodpecker-ci/woodpecker/pull/6153)]
 - Fully merge statuses [[#6119](https://github.com/woodpecker-ci/woodpecker/pull/6119)]
 - Only set tag env on tags [[#6142](https://github.com/woodpecker-ci/woodpecker/pull/6142)]
