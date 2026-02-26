@@ -106,7 +106,7 @@ woodpecker-cli repo secret add \
 Create the secret and limit it to a single image:
 
 ```diff
- woodpecker-cli repo secret add \
+ woodpecker-cli secret add \
    --repository octocat/hello-world \
 +  --image woodpeckerci/plugin-s3 \
    --name aws_access_key_id \
