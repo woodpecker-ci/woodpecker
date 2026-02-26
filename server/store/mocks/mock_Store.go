@@ -4478,6 +4478,232 @@ func (_c *MockStore_PipelineConfigCreate_Call) RunAndReturn(run func(pipelineCon
 	return _c
 }
 
+// RecoveryStateCleanExpired provides a mock function for the type MockStore
+func (_mock *MockStore) RecoveryStateCleanExpired() error {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for RecoveryStateCleanExpired")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func() error); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_RecoveryStateCleanExpired_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RecoveryStateCleanExpired'
+type MockStore_RecoveryStateCleanExpired_Call struct {
+	*mock.Call
+}
+
+// RecoveryStateCleanExpired is a helper method to define mock.On call
+func (_e *MockStore_Expecter) RecoveryStateCleanExpired() *MockStore_RecoveryStateCleanExpired_Call {
+	return &MockStore_RecoveryStateCleanExpired_Call{Call: _e.mock.On("RecoveryStateCleanExpired")}
+}
+
+func (_c *MockStore_RecoveryStateCleanExpired_Call) Run(run func()) *MockStore_RecoveryStateCleanExpired_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockStore_RecoveryStateCleanExpired_Call) Return(err error) *MockStore_RecoveryStateCleanExpired_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_RecoveryStateCleanExpired_Call) RunAndReturn(run func() error) *MockStore_RecoveryStateCleanExpired_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RecoveryStateCreate provides a mock function for the type MockStore
+func (_mock *MockStore) RecoveryStateCreate(workflowID string, stepUUIDs []string, agentID int64, expiresAt int64) error {
+	ret := _mock.Called(workflowID, stepUUIDs, agentID, expiresAt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RecoveryStateCreate")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string, []string, int64, int64) error); ok {
+		r0 = returnFunc(workflowID, stepUUIDs, agentID, expiresAt)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_RecoveryStateCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RecoveryStateCreate'
+type MockStore_RecoveryStateCreate_Call struct {
+	*mock.Call
+}
+
+// RecoveryStateCreate is a helper method to define mock.On call
+//   - workflowID string
+//   - stepUUIDs []string
+//   - agentID int64
+//   - expiresAt int64
+func (_e *MockStore_Expecter) RecoveryStateCreate(workflowID interface{}, stepUUIDs interface{}, agentID interface{}, expiresAt interface{}) *MockStore_RecoveryStateCreate_Call {
+	return &MockStore_RecoveryStateCreate_Call{Call: _e.mock.On("RecoveryStateCreate", workflowID, stepUUIDs, agentID, expiresAt)}
+}
+
+func (_c *MockStore_RecoveryStateCreate_Call) Run(run func(workflowID string, stepUUIDs []string, agentID int64, expiresAt int64)) *MockStore_RecoveryStateCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []string
+		if args[1] != nil {
+			arg1 = args[1].([]string)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 int64
+		if args[3] != nil {
+			arg3 = args[3].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_RecoveryStateCreate_Call) Return(err error) *MockStore_RecoveryStateCreate_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_RecoveryStateCreate_Call) RunAndReturn(run func(workflowID string, stepUUIDs []string, agentID int64, expiresAt int64) error) *MockStore_RecoveryStateCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RecoveryStateGetAll provides a mock function for the type MockStore
+func (_mock *MockStore) RecoveryStateGetAll(workflowID string) ([]*model.StepRecoveryState, error) {
+	ret := _mock.Called(workflowID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RecoveryStateGetAll")
+	}
+
+	var r0 []*model.StepRecoveryState
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) ([]*model.StepRecoveryState, error)); ok {
+		return returnFunc(workflowID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) []*model.StepRecoveryState); ok {
+		r0 = returnFunc(workflowID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.StepRecoveryState)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(workflowID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_RecoveryStateGetAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RecoveryStateGetAll'
+type MockStore_RecoveryStateGetAll_Call struct {
+	*mock.Call
+}
+
+// RecoveryStateGetAll is a helper method to define mock.On call
+//   - workflowID string
+func (_e *MockStore_Expecter) RecoveryStateGetAll(workflowID interface{}) *MockStore_RecoveryStateGetAll_Call {
+	return &MockStore_RecoveryStateGetAll_Call{Call: _e.mock.On("RecoveryStateGetAll", workflowID)}
+}
+
+func (_c *MockStore_RecoveryStateGetAll_Call) Run(run func(workflowID string)) *MockStore_RecoveryStateGetAll_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_RecoveryStateGetAll_Call) Return(stepRecoveryStates []*model.StepRecoveryState, err error) *MockStore_RecoveryStateGetAll_Call {
+	_c.Call.Return(stepRecoveryStates, err)
+	return _c
+}
+
+func (_c *MockStore_RecoveryStateGetAll_Call) RunAndReturn(run func(workflowID string) ([]*model.StepRecoveryState, error)) *MockStore_RecoveryStateGetAll_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RecoveryStateUpdate provides a mock function for the type MockStore
+func (_mock *MockStore) RecoveryStateUpdate(state *model.StepRecoveryState) error {
+	ret := _mock.Called(state)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RecoveryStateUpdate")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.StepRecoveryState) error); ok {
+		r0 = returnFunc(state)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_RecoveryStateUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RecoveryStateUpdate'
+type MockStore_RecoveryStateUpdate_Call struct {
+	*mock.Call
+}
+
+// RecoveryStateUpdate is a helper method to define mock.On call
+//   - state *model.StepRecoveryState
+func (_e *MockStore_Expecter) RecoveryStateUpdate(state interface{}) *MockStore_RecoveryStateUpdate_Call {
+	return &MockStore_RecoveryStateUpdate_Call{Call: _e.mock.On("RecoveryStateUpdate", state)}
+}
+
+func (_c *MockStore_RecoveryStateUpdate_Call) Run(run func(state *model.StepRecoveryState)) *MockStore_RecoveryStateUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.StepRecoveryState
+		if args[0] != nil {
+			arg0 = args[0].(*model.StepRecoveryState)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_RecoveryStateUpdate_Call) Return(err error) *MockStore_RecoveryStateUpdate_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_RecoveryStateUpdate_Call) RunAndReturn(run func(state *model.StepRecoveryState) error) *MockStore_RecoveryStateUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // RegistryCreate provides a mock function for the type MockStore
 func (_mock *MockStore) RegistryCreate(registry *model.Registry) error {
 	ret := _mock.Called(registry)

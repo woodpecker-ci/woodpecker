@@ -64,3 +64,10 @@ func WithTaskUUID(uuid string) Option {
 		r.taskUUID = uuid
 	}
 }
+
+// WithRecoveryManager returns an option configured with a recovery manager.
+func WithRecoveryManager(rm *RecoveryManager) Option {
+	return func(r *Runtime) {
+		r.recoveryManager = rm
+	}
+}

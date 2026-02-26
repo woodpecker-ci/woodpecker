@@ -39,8 +39,9 @@ type Runtime struct {
 	// Cleanup operations should use the runnerCtx passed to Run()
 	ctx context.Context
 
-	tracer tracing.Tracer
-	logger logging.Logger
+	tracer          tracing.Tracer
+	logger          logging.Logger
+	recoveryManager *RecoveryManager
 
 	taskUUID string
 
@@ -55,6 +56,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	r.spec = spec
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
+	r.recoveryManager = NewRecoveryManager(nil, "", false)
 	for _, opts := range opts {
 		opts(r)
 	}

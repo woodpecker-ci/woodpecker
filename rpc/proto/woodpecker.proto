@@ -35,6 +35,10 @@ service Woodpecker {
   rpc RegisterAgent   (RegisterAgentRequest) returns (RegisterAgentResponse) {}
   rpc UnregisterAgent (Empty)                returns (Empty) {}
   rpc ReportHealth    (ReportHealthRequest)  returns (Empty) {}
+
+  // Recovery methods for agent workflow recovery
+  rpc InitWorkflowRecovery    (InitWorkflowRecoveryRequest)    returns (InitWorkflowRecoveryResponse) {}
+  rpc UpdateStepRecoveryState (UpdateStepRecoveryStateRequest) returns (Empty) {}
 }
 
 //
@@ -74,6 +78,11 @@ message Workflow {
   string id = 1;
   int64 timeout = 2;
   bytes payload = 3;
+}
+
+message AgentConfig {
+  int64 agent_id = 1;
+  bool recovery_enabled = 2;
 }
 
 //
@@ -144,7 +153,7 @@ message NextResponse {
 }
 
 message RegisterAgentResponse {
-  int64 agent_id = 1;
+  AgentConfig config = 1;
 }
 
 message WaitResponse {
@@ -166,4 +175,39 @@ message AuthResponse {
   string status        = 1;
   int64  agent_id      = 2;
   string access_token  = 3;
+}
+
+//
+// Recovery types
+//
+
+enum RecoveryStatus {
+  RECOVERY_PENDING = 0;
+  RECOVERY_RUNNING = 1;
+  RECOVERY_SUCCESS = 2;
+  RECOVERY_FAILED = 3;
+  RECOVERY_SKIPPED = 4;
+}
+
+message InitWorkflowRecoveryRequest {
+  string workflow_id = 1;
+  repeated string step_uuids = 2;
+  int64 timeout_seconds = 3;
+}
+
+message StepRecoveryState {
+  string step_uuid = 1;
+  RecoveryStatus status = 2;
+  int32 exit_code = 3;
+}
+
+message InitWorkflowRecoveryResponse {
+  repeated StepRecoveryState states = 1;
+}
+
+message UpdateStepRecoveryStateRequest {
+  string workflow_id = 1;
+  string step_uuid = 2;
+  RecoveryStatus status = 3;
+  int32 exit_code = 4;
 }

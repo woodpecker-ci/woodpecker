@@ -211,7 +211,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		log.Debug().Msgf("custom labels detected: %#v", customLabels)
 	}
 
-	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, rpc.AgentInfo{ //nolint:contextcheck
+	registeredAgent, err := client.RegisterAgent(grpcCtx, rpc.AgentInfo{ //nolint:contextcheck
 		Version:      version.String(),
 		Backend:      backendEngine.Name(),
 		Platform:     engInfo.Platform,
@@ -221,6 +221,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	if err != nil {
 		return err
 	}
+	agentConfig.AgentID = registeredAgent.AgentID
 
 	serviceWaitingGroup.Go(func() error {
 		// we close grpc client context once unregister was handled
@@ -288,7 +289,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	// https://go.dev/blog/go1.22 fixed scope for goroutines in loops
 	for i := range maxWorkflows {
 		serviceWaitingGroup.Go(func() error {
-			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
+			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine, registeredAgent.RecoveryEnabled)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
