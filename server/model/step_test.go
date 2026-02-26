@@ -31,9 +31,9 @@ func TestStepStatus(t *testing.T) {
 
 	step.Failure = FailureIgnore
 	step.State = StatusError
-	assert.Equal(t, step.Failing(), false)
+	assert.Equal(t, step.Failing(), true)
 	step.State = StatusFailure
-	assert.Equal(t, step.Failing(), false)
+	assert.Equal(t, step.Failing(), true)
 	step.Failure = FailureFail
 	step.State = StatusError
 	assert.Equal(t, step.Failing(), true)

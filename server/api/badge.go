@@ -30,6 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/badges"
 	"go.woodpecker-ci.org/woodpecker/v3/server/ccmenu"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -96,13 +97,13 @@ func GetBadge(c *gin.Context) {
 	name := "pipeline"
 	var status *model.StatusValue = nil
 
-	pipeline, err := _store.GetPipelineBadge(repo, branch, events)
+	pl, err := _store.GetPipelineBadge(repo, branch, events)
 	if err != nil {
 		if !errors.Is(err, types.RecordNotExist) {
 			log.Warn().Err(err).Msg("could not get last pipeline for badge")
 		}
 	} else {
-		status = &pipeline.Status
+		status = &pl.Status
 	}
 
 	// we serve an SVG, so set content type appropriately.
@@ -114,13 +115,16 @@ func GetBadge(c *gin.Context) {
 		name = workflowName
 		status = nil
 
-		workflows, err := _store.WorkflowGetTree(pipeline)
+		workflows, err := _store.WorkflowGetTree(pl)
 		if err == nil {
 			for _, wf := range workflows {
 				if wf.Name == workflowName {
 					stepName := c.Query("step")
 					if len(stepName) == 0 {
-						if status == nil || wf.Failing() {
+						if status != nil {
+							merged := pipeline.MergeStatusValues(*status, wf.State)
+							status = &merged
+						} else {
 							status = &wf.State
 						}
 						continue
@@ -129,7 +133,10 @@ func GetBadge(c *gin.Context) {
 					name = workflowName + ": " + stepName
 					for _, s := range wf.Children {
 						if s.Name == stepName {
-							if status == nil || s.Failing() {
+							if status != nil {
+								merged := pipeline.MergeStatusValues(*status, s.State)
+								status = &merged
+							} else {
 								status = &s.State
 							}
 						}
