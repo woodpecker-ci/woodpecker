@@ -1,7 +1,7 @@
 ARG TARGET_BASE=scratch
 
 # -------------- Prepare scratch user --------------
-FROM --platform=$BUILDPLATFORM docker.io/golang:1.25 AS prepare
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.26 AS prepare
 
 RUN groupadd -g 1000 woodpecker && \
     useradd -u 1000 -g 1000 woodpecker && \
