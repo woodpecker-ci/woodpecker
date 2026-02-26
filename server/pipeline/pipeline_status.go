@@ -23,6 +23,17 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
+// PipelineStatus determine pipeline status based on corresponding workflow list.
+func PipelineStatus(workflows []*model.Workflow) model.StatusValue {
+	status := model.StatusSuccess
+
+	for _, p := range workflows {
+		status = MergeStatusValues(status, p.State)
+	}
+
+	return status
+}
+
 func UpdateToStatusRunning(store store.Store, pipeline model.Pipeline, started int64) (*model.Pipeline, error) {
 	pipeline.Status = model.StatusRunning
 	pipeline.Started = started

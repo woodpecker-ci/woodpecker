@@ -308,7 +308,11 @@
             },
             "log_delete_confirm": "Você realmente deseja excluir os registros de etapas?",
             "log_delete_error": "Ocorreu um erro ao excluir os registros de etapas",
-            "view": "Ver pipeline"
+            "view": "Ver pipeline",
+            "cancel_info": {
+                "superseded_by": "Substituído por #{pipelineId}",
+                "canceled_by_user": "Cancelado por {user}"
+            }
         },
         "branches": "Branches",
         "pull_requests": "Pull requests",

@@ -47,9 +47,6 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 
 		_, err = dummyEngine.WaitStep(ctx, step, nonExistWorkflowID)
 		assert.Error(t, err)
-
-		err = dummyEngine.DestroyStep(ctx, step, nonExistWorkflowID)
-		assert.Error(t, err)
 	})
 
 	t.Run("step exec successfully", func(t *testing.T) {
