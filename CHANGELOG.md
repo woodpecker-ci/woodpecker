@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-26
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -35,7 +35,7 @@
 
 ### 🐛 Bug Fixes
 
-- Update schema [[#6156](https://github.com/woodpecker-ci/woodpecker/pull/6156)]
+- Update pipeline config schema [[#6156](https://github.com/woodpecker-ci/woodpecker/pull/6156)]
 - Fix OAuth token refresh race condition with singleflight [[#6153](https://github.com/woodpecker-ci/woodpecker/pull/6153)]
 - Fully merge statuses [[#6119](https://github.com/woodpecker-ci/woodpecker/pull/6119)]
 - Only set tag env on tags [[#6142](https://github.com/woodpecker-ci/woodpecker/pull/6142)]
@@ -77,6 +77,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.44.0 [[#6165](https://github.com/woodpecker-ci/woodpecker/pull/6165)]
 - fix(deps): update golang-packages [[#6160](https://github.com/woodpecker-ci/woodpecker/pull/6160)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.42.0 [[#6159](https://github.com/woodpecker-ci/woodpecker/pull/6159)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.41.0 [[#6151](https://github.com/woodpecker-ci/woodpecker/pull/6151)]
