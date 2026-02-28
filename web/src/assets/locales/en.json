@@ -200,6 +200,9 @@
           "confirm": "All data will be lost after this action!\n\nDo you really want to proceed?",
           "success": "Repository deleted"
         }
+      },
+      "agents": {
+        "desc": "Agents registered for this repository."
       }
     },
     "pipeline": {
@@ -350,6 +353,9 @@
         },
         "org": {
           "badge": "org"
+        },
+        "repo": {
+          "badge": "repo"
         },
         "version": "Version",
         "last_contact": {
