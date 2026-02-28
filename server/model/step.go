@@ -51,7 +51,7 @@ func (p *Step) Running() bool {
 
 // Failing returns true if the process state is failed, killed or error.
 func (p *Step) Failing() bool {
-	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
+	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
 }
 
 // StepType identifies the type of step.
