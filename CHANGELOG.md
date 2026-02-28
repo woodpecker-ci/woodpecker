@@ -78,6 +78,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v83 to v84 [[#6172](https://github.com/woodpecker-ci/woodpecker/pull/6172)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v4 [[#6171](https://github.com/woodpecker-ci/woodpecker/pull/6171)]
 - chore(deps): update web npm deps non-major [[#6170](https://github.com/woodpecker-ci/woodpecker/pull/6170)]
 - chore(deps): update postgres docker tag to v18.3 [[#6169](https://github.com/woodpecker-ci/woodpecker/pull/6169)]
