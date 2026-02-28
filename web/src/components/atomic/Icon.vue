@@ -53,6 +53,7 @@
   <SvgIcon v-else-if="name === 'alert'" :bg-circle="bgCircle" :path="mdiAlertCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'question'" :bg-circle="bgCircle" :path="mdiHelpCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'plus'" :bg-circle="bgCircle" :path="mdiPlus" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'refresh'" :bg-circle="bgCircle"  :path="mdiRefresh" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :bg-circle="bgCircle" :path="mdiFormatListBulleted" size="1.3rem" />
   <SvgIcon v-else-if="name === 'heal'" :bg-circle="bgCircle" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :bg-circle="bgCircle" :path="mdiPower" size="1.3rem" />
@@ -171,6 +172,7 @@ import {
   mdiPuzzleOutline,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
+  mdiRefresh,
   mdiShieldKeyOutline,
   mdiSourceBranch,
   mdiSourceCommit,
@@ -224,6 +226,7 @@ export type IconNames =
   | 'question'
   | 'list'
   | 'plus'
+  | 'refresh'
   | 'blank'
   | 'heal'
   | 'chevron-right'
