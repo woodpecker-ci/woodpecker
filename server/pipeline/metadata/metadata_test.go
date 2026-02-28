@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package metadata
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func TestMetadataFromStruct(t *testing.T) {
+func TestGetWorkflowMetadata(t *testing.T) {
 	forge := mocks.NewMockForge(t)
 	forge.On("Name").Return("gitea")
 	forge.On("URL").Return("https://gitea.com")
@@ -34,7 +35,7 @@ func TestMetadataFromStruct(t *testing.T) {
 		forge            metadata.ServerForge
 		repo             *model.Repo
 		pipeline, prev   *model.Pipeline
-		workflow         *model.Workflow
+		workflow         *builder.Workflow
 		sysURL           string
 		expectedMetadata metadata.Metadata
 		expectedEnviron  map[string]string
@@ -60,7 +61,7 @@ func TestMetadataFromStruct(t *testing.T) {
 			repo:     &model.Repo{FullName: "testUser/testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
 			pipeline: &model.Pipeline{Number: 3, ChangedFiles: []string{"test.go", "markdown file.md"}},
 			prev:     &model.Pipeline{Number: 2},
-			workflow: &model.Workflow{Name: "hello"},
+			workflow: &builder.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
 				Forge: metadata.Forge{Type: "gitea", URL: "https://gitea.com"},
@@ -91,7 +92,7 @@ func TestMetadataFromStruct(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.workflow, testCase.sysURL)
+			result := NewServerMetadata(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL).GetWorkflowMetadata(testCase.workflow)
 			assert.EqualValues(t, testCase.expectedMetadata, result)
 			assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
 		})

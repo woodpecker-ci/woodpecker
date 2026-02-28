@@ -13,13 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package builder
 
 import (
 	"fmt"
 	"maps"
-	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -35,36 +33,22 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
-	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// StepBuilder Takes the hook data and the yaml and returns the internal data model.
-type StepBuilder struct {
-	Repo                *model.Repo     // TODO: get rid of server dependency
-	Curr                *model.Pipeline // TODO: get rid of server dependency
-	Prev                *model.Pipeline // TODO: get rid of server dependency
-	Host                string
-	Yamls               []*forge_types.FileMeta
+// PipelineBuilder Takes the yaml configs and some metadata and returns the internal data model to execute a pipeline.
+type PipelineBuilder struct {
+	Yamls               []*YamlFile
 	Envs                map[string]string
-	Forge               metadata.ServerForge
 	DefaultLabels       map[string]string
 	RepoTrusted         *metadata.TrustedConfiguration
 	TrustedClonePlugins []string
 	PrivilegedPlugins   []string
 	CompilerOptions     []compiler.Option
+	GetWorkflowMetadata func(workflow *Workflow) metadata.Metadata
 }
 
-type Item struct {
-	Workflow  *model.Workflow // TODO: get rid of server dependency
-	Labels    map[string]string
-	DependsOn []string
-	RunsOn    []string
-	Config    *backend_types.Config
-}
-
-func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
-	b.Yamls = forge_types.SortByName(b.Yamls)
+func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
+	b.Yamls = SortYamlFilesByName(b.Yamls)
 
 	pidSequence := 1
 
@@ -79,9 +63,8 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		}
 
 		for i, axis := range axes {
-			workflow := &model.Workflow{
+			workflow := &Workflow{
 				PID:     pidSequence,
-				State:   model.StatusPending,
 				Environ: axis,
 				Name:    SanitizePath(y.Name),
 			}
@@ -109,15 +92,15 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	items = filterItemsWithMissingDependencies(items)
 
 	// check if at least one step can start if slice is not empty
-	if len(items) > 0 && !workflowListContainsItemsToRun(items) {
+	if len(items) > 0 {
 		return nil, fmt.Errorf("pipeline has no steps to run")
 	}
 
 	return items, errorsAndWarnings
 }
 
-func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Prev, workflow, b.Host)
+func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
+	workflowMetadata := b.GetWorkflowMetadata(workflow)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
@@ -144,9 +127,9 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(linter.TrustedConfiguration{
-			Network:  b.Repo.Trusted.Network,
-			Volumes:  b.Repo.Trusted.Volumes,
-			Security: b.Repo.Trusted.Security,
+			Network:  b.RepoTrusted.Network,
+			Volumes:  b.RepoTrusted.Volumes,
+			Security: b.RepoTrusted.Security,
 		}),
 		linter.PrivilegedPlugins(b.PrivilegedPlugins),
 		linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
@@ -197,80 +180,38 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// "woodpecker-ci.org" namespace is reserved for internal use
 	for key := range item.Labels {
 		if strings.HasPrefix(key, pipeline.InternalLabelPrefix) {
-			log.Debug().Str("forge", b.Forge.Name()).Str("repo", b.Repo.FullName).Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
+			log.Debug().Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
 			delete(item.Labels, key)
 		}
 	}
 
+	// TODO: handle labels for steps
 	// Add Woodpecker managed labels to the pipeline
-	item.Labels[pipeline.LabelForgeRemoteID] = b.Forge.Name()
-	item.Labels[pipeline.LabelRepoForgeID] = string(b.Repo.ForgeRemoteID)
-	item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
-	item.Labels[pipeline.LabelRepoName] = b.Repo.Name
-	item.Labels[pipeline.LabelRepoFullName] = b.Repo.FullName
-	item.Labels[pipeline.LabelBranch] = b.Repo.Branch
-	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(b.Repo.OrgID, 10)
+	// item.Labels[pipeline.LabelForgeRemoteID] = b.Forge.Name()
+	// item.Labels[pipeline.LabelRepoForgeID] = string(b.Repo.ForgeRemoteID)
+	// item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
+	// item.Labels[pipeline.LabelRepoName] = b.Repo.Name
+	// item.Labels[pipeline.LabelRepoFullName] = b.Repo.FullName
+	// item.Labels[pipeline.LabelBranch] = b.Repo.Branch
+	// item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(b.Repo.OrgID, 10)
 
-	for stageI := range item.Config.Stages {
-		for stepI := range item.Config.Stages[stageI].Steps {
-			item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
-			item.Config.Stages[stageI].Steps[stepI].OrgID = b.Repo.OrgID
-		}
-	}
+	// for stageI := range item.Config.Stages {
+	// 	for stepI := range item.Config.Stages[stageI].Steps {
+	// 		item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+	// 		item.Config.Stages[stageI].Steps[stepI].OrgID = b.Repo.OrgID
+	// 	}
+	// }
 
 	return item, errorsAndWarnings
 }
 
-func workflowListContainsItemsToRun(items []*Item) bool {
-	for i := range items {
-		if items[i].Workflow.State == model.StatusPending {
-			return true
-		}
-	}
-	return false
-}
-
-func filterItemsWithMissingDependencies(items []*Item) []*Item {
-	itemsToRemove := make([]*Item, 0)
-
-	for _, item := range items {
-		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
-				itemsToRemove = append(itemsToRemove, item)
-			}
-		}
-	}
-
-	if len(itemsToRemove) > 0 {
-		filtered := make([]*Item, 0)
-		for _, item := range items {
-			if !containsItemWithName(item.Workflow.Name, itemsToRemove) {
-				filtered = append(filtered, item)
-			}
-		}
-		// Recursive to handle transitive deps
-		return filterItemsWithMissingDependencies(filtered)
-	}
-
-	return items
-}
-
-func containsItemWithName(name string, items []*Item) bool {
-	for _, item := range items {
-		if name == item.Workflow.Name {
-			return true
-		}
-	}
-	return false
-}
-
-func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
+func (b *PipelineBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	maps.Copy(environ, axis)
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
+func (b *PipelineBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	options := []compiler.Option{}
 	options = append(options,
 		compiler.WithEnviron(environ),
@@ -293,12 +234,4 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 	options = append(options, b.CompilerOptions...)
 
 	return compiler.New(options...).Compile(parsed)
-}
-
-func SanitizePath(path string) string {
-	path = filepath.Base(path)
-	path = strings.TrimSuffix(path, ".yml")
-	path = strings.TrimSuffix(path, ".yaml")
-	path = strings.TrimPrefix(path, ".")
-	return path
 }

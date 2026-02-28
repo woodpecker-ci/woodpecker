@@ -20,25 +20,25 @@ import (
 	"fmt"
 	"maps"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*builder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
-		if item.Workflow.State == model.StatusSkipped {
+		if !item.Pending {
 			continue
 		}
 		task := &model.Task{
-			ID:         fmt.Sprint(item.Workflow.ID),
-			PID:        item.Workflow.PID,
-			Name:       item.Workflow.Name,
-			Labels:     make(map[string]string),
-			PipelineID: item.Workflow.PipelineID,
-			RepoID:     repo.ID,
+			ID:     fmt.Sprint(item.Workflow.ID),
+			PID:    item.Workflow.PID,
+			Name:   item.Workflow.Name,
+			Labels: make(map[string]string),
+			// PipelineID: item.Workflow.PipelineID, // TODO
+			RepoID: repo.ID,
 		}
 		maps.Copy(task.Labels, item.Labels)
 		err := task.ApplyLabelsFromRepo(repo)
@@ -63,7 +63,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
 }
 
-func getTaskDependencies(dependsOn []string, items []*stepbuilder.Item) (taskIDs []string) {
+func getTaskDependencies(dependsOn []string, items []*builder.Item) (taskIDs []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range items {
 			if pipelineItem.Workflow.Name == dep {
