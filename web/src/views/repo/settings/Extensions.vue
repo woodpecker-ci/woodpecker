@@ -18,6 +18,13 @@
         />
       </InputField>
 
+      <InputField :label="$t('registry_extension_endpoint')" docs-url="docs/usage/extensions/registry-extension">
+        <TextField
+          v-model="extensions.registry_extension_endpoint"
+          :placeholder="$t('extension_endpoint_placeholder')"
+        />
+      </InputField>
+
       <Button :is-loading="isSaving" color="green" type="submit" :text="$t('save')" />
     </form>
   </Settings>
@@ -57,6 +64,7 @@ onMounted(async () => {
 const extensions = ref<ExtensionSettings>({
   config_extension_endpoint: repo.value.config_extension_endpoint,
   config_extension_exclusive: repo.value.config_extension_exclusive,
+  registry_extension_endpoint: repo.value.registry_extension_endpoint,
 });
 
 const { doSubmit: saveExtensions, isLoading: isSaving } = useAsyncAction(async () => {
