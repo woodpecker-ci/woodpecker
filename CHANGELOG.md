@@ -79,6 +79,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.10.0 [[#6175](https://github.com/woodpecker-ci/woodpecker/pull/6175)]
 - fix(deps): update golang-packages [[#6174](https://github.com/woodpecker-ci/woodpecker/pull/6174)]
 - fix(deps): update module github.com/google/go-github/v83 to v84 [[#6172](https://github.com/woodpecker-ci/woodpecker/pull/6172)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v4 [[#6171](https://github.com/woodpecker-ci/woodpecker/pull/6171)]
