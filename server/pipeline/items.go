@@ -189,9 +189,6 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
 				}
-				if item.Workflow.State == model.StatusSkipped {
-					step.State = model.StatusSkipped
-				}
 				if pipeline.Status == model.StatusBlocked {
 					step.State = model.StatusBlocked
 				}

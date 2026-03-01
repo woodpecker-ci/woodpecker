@@ -29,7 +29,7 @@ var statusPriorityOrder = []model.StatusValue{
 
 	// skipped and killed cannot appear together with running/pending.
 	model.StatusKilled,
-	model.StatusSkipped,
+	model.StatusCanceled,
 
 	// running states
 	model.StatusRunning,
@@ -38,6 +38,9 @@ var statusPriorityOrder = []model.StatusValue{
 	// finished states
 	model.StatusFailure,
 	model.StatusSuccess,
+
+	// skipped due to status condition
+	model.StatusSkipped,
 }
 
 var priorityMap map[model.StatusValue]int = buildPriorityMap()
@@ -51,5 +54,16 @@ func buildPriorityMap() map[model.StatusValue]int {
 }
 
 func MergeStatusValues(s, t model.StatusValue) model.StatusValue {
+	// both are skipped due to cancellation -> canceled
+	if s == model.StatusCanceled && t == model.StatusCanceled {
+		return model.StatusCanceled
+	}
+	// if only one was skipped -> use killed as the workflow/pipeline was running once already
+	if s == model.StatusCanceled {
+		s = model.StatusKilled
+	}
+	if t == model.StatusCanceled {
+		t = model.StatusKilled
+	}
 	return statusPriorityOrder[min(priorityMap[s], priorityMap[t])]
 }

@@ -48,7 +48,12 @@
     :path="mdiRadioboxIndeterminateVariant"
     size="1.3rem"
   />
-  <SvgIcon v-else-if="name === 'status-skipped'" :bg-circle="bgCircle" :path="mdiMinusCircle" size="1.3rem" />
+  <SvgIcon
+    v-else-if="name === 'status-skipped' || name === 'status-canceled'"
+    :bg-circle="bgCircle"
+    :path="mdiMinusCircle"
+    size="1.3rem"
+  />
   <SvgIcon v-else-if="name === 'status-success'" :bg-circle="bgCircle" :path="mdiCheckCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'alert'" :bg-circle="bgCircle" :path="mdiAlertCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'question'" :bg-circle="bgCircle" :path="mdiHelpCircle" size="1.3rem" />
@@ -216,6 +221,7 @@ export type IconNames =
   | 'status-skipped'
   | 'status-started'
   | 'status-success'
+  | 'status-canceled'
   | 'gitea'
   | 'gitlab'
   | 'bitbucket'
