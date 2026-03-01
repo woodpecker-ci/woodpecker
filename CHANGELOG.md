@@ -58,7 +58,6 @@
 - chore(deps): update dependency isomorphic-dompurify to v3 [[#6147](https://github.com/woodpecker-ci/woodpecker/pull/6147)]
 - chore(deps): update docs npm deps non-major [[#6137](https://github.com/woodpecker-ci/woodpecker/pull/6137)]
 - Add deprecation policy [[#6068](https://github.com/woodpecker-ci/woodpecker/pull/6068)]
-- chore(deps): lock file maintenance [[#6128](https://github.com/woodpecker-ci/woodpecker/pull/6128)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.55.0 [[#6125](https://github.com/woodpecker-ci/woodpecker/pull/6125)]
 - Improve selinux docs [[#6066](https://github.com/woodpecker-ci/woodpecker/pull/6066)]
 - document how to ignore failure on services [[#6106](https://github.com/woodpecker-ci/woodpecker/pull/6106)]
@@ -79,6 +78,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @intlify/eslint-plugin-vue-i18n to v4.3.0 [[#6177](https://github.com/woodpecker-ci/woodpecker/pull/6177)]
 - chore(deps): update dependency simple-icons to v16.10.0 [[#6175](https://github.com/woodpecker-ci/woodpecker/pull/6175)]
 - fix(deps): update golang-packages [[#6174](https://github.com/woodpecker-ci/woodpecker/pull/6174)]
 - fix(deps): update module github.com/google/go-github/v83 to v84 [[#6172](https://github.com/woodpecker-ci/woodpecker/pull/6172)]
@@ -98,6 +98,7 @@
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.10.1 [[#6139](https://github.com/woodpecker-ci/woodpecker/pull/6139)]
 - chore(deps): update web npm deps non-major [[#6136](https://github.com/woodpecker-ci/woodpecker/pull/6136)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v1.39.0 [[#6134](https://github.com/woodpecker-ci/woodpecker/pull/6134)]
+- chore(deps): lock file maintenance [[#6128](https://github.com/woodpecker-ci/woodpecker/pull/6128)]
 - chore(deps): update web npm deps non-major [[#6127](https://github.com/woodpecker-ci/woodpecker/pull/6127)]
 - fix(deps): update golang-packages [[#6126](https://github.com/woodpecker-ci/woodpecker/pull/6126)]
 - chore(deps): update golang-lang [[#6123](https://github.com/woodpecker-ci/woodpecker/pull/6123)]
@@ -110,7 +111,6 @@
 - fix(deps): update golang-packages [[#6098](https://github.com/woodpecker-ci/woodpecker/pull/6098)]
 - chore(deps): lock file maintenance [[#6093](https://github.com/woodpecker-ci/woodpecker/pull/6093)]
 - fix(deps): update golang-packages [[#6092](https://github.com/woodpecker-ci/woodpecker/pull/6092)]
-- chore(deps): update dependency simple-icons to v16.8.0 [[#6089](https://github.com/woodpecker-ci/woodpecker/pull/6089)]
 - chore(deps): update dependency @types/node to v24.10.12 [[#6087](https://github.com/woodpecker-ci/woodpecker/pull/6087)]
 - chore(deps): update eslint monorepo to v10 (major) [[#6083](https://github.com/woodpecker-ci/woodpecker/pull/6083)]
 - chore(deps): update dependency @antfu/eslint-config to v7.3.0 [[#6084](https://github.com/woodpecker-ci/woodpecker/pull/6084)]
@@ -119,7 +119,6 @@
 - chore(deps): update dependency golang to v1.25.7 [[#6080](https://github.com/woodpecker-ci/woodpecker/pull/6080)]
 - fix(deps): update golang-packages [[#6058](https://github.com/woodpecker-ci/woodpecker/pull/6058)]
 - chore(deps): lock file maintenance [[#6054](https://github.com/woodpecker-ci/woodpecker/pull/6054)]
-- chore(deps): update dependency simple-icons to v16.7.0 [[#6051](https://github.com/woodpecker-ci/woodpecker/pull/6051)]
 - chore(deps): update dependency @vueuse/core to v14.2.0 [[#6048](https://github.com/woodpecker-ci/woodpecker/pull/6048)]
 - fix(deps): update dependency vue-router to v5 [[#6046](https://github.com/woodpecker-ci/woodpecker/pull/6046)]
 - fix(deps): update golang-packages [[#6042](https://github.com/woodpecker-ci/woodpecker/pull/6042)]
