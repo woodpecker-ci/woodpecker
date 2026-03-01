@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-02-28
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -78,6 +78,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6174](https://github.com/woodpecker-ci/woodpecker/pull/6174)]
 - fix(deps): update module github.com/google/go-github/v83 to v84 [[#6172](https://github.com/woodpecker-ci/woodpecker/pull/6172)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v4 [[#6171](https://github.com/woodpecker-ci/woodpecker/pull/6171)]
 - chore(deps): update web npm deps non-major [[#6170](https://github.com/woodpecker-ci/woodpecker/pull/6170)]
