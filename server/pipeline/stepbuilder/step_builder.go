@@ -108,11 +108,6 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	items = filterItemsWithMissingDependencies(items)
 
-	// check if at least one step can start if slice is not empty
-	if len(items) > 0 {
-		return nil, fmt.Errorf("pipeline has no steps to run")
-	}
-
 	return items, errorsAndWarnings
 }
 
