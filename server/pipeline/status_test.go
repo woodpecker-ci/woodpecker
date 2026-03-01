@@ -70,17 +70,17 @@ func TestStatusValueMerge(t *testing.T) {
 		},
 		{
 			s: model.StatusSkipped,
-			t: model.StatusCancelled,
+			t: model.StatusCanceled,
 			e: model.StatusKilled,
 		},
 		{
 			s: model.StatusSuccess,
-			t: model.StatusCancelled,
+			t: model.StatusCanceled,
 			e: model.StatusKilled,
 		},
 		{
 			s: model.StatusFailure,
-			t: model.StatusCancelled,
+			t: model.StatusCanceled,
 			e: model.StatusKilled,
 		},
 	}

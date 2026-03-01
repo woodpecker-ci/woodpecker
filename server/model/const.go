@@ -61,7 +61,7 @@ const (
 	StatusSuccess  StatusValue = "success"  // successfully finished
 	StatusFailure  StatusValue = "failure"  // failed to finish (exit code != 0)
 	StatusKilled   StatusValue = "killed"   // killed by user
-	StatusCancelled StatusValue = "cancelled"  // cancelled but hasn't been started
+	StatusCanceled StatusValue = "canceled" // canceled but hasn't been started
 	StatusError    StatusValue = "error"    // error with the config / while parsing / some other system problem
 	StatusBlocked  StatusValue = "blocked"  // waiting for approval
 	StatusDeclined StatusValue = "declined" // blocked and declined
@@ -72,7 +72,7 @@ var ErrInvalidStatusValue = errors.New("invalid status value")
 
 func (s StatusValue) Validate() error {
 	switch s {
-	case StatusSkipped, StatusPending, StatusRunning, StatusSuccess, StatusFailure, StatusKilled, StatusCancelled, StatusError, StatusBlocked, StatusDeclined, StatusCreated:
+	case StatusSkipped, StatusPending, StatusRunning, StatusSuccess, StatusFailure, StatusKilled, StatusCanceled, StatusError, StatusBlocked, StatusDeclined, StatusCreated:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidStatusValue, s)
