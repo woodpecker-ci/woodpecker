@@ -19,9 +19,7 @@ package model
 const (
 	FailureIgnore = "ignore"
 	FailureFail   = "fail"
-	//nolint:godot
-	// TODO: Not implemented yet.
-	// FailureCancel = "cancel"
+	FailureCancel = "cancel"
 )
 
 // Step represents a process in the pipeline.
