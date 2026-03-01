@@ -29,7 +29,7 @@ var statusPriorityOrder = []model.StatusValue{
 
 	// skipped and killed cannot appear together with running/pending.
 	model.StatusKilled,
-	model.StatusSkipped,
+	model.StatusCancelled, // TODO if has both cancelled: final status should be killed (if not both are cancelled)
 
 	// running states
 	model.StatusRunning,
@@ -38,6 +38,9 @@ var statusPriorityOrder = []model.StatusValue{
 	// finished states
 	model.StatusFailure,
 	model.StatusSuccess,
+
+	// skipped due to status condition
+	model.StatusSkipped,
 }
 
 var priorityMap map[model.StatusValue]int = buildPriorityMap()
