@@ -53,6 +53,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#6173](https://github.com/woodpecker-ci/woodpecker/pull/6173)]
 - chore(deps): update docs npm deps non-major [[#6168](https://github.com/woodpecker-ci/woodpecker/pull/6168)]
 - chore(deps): update dependency isomorphic-dompurify to v3 [[#6147](https://github.com/woodpecker-ci/woodpecker/pull/6147)]
 - chore(deps): update docs npm deps non-major [[#6137](https://github.com/woodpecker-ci/woodpecker/pull/6137)]
