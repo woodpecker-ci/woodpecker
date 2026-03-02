@@ -23,19 +23,25 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
-func TestConstraintStatusSuccess(t *testing.T) {
+func TestConstraintStatusSuccessFailure(t *testing.T) {
 	testdata := []struct {
 		conf string
-		want bool
+		wantSuccess bool
+		wantFail bool
 	}{
-		{conf: "", want: true},
-		{conf: "{status: [failure]}", want: false},
-		{conf: "{status: [success]}", want: true},
-		{conf: "{status: [failure, success]}", want: true},
+		{conf: "", wantSuccess: true, wantFail: false},
+		{conf: "{status: [failure]}", wantSuccess: false, wantFail: true},
+		{conf: "{status: [success]}", wantSuccess: true, wantFail: false},
+		{conf: "{status: [failure, success]}", wantSuccess: true, wantFail: true},
+		{conf: "{event: push, status: [failure, success]}", wantSuccess: true, wantFail: false},
+		{conf: "{event: pull_request, status: [failure, success]}", wantSuccess: true, wantFail: true},
+		{conf: "{event: push, status: [failure]}", wantSuccess: true, wantFail: false},
+		{conf: "{event: pull_request, status: [failure]}", wantSuccess: false, wantFail: true},
 	}
 	for _, test := range testdata {
 		c := parseConstraints(t, test.conf)
-		assert.Equal(t, test.want, c.IncludesStatusSuccess(), "when: '%s'", test.conf)
+		assert.Equal(t, test.wantSuccess, c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}), "when: '%s'", test.conf)
+		assert.Equal(t, test.wantFail, c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}), "when: '%s'", test.conf)
 	}
 }
 
