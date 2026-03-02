@@ -304,6 +304,9 @@ func (l *Linter) lintSchema(config *WorkflowConfig) error {
 func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 	parsed := new(types.Workflow)
 	err := xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	if err != nil {
+		return err
+	}
 
 	if len(parsed.RunsOn) > 0 { //nolint:staticcheck
 		err = multierr.Append(err, &pipeline_errors.PipelineError{
