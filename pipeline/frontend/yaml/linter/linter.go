@@ -308,6 +308,18 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
+	if len(parsed.RunsOn) > 0 {
+		err = multierr.Append(err, &pipeline_errors.PipelineError{
+			Type:    pipeline_errors.PipelineErrorTypeDeprecation,
+			Message: "Usage of `runs_on` is deprecated, use `when.status`",
+			Data: pipeline_errors.DeprecationErrorData{
+				File:  config.File,
+				Field: fmt.Sprintf("%s.runs_on", config.File),
+				Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#status",
+			},
+		})
+	}
+
 	return nil
 }
 
