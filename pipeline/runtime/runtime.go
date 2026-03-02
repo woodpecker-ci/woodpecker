@@ -63,8 +63,8 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	return r
 }
 
-// MakeLogger returns a logger enriched with all runtime description fields.
-func (r *Runtime) MakeLogger() zerolog.Logger {
+// makeLogger returns a logger enriched with all runtime description fields.
+func (r *Runtime) makeLogger() zerolog.Logger {
 	logCtx := log.With()
 	for key, val := range r.description {
 		logCtx = logCtx.Str(key, val)

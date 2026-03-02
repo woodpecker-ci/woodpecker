@@ -31,7 +31,7 @@ import (
 
 // Run starts the execution of a workflow and waits for it to complete.
 func (r *Runtime) Run(runnerCtx context.Context) error {
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
 	for stagePos, stage := range r.spec.Stages {
 		stepNames := []string{}
@@ -128,7 +128,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 
 	for _, step := range steps {
 		// Required since otherwise the loop variable
@@ -228,7 +228,7 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 		return nil, err
 	}
 	startTime := time.Now().Unix()
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
