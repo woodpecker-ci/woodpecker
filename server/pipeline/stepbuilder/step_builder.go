@@ -110,11 +110,6 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	items = filterItemsWithMissingDependencies(items)
 
-	// check if at least one step can start if slice is not empty
-	if len(items) > 0 && !workflowListContainsItemsToRun(items) {
-		return nil, fmt.Errorf("pipeline has no steps to run")
-	}
-
 	return items, errorsAndWarnings
 }
 
@@ -229,15 +224,6 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	return item, errorsAndWarnings
-}
-
-func workflowListContainsItemsToRun(items []*Item) bool {
-	for i := range items {
-		if items[i].Workflow.State == model.StatusPending {
-			return true
-		}
-	}
-	return false
 }
 
 func filterItemsWithMissingDependencies(items []*Item) []*Item {
