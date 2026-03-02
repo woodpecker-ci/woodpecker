@@ -322,10 +322,10 @@ labels:
 depends_on:
     - lint
     - test
+skip_clone: false
 runs_on:
     - success
     - failure
-skip_clone: false
 `, string(workBin2))
 }
 
