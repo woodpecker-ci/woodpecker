@@ -36,6 +36,7 @@
 
 ### 🐛 Bug Fixes
 
+- Independently evaluate status filter and support on workflows [[#6183](https://github.com/woodpecker-ci/woodpecker/pull/6183)]
 - Fix status merging with skipped pipelines [[#6176](https://github.com/woodpecker-ci/woodpecker/pull/6176)]
 - Update pipeline config schema [[#6156](https://github.com/woodpecker-ci/woodpecker/pull/6156)]
 - Fix OAuth token refresh race condition with singleflight [[#6153](https://github.com/woodpecker-ci/woodpecker/pull/6153)]
