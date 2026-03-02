@@ -232,7 +232,7 @@ func TestWaitStepReturnsOnContextCancel(t *testing.T) {
 
 	createPod(t, client, step, namespace)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancelCause(context.Background())
 
 	type result struct {
 		state *types.State
@@ -248,7 +248,7 @@ func TestWaitStepReturnsOnContextCancel(t *testing.T) {
 	// Give the informer time to start and begin watching.
 	time.Sleep(200 * time.Millisecond)
 
-	cancel()
+	cancel(nil)
 
 	select {
 	case r := <-ch:
@@ -281,14 +281,14 @@ func TestWaitStepNoGoroutineLeak(t *testing.T) {
 		go func() {
 			defer wg.Done()
 
-			ctx, cancel := context.WithCancel(context.Background())
+			ctx, cancel := context.WithCancelCause(context.Background())
 
 			go func() {
 				_, _ = engine.WaitStep(ctx, steps[i], fmt.Sprintf("task-%d", i))
 			}()
 
 			time.Sleep(200 * time.Millisecond)
-			cancel()
+			cancel(nil)
 		}()
 	}
 	wg.Wait()
