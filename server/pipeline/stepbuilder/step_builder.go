@@ -188,7 +188,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		Config:    ir,
 		Labels:    parsed.Labels,
 		DependsOn: parsed.DependsOn,
-		RunsOn:    parsed.RunsOn, // Deprecated. TODO remove in next major.
+		RunsOn:    parsed.RunsOn, //nolint:staticcheck // TODO: remove in next major.
 	}
 	if len(item.Labels) == 0 {
 		item.Labels = make(map[string]string, len(b.DefaultLabels))

@@ -301,14 +301,11 @@ func (l *Linter) lintSchema(config *WorkflowConfig) error {
 	return linterErr
 }
 
-func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
+func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 	parsed := new(types.Workflow)
-	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
-	if err != nil {
-		return err
-	}
+	err := xyaml.Unmarshal([]byte(config.RawConfig), parsed)
 
-	if len(parsed.RunsOn) > 0 {
+	if len(parsed.RunsOn) > 0 { //nolint:staticcheck
 		err = multierr.Append(err, &pipeline_errors.PipelineError{
 			Type:    pipeline_errors.PipelineErrorTypeDeprecation,
 			Message: "Usage of `runs_on` is deprecated, use `when.status`",
@@ -320,7 +317,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		})
 	}
 
-	return nil
+	return err
 }
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {

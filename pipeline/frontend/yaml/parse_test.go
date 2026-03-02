@@ -48,8 +48,8 @@ func TestParse(t *testing.T) {
 		assert.Equal(t, "build", out.Labels["com.example.type"])
 		assert.Equal(t, "lint", out.DependsOn[0])
 		assert.Equal(t, "test", out.DependsOn[1])
-		assert.Equal(t, ("success"), out.RunsOn[0])
-		assert.Equal(t, ("failure"), out.RunsOn[1])
+		assert.Equal(t, ("success"), out.RunsOn[0]) //nolint:staticcheck
+		assert.Equal(t, ("failure"), out.RunsOn[1]) //nolint:staticcheck
 		assert.False(t, out.SkipClone)
 	})
 
