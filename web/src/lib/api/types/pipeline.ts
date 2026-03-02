@@ -106,7 +106,8 @@ export type PipelineStatus =
   | 'running'
   | 'skipped'
   | 'started'
-  | 'success';
+  | 'success'
+  | 'canceled';
 
 export interface PipelineWorkflow {
   id: number;
