@@ -16,7 +16,6 @@ package runtime
 
 import (
 	"context"
-	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
@@ -25,15 +24,14 @@ import (
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // Runtime represents a workflow state executed by a specific backend.
 // Each workflow gets its own Runtime instance.
 type Runtime struct {
 	// err holds the first error that occurred in the workflow.
-	// Always use getErr/setErr to access it — it is read and written from concurrent goroutines.
-	errMu sync.RWMutex
-	err   error
+	err utils.Protected[error]
 
 	spec    *backend.Config
 	engine  backend.Backend
@@ -54,6 +52,7 @@ type Runtime struct {
 // New returns a new Runtime for the given workflow spec and options.
 func New(spec *backend.Config, opts ...Option) *Runtime {
 	r := new(Runtime)
+	r.err = utils.NewProtected[error](nil)
 	r.description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
@@ -71,16 +70,4 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 		logCtx = logCtx.Str(key, val)
 	}
 	return logCtx.Logger()
-}
-
-func (r *Runtime) getErr() error {
-	r.errMu.RLock()
-	defer r.errMu.RUnlock()
-	return r.err
-}
-
-func (r *Runtime) setErr(err error) {
-	r.errMu.Lock()
-	defer r.errMu.Unlock()
-	r.err = err
 }

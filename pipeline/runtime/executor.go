@@ -85,12 +85,12 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 			return pipeline_errors.ErrCancel
 		case err := <-r.execAll(runnerCtx, stage.Steps):
 			if err != nil {
-				r.setErr(err)
+				r.err.Set(err)
 			}
 		}
 	}
 
-	return r.getErr()
+	return r.err.Get()
 }
 
 // Updates the current status of a step.
@@ -105,7 +105,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	state := new(state.State)
 	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
-	state.Pipeline.Error = r.getErr()
+	state.Pipeline.Error = r.err.Get()
 
 	// We have an error while starting the step
 	if processState == nil && err != nil {
@@ -141,7 +141,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				Str("step", step.Name).
 				Msg("prepare")
 
-			switch rErr := r.getErr(); {
+			switch rErr := r.err.Get(); {
 			case rErr != nil && !step.OnFailure:
 				logger.Debug().
 					Str("step", step.Name).
