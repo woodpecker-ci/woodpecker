@@ -47,7 +47,7 @@
     },
     "runs_on": {
       "type": "array",
-      "description": "Deprecation: use `when.status` instead. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
+      "description": "Deprecated: use `when.status` instead. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
       "minLength": 1,
       "items": {
         "type": "string"
