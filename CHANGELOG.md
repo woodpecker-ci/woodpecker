@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-01
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -53,6 +53,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#6180](https://github.com/woodpecker-ci/woodpecker/pull/6180)]
 - chore(deps): update docs npm deps non-major [[#6173](https://github.com/woodpecker-ci/woodpecker/pull/6173)]
 - chore(deps): update docs npm deps non-major [[#6168](https://github.com/woodpecker-ci/woodpecker/pull/6168)]
 - chore(deps): update dependency isomorphic-dompurify to v3 [[#6147](https://github.com/woodpecker-ci/woodpecker/pull/6147)]
@@ -78,6 +79,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6179](https://github.com/woodpecker-ci/woodpecker/pull/6179)]
 - chore(deps): update dependency @intlify/eslint-plugin-vue-i18n to v4.3.0 [[#6177](https://github.com/woodpecker-ci/woodpecker/pull/6177)]
 - chore(deps): update dependency simple-icons to v16.10.0 [[#6175](https://github.com/woodpecker-ci/woodpecker/pull/6175)]
 - fix(deps): update golang-packages [[#6174](https://github.com/woodpecker-ci/woodpecker/pull/6174)]
