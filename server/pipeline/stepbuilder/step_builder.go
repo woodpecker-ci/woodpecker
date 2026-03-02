@@ -38,7 +38,6 @@ import (
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns the internal data model.
@@ -197,7 +196,6 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	if !slices.Contains(item.RunsOn, "success") && parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
 		item.RunsOn = append(item.RunsOn, "success")
 	}
-	item.RunsOn = utils.UniqSlice(item.RunsOn)
 
 	// "woodpecker-ci.org" namespace is reserved for internal use
 	for key := range item.Labels {
