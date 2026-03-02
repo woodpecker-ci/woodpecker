@@ -175,7 +175,7 @@ const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(
   () =>
     // we do not have logs for skipped/canceled steps
-    repo?.value && pipeline.value && step.value && (step.value.state !== 'skipped' || step.value.state !== 'canceled'),
+    repo?.value && pipeline.value && step.value && step.value.state !== 'skipped' && step.value.state !== 'canceled',
 );
 const autoScroll = useStorage('woodpecker:log-auto-scroll', true);
 const showActions = ref(false);
