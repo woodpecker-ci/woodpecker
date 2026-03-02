@@ -63,7 +63,7 @@ func UniqSlice[E comparable](list []E) []E {
 	for i := range list {
 		m[list[i]] = struct{}{}
 	}
-	n := make([]E, len(m))
+	n := make([]E, 0, len(m))
 	for k := range m {
 		n = append(n, k)
 	}

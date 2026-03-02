@@ -59,6 +59,52 @@ func TestEqualSliceValues(t *testing.T) {
 	assert.False(t, EqualSliceValues([]bool{true, false, false}, []bool{true, false, true}))
 }
 
+func TestUniqSlice(t *testing.T) {
+	// String tests
+	t.Run("StringTests", func(t *testing.T) {
+		stringTests := []struct {
+			name     string
+			input    []string
+			expected []string
+		}{
+			{"Basic duplicates", []string{"apple", "banana", "apple", "orange"}, []string{"apple", "banana", "orange"}},
+			{"Empty slice", []string{}, []string{}},
+			{"Single item", []string{"apple"}, []string{"apple"}},
+			{"All duplicates", []string{"apple", "apple", "apple"}, []string{"apple"}},
+			{"Multiple items", []string{"a", "b", "c", "a", "b", "c"}, []string{"a", "b", "c"}},
+		}
+
+		for _, test := range stringTests {
+			t.Run(test.name, func(t *testing.T) {
+				result := UniqSlice(test.input)
+				assert.ElementsMatch(t, test.expected, result, "The unique slices do not match")
+			})
+		}
+	})
+
+	// Integer tests
+	t.Run("IntTests", func(t *testing.T) {
+		intTests := []struct {
+			name     string
+			input    []int
+			expected []int
+		}{
+			{"Basic duplicates", []int{1, 2, 2, 3}, []int{1, 2, 3}},
+			{"Empty slice", []int{}, []int{}},
+			{"Single item", []int{1}, []int{1}},
+			{"All duplicates", []int{1, 1, 1}, []int{1}},
+			{"Multiple items", []int{1, 2, 3, 1, 2}, []int{1, 2, 3}},
+		}
+
+		for _, test := range intTests {
+			t.Run(test.name, func(t *testing.T) {
+				result := UniqSlice(test.input)
+				assert.ElementsMatch(t, test.expected, result, "The unique slices do not match")
+			})
+		}
+	})
+}
+
 func TestSliceToBoolMap(t *testing.T) {
 	assert.Equal(t, map[string]bool{
 		"a": true,
