@@ -38,6 +38,7 @@ import (
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns the internal data model.
@@ -187,19 +188,21 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		Config:    ir,
 		Labels:    parsed.Labels,
 		DependsOn: parsed.DependsOn,
-		RunsOn:    parsed.RunsOn, // Depricated. TODO remove in next major.
+		RunsOn:    parsed.RunsOn, // Deprecated. TODO remove in next major.
 	}
 	if len(item.Labels) == 0 {
 		item.Labels = make(map[string]string, len(b.DefaultLabels))
 		// Set default labels if no labels are defined in the pipeline
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
+
 	if !slices.Contains(item.RunsOn, "failure") && parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
 		item.RunsOn = append(item.RunsOn, "failure")
 	}
 	if !slices.Contains(item.RunsOn, "success") && parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
 		item.RunsOn = append(item.RunsOn, "success")
 	}
+	item.RunsOn = utils.UniqSlice(item.RunsOn)
 
 	// "woodpecker-ci.org" namespace is reserved for internal use
 	for key := range item.Labels {

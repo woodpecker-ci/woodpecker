@@ -28,9 +28,9 @@ type (
 		Services  ContainerList     `yaml:"services,omitempty"`
 		Labels    map[string]string `yaml:"labels,omitempty"`
 		DependsOn []string          `yaml:"depends_on,omitempty"`
-		// RunsOn is deprecated, use when.status. TODO remove in next major.
-		RunsOn    []string          `yaml:"runs_on,omitempty"`
 		SkipClone bool              `yaml:"skip_clone"`
+		// Deprecated: use when.status. TODO remove in next major.
+		RunsOn []string `yaml:"runs_on,omitempty"`
 	}
 
 	// Workspace defines a pipeline workspace.

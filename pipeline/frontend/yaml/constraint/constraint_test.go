@@ -25,9 +25,9 @@ import (
 
 func TestConstraintStatusSuccessFailure(t *testing.T) {
 	testdata := []struct {
-		conf string
+		conf        string
 		wantSuccess bool
-		wantFail bool
+		wantFail    bool
 	}{
 		{conf: "", wantSuccess: true, wantFail: false},
 		{conf: "{status: [failure]}", wantSuccess: false, wantFail: true},
