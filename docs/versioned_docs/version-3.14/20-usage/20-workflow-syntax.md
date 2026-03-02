@@ -350,6 +350,18 @@ There are use cases for executing steps on failure, such as sending notification
 +      - status: [ success, failure ]
 ```
 
+The filter is aware of the other filters. If you want to run on failures if the event is `tag`, but if it's a `pull_request`, run it on both success and failure:
+
+```diff
+ when:
++  - event: tag
++    status: [ failure ]
++  - event: pull_request
++    status: [ success, failure ]
+```
+
+If there's no matching filter at all or all matching filters don't have set `status`, it will use the default, which means it runs on success only. In the example above this will happen if the event is neither `tag` nor `pull_request`.
+
 #### `platform`
 
 :::note
@@ -760,10 +772,6 @@ The workflow now triggers on `main`, but also if the target branch of a pull req
 <!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
-
-## `runs_on`
-
-Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
 ## Advanced network options for steps
 
