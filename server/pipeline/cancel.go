@@ -53,6 +53,8 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		}
 	}
 
+	hasPendingOnly := true
+
 	// Then update the DB status for pending pipelines
 	// Running ones will be set when the agents stop on the cancel signal
 	for _, workflow := range workflows {
@@ -60,6 +62,8 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow); err != nil {
 				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 			}
+		} else {
+			hasPendingOnly = false
 		}
 		for _, step := range workflow.Children {
 			if step.State == model.StatusPending {
@@ -70,7 +74,11 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		}
 	}
 
-	killedPipeline, err := UpdateToStatusKilled(store, *pipeline, cancelInfo)
+	plState := model.StatusKilled
+	if hasPendingOnly {
+		plState = model.StatusCanceled
+	}
+	killedPipeline, err := UpdateToStatusKilled(store, *pipeline, cancelInfo, plState)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
