@@ -6209,6 +6209,9 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
+                "cancel_info": {
+                    "$ref": "#/definitions/CancelInfo"
+                },
                 "changed_files": {
                     "type": "array",
                     "items": {
@@ -6236,7 +6239,7 @@ const docTemplate = `{
                 "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.PipelineError"
+                        "$ref": "#/definitions/errors.PipelineError"
                     }
                 },
                 "event": {
