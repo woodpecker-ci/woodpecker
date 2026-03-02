@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proto
+package types
 
-// Version is the version of the woodpecker.proto file,
-// IMPORTANT: increased by 1 each time it get changed.
-const Version int32 = 16
+// RecoveryStatus represents the recovery state of a step.
+type RecoveryStatus int
+
+// RecoveryState represents the recovery state for a step.
+type RecoveryState struct {
+	Status   RecoveryStatus `json:"status"`
+	ExitCode int            `json:"exit_code"`
+}
+
+const (
+	RecoveryStatusPending RecoveryStatus = iota
+	RecoveryStatusRunning
+	RecoveryStatusSuccess
+	RecoveryStatusFailed
+	RecoveryStatusSkipped
+)
