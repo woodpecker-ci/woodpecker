@@ -44,6 +44,7 @@ const statusDescriptions = {
   pending: t('repo.pipeline.status.pending'),
   running: t('repo.pipeline.status.running'),
   skipped: t('repo.pipeline.status.skipped'),
+  canceled: t('repo.pipeline.status.skipped'),
   started: t('repo.pipeline.status.started'),
   success: t('repo.pipeline.status.success'),
 } satisfies {
@@ -52,6 +53,8 @@ const statusDescriptions = {
 };
 
 const shouldShowBgCircle = computed(() => {
-  return service ? false : ['blocked', 'declined', 'error', 'failure', 'killed', 'skipped', 'success'].includes(status);
+  return service
+    ? false
+    : ['blocked', 'declined', 'error', 'failure', 'killed', 'skipped', 'canceled', 'success'].includes(status);
 });
 </script>
