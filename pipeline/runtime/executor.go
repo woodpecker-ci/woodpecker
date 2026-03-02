@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package runtime
 
 import (
 	"context"
@@ -21,78 +21,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oklog/ulid/v2"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	pipelineErrors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
-
-// TODO: move runtime into "runtime" subpackage
-
-type (
-	// State defines the pipeline and process state.
-	State struct {
-		// Global state of the pipeline.
-		Pipeline struct {
-			// Pipeline time started
-			Started int64 `json:"time"`
-			// Current pipeline step
-			Step *backend.Step `json:"step"`
-			// Current pipeline error state
-			Error error `json:"error"`
-		}
-
-		// Current process state.
-		Process backend.State
-	}
-)
-
-// Runtime represents a workflow state executed by a specific backend.
-// Each workflow gets its own state configuration at runtime.
-type Runtime struct {
-	err     error
-	spec    *backend.Config
-	engine  backend.Backend
-	started int64
-
-	// The context a workflow is being executed with.
-	// All normal (non cleanup) operations must use this.
-	// Cleanup operations should use the runnerCtx passed to Run()
-	ctx context.Context
-
-	tracer Tracer
-	logger Logger
-
-	taskUUID string
-
-	Description map[string]string // The runtime descriptors.
-}
-
-// New returns a new runtime using the specified runtime
-// configuration and runtime engine.
-func New(spec *backend.Config, opts ...Option) *Runtime {
-	r := new(Runtime)
-	r.Description = map[string]string{}
-	r.spec = spec
-	r.ctx = context.Background()
-	r.taskUUID = ulid.Make().String()
-	for _, opts := range opts {
-		opts(r)
-	}
-	return r
-}
-
-func (r *Runtime) MakeLogger() zerolog.Logger {
-	logCtx := log.With()
-	for key, val := range r.Description {
-		logCtx = logCtx.Str(key, val)
-	}
-	return logCtx.Logger()
-}
 
 // Run starts the execution of a workflow and waits for it to complete.
 func (r *Runtime) Run(runnerCtx context.Context) error {
@@ -122,9 +57,9 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 
 	r.started = time.Now().Unix()
 	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
-		var stepErr *pipelineErrors.ErrInvalidWorkflowSetup
+		var stepErr *pipeline_errors.ErrInvalidWorkflowSetup
 		if errors.As(err, &stepErr) {
-			state := new(State)
+			state := new(state.State)
 			state.Pipeline.Step = stepErr.Step
 			state.Pipeline.Error = stepErr.Err
 			state.Process = backend.State{
@@ -147,7 +82,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	for _, stage := range r.spec.Stages {
 		select {
 		case <-r.ctx.Done():
-			return ErrCancel
+			return pipeline_errors.ErrCancel
 		case err := <-r.execAll(runnerCtx, stage.Steps):
 			if err != nil {
 				r.err = err
@@ -167,7 +102,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 		return nil
 	}
 
-	state := new(State)
+	state := new(state.State)
 	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
 	state.Pipeline.Error = r.err
@@ -244,7 +179,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 
 				// normalize context cancel error
 				if errors.Is(err, context.Canceled) {
-					err = ErrCancel
+					err = pipeline_errors.ErrCancel
 				}
 
 				// Return the error after tracing it.
@@ -326,7 +261,7 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			waitState.Error = ErrCancel
+			waitState.Error = pipeline_errors.ErrCancel
 		} else {
 			return nil, err
 		}
@@ -343,16 +278,16 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 
 	// we handle cancel case
 	if ctxErr := r.ctx.Err(); ctxErr != nil && errors.Is(ctxErr, context.Canceled) {
-		waitState.Error = ErrCancel
+		waitState.Error = pipeline_errors.ErrCancel
 	}
 
 	if waitState.OOMKilled {
-		return waitState, &OomError{
+		return waitState, &pipeline_errors.OomError{
 			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
 	} else if waitState.ExitCode != 0 {
-		return waitState, &ExitError{
+		return waitState, &pipeline_errors.ExitError{
 			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}

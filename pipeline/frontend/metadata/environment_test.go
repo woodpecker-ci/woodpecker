@@ -26,6 +26,7 @@ func TestEnviron(t *testing.T) {
 		Curr: Pipeline{
 			Event: EventRelease,
 			Commit: Commit{
+				Ref:          "refs/tags/v1.2.3",
 				IsPrerelease: true,
 			},
 		},
@@ -44,4 +45,30 @@ func TestEnviron(t *testing.T) {
 	assert.Equal(t, "true", envs["CI_COMMIT_PRERELEASE"])
 	assert.Equal(t, "branch-a", envs["CI_PREV_COMMIT_SOURCE_BRANCH"])
 	assert.Equal(t, "branch-b", envs["CI_PREV_COMMIT_TARGET_BRANCH"])
+	assert.Equal(t, "[]", envs["CI_PIPELINE_FILES"])
+	assert.Equal(t, "v1.2.3", envs["CI_COMMIT_TAG"])
+
+	m = Metadata{
+		Sys: System{Name: "wp"},
+		Curr: Pipeline{
+			Event: EventPull,
+			Commit: Commit{
+				ChangedFiles: []string{"readme", "license"},
+				Refspec:      "branch-a:branch-b",
+			},
+		},
+		Prev: Pipeline{
+			Event: EventPull,
+			Commit: Commit{
+				Refspec: "branch-a:branch-b",
+			},
+		},
+	}
+
+	envs = m.Environ()
+
+	_, ok := envs["CI_COMMIT_TAG"]
+	assert.False(t, ok)
+
+	assert.Equal(t, `["readme","license"]`, envs["CI_PIPELINE_FILES"])
 }

@@ -136,7 +136,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 		// Create new request for each attempt
 		req, err := http.NewRequestWithContext(ctx, method, uri.String(), body)
 		if err != nil {
-			return 0, err
+			return 0, httputil.EnhanceHTTPError(err, method, path)
 		}
 		if in != nil {
 			req.Header.Set("Content-Type", "application/json")

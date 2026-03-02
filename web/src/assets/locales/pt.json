@@ -310,7 +310,7 @@
             "log_delete_error": "Ocorreu um erro ao excluir os registros de etapas",
             "view": "Ver pipeline",
             "cancel_info": {
-                "superseded_by": "Substituído pelo pipeline #{pipelineId}",
+                "superseded_by": "Substituído por #{pipelineId}",
                 "canceled_by_user": "Cancelado por {user}"
             }
         },

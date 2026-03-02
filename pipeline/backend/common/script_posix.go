@@ -35,11 +35,11 @@ func generateScriptPosix(commands []string, workDir string) string {
 	}
 
 	for _, command := range commands {
-		buf.WriteString(fmt.Sprintf(
+		fmt.Fprintf(&buf,
 			traceScript,
 			shellescape.Quote(command),
 			command,
-		))
+		)
 	}
 
 	return buf.String()

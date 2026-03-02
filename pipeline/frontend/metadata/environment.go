@@ -96,8 +96,8 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_COMMIT_BRANCH", commit.Branch)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR", commit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_EMAIL", commit.Author.Email)
-	if pipeline.Event == EventTag || pipeline.Event == EventRelease || pipeline.Event == EventDeploy || strings.HasPrefix(pipeline.Commit.Ref, "refs/tags/") {
-		setNonEmptyEnvVar(params, "CI_COMMIT_TAG", strings.TrimPrefix(pipeline.Commit.Ref, "refs/tags/"))
+	if p, f := strings.CutPrefix(pipeline.Commit.Ref, "refs/tags/"); f {
+		setNonEmptyEnvVar(params, "CI_COMMIT_TAG", p)
 	}
 	if pipeline.Event == EventRelease {
 		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Commit.IsPrerelease))

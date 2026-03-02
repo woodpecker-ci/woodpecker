@@ -322,7 +322,7 @@
             "log_delete_error": "删除步骤日志时发生了错误",
             "view": "查看流水线",
             "cancel_info": {
-                "superseded_by": "#{pipelineId} 流水线已被取消",
+                "superseded_by": "#{pipelineId} 已取消",
                 "canceled_by_user": "{user} 已取消"
             }
         },

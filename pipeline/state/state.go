@@ -12,13 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package state
 
 import (
-	"io"
-
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
-// Logger handles the process logging.
-type Logger func(*backend.Step, io.ReadCloser) error
+type (
+	// State defines the pipeline and process state.
+	State struct {
+		// Global state of the pipeline.
+		Pipeline struct {
+			// Pipeline time started
+			Started int64 `json:"time"`
+			// Current pipeline step
+			Step *backend.Step `json:"step"`
+			// Current pipeline error state
+			Error error `json:"error"`
+		}
+
+		// Current process state.
+		Process backend.State
+	}
+)

@@ -78,8 +78,13 @@ func CreatePipeline(c *gin.Context) {
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
-	} else {
+		return
+	}
+
+	if pl != nil {
 		c.JSON(http.StatusOK, pl.ToAPIModel())
+	} else {
+		c.String(http.StatusOK, "nothing to run")
 	}
 }
 

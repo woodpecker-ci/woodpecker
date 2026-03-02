@@ -15,15 +15,14 @@
 package linter
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
-	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 )
 
-func newLinterError(message, file, field string, isWarning bool) *errorTypes.PipelineError {
-	return &errorTypes.PipelineError{
-		Type:      errorTypes.PipelineErrorTypeLinter,
+func newLinterError(message, file, field string, isWarning bool) *pipeline_errors.PipelineError {
+	return &pipeline_errors.PipelineError{
+		Type:      pipeline_errors.PipelineErrorTypeLinter,
 		Message:   message,
-		Data:      &errors.LinterErrorData{File: file, Field: field},
+		Data:      &pipeline_errors.LinterErrorData{File: file, Field: field},
 		IsWarning: isWarning,
 	}
 }

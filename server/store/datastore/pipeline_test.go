@@ -106,10 +106,10 @@ func TestPipelines(t *testing.T) {
 	assert.Equal(t, pipeline2.Status, GetPipeline.Status)
 
 	pipeline3 := &model.Pipeline{
-		RepoID: repo.ID,
-		Status: model.StatusRunning,
-		Branch: "main",
-		Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144ac"},
+		RepoID:   repo.ID,
+		Status:   model.StatusRunning,
+		Branch:   "main",
+		Commit:   &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144ac"},
 		Event:    model.EventPull,
 		ForgeURL: "example.com/id3",
 	}

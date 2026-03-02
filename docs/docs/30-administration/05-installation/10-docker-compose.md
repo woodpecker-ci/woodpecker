@@ -140,3 +140,14 @@ To store values in a docker secret you can use the following command:
 ```bash
 echo "my_agent_secret_key" | docker secret create woodpecker-agent-secret -
 ```
+
+## SELinux Considerations
+
+If you're running Woodpecker on a system with SELinux enabled (RHEL, CentOS, Fedora, etc.), you may need to add the `:z` or `:Z` option to volume mounts. For the Docker socket volume:
+
+```yaml
+volumes:
+  - /var/run/docker.sock:/var/run/docker.sock:z
+```
+
+For more details and other SELinux-related solutions, see the [Troubleshooting](../../20-usage/100-troubleshooting.md#selinux-issues) page.

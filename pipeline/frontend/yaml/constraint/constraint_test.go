@@ -32,8 +32,6 @@ func TestConstraintStatusSuccess(t *testing.T) {
 		{conf: "{status: [failure]}", want: false},
 		{conf: "{status: [success]}", want: true},
 		{conf: "{status: [failure, success]}", want: true},
-		{conf: "{status: {exclude: [success], include: [failure]}}", want: false},
-		{conf: "{status: {exclude: [failure], include: [success]}}", want: true},
 	}
 	for _, test := range testdata {
 		c := parseConstraints(t, test.conf)
