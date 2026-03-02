@@ -245,13 +245,11 @@ func TestRunsOn(t *testing.T) {
 			{Data: []byte(`
 when:
   event: push
+  status: [ success, failure ]
+
 steps:
   - name: deploy
     image: scratch
-
-runs_on:
-  - success
-  - failure
 `)},
 		},
 	}
