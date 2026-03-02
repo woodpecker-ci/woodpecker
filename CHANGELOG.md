@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- refactor: use upstream slices.Concat and remove utils.MergeSlices [[#6185](https://github.com/woodpecker-ci/woodpecker/pull/6185)]
 - Add enhanced function for error message handling in http request for configuration fetching [[#5712](https://github.com/woodpecker-ci/woodpecker/pull/5712)]
 - Remove fixed badge width in UI [[#6157](https://github.com/woodpecker-ci/woodpecker/pull/6157)]
 - Refactor pipeline engine [[#6073](https://github.com/woodpecker-ci/woodpecker/pull/6073)]
@@ -54,7 +55,6 @@
 ### 📚 Documentation
 
 - chore(deps): update docs npm deps non-major [[#6173](https://github.com/woodpecker-ci/woodpecker/pull/6173)]
-- chore(deps): update docs npm deps non-major [[#6168](https://github.com/woodpecker-ci/woodpecker/pull/6168)]
 - chore(deps): update dependency isomorphic-dompurify to v3 [[#6147](https://github.com/woodpecker-ci/woodpecker/pull/6147)]
 - chore(deps): update docs npm deps non-major [[#6137](https://github.com/woodpecker-ci/woodpecker/pull/6137)]
 - Add deprecation policy [[#6068](https://github.com/woodpecker-ci/woodpecker/pull/6068)]
