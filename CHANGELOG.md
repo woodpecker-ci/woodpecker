@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-02
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -82,6 +82,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/yaronf/httpsign to v0.4.2 [[#6188](https://github.com/woodpecker-ci/woodpecker/pull/6188)]
 - chore(deps): update dependency eslint-plugin-vue-scoped-css to v3 [[#6178](https://github.com/woodpecker-ci/woodpecker/pull/6178)]
 - fix(deps): update golang-packages [[#6179](https://github.com/woodpecker-ci/woodpecker/pull/6179)]
 - chore(deps): lock file maintenance [[#6180](https://github.com/woodpecker-ci/woodpecker/pull/6180)]
