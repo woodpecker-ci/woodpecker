@@ -23,6 +23,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 
 	"codeberg.org/6543/xyaml"
@@ -59,7 +60,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(flags, backend_docker.Flags, backend_kubernetes.Flags, backend_local.Flags),
+	Flags:     slices.Concat(flags, backend_docker.Flags, backend_kubernetes.Flags, backend_local.Flags),
 }
 
 var backends = []backend_types.Backend{
