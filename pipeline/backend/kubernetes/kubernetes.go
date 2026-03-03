@@ -25,6 +25,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	backoff "github.com/cenkalti/backoff/v5"
@@ -287,7 +288,8 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("waiting for pod: %s", podName)
 
-	finished := make(chan bool)
+	finished := make(chan struct{})
+	var finishedOnce sync.Once
 
 	podUpdated := func(_, newPod any) {
 		pod, ok := newPod.(*v1.Pod)
@@ -298,12 +300,12 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				finished <- true
+				finishedOnce.Do(func() { close(finished) })
 			}
 
 			switch pod.Status.Phase {
 			case v1.PodSucceeded, v1.PodFailed, v1.PodUnknown:
-				finished <- true
+				finishedOnce.Do(func() { close(finished) })
 			}
 		}
 	}
@@ -321,8 +323,11 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// TODO: Cancel on ctx.Done
-	<-finished
+	select {
+	case <-finished:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 
 	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, meta_v1.GetOptions{})
 	if err != nil {
@@ -363,7 +368,8 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of pod: %s", podName)
 
-	up := make(chan bool)
+	up := make(chan struct{})
+	var upOnce sync.Once
 
 	podUpdated := func(_, newPod any) {
 		pod, ok := newPod.(*v1.Pod)
@@ -374,11 +380,11 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				up <- true
+				upOnce.Do(func() { close(up) })
 			}
 			switch pod.Status.Phase {
 			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
-				up <- true
+				upOnce.Do(func() { close(up) })
 			}
 		}
 	}
@@ -396,7 +402,11 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	<-up
+	select {
+	case <-up:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 
 	opts := &v1.PodLogOptions{
 		Follow:    true,
