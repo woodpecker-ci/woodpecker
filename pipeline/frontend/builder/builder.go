@@ -18,6 +18,7 @@ package builder
 import (
 	"fmt"
 	"maps"
+	"slices"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -90,11 +91,6 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	}
 
 	items = filterItemsWithMissingDependencies(items)
-
-	// check if at least one step can start if slice is not empty
-	if len(items) > 0 {
-		return nil, fmt.Errorf("pipeline has no steps to run")
-	}
 
 	return items, errorsAndWarnings
 }
@@ -169,12 +165,19 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		Config:    ir,
 		Labels:    parsed.Labels,
 		DependsOn: parsed.DependsOn,
-		RunsOn:    parsed.RunsOn,
+		RunsOn:    parsed.RunsOn, //nolint:staticcheck // TODO: remove in next major.
 	}
 	if len(item.Labels) == 0 {
 		item.Labels = make(map[string]string, len(b.DefaultLabels))
 		// Set default labels if no labels are defined in the pipeline
 		maps.Copy(item.Labels, b.DefaultLabels)
+	}
+
+	if !slices.Contains(item.RunsOn, "failure") && parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
+		item.RunsOn = append(item.RunsOn, "failure")
+	}
+	if !slices.Contains(item.RunsOn, "success") && parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
+		item.RunsOn = append(item.RunsOn, "success")
 	}
 
 	// "woodpecker-ci.org" namespace is reserved for internal use

@@ -207,9 +207,12 @@ func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeli
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
 				}
-				if !item.Pending {
-					step.State = model.StatusSkipped
-				}
+
+				// TODO: this was added why?
+				// if !item.Pending {
+				// 	step.State = model.StatusSkipped
+				// }
+
 				if pipeline.Status == model.StatusBlocked {
 					step.State = model.StatusBlocked
 				}
