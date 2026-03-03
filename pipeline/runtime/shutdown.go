@@ -29,7 +29,7 @@ var (
 
 // GetShutdownCtx returns a context that is valid for shutdownTimeout after the
 // first call. It is used as a fallback cleanup context when the runner context
-// is already cancelled.
+// is already canceled.
 func GetShutdownCtx() context.Context {
 	shutdownCtxLock.Lock()
 	defer shutdownCtxLock.Unlock()
