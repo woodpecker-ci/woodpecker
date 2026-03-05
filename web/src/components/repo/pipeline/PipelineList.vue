@@ -15,10 +15,14 @@
     <Panel v-else-if="pipelines?.length === 0">
       <span class="text-wp-text-100">{{ $t('repo.pipeline.no_pipelines') }}</span>
     </Panel>
+    <div v-if="hasMore && !loading" class="flex justify-center">
+      <Button :text="$t('repo.pipeline.load_more')" @click="$emit('load-more')" />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import PipelineItem from '~/components/repo/pipeline/PipelineItem.vue';
@@ -27,5 +31,10 @@ import type { Pipeline } from '~/lib/api/types';
 defineProps<{
   pipelines: Pipeline[] | undefined;
   loading?: boolean;
+  hasMore?: boolean;
+}>();
+
+defineEmits<{
+  (event: 'load-more'): void;
 }>();
 </script>
