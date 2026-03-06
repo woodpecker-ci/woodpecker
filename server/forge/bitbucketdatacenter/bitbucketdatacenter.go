@@ -580,7 +580,7 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 		return nil, fmt.Errorf("unable to read commit: %w", err)
 	}
 
-	// Fix for https://github.com/woodpecker-ci/woodpecker/issues/6202:
+	// In Bitbucket Data Center, when using annotated tags, the webhook's ToHash is the tag object SHA, not the actual commit SHA.
 	// Update p.Commit so that build statuses are posted to the correct commit SHA.
 	if p.Event == model.EventTag && commit.ID != "" && commit.ID != p.Commit {
 		p.Commit = commit.ID
