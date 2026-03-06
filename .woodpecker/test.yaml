@@ -72,9 +72,8 @@ steps:
     when: *when
 
   lint-license-header:
-    image: *golang_image
+    image: ghcr.io/google/addlicense:v1.2.0
     commands:
-      - make install-addlicense # cspell:words addlicense
       - 'addlicense -check -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go'
     when: *when
 
