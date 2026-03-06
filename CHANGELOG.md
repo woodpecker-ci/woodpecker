@@ -37,6 +37,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix message on gitlab tag event [[#6196](https://github.com/woodpecker-ci/woodpecker/pull/6196)]
 - fix(bbdc): resolve annotated tag object SHA to commit SHA before posting build status [[#6203](https://github.com/woodpecker-ci/woodpecker/pull/6203)]
 - Prevent leaking goroutines on cancelled steps [[#6186](https://github.com/woodpecker-ci/woodpecker/pull/6186)]
 - Independently evaluate status filter and support on workflows [[#6183](https://github.com/woodpecker-ci/woodpecker/pull/6183)]
