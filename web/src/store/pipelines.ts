@@ -82,16 +82,12 @@ export const usePipelineStore = defineStore('pipelines', () => {
     setPipeline(repoId, pipeline);
   }
 
-  const perPage = 50;
-  const hasMore = ref(false);
-
   async function loadRepoPipelines(repoId: number, page?: number) {
     loading.value = true;
-    const _pipelines = await apiClient.getPipelineList(repoId, { page, perPage });
+    const _pipelines = await apiClient.getPipelineList(repoId, { page });
     _pipelines.forEach((pipeline) => {
       setPipeline(repoId, pipeline);
     });
-    hasMore.value = _pipelines.length >= perPage;
     loading.value = false;
   }
 
@@ -143,7 +139,6 @@ export const usePipelineStore = defineStore('pipelines', () => {
     getPipeline,
     loadRepoPipelines,
     loadPipeline,
-    hasMore,
     activePipelines,
     pipelineFeed,
     loadPipelineFeed,
