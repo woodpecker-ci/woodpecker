@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-03
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Update `dompurify` and `svgo` [[#6198](https://github.com/woodpecker-ci/woodpecker/pull/6198)]
 - Update edwards25519 [[#6143](https://github.com/woodpecker-ci/woodpecker/pull/6143)]
 - chore(deps): update dependency lodash to v4.17.23 [security] [[#5997](https://github.com/woodpecker-ci/woodpecker/pull/5997)]
 
@@ -82,6 +83,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/docker/cli to v29.3.0+incompatible [[#6201](https://github.com/woodpecker-ci/woodpecker/pull/6201)]
 - fix(deps): update module github.com/yaronf/httpsign to v0.4.2 [[#6188](https://github.com/woodpecker-ci/woodpecker/pull/6188)]
 - chore(deps): update dependency eslint-plugin-vue-scoped-css to v3 [[#6178](https://github.com/woodpecker-ci/woodpecker/pull/6178)]
 - fix(deps): update golang-packages [[#6179](https://github.com/woodpecker-ci/woodpecker/pull/6179)]
@@ -148,6 +150,7 @@
 
 ### Misc
 
+- Ignore fixtures for coverage [[#6197](https://github.com/woodpecker-ci/woodpecker/pull/6197)]
 - Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
 - Improve Debian packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
 - Add some tests [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
