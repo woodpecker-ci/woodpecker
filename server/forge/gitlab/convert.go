@@ -287,13 +287,13 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	return repo, pipeline, nil
 }
 
-func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error) {
+func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string, error) {
 	repo := &model.Repo{}
 	pipeline := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
-		return nil, nil, err
+		return nil, nil, "", err
 	}
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
@@ -313,9 +313,10 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 		repo.IsSCMPrivate = false
 	}
 
+	refTag := strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Event = model.EventTag
 	pipeline.Commit = hook.After
-	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	pipeline.Branch = refTag
 	pipeline.Ref = hook.Ref
 
 	for _, cm := range hook.Commits {
@@ -331,7 +332,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 		}
 	}
 
-	return repo, pipeline, nil
+	return repo, pipeline, hook.After, nil
 }
 
 func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline, error) {

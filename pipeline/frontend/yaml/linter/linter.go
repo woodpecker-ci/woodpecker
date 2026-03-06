@@ -301,14 +301,26 @@ func (l *Linter) lintSchema(config *WorkflowConfig) error {
 	return linterErr
 }
 
-func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
+func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 	parsed := new(types.Workflow)
-	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	err := xyaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	if len(parsed.RunsOn) > 0 { //nolint:staticcheck
+		err = multierr.Append(err, &pipeline_errors.PipelineError{
+			Type:    pipeline_errors.PipelineErrorTypeDeprecation,
+			Message: "Usage of `runs_on` is deprecated, use `when.status`",
+			Data: pipeline_errors.DeprecationErrorData{
+				File:  config.File,
+				Field: fmt.Sprintf("%s.runs_on", config.File),
+				Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#status",
+			},
+		})
+	}
+
+	return err
 }
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
