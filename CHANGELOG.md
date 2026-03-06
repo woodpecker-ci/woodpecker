@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @qwerty287, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @dccdis, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @qwerty287, @stardothosting
 
 ### 🔒 Security
 
@@ -37,6 +37,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(bbdc): resolve annotated tag object SHA to commit SHA before posting build status [[#6203](https://github.com/woodpecker-ci/woodpecker/pull/6203)]
 - Prevent leaking goroutines on cancelled steps [[#6186](https://github.com/woodpecker-ci/woodpecker/pull/6186)]
 - Independently evaluate status filter and support on workflows [[#6183](https://github.com/woodpecker-ci/woodpecker/pull/6183)]
 - Fix status merging with skipped pipelines [[#6176](https://github.com/woodpecker-ci/woodpecker/pull/6176)]
