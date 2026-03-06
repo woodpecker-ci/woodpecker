@@ -585,10 +585,18 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 	if err != nil {
 		return nil, fmt.Errorf("unable to read commit: %w", err)
 	}
+
 	p.Commit.Message = commit.Message
 	p.Commit.Author = model.CommitAuthor{
 		Name:  commit.Author.Name,
 		Email: commit.Author.Email,
+	}
+
+	// In Bitbucket Data Center, when using annotated tags, the webhook's ToHash is the tag object SHA, not the actual commit SHA.
+	// Update p.Commit so that build statuses are posted to the correct commit SHA.
+	if p.Event == model.EventTag && commit.ID != "" && commit.ID != p.Commit.SHA {
+		p.Commit.SHA = commit.ID
+		p.Commit.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, commit.ID)
 	}
 
 	opts := &bb.CompareChangesOptions{}

@@ -248,13 +248,11 @@ func TestRunsOn(t *testing.T) {
 			{Data: []byte(`
 when:
   event: push
+  status: [ success, failure ]
+
 steps:
   - name: deploy
     image: scratch
-
-runs_on:
-  - success
-  - failure
 `)},
 		},
 	}
@@ -262,7 +260,7 @@ runs_on:
 	items, err := b.Build()
 	assert.NoError(t, err)
 	assert.Len(t, items[0].RunsOn, 2, "Should run on success and failure")
-	assert.Equal(t, "failure", items[0].RunsOn[1], "Should run on failure")
+	assert.ElementsMatchf(t, []string{"success", "failure"}, items[0].RunsOn, "Should run on failure")
 }
 
 func TestPipelineName(t *testing.T) {

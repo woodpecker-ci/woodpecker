@@ -50,7 +50,7 @@ const (
 // GitHub commit status.
 func convertStatus(status model.StatusValue) string {
 	switch status {
-	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped:
+	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped, model.StatusCanceled:
 		return statusPending
 	case model.StatusFailure, model.StatusDeclined:
 		return statusFailure

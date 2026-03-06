@@ -16,7 +16,7 @@ require (
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.2.1+incompatible
+	github.com/docker/cli v29.3.0+incompatible
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.6.0
 	github.com/docker/go-units v0.5.0
@@ -54,7 +54,7 @@ require (
 	github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482
 	github.com/urfave/cli/v3 v3.7.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	github.com/yaronf/httpsign v0.4.1
+	github.com/yaronf/httpsign v0.4.2
 	github.com/zalando/go-keyring v0.2.6
 	gitlab.com/gitlab-org/api/client-go v1.46.0
 	go.uber.org/multierr v1.11.0
