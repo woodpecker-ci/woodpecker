@@ -579,6 +579,14 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 	if err != nil {
 		return nil, fmt.Errorf("unable to read commit: %w", err)
 	}
+
+	// Fix for https://github.com/woodpecker-ci/woodpecker/issues/6202:
+	// Update p.Commit so that build statuses are posted to the correct commit SHA.
+	if p.Event == model.EventTag && commit.ID != "" && commit.ID != p.Commit {
+		p.Commit = commit.ID
+		p.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, commit.ID)
+	}
+
 	p.Message = commit.Message
 
 	opts := &bb.CompareChangesOptions{}
