@@ -286,13 +286,13 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	return repo, pipeline, nil
 }
 
-func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error) {
+func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string, error) {
 	repo := &model.Repo{}
 	pipeline := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
-		return nil, nil, err
+		return nil, nil, "", err
 	}
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
@@ -322,7 +322,6 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	pipeline.AuthorAvatar = hook.UserAvatar
 	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, strings.TrimPrefix(hook.Ref, "refs/tags/"))
 
-	// TODO does hook.Commits always contain hook.After?
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
 			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
@@ -332,7 +331,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 		}
 	}
 
-	return repo, pipeline, nil
+	return repo, pipeline, hook.After, nil
 }
 
 func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline, error) {
