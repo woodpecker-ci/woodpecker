@@ -32,7 +32,12 @@ type storage struct {
 const perPage = 50
 
 func NewEngine(opts *store.Opts) (store.Store, error) {
-	engine, err := xorm.NewEngine(opts.Driver, opts.Config)
+	driver := opts.Driver
+	if driver == "postgres" {
+		driver = "pgx"
+	}
+
+	engine, err := xorm.NewEngine(driver, opts.Config)
 	if err != nil {
 		return nil, err
 	}
