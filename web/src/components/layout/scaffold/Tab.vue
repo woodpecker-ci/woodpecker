@@ -26,7 +26,7 @@ function isSameRoute(a: RouteLocationRaw, b: RouteLocationRaw): boolean {
 
 onMounted(() => {
   // don't add tab if tab id is already present
-  if (tabs.value.find(({ to }) => isSameRoute(to, props.to))) {
+  if (tabs.value.some(({ to }) => isSameRoute(to, props.to))) {
     return;
   }
 
