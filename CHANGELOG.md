@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-06
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -85,6 +85,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency golang to v1.26.1 [[#6207](https://github.com/woodpecker-ci/woodpecker/pull/6207)]
 - fix(deps): update module github.com/docker/cli to v29.3.0+incompatible [[#6201](https://github.com/woodpecker-ci/woodpecker/pull/6201)]
 - fix(deps): update module github.com/yaronf/httpsign to v0.4.2 [[#6188](https://github.com/woodpecker-ci/woodpecker/pull/6188)]
 - chore(deps): update dependency eslint-plugin-vue-scoped-css to v3 [[#6178](https://github.com/woodpecker-ci/woodpecker/pull/6178)]
@@ -152,6 +153,7 @@
 
 ### Misc
 
+- Increase timeout for migration tests [[#6206](https://github.com/woodpecker-ci/woodpecker/pull/6206)]
 - Ignore fixtures for coverage [[#6197](https://github.com/woodpecker-ci/woodpecker/pull/6197)]
 - Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
 - Improve Debian packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
