@@ -60,6 +60,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency svgo to v4 [[#6214](https://github.com/woodpecker-ci/woodpecker/pull/6214)]
 - chore(deps): update docs npm deps non-major [[#6210](https://github.com/woodpecker-ci/woodpecker/pull/6210)]
 - Update serialize-javascript [[#6182](https://github.com/woodpecker-ci/woodpecker/pull/6182)]
 - chore(deps): update docs npm deps non-major [[#6173](https://github.com/woodpecker-ci/woodpecker/pull/6173)]
@@ -86,6 +87,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 to v3 [[#6215](https://github.com/woodpecker-ci/woodpecker/pull/6215)]
 - chore(deps): update web npm deps non-major [[#6213](https://github.com/woodpecker-ci/woodpecker/pull/6213)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.11.1 [[#6211](https://github.com/woodpecker-ci/woodpecker/pull/6211)]
 - fix(deps): update module google.golang.org/grpc to v1.79.2 [[#6208](https://github.com/woodpecker-ci/woodpecker/pull/6208)]
