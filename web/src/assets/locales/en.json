@@ -271,7 +271,8 @@
       "created": "Created: {created}",
       "cancel_info": {
         "superseded_by": "Superseded by #{pipelineId}",
-        "canceled_by_user": "Canceled by {user}"
+        "canceled_by_user": "Canceled by {user}",
+        "canceled_by_step": "Canceled due to {step}"
       },
       "debug": {
         "title": "Debug",
