@@ -86,6 +86,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#6213](https://github.com/woodpecker-ci/woodpecker/pull/6213)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.11.1 [[#6211](https://github.com/woodpecker-ci/woodpecker/pull/6211)]
 - fix(deps): update module google.golang.org/grpc to v1.79.2 [[#6208](https://github.com/woodpecker-ci/woodpecker/pull/6208)]
 - chore(deps): update dependency golang to v1.26.1 [[#6207](https://github.com/woodpecker-ci/woodpecker/pull/6207)]
