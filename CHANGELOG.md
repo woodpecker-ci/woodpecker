@@ -85,6 +85,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update golangci/golangci-lint docker tag to v2.11.1 [[#6211](https://github.com/woodpecker-ci/woodpecker/pull/6211)]
 - fix(deps): update module google.golang.org/grpc to v1.79.2 [[#6208](https://github.com/woodpecker-ci/woodpecker/pull/6208)]
 - chore(deps): update dependency golang to v1.26.1 [[#6207](https://github.com/woodpecker-ci/woodpecker/pull/6207)]
 - fix(deps): update module github.com/docker/cli to v29.3.0+incompatible [[#6201](https://github.com/woodpecker-ci/woodpecker/pull/6201)]
