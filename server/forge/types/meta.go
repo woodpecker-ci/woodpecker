@@ -14,22 +14,8 @@
 
 package types
 
-import "sort"
-
 // FileMeta represents a file in version control.
 type FileMeta struct {
 	Name string
 	Data []byte
-}
-
-type fileMetaList []*FileMeta
-
-func (a fileMetaList) Len() int           { return len(a) }
-func (a fileMetaList) Less(i, j int) bool { return a[i].Name < a[j].Name }
-func (a fileMetaList) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
-func SortByName(fm []*FileMeta) []*FileMeta {
-	l := fileMetaList(fm)
-	sort.Sort(l)
-	return l
 }
