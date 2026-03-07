@@ -87,6 +87,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v2 [[#6216](https://github.com/woodpecker-ci/woodpecker/pull/6216)]
 - fix(deps): update module codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 to v3 [[#6215](https://github.com/woodpecker-ci/woodpecker/pull/6215)]
 - chore(deps): update web npm deps non-major [[#6213](https://github.com/woodpecker-ci/woodpecker/pull/6213)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.11.1 [[#6211](https://github.com/woodpecker-ci/woodpecker/pull/6211)]
