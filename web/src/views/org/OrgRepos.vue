@@ -43,9 +43,7 @@ const orgPermissions = requiredInject('org-permissions');
 
 const search = ref('');
 const repos = computed(() =>
-  Array.from(repoStore.repos.values())
-    .filter((repo) => repo.org_id === org.value?.id)
-    .map(repoWithLastPipeline),
+  [...repoStore.repos.values()].filter((repo) => repo.org_id === org.value?.id).map(repoWithLastPipeline),
 );
 const { searchedRepos } = useRepoSearch(repos, search);
 const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
