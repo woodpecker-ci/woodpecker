@@ -23,7 +23,7 @@ import (
 
 	// Blank imports to register the sql drivers.
 	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -87,7 +87,7 @@ func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) 
 		if !initNewDB {
 			restorePostgresDump(t, config)
 		}
-		engine, err = xorm.NewEngine(driver, config)
+		engine, err = xorm.NewEngine("pgx", config)
 		require.NoError(t, err)
 		return engine, closeDB
 	default:
@@ -102,7 +102,7 @@ func restorePostgresDump(t *testing.T, config string) {
 	dump, err := os.ReadFile(postgresDump)
 	require.NoError(t, err)
 
-	db, err := sql.Open("postgres", config)
+	db, err := sql.Open("pgx", config)
 	require.NoError(t, err)
 	defer db.Close()
 
@@ -134,7 +134,7 @@ func restorePostgresDump(t *testing.T, config string) {
 }
 
 func cleanPostgresDB(t *testing.T, config string) {
-	db, err := sql.Open("postgres", config)
+	db, err := sql.Open("pgx", config)
 	require.NoError(t, err)
 	defer db.Close()
 

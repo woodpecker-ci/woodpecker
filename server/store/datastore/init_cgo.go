@@ -19,7 +19,7 @@ package datastore
 import (
 	// Blank imports to register the sql drivers.
 	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 )
 
