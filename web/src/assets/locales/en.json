@@ -531,6 +531,7 @@
   "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
   "extension_endpoint_placeholder": "e.g. https://example.com/api",
   "config_extension_endpoint": "Config extension endpoint",
+  "registry_extension_endpoint": "Registry extension endpoint",
   "config_extension_exclusive": "Exclusive",
   "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
   "extensions_signatures_public_key": "Public key for signatures",
