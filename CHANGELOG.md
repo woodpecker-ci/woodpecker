@@ -87,6 +87,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vue-i18n to v11.3.0 [[#6217](https://github.com/woodpecker-ci/woodpecker/pull/6217)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v2 [[#6216](https://github.com/woodpecker-ci/woodpecker/pull/6216)]
 - fix(deps): update module codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 to v3 [[#6215](https://github.com/woodpecker-ci/woodpecker/pull/6215)]
 - chore(deps): update web npm deps non-major [[#6213](https://github.com/woodpecker-ci/woodpecker/pull/6213)]
