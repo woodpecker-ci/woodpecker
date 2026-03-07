@@ -85,6 +85,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module google.golang.org/grpc to v1.79.2 [[#6208](https://github.com/woodpecker-ci/woodpecker/pull/6208)]
 - chore(deps): update dependency golang to v1.26.1 [[#6207](https://github.com/woodpecker-ci/woodpecker/pull/6207)]
 - fix(deps): update module github.com/docker/cli to v29.3.0+incompatible [[#6201](https://github.com/woodpecker-ci/woodpecker/pull/6201)]
 - fix(deps): update module github.com/yaronf/httpsign to v0.4.2 [[#6188](https://github.com/woodpecker-ci/woodpecker/pull/6188)]
