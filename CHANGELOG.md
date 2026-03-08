@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- refactor: pipeline runtime add description and prevent race [[#6167](https://github.com/woodpecker-ci/woodpecker/pull/6167)]
 - refactor: use upstream slices.Concat and remove utils.MergeSlices [[#6185](https://github.com/woodpecker-ci/woodpecker/pull/6185)]
 - Add enhanced function for error message handling in http request for configuration fetching [[#5712](https://github.com/woodpecker-ci/woodpecker/pull/5712)]
 - Remove fixed badge width in UI [[#6157](https://github.com/woodpecker-ci/woodpecker/pull/6157)]
