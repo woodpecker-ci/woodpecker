@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-07
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -87,6 +87,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.11.0 [[#6220](https://github.com/woodpecker-ci/woodpecker/pull/6220)]
 - chore(deps): update dependency vue-i18n to v11.3.0 [[#6217](https://github.com/woodpecker-ci/woodpecker/pull/6217)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v2 [[#6216](https://github.com/woodpecker-ci/woodpecker/pull/6216)]
 - fix(deps): update module codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 to v3 [[#6215](https://github.com/woodpecker-ci/woodpecker/pull/6215)]
