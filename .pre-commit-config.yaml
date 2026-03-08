@@ -20,7 +20,7 @@ repos:
     hooks:
       - id: markdownlint
         exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
-        language_version: 22.15.1
+        language_version: 24.14.0
   - repo: https://github.com/mrtazz/checkmake
     rev: v0.3.2
     hooks:
