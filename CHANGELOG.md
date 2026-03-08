@@ -87,6 +87,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update golangci/golangci-lint docker tag to v2.11.2 [[#6219](https://github.com/woodpecker-ci/woodpecker/pull/6219)]
 - chore(deps): update dependency simple-icons to v16.11.0 [[#6220](https://github.com/woodpecker-ci/woodpecker/pull/6220)]
 - chore(deps): update dependency vue-i18n to v11.3.0 [[#6217](https://github.com/woodpecker-ci/woodpecker/pull/6217)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v2 [[#6216](https://github.com/woodpecker-ci/woodpecker/pull/6216)]
