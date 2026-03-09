@@ -16,6 +16,8 @@ import { requiredInject } from '~/compositions/useInjectProvide';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import { usePipelineStore } from '~/store/pipelines';
 
+// TODO(4626): Refactor to use usePagination with server-side filtering,
+// so pipeline loading can move from RepoWrapper to individual list views.
 const repo = requiredInject('repo');
 const pipelines = requiredInject('pipelines');
 const pipelineStore = usePipelineStore();
