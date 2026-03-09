@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-08
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -61,6 +61,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#6225](https://github.com/woodpecker-ci/woodpecker/pull/6225)]
 - chore(deps): update dependency svgo to v4 [[#6214](https://github.com/woodpecker-ci/woodpecker/pull/6214)]
 - chore(deps): update docs npm deps non-major [[#6210](https://github.com/woodpecker-ci/woodpecker/pull/6210)]
 - Update serialize-javascript [[#6182](https://github.com/woodpecker-ci/woodpecker/pull/6182)]
@@ -88,6 +89,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6224](https://github.com/woodpecker-ci/woodpecker/pull/6224)]
 - chore(deps): update pre-commit non-major [[#6212](https://github.com/woodpecker-ci/woodpecker/pull/6212)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.11.2 [[#6219](https://github.com/woodpecker-ci/woodpecker/pull/6219)]
 - chore(deps): update dependency simple-icons to v16.11.0 [[#6220](https://github.com/woodpecker-ci/woodpecker/pull/6220)]
