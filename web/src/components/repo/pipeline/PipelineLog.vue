@@ -187,6 +187,8 @@ const logBuffer = ref<LogLine[]>([]);
 const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
+const urlRegex = /https?:\/\/\S+/g;
+
 function isScrolledToBottom(): boolean {
   if (!consoleElement.value) {
     return false;
@@ -204,7 +206,6 @@ function formatTime(time?: number): string {
 }
 
 function processText(text: string): string {
-  const urlRegex = /https?:\/\/\S+/g;
   let txt = ansiUp.value.ansi_to_html(`${decode(text)}\n`);
   txt = txt.replace(
     urlRegex,
