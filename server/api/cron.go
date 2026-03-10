@@ -152,6 +152,16 @@ func PostCron(c *gin.Context) {
 		}
 	}
 
+	nameExists, err := _store.CronExists(repo, in.Name)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+	if nameExists {
+		c.String(http.StatusConflict, "cron with this exists for this repo already")
+		return
+	}
+
 	if err := _store.CronCreate(cron); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting cron %q. %s", in.Name, err)
 		return

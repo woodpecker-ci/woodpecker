@@ -257,6 +257,7 @@ type (
 		Schedule  string `json:"schedule"`
 		Created   int64  `json:"created"`
 		Branch    string `json:"branch"`
+		Enabled   bool   `json:"enabled"`
 	}
 
 	// PipelineOptions is the JSON data for creating a new pipeline.
