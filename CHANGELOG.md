@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-09
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -89,6 +89,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.5.0 [[#6227](https://github.com/woodpecker-ci/woodpecker/pull/6227)]
 - fix(deps): update golang-packages [[#6224](https://github.com/woodpecker-ci/woodpecker/pull/6224)]
 - chore(deps): update pre-commit non-major [[#6212](https://github.com/woodpecker-ci/woodpecker/pull/6212)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.11.2 [[#6219](https://github.com/woodpecker-ci/woodpecker/pull/6219)]
