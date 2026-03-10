@@ -16,7 +16,7 @@
       <span class="text-wp-text-100">{{ $t('repo.pipeline.no_pipelines') }}</span>
     </Panel>
     <div v-if="hasMore && !loading" class="flex justify-center">
-      <Button :text="$t('repo.pipeline.load_more')" @click="$emit('load-more')" />
+      <Button :text="$t('repo.pipeline.load_more')" @click="$emit('loadMore')" />
     </div>
   </div>
 </template>
@@ -35,6 +35,6 @@ defineProps<{
 }>();
 
 defineEmits<{
-  (event: 'load-more'): void;
+  (event: 'loadMore'): void;
 }>();
 </script>
