@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @brainbaking, @dccdis, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @qwerty287, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @brainbaking, @dccdis, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @qwerty287, @savv, @stardothosting
 
 ### 🔒 Security
 
@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- Add "Load more" pagination to pipeline list [[#6200](https://github.com/woodpecker-ci/woodpecker/pull/6200)]
 - refactor: pipeline runtime add description and prevent race [[#6167](https://github.com/woodpecker-ci/woodpecker/pull/6167)]
 - refactor: use upstream slices.Concat and remove utils.MergeSlices [[#6185](https://github.com/woodpecker-ci/woodpecker/pull/6185)]
 - Add enhanced function for error message handling in http request for configuration fetching [[#5712](https://github.com/woodpecker-ci/woodpecker/pull/5712)]
