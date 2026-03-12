@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-10
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @dccdis, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @qwerty287, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @brainbaking, @dccdis, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @qwerty287, @stardothosting
 
 ### 🔒 Security
 
@@ -61,6 +61,7 @@
 
 ### 📚 Documentation
 
+- plugin: ascii junit report: renamed gh username [[#6232](https://github.com/woodpecker-ci/woodpecker/pull/6232)]
 - chore(deps): lock file maintenance [[#6225](https://github.com/woodpecker-ci/woodpecker/pull/6225)]
 - chore(deps): update dependency svgo to v4 [[#6214](https://github.com/woodpecker-ci/woodpecker/pull/6214)]
 - chore(deps): update docs npm deps non-major [[#6210](https://github.com/woodpecker-ci/woodpecker/pull/6210)]
@@ -89,6 +90,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6233](https://github.com/woodpecker-ci/woodpecker/pull/6233)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.5.0 [[#6227](https://github.com/woodpecker-ci/woodpecker/pull/6227)]
 - fix(deps): update golang-packages [[#6224](https://github.com/woodpecker-ci/woodpecker/pull/6224)]
 - chore(deps): update pre-commit non-major [[#6212](https://github.com/woodpecker-ci/woodpecker/pull/6212)]
