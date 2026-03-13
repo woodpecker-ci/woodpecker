@@ -22,43 +22,45 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 )
 
-// Option configures a runtime option.
+// Option configures a Runtime.
 type Option func(*Runtime)
 
-// WithBackend returns an option configured with a runtime engine.
+// WithBackend sets the backend engine used to run steps.
 func WithBackend(backend backend.Backend) Option {
 	return func(r *Runtime) {
 		r.engine = backend
 	}
 }
 
-// WithLogger returns an option configured with a runtime logger.
+// WithLogger sets the function used to stream step logs.
 func WithLogger(logger logging.Logger) Option {
 	return func(r *Runtime) {
 		r.logger = logger
 	}
 }
 
-// WithTracer returns an option configured with a runtime tracer.
+// WithTracer sets the tracer used to report step state changes.
 func WithTracer(tracer tracing.Tracer) Option {
 	return func(r *Runtime) {
 		r.tracer = tracer
 	}
 }
 
-// WithContext returns an option configured with a context.
+// WithContext sets the workflow execution context.
 func WithContext(ctx context.Context) Option {
 	return func(r *Runtime) {
 		r.ctx = ctx
 	}
 }
 
+// WithDescription sets the descriptive key-value pairs attached to every log line.
 func WithDescription(desc map[string]string) Option {
 	return func(r *Runtime) {
-		r.Description = desc
+		r.description = desc
 	}
 }
 
+// WithTaskUUID sets a specific task UUID instead of the auto-generated one.
 func WithTaskUUID(uuid string) Option {
 	return func(r *Runtime) {
 		r.taskUUID = uuid

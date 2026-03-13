@@ -31,7 +31,7 @@ import (
 
 // Run starts the execution of a workflow and waits for it to complete.
 func (r *Runtime) Run(runnerCtx context.Context) error {
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
 	for stagePos, stage := range r.spec.Stages {
 		stepNames := []string{}
@@ -90,12 +90,12 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 			return pipeline_errors.ErrCancel
 		case err := <-r.execAll(runnerCtx, stage.Steps):
 			if err != nil {
-				r.err = err
+				r.err.Set(err)
 			}
 		}
 	}
 
-	return r.err
+	return r.err.Get()
 }
 
 // Updates the current status of a step.
@@ -110,7 +110,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	state := new(state.State)
 	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
-	state.Pipeline.Error = r.err
+	state.Pipeline.Error = r.err.Get()
 
 	// We have an error while starting the step
 	if processState == nil && err != nil {
@@ -133,7 +133,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 
 	for _, step := range steps {
 		// Required since otherwise the loop variable
@@ -146,14 +146,14 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				Str("step", step.Name).
 				Msg("prepare")
 
-			switch {
-			case r.err != nil && !step.OnFailure:
+			switch rErr := r.err.Get(); {
+			case rErr != nil && !step.OnFailure:
 				logger.Debug().
 					Str("step", step.Name).
-					Err(r.err).
+					Err(rErr).
 					Msgf("skipped due to OnFailure=%t", step.OnFailure)
 				return nil
-			case r.err == nil && !step.OnSuccess:
+			case rErr == nil && !step.OnSuccess:
 				logger.Debug().
 					Str("step", step.Name).
 					Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
@@ -370,7 +370,7 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 		return nil, err
 	}
 	startTime := time.Now().Unix()
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
