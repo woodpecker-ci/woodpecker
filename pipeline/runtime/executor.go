@@ -403,6 +403,9 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
+			if waitState == nil {
+				waitState = &backend.State{}
+			}
 			waitState.Error = pipeline_errors.ErrCancel
 		} else {
 			return nil, err
