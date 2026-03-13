@@ -16,4 +16,7 @@ package types
 
 import "errors"
 
-var ErrNoCliContextFound = errors.New("no CliContext in context found")
+var (
+	ErrNoCliContextFound            = errors.New("no CliContext in context found")
+	ErrWorkflowRecoveryNotSupported = errors.New("workflow recovery not supported")
+)

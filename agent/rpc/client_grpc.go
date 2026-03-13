@@ -28,6 +28,7 @@ import (
 	grpcproto "google.golang.org/protobuf/proto"
 
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 )
@@ -482,7 +483,7 @@ func (c *client) sendLogs(ctx context.Context, entries []*proto.LogEntry) error 
 	return nil
 }
 
-func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
+func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (rpc.AgentConfig, error) {
 	req := new(proto.RegisterAgentRequest)
 	req.Info = &proto.AgentInfo{
 		Platform:     info.Platform,
@@ -493,7 +494,14 @@ func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, 
 	}
 
 	res, err := c.client.RegisterAgent(ctx, req)
-	return res.GetAgentId(), err
+	if err != nil {
+		return rpc.AgentConfig{}, err
+	}
+	protoConfig := res.GetConfig()
+	return rpc.AgentConfig{
+		AgentID:         protoConfig.GetAgentId(),
+		RecoveryEnabled: protoConfig.GetRecoveryEnabled(),
+	}, nil
 }
 
 func (c *client) UnregisterAgent(ctx context.Context) error {
@@ -532,6 +540,101 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 			codes.Unavailable:
 		default:
 			log.Error().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
+			return err
+		}
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+}
+
+// InitWorkflowRecovery initializes recovery state for all steps in a workflow and returns current states.
+func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error) {
+	retry := c.newBackOff()
+	req := &proto.InitWorkflowRecoveryRequest{
+		WorkflowId:     workflowID,
+		StepUuids:      stepUUIDs,
+		TimeoutSeconds: timeoutSeconds,
+	}
+
+	var res *proto.InitWorkflowRecoveryResponse
+	var err error
+
+	for {
+		res, err = c.client.InitWorkflowRecovery(ctx, req)
+		if err == nil {
+			break
+		}
+		log.Error().Err(err).Msgf("grpc error: InitWorkflowRecovery(): code: %v", status.Code(err))
+
+		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				return nil, nil
+			}
+			return nil, err
+		case
+			codes.Aborted,
+			codes.DataLoss,
+			codes.DeadlineExceeded,
+			codes.Internal,
+			codes.Unavailable:
+			// non-fatal errors
+		default:
+			return nil, err
+		}
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+
+	result := make(map[string]*types.RecoveryState, len(res.GetStates()))
+	for _, state := range res.GetStates() {
+		result[state.GetStepUuid()] = &types.RecoveryState{
+			Status:   types.RecoveryStatus(state.GetStatus()),
+			ExitCode: int(state.GetExitCode()),
+		}
+	}
+	return result, nil
+}
+
+// UpdateStepRecoveryState updates the recovery state for a specific step.
+func (c *client) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, recoveryStatus types.RecoveryStatus, exitCode int) (err error) {
+	retry := c.newBackOff()
+	req := &proto.UpdateStepRecoveryStateRequest{
+		WorkflowId: workflowID,
+		StepUuid:   stepUUID,
+		Status:     proto.RecoveryStatus(recoveryStatus),
+		ExitCode:   int32(exitCode),
+	}
+
+	for {
+		_, err = c.client.UpdateStepRecoveryState(ctx, req)
+		if err == nil {
+			return nil
+		}
+		log.Error().Err(err).Msgf("grpc error: UpdateStepRecoveryState(): code: %v", status.Code(err))
+
+		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				return nil
+			}
+			return err
+		case
+			codes.Aborted,
+			codes.DataLoss,
+			codes.DeadlineExceeded,
+			codes.Internal,
+			codes.Unavailable:
+			// non-fatal errors
+		default:
 			return err
 		}
 
