@@ -310,8 +310,9 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 
 	if len(parsed.RunsOn) > 0 { //nolint:staticcheck
 		err = multierr.Append(err, &pipeline_errors.PipelineError{
-			Type:    pipeline_errors.PipelineErrorTypeDeprecation,
-			Message: "Usage of `runs_on` is deprecated, use `when.status`",
+			Type:      pipeline_errors.PipelineErrorTypeDeprecation,
+			IsWarning: true,
+			Message:   "Usage of `runs_on` is deprecated, use `when.status`",
 			Data: pipeline_errors.DeprecationErrorData{
 				File:  config.File,
 				Field: fmt.Sprintf("%s.runs_on", config.File),
