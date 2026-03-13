@@ -28,6 +28,11 @@ func (s storage) CronCreate(cron *model.Cron) error {
 	return err
 }
 
+func (s storage) CronExists(repo *model.Repo, name string) (bool, error) {
+	cron := new(model.Cron)
+	return s.engine.Where("name = ?", name).And("repo_id = ?", repo.ID).Exist(cron)
+}
+
 func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
 	cron := new(model.Cron)
 	return cron, wrapGet(s.engine.ID(id).Where("repo_id = ?", repo.ID).Get(cron))
