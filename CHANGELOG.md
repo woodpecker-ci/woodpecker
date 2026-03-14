@@ -91,6 +91,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency golangci/golangci-lint to v2.11.3 [[#6237](https://github.com/woodpecker-ci/woodpecker/pull/6237)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.11.3 [[#6238](https://github.com/woodpecker-ci/woodpecker/pull/6238)]
 - fix(deps): update module golang.org/x/net to v0.52.0 [[#6235](https://github.com/woodpecker-ci/woodpecker/pull/6235)]
 - fix(deps): update golang-packages [[#6233](https://github.com/woodpecker-ci/woodpecker/pull/6233)]
