@@ -91,6 +91,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-release docker tag to v0.3.0 [[#6241](https://github.com/woodpecker-ci/woodpecker/pull/6241)]
 - chore(deps): update dependency vite to v8 [[#6242](https://github.com/woodpecker-ci/woodpecker/pull/6242)]
 - chore(deps): update web npm deps non-major [[#6239](https://github.com/woodpecker-ci/woodpecker/pull/6239)]
 - chore(deps): update dependency golangci/golangci-lint to v2.11.3 [[#6237](https://github.com/woodpecker-ci/woodpecker/pull/6237)]
