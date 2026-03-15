@@ -92,6 +92,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency jsdom to v29 [[#6246](https://github.com/woodpecker-ci/woodpecker/pull/6246)]
 - chore(deps): update dependency simple-icons to v16.12.0 [[#6245](https://github.com/woodpecker-ci/woodpecker/pull/6245)]
 - fix(deps): update golang-packages [[#6244](https://github.com/woodpecker-ci/woodpecker/pull/6244)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.3.0 [[#6241](https://github.com/woodpecker-ci/woodpecker/pull/6241)]
