@@ -91,6 +91,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.12.0 [[#6245](https://github.com/woodpecker-ci/woodpecker/pull/6245)]
 - fix(deps): update golang-packages [[#6244](https://github.com/woodpecker-ci/woodpecker/pull/6244)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.3.0 [[#6241](https://github.com/woodpecker-ci/woodpecker/pull/6241)]
 - chore(deps): update dependency vite to v8 [[#6242](https://github.com/woodpecker-ci/woodpecker/pull/6242)]
