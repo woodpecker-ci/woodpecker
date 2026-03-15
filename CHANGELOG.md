@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-14
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -91,6 +91,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6244](https://github.com/woodpecker-ci/woodpecker/pull/6244)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.3.0 [[#6241](https://github.com/woodpecker-ci/woodpecker/pull/6241)]
 - chore(deps): update dependency vite to v8 [[#6242](https://github.com/woodpecker-ci/woodpecker/pull/6242)]
 - chore(deps): update web npm deps non-major [[#6239](https://github.com/woodpecker-ci/woodpecker/pull/6239)]
