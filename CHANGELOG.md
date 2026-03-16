@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-15
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -62,6 +62,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#6249](https://github.com/woodpecker-ci/woodpecker/pull/6249)]
 - chore(deps): update docs npm deps non-major [[#6240](https://github.com/woodpecker-ci/woodpecker/pull/6240)]
 - plugin: ascii junit report: renamed gh username [[#6232](https://github.com/woodpecker-ci/woodpecker/pull/6232)]
 - chore(deps): lock file maintenance [[#6225](https://github.com/woodpecker-ci/woodpecker/pull/6225)]
@@ -92,6 +93,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.6.0 [[#6248](https://github.com/woodpecker-ci/woodpecker/pull/6248)]
 - chore(deps): update dependency jsdom to v29 [[#6246](https://github.com/woodpecker-ci/woodpecker/pull/6246)]
 - chore(deps): update dependency simple-icons to v16.12.0 [[#6245](https://github.com/woodpecker-ci/woodpecker/pull/6245)]
 - fix(deps): update golang-packages [[#6244](https://github.com/woodpecker-ci/woodpecker/pull/6244)]
