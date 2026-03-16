@@ -102,15 +102,15 @@ func (m *manager) SignaturePublicKey() crypto.PublicKey {
 }
 
 func (m *manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
-    if repo.SecretExtensionEndpoint != "" {
-        httpService := secret.NewHTTP(strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.client)
-        if repo.SecretExtensionExclusive {
-            return httpService
-        }
-        return secret.NewCombined(m.secret, httpService)
-    }
+	if repo.SecretExtensionEndpoint != "" {
+		httpService := secret.NewHTTP(strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.client)
+		if repo.SecretExtensionExclusive {
+			return httpService
+		}
+		return secret.NewCombined(m.secret, httpService)
+	}
 
-    return m.SecretService()
+	return m.SecretService()
 }
 
 func (m *manager) SecretService() secret.Service {

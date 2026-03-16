@@ -33,7 +33,7 @@ type http struct {
 type secretRequestStructure struct {
 	Repo     *model.Repo     `json:"repo"`
 	Pipeline *model.Pipeline `json:"pipeline"`
-	Netrc         *model.Netrc    `json:"netrc"`
+	Netrc    *model.Netrc    `json:"netrc"`
 }
 
 // NewHTTP returns a new external secret service backed by an HTTP endpoint.
