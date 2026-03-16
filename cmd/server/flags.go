@@ -345,6 +345,12 @@ var flags = append([]cli.Flag{
 		Usage:   "Disable version check in admin web ui.",
 		Name:    "skip-version-check",
 	},
+	&cli.UintFlag{
+		Sources: cli.EnvVars("WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT"),
+		Usage:   "Maximum number of lines to show in a pipeline log, defaults to 5000.",
+		Name:    "max-pipeline-log-line-count",
+		Value:   5000,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE"),
 		Name:    "log-store",
