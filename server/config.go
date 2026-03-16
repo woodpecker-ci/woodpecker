@@ -58,8 +58,9 @@ var Config = struct {
 		DisableUserRegisteredAgentRegistration bool
 	}
 	WebUI struct {
-		EnableSwagger    bool
-		SkipVersionCheck bool
+		EnableSwagger           bool
+		SkipVersionCheck        bool
+		MaxPipelineLogLineCount uint
 	}
 	Prometheus struct {
 		AuthToken string
