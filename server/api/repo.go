@@ -292,6 +292,12 @@ func PatchRepo(c *gin.Context) {
 	if in.ConfigExtensionExclusive != nil {
 		repo.ConfigExtensionExclusive = *in.ConfigExtensionExclusive
 	}
+	if in.SecretExtensionEndpoint != nil {
+		repo.SecretExtensionEndpoint = *in.SecretExtensionEndpoint
+	}
+	if in.SecretExtensionExclusive != nil {
+		repo.SecretExtensionExclusive = *in.SecretExtensionExclusive
+	}
 
 	err := _store.UpdateRepo(repo)
 	if err != nil {

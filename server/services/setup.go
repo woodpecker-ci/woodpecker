@@ -46,7 +46,7 @@ func setupRegistryService(store store.Store, dockerConfig string) registry.Servi
 	return registry.NewDB(store)
 }
 
-func setupSecretService(store store.Store) secret.Service {
+func setupSecretService(store store.Store, endpoint string, exclusive bool, client *utils.Client) secret.Service {
 	// TODO(1544): fix encrypted store
 	// // encryption
 	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
@@ -54,6 +54,14 @@ func setupSecretService(store store.Store) secret.Service {
 	// if err != nil {
 	// 	log.Fatal().Err(err).Msg("could not create encryption service")
 	// }
+
+	if endpoint != "" {
+		httpService := secret.NewHTTP(endpoint, client)
+		if exclusive {
+			return httpService
+		}
+		return secret.NewCombined(secret.NewDB(store), httpService)
+	}
 
 	return secret.NewDB(store)
 }

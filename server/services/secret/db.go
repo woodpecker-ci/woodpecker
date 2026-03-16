@@ -36,7 +36,7 @@ func (d *db) SecretList(repo *model.Repo, p *model.ListOptions) ([]*model.Secret
 	return d.store.SecretList(repo, false, p)
 }
 
-func (d *db) SecretListPipeline(repo *model.Repo, _ *model.Pipeline) ([]*model.Secret, error) {
+func (d *db) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, _ *model.Netrc) ([]*model.Secret, error) {
 	s, err := d.store.SecretList(repo, true, &model.ListOptions{All: true})
 	if err != nil {
 		return nil, err

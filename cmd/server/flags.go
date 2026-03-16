@@ -284,6 +284,16 @@ var flags = append([]cli.Flag{
 		Usage:   "whether global configuration service endpoint should be exclusive (skip forge)",
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRET_SERVICE_ENDPOINT"),
+		Name:    "secret-service-endpoint",
+		Usage:   "url used for calling external secret service endpoint",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRET_SERVICE_EXCLUSIVE"),
+		Name:    "secret-service-exclusive",
+		Usage:   "whether external secret service endpoint should be exclusive (skip database secrets)",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
 		Name:    "extensions-allowed-hosts",
 		Usage:   "Hosts that are allowed to be contacted by extensions",

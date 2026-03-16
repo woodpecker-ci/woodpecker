@@ -84,6 +84,11 @@ export interface Repo {
   config_extension_endpoint: string;
 
   config_extension_exclusive: boolean;
+
+  // Endpoint for secret extensions
+  secret_extension_endpoint: string;
+
+  secret_extension_exclusive: boolean;
 }
 
 /* eslint-disable no-unused-vars */
@@ -115,7 +120,7 @@ export type RepoSettings = Pick<
   | 'netrc_trusted'
 >;
 
-export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'config_extension_exclusive'>;
+export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'config_extension_exclusive' | 'secret_extension_endpoint' | 'secret_extension_exclusive'>;
 
 export interface RepoPermissions {
   pull: boolean;
