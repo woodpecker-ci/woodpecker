@@ -526,12 +526,22 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	switch e := hook.Event.(type) {
 	case *bb.RepositoryPushEvent:
 		pipe, err = c.updatePipelineFromCommits(ctx, user, repo, hook.Pipeline, currCommit, prevCommit)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to update pipeline: %w", err)
+		}
+		// For tag events, we need to resolve the actual commit SHA early.
+		// In Bitbucket Data Center, when using annotated tags, the webhook's ToHash is the tag object SHA,
+		// not the actual commit SHA. We need to resolve this before the config is fetched.
+		if pipe != nil && pipe.Event == model.EventTag {
+			if err := c.resolveTagCommit(ctx, user, repo, pipe); err != nil {
+				return nil, nil, fmt.Errorf("failed to resolve tag commit: %w", err)
+			}
+		}
 	case *bb.PullRequestEvent:
 		pipe, err = c.updatePipelineFromPullRequest(ctx, user, repo, hook.Pipeline, e.PullRequest.ID)
-	}
-
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to update pipeline: %w", err)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to update pipeline: %w", err)
+		}
 	}
 
 	if pipe == nil {
@@ -580,13 +590,6 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 		return nil, fmt.Errorf("unable to read commit: %w", err)
 	}
 
-	// In Bitbucket Data Center, when using annotated tags, the webhook's ToHash is the tag object SHA, not the actual commit SHA.
-	// Update p.Commit so that build statuses are posted to the correct commit SHA.
-	if p.Event == model.EventTag && commit.ID != "" && commit.ID != p.Commit {
-		p.Commit = commit.ID
-		p.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, commit.ID)
-	}
-
 	p.Message = commit.Message
 
 	opts := &bb.CompareChangesOptions{}
@@ -611,6 +614,29 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 	}
 
 	return p, nil
+}
+
+// resolveTagCommit resolves the actual commit SHA for tag events.
+// In Bitbucket Data Center, when using annotated tags, the webhook's ToHash is the tag object SHA,
+// not the actual commit SHA. This function resolves the tag SHA to the actual commit SHA.
+func (c *client) resolveTagCommit(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline) error {
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return fmt.Errorf("unable to create bitbucket client: %w", err)
+	}
+
+	commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, p.Commit)
+	if err != nil {
+		return fmt.Errorf("unable to resolve tag commit: %w", err)
+	}
+
+	// Update the commit SHA and ForgeURL to point to the actual commit
+	if commit.ID != "" && commit.ID != p.Commit {
+		p.Commit = commit.ID
+		p.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, commit.ID)
+	}
+
+	return nil
 }
 
 func (c *client) updatePipelineFromPullRequest(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, pullRequestID uint64) (*model.Pipeline, error) {
