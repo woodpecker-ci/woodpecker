@@ -104,6 +104,7 @@ linters:
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/agent
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend
             - pkg: go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker
         rpc:
           list-mode: lax
