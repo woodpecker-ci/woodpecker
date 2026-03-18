@@ -327,7 +327,8 @@
             "cancel_info": {
                 "superseded_by": "Ersetzt durch #{pipelineId}",
                 "canceled_by_user": "Abgebrochen von {user}"
-            }
+            },
+            "load_more": "Mehr laden"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
