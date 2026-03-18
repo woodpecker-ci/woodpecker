@@ -227,7 +227,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 		t.Run("should return not found for non-existent pipeline", func(t *testing.T) {
 			mockStore := store_mocks.NewMockStore(t)
-			mockStore.On("GetPipelineNumber", mock.Anything, int64(3)).Return((*model.Pipeline)(nil), types.RecordNotExist)
+			mockStore.On("GetPipelineNumber", mock.Anything, int64(3)).Return((*model.Pipeline)(nil), types.ErrRecordNotExist)
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)

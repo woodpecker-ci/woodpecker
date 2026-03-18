@@ -108,7 +108,7 @@ func (c *combined) OrgRegistryDelete(owner int64, addr string) error {
 
 func (c *combined) GlobalRegistryFind(addr string) (*model.Registry, error) {
 	registry, err := c.dbRegistry.GlobalRegistryFind(addr)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return nil, err
 	}
 	if registry != nil {
@@ -119,7 +119,7 @@ func (c *combined) GlobalRegistryFind(addr string) (*model.Registry, error) {
 			return registry, nil
 		}
 	}
-	return nil, types.RecordNotExist
+	return nil, types.ErrRecordNotExist
 }
 
 func (c *combined) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {

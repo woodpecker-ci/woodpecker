@@ -19,6 +19,13 @@ import (
 	"errors"
 )
 
-var RecordNotExist = sql.ErrNoRows
+var (
+	// RecordNotExist a Get or Update could not find the requested record
+	ErrRecordNotExist = sql.ErrNoRows
 
-var ErrUniqueExists = errors.New("unique constraint failed")
+	// ErrInsertDuplicateDetected is returned when an insert fails because of unique constrains
+	ErrInsertDuplicateDetected = errors.New("on insert duplicate based on constraints was detected")
+
+	// ErrInsertNone indicates that an insert did not create a record but statement itself was successful
+	ErrInsertNone = errors.New("no records where inserted")
+)
