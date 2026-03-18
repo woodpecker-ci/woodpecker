@@ -15,6 +15,7 @@
 
 ### ✨ Features
 
+- Add Container Registry credential extension [[#5993](https://github.com/woodpecker-ci/woodpecker/pull/5993)]
 - Support exclusive config extensions [[#5978](https://github.com/woodpecker-ci/woodpecker/pull/5978)]
 
 ### 📈 Enhancement
