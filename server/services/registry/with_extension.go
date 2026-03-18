@@ -28,7 +28,8 @@ type withExtension struct {
 }
 
 // NewWithExtension returns a registry service that combines a base service with an HTTP extension.
-// The extension is called during RegistryListPipeline to fetch additional registry credentials.
+// The extension is called during RegistryListPipeline to fetch additional registry credentials and
+// the extension registries taking priority.
 func NewWithExtension(base Service, extension *httpExtension) Service {
 	return &withExtension{base, extension}
 }
