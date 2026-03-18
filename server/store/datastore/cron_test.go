@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestCronCreate(t *testing.T) {
@@ -33,7 +34,7 @@ func TestCronCreate(t *testing.T) {
 	assert.NotEqualValues(t, 0, cron1.ID)
 
 	// cannot insert cron job with same repoID and title
-	assert.EqualError(t, store.CronCreate(cron1), "cron with this name exists already for this repo")
+	assert.ErrorIs(t, types.UniqueExists, store.CronCreate(cron1))
 
 	oldID := cron1.ID
 	assert.NoError(t, store.CronDelete(repo, oldID))
