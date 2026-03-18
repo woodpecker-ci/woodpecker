@@ -207,6 +207,7 @@
       "config": "Config",
       "files": "Changed files",
       "no_pipelines": "No pipelines have been started yet.",
+      "load_more": "Load more",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
       "pipelines_for": "Pipelines for branch \"{branch}\"",
