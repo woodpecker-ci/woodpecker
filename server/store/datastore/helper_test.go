@@ -40,7 +40,7 @@ func TestWrapDelete(t *testing.T) {
 	assert.Equal(t, "TestWrapDelete: test err", err.Error())
 }
 
-func TestWrapInsert(t *testing.t) {
+func TestWrapInsert(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Cron))
 	defer closer()
 
