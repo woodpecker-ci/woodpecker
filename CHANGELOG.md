@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Update `fast-xml-parser` [[#6258](https://github.com/woodpecker-ci/woodpecker/pull/6258)]
 - Update `dompurify` and `svgo` [[#6198](https://github.com/woodpecker-ci/woodpecker/pull/6198)]
 - Update edwards25519 [[#6143](https://github.com/woodpecker-ci/woodpecker/pull/6143)]
 - chore(deps): update dependency lodash to v4.17.23 [security] [[#5997](https://github.com/woodpecker-ci/woodpecker/pull/5997)]
