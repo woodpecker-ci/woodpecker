@@ -21,4 +21,4 @@ import (
 
 var RecordNotExist = sql.ErrNoRows
 
-var UniqueExists = errors.New("unique constraint failed")
+var ErrUniqueExists = errors.New("unique constraint failed")
