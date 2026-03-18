@@ -15,6 +15,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -28,6 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // GetCron
@@ -153,7 +155,11 @@ func PostCron(c *gin.Context) {
 	}
 
 	if err := _store.CronCreate(cron); err != nil {
-		c.String(http.StatusInternalServerError, "Error inserting cron %q. %s", in.Name, err)
+		if errors.Is(err, types.ErrUniqueExists) {
+			c.String(http.StatusConflict, "cron with this exists for this repo already")
+		} else {
+			c.String(http.StatusInternalServerError, "Error inserting cron %q. %s", in.Name, err)
+		}
 		return
 	}
 	c.JSON(http.StatusOK, cron)
