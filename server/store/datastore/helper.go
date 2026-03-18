@@ -52,22 +52,22 @@ func wrapDelete(c int64, err error) error {
 }
 
 func wrapInsert(c int64, err error) error {
+	if err != nil {
+		switch errMsg := err.Error(); {
+		case strings.HasPrefix(errMsg, "UNIQUE constraint failed"),
+			strings.HasPrefix(errMsg, "pq: duplicate key value violates unique constraint"),
+			strings.Contains(errMsg, "Duplicate entry"):
+			return types.ErrInsertDuplicateDetected
+		default:
+			return err
+		}
+	}
+
 	if c == 0 {
 		return types.ErrInsertNone
 	}
 
-	if err == nil {
-		return nil
-	}
-
-	switch errMsg := err.Error(); {
-	case strings.HasPrefix(errMsg, "UNIQUE constraint failed"),
-		strings.HasPrefix(errMsg, "pq: duplicate key value violates unique constraint"),
-		strings.Contains(errMsg, "Duplicate entry"):
-		return types.ErrInsertDuplicateDetected
-	default:
-		return err
-	}
+	return nil
 }
 
 func (s storage) paginate(p *model.ListOptions) *xorm.Session {
