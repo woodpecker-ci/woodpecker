@@ -15,8 +15,10 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -152,18 +154,12 @@ func PostCron(c *gin.Context) {
 		}
 	}
 
-	nameExists, err := _store.CronExists(repo, in.Name)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
-	if nameExists {
-		c.String(http.StatusConflict, "cron with this exists for this repo already")
-		return
-	}
-
 	if err := _store.CronCreate(cron); err != nil {
-		c.String(http.StatusInternalServerError, "Error inserting cron %q. %s", in.Name, err)
+		if err.Error() == "cron with this name exists already for this repo" {
+			c.String(http.StatusConflict, "cron with this exists for this repo already")
+		} else {
+			c.String(http.StatusInternalServerError, "Error inserting cron %q. %s", in.Name, err)
+		}
 		return
 	}
 	c.JSON(http.StatusOK, cron)

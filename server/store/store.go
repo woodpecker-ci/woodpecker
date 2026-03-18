@@ -163,7 +163,6 @@ type Store interface {
 
 	// Cron
 	CronCreate(*model.Cron) error
-	CronExists(*model.Repo, string) (bool, error)
 	CronFind(*model.Repo, int64) (*model.Cron, error)
 	CronList(*model.Repo, *model.ListOptions) ([]*model.Cron, error)
 	CronUpdate(*model.Repo, *model.Cron) error

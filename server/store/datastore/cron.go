@@ -15,6 +15,9 @@
 package datastore
 
 import (
+	"errors"
+	"strings"
+
 	"xorm.io/builder"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -25,12 +28,10 @@ func (s storage) CronCreate(cron *model.Cron) error {
 		return err
 	}
 	_, err := s.engine.Insert(cron)
+	if strings.HasPrefix(err.Error(), "UNIQUE constraint failed") {
+		return errors.New("cron with this name exists already for this repo")
+	}
 	return err
-}
-
-func (s storage) CronExists(repo *model.Repo, name string) (bool, error) {
-	cron := new(model.Cron)
-	return s.engine.Where("name = ?", name).And("repo_id = ?", repo.ID).Exist(cron)
 }
 
 func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
