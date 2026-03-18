@@ -50,7 +50,4 @@ func TestWrapInsert(t *testing.T) {
 
 	// test insert witch should fail because of unique constraint
 	assert.ErrorIs(t, wrapInsert(store.engine.Insert(cron)), types.ErrInsertDuplicateDetected)
-
-	// test if no insert is detected
-	assert.ErrorIs(t, wrapInsert(store.engine.Insert(nil)), types.ErrInsertNone)
 }

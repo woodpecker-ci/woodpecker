@@ -63,10 +63,6 @@ func wrapInsert(c int64, err error) error {
 		}
 	}
 
-	if c == 0 {
-		return types.ErrInsertNone
-	}
-
 	return nil
 }
 

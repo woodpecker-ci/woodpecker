@@ -25,7 +25,4 @@ var (
 
 	// ErrInsertDuplicateDetected is returned when an insert fails because of unique constrains.
 	ErrInsertDuplicateDetected = errors.New("on insert duplicate based on constraints was detected")
-
-	// ErrInsertNone indicates that an insert did not create a record but statement itself was successful.
-	ErrInsertNone = errors.New("no records where inserted")
 )
