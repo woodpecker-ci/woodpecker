@@ -28,7 +28,7 @@ func (s storage) CronCreate(cron *model.Cron) error {
 		return err
 	}
 	_, err := s.engine.Insert(cron)
-	if strings.HasPrefix(err.Error(), "UNIQUE constraint failed") {
+	if err != nil && strings.HasPrefix(err.Error(), "UNIQUE constraint failed") {
 		return errors.New("cron with this name exists already for this repo")
 	}
 	return err
