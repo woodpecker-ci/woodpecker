@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @qwerty287, @savv, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @paulovitorbal, @qwerty287, @savv, @stardothosting
 
 ### 🔒 Security
 
@@ -64,6 +64,7 @@
 
 ### 📚 Documentation
 
+- Sorted the glossary items [[#6255](https://github.com/woodpecker-ci/woodpecker/pull/6255)]
 - chore(deps): update docs npm deps non-major [[#6240](https://github.com/woodpecker-ci/woodpecker/pull/6240)]
 - plugin: ascii junit report: renamed gh username [[#6232](https://github.com/woodpecker-ci/woodpecker/pull/6232)]
 - chore(deps): lock file maintenance [[#6225](https://github.com/woodpecker-ci/woodpecker/pull/6225)]
