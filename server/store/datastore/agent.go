@@ -42,8 +42,7 @@ func (s storage) AgentFindByToken(token string) (*model.Agent, error) {
 
 func (s storage) AgentCreate(agent *model.Agent) error {
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(agent)
-	return err
+	return wrapInsert(s.engine.Insert(agent))
 }
 
 func (s storage) AgentUpdate(agent *model.Agent) error {

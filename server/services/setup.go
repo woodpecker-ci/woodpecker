@@ -35,15 +35,23 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-func setupRegistryService(store store.Store, dockerConfig string) registry.Service {
+func setupRegistryService(store store.Store, dockerConfig, endpoint string, client *utils.Client) registry.Service {
+	var service registry.Service
 	if dockerConfig != "" {
-		return registry.NewCombined(
+		service = registry.NewCombined(
 			registry.NewDB(store),
 			registry.NewFilesystem(dockerConfig),
 		)
+	} else {
+		service = registry.NewDB(store)
 	}
 
-	return registry.NewDB(store)
+	// Wrap with global HTTP extension if configured
+	if endpoint != "" {
+		service = registry.NewWithExtension(service, registry.NewHTTP(endpoint, client))
+	}
+
+	return service
 }
 
 func setupSecretService(store store.Store) secret.Service {
@@ -82,7 +90,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 	privKeyID := "signature-private-key"
 
 	privKey, err := _store.ServerConfigGet(privKeyID)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to generate private key: %w", err)
@@ -106,7 +114,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 
 func setupForgeService(c *cli.Command, _store store.Store) error {
 	_forge, err := _store.ForgeGet(1)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return err
 	}
 	forgeExists := err == nil

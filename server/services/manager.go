@@ -88,7 +88,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
 		secret:              setupSecretService(store),
-		registry:            setupRegistryService(store, c.String("docker-config")),
+		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-service-endpoint"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
 		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
@@ -109,7 +109,10 @@ func (m *manager) SecretService() secret.Service {
 	return m.secret
 }
 
-func (m *manager) RegistryServiceFromRepo(_ *model.Repo) registry.Service {
+func (m *manager) RegistryServiceFromRepo(repo *model.Repo) registry.Service {
+	if repo.RegistryExtensionEndpoint != "" {
+		return registry.NewWithExtension(m.registry, registry.NewHTTP(strings.TrimRight(repo.RegistryExtensionEndpoint, "/"), m.client))
+	}
 	return m.RegistryService()
 }
 

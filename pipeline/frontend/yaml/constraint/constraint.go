@@ -80,17 +80,19 @@ func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]
 	return false, nil
 }
 
-func (when *When) IncludesStatusFailure() bool {
+func (when *When) IncludesStatusFailure(metadata metadata.Metadata, global bool, env map[string]string) bool {
 	for _, c := range when.Constraints {
-		if slices.Contains(c.Status, statusFailure) {
-			return true
+		if matches, err := c.Match(metadata, global, env); err == nil && matches {
+			if slices.Contains(c.Status, statusFailure) {
+				return true
+			}
 		}
 	}
 
 	return false
 }
 
-func (when *When) IncludesStatusSuccess() bool {
+func (when *When) IncludesStatusSuccess(metadata metadata.Metadata, global bool, env map[string]string) bool {
 	// "success" acts differently than "failure" in that it's
 	// presumed to be included unless it's specifically not part
 	// of the list
@@ -98,11 +100,15 @@ func (when *When) IncludesStatusSuccess() bool {
 		return true
 	}
 	for _, c := range when.Constraints {
-		if len(c.Status) == 0 || slices.Contains(c.Status, statusSuccess) {
-			return true
+		matches, err := c.Match(metadata, global, env)
+		fmt.Println("mat", matches, err, c.Status)
+		if matches, err := c.Match(metadata, global, env); err == nil && matches {
+			if len(c.Status) > 0 && !slices.Contains(c.Status, statusSuccess) {
+				return false
+			}
 		}
 	}
-	return false
+	return true
 }
 
 // False if (any) non local.

@@ -143,9 +143,9 @@ func TestPermPruneDeleteAll(t *testing.T) {
 	assert.NoError(t, store.PermPrune(user.ID, []int64{}))
 
 	_, err = store.PermFind(user, repo1)
-	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 	_, err = store.PermFind(user, repo2)
-	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 }
 
 func TestPermPruneKeepOne(t *testing.T) {
@@ -183,7 +183,7 @@ func TestPermPruneKeepOne(t *testing.T) {
 	assert.NoError(t, store.PermPrune(user.ID, []int64{repo2.ID}))
 
 	_, err = store.PermFind(user, repo1)
-	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 
 	_, err = store.PermFind(user, repo2)
 	assert.NoError(t, err)

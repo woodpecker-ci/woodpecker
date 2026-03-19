@@ -101,7 +101,7 @@
       </div>
 
       <div class="text-wp-text-alt-100 m-auto text-xl">
-        <span v-if="step?.state === 'skipped'">{{ $t('repo.pipeline.actions.canceled') }}</span>
+        <span v-if="step?.state === 'canceled'">{{ $t('repo.pipeline.actions.canceled') }}</span>
         <span v-else-if="!step?.started">{{ $t('repo.pipeline.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
         <div v-else-if="log?.length === 0">{{ $t('repo.pipeline.no_logs') }}</div>
@@ -133,6 +133,7 @@ import { useRoute } from 'vue-router';
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
@@ -174,8 +175,8 @@ const fullscreen = ref(false);
 const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(
   () =>
-    // we do not have logs for skipped steps
-    repo?.value && pipeline.value && step.value && step.value.state !== 'skipped',
+    // we do not have logs for skipped/canceled steps
+    repo?.value && pipeline.value && step.value && step.value.state !== 'skipped' && step.value.state !== 'canceled',
 );
 const autoScroll = useStorage('woodpecker:log-auto-scroll', true);
 const showActions = ref(false);
@@ -184,8 +185,12 @@ const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
-const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
+const config = useConfig();
+
+const maxLineCount = config.maxPipelineLogLineCount; // TODO(2653): implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
+
+const urlRegex = /https?:\/\/\S+/g;
 
 function isScrolledToBottom(): boolean {
   if (!consoleElement.value) {
@@ -204,7 +209,6 @@ function formatTime(time?: number): string {
 }
 
 function processText(text: string): string {
-  const urlRegex = /https?:\/\/\S+/g;
   let txt = ansiUp.value.ansi_to_html(`${decode(text)}\n`);
   txt = txt.replace(
     urlRegex,
