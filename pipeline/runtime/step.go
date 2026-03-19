@@ -89,7 +89,7 @@ func (r *Runtime) shouldSkipStep(step *backend.Step) bool {
 // If StartStep or TailStep fail, startStep returns a non-nil error and the caller
 // must not call waitForLogs.
 func (r *Runtime) startStep(step *backend.Step) (waitForLogs func(), startTime int64, err error) {
-	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil { //nolint:contextcheck
+	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, 0, err
 	}
 	startTime = time.Now().Unix()
@@ -97,7 +97,7 @@ func (r *Runtime) startStep(step *backend.Step) (waitForLogs func(), startTime i
 	var wg sync.WaitGroup
 
 	if r.logger != nil {
-		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
+		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -120,8 +120,8 @@ func (r *Runtime) startStep(step *backend.Step) (waitForLogs func(), startTime i
 // the container, and maps exit conditions (OOM kill, non-zero exit code, context
 // cancellation) to typed errors.
 //
-// runnerCtx is intentionally used for DestroyStep so that container cleanup can
-// still reach the backend even after the workflow context (r.ctx) is cancelled.
+// The runnerCtx is intentionally used for DestroyStep so that container cleanup can
+// still reach the backend even after the workflow context (r.ctx) is canceled.
 func (r *Runtime) completeStep(runnerCtx context.Context, step *backend.Step, waitForLogs func(), startTime int64) (*backend.State, error) {
 	// Drain the log stream before waiting on the process exit.
 	waitForLogs()
@@ -135,7 +135,7 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend.Step, wa
 		}
 	}
 
-	// Use runnerCtx here: the workflow context may already be cancelled but we
+	// Use runnerCtx here: the workflow context may already be canceled but we
 	// still need to reach the backend to stop/remove the container.
 	if err := r.engine.DestroyStep(runnerCtx, step, r.taskUUID); err != nil {
 		return nil, err
@@ -231,7 +231,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 //   - processState == nil, err != nil  →  step failed to start
 //   - processState != nil              →  step has finished (err may or may not be set)
 //
-// Always returns err unchanged so callers can write: return r.traceStep(state, err, step)
+// Always returns err unchanged so callers can write: return r.traceStep(state, err, step).
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
 	if r.tracer == nil {
 		return err
@@ -244,7 +244,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 
 	switch {
 	case processState == nil && err != nil:
-		// Step failed to start — synthesise an exited process state.
+		// Step failed to start — synthesis an exited process state.
 		s.Process = backend.State{
 			Error:     err,
 			Exited:    true,

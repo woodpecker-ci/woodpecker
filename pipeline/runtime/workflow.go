@@ -28,7 +28,7 @@ import (
 )
 
 // Run starts the workflow, executes all stages sequentially, and tears down the
-// workflow on exit. runnerCtx must outlive workflow cancellation so that cleanup
+// workflow on exit. The runnerCtx must outlive workflow cancellation so that cleanup
 // can still reach the backend (e.g. stopping Docker containers).
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.makeLogger()
