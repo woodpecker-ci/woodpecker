@@ -36,10 +36,7 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend.Step) err
 	if r.shouldSkipStep(step) {
 		// Trace the skip so the server marks the step as skipped immediately,
 		// rather than leaving it in "pending" until workflow Done.
-		return r.traceStep(&backend.State{
-			Exited:  true,
-			Skipped: true,
-		}, nil, step)
+		return r.traceStep(&backend.State{Skipped: true}, nil, step)
 	}
 
 	// Emit a "step started" trace before doing any real work.
@@ -101,24 +98,21 @@ func (r *Runtime) startStep(step *backend.Step) (func(), int64, error) {
 	}
 	startTime := time.Now().Unix()
 
-	var wg sync.WaitGroup
-
-	if r.logger != nil {
-		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			logger := r.makeLogger()
-			if err := r.logger(step, rc); err != nil {
-				logger.Error().Err(err).Str("step", step.Name).Msg("step log streaming failed")
-			}
-			_ = rc.Close()
-		}()
+	rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
+	if err != nil {
+		return nil, 0, err
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		logger := r.makeLogger()
+		if err := r.logger(step, rc); err != nil {
+			logger.Error().Err(err).Str("step", step.Name).Msg("step log streaming failed")
+		}
+		_ = rc.Close()
+	}()
 
 	return wg.Wait, startTime, nil
 }

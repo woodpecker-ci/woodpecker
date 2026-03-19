@@ -1,5 +1,3 @@
-//go:build test
-
 // Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build test
+
 package runtime
 
 import (
+	"io"
+	"testing"
+
+	"github.com/stretchr/testify/mock"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 	tracer_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks"
 )
+
+// newTestTracer creates a MockTracer that accepts any number of Trace calls.
+func newTestTracer(t *testing.T) *tracer_mocks.MockTracer {
+	t.Helper()
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Return(nil).Maybe()
+	return tracer
+}
+
+// newTestLogger creates a noop logger.
+func newTestLogger(t *testing.T) logging.Logger {
+	return func(_ *types.Step, rc io.ReadCloser) error {
+		io.Copy(io.Discard, rc)
+		return rc.Close()
+	}
+}
 
 // getTracerStates extracts all state.State values passed to Trace() calls
 // on a mockery-generated MockTracer. Thread-safe because mock.Mock.Calls

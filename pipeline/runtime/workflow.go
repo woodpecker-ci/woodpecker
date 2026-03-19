@@ -37,6 +37,9 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	if r.tracer == nil {
 		return fmt.Errorf("runtime misconfiguration: tracer must not be nil")
 	}
+	if r.logger == nil {
+		return fmt.Errorf("runtime misconfiguration: logger must not be nil")
+	}
 
 	r.logStages()
 

@@ -142,6 +142,7 @@ func TestWorkflowCloneBuildDeploy(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -170,6 +171,7 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
@@ -189,6 +191,7 @@ func TestWorkflowDetachedStepDoesNotBlockPipeline(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
@@ -207,6 +210,7 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -233,6 +237,7 @@ func TestWorkflowOnFailureStepRuns(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -254,6 +259,7 @@ func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -278,6 +284,7 @@ func TestWorkflowFailureIgnore(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -301,6 +308,7 @@ func TestWorkflowFailureIgnoreDoesNotSetPipelineError(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -325,6 +333,7 @@ func TestWorkflowPluginStep(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
@@ -340,6 +349,7 @@ func TestWorkflowOOMKilledStep(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -365,6 +375,7 @@ func TestWorkflowParallelStepsInStage(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -387,6 +398,7 @@ func TestWorkflowParallelStepOneFailsOthersComplete(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -407,6 +419,7 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -443,6 +456,7 @@ func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
 		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -461,6 +475,7 @@ func TestWorkflowSetupFailure(t *testing.T) {
 		WithBackend(dummy.New()),
 		WithTracer(newTestTracer(t)),
 		WithTaskUUID(dummy.WorkflowSetupFailUUID),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -489,6 +504,7 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -519,6 +535,7 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 		},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
@@ -542,6 +559,7 @@ func TestWorkflowEmptyStages(t *testing.T) {
 		&backend.Config{Stages: []*backend.Stage{}},
 		WithBackend(dummy.New()),
 		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
 	)
 
 	err := r.Run(t.Context())
