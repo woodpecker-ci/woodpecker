@@ -291,7 +291,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 
 // execReconnected handles a reconnected step (waiting for completion without re-executing).
 func (r *Runtime) execReconnected(step *backend.Step) error {
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 
 	var wg sync.WaitGroup
 	if r.logger != nil {

@@ -368,7 +368,6 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of pod: %s", podName)
 
-	up := make(chan struct{})
 	var upOnce sync.Once
 	up := make(chan bool, 1) // buffered to avoid blocking in handlers
 
