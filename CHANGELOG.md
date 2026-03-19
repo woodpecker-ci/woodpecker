@@ -21,6 +21,7 @@
 
 ### 📈 Enhancement
 
+- Compare admins case-insensitively [[#6261](https://github.com/woodpecker-ci/woodpecker/pull/6261)]
 - Allow to cancel on failure [[#6158](https://github.com/woodpecker-ci/woodpecker/pull/6158)]
 - Refactor so storage detects if Insert fails because of unique constraint [[#6259](https://github.com/woodpecker-ci/woodpecker/pull/6259)]
 - Add configure the max number of lines loaded in log webview [[#6250](https://github.com/woodpecker-ci/woodpecker/pull/6250)]
@@ -72,7 +73,6 @@
 - Sorted the glossary items [[#6255](https://github.com/woodpecker-ci/woodpecker/pull/6255)]
 - chore(deps): update docs npm deps non-major [[#6240](https://github.com/woodpecker-ci/woodpecker/pull/6240)]
 - plugin: ascii junit report: renamed gh username [[#6232](https://github.com/woodpecker-ci/woodpecker/pull/6232)]
-- chore(deps): lock file maintenance [[#6225](https://github.com/woodpecker-ci/woodpecker/pull/6225)]
 - chore(deps): update dependency svgo to v4 [[#6214](https://github.com/woodpecker-ci/woodpecker/pull/6214)]
 - chore(deps): update docs npm deps non-major [[#6210](https://github.com/woodpecker-ci/woodpecker/pull/6210)]
 - Update serialize-javascript [[#6182](https://github.com/woodpecker-ci/woodpecker/pull/6182)]
@@ -116,6 +116,7 @@
 - fix(deps): update module golang.org/x/net to v0.52.0 [[#6235](https://github.com/woodpecker-ci/woodpecker/pull/6235)]
 - fix(deps): update golang-packages [[#6233](https://github.com/woodpecker-ci/woodpecker/pull/6233)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.5.0 [[#6227](https://github.com/woodpecker-ci/woodpecker/pull/6227)]
+- chore(deps): lock file maintenance [[#6225](https://github.com/woodpecker-ci/woodpecker/pull/6225)]
 - fix(deps): update golang-packages [[#6224](https://github.com/woodpecker-ci/woodpecker/pull/6224)]
 - chore(deps): update pre-commit non-major [[#6212](https://github.com/woodpecker-ci/woodpecker/pull/6212)]
 - chore(deps): update golangci/golangci-lint docker tag to v2.11.2 [[#6219](https://github.com/woodpecker-ci/woodpecker/pull/6219)]
