@@ -279,6 +279,31 @@ func TestStartStep(t *testing.T) {
 		waitForLogs()
 		assert.Equal(t, int32(1), atomic.LoadInt32(&logCalled))
 	})
+
+	t.Run("LoggerError", func(t *testing.T) {
+		t.Parallel()
+		logErr := errors.New("log stream broken")
+
+		engine := backend_mocks.NewMockBackend(t)
+		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(io.NopCloser(strings.NewReader("data")), nil)
+
+		r := New(&backend.Config{},
+			WithBackend(engine),
+			WithTracer(newTestTracer(t)),
+			WithLogger(logging.Logger(func(_ *backend.Step, rc io.ReadCloser) error {
+				_, _ = io.ReadAll(rc)
+				return logErr // triggers the error-log branch in the goroutine
+			})),
+		)
+
+		waitForLogs, _, err := r.startStep(dummyStep("s1"))
+		require.NoError(t, err) // startStep itself succeeds
+
+		// waitForLogs blocks until the goroutine finishes; the branch is hit inside.
+		waitForLogs()
+	})
 }
 
 // ---------------------------------------------------------------------------
@@ -406,6 +431,33 @@ func TestCompleteStep(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, int64(9999), ws.Started)
 	})
+
+	t.Run("CtxCanceledAfterDestroyStep", func(t *testing.T) {
+		t.Parallel()
+		// WaitStep succeeds (no context.Canceled from the engine),
+		// but r.ctx is already canceled — the re-check at the bottom catches it.
+		canceledCtx, cancel := context.WithCancel(context.Background())
+		cancel() // pre-cancel
+
+		engine := backend_mocks.NewMockBackend(t)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		r := New(&backend.Config{},
+			WithBackend(engine),
+			WithTracer(newTestTracer(t)),
+			WithLogger(newTestLogger(t)),
+			WithContext(canceledCtx), // r.ctx is canceled
+		)
+
+		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
+
+		assert.NoError(t, err)
+		require.NotNil(t, ws)
+		assert.Equal(t, pipeline_errors.ErrCancel, ws.Error,
+			"re-check should set ErrCancel when r.ctx is already canceled")
+	})
 }
 
 // ---------------------------------------------------------------------------
@@ -478,6 +530,23 @@ func TestExecuteStep(t *testing.T) {
 		assert.Eventually(t, func() bool {
 			return len(getTracerStates(tracer)) >= 2
 		}, time.Second, 10*time.Millisecond)
+	})
+
+	t.Run("TracerErrorOnStarted", func(t *testing.T) {
+		t.Parallel()
+		traceErr := errors.New("tracer down")
+		tracer := tracer_mocks.NewMockTracer(t)
+		// First call (skip-check passes, this is the "started" trace) → error.
+		// The step has OnSuccess=true and no prior error, so shouldSkipStep returns false,
+		// meaning executeStep calls traceStep(nil, nil, step) first.
+		tracer.On("Trace", mock.Anything).Return(traceErr).Once()
+
+		r := newDummyRuntime(t, tracer)
+		step := dummyStep("s1") // OnSuccess=true, so not skipped
+
+		err := r.executeStep(t.Context(), step)
+
+		assert.ErrorIs(t, err, traceErr)
 	})
 }
 
@@ -574,5 +643,69 @@ func TestRunDetachedStep(t *testing.T) {
 		err := r.runDetachedStep(t.Context(), step)
 
 		assert.Error(t, err)
+	})
+
+	// Branch 1: context.Canceled from WaitStep → mapped to ErrCancel in the goroutine.
+	// Branch 2: non-nil error from completeStep → error log branch.
+	// Both are covered by a WaitStep that returns context.Canceled.
+	t.Run("BackgroundContextCanceled", func(t *testing.T) {
+		t.Parallel()
+		tracer := newTestTracer(t)
+
+		engine := backend_mocks.NewMockBackend(t)
+		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(io.NopCloser(strings.NewReader("")), nil)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(nil, context.Canceled)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		r := New(&backend.Config{},
+			WithBackend(engine),
+			WithTracer(tracer),
+			WithLogger(newTestLogger(t)),
+		)
+		step := dummyStep("svc")
+
+		err := r.runDetachedStep(t.Context(), step)
+
+		assert.NoError(t, err) // returns immediately
+		// Wait for the goroutine to finish and emit its trace.
+		assert.Eventually(t, func() bool {
+			return len(getTracerStates(tracer)) >= 1
+		}, time.Second, 10*time.Millisecond)
+	})
+
+	// Branch 3: traceStep itself fails inside the goroutine → trace-error log branch.
+	t.Run("BackgroundTracerError", func(t *testing.T) {
+		t.Parallel()
+		traceErr := errors.New("trace failed in background")
+
+		engine := backend_mocks.NewMockBackend(t)
+		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(io.NopCloser(strings.NewReader("")), nil)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		var traced int32
+		tracer := tracer_mocks.NewMockTracer(t)
+		tracer.On("Trace", mock.Anything).
+			Run(func(_ mock.Arguments) { atomic.AddInt32(&traced, 1) }).
+			Return(traceErr) // every Trace call fails
+
+		r := New(&backend.Config{},
+			WithBackend(engine),
+			WithTracer(tracer),
+			WithLogger(newTestLogger(t)),
+		)
+
+		err := r.runDetachedStep(t.Context(), dummyStep("svc"))
+
+		assert.NoError(t, err)
+		assert.Eventually(t, func() bool {
+			return atomic.LoadInt32(&traced) >= 1
+		}, time.Second, 10*time.Millisecond)
 	})
 }

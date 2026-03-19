@@ -352,6 +352,17 @@ func TestWithOptions(t *testing.T) {
 	assert.Equal(t, "test", r.description["repo"])
 }
 
+func TestMakeLoggerWithDescription(t *testing.T) {
+	t.Parallel()
+	r := New(&backend.Config{},
+		WithBackend(dummy.New()),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+		WithDescription(map[string]string{"repo": "woodpecker", "branch": "main"}),
+	)
+	r.logStages()
+}
+
 // ---------------------------------------------------------------------------
 // GetShutdownCtx
 // ---------------------------------------------------------------------------
@@ -362,4 +373,50 @@ func TestGetShutdownCtx(t *testing.T) {
 
 	ctx2 := GetShutdownCtx()
 	assert.Equal(t, ctx, ctx2)
+}
+
+// Gap A: logger == nil guard.
+func TestRunNilLogger(t *testing.T) {
+	t.Parallel()
+	r := New(&backend.Config{},
+		WithBackend(dummy.New()),
+		WithTracer(newTestTracer(t)),
+		// WithLogger intentionally omitted
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "logger must not be nil")
+}
+
+// Gap B: runnerCtx is already done inside the defer → GetShutdownCtx() fallback.
+func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
+	t.Parallel()
+	engine := backend_mocks.NewMockBackend(t)
+	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	var destroyCtx context.Context
+	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
+		Run(func(args mock.Arguments) {
+			destroyCtx = args.Get(0).(context.Context)
+		}).Return(nil)
+
+	// Pass a pre-canceled runnerCtx so ctx.Err() != nil in the defer.
+	runnerCtx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	r := New(&backend.Config{},
+		WithBackend(engine),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	_ = r.Run(runnerCtx)
+
+	require.NotNil(t, destroyCtx)
+	// The shutdown context is not the canceled runnerCtx — it must still be valid
+	// (or at least not the same canceled one).
+	assert.NotEqual(t, runnerCtx, destroyCtx,
+		"DestroyWorkflow should receive the shutdown fallback context, not the canceled runnerCtx")
 }
