@@ -34,8 +34,10 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 
 	switch step.State {
 	case model.StatusPending:
-		// Transition from pending to running when started
-		if state.Finished == 0 {
+		// Transition from pending to running or skipped
+		if state.Canceled {
+			step.State = model.StatusSkipped
+		} else if state.Finished == 0 {
 			step.State = model.StatusRunning
 		}
 		step.Started = state.Started
@@ -97,7 +99,7 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 	}
 
 	// Handle cancellation across both cases
-	if state.Canceled && step.State != model.StatusKilled {
+	if state.Canceled && step.State != model.StatusKilled && step.State != model.StatusSkipped {
 		step.State = model.StatusKilled
 		if step.Finished == 0 {
 			step.Finished = time.Now().Unix()

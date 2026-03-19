@@ -16,6 +16,7 @@ package runtime
 
 import (
 	"context"
+	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
@@ -42,6 +43,16 @@ type Runtime struct {
 	// Cleanup operations should use the runnerCtx passed to Run().
 	ctx context.Context
 
+	// cancelCtx cancels ctx. Called by Run() after the stage loop completes
+	// so that any still-running detached steps / services are told to stop,
+	// unblocking detachedWg.Wait().
+	cancelCtx context.CancelFunc
+
+	// detachedWg tracks all background goroutines launched by runDetachedStep.
+	// Run cancels ctx first, then waits here, so every goroutine unblocks
+	// promptly and r.err is fully populated before Run returns.
+	detachedWg sync.WaitGroup
+
 	tracer tracing.Tracer
 	logger logging.Logger
 
@@ -55,7 +66,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	r.err = utils.NewProtected[error](nil)
 	r.description = map[string]string{}
 	r.spec = spec
-	r.ctx = context.Background()
+	r.ctx, r.cancelCtx = context.WithCancel(context.Background())
 	r.taskUUID = ulid.Make().String()
 	for _, opt := range opts {
 		opt(r)
