@@ -23,9 +23,9 @@ when:
 steps:
   lint-license-header:
     image: *golang_image
+    # use bash as shell so we can use **
+    entrypoint: ["/bin/bash", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]
     commands:
-      - env
-      - ls /bin/sh /bin/bash
       - shopt -s globstar
       - make generate-license-header
       - 'DIFF=$(git diff | head)'
