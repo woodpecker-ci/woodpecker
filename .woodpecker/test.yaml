@@ -23,11 +23,7 @@ when:
 steps:
   lint-license-header:
     image: *golang_image
-    # use bash as shell so we can use **
-    entrypoint: ["/bin/bash", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]
     commands:
-      - shopt -s globstar
-      - make generate-license-header
-      - 'DIFF=$(git diff | head)'
-      - '[ -n "$DIFF" ] && { echo "license headers not up to date, exec `make generate-license-header` and commit"; exit 1; } || true'
+      - make install-addlicense # cspell:words addlicense
+      - bash -c 'shopt -s globstar; addlicense -check -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go'
     when: *when
