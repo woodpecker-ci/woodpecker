@@ -498,9 +498,16 @@ func TestExecuteStep(t *testing.T) {
 		assert.Equal(t, 1, exitErr.Code)
 	})
 
+	// Use an atomic counter instead of getTracerStates inside Eventually to avoid
+	// a data race: the detached-step goroutine writes to mock.Calls concurrently
+	// with the Eventually polling goroutine reading it.
 	t.Run("DetachedStep", func(t *testing.T) {
 		t.Parallel()
-		tracer := newTestTracer(t)
+		var traced int32
+		tracer := tracer_mocks.NewMockTracer(t)
+		tracer.On("Trace", mock.Anything).
+			Run(func(mock.Arguments) { atomic.AddInt32(&traced, 1) }).
+			Return(nil).Maybe()
 		r := newDummyRuntime(t, tracer)
 		step := dummyStep("svc")
 		step.Detached = true
@@ -511,7 +518,7 @@ func TestExecuteStep(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Eventually(t, func() bool {
-			return len(getTracerStates(tracer)) >= 2
+			return atomic.LoadInt32(&traced) >= 2
 		}, time.Second, 10*time.Millisecond)
 	})
 
@@ -594,9 +601,16 @@ func TestRunBlockingStep(t *testing.T) {
 func TestRunDetachedStep(t *testing.T) {
 	t.Parallel()
 
+	// Use an atomic counter instead of getTracerStates inside Eventually to avoid
+	// a data race: the detached-step goroutine writes to mock.Calls concurrently
+	// with the Eventually polling goroutine reading it.
 	t.Run("ReturnsImmediately", func(t *testing.T) {
 		t.Parallel()
-		tracer := newTestTracer(t)
+		var traced int32
+		tracer := tracer_mocks.NewMockTracer(t)
+		tracer.On("Trace", mock.Anything).
+			Run(func(mock.Arguments) { atomic.AddInt32(&traced, 1) }).
+			Return(nil).Maybe()
 		r := newDummyRuntime(t, tracer)
 		step := dummyStep("svc")
 		step.Environment[dummy.EnvKeyStepSleep] = "1ms"
@@ -605,7 +619,7 @@ func TestRunDetachedStep(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Eventually(t, func() bool {
-			return len(getTracerStates(tracer)) >= 1
+			return atomic.LoadInt32(&traced) >= 1
 		}, time.Second, 10*time.Millisecond)
 	})
 
@@ -623,9 +637,17 @@ func TestRunDetachedStep(t *testing.T) {
 	// Branch 1: context.Canceled from WaitStep → mapped to ErrCancel in the goroutine.
 	// Branch 2: non-nil error from completeStep → error log branch.
 	// Both are covered by a WaitStep that returns context.Canceled.
+	//
+	// Use an atomic counter instead of getTracerStates inside Eventually to avoid
+	// a data race: the detached-step goroutine writes to mock.Calls concurrently
+	// with the Eventually polling goroutine reading it.
 	t.Run("BackgroundContextCanceled", func(t *testing.T) {
 		t.Parallel()
-		tracer := newTestTracer(t)
+		var traced int32
+		tracer := tracer_mocks.NewMockTracer(t)
+		tracer.On("Trace", mock.Anything).
+			Run(func(mock.Arguments) { atomic.AddInt32(&traced, 1) }).
+			Return(nil).Maybe()
 
 		engine := backend_mocks.NewMockBackend(t)
 		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
@@ -647,7 +669,7 @@ func TestRunDetachedStep(t *testing.T) {
 		assert.NoError(t, err) // returns immediately
 		// Wait for the goroutine to finish and emit its trace.
 		assert.Eventually(t, func() bool {
-			return len(getTracerStates(tracer)) >= 1
+			return atomic.LoadInt32(&traced) >= 1
 		}, time.Second, 10*time.Millisecond)
 	})
 
