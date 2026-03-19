@@ -195,7 +195,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	if err := pipeline.UpdateStepStatus(s.store, step, state); err != nil {
+	if err := pipeline.UpdateStepStatus(c, s.store, step, state); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
