@@ -24,7 +24,7 @@ steps:
   lint-license-header:
     image: *golang_image
     commands:
-      - make install-addlicense # cspell:words addlicense
-      - pwd
-      - 'addlicense -check -ignore "vendor/**" -ignore cmd/server/openapi/docs.go $(pwd)/**/*.go'
+      - make generate-license-header
+      - 'DIFF=$(git diff | head)'
+      - '[ -n "$DIFF" ] && { echo "license headers not up to date, exec `make generate-license-header` and commit"; exit 1; } || true'
     when: *when
