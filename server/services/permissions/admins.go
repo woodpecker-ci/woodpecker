@@ -12,7 +12,7 @@ func NewAdmins(admins []string) *Admins {
 	for _, a := range admins {
 		adminsLowercase = append(adminsLowercase, strings.ToLower(a))
 	}
-	return &Admins{admins: utils.SliceToBoolMap(admins)}
+	return &Admins{admins: utils.SliceToBoolMap(adminsLowercase)}
 }
 
 type Admins struct {
