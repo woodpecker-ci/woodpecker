@@ -46,10 +46,12 @@ func WithTracer(tracer tracing.Tracer) Option {
 	}
 }
 
-// WithContext sets the workflow execution context.
+// WithContext sets the workflow execution context. The provided context is
+// wrapped in a cancelable child so that Run() can always cancel it at the end
+// of the stage loop to unblock any still-running detached steps / services.
 func WithContext(ctx context.Context) Option {
 	return func(r *Runtime) {
-		r.ctx = ctx
+		r.ctx, r.cancelCtx = context.WithCancel(ctx)
 	}
 }
 
