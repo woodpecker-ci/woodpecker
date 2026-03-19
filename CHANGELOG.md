@@ -20,6 +20,7 @@
 
 ### 📈 Enhancement
 
+- Refactor so storage detects if Insert fails because of unique constraint [[#6259](https://github.com/woodpecker-ci/woodpecker/pull/6259)]
 - Add configure the max number of lines loaded in log webview [[#6250](https://github.com/woodpecker-ci/woodpecker/pull/6250)]
 - Add "Load more" pagination to pipeline list [[#6200](https://github.com/woodpecker-ci/woodpecker/pull/6200)]
 - refactor: pipeline runtime add description and prevent race [[#6167](https://github.com/woodpecker-ci/woodpecker/pull/6167)]
