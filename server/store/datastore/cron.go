@@ -15,9 +15,12 @@
 package datastore
 
 import (
+	"strings"
+
 	"xorm.io/builder"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) CronCreate(cron *model.Cron) error {
@@ -25,6 +28,9 @@ func (s storage) CronCreate(cron *model.Cron) error {
 		return err
 	}
 	_, err := s.engine.Insert(cron)
+	if err != nil && (strings.HasPrefix(err.Error(), "UNIQUE constraint failed") || strings.HasPrefix(err.Error(), "pq: duplicate key value violates unique constraint") || strings.Contains(err.Error(), "Duplicate entry")) {
+		return types.ErrUniqueExists
+	}
 	return err
 }
 

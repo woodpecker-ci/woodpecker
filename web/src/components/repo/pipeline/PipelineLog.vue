@@ -133,6 +133,7 @@ import { useRoute } from 'vue-router';
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
@@ -184,7 +185,9 @@ const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
-const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
+const config = useConfig();
+
+const maxLineCount = config.maxPipelineLogLineCount; // TODO(2653): implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 const urlRegex = /https?:\/\/\S+/g;
