@@ -36,7 +36,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 		defer uploads.Done()
 
 		stepLogger := logger.With().
-			Str("image", state.Pipeline.Step.Image).
+			Str("image", state.Workflow.Step.Image).
 			Str("workflow_id", workflow.ID).
 			Err(state.CurrentStep.Error).
 			Int("exit_code", state.CurrentStep.ExitCode).
@@ -44,7 +44,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 			Logger()
 
 		stepState := rpc.StepState{
-			StepUUID: state.Pipeline.Step.UUID,
+			StepUUID: state.Workflow.Step.UUID,
 			Exited:   state.CurrentStep.Exited,
 			ExitCode: state.CurrentStep.ExitCode,
 			Started:  state.CurrentStep.Started,
@@ -71,18 +71,18 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 		if state.CurrentStep.Exited {
 			return nil
 		}
-		if state.Pipeline.Step.Environment == nil {
-			state.Pipeline.Step.Environment = map[string]string{}
+		if state.Workflow.Step.Environment == nil {
+			state.Workflow.Step.Environment = map[string]string{}
 		}
 
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
-		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
+		state.Workflow.Step.Environment["CI_MACHINE"] = r.hostname
 
-		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
+		state.Workflow.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
 
-		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
+		state.Workflow.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
 
-		state.Pipeline.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
+		state.Workflow.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		return nil
 	}

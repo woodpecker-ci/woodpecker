@@ -109,7 +109,7 @@ func withStartFail() func(*backend.Step) {
 
 func findTraceByName(traces []state.State, name string) *state.State {
 	for i := range traces {
-		if traces[i].Pipeline.Step != nil && traces[i].Pipeline.Step.Name == name {
+		if traces[i].Workflow.Step != nil && traces[i].Workflow.Step.Name == name {
 			return &traces[i]
 		}
 	}
@@ -118,7 +118,7 @@ func findTraceByName(traces []state.State, name string) *state.State {
 
 func findStartedTrace(traces []state.State, name string) *state.State {
 	for i := range traces {
-		if traces[i].Pipeline.Step != nil && traces[i].Pipeline.Step.Name == name && !traces[i].CurrentStep.Exited {
+		if traces[i].Workflow.Step != nil && traces[i].Workflow.Step.Name == name && !traces[i].CurrentStep.Exited {
 			return &traces[i]
 		}
 	}
@@ -308,7 +308,7 @@ func TestWorkflowFailureIgnoreDoesNotSetPipelineError(t *testing.T) {
 	assert.NoError(t, err)
 	traces := getTracerStates(tracer)
 	for _, c := range traces {
-		if c.Pipeline.Step != nil && c.Pipeline.Step.Name == "deploy" {
+		if c.Workflow.Step != nil && c.Workflow.Step.Name == "deploy" {
 			assert.False(t, c.CurrentStep.Skipped, "deploy should not be skipped after failure=ignore step")
 		}
 	}

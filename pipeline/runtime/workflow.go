@@ -99,8 +99,8 @@ func (r *Runtime) traceWorkflowSetupError(err error) {
 	}
 
 	s := new(state.State)
-	s.Pipeline.Step = stepErr.Step
-	s.Pipeline.Error = stepErr.Err
+	s.Workflow.Step = stepErr.Step
+	s.Workflow.Error = stepErr.Err
 	s.CurrentStep = backend.State{
 		Error:    stepErr.Err,
 		Exited:   true,

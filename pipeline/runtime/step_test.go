@@ -136,8 +136,8 @@ func TestTraceStep(t *testing.T) {
 		assert.NoError(t, err)
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
-		assert.Equal(t, int64(1000), calls[0].Pipeline.Started)
-		assert.Equal(t, step, calls[0].Pipeline.Step)
+		assert.Equal(t, int64(1000), calls[0].Workflow.Started)
+		assert.Equal(t, step, calls[0].Workflow.Step)
 		assert.False(t, calls[0].CurrentStep.Exited)
 	})
 
@@ -212,7 +212,7 @@ func TestTraceStep(t *testing.T) {
 
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
-		assert.EqualError(t, calls[0].Pipeline.Error, "earlier failure")
+		assert.EqualError(t, calls[0].Workflow.Error, "earlier failure")
 	})
 }
 

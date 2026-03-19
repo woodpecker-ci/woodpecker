@@ -41,12 +41,12 @@ var DefaultTracer = TraceFunc(func(state *state.State) error {
 	if state.CurrentStep.Exited {
 		return nil
 	}
-	if state.Pipeline.Step.Environment == nil {
+	if state.Workflow.Step.Environment == nil {
 		return nil
 	}
-	state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
+	state.Workflow.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
 
-	state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
+	state.Workflow.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
 
 	return nil
 })

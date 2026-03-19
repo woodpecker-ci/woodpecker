@@ -21,9 +21,9 @@ import (
 type (
 	// State defines the pipeline and process state.
 	State struct {
-		// Global state of the pipeline.
-		Pipeline struct {
-			// Pipeline time started
+		// Global state of the currently running Workflow.
+		Workflow struct {
+			// Workflow start time
 			Started int64 `json:"time"`
 			// Current pipeline step
 			Step *backend.Step `json:"step"`

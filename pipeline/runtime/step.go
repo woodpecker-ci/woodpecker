@@ -244,9 +244,9 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 // Always returns err unchanged so callers can write: return r.traceStep(state, err, step).
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
 	s := new(state.State)
-	s.Pipeline.Started = r.started
-	s.Pipeline.Step = step
-	s.Pipeline.Error = r.err.Get()
+	s.Workflow.Started = r.started
+	s.Workflow.Step = step
+	s.Workflow.Error = r.err.Get()
 
 	switch {
 	case processState == nil && err != nil:

@@ -184,7 +184,7 @@ func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 	assert.Error(t, err)
 	calls := getTracerStates(tracer)
 	require.Len(t, calls, 1)
-	assert.Equal(t, step, calls[0].Pipeline.Step)
+	assert.Equal(t, step, calls[0].Workflow.Step)
 	assert.True(t, calls[0].CurrentStep.Exited)
 	assert.Equal(t, 1, calls[0].CurrentStep.ExitCode)
 }
@@ -238,7 +238,7 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
-		assert.Equal(t, step, calls[0].Pipeline.Step)
+		assert.Equal(t, step, calls[0].Workflow.Step)
 		assert.True(t, calls[0].CurrentStep.Exited)
 		assert.Equal(t, 1, calls[0].CurrentStep.ExitCode)
 	})
