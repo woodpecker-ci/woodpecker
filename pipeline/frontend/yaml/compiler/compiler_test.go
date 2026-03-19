@@ -263,6 +263,7 @@ func TestCompilerCompile(t *testing.T) {
 						Type:          backend_types.StepTypeCommands,
 						Image:         "bash",
 						Commands:      []string{"echo 1"},
+						DependsOn:     []string{"echo env", "echo 2"},
 						OnSuccess:     true,
 						Failure:       "fail",
 						Volumes:       []string{defaultVolume + ":/test"},
