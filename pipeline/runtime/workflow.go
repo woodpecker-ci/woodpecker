@@ -17,6 +17,7 @@ package runtime
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -32,6 +33,11 @@ import (
 // can still reach the backend (e.g. stopping Docker containers).
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.makeLogger()
+
+	if r.tracer == nil {
+		return fmt.Errorf("runtime misconfiguration: tracer must not be nil")
+	}
+
 	r.logStages()
 
 	// we make sure cleanup always happens
@@ -101,11 +107,9 @@ func (r *Runtime) traceWorkflowSetupError(err error) {
 		ExitCode: 1,
 	}
 
-	if r.tracer != nil {
-		if traceErr := r.tracer.Trace(s); traceErr != nil {
-			logger := r.makeLogger()
-			logger.Error().Err(traceErr).Msg("failed to trace workflow setup error")
-		}
+	if traceErr := r.tracer.Trace(s); traceErr != nil {
+		logger := r.makeLogger()
+		logger.Error().Err(traceErr).Msg("failed to trace workflow setup error")
 	}
 }
 

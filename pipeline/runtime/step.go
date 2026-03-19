@@ -34,7 +34,12 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend.Step) err
 	logger.Debug().Str("step", step.Name).Msg("prepare")
 
 	if r.shouldSkipStep(step) {
-		return nil
+		// Trace the skip so the server marks the step as skipped immediately,
+		// rather than leaving it in "pending" until workflow Done.
+		return r.traceStep(&backend.State{
+			Exited:  true,
+			Skipped: true,
+		}, nil, step)
 	}
 
 	// Emit a "step started" trace before doing any real work.
@@ -90,11 +95,11 @@ func (r *Runtime) shouldSkipStep(step *backend.Step) bool {
 //
 // If StartStep or TailStep fail, startStep returns a non-nil error and the caller
 // must not call waitForLogs.
-func (r *Runtime) startStep(step *backend.Step) (waitForLogs func(), startTime int64, err error) {
+func (r *Runtime) startStep(step *backend.Step) (func(), int64, error) {
 	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, 0, err
 	}
-	startTime = time.Now().Unix()
+	startTime := time.Now().Unix()
 
 	var wg sync.WaitGroup
 
@@ -131,6 +136,9 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend.Step, wa
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
+			if waitState == nil {
+				waitState = &backend.State{}
+			}
 			waitState.Error = pipeline_errors.ErrCancel
 		} else {
 			return nil, err
@@ -235,10 +243,6 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 //
 // Always returns err unchanged so callers can write: return r.traceStep(state, err, step).
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
-	if r.tracer == nil {
-		return err
-	}
-
 	s := new(state.State)
 	s.Pipeline.Started = r.started
 	s.Pipeline.Step = step
