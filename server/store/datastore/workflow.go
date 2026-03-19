@@ -57,7 +57,7 @@ func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow
 		if err := s.stepCreate(sess, workflows[i].Children); err != nil {
 			return err
 		}
-		if _, err := sess.Insert(workflows[i]); err != nil {
+		if err := wrapInsert(sess.Insert(workflows[i])); err != nil {
 			return err
 		}
 	}

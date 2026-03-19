@@ -15,7 +15,8 @@
 package datastore
 
 import (
-	"strings"
+	"errors"
+	"fmt"
 
 	"xorm.io/builder"
 
@@ -27,9 +28,9 @@ func (s storage) CronCreate(cron *model.Cron) error {
 	if err := cron.Validate(); err != nil {
 		return err
 	}
-	_, err := s.engine.Insert(cron)
-	if err != nil && (strings.HasPrefix(err.Error(), "UNIQUE constraint failed") || strings.HasPrefix(err.Error(), "pq: duplicate key value violates unique constraint") || strings.Contains(err.Error(), "Duplicate entry")) {
-		return types.ErrUniqueExists
+	err := wrapInsert(s.engine.Insert(cron))
+	if errors.Is(err, types.ErrInsertDuplicateDetected) {
+		return fmt.Errorf("create cron failed, duplicate detected: %w", err)
 	}
 	return err
 }

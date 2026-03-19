@@ -158,8 +158,8 @@ func TestHandleAuth(t *testing.T) {
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.RecordNotExist)
-		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.RecordNotExist)
+		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.ErrRecordNotExist)
 		_store.On("CreateUser", mock.Anything).Return(nil)
 		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, nil)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
@@ -227,8 +227,8 @@ func TestHandleAuth(t *testing.T) {
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.RecordNotExist)
-		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.RecordNotExist)
+		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.ErrRecordNotExist)
 
 		api.HandleAuth(c)
 
@@ -290,7 +290,7 @@ func TestHandleAuth(t *testing.T) {
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
-		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.RecordNotExist)
+		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.ErrRecordNotExist)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
