@@ -43,9 +43,14 @@ type Runtime struct {
 	// Cleanup operations should use the runnerCtx passed to Run().
 	ctx context.Context
 
+	// cancelCtx cancels ctx. Called by Run() after the stage loop completes
+	// so that any still-running detached steps / services are told to stop,
+	// unblocking detachedWg.Wait().
+	cancelCtx context.CancelFunc
+
 	// detachedWg tracks all background goroutines launched by runDetachedStep.
-	// Run waits on it before returning so that a service that exits after the
-	// last stage still has the opportunity to mark the pipeline as failed.
+	// Run cancels ctx first, then waits here, so every goroutine unblocks
+	// promptly and r.err is fully populated before Run returns.
 	detachedWg sync.WaitGroup
 
 	tracer tracing.Tracer
@@ -62,7 +67,7 @@ func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Opti
 	r.description = map[string]string{}
 	r.spec = spec
 	r.engine = backend
-	r.ctx = context.Background()
+	r.ctx, r.cancelCtx = context.WithCancel(context.Background())
 	r.taskUUID = ulid.Make().String()
 	for _, opt := range opts {
 		opt(r)

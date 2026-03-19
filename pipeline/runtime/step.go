@@ -195,8 +195,12 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types
 // runDetachedStep starts the step and returns as soon as the container is running
 // and log streaming is set up. The rest of the step lifecycle runs in the background.
 //
-// Any error that occurs after setup is logged but not propagated — it cannot
-// influence the pipeline outcome at that point.
+// The goroutine is tracked by r.detachedWg so that Run() can wait for it after
+// canceling r.ctx. This means:
+//   - services/detached steps that are still running when stages finish are stopped
+//     promptly via context cancellation and do not block Run() indefinitely;
+//   - a service that exits non-zero before Run() cancels r.ctx propagates the
+//     failure into r.err so Run() returns the correct error.
 func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types.Step) error {
 	waitForLogs, startTime, err := r.startStep(step)
 	if err != nil {
@@ -218,9 +222,13 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
 		logger.Debug().Str("step", step.Name).Msg("complete")
 
-		if errors.Is(err, context.Canceled) {
-			err = pipeline_errors.ErrCancel
+		// A context.Canceled / ErrCancel result here means Run() cancelled r.ctx
+		// to stop the service at end-of-pipeline — that is the normal teardown
+		// path, not a failure. Only propagate genuinely unexpected errors.
+		if errors.Is(err, context.Canceled) || errors.Is(err, pipeline_errors.ErrCancel) {
+			err = nil
 		}
+
 		if err != nil {
 			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed after while running")
 			r.err.Set(err)

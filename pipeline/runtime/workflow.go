@@ -69,9 +69,14 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		}
 	}
 
-	// Wait for all detached step goroutines to finish. A service or background
-	// worker that exits after the last stage would otherwise be silently ignored;
-	// waiting here ensures r.err is populated before we return.
+	// Cancel r.ctx to tell any still-running detached steps / services to stop.
+	// Without this, detachedWg.Wait() would block indefinitely for services that
+	// are designed to outlive the pipeline stages.
+	r.cancelCtx()
+
+	// Wait for every detached goroutine to finish. Each one will call r.err.Set
+	// if it exits with an error, so waiting here ensures the final return value
+	// reflects all outcomes — including a service that fails after the last stage.
 	r.detachedWg.Wait()
 
 	return r.err.Get()
