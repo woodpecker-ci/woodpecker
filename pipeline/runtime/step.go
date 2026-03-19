@@ -205,8 +205,14 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 		return r.traceStep(nil, err, step)
 	}
 
-	// Container is up and logging is streaming — hand off to background.
+	// Register the goroutine with the WaitGroup before spawning it so there
+	// is no window between launch and Run()'s detachedWg.Wait() where the
+	// goroutine could be missed.
+	r.detachedWg.Add(1)
+
 	go func() {
+		defer r.detachedWg.Done()
+
 		logger := r.makeLogger()
 
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
@@ -217,6 +223,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 		}
 		if err != nil {
 			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed after while running")
+			r.err.Set(err)
 		}
 
 		if traceErr := r.traceStep(processState, err, step); traceErr != nil {

@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -94,6 +95,12 @@ func withOOM() func(*backend_types.Step) {
 	return func(s *backend_types.Step) {
 		s.Environment[dummy.EnvKeyStepOOMKilled] = "true"
 		s.Environment[dummy.EnvKeyStepExitCode] = "137"
+	}
+}
+
+func withSleep(t time.Duration) func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
+		s.Environment[dummy.EnvKeyStepSleep] = t.String()
 	}
 }
 
@@ -194,32 +201,35 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 
 	assert.NoError(t, r.Run(t.Context()))
 	traces := getTracerStates(tracer)
-	if assert.Len(t, traces, 5) {
+	if assert.Len(t, traces, 6) {
 		assert.EqualValues(t, backend_types.State{}, traces[0].CurrStepState)
 		assert.Greater(t, traces[2].CurrStepState.Started, int64(0))
 		assert.EqualValues(t, backend_types.State{Started: traces[2].CurrStepState.Started, Exited: true}, traces[2].CurrStepState)
 		assert.EqualValues(t, backend_types.State{}, traces[3].CurrStepState)
 		assert.Greater(t, traces[4].CurrStepState.Started, int64(0))
 		assert.EqualValues(t, backend_types.State{Started: traces[4].CurrStepState.Started, Exited: true}, traces[4].CurrStepState)
+		assert.Greater(t, calls[5].CurrStepState.Started, int64(0))
+		assert.EqualValues(t, backend.State{Started: calls[5].CurrStepState.Started, Exited: true}, calls[5].CurrStepState)
 
-		assert.Greater(t, traces[4].Workflow.Started, int64(0))
+		assert.Greater(t, traces[5].Workflow.Started, int64(0))
 		assert.EqualValues(t, state.State{
 			Workflow: state.Workflow{
 				Started: traces[4].Workflow.Started,
 			},
 			CurrStep: &backend_types.Step{
-				Name:        "test",
-				UUID:        "test-uuid",
-				Type:        "commands",
+				Name:        "db",
+				UUID:        "db-uuid",
+				Type:        "service",
+				Detached:    true,
 				OnSuccess:   true,
-				Environment: map[string]string{},
-				Commands:    []string{"echo test"},
+				Environment: map[string]string{"SLEEP": "100ms"},
+				Commands:    []string{"echo db"},
 			},
 			CurrStepState: backend_types.State{
-				Started: traces[4].CurrStepState.Started,
+				Started: traces[5].CurrStepState.Started,
 				Exited:  true,
 			},
-		}, traces[4])
+		}, traces[5])
 	}
 }
 
@@ -667,4 +677,83 @@ func TestWorkflowEmptyStages(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Empty(t, getTracerStates(tracer))
+}
+
+func TestWorkflowFailingServiceMarksWorkflowFailed(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					// Service starts, runs for ~100ms, then exits non-zero.
+					// withService sets Detached=true; the exit-code env var
+					// causes the dummy backend to return code 1 when the
+					// step finishes.
+					cmdStep("db", withService(), withExitCode(1)),
+					// workflow is over before service exits on its own
+					cmdStep("build", withSleep(150*time.Millisecond)),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	if !assert.Error(t, err, "workflow should fail when a service step exits non-zero") {
+		t.FailNow()
+	}
+
+	var exitErr *pipeline_errors.ExitError
+	if assert.ErrorAs(t, err, &exitErr, "error should be an ExitError when service step fails") {
+		assert.Equal(t, 1, exitErr.Code)
+	}
+
+	// deploy must be skipped, not silently dropped
+	deployTrace := findTraceByName(getTracerStates(tracer), "deploy")
+	require.NotNil(t, deployTrace, "deploy step should still be traced")
+	assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after service failure")
+}
+
+func TestWorkflowFailingDetachedStepMarksWorkflowFailed(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					// Detached (non-service) step that exits with code 2.
+					// withDetached sets Detached=true without changing the
+					// step type to StepTypeService, so it represents a
+					// background worker rather than a long-running service.
+					cmdStep("background-worker", withDetached(), withExitCode(2)),
+					// detached fails befor workflow is over
+					cmdStep("main-build", withSleep(200*time.Millisecond)),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	if !assert.Error(t, err, "workflow should fail when a detached step exits non-zero") {
+		t.FailNow()
+	}
+
+	var exitErr *pipeline_errors.ExitError
+	if assert.ErrorAs(t, err, &exitErr, "error should be an ExitError when detached step fails") {
+		assert.Equal(t, 2, exitErr.Code)
+	}
+
+	deployTrace := findTraceByName(getTracerStates(tracer), "deploy")
+	require.NotNil(t, deployTrace, "deploy step should still be traced")
+	assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after detached step failure")
 }

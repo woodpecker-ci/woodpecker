@@ -69,6 +69,11 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		}
 	}
 
+	// Wait for all detached step goroutines to finish. A service or background
+	// worker that exits after the last stage would otherwise be silently ignored;
+	// waiting here ensures r.err is populated before we return.
+	r.detachedWg.Wait()
+
 	return r.err.Get()
 }
 
