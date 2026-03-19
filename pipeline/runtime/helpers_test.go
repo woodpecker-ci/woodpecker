@@ -39,7 +39,7 @@ func newTestTracer(t *testing.T) *tracer_mocks.MockTracer {
 // newTestLogger creates a noop logger.
 func newTestLogger(t *testing.T) logging.Logger {
 	return func(_ *types.Step, rc io.ReadCloser) error {
-		io.Copy(io.Discard, rc)
+		_, _ = io.Copy(io.Discard, rc)
 		return rc.Close()
 	}
 }
@@ -51,7 +51,7 @@ func getTracerStates(tracer *tracer_mocks.MockTracer) []state.State {
 	var states []state.State
 	for _, call := range tracer.Calls {
 		if call.Method == "Trace" {
-			s := call.Arguments.Get(0).(*state.State)
+			s, _ := call.Arguments.Get(0).(*state.State)
 			states = append(states, *s)
 		}
 	}

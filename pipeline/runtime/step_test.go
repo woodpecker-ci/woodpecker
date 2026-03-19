@@ -68,10 +68,6 @@ func dummyStep(name string) *backend.Step {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// shouldSkipStep
-// ---------------------------------------------------------------------------
-
 func TestShouldSkipStep(t *testing.T) {
 	t.Parallel()
 
@@ -109,10 +105,6 @@ func TestShouldSkipStep(t *testing.T) {
 		assert.True(t, r.shouldSkipStep(step))
 	})
 }
-
-// ---------------------------------------------------------------------------
-// traceStep
-// ---------------------------------------------------------------------------
 
 func TestTraceStep(t *testing.T) {
 	t.Parallel()
@@ -214,10 +206,7 @@ func TestTraceStep(t *testing.T) {
 	})
 }
 
-// ---------------------------------------------------------------------------
-// startStep — dummy for success + start/tail failures; mockery mock for logger test
-// ---------------------------------------------------------------------------
-
+// The startStep uses dummy for success + start/tail failures and mockery mock for logger test.
 func TestStartStep(t *testing.T) {
 	t.Parallel()
 
@@ -306,11 +295,8 @@ func TestStartStep(t *testing.T) {
 	})
 }
 
-// ---------------------------------------------------------------------------
-// completeStep — uses mockery mock for fine-grained control over
+// The completeStep uses mockery mock for fine-grained control over
 // WaitStep/DestroyStep return values that dummy cannot provide.
-// ---------------------------------------------------------------------------
-
 func TestCompleteStep(t *testing.T) {
 	t.Parallel()
 
@@ -436,8 +422,8 @@ func TestCompleteStep(t *testing.T) {
 		t.Parallel()
 		// WaitStep succeeds (no context.Canceled from the engine),
 		// but r.ctx is already canceled — the re-check at the bottom catches it.
-		canceledCtx, cancel := context.WithCancel(context.Background())
-		cancel() // pre-cancel
+		canceledCtx, cancel := context.WithCancelCause(context.Background())
+		cancel(nil) // pre-cancel
 
 		engine := backend_mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
@@ -460,10 +446,7 @@ func TestCompleteStep(t *testing.T) {
 	})
 }
 
-// ---------------------------------------------------------------------------
-// executeStep — uses dummy for the full step lifecycle
-// ---------------------------------------------------------------------------
-
+// The executeStep uses dummy for the full step lifecycle.
 func TestExecuteStep(t *testing.T) {
 	t.Parallel()
 
@@ -550,10 +533,6 @@ func TestExecuteStep(t *testing.T) {
 	})
 }
 
-// ---------------------------------------------------------------------------
-// runBlockingStep
-// ---------------------------------------------------------------------------
-
 func TestRunBlockingStep(t *testing.T) {
 	t.Parallel()
 
@@ -611,10 +590,6 @@ func TestRunBlockingStep(t *testing.T) {
 		assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
 	})
 }
-
-// ---------------------------------------------------------------------------
-// runDetachedStep
-// ---------------------------------------------------------------------------
 
 func TestRunDetachedStep(t *testing.T) {
 	t.Parallel()

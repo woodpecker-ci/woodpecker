@@ -34,9 +34,9 @@ import (
 	tracer_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks"
 )
 
-// ---------------------------------------------------------------------------
-// Step builder helpers
-// ---------------------------------------------------------------------------
+//
+// Step builder helpers.
+//
 
 func cmdStep(name string, opts ...func(*backend.Step)) *backend.Step {
 	s := &backend.Step{
@@ -103,9 +103,9 @@ func withStartFail() func(*backend.Step) {
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Trace assertion helpers
-// ---------------------------------------------------------------------------
+//
+// Trace assertion helpers.
+//
 
 func findTraceByName(traces []state.State, name string) *state.State {
 	for i := range traces {
@@ -125,9 +125,9 @@ func findStartedTrace(traces []state.State, name string) *state.State {
 	return nil
 }
 
-// ---------------------------------------------------------------------------
-// Realistic workflow simulations
-// ---------------------------------------------------------------------------
+//
+// Realistic workflow simulations.
+//
 
 func TestWorkflowCloneBuildDeploy(t *testing.T) {
 	t.Parallel()
@@ -231,7 +231,7 @@ func TestWorkflowOnFailureStepRuns(t *testing.T) {
 	r := New(
 		&backend.Config{
 			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend.Step{cmdStep("build", withExitCode(2))}},
 				{Steps: []*backend.Step{cmdStep("notify-failure", withOnFailure())}},
 			},
 		},
@@ -432,16 +432,16 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 
 func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 	t.Parallel()
-	ctx, cancel := context.WithCancel(t.Context())
+	ctx, cancel := context.WithCancelCause(t.Context())
 
 	var stageCount int
 	tracer := tracer_mocks.NewMockTracer(t)
 	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
-		s := args.Get(0).(*state.State)
+		s, _ := args.Get(0).(*state.State)
 		if s.CurrentStep.Exited && !s.CurrentStep.Skipped {
 			stageCount++
 			if stageCount >= 1 {
-				cancel()
+				cancel(nil)
 			}
 		}
 	}).Return(nil).Maybe()

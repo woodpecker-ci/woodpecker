@@ -33,10 +33,6 @@ import (
 	tracer_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks"
 )
 
-// ---------------------------------------------------------------------------
-// Run
-// ---------------------------------------------------------------------------
-
 func TestRunNilTracer(t *testing.T) {
 	t.Parallel()
 	r := New(&backend.Config{}, WithBackend(dummy.New()), WithLogger(newTestLogger(t)))
@@ -131,8 +127,8 @@ func TestRunStepError(t *testing.T) {
 
 func TestRunContextCanceled(t *testing.T) {
 	t.Parallel()
-	ctx, cancel := context.WithCancel(t.Context())
-	cancel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+	cancel(nil)
 
 	r := New(
 		&backend.Config{
@@ -225,10 +221,6 @@ func TestRunDestroyWorkflowCalledOnSetupError(t *testing.T) {
 	assert.Equal(t, int32(1), atomic.LoadInt32(&destroyed))
 }
 
-// ---------------------------------------------------------------------------
-// traceWorkflowSetupError
-// ---------------------------------------------------------------------------
-
 func TestTraceWorkflowSetupError(t *testing.T) {
 	t.Parallel()
 
@@ -271,10 +263,6 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 	})
 }
 
-// ---------------------------------------------------------------------------
-// runStage
-// ---------------------------------------------------------------------------
-
 func TestRunStage(t *testing.T) {
 	t.Parallel()
 
@@ -310,10 +298,6 @@ func TestRunStage(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
-
-// ---------------------------------------------------------------------------
-// New + Options
-// ---------------------------------------------------------------------------
 
 func TestNewDefaults(t *testing.T) {
 	t.Parallel()
@@ -363,10 +347,6 @@ func TestMakeLoggerWithDescription(t *testing.T) {
 	r.logStages()
 }
 
-// ---------------------------------------------------------------------------
-// GetShutdownCtx
-// ---------------------------------------------------------------------------
-
 func TestGetShutdownCtx(t *testing.T) {
 	ctx := GetShutdownCtx()
 	assert.NotNil(t, ctx)
@@ -399,12 +379,12 @@ func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 	var destroyCtx context.Context
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			destroyCtx = args.Get(0).(context.Context)
+			destroyCtx, _ = args.Get(0).(context.Context)
 		}).Return(nil)
 
 	// Pass a pre-canceled runnerCtx so ctx.Err() != nil in the defer.
-	runnerCtx, cancel := context.WithCancel(context.Background())
-	cancel()
+	runnerCtx, cancel := context.WithCancelCause(context.Background())
+	cancel(nil)
 
 	r := New(&backend.Config{},
 		WithBackend(engine),
