@@ -185,8 +185,8 @@ func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 	calls := getTracerStates(tracer)
 	require.Len(t, calls, 1)
 	assert.Equal(t, step, calls[0].Pipeline.Step)
-	assert.True(t, calls[0].Process.Exited)
-	assert.Equal(t, 1, calls[0].Process.ExitCode)
+	assert.True(t, calls[0].CurrentStep.Exited)
+	assert.Equal(t, 1, calls[0].CurrentStep.ExitCode)
 }
 
 func TestRunDestroyWorkflowAlwaysCalled(t *testing.T) {
@@ -239,8 +239,8 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
 		assert.Equal(t, step, calls[0].Pipeline.Step)
-		assert.True(t, calls[0].Process.Exited)
-		assert.Equal(t, 1, calls[0].Process.ExitCode)
+		assert.True(t, calls[0].CurrentStep.Exited)
+		assert.Equal(t, 1, calls[0].CurrentStep.ExitCode)
 	})
 
 	t.Run("NonMatchingError", func(t *testing.T) {

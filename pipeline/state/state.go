@@ -31,7 +31,7 @@ type (
 			Error error `json:"error"`
 		}
 
-		// Current process state.
-		Process backend.State
+		// Current Step state.
+		CurrentStep backend.State
 	}
 )

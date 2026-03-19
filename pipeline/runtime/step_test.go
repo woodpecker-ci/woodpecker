@@ -138,7 +138,7 @@ func TestTraceStep(t *testing.T) {
 		require.Len(t, calls, 1)
 		assert.Equal(t, int64(1000), calls[0].Pipeline.Started)
 		assert.Equal(t, step, calls[0].Pipeline.Step)
-		assert.False(t, calls[0].Process.Exited)
+		assert.False(t, calls[0].CurrentStep.Exited)
 	})
 
 	t.Run("StepFailedToStart", func(t *testing.T) {
@@ -153,8 +153,8 @@ func TestTraceStep(t *testing.T) {
 		assert.ErrorIs(t, err, startErr)
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
-		assert.True(t, calls[0].Process.Exited)
-		assert.Equal(t, startErr, calls[0].Process.Error)
+		assert.True(t, calls[0].CurrentStep.Exited)
+		assert.Equal(t, startErr, calls[0].CurrentStep.Error)
 	})
 
 	t.Run("StepFinished", func(t *testing.T) {
@@ -169,9 +169,9 @@ func TestTraceStep(t *testing.T) {
 		assert.NoError(t, err)
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
-		assert.True(t, calls[0].Process.Exited)
-		assert.Equal(t, 0, calls[0].Process.ExitCode)
-		assert.Equal(t, int64(42), calls[0].Process.Started)
+		assert.True(t, calls[0].CurrentStep.Exited)
+		assert.Equal(t, 0, calls[0].CurrentStep.ExitCode)
+		assert.Equal(t, int64(42), calls[0].CurrentStep.Started)
 	})
 
 	t.Run("StepSkipped", func(t *testing.T) {
@@ -186,8 +186,8 @@ func TestTraceStep(t *testing.T) {
 		assert.NoError(t, err)
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
-		assert.True(t, calls[0].Process.Skipped)
-		assert.True(t, calls[0].Process.Exited)
+		assert.True(t, calls[0].CurrentStep.Skipped)
+		assert.True(t, calls[0].CurrentStep.Exited)
 	})
 
 	t.Run("TracerError", func(t *testing.T) {
@@ -432,8 +432,8 @@ func TestExecuteStep(t *testing.T) {
 		assert.NoError(t, err)
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
-		assert.True(t, calls[0].Process.Skipped)
-		assert.True(t, calls[0].Process.Exited)
+		assert.True(t, calls[0].CurrentStep.Skipped)
+		assert.True(t, calls[0].CurrentStep.Exited)
 	})
 
 	t.Run("BlockingStepSuccess", func(t *testing.T) {
@@ -447,8 +447,8 @@ func TestExecuteStep(t *testing.T) {
 		assert.NoError(t, err)
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 2)
-		assert.False(t, calls[0].Process.Exited, "first trace should be step-started")
-		assert.True(t, calls[1].Process.Exited, "second trace should be step-completed")
+		assert.False(t, calls[0].CurrentStep.Exited, "first trace should be step-started")
+		assert.True(t, calls[1].CurrentStep.Exited, "second trace should be step-completed")
 	})
 
 	t.Run("BlockingStepFailure", func(t *testing.T) {
@@ -524,7 +524,7 @@ func TestRunBlockingStep(t *testing.T) {
 		assert.Error(t, err)
 		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
-		assert.True(t, calls[0].Process.Exited)
+		assert.True(t, calls[0].CurrentStep.Exited)
 	})
 
 	t.Run("DestroyStepErrorMappedToErrCancel", func(t *testing.T) {

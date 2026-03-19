@@ -251,14 +251,14 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	switch {
 	case processState == nil && err != nil:
 		// Step failed to start — synthesis an exited process state.
-		s.Process = backend.State{
+		s.CurrentStep = backend.State{
 			Error:     err,
 			Exited:    true,
 			OOMKilled: false,
 		}
 	case processState != nil:
-		s.Process = *processState
-		// processState == nil && err == nil: step just started, leave s.Process zero-valued.
+		s.CurrentStep = *processState
+		// processState == nil && err == nil: step just started, leave s.CurrentStep zero-valued.
 	}
 
 	if traceErr := r.tracer.Trace(s); traceErr != nil {

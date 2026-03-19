@@ -38,7 +38,7 @@ func (f TraceFunc) Trace(state *state.State) error {
 // variables to include the correct timestamp and status.
 // TODO: find either a new home or better name for this.
 var DefaultTracer = TraceFunc(func(state *state.State) error {
-	if state.Process.Exited {
+	if state.CurrentStep.Exited {
 		return nil
 	}
 	if state.Pipeline.Step.Environment == nil {

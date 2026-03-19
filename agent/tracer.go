@@ -38,22 +38,22 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("workflow_id", workflow.ID).
-			Err(state.Process.Error).
-			Int("exit_code", state.Process.ExitCode).
-			Bool("exited", state.Process.Exited).
+			Err(state.CurrentStep.Error).
+			Int("exit_code", state.CurrentStep.ExitCode).
+			Bool("exited", state.CurrentStep.Exited).
 			Logger()
 
 		stepState := rpc.StepState{
 			StepUUID: state.Pipeline.Step.UUID,
-			Exited:   state.Process.Exited,
-			ExitCode: state.Process.ExitCode,
-			Started:  state.Process.Started,
-			Canceled: errors.Is(state.Process.Error, pipeline_errors.ErrCancel) || state.Skipped,
+			Exited:   state.CurrentStep.Exited,
+			ExitCode: state.CurrentStep.ExitCode,
+			Started:  state.CurrentStep.Started,
+			Canceled: errors.Is(state.CurrentStep.Error, pipeline_errors.ErrCancel) || state.CurrentStep.Skipped,
 		}
-		if state.Process.Error != nil {
-			stepState.Error = state.Process.Error.Error()
+		if state.CurrentStep.Error != nil {
+			stepState.Error = state.CurrentStep.Error.Error()
 		}
-		if state.Process.Exited {
+		if state.CurrentStep.Exited {
 			stepState.Finished = time.Now().Unix()
 		}
 
@@ -68,7 +68,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 
 			stepLogger.Debug().Msg("update step status complete")
 		}()
-		if state.Process.Exited {
+		if state.CurrentStep.Exited {
 			return nil
 		}
 		if state.Pipeline.Step.Environment == nil {
