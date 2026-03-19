@@ -71,7 +71,7 @@ func withOnFailure() func(*backend.Step) {
 func withDetached() func(*backend.Step) {
 	return func(s *backend.Step) {
 		s.Detached = true
-		s.Environment[dummy.EnvKeyStepSleep] = "1ms"
+		s.Environment[dummy.EnvKeyStepSleep] = "100ms"
 	}
 }
 
@@ -79,7 +79,7 @@ func withService() func(*backend.Step) {
 	return func(s *backend.Step) {
 		s.Type = backend.StepTypeService
 		s.Detached = true
-		s.Environment[dummy.EnvKeyStepSleep] = "1ms"
+		s.Environment[dummy.EnvKeyStepSleep] = "100ms"
 	}
 }
 
