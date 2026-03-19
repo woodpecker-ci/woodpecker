@@ -16,6 +16,7 @@ package runtime
 
 import (
 	"context"
+	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
@@ -41,6 +42,11 @@ type Runtime struct {
 	// All normal (non-cleanup) step operations must use this context.
 	// Cleanup operations should use the runnerCtx passed to Run().
 	ctx context.Context
+
+	// detachedWg tracks all background goroutines launched by runDetachedStep.
+	// Run waits on it before returning so that a service that exits after the
+	// last stage still has the opportunity to mark the pipeline as failed.
+	detachedWg sync.WaitGroup
 
 	tracer tracing.Tracer
 	logger logging.Logger
