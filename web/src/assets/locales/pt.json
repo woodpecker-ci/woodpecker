@@ -312,7 +312,8 @@
             "cancel_info": {
                 "superseded_by": "Substituído por #{pipelineId}",
                 "canceled_by_user": "Cancelado por {user}"
-            }
+            },
+            "load_more": "Carregar mais"
         },
         "branches": "Branches",
         "pull_requests": "Pull requests",
