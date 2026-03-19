@@ -24,46 +24,49 @@ import (
 	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // Runtime represents a workflow state executed by a specific backend.
-// Each workflow gets its own state configuration at runtime.
+// Each workflow gets its own Runtime instance.
 type Runtime struct {
-	err     error
+	// err holds the first error that occurred in the workflow.
+	err utils.Protected[error]
+
 	spec    *backend.Config
 	engine  backend.Backend
 	started int64
 
-	// The context a workflow is being executed with.
-	// All normal (non cleanup) operations must use this.
-	// Cleanup operations should use the runnerCtx passed to Run()
+	// ctx is the context for the current workflow execution.
+	// All normal (non-cleanup) step operations must use this context.
+	// Cleanup operations should use the runnerCtx passed to Run().
 	ctx context.Context
 
 	tracer tracing.Tracer
 	logger logging.Logger
 
-	taskUUID string
-
-	Description map[string]string // The runtime descriptors.
+	taskUUID    string
+	description map[string]string
 }
 
-// New returns a new runtime using the specified runtime
-// configuration and runtime engine.
+// New returns a new Runtime for the given workflow spec and options.
 func New(spec *backend.Config, opts ...Option) *Runtime {
 	r := new(Runtime)
-	r.Description = map[string]string{}
+	r.err = utils.NewProtected[error](nil)
+	r.description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
-	for _, opts := range opts {
-		opts(r)
+	for _, opt := range opts {
+		opt(r)
 	}
 	return r
 }
 
-func (r *Runtime) MakeLogger() zerolog.Logger {
+// makeLogger returns a logger enriched with all runtime description fields.
+func (r *Runtime) makeLogger() zerolog.Logger {
 	logCtx := log.With()
-	for key, val := range r.Description {
+	for key, val := range r.description {
 		logCtx = logCtx.Str(key, val)
 	}
 	return logCtx.Logger()

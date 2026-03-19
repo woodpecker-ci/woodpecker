@@ -46,8 +46,7 @@ func (s storage) RegistryListAll() ([]*model.Registry, error) {
 
 func (s storage) RegistryCreate(registry *model.Registry) error {
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(registry)
-	return err
+	return wrapInsert(s.engine.Insert(registry))
 }
 
 func (s storage) RegistryUpdate(registry *model.Registry) error {

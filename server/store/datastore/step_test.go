@@ -207,7 +207,7 @@ func TestStepByUUID(t *testing.T) {
 	assert.NotEmpty(t, step)
 
 	step, err = store.StepByUUID("52feb6f5-8ce2-40c0-9937-9d0e3349c98c")
-	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 	assert.Empty(t, step)
 }
 
@@ -244,6 +244,6 @@ func TestStepLoad(t *testing.T) {
 	assert.Equal(t, step.UUID, "4db7e5fc-5312-4d02-9e14-b51b9e3242cc")
 
 	step, err = store.StepLoad(5)
-	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 	assert.Empty(t, step)
 }

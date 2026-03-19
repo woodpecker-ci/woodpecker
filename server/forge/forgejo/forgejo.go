@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 

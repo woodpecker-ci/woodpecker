@@ -28,7 +28,7 @@ import (
 // wrapGet return error if err not nil or if requested entry do not exist.
 func wrapGet(exist bool, err error) error {
 	if !exist {
-		return types.RecordNotExist
+		return types.ErrRecordNotExist
 	}
 	if err != nil {
 		// we only ask for the function's name if needed for performance reasons
@@ -41,13 +41,26 @@ func wrapGet(exist bool, err error) error {
 // wrapDelete return error if err not nil or if requested entry do not exist.
 func wrapDelete(c int64, err error) error {
 	if c == 0 {
-		return types.RecordNotExist
+		return types.ErrRecordNotExist
 	}
 	if err != nil {
 		// we only ask for the function's name if needed for performance reasons
 		fnName := callerName(2)
 		return fmt.Errorf("%s: %w", fnName, err)
 	}
+	return nil
+}
+
+func wrapInsert(c int64, err error) error {
+	if err != nil {
+		if errMsg := err.Error(); strings.HasPrefix(errMsg, "UNIQUE constraint failed") ||
+			strings.HasPrefix(errMsg, "pq: duplicate key value violates unique constraint") ||
+			strings.Contains(errMsg, "Duplicate entry") {
+			return types.ErrInsertDuplicateDetected
+		}
+		return err
+	}
+
 	return nil
 }
 

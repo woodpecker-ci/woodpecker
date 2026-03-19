@@ -104,7 +104,7 @@ func TestGetAgent(t *testing.T) {
 
 	t.Run("should return not found for non-existent agent", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
-		mockStore.On("AgentFind", int64(2)).Return((*model.Agent)(nil), types.RecordNotExist)
+		mockStore.On("AgentFind", int64(2)).Return((*model.Agent)(nil), types.ErrRecordNotExist)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
