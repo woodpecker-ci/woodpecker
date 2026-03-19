@@ -53,14 +53,12 @@ func wrapDelete(c int64, err error) error {
 
 func wrapInsert(c int64, err error) error {
 	if err != nil {
-		switch errMsg := err.Error(); {
-		case strings.HasPrefix(errMsg, "UNIQUE constraint failed"),
-			strings.HasPrefix(errMsg, "pq: duplicate key value violates unique constraint"),
-			strings.Contains(errMsg, "Duplicate entry"):
+		if errMsg := err.Error(); strings.HasPrefix(errMsg, "UNIQUE constraint failed") ||
+			strings.HasPrefix(errMsg, "pq: duplicate key value violates unique constraint") ||
+			strings.Contains(errMsg, "Duplicate entry") {
 			return types.ErrInsertDuplicateDetected
-		default:
-			return err
 		}
+		return err
 	}
 
 	return nil
