@@ -495,7 +495,7 @@ func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (rpc.Age
 
 	res, err := c.client.RegisterAgent(ctx, req)
 	if err != nil {
-		return rpc.AgentConfig{}, err
+		return nil, err
 	}
 	protoConfig := res.GetConfig()
 	return rpc.AgentConfig{
