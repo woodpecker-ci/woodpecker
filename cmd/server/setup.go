@@ -257,6 +257,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
 	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
+	server.Config.WebUI.MaxPipelineLogLineCount = c.Uint("max-pipeline-log-line-count")
 	server.Config.Pipeline.PrivilegedPlugins = c.StringSlice("plugins-privileged")
 
 	// prometheus

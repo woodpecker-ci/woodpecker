@@ -24,7 +24,7 @@ require (
 	github.com/expr-lang/expr v1.17.8
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gdgvda/cron v0.6.0
-	github.com/getkin/kin-openapi v0.133.0
+	github.com/getkin/kin-openapi v0.134.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.9.3
@@ -38,7 +38,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/kinbiko/jsonassert v1.2.0
 	github.com/lib/pq v1.11.2
-	github.com/mattn/go-sqlite3 v1.14.34
+	github.com/mattn/go-sqlite3 v1.14.37
 	github.com/migueleliasweb/go-github-mock v1.5.0
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
@@ -54,9 +54,9 @@ require (
 	github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482
 	github.com/urfave/cli/v3 v3.7.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	github.com/yaronf/httpsign v0.4.2
+	github.com/yaronf/httpsign v0.5.0
 	github.com/zalando/go-keyring v0.2.6
-	gitlab.com/gitlab-org/api/client-go/v2 v2.5.0
+	gitlab.com/gitlab-org/api/client-go/v2 v2.7.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.49.0
 	golang.org/x/image v0.37.0
@@ -65,7 +65,7 @@ require (
 	golang.org/x/sync v0.20.0
 	golang.org/x/term v0.41.0
 	golang.org/x/text v0.35.0
-	google.golang.org/grpc v1.79.2
+	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.35.2
@@ -186,8 +186,8 @@ require (
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
-	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
+	github.com/oasdiff/yaml v0.0.0-20260313112342-a3ea61cb4d4c // indirect
+	github.com/oasdiff/yaml3 v0.0.0-20260224194419-61cd415a242b // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
