@@ -239,20 +239,20 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
 	s := new(state.State)
 	s.Workflow.Started = r.started
-	s.Workflow.Step = step
+	s.CurrStep = step
 	s.Workflow.Error = r.err.Get()
 
 	switch {
 	case processState == nil && err != nil:
 		// Step failed to start — synthesis an exited process state.
-		s.CurrentStep = backend.State{
+		s.CurrStepState = backend.State{
 			Error:     err,
 			Exited:    true,
 			OOMKilled: false,
 		}
 	case processState != nil:
-		s.CurrentStep = *processState
-		// processState == nil && err == nil: step just started, leave s.CurrentStep zero-valued.
+		s.CurrStepState = *processState
+		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
 	}
 
 	if traceErr := r.tracer.Trace(s); traceErr != nil {

@@ -109,7 +109,7 @@ func withStartFail() func(*backend.Step) {
 
 func findTraceByName(traces []state.State, name string) *state.State {
 	for i := range traces {
-		if traces[i].Workflow.Step != nil && traces[i].Workflow.Step.Name == name {
+		if traces[i].CurrStep != nil && traces[i].CurrStep.Name == name {
 			return &traces[i]
 		}
 	}
@@ -118,7 +118,7 @@ func findTraceByName(traces []state.State, name string) *state.State {
 
 func findStartedTrace(traces []state.State, name string) *state.State {
 	for i := range traces {
-		if traces[i].Workflow.Step != nil && traces[i].Workflow.Step.Name == name && !traces[i].CurrentStep.Exited {
+		if traces[i].CurrStep != nil && traces[i].CurrStep.Name == name && !traces[i].CurrStepState.Exited {
 			return &traces[i]
 		}
 	}
@@ -151,14 +151,15 @@ func TestWorkflowCloneBuildDeploy(t *testing.T) {
 	calls := getTracerStates(tracer)
 	assert.Len(t, calls, 6)
 	for i := 0; i < 6; i += 2 {
-		assert.False(t, calls[i].CurrentStep.Exited, "trace %d should be step-started", i)
-		assert.True(t, calls[i+1].CurrentStep.Exited, "trace %d should be step-completed", i+1)
-		assert.Equal(t, 0, calls[i+1].CurrentStep.ExitCode)
+		assert.False(t, calls[i].CurrStepState.Exited, "trace %d should be step-started", i)
+		assert.True(t, calls[i+1].CurrStepState.Exited, "trace %d should be step-completed", i+1)
+		assert.Equal(t, 0, calls[i+1].CurrStepState.ExitCode)
 	}
 }
 
 func TestWorkflowWithServiceStep(t *testing.T) {
 	t.Parallel()
+	tracer := newTestTracer(t)
 	r := New(
 		&backend.Config{
 			Stages: []*backend.Stage{
@@ -170,11 +171,43 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 			},
 		},
 		WithBackend(dummy.New()),
-		WithTracer(newTestTracer(t)),
+		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
+	calls := getTracerStates(tracer)
+	if assert.Len(t, calls, 5) {
+		assert.EqualValues(t, backend.State{}, calls[0].CurrStepState)
+		assert.EqualValues(t, backend.State{}, calls[1].CurrStepState)
+		assert.Greater(t, calls[2].CurrStepState.Started, int64(0))
+		assert.EqualValues(t, backend.State{Started: calls[2].CurrStepState.Started, Exited: true}, calls[2].CurrStepState)
+		assert.EqualValues(t, backend.State{}, calls[3].CurrStepState)
+		assert.Greater(t, calls[4].CurrStepState.Started, int64(0))
+		assert.EqualValues(t, backend.State{Started: calls[4].CurrStepState.Started, Exited: true}, calls[4].CurrStepState)
+
+		assert.Greater(t, calls[4].Workflow.Started, int64(0))
+		assert.EqualValues(t, state.State{
+			Workflow: struct {
+				Started int64 `json:"time"`
+				Error   error `json:"error"`
+			}{
+				Started: calls[4].Workflow.Started,
+			},
+			CurrStep: &backend.Step{
+				Name:        "test",
+				UUID:        "test-uuid",
+				Type:        "commands",
+				OnSuccess:   true,
+				Environment: map[string]string{},
+				Commands:    []string{"echo test"},
+			},
+			CurrStepState: backend.State{
+				Started: calls[4].CurrStepState.Started,
+				Exited:  true,
+			},
+		}, calls[4])
+	}
 }
 
 func TestWorkflowDetachedStepDoesNotBlockPipeline(t *testing.T) {
@@ -222,7 +255,7 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 
 	deployTrace := findTraceByName(getTracerStates(tracer), "deploy")
 	require.NotNil(t, deployTrace, "deploy step should still be traced")
-	assert.True(t, deployTrace.CurrentStep.Skipped)
+	assert.True(t, deployTrace.CurrStepState.Skipped)
 }
 
 func TestWorkflowOnFailureStepRuns(t *testing.T) {
@@ -267,7 +300,7 @@ func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	cleanupTrace := findTraceByName(getTracerStates(tracer), "cleanup-on-fail")
 	require.NotNil(t, cleanupTrace, "cleanup step should be traced even when skipped")
-	assert.True(t, cleanupTrace.CurrentStep.Skipped)
+	assert.True(t, cleanupTrace.CurrStepState.Skipped)
 }
 
 func TestWorkflowFailureIgnore(t *testing.T) {
@@ -316,8 +349,8 @@ func TestWorkflowFailureIgnoreDoesNotSetPipelineError(t *testing.T) {
 	assert.NoError(t, err)
 	traces := getTracerStates(tracer)
 	for _, c := range traces {
-		if c.Workflow.Step != nil && c.Workflow.Step.Name == "deploy" {
-			assert.False(t, c.CurrentStep.Skipped, "deploy should not be skipped after failure=ignore step")
+		if c.CurrStep != nil && c.CurrStep.Name == "deploy" {
+			assert.False(t, c.CurrStepState.Skipped, "deploy should not be skipped after failure=ignore step")
 		}
 	}
 }
@@ -427,7 +460,7 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 	assert.Error(t, err)
 	deployTrace := findTraceByName(getTracerStates(tracer), "deploy")
 	require.NotNil(t, deployTrace)
-	assert.True(t, deployTrace.CurrentStep.Skipped)
+	assert.True(t, deployTrace.CurrStepState.Skipped)
 }
 
 func TestWorkflowContextCancelDuringExecution(t *testing.T) {
@@ -438,7 +471,7 @@ func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 	tracer := tracer_mocks.NewMockTracer(t)
 	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
 		s, _ := args.Get(0).(*state.State)
-		if s.CurrentStep.Exited && !s.CurrentStep.Skipped {
+		if s.CurrStepState.Exited && !s.CurrStepState.Skipped {
 			stageCount++
 			if stageCount >= 1 {
 				cancel(nil)
@@ -514,7 +547,7 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 
 	deployTrace := findTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace)
-	assert.True(t, deployTrace.CurrentStep.Skipped, "deploy should be skipped after lint failure")
+	assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after lint failure")
 
 	assert.NotNil(t, findStartedTrace(traces, "notify"),
 		"notify (OnFailure) should have started")
@@ -545,7 +578,7 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 
 	notifyTrace := findTraceByName(traces, "error-notify")
 	require.NotNil(t, notifyTrace)
-	assert.True(t, notifyTrace.CurrentStep.Skipped,
+	assert.True(t, notifyTrace.CurrStepState.Skipped,
 		"OnFailure step should be skipped when prior failure was ignored")
 
 	assert.NotNil(t, findStartedTrace(traces, "build"),

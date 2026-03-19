@@ -36,24 +36,24 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 		defer uploads.Done()
 
 		stepLogger := logger.With().
-			Str("image", state.Workflow.Step.Image).
+			Str("image", state.CurrStep.Image).
 			Str("workflow_id", workflow.ID).
-			Err(state.CurrentStep.Error).
-			Int("exit_code", state.CurrentStep.ExitCode).
-			Bool("exited", state.CurrentStep.Exited).
+			Err(state.CurrStepState.Error).
+			Int("exit_code", state.CurrStepState.ExitCode).
+			Bool("exited", state.CurrStepState.Exited).
 			Logger()
 
 		stepState := rpc.StepState{
-			StepUUID: state.Workflow.Step.UUID,
-			Exited:   state.CurrentStep.Exited,
-			ExitCode: state.CurrentStep.ExitCode,
-			Started:  state.CurrentStep.Started,
-			Canceled: errors.Is(state.CurrentStep.Error, pipeline_errors.ErrCancel) || state.CurrentStep.Skipped,
+			StepUUID: state.CurrStep.UUID,
+			Exited:   state.CurrStepState.Exited,
+			ExitCode: state.CurrStepState.ExitCode,
+			Started:  state.CurrStepState.Started,
+			Canceled: errors.Is(state.CurrStepState.Error, pipeline_errors.ErrCancel) || state.CurrStepState.Skipped,
 		}
-		if state.CurrentStep.Error != nil {
-			stepState.Error = state.CurrentStep.Error.Error()
+		if state.CurrStepState.Error != nil {
+			stepState.Error = state.CurrStepState.Error.Error()
 		}
-		if state.CurrentStep.Exited {
+		if state.CurrStepState.Exited {
 			stepState.Finished = time.Now().Unix()
 		}
 
@@ -68,21 +68,21 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 
 			stepLogger.Debug().Msg("update step status complete")
 		}()
-		if state.CurrentStep.Exited {
+		if state.CurrStepState.Exited {
 			return nil
 		}
-		if state.Workflow.Step.Environment == nil {
-			state.Workflow.Step.Environment = map[string]string{}
+		if state.CurrStep.Environment == nil {
+			state.CurrStep.Environment = map[string]string{}
 		}
 
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
-		state.Workflow.Step.Environment["CI_MACHINE"] = r.hostname
+		state.CurrStep.Environment["CI_MACHINE"] = r.hostname
 
-		state.Workflow.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
+		state.CurrStep.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
 
-		state.Workflow.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
+		state.CurrStep.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
 
-		state.Workflow.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
+		state.CurrStep.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		return nil
 	}
