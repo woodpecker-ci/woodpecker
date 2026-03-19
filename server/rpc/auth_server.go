@@ -76,7 +76,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 
 		if agentToken == s.agentMasterToken {
 			agent, err := s.store.AgentFind(agentID)
-			if err != nil && errors.Is(err, types.RecordNotExist) {
+			if err != nil && errors.Is(err, types.ErrRecordNotExist) {
 				return nil, fmt.Errorf("AgentID not found in database")
 			}
 			return agent, err
@@ -85,7 +85,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 
 	// individual agent token auth
 	agent, err := s.store.AgentFindByToken(agentToken)
-	if err != nil && errors.Is(err, types.RecordNotExist) {
+	if err != nil && errors.Is(err, types.ErrRecordNotExist) {
 		return nil, fmt.Errorf("individual agent not found by token: %w", err)
 	}
 	return agent, err

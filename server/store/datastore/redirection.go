@@ -34,8 +34,7 @@ func (s storage) CreateRedirection(redirect *model.Redirection) error {
 
 func (s storage) createRedirection(e *xorm.Session, redirect *model.Redirection) error {
 	// only Insert set auto created ID back to object
-	_, err := e.Insert(redirect)
-	return err
+	return wrapInsert(e.Insert(redirect))
 }
 
 func (s storage) HasRedirectionForRepo(repoID int64, fullName string) (bool, error) {
