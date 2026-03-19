@@ -713,6 +713,8 @@ add a cron job
 
 **--branch**="": cron branch
 
+**--enabled**: whether cron is enabled (default: true)
+
 **--format**="": format output (deprecated) (default: \x1b[33m{{ .Name }} \x1b[0m\nID: {{ .ID }}\nBranch: {{ .Branch }}\nSchedule: {{ .Schedule }}\nNextExec: {{ .NextExec }}\n)
 
 **--name**="": cron name
@@ -752,6 +754,8 @@ show cron job information
 update a cron job
 
 **--branch**="": cron branch
+
+**--enabled**: whether cron is enabled (default: true)
 
 **--format**="": format output (deprecated) (default: \x1b[33m{{ .Name }} \x1b[0m\nID: {{ .ID }}\nBranch: {{ .Branch }}\nSchedule: {{ .Schedule }}\nNextExec: {{ .NextExec }}\n)
 
