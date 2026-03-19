@@ -15,11 +15,13 @@
 
 ### ✨ Features
 
+- make it possible to disable the isolated home for local agents [[#6251](https://github.com/woodpecker-ci/woodpecker/pull/6251)]
 - Add Container Registry credential extension [[#5993](https://github.com/woodpecker-ci/woodpecker/pull/5993)]
 - Support exclusive config extensions [[#5978](https://github.com/woodpecker-ci/woodpecker/pull/5978)]
 
 ### 📈 Enhancement
 
+- Allow to cancel on failure [[#6158](https://github.com/woodpecker-ci/woodpecker/pull/6158)]
 - Refactor so storage detects if Insert fails because of unique constraint [[#6259](https://github.com/woodpecker-ci/woodpecker/pull/6259)]
 - Add configure the max number of lines loaded in log webview [[#6250](https://github.com/woodpecker-ci/woodpecker/pull/6250)]
 - Add "Load more" pagination to pipeline list [[#6200](https://github.com/woodpecker-ci/woodpecker/pull/6200)]
