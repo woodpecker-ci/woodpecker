@@ -48,7 +48,7 @@ func (s storage) RecoveryStateCreate(workflowID string, stepUUIDs []string, agen
 		})
 	}
 
-	_, err = s.engine.Insert(&states)
+	err = wrapInsert(s.engine.Insert(&states))
 	return err
 }
 
