@@ -137,7 +137,7 @@ const jwtSecretID = "jwt-secret"
 
 func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		jwtSecret := base32.StdEncoding.EncodeToString(
 			random.GetRandomBytes(32),
 		)

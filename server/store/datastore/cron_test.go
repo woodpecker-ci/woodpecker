@@ -34,7 +34,7 @@ func TestCronCreate(t *testing.T) {
 	assert.NotEqualValues(t, 0, cron1.ID)
 
 	// cannot insert cron job with same repoID and title
-	assert.ErrorIs(t, types.ErrUniqueExists, store.CronCreate(cron1))
+	assert.ErrorIs(t, store.CronCreate(cron1), types.ErrInsertDuplicateDetected)
 
 	oldID := cron1.ID
 	assert.NoError(t, store.CronDelete(repo, oldID))

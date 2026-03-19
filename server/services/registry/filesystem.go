@@ -99,7 +99,7 @@ func (f *filesystem) GlobalRegistryFind(addr string) (*model.Registry, error) {
 		}
 	}
 
-	return nil, model_types.RecordNotExist
+	return nil, model_types.ErrRecordNotExist
 }
 
 func (f *filesystem) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {

@@ -757,7 +757,8 @@
     "extensions_signatures_public_key_description": "Этот открытый ключ должен использоваться вашими расширениями для проверки запросов, отправляемых Woodpecker.",
     "extensions_configuration_saved": "Настройки расширений сохранены",
     "disabled": "Отключено",
-    "config_extension_endpoint": "Адрес конфигурации расширения",
+    "config_extension_endpoint": "Конечная точка расширения конфигурации",
     "config_extension_exclusive_desc": "Отключает все другие способы получения конфигурации, в том числе от платформы.",
-    "config_extension_exclusive": "Эксклюзивно"
+    "config_extension_exclusive": "Эксклюзивно",
+    "registry_extension_endpoint": "Конечная точка расширения реестра"
 }
