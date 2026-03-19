@@ -34,6 +34,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.makeLogger()
 	r.logStages()
 
+	// we make sure cleanup always happens
 	defer func() {
 		ctx := runnerCtx //nolint:contextcheck
 		if ctx.Err() != nil {
