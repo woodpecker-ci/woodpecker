@@ -45,9 +45,7 @@ const testWorkflowID = "WID_test"
 func newDummyRuntime(t *testing.T, tracer *tracer_mocks.MockTracer) *Runtime {
 	t.Helper()
 	engine := dummy.New()
-	r := New(
-		&backend.Config{},
-		WithBackend(engine),
+	r := New(&backend.Config{}, engine,
 		WithTracer(tracer),
 		WithTaskUUID(testWorkflowID),
 		WithLogger(newTestLogger(t)),
@@ -254,7 +252,7 @@ func TestStartStep(t *testing.T) {
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(io.NopCloser(strings.NewReader("log line")), nil)
 
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)),
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)),
 			WithLogger(logging.Logger(func(_ *backend.Step, rc io.ReadCloser) error {
 				atomic.AddInt32(&logCalled, 1)
 				_, _ = io.ReadAll(rc)
@@ -278,8 +276,7 @@ func TestStartStep(t *testing.T) {
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(io.NopCloser(strings.NewReader("data")), nil)
 
-		r := New(&backend.Config{},
-			WithBackend(engine),
+		r := New(&backend.Config{}, engine,
 			WithTracer(newTestTracer(t)),
 			WithLogger(logging.Logger(func(_ *backend.Step, rc io.ReadCloser) error {
 				_, _ = io.ReadAll(rc)
@@ -306,7 +303,7 @@ func TestCompleteStep(t *testing.T) {
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -321,7 +318,7 @@ func TestCompleteStep(t *testing.T) {
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(&backend.State{Exited: true, ExitCode: 1}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -337,7 +334,7 @@ func TestCompleteStep(t *testing.T) {
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(&backend.State{Exited: true, OOMKilled: true, ExitCode: 137}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -352,7 +349,7 @@ func TestCompleteStep(t *testing.T) {
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, context.Canceled)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -367,7 +364,7 @@ func TestCompleteStep(t *testing.T) {
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(&backend.State{Exited: true, ExitCode: 0}, context.Canceled)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -381,7 +378,7 @@ func TestCompleteStep(t *testing.T) {
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, errors.New("engine exploded"))
 		// DestroyStep should NOT be called — early return.
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -396,7 +393,7 @@ func TestCompleteStep(t *testing.T) {
 			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(errors.New("cleanup failed"))
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -410,7 +407,7 @@ func TestCompleteStep(t *testing.T) {
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, 9999)
 
@@ -431,7 +428,7 @@ func TestCompleteStep(t *testing.T) {
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		r := New(&backend.Config{},
-			WithBackend(engine),
+			engine,
 			WithTracer(newTestTracer(t)),
 			WithLogger(newTestLogger(t)),
 			WithContext(canceledCtx), // r.ctx is canceled
@@ -590,7 +587,7 @@ func TestRunBlockingStep(t *testing.T) {
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("")), nil)
 
 		tracer := newTestTracer(t)
-		r := New(&backend.Config{}, WithBackend(engine), WithTracer(tracer), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, engine, WithTracer(tracer), WithLogger(newTestLogger(t)))
 
 		err := r.runBlockingStep(t.Context(), dummyStep("s1"))
 
@@ -658,7 +655,7 @@ func TestRunDetachedStep(t *testing.T) {
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		r := New(&backend.Config{},
-			WithBackend(engine),
+			engine,
 			WithTracer(tracer),
 			WithLogger(newTestLogger(t)),
 		)
@@ -693,7 +690,7 @@ func TestRunDetachedStep(t *testing.T) {
 			Return(traceErr) // every Trace call fails
 
 		r := New(&backend.Config{},
-			WithBackend(engine),
+			engine,
 			WithTracer(tracer),
 			WithLogger(newTestLogger(t)),
 		)

@@ -35,7 +35,7 @@ import (
 
 func TestRunNilTracer(t *testing.T) {
 	t.Parallel()
-	r := New(&backend.Config{}, WithBackend(dummy.New()), WithLogger(newTestLogger(t)))
+	r := New(&backend.Config{}, dummy.New(), WithLogger(newTestLogger(t)))
 
 	err := r.Run(t.Context())
 
@@ -56,7 +56,7 @@ func TestRunSuccess(t *testing.T) {
 				}},
 			}},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -86,7 +86,7 @@ func TestRunMultipleStages(t *testing.T) {
 				}}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -112,7 +112,7 @@ func TestRunStepError(t *testing.T) {
 				}},
 			}},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -140,7 +140,7 @@ func TestRunContextCanceled(t *testing.T) {
 				}},
 			}},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		WithContext(ctx),
 		WithLogger(newTestLogger(t)),
@@ -155,7 +155,7 @@ func TestRunSetupWorkflowError(t *testing.T) {
 	t.Parallel()
 	r := New(
 		&backend.Config{},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		WithTaskUUID(dummy.WorkflowSetupFailUUID),
 		WithLogger(newTestLogger(t)),
@@ -178,7 +178,7 @@ func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(setupErr)
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	r := New(&backend.Config{}, WithBackend(engine), WithTracer(tracer), WithLogger(newTestLogger(t)))
+	r := New(&backend.Config{}, engine, WithTracer(tracer), WithLogger(newTestLogger(t)))
 
 	err := r.Run(t.Context())
 
@@ -198,7 +198,7 @@ func TestRunDestroyWorkflowAlwaysCalled(t *testing.T) {
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
 
-	r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+	r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 	_ = r.Run(t.Context())
 
@@ -214,7 +214,7 @@ func TestRunDestroyWorkflowCalledOnSetupError(t *testing.T) {
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
 
-	r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+	r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 	_ = r.Run(t.Context())
 
@@ -227,7 +227,7 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 	t.Run("MatchingError", func(t *testing.T) {
 		t.Parallel()
 		tracer := newTestTracer(t)
-		r := New(&backend.Config{}, WithBackend(dummy.New()), WithTracer(tracer), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
 		step := &backend.Step{Name: "setup", UUID: "su"}
 		err := &pipeline_errors.ErrInvalidWorkflowSetup{Err: errors.New("bad"), Step: step}
 
@@ -244,7 +244,7 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 		t.Parallel()
 		tracer := tracer_mocks.NewMockTracer(t)
 		// Trace should NOT be called — no .On() setup means test panics if called.
-		r := New(&backend.Config{}, WithBackend(dummy.New()), WithTracer(tracer), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
 
 		r.traceWorkflowSetupError(errors.New("generic error"))
 	})
@@ -253,7 +253,7 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 		t.Parallel()
 		tracer := tracer_mocks.NewMockTracer(t)
 		tracer.On("Trace", mock.Anything).Return(errors.New("trace failed"))
-		r := New(&backend.Config{}, WithBackend(dummy.New()), WithTracer(tracer), WithLogger(newTestLogger(t)))
+		r := New(&backend.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
 		step := &backend.Step{Name: "setup", UUID: "su"}
 
 		// Should not panic — the error is logged, not returned.
@@ -303,7 +303,7 @@ func TestNewDefaults(t *testing.T) {
 	t.Parallel()
 	spec := &backend.Config{}
 
-	r := New(spec)
+	r := New(spec, dummy.New())
 
 	assert.Equal(t, spec, r.spec)
 	assert.NotEmpty(t, r.taskUUID)
@@ -321,7 +321,7 @@ func TestWithOptions(t *testing.T) {
 	desc := map[string]string{"repo": "test"}
 
 	r := New(&backend.Config{},
-		WithBackend(engine),
+		engine,
 		WithTracer(tracer),
 		WithContext(ctx),
 		WithDescription(desc),
@@ -339,7 +339,7 @@ func TestWithOptions(t *testing.T) {
 func TestMakeLoggerWithDescription(t *testing.T) {
 	t.Parallel()
 	r := New(&backend.Config{},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		WithLogger(newTestLogger(t)),
 		WithDescription(map[string]string{"repo": "woodpecker", "branch": "main"}),
@@ -359,7 +359,7 @@ func TestGetShutdownCtx(t *testing.T) {
 func TestRunNilLogger(t *testing.T) {
 	t.Parallel()
 	r := New(&backend.Config{},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		// WithLogger intentionally omitted
 	)
@@ -387,7 +387,7 @@ func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 	cancel(nil)
 
 	r := New(&backend.Config{},
-		WithBackend(engine),
+		engine,
 		WithTracer(newTestTracer(t)),
 		WithLogger(newTestLogger(t)),
 	)

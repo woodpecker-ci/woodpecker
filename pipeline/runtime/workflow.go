@@ -32,15 +32,11 @@ import (
 // workflow on exit. The runnerCtx must outlive workflow cancellation so that cleanup
 // can still reach the backend (e.g. stopping Docker containers).
 func (r *Runtime) Run(runnerCtx context.Context) error {
+	if err := r.validateConfig(); err != nil {
+		return err
+	}
+
 	logger := r.makeLogger()
-
-	if r.tracer == nil {
-		return fmt.Errorf("runtime misconfiguration: tracer must not be nil")
-	}
-	if r.logger == nil {
-		return fmt.Errorf("runtime misconfiguration: logger must not be nil")
-	}
-
 	r.logStages()
 
 	// we make sure cleanup always happens
@@ -74,6 +70,21 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}
 
 	return r.err.Get()
+}
+
+// The validateConfig checks if a dev made a mistake,
+// this should be values a user has no control over.
+func (r *Runtime) validateConfig() error {
+	if r.tracer == nil {
+		return fmt.Errorf("runtime misconfiguration: tracer must not be nil")
+	}
+	if r.logger == nil {
+		return fmt.Errorf("runtime misconfiguration: logger must not be nil")
+	}
+	if r.spec == nil {
+		return fmt.Errorf("runtime misconfiguration: backend configuration is missing")
+	}
+	return nil
 }
 
 // logStages logs the ordered list of stages and their steps at debug level.

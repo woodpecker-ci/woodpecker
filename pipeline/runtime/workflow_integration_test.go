@@ -140,7 +140,7 @@ func TestWorkflowCloneBuildDeploy(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("deploy")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -170,7 +170,7 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("test")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -222,7 +222,7 @@ func TestWorkflowDetachedStepDoesNotBlockPipeline(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("deploy")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		WithLogger(newTestLogger(t)),
 	)
@@ -241,7 +241,7 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("deploy")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -268,7 +268,7 @@ func TestWorkflowOnFailureStepRuns(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("notify-failure", withOnFailure())}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -290,7 +290,7 @@ func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("cleanup-on-fail", withOnFailure())}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -315,7 +315,7 @@ func TestWorkflowFailureIgnore(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("build")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -339,7 +339,7 @@ func TestWorkflowFailureIgnoreDoesNotSetPipelineError(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("deploy")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -364,7 +364,7 @@ func TestWorkflowPluginStep(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("publish", withPlugin())}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		WithLogger(newTestLogger(t)),
 	)
@@ -380,7 +380,7 @@ func TestWorkflowOOMKilledStep(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("build", withOOM())}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		WithLogger(newTestLogger(t)),
 	)
@@ -406,7 +406,7 @@ func TestWorkflowParallelStepsInStage(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("deploy")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -429,7 +429,7 @@ func TestWorkflowParallelStepOneFailsOthersComplete(t *testing.T) {
 				}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -450,7 +450,7 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("deploy")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -486,7 +486,7 @@ func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("deploy")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithContext(ctx),
 		WithLogger(newTestLogger(t)),
@@ -505,7 +505,7 @@ func TestWorkflowSetupFailure(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("build")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		WithTaskUUID(dummy.WorkflowSetupFailUUID),
 		WithLogger(newTestLogger(t)),
@@ -535,7 +535,7 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("notify", withOnFailure())}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -566,7 +566,7 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 				{Steps: []*backend.Step{cmdStep("build")}},
 			},
 		},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
@@ -590,7 +590,7 @@ func TestWorkflowEmptyStages(t *testing.T) {
 	tracer := newTestTracer(t)
 	r := New(
 		&backend.Config{Stages: []*backend.Stage{}},
-		WithBackend(dummy.New()),
+		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
