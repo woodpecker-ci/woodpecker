@@ -97,7 +97,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	workflowCtx, cancelWorkflowCtx := context.WithCancelCause(workflowCtx)
 	defer cancelWorkflowCtx(nil)
 
-	// Handle SIGTERM (k8s, docker, system shutdown)
+	// Add sigterm support for internal context.
+	// Required to be able to terminate the running workflow by external signals.
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
 		// WithContextSigtermCallback would cancel the context too, but  we want our own custom error
