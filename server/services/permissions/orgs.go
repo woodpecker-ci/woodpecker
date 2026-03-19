@@ -9,8 +9,8 @@ import (
 
 func NewOrgs(orgs []string) *Orgs {
 	orgsLowercase := make([]string, len(orgs))
-	for _, a := range orgs {
-		orgsLowercase = append(orgsLowercase, strings.ToLower(a))
+	for i, a := range orgs {
+		orgsLowercase[i] = strings.ToLower(a)
 	}
 	return &Orgs{
 		IsConfigured: len(orgs) > 0,

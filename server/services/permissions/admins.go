@@ -9,8 +9,8 @@ import (
 
 func NewAdmins(admins []string) *Admins {
 	adminsLowercase := make([]string, len(admins))
-	for _, a := range admins {
-		adminsLowercase = append(adminsLowercase, strings.ToLower(a))
+	for i, a := range admins {
+		adminsLowercase[i] = strings.ToLower(a)
 	}
 	return &Admins{admins: utils.SliceToBoolMap(adminsLowercase)}
 }

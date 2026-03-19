@@ -9,8 +9,8 @@ import (
 
 func NewOwnersAllowlist(owners []string) *OwnersAllowlist {
 	ownersLowercase := make([]string, len(owners))
-	for _, a := range owners {
-		ownersLowercase = append(ownersLowercase, strings.ToLower(a))
+	for i, a := range owners {
+		ownersLowercase[i] = strings.ToLower(a)
 	}
 	return &OwnersAllowlist{owners: utils.SliceToBoolMap(ownersLowercase)}
 }
