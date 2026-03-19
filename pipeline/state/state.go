@@ -26,13 +26,13 @@ type State struct {
 	Workflow struct {
 		// Workflow start time
 		Started int64 `json:"time"`
-		// Current pipeline error state
+		// Current workflow error state
 		Error error `json:"error"`
 	}
 
 	// Current step that updates the step and workflow state
 	CurrStep *backend.Step `json:"step"`
 
-	// Current Step state.
+	// Current step state
 	CurrStepState backend.State
 }
