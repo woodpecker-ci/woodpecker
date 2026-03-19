@@ -244,7 +244,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 
 	switch {
 	case processState == nil && err != nil:
-		// Step failed to start — synthesis an exited process state.
+		// Step failed to start — create an dummy exited process state.
 		s.CurrStepState = backend.State{
 			Error:     err,
 			Exited:    true,

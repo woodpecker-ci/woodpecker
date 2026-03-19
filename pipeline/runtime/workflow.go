@@ -103,9 +103,7 @@ func (r *Runtime) logStages() {
 	}
 }
 
-// traceWorkflowSetupError traces an ErrInvalidWorkflowSetup to the tracer, if one
-// is configured. Other error types are silently ignored here (they are still
-// returned by Run).
+// traceWorkflowSetupError traces an ErrInvalidWorkflowSetup to the tracer.
 func (r *Runtime) traceWorkflowSetupError(err error) {
 	var stepErr *pipeline_errors.ErrInvalidWorkflowSetup
 	if !errors.As(err, &stepErr) {
