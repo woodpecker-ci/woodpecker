@@ -24,9 +24,7 @@ steps:
   lint-license-header:
     image: *golang_image
     commands:
-      - pwd
-      - ls
-      - echo **/*.go
+      - shopt -s globstar
       - make generate-license-header
       - 'DIFF=$(git diff | head)'
       - '[ -n "$DIFF" ] && { echo "license headers not up to date, exec `make generate-license-header` and commit"; exit 1; } || true'
