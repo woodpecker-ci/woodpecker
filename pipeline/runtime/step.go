@@ -197,9 +197,8 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend.Step)
 // runDetachedStep starts the step and returns as soon as the container is running
 // and log streaming is set up. The rest of the step lifecycle runs in the background.
 //
-// The goroutine is tracked by r.detachedWg so that Run() waits for all detached
-// steps to finish before it returns — ensuring a service that exits with a non-zero
-// code after the last stage still marks the overall pipeline as failed.
+// Any error that occurs after setup is logged but not propagated — it cannot
+// influence the pipeline outcome at that point.
 func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step) error {
 	waitForLogs, startTime, err := r.startStep(step)
 	if err != nil {
@@ -208,14 +207,8 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 		return r.traceStep(nil, err, step)
 	}
 
-	// Register the goroutine with the WaitGroup before spawning it so there
-	// is no window between launch and Run()'s detachedWg.Wait() where the
-	// goroutine could be missed.
-	r.detachedWg.Add(1)
-
+	// Container is up and logging is streaming — hand off to background.
 	go func() {
-		defer r.detachedWg.Done()
-
 		logger := r.makeLogger()
 
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
@@ -226,7 +219,6 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 		}
 		if err != nil {
 			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed after setup")
-			r.err.Set(err)
 		}
 
 		if traceErr := r.traceStep(processState, err, step); traceErr != nil {
