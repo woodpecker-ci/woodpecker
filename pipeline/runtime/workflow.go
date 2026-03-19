@@ -31,7 +31,7 @@ import (
 // workflow on exit. runnerCtx must outlive workflow cancellation so that cleanup
 // can still reach the backend (e.g. stopping Docker containers).
 func (r *Runtime) Run(runnerCtx context.Context) error {
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 	r.logStages()
 
 	defer func() {
@@ -58,17 +58,17 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 			return pipeline_errors.ErrCancel
 		case err := <-r.runStage(runnerCtx, stage.Steps):
 			if err != nil {
-				r.setErr(err)
+				r.err.Set(err)
 			}
 		}
 	}
 
-	return r.getErr()
+	return r.err.Get()
 }
 
 // logStages logs the ordered list of stages and their steps at debug level.
 func (r *Runtime) logStages() {
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
 	for stagePos, stage := range r.spec.Stages {
 		stepNames := make([]string, 0, len(stage.Steps))
@@ -102,7 +102,7 @@ func (r *Runtime) traceWorkflowSetupError(err error) {
 
 	if r.tracer != nil {
 		if traceErr := r.tracer.Trace(s); traceErr != nil {
-			logger := r.MakeLogger()
+			logger := r.makeLogger()
 			logger.Error().Err(traceErr).Msg("failed to trace workflow setup error")
 		}
 	}

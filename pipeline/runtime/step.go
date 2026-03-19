@@ -30,7 +30,7 @@ import (
 // It checks whether the step should be skipped, emits a "started" trace,
 // sets up drone-compat env vars, then hands off to blocking or detached execution.
 func (r *Runtime) executeStep(runnerCtx context.Context, step *backend.Step) error {
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 	logger.Debug().Str("step", step.Name).Msg("prepare")
 
 	if r.shouldSkipStep(step) {
@@ -57,8 +57,8 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend.Step) err
 // pipeline error state and the step's OnSuccess / OnFailure flags.
 // It logs the reason for skipping before returning.
 func (r *Runtime) shouldSkipStep(step *backend.Step) bool {
-	logger := r.MakeLogger()
-	currentErr := r.getErr()
+	logger := r.makeLogger()
+	currentErr := r.err.Get()
 
 	if currentErr != nil && !step.OnFailure {
 		logger.Debug().
@@ -105,7 +105,7 @@ func (r *Runtime) startStep(step *backend.Step) (waitForLogs func(), startTime i
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			logger := r.MakeLogger()
+			logger := r.makeLogger()
 			if err := r.logger(step, rc); err != nil {
 				logger.Error().Err(err).Str("step", step.Name).Msg("step log streaming failed")
 			}
@@ -168,7 +168,7 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend.Step, wa
 // The error is traced and returned to runStage, which feeds it into the
 // stage error group.
 func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend.Step) error {
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 
 	waitForLogs, startTime, err := r.startStep(step)
 	if err != nil {
@@ -205,7 +205,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 
 	// Container is up and logging is streaming — hand off to background.
 	go func() {
-		logger := r.MakeLogger()
+		logger := r.makeLogger()
 
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
 		logger.Debug().Str("step", step.Name).Msg("complete")
@@ -240,7 +240,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	s := new(state.State)
 	s.Pipeline.Started = r.started
 	s.Pipeline.Step = step
-	s.Pipeline.Error = r.getErr()
+	s.Pipeline.Error = r.err.Get()
 
 	switch {
 	case processState == nil && err != nil:
