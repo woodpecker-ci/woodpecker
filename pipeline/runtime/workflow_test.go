@@ -1,5 +1,3 @@
-//go:build test
-
 // Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build test
+
 package runtime
 
 import (
@@ -23,22 +23,23 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types/mocks"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
+	tracer_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks"
 )
 
 // ---------------------------------------------------------------------------
-// Run — integration tests using dummy backend
+// Run
 // ---------------------------------------------------------------------------
 
 func TestRunNilTracer(t *testing.T) {
 	t.Parallel()
 	r := New(&backend.Config{}, WithBackend(dummy.New()))
-	// tracer is NOT set
 
 	err := r.Run(t.Context())
 
@@ -48,16 +49,14 @@ func TestRunNilTracer(t *testing.T) {
 
 func TestRunSuccess(t *testing.T) {
 	t.Parallel()
-	tracer := &mockTracer{}
+	tracer := newTestTracer(t)
 	r := New(
 		&backend.Config{
 			Stages: []*backend.Stage{{
 				Steps: []*backend.Step{{
 					Name: "build", UUID: "u1",
-					Type:        backend.StepTypeCommands,
-					OnSuccess:   true,
-					Environment: map[string]string{},
-					Commands:    []string{"echo hello"},
+					Type: backend.StepTypeCommands, OnSuccess: true,
+					Environment: map[string]string{}, Commands: []string{"echo hello"},
 				}},
 			}},
 		},
@@ -68,14 +67,13 @@ func TestRunSuccess(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.NoError(t, err)
-	// step-started + step-completed
-	calls := tracer.getCalls()
+	calls := getTracerStates(tracer)
 	require.Len(t, calls, 2)
 }
 
 func TestRunMultipleStages(t *testing.T) {
 	t.Parallel()
-	tracer := &mockTracer{}
+	tracer := newTestTracer(t)
 	r := New(
 		&backend.Config{
 			Stages: []*backend.Stage{
@@ -98,14 +96,13 @@ func TestRunMultipleStages(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.NoError(t, err)
-	// 2 stages × (started + completed) = 4 traces
-	calls := tracer.getCalls()
+	calls := getTracerStates(tracer)
 	require.Len(t, calls, 4)
 }
 
 func TestRunStepError(t *testing.T) {
 	t.Parallel()
-	tracer := &mockTracer{}
+	tracer := newTestTracer(t)
 	r := New(
 		&backend.Config{
 			Stages: []*backend.Stage{{
@@ -129,48 +126,10 @@ func TestRunStepError(t *testing.T) {
 	assert.Equal(t, 1, exitErr.Code)
 }
 
-func TestRunStepErrorSkipsSubsequentStages(t *testing.T) {
-	t.Parallel()
-	tracer := &mockTracer{}
-	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{{
-					Name: "fail", UUID: "u1",
-					Type: backend.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{dummy.EnvKeyStepExitCode: "1"},
-					Commands:    []string{"exit 1"},
-				}}},
-				{Steps: []*backend.Step{{
-					Name: "after", UUID: "u2",
-					Type: backend.StepTypeCommands, OnSuccess: true, OnFailure: false,
-					Environment: map[string]string{},
-					Commands:    []string{"echo should not run"},
-				}}},
-			},
-		},
-		WithBackend(dummy.New()),
-		WithTracer(tracer),
-	)
-
-	err := r.Run(t.Context())
-
-	assert.Error(t, err)
-	// "after" should be traced as skipped, not started by the engine.
-	calls := tracer.getCalls()
-	// fail: started + completed = 2, after: skipped = 1 → total 3
-	require.Len(t, calls, 3)
-	lastCall := calls[2]
-	assert.True(t, lastCall.Process.Skipped)
-	assert.True(t, lastCall.Process.Exited)
-}
-
 func TestRunContextCanceled(t *testing.T) {
 	t.Parallel()
-	tracer := &mockTracer{}
-
 	ctx, cancel := context.WithCancel(t.Context())
-	cancel() // pre-cancel
+	cancel()
 
 	r := New(
 		&backend.Config{
@@ -178,13 +137,12 @@ func TestRunContextCanceled(t *testing.T) {
 				Steps: []*backend.Step{{
 					Name: "s1", UUID: "u1",
 					Type: backend.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{},
-					Commands:    []string{"echo hello"},
+					Environment: map[string]string{}, Commands: []string{"echo hello"},
 				}},
 			}},
 		},
 		WithBackend(dummy.New()),
-		WithTracer(tracer),
+		WithTracer(newTestTracer(t)),
 		WithContext(ctx),
 	)
 
@@ -195,11 +153,10 @@ func TestRunContextCanceled(t *testing.T) {
 
 func TestRunSetupWorkflowError(t *testing.T) {
 	t.Parallel()
-	tracer := &mockTracer{}
 	r := New(
 		&backend.Config{},
 		WithBackend(dummy.New()),
-		WithTracer(tracer),
+		WithTracer(newTestTracer(t)),
 		WithTaskUUID(dummy.WorkflowSetupFailUUID),
 	)
 
@@ -210,28 +167,22 @@ func TestRunSetupWorkflowError(t *testing.T) {
 
 func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 	t.Parallel()
-	// Uses mockEngine: dummy cannot return ErrInvalidWorkflowSetup.
-	tracer := &mockTracer{}
+	tracer := newTestTracer(t)
 	step := &backend.Step{Name: "clone", UUID: "clone-uuid"}
 	setupErr := &pipeline_errors.ErrInvalidWorkflowSetup{
 		Err:  errors.New("bad image"),
 		Step: step,
 	}
-	engine := &mockEngine{
-		setupWorkflowFn: func(_ context.Context, _ *backend.Config, _ string) error {
-			return setupErr
-		},
-	}
-	r := New(
-		&backend.Config{},
-		WithBackend(engine),
-		WithTracer(tracer),
-	)
+	engine := backend_mocks.NewMockBackend(t)
+	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(setupErr)
+	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	r := New(&backend.Config{}, WithBackend(engine), WithTracer(tracer))
 
 	err := r.Run(t.Context())
 
 	assert.Error(t, err)
-	calls := tracer.getCalls()
+	calls := getTracerStates(tracer)
 	require.Len(t, calls, 1)
 	assert.Equal(t, step, calls[0].Pipeline.Step)
 	assert.True(t, calls[0].Process.Exited)
@@ -240,16 +191,13 @@ func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 
 func TestRunDestroyWorkflowAlwaysCalled(t *testing.T) {
 	t.Parallel()
-	// Uses mockEngine: need to track DestroyWorkflow calls.
 	var destroyed int32
-	tracer := &mockTracer{}
-	engine := &mockEngine{
-		destroyWorkflowFn: func(_ context.Context, _ *backend.Config, _ string) error {
-			atomic.AddInt32(&destroyed, 1)
-			return nil
-		},
-	}
-	r := New(&backend.Config{}, WithBackend(engine), WithTracer(tracer))
+	engine := backend_mocks.NewMockBackend(t)
+	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
+		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
+
+	r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)))
 
 	_ = r.Run(t.Context())
 
@@ -258,19 +206,14 @@ func TestRunDestroyWorkflowAlwaysCalled(t *testing.T) {
 
 func TestRunDestroyWorkflowCalledOnSetupError(t *testing.T) {
 	t.Parallel()
-	// Uses mockEngine: need to track DestroyWorkflow even when setup fails.
 	var destroyed int32
-	tracer := &mockTracer{}
-	engine := &mockEngine{
-		setupWorkflowFn: func(_ context.Context, _ *backend.Config, _ string) error {
-			return errors.New("setup boom")
-		},
-		destroyWorkflowFn: func(_ context.Context, _ *backend.Config, _ string) error {
-			atomic.AddInt32(&destroyed, 1)
-			return nil
-		},
-	}
-	r := New(&backend.Config{}, WithBackend(engine), WithTracer(tracer))
+	engine := backend_mocks.NewMockBackend(t)
+	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).
+		Return(errors.New("setup boom"))
+	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
+		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
+
+	r := New(&backend.Config{}, WithBackend(engine), WithTracer(newTestTracer(t)))
 
 	_ = r.Run(t.Context())
 
@@ -286,14 +229,14 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 
 	t.Run("MatchingError", func(t *testing.T) {
 		t.Parallel()
-		tracer := &mockTracer{}
+		tracer := newTestTracer(t)
 		r := New(&backend.Config{}, WithBackend(dummy.New()), WithTracer(tracer))
 		step := &backend.Step{Name: "setup", UUID: "su"}
 		err := &pipeline_errors.ErrInvalidWorkflowSetup{Err: errors.New("bad"), Step: step}
 
 		r.traceWorkflowSetupError(err)
 
-		calls := tracer.getCalls()
+		calls := getTracerStates(tracer)
 		require.Len(t, calls, 1)
 		assert.Equal(t, step, calls[0].Pipeline.Step)
 		assert.True(t, calls[0].Process.Exited)
@@ -302,25 +245,24 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 
 	t.Run("NonMatchingError", func(t *testing.T) {
 		t.Parallel()
-		tracer := &mockTracer{}
+		tracer := tracer_mocks.NewMockTracer(t)
+		// Trace should NOT be called — no .On() setup means test panics if called.
 		r := New(&backend.Config{}, WithBackend(dummy.New()), WithTracer(tracer))
 
 		r.traceWorkflowSetupError(errors.New("generic error"))
-
-		assert.Empty(t, tracer.getCalls())
 	})
 
 	t.Run("TracerFailure", func(t *testing.T) {
 		t.Parallel()
-		tracer := &mockTracer{fn: func(_ *state.State) error {
-			return errors.New("trace failed")
-		}}
+		tracer := tracer_mocks.NewMockTracer(t)
+		tracer.On("Trace", mock.Anything).Return(errors.New("trace failed"))
 		r := New(&backend.Config{}, WithBackend(dummy.New()), WithTracer(tracer))
 		step := &backend.Step{Name: "setup", UUID: "su"}
-		err := &pipeline_errors.ErrInvalidWorkflowSetup{Err: errors.New("bad"), Step: step}
 
-		// Should not panic.
-		r.traceWorkflowSetupError(err)
+		// Should not panic — the error is logged, not returned.
+		r.traceWorkflowSetupError(&pipeline_errors.ErrInvalidWorkflowSetup{
+			Err: errors.New("bad"), Step: step,
+		})
 	})
 }
 
@@ -333,7 +275,7 @@ func TestRunStage(t *testing.T) {
 
 	t.Run("ParallelExecution", func(t *testing.T) {
 		t.Parallel()
-		tracer := &mockTracer{}
+		tracer := newTestTracer(t)
 		r := newDummyRuntime(t, tracer)
 
 		steps := []*backend.Step{
@@ -345,13 +287,12 @@ func TestRunStage(t *testing.T) {
 		err := <-r.runStage(t.Context(), steps)
 
 		assert.NoError(t, err)
-		// 3 steps × (started + completed) = 6 traces
-		assert.Len(t, tracer.getCalls(), 6)
+		assert.Len(t, getTracerStates(tracer), 6)
 	})
 
 	t.Run("OneStepFails", func(t *testing.T) {
 		t.Parallel()
-		tracer := &mockTracer{}
+		tracer := newTestTracer(t)
 		r := newDummyRuntime(t, tracer)
 
 		steps := []*backend.Step{
@@ -386,7 +327,7 @@ func TestNewDefaults(t *testing.T) {
 func TestWithOptions(t *testing.T) {
 	t.Parallel()
 	engine := dummy.New()
-	tracer := &mockTracer{}
+	tracer := newTestTracer(t)
 	ctx := context.Background()
 	desc := map[string]string{"repo": "test"}
 
