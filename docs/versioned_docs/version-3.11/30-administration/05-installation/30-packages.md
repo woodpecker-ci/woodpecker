@@ -96,7 +96,7 @@ WOODPECKER_DATABASE_DATASOURCE=/var/lib/woodpecker/woodpecker.sqlite
 # WOODPECKER_DATABASE_DRIVER=mysql
 # WOODPECKER_DATABASE_DATASOURCE=woodpecker:password@tcp(localhost:3306)/woodpecker?parseTime=true
 
-# Or use PostgreSQL  
+# Or use PostgreSQL
 # WOODPECKER_DATABASE_DRIVER=postgres
 # WOODPECKER_DATABASE_DATASOURCE=postgres://woodpecker:password@localhost:5432/woodpecker?sslmode=disable
 ```
@@ -270,7 +270,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # WebSocket support
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -289,7 +289,7 @@ server {
 
 <VirtualHost *:443>
     ServerName ci.example.com
-    
+
     SSLEngine on
     SSLCertificateFile /path/to/cert.pem
     SSLCertificateKeyFile /path/to/key.pem
@@ -297,7 +297,7 @@ server {
     ProxyPreserveHost On
     ProxyPass / http://localhost:8000/
     ProxyPassReverse / http://localhost:8000/
-    
+
     # WebSocket support
     RewriteEngine on
     RewriteCond %{HTTP:Upgrade} websocket [NC]
