@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-19
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -100,6 +100,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages to v0.35.3 [[#6265](https://github.com/woodpecker-ci/woodpecker/pull/6265)]
 - fix(deps): update module github.com/lib/pq to v1.12.0 [[#6260](https://github.com/woodpecker-ci/woodpecker/pull/6260)]
 - fix(deps): update golang-packages [[#6257](https://github.com/woodpecker-ci/woodpecker/pull/6257)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.37 [[#6253](https://github.com/woodpecker-ci/woodpecker/pull/6253)]
