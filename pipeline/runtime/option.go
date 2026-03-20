@@ -17,20 +17,12 @@ package runtime
 import (
 	"context"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 )
 
 // Option configures a Runtime.
 type Option func(*Runtime)
-
-// WithBackend sets the backend engine used to run steps.
-func WithBackend(backend backend.Backend) Option {
-	return func(r *Runtime) {
-		r.engine = backend
-	}
-}
 
 // WithLogger sets the function used to stream step logs.
 func WithLogger(logger logging.Logger) Option {
