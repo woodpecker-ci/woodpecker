@@ -55,7 +55,7 @@ func (s WebhookEvent) Validate() error {
 type StatusValue string //	@name	StatusValue
 
 const (
-	StatusSkipped  StatusValue = "skipped"  // skipped as per condition of current workflow failed state
+	StatusSkipped  StatusValue = "skipped"  // skipped as per condition of current workflow failed/success state
 	StatusPending  StatusValue = "pending"  // pending to be executed
 	StatusRunning  StatusValue = "running"  // currently running
 	StatusSuccess  StatusValue = "success"  // successfully finished

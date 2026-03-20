@@ -224,7 +224,7 @@
         "cancel": "Cancel",
         "restart": "Restart",
         "canceled": "This step has been canceled.",
-        "skipped": "This step has been skipped as per condition of current workflow state.",
+        "skipped": "This step has been skipped.",
         "cancel_success": "Pipeline canceled",
         "deploy": "Deploy",
         "restart_success": "Pipeline restarted",
