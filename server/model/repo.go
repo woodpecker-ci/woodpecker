@@ -76,7 +76,6 @@ type Repo struct {
 	ConfigExtensionExclusive     bool                 `json:"config_extension_exclusive"      xorm:"DEFAULT FALSE 'config_extension_exclusive'"`
 	RegistryExtensionEndpoint    string               `json:"registry_extension_endpoint"     xorm:"varchar(500) 'registry_extension_endpoint'"`
 	SecretExtensionEndpoint      string               `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
-	SecretExtensionExclusive     bool                 `json:"secret_extension_exclusive"      xorm:"DEFAULT FALSE 'secret_extension_exclusive'"`
 } //	@name	Repo
 
 // TableName return database table name for xorm.
@@ -151,7 +150,6 @@ type RepoPatch struct {
 	ConfigExtensionExclusive     *bool                      `json:"config_extension_exclusive"`
 	RegistryExtensionEndpoint    *string                    `json:"registry_extension_endpoint,omitempty"`
 	SecretExtensionEndpoint      *string                    `json:"secret_extension_endpoint,omitempty"`
-	SecretExtensionExclusive     *bool                      `json:"secret_extension_exclusive"`
 } //	@name	RepoPatch
 
 type ForgeRemoteID string

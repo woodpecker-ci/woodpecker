@@ -1,4 +1,4 @@
-// Copyright 2024 Woodpecker Authors
+// Copyright 2025 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,111 +15,120 @@
 package secret
 
 import (
+	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// combined merges secrets from multiple services.
-// For SecretListPipeline, external (HTTP) secrets override DB secrets by name.
-// CRUD operations are delegated to the primary (first) service only.
 type combined struct {
-	primary  Service
-	services []Service
+	base      Service
+	extension *httpExtension
 }
 
-// NewCombined returns a secret service that merges secrets from multiple sources.
-// The first service is the primary and handles CRUD operations.
-// For SecretListPipeline, secrets from later services override earlier ones by name.
-func NewCombined(services ...Service) Service {
-	return &combined{
-		primary:  services[0],
-		services: services,
-	}
+// NewCombined returns a secret service that combines a base service with an HTTP extension.
+// The extension is called during SecretListPipeline to fetch additional secrets and
+// the extension secrets taking priority.
+func NewCombined(base Service, extension *httpExtension) Service {
+	return &combined{base, extension}
 }
 
 func (c *combined) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error) {
-	secretMap := make(map[string]*model.Secret)
-	var orderedNames []string
-
-	for _, svc := range c.services {
-		secrets, err := svc.SecretListPipeline(repo, pipeline, netrc)
-		if err != nil {
-			return nil, err
-		}
-		for _, s := range secrets {
-			if _, exists := secretMap[s.Name]; !exists {
-				orderedNames = append(orderedNames, s.Name)
-			}
-			// Later services override earlier ones by name
-			secretMap[s.Name] = s
-		}
+	// Get secrets from base service
+	baseSecrets, err := c.base.SecretListPipeline(repo, pipeline, netrc)
+	if err != nil {
+		return nil, err
 	}
 
-	result := make([]*model.Secret, 0, len(secretMap))
-	for _, name := range orderedNames {
-		result = append(result, secretMap[name])
+	// Get secrets from HTTP extension
+	extensionSecrets, err := c.extension.SecretListPipeline(repo, pipeline, netrc)
+	if err != nil {
+		// Log the error but don't fail - use base secrets only
+		log.Warn().Err(err).Msg("failed to fetch secrets from extension")
+		return baseSecrets, nil
 	}
 
-	return result, nil
+	if len(extensionSecrets) == 0 {
+		return baseSecrets, nil
+	}
+
+	// Merge secrets, with extension secrets taking priority (no duplicates by name)
+	exists := make(map[string]struct{}, len(extensionSecrets))
+	for _, s := range extensionSecrets {
+		exists[s.Name] = struct{}{}
+	}
+
+	merged := make([]*model.Secret, 0, len(baseSecrets)+len(extensionSecrets))
+	merged = append(merged, extensionSecrets...)
+
+	for _, s := range baseSecrets {
+		if _, ok := exists[s.Name]; ok {
+			continue
+		}
+		exists[s.Name] = struct{}{}
+		merged = append(merged, s)
+	}
+
+	return merged, nil
 }
 
-// CRUD operations delegate to the primary service.
+// All other methods delegate to the base service.
 
 func (c *combined) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
-	return c.primary.SecretFind(repo, name)
+	return c.base.SecretFind(repo, name)
 }
 
 func (c *combined) SecretList(repo *model.Repo, p *model.ListOptions) ([]*model.Secret, error) {
-	return c.primary.SecretList(repo, p)
+	return c.base.SecretList(repo, p)
 }
 
 func (c *combined) SecretCreate(repo *model.Repo, secret *model.Secret) error {
-	return c.primary.SecretCreate(repo, secret)
+	return c.base.SecretCreate(repo, secret)
 }
 
 func (c *combined) SecretUpdate(repo *model.Repo, secret *model.Secret) error {
-	return c.primary.SecretUpdate(repo, secret)
+	return c.base.SecretUpdate(repo, secret)
 }
 
 func (c *combined) SecretDelete(repo *model.Repo, name string) error {
-	return c.primary.SecretDelete(repo, name)
+	return c.base.SecretDelete(repo, name)
 }
 
 func (c *combined) OrgSecretFind(orgID int64, name string) (*model.Secret, error) {
-	return c.primary.OrgSecretFind(orgID, name)
+	return c.base.OrgSecretFind(orgID, name)
 }
 
 func (c *combined) OrgSecretList(orgID int64, p *model.ListOptions) ([]*model.Secret, error) {
-	return c.primary.OrgSecretList(orgID, p)
+	return c.base.OrgSecretList(orgID, p)
 }
 
 func (c *combined) OrgSecretCreate(orgID int64, secret *model.Secret) error {
-	return c.primary.OrgSecretCreate(orgID, secret)
+	return c.base.OrgSecretCreate(orgID, secret)
 }
 
 func (c *combined) OrgSecretUpdate(orgID int64, secret *model.Secret) error {
-	return c.primary.OrgSecretUpdate(orgID, secret)
+	return c.base.OrgSecretUpdate(orgID, secret)
 }
 
 func (c *combined) OrgSecretDelete(orgID int64, name string) error {
-	return c.primary.OrgSecretDelete(orgID, name)
+	return c.base.OrgSecretDelete(orgID, name)
 }
 
 func (c *combined) GlobalSecretFind(name string) (*model.Secret, error) {
-	return c.primary.GlobalSecretFind(name)
+	return c.base.GlobalSecretFind(name)
 }
 
 func (c *combined) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
-	return c.primary.GlobalSecretList(p)
+	return c.base.GlobalSecretList(p)
 }
 
 func (c *combined) GlobalSecretCreate(secret *model.Secret) error {
-	return c.primary.GlobalSecretCreate(secret)
+	return c.base.GlobalSecretCreate(secret)
 }
 
 func (c *combined) GlobalSecretUpdate(secret *model.Secret) error {
-	return c.primary.GlobalSecretUpdate(secret)
+	return c.base.GlobalSecretUpdate(secret)
 }
 
 func (c *combined) GlobalSecretDelete(name string) error {
-	return c.primary.GlobalSecretDelete(name)
+	return c.base.GlobalSecretDelete(name)
 }
