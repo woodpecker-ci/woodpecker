@@ -325,7 +325,8 @@
             "view": "Посмотреть конвейер",
             "cancel_info": {
                 "canceled_by_user": "Отменено {user}",
-                "superseded_by": "Заменено на #{pipelineId}"
+                "superseded_by": "Заменено на #{pipelineId}",
+                "canceled_by_step": "Отменено из-за шага {step}"
             },
             "load_more": "Загрузить ещё"
         },

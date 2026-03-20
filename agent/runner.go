@@ -38,11 +38,11 @@ type Runner struct {
 	filter          rpc.Filter
 	hostname        string
 	counter         *State
-	backend         *backend.Backend
+	backend         backend.Backend
 	recoveryEnabled bool
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend, recoveryEnabled bool) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend backend.Backend, recoveryEnabled bool) Runner {
 	return Runner{
 		client:          workEngine,
 		filter:          f,
@@ -161,11 +161,11 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	// Run pipeline
 	err = pipeline_runtime.New(
 		workflow.Config,
+		r.backend,
 		pipeline_runtime.WithContext(workflowCtx),
 		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
 		pipeline_runtime.WithLogger(r.createLogger(logger, &uploads, workflow)),
 		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
-		pipeline_runtime.WithBackend(*r.backend),
 		pipeline_runtime.WithRecoveryManager(recoveryManager),
 		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,

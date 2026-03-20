@@ -355,16 +355,22 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
 	}
 
+	var queueErr error
 	if !state.Canceled {
-		var queueErr error
 		if workflow.Failing() {
 			queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
 		} else {
 			queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
 		}
-		if queueErr != nil {
-			logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
+	} else {
+		if workflow.Started > 0 {
+			queueErr = s.queue.Done(c, strWorkflowID, model.StatusKilled)
+		} else {
+			queueErr = s.queue.Done(c, strWorkflowID, model.StatusCanceled)
 		}
+	}
+	if queueErr != nil {
+		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
 	}
 
 	currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline)
