@@ -358,7 +358,11 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 			queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
 		}
 	} else {
-		queueErr = s.queue.Done(c, strWorkflowID, model.StatusCanceled)
+		if workflow.Started > 0 {
+			queueErr = s.queue.Done(c, strWorkflowID, model.StatusKilled)
+		} else {
+			queueErr = s.queue.Done(c, strWorkflowID, model.StatusCanceled)
+		}
 	}
 	if queueErr != nil {
 		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
