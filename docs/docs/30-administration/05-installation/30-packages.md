@@ -530,7 +530,7 @@ sudo systemctl reload httpd
    ```shell
    # For MySQL
    mysql -u woodpecker -p -e "SELECT 1;" woodpecker
-   
+
    # For PostgreSQL
    sudo -u woodpecker psql -h localhost -d woodpecker -c "SELECT 1;"
    ```
