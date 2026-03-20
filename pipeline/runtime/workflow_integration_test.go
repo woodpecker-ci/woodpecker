@@ -17,11 +17,13 @@
 package runtime
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
@@ -29,6 +31,7 @@ import (
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
+	tracer_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks"
 )
 
 //
@@ -57,8 +60,8 @@ func withExitCode(code int) func(*backend.Step) {
 	}
 }
 
-func withFailure(mode string) func(*backend.Step) {
-	return func(s *backend.Step) { s.Failure = mode }
+func withIgnoreFailure() func(*backend.Step) {
+	return func(s *backend.Step) { s.Failure = metadata.FailureIgnore }
 }
 
 func withOnFailure() func(*backend.Step) {
@@ -342,7 +345,7 @@ func TestWorkflowFailureIgnore(t *testing.T) {
 		&backend.Config{
 			Stages: []*backend.Stage{
 				{Steps: []*backend.Step{
-					cmdStep("lint", withExitCode(1), withFailure(metadata.FailureIgnore)),
+					cmdStep("lint", withExitCode(1), withIgnoreFailure()),
 				}},
 				{Steps: []*backend.Step{cmdStep("build")}},
 			},
@@ -370,7 +373,7 @@ func TestWorkflowFailureIgnoreDoesNotSetPipelineError(t *testing.T) {
 		&backend.Config{
 			Stages: []*backend.Stage{
 				{Steps: []*backend.Step{
-					cmdStep("flaky-test", withExitCode(1), withFailure(metadata.FailureIgnore)),
+					cmdStep("flaky-test", withExitCode(1), withIgnoreFailure()),
 				}},
 				{Steps: []*backend.Step{cmdStep("deploy")}},
 			},
@@ -629,7 +632,7 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 		&backend.Config{
 			Stages: []*backend.Stage{
 				{Steps: []*backend.Step{
-					cmdStep("lint", withExitCode(1), withFailure(metadata.FailureIgnore)),
+					cmdStep("lint", withExitCode(1), withIgnoreFailure()),
 				}},
 				{Steps: []*backend.Step{cmdStep("error-notify", withOnFailure())}},
 				{Steps: []*backend.Step{cmdStep("build")}},
@@ -668,4 +671,520 @@ func TestWorkflowEmptyStages(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Empty(t, getTracerStates(tracer))
+}
+
+//
+// outcome: failure
+//
+
+func TestPluginStepFailure(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("publish", withPlugin(), withExitCode(1))}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	var exitErr *pipeline_errors.ExitError
+	require.True(t, errors.As(err, &exitErr))
+	assert.Equal(t, 1, exitErr.Code)
+
+	last := findLastTraceByName(getTracerStates(tracer), "publish")
+	require.NotNil(t, last)
+	assert.True(t, last.Process.Exited)
+	assert.Equal(t, 1, last.Process.ExitCode)
+}
+
+func TestDetachedStepFailure(t *testing.T) {
+	t.Parallel()
+	// A detached step that exits non-zero; since it is detached the runtime
+	// only waits for setup, so the pipeline itself should still succeed.
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{
+					cmdStep("background", withDetached(), withExitCode(1)),
+					cmdStep("build"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	// Detached step errors are not propagated to the pipeline result.
+	assert.NoError(t, r.Run(t.Context()))
+}
+
+func TestServiceStepFailure(t *testing.T) {
+	t.Parallel()
+	// A service that exits non-zero; same semantics as detached — the pipeline
+	// should still complete because services are fire-and-forget from the
+	// runtime's perspective.
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{
+					cmdStep("db", withService(), withExitCode(1)),
+					cmdStep("test"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	assert.NoError(t, r.Run(t.Context()))
+}
+
+//
+// outcome: start failure
+//
+
+func TestPluginStepStartFailure(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("publish", withPlugin(), withStartFail())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+}
+
+func TestDetachedStepStartFailure(t *testing.T) {
+	t.Parallel()
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{
+					cmdStep("background", withDetached(), withStartFail()),
+					cmdStep("build"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	// A detached step that fails to start should surface the error, since the
+	// runtime waits for setup to complete before continuing.
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+}
+
+func TestServiceStepStartFailure(t *testing.T) {
+	t.Parallel()
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{
+					cmdStep("db", withService(), withStartFail()),
+					cmdStep("test"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+}
+
+//
+// Run condition: OnFailure for plugin / detached / service.
+//
+
+func TestPluginOnFailureStepRuns(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend.Step{cmdStep("notify", withPlugin(), withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "notify"),
+		"plugin OnFailure step should have started")
+
+	last := findLastTraceByName(getTracerStates(tracer), "notify")
+	require.NotNil(t, last)
+	assert.True(t, last.Process.Exited)
+	assert.Equal(t, 0, last.Process.ExitCode)
+}
+
+func TestPluginOnFailureStepSkippedOnSuccess(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build")}},
+				{Steps: []*backend.Step{cmdStep("notify", withPlugin(), withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err)
+	assert.Nil(t, findStartedTrace(getTracerStates(tracer), "notify"),
+		"plugin OnFailure step should not run when pipeline succeeds")
+}
+
+func TestDetachedOnFailureStepRuns(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend.Step{cmdStep("cleanup", withDetached(), withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "cleanup"),
+		"detached OnFailure step should have started")
+}
+
+func TestDetachedOnFailureStepSkippedOnSuccess(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build")}},
+				{Steps: []*backend.Step{cmdStep("cleanup", withDetached(), withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err)
+	assert.Nil(t, findStartedTrace(getTracerStates(tracer), "cleanup"),
+		"detached OnFailure step should not run when pipeline succeeds")
+}
+
+//
+// Run condition: OnSuccess=true + OnFailure=true (always-run).
+//
+
+func withAlwaysRun() func(*backend.Step) {
+	return func(s *backend.Step) { s.OnSuccess = true; s.OnFailure = true }
+}
+
+func TestAlwaysRunStepRunsOnSuccess(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build")}},
+				{Steps: []*backend.Step{cmdStep("report", withAlwaysRun())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err)
+	last := findLastTraceByName(getTracerStates(tracer), "report")
+	require.NotNil(t, last, "always-run step should be traced")
+	assert.True(t, last.Process.Exited)
+	assert.Equal(t, 0, last.Process.ExitCode)
+}
+
+func TestAlwaysRunStepRunsOnFailure(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend.Step{cmdStep("report", withAlwaysRun())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "report"),
+		"always-run step should start even when pipeline is failing")
+
+	last := findLastTraceByName(getTracerStates(tracer), "report")
+	require.NotNil(t, last)
+	assert.True(t, last.Process.Exited)
+	assert.Equal(t, 0, last.Process.ExitCode)
+}
+
+func TestAlwaysRunPluginRunsOnFailure(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend.Step{cmdStep("report", withPlugin(), withAlwaysRun())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "report"),
+		"always-run plugin step should start even when pipeline is failing")
+}
+
+//
+// Failure handling: failure=ignore for plugin.
+//
+
+func TestPluginFailureIgnore(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{
+					cmdStep("lint", withPlugin(), withExitCode(1), withIgnoreFailure()),
+				}},
+				{Steps: []*backend.Step{cmdStep("build")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err, "pipeline should succeed when failing plugin has failure=ignore")
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "build"),
+		"build step should run after ignored plugin failure")
+}
+
+func TestDetachedFailureIgnore(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{
+					cmdStep("watcher", withDetached(), withExitCode(1), withIgnoreFailure()),
+					cmdStep("build"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err)
+}
+
+//
+// Cancellation.
+//
+
+func TestWorkflowContextCancelDuringExecution(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var stageCount int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s.Process.Exited {
+			stageCount++
+			if stageCount >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build")}},
+				{Steps: []*backend.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+}
+
+func TestWorkflowContextCancelWithPluginStep(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var stageCount int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s.Process.Exited {
+			stageCount++
+			if stageCount >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{cmdStep("build")}},
+				{Steps: []*backend.Step{cmdStep("publish", withPlugin())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+}
+
+func TestWorkflowContextCancelWithDetachedStep(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var stageCount int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s.Process.Exited {
+			stageCount++
+			if stageCount >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{
+					cmdStep("background", withDetached()),
+					cmdStep("build"),
+				}},
+				{Steps: []*backend.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+}
+
+func TestWorkflowContextCancelWithServiceStep(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var stageCount int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s.Process.Exited {
+			stageCount++
+			if stageCount >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend.Config{
+			Stages: []*backend.Stage{
+				{Steps: []*backend.Step{
+					cmdStep("db", withService()),
+					cmdStep("build"),
+				}},
+				{Steps: []*backend.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
 }
