@@ -15,16 +15,23 @@
 package datastore
 
 import (
+	"errors"
+	"fmt"
+
 	"xorm.io/builder"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) CronCreate(cron *model.Cron) error {
 	if err := cron.Validate(); err != nil {
 		return err
 	}
-	_, err := s.engine.Insert(cron)
+	err := wrapInsert(s.engine.Insert(cron))
+	if errors.Is(err, types.ErrInsertDuplicateDetected) {
+		return fmt.Errorf("create cron failed, duplicate detected: %w", err)
+	}
 	return err
 }
 

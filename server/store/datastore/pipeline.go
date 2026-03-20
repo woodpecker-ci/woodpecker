@@ -168,7 +168,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 
 		pipeline.Created = time.Now().UTC().Unix()
 		// only Insert set auto created ID back to object
-		if _, err := sess.Insert(pipeline); err != nil {
+		if err := wrapInsert(sess.Insert(pipeline)); err != nil {
 			if isUniqueConstraintError(err) {
 				return struct{}{}, err
 			}
@@ -178,7 +178,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		for i := range stepList {
 			stepList[i].PipelineID = pipeline.ID
 			// only Insert set auto created ID back to object
-			if _, err := sess.Insert(stepList[i]); err != nil {
+			if err := wrapInsert(sess.Insert(stepList[i])); err != nil {
 				if isUniqueConstraintError(err) {
 					return struct{}{}, err
 				}

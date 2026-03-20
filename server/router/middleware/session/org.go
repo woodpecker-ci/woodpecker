@@ -56,7 +56,7 @@ func SetOrg() gin.HandlerFunc {
 		}
 
 		org, err := store.FromContext(c).OrgGet(orgID)
-		if err != nil && !errors.Is(err, types.RecordNotExist) {
+		if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
