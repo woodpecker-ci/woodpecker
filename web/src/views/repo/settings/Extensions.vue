@@ -24,7 +24,7 @@
           :placeholder="$t('extension_endpoint_placeholder')"
         />
       </InputField>
-      
+
       <InputField :label="$t('secret_extension_endpoint')" docs-url="docs/usage/extensions/secret-extension">
         <TextField v-model="extensions.secret_extension_endpoint" :placeholder="$t('extension_endpoint_placeholder')" />
       </InputField>
