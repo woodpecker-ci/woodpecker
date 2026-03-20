@@ -21,6 +21,7 @@
 
 ### 📈 Enhancement
 
+- Creating new engine runtime now requires backend as argument [[#6268](https://github.com/woodpecker-ci/woodpecker/pull/6268)]
 - Compare admins case-insensitively [[#6261](https://github.com/woodpecker-ci/woodpecker/pull/6261)]
 - Allow to cancel on failure [[#6158](https://github.com/woodpecker-ci/woodpecker/pull/6158)]
 - Refactor so storage detects if Insert fails because of unique constraint [[#6259](https://github.com/woodpecker-ci/woodpecker/pull/6259)]
