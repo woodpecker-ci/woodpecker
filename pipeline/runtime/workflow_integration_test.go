@@ -552,7 +552,7 @@ func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
-}
+}.
 */
 
 func TestWorkflowSetupFailure(t *testing.T) {
@@ -606,7 +606,7 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	deployTrace := findLastTraceByName(traces, "notify")
 	require.NotNil(t, deployTrace)
 	assert.True(t, deployTrace.Process.Exited, "notify should exited")
-	assert.EqualValues(t, 0, deployTrace.Process.ExitCode, "notify should be successfull")
+	assert.EqualValues(t, 0, deployTrace.Process.ExitCode, "notify should be successful")
 
 	lastBuild := findLastTraceByName(traces, "lint")
 	require.NotNil(t, lastBuild)
