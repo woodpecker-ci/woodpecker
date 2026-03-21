@@ -117,7 +117,7 @@ importers:
         version: 9.2.1
       isomorphic-dompurify:
         specifier: ^3.0.0
-        version: 3.5.1
+        version: 3.6.0
       marked:
         specifier: ^17.0.1
         version: 17.0.5
@@ -3873,8 +3873,8 @@ packages:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
 
-  isomorphic-dompurify@3.5.1:
-    resolution: {integrity: sha512-LlUCZikq/W6CmSq1UWcFLgS4nhkNBwimmVyNQtdByDffT0yVjKYef9lincZ7/ohBlknPkX1C97BBmjeNuFFR4Q==}
+  isomorphic-dompurify@3.6.0:
+    resolution: {integrity: sha512-0dF93ZF/7SgzdnCjXTsqSteJmhlR5PNhq/mJXRMQtnFdaGdG94ul6mYF80hSKfh6VfmLsaGKBd0Eye4eUHyeWA==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
 
   jest-util@29.7.0:
@@ -11013,7 +11013,7 @@ snapshots:
 
   isobject@3.0.1: {}
 
-  isomorphic-dompurify@3.5.1:
+  isomorphic-dompurify@3.6.0:
     dependencies:
       dompurify: 3.3.3
       jsdom: 29.0.1
