@@ -72,6 +72,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency yaml to v2.8.3 [[#6287](https://github.com/woodpecker-ci/woodpecker/pull/6287)]
 - Add agentscan to plugin docs [[#6285](https://github.com/woodpecker-ci/woodpecker/pull/6285)]
 - Adding opengrep plugin [[#6282](https://github.com/woodpecker-ci/woodpecker/pull/6282)]
 - chore(deps): update docs npm deps non-major [[#6281](https://github.com/woodpecker-ci/woodpecker/pull/6281)]
