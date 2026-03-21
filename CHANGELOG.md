@@ -102,6 +102,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#6279](https://github.com/woodpecker-ci/woodpecker/pull/6279)]
 - fix(deps): update module github.com/zalando/go-keyring to v0.2.7 [[#6280](https://github.com/woodpecker-ci/woodpecker/pull/6280)]
 - fix(deps): update golang-packages to v0.35.3 [[#6265](https://github.com/woodpecker-ci/woodpecker/pull/6265)]
 - fix(deps): update module github.com/lib/pq to v1.12.0 [[#6260](https://github.com/woodpecker-ci/woodpecker/pull/6260)]
