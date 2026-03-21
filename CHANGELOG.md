@@ -72,6 +72,7 @@
 
 ### 📚 Documentation
 
+- Add agentscan to plugin docs [[#6285](https://github.com/woodpecker-ci/woodpecker/pull/6285)]
 - Adding opengrep plugin [[#6282](https://github.com/woodpecker-ci/woodpecker/pull/6282)]
 - chore(deps): update docs npm deps non-major [[#6281](https://github.com/woodpecker-ci/woodpecker/pull/6281)]
 - Sorted the glossary items [[#6255](https://github.com/woodpecker-ci/woodpecker/pull/6255)]
@@ -202,6 +203,7 @@
 
 ### Misc
 
+- Add agentscan plugin [[#6284](https://github.com/woodpecker-ci/woodpecker/pull/6284)]
 - Increase timeout for migration tests [[#6206](https://github.com/woodpecker-ci/woodpecker/pull/6206)]
 - Ignore fixtures for coverage [[#6197](https://github.com/woodpecker-ci/woodpecker/pull/6197)]
 - Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
