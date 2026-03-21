@@ -97,7 +97,7 @@ const updateVisibleItems = () => {
     const gapWidth = 16; // This need to match the gap between the tabs (gap-4)
     let totalWidth = 0;
 
-     
+
     const items = Array.from(tabsRef.value!.children);
 
     for (let i = 0; i < items.length; i++) {
