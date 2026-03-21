@@ -71,6 +71,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#6281](https://github.com/woodpecker-ci/woodpecker/pull/6281)]
 - Sorted the glossary items [[#6255](https://github.com/woodpecker-ci/woodpecker/pull/6255)]
 - chore(deps): update docs npm deps non-major [[#6240](https://github.com/woodpecker-ci/woodpecker/pull/6240)]
 - plugin: ascii junit report: renamed gh username [[#6232](https://github.com/woodpecker-ci/woodpecker/pull/6232)]
