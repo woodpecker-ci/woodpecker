@@ -72,6 +72,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency isomorphic-dompurify to v3.6.0 [[#6288](https://github.com/woodpecker-ci/woodpecker/pull/6288)]
 - chore(deps): update dependency yaml to v2.8.3 [[#6287](https://github.com/woodpecker-ci/woodpecker/pull/6287)]
 - Add agentscan to plugin docs [[#6285](https://github.com/woodpecker-ci/woodpecker/pull/6285)]
 - Adding opengrep plugin [[#6282](https://github.com/woodpecker-ci/woodpecker/pull/6282)]
