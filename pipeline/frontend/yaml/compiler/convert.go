@@ -116,6 +116,12 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 
 	secretMapping := map[string]string{}
 
+	if stepType != backend_types.StepTypeClone && stepType != backend_types.StepTypePlugin {
+		if err := settings.ParamsToEnv(workflow.Environment, environment, "", false, getSecretValue, secretMapping); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue, secretMapping); err != nil {
 		return nil, err
 	}

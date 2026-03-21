@@ -29,6 +29,26 @@ Please note that the environment section is not able to expand environment varia
        - go test
 ```
 
+You can also set the environment variables at a workflow level. In this case, they will get injected into all steps and services except clone and plugin steps.
+
+```diff
++environment:
++  CGO: 0
++  GOOS: linux
++  GOARCH: amd64
+
+ steps:
+   - name: build
+     image: golang
+-    environment:
+-      CGO: 0
+-      GOOS: linux
+-      GOARCH: amd64
+     commands:
+       - go build
+       - go test
+```
+
 :::warning
 `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
 :::

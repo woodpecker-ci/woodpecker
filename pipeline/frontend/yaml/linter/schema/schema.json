@@ -45,6 +45,9 @@
         "type": "string"
       }
     },
+    "environment": {
+      "$ref": "#/definitions/environment"
+    },
     "runs_on": {
       "type": "array",
       "description": "Deprecated: use `when.status` instead. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
@@ -313,7 +316,7 @@
           "$ref": "#/definitions/step_commands"
         },
         "environment": {
-          "$ref": "#/definitions/step_environment"
+          "$ref": "#/definitions/environment"
         },
         "directory": {
           "$ref": "#/definitions/step_directory"
@@ -623,7 +626,7 @@
         }
       ]
     },
-    "step_environment": {
+    "environment": {
       "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.org/docs/usage/environment",
       "type": "object",
       "additionalProperties": {
@@ -883,7 +886,7 @@
           "$ref": "#/definitions/step_commands"
         },
         "environment": {
-          "$ref": "#/definitions/step_environment"
+          "$ref": "#/definitions/environment"
         },
         "directory": {
           "$ref": "#/definitions/step_directory"
