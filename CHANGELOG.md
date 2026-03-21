@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @mehrdadbn9, @myers, @myselfghost, @paulovitorbal, @qwerty287, @savv, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @TumbleOwlee, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @myers, @myselfghost, @paulovitorbal, @qwerty287, @savv, @stardothosting
 
 ### 🔒 Security
 
@@ -71,6 +71,7 @@
 
 ### 📚 Documentation
 
+- Adding opengrep plugin [[#6282](https://github.com/woodpecker-ci/woodpecker/pull/6282)]
 - chore(deps): update docs npm deps non-major [[#6281](https://github.com/woodpecker-ci/woodpecker/pull/6281)]
 - Sorted the glossary items [[#6255](https://github.com/woodpecker-ci/woodpecker/pull/6255)]
 - chore(deps): update docs npm deps non-major [[#6240](https://github.com/woodpecker-ci/woodpecker/pull/6240)]
