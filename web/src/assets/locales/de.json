@@ -256,7 +256,8 @@
                 "log_download": "Herunterladen",
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",
-                "log_delete": "Löschen"
+                "log_delete": "Löschen",
+                "skipped": "Dieser Schritt wurde übersprungen."
             },
             "config": "Konfiguration",
             "errors": "Fehler",
@@ -297,13 +298,14 @@
                 "declined": "abgelehnt",
                 "error": "Fehler",
                 "failure": "fehlgeschlagen",
-                "killed": "abgebrochen",
+                "killed": "getötet",
                 "pending": "ausstehend",
                 "running": "laufend",
                 "skipped": "übersprungen",
                 "started": "gestartet",
                 "status": "Status: {status}",
-                "success": "erfolgreich"
+                "success": "erfolgreich",
+                "canceled": "abgebrochen"
             },
             "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
             "tasks": "Vorgänge",
