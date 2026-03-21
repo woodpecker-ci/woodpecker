@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Prevent registering as arbitrary agents with system token [[#6283](https://github.com/woodpecker-ci/woodpecker/pull/6283)]
 - Update `fast-xml-parser` [[#6258](https://github.com/woodpecker-ci/woodpecker/pull/6258)]
 - Update `dompurify` and `svgo` [[#6198](https://github.com/woodpecker-ci/woodpecker/pull/6198)]
 - Update edwards25519 [[#6143](https://github.com/woodpecker-ci/woodpecker/pull/6143)]
