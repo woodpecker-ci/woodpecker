@@ -26,7 +26,7 @@ steps:
       version: 3.6.2
 
   - name: agentscan
-    image: docker.io/woodpeckerci/plugin-agentscan:next
+    image: docker.io/woodpeckerci/plugin-agentscan:latest
     pull: true
     depends_on: []
     settings:
