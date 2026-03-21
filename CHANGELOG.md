@@ -22,6 +22,7 @@
 
 ### 📈 Enhancement
 
+- Only add compatibility environment variables for drone-ci to plugins [[#6271](https://github.com/woodpecker-ci/woodpecker/pull/6271)]
 - Creating new engine runtime now requires backend as argument [[#6268](https://github.com/woodpecker-ci/woodpecker/pull/6268)]
 - Compare admins case-insensitively [[#6261](https://github.com/woodpecker-ci/woodpecker/pull/6261)]
 - Allow to cancel on failure [[#6158](https://github.com/woodpecker-ci/woodpecker/pull/6158)]
