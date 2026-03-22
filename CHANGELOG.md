@@ -110,6 +110,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency golangci/golangci-lint to v2.11.4 [[#6301](https://github.com/woodpecker-ci/woodpecker/pull/6301)]
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.11.4 [[#6302](https://github.com/woodpecker-ci/woodpecker/pull/6302)]
 - chore(deps): update dependency simple-icons to v16.13.0 [[#6290](https://github.com/woodpecker-ci/woodpecker/pull/6290)]
 - chore(deps): update web npm deps non-major [[#6279](https://github.com/woodpecker-ci/woodpecker/pull/6279)]
 - fix(deps): update module github.com/zalando/go-keyring to v0.2.7 [[#6280](https://github.com/woodpecker-ci/woodpecker/pull/6280)]
