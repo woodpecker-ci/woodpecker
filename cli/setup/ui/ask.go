@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/charmbracelet/huh"
+	"charm.land/huh/v2"
 )
 
 func Ask(prompt, placeholder string, required bool) (string, error) {
