@@ -49,7 +49,7 @@
         "value": "Variable value"
       },
       "show_pipelines": "Show pipelines",
-      "no_manual_workflows": "There were no manually executable workflows, or the filter exclude all of them."
+      "no_manual_workflows": "No workflows matched the manual trigger. Make sure at least one workflow has `when: - event: manual` in its configuration."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
