@@ -100,6 +100,11 @@ var flags = append([]cli.Flag{
 		Name:    "custom-js-file",
 		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_ASYNC_REPOSITORY_UPDATE"),
+		Name:    "async-repository-update",
+		Usage:   "if true fetch repository permissions asynchronous, impacts performance if there are many repositories with possible tradeoff in consistency",
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_ADDR"),
 		Name:    "grpc-addr",
