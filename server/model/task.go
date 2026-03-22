@@ -53,6 +53,7 @@ func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 		t.Labels = make(map[string]string)
 	}
 	t.Labels[pipeline.LabelFilterRepo] = r.FullName
+	t.Labels[pipeline.LabelRepoID] = fmt.Sprintf("%d", r.ID)
 	t.Labels[pipeline.LabelFilterOrg] = fmt.Sprintf("%d", r.OrgID)
 	return nil
 }
