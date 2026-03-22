@@ -5292,6 +5292,9 @@ const docTemplate = `{
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -5394,6 +5397,9 @@ const docTemplate = `{
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -5445,6 +5451,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "require_approval": {
+                    "type": "string"
+                },
+                "secret_extension_endpoint": {
                     "type": "string"
                 },
                 "timeout": {

@@ -871,8 +871,8 @@ func (_c *MockService_SecretList_Call) RunAndReturn(run func(repo *model.Repo, l
 }
 
 // SecretListPipeline provides a mock function for the type MockService
-func (_mock *MockService) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Secret, error) {
-	ret := _mock.Called(repo, pipeline)
+func (_mock *MockService) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error) {
+	ret := _mock.Called(repo, pipeline, netrc)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretListPipeline")
@@ -880,18 +880,18 @@ func (_mock *MockService) SecretListPipeline(repo *model.Repo, pipeline *model.P
 
 	var r0 []*model.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) ([]*model.Secret, error)); ok {
-		return returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline, *model.Netrc) ([]*model.Secret, error)); ok {
+		return returnFunc(repo, pipeline, netrc)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) []*model.Secret); ok {
-		r0 = returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline, *model.Netrc) []*model.Secret); ok {
+		r0 = returnFunc(repo, pipeline, netrc)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.Pipeline) error); ok {
-		r1 = returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.Pipeline, *model.Netrc) error); ok {
+		r1 = returnFunc(repo, pipeline, netrc)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -906,11 +906,12 @@ type MockService_SecretListPipeline_Call struct {
 // SecretListPipeline is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - pipeline *model.Pipeline
-func (_e *MockService_Expecter) SecretListPipeline(repo interface{}, pipeline interface{}) *MockService_SecretListPipeline_Call {
-	return &MockService_SecretListPipeline_Call{Call: _e.mock.On("SecretListPipeline", repo, pipeline)}
+//   - netrc *model.Netrc
+func (_e *MockService_Expecter) SecretListPipeline(repo interface{}, pipeline interface{}, netrc interface{}) *MockService_SecretListPipeline_Call {
+	return &MockService_SecretListPipeline_Call{Call: _e.mock.On("SecretListPipeline", repo, pipeline, netrc)}
 }
 
-func (_c *MockService_SecretListPipeline_Call) Run(run func(repo *model.Repo, pipeline *model.Pipeline)) *MockService_SecretListPipeline_Call {
+func (_c *MockService_SecretListPipeline_Call) Run(run func(repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc)) *MockService_SecretListPipeline_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *model.Repo
 		if args[0] != nil {
@@ -920,9 +921,14 @@ func (_c *MockService_SecretListPipeline_Call) Run(run func(repo *model.Repo, pi
 		if args[1] != nil {
 			arg1 = args[1].(*model.Pipeline)
 		}
+		var arg2 *model.Netrc
+		if args[2] != nil {
+			arg2 = args[2].(*model.Netrc)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -933,7 +939,7 @@ func (_c *MockService_SecretListPipeline_Call) Return(secrets []*model.Secret, e
 	return _c
 }
 
-func (_c *MockService_SecretListPipeline_Call) RunAndReturn(run func(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Secret, error)) *MockService_SecretListPipeline_Call {
+func (_c *MockService_SecretListPipeline_Call) RunAndReturn(run func(repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error)) *MockService_SecretListPipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }

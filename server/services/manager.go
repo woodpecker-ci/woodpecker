@@ -87,7 +87,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
-		secret:              setupSecretService(store),
+		secret:              setupSecretService(store, c.String("secret-service-endpoint"), client),
 		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-service-endpoint"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
@@ -101,7 +101,11 @@ func (m *manager) SignaturePublicKey() crypto.PublicKey {
 	return m.signaturePublicKey
 }
 
-func (m *manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
+func (m *manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
+	if repo.SecretExtensionEndpoint != "" {
+		return secret.NewCombined(m.secret, secret.NewHTTP(strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.client))
+	}
+
 	return m.SecretService()
 }
 

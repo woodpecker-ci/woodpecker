@@ -25,6 +25,9 @@
         />
       </InputField>
 
+      <InputField :label="$t('secret_extension_endpoint')" docs-url="docs/usage/extensions/secret-extension">
+        <TextField v-model="extensions.secret_extension_endpoint" :placeholder="$t('extension_endpoint_placeholder')" />
+      </InputField>
       <Button :is-loading="isSaving" color="green" type="submit" :text="$t('save')" />
     </form>
   </Settings>
@@ -65,6 +68,7 @@ const extensions = ref<ExtensionSettings>({
   config_extension_endpoint: repo.value.config_extension_endpoint,
   config_extension_exclusive: repo.value.config_extension_exclusive,
   registry_extension_endpoint: repo.value.registry_extension_endpoint,
+  secret_extension_endpoint: repo.value.secret_extension_endpoint,
 });
 
 const { doSubmit: saveExtensions, isLoading: isSaving } = useAsyncAction(async () => {
