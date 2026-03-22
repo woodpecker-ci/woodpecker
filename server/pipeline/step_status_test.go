@@ -216,6 +216,36 @@ func TestUpdateStepStatus(t *testing.T) {
 			assert.Equal(t, 1, step.ExitCode)
 			assert.Equal(t, "canceled", step.Error)
 		})
+	})
+
+	t.Run("Skipped", func(t *testing.T) {
+		t.Parallel()
+
+		// This mirrors exactly what the agent sends when executor.go detects
+		// OnSuccess=false or OnFailure=false — only Skipped is set, everything
+		// else is zero/false (no Started, no Finished, not Exited).
+		t.Run("PendingToSkipped_AgentPayload", func(t *testing.T) {
+			t.Parallel()
+			step := &model.Step{State: model.StatusPending}
+			// Exact payload from: traceStep(&backend.State{Skipped: true}, nil, step)
+			// Started=0, Finished=0, Exited=false, Skipped=true
+			state := rpc.StepState{
+				Skipped:  true,
+				Exited:   false,
+				Finished: 0,
+				Started:  0,
+			}
+
+			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
+
+			assert.NoError(t, err)
+			// Must be Skipped, NOT Running (the bug: Finished==0 triggers StatusRunning first)
+			assert.Equal(t, model.StatusSkipped, step.State)
+			// Started must NOT be set — skipped steps never ran
+			assert.Equal(t, int64(0), step.Started)
+			// Finished must NOT be set — skipped steps never ran
+			assert.Equal(t, int64(0), step.Finished)
+		})
 
 		t.Run("PendingToSkipped", func(t *testing.T) {
 			t.Parallel()
