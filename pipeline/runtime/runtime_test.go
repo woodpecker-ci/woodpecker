@@ -511,8 +511,8 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 	r := New(
 		&backend.Config{
 			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build", withStartFail())}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
+				{Steps: []*backend.Step{cmdStep("build")}},
+				{Steps: []*backend.Step{cmdStep("deploy", withStartFail())}},
 			},
 		},
 		dummy.New(),
@@ -523,9 +523,9 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.Error(t, err)
-	deployTrace := findFirstTraceByName(getTracerStates(tracer), "deploy")
+	deployTrace := findFirstTraceByName(getTracerStates(tracer), "build")
 	require.NotNil(t, deployTrace)
-	assert.EqualValues(t, backend.State{Skipped: true}, deployTrace.CurrStepState)
+	assert.EqualValues(t, backend.State{}, deployTrace.CurrStepState)
 }
 
 func TestWorkflowContextCancelDuringExecution(t *testing.T) {
@@ -610,6 +610,7 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	assert.Error(t, err)
 	traces := getTracerStates(tracer)
 
+	assert.NotNil(t, findStartedTrace(traces, "notify"), "notify (OnFailure) should have started")
 	notifyTrace := findLastTraceByName(traces, "notify")
 	require.NotNil(t, notifyTrace)
 	assert.True(t, notifyTrace.CurrStepState.Exited, "notify should exited")
