@@ -40,6 +40,18 @@ func sliceToCountMap[E comparable](list []E) map[E]int {
 	return m
 }
 
+func UniqSlice[E comparable](list []E) []E {
+	m := make(map[E]struct{})
+	for i := range list {
+		m[list[i]] = struct{}{}
+	}
+	n := make([]E, 0, len(m))
+	for k := range m {
+		n = append(n, k)
+	}
+	return n
+}
+
 // SliceToBoolMap is a helper function to convert a string slice to a map.
 func SliceToBoolMap(s []string) map[string]bool {
 	v := map[string]bool{}
