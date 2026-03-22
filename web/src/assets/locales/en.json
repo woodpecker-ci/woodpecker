@@ -420,7 +420,8 @@
           "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, the user will regain them when they sign in next time."
         },
         "delete_user": "Delete user",
-        "edit_user": "Edit user"
+        "edit_user": "Edit user",
+        "forge": "Forge"
       },
       "orgs": {
         "orgs": "Organizations",
