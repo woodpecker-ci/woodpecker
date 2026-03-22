@@ -209,8 +209,10 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				return err
 			}
 
-			// add compatibility for drone-ci plugins
-			metadata.SetDroneEnviron(step.Environment)
+			// Add compatibility environment variables for drone-ci plugins.
+			if step.Type == backend.StepTypePlugin {
+				metadata.SetDroneEnviron(step.Environment)
+			}
 
 			logger.Debug().
 				Str("step", step.Name).
