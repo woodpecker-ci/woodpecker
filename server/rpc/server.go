@@ -109,6 +109,7 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
 		Canceled: req.GetState().GetCanceled(),
+		Skipped:  req.GetState().GetSkipped(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Update(c, req.GetId(), state)
