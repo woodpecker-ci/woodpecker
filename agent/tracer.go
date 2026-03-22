@@ -48,7 +48,8 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 			Exited:   state.CurrStepState.Exited,
 			ExitCode: state.CurrStepState.ExitCode,
 			Started:  state.CurrStepState.Started,
-			Canceled: errors.Is(state.CurrStepState.Error, pipeline_errors.ErrCancel) || state.CurrStepState.Skipped,
+			Canceled: errors.Is(state.CurrStepState.Error, pipeline_errors.ErrCancel),
+			Skipped:  state.CurrStepState.Skipped,
 		}
 		if state.CurrStepState.Error != nil {
 			stepState.Error = state.CurrStepState.Error.Error()

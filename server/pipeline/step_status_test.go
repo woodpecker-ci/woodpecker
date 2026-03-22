@@ -220,7 +220,7 @@ func TestUpdateStepStatus(t *testing.T) {
 		t.Run("PendingToSkipped", func(t *testing.T) {
 			t.Parallel()
 			step := &model.Step{State: model.StatusPending}
-			state := rpc.StepState{Canceled: true}
+			state := rpc.StepState{Skipped: true}
 
 			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
@@ -231,12 +231,12 @@ func TestUpdateStepStatus(t *testing.T) {
 		t.Run("PendingToSkippedWithFinishTime", func(t *testing.T) {
 			t.Parallel()
 			step := &model.Step{State: model.StatusPending}
-			state := rpc.StepState{Canceled: true, Exited: true, Finished: 50}
+			state := rpc.StepState{Skipped: true, Exited: true, Finished: 50}
 
 			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 			assert.NoError(t, err)
-			assert.Equal(t, model.StatusKilled, step.State)
+			assert.Equal(t, model.StatusSkipped, step.State)
 			assert.Equal(t, int64(50), step.Finished)
 		})
 	})

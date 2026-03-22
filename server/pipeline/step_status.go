@@ -45,6 +45,10 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 			step.Started = time.Now().Unix()
 		}
 
+		if state.Skipped {
+			step.State = model.StatusSkipped
+		}
+
 		// Handle direct transition to finished if step setup error happened
 		if state.Exited || state.Error != "" {
 			step.Finished = state.Finished
@@ -54,16 +58,18 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 			step.ExitCode = state.ExitCode
 			step.Error = state.Error
 
-			if state.ExitCode == 0 && state.Error == "" {
-				step.State = model.StatusSuccess
-			} else {
-				step.State = model.StatusFailure
+			if !state.Skipped {
+				if state.ExitCode == 0 && state.Error == "" {
+					step.State = model.StatusSuccess
+				} else {
+					step.State = model.StatusFailure
 
-				if step.Failure == model.FailureCancel {
-					// cancel the pipeline
-					err := cancelPipelineFromStep(ctx, store, step)
-					if err != nil {
-						return err
+					if step.Failure == model.FailureCancel {
+						// cancel the pipeline
+						err := cancelPipelineFromStep(ctx, store, step)
+						if err != nil {
+							return err
+						}
 					}
 				}
 			}
