@@ -18,12 +18,13 @@
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
+        <Badge v-if="getForgeLabel(user.forge_id)" :label="$t('admin.settings.users.forge')" :value="getForgeLabel(user.forge_id)" />
         <Badge
           v-if="user.admin"
-          class="md:display-unset ml-auto hidden"
+          class="md:display-unset hidden"
           :value="$t('admin.settings.users.admin.admin')"
         />
-        <div class="flex items-center gap-2" :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }">
+        <div class="flex items-center gap-2" :class="{ 'ml-auto': !user.admin }">
           <IconButton
             icon="edit"
             :title="$t('admin.settings.users.edit_user')"
@@ -62,6 +63,10 @@
           </div>
         </InputField>
 
+        <InputField v-if="isEditingUser && selectedUser.forge_id" :label="$t('admin.settings.users.forge')">
+          <Badge :value="getForgeLabel(selectedUser.forge_id)" />
+        </InputField>
+
         <InputField :label="$t('admin.settings.users.admin.admin')">
           <Checkbox
             :model-value="selectedUser.admin || false"
@@ -87,7 +92,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -104,7 +109,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
-import type { User } from '~/lib/api/types';
+import type { Forge, User } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -112,6 +117,38 @@ const { t } = useI18n();
 
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
+
+const forgesMap = ref<Map<number, Forge>>(new Map());
+
+async function loadForges() {
+  const forges = await apiClient.getForges({ page: 1 });
+  if (forges) {
+    forgesMap.value = new Map(forges.map((f) => [f.id, f]));
+  }
+}
+
+const forgeTypeNames: Record<string, string> = {
+  github: 'GitHub',
+  gitlab: 'GitLab',
+  gitea: 'Gitea',
+  forgejo: 'Forgejo',
+  bitbucket: 'Bitbucket',
+  'bitbucket-dc': 'Bitbucket DC',
+  addon: 'Addon',
+};
+
+function getForgeLabel(forgeId: number | undefined): string | undefined {
+  if (!forgeId) {
+    return undefined;
+  }
+  const forge = forgesMap.value.get(forgeId);
+  if (!forge) {
+    return undefined;
+  }
+  return forgeTypeNames[forge.type] || forge.type;
+}
+
+onMounted(loadForges);
 
 async function loadUsers(page: number): Promise<User[] | null> {
   return apiClient.getUsers({ page });
