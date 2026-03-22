@@ -32,5 +32,7 @@ steps:
     settings:
       github_token:
         from_secret: GITHUB_TOKEN_SURGE
+      allowlist:
+        - woodpecker-bot
     when:
       - event: pull_request
