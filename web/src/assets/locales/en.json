@@ -406,7 +406,8 @@
           "placeholder": "User is an admin"
         },
         "delete_user": "Delete user",
-        "edit_user": "Edit user"
+        "edit_user": "Edit user",
+        "forge": "Forge"
       },
       "orgs": {
         "orgs": "Organizations",
