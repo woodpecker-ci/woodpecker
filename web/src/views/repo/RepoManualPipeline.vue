@@ -102,7 +102,11 @@ async function triggerManualPipeline() {
       name: 'repo',
     });
 
-    notifications.notify({ type: 'warn', title: i18n.t('repo.manual_pipeline.no_manual_workflows') });
+    notifications.notify({
+      type: 'warn',
+      title: i18n.t('repo.manual_pipeline.no_manual_workflows'),
+      duration: 10000,
+    });
   } else {
     await router.push({
       name: 'repo-pipeline',
