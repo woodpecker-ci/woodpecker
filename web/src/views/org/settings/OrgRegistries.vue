@@ -16,7 +16,7 @@
 
     <RegistryList
       v-if="!selectedRegistry"
-      :model-value="registries"
+      v-model="registries"
       :is-deleting="isDeleting"
       :loading="loading"
       @edit="editRegistry"
