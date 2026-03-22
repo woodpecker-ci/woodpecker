@@ -274,7 +274,7 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 	buildTrace := findLastTraceByName(traces, "build")
 	require.NotNil(t, buildTrace, "build step should fail")
 	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
-	assert.False(t, buildTrace.CurrStepState.Exited, "build should have started")
+	assert.True(t, buildTrace.CurrStepState.Exited, "build should have started")
 
 	buildTrace = findLastTraceByName(traces, "build")
 	require.NotNil(t, buildTrace, "build step should fail")
@@ -525,7 +525,7 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 	assert.Error(t, err)
 	deployTrace := findFirstTraceByName(getTracerStates(tracer), "deploy")
 	require.NotNil(t, deployTrace)
-	assert.EqualValues(t, backend.State{}, deployTrace.CurrStepState)
+	assert.EqualValues(t, backend.State{Skipped: true}, deployTrace.CurrStepState)
 }
 
 func TestWorkflowContextCancelDuringExecution(t *testing.T) {
