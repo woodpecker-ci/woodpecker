@@ -29,10 +29,8 @@ type State struct {
 		// Current workflow error state
 		Error error `json:"error"`
 	}
-
 	// Current step that updates the step and workflow state
 	CurrStep *backend.Step `json:"step"`
-
 	// Current step state
 	CurrStepState backend.State
 }
