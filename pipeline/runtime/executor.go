@@ -60,9 +60,9 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		var stepErr *pipeline_errors.ErrInvalidWorkflowSetup
 		if errors.As(err, &stepErr) {
 			state := new(state.State)
-			state.Pipeline.Step = stepErr.Step
-			state.Pipeline.Error = stepErr.Err
-			state.Process = backend.State{
+			state.CurrStep = stepErr.Step
+			state.Workflow.Error = stepErr.Err
+			state.CurrStepState = backend.State{
 				Error:    stepErr.Err,
 				Exited:   true,
 				ExitCode: 1,
@@ -103,19 +103,19 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	}
 
 	state := new(state.State)
-	state.Pipeline.Started = r.started
-	state.Pipeline.Step = step
-	state.Pipeline.Error = r.err.Get()
+	state.Workflow.Started = r.started
+	state.CurrStep = step
+	state.Workflow.Error = r.err.Get()
 
 	// We have an error while starting the step
 	if processState == nil && err != nil {
-		state.Process = backend.State{
+		state.CurrStepState = backend.State{
 			Error:     err,
 			Exited:    true,
 			OOMKilled: false,
 		}
 	} else if processState != nil {
-		state.Process = *processState
+		state.CurrStepState = *processState
 	}
 
 	if traceErr := r.tracer.Trace(state); traceErr != nil {
