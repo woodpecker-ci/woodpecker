@@ -148,20 +148,25 @@ func TestCompilerCompile(t *testing.T) {
 			},
 		},
 		{
-			name: "workflow with three steps",
-			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
-				Name:     "echo env",
-				Image:    "bash",
-				Commands: []string{"env"},
-			}, {
-				Name:     "parallel echo 1",
-				Image:    "bash",
-				Commands: []string{"echo 1"},
-			}, {
-				Name:     "parallel echo 2",
-				Image:    "bash",
-				Commands: []string{"echo 2"},
-			}}}},
+			name: "workflow with three steps and workflow env vars",
+			fronConf: &yaml_types.Workflow{
+				Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+					Name:     "echo env",
+					Image:    "bash",
+					Commands: []string{"env"},
+				}, {
+					Name:     "parallel echo 1",
+					Image:    "bash",
+					Commands: []string{"echo 1"},
+				}, {
+					Name:     "parallel echo 2",
+					Image:    "bash",
+					Commands: []string{"echo 2"},
+				}}},
+				Environment: map[string]any{
+					"ENV": "abc",
+				},
+			},
 			backConf: &backend_types.Config{
 				Network: defaultNetwork,
 				Volume:  defaultVolume,
@@ -310,8 +315,15 @@ func TestCompilerCompile(t *testing.T) {
 				for _, st := range backConf.Stages {
 					for _, s := range st.Steps {
 						s.UUID = ""
-						assert.Truef(t, s.Environment["VERBOSE"] == "true", "expected to get value of global set environment")
-						assert.Truef(t, len(s.Environment) > 10, "expected to have a lot of built-in variables")
+						assert.Equalf(t, "true", s.Environment["VERBOSE"], "expected to get value of global set environment")
+						assert.Greaterf(t, len(s.Environment), 10, "expected to have a lot of built-in variables")
+
+						if s.Type != backend_types.StepTypeClone && s.Type != backend_types.StepTypePlugin {
+							for key, val := range test.fronConf.Environment {
+								assert.Equal(t, val, s.Environment[key])
+							}
+						}
+
 						s.Environment = nil
 						s.SecretMapping = nil
 					}

@@ -775,6 +775,12 @@ The workflow now triggers on `main`, but also if the target branch of a pull req
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
 
+## `environment`
+
+You can specify workflow-wide environment variables. They will get injected into all steps and services expcept clone steps and plugin steps.
+
+For more details, check the [environment docs](./50-environment.md).
+
 ## Advanced network options for steps
 
 :::warning
