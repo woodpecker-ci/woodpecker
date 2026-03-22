@@ -309,7 +309,7 @@ func TestNewDefaults(t *testing.T) {
 	assert.NotEmpty(t, r.taskUUID)
 	assert.NotNil(t, r.ctx)
 	assert.Nil(t, r.tracer)
-	assert.Nil(t, r.engine)
+	assert.NotNil(t, r.engine)
 	assert.NoError(t, r.err.Get())
 }
 

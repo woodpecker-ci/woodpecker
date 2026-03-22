@@ -107,8 +107,17 @@ func withStartFail() func(*backend.Step) {
 // Trace assertion helpers.
 //
 
-func findTraceByName(traces []state.State, name string) *state.State {
+func findFirstTraceByName(traces []state.State, name string) *state.State {
 	for i := range traces {
+		if traces[i].CurrStep != nil && traces[i].CurrStep.Name == name {
+			return &traces[i]
+		}
+	}
+	return nil
+}
+
+func findLastTraceByName(traces []state.State, name string) *state.State {
+	for i := len(traces) - 1; i >= 0; i-- {
 		if traces[i].CurrStep != nil && traces[i].CurrStep.Name == name {
 			return &traces[i]
 		}
@@ -148,12 +157,20 @@ func TestWorkflowCloneBuildDeploy(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.NoError(t, err)
-	calls := getTracerStates(tracer)
-	assert.Len(t, calls, 6)
+	traces := getTracerStates(tracer)
+	assert.Len(t, traces, 6)
 	for i := 0; i < 6; i += 2 {
-		assert.False(t, calls[i].CurrStepState.Exited, "trace %d should be step-started", i)
-		assert.True(t, calls[i+1].CurrStepState.Exited, "trace %d should be step-completed", i+1)
-		assert.Equal(t, 0, calls[i+1].CurrStepState.ExitCode)
+		assert.False(t, traces[i].CurrStepState.Exited, "trace %d should be step-started", i)
+		assert.True(t, traces[i+1].CurrStepState.Exited, "trace %d should be step-completed", i+1)
+		assert.Equal(t, 0, traces[i+1].CurrStepState.ExitCode)
+	}
+
+	for _, name := range []string{"clone", "build", "deploy"} {
+		last := findLastTraceByName(traces, name)
+		require.NotNil(t, last, "%s should have a final trace", name)
+		assert.True(t, last.CurrStepState.Exited, "%s last trace should be exited", name)
+		assert.Equal(t, 0, last.CurrStepState.ExitCode, "%s should exit with code 0", name)
+		assert.False(t, last.CurrStepState.OOMKilled, "%s should not be OOM killed", name)
 	}
 }
 
@@ -176,23 +193,22 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
-	calls := getTracerStates(tracer)
-	if assert.Len(t, calls, 5) {
-		assert.EqualValues(t, backend.State{}, calls[0].CurrStepState)
-		assert.EqualValues(t, backend.State{}, calls[1].CurrStepState)
-		assert.Greater(t, calls[2].CurrStepState.Started, int64(0))
-		assert.EqualValues(t, backend.State{Started: calls[2].CurrStepState.Started, Exited: true}, calls[2].CurrStepState)
-		assert.EqualValues(t, backend.State{}, calls[3].CurrStepState)
-		assert.Greater(t, calls[4].CurrStepState.Started, int64(0))
-		assert.EqualValues(t, backend.State{Started: calls[4].CurrStepState.Started, Exited: true}, calls[4].CurrStepState)
+	traces := getTracerStates(tracer)
+	if assert.Len(t, traces, 5) {
+		assert.EqualValues(t, backend.State{}, traces[0].CurrStepState)
+		assert.Greater(t, traces[2].CurrStepState.Started, int64(0))
+		assert.EqualValues(t, backend.State{Started: traces[2].CurrStepState.Started, Exited: true}, traces[2].CurrStepState)
+		assert.EqualValues(t, backend.State{}, traces[3].CurrStepState)
+		assert.Greater(t, traces[4].CurrStepState.Started, int64(0))
+		assert.EqualValues(t, backend.State{Started: traces[4].CurrStepState.Started, Exited: true}, traces[4].CurrStepState)
 
-		assert.Greater(t, calls[4].Workflow.Started, int64(0))
-		assert.EqualValues(t, state.State{
+		assert.Greater(t, traces[4].Workflow.Started, int64(0))
+		assert.EqualValues(t, traces[4], state.State{
 			Workflow: struct {
 				Started int64 `json:"time"`
 				Error   error `json:"error"`
 			}{
-				Started: calls[4].Workflow.Started,
+				Started: traces[4].Workflow.Started,
 			},
 			CurrStep: &backend.Step{
 				Name:        "test",
@@ -203,10 +219,11 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 				Commands:    []string{"echo test"},
 			},
 			CurrStepState: backend.State{
-				Started: calls[4].CurrStepState.Started,
+				Started: traces[4].CurrStepState.Started,
 				Exited:  true,
 			},
-		}, calls[4])
+		})
+
 	}
 }
 
@@ -253,7 +270,18 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 	require.True(t, errors.As(err, &exitErr))
 	assert.Equal(t, 1, exitErr.Code)
 
-	deployTrace := findTraceByName(getTracerStates(tracer), "deploy")
+	traces := getTracerStates(tracer)
+
+	buildTrace := findFirstTraceByName(traces, "build")
+	require.NotNil(t, buildTrace, "build step should fail")
+	assert.EqualValues(t, 0, buildTrace.CurrStepState.ExitCode)
+	assert.False(t, buildTrace.CurrStepState.Exited, "build should have started")
+
+	buildTrace = findLastTraceByName(traces, "build")
+	require.NotNil(t, buildTrace, "build step should fail")
+	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
+
+	deployTrace := findFirstTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace, "deploy step should still be traced")
 	assert.True(t, deployTrace.CurrStepState.Skipped)
 }
@@ -276,8 +304,12 @@ func TestWorkflowOnFailureStepRuns(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.Error(t, err)
-	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "notify-failure"),
-		"OnFailure step should have started")
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "notify-failure"), "OnFailure step should have started")
+
+	last := findLastTraceByName(getTracerStates(tracer), "notify-failure")
+	require.NotNil(t, last)
+	assert.True(t, last.CurrStepState.Exited, "notify-failure should have exited")
+	assert.Equal(t, 0, last.CurrStepState.ExitCode, "notify-failure step itself should succeed")
 }
 
 func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
@@ -298,7 +330,7 @@ func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.NoError(t, err)
-	cleanupTrace := findTraceByName(getTracerStates(tracer), "cleanup-on-fail")
+	cleanupTrace := findFirstTraceByName(getTracerStates(tracer), "cleanup-on-fail")
 	require.NotNil(t, cleanupTrace, "cleanup step should be traced even when skipped")
 	assert.True(t, cleanupTrace.CurrStepState.Skipped)
 }
@@ -323,8 +355,12 @@ func TestWorkflowFailureIgnore(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.NoError(t, err, "pipeline should succeed when failing step has failure=ignore")
-	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "build"),
-		"build step should run after ignored failure")
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "build"), "build step should run after ignored failure")
+
+	last := findLastTraceByName(getTracerStates(tracer), "build")
+	require.NotNil(t, last)
+	assert.True(t, last.CurrStepState.Exited)
+	assert.Equal(t, 0, last.CurrStepState.ExitCode)
 }
 
 func TestWorkflowFailureIgnoreDoesNotSetPipelineError(t *testing.T) {
@@ -357,6 +393,7 @@ func TestWorkflowFailureIgnoreDoesNotSetPipelineError(t *testing.T) {
 
 func TestWorkflowPluginStep(t *testing.T) {
 	t.Parallel()
+	tracer := newTestTracer(t)
 	r := New(
 		&backend.Config{
 			Stages: []*backend.Stage{
@@ -365,15 +402,26 @@ func TestWorkflowPluginStep(t *testing.T) {
 			},
 		},
 		dummy.New(),
-		WithTracer(newTestTracer(t)),
+		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
+
+	lastPluginTrace := findLastTraceByName(getTracerStates(tracer), "publish")
+	if assert.NotNil(t, lastPluginTrace) {
+		assert.EqualValues(t, map[string]string{
+			"DRONE_BUILD_STATUS":             "success",
+			"DRONE_REPO_SCM":                 "git",
+			"EXPECT_TYPE":                    "plugin",
+			"PULLREQUEST_DRONE_PULL_REQUEST": "0",
+		}, lastPluginTrace.CurrStep.Environment)
+	}
 }
 
 func TestWorkflowOOMKilledStep(t *testing.T) {
 	t.Parallel()
+	tracer := newTestTracer(t)
 	r := New(
 		&backend.Config{
 			Stages: []*backend.Stage{
@@ -381,7 +429,7 @@ func TestWorkflowOOMKilledStep(t *testing.T) {
 			},
 		},
 		dummy.New(),
-		WithTracer(newTestTracer(t)),
+		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
 
@@ -389,6 +437,12 @@ func TestWorkflowOOMKilledStep(t *testing.T) {
 
 	var oomErr *pipeline_errors.OomError
 	assert.True(t, errors.As(err, &oomErr))
+
+	last := findLastTraceByName(getTracerStates(tracer), "build")
+	require.NotNil(t, last)
+	assert.True(t, last.CurrStepState.Exited)
+	assert.True(t, last.CurrStepState.OOMKilled)
+	assert.Equal(t, 137, last.CurrStepState.ExitCode)
 }
 
 func TestWorkflowParallelStepsInStage(t *testing.T) {
@@ -438,6 +492,16 @@ func TestWorkflowParallelStepOneFailsOthersComplete(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Len(t, getTracerStates(tracer), 4, "both parallel steps should complete and be traced")
+
+	lastFast := findLastTraceByName(getTracerStates(tracer), "test-fast")
+	require.NotNil(t, lastFast)
+	assert.True(t, lastFast.CurrStepState.Exited)
+	assert.Equal(t, 0, lastFast.CurrStepState.ExitCode, "test-fast should succeed")
+
+	lastSlow := findLastTraceByName(getTracerStates(tracer), "test-slow")
+	require.NotNil(t, lastSlow)
+	assert.True(t, lastSlow.CurrStepState.Exited)
+	assert.Equal(t, 1, lastSlow.CurrStepState.ExitCode, "test-slow should fail with code 1")
 }
 
 func TestWorkflowStepStartFailure(t *testing.T) {
@@ -458,7 +522,7 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.Error(t, err)
-	deployTrace := findTraceByName(getTracerStates(tracer), "deploy")
+	deployTrace := findFirstTraceByName(getTracerStates(tracer), "deploy")
 	require.NotNil(t, deployTrace)
 	assert.True(t, deployTrace.CurrStepState.Skipped)
 }
@@ -545,12 +609,20 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	assert.Error(t, err)
 	traces := getTracerStates(tracer)
 
-	deployTrace := findTraceByName(traces, "deploy")
+	assert.NotNil(t, findStartedTrace(traces, "notify"), "notify (OnFailure) should have started")
+	notifyTrace := findLastTraceByName(traces, "notify")
+	require.NotNil(t, notifyTrace)
+	assert.True(t, notifyTrace.CurrStepState.Exited, "notify should exited")
+	assert.EqualValues(t, 0, notifyTrace.CurrStepState.ExitCode, "notify should be successful")
+
+	lastBuild := findLastTraceByName(traces, "lint")
+	require.NotNil(t, lastBuild)
+	assert.True(t, lastBuild.CurrStepState.Exited)
+	assert.Equal(t, 1, lastBuild.CurrStepState.ExitCode, "lint should have failed")
+
+	deployTrace := findFirstTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace)
 	assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after lint failure")
-
-	assert.NotNil(t, findStartedTrace(traces, "notify"),
-		"notify (OnFailure) should have started")
 }
 
 func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
@@ -576,13 +648,12 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 	assert.NoError(t, err)
 	traces := getTracerStates(tracer)
 
-	notifyTrace := findTraceByName(traces, "error-notify")
-	require.NotNil(t, notifyTrace)
-	assert.True(t, notifyTrace.CurrStepState.Skipped,
-		"OnFailure step should be skipped when prior failure was ignored")
+	buildTrace := findFirstTraceByName(traces, "build")
+	assert.False(t, buildTrace.CurrStepState.Exited, "build should run after ignored failure")
 
-	assert.NotNil(t, findStartedTrace(traces, "build"),
-		"build should run after ignored failure")
+	notifyTrace := findLastTraceByName(traces, "error-notify")
+	require.NotNil(t, notifyTrace)
+	assert.True(t, notifyTrace.CurrStepState.Skipped, "OnFailure step should be skipped when prior failure was ignored")
 }
 
 func TestWorkflowEmptyStages(t *testing.T) {
