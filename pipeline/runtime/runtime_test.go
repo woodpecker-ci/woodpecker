@@ -329,8 +329,7 @@ func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
 	firstCleanupTrace := findFirstTraceByName(traces, "cleanup-on-fail")
 	lastCleanupTrace := findLastTraceByName(traces, "cleanup-on-fail")
 	assert.Equal(t, firstCleanupTrace, lastCleanupTrace, "we expect on skipped steps to only have one trace")
-	assert.True(t, lastCleanupTrace.CurrStepState.Skipped, "cleanup-on-fail should be skipped after no failure happend")
-
+	assert.True(t, lastCleanupTrace.CurrStepState.Skipped, "cleanup-on-fail should be skipped after no failure happened")
 }
 
 func TestWorkflowFailureIgnore(t *testing.T) {
