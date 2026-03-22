@@ -11,7 +11,7 @@
         class="ml-2"
         :value="registry.org_id === 0 ? $t('global_level_registry') : $t('org_level_registry')"
       />
-      <div v-if="registry.edit !== false" class="ml-auto flex items-center gap-2">
+      <div v-else class="ml-auto flex items-center gap-2">
         <IconButton
           :icon="registry.readonly ? 'chevron-right' : 'edit'"
           class="h-8 w-8"
