@@ -23,7 +23,7 @@
 ### 📈 Enhancement
 
 - Show global/org registries in org/repo registries tab [[#6291](https://github.com/woodpecker-ci/woodpecker/pull/6291)]
-- Forward skipped step state asap it is known [[#6295](https://github.com/woodpecker-ci/woodpecker/pull/6295)]
+- Forward skipped step state once it's known [[#6295](https://github.com/woodpecker-ci/woodpecker/pull/6295)]
 - Only add compatibility environment variables for drone-ci to plugins [[#6271](https://github.com/woodpecker-ci/woodpecker/pull/6271)]
 - Creating new engine runtime now requires backend as argument [[#6268](https://github.com/woodpecker-ci/woodpecker/pull/6268)]
 - Compare admins case-insensitively [[#6261](https://github.com/woodpecker-ci/woodpecker/pull/6261)]
