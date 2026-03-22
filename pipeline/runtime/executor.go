@@ -141,18 +141,19 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				Str("step", step.Name).
 				Msg("prepare")
 
-			switch rErr := r.err.Get(); {
-			case rErr != nil && !step.OnFailure:
-				logger.Debug().
-					Str("step", step.Name).
-					Err(rErr).
-					Msgf("skipped due to OnFailure=%t", step.OnFailure)
-				return nil
-			case rErr == nil && !step.OnSuccess:
-				logger.Debug().
-					Str("step", step.Name).
-					Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
-				return nil
+			if rErr := r.err.Get(); rErr != nil {
+				if !step.OnFailure {
+					logger.Debug().
+						Str("step", step.Name).
+						Err(rErr).
+						Msgf("skipped due to OnFailure=%t", step.OnFailure)
+				}
+				if step.OnSuccess {
+					logger.Debug().
+						Str("step", step.Name).
+						Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
+				}
+				return r.traceStep(&backend.State{Skipped: true}, nil, step)
 			}
 
 			// Trace started.
