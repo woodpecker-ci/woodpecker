@@ -94,14 +94,17 @@ func Test_convertRepo(t *testing.T) {
 func Test_convertRepositoryPushEvent(t *testing.T) {
 	now := time.Now()
 	tests := []struct {
+		name string
 		from *bb.RepositoryPushEvent
 		to   *model.Pipeline
 	}{
 		{
+			name: "empty event",
 			from: &bb.RepositoryPushEvent{},
 			to:   nil,
 		},
 		{
+			name: "delete event with zero ToHash",
 			from: &bb.RepositoryPushEvent{
 				Changes: []bb.RepositoryPushEventChange{
 					{
@@ -113,6 +116,7 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 			to: nil,
 		},
 		{
+			name: "delete event",
 			from: &bb.RepositoryPushEvent{
 				Changes: []bb.RepositoryPushEventChange{
 					{
@@ -125,6 +129,7 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 			to: nil,
 		},
 		{
+			name: "branch push event",
 			from: &bb.RepositoryPushEvent{
 				Event: bb.Event{
 					Date: bb.ISOTime(now),
@@ -164,10 +169,53 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 				Event:     model.EventPush,
 			},
 		},
+		{
+			name: "tag push event",
+			from: &bb.RepositoryPushEvent{
+				Event: bb.Event{
+					Date: bb.ISOTime(now),
+					Actor: bb.User{
+						Name:  "John Doe",
+						Email: "john.doe@mail.com",
+						Slug:  "john.doe_mail.com",
+					},
+				},
+				Repository: bb.Repository{
+					Slug: "REPO",
+					Project: &bb.Project{
+						Key: "PRJ",
+					},
+				},
+				Changes: []bb.RepositoryPushEventChange{
+					{
+						Ref: bb.RepositoryPushEventRef{
+							ID:        "refs/tags/v1.0.0",
+							DisplayID: "v1.0.0",
+						},
+						RefId:  "refs/tags/v1.0.0",
+						ToHash: "abcdef1234567890",
+					},
+				},
+			},
+			to: &model.Pipeline{
+				Commit:    "abcdef1234567890",
+				Branch:    "v1.0.0",
+				Message:   "",
+				Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
+				Author:    "John Doe",
+				Email:     "john.doe@mail.com",
+				Timestamp: now.UTC().Unix(),
+				Ref:       "refs/tags/v1.0.0",
+				ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/abcdef1234567890",
+				Event:     model.EventTag,
+			},
+		},
 	}
 	for _, tt := range tests {
-		to := convertRepositoryPushEvent(tt.from, "https://base.url")
-		assert.Equal(t, tt.to, to)
+		t.Run(tt.name, func(t *testing.T) {
+			to := convertRepositoryPushEvent(tt.from, "https://base.url")
+			assert.Equal(t, tt.to, to)
+		})
 	}
 }
 
