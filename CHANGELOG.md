@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-21
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -108,6 +108,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.13.0 [[#6290](https://github.com/woodpecker-ci/woodpecker/pull/6290)]
 - chore(deps): update web npm deps non-major [[#6279](https://github.com/woodpecker-ci/woodpecker/pull/6279)]
 - fix(deps): update module github.com/zalando/go-keyring to v0.2.7 [[#6280](https://github.com/woodpecker-ci/woodpecker/pull/6280)]
 - fix(deps): update golang-packages to v0.35.3 [[#6265](https://github.com/woodpecker-ci/woodpecker/pull/6265)]
