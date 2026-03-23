@@ -255,7 +255,8 @@
                 "log_download": "Скачать",
                 "restart": "Перезапустить",
                 "restart_success": "Конвейер перезапущен",
-                "log_delete": "Удалить"
+                "log_delete": "Удалить",
+                "skipped": "Этот шаг был пропущен."
             },
             "config": "Конфигурация",
             "errors": "Ошибки",
@@ -302,7 +303,8 @@
                 "skipped": "пропущен",
                 "started": "запущен",
                 "status": "Состояние: {status}",
-                "success": "успешно выполнен"
+                "success": "успешно выполнен",
+                "canceled": "отменено"
             },
             "step_not_started": "Этот шаг ещё не запущен.",
             "tasks": "Задачи",
@@ -761,5 +763,7 @@
     "config_extension_endpoint": "Конечная точка расширения конфигурации",
     "config_extension_exclusive_desc": "Отключает все другие способы получения конфигурации, в том числе от платформы.",
     "config_extension_exclusive": "Эксклюзивно",
-    "registry_extension_endpoint": "Конечная точка расширения реестра"
+    "registry_extension_endpoint": "Конечная точка расширения реестра",
+    "global_level_registry": "глобальный реестр",
+    "org_level_registry": "реестр организации"
 }
