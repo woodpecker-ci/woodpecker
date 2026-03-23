@@ -22,7 +22,7 @@
 
 ### 📈 Enhancement
 
-- fix(api): return conflict when stale repo causes duplicate insert [[#6276](https://github.com/woodpecker-ci/woodpecker/pull/6276)]
+- Server return conflict status when stale repo causes duplicate insert [[#6276](https://github.com/woodpecker-ci/woodpecker/pull/6276)]
 - Show global/org registries in org/repo registries tab [[#6291](https://github.com/woodpecker-ci/woodpecker/pull/6291)]
 - Forward skipped step state once it's known [[#6295](https://github.com/woodpecker-ci/woodpecker/pull/6295)]
 - Only add compatibility environment variables for drone-ci to plugins [[#6271](https://github.com/woodpecker-ci/woodpecker/pull/6271)]
@@ -111,6 +111,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/charmbracelet/huh to v2 [[#6243](https://github.com/woodpecker-ci/woodpecker/pull/6243)]
 - chore(deps): lock file maintenance [[#6305](https://github.com/woodpecker-ci/woodpecker/pull/6305)]
 - chore(deps): update dependency golangci/golangci-lint to v2.11.4 [[#6301](https://github.com/woodpecker-ci/woodpecker/pull/6301)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.11.4 [[#6302](https://github.com/woodpecker-ci/woodpecker/pull/6302)]
