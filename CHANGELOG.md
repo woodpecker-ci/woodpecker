@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @myers, @myselfghost, @paulovitorbal, @qwerty287, @savv, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @myers, @myselfghost, @paulovitorbal, @qwerty287, @savv, @stardothosting
 
 ### 🔒 Security
 
@@ -22,6 +22,7 @@
 
 ### 📈 Enhancement
 
+- fix(api): return conflict when stale repo causes duplicate insert [[#6276](https://github.com/woodpecker-ci/woodpecker/pull/6276)]
 - Show global/org registries in org/repo registries tab [[#6291](https://github.com/woodpecker-ci/woodpecker/pull/6291)]
 - Forward skipped step state once it's known [[#6295](https://github.com/woodpecker-ci/woodpecker/pull/6295)]
 - Only add compatibility environment variables for drone-ci to plugins [[#6271](https://github.com/woodpecker-ci/woodpecker/pull/6271)]
