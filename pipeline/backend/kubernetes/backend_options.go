@@ -66,14 +66,16 @@ const (
 )
 
 type SecurityContext struct {
-	Privileged          *bool                                `mapstructure:"privileged"`
-	RunAsNonRoot        *bool                                `mapstructure:"runAsNonRoot"`
-	RunAsUser           *int64                               `mapstructure:"runAsUser"`
-	RunAsGroup          *int64                               `mapstructure:"runAsGroup"`
-	FSGroup             *int64                               `mapstructure:"fsGroup"`
-	FsGroupChangePolicy *kube_core_v1.PodFSGroupChangePolicy `mapstructure:"fsGroupChangePolicy"`
-	SeccompProfile      *SecProfile                          `mapstructure:"seccompProfile"`
-	ApparmorProfile     *SecProfile                          `mapstructure:"apparmorProfile"`
+	Privileged               *bool                                `mapstructure:"privileged"`
+	RunAsNonRoot             *bool                                `mapstructure:"runAsNonRoot"`
+	RunAsUser                *int64                               `mapstructure:"runAsUser"`
+	RunAsGroup               *int64                               `mapstructure:"runAsGroup"`
+	FSGroup                  *int64                               `mapstructure:"fsGroup"`
+	FsGroupChangePolicy      *kube_core_v1.PodFSGroupChangePolicy `mapstructure:"fsGroupChangePolicy"`
+	SeccompProfile           *SecProfile                          `mapstructure:"seccompProfile"`
+	ApparmorProfile          *SecProfile                          `mapstructure:"apparmorProfile"`
+	AllowPrivilegeEscalation *bool                                `mapstructure:"allowPrivilegeEscalation"`
+	Capabilities             *Capabilities                        `mapstructure:"capabilities"`
 }
 
 type SecProfile struct {
@@ -82,6 +84,10 @@ type SecProfile struct {
 }
 
 type SecProfileType string
+
+type Capabilities struct {
+	Drop []string `mapstructure:"drop"`
+}
 
 // SecretRef defines Kubernetes secret reference.
 type SecretRef struct {
