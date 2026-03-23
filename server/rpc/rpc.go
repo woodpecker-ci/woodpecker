@@ -455,10 +455,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 	}
 
 	// sanitize agent input
-	if err := checkPipelineState(currentPipeline); err != nil {
-		return fmt.Errorf("can not alter logs: %w", err)
-	}
-	if err := allowAppendingLogs(step); err != nil {
+	if err := allowAppendingLogs(currentPipeline, step); err != nil {
 		return fmt.Errorf("can not alter logs: %w", err)
 	}
 

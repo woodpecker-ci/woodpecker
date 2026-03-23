@@ -19,11 +19,14 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
+
+const logStreamDelayAllowed = 5 * time.Minute
 
 func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
 	var err error
@@ -125,12 +128,17 @@ func checkWorkflowStepStates(currWorkflow *model.Workflow, currStep *model.Step)
 	return err
 }
 
-func allowAppendingLogs(currStep *model.Step) (err error) {
-	if currStep.State != model.StatusRunning {
-		err = ErrAgentIllegalLogStreaming
+func allowAppendingLogs(currPipeline *model.Pipeline, currStep *model.Step) error {
+	// As long as pipeline is running just let the agent send logs
+	if currStep.State == model.StatusRunning || currPipeline.Status == model.StatusRunning {
+		return nil
 	}
-	if err != nil {
-		log.Error().Err(err).Msg("caught agent performing illegal instruction")
+	// else give some delay where log caches can drain and be send ... because of network outage / server restart / ...
+	if time.Unix(currPipeline.Finished, 0).Add(logStreamDelayAllowed).After(time.Now()) {
+		return nil
 	}
+
+	err := ErrAgentIllegalLogStreaming
+	log.Error().Err(err).Msg("caught agent performing illegal instruction")
 	return err
 }
