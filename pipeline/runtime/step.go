@@ -218,7 +218,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 			err = pipeline_errors.ErrCancel
 		}
 		if err != nil {
-			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed after setup")
+			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed after while running")
 		}
 
 		if traceErr := r.traceStep(processState, err, step); traceErr != nil {
