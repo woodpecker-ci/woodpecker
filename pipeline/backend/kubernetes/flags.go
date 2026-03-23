@@ -108,6 +108,18 @@ var Flags = []cli.Flag{
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_DEFAULT_SECCTX"), // cspell:words secctx
+		Name:    "backend-k8s-default-secctx",
+		Usage:   "default Kubernetes security context option",
+		Value:   "",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_ENFORCED_SECCTX"), // cspell:words secctx
+		Name:    "backend-k8s-enforced-secctx",
+		Usage:   "enforced Kubernetes security context option, cannot be overridden by step options",
+		Value:   "",
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES"),
 		Name:    "backend-k8s-pod-image-pull-secret-names",
