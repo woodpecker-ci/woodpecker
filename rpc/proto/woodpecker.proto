@@ -53,6 +53,7 @@ message StepState {
   int32  exit_code = 5;
   string error = 6;
   bool   canceled = 7;
+  bool   skipped = 8;
 }
 
 message WorkflowState {

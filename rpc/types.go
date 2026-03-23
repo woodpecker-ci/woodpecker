@@ -33,7 +33,7 @@ type (
 		ExitCode int    `json:"exit_code"`
 		Error    string `json:"error"`
 		Canceled bool   `json:"canceled"`
-		Skipped  bool   `json:"Skipped"`
+		Skipped  bool   `json:"skipped"`
 	}
 
 	// WorkflowState defines the workflow state.
