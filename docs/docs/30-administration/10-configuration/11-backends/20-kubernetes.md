@@ -360,7 +360,6 @@ The feature requires Kubernetes v1.30 or above.
 :::
 
 You can set `allowPrivilegeEscalation` to `false` to prevent a container from gaining more privileges than its parent process.
-Setting it to `true` is only allowed for [privileged](../../../20-usage/20-workflow-syntax.md#privileged) steps.
 
 ```yaml
 backend_options:
@@ -369,16 +368,13 @@ backend_options:
       allowPrivilegeEscalation: false
 ```
 
-You can also configure Linux [capabilities](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container) for a container.
-Dropping capabilities is always allowed, but adding capabilities is only allowed for [privileged](../../../20-usage/20-workflow-syntax.md#privileged) steps.
+You can also drop [Linux capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html) from a container. Adding capabilities is not allowed.
 
 ```yaml
 backend_options:
   kubernetes:
     securityContext:
       capabilities:
-        add:
-          - NET_ADMIN
         drop:
           - ALL
 ```
