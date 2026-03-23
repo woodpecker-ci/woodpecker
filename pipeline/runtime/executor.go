@@ -31,7 +31,7 @@ import (
 
 // Run starts the execution of a workflow and waits for it to complete.
 func (r *Runtime) Run(runnerCtx context.Context) error {
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
 	for stagePos, stage := range r.spec.Stages {
 		stepNames := []string{}
@@ -60,9 +60,9 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		var stepErr *pipeline_errors.ErrInvalidWorkflowSetup
 		if errors.As(err, &stepErr) {
 			state := new(state.State)
-			state.Pipeline.Step = stepErr.Step
-			state.Pipeline.Error = stepErr.Err
-			state.Process = backend.State{
+			state.CurrStep = stepErr.Step
+			state.Workflow.Error = stepErr.Err
+			state.CurrStepState = backend.State{
 				Error:    stepErr.Err,
 				Exited:   true,
 				ExitCode: 1,
@@ -85,12 +85,12 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 			return pipeline_errors.ErrCancel
 		case err := <-r.execAll(runnerCtx, stage.Steps):
 			if err != nil {
-				r.err = err
+				r.err.Set(err)
 			}
 		}
 	}
 
-	return r.err
+	return r.err.Get()
 }
 
 // Updates the current status of a step.
@@ -103,19 +103,19 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	}
 
 	state := new(state.State)
-	state.Pipeline.Started = r.started
-	state.Pipeline.Step = step
-	state.Pipeline.Error = r.err
+	state.Workflow.Started = r.started
+	state.CurrStep = step
+	state.Workflow.Error = r.err.Get()
 
 	// We have an error while starting the step
 	if processState == nil && err != nil {
-		state.Process = backend.State{
+		state.CurrStepState = backend.State{
 			Error:     err,
 			Exited:    true,
 			OOMKilled: false,
 		}
 	} else if processState != nil {
-		state.Process = *processState
+		state.CurrStepState = *processState
 	}
 
 	if traceErr := r.tracer.Trace(state); traceErr != nil {
@@ -128,7 +128,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 
 	for _, step := range steps {
 		// Required since otherwise the loop variable
@@ -141,18 +141,18 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				Str("step", step.Name).
 				Msg("prepare")
 
-			switch {
-			case r.err != nil && !step.OnFailure:
+			rErr := r.err.Get()
+			if rErr != nil && !step.OnFailure {
 				logger.Debug().
 					Str("step", step.Name).
-					Err(r.err).
 					Msgf("skipped due to OnFailure=%t", step.OnFailure)
-				return nil
-			case r.err == nil && !step.OnSuccess:
+				return r.traceStep(&backend.State{Skipped: true}, nil, step)
+			}
+			if rErr == nil && !step.OnSuccess {
 				logger.Debug().
 					Str("step", step.Name).
 					Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
-				return nil
+				return r.traceStep(&backend.State{Skipped: true}, nil, step)
 			}
 
 			// Trace started.
@@ -161,8 +161,10 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				return err
 			}
 
-			// add compatibility for drone-ci plugins
-			metadata.SetDroneEnviron(step.Environment)
+			// Add compatibility environment variables for drone-ci plugins.
+			if step.Type == backend.StepTypePlugin {
+				metadata.SetDroneEnviron(step.Environment)
+			}
 
 			logger.Debug().
 				Str("step", step.Name).
@@ -228,7 +230,7 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 		return nil, err
 	}
 	startTime := time.Now().Unix()
-	logger := r.MakeLogger()
+	logger := r.makeLogger()
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
@@ -261,6 +263,9 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
+			if waitState == nil {
+				waitState = &backend.State{}
+			}
 			waitState.Error = pipeline_errors.ErrCancel
 		} else {
 			return nil, err

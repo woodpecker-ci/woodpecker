@@ -166,9 +166,7 @@ const selectedCronVariables = computed<Record<string, string>>({
     selectedCron.value!.variables = _vars;
   },
   get() {
-    return selectedCron.value!.variables !== undefined && selectedCron.value!.variables !== null
-      ? selectedCron.value!.variables
-      : {};
+    return selectedCron.value!.variables ?? {};
   },
 });
 

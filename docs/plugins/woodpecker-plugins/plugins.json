@@ -282,7 +282,7 @@
     },
     {
       "name": "ASCII JUnit Test Report",
-      "docs": "https://raw.githubusercontent.com/wgroeneveld/woodpecker-ascii-junit/refs/heads/main/README.md",
+      "docs": "https://raw.githubusercontent.com/brainbaking/woodpecker-ascii-junit/refs/heads/main/README.md",
       "verified": false
     },
     {
@@ -309,6 +309,16 @@
       "name": "Buildah",
       "docs": "https://raw.githubusercontent.com/404systems/plugin-buildah/refs/heads/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Opengrep",
+      "docs": "https://raw.githubusercontent.com/KalvadTech/woodpecker-opengrep/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "AgentScan",
+      "docs": "https://codeberg.org/woodpecker-plugins/agentscan/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }

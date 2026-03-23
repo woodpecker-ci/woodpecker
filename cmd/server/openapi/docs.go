@@ -4681,6 +4681,9 @@ const docTemplate = `{
         "CancelInfo": {
             "type": "object",
             "properties": {
+                "canceled_by_step": {
+                    "type": "string"
+                },
                 "canceled_by_user": {
                     "type": "string"
                 },
@@ -5283,6 +5286,9 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
@@ -5382,6 +5388,9 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
@@ -5431,6 +5440,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "registry_extension_endpoint": {
+                    "type": "string"
                 },
                 "require_approval": {
                     "type": "string"
@@ -5529,6 +5541,7 @@ const docTemplate = `{
                 "success",
                 "failure",
                 "killed",
+                "canceled",
                 "error",
                 "blocked",
                 "declined",
@@ -5536,6 +5549,7 @@ const docTemplate = `{
             ],
             "x-enum-comments": {
                 "StatusBlocked": "waiting for approval",
+                "StatusCanceled": "canceled but hasn't been started",
                 "StatusCreated": "created / internal use only",
                 "StatusDeclined": "blocked and declined",
                 "StatusError": "error with the config / while parsing / some other system problem",
@@ -5543,16 +5557,17 @@ const docTemplate = `{
                 "StatusKilled": "killed by user",
                 "StatusPending": "pending to be executed",
                 "StatusRunning": "currently running",
-                "StatusSkipped": "skipped as another step failed",
+                "StatusSkipped": "skipped as per condition of current workflow failed/success state",
                 "StatusSuccess": "successfully finished"
             },
             "x-enum-descriptions": [
-                "skipped as another step failed",
+                "skipped as per condition of current workflow failed/success state",
                 "pending to be executed",
                 "currently running",
                 "successfully finished",
                 "failed to finish (exit code != 0)",
                 "killed by user",
+                "canceled but hasn't been started",
                 "error with the config / while parsing / some other system problem",
                 "waiting for approval",
                 "blocked and declined",
@@ -5565,6 +5580,7 @@ const docTemplate = `{
                 "StatusSuccess",
                 "StatusFailure",
                 "StatusKilled",
+                "StatusCanceled",
                 "StatusError",
                 "StatusBlocked",
                 "StatusDeclined",
