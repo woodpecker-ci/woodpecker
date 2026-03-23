@@ -17,6 +17,7 @@ package rpc
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
@@ -642,7 +643,22 @@ func TestRPCDone(t *testing.T) {
 }
 
 func TestRPCLog(t *testing.T) {
-	t.Run("happy path", func(t *testing.T) {
+	// helper: a pipeline whose Finished timestamp is far enough in the past
+	// that it is outside the drain window, so log appending is rejected.
+	stalePipeline := func(status model.StatusValue) *model.Pipeline {
+		p := defaultPipeline(status)
+		p.Finished = time.Now().Add(-(logStreamDelayAllowed + time.Minute)).Unix()
+		return p
+	}
+
+	// helper: a pipeline that finished very recently (within drain window).
+	recentPipeline := func(status model.StatusValue) *model.Pipeline {
+		p := defaultPipeline(status)
+		p.Finished = time.Now().Add(-30 * time.Second).Unix()
+		return p
+	}
+
+	t.Run("happy path: step running, pipeline running", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
 		mockLogStore := logMocks.NewMockService(t)
 		origLogStore := server.Config.Services.LogStore
@@ -671,11 +687,96 @@ func TestRPCLog(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("reject pipeline already finished", func(t *testing.T) {
+	t.Run("allow: step finished but pipeline still running (logs draining)", func(t *testing.T) {
+		mockStore := storeMocks.NewMockStore(t)
+		mockLogStore := logMocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		agent := defaultAgent()
+		pipeline := defaultPipeline(model.StatusRunning) // pipeline still running
+		step := defaultStep(model.StatusSuccess)         // but step already finished
+
+		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+
+		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
+			{StepUUID: "step-uuid-123", Data: []byte("late log")},
+		})
+		assert.NoError(t, err)
+	})
+
+	t.Run("allow: step running even though pipeline finished stale (step takes priority)", func(t *testing.T) {
+		mockStore := storeMocks.NewMockStore(t)
+		mockLogStore := logMocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		agent := defaultAgent()
+		pipeline := stalePipeline(model.StatusSuccess) // finished long ago
+		step := defaultStep(model.StatusRunning)       // but step is still running
+
+		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+
+		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
+			{StepUUID: "step-uuid-123", Data: []byte("running log")},
+		})
+		assert.NoError(t, err)
+	})
+
+	t.Run("allow: pipeline finished recently — within drain window", func(t *testing.T) {
+		mockStore := storeMocks.NewMockStore(t)
+		mockLogStore := logMocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		agent := defaultAgent()
+		pipeline := recentPipeline(model.StatusSuccess) // finished 30s ago
+		step := defaultStep(model.StatusSuccess)
+
+		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+
+		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
+			{StepUUID: "step-uuid-123", Data: []byte("drain log")},
+		})
+		assert.NoError(t, err)
+	})
+
+	t.Run("reject: pipeline finished stale and step not running", func(t *testing.T) {
+		// This replaces the old "reject pipeline already finished" test.
+		// Previously the rejection came from checkPipelineState returning
+		// ErrAgentIllegalPipelineWorkflowReRunStateChange.
+		// Now it comes from allowAppendingLogs returning ErrAgentIllegalLogStreaming.
 		mockStore := storeMocks.NewMockStore(t)
 		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusSuccess)
-		step := defaultStep(model.StatusRunning)
+		pipeline := stalePipeline(model.StatusSuccess)
+		step := defaultStep(model.StatusSuccess)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
@@ -690,13 +791,37 @@ func TestRPCLog(t *testing.T) {
 		})
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "can not alter logs")
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowReRunStateChange)
+		assert.ErrorIs(t, err, ErrAgentIllegalLogStreaming)
+		// The old error is no longer returned from Log() — allowAppendingLogs
+		// now handles the pipeline-finished case itself.
+		assert.False(t, errors.Is(err, ErrAgentIllegalPipelineWorkflowReRunStateChange))
 	})
 
-	t.Run("reject step pending (not running)", func(t *testing.T) {
+	t.Run("reject: pipeline failed stale and step not running", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
 		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusRunning)
+		pipeline := stalePipeline(model.StatusFailure)
+		step := defaultStep(model.StatusFailure)
+
+		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+
+		rpcInst := newTestRPC(t, mockStore)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+
+		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
+			{StepUUID: "step-uuid-123", Data: []byte("test")},
+		})
+		require.Error(t, err)
+		assert.ErrorIs(t, err, ErrAgentIllegalLogStreaming)
+	})
+
+	t.Run("reject: step pending (not running), pipeline not running, outside drain window", func(t *testing.T) {
+		mockStore := storeMocks.NewMockStore(t)
+		agent := defaultAgent()
+		pipeline := stalePipeline(model.StatusKilled)
 		step := defaultStep(model.StatusPending)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
@@ -715,10 +840,10 @@ func TestRPCLog(t *testing.T) {
 		assert.ErrorIs(t, err, ErrAgentIllegalLogStreaming)
 	})
 
-	t.Run("reject step already succeeded", func(t *testing.T) {
+	t.Run("reject: step already succeeded, pipeline succeeded stale", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
 		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusRunning)
+		pipeline := stalePipeline(model.StatusSuccess)
 		step := defaultStep(model.StatusSuccess)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
@@ -736,10 +861,10 @@ func TestRPCLog(t *testing.T) {
 		assert.ErrorIs(t, err, ErrAgentIllegalLogStreaming)
 	})
 
-	t.Run("reject step killed", func(t *testing.T) {
+	t.Run("reject: step killed, pipeline killed stale", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
 		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusRunning)
+		pipeline := stalePipeline(model.StatusKilled)
 		step := defaultStep(model.StatusKilled)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
@@ -777,7 +902,7 @@ func TestRPCLog(t *testing.T) {
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
-		// one entry has a different UUID — rogue agent trying to inject logs into another step
+		// Second entry has a rogue UUID — agent trying to inject into another step.
 		entries := []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Line: 0, Data: []byte("ok")},
 			{StepUUID: "DIFFERENT-UUID", Line: 1, Data: []byte("injected!")},
