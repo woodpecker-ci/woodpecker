@@ -590,33 +590,75 @@ func apparmorProfile(scp *SecProfile) *v1.AppArmorProfile {
 	return apparmorProfile
 }
 
-func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
-	if !stepPrivileged {
+func containerCapabilities(capabilities *Capabilities, stepPrivileged bool) *v1.Capabilities {
+	if capabilities == nil {
 		return nil
 	}
 
-	//nolint:staticcheck
-	privileged := false
+	var add []v1.Capability
+	var drop []v1.Capability
 
-	// if security context privileged is set explicitly
-	if sc != nil && sc.Privileged != nil && *sc.Privileged {
-		privileged = true
-	}
-
-	// if security context privileged is not set explicitly, but step is privileged
-	if (sc == nil || sc.Privileged == nil) && stepPrivileged {
-		privileged = true
-	}
-
-	if privileged {
-		securityContext := &v1.SecurityContext{
-			Privileged: newBool(true),
+	if len(capabilities.Drop) > 0 {
+		drop = make([]v1.Capability, len(capabilities.Drop))
+		for i, c := range capabilities.Drop {
+			drop[i] = v1.Capability(c)
 		}
-		log.Trace().Msgf("container security context that will be used: %v", securityContext)
-		return securityContext
 	}
 
-	return nil
+	// adding capabilities is only allowed for privileged steps
+	if len(capabilities.Add) > 0 && stepPrivileged {
+		add = make([]v1.Capability, len(capabilities.Add))
+		for i, c := range capabilities.Add {
+			add[i] = v1.Capability(c)
+		}
+	}
+
+	if len(add) == 0 && len(drop) == 0 {
+		return nil
+	}
+
+	return &v1.Capabilities{
+		Add:  add,
+		Drop: drop,
+	}
+}
+
+func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
+	var (
+		privileged               *bool
+		allowPrivilegeEscalation *bool
+		capabilities             *v1.Capabilities
+	)
+
+	// A container may only run privileged when the step itself is privileged.
+	// If the step is privileged, the container is privileged by default unless
+	// explicitly disabled via securityContext.privileged=false.
+	if stepPrivileged && (sc == nil || sc.Privileged == nil || *sc.Privileged) {
+		privileged = newBool(true)
+	}
+
+	if sc != nil {
+		// allowPrivilegeEscalation=false is always allowed.
+		// allowPrivilegeEscalation=true is only allowed for privileged steps.
+		if sc.AllowPrivilegeEscalation != nil && (!*sc.AllowPrivilegeEscalation || stepPrivileged) {
+			allowPrivilegeEscalation = sc.AllowPrivilegeEscalation
+		}
+
+		capabilities = containerCapabilities(sc.Capabilities, stepPrivileged)
+	}
+
+	if privileged == nil && capabilities == nil && allowPrivilegeEscalation == nil {
+		return nil
+	}
+
+	securityContext := &v1.SecurityContext{
+		Privileged:               privileged,
+		AllowPrivilegeEscalation: allowPrivilegeEscalation,
+		Capabilities:             capabilities,
+	}
+
+	log.Trace().Msgf("container security context that will be used: %v", securityContext)
+	return securityContext
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {

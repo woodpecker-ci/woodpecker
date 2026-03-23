@@ -300,7 +300,12 @@ func TestFullPod(t *testing.T) {
 					],
 					"imagePullPolicy": "Always",
 					"securityContext": {
-						"privileged": true
+						"privileged": true,
+						"allowPrivilegeEscalation": false,
+						"capabilities": {
+							"add": ["NET_ADMIN"],
+							"drop": ["ALL"]
+						}
 					}
 				}
 			],
@@ -378,12 +383,17 @@ func TestFullPod(t *testing.T) {
 	}
 	fsGroupChangePolicy := v1.PodFSGroupChangePolicy("OnRootMismatch")
 	secCtx := SecurityContext{
-		Privileged:          newBool(true),
-		RunAsNonRoot:        newBool(true),
-		RunAsUser:           newInt64(101),
-		RunAsGroup:          newInt64(101),
-		FSGroup:             newInt64(101),
-		FsGroupChangePolicy: &fsGroupChangePolicy,
+		Privileged:               newBool(true),
+		RunAsNonRoot:             newBool(true),
+		RunAsUser:                newInt64(101),
+		RunAsGroup:               newInt64(101),
+		FSGroup:                  newInt64(101),
+		FsGroupChangePolicy:      &fsGroupChangePolicy,
+		AllowPrivilegeEscalation: newBool(false),
+		Capabilities: &Capabilities{
+			Add:  []Capability{"NET_ADMIN"},
+			Drop: []Capability{"ALL"},
+		},
 		SeccompProfile: &SecProfile{
 			Type:             "Localhost",
 			LocalhostProfile: "profiles/audit.json",
@@ -526,6 +536,91 @@ func TestPodPrivilege(t *testing.T) {
 	pod, err = createTestPod(false, true, secCtx)
 	assert.NoError(t, err)
 	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+
+	// non-privileged step with allowPrivilegeEscalation=false: applied
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(false),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// non-privileged step with allowPrivilegeEscalation=true: ignored
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(true),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// privileged step with allowPrivilegeEscalation=true: applied
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(true),
+	}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.True(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.True(t, *pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// non-privileged step with capabilities drop: applied
+	secCtx = SecurityContext{
+		Capabilities: &Capabilities{Drop: []Capability{"ALL"}},
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Equal(t, []v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// non-privileged step with capabilities add: ignored
+	secCtx = SecurityContext{
+		Capabilities: &Capabilities{Add: []Capability{"NET_ADMIN"}},
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// privileged step with capabilities add and drop: both applied
+	secCtx = SecurityContext{
+		Capabilities: &Capabilities{
+			Add:  []Capability{"NET_ADMIN"},
+			Drop: []Capability{"ALL"},
+		},
+	}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Equal(t, []v1.Capability{"NET_ADMIN"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
+	assert.Equal(t, []v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+
+	// non-privileged step with add+drop capabilities: only drop is kept
+	secCtx = SecurityContext{
+		Capabilities: &Capabilities{
+			Add:  []Capability{"NET_ADMIN"},
+			Drop: []Capability{"ALL"},
+		},
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
+	assert.Equal(t, []v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+
+	// non-privileged step with drop capabilities and allowPrivilegeEscalation=false: both applied
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(false),
+		Capabilities:             &Capabilities{Drop: []Capability{"ALL"}},
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, []v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 }
 
 func TestScratchPod(t *testing.T) {
