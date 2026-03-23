@@ -41,7 +41,8 @@
                 "skipped": "跳過",
                 "success": "成功",
                 "failure": "失敗"
-            }
+            },
+            "load_more": "載入更多"
         },
         "settings": {
             "general": {
@@ -122,5 +123,6 @@
     },
     "empty_list": "找不到{entity}！",
     "default": "預設",
-    "info": "資訊"
+    "info": "資訊",
+    "login_to_woodpecker_with": "使用以下方式登入 Woodpecker"
 }

@@ -69,7 +69,7 @@ func PostRepo(c *gin.Context) {
 	if enabledOnce && repo.IsActive {
 		c.String(http.StatusConflict, "Repository is already active.")
 		return
-	} else if err != nil && !errors.Is(err, types.RecordNotExist) {
+	} else if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		msg := "could not get repo by remote id from store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
@@ -125,13 +125,13 @@ func PostRepo(c *gin.Context) {
 	// find org of repo
 	var org *model.Org
 	org, err = _store.OrgFindByName(repo.Owner, user.ForgeID)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// create an org if it doesn't exist yet
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		org, err = _forge.Org(c, user, repo.Owner)
 		if err != nil {
 			msg := fmt.Sprintf("Organization %s not found in DB. Attempting to create new one.", repo.Owner)
@@ -184,6 +184,10 @@ func PostRepo(c *gin.Context) {
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {
+		if errors.Is(err, types.ErrInsertDuplicateDetected) {
+			c.String(http.StatusConflict, "Repository already exists in Woodpecker. Remove the stale repository entry and try again.")
+			return
+		}
 		msg := "could not create/update repo in store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
@@ -291,6 +295,9 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.ConfigExtensionExclusive != nil {
 		repo.ConfigExtensionExclusive = *in.ConfigExtensionExclusive
+	}
+	if in.RegistryExtensionEndpoint != nil {
+		repo.RegistryExtensionEndpoint = *in.RegistryExtensionEndpoint
 	}
 
 	err := _store.UpdateRepo(repo)
@@ -760,7 +767,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 func repairRepoUser(c *gin.Context, repo *model.Repo, _store store.Store) (*model.User, error) {
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
+		if errors.Is(err, types.ErrRecordNotExist) {
 			oldUserID := repo.UserID
 			sessionUser := session.User(c)
 			repo.UserID = sessionUser.ID

@@ -1,3 +1,17 @@
+// Copyright 2024 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package api_test
 
 import (
@@ -158,8 +172,8 @@ func TestHandleAuth(t *testing.T) {
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.RecordNotExist)
-		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.RecordNotExist)
+		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.ErrRecordNotExist)
 		_store.On("CreateUser", mock.Anything).Return(nil)
 		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, nil)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
@@ -227,8 +241,8 @@ func TestHandleAuth(t *testing.T) {
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.RecordNotExist)
-		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.RecordNotExist)
+		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.ErrRecordNotExist)
 
 		api.HandleAuth(c)
 
@@ -290,7 +304,7 @@ func TestHandleAuth(t *testing.T) {
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
-		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.RecordNotExist)
+		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.ErrRecordNotExist)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)

@@ -224,6 +224,7 @@
         "cancel": "Cancel",
         "restart": "Restart",
         "canceled": "This step has been canceled.",
+        "skipped": "This step has been skipped.",
         "cancel_success": "Pipeline canceled",
         "deploy": "Deploy",
         "restart_success": "Pipeline restarted",
@@ -258,6 +259,7 @@
         "running": "running",
         "started": "started",
         "skipped": "skipped",
+        "canceled": "canceled",
         "success": "success",
         "declined": "declined",
         "error": "error",
@@ -272,7 +274,8 @@
       "created": "Created: {created}",
       "cancel_info": {
         "superseded_by": "Superseded by #{pipelineId}",
-        "canceled_by_user": "Canceled by {user}"
+        "canceled_by_user": "Canceled by {user}",
+        "canceled_by_step": "Canceled due to {step}"
       },
       "debug": {
         "title": "Debug",
@@ -514,6 +517,8 @@
   "update_woodpecker": "Please update your Woodpecker instance to {0}",
   "global_level_secret": "global secret",
   "org_level_secret": "organization secret",
+  "global_level_registry": "global registry",
+  "org_level_registry": "organization registry",
   "login_to_cli": "Login to CLI",
   "login_to_cli_description": "If you continue, you will be logged in to the CLI.",
   "abort": "Abort",
@@ -532,6 +537,7 @@
   "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
   "extension_endpoint_placeholder": "e.g. https://example.com/api",
   "config_extension_endpoint": "Config extension endpoint",
+  "registry_extension_endpoint": "Registry extension endpoint",
   "config_extension_exclusive": "Exclusive",
   "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
   "extensions_signatures_public_key": "Public key for signatures",

@@ -41,7 +41,7 @@ func (b builder) getService(keyType string) (types.EncryptionService, error) {
 
 func (b builder) isEnabled() (bool, error) {
 	_, err := b.store.ServerConfigGet(ciphertextSampleConfigKey)
-	if err != nil && !errors.Is(err, storeTypes.RecordNotExist) {
+	if err != nil && !errors.Is(err, storeTypes.ErrRecordNotExist) {
 		return false, fmt.Errorf(errTemplateFailedLoadingServerConfig, err)
 	}
 	return err == nil, nil

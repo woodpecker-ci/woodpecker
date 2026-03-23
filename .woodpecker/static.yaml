@@ -24,3 +24,21 @@ steps:
     depends_on: []
     settings:
       version: 3.6.2
+
+  - name: agentscan
+    image: docker.io/woodpeckerci/plugin-agentscan:latest
+    pull: true
+    depends_on: []
+    settings:
+      github_token:
+        from_secret: GITHUB_TOKEN_SURGE
+      allowlist:
+        - woodpecker-bot
+        - 'renovate[bot]'
+        - 6543
+        - anbraten
+        - lafriks
+        - qwerty287
+        - xoxys
+    when:
+      - event: pull_request

@@ -4681,6 +4681,9 @@ const docTemplate = `{
         "CancelInfo": {
             "type": "object",
             "properties": {
+                "canceled_by_step": {
+                    "type": "string"
+                },
                 "canceled_by_user": {
                     "type": "string"
                 },
@@ -5283,6 +5286,9 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
@@ -5382,6 +5388,9 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
@@ -5431,6 +5440,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "registry_extension_endpoint": {
+                    "type": "string"
                 },
                 "require_approval": {
                     "type": "string"
@@ -5545,11 +5557,11 @@ const docTemplate = `{
                 "StatusKilled": "killed by user",
                 "StatusPending": "pending to be executed",
                 "StatusRunning": "currently running",
-                "StatusSkipped": "skipped as another step failed",
+                "StatusSkipped": "skipped as per condition of current workflow failed/success state",
                 "StatusSuccess": "successfully finished"
             },
             "x-enum-descriptions": [
-                "skipped as another step failed",
+                "skipped as per condition of current workflow failed/success state",
                 "pending to be executed",
                 "currently running",
                 "successfully finished",
