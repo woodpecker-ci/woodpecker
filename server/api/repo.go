@@ -184,6 +184,10 @@ func PostRepo(c *gin.Context) {
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {
+		if errors.Is(err, types.ErrInsertDuplicateDetected) {
+			c.String(http.StatusConflict, "Repository already exists in Woodpecker. Remove the stale repository entry and try again.")
+			return
+		}
 		msg := "could not create/update repo in store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)

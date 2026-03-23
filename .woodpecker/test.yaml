@@ -75,7 +75,7 @@ steps:
     image: *golang_image
     commands:
       - make install-addlicense # cspell:words addlicense
-      - 'addlicense -check -ignore "vendor/**" **/*.go'
+      - bash -c 'shopt -s globstar; addlicense -check -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go'
     when: *when
 
   test:
