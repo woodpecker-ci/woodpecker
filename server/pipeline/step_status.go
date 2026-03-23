@@ -34,6 +34,16 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 
 	switch step.State {
 	case model.StatusPending:
+		// Handle skip before anything else — skipped steps never started,
+		// so we must not set Started or transition through Running.
+		if state.Skipped {
+			step.State = model.StatusSkipped
+			if state.Finished != 0 {
+				step.Finished = state.Finished
+			}
+			return store.StepUpdate(step)
+		}
+
 		// Transition from pending to running when started
 		if state.Finished == 0 {
 			step.State = model.StatusRunning
@@ -58,7 +68,6 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 				step.State = model.StatusFailure
 
 				if step.Failure == model.FailureCancel {
-					// cancel the pipeline
 					err := cancelPipelineFromStep(ctx, store, step)
 					if err != nil {
 						return err
@@ -83,7 +92,6 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 				step.State = model.StatusFailure
 
 				if step.Failure == model.FailureCancel {
-					// cancel the pipeline
 					err := cancelPipelineFromStep(ctx, store, step)
 					if err != nil {
 						return err

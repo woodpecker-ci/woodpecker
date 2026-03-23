@@ -196,43 +196,37 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	traces := getTracerStates(tracer)
 	if assert.Len(t, traces, 5) {
 		assert.EqualValues(t, backend.State{}, traces[0].CurrStepState)
-		assert.EqualValues(t, backend.State{}, traces[1].CurrStepState)
 		assert.Greater(t, traces[2].CurrStepState.Started, int64(0))
 		assert.EqualValues(t, backend.State{Started: traces[2].CurrStepState.Started, Exited: true}, traces[2].CurrStepState)
 		assert.EqualValues(t, backend.State{}, traces[3].CurrStepState)
 		assert.Greater(t, traces[4].CurrStepState.Started, int64(0))
 		assert.EqualValues(t, backend.State{Started: traces[4].CurrStepState.Started, Exited: true}, traces[4].CurrStepState)
 
-		assert.Greater(t, traces[4].CurrStep.Started, int64(0))
-		assert.EqualValues(t, traces[4], state.State{
-			CurrStep: struct {
-				Started int64         `json:"time"`
-				Step    *backend.Step `json:"step"`
-				Error   error         `json:"error"`
+		assert.Greater(t, traces[4].Workflow.Started, int64(0))
+		assert.EqualValues(t, state.State{
+			Workflow: struct {
+				Started int64 `json:"time"`
+				Error   error `json:"error"`
 			}{
-				Started: traces[4].CurrStep.Started,
-				Step: &backend.Step{
-					Name:      "test",
-					UUID:      "test-uuid",
-					Type:      "commands",
-					OnSuccess: true,
-					Environment: map[string]string{
-						"DRONE_BUILD_STATUS":             "success",
-						"DRONE_REPO_SCM":                 "git",
-						"PULLREQUEST_DRONE_PULL_REQUEST": "0",
-					},
-					Commands: []string{"echo test"},
-				},
+				Started: traces[4].Workflow.Started,
+			},
+			CurrStep: &backend.Step{
+				Name:        "test",
+				UUID:        "test-uuid",
+				Type:        "commands",
+				OnSuccess:   true,
+				Environment: map[string]string{},
+				Commands:    []string{"echo test"},
 			},
 			CurrStepState: backend.State{
 				Started: traces[4].CurrStepState.Started,
 				Exited:  true,
 			},
-		})
+		}, traces[4])
 	}
 }
 
-func TestWorkflowDetachedStepDoesNotBlockCurrStep(t *testing.T) {
+func TestWorkflowDetachedStepDoesNotBlockWorkflow(t *testing.T) {
 	t.Parallel()
 	r := New(
 		&backend.Config{
@@ -275,17 +269,15 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 	require.True(t, errors.As(err, &exitErr))
 	assert.Equal(t, 1, exitErr.Code)
 
-	// traces := getTracerStates(tracer)
+	traces := getTracerStates(tracer)
 
-	// TODO: signal failed back (https://github.com/woodpecker-ci/woodpecker/pull/6166)
-	// deployTrace := findFirstTraceByName(calls, "build")
-	// require.NotNil(t, deployTrace, "build step should fail")
-	// assert.EqualValues(t, 1, deployTrace.CurrStepState.ExitCode)
+	buildTrace := findLastTraceByName(traces, "build")
+	require.NotNil(t, buildTrace, "build step should fail")
+	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
 
-	// TODO: signal skipped back (https://github.com/woodpecker-ci/woodpecker/pull/6166)
-	// deployTrace := findFirstTraceByName(calls, "deploy")
-	// require.NotNil(t, deployTrace, "deploy step should still be traced")
-	// assert.True(t, deployTrace.CurrStepState.Skipped)
+	deployTrace := findLastTraceByName(traces, "deploy")
+	require.NotNil(t, deployTrace, "deploy step should still be traced")
+	assert.True(t, deployTrace.CurrStepState.Skipped)
 }
 
 func TestWorkflowOnFailureStepRuns(t *testing.T) {
@@ -304,14 +296,15 @@ func TestWorkflowOnFailureStepRuns(t *testing.T) {
 	)
 
 	err := r.Run(t.Context())
+	traces := getTracerStates(tracer)
 
 	assert.Error(t, err)
-	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "notify-failure"), "OnFailure step should have started")
+	assert.NotNil(t, findStartedTrace(traces, "notify-failure"), "OnFailure step should have started")
 
-	last := findLastTraceByName(getTracerStates(tracer), "notify-failure")
+	last := findLastTraceByName(traces, "notify-failure")
 	require.NotNil(t, last)
-	assert.True(t, last.CurrStepState.Exited, "notify-failure should have exited")
-	assert.Equal(t, 0, last.CurrStepState.ExitCode, "notify-failure step itself should succeed")
+	assert.Greater(t, last.CurrStepState.Started, int64(0), "step should have started")
+	assert.EqualValues(t, backend.State{Started: last.CurrStepState.Started, Exited: true}, last.CurrStepState)
 }
 
 func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
@@ -330,12 +323,13 @@ func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
 	)
 
 	err := r.Run(t.Context())
+	require.NoError(t, err)
+	traces := getTracerStates(tracer)
 
-	assert.NoError(t, err)
-	// TODO: signal skipped back (https://github.com/woodpecker-ci/woodpecker/pull/6166)
-	// cleanupTrace := findFirstTraceByName(getTracerStates(tracer), "cleanup-on-fail")
-	// require.NotNil(t, cleanupTrace, "cleanup step should be traced even when skipped")
-	// assert.True(t, cleanupTrace.CurrStepState.Skipped)
+	firstCleanupTrace := findFirstTraceByName(traces, "cleanup-on-fail")
+	lastCleanupTrace := findLastTraceByName(traces, "cleanup-on-fail")
+	assert.Equal(t, firstCleanupTrace, lastCleanupTrace, "we expect on skipped steps to only have one trace")
+	assert.True(t, lastCleanupTrace.CurrStepState.Skipped, "cleanup-on-fail should be skipped after no failure happened")
 }
 
 func TestWorkflowFailureIgnore(t *testing.T) {
@@ -366,7 +360,7 @@ func TestWorkflowFailureIgnore(t *testing.T) {
 	assert.Equal(t, 0, last.CurrStepState.ExitCode)
 }
 
-func TestWorkflowFailureIgnoreDoesNotSetCurrStepError(t *testing.T) {
+func TestWorkflowFailureIgnoreDoesNotSetWorkflowError(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
@@ -386,13 +380,11 @@ func TestWorkflowFailureIgnoreDoesNotSetCurrStepError(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.NoError(t, err)
-	// TODO: signal skipped back (https://github.com/woodpecker-ci/woodpecker/pull/6166)
-	// traces := getTracerStates(tracer)
-	// for _, c := range traces {
-	// 	if c.CurrStep != nil && c.CurrStep.Name == "deploy" {
-	// 		assert.False(t, c.CurrStepState.Skipped, "deploy should not be skipped after failure=ignore step")
-	// 	}
-	// }
+	traces := getTracerStates(tracer)
+	firstDeployTrace := findFirstTraceByName(traces, "deploy")
+	lastDeployTrace := findLastTraceByName(traces, "deploy")
+	assert.NotEqualValues(t, firstDeployTrace, lastDeployTrace, "we expect two traces")
+	assert.False(t, lastDeployTrace.CurrStepState.Skipped, "deploy should not be skipped after failure=ignore step")
 }
 
 func TestWorkflowPluginStep(t *testing.T) {
@@ -517,12 +509,9 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 	assert.Error(t, err)
 	deployTrace := findFirstTraceByName(getTracerStates(tracer), "build")
 	require.NotNil(t, deployTrace)
-	// TODO: signal skipped back (https://github.com/woodpecker-ci/woodpecker/pull/6166)
-	// assert.True(t, deployTrace.CurrStepState.Skipped)
+	assert.EqualValues(t, backend.State{}, deployTrace.CurrStepState)
 }
 
-// TODO: signal skipped back (https://github.com/woodpecker-ci/woodpecker/pull/6166)
-/*
 func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 	t.Parallel()
 	ctx, cancel := context.WithCancelCause(t.Context())
@@ -555,8 +544,7 @@ func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
-}.
-*/
+}
 
 func TestWorkflowSetupFailure(t *testing.T) {
 	t.Parallel()
@@ -606,20 +594,19 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	assert.Error(t, err)
 	traces := getTracerStates(tracer)
 
-	deployTrace := findLastTraceByName(traces, "notify")
-	require.NotNil(t, deployTrace)
-	assert.True(t, deployTrace.CurrStepState.Exited, "notify should exited")
-	assert.EqualValues(t, 0, deployTrace.CurrStepState.ExitCode, "notify should be successful")
+	notifyTrace := findLastTraceByName(traces, "notify")
+	require.NotNil(t, notifyTrace)
+	assert.True(t, notifyTrace.CurrStepState.Exited, "notify should exited")
+	assert.EqualValues(t, 0, notifyTrace.CurrStepState.ExitCode, "notify should be successful")
 
 	lastBuild := findLastTraceByName(traces, "lint")
 	require.NotNil(t, lastBuild)
 	assert.True(t, lastBuild.CurrStepState.Exited)
 	assert.Equal(t, 1, lastBuild.CurrStepState.ExitCode, "lint should have failed")
 
-	// TODO: signal skipped back (https://github.com/woodpecker-ci/woodpecker/pull/6166)
-	// deployTrace := findFirstTraceByName(traces, "deploy")
-	// require.NotNil(t, deployTrace)
-	// assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after lint failure")
+	deployTrace := findFirstTraceByName(traces, "deploy")
+	require.NotNil(t, deployTrace)
+	assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after lint failure")
 
 	assert.NotNil(t, findStartedTrace(traces, "notify"),
 		"notify (OnFailure) should have started")
@@ -632,7 +619,7 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 		&backend.Config{
 			Stages: []*backend.Stage{
 				{Steps: []*backend.Step{
-					cmdStep("lint", withExitCode(1), withIgnoreFailure()),
+					cmdStep("lint", withExitCode(1), withFailure(metadata.FailureIgnore)),
 				}},
 				{Steps: []*backend.Step{cmdStep("error-notify", withOnFailure())}},
 				{Steps: []*backend.Step{cmdStep("build")}},
@@ -648,13 +635,11 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 	assert.NoError(t, err)
 	traces := getTracerStates(tracer)
 
-	notifyTrace := findFirstTraceByName(traces, "build")
+	notifyTrace := findFirstTraceByName(traces, "error-notify")
 	require.NotNil(t, notifyTrace)
-	// TODO: signal skipped back (https://github.com/woodpecker-ci/woodpecker/pull/6166)
-	// assert.True(t, notifyTrace.CurrStepState.Skipped,		"OnFailure step should be skipped when prior failure was ignored")
+	assert.True(t, notifyTrace.CurrStepState.Skipped, "OnFailure step should be skipped when prior failure was ignored")
 
-	assert.NotNil(t, findStartedTrace(traces, "build"),
-		"build should run after ignored failure")
+	assert.NotNil(t, findStartedTrace(traces, "build"), "build should run after ignored failure")
 }
 
 func TestWorkflowEmptyStages(t *testing.T) {

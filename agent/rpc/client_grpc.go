@@ -345,6 +345,7 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	req.State.ExitCode = int32(state.ExitCode)
 	req.State.Error = state.Error
 	req.State.Canceled = state.Canceled
+	req.State.Skipped = state.Skipped
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
