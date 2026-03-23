@@ -47,7 +47,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusPending}
 				state := rpc.StepState{Started: 42, Finished: 0}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusRunning, step.State)
@@ -60,7 +60,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusPending}
 				state := rpc.StepState{Started: 0, Finished: 0}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusRunning, step.State)
@@ -76,7 +76,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusPending}
 				state := rpc.StepState{Started: 42, Exited: true, Finished: 100, ExitCode: 0, Error: ""}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusSuccess, step.State)
@@ -89,7 +89,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusPending}
 				state := rpc.StepState{Started: 42, Exited: true, Finished: 0, ExitCode: 0, Error: ""}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusSuccess, step.State)
@@ -105,7 +105,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusPending}
 				state := rpc.StepState{Started: 42, Exited: true, Finished: 34, ExitCode: 1, Error: "an error"}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusFailure, step.State)
@@ -126,7 +126,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusRunning, Started: 42}
 				state := rpc.StepState{Exited: true, Finished: 100, ExitCode: 0, Error: ""}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusSuccess, step.State)
@@ -138,7 +138,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusRunning, Started: 42}
 				state := rpc.StepState{Exited: true, Finished: 0, ExitCode: 0, Error: ""}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusSuccess, step.State)
@@ -154,7 +154,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusRunning, Started: 42}
 				state := rpc.StepState{Exited: true, Finished: 34, ExitCode: pipeline.ExitCodeKilled, Error: "an error"}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusFailure, step.State)
@@ -167,7 +167,7 @@ func TestUpdateStepStatus(t *testing.T) {
 				step := &model.Step{State: model.StatusRunning, Started: 42}
 				state := rpc.StepState{Exited: true, Finished: 34, ExitCode: 0, Error: "an error"}
 
-				err := UpdateStepStatus(mockStoreStep(t), step, state)
+				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusFailure, step.State)
@@ -180,7 +180,7 @@ func TestUpdateStepStatus(t *testing.T) {
 			step := &model.Step{State: model.StatusRunning, Started: 42}
 			state := rpc.StepState{Exited: false, Finished: 0}
 
-			err := UpdateStepStatus(mockStoreStep(t), step, state)
+			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 			assert.NoError(t, err)
 			assert.Equal(t, model.StatusRunning, step.State)
@@ -196,7 +196,7 @@ func TestUpdateStepStatus(t *testing.T) {
 			step := &model.Step{State: model.StatusRunning, Started: 42}
 			state := rpc.StepState{Canceled: true}
 
-			err := UpdateStepStatus(mockStoreStep(t), step, state)
+			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 			assert.NoError(t, err)
 			assert.Equal(t, model.StatusKilled, step.State)
@@ -208,7 +208,7 @@ func TestUpdateStepStatus(t *testing.T) {
 			step := &model.Step{State: model.StatusRunning, Started: 42}
 			state := rpc.StepState{Canceled: true, Exited: true, Finished: 100, ExitCode: 1, Error: "canceled"}
 
-			err := UpdateStepStatus(mockStoreStep(t), step, state)
+			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 			assert.NoError(t, err)
 			assert.Equal(t, model.StatusKilled, step.State)
@@ -218,12 +218,65 @@ func TestUpdateStepStatus(t *testing.T) {
 		})
 	})
 
+	t.Run("Skipped", func(t *testing.T) {
+		t.Parallel()
+
+		// This mirrors exactly what the agent sends when executor.go detects
+		// OnSuccess=false or OnFailure=false — only Skipped is set, everything
+		// else is zero/false (no Started, no Finished, not Exited).
+		t.Run("PendingToSkipped_AgentPayload", func(t *testing.T) {
+			t.Parallel()
+			step := &model.Step{State: model.StatusPending}
+			// Exact payload from: traceStep(&backend.State{Skipped: true}, nil, step)
+			// Started=0, Finished=0, Exited=false, Skipped=true
+			state := rpc.StepState{
+				Skipped:  true,
+				Exited:   false,
+				Finished: 0,
+				Started:  0,
+			}
+
+			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
+
+			assert.NoError(t, err)
+			// Must be Skipped, NOT Running (the bug: Finished==0 triggers StatusRunning first)
+			assert.Equal(t, model.StatusSkipped, step.State)
+			// Started must NOT be set — skipped steps never ran
+			assert.Equal(t, int64(0), step.Started)
+			// Finished must NOT be set — skipped steps never ran
+			assert.Equal(t, int64(0), step.Finished)
+		})
+
+		t.Run("PendingToSkipped", func(t *testing.T) {
+			t.Parallel()
+			step := &model.Step{State: model.StatusPending}
+			state := rpc.StepState{Skipped: true}
+
+			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
+
+			assert.NoError(t, err)
+			assert.Equal(t, model.StatusSkipped, step.State)
+		})
+
+		t.Run("PendingToSkippedWithFinishTime", func(t *testing.T) {
+			t.Parallel()
+			step := &model.Step{State: model.StatusPending}
+			state := rpc.StepState{Skipped: true, Exited: true, Finished: 50}
+
+			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
+
+			assert.NoError(t, err)
+			assert.Equal(t, model.StatusSkipped, step.State)
+			assert.Equal(t, int64(50), step.Finished)
+		})
+	})
+
 	t.Run("TerminalState", func(t *testing.T) {
 		t.Parallel()
 		step := &model.Step{State: model.StatusKilled, Started: 42, Finished: 64}
 		state := rpc.StepState{Exited: false}
 
-		err := UpdateStepStatus(mocks.NewMockStore(t), step, state)
+		err := UpdateStepStatus(t.Context(), mocks.NewMockStore(t), step, state)
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "does not expect rpc state updates")

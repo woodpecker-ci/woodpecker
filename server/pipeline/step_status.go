@@ -16,22 +16,34 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // UpdateStepStatus updates step status based on agent reports via RPC.
-func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) error {
+func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, state rpc.StepState) error {
 	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", *step, state)
 
 	switch step.State {
 	case model.StatusPending:
+		// Handle skip before anything else — skipped steps never started,
+		// so we must not set Started or transition through Running.
+		if state.Skipped {
+			step.State = model.StatusSkipped
+			if state.Finished != 0 {
+				step.Finished = state.Finished
+			}
+			return store.StepUpdate(step)
+		}
+
 		// Transition from pending to running when started
 		if state.Finished == 0 {
 			step.State = model.StatusRunning
@@ -54,6 +66,13 @@ func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) 
 				step.State = model.StatusSuccess
 			} else {
 				step.State = model.StatusFailure
+
+				if step.Failure == model.FailureCancel {
+					err := cancelPipelineFromStep(ctx, store, step)
+					if err != nil {
+						return err
+					}
+				}
 			}
 		}
 
@@ -71,6 +90,13 @@ func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) 
 				step.State = model.StatusSuccess
 			} else {
 				step.State = model.StatusFailure
+
+				if step.Failure == model.FailureCancel {
+					err := cancelPipelineFromStep(ctx, store, step)
+					if err != nil {
+						return err
+					}
+				}
 			}
 		}
 
@@ -87,6 +113,31 @@ func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) 
 	}
 
 	return store.StepUpdate(step)
+}
+
+func cancelPipelineFromStep(ctx context.Context, store store.Store, step *model.Step) error {
+	pipeline, err := store.GetPipeline(step.PipelineID)
+	if err != nil {
+		return err
+	}
+
+	repo, err := store.GetRepo(pipeline.RepoID)
+	if err != nil {
+		return err
+	}
+
+	repoUser, err := store.GetUser(repo.UserID)
+	if err != nil {
+		return err
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		return err
+	}
+	return Cancel(ctx, _forge, store, repo, repoUser, pipeline, &model.CancelInfo{
+		CanceledByStep: step.Name,
+	})
 }
 
 func UpdateStepToStatusSkipped(store store.Store, step model.Step, finished int64, status model.StatusValue) (*model.Step, error) {
