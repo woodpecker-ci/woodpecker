@@ -502,7 +502,7 @@ steps:
     image: alpine
     commands:
       - mkdir -p $CI_WORKSPACE
-    
+
   - name: clone
     image: quay.io/woodpeckerci/plugin-git
     settings:
