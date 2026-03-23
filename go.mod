@@ -55,7 +55,7 @@ require (
 	github.com/urfave/cli/v3 v3.7.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.5.0
-	github.com/zalando/go-keyring v0.2.6
+	github.com/zalando/go-keyring v0.2.7
 	gitlab.com/gitlab-org/api/client-go/v2 v2.7.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.49.0

@@ -517,6 +517,8 @@
   "update_woodpecker": "Please update your Woodpecker instance to {0}",
   "global_level_secret": "global secret",
   "org_level_secret": "organization secret",
+  "global_level_registry": "global registry",
+  "org_level_registry": "organization registry",
   "login_to_cli": "Login to CLI",
   "login_to_cli_description": "If you continue, you will be logged in to the CLI.",
   "abort": "Abort",
