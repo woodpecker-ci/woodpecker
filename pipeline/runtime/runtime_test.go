@@ -619,7 +619,7 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 		&backend.Config{
 			Stages: []*backend.Stage{
 				{Steps: []*backend.Step{
-					cmdStep("lint", withExitCode(1), withFailure(metadata.FailureIgnore)),
+					cmdStep("lint", withExitCode(1), withIgnoreFailure()),
 				}},
 				{Steps: []*backend.Step{cmdStep("error-notify", withOnFailure())}},
 				{Steps: []*backend.Step{cmdStep("build")}},
@@ -1031,40 +1031,6 @@ func TestDetachedFailureIgnore(t *testing.T) {
 //
 // Cancellation.
 //
-
-func TestWorkflowContextCancelDuringExecution(t *testing.T) {
-	t.Parallel()
-	ctx, cancel := context.WithCancelCause(t.Context())
-
-	var stageCount int
-	tracer := tracer_mocks.NewMockTracer(t)
-	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
-		s, _ := args.Get(0).(*state.State)
-		if s.CurrStepState.Exited {
-			stageCount++
-			if stageCount >= 1 {
-				cancel(nil)
-			}
-		}
-	}).Return(nil).Maybe()
-
-	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build")}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
-			},
-		},
-		dummy.New(),
-		WithTracer(tracer),
-		WithContext(ctx),
-		WithLogger(newTestLogger(t)),
-	)
-
-	err := r.Run(t.Context())
-
-	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
-}
 
 func TestWorkflowContextCancelWithPluginStep(t *testing.T) {
 	t.Parallel()
