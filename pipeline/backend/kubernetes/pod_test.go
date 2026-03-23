@@ -303,7 +303,6 @@ func TestFullPod(t *testing.T) {
 						"privileged": true,
 						"allowPrivilegeEscalation": false,
 						"capabilities": {
-							"add": ["NET_ADMIN"],
 							"drop": ["ALL"]
 						}
 					}
@@ -391,8 +390,7 @@ func TestFullPod(t *testing.T) {
 		FsGroupChangePolicy:      &fsGroupChangePolicy,
 		AllowPrivilegeEscalation: newBool(false),
 		Capabilities: &Capabilities{
-			Add:  []Capability{"NET_ADMIN"},
-			Drop: []Capability{"ALL"},
+			Drop: []string{"ALL"},
 		},
 		SeccompProfile: &SecProfile{
 			Type:             "Localhost",
@@ -555,19 +553,17 @@ func TestPodPrivilege(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
 
-	// privileged step with allowPrivilegeEscalation=true: applied
+	// privileged step with allowPrivilegeEscalation=true: ignored
 	secCtx = SecurityContext{
 		AllowPrivilegeEscalation: newBool(true),
 	}
 	pod, err = createTestPod(true, false, secCtx)
 	assert.NoError(t, err)
-	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
-	assert.True(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
-	assert.True(t, *pod.Spec.Containers[0].SecurityContext.Privileged)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
 
 	// non-privileged step with capabilities drop: applied
 	secCtx = SecurityContext{
-		Capabilities: &Capabilities{Drop: []Capability{"ALL"}},
+		Capabilities: &Capabilities{Drop: []string{"ALL"}},
 	}
 	pod, err = createTestPod(false, false, secCtx)
 	assert.NoError(t, err)
@@ -576,44 +572,10 @@ func TestPodPrivilege(t *testing.T) {
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
 
-	// non-privileged step with capabilities add: ignored
-	secCtx = SecurityContext{
-		Capabilities: &Capabilities{Add: []Capability{"NET_ADMIN"}},
-	}
-	pod, err = createTestPod(false, false, secCtx)
-	assert.NoError(t, err)
-	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
-
-	// privileged step with capabilities add and drop: both applied
-	secCtx = SecurityContext{
-		Capabilities: &Capabilities{
-			Add:  []Capability{"NET_ADMIN"},
-			Drop: []Capability{"ALL"},
-		},
-	}
-	pod, err = createTestPod(true, false, secCtx)
-	assert.NoError(t, err)
-	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
-	assert.Equal(t, []v1.Capability{"NET_ADMIN"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
-	assert.Equal(t, []v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
-
-	// non-privileged step with add+drop capabilities: only drop is kept
-	secCtx = SecurityContext{
-		Capabilities: &Capabilities{
-			Add:  []Capability{"NET_ADMIN"},
-			Drop: []Capability{"ALL"},
-		},
-	}
-	pod, err = createTestPod(false, false, secCtx)
-	assert.NoError(t, err)
-	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
-	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
-	assert.Equal(t, []v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
-
 	// non-privileged step with drop capabilities and allowPrivilegeEscalation=false: both applied
 	secCtx = SecurityContext{
 		AllowPrivilegeEscalation: newBool(false),
-		Capabilities:             &Capabilities{Drop: []Capability{"ALL"}},
+		Capabilities:             &Capabilities{Drop: []string{"ALL"}},
 	}
 	pod, err = createTestPod(false, false, secCtx)
 	assert.NoError(t, err)

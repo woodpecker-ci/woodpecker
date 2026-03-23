@@ -86,11 +86,8 @@ type SecProfile struct {
 type SecProfileType string
 
 type Capabilities struct {
-	Add  []Capability `mapstructure:"add"`
-	Drop []Capability `mapstructure:"drop"`
+	Drop []string `mapstructure:"drop"`
 }
-
-type Capability string
 
 // SecretRef defines Kubernetes secret reference.
 type SecretRef struct {

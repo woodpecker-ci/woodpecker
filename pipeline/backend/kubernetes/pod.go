@@ -590,35 +590,18 @@ func apparmorProfile(scp *SecProfile) *v1.AppArmorProfile {
 	return apparmorProfile
 }
 
-func containerCapabilities(capabilities *Capabilities, stepPrivileged bool) *v1.Capabilities {
-	if capabilities == nil {
+func containerCapabilities(capabilities *Capabilities) *v1.Capabilities {
+	if capabilities == nil || len(capabilities.Drop) == 0 {
 		return nil
 	}
 
-	var add []v1.Capability
-	var drop []v1.Capability
+	drop := make([]v1.Capability, len(capabilities.Drop))
 
-	if len(capabilities.Drop) > 0 {
-		drop = make([]v1.Capability, len(capabilities.Drop))
-		for i, c := range capabilities.Drop {
-			drop[i] = v1.Capability(c)
-		}
-	}
-
-	// adding capabilities is only allowed for privileged steps
-	if len(capabilities.Add) > 0 && stepPrivileged {
-		add = make([]v1.Capability, len(capabilities.Add))
-		for i, c := range capabilities.Add {
-			add[i] = v1.Capability(c)
-		}
-	}
-
-	if len(add) == 0 && len(drop) == 0 {
-		return nil
+	for i, c := range capabilities.Drop {
+		drop[i] = v1.Capability(c)
 	}
 
 	return &v1.Capabilities{
-		Add:  add,
 		Drop: drop,
 	}
 }
@@ -638,13 +621,12 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 	}
 
 	if sc != nil {
-		// allowPrivilegeEscalation=false is always allowed.
-		// allowPrivilegeEscalation=true is only allowed for privileged steps.
-		if sc.AllowPrivilegeEscalation != nil && (!*sc.AllowPrivilegeEscalation || stepPrivileged) {
+		// allowPrivilegeEscalation can only be set to false.
+		if sc.AllowPrivilegeEscalation != nil && !*sc.AllowPrivilegeEscalation {
 			allowPrivilegeEscalation = sc.AllowPrivilegeEscalation
 		}
 
-		capabilities = containerCapabilities(sc.Capabilities, stepPrivileged)
+		capabilities = containerCapabilities(sc.Capabilities)
 	}
 
 	if privileged == nil && capabilities == nil && allowPrivilegeEscalation == nil {
