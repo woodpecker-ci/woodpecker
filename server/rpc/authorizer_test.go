@@ -45,13 +45,6 @@ func ctxWithToken(ctx context.Context, token string) context.Context {
 	return metadata.NewIncomingContext(ctx, metadata.Pairs("token", token))
 }
 
-// ctxWithNoMeta returns an incoming context with no metadata at all.
-func ctxWithNoMeta(ctx context.Context) context.Context {
-	// Wrap with empty metadata so FromIncomingContext returns ok=false only
-	// when we deliberately pass a plain background context.
-	return ctx
-}
-
 func TestAuthorize(t *testing.T) {
 	t.Parallel()
 

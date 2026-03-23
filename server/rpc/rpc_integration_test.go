@@ -66,12 +66,12 @@ func defaultAgent() *model.Agent {
 	}
 }
 
-// orgAgent returns an agent scoped to a specific org.
-func orgAgent(orgID int64) *model.Agent {
+// orgAgent999 returns an agent scoped to a specific org.
+func orgAgent999() *model.Agent {
 	return &model.Agent{
 		ID:    2,
 		Name:  "org-agent",
-		OrgID: orgID,
+		OrgID: 999,
 	}
 }
 
@@ -271,8 +271,8 @@ func TestRPCUpdate(t *testing.T) {
 
 	t.Run("reject agent from wrong org", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
-		agent := orgAgent(999) // org 999
-		repo := defaultRepo()  // org 100
+		agent := orgAgent999()
+		repo := defaultRepo() // org 100
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusRunning)
 		step := defaultStep(model.StatusRunning)
@@ -474,7 +474,7 @@ func TestRPCInit(t *testing.T) {
 
 	t.Run("reject agent wrong org", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
-		agent := orgAgent(999)
+		agent := orgAgent999()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusPending)
 
@@ -614,7 +614,7 @@ func TestRPCDone(t *testing.T) {
 
 	t.Run("reject agent wrong org", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
-		agent := orgAgent(999)
+		agent := orgAgent999()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusRunning)
 
@@ -914,7 +914,7 @@ func TestRPCLog(t *testing.T) {
 
 	t.Run("reject agent wrong org", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
-		agent := orgAgent(999)
+		agent := orgAgent999()
 		pipeline := defaultPipeline(model.StatusRunning)
 		step := defaultStep(model.StatusRunning)
 
@@ -951,7 +951,7 @@ func TestRPCLog(t *testing.T) {
 func TestRPCExtend(t *testing.T) {
 	t.Run("reject agent wrong org via permission check", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
-		agent := orgAgent(999)
+		agent := orgAgent999()
 		workflow := defaultWorkflow(model.StatusRunning)
 		pipeline := defaultPipeline(model.StatusRunning)
 
@@ -974,7 +974,7 @@ func TestRPCExtend(t *testing.T) {
 func TestRPCWait(t *testing.T) {
 	t.Run("reject agent wrong org", func(t *testing.T) {
 		mockStore := storeMocks.NewMockStore(t)
-		agent := orgAgent(999)
+		agent := orgAgent999()
 		workflow := defaultWorkflow(model.StatusRunning)
 		pipeline := defaultPipeline(model.StatusRunning)
 

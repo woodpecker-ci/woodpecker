@@ -248,8 +248,7 @@ func TestCheckWorkflowStepStates(t *testing.T) {
 	})
 }
 
-// ---------------------------------------------------------------------------
-// allowAppendingLogs — updated for the new (pipeline, step) signature
+// AllowAppendingLogs — updated for the new (pipeline, step) signature
 //
 // New logic:
 //   Allow if step.State == Running  (step is actively running)
@@ -257,8 +256,7 @@ func TestCheckWorkflowStepStates(t *testing.T) {
 //     have just finished but pipeline hasn't caught up yet)
 //   Allow if pipeline.Finished is within the last logStreamDelayAllowed
 //     (drain window after a server restart / network blip)
-//   Reject otherwise
-// ---------------------------------------------------------------------------
+//   Reject otherwise.
 
 func TestAllowAppendingLogs(t *testing.T) {
 	t.Parallel()
