@@ -19,3 +19,4 @@ contents:
     file_info:
       owner: woodpecker
       group: woodpecker
+      mode: 0750
