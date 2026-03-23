@@ -293,6 +293,8 @@ execute a local pipeline
 
 **--backend-k8s-volume-size**="": backend k8s volume size (default 10G) (default: 10G)
 
+**--backend-local-isolated-home**: set HOME, USERPROFILE and other variables to an isolated directory, if false we ignore netrc (default: true)
+
 **--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: system temporary directory)
 
 **--backend-no-proxy**="": if set, pass the environment variable down as "NO_PROXY" to steps
