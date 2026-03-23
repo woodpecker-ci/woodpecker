@@ -334,7 +334,7 @@ release-checksums: ## Create checksums for all release files
 release: release-frontend release-server release-agent release-cli ## Release all binaries
 
 bundle-prepare: ## Prepare the bundles
-	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
+	CGO_ENABLED=0 go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
 
 bundle-agent: bundle-prepare ## Create bundles for agent
 	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ${DIST_DIR} --packager deb
