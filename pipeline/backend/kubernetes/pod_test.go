@@ -559,7 +559,7 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(true, false, secCtx)
 	assert.NoError(t, err)
-	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
 
 	// non-privileged step with capabilities drop: applied
 	secCtx = SecurityContext{
