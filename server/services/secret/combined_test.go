@@ -83,9 +83,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 	}
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		t.Fatal("can't generate ed25519 key pair")
-	}
+	require.NoError(t, err, "can't generate ed25519 keypair")
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		// check signature
@@ -134,9 +132,11 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		assert.NoError(t, json.NewEncoder(w).Encode([]*model.Secret{
-			{Name: "shared", Value: "external-value"},
-			{Name: "ext-only", Value: "only-in-ext"},
+		assert.NoError(t, json.NewEncoder(w).Encode(map[string]any{
+			"secrets": []map[string]any{
+				{"name": "shared", "value": "external-value"},
+				{"name": "ext-only", "value": "only-in-ext"},
+			},
 		}))
 	}
 
@@ -160,10 +160,10 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 				&model.Pipeline{},
 				nil,
 			)
-			if tt.expectedError && err == nil {
-				t.Fatal("expected an error")
-			} else if !tt.expectedError && err != nil {
-				t.Fatal("error fetching secrets:", err)
+			if tt.expectedError {
+				require.Error(t, err, "expected an error")
+			} else {
+				require.NoError(t, err, "error fetching secrets")
 			}
 
 			secretNames := make([]string, len(secrets))

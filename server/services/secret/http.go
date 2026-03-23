@@ -34,6 +34,10 @@ type secretRequestStructure struct {
 	Netrc    *model.Netrc    `json:"netrc"`
 }
 
+type secretResponseStructure struct {
+	Secrets []*model.Secret `json:"secrets"`
+}
+
 // NewHTTP returns a new HTTP secret extension client.
 func NewHTTP(endpoint string, client *utils.Client) *httpExtension {
 	return &httpExtension{endpoint: endpoint, client: client}
@@ -47,8 +51,8 @@ func (h *httpExtension) SecretListPipeline(repo *model.Repo, pipeline *model.Pip
 		Netrc:    netrc,
 	}
 
-	var response []*model.Secret
-	status, err := h.client.Send(context.Background(), net_http.MethodPost, h.endpoint, body, &response)
+	response := new(secretResponseStructure)
+	status, err := h.client.Send(context.Background(), net_http.MethodPost, h.endpoint, body, response)
 	if err != nil && status != net_http.StatusNoContent {
 		return nil, fmt.Errorf("failed to fetch secrets via http (%d) %w", status, err)
 	}
@@ -58,5 +62,5 @@ func (h *httpExtension) SecretListPipeline(repo *model.Repo, pipeline *model.Pip
 		return nil, nil
 	}
 
-	return response, nil
+	return response.Secrets, nil
 }

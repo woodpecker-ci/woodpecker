@@ -127,30 +127,34 @@ Example request:
 
 ### Response
 
-The extension should respond with a JSON array of secret objects.
+The extension should respond with a JSON object containing a `secrets` array.
 If the extension wants to keep the existing secrets without adding any, it can respond with HTTP status `204 No Content`.
 
 ```ts
-class Secret {
-  name: string; // the secret name, matched by from_secret in pipeline config
-  value: string; // the secret value
-  images?: string[]; // optional: restrict to specific container images
-  events?: string[]; // optional: restrict to specific pipeline events
+class Response {
+  secrets: {
+    name: string; // the secret name, matched by from_secret in pipeline config
+    value: string; // the secret value
+    images?: string[]; // optional: restrict to specific container images
+    events?: string[]; // optional: restrict to specific pipeline events
+  }[];
 }
 ```
 
 Example response:
 
 ```json
-[
-  {
-    "name": "docker_password",
-    "value": "your-secret-password-123"
-  },
-  {
-    "name": "deploy_token",
-    "value": "super-secret-token",
-    "events": ["push", "tag"]
-  }
-]
+{
+  "secrets": [
+    {
+      "name": "docker_password",
+      "value": "your-secret-password-123"
+    },
+    {
+      "name": "deploy_token",
+      "value": "super-secret-token",
+      "events": ["push", "tag"]
+    }
+  ]
+}
 ```
