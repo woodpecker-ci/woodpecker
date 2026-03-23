@@ -7,6 +7,8 @@ homepage: https://woodpecker-ci.org/
 license: Apache 2.0
 maintainer: Woodpecker Authors <maintainer@woodpecker-ci.org>
 section: daemon/system
+scripts:
+  preinstall: ./nfpm/woodpecker-system-user.preinstall.sh
 contents:
   - src: ./dist/agent/linux_amd64/woodpecker-agent
     dst: /usr/local/bin/woodpecker-agent
