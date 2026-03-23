@@ -65,25 +65,30 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 
 // checkPipelineState checks if an agent is allowed to change/update a workflow/pipeline state
 // by the state the parent pipeline is in.
-func checkPipelineState(currPipeline *model.Pipeline) error {
+func checkPipelineState(currPipeline *model.Pipeline) (err error) {
 	// check if pipeline was already run and marked finished or is blocked
 	switch currPipeline.Status {
 	case model.StatusCreated,
 		model.StatusPending,
 		model.StatusRunning:
-		return nil
+		break
 
 	case model.StatusBlocked:
-		return ErrAgentIllegalPipelineWorkflowRun
+		err = ErrAgentIllegalPipelineWorkflowRun
 
 	default:
-		return ErrAgentIllegalPipelineWorkflowReRunStateChange
+		err = ErrAgentIllegalPipelineWorkflowReRunStateChange
 	}
+
+	if err != nil {
+		log.Error().Err(err).Msg("caught agent performing illegal instruction")
+	}
+	return err
 }
 
 // checkWorkflowStepStates checks if a workflow/step state or its logs can be altered
 // depending on what state the workflow and step currently is in.
-func checkWorkflowStepStates(currWorkflow *model.Workflow, currStep *model.Step) error {
+func checkWorkflowStepStates(currWorkflow *model.Workflow, currStep *model.Step) (err error) {
 	if currWorkflow != nil {
 		switch currWorkflow.State {
 		case model.StatusCreated,
@@ -92,10 +97,10 @@ func checkWorkflowStepStates(currWorkflow *model.Workflow, currStep *model.Step)
 			break
 
 		case model.StatusBlocked:
-			return ErrAgentIllegalWorkflowRun
+			err = ErrAgentIllegalWorkflowRun
 
 		default:
-			return ErrAgentIllegalWorkflowReRunStateChange
+			err = ErrAgentIllegalWorkflowReRunStateChange
 		}
 	}
 
@@ -107,18 +112,25 @@ func checkWorkflowStepStates(currWorkflow *model.Workflow, currStep *model.Step)
 			break
 
 		case model.StatusBlocked:
-			return ErrAgentIllegalStepRun
+			err = errors.Join(err, ErrAgentIllegalStepRun)
 
 		default:
-			return ErrAgentIllegalStepReRunStateChange
+			err = errors.Join(err, ErrAgentIllegalStepReRunStateChange)
 		}
 	}
-	return nil
+
+	if err != nil {
+		log.Error().Err(err).Msg("caught agent performing illegal instruction")
+	}
+	return err
 }
 
-func allowAppendingLogs(currStep *model.Step) error {
+func allowAppendingLogs(currStep *model.Step) (err error) {
 	if currStep.State != model.StatusRunning {
-		return ErrAgentIllegalLogStreaming
+		err = ErrAgentIllegalLogStreaming
 	}
-	return nil
+	if err != nil {
+		log.Error().Err(err).Msg("caught agent performing illegal instruction")
+	}
+	return err
 }
