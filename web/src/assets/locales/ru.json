@@ -255,7 +255,8 @@
                 "log_download": "Скачать",
                 "restart": "Перезапустить",
                 "restart_success": "Конвейер перезапущен",
-                "log_delete": "Удалить"
+                "log_delete": "Удалить",
+                "skipped": "Этот шаг был пропущен."
             },
             "config": "Конфигурация",
             "errors": "Ошибки",
@@ -302,7 +303,8 @@
                 "skipped": "пропущен",
                 "started": "запущен",
                 "status": "Состояние: {status}",
-                "success": "успешно выполнен"
+                "success": "успешно выполнен",
+                "canceled": "отменено"
             },
             "step_not_started": "Этот шаг ещё не запущен.",
             "tasks": "Задачи",
@@ -325,8 +327,10 @@
             "view": "Посмотреть конвейер",
             "cancel_info": {
                 "canceled_by_user": "Отменено {user}",
-                "superseded_by": "Заменено конвейером #{pipelineId}"
-            }
+                "superseded_by": "Заменено на #{pipelineId}",
+                "canceled_by_step": "Отменено из-за шага {step}"
+            },
+            "load_more": "Загрузить ещё"
         },
         "pull_requests": "Запросы на слияние",
         "settings": {
@@ -756,7 +760,10 @@
     "extensions_signatures_public_key_description": "Этот открытый ключ должен использоваться вашими расширениями для проверки запросов, отправляемых Woodpecker.",
     "extensions_configuration_saved": "Настройки расширений сохранены",
     "disabled": "Отключено",
-    "config_extension_endpoint": "Адрес конфигурации расширения",
+    "config_extension_endpoint": "Конечная точка расширения конфигурации",
     "config_extension_exclusive_desc": "Отключает все другие способы получения конфигурации, в том числе от платформы.",
-    "config_extension_exclusive": "Эксклюзивно"
+    "config_extension_exclusive": "Эксклюзивно",
+    "registry_extension_endpoint": "Конечная точка расширения реестра",
+    "global_level_registry": "глобальный реестр",
+    "org_level_registry": "реестр организации"
 }

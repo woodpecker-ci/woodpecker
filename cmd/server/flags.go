@@ -284,6 +284,11 @@ var flags = append([]cli.Flag{
 		Usage:   "whether global configuration service endpoint should be exclusive (skip forge)",
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_REGISTRY_SERVICE_ENDPOINT"),
+		Name:    "registry-service-endpoint",
+		Usage:   "url used for calling registry service endpoint",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
 		Name:    "extensions-allowed-hosts",
 		Usage:   "Hosts that are allowed to be contacted by extensions",
@@ -344,6 +349,12 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_DISABLE_VERSION_CHECK"),
 		Usage:   "Disable version check in admin web ui.",
 		Name:    "skip-version-check",
+	},
+	&cli.UintFlag{
+		Sources: cli.EnvVars("WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT"),
+		Usage:   "Maximum number of lines to show in a pipeline log, defaults to 5000.",
+		Name:    "max-pipeline-log-line-count",
+		Value:   5000,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE"),

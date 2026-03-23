@@ -23,6 +23,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 
 	"codeberg.org/6543/xyaml"
@@ -59,7 +60,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(flags, backend_docker.Flags, backend_kubernetes.Flags, backend_local.Flags),
+	Flags:     slices.Concat(flags, backend_docker.Flags, backend_kubernetes.Flags, backend_local.Flags),
 }
 
 var backends = []backend_types.Backend{
@@ -321,11 +322,10 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		fmt.Printf("ctrl+c received, terminating current pipeline '%s'\n", confStr)
 	})
 
-	return pipeline_runtime.New(compiled,
+	return pipeline_runtime.New(compiled, backendEngine,
 		pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
 		pipeline_runtime.WithTracer(tracing.DefaultTracer),
 		pipeline_runtime.WithLogger(defaultLogger),
-		pipeline_runtime.WithBackend(backendEngine),
 		pipeline_runtime.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
