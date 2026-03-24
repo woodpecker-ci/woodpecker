@@ -95,4 +95,4 @@ The engine is the shared kernel that validates, parses frontend facing config fi
 
 The runtime is the package controlling how a workflow is executed, and can be found at `pipeline/runtime`.
 
-<img src="./woodpecker-workflow-run-flowchart.svg" alt="Pipeline/runtime flow diagram" style="max-width: 600px; width: 100%;" />
+<img src="/svg/woodpecker-workflow-run-flowchart.svg" alt="Pipeline/runtime flow diagram" style="max-width: 600px; width: 100%;" />
