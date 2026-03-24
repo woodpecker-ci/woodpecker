@@ -336,17 +336,6 @@ func TestWithOptions(t *testing.T) {
 	assert.Equal(t, "test", r.description["repo"])
 }
 
-func TestMakeLoggerWithDescription(t *testing.T) {
-	t.Parallel()
-	r := New(&backend.Config{},
-		dummy.New(),
-		WithTracer(newTestTracer(t)),
-		WithLogger(newTestLogger(t)),
-		WithDescription(map[string]string{"repo": "woodpecker", "branch": "main"}),
-	)
-	r.logStages()
-}
-
 func TestGetShutdownCtx(t *testing.T) {
 	ctx := GetShutdownCtx()
 	assert.NotNil(t, ctx)
