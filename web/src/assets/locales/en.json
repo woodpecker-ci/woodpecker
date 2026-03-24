@@ -49,7 +49,7 @@
         "value": "Variable value"
       },
       "show_pipelines": "Show pipelines",
-      "no_manual_workflows": "No matching workflows found. Make sure at least one workflow has runs on the manual event."
+      "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
