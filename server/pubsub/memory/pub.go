@@ -16,38 +16,60 @@ package memory
 
 import (
 	"context"
+	"fmt"
+	"slices"
 	"sync"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 )
 
-type Publisher struct {
+type publisher struct {
 	sync.Mutex
 
-	subs map[*types.Receiver]struct{}
+	subs map[*pubsub.Receiver][]string
 }
 
 // New creates an in-memory publisher.
-func New() *Publisher {
-	return &Publisher{
-		subs: make(map[*types.Receiver]struct{}),
+func New() pubsub.PubSub {
+	return &publisher{
+		subs: make(map[*pubsub.Receiver][]string),
 	}
 }
 
-func (p *Publisher) Publish(message types.Message) {
+func (p *publisher) Publish(_ context.Context, topics pubsub.Topics, message pubsub.Message) error {
 	p.Lock()
-	for s := range p.subs {
-		go (*s)(message)
+	for s, tl := range p.subs {
+		for t := range topics {
+			if slices.Contains(tl, t) {
+				go (*s)(message)
+				break
+			}
+		}
 	}
 	p.Unlock()
+	return nil
 }
 
-func (p *Publisher) Subscribe(c context.Context, receiver types.Receiver) {
+func (p *publisher) Subscribe(c context.Context, topics pubsub.Topics, receiver pubsub.Receiver) error {
+	if topics == nil {
+		return fmt.Errorf("subscribe to at least one topic")
+	}
+
+	var tl []string
+	for k := range topics {
+		tl = append(tl, k)
+	}
+
+	defer func() {
+		p.Lock()
+		delete(p.subs, &receiver)
+		p.Unlock()
+	}()
+
 	p.Lock()
-	p.subs[&receiver] = struct{}{}
+	p.subs[&receiver] = tl
 	p.Unlock()
+
 	<-c.Done()
-	p.Lock()
-	delete(p.subs, &receiver)
-	p.Unlock()
+	return nil
 }

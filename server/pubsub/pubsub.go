@@ -16,16 +16,34 @@ package pubsub
 
 import (
 	"context"
+	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 type PubSub interface {
-	Publish(message types.Message)
-	Subscribe(ctx context.Context, receiver types.Receiver)
+	Publish(context.Context, Topics, Message) error
+	Subscribe(context.Context, Topics, Receiver) error
 }
 
-func NewInMemory(ctx context.Context) PubSub {
-	return &memory.Publisher{}
+// Message defines a published message.
+type Message struct {
+	// ID identifies this message.
+	ID string `json:"id,omitempty"`
+
+	// Data is the actual data in the entry.
+	Data []byte `json:"data"`
 }
+
+// Receiver receives published messages.
+type Receiver func(Message)
+
+// Topics are key-value pairs, messages are filtered upon
+// the the key is the base-key and the value su the sub-key.
+type Topics map[string]struct{}
+
+func GetRepoTopic(r *model.Repo) string {
+	return fmt.Sprintf("repo.id.%d", r.ID)
+}
+
+const PublicTopic = "public"

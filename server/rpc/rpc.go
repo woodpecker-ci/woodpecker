@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
@@ -36,7 +37,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
-	pubsub_types "go.woodpecker-ci.org/woodpecker/v3/server/pubsub/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
@@ -208,22 +208,8 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err
 	}
-	message := pubsub_types.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsSCMPrivate),
-		},
-	}
-	message.Data, err = json.Marshal(model.Event{
-		Repo:     *repo,
-		Pipeline: *currentPipeline,
-	})
-	if err != nil {
-		return err
-	}
-	s.pubsub.Publish(message)
 
-	return nil
+	return s.notify(c, repo, currentPipeline)
 }
 
 // Init signals the workflow is initialized.
@@ -273,21 +259,10 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	defer func() {
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
-		message := pubsub_types.Message{
-			Labels: map[string]string{
-				"repo":    repo.FullName,
-				"private": strconv.FormatBool(repo.IsSCMPrivate),
-			},
+
+		if err := s.notify(c, repo, currentPipeline); err != nil {
+			log.Error().Err(err).Msg("could not publish pipeline state change to pubsub")
 		}
-		message.Data, err = json.Marshal(model.Event{
-			Repo:     *repo,
-			Pipeline: *currentPipeline,
-		})
-		if err != nil {
-			log.Error().Err(err).Msg("could not marshal JSON")
-			return
-		}
-		s.pubsub.Publish(message)
 	}()
 
 	workflow, err = pipeline.UpdateWorkflowStatusToRunning(s.store, *workflow, state)
@@ -392,7 +367,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}()
 
-	if err := s.notify(repo, currentPipeline); err != nil {
+	if err := s.notify(c, repo, currentPipeline); err != nil {
 		return err
 	}
 
@@ -597,22 +572,26 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 	}
 }
 
-func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
-	message := pubsub_types.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsSCMPrivate),
-		},
-	}
+// Notify push to our pubsub infra pipeline state changes.
+func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline) (err error) {
+	message := pubsub.Message{ID: ulid.Make().String()}
 	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *pipeline,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("can't marshal JSON: %w", err)
 	}
-	s.pubsub.Publish(message)
-	return nil
+
+	subTopics := make(map[string]struct{})
+	// if repo is public, push to public topic
+	if !repo.IsSCMPrivate {
+		subTopics[pubsub.PublicTopic] = struct{}{}
+	}
+	// publish to repo specific topic
+	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
+
+	return s.pubsub.Publish(c, subTopics, message)
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {

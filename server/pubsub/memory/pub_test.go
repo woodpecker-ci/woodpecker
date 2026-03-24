@@ -22,14 +22,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 )
 
 func TestPubsub(t *testing.T) {
 	var (
 		wg sync.WaitGroup
 
-		testMessage = types.Message{
+		testTopic = map[string]struct{}{"test": {}}
+
+		testMessage = pubsub.Message{
 			Data: []byte("test"),
 		}
 	)
@@ -37,20 +39,21 @@ func TestPubsub(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(
 		t.Context(),
 	)
-
 	broker := New()
+
+	assert.Error(t, broker.Subscribe(ctx, nil, func(pubsub.Message) {}))
 	go func() {
-		broker.Subscribe(ctx, func(message types.Message) { assert.Equal(t, testMessage, message); wg.Done() })
+		assert.NoError(t, broker.Subscribe(ctx, testTopic, func(message pubsub.Message) { assert.Equal(t, testMessage, message); wg.Done() }))
 	}()
 	go func() {
-		broker.Subscribe(ctx, func(_ types.Message) { wg.Done() })
+		assert.NoError(t, broker.Subscribe(ctx, testTopic, func(pubsub.Message) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)
 
 	wg.Add(2)
 	go func() {
-		broker.Publish(testMessage)
+		assert.NoError(t, broker.Publish(ctx, testTopic, testMessage))
 	}()
 
 	wg.Wait()

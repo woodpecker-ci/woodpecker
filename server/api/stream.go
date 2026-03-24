@@ -31,7 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	pubsub "go.woodpecker-ci.org/woodpecker/v3/server/pubsub/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
@@ -71,11 +71,14 @@ func EventStreamSSE(c *gin.Context) {
 	log.Debug().Msg("user feed: connection opened")
 
 	user := session.User(c)
-	repo := map[string]bool{}
+	subTopics := make(map[string]struct{})
+	// subscribe to all public state changes
+	subTopics[pubsub.PublicTopic] = struct{}{}
+	// subscribe to all private state changes or repos the user owns
 	if user != nil {
 		repos, _ := store.FromContext(c).RepoList(user, false, true, nil)
 		for _, r := range repos {
-			repo[r.FullName] = true
+			subTopics[pubsub.GetRepoTopic(r)] = struct{}{}
 		}
 	}
 
@@ -92,23 +95,16 @@ func EventStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		server.Config.Services.Pubsub.Subscribe(ctx, func(m pubsub.Message) {
-			defer func() {
-				obj := recover() // fix #2480 // TODO: check if it's still needed
-				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
-			}()
-			name := m.Labels["repo"]
-			priv := m.Labels["private"]
-			if repo[name] || priv == "false" {
+		err := server.Config.Services.Pubsub.Subscribe(ctx, subTopics,
+			func(m pubsub.Message) {
 				select {
 				case <-ctx.Done():
 					return
 				default:
 					eventChan <- m.Data
 				}
-			}
-		})
-		cancel(nil)
+			})
+		cancel(err)
 	}()
 
 	for {

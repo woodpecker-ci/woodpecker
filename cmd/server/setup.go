@@ -34,7 +34,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	pubsub_in_memory "go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
 	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
@@ -159,7 +159,7 @@ func setupJWTSecret(_store store.Store) (string, error) {
 func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Pubsub = pubsub.NewInMemory(ctx)
+	server.Config.Services.Pubsub = pubsub_in_memory.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
 	server.Config.Services.Queue, err = setupQueue(ctx, s)
 	if err != nil {
