@@ -141,6 +141,7 @@
     "nixpkgs",
     "nocolor",
     "nolint",
+    "nologin",
     "norunningpipelines",
     "nosniff",
     "ntfy",
