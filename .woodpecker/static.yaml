@@ -42,7 +42,7 @@ steps:
           exit 0
         fi
         echo "ERROR: PR has 'feature' label but no changes in docs/docs/"
-        echo "Please add documentation for the new feature."
+        echo "🚨 Please add documentation for the new feature. 🚨"
         exit 1
     when:
       - event: pull_request
