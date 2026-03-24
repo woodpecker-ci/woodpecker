@@ -107,7 +107,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	// Listen for remote cancel events (UI / API).
 	// When canceled, we MUST cancel the workflow context
-	// so that workflow execution stop immediately.
+	// so that workflow execution stops immediately.
 	go func() {
 		logger.Debug().Msg("start listening for server side cancel signal")
 
