@@ -39,7 +39,7 @@ type Message struct {
 type Receiver func(Message)
 
 // Topics are key-value pairs, messages are filtered upon
-// the the key is the base-key and the value su the sub-key.
+// the the key is the base-key and the value to the sub-key.
 type Topics map[string]struct{}
 
 func GetRepoTopic(r *model.Repo) string {
