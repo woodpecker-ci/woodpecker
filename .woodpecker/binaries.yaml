@@ -68,14 +68,14 @@ steps:
       - apt install -y zip
       - make release-cli
 
-  #build-deb-rpm:
-  #  depends_on:
-  #    - cross-compile-server
-  #    - build-agent
-  #    - build-cli
-  #  image: *golang_image
-  #  commands:
-  #    - make bundle
+  build-deb-rpm:
+    depends_on:
+      - cross-compile-server
+      - build-agent
+      - build-cli
+    image: *golang_image
+    commands:
+      - make bundle
 
   build-sbom-trivy: # same as make sbom-trivy
     depends_on:
