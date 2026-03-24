@@ -29,21 +29,7 @@ steps:
     image: docker.io/alpine:3.23
     depends_on: []
     commands:
-      - apk add --no-cache -q jq
-      - |
-        DOCS_CHANGED=$(echo "$CI_PIPELINE_FILES" | jq -r '.[]' | grep -c '^docs/docs/' || true)
-        if [ "$DOCS_CHANGED" -gt 0 ]; then
-          echo "OK: docs/docs/ has changes"
-          exit 0
-        fi
-        NON_CLI=$(echo "$CI_PIPELINE_FILES" | jq -r '.[]' | grep -v '^cli/' | grep -v '^cmd/cli/' | grep -v '^docs/' || true)
-        if [ -z "$NON_CLI" ]; then
-          echo "OK: CLI-only feature, docs are auto-generated"
-          exit 0
-        fi
-        echo "ERROR: PR has 'feature' label but no changes in docs/docs/"
-        echo "🚨 Please add documentation for the new feature. 🚨"
-        exit 1
+      - apk add --no-cache -q jq && ./.woodpecker/check-feature-docs.sh
     when:
       - event: pull_request
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "feature"'
