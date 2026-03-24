@@ -51,6 +51,8 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
+// TODO: refactor this big function into subfunctions in it's own subpackage
+
 // Run executes a workflow using a backend, tracks its state and reports the state back to the server.
 func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	log.Debug().Msg("request next execution")
