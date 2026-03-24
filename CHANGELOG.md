@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-23
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -52,6 +52,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix build deb rpm packages [[#6309](https://github.com/woodpecker-ci/woodpecker/pull/6309)]
 - Enable crons if created via CLI [[#6228](https://github.com/woodpecker-ci/woodpecker/pull/6228)]
 - Fix message on gitlab tag event [[#6196](https://github.com/woodpecker-ci/woodpecker/pull/6196)]
 - fix(bbdc): resolve annotated tag object SHA to commit SHA before posting build status [[#6203](https://github.com/woodpecker-ci/woodpecker/pull/6203)]
