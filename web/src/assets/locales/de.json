@@ -774,5 +774,7 @@
     "disabled": "Deaktiviert",
     "config_extension_exclusive": "Exklusiv",
     "config_extension_exclusive_desc": "Wenn aktiviert, werden alle anderen Möglichkeiten zum Laden der Konfiguration, einschließlich der Code-Plattform, übersprungen.",
-    "registry_extension_endpoint": "Endpunkt der Register-Erweiterung"
+    "registry_extension_endpoint": "Endpunkt der Register-Erweiterung",
+    "global_level_registry": "globales Register",
+    "org_level_registry": "Organisationsregister"
 }
