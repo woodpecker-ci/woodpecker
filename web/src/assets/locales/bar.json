@@ -69,7 +69,8 @@
                 "log_download": "Runterladn",
                 "log_delete": "Löschn",
                 "log_auto_scroll": "Automatisch scrollen oschoidn",
-                "log_auto_scroll_off": "Automatisch scrollen ausschoidn"
+                "log_auto_scroll_off": "Automatisch scrollen ausschoidn",
+                "skipped": "Da Schrid is ausglosn woan."
             },
             "event": {
                 "push": "Push",
@@ -93,7 +94,8 @@
                 "declined": "obglehnt",
                 "error": "Fella",
                 "failure": "is schiaf ganga",
-                "killed": "obgwürgt"
+                "killed": "obgwürgt",
+                "canceled": "abgwürgt"
             },
             "errors": "Fella",
             "warnings": "Warnunga",
@@ -110,7 +112,13 @@
                 "metadata_exec_title": "Pipeline lokal neistarten",
                 "metadata_exec_desc": "Load de Metadaten vo dera Pipeline runter um se lokal laufa zu lassn. So kost Probleme fixen und Änderunga testn bevors'd sie commitest. De Woodpecker CLI muas lokal in da gleichn Version wia da Server sei."
             },
-            "view": "Pipeline oschaun"
+            "view": "Pipeline oschaun",
+            "load_more": "Zoag mea o",
+            "cancel_info": {
+                "superseded_by": "Ersetzt duach #{pipelineId}",
+                "canceled_by_user": "Abgewürgt duach {user}",
+                "canceled_by_step": "Abgwürgt wenga {step}"
+            }
         },
         "manual_pipeline": {
             "title": "Pipeline vo Hand starten",
@@ -595,5 +603,8 @@
     "weblate": "unserm Weblate",
     "disabled": "Abgschoidn",
     "config_extension_exclusive": "Ganz Alloa",
-    "config_extension_exclusive_desc": "Wenn ogschoid, werdn alle anderen konfigurations Möglichkeitn überganga, a de Forge."
+    "config_extension_exclusive_desc": "Wenn ogschoid, werdn alle anderen konfigurations Möglichkeitn überganga, a de Forge.",
+    "global_level_registry": "Globale Registry",
+    "org_level_registry": "Organisations-Registry",
+    "registry_extension_endpoint": "Registry Erweiterungs Endpoint"
 }

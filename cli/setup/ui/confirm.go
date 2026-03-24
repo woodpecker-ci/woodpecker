@@ -15,7 +15,7 @@
 package ui
 
 import (
-	"github.com/charmbracelet/huh"
+	"charm.land/huh/v2"
 )
 
 func Confirm(prompt string) (bool, error) {
