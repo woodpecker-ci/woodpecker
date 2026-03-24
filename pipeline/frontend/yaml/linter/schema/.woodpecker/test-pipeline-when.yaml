@@ -1,3 +1,9 @@
+environment:
+  MY_ENV_VAR: 5
+  MY_COMPLEX_VAR:
+    - abc: def
+    - xyz: 123
+
 when:
   - branch: [main, deploy]
     event: push

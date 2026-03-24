@@ -21,14 +21,15 @@ import (
 type (
 	// Workflow defines a workflow configuration.
 	Workflow struct {
-		When      constraint.When   `yaml:"when,omitempty"`
-		Workspace Workspace         `yaml:"workspace,omitempty"`
-		Clone     ContainerList     `yaml:"clone,omitempty"`
-		Steps     ContainerList     `yaml:"steps,omitempty"`
-		Services  ContainerList     `yaml:"services,omitempty"`
-		Labels    map[string]string `yaml:"labels,omitempty"`
-		DependsOn []string          `yaml:"depends_on,omitempty"`
-		SkipClone bool              `yaml:"skip_clone"`
+		When        constraint.When   `yaml:"when,omitempty"`
+		Workspace   Workspace         `yaml:"workspace,omitempty"`
+		Clone       ContainerList     `yaml:"clone,omitempty"`
+		Steps       ContainerList     `yaml:"steps,omitempty"`
+		Services    ContainerList     `yaml:"services,omitempty"`
+		Labels      map[string]string `yaml:"labels,omitempty"`
+		DependsOn   []string          `yaml:"depends_on,omitempty"`
+		SkipClone   bool              `yaml:"skip_clone"`
+		Environment map[string]any    `yaml:"environment,omitempty"`
 		// Deprecated: use when.status. TODO remove in next major.
 		RunsOn []string `yaml:"runs_on,omitempty"`
 	}
