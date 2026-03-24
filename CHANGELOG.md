@@ -22,6 +22,7 @@
 
 ### 📈 Enhancement
 
+- Improve linter warning when step has no when block [[#6314](https://github.com/woodpecker-ci/woodpecker/pull/6314)]
 - Improve error message when no workflows for manual were found [[#6313](https://github.com/woodpecker-ci/woodpecker/pull/6313)]
 - Server return conflict status when stale repo causes duplicate insert [[#6276](https://github.com/woodpecker-ci/woodpecker/pull/6276)]
 - Show global/org registries in org/repo registries tab [[#6291](https://github.com/woodpecker-ci/woodpecker/pull/6291)]
