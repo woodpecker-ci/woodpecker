@@ -24,7 +24,7 @@ import (
 )
 
 type publisher struct {
-	sync.Mutex
+	sync.RWMutex
 
 	subs map[*pubsub.Receiver][]string
 }
@@ -37,7 +37,9 @@ func New() pubsub.PubSub {
 }
 
 func (p *publisher) Publish(_ context.Context, topics pubsub.Topics, message pubsub.Message) error {
-	p.Lock()
+	p.RLock()
+	defer p.RUnlock()
+
 	for s, tl := range p.subs {
 		for t := range topics {
 			if slices.Contains(tl, t) {
@@ -46,7 +48,7 @@ func (p *publisher) Publish(_ context.Context, topics pubsub.Topics, message pub
 			}
 		}
 	}
-	p.Unlock()
+
 	return nil
 }
 
