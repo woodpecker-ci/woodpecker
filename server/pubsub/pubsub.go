@@ -21,8 +21,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
+// PubSub provider interface, used to signal pipeline state changes to WebUI.
 type PubSub interface {
+	// Publish pushes a state change to all subscribers,
+	// that have at least subscribed to one of the topics we publish it under.
 	Publish(context.Context, Topics, Message) error
+	// Subscribe gets all state changes that match the same topic.
+	// If multiple topics are subscribed, and a message also match multiple,
+	// the implementation takes care of deduplication.
 	Subscribe(context.Context, Topics, Receiver) error
 }
 
