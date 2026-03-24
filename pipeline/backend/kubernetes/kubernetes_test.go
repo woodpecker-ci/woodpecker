@@ -52,7 +52,7 @@ func TestGettingConfig(t *testing.T) {
 	config.PodLabels = nil
 	config.PodAnnotations["a2"] = "v2"
 	config.ImagePullSecretNames = append(config.ImagePullSecretNames, "docker.io")
-	config.EnforcedSecurityContext.RunAsNonRoot = newBool(true)
+	config.DefaultSecurityContext.RunAsNonRoot = newBool(true)
 
 	assert.Equal(t, "default", engine.config.Namespace)
 	assert.Equal(t, "hdd", engine.config.StorageClass)
@@ -61,7 +61,7 @@ func TestGettingConfig(t *testing.T) {
 	assert.Len(t, engine.config.PodLabels, 1)
 	assert.Len(t, engine.config.PodAnnotations, 1)
 	assert.Len(t, engine.config.ImagePullSecretNames, 1)
-	assert.False(t, *engine.config.EnforcedSecurityContext.RunAsNonRoot)
+	assert.False(t, *engine.config.DefaultSecurityContext.RunAsNonRoot)
 }
 
 func TestSetupWorkflow(t *testing.T) {
