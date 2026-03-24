@@ -54,6 +54,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix workflow serialize to omit skip_clone if false [[#6319](https://github.com/woodpecker-ci/woodpecker/pull/6319)]
 - Fix build deb rpm packages [[#6309](https://github.com/woodpecker-ci/woodpecker/pull/6309)]
 - Enable crons if created via CLI [[#6228](https://github.com/woodpecker-ci/woodpecker/pull/6228)]
 - Fix message on gitlab tag event [[#6196](https://github.com/woodpecker-ci/woodpecker/pull/6196)]
