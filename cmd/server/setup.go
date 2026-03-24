@@ -159,7 +159,7 @@ func setupJWTSecret(_store store.Store) (string, error) {
 func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Pubsub = pubsub.New()
+	server.Config.Services.Pubsub = pubsub.NewInMemory(ctx)
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
 	server.Config.Services.Queue, err = setupQueue(ctx, s)
 	if err != nil {

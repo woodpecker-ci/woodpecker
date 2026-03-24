@@ -36,6 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	pubsub_types "go.woodpecker-ci.org/woodpecker/v3/server/pubsub/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
@@ -45,7 +46,7 @@ const updateAgentLastWorkDelay = time.Minute
 
 type RPC struct {
 	queue         queue.Queue
-	pubsub        *pubsub.Publisher
+	pubsub        pubsub.PubSub
 	logger        logging.Log
 	store         store.Store
 	pipelineTime  *prometheus.GaugeVec
@@ -207,7 +208,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err
 	}
-	message := pubsub.Message{
+	message := pubsub_types.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
@@ -272,7 +273,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	defer func() {
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
-		message := pubsub.Message{
+		message := pubsub_types.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
 				"private": strconv.FormatBool(repo.IsSCMPrivate),
@@ -597,7 +598,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 }
 
 func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
-	message := pubsub.Message{
+	message := pubsub_types.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
 			"private": strconv.FormatBool(repo.IsSCMPrivate),

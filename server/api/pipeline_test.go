@@ -264,7 +264,7 @@ func TestCancelPipeline(t *testing.T) {
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Pubsub = pubsub.NewInMemory(t.Context())
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -315,7 +315,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Pubsub = pubsub.NewInMemory(t.Context())
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
@@ -388,7 +388,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Pubsub = pubsub.NewInMemory(t.Context())
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
@@ -444,7 +444,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Pubsub = pubsub.NewInMemory(t.Context())
 
 		// return nil config with error
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(nil, http.ErrHandlerTimeout)

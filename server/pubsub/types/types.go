@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pubsub
-
-import (
-	"context"
-	"sync"
-)
+package types
 
 // Message defines a published message.
 type Message struct {
@@ -33,34 +28,3 @@ type Message struct {
 
 // Receiver receives published messages.
 type Receiver func(Message)
-
-type Publisher struct {
-	sync.Mutex
-
-	subs map[*Receiver]struct{}
-}
-
-// New creates an in-memory publisher.
-func New() *Publisher {
-	return &Publisher{
-		subs: make(map[*Receiver]struct{}),
-	}
-}
-
-func (p *Publisher) Publish(message Message) {
-	p.Lock()
-	for s := range p.subs {
-		go (*s)(message)
-	}
-	p.Unlock()
-}
-
-func (p *Publisher) Subscribe(c context.Context, receiver Receiver) {
-	p.Lock()
-	p.subs[&receiver] = struct{}{}
-	p.Unlock()
-	<-c.Done()
-	p.Lock()
-	delete(p.subs, &receiver)
-	p.Unlock()
-}

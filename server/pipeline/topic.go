@@ -22,7 +22,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	pubsub "go.woodpecker-ci.org/woodpecker/v3/server/pubsub/types"
 )
 
 // publishToTopic publishes message to UI clients.

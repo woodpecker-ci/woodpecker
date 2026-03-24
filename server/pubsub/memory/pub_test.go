@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pubsub
+package memory
 
 import (
 	"context"
@@ -21,13 +21,15 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/types"
 )
 
 func TestPubsub(t *testing.T) {
 	var (
 		wg sync.WaitGroup
 
-		testMessage = Message{
+		testMessage = types.Message{
 			Data: []byte("test"),
 		}
 	)
@@ -38,10 +40,10 @@ func TestPubsub(t *testing.T) {
 
 	broker := New()
 	go func() {
-		broker.Subscribe(ctx, func(message Message) { assert.Equal(t, testMessage, message); wg.Done() })
+		broker.Subscribe(ctx, func(message types.Message) { assert.Equal(t, testMessage, message); wg.Done() })
 	}()
 	go func() {
-		broker.Subscribe(ctx, func(_ Message) { wg.Done() })
+		broker.Subscribe(ctx, func(_ types.Message) { wg.Done() })
 	}()
 
 	<-time.After(500 * time.Millisecond)
