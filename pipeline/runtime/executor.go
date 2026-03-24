@@ -60,9 +60,9 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		var stepErr *pipeline_errors.ErrInvalidWorkflowSetup
 		if errors.As(err, &stepErr) {
 			state := new(state.State)
-			state.Pipeline.Step = stepErr.Step
-			state.Pipeline.Error = stepErr.Err
-			state.Process = backend.State{
+			state.CurrStep = stepErr.Step
+			state.Workflow.Error = stepErr.Err
+			state.CurrStepState = backend.State{
 				Error:    stepErr.Err,
 				Exited:   true,
 				ExitCode: 1,
@@ -103,19 +103,19 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	}
 
 	state := new(state.State)
-	state.Pipeline.Started = r.started
-	state.Pipeline.Step = step
-	state.Pipeline.Error = r.err.Get()
+	state.Workflow.Started = r.started
+	state.CurrStep = step
+	state.Workflow.Error = r.err.Get()
 
 	// We have an error while starting the step
 	if processState == nil && err != nil {
-		state.Process = backend.State{
+		state.CurrStepState = backend.State{
 			Error:     err,
 			Exited:    true,
 			OOMKilled: false,
 		}
 	} else if processState != nil {
-		state.Process = *processState
+		state.CurrStepState = *processState
 	}
 
 	if traceErr := r.tracer.Trace(state); traceErr != nil {
@@ -141,18 +141,18 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				Str("step", step.Name).
 				Msg("prepare")
 
-			switch rErr := r.err.Get(); {
-			case rErr != nil && !step.OnFailure:
+			rErr := r.err.Get()
+			if rErr != nil && !step.OnFailure {
 				logger.Debug().
 					Str("step", step.Name).
-					Err(rErr).
 					Msgf("skipped due to OnFailure=%t", step.OnFailure)
-				return nil
-			case rErr == nil && !step.OnSuccess:
+				return r.traceStep(&backend.State{Skipped: true}, nil, step)
+			}
+			if rErr == nil && !step.OnSuccess {
 				logger.Debug().
 					Str("step", step.Name).
 					Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
-				return nil
+				return r.traceStep(&backend.State{Skipped: true}, nil, step)
 			}
 
 			// Trace started.
