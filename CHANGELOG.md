@@ -113,6 +113,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6311](https://github.com/woodpecker-ci/woodpecker/pull/6311)]
 - fix(deps): update module github.com/charmbracelet/huh to v2 [[#6243](https://github.com/woodpecker-ci/woodpecker/pull/6243)]
 - chore(deps): lock file maintenance [[#6305](https://github.com/woodpecker-ci/woodpecker/pull/6305)]
 - chore(deps): update dependency golangci/golangci-lint to v2.11.4 [[#6301](https://github.com/woodpecker-ci/woodpecker/pull/6301)]
