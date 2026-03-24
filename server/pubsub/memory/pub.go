@@ -20,6 +20,7 @@ import (
 	"slices"
 	"sync"
 
+	"github.com/rs/zerolog/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 )
 
@@ -41,6 +42,12 @@ func (p *publisher) Publish(_ context.Context, topics pubsub.Topics, message pub
 	defer p.RUnlock()
 
 	for s, tl := range p.subs {
+		// callback is from outside so just make sure it still exists
+		if s == nil || *s == nil {
+			log.Error().Msg("found nil callback func in subscribers!")
+			continue
+		}
+
 		for t := range topics {
 			if slices.Contains(tl, t) {
 				go (*s)(message)
