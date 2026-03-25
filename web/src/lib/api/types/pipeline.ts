@@ -96,7 +96,7 @@ export interface Pipeline {
 
   cancel_info: CancelInfo;
 
-  version?: string;
+  version: string;
 }
 
 export type PipelineStatus =
