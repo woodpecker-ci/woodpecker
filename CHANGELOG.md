@@ -54,6 +54,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix bitbucket api deprecations [[#6324](https://github.com/woodpecker-ci/woodpecker/pull/6324)]
 - Fix workflow serialize to omit skip_clone if false [[#6319](https://github.com/woodpecker-ci/woodpecker/pull/6319)]
 - Fix build deb rpm packages [[#6309](https://github.com/woodpecker-ci/woodpecker/pull/6309)]
 - Enable crons if created via CLI [[#6228](https://github.com/woodpecker-ci/woodpecker/pull/6228)]
