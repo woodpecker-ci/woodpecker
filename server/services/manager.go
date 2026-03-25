@@ -60,6 +60,7 @@ type manager struct {
 	forgeCache          *ttlcache.Cache[int64, forge.Forge]
 	setupForge          SetupForge
 	client              *utils.Client
+	secretServiceNetrc  bool
 }
 
 func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
@@ -87,7 +88,8 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
-		secret:              setupSecretService(store, c.String("secret-service-endpoint"), client),
+		secret:              setupSecretService(store, c.String("secret-service-endpoint"), client, c.Bool("secret-service-netrc")),
+		secretServiceNetrc:  c.Bool("secret-service-netrc"),
 		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-service-endpoint"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
@@ -103,7 +105,8 @@ func (m *manager) SignaturePublicKey() crypto.PublicKey {
 
 func (m *manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
 	if repo.SecretExtensionEndpoint != "" {
-		return secret.NewCombined(m.secret, secret.NewHTTP(strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.client))
+		includeNetrc := m.secretServiceNetrc && repo.SecretExtensionNetrc
+		return secret.NewCombined(m.secret, secret.NewHTTP(strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.client, includeNetrc))
 	}
 
 	return m.SecretService()

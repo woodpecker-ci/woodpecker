@@ -5292,6 +5292,9 @@ const docTemplate = `{
                 "secret_extension_endpoint": {
                     "type": "string"
                 },
+                "secret_extension_netrc": {
+                    "type": "boolean"
+                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -5397,6 +5400,9 @@ const docTemplate = `{
                 "secret_extension_endpoint": {
                     "type": "string"
                 },
+                "secret_extension_netrc": {
+                    "type": "boolean"
+                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -5452,6 +5458,9 @@ const docTemplate = `{
                 },
                 "secret_extension_endpoint": {
                     "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
                 },
                 "timeout": {
                     "type": "integer"

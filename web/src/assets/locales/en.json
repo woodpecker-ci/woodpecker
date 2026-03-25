@@ -536,6 +536,8 @@
   "config_extension_exclusive": "Exclusive",
   "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
   "secret_extension_endpoint": "Secret extension endpoint",
+  "secret_extension_netrc": "Include netrc credentials",
+  "secret_extension_netrc_desc": "Send forge netrc credentials to the secret extension.",
   "extensions_signatures_public_key": "Public key for signatures",
   "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
   "extensions_configuration_saved": "Extensions configuration saved",

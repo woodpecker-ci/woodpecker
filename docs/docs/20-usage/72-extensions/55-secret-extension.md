@@ -22,6 +22,7 @@ If both the global and the repo-level extension return a secret with the same na
 
 ```ini title="Server"
 WOODPECKER_SECRET_SERVICE_ENDPOINT=https://example.com/secrets
+WOODPECKER_SECRET_SERVICE_NETRC=false
 ```
 
 ## How it works
@@ -32,11 +33,15 @@ When a pipeline is triggered, Woodpecker will fetch secrets from your service. T
 
 The extension receives an HTTP POST request with the following JSON payload:
 
+:::info
+The `netrc` field is only included in the request when the global `WOODPECKER_SECRET_SERVICE_NETRC` is set to `true` (default: `false`). When this global flag is `false`, netrc is **never** sent, regardless of repository settings. When set to `true`, each repository can opt in or opt out of sending netrc via the per-repo "Send netrc credentials" setting.
+:::
+
 ```ts
 class Request {
   repo: Repo;
   pipeline: Pipeline;
-  netrc: Netrc;
+  netrc?: Netrc; // only included when netrc sending is enabled (see below)
 }
 ```
 
@@ -123,6 +128,7 @@ Example request:
     "password": "forge-access-token"
   }
 }
+// Note: the "netrc" field is omitted when netrc sending is not enabled.
 ```
 
 ### Response

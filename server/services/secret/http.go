@@ -24,14 +24,15 @@ import (
 )
 
 type httpExtension struct {
-	endpoint string
-	client   *utils.Client
+	endpoint     string
+	client       *utils.Client
+	includeNetrc bool
 }
 
 type secretRequestStructure struct {
 	Repo     *model.Repo     `json:"repo"`
 	Pipeline *model.Pipeline `json:"pipeline"`
-	Netrc    *model.Netrc    `json:"netrc"`
+	Netrc    *model.Netrc    `json:"netrc,omitempty"`
 }
 
 type secretResponseStructure struct {
@@ -39,8 +40,8 @@ type secretResponseStructure struct {
 }
 
 // NewHTTP returns a new HTTP secret extension client.
-func NewHTTP(endpoint string, client *utils.Client) *httpExtension {
-	return &httpExtension{endpoint: endpoint, client: client}
+func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) *httpExtension {
+	return &httpExtension{endpoint: endpoint, client: client, includeNetrc: includeNetrc}
 }
 
 // SecretListPipeline fetches secrets from an external HTTP extension.
@@ -48,7 +49,9 @@ func (h *httpExtension) SecretListPipeline(repo *model.Repo, pipeline *model.Pip
 	body := secretRequestStructure{
 		Repo:     repo,
 		Pipeline: pipeline,
-		Netrc:    netrc,
+	}
+	if h.includeNetrc {
+		body.Netrc = netrc
 	}
 
 	response := new(secretResponseStructure)

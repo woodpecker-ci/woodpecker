@@ -90,6 +90,9 @@ export interface Repo {
 
   // Endpoint for secret extensions
   secret_extension_endpoint: string;
+
+  // Whether to include netrc credentials in secret extension requests
+  secret_extension_netrc: boolean;
 }
 
 /* eslint-disable no-unused-vars */
@@ -123,7 +126,7 @@ export type RepoSettings = Pick<
 
 export type ExtensionSettings = Pick<
   Repo,
-  'config_extension_endpoint' | 'config_extension_exclusive' | 'registry_extension_endpoint' | 'secret_extension_endpoint'
+  'config_extension_endpoint' | 'config_extension_exclusive' | 'registry_extension_endpoint' | 'secret_extension_endpoint' | 'secret_extension_netrc'
 >;
 
 export interface RepoPermissions {
