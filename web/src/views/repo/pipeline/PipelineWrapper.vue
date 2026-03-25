@@ -80,7 +80,7 @@
         </div>
         <div v-if="pipeline.version" class="flex shrink-0 items-center gap-2" :title="$t('repo.pipeline.version')">
           <Icon name="tag" />
-          <span>{{ pipeline.version }}</span>
+          <span>{{ $t('repo.pipeline.version') }}: {{ pipeline.version }}</span>
         </div>
         <div v-if="pipeline.status === 'killed' && pipeline.cancel_info" class="flex shrink-0 items-center gap-2">
           <Icon name="status-killed" />
