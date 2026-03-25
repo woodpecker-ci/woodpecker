@@ -16,6 +16,7 @@ package pubsub
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -53,3 +54,5 @@ func GetRepoTopic(r *model.Repo) string {
 }
 
 const PublicTopic = "public"
+
+var ErrNoTopic = errors.New("no topic specified")
