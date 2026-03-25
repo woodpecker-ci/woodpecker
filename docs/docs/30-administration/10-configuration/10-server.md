@@ -998,7 +998,7 @@ If you enable this, all repos will exclusively use the global config service end
 - Name: `WOODPECKER_REGISTRY_EXTENSION_ENDPOINT`
 - Default: none
 
-Specify a registry extension endpoint, see [Registry Extension](../../20-usage/72-extensions/50-registy-extension.md)
+Specify a registry extension endpoint, see [Registry Extension](../../20-usage/72-extensions/50-registry-extension.md)
 
 ---
 
