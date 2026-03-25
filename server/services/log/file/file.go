@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	logger "github.com/rs/zerolog/log"
+	zerolog_log "github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -92,7 +92,7 @@ func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) erro
 
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
-		logger.Error().Err(err).Msgf("could not open log file %s", path)
+		zerolog_log.Error().Err(err).Msgf("could not open log file %s", path)
 		return err
 	}
 
@@ -103,12 +103,12 @@ func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) erro
 			bytes = append(bytes, jsonLine...)
 			bytes = append(bytes, byte('\n'))
 		} else {
-			logger.Error().Err(err).Msg("could not convert log entry to JSON")
+			zerolog_log.Error().Err(err).Msg("could not convert log entry to JSON")
 		}
 	}
 
 	if _, err = file.Write(bytes); err != nil {
-		logger.Error().Err(err).Msg("could not write out log entries")
+		zerolog_log.Error().Err(err).Msg("could not write out log entries")
 	}
 
 	return file.Close()

@@ -21,12 +21,12 @@ import (
 	"strings"
 
 	"github.com/distribution/reference"
-	config_file "github.com/docker/cli/cli/config/configfile"
-	config_file_types "github.com/docker/cli/cli/config/types"
+	docker_config_file "github.com/docker/cli/cli/config/configfile"
+	docker_config_types "github.com/docker/cli/cli/config/types"
 	"github.com/rs/zerolog/log"
-	v1 "k8s.io/api/core/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -36,10 +36,10 @@ import (
 type nativeSecretsProcessor struct {
 	config         *config
 	secrets        []SecretRef
-	envFromSources []v1.EnvFromSource
-	envVars        []v1.EnvVar
-	volumes        []v1.Volume
-	mounts         []v1.VolumeMount
+	envFromSources []kube_core_v1.EnvFromSource
+	envVars        []kube_core_v1.EnvVar
+	volumes        []kube_core_v1.Volume
+	mounts         []kube_core_v1.VolumeMount
 }
 
 func newNativeSecretsProcessor(config *config, secrets []SecretRef) nativeSecretsProcessor {
@@ -107,15 +107,15 @@ func (sr SecretRef) isFile() bool {
 	return len(sr.Target.File) > 0
 }
 
-func (sr SecretRef) toEnvFromSource() (v1.EnvFromSource, error) {
-	env := v1.EnvFromSource{}
+func (sr SecretRef) toEnvFromSource() (kube_core_v1.EnvFromSource, error) {
+	env := kube_core_v1.EnvFromSource{}
 
 	if !sr.isSimple() {
 		return env, fmt.Errorf("secret '%s' is not simple reference", sr.Name)
 	}
 
-	env = v1.EnvFromSource{
-		SecretRef: &v1.SecretEnvSource{
+	env = kube_core_v1.EnvFromSource{
+		SecretRef: &kube_core_v1.SecretEnvSource{
 			LocalObjectReference: secretReference(sr.Name),
 		},
 	}
@@ -123,15 +123,15 @@ func (sr SecretRef) toEnvFromSource() (v1.EnvFromSource, error) {
 	return env, nil
 }
 
-func (sr SecretRef) toEnvVar() (v1.EnvVar, error) {
-	envVar := v1.EnvVar{}
+func (sr SecretRef) toEnvVar() (kube_core_v1.EnvVar, error) {
+	envVar := kube_core_v1.EnvVar{}
 
 	if !sr.isAdvanced() {
 		return envVar, fmt.Errorf("secret '%s' is not advanced reference", sr.Name)
 	}
 
-	envVar.ValueFrom = &v1.EnvVarSource{
-		SecretKeyRef: &v1.SecretKeySelector{
+	envVar.ValueFrom = &kube_core_v1.EnvVarSource{
+		SecretKeyRef: &kube_core_v1.SecretKeySelector{
 			LocalObjectReference: secretReference(sr.Name),
 			Key:                  sr.Key,
 		},
@@ -146,9 +146,9 @@ func (sr SecretRef) toEnvVar() (v1.EnvVar, error) {
 	return envVar, nil
 }
 
-func (sr SecretRef) toVolume() (v1.Volume, error) {
+func (sr SecretRef) toVolume() (kube_core_v1.Volume, error) {
 	var err error
-	volume := v1.Volume{}
+	volume := kube_core_v1.Volume{}
 
 	if !sr.isFile() {
 		return volume, fmt.Errorf("secret '%s' is not file reference", sr.Name)
@@ -159,16 +159,16 @@ func (sr SecretRef) toVolume() (v1.Volume, error) {
 		return volume, err
 	}
 
-	volume.Secret = &v1.SecretVolumeSource{
+	volume.Secret = &kube_core_v1.SecretVolumeSource{
 		SecretName: sr.Name,
 	}
 
 	return volume, nil
 }
 
-func (sr SecretRef) toVolumeMount() (v1.VolumeMount, error) {
+func (sr SecretRef) toVolumeMount() (kube_core_v1.VolumeMount, error) {
 	var err error
-	mount := v1.VolumeMount{
+	mount := kube_core_v1.VolumeMount{
 		ReadOnly: true,
 	}
 
@@ -187,16 +187,16 @@ func (sr SecretRef) toVolumeMount() (v1.VolumeMount, error) {
 	return mount, nil
 }
 
-func secretsReferences(names []string) []v1.LocalObjectReference {
-	secretReferences := make([]v1.LocalObjectReference, len(names))
+func secretsReferences(names []string) []kube_core_v1.LocalObjectReference {
+	secretReferences := make([]kube_core_v1.LocalObjectReference, len(names))
 	for i, imagePullSecretName := range names {
 		secretReferences[i] = secretReference(imagePullSecretName)
 	}
 	return secretReferences
 }
 
-func secretReference(name string) v1.LocalObjectReference {
-	return v1.LocalObjectReference{
+func secretReference(name string) kube_core_v1.LocalObjectReference {
+	return kube_core_v1.LocalObjectReference{
 		Name: name,
 	}
 }
@@ -205,7 +205,7 @@ func needsRegistrySecret(step *types.Step) bool {
 	return step.AuthConfig.Username != "" && step.AuthConfig.Password != ""
 }
 
-func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
+func mkRegistrySecret(step *types.Step, config *config) (*kube_core_v1.Secret, error) {
 	name, err := registrySecretName(step)
 	if err != nil {
 		return nil, err
@@ -221,8 +221,8 @@ func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
 		return nil, err
 	}
 
-	authConfig := config_file.ConfigFile{
-		AuthConfigs: map[string]config_file_types.AuthConfig{
+	authConfig := docker_config_file.ConfigFile{
+		AuthConfigs: map[string]docker_config_types.AuthConfig{
 			reference.Domain(named): {
 				Username: step.AuthConfig.Username,
 				Password: step.AuthConfig.Password,
@@ -235,15 +235,15 @@ func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
 		return nil, err
 	}
 
-	return &v1.Secret{
-		ObjectMeta: meta_v1.ObjectMeta{
+	return &kube_core_v1.Secret{
+		ObjectMeta: kube_meta_v1.ObjectMeta{
 			Namespace: config.GetNamespace(step.OrgID),
 			Name:      name,
 			Labels:    labels,
 		},
-		Type: v1.SecretTypeDockerConfigJson,
+		Type: kube_core_v1.SecretTypeDockerConfigJson,
 		Data: map[string][]byte{
-			v1.DockerConfigJsonKey: configFileJSON,
+			kube_core_v1.DockerConfigJsonKey: configFileJSON,
 		},
 	}, nil
 }
@@ -288,14 +288,14 @@ func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) er
 		return err
 	}
 	log.Trace().Msgf("creating secret: %s", secret.Name)
-	_, err = engine.client.CoreV1().Secrets(engine.config.GetNamespace(step.OrgID)).Create(ctx, secret, meta_v1.CreateOptions{})
+	_, err = engine.client.CoreV1().Secrets(engine.config.GetNamespace(step.OrgID)).Create(ctx, secret, kube_meta_v1.CreateOptions{})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts kube_meta_v1.DeleteOptions) error {
 	name, err := registrySecretName(step)
 	if err != nil {
 		return err
@@ -319,25 +319,25 @@ func startStepSecret(ctx context.Context, e *kube, step *types.Step) error {
 		return err
 	}
 	log.Trace().Msgf("creating secret: %s", secret.Name)
-	_, err = e.client.CoreV1().Secrets(e.config.GetNamespace(step.OrgID)).Create(ctx, secret, meta_v1.CreateOptions{})
+	_, err = e.client.CoreV1().Secrets(e.config.GetNamespace(step.OrgID)).Create(ctx, secret, kube_meta_v1.CreateOptions{})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func mkStepSecret(step *types.Step, config *config) (*v1.Secret, error) {
+func mkStepSecret(step *types.Step, config *config) (*kube_core_v1.Secret, error) {
 	name, err := stepSecretName(step)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.Secret{
-		ObjectMeta: meta_v1.ObjectMeta{
+	return &kube_core_v1.Secret{
+		ObjectMeta: kube_meta_v1.ObjectMeta{
 			Namespace: config.GetNamespace(step.OrgID),
 			Name:      name,
 		},
-		Type:       v1.SecretTypeOpaque,
+		Type:       kube_core_v1.SecretTypeOpaque,
 		StringData: step.SecretMapping,
 	}, nil
 }
@@ -350,7 +350,7 @@ func stepSecretName(step *types.Step) (string, error) {
 	return fmt.Sprintf("%s-step-secret", name), nil
 }
 
-func stopStepSecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+func stopStepSecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts kube_meta_v1.DeleteOptions) error {
 	name, err := stepSecretName(step)
 	if err != nil {
 		return err

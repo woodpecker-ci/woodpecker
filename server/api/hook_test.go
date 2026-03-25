@@ -30,7 +30,7 @@ import (
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
-	services_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
@@ -41,7 +41,7 @@ import (
 func TestHook(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	_manager := services_mocks.NewMockManager(t)
+	_manager := manager_mocks.NewMockManager(t)
 	_forge := forge_mocks.NewMockForge(t)
 	_store := store_mocks.NewMockStore(t)
 	_configService := config_service_mocks.NewMockService(t)

@@ -15,7 +15,7 @@
 package state
 
 import (
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // State is used to signal the current workflow and step state.
@@ -30,7 +30,7 @@ type State struct {
 		Error error `json:"error"`
 	}
 	// Current step that updates the step and workflow state
-	CurrStep *backend.Step `json:"step"`
+	CurrStep *backend_types.Step `json:"step"`
 	// Current step state
-	CurrStepState backend.State
+	CurrStepState backend_types.State
 }

@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	vsc_url "github.com/gitsight/go-vcsurl"
+	vcs_url "github.com/gitsight/go-vcsurl"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/net/proxy"
@@ -112,7 +112,7 @@ func getRepoFromGit(remoteName string) (string, error) {
 		return "", fmt.Errorf("no repository provided")
 	}
 
-	u, err := vsc_url.Parse(gitRemote)
+	u, err := vcs_url.Parse(gitRemote)
 	if err != nil {
 		return "", fmt.Errorf("could not parse git remote url: %w", err)
 	}

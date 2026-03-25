@@ -31,15 +31,15 @@ import (
 	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
-	json_message "github.com/docker/docker/pkg/jsonmessage"
-	std_copy "github.com/docker/docker/pkg/stdcopy"
-	tls_config "github.com/docker/go-connections/tlsconfig"
+	docker_json_message "github.com/docker/docker/pkg/jsonmessage"
+	docker_std_copy "github.com/docker/docker/pkg/stdcopy"
+	docker_tls_config "github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
@@ -60,7 +60,7 @@ const (
 )
 
 // New returns a new Docker Backend.
-func New() backend.Backend {
+func New() backend_types.Backend {
 	return &docker{
 		client: nil,
 	}
@@ -71,7 +71,7 @@ func (e *docker) Name() string {
 }
 
 func (e *docker) IsAvailable(ctx context.Context) bool {
-	if c, ok := ctx.Value(backend.CliCommand).(*cli.Command); ok {
+	if c, ok := ctx.Value(backend_types.CliCommand).(*cli.Command); ok {
 		if c.IsSet("backend-docker-host") {
 			return true
 		}
@@ -85,13 +85,13 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 		return nil
 	}
 
-	options := tls_config.Options{
+	options := docker_tls_config.Options{
 		CAFile:             filepath.Join(dockerCertPath, "ca.pem"),
 		CertFile:           filepath.Join(dockerCertPath, "cert.pem"),
 		KeyFile:            filepath.Join(dockerCertPath, "key.pem"),
 		InsecureSkipVerify: !verifyTLS,
 	}
-	tlsConf, err := tls_config.Client(options)
+	tlsConf, err := docker_tls_config.Client(options)
 	if err != nil {
 		log.Error().Err(err).Msg("could not create http client out of docker backend options")
 		return nil
@@ -110,10 +110,10 @@ func (e *docker) Flags() []cli.Flag {
 }
 
 // Load new client for Docker Backend using environment variables.
-func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
-	c, ok := ctx.Value(backend.CliCommand).(*cli.Command)
+func (e *docker) Load(ctx context.Context) (*backend_types.BackendInfo, error) {
+	c, ok := ctx.Value(backend_types.CliCommand).(*cli.Command)
 	if !ok {
-		return nil, backend.ErrNoCliContextFound
+		return nil, backend_types.ErrNoCliContextFound
 	}
 
 	var dockerClientOpts []client.Opt
@@ -145,12 +145,12 @@ func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
 		return nil, err
 	}
 
-	return &backend.BackendInfo{
+	return &backend_types.BackendInfo{
 		Platform: e.info.OSType + "/" + normalizeArchType(e.info.Architecture),
 	}, nil
 }
 
-func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) SetupWorkflow(ctx context.Context, conf *backend_types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
@@ -172,7 +172,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	return err
 }
 
-func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUUID string) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
@@ -197,7 +197,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		if pErr == nil {
 			// TODO(1936): show image pull progress in web-ui
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
-			if err := json_message.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+			if err := docker_json_message.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
 			responseBody.Close()
@@ -222,7 +222,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		}
 		// TODO(1936): show image pull progress in web-ui
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
-		if err := json_message.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+		if err := docker_json_message.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
 		responseBody.Close()
@@ -255,7 +255,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	return e.client.ContainerStart(ctx, containerName, container.StartOptions{})
 }
 
-func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
 	log := log.Logger.With().Str("taskUUID", taskUUID).Str("stepUUID", step.UUID).Logger()
 	log.Trace().Msgf("wait for step %s", step.Name)
 
@@ -274,14 +274,14 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 		return nil, err
 	}
 
-	return &backend.State{
+	return &backend_types.State{
 		Exited:    true,
 		ExitCode:  info.State.ExitCode,
 		OOMKilled: info.State.OOMKilled,
 	}, nil
 }
 
-func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+func (e *docker) TailStep(ctx context.Context, step *backend_types.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
 	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), container.LogsOptions{
@@ -298,14 +298,14 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 
 	// de multiplex 'logs' who contains two streams, previously multiplexed together using StdWriter
 	go func() {
-		_, _ = std_copy.StdCopy(wc, wc, logs)
+		_, _ = docker_std_copy.StdCopy(wc, wc, logs)
 		_ = logs.Close()
 		_ = wc.Close()
 	}()
 	return rc, nil
 }
 
-func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+func (e *docker) DestroyStep(ctx context.Context, step *backend_types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
 	containerName := toContainerName(step)
@@ -332,7 +332,7 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 	return nil
 }
 
-func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend_types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	errWG := errgroup.Group{}

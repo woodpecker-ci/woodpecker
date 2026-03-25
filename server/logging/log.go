@@ -18,7 +18,7 @@ import (
 	"context"
 	"sync"
 
-	logger "github.com/rs/zerolog/log"
+	zerolog_log "github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -99,7 +99,7 @@ func (l *log) Write(ctx context.Context, stepID int64, entries []*model.LogEntry
 		select {
 		case sub.receiver <- entries:
 		default:
-			logger.Info().Msgf("subscriber channel is full -- dropping logs for step %d", stepID)
+			zerolog_log.Info().Msgf("subscriber channel is full -- dropping logs for step %d", stepID)
 		}
 	}
 	s.Unlock()
