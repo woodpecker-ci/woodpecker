@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-24
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -117,7 +117,7 @@
 
 ### 📦️ Dependency
 
-- fix(deps): update golang-packages [[#6311](https://github.com/woodpecker-ci/woodpecker/pull/6311)]
+- fix(deps): update module code.gitea.io/sdk/gitea to v0.24.1 [[#6321](https://github.com/woodpecker-ci/woodpecker/pull/6321)]
 - fix(deps): update module github.com/charmbracelet/huh to v2 [[#6243](https://github.com/woodpecker-ci/woodpecker/pull/6243)]
 - chore(deps): update dependency golangci/golangci-lint to v2.11.4 [[#6301](https://github.com/woodpecker-ci/woodpecker/pull/6301)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.11.4 [[#6302](https://github.com/woodpecker-ci/woodpecker/pull/6302)]
@@ -132,15 +132,10 @@
 - chore(deps): update dependency simple-icons to v16.12.0 [[#6245](https://github.com/woodpecker-ci/woodpecker/pull/6245)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.3.0 [[#6241](https://github.com/woodpecker-ci/woodpecker/pull/6241)]
 - chore(deps): update dependency vite to v8 [[#6242](https://github.com/woodpecker-ci/woodpecker/pull/6242)]
-- chore(deps): update dependency golangci/golangci-lint to v2.11.3 [[#6237](https://github.com/woodpecker-ci/woodpecker/pull/6237)]
-- chore(deps): update pre-commit hook golangci/golangci-lint to v2.11.3 [[#6238](https://github.com/woodpecker-ci/woodpecker/pull/6238)]
 - fix(deps): update module golang.org/x/net to v0.52.0 [[#6235](https://github.com/woodpecker-ci/woodpecker/pull/6235)]
 - chore(deps): update pre-commit non-major [[#6212](https://github.com/woodpecker-ci/woodpecker/pull/6212)]
-- chore(deps): update golangci/golangci-lint docker tag to v2.11.2 [[#6219](https://github.com/woodpecker-ci/woodpecker/pull/6219)]
 - chore(deps): update dependency simple-icons to v16.11.0 [[#6220](https://github.com/woodpecker-ci/woodpecker/pull/6220)]
 - chore(deps): update dependency vue-i18n to v11.3.0 [[#6217](https://github.com/woodpecker-ci/woodpecker/pull/6217)]
-- fix(deps): update module codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 to v3 [[#6215](https://github.com/woodpecker-ci/woodpecker/pull/6215)]
-- chore(deps): update golangci/golangci-lint docker tag to v2.11.1 [[#6211](https://github.com/woodpecker-ci/woodpecker/pull/6211)]
 - fix(deps): update module google.golang.org/grpc to v1.79.2 [[#6208](https://github.com/woodpecker-ci/woodpecker/pull/6208)]
 - chore(deps): update dependency golang to v1.26.1 [[#6207](https://github.com/woodpecker-ci/woodpecker/pull/6207)]
 - fix(deps): update module github.com/docker/cli to v29.3.0+incompatible [[#6201](https://github.com/woodpecker-ci/woodpecker/pull/6201)]
@@ -155,11 +150,9 @@
 - chore(deps): update golangci/golangci-lint docker tag to v2.10.1 [[#6138](https://github.com/woodpecker-ci/woodpecker/pull/6138)]
 - chore(deps): update dependency vue-tsc to v3.2.5 [[#6141](https://github.com/woodpecker-ci/woodpecker/pull/6141)]
 - fix(deps): update module github.com/google/go-github/v82 to v83 [[#6140](https://github.com/woodpecker-ci/woodpecker/pull/6140)]
-- chore(deps): update pre-commit hook golangci/golangci-lint to v2.10.1 [[#6139](https://github.com/woodpecker-ci/woodpecker/pull/6139)]
 - chore(deps): update postgres docker tag to v18.2 [[#6124](https://github.com/woodpecker-ci/woodpecker/pull/6124)]
 - chore(deps): update docker.io/golang docker tag to v1.26 [[#6121](https://github.com/woodpecker-ci/woodpecker/pull/6121)]
 - chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.23.0 [[#6122](https://github.com/woodpecker-ci/woodpecker/pull/6122)]
-- chore(deps): update web npm deps non-major [[#6116](https://github.com/woodpecker-ci/woodpecker/pull/6116)]
 - fix(deps): update module google.golang.org/grpc to v1.79.0 [[#6117](https://github.com/woodpecker-ci/woodpecker/pull/6117)]
 - chore(deps): update dependency @types/node to v24.10.12 [[#6087](https://github.com/woodpecker-ci/woodpecker/pull/6087)]
 - chore(deps): update eslint monorepo to v10 (major) [[#6083](https://github.com/woodpecker-ci/woodpecker/pull/6083)]
