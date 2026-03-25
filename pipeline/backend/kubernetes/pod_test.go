@@ -602,6 +602,7 @@ func TestDefaultSecurityContext(t *testing.T) {
 	}
 
 	// default security context is applied when step has no security context
+	fsGroupChangePolicy := v1.FSGroupChangeOnRootMismatch
 	pod, err := mkPod(step, &config{
 		Namespace: "woodpecker",
 		DefaultSecurityContext: SecurityContext{
@@ -609,6 +610,7 @@ func TestDefaultSecurityContext(t *testing.T) {
 			RunAsUser:                newInt64(1000),
 			RunAsGroup:               newInt64(2000),
 			FSGroup:                  newInt64(2000),
+			FsGroupChangePolicy:      &fsGroupChangePolicy,
 			SeccompProfile:           &SecProfile{Type: "RuntimeDefault"},
 			Capabilities:             &Capabilities{Drop: []string{"ALL"}},
 			AllowPrivilegeEscalation: newBool(false),
@@ -619,7 +621,8 @@ func TestDefaultSecurityContext(t *testing.T) {
 	assert.Equal(t, int64(1000), *pod.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.RunAsGroup)
 	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.FSGroup)
-	assert.Equal(t, v1.SeccompProfileType("RuntimeDefault"), pod.Spec.SecurityContext.SeccompProfile.Type)
+	assert.Equal(t, v1.FSGroupChangeOnRootMismatch, *pod.Spec.SecurityContext.FSGroupChangePolicy)
+	assert.Equal(t, v1.SeccompProfileTypeRuntimeDefault, pod.Spec.SecurityContext.SeccompProfile.Type)
 	assert.Equal(t, []v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
 	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
@@ -677,6 +680,7 @@ func TestEnforcedSecurityContext(t *testing.T) {
 			RunAsGroup:               newInt64(2000),
 			FSGroup:                  newInt64(2000),
 			SeccompProfile:           &SecProfile{Type: "RuntimeDefault"},
+			ApparmorProfile:          &SecProfile{Type: "RuntimeDefault"},
 			Capabilities:             &Capabilities{Drop: []string{"ALL"}},
 			AllowPrivilegeEscalation: newBool(false),
 			Privileged:               newBool(false),
@@ -688,6 +692,7 @@ func TestEnforcedSecurityContext(t *testing.T) {
 			RunAsGroup:               newInt64(0),
 			FSGroup:                  newInt64(0),
 			SeccompProfile:           nil,
+			ApparmorProfile:          &SecProfile{Type: "Unconfined"},
 			Capabilities:             &Capabilities{Drop: []string{""}},
 			AllowPrivilegeEscalation: newBool(true),
 			Privileged:               newBool(true),
@@ -698,7 +703,8 @@ func TestEnforcedSecurityContext(t *testing.T) {
 	assert.Equal(t, int64(1000), *pod.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.RunAsGroup)
 	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.FSGroup)
-	assert.Equal(t, v1.SeccompProfileType("RuntimeDefault"), pod.Spec.SecurityContext.SeccompProfile.Type)
+	assert.Equal(t, v1.SeccompProfileTypeRuntimeDefault, pod.Spec.SecurityContext.SeccompProfile.Type)
+	assert.Equal(t, v1.AppArmorProfileTypeRuntimeDefault, pod.Spec.SecurityContext.AppArmorProfile.Type)
 	assert.Equal(t, []v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
 	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)

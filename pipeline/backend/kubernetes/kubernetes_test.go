@@ -181,6 +181,74 @@ func TestAffinityFromCliContext(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestSecctxNonrootFromCliContext(t *testing.T) {
+	t.Setenv("WOODPECKER_BACKEND_K8S_SECCTX_NONROOT", "true")
+
+	cmd := &cli.Command{
+		Flags: Flags,
+		Action: func(ctx context.Context, c *cli.Command) error {
+			ctx = context.WithValue(ctx, types.CliCommand, c)
+			config, err := configFromCliContext(ctx)
+
+			require.NoError(t, err)
+			require.NotNil(t, config)
+
+			// Verify security context was parsed
+			require.NotNil(t, config.EnforcedSecurityContext)
+			assert.True(t, *config.EnforcedSecurityContext.RunAsNonRoot)
+			return nil
+		},
+	}
+	err := cmd.Run(context.Background(), []string{"test"})
+	require.NoError(t, err)
+}
+
+func TestSecurityContextFromCliContext(t *testing.T) {
+	t.Setenv("WOODPECKER_BACKEND_K8S_DEFAULT_SECCTX", `{
+		"runAsUser":1000,
+		"runAsGroup":1000,
+		"fsGroup":1000,
+		"fsGroupChangePolicy": "OnRootMismatch"
+	}`)
+	t.Setenv("WOODPECKER_BACKEND_K8S_ENFORCED_SECCTX", `{
+		"privileged":false,
+		"runAsNonRoot":true,
+		"allowPrivilegeEscalation":false,
+		"seccompProfile": {"type": "RuntimeDefault"},
+		"capabilities": {"drop": ["ALL"]}
+	}`)
+
+	cmd := &cli.Command{
+		Flags: Flags,
+		Action: func(ctx context.Context, c *cli.Command) error {
+			ctx = context.WithValue(ctx, types.CliCommand, c)
+			config, err := configFromCliContext(ctx)
+
+			require.NoError(t, err)
+			require.NotNil(t, config)
+
+			// Verify security context was parsed
+			require.NotNil(t, config.DefaultSecurityContext)
+			require.NotNil(t, config.EnforcedSecurityContext)
+
+			assert.Equal(t, (int64)(1000), *config.DefaultSecurityContext.RunAsUser)
+			assert.Equal(t, (int64)(1000), *config.DefaultSecurityContext.RunAsGroup)
+			assert.Equal(t, (int64)(1000), *config.DefaultSecurityContext.FSGroup)
+			assert.Equal(t, v1.PodFSGroupChangePolicy("OnRootMismatch"), *config.DefaultSecurityContext.FsGroupChangePolicy)
+
+			assert.False(t, *config.EnforcedSecurityContext.Privileged)
+			assert.True(t, *config.EnforcedSecurityContext.RunAsNonRoot)
+			assert.False(t, *config.EnforcedSecurityContext.AllowPrivilegeEscalation)
+			assert.Equal(t, SecProfileType("RuntimeDefault"), config.EnforcedSecurityContext.SeccompProfile.Type)
+			assert.Equal(t, []string{"ALL"}, config.EnforcedSecurityContext.Capabilities.Drop)
+
+			return nil
+		},
+	}
+	err := cmd.Run(context.Background(), []string{"test"})
+	require.NoError(t, err)
+}
+
 func makeStep(uuid string) *types.Step {
 	return &types.Step{
 		UUID:  uuid,
