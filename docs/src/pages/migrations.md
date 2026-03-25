@@ -12,6 +12,8 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 ### Admin-facing migrations
 
+- changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
+
 #### Extensions
 
 Extension HTTP calls (as of now the configuration extension) will by default only be allowed to contact external hosts. Set `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS` accordingly to allow additional hosts as needed.
