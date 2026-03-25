@@ -296,7 +296,7 @@ var flags = append([]cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_SECRET_SERVICE_NETRC"),
 		Name:    "secret-service-netrc",
-		Usage:   "include netrc credentials in secret extension requests (allows per-repo override when enabled)",
+		Usage:   "include netrc credentials in requests to secret service endpoint",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),

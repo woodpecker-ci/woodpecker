@@ -34,7 +34,7 @@ When a pipeline is triggered, Woodpecker will fetch secrets from your service. T
 The extension receives an HTTP POST request with the following JSON payload:
 
 :::info
-The `netrc` field is only included in the request when the global `WOODPECKER_SECRET_SERVICE_NETRC` is set to `true` (default: `false`). When this global flag is `false`, netrc is **never** sent, regardless of repository settings. When set to `true`, each repository can opt in or opt out of sending netrc via the per-repo "Send netrc credentials" setting.
+The `netrc` field is only included in the request when the global `WOODPECKER_SECRET_SERVICE_NETRC` is set to `true` (default: `false`) or the per-repo "Send netrc credentials" is checked.
 :::
 
 ```ts
