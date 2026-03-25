@@ -81,7 +81,6 @@
 ### 📚 Documentation
 
 - Add CI check for docs on feature PRs [[#6315](https://github.com/woodpecker-ci/woodpecker/pull/6315)]
-- chore(deps): lock file maintenance [[#6306](https://github.com/woodpecker-ci/woodpecker/pull/6306)]
 - chore(deps): update dependency isomorphic-dompurify to v3.6.0 [[#6288](https://github.com/woodpecker-ci/woodpecker/pull/6288)]
 - chore(deps): update dependency yaml to v2.8.3 [[#6287](https://github.com/woodpecker-ci/woodpecker/pull/6287)]
 - Add agentscan to plugin docs [[#6285](https://github.com/woodpecker-ci/woodpecker/pull/6285)]
@@ -118,6 +117,7 @@
 ### 📦️ Dependency
 
 - fix(deps): update module code.gitea.io/sdk/gitea to v0.24.1 [[#6321](https://github.com/woodpecker-ci/woodpecker/pull/6321)]
+- chore(deps): lock file maintenance [[#6306](https://github.com/woodpecker-ci/woodpecker/pull/6306)]
 - fix(deps): update module github.com/charmbracelet/huh to v2 [[#6243](https://github.com/woodpecker-ci/woodpecker/pull/6243)]
 - chore(deps): update dependency golangci/golangci-lint to v2.11.4 [[#6301](https://github.com/woodpecker-ci/woodpecker/pull/6301)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.11.4 [[#6302](https://github.com/woodpecker-ci/woodpecker/pull/6302)]
