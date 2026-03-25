@@ -34,11 +34,12 @@ import (
 const (
 	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
 	// This will be removed in the future.
-	StepLabelLegacy       = "step"
-	StepLabel             = "woodpecker-ci.org/step"
-	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
-	podPrefix             = "wp-"
-	defaultFSGroup  int64 = 1000
+	StepLabelLegacy          = "step"
+	StepLabel                = "woodpecker-ci.org/step"
+	TaskUUIDLabel            = "woodpecker-ci.org/task-uuid"
+	podPrefix                = "wp-"
+	defaultFSGroup     int64 = 1000
+	initContainerImage       = "busybox:stable-musl"
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*kube_core_v1.Pod, error) {
@@ -65,6 +66,11 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 	spec.Containers = append(spec.Containers, container)
+
+	initContainer := podInitContainer(&spec, &container)
+	if initContainer.Name != "" {
+		spec.InitContainers = append(spec.InitContainers, initContainer)
+	}
 
 	pod := &kube_core_v1.Pod{
 		ObjectMeta: meta,
@@ -282,6 +288,58 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
 
 	return container, nil
+}
+
+// podInitContainer determines whether an init container is required to prepare the
+// main step container's working directory with the correct permissions.
+// If it is required, it returns the init container spec, otherwise it returns an empty container spec.
+func podInitContainer(podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Container) kube_core_v1.Container {
+	// if pod is running as root, we don't need an init container to precreate the workingDir
+	// since kubelet already precreates it (as root:root)
+	if podSpec.SecurityContext == nil ||
+		podSpec.SecurityContext.RunAsUser == nil ||
+		*podSpec.SecurityContext.RunAsUser == 0 {
+		return kube_core_v1.Container{}
+	}
+
+	volumeMounts := []kube_core_v1.VolumeMount{}
+
+	for _, mount := range container.VolumeMounts {
+		// we only add volume mounts to the init container if the workingDir is under the mount path
+		// otherwise the init container won't have permission to create the workingDir
+		// when workingDir is exactly the same as mountPath, permissions are already handled by the FsGroupChangePolicy
+		if strings.HasPrefix(container.WorkingDir, mount.MountPath+"/") {
+			volumeMounts = append(volumeMounts, mount)
+		}
+	}
+	// if workingDir is not covered by any volume mount, we don't need an init container to precreate it
+	if len(volumeMounts) == 0 {
+		return kube_core_v1.Container{}
+	}
+
+	return kube_core_v1.Container{
+		Name:            "init-" + container.Name,
+		Image:           initContainerImage,
+		ImagePullPolicy: kube_core_v1.PullAlways,
+		Args:            []string{"mkdir", "-p", container.WorkingDir},
+		SecurityContext: &kube_core_v1.SecurityContext{
+			Capabilities: &kube_core_v1.Capabilities{
+				Drop: []kube_core_v1.Capability{"ALL"},
+			},
+			AllowPrivilegeEscalation: newBool(false),
+		},
+		Resources: kube_core_v1.ResourceRequirements{
+			Requests: kube_core_v1.ResourceList{
+				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
+				kube_core_v1.ResourceMemory: resource.MustParse("5Mi"),
+			},
+			Limits: kube_core_v1.ResourceList{
+				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
+				kube_core_v1.ResourceMemory: resource.MustParse("5Mi"),
+			},
+		},
+		VolumeMounts: volumeMounts,
+	}
 }
 
 func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []kube_core_v1.EnvVar {
