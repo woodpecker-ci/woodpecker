@@ -9,6 +9,9 @@
         <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
       </div>
     </Panel>
+    <Panel v-if="pipeline.version">
+      <span class="text-wp-text-alt-100">{{ $t('repo.pipeline.version', { version: pipeline.version }) }}</span>
+    </Panel>
   </template>
   <div v-else class="flex h-full items-center justify-center">
     <div class="bg-wp-error-100 dark:bg-wp-error-200 rounded-lg p-8 text-center shadow-lg">
