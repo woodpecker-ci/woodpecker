@@ -44,6 +44,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 				{ID: 2, RepoID: 1, Address: "quay.io", Username: "db-only", Password: "only-in-db"},
 			},
 			expected: []*model.Registry{
+				{Address: "example.com", Username: "user", Password: "password-encoded", ReadOnly: true},
 				{ID: 1, RepoID: 1, Address: "docker.io", Username: "shared", Password: "db-value"},
 				{ID: 2, RepoID: 1, Address: "quay.io", Username: "db-only", Password: "only-in-db"},
 			},
@@ -57,6 +58,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 			},
 			expected: []*model.Registry{
 				{Address: "docker.io", Username: "user", Password: "your-pw", ReadOnly: true},
+				{Address: "example.com", Username: "user", Password: "password-encoded", ReadOnly: true},
 				{ID: 1, RepoID: 1, Address: "quay.io", Username: "db-secret", Password: "db-value"},
 			},
 			expectedError: false,
@@ -66,7 +68,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 	tmpFile, err := os.CreateTemp(t.TempDir(), "registry-test-combined-*.json")
 	require.NoError(t, err)
 
-	_, err = tmpFile.WriteString(`{"auths": {"docker.io": {"username": "user", "password": "your-pw"}}}`)
+	_, err = tmpFile.WriteString(`{"auths": {"docker.io": {"username": "user", "password": "your-pw"}, "example.com": {"auth": "dXNlcjpwYXNzd29yZC1lbmNvZGVk"}}}`)
 	require.NoError(t, err)
 
 	fsService := NewFilesystem(tmpFile.Name())
