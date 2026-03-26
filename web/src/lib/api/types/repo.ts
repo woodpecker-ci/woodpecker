@@ -126,7 +126,11 @@ export type RepoSettings = Pick<
 
 export type ExtensionSettings = Pick<
   Repo,
-  'config_extension_endpoint' | 'config_extension_exclusive' | 'registry_extension_endpoint' | 'secret_extension_endpoint' | 'secret_extension_netrc'
+  | 'config_extension_endpoint'
+  | 'config_extension_exclusive'
+  | 'registry_extension_endpoint'
+  | 'secret_extension_endpoint'
+  | 'secret_extension_netrc'
 >;
 
 export interface RepoPermissions {
