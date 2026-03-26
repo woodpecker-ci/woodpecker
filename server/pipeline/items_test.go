@@ -25,7 +25,7 @@ import (
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	step_builder "go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"

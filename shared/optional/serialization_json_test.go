@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
@@ -43,7 +42,7 @@ func TestOptionalToJson(t *testing.T) {
 			assert.NoError(t, err)
 			assert.EqualValues(t, tc.want, string(b), "gitea json module returned unexpected")
 
-			b, err = jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(tc.obj)
+			b, err = json.Marshal(tc.obj)
 			assert.NoError(t, err)
 			assert.EqualValues(t, tc.want, string(b), "std json module returned unexpected")
 		})
@@ -83,7 +82,7 @@ func TestOptionalFromJson(t *testing.T) {
 			assert.EqualValues(t, tc.want, obj1, "gitea json module returned unexpected")
 
 			var obj2 testSerializationStruct
-			err = jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal([]byte(tc.data), &obj2)
+			err = json.Unmarshal([]byte(tc.data), &obj2)
 			assert.NoError(t, err)
 			assert.EqualValues(t, tc.want, obj2, "std json module returned unexpected")
 		})

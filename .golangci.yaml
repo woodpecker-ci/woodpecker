@@ -170,10 +170,6 @@ linters:
         # stdlib
         - pkg: log
           alias: std_log
-        - pkg: errors
-          alias: std_errors
-        - pkg: net/http
-          alias: net_http
 
         # grpc / protobuf
         - pkg: google.golang.org/grpc/metadata
@@ -186,12 +182,6 @@ linters:
         # woodpecker internal
         - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types
           alias: backend_types
-        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker
-          alias: backend_docker
-        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes
-          alias: backend_kubernetes
-        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local
-          alias: backend_local
         - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/errors
           alias: pipeline_errors
         - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime
@@ -204,8 +194,6 @@ linters:
           alias: forge_types
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/log
           alias: service_log
-        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher
-          alias: service_host_matcher
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/rpc
           alias: server_rpc
         - pkg: go.woodpecker-ci.org/woodpecker/v3/agent/rpc
@@ -220,8 +208,6 @@ linters:
           alias: yaml_types
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/cron
           alias: cron_scheduler
-        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder
-          alias: step_builder
 
         # mocks
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks
@@ -252,48 +238,20 @@ linters:
           alias: kube_client_cmd
 
         # docker
-        - pkg: github.com/docker/docker/pkg/jsonmessage
-          alias: docker_json_message
-        - pkg: github.com/docker/docker/pkg/stdcopy
-          alias: docker_std_copy
-        - pkg: github.com/docker/go-connections/tlsconfig
-          alias: docker_tls_config
-        - pkg: github.com/docker/cli/cli/config/configfile
-          alias: docker_config_file
         - pkg: github.com/docker/cli/cli/config/types
           alias: docker_config_types
 
-        # prometheus
-        - pkg: github.com/prometheus/client_golang/prometheus/promhttp
-          alias: prometheus_http
-        - pkg: github.com/prometheus/client_golang/prometheus/promauto
-          alias: prometheus_auto
-
         # misc third-party
-        - pkg: github.com/cenkalti/backoff/v5
-          alias: backoff
-        - pkg: github.com/gitsight/go-vcsurl
-          alias: vcs_url
-        - pkg: github.com/muesli/termenv
-          alias: term_env
-        - pkg: github.com/xeipuuv/gojsonschema
-          alias: json_schema
-        - pkg: github.com/rs/zerolog/log
-          alias: zerolog_log
         - pkg: github.com/swaggo/files
           alias: swaggo_files
         - pkg: github.com/swaggo/gin-swagger
           alias: swaggo_gin_swagger
-        - pkg: github.com/json-iterator/go
-          alias: jsoniter
         - pkg: xorm.io/xorm/log
           alias: xlog
         - pkg: github.com/tink-crypto/tink-go/v2/insecurecleartextkeyset
           alias: insecure_clear_text_keyset
         - pkg: github.com/migueleliasweb/go-github-mock/src/mock
           alias: github_mock
-        - pkg: gitlab.com/gitlab-org/api/client-go/v2
-          alias: gitlab
     misspell:
       locale: US
     mnd:

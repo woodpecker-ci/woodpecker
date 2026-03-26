@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	term_env "github.com/muesli/termenv"
+	"github.com/muesli/termenv"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 )
@@ -29,7 +29,7 @@ func FormatLintError(file string, err error, strict bool) (string, error) {
 		return "", nil
 	}
 
-	output := term_env.NewOutput(os.Stdout)
+	output := termenv.NewOutput(os.Stdout)
 	str := ""
 
 	amountErrors := 0

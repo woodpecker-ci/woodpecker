@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/distribution/reference"
-	docker_config_file "github.com/docker/cli/cli/config/configfile"
+	"github.com/docker/cli/cli/config/configfile"
 	docker_config_types "github.com/docker/cli/cli/config/types"
 	"github.com/rs/zerolog/log"
 	kube_core_v1 "k8s.io/api/core/v1"
@@ -221,7 +221,7 @@ func mkRegistrySecret(step *types.Step, config *config) (*kube_core_v1.Secret, e
 		return nil, err
 	}
 
-	authConfig := docker_config_file.ConfigFile{
+	authConfig := configfile.ConfigFile{
 		AuthConfigs: map[string]docker_config_types.AuthConfig{
 			reference.Domain(named): {
 				Username: step.AuthConfig.Username,
