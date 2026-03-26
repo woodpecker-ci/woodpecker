@@ -22,7 +22,7 @@ you share your Woodpecker server with others as they will also use your registry
 If both the global and the repo-level extension return credentials for a registry, it will use the credentials from the repo extension.
 
 ```ini title="Server"
-WOODPECKER_REGISTRY_SERVICE_ENDPOINT=https://example.com/ciconfig
+WOODPECKER_REGISTRY_EXTENSION_ENDPOINT=https://example.com/ciconfig
 ```
 
 ## How it works
