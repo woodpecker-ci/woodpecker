@@ -19,7 +19,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
