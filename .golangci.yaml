@@ -252,6 +252,8 @@ linters:
           alias: insecure_clear_text_keyset
         - pkg: github.com/migueleliasweb/go-github-mock/src/mock
           alias: github_mock
+        - pkg: gitlab.com/gitlab-org/api/client-go/v2
+          alias: gitlab
     misspell:
       locale: US
     mnd:
