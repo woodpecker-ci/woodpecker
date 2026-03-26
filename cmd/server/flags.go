@@ -274,17 +274,17 @@ var flags = append([]cli.Flag{
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_CONFIG_SERVICE_ENDPOINT"),
+		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT", "WOODPECKER_CONFIG_SERVICE_ENDPOINT"), // TODO remove _SERVICE_ var in 4.0.0
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling global configuration service endpoint",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_CONFIG_SERVICE_EXCLUSIVE"),
+		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_EXCLUSIVE"),
 		Name:    "config-service-exclusive",
 		Usage:   "whether global configuration service endpoint should be exclusive (skip forge)",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_REGISTRY_SERVICE_ENDPOINT"),
+		Sources: cli.EnvVars("WOODPECKER_REGISTRY_EXTENSION_ENDPOINT"),
 		Name:    "registry-service-endpoint",
 		Usage:   "url used for calling registry service endpoint",
 	},

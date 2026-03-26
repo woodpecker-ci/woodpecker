@@ -971,18 +971,18 @@ Supported variables:
 
 ---
 
-### CONFIG_SERVICE_ENDPOINT
+### CONFIG_EXTENSION_ENDPOINT
 
-- Name: `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
+- Name: `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
 - Default: none
 
-Specify a configuration service endpoint, see [Configuration Extension](../../20-usage/72-extensions/40-configuration-extension.md)
+Specify a configuration extension endpoint, see [Configuration Extension](../../20-usage/72-extensions/40-configuration-extension.md)
 
 ---
 
-### CONFIG_SERVICE_EXCLUSIVE
+### CONFIG_EXTENSION_EXCLUSIVE
 
-- Name: `CONFIG_SERVICE_EXCLUSIVE`
+- Name: `CONFIG_EXTENSION_EXCLUSIVE`
 - Default: false
 
 Whether the forge request should be skipped for the global configuration endpoint.
@@ -990,6 +990,15 @@ Whether the forge request should be skipped for the global configuration endpoin
 :::warning
 If you enable this, all repos will exclusively use the global config service endpoint. There is no possibility to directly define pipelines in the forge, except the extension handles this case itself as well.
 :::
+
+---
+
+### REGISTRY_EXTENSION_ENDPOINT
+
+- Name: `WOODPECKER_REGISTRY_EXTENSION_ENDPOINT`
+- Default: none
+
+Specify a registry extension endpoint, see [Registry Extension](../../20-usage/72-extensions/50-registry-extension.md)
 
 ---
 
