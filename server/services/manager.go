@@ -88,7 +88,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
 		secret:              setupSecretService(store),
-		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-service-endpoint"), client),
+		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
 		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
