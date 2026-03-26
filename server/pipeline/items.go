@@ -46,7 +46,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	secs, err := secretService.SecretListPipeline(repo, currentPipeline, netrc)
+	secs, err := secretService.SecretListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}

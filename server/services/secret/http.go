@@ -45,7 +45,7 @@ func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) *httpExte
 }
 
 // SecretListPipeline fetches secrets from an external HTTP extension.
-func (h *httpExtension) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error) {
+func (h *httpExtension) SecretListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error) {
 	body := secretRequestStructure{
 		Repo:     repo,
 		Pipeline: pipeline,
@@ -55,7 +55,7 @@ func (h *httpExtension) SecretListPipeline(repo *model.Repo, pipeline *model.Pip
 	}
 
 	response := new(secretResponseStructure)
-	status, err := h.client.Send(context.Background(), net_http.MethodPost, h.endpoint, body, response)
+	status, err := h.client.Send(ctx, net_http.MethodPost, h.endpoint, body, response)
 	if err != nil && status != net_http.StatusNoContent {
 		return nil, fmt.Errorf("failed to fetch secrets via http (%d) %w", status, err)
 	}

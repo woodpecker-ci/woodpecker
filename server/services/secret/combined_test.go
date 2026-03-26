@@ -41,8 +41,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 		name           string
 		repoName       string
 		dbSecrets      []*model.Secret
-		expectedNames  []string
-		expectedValues map[string]string
+		expected      []*model.Secret
 		expectedError  bool
 	}{
 		{
@@ -52,11 +51,10 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 				{ID: 1, RepoID: 1, Name: "shared", Value: "db-value"},
 				{ID: 2, RepoID: 1, Name: "db-only", Value: "only-in-db"},
 			},
-			expectedNames: []string{"shared", "db-only", "ext-only"},
-			expectedValues: map[string]string{
-				"shared":   "external-value",
-				"db-only":  "only-in-db",
-				"ext-only": "only-in-ext",
+			expected: []*model.Secret{
+				{Name: "shared", Value: "external-value"},
+				{Name: "ext-only", Value: "only-in-ext"},
+				{ID: 2, RepoID: 1, Name: "db-only", Value: "only-in-db"},
 			},
 			expectedError: false,
 		},
@@ -66,8 +64,9 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 			dbSecrets: []*model.Secret{
 				{ID: 1, RepoID: 1, Name: "db-secret", Value: "db-value"},
 			},
-			expectedNames:  []string{"db-secret"},
-			expectedValues: map[string]string{"db-secret": "db-value"},
+			expected: []*model.Secret{
+				{ID: 1, RepoID: 1, Name: "db-secret", Value: "db-value"},
+			},
 			expectedError:  false,
 		},
 		{
@@ -76,8 +75,9 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 			dbSecrets: []*model.Secret{
 				{ID: 1, RepoID: 1, Name: "db-secret", Value: "db-value"},
 			},
-			expectedNames:  []string{"db-secret"},
-			expectedValues: map[string]string{"db-secret": "db-value"},
+			expected: []*model.Secret{
+				{ID: 1, RepoID: 1, Name: "db-secret", Value: "db-value"},
+			},
 			expectedError:  false,
 		},
 	}
@@ -133,9 +133,9 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		assert.NoError(t, json.NewEncoder(w).Encode(map[string]any{
-			"secrets": []map[string]any{
-				{"name": "shared", "value": "external-value"},
-				{"name": "ext-only", "value": "only-in-ext"},
+			"secrets": []*model.Secret{
+				{Name: "shared", Value: "external-value"},
+				{Name: "ext-only", Value: "only-in-ext"},
 			},
 		}))
 	}
@@ -156,6 +156,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 			combined := secret.NewCombined(secret.NewDB(mockStore), httpExtension)
 
 			secrets, err := combined.SecretListPipeline(
+				t.Context(),
 				&model.Repo{ID: 1, Name: tt.repoName},
 				&model.Pipeline{},
 				nil,
@@ -166,17 +167,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 				require.NoError(t, err, "error fetching secrets")
 			}
 
-			secretNames := make([]string, len(secrets))
-			for i := range secrets {
-				secretNames[i] = secrets[i].Name
-			}
-			assert.ElementsMatch(t, tt.expectedNames, secretNames, "expected some other secrets")
-
-			for _, s := range secrets {
-				if expected, ok := tt.expectedValues[s.Name]; ok {
-					assert.Equal(t, expected, s.Value, "unexpected value for secret %s", s.Name)
-				}
-			}
+			assert.ElementsMatch(t, tt.expected, secrets, "expected some other secrets")
 		})
 	}
 }

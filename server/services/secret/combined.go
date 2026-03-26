@@ -15,6 +15,8 @@
 package secret
 
 import (
+	"context"
+
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -32,15 +34,15 @@ func NewCombined(base Service, extension *httpExtension) Service {
 	return &combined{base, extension}
 }
 
-func (c *combined) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error) {
+func (c *combined) SecretListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error) {
 	// Get secrets from base service
-	baseSecrets, err := c.base.SecretListPipeline(repo, pipeline, netrc)
+	baseSecrets, err := c.base.SecretListPipeline(ctx, repo, pipeline, netrc)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get secrets from HTTP extension
-	extensionSecrets, err := c.extension.SecretListPipeline(repo, pipeline, netrc)
+	extensionSecrets, err := c.extension.SecretListPipeline(ctx, repo, pipeline, netrc)
 	if err != nil {
 		// Log the error but don't fail - use base secrets only
 		log.Warn().Err(err).Msg("failed to fetch secrets from extension")

@@ -87,7 +87,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
-		secret:              setupSecretService(store, c.String("secret-service-endpoint"), client, c.Bool("secret-service-netrc")),
+		secret:              setupSecretService(store, c.String("secret-extension-endpoint"), client, c.Bool("secret-extension-netrc")),
 		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-service-endpoint"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
