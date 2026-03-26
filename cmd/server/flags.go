@@ -275,17 +275,18 @@ var flags = append([]cli.Flag{
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT", "WOODPECKER_CONFIG_SERVICE_ENDPOINT"), // TODO remove _SERVICE_ var in 4.0.0
-		Name:    "config-service-endpoint",
+		Name:    "config-extension-endpoint",
+		Aliases: []string{"config-service-endpoint"}, // TODO: remove in v4.0.0
 		Usage:   "url used for calling global configuration service endpoint",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_EXCLUSIVE"),
-		Name:    "config-service-exclusive",
+		Name:    "config-extension-exclusive",
 		Usage:   "whether global configuration service endpoint should be exclusive (skip forge)",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_REGISTRY_EXTENSION_ENDPOINT"),
-		Name:    "registry-service-endpoint",
+		Name:    "registry-extension-endpoint",
 		Usage:   "url used for calling registry service endpoint",
 	},
 	&cli.StringFlag{
