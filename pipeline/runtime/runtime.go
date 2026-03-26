@@ -50,11 +50,12 @@ type Runtime struct {
 }
 
 // New returns a new Runtime for the given workflow spec and options.
-func New(spec *backend.Config, opts ...Option) *Runtime {
+func New(spec *backend.Config, backend backend.Backend, opts ...Option) *Runtime {
 	r := new(Runtime)
 	r.err = utils.NewProtected[error](nil)
 	r.description = map[string]string{}
 	r.spec = spec
+	r.engine = backend
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
 	for _, opt := range opts {

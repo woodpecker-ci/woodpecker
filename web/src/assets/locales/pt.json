@@ -251,7 +251,8 @@
                 "declined": "recusado",
                 "error": "erro",
                 "failure": "falha",
-                "killed": "finalizado"
+                "killed": "finalizado",
+                "canceled": "cancelada"
             },
             "we_got_some_errors": "Oh não, ocorreu um erro!",
             "step_not_started": "Essa etapa ainda não foi iniciada.",
@@ -266,7 +267,8 @@
                 "restart_success": "Pipeline reiniciado",
                 "log_download": "Baixar",
                 "log_auto_scroll": "Habilitar rolagem automática",
-                "log_delete": "Excluir"
+                "log_delete": "Excluir",
+                "skipped": "Essa etapa foi ignorada."
             },
             "tasks": "Tarefas",
             "config": "Configuração",
@@ -311,7 +313,8 @@
             "view": "Ver pipeline",
             "cancel_info": {
                 "superseded_by": "Substituído por #{pipelineId}",
-                "canceled_by_user": "Cancelado por {user}"
+                "canceled_by_user": "Cancelado por {user}",
+                "canceled_by_step": "Cancelada por causa de {step}"
             },
             "load_more": "Carregar mais"
         },
@@ -753,5 +756,7 @@
     "extensions_configuration_saved": "Configuração de extensões salva",
     "disabled": "Desativado",
     "config_extension_exclusive": "Exclusiva",
-    "config_extension_exclusive_desc": "Se habilitada, essa opção ignorará todas as outras formas de obter configurações, incluindo a forja."
+    "config_extension_exclusive_desc": "Se habilitada, essa opção ignorará todas as outras formas de obter configurações, incluindo a forja.",
+    "global_level_registry": "registry global",
+    "org_level_registry": "registry de organização"
 }

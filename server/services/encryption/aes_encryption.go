@@ -52,7 +52,7 @@ func (svc *aesEncryptionService) loadCipher(password string) error {
 
 func (svc *aesEncryptionService) validateKey() error {
 	ciphertextSample, err := svc.store.ServerConfigGet(ciphertextSampleConfigKey)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		return errEncryptionNotEnabled
 	} else if err != nil {
 		return fmt.Errorf(errTemplateFailedLoadingServerConfig, err)
