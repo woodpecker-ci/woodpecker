@@ -8,9 +8,13 @@
       <div class="flex items-center space-x-4">
         <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
       </div>
-    </Panel>
-    <Panel v-if="pipeline.version">
-      <span class="text-wp-text-alt-100">{{ $t('repo.pipeline.version', { version: pipeline.version }) }}</span>
+      <InputField v-if="pipeline.version" :label="$t('repo.pipeline.version_header')">
+        <i18n-t keypath="repo.pipeline.version" tag="p" class="text-wp-text-alt-100 text-sm">
+          <template #version>
+            <strong>{{ pipeline.version }}</strong>
+          </template>
+        </i18n-t>
+      </InputField>
     </Panel>
   </template>
   <div v-else class="flex h-full items-center justify-center">
