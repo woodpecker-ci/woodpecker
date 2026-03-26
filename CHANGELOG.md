@@ -167,6 +167,7 @@
 
 ### Misc
 
+- Add registry service tests [[#6330](https://github.com/woodpecker-ci/woodpecker/pull/6330)]
 - Fix license headers [[#6205](https://github.com/woodpecker-ci/woodpecker/pull/6205)]
 - Add workflow integration test [[#6270](https://github.com/woodpecker-ci/woodpecker/pull/6270)]
 - Add agentscan plugin [[#6284](https://github.com/woodpecker-ci/woodpecker/pull/6284)]
