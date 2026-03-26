@@ -32,14 +32,14 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 	testTable := []struct {
 		name          string
 		repoName      string
-		dbSecrets     []*model.Registry
+		dbRegs        []*model.Registry
 		expected      []*model.Registry
 		expectedError bool
 	}{
 		{
 			name:     "DB registries override file registry",
 			repoName: "override-test",
-			dbSecrets: []*model.Registry{
+			dbRegs: []*model.Registry{
 				{ID: 1, RepoID: 1, Address: "docker.io", Username: "shared", Password: "db-value"},
 				{ID: 2, RepoID: 1, Address: "quay.io", Username: "db-only", Password: "only-in-db"},
 			},
@@ -52,7 +52,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 		{
 			name:     "No overriding, but merged",
 			repoName: "no-content",
-			dbSecrets: []*model.Registry{
+			dbRegs: []*model.Registry{
 				{ID: 1, RepoID: 1, Address: "quay.io", Username: "db-secret", Password: "db-value"},
 			},
 			expected: []*model.Registry{
@@ -74,7 +74,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			mockStore := store_mocks.NewMockStore(t)
-			mockStore.On("RegistryList", mock.Anything, true, mock.Anything).Return(tt.dbSecrets, nil)
+			mockStore.On("RegistryList", mock.Anything, true, mock.Anything).Return(tt.dbRegs, nil)
 			mockStore.On("GlobalRegistryList", mock.Anything).Return(nil, nil)
 
 			combined := NewCombined(NewDB(mockStore), fsService)
