@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @myers, @myselfghost, @paulovitorbal, @qwerty287, @savv, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @savv, @stardothosting
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### ✨ Features
 
+- Add external secret extension implementation [[#6252](https://github.com/woodpecker-ci/woodpecker/pull/6252)]
 - make it possible to disable the isolated home for local agents [[#6251](https://github.com/woodpecker-ci/woodpecker/pull/6251)]
 - Add Container Registry credential extension [[#5993](https://github.com/woodpecker-ci/woodpecker/pull/5993)]
 - Support exclusive config extensions [[#5978](https://github.com/woodpecker-ci/woodpecker/pull/5978)]
@@ -79,6 +80,16 @@
 - Fix: Agent now gracefully handles running containers when killed [[#6018](https://github.com/woodpecker-ci/woodpecker/pull/6018)]
 - Local backend: handle canceled steps case [[#6008](https://github.com/woodpecker-ci/woodpecker/pull/6008)]
 
+### 🧪 Tests
+
+- Add registry service tests [[#6330](https://github.com/woodpecker-ci/woodpecker/pull/6330)]
+- Add workflow integration test [[#6270](https://github.com/woodpecker-ci/woodpecker/pull/6270)]
+- Increase timeout for migration tests [[#6206](https://github.com/woodpecker-ci/woodpecker/pull/6206)]
+- Ignore fixtures for coverage [[#6197](https://github.com/woodpecker-ci/woodpecker/pull/6197)]
+- Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
+- Add some tests [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
+- Ignore mocks for coverage [[#6074](https://github.com/woodpecker-ci/woodpecker/pull/6074)]
+
 ### 📚 Documentation
 
 - Add CI check for docs on feature PRs [[#6315](https://github.com/woodpecker-ci/woodpecker/pull/6315)]
@@ -117,6 +128,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v4.1.0 [[#6331](https://github.com/woodpecker-ci/woodpecker/pull/6331)]
 - fix(deps): update golang-packages [[#6327](https://github.com/woodpecker-ci/woodpecker/pull/6327)]
 - fix(deps): update module code.gitea.io/sdk/gitea to v0.24.1 [[#6321](https://github.com/woodpecker-ci/woodpecker/pull/6321)]
 - chore(deps): lock file maintenance [[#6306](https://github.com/woodpecker-ci/woodpecker/pull/6306)]
@@ -167,16 +179,9 @@
 
 ### Misc
 
-- Add registry service tests [[#6330](https://github.com/woodpecker-ci/woodpecker/pull/6330)]
 - Fix license headers [[#6205](https://github.com/woodpecker-ci/woodpecker/pull/6205)]
-- Add workflow integration test [[#6270](https://github.com/woodpecker-ci/woodpecker/pull/6270)]
 - Add agentscan plugin [[#6284](https://github.com/woodpecker-ci/woodpecker/pull/6284)]
-- Increase timeout for migration tests [[#6206](https://github.com/woodpecker-ci/woodpecker/pull/6206)]
-- Ignore fixtures for coverage [[#6197](https://github.com/woodpecker-ci/woodpecker/pull/6197)]
-- Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
 - Improve Debian packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
-- Add some tests [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
-- Ignore mocks for coverage [[#6074](https://github.com/woodpecker-ci/woodpecker/pull/6074)]
 
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
 
