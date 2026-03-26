@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-25
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -117,6 +117,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6327](https://github.com/woodpecker-ci/woodpecker/pull/6327)]
 - fix(deps): update module code.gitea.io/sdk/gitea to v0.24.1 [[#6321](https://github.com/woodpecker-ci/woodpecker/pull/6321)]
 - chore(deps): lock file maintenance [[#6306](https://github.com/woodpecker-ci/woodpecker/pull/6306)]
 - fix(deps): update module github.com/charmbracelet/huh to v2 [[#6243](https://github.com/woodpecker-ci/woodpecker/pull/6243)]
