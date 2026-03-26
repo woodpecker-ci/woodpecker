@@ -38,11 +38,11 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 	t.Parallel()
 
 	testTable := []struct {
-		name           string
-		repoName       string
-		dbSecrets      []*model.Secret
+		name          string
+		repoName      string
+		dbSecrets     []*model.Secret
 		expected      []*model.Secret
-		expectedError  bool
+		expectedError bool
 	}{
 		{
 			name:     "Extension overrides base secret by name",
@@ -67,7 +67,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 			expected: []*model.Secret{
 				{ID: 1, RepoID: 1, Name: "db-secret", Value: "db-value"},
 			},
-			expectedError:  false,
+			expectedError: false,
 		},
 		{
 			name:     "Extension error falls back to base secrets",
@@ -78,7 +78,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 			expected: []*model.Secret{
 				{ID: 1, RepoID: 1, Name: "db-secret", Value: "db-value"},
 			},
-			expectedError:  false,
+			expectedError: false,
 		},
 	}
 
