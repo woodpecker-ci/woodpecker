@@ -289,7 +289,7 @@ var flags = append([]cli.Flag{
 		Usage:   "url used for calling registry service endpoint",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_SECRET_SERVICE_ENDPOINT"),
+		Sources: cli.EnvVars("WOODPECKER_SECRET_EXTENSION_ENDPOINT"),
 		Name:    "secret-service-endpoint",
 		Usage:   "url used for calling external secret service endpoint",
 	},

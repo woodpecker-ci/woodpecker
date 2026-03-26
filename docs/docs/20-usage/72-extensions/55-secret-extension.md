@@ -21,7 +21,7 @@ you share your Woodpecker server with others as they will also use your secret e
 If both the global and the repo-level extension return a secret with the same name, it will use the secret from the repo extension.
 
 ```ini title="Server"
-WOODPECKER_SECRET_SERVICE_ENDPOINT=https://example.com/secrets
+WOODPECKER_SECRET_EXTENSION_ENDPOINT=https://example.com/secrets
 WOODPECKER_SECRET_SERVICE_NETRC=false
 ```
 
@@ -141,7 +141,7 @@ class Response {
   secrets: {
     name: string; // the secret name, matched by from_secret in pipeline config
     value: string; // the secret value
-    images?: string[]; // optional: restrict to specific container images
+    images?: string[]; // optional: restrict to specific plugins
     events?: string[]; // optional: restrict to specific pipeline events
   }[];
 }
