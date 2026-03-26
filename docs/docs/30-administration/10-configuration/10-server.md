@@ -1010,7 +1010,7 @@ Specify a secret extension endpoint, see [Secret Extension](../../20-usage/72-ex
 Send `netrc` to the secret extension endpoint.
 
 :::warning
-The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) API to get more information about the repository.
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge API to get more information about the repository.
 :::
 
 ---
