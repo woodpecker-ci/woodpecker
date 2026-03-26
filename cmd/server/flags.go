@@ -294,7 +294,7 @@ var flags = append([]cli.Flag{
 		Usage:   "url used for calling external secret service endpoint",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_SECRET_SERVICE_NETRC"),
+		Sources: cli.EnvVars("WOODPECKER_SECRET_EXTENSION_NETRC"),
 		Name:    "secret-service-netrc",
 		Usage:   "include netrc credentials in requests to secret service endpoint",
 	},
