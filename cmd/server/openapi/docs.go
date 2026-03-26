@@ -5292,6 +5292,12 @@ const docTemplate = `{
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
+                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -5394,6 +5400,12 @@ const docTemplate = `{
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
+                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -5446,6 +5458,12 @@ const docTemplate = `{
                 },
                 "require_approval": {
                     "type": "string"
+                },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
                 },
                 "timeout": {
                     "type": "integer"

@@ -290,6 +290,16 @@ var flags = append([]cli.Flag{
 		Usage:   "url used for calling registry service endpoint",
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRET_EXTENSION_ENDPOINT"),
+		Name:    "secret-extension-endpoint",
+		Usage:   "url used for calling external secret service endpoint",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRET_EXTENSION_NETRC"),
+		Name:    "secret-extension-netrc",
+		Usage:   "include netrc credentials in requests to secret service endpoint",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS"),
 		Name:    "extensions-allowed-hosts",
 		Usage:   "Hosts that are allowed to be contacted by extensions",
