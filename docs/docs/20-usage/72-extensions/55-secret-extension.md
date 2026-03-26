@@ -41,7 +41,7 @@ The `netrc` field is only included in the request when the global `WOODPECKER_SE
 class Request {
   repo: Repo;
   pipeline: Pipeline;
-  netrc?: Netrc; // only included when netrc sending is enabled (see below)
+  netrc?: Netrc; // only included when netrc sending is enabled (see above)
 }
 ```
 
