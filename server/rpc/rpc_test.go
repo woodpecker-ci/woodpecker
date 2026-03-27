@@ -57,7 +57,7 @@ func TestRegisterAgent(t *testing.T) {
 			t.Context(),
 			metadata.Pairs("hostname", "hostname", "agent_id", "1337"),
 		)
-		agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
+		agentConfig, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
 			Version:  "version",
 			Platform: "platform",
 			Backend:  "backend",
@@ -65,7 +65,7 @@ func TestRegisterAgent(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		assert.EqualValues(t, 1337, agentID)
+		assert.EqualValues(t, 1337, agentConfig.AgentID)
 	})
 
 	t.Run("When existing agent hostname is present it should not update the hostname", func(t *testing.T) {
@@ -97,7 +97,7 @@ func TestRegisterAgent(t *testing.T) {
 			t.Context(),
 			metadata.Pairs("hostname", "newHostname", "agent_id", "1337"),
 		)
-		agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
+		agentConfig, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
 			Version:  "version",
 			Platform: "platform",
 			Backend:  "backend",
@@ -105,7 +105,7 @@ func TestRegisterAgent(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		assert.EqualValues(t, 1337, agentID)
+		assert.EqualValues(t, 1337, agentConfig.AgentID)
 	})
 }
 
