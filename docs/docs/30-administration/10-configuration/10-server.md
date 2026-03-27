@@ -993,6 +993,19 @@ If you enable this, all repos will exclusively use the global config service end
 
 ---
 
+### CONFIG_EXTENSION_NETRC
+
+- Name: `WOODPECKER_CONFIG_EXTENSION_NETRC`
+- Default: false
+
+Send `netrc` to the config extension endpoint.
+
+:::warning
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge API to get more information about the repository.
+:::
+
+---
+
 ### SECRET_EXTENSION_ENDPOINT
 
 - Name: `WOODPECKER_SECRET_EXTENSION_ENDPOINT`
@@ -1021,6 +1034,19 @@ The `netrc` data is pretty powerful as it contains credentials to access the rep
 - Default: none
 
 Specify a registry extension endpoint, see [Registry Extension](../../20-usage/72-extensions/50-registry-extension.md)
+
+---
+
+### REGISTRY_EXTENSION_NETRC
+
+- Name: `WOODPECKER_REGISTRY_EXTENSION_NETRC`
+- Default: false
+
+Send `netrc` to the registry extension endpoint.
+
+:::warning
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge API to get more information about the repository.
+:::
 
 ---
 
