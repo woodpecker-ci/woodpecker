@@ -19,7 +19,6 @@
 
         <Checkbox
           v-model="extensions.config_extension_netrc"
-          class="pt-3"
           :label="$t('extension_netrc')"
           :description="$t('extension_netrc_desc')"
         />
