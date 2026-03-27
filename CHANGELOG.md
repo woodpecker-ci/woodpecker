@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-26
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -128,6 +128,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.8.0 [[#6332](https://github.com/woodpecker-ci/woodpecker/pull/6332)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v4.1.0 [[#6331](https://github.com/woodpecker-ci/woodpecker/pull/6331)]
 - fix(deps): update golang-packages [[#6327](https://github.com/woodpecker-ci/woodpecker/pull/6327)]
 - fix(deps): update module code.gitea.io/sdk/gitea to v0.24.1 [[#6321](https://github.com/woodpecker-ci/woodpecker/pull/6321)]
