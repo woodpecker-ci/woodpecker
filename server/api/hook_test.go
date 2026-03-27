@@ -97,9 +97,9 @@ func TestHook(t *testing.T) {
 	_forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
 	_store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 	_manager.On("SecretServiceFromRepo", repo).Return(_secretService)
-	_secretService.On("SecretListPipeline", mock.Anything, repo, mock.Anything, mock.Anything).Return(nil, nil)
+	_secretService.On("SecretListPipeline", mock.Anything, repo, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 	_manager.On("RegistryServiceFromRepo", repo).Return(_registryService)
-	_registryService.On("RegistryListPipeline", mock.Anything, repo, mock.Anything).Return(nil, nil)
+	_registryService.On("RegistryListPipeline", mock.Anything, repo, mock.Anything, mock.Anything).Return(nil, nil)
 	_manager.On("EnvironmentService").Return(nil)
 	_store.On("DeletePipeline", mock.Anything).Return(nil)
 

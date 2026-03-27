@@ -85,6 +85,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 				t.Context(),
 				&model.Repo{ID: 1, Name: tt.repoName},
 				&model.Pipeline{},
+				nil,
 			)
 			if tt.expectedError {
 				require.Error(t, err, "expected an error")
