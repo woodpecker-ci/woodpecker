@@ -19,20 +19,20 @@ import (
 	"net/url"
 	"strings"
 
-	bb "github.com/neticdk/go-bitbucket/bitbucket"
+	"github.com/neticdk/go-bitbucket/bitbucket"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func convertStatus(status model.StatusValue) bb.BuildStatusState {
+func convertStatus(status model.StatusValue) bitbucket.BuildStatusState {
 	switch status {
 	case model.StatusPending, model.StatusRunning:
-		return bb.BuildStatusStateInProgress
+		return bitbucket.BuildStatusStateInProgress
 	case model.StatusSuccess:
-		return bb.BuildStatusStateSuccessful
+		return bitbucket.BuildStatusStateSuccessful
 	default:
-		return bb.BuildStatusStateFailed
+		return bitbucket.BuildStatusStateFailed
 	}
 }
 
@@ -49,7 +49,7 @@ func anonymizeLink(link string) (href string) {
 	return parsed.String()
 }
 
-func convertRepo(from *bb.Repository, perm *model.Perm, branch string) *model.Repo {
+func convertRepo(from *bitbucket.Repository, perm *model.Perm, branch string) *model.Repo {
 	r := &model.Repo{
 		ForgeRemoteID: convertID(from.ID),
 		Name:          from.Slug,
@@ -74,7 +74,7 @@ func convertRepo(from *bb.Repository, perm *model.Perm, branch string) *model.Re
 	return r
 }
 
-func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *model.Pipeline {
+func convertRepositoryPushEvent(ev *bitbucket.RepositoryPushEvent, baseURL string) *model.Pipeline {
 	if len(ev.Changes) == 0 {
 		return nil
 	}
@@ -83,7 +83,7 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 		// No ToHash present - could be "DELETE"
 		return nil
 	}
-	if change.Type == bb.RepositoryPushEventChangeTypeDelete {
+	if change.Type == bitbucket.RepositoryPushEventChangeTypeDelete {
 		return nil
 	}
 
@@ -111,7 +111,7 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	return pipeline
 }
 
-func convertGetCommitRange(ev *bb.RepositoryPushEvent) (currCommit, prevCommit string) {
+func convertGetCommitRange(ev *bitbucket.RepositoryPushEvent) (currCommit, prevCommit string) {
 	if len(ev.Changes) == 0 {
 		return "", ""
 	}
@@ -124,7 +124,7 @@ func convertGetCommitRange(ev *bb.RepositoryPushEvent) (currCommit, prevCommit s
 	return change.ToHash, change.FromHash
 }
 
-func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
+func convertPullRequestEvent(ev *bitbucket.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit: &model.Commit{
 			// message is set later
@@ -140,7 +140,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Refspec:      fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 	}
 
-	if ev.EventKey == bb.EventKeyPullRequestMerged || ev.EventKey == bb.EventKeyPullRequestDeclined || ev.EventKey == bb.EventKeyPullRequestDeleted {
+	if ev.EventKey == bitbucket.EventKeyPullRequestMerged || ev.EventKey == bitbucket.EventKeyPullRequestDeclined || ev.EventKey == bitbucket.EventKeyPullRequestDeleted {
 		pipeline.Event = model.EventPullClosed
 	} else {
 		pipeline.Event = model.EventPull
@@ -149,7 +149,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 	return pipeline
 }
 
-func convertUser(user *bb.User, baseURL string) *model.User {
+func convertUser(user *bitbucket.User, baseURL string) *model.User {
 	return &model.User{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprintf("%d", user.ID)),
 		Login:         user.Slug,
@@ -162,11 +162,11 @@ func bitbucketAvatarURL(baseURL, slug string) string {
 	return fmt.Sprintf("%s/users/%s/avatar.png", baseURL, slug)
 }
 
-func convertListOptions(p *model.ListOptions) bb.ListOptions {
+func convertListOptions(p *model.ListOptions) bitbucket.ListOptions {
 	if p.All {
-		return bb.ListOptions{}
+		return bitbucket.ListOptions{}
 	}
-	return bb.ListOptions{Limit: uint(p.PerPage), Start: uint((p.Page - 1) * p.PerPage)}
+	return bitbucket.ListOptions{Limit: uint(p.PerPage), Start: uint((p.Page - 1) * p.PerPage)}
 }
 
 func updateUserCredentials(u *model.User, t *oauth2.Token) {
@@ -175,7 +175,7 @@ func updateUserCredentials(u *model.User, t *oauth2.Token) {
 	u.Expiry = t.Expiry.UTC().Unix()
 }
 
-func convertPullRequest(pr *bb.PullRequest) *model.PullRequest {
+func convertPullRequest(pr *bitbucket.PullRequest) *model.PullRequest {
 	return &model.PullRequest{
 		FromFork: pr.Source.Repository.ID != pr.Target.Repository.ID,
 		Title:    pr.Title,
@@ -183,7 +183,7 @@ func convertPullRequest(pr *bb.PullRequest) *model.PullRequest {
 	}
 }
 
-func convertProjectsToTeams(projects []*bb.Project, client *bb.Client) []*model.Team {
+func convertProjectsToTeams(projects []*bitbucket.Project, client *bitbucket.Client) []*model.Team {
 	teams := make([]*model.Team, 0)
 	for _, project := range projects {
 		team := &model.Team{

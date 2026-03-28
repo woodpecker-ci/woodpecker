@@ -23,14 +23,14 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
-// make sure RPC implements logService.Service.
-var _ logService.Service = new(RPC)
+// make sure RPC implements service_log.Service.
+var _ service_log.Service = new(RPC)
 
-func Load(file string) (logService.Service, error) {
+func Load(file string) (service_log.Service, error) {
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
@@ -53,7 +53,7 @@ func Load(file string) (logService.Service, error) {
 		return nil, err
 	}
 
-	extension, _ := raw.(logService.Service)
+	extension, _ := raw.(service_log.Service)
 	return extension, nil
 }
 

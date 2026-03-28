@@ -17,14 +17,14 @@ package pipeline
 import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 func findOrPersistPipelineConfig(store store.Store, currentPipeline *model.Pipeline, forgeYamlConfig *forge_types.FileMeta) (*model.Config, error) {
 	return store.ConfigPersist(&model.Config{
 		RepoID: currentPipeline.RepoID,
-		Name:   stepbuilder.SanitizePath(forgeYamlConfig.Name),
+		Name:   step_builder.SanitizePath(forgeYamlConfig.Name),
 		Data:   forgeYamlConfig.Data,
 	})
 }

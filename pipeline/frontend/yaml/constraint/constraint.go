@@ -24,7 +24,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
 )
 
@@ -41,18 +41,18 @@ type (
 	}
 
 	Constraint struct {
-		Ref      List                        `yaml:"ref,omitempty"`
-		Repo     List                        `yaml:"repo,omitempty"`
-		Instance List                        `yaml:"instance,omitempty"`
-		Platform List                        `yaml:"platform,omitempty"`
-		Branch   List                        `yaml:"branch,omitempty"`
-		Cron     List                        `yaml:"cron,omitempty"`
-		Status   []string                    `yaml:"status,omitempty"`
-		Matrix   Map                         `yaml:"matrix,omitempty"`
-		Local    optional.Option[bool]       `yaml:"local,omitempty"`
-		Path     Path                        `yaml:"path,omitempty"`
-		Evaluate string                      `yaml:"evaluate,omitempty"`
-		Event    yamlBaseTypes.StringOrSlice `yaml:"event,omitempty"`
+		Ref      List                          `yaml:"ref,omitempty"`
+		Repo     List                          `yaml:"repo,omitempty"`
+		Instance List                          `yaml:"instance,omitempty"`
+		Platform List                          `yaml:"platform,omitempty"`
+		Branch   List                          `yaml:"branch,omitempty"`
+		Cron     List                          `yaml:"cron,omitempty"`
+		Status   []string                      `yaml:"status,omitempty"`
+		Matrix   Map                           `yaml:"matrix,omitempty"`
+		Local    optional.Option[bool]         `yaml:"local,omitempty"`
+		Path     Path                          `yaml:"path,omitempty"`
+		Evaluate string                        `yaml:"evaluate,omitempty"`
+		Event    yaml_base_types.StringOrSlice `yaml:"event,omitempty"`
 	}
 )
 

@@ -23,7 +23,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v84/github"
-	gh_mock "github.com/migueleliasweb/go-github-mock/src/mock"
+	github_mock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -120,9 +120,9 @@ var (
 
 func TestHook(t *testing.T) {
 	// Mock GitHub API for changed files
-	mockedHTTPClient := gh_mock.NewMockedHTTPClient(
-		gh_mock.WithRequestMatch(
-			gh_mock.EndpointPattern{
+	mockedHTTPClient := github_mock.NewMockedHTTPClient(
+		github_mock.WithRequestMatch(
+			github_mock.EndpointPattern{
 				Pattern: "/repos/6543/hello-world/commits/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
 				Method:  "GET",
 			},
@@ -140,23 +140,23 @@ func TestHook(t *testing.T) {
 				},
 			},
 		),
-		gh_mock.WithRequestMatch(
-			gh_mock.GetReposCompareByOwnerByRepoByBasehead,
+		github_mock.WithRequestMatch(
+			github_mock.GetReposCompareByOwnerByRepoByBasehead,
 			github.CommitsComparison{
 				Files: []*github.CommitFile{
 					{Filename: github.Ptr("main.go")},
 				},
 			},
 		),
-		gh_mock.WithRequestMatch(
-			gh_mock.GetReposPullsFilesByOwnerByRepoByPullNumber,
+		github_mock.WithRequestMatch(
+			github_mock.GetReposPullsFilesByOwnerByRepoByPullNumber,
 			[]*github.CommitFile{
 				{Filename: github.Ptr("README.md")},
 				{Filename: github.Ptr("main.go")},
 			},
 		),
-		gh_mock.WithRequestMatch(
-			gh_mock.EndpointPattern{
+		github_mock.WithRequestMatch(
+			github_mock.EndpointPattern{
 				Pattern: "/repos/6543/hello-world/commits/9049f1265b7d61be4a8904a9a27120d2064dab3b",
 				Method:  "GET",
 			},
