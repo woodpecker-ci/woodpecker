@@ -185,26 +185,6 @@ func (o *ListOpts) Encode() string {
 	return params.Encode()
 }
 
-type ListWorkspacesOpts struct {
-	Page    int
-	PageLen int
-	Role    string
-}
-
-func (o *ListWorkspacesOpts) Encode() string {
-	params := url.Values{}
-	if o.Page != 0 {
-		params.Set("page", strconv.Itoa(o.Page))
-	}
-	if o.PageLen != 0 {
-		params.Set("pagelen", strconv.Itoa(o.PageLen))
-	}
-	if len(o.Role) != 0 {
-		params.Set("role", o.Role)
-	}
-	return params.Encode()
-}
-
 type Error struct {
 	Status int
 	Body   struct {

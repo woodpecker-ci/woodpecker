@@ -151,10 +151,9 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 func (c *config) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
 	setListOptions(p)
 
-	opts := &internal.ListWorkspacesOpts{
+	opts := &internal.ListOpts{
 		PageLen: p.PerPage,
 		Page:    p.Page,
-		Role:    "member",
 	}
 	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
 	if err != nil {
@@ -205,23 +204,12 @@ func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 
 	client := c.newClient(ctx, u)
 
-	resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
+	resp, err := client.ListWorkspaces(&internal.ListOpts{
 		Page:    p.Page,
 		PageLen: p.PerPage,
-		Role:    "member",
 	})
 	if err != nil {
 		return nil, err
-	}
-
-	userPermissions, err := client.ListPermissionsAll()
-	if err != nil {
-		return nil, err
-	}
-
-	userPermissionsByRepo := make(map[string]*internal.RepoPerm)
-	for _, permission := range userPermissions {
-		userPermissionsByRepo[permission.Repo.FullName] = permission
 	}
 
 	var all []*model.Repo
@@ -230,6 +218,17 @@ func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 		if err != nil {
 			return nil, err
 		}
+
+		userPermissions, err := client.ListPermissionsAll(workspace.Slug)
+		if err != nil {
+			return nil, err
+		}
+
+		userPermissionsByRepo := make(map[string]*internal.RepoPerm)
+		for _, permission := range userPermissions {
+			userPermissionsByRepo[permission.Repo.FullName] = permission
+		}
+
 		for _, repo := range repos {
 			if perm, ok := userPermissionsByRepo[repo.FullName]; ok {
 				all = append(all, convertRepo(repo, perm))

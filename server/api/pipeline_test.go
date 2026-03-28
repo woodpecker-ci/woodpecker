@@ -306,7 +306,7 @@ func TestCreatePipeline(t *testing.T) {
 		}, nil).Maybe()
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
 
-		mockSecretService.On("SecretListPipeline", fakeRepo, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
 		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
 
 		mockManager := manager_mocks.NewMockManager(t)
@@ -379,7 +379,7 @@ func TestCreatePipeline(t *testing.T) {
 		}, nil).Maybe()
 
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
-		mockSecretService.On("SecretListPipeline", fakeRepo, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
 		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
 
 		mockManager := manager_mocks.NewMockManager(t)

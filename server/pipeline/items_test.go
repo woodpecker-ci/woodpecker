@@ -136,7 +136,7 @@ steps:
 	server.Config.Services.Manager = mockManager
 
 	secretService := secret_service_mocks.NewMockService(t)
-	secretService.On("SecretListPipeline", mock.Anything, mock.Anything).Return([]*model.Secret{
+	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{
 		{
 			Name:  "hello",
 			Value: "secret world",
