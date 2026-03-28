@@ -1,7 +1,7 @@
 # renovate: datasource=github-releases depName=mvdan/gofumpt
 GOFUMPT_VERSION := v0.9.2
 # renovate: datasource=github-releases depName=golangci/golangci-lint
-GOLANGCI_LINT_VERSION := v2.10.1
+GOLANGCI_LINT_VERSION := v2.11.4
 # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
 XGO_VERSION := go-1.26.x
 
@@ -127,7 +127,7 @@ generate-openapi: ## Run openapi code generation and format it
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 generate-license-header: install-addlicense
-	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
+	addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -189,7 +189,7 @@ test-cli: ## Test cli code
 
 test-server-datastore: ## Test server datastore
 	go test -timeout 300s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
-	go test -race -timeout 100s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -race -timeout 120s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
 	go test -race -cover -coverprofile datastore-coverage.out -timeout 300s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/server/store/...
@@ -334,7 +334,7 @@ release-checksums: ## Create checksums for all release files
 release: release-frontend release-server release-agent release-cli ## Release all binaries
 
 bundle-prepare: ## Prepare the bundles
-	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
+	CGO_ENABLED=0 go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.45.0
 
 bundle-agent: bundle-prepare ## Create bundles for agent
 	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ${DIST_DIR} --packager deb

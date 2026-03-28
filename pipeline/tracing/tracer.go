@@ -38,15 +38,15 @@ func (f TraceFunc) Trace(state *state.State) error {
 // variables to include the correct timestamp and status.
 // TODO: find either a new home or better name for this.
 var DefaultTracer = TraceFunc(func(state *state.State) error {
-	if state.Process.Exited {
+	if state.CurrStepState.Exited {
 		return nil
 	}
-	if state.Pipeline.Step.Environment == nil {
+	if state.CurrStep.Environment == nil {
 		return nil
 	}
-	state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
+	state.CurrStep.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
 
-	state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
+	state.CurrStep.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
 
 	return nil
 })

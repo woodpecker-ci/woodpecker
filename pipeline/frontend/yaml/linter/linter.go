@@ -310,8 +310,9 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 
 	if len(parsed.RunsOn) > 0 { //nolint:staticcheck
 		err = multierr.Append(err, &pipeline_errors.PipelineError{
-			Type:    pipeline_errors.PipelineErrorTypeDeprecation,
-			Message: "Usage of `runs_on` is deprecated, use `when.status`",
+			Type:      pipeline_errors.PipelineErrorTypeDeprecation,
+			IsWarning: true,
+			Message:   "Usage of `runs_on` is deprecated, use `when.status`",
 			Data: pipeline_errors.DeprecationErrorData{
 				File:  config.File,
 				Field: fmt.Sprintf("%s.runs_on", config.File),
@@ -341,8 +342,10 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 		// root whens do not necessarily have an event filter, check steps
 		for _, step := range parsed.Steps.ContainerList {
 			var field string
+			var msg string
 			if len(step.When.Constraints) == 0 {
 				field = fmt.Sprintf("steps.%s", step.Name)
+				msg = "Consider adding a `when` block with an `event` filter to this step or the entire workflow"
 			} else {
 				stepEventIndex := -1
 				for i, c := range step.When.Constraints {
@@ -353,12 +356,13 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 				}
 				if stepEventIndex > -1 {
 					field = fmt.Sprintf("steps.%s.when[%d]", step.Name, stepEventIndex)
+					msg = "Set an event filter for all steps or the entire workflow on all items of the `when` block"
 				}
 			}
 			if field != "" {
 				err = multierr.Append(err, &pipeline_errors.PipelineError{
 					Type:    pipeline_errors.PipelineErrorTypeBadHabit,
-					Message: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
+					Message: msg,
 					Data: pipeline_errors.BadHabitErrorData{
 						File:  config.File,
 						Field: field,

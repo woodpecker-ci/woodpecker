@@ -87,8 +87,8 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
-		secret:              setupSecretService(store),
-		registry:            setupRegistryService(store, c.String("docker-config")),
+		secret:              setupSecretService(store, c.String("secret-extension-endpoint"), client, c.Bool("secret-extension-netrc")),
+		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
 		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
@@ -101,7 +101,11 @@ func (m *manager) SignaturePublicKey() crypto.PublicKey {
 	return m.signaturePublicKey
 }
 
-func (m *manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
+func (m *manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
+	if repo.SecretExtensionEndpoint != "" {
+		return secret.NewCombined(m.secret, secret.NewHTTP(strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.client, repo.SecretExtensionNetrc))
+	}
+
 	return m.SecretService()
 }
 
@@ -109,7 +113,10 @@ func (m *manager) SecretService() secret.Service {
 	return m.secret
 }
 
-func (m *manager) RegistryServiceFromRepo(_ *model.Repo) registry.Service {
+func (m *manager) RegistryServiceFromRepo(repo *model.Repo) registry.Service {
+	if repo.RegistryExtensionEndpoint != "" {
+		return registry.NewWithExtension(m.registry, registry.NewHTTP(strings.TrimRight(repo.RegistryExtensionEndpoint, "/"), m.client))
+	}
 	return m.RegistryService()
 }
 

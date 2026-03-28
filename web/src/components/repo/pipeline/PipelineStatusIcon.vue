@@ -44,7 +44,7 @@ const statusDescriptions = {
   pending: t('repo.pipeline.status.pending'),
   running: t('repo.pipeline.status.running'),
   skipped: t('repo.pipeline.status.skipped'),
-  canceled: t('repo.pipeline.status.skipped'),
+  canceled: t('repo.pipeline.status.canceled'),
   started: t('repo.pipeline.status.started'),
   success: t('repo.pipeline.status.success'),
 } satisfies {

@@ -1,3 +1,17 @@
+// Copyright 2024 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package api_test
 
 import (
@@ -83,9 +97,9 @@ func TestHook(t *testing.T) {
 	_forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
 	_store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 	_manager.On("SecretServiceFromRepo", repo).Return(_secretService)
-	_secretService.On("SecretListPipeline", repo, mock.Anything, mock.Anything).Return(nil, nil)
+	_secretService.On("SecretListPipeline", mock.Anything, repo, mock.Anything, mock.Anything).Return(nil, nil)
 	_manager.On("RegistryServiceFromRepo", repo).Return(_registryService)
-	_registryService.On("RegistryListPipeline", repo, mock.Anything).Return(nil, nil)
+	_registryService.On("RegistryListPipeline", mock.Anything, repo, mock.Anything).Return(nil, nil)
 	_manager.On("EnvironmentService").Return(nil)
 	_store.On("DeletePipeline", mock.Anything).Return(nil)
 

@@ -227,7 +227,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 		t.Run("should return not found for non-existent pipeline", func(t *testing.T) {
 			mockStore := store_mocks.NewMockStore(t)
-			mockStore.On("GetPipelineNumber", mock.Anything, int64(3)).Return((*model.Pipeline)(nil), types.RecordNotExist)
+			mockStore.On("GetPipelineNumber", mock.Anything, int64(3)).Return((*model.Pipeline)(nil), types.ErrRecordNotExist)
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
@@ -304,8 +304,8 @@ func TestCreatePipeline(t *testing.T) {
 		}, nil).Maybe()
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
 
-		mockSecretService.On("SecretListPipeline", fakeRepo, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
-		mockRegistryService.On("RegistryListPipeline", fakeRepo, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
 
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
@@ -377,8 +377,8 @@ func TestCreatePipeline(t *testing.T) {
 		}, nil).Maybe()
 
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
-		mockSecretService.On("SecretListPipeline", fakeRepo, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
-		mockRegistryService.On("RegistryListPipeline", fakeRepo, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
 
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
