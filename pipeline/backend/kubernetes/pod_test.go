@@ -20,8 +20,8 @@ import (
 
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -376,7 +376,7 @@ func TestFullPod(t *testing.T) {
 		{Number: 2345, Protocol: "tcp"},
 		{Number: 3456, Protocol: "udp"},
 	}
-	fsGroupChangePolicy := v1.PodFSGroupChangePolicy("OnRootMismatch")
+	fsGroupChangePolicy := kube_core_v1.PodFSGroupChangePolicy("OnRootMismatch")
 	secCtx := SecurityContext{
 		Privileged:          newBool(true),
 		RunAsNonRoot:        newBool(true),
@@ -446,7 +446,7 @@ func TestFullPod(t *testing.T) {
 }
 
 func TestPodPrivilege(t *testing.T) {
-	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*v1.Pod, error) {
+	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*kube_core_v1.Pod, error) {
 		return mkPod(&types.Step{
 			Name:       "go-test",
 			Image:      "golang:1.16",
@@ -480,19 +480,19 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(false, false, secCtx)
 	assert.NoError(t, err)
-	assert.Equal(t, &v1.PodSecurityContext{
-		SELinuxOptions:           (*v1.SELinuxOptions)(nil),
-		WindowsOptions:           (*v1.WindowsSecurityContextOptions)(nil),
+	assert.Equal(t, &kube_core_v1.PodSecurityContext{
+		SELinuxOptions:           (*kube_core_v1.SELinuxOptions)(nil),
+		WindowsOptions:           (*kube_core_v1.WindowsSecurityContextOptions)(nil),
 		RunAsUser:                (*int64)(nil),
 		RunAsGroup:               (*int64)(nil),
 		RunAsNonRoot:             (*bool)(nil),
 		SupplementalGroups:       []int64(nil),
-		SupplementalGroupsPolicy: (*v1.SupplementalGroupsPolicy)(nil),
+		SupplementalGroupsPolicy: (*kube_core_v1.SupplementalGroupsPolicy)(nil),
 		FSGroup:                  newInt64(0),
-		Sysctls:                  []v1.Sysctl(nil),
-		FSGroupChangePolicy:      (*v1.PodFSGroupChangePolicy)(nil),
-		SeccompProfile:           (*v1.SeccompProfile)(nil),
-		AppArmorProfile:          (*v1.AppArmorProfile)(nil),
+		Sysctls:                  []kube_core_v1.Sysctl(nil),
+		FSGroupChangePolicy:      (*kube_core_v1.PodFSGroupChangePolicy)(nil),
+		SeccompProfile:           (*kube_core_v1.SeccompProfile)(nil),
+		AppArmorProfile:          (*kube_core_v1.AppArmorProfile)(nil),
 	}, pod.Spec.SecurityContext)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
 
@@ -503,7 +503,7 @@ func TestPodPrivilege(t *testing.T) {
 	pod, err = createTestPod(false, false, secCtx)
 	assert.NoError(t, err)
 	assert.Nil(t, pod.Spec.SecurityContext)
-	assert.Equal(t, (*v1.PodSecurityContext)(nil), pod.Spec.SecurityContext)
+	assert.Equal(t, (*kube_core_v1.PodSecurityContext)(nil), pod.Spec.SecurityContext)
 
 	// step is privileged and security context is requesting privileged
 	secCtx = SecurityContext{
@@ -947,11 +947,11 @@ func TestPodAffinity(t *testing.T) {
 		"status": {}
 	}`
 
-	agentAffinity := &v1.Affinity{
-		PodAffinity: &v1.PodAffinity{
-			RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+	agentAffinity := &kube_core_v1.Affinity{
+		PodAffinity: &kube_core_v1.PodAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: []kube_core_v1.PodAffinityTerm{
 				{
-					LabelSelector:  &meta_v1.LabelSelector{},
+					LabelSelector:  &kube_meta_v1.LabelSelector{},
 					MatchLabelKeys: []string{"woodpecker-ci.org/task-uuid"},
 					TopologyKey:    "kubernetes.io/hostname",
 				},
@@ -1052,13 +1052,13 @@ func TestPodAffinityAllowFromStep(t *testing.T) {
 		"status": {}
 	}`
 
-	stepAffinity := &v1.Affinity{
-		PodAntiAffinity: &v1.PodAntiAffinity{
-			PreferredDuringSchedulingIgnoredDuringExecution: []v1.WeightedPodAffinityTerm{
+	stepAffinity := &kube_core_v1.Affinity{
+		PodAntiAffinity: &kube_core_v1.PodAntiAffinity{
+			PreferredDuringSchedulingIgnoredDuringExecution: []kube_core_v1.WeightedPodAffinityTerm{
 				{
 					Weight: 100,
-					PodAffinityTerm: v1.PodAffinityTerm{
-						LabelSelector: &meta_v1.LabelSelector{
+					PodAffinityTerm: kube_core_v1.PodAffinityTerm{
+						LabelSelector: &kube_meta_v1.LabelSelector{
 							MatchLabels: map[string]string{
 								"app": "woodpecker",
 							},
@@ -1154,15 +1154,15 @@ func TestPodAffinityStepOverridesAgent(t *testing.T) {
 		"status": {}
 	}`
 
-	agentAffinity := &v1.Affinity{
-		NodeAffinity: &v1.NodeAffinity{
-			RequiredDuringSchedulingIgnoredDuringExecution: &v1.NodeSelector{
-				NodeSelectorTerms: []v1.NodeSelectorTerm{
+	agentAffinity := &kube_core_v1.Affinity{
+		NodeAffinity: &kube_core_v1.NodeAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: &kube_core_v1.NodeSelector{
+				NodeSelectorTerms: []kube_core_v1.NodeSelectorTerm{
 					{
-						MatchExpressions: []v1.NodeSelectorRequirement{
+						MatchExpressions: []kube_core_v1.NodeSelectorRequirement{
 							{
 								Key:      "topology.kubernetes.io/zone",
-								Operator: v1.NodeSelectorOpIn,
+								Operator: kube_core_v1.NodeSelectorOpIn,
 								Values:   []string{"eu-central-1a"},
 							},
 						},
@@ -1172,15 +1172,15 @@ func TestPodAffinityStepOverridesAgent(t *testing.T) {
 		},
 	}
 
-	stepAffinity := &v1.Affinity{
-		NodeAffinity: &v1.NodeAffinity{
-			RequiredDuringSchedulingIgnoredDuringExecution: &v1.NodeSelector{
-				NodeSelectorTerms: []v1.NodeSelectorTerm{
+	stepAffinity := &kube_core_v1.Affinity{
+		NodeAffinity: &kube_core_v1.NodeAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: &kube_core_v1.NodeSelector{
+				NodeSelectorTerms: []kube_core_v1.NodeSelectorTerm{
 					{
-						MatchExpressions: []v1.NodeSelectorRequirement{
+						MatchExpressions: []kube_core_v1.NodeSelectorRequirement{
 							{
 								Key:      "disk-type",
-								Operator: v1.NodeSelectorOpIn,
+								Operator: kube_core_v1.NodeSelectorOpIn,
 								Values:   []string{"ssd"},
 							},
 						},

@@ -23,7 +23,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
@@ -62,7 +62,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 			state := new(state.State)
 			state.CurrStep = stepErr.Step
 			state.Workflow.Error = stepErr.Err
-			state.CurrStepState = backend.State{
+			state.CurrStepState = backend_types.State{
 				Error:    stepErr.Err,
 				Exited:   true,
 				ExitCode: 1,
@@ -96,7 +96,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 // Updates the current status of a step.
 // If processState is nil, we assume the step did not start.
 // If step did not started and err exists, it's a step start issue and step is done.
-func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
+func (r *Runtime) traceStep(processState *backend_types.State, err error, step *backend_types.Step) error {
 	if r.tracer == nil {
 		// no tracer nothing to trace :)
 		return nil
@@ -109,7 +109,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 
 	// We have an error while starting the step
 	if processState == nil && err != nil {
-		state.CurrStepState = backend.State{
+		state.CurrStepState = backend_types.State{
 			Error:     err,
 			Exited:    true,
 			OOMKilled: false,
@@ -125,7 +125,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 }
 
 // Executes a set of parallel steps.
-func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-chan error {
+func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend_types.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
 	logger := r.makeLogger()
@@ -146,13 +146,13 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 				logger.Debug().
 					Str("step", step.Name).
 					Msgf("skipped due to OnFailure=%t", step.OnFailure)
-				return r.traceStep(&backend.State{Skipped: true}, nil, step)
+				return r.traceStep(&backend_types.State{Skipped: true}, nil, step)
 			}
 			if rErr == nil && !step.OnSuccess {
 				logger.Debug().
 					Str("step", step.Name).
 					Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
-				return r.traceStep(&backend.State{Skipped: true}, nil, step)
+				return r.traceStep(&backend_types.State{Skipped: true}, nil, step)
 			}
 
 			// Trace started.
@@ -162,7 +162,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 			}
 
 			// Add compatibility environment variables for drone-ci plugins.
-			if step.Type == backend.StepTypePlugin {
+			if step.Type == backend_types.StepTypePlugin {
 				metadata.SetDroneEnviron(step.Environment)
 			}
 
@@ -219,7 +219,7 @@ func (r *Runtime) execAll(runnerCtx context.Context, steps []*backend.Step) <-ch
 }
 
 // Executes the step and returns the state and error.
-func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *sync.WaitGroup) (*backend.State, error) {
+func (r *Runtime) exec(runnerCtx context.Context, step *backend_types.Step, setupWg *sync.WaitGroup) (*backend_types.State, error) {
 	defer func() {
 		if setupWg != nil {
 			setupWg.Done()
@@ -264,7 +264,7 @@ func (r *Runtime) exec(runnerCtx context.Context, step *backend.Step, setupWg *s
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			if waitState == nil {
-				waitState = &backend.State{}
+				waitState = &backend_types.State{}
 			}
 			waitState.Error = pipeline_errors.ErrCancel
 		} else {
