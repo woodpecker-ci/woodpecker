@@ -23,9 +23,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// all agent labels need to be present in task
+// All agent labels need to be present in task
 // tasks without labels can also be picked (also pick untagged mode)
-// tasks with additional labels (not set on agent) wont be picked
+// tasks with additional labels (not set on agent) wont be picked.
 
 func TestCreateFilterFunc(t *testing.T) {
 	tests := []struct {
