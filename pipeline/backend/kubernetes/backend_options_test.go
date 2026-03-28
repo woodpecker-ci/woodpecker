@@ -18,32 +18,32 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func Test_parseBackendOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		step    *backend.Step
+		step    *backend_types.Step
 		want    BackendOptions
 		wantErr bool
 	}{
 		{
 			name: "nil options",
-			step: &backend.Step{BackendOptions: nil},
+			step: &backend_types.Step{BackendOptions: nil},
 			want: BackendOptions{},
 		},
 		{
 			name: "empty options",
-			step: &backend.Step{BackendOptions: map[string]any{}},
+			step: &backend_types.Step{BackendOptions: map[string]any{}},
 			want: BackendOptions{},
 		},
 		{
 			name: "full k8s options",
-			step: &backend.Step{
+			step: &backend_types.Step{
 				BackendOptions: map[string]any{
 					"kubernetes": map[string]any{
 						"nodeSelector":       map[string]string{"storage": "ssd"},
@@ -110,11 +110,11 @@ func Test_parseBackendOptions(t *testing.T) {
 				Labels:             map[string]string{"app": "test"},
 				Annotations:        map[string]string{"apps.kubernetes.io/pod-index": "0"},
 				Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
-				Affinity: &v1.Affinity{
-					PodAffinity: &v1.PodAffinity{
-						RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+				Affinity: &kube_core_v1.Affinity{
+					PodAffinity: &kube_core_v1.PodAffinity{
+						RequiredDuringSchedulingIgnoredDuringExecution: []kube_core_v1.PodAffinityTerm{
 							{
-								LabelSelector: &metav1.LabelSelector{},
+								LabelSelector: &kube_meta_v1.LabelSelector{},
 								MatchLabelKeys: []string{
 									"woodpecker-ci.org/task-uuid",
 								},
@@ -158,7 +158,7 @@ func Test_parseBackendOptions(t *testing.T) {
 		},
 		{
 			name: "number options",
-			step: &backend.Step{BackendOptions: map[string]any{
+			step: &backend_types.Step{BackendOptions: map[string]any{
 				"kubernetes": map[string]any{
 					"resources": map[string]any{
 						"requests": map[string]int{"memory": 128, "cpu": 1000},

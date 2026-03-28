@@ -37,7 +37,7 @@ import (
 	pubsub_in_memory "go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
-	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
@@ -122,7 +122,7 @@ func setupMembershipService(_ context.Context, _store store.Store) cache.Members
 	return cache.NewMembershipService(_store)
 }
 
-func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
+func setupLogStore(c *cli.Command, s store.Store) (service_log.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
