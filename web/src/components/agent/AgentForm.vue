@@ -4,6 +4,17 @@
       <TextField :id="id" v-model="agent.name" :placeholder="$t('admin.settings.agents.name.placeholder')" required />
     </InputField>
 
+    <InputField v-slot="{ id }" :label="$t('admin.settings.agents.filters.name')">
+      <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('admin.settings.agents.filters.desc') }}</span>
+      <KeyValueEditor
+        :id="id"
+        v-model="agent.filters"
+        :key-placeholder="$t('admin.settings.agents.filters.key')"
+        :value-placeholder="$t('admin.settings.agents.filters.value')"
+        :delete-title="$t('admin.settings.agents.filters.delete')"
+      />
+    </InputField>
+
     <InputField :label="$t('admin.settings.agents.no_schedule.name')">
       <Checkbox
         :model-value="agent.no_schedule || false"
@@ -80,6 +91,7 @@ import { computed } from 'vue';
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
+import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import TextField from '~/components/form/TextField.vue';
 import { useDate } from '~/compositions/useDate';
 import type { Agent } from '~/lib/api/types';
