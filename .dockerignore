@@ -1,0 +1,17 @@
+### Hidden folders ###
+.*/
+
+### Secrets and environment files ###
+**/*.env
+
+### Docker ###
+docker-compose.*.yaml
+
+### Go ###
+vendor/
+dist/
+
+### Frontend & doc ###
+web/dist
+*/node_modules
+.pnpm-store
