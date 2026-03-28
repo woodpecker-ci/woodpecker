@@ -51,7 +51,7 @@ const (
 	testServiceTimeout = 1 * time.Second
 )
 
-// New returns a dummy backend_types.
+// New returns a dummy backend.
 func New() backend_types.Backend {
 	return &dummy{
 		kv: sync.Map{},
