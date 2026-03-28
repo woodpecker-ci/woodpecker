@@ -129,6 +129,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#6334](https://github.com/woodpecker-ci/woodpecker/pull/6334)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.8.0 [[#6332](https://github.com/woodpecker-ci/woodpecker/pull/6332)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v4.1.0 [[#6331](https://github.com/woodpecker-ci/woodpecker/pull/6331)]
 - fix(deps): update golang-packages [[#6327](https://github.com/woodpecker-ci/woodpecker/pull/6327)]
