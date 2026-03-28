@@ -23,14 +23,16 @@ import (
 // And the workflow is updated alongside it.
 type State struct {
 	// Global state of the currently running Workflow.
-	Workflow struct {
-		// Workflow start time
-		Started int64 `json:"time"`
-		// Current workflow error state
-		Error error `json:"error"`
-	}
+	Workflow Workflow
 	// Current step that updates the step and workflow state
 	CurrStep *backend.Step `json:"step"`
 	// Current step state
 	CurrStepState backend.State
+}
+
+type Workflow struct {
+	// Workflow start time
+	Started int64 `json:"time"`
+	// Current workflow error state
+	Error error `json:"error"`
 }

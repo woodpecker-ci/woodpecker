@@ -204,10 +204,7 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 
 		assert.Greater(t, traces[4].Workflow.Started, int64(0))
 		assert.EqualValues(t, state.State{
-			Workflow: struct {
-				Started int64 `json:"time"`
-				Error   error `json:"error"`
-			}{
+			Workflow: state.Workflow{
 				Started: traces[4].Workflow.Started,
 			},
 			CurrStep: &backend.Step{
