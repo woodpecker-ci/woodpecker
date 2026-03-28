@@ -18,6 +18,10 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 Extension HTTP calls (as of now the configuration extension) will by default only be allowed to contact external hosts. Set `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS` accordingly to allow additional hosts as needed.
 
+### Internal changes
+
+- Renamed the server flag `config-service-endpoint` to `config-extension-endpoint`
+
 ## 3.0.0
 
 ### User-facing migrations
