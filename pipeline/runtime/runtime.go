@@ -27,7 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-// Runtime represents a workflow state executed by a specific backend_types.
+// Runtime represents a workflow state executed by a specific backend.
 // Each workflow gets its own Runtime instance.
 type Runtime struct {
 	// err holds the first error that occurred in the workflow.
