@@ -80,9 +80,7 @@ func TestSetGatedState(t *testing.T) {
 			},
 			pipeline: &model.Pipeline{
 				Event: model.EventPullMetadata,
-				PullRequest: &model.PullRequest{
-					FromFork: false,
-				},
+				PullRequest: &model.PullRequest{FromFork: false},
 			},
 			expectBlocked: true,
 		},
