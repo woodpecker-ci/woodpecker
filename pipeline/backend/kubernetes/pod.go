@@ -21,10 +21,10 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	v1 "k8s.io/api/core/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
@@ -42,7 +42,7 @@ const (
 	initContainerImage       = "busybox:stable-musl"
 )
 
-func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*v1.Pod, error) {
+func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*kube_core_v1.Pod, error) {
 	var err error
 
 	nsp := newNativeSecretsProcessor(config, options.Secrets)
@@ -72,7 +72,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		spec.InitContainers = append(spec.InitContainers, initContainer)
 	}
 
-	pod := &v1.Pod{
+	pod := &kube_core_v1.Pod{
 		ObjectMeta: meta,
 		Spec:       spec,
 	}
@@ -91,9 +91,9 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (meta_v1.ObjectMeta, error) {
+func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (kube_meta_v1.ObjectMeta, error) {
 	var err error
-	meta := meta_v1.ObjectMeta{
+	meta := kube_meta_v1.ObjectMeta{
 		Name:        podName,
 		Namespace:   config.GetNamespace(step.OrgID),
 		Annotations: podAnnotations(config, options),
@@ -178,14 +178,14 @@ func podAnnotations(config *config, options BackendOptions) map[string]string {
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor, taskUUID string) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor, taskUUID string) (kube_core_v1.PodSpec, error) {
 	subdomain, err := subdomain(taskUUID)
 	if err != nil {
-		return v1.PodSpec{}, err
+		return kube_core_v1.PodSpec{}, err
 	}
 
-	spec := v1.PodSpec{
-		RestartPolicy:      v1.RestartPolicyNever,
+	spec := kube_core_v1.PodSpec{
+		RestartPolicy:      kube_core_v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
 		PriorityClassName:  config.PriorityClassName,
@@ -212,7 +212,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	}
 
 	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
-		spec.DNSConfig = &v1.PodDNSConfig{}
+		spec.DNSConfig = &kube_core_v1.PodDNSConfig{}
 		if len(step.DNS) != 0 {
 			spec.DNSConfig.Nameservers = step.DNS
 		}
@@ -237,9 +237,9 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (kube_core_v1.Container, error) {
 	var err error
-	container := v1.Container{
+	container := kube_core_v1.Container{
 		Name:            podName,
 		Image:           step.Image,
 		WorkingDir:      step.WorkingDir,
@@ -248,7 +248,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if step.Pull {
-		container.ImagePullPolicy = v1.PullAlways
+		container.ImagePullPolicy = kube_core_v1.PullAlways
 	}
 
 	if len(step.Commands) > 0 {
@@ -293,16 +293,16 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 // podInitContainer determines whether an init container is required to prepare the
 // main step container's working directory with the correct permissions.
 // If it is required, it returns the init container spec, otherwise it returns an empty container spec.
-func podInitContainer(podSpec *v1.PodSpec, container *v1.Container) v1.Container {
+func podInitContainer(podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Container) kube_core_v1.Container {
 	// if pod is running as root, we don't need an init container to precreate the workingDir
 	// since kubelet already precreates it (as root:root)
 	if podSpec.SecurityContext == nil ||
 		podSpec.SecurityContext.RunAsUser == nil ||
 		*podSpec.SecurityContext.RunAsUser == 0 {
-		return v1.Container{}
+		return kube_core_v1.Container{}
 	}
 
-	volumeMounts := []v1.VolumeMount{}
+	volumeMounts := []kube_core_v1.VolumeMount{}
 
 	for _, mount := range container.VolumeMounts {
 		// we only add volume mounts to the init container if the workingDir is under the mount path
@@ -314,42 +314,42 @@ func podInitContainer(podSpec *v1.PodSpec, container *v1.Container) v1.Container
 	}
 	// if workingDir is not covered by any volume mount, we don't need an init container to precreate it
 	if len(volumeMounts) == 0 {
-		return v1.Container{}
+		return kube_core_v1.Container{}
 	}
 
-	return v1.Container{
+	return kube_core_v1.Container{
 		Name:            "init-" + container.Name,
 		Image:           initContainerImage,
-		ImagePullPolicy: v1.PullAlways,
+		ImagePullPolicy: kube_core_v1.PullAlways,
 		Args:            []string{"mkdir", "-p", container.WorkingDir},
-		SecurityContext: &v1.SecurityContext{
-			Capabilities: &v1.Capabilities{
-				Drop: []v1.Capability{"ALL"},
+		SecurityContext: &kube_core_v1.SecurityContext{
+			Capabilities: &kube_core_v1.Capabilities{
+				Drop: []kube_core_v1.Capability{"ALL"},
 			},
 			AllowPrivilegeEscalation: newBool(false),
 		},
-		Resources: v1.ResourceRequirements{
-			Requests: v1.ResourceList{
-				v1.ResourceCPU:    resource.MustParse("5m"),
-				v1.ResourceMemory: resource.MustParse("5Mi"),
+		Resources: kube_core_v1.ResourceRequirements{
+			Requests: kube_core_v1.ResourceList{
+				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
+				kube_core_v1.ResourceMemory: resource.MustParse("5Mi"),
 			},
-			Limits: v1.ResourceList{
-				v1.ResourceCPU:    resource.MustParse("5m"),
-				v1.ResourceMemory: resource.MustParse("5Mi"),
+			Limits: kube_core_v1.ResourceList{
+				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
+				kube_core_v1.ResourceMemory: resource.MustParse("5Mi"),
 			},
 		},
 		VolumeMounts: volumeMounts,
 	}
 }
 
-func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []v1.EnvVar {
-	var ev []v1.EnvVar
+func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []kube_core_v1.EnvVar {
+	var ev []kube_core_v1.EnvVar
 	for _, key := range secs {
-		ev = append(ev, v1.EnvVar{
+		ev = append(ev, kube_core_v1.EnvVar{
 			Name: key,
-			ValueFrom: &v1.EnvVarSource{
-				SecretKeyRef: &v1.SecretKeySelector{
-					LocalObjectReference: v1.LocalObjectReference{
+			ValueFrom: &kube_core_v1.EnvVarSource{
+				SecretKeyRef: &kube_core_v1.SecretKeySelector{
+					LocalObjectReference: kube_core_v1.LocalObjectReference{
 						Name: stepSecretName,
 					},
 					Key: key,
@@ -374,8 +374,8 @@ func filterSecrets(environment, secrets map[string]string) (map[string]string, [
 	return ev, secs
 }
 
-func pvcVolumes(volumes []string) ([]v1.Volume, error) {
-	var vols []v1.Volume
+func pvcVolumes(volumes []string) ([]kube_core_v1.Volume, error) {
+	var vols []kube_core_v1.Volume
 
 	for _, v := range volumes {
 		volumeName, err := volumeName(v)
@@ -388,21 +388,21 @@ func pvcVolumes(volumes []string) ([]v1.Volume, error) {
 	return vols, nil
 }
 
-func pvcVolume(name string) v1.Volume {
-	pvcSource := v1.PersistentVolumeClaimVolumeSource{
+func pvcVolume(name string) kube_core_v1.Volume {
+	pvcSource := kube_core_v1.PersistentVolumeClaimVolumeSource{
 		ClaimName: name,
 		ReadOnly:  false,
 	}
-	return v1.Volume{
+	return kube_core_v1.Volume{
 		Name: name,
-		VolumeSource: v1.VolumeSource{
+		VolumeSource: kube_core_v1.VolumeSource{
 			PersistentVolumeClaim: &pvcSource,
 		},
 	}
 }
 
-func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
-	var mounts []v1.VolumeMount
+func volumeMounts(volumes []string) ([]kube_core_v1.VolumeMount, error) {
+	var mounts []kube_core_v1.VolumeMount
 
 	for _, v := range volumes {
 		volumeName, err := volumeName(v)
@@ -416,31 +416,31 @@ func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
 	return mounts, nil
 }
 
-func volumeMount(name, path string) v1.VolumeMount {
-	return v1.VolumeMount{
+func volumeMount(name, path string) kube_core_v1.VolumeMount {
+	return kube_core_v1.VolumeMount{
 		Name:      name,
 		MountPath: path,
 	}
 }
 
-func containerPorts(ports []types.Port) []v1.ContainerPort {
-	containerPorts := make([]v1.ContainerPort, len(ports))
+func containerPorts(ports []types.Port) []kube_core_v1.ContainerPort {
+	containerPorts := make([]kube_core_v1.ContainerPort, len(ports))
 	for i, port := range ports {
 		containerPorts[i] = containerPort(port)
 	}
 	return containerPorts
 }
 
-func containerPort(port types.Port) v1.ContainerPort {
-	return v1.ContainerPort{
+func containerPort(port types.Port) kube_core_v1.ContainerPort {
+	return kube_core_v1.ContainerPort{
 		ContainerPort: int32(port.Number),
-		Protocol:      v1.Protocol(strings.ToUpper(port.Protocol)),
+		Protocol:      kube_core_v1.Protocol(strings.ToUpper(port.Protocol)),
 	}
 }
 
 // Here is the service IPs (placed in /etc/hosts in the Pod).
-func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
-	var hostAliases []v1.HostAlias
+func hostAliases(extraHosts []types.HostAlias) []kube_core_v1.HostAlias {
+	var hostAliases []kube_core_v1.HostAlias
 	for _, extraHost := range extraHosts {
 		hostAlias := hostAlias(extraHost)
 		hostAliases = append(hostAliases, hostAlias)
@@ -448,16 +448,16 @@ func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
 	return hostAliases
 }
 
-func hostAlias(extraHost types.HostAlias) v1.HostAlias {
-	return v1.HostAlias{
+func hostAlias(extraHost types.HostAlias) kube_core_v1.HostAlias {
+	return kube_core_v1.HostAlias{
 		IP:        extraHost.IP,
 		Hostnames: []string{extraHost.Name},
 	}
 }
 
-func resourceRequirements(resources Resources) (v1.ResourceRequirements, error) {
+func resourceRequirements(resources Resources) (kube_core_v1.ResourceRequirements, error) {
 	var err error
-	requirements := v1.ResourceRequirements{}
+	requirements := kube_core_v1.ResourceRequirements{}
 
 	requirements.Requests, err = resourceList(resources.Requests)
 	if err != nil {
@@ -472,10 +472,10 @@ func resourceRequirements(resources Resources) (v1.ResourceRequirements, error) 
 	return requirements, nil
 }
 
-func resourceList(resources map[string]string) (v1.ResourceList, error) {
-	requestResources := v1.ResourceList{}
+func resourceList(resources map[string]string) (kube_core_v1.ResourceList, error) {
+	requestResources := kube_core_v1.ResourceList{}
 	for key, val := range resources {
-		resName := v1.ResourceName(key)
+		resName := kube_core_v1.ResourceName(key)
 		resVal, err := resource.ParseQuantity(val)
 		if err != nil {
 			return nil, fmt.Errorf("resource request '%s' quantity '%s': %w", key, val, err)
@@ -490,7 +490,7 @@ func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, pla
 
 	if platform != "" {
 		arch := strings.Split(platform, "/")[1]
-		nodeSelector[v1.LabelArchStable] = arch
+		nodeSelector[kube_core_v1.LabelArchStable] = arch
 		log.Trace().Msgf("using the node selector from the Agent's platform: %v", nodeSelector)
 	}
 
@@ -507,8 +507,8 @@ func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, pla
 	return nodeSelector
 }
 
-func tolerations(backendTolerations []Toleration) []v1.Toleration {
-	var tolerations []v1.Toleration
+func tolerations(backendTolerations []Toleration) []kube_core_v1.Toleration {
+	var tolerations []kube_core_v1.Toleration
 
 	if len(backendTolerations) > 0 {
 		log.Trace().Msgf("tolerations that will be used in the backend options: %v", backendTolerations)
@@ -521,17 +521,17 @@ func tolerations(backendTolerations []Toleration) []v1.Toleration {
 	return tolerations
 }
 
-func toleration(backendToleration Toleration) v1.Toleration {
-	return v1.Toleration{
+func toleration(backendToleration Toleration) kube_core_v1.Toleration {
+	return kube_core_v1.Toleration{
 		Key:               backendToleration.Key,
-		Operator:          v1.TolerationOperator(backendToleration.Operator),
+		Operator:          kube_core_v1.TolerationOperator(backendToleration.Operator),
 		Value:             backendToleration.Value,
-		Effect:            v1.TaintEffect(backendToleration.Effect),
+		Effect:            kube_core_v1.TaintEffect(backendToleration.Effect),
 		TolerationSeconds: backendToleration.TolerationSeconds,
 	}
 }
 
-func affinity(stepAffinity, agentAffinity *v1.Affinity, allowFromStep bool) *v1.Affinity {
+func affinity(stepAffinity, agentAffinity *kube_core_v1.Affinity, allowFromStep bool) *kube_core_v1.Affinity {
 	if stepAffinity != nil {
 		if allowFromStep {
 			log.Trace().Msg("using affinity from step backend options")
@@ -550,15 +550,15 @@ func affinity(stepAffinity, agentAffinity *v1.Affinity, allowFromStep bool) *v1.
 	return nil
 }
 
-func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
+func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *kube_core_v1.PodSecurityContext {
 	var (
 		nonRoot             *bool
 		user                *int64
 		group               *int64
 		fsGroup             *int64
-		fsGroupChangePolicy *v1.PodFSGroupChangePolicy
-		seccomp             *v1.SeccompProfile
-		apparmor            *v1.AppArmorProfile
+		fsGroupChangePolicy *kube_core_v1.PodFSGroupChangePolicy
+		seccomp             *kube_core_v1.SeccompProfile
+		apparmor            *kube_core_v1.AppArmorProfile
 	)
 
 	if secCtxConf.RunAsNonRoot {
@@ -603,7 +603,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		return nil
 	}
 
-	securityContext := &v1.PodSecurityContext{
+	securityContext := &kube_core_v1.PodSecurityContext{
 		RunAsNonRoot:        nonRoot,
 		RunAsUser:           user,
 		RunAsGroup:          group,
@@ -616,14 +616,14 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	return securityContext
 }
 
-func seccompProfile(scp *SecProfile) *v1.SeccompProfile {
+func seccompProfile(scp *SecProfile) *kube_core_v1.SeccompProfile {
 	if scp == nil || len(scp.Type) == 0 {
 		return nil
 	}
 	log.Trace().Msgf("using seccomp profile: %v", scp)
 
-	seccompProfile := &v1.SeccompProfile{
-		Type: v1.SeccompProfileType(scp.Type),
+	seccompProfile := &kube_core_v1.SeccompProfile{
+		Type: kube_core_v1.SeccompProfileType(scp.Type),
 	}
 	if len(scp.LocalhostProfile) > 0 {
 		seccompProfile.LocalhostProfile = &scp.LocalhostProfile
@@ -632,14 +632,14 @@ func seccompProfile(scp *SecProfile) *v1.SeccompProfile {
 	return seccompProfile
 }
 
-func apparmorProfile(scp *SecProfile) *v1.AppArmorProfile {
+func apparmorProfile(scp *SecProfile) *kube_core_v1.AppArmorProfile {
 	if scp == nil || len(scp.Type) == 0 {
 		return nil
 	}
 	log.Trace().Msgf("using AppArmor profile: %v", scp)
 
-	apparmorProfile := &v1.AppArmorProfile{
-		Type: v1.AppArmorProfileType(scp.Type),
+	apparmorProfile := &kube_core_v1.AppArmorProfile{
+		Type: kube_core_v1.AppArmorProfileType(scp.Type),
 	}
 	if len(scp.LocalhostProfile) > 0 {
 		apparmorProfile.LocalhostProfile = &scp.LocalhostProfile
@@ -648,7 +648,7 @@ func apparmorProfile(scp *SecProfile) *v1.AppArmorProfile {
 	return apparmorProfile
 }
 
-func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
+func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *kube_core_v1.SecurityContext {
 	if !stepPrivileged {
 		return nil
 	}
@@ -667,7 +667,7 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 	}
 
 	if privileged {
-		securityContext := &v1.SecurityContext{
+		securityContext := &kube_core_v1.SecurityContext{
 			Privileged: newBool(true),
 		}
 		log.Trace().Msgf("container security context that will be used: %v", securityContext)
@@ -677,10 +677,10 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 	return nil
 }
 
-func mapToEnvVars(m map[string]string) []v1.EnvVar {
-	var ev []v1.EnvVar
+func mapToEnvVars(m map[string]string) []kube_core_v1.EnvVar {
+	var ev []kube_core_v1.EnvVar
 	for k, v := range m {
-		ev = append(ev, v1.EnvVar{
+		ev = append(ev, kube_core_v1.EnvVar{
 			Name:  k,
 			Value: v,
 		})
@@ -688,13 +688,13 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func dnsConfig(namespace, subdomain string) *v1.PodDNSConfig {
-	return &v1.PodDNSConfig{
+func dnsConfig(namespace, subdomain string) *kube_core_v1.PodDNSConfig {
+	return &kube_core_v1.PodDNSConfig{
 		Searches: []string{fmt.Sprintf("%s.%s.svc.cluster.local", subdomain, namespace)},
 	}
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions, taskUUID string) (*v1.Pod, error) {
+func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions, taskUUID string) (*kube_core_v1.Pod, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
@@ -706,10 +706,10 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 	}
 
 	log.Trace().Msgf("creating pod: %s", pod.Name)
-	return engine.client.CoreV1().Pods(engineConfig.GetNamespace(step.OrgID)).Create(ctx, pod, meta_v1.CreateOptions{})
+	return engine.client.CoreV1().Pods(engineConfig.GetNamespace(step.OrgID)).Create(ctx, pod, kube_meta_v1.CreateOptions{})
 }
 
-func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts kube_meta_v1.DeleteOptions) error {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return err
