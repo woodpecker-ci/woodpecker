@@ -23,6 +23,7 @@
 
 ### 📈 Enhancement
 
+- Show Woodpecker version on pipeline details [[#6316](https://github.com/woodpecker-ci/woodpecker/pull/6316)]
 - Unify import aliases [[#6328](https://github.com/woodpecker-ci/woodpecker/pull/6328)]
 - Improve linter warning when step has no when block [[#6314](https://github.com/woodpecker-ci/woodpecker/pull/6314)]
 - Improve error message when no workflows for manual were found [[#6313](https://github.com/woodpecker-ci/woodpecker/pull/6313)]
