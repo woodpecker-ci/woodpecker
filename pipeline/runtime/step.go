@@ -104,15 +104,13 @@ func (r *Runtime) startStep(step *backend_types.Step) (func(), int64, error) {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		logger := r.makeLogger()
 		if err := r.logger(step, rc); err != nil {
 			logger.Error().Err(err).Str("step", step.Name).Msg("step log streaming failed")
 		}
 		_ = rc.Close()
-	}()
+	})
 
 	return wg.Wait, startTime, nil
 }
