@@ -156,10 +156,10 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 
 	// all other actions return the state of labels after the actions where done ... so we should too
 	if pr.Action == actionLabelCleared {
-		pipeline.PullRequestLabels = []string{}
+		pipeline.PullRequest.Labels = []string{}
 	}
 	if pr.Action == actionDeMilestoned {
-		pipeline.PullRequestMilestone = ""
+		pipeline.PullRequest.Milestone = ""
 	}
 
 	for i := range pipeline.EventReason {
