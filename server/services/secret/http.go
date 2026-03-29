@@ -17,7 +17,7 @@ package secret
 import (
 	"context"
 	"fmt"
-	net_http "net/http"
+	"net/http"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
@@ -55,12 +55,12 @@ func (h *httpExtension) SecretListPipeline(ctx context.Context, repo *model.Repo
 	}
 
 	response := new(secretResponseStructure)
-	status, err := h.client.Send(ctx, net_http.MethodPost, h.endpoint, body, response)
-	if err != nil && status != net_http.StatusNoContent {
+	status, err := h.client.Send(ctx, http.MethodPost, h.endpoint, body, response)
+	if err != nil && status != http.StatusNoContent {
 		return nil, fmt.Errorf("failed to fetch secrets via http (%d) %w", status, err)
 	}
 
-	if status != net_http.StatusOK {
+	if status != http.StatusOK {
 		// 204 No Content means no additional secrets
 		return nil, nil
 	}

@@ -23,7 +23,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
@@ -113,7 +113,7 @@ func (r *Runtime) traceWorkflowSetupError(err error) {
 	s := new(state.State)
 	s.CurrStep = stepErr.Step
 	s.Workflow.Error = stepErr.Err
-	s.CurrStepState = backend.State{
+	s.CurrStepState = backend_types.State{
 		Error:    stepErr.Err,
 		Exited:   true,
 		ExitCode: 1,
@@ -127,7 +127,7 @@ func (r *Runtime) traceWorkflowSetupError(err error) {
 
 // runStage executes all steps of a stage in parallel.
 // It returns a channel that emits the combined error (if any) once all steps finish.
-func (r *Runtime) runStage(runnerCtx context.Context, steps []*backend.Step) <-chan error {
+func (r *Runtime) runStage(runnerCtx context.Context, steps []*backend_types.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
 
