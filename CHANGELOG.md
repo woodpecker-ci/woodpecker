@@ -130,6 +130,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.14.0 [[#6341](https://github.com/woodpecker-ci/woodpecker/pull/6341)]
 - fix(deps): update golang-packages [[#6340](https://github.com/woodpecker-ci/woodpecker/pull/6340)]
 - chore(deps): update web npm deps non-major [[#6334](https://github.com/woodpecker-ci/woodpecker/pull/6334)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.8.0 [[#6332](https://github.com/woodpecker-ci/woodpecker/pull/6332)]
