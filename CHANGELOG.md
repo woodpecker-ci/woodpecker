@@ -132,6 +132,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6343](https://github.com/woodpecker-ci/woodpecker/pull/6343)]
 - chore(deps): update dependency simple-icons to v16.14.0 [[#6341](https://github.com/woodpecker-ci/woodpecker/pull/6341)]
 - fix(deps): update golang-packages [[#6340](https://github.com/woodpecker-ci/woodpecker/pull/6340)]
 - chore(deps): update web npm deps non-major [[#6334](https://github.com/woodpecker-ci/woodpecker/pull/6334)]
