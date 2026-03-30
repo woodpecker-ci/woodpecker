@@ -9,6 +9,7 @@
 - **Container**: A lightweight and isolated environment where commands are executed.
 - **Dependency**: [Workflows][Workflow] can depend on each other, and if possible, they are executed in parallel.
 - **[Event][Event]**: Triggers the execution of a [pipeline][Pipeline], such as a [forge][Forge] event like `push`, or `manual` triggered manually from the UI.
+- **[Extension][Extension]**: Some parts of Woodpecker internal services like secrets storage or config fetcher can be replaced through extensions.
 - **[Forge][Forge]**: The hosting platform or service where the repositories are hosted.
 - **[Matrix][Matrix]**: A configuration option that allows the execution of [workflows][Workflow] for each value in the matrix.
 - **[Pipeline][Pipeline]**: A sequence of [workflows][Workflow] that are executed on the code. Pipelines are triggered by events.
@@ -16,7 +17,6 @@
 - **Repos**: Short for repositories, these are storage locations where code is stored.
 - **Server**: The component of Woodpecker that handles webhooks from forges, orchestrates agents, and sends status back. It also serves the API and web UI for administration and configuration.
 - **Service**: A service is a step that is executed from the start of a [workflow][Workflow] until its end. It can be accessed by name via the network from other steps within the same [workflow][Workflow].
-- **Service extension**: Some parts of Woodpecker internal services like secrets storage or config fetcher can be replaced through service extensions.
 - **Status**: Status refers to the outcome of a step or [workflow][Workflow] after it has been executed, determined by the internal command exit code. At the end of a [workflow][Workflow], its status is sent to the [forge][Forge].
 - **Steps**: Individual commands, actions or tasks within a [workflow][Workflow].
 - **Task**: A task is a [workflow][Workflow] that's currently waiting for its execution in the task queue.
@@ -54,3 +54,4 @@ Sometimes there are multiple terms that can be used to describe something. This 
 [Matrix]: ../30-matrix-workflows.md
 [Docker]: ../../30-administration/10-configuration/11-backends/10-docker.md
 [Local]: ../../30-administration/10-configuration/11-backends/30-local.md
+[Extension]: ../72-extensions/index.md

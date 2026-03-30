@@ -28,7 +28,7 @@ func Handler() http.Handler {
 
 	e := gin.New()
 	e.POST("/site/oauth2/access_token", getOauth)
-	e.GET("/2.0/workspaces/", getWorkspaces)
+	e.GET("/2.0/user/workspaces/", getWorkspaces)
 	e.GET("/2.0/repositories/:owner/:name", getRepo)
 	e.GET("/2.0/repositories/:owner/:name/hooks", getRepoHooks)
 	e.GET("/2.0/repositories/:owner/:name/src/:commit/:file", getRepoFile)
@@ -38,7 +38,8 @@ func Handler() http.Handler {
 	e.GET("/2.0/repositories/:owner", getUserRepos)
 	e.GET("/2.0/user/", getUser)
 	e.GET("/2.0/user/emails", getEmails)
-	e.GET("/2.0/user/permissions/repositories", getPermissions)
+	e.GET("/2.0/user/permissions/repositories", getPermission)
+	e.GET("/2.0/user/workspaces/:workspace/permissions/repositories", getPermissions)
 	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
 	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
 	e.GET("/2.0/repositories/:owner/:name/diffstat/:commit", getCommitDiffstat)
@@ -75,9 +76,6 @@ func getOauth(c *gin.Context) {
 }
 
 func getWorkspaces(c *gin.Context) {
-	// TODO: should the role be used ?
-	// role, _ := c.Params.Get("role")
-
 	switch c.Request.Header.Get("Authorization") {
 	case "Bearer teams_not_found", "Bearer c81e728d":
 		c.String(http.StatusNotFound, "")
@@ -202,8 +200,23 @@ func getUserRepos(c *gin.Context) {
 	}
 }
 
-func getPermissions(c *gin.Context) {
+func getPermission(c *gin.Context) {
 	if c.Query("page") == "" || c.Query("page") == "1" {
+		switch c.Query("q") {
+		case "repository.full_name=\"test_name/repo_name\"":
+			c.String(http.StatusOK, permissionPayLoad)
+			return
+		case "repository.full_name=\"martinherren1984/publictestrepo\"":
+			c.String(http.StatusOK, permissionHookPayLoad)
+			return
+		}
+	}
+
+	c.String(http.StatusOK, "{\"values\":[]}")
+}
+
+func getPermissions(c *gin.Context) {
+	if (c.Query("page") == "" || c.Query("page") == "1") && c.Param("workspace") == "test_name" {
 		c.String(http.StatusOK, permissionsPayLoad)
 	} else {
 		c.String(http.StatusOK, "{\"values\":[]}")
@@ -524,7 +537,7 @@ const workspacesPayload = `
 			"type": "workspace",
 			"uuid": "{c7a04a76-fa20-43e4-dc42-a7506db4c95b}",
 			"name": "Ueber Dev",
-			"slug": "ueberdev42",
+			"slug": "test_name",
 			"links": {
 				"avatar": {
 					"href": "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964"
@@ -567,6 +580,36 @@ const permissionsPayLoad = `
 		{
 			"repository": {
 				"full_name": "test_name/permission_admin"
+			},
+			"permission": "admin"
+		}
+	]
+}
+`
+
+const permissionPayLoad = `
+{
+	"pagelen": 100,
+	"page": 1,
+	"values": [
+		{
+			"repository": {
+				"full_name": "test_name/repo_name"
+			},
+			"permission": "read"
+		}
+	]
+}
+`
+
+const permissionHookPayLoad = `
+{
+	"pagelen": 100,
+	"page": 1,
+	"values": [
+		{
+			"repository": {
+				"full_name": "martinherren1984/publictestrepo"
 			},
 			"permission": "admin"
 		}

@@ -28,6 +28,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
@@ -68,6 +69,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
 	pipeline.Status = model.StatusCreated
+	pipeline.Version = version.String()
 	setApprovalState(repo, pipeline)
 	err = _store.CreatePipeline(pipeline)
 	if err != nil {

@@ -27,7 +27,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
-	grpcMetadata "google.golang.org/grpc/metadata"
+	grpc_metadata "google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -370,6 +370,10 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	logger.Debug().Msgf("workflow state in store: %#v", workflow)
 	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
+	// Complete any still-running children (e.g. service containers) before
+	// computing the workflow status, so their final state is reflected.
+	s.completeChildrenIfParentCompleted(workflow, state.Finished)
+
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
 	}
@@ -396,7 +400,6 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
-	s.completeChildrenIfParentCompleted(workflow)
 
 	if !model.IsThereRunningStage(currentPipeline.Workflows) {
 		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
@@ -555,11 +558,53 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	return s.store.AgentUpdate(agent)
 }
 
-func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
+func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
+	var err error
+	if repo == nil && pipeline == nil {
+		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		workflow, err := s.store.WorkflowLoad(workflowID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
+			return err
+		}
+
+		pipeline, err = s.store.GetPipeline(workflow.PipelineID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
+			return err
+		}
+	}
+
+	if repo == nil {
+		repo, err = s.store.GetRepo(pipeline.RepoID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find repo with id %d", pipeline.RepoID)
+			return err
+		}
+	}
+
+	if agent.CanAccessRepo(repo) {
+		return nil
+	}
+
+	msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
+	log.Error().Int64("repoId", repo.ID).Msg(msg)
+	return errors.New(msg)
+}
+
+func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
-			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Finished, model.StatusKilled); err != nil {
+			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusKilled); err != nil {
 				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
+			} else {
+				// Update in-memory state so WorkflowStatus sees the final state
+				c.State = updated.State
+				c.Finished = updated.Finished
 			}
 		}
 	}
@@ -608,7 +653,7 @@ func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := grpcMetadata.FromIncomingContext(ctx)
+	md, ok := grpc_metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, errors.New("metadata is not provided")
 	}
@@ -628,7 +673,7 @@ func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 }
 
 func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	metadata, ok := grpc_metadata.FromIncomingContext(ctx)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {

@@ -18,7 +18,7 @@ import (
 	"maps"
 	"strings"
 
-	pipelineConsts "go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
@@ -35,7 +35,7 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 
 		// ignore internal labels for filtering
 		for k := range labels {
-			if strings.HasPrefix(k, pipelineConsts.InternalLabelPrefix) {
+			if strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
 				delete(labels, k)
 			}
 		}

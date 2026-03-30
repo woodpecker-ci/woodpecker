@@ -75,6 +75,8 @@ type Repo struct {
 	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 	ConfigExtensionExclusive     bool                 `json:"config_extension_exclusive"      xorm:"DEFAULT FALSE 'config_extension_exclusive'"`
 	RegistryExtensionEndpoint    string               `json:"registry_extension_endpoint"     xorm:"varchar(500) 'registry_extension_endpoint'"`
+	SecretExtensionEndpoint      string               `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
+	SecretExtensionNetrc         bool                 `json:"secret_extension_netrc"          xorm:"DEFAULT FALSE 'secret_extension_netrc'"`
 } //	@name	Repo
 
 // TableName return database table name for xorm.
@@ -148,6 +150,8 @@ type RepoPatch struct {
 	ConfigExtensionEndpoint      *string                    `json:"config_extension_endpoint,omitempty"`
 	ConfigExtensionExclusive     *bool                      `json:"config_extension_exclusive"`
 	RegistryExtensionEndpoint    *string                    `json:"registry_extension_endpoint,omitempty"`
+	SecretExtensionEndpoint      *string                    `json:"secret_extension_endpoint,omitempty"`
+	SecretExtensionNetrc         *bool                      `json:"secret_extension_netrc,omitempty"`
 } //	@name	RepoPatch
 
 type ForgeRemoteID string
@@ -171,5 +175,5 @@ type TrustedConfigurationPatch struct {
 // RepoLastPipeline represents a repository with last pipeline execution information.
 type RepoLastPipeline struct {
 	*Repo
-	LastPipeline *Pipeline `json:"last_pipeline,omitempty"`
+	LastPipeline *APIPipeline `json:"last_pipeline,omitempty"`
 } //	@name	RepoLastPipeline

@@ -330,7 +330,9 @@
                 "superseded_by": "Заменено на #{pipelineId}",
                 "canceled_by_step": "Отменено из-за шага {step}"
             },
-            "load_more": "Загрузить ещё"
+            "load_more": "Загрузить ещё",
+            "version_header": "Версия Woodpecker",
+            "version": "Версия Woodpecker, на которой был выполнен этот конвейер."
         },
         "pull_requests": "Запросы на слияние",
         "settings": {
@@ -765,5 +767,8 @@
     "config_extension_exclusive": "Эксклюзивно",
     "registry_extension_endpoint": "Конечная точка расширения реестра",
     "global_level_registry": "глобальный реестр",
-    "org_level_registry": "реестр организации"
+    "org_level_registry": "реестр организации",
+    "secret_extension_endpoint": "Конечная точка расширения секретов",
+    "secret_extension_netrc": "Включить учётные данные netrc",
+    "secret_extension_netrc_desc": "Отправлять расширению учётные данные netrc платформы."
 }
