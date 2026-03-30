@@ -238,7 +238,7 @@
                 "delete": "删除变量"
             },
             "show_pipelines": "查看流水线",
-            "no_manual_workflows": "无手动触发的工作流，或已被全部筛选。"
+            "no_manual_workflows": "未找到匹配的工作流。请确保至少有一个手动触发的工作流运行。"
         },
         "not_allowed": "你没有权限访问这个仓库",
         "open_in_forge": "在代码托管平台中打开",
@@ -329,7 +329,7 @@
                 "canceled_by_step": "因 {step} 而取消"
             },
             "load_more": "加载更多",
-            "version": "此流水线在该 Woodpecker 版本上执行的。",
+            "version": "此流水线在该 Woodpecker 版本上执行。",
             "version_header": "Woodpecker 版本"
         },
         "pull_requests": "合并请求",
@@ -761,6 +761,6 @@
     "global_level_registry": "全局注册表",
     "org_level_registry": "组织注册表",
     "secret_extension_endpoint": "密钥扩展程序端点",
-    "secret_extension_netrc": "包含 netrc 凭据",
+    "secret_extension_netrc": "包含 netrc 凭证",
     "secret_extension_netrc_desc": "将代码托管平台 netrc 凭证发送给密钥扩展程序。"
 }
