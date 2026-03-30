@@ -776,5 +776,8 @@
     "config_extension_exclusive_desc": "Wenn aktiviert, werden alle anderen Möglichkeiten zum Laden der Konfiguration, einschließlich der Code-Plattform, übersprungen.",
     "registry_extension_endpoint": "Endpunkt der Register-Erweiterung",
     "global_level_registry": "globales Register",
-    "org_level_registry": "Organisationsregister"
+    "org_level_registry": "Organisationsregister",
+    "secret_extension_endpoint": "Endpunkt der Geheimnis-Erweiterung",
+    "secret_extension_netrc": "Netrc-Zugangsdaten senden",
+    "secret_extension_netrc_desc": "Die Netrc-Zugangsdaten für die Code-Plattform an die Geheimnis-Erweiterung senden."
 }

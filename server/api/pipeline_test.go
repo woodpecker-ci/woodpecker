@@ -33,10 +33,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
-	config_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
+	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
-	registry_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
-	secret_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
+	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
+	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -285,9 +285,9 @@ func TestCreatePipeline(t *testing.T) {
 	// 1. normal: config fetch succeeds (no error, returns config) -> success
 	t.Run("normal workflow - config can be read", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
-		mockConfigService := config_mocks.NewMockService(t)
-		mockSecretService := secret_mocks.NewMockService(t)
-		mockRegistryService := registry_mocks.NewMockService(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
+		mockSecretService := secret_service_mocks.NewMockService(t)
+		mockRegistryService := registry_service_mocks.NewMockService(t)
 
 		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
 		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}
@@ -357,9 +357,9 @@ func TestCreatePipeline(t *testing.T) {
 	// 2. abnormal with oldconfig: config fetch fails but returns config data (error + non-nil config) -> continues with fallback
 	t.Run("abnormal workflow - cannot read config but has oldconfig", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
-		mockConfigService := config_mocks.NewMockService(t)
-		mockSecretService := secret_mocks.NewMockService(t)
-		mockRegistryService := registry_mocks.NewMockService(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
+		mockSecretService := secret_service_mocks.NewMockService(t)
+		mockRegistryService := registry_service_mocks.NewMockService(t)
 
 		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
 		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}
@@ -429,7 +429,7 @@ func TestCreatePipeline(t *testing.T) {
 	// 3. abnormal without oldconfig: config fetch fails without config data (error + nil config) -> fails immediately
 	t.Run("abnormal workflow - cannot read config and no oldconfig", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
-		mockConfigService := config_mocks.NewMockService(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
 
 		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
 		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}

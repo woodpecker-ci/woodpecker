@@ -17,7 +17,7 @@ package config
 import (
 	"context"
 	"fmt"
-	net_http "net/http"
+	"net/http"
 
 	"github.com/rs/zerolog/log"
 
@@ -27,7 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
 )
 
-type http struct {
+type httpService struct {
 	endpoint     string
 	client       *utils.Client
 	includeNetrc bool
@@ -51,10 +51,10 @@ type responseStructure struct {
 }
 
 func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) Service {
-	return &http{endpoint, client, includeNetrc}
+	return &httpService{endpoint, client, includeNetrc}
 }
 
-func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
+func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
 	configuration := make([]*configData, len(oldConfigData))
 	for i, oldConfig := range oldConfigData {
 		configuration[i] = &configData{Name: oldConfig.Name, Data: string(oldConfig.Data)}
@@ -75,13 +75,13 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 		body.Netrc = netrc
 	}
 
-	status, err := h.client.Send(ctx, net_http.MethodPost, h.endpoint, body, response)
-	if err != nil && status != net_http.StatusNoContent {
+	status, err := h.client.Send(ctx, http.MethodPost, h.endpoint, body, response)
+	if err != nil && status != http.StatusNoContent {
 		return nil, fmt.Errorf("failed to fetch config via http (status: %d): %w", status, err)
 	}
 
 	// handle 204 - no new config available, return old config without error
-	if status == net_http.StatusNoContent {
+	if status == http.StatusNoContent {
 		log.Debug().
 			Str("endpoint", h.endpoint).
 			Str("repo", repo.FullName).
@@ -90,7 +90,7 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 	}
 
 	// unexpected non-success status code
-	if status != net_http.StatusOK {
+	if status != http.StatusOK {
 		return oldConfigData, fmt.Errorf("unexpected status code %d from config endpoint (expected 200 or 204)", status)
 	}
 

@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -28,37 +28,37 @@ import (
 )
 
 func startMetricsCollector(ctx context.Context, _store store.Store) {
-	pendingSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
+	pendingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pending_steps",
 		Help:      "Total number of pending pipeline steps.",
 	})
-	waitingSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
+	waitingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "waiting_steps",
 		Help:      "Total number of pipeline waiting on deps.",
 	})
-	runningSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
+	runningSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "running_steps",
 		Help:      "Total number of running pipeline steps.",
 	})
-	workers := prometheus_auto.NewGauge(prometheus.GaugeOpts{
+	workers := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "worker_count",
 		Help:      "Total number of workers.",
 	})
-	pipelines := prometheus_auto.NewGauge(prometheus.GaugeOpts{
+	pipelines := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_total_count",
 		Help:      "Total number of pipelines.",
 	})
-	users := prometheus_auto.NewGauge(prometheus.GaugeOpts{
+	users := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "user_count",
 		Help:      "Total number of users.",
 	})
-	repos := prometheus_auto.NewGauge(prometheus.GaugeOpts{
+	repos := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "repo_count",
 		Help:      "Total number of repos.",
