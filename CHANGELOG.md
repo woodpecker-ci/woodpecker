@@ -23,6 +23,7 @@
 
 ### 📈 Enhancement
 
+- Refactor pipeline runtime code [[#6166](https://github.com/woodpecker-ci/woodpecker/pull/6166)]
 - Show Woodpecker version on pipeline details [[#6316](https://github.com/woodpecker-ci/woodpecker/pull/6316)]
 - Unify import aliases [[#6328](https://github.com/woodpecker-ci/woodpecker/pull/6328)]
 - Improve linter warning when step has no when block [[#6314](https://github.com/woodpecker-ci/woodpecker/pull/6314)]
