@@ -66,7 +66,6 @@ func TestCreatePipeline(t *testing.T) {
 		Commit:   "sha1",
 		Event:    "cron",
 		ForgeURL: "https://example.com/sha1",
-		Message:  "test",
 		Ref:      "refs/heads/default",
 		Cron:     "test",
 	}, pipeline)
