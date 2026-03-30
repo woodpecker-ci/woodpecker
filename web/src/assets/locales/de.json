@@ -331,7 +331,9 @@
                 "canceled_by_user": "Abgebrochen von {user}",
                 "canceled_by_step": "Wegen Schritt {step} abgebrochen"
             },
-            "load_more": "Mehr laden"
+            "load_more": "Mehr laden",
+            "version": "Die Woodpecker-Version, mit der diese Pipeline ausgeführt wurde.",
+            "version_header": "Woodpecker-Version"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
