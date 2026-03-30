@@ -6340,6 +6340,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "version": {
+                    "type": "string"
+                },
                 "workflows": {
                     "type": "array",
                     "items": {
