@@ -24,15 +24,10 @@ import (
 var addCronField = xormigrate.Migration{
 	ID: "add-cron-field",
 	MigrateSession: func(sess *xorm.Session) error {
-		// perPage027 set the size of the slice to read per page.
-		perPage027 := 100
-
 		type pipelines struct {
 			ID int64 `xorm:"pk autoincr 'id'"`
 
-			Sender string `xorm:"sender"` // uses name of cron for cron pipelines
-
-			// new fields
+			// new cron field
 			Cron string `xorm:"cron"`
 		}
 
@@ -40,35 +35,7 @@ var addCronField = xormigrate.Migration{
 			return err
 		}
 
-		page := 0
-		oldPipelines := make([]*pipelines, 0, perPage027)
-
-		for {
-			oldPipelines = oldPipelines[:0]
-
-			err := sess.Limit(perPage027, page*perPage027).Where("event = ?", model.EventCron).Cols("id", "sender").Find(&oldPipelines)
-			if err != nil {
-				return err
-			}
-
-			for _, oldPipeline := range oldPipelines {
-				newPipeline := pipelines{
-					ID:   oldPipeline.ID,
-					Cron: oldPipeline.Sender,
-				}
-
-				if _, err := sess.ID(oldPipeline.ID).Cols("cron").Update(newPipeline); err != nil {
-					return err
-				}
-			}
-
-			if len(oldPipelines) < perPage027 {
-				break
-			}
-
-			page++
-		}
-
-		return nil
+		_, err := sess.Exec("UPDATE pipelines SET cron = sender, sender = '', message = '' WHERE event = ?", model.EventCron)
+		return err
 	},
 }
