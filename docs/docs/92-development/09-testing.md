@@ -5,7 +5,7 @@
 ### Unit Tests
 
 [We use default golang unit tests](https://go.dev/doc/tutorial/add-a-test)
-with [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stretchr/testify@v1.9.0/assert) to simplify testing.
+with [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stretchr/testify/assert) to simplify testing.
 
 ### Integration Tests
 
