@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-29
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -94,6 +94,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#6344](https://github.com/woodpecker-ci/woodpecker/pull/6344)]
 - chore(deps): update docs npm deps non-major [[#6335](https://github.com/woodpecker-ci/woodpecker/pull/6335)]
 - Add CI check for docs on feature PRs [[#6315](https://github.com/woodpecker-ci/woodpecker/pull/6315)]
 - chore(deps): update dependency isomorphic-dompurify to v3.6.0 [[#6288](https://github.com/woodpecker-ci/woodpecker/pull/6288)]
