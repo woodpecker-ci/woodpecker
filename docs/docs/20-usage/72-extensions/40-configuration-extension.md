@@ -26,7 +26,7 @@ you share your Woodpecker server with others as they will also use your configur
 The global configuration will be called before the repository specific configuration extension if both are configured and the repository has not enabled the exclusive setting.
 
 ```ini title="Server"
-WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
+WOODPECKER_CONFIG_EXTENSION_ENDPOINT=https://example.com/ciconfig
 ```
 
 ## How it works

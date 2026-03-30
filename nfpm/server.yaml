@@ -7,6 +7,8 @@ homepage: https://woodpecker-ci.org/
 license: Apache 2.0
 maintainer: Woodpecker Authors <maintainer@woodpecker-ci.org>
 section: daemon/system
+scripts:
+  preinstall: ./nfpm/woodpecker-system-user.preinstall.sh
 contents:
   - src: ./dist/server/linux_amd64/woodpecker-server
     dst: /usr/local/bin/woodpecker-server
@@ -19,3 +21,4 @@ contents:
     file_info:
       owner: woodpecker
       group: woodpecker
+      mode: 0750
