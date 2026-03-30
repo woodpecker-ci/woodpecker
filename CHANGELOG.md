@@ -24,6 +24,7 @@
 
 ### 📈 Enhancement
 
+- Separate cron field [[#6346](https://github.com/woodpecker-ci/woodpecker/pull/6346)]
 - Refactor pipeline runtime code [[#6166](https://github.com/woodpecker-ci/woodpecker/pull/6166)]
 - Show Woodpecker version on pipeline details [[#6316](https://github.com/woodpecker-ci/woodpecker/pull/6316)]
 - Unify import aliases [[#6328](https://github.com/woodpecker-ci/woodpecker/pull/6328)]
