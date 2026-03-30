@@ -63,8 +63,6 @@ type Pipeline struct {
 // APIPipeline TODO remove deprecated properties in next major.
 type APIPipeline struct {
 	*Pipeline
-
-	Sender string `json:"sender"` // deprecated, use author instead
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
@@ -75,7 +73,6 @@ func (Pipeline) TableName() string {
 func (p *Pipeline) ToAPIModel() *APIPipeline {
 	ap := &APIPipeline{
 		Pipeline: p,
-		Sender:   p.Author,
 	}
 
 	switch p.Event {
