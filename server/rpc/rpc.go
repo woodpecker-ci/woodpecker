@@ -117,13 +117,16 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 	if err := s.queue.Wait(c, workflowID); err != nil {
 		if errors.Is(err, queue.ErrCancel) {
 			// we explicit send a cancel signal
+			log.Debug().Str("workflowID", workflowID).Msg("while waiting the queue reported the workflow as canceled")
 			return true, nil
 		}
 		// unknown error happened
+		log.Error().Err(err).Str("workflowID", workflowID).Msg("while waiting the queue returned an unexpected error")
 		return false, err
 	}
 
 	// workflow finished and on issues appeared
+	log.Debug().Str("workflowID", workflowID).Msg("queue reported the workflow as finished")
 	return false, nil
 }
 
