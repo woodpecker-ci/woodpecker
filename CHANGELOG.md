@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @savv, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting
 
 ### 🔒 Security
 
+- Send 404 if logs are not allowed to access [[#6349](https://github.com/woodpecker-ci/woodpecker/pull/6349)]
 - Prevent registering as arbitrary agents with system token [[#6283](https://github.com/woodpecker-ci/woodpecker/pull/6283)]
 - Update `fast-xml-parser` [[#6258](https://github.com/woodpecker-ci/woodpecker/pull/6258)]
 - Update `dompurify` and `svgo` [[#6198](https://github.com/woodpecker-ci/woodpecker/pull/6198)]
@@ -58,6 +59,7 @@
 
 ### 🐛 Bug Fixes
 
+- Set workflow services stuck in running state to finished [[#6337](https://github.com/woodpecker-ci/woodpecker/pull/6337)]
 - Fix bitbucket api deprecations [[#6324](https://github.com/woodpecker-ci/woodpecker/pull/6324)]
 - Fix workflow serialize to omit skip_clone if false [[#6319](https://github.com/woodpecker-ci/woodpecker/pull/6319)]
 - Fix build deb rpm packages [[#6309](https://github.com/woodpecker-ci/woodpecker/pull/6309)]
