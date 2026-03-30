@@ -132,7 +132,6 @@ func (r *Runtime) runStage(runnerCtx context.Context, steps []*backend_types.Ste
 	done := make(chan error)
 
 	for _, step := range steps {
-		step := step // capture loop variable
 		g.Go(func() error {
 			return r.executeStep(runnerCtx, step)
 		})
