@@ -50,6 +50,7 @@ type Pipeline struct {
 	Cron                string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
 	Release             *Release                `json:"release,omitempty"       xorm:"json 'release'"`
 	TagTitle            string                  `json:"tag_title,omitempty"     xorm:"tag_title"`
+	Version             string                  `json:"version"                 xorm:"'version'"`
 }
 
 // APIPipeline TODO remove deprecated properties in next major.
