@@ -78,6 +78,7 @@ func CreatePipeline(c *gin.Context) {
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
+		return
 	}
 
 	if pl != nil {
