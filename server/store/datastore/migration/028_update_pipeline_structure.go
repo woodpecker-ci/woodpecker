@@ -81,7 +81,6 @@ var updatePipelineStructure = xormigrate.Migration{
 			CommitNew   *commit      `xorm:"json 'commit_new'"`
 			Deployment  *deployment  `xorm:"json 'deployment'"`
 			PullRequest *pullRequest `xorm:"json 'pr'"`
-			Cron        string       `xorm:"cron"`
 			Release     *release     `xorm:"json 'release'"`
 			TagTitle    string       `xorm:"tag_title"`
 
@@ -127,8 +126,6 @@ var updatePipelineStructure = xormigrate.Migration{
 					newPipeline.TagTitle = strings.TrimPrefix(oldPipeline.Ref, "refs/tags/")
 				case model.EventTag:
 					newPipeline.TagTitle = strings.TrimPrefix(oldPipeline.Ref, "refs/tags/")
-				case model.EventCron:
-					newPipeline.Cron = oldPipeline.Sender
 				case model.EventPull, model.EventPullClosed:
 					newPipeline.PullRequest = &pullRequest{
 						Title: oldPipeline.Title,
@@ -154,7 +151,7 @@ var updatePipelineStructure = xormigrate.Migration{
 					}
 				}
 
-				if _, err := sess.ID(oldPipeline.ID).Cols("commit_new", "deployment", "pr", "cron", "release", "tag_title").Update(newPipeline); err != nil {
+				if _, err := sess.ID(oldPipeline.ID).Cols("commit_new", "deployment", "pr", "release", "tag_title").Update(newPipeline); err != nil {
 					return err
 				}
 			}

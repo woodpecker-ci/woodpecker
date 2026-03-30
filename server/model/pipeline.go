@@ -93,6 +93,7 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 	switch p.Event {
 	case EventCron:
 		ap.Message = p.Cron
+		ap.Sender = p.Cron
 	case EventTag:
 		ap.Message = p.TagTitle
 	case EventRelease:

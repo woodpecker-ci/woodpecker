@@ -84,7 +84,7 @@ func CreatePipeline(c *gin.Context) {
 	if pl != nil {
 		c.JSON(http.StatusOK, pl.ToAPIModel())
 	} else {
-		c.String(http.StatusOK, "nothing to run")
+		c.Status(http.StatusNoContent)
 	}
 }
 
@@ -176,9 +176,10 @@ func GetPipelines(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	var pls []*model.APIPipeline
-	for _, p := range pipelines {
-		pls = append(pls, p.ToAPIModel())
+
+	pls := make([]*model.APIPipeline, len(pipelines))
+	for i, p := range pipelines {
+		pls[i] = p.ToAPIModel()
 	}
 	c.JSON(http.StatusOK, pls)
 }
