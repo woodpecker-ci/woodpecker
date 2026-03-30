@@ -31,7 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -316,7 +316,7 @@ func GetStepLogs(c *gin.Context) {
 
 	if step.PipelineID != pl.ID {
 		// make sure we cannot read arbitrary logs by id
-		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
@@ -460,7 +460,7 @@ func GetPipelineMetadata(c *gin.Context) {
 		return
 	}
 
-	metadata := stepbuilder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
+	metadata := step_builder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
 	c.JSON(http.StatusOK, metadata)
 }
 

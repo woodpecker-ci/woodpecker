@@ -22,14 +22,14 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/agent/log"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
 func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) logging.Logger {
-	return func(step *backend.Step, rc io.ReadCloser) error {
+	return func(step *backend_types.Step, rc io.ReadCloser) error {
 		defer rc.Close()
 
 		logger := _logger.With().

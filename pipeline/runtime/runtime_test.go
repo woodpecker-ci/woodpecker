@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
@@ -38,11 +38,11 @@ import (
 // Step builder helpers.
 //
 
-func cmdStep(name string, opts ...func(*backend.Step)) *backend.Step {
-	s := &backend.Step{
+func cmdStep(name string, opts ...func(*backend_types.Step)) *backend_types.Step {
+	s := &backend_types.Step{
 		Name:        name,
 		UUID:        name + "-uuid",
-		Type:        backend.StepTypeCommands,
+		Type:        backend_types.StepTypeCommands,
 		OnSuccess:   true,
 		OnFailure:   false,
 		Environment: map[string]string{},
@@ -54,51 +54,51 @@ func cmdStep(name string, opts ...func(*backend.Step)) *backend.Step {
 	return s
 }
 
-func withExitCode(code int) func(*backend.Step) {
-	return func(s *backend.Step) {
+func withExitCode(code int) func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
 		s.Environment[dummy.EnvKeyStepExitCode] = fmt.Sprintf("%d", code)
 	}
 }
 
-func withFailure(mode string) func(*backend.Step) {
-	return func(s *backend.Step) { s.Failure = mode }
+func withFailure(mode string) func(*backend_types.Step) {
+	return func(s *backend_types.Step) { s.Failure = mode }
 }
 
-func withOnFailure() func(*backend.Step) {
-	return func(s *backend.Step) { s.OnSuccess = false; s.OnFailure = true }
+func withOnFailure() func(*backend_types.Step) {
+	return func(s *backend_types.Step) { s.OnSuccess = false; s.OnFailure = true }
 }
 
-func withDetached() func(*backend.Step) {
-	return func(s *backend.Step) {
+func withDetached() func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
 		s.Detached = true
 		s.Environment[dummy.EnvKeyStepSleep] = "100ms"
 	}
 }
 
-func withService() func(*backend.Step) {
-	return func(s *backend.Step) {
-		s.Type = backend.StepTypeService
+func withService() func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
+		s.Type = backend_types.StepTypeService
 		s.Detached = true
 		s.Environment[dummy.EnvKeyStepSleep] = "100ms"
 	}
 }
 
-func withPlugin() func(*backend.Step) {
-	return func(s *backend.Step) {
-		s.Type = backend.StepTypePlugin
+func withPlugin() func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
+		s.Type = backend_types.StepTypePlugin
 		s.Environment[dummy.EnvKeyStepType] = "plugin"
 	}
 }
 
-func withOOM() func(*backend.Step) {
-	return func(s *backend.Step) {
+func withOOM() func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
 		s.Environment[dummy.EnvKeyStepOOMKilled] = "true"
 		s.Environment[dummy.EnvKeyStepExitCode] = "137"
 	}
 }
 
-func withStartFail() func(*backend.Step) {
-	return func(s *backend.Step) {
+func withStartFail() func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
 		s.Environment[dummy.EnvKeyStepStartFail] = "true"
 	}
 }
@@ -142,11 +142,11 @@ func TestWorkflowCloneBuildDeploy(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("clone")}},
-				{Steps: []*backend.Step{cmdStep("build")}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("clone")}},
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
 			},
 		},
 		dummy.New(),
@@ -178,13 +178,13 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
 					cmdStep("db", withService()),
 					cmdStep("build"),
 				}},
-				{Steps: []*backend.Step{cmdStep("test")}},
+				{Steps: []*backend_types.Step{cmdStep("test")}},
 			},
 		},
 		dummy.New(),
@@ -195,22 +195,19 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	assert.NoError(t, r.Run(t.Context()))
 	traces := getTracerStates(tracer)
 	if assert.Len(t, traces, 5) {
-		assert.EqualValues(t, backend.State{}, traces[0].CurrStepState)
+		assert.EqualValues(t, backend_types.State{}, traces[0].CurrStepState)
 		assert.Greater(t, traces[2].CurrStepState.Started, int64(0))
-		assert.EqualValues(t, backend.State{Started: traces[2].CurrStepState.Started, Exited: true}, traces[2].CurrStepState)
-		assert.EqualValues(t, backend.State{}, traces[3].CurrStepState)
+		assert.EqualValues(t, backend_types.State{Started: traces[2].CurrStepState.Started, Exited: true}, traces[2].CurrStepState)
+		assert.EqualValues(t, backend_types.State{}, traces[3].CurrStepState)
 		assert.Greater(t, traces[4].CurrStepState.Started, int64(0))
-		assert.EqualValues(t, backend.State{Started: traces[4].CurrStepState.Started, Exited: true}, traces[4].CurrStepState)
+		assert.EqualValues(t, backend_types.State{Started: traces[4].CurrStepState.Started, Exited: true}, traces[4].CurrStepState)
 
 		assert.Greater(t, traces[4].Workflow.Started, int64(0))
 		assert.EqualValues(t, state.State{
-			Workflow: struct {
-				Started int64 `json:"time"`
-				Error   error `json:"error"`
-			}{
+			Workflow: state.Workflow{
 				Started: traces[4].Workflow.Started,
 			},
-			CurrStep: &backend.Step{
+			CurrStep: &backend_types.Step{
 				Name:        "test",
 				UUID:        "test-uuid",
 				Type:        "commands",
@@ -218,7 +215,7 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 				Environment: map[string]string{},
 				Commands:    []string{"echo test"},
 			},
-			CurrStepState: backend.State{
+			CurrStepState: backend_types.State{
 				Started: traces[4].CurrStepState.Started,
 				Exited:  true,
 			},
@@ -229,13 +226,13 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 func TestWorkflowDetachedStepDoesNotBlockWorkflow(t *testing.T) {
 	t.Parallel()
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
 					cmdStep("background-worker", withDetached()),
 					cmdStep("main-build"),
 				}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
 			},
 		},
 		dummy.New(),
@@ -250,11 +247,11 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("clone")}},
-				{Steps: []*backend.Step{cmdStep("build", withExitCode(1))}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("clone")}},
+				{Steps: []*backend_types.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
 			},
 		},
 		dummy.New(),
@@ -274,6 +271,11 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 	buildTrace := findLastTraceByName(traces, "build")
 	require.NotNil(t, buildTrace, "build step should fail")
 	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
+	assert.True(t, buildTrace.CurrStepState.Exited, "build should have started")
+
+	buildTrace = findLastTraceByName(traces, "build")
+	require.NotNil(t, buildTrace, "build step should fail")
+	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
 
 	deployTrace := findLastTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace, "deploy step should still be traced")
@@ -284,10 +286,10 @@ func TestWorkflowOnFailureStepRuns(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build", withExitCode(2))}},
-				{Steps: []*backend.Step{cmdStep("notify-failure", withOnFailure())}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build", withExitCode(2))}},
+				{Steps: []*backend_types.Step{cmdStep("notify-failure", withOnFailure())}},
 			},
 		},
 		dummy.New(),
@@ -304,17 +306,17 @@ func TestWorkflowOnFailureStepRuns(t *testing.T) {
 	last := findLastTraceByName(traces, "notify-failure")
 	require.NotNil(t, last)
 	assert.Greater(t, last.CurrStepState.Started, int64(0), "step should have started")
-	assert.EqualValues(t, backend.State{Started: last.CurrStepState.Started, Exited: true}, last.CurrStepState)
+	assert.EqualValues(t, backend_types.State{Started: last.CurrStepState.Started, Exited: true}, last.CurrStepState)
 }
 
 func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build")}},
-				{Steps: []*backend.Step{cmdStep("cleanup-on-fail", withOnFailure())}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("cleanup-on-fail", withOnFailure())}},
 			},
 		},
 		dummy.New(),
@@ -336,12 +338,12 @@ func TestWorkflowFailureIgnore(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
 					cmdStep("lint", withExitCode(1), withFailure(metadata.FailureIgnore)),
 				}},
-				{Steps: []*backend.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("build")}},
 			},
 		},
 		dummy.New(),
@@ -364,12 +366,12 @@ func TestWorkflowFailureIgnoreDoesNotSetWorkflowError(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
 					cmdStep("flaky-test", withExitCode(1), withFailure(metadata.FailureIgnore)),
 				}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
 			},
 		},
 		dummy.New(),
@@ -389,28 +391,39 @@ func TestWorkflowFailureIgnoreDoesNotSetWorkflowError(t *testing.T) {
 
 func TestWorkflowPluginStep(t *testing.T) {
 	t.Parallel()
+	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("clone")}},
-				{Steps: []*backend.Step{cmdStep("publish", withPlugin())}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("clone")}},
+				{Steps: []*backend_types.Step{cmdStep("publish", withPlugin())}},
 			},
 		},
 		dummy.New(),
-		WithTracer(newTestTracer(t)),
+		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
+
+	lastPluginTrace := findLastTraceByName(getTracerStates(tracer), "publish")
+	if assert.NotNil(t, lastPluginTrace) {
+		assert.EqualValues(t, map[string]string{
+			"DRONE_BUILD_STATUS":             "success",
+			"DRONE_REPO_SCM":                 "git",
+			"EXPECT_TYPE":                    "plugin",
+			"PULLREQUEST_DRONE_PULL_REQUEST": "0",
+		}, lastPluginTrace.CurrStep.Environment)
+	}
 }
 
 func TestWorkflowOOMKilledStep(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build", withOOM())}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build", withOOM())}},
 			},
 		},
 		dummy.New(),
@@ -434,15 +447,15 @@ func TestWorkflowParallelStepsInStage(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("clone")}},
-				{Steps: []*backend.Step{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("clone")}},
+				{Steps: []*backend_types.Step{
 					cmdStep("test-unit"),
 					cmdStep("test-integration"),
 					cmdStep("test-e2e"),
 				}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
 			},
 		},
 		dummy.New(),
@@ -460,9 +473,9 @@ func TestWorkflowParallelStepOneFailsOthersComplete(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
 					cmdStep("test-fast"),
 					cmdStep("test-slow", withExitCode(1)),
 				}},
@@ -493,10 +506,10 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build")}},
-				{Steps: []*backend.Step{cmdStep("deploy", withStartFail())}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy", withStartFail())}},
 			},
 		},
 		dummy.New(),
@@ -509,7 +522,7 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 	assert.Error(t, err)
 	deployTrace := findFirstTraceByName(getTracerStates(tracer), "build")
 	require.NotNil(t, deployTrace)
-	assert.EqualValues(t, backend.State{}, deployTrace.CurrStepState)
+	assert.EqualValues(t, backend_types.State{}, deployTrace.CurrStepState)
 }
 
 func TestWorkflowContextCancelDuringExecution(t *testing.T) {
@@ -529,10 +542,10 @@ func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 	}).Return(nil).Maybe()
 
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build")}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
 			},
 		},
 		dummy.New(),
@@ -549,9 +562,9 @@ func TestWorkflowContextCancelDuringExecution(t *testing.T) {
 func TestWorkflowSetupFailure(t *testing.T) {
 	t.Parallel()
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{cmdStep("build")}},
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
 			},
 		},
 		dummy.New(),
@@ -570,18 +583,18 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
 					cmdStep("redis", withService()),
 					cmdStep("clone"),
 				}},
-				{Steps: []*backend.Step{
+				{Steps: []*backend_types.Step{
 					cmdStep("build"),
 					cmdStep("lint", withExitCode(1)),
 				}},
-				{Steps: []*backend.Step{cmdStep("deploy")}},
-				{Steps: []*backend.Step{cmdStep("notify", withOnFailure())}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("notify", withOnFailure())}},
 			},
 		},
 		dummy.New(),
@@ -594,6 +607,7 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	assert.Error(t, err)
 	traces := getTracerStates(tracer)
 
+	assert.NotNil(t, findStartedTrace(traces, "notify"), "notify (OnFailure) should have started")
 	notifyTrace := findLastTraceByName(traces, "notify")
 	require.NotNil(t, notifyTrace)
 	assert.True(t, notifyTrace.CurrStepState.Exited, "notify should exited")
@@ -607,22 +621,19 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	deployTrace := findFirstTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace)
 	assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after lint failure")
-
-	assert.NotNil(t, findStartedTrace(traces, "notify"),
-		"notify (OnFailure) should have started")
 }
 
 func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
 					cmdStep("lint", withExitCode(1), withFailure(metadata.FailureIgnore)),
 				}},
-				{Steps: []*backend.Step{cmdStep("error-notify", withOnFailure())}},
-				{Steps: []*backend.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("error-notify", withOnFailure())}},
+				{Steps: []*backend_types.Step{cmdStep("build")}},
 			},
 		},
 		dummy.New(),
@@ -646,7 +657,7 @@ func TestWorkflowEmptyStages(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{Stages: []*backend.Stage{}},
+		&backend_types.Config{Stages: []*backend_types.Stage{}},
 		dummy.New(),
 		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),

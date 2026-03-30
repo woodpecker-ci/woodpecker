@@ -56,6 +56,7 @@ type Pipeline struct {
 	PullRequestMilestone string                  `json:"pr_milestone,omitempty"  xorm:"pr_milestone"`
 	IsPrerelease         bool                    `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
 	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
+	Version              string                  `json:"version"                 xorm:"'version'"`
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.

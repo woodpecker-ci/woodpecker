@@ -21,7 +21,7 @@ import (
 	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
-	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 )
 
 // List defines a runtime constraint for exclude & include string slices.
@@ -76,11 +76,11 @@ func (c *List) Excludes(v string) bool {
 // UnmarshalYAML unmarshal the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include yamlBaseTypes.StringOrSlice
-		Exclude yamlBaseTypes.StringOrSlice
+		Include yaml_base_types.StringOrSlice
+		Exclude yaml_base_types.StringOrSlice
 	}{}
 
-	var out2 yamlBaseTypes.StringOrSlice
+	var out2 yaml_base_types.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -105,12 +105,12 @@ func (c List) MarshalYAML() (any, error) {
 	case len(c.Include) == 0 && len(c.Exclude) == 0:
 		return nil, nil
 	case len(c.Exclude) == 0:
-		return yamlBaseTypes.StringOrSlice(c.Include), nil
+		return yaml_base_types.StringOrSlice(c.Include), nil
 	default:
 		// we can not return type List as it would lead to infinite recursion :/
 		return struct {
-			Include yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
-			Exclude yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
+			Include yaml_base_types.StringOrSlice `yaml:"include,omitempty"`
+			Exclude yaml_base_types.StringOrSlice `yaml:"exclude,omitempty"`
 		}{
 			Include: c.Include,
 			Exclude: c.Exclude,
