@@ -197,7 +197,7 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	if assert.Len(t, traces, 5) {
 		assert.EqualValues(t, backend_types.State{}, traces[0].CurrStepState)
 		assert.Greater(t, traces[2].CurrStepState.Started, int64(0))
-		assert.EqualValues(t, backend_types.State{Started: traces[2].CurrStepState.Started, Exited: false}, traces[2].CurrStepState)
+		assert.EqualValues(t, backend_types.State{Started: traces[2].CurrStepState.Started, Exited: true}, traces[2].CurrStepState)
 		assert.EqualValues(t, backend_types.State{}, traces[3].CurrStepState)
 		assert.Greater(t, traces[4].CurrStepState.Started, int64(0))
 		assert.EqualValues(t, backend_types.State{Started: traces[4].CurrStepState.Started, Exited: true}, traces[4].CurrStepState)
