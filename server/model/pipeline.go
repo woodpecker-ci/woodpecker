@@ -75,7 +75,7 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		Pipeline: p,
 	}
 
-	switch p.Event {
+	switch p.Event { //nolint:gocritic
 	case EventCron:
 		ap.Message = p.Cron
 		ap.Sender = p.Cron

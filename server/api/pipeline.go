@@ -181,8 +181,8 @@ func GetPipelines(c *gin.Context) {
 	}
 
 	pls := make([]*model.APIPipeline, len(pipelines))
-	for _, p := range pipelines {
-		pls = append(pls, p.ToAPIModel())
+	for i, p := range pipelines {
+		pls[i] = p.ToAPIModel()
 	}
 	c.JSON(http.StatusOK, pls)
 }
