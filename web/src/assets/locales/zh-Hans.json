@@ -761,5 +761,6 @@
     "global_level_registry": "全局注册表",
     "org_level_registry": "组织注册表",
     "secret_extension_endpoint": "密钥扩展程序端点",
-    "secret_extension_netrc": "包含 netrc 凭据"
+    "secret_extension_netrc": "包含 netrc 凭据",
+    "secret_extension_netrc_desc": "将代码托管平台 netrc 凭证发送给密钥扩展程序。"
 }
