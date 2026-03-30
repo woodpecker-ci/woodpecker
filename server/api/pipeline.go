@@ -321,7 +321,7 @@ func GetStepLogs(c *gin.Context) {
 
 	if step.PipelineID != pl.ID {
 		// make sure we cannot read arbitrary logs by id
-		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
