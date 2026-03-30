@@ -47,6 +47,7 @@
     },
     "runs_on": {
       "type": "array",
+      "description": "Deprecated: use `when.status` instead. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
       "minLength": 1,
       "items": {
         "type": "string"
@@ -181,11 +182,28 @@
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
-          "type": "string"
+          "$ref": "#/definitions/constraint_list"
         },
         "cron": {
           "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",
           "$ref": "#/definitions/constraint_list"
+        },
+        "status": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string",
+                "enum": ["success", "failure"]
+              }
+            },
+            {
+              "type": "string",
+              "enum": ["success", "failure"]
+            }
+          ]
         },
         "platform": {
           "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#platform",
@@ -317,7 +335,7 @@
         "failure": {
           "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
           "type": "string",
-          "enum": ["fail", "ignore"],
+          "enum": ["fail", "ignore", "cancel"],
           "default": "fail"
         },
         "backend_options": {
@@ -420,7 +438,7 @@
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
-          "type": "string"
+          "$ref": "#/definitions/constraint_list"
         },
         "cron": {
           "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",

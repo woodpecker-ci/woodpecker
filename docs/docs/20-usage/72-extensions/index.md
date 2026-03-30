@@ -5,6 +5,8 @@ Woodpecker allows you to replace internal logic with external extensions by usin
 There is currently one type of extension available:
 
 - [Configuration extension](./40-configuration-extension.md) to modify or generate pipeline configurations on the fly.
+- [Registry extension](./50-registry-extension.md) to get registry credentials from the extension.
+- [Secret extension](./55-secret-extension.md) to get secrets from an external service.
 
 ## Security
 

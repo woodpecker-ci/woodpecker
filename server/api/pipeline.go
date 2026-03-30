@@ -31,7 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -455,12 +455,12 @@ func GetPipelineMetadata(c *gin.Context) {
 	}
 
 	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		handleDBError(c, err)
 		return
 	}
 
-	metadata := stepbuilder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
+	metadata := step_builder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
 	c.JSON(http.StatusOK, metadata)
 }
 

@@ -37,7 +37,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
-	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
@@ -122,7 +122,7 @@ func setupMembershipService(_ context.Context, _store store.Store) cache.Members
 	return cache.NewMembershipService(_store)
 }
 
-func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
+func setupLogStore(c *cli.Command, s store.Store) (service_log.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
@@ -137,7 +137,7 @@ const jwtSecretID = "jwt-secret"
 
 func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		jwtSecret := base32.StdEncoding.EncodeToString(
 			random.GetRandomBytes(32),
 		)
@@ -258,6 +258,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
 	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
+	server.Config.WebUI.MaxPipelineLogLineCount = c.Uint("max-pipeline-log-line-count")
 	server.Config.Pipeline.PrivilegedPlugins = c.StringSlice("plugins-privileged")
 
 	// prometheus

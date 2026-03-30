@@ -27,7 +27,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
-	grpcMetadata "google.golang.org/grpc/metadata"
+	grpc_metadata "google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -195,7 +195,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	if err := pipeline.UpdateStepStatus(s.store, step, state); err != nil {
+	if err := pipeline.UpdateStepStatus(c, s.store, step, state); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
@@ -350,16 +350,22 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
 	}
 
+	var queueErr error
 	if !state.Canceled {
-		var queueErr error
 		if workflow.Failing() {
 			queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
 		} else {
 			queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
 		}
-		if queueErr != nil {
-			logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
+	} else {
+		if workflow.Started > 0 {
+			queueErr = s.queue.Done(c, strWorkflowID, model.StatusKilled)
+		} else {
+			queueErr = s.queue.Done(c, strWorkflowID, model.StatusCanceled)
 		}
+	}
+	if queueErr != nil {
+		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
 	}
 
 	currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline)
@@ -559,7 +565,7 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
-			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Finished); err != nil {
+			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Finished, model.StatusSkipped); err != nil {
 				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			}
 		}
@@ -609,7 +615,7 @@ func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := grpcMetadata.FromIncomingContext(ctx)
+	md, ok := grpc_metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, errors.New("metadata is not provided")
 	}
@@ -629,7 +635,7 @@ func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 }
 
 func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	metadata, ok := grpc_metadata.FromIncomingContext(ctx)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {

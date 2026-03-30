@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 
 	"github.com/prometheus/client_golang/prometheus"
-	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -38,12 +38,12 @@ type WoodpeckerServer struct {
 }
 
 func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
-	pipelineTime := prometheus_auto.NewGaugeVec(prometheus.GaugeOpts{
+	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
 		Help:      "Pipeline time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
-	pipelineCount := prometheus_auto.NewCounterVec(prometheus.CounterOpts{
+	pipelineCount := promauto.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_count",
 		Help:      "Pipeline count.",
@@ -109,6 +109,7 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
 		Canceled: req.GetState().GetCanceled(),
+		Skipped:  req.GetState().GetSkipped(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Update(c, req.GetId(), state)

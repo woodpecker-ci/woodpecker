@@ -25,9 +25,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	grpcproto "google.golang.org/protobuf/proto"
+	grpc_proto "google.golang.org/protobuf/proto"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 )
@@ -141,7 +141,7 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 	w := new(rpc.Workflow)
 	w.ID = res.GetWorkflow().GetId()
 	w.Timeout = res.GetWorkflow().GetTimeout()
-	w.Config = new(backend.Config)
+	w.Config = new(backend_types.Config)
 	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
 		log.Error().Err(err).Msgf("could not unmarshal workflow config of '%s'", w.ID)
 	}
@@ -345,6 +345,7 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	req.State.ExitCode = int32(state.ExitCode)
 	req.State.Error = state.Error
 	req.State.Canceled = state.Canceled
+	req.State.Skipped = state.Skipped
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
@@ -429,7 +430,7 @@ func (c *client) processLogs(ctx context.Context) {
 			}
 
 			entries = append(entries, entry)
-			bytes += grpcproto.Size(entry) // cspell:words grpcproto
+			bytes += grpc_proto.Size(entry)
 
 			if bytes >= maxLogBatchSize {
 				send()

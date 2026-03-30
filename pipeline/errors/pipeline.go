@@ -17,7 +17,7 @@ package errors
 import (
 	"fmt"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 type PipelineErrorType string
@@ -43,7 +43,7 @@ func (e *PipelineError) Error() string {
 
 type ErrInvalidWorkflowSetup struct {
 	Err  error
-	Step *backend.Step
+	Step *backend_types.Step
 }
 
 func (e *ErrInvalidWorkflowSetup) Error() string {

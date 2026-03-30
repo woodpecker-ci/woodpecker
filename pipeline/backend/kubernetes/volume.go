@@ -19,24 +19,24 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	v1 "k8s.io/api/core/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func mkPersistentVolumeClaim(config *config, name, namespace string) (*v1.PersistentVolumeClaim, error) {
+func mkPersistentVolumeClaim(config *config, name, namespace string) (*kube_core_v1.PersistentVolumeClaim, error) {
 	_storageClass := &config.StorageClass
 	if config.StorageClass == "" {
 		_storageClass = nil
 	}
 
-	var accessMode v1.PersistentVolumeAccessMode
+	var accessMode kube_core_v1.PersistentVolumeAccessMode
 
 	if config.StorageRwx {
-		accessMode = v1.ReadWriteMany
+		accessMode = kube_core_v1.ReadWriteMany
 	} else {
-		accessMode = v1.ReadWriteOnce
+		accessMode = kube_core_v1.ReadWriteOnce
 	}
 
 	volumeName, err := volumeName(name)
@@ -44,17 +44,17 @@ func mkPersistentVolumeClaim(config *config, name, namespace string) (*v1.Persis
 		return nil, err
 	}
 
-	pvc := &v1.PersistentVolumeClaim{
-		ObjectMeta: meta_v1.ObjectMeta{
+	pvc := &kube_core_v1.PersistentVolumeClaim{
+		ObjectMeta: kube_meta_v1.ObjectMeta{
 			Name:      volumeName,
 			Namespace: namespace,
 		},
-		Spec: v1.PersistentVolumeClaimSpec{
-			AccessModes:      []v1.PersistentVolumeAccessMode{accessMode},
+		Spec: kube_core_v1.PersistentVolumeClaimSpec{
+			AccessModes:      []kube_core_v1.PersistentVolumeAccessMode{accessMode},
 			StorageClassName: _storageClass,
-			Resources: v1.VolumeResourceRequirements{
-				Requests: v1.ResourceList{
-					v1.ResourceStorage: resource.MustParse(config.VolumeSize),
+			Resources: kube_core_v1.VolumeResourceRequirements{
+				Requests: kube_core_v1.ResourceList{
+					kube_core_v1.ResourceStorage: resource.MustParse(config.VolumeSize),
 				},
 			},
 		},
@@ -75,7 +75,7 @@ func volumeMountPath(name string) string {
 	return s[0]
 }
 
-func startVolume(ctx context.Context, engine *kube, name, namespace string) (*v1.PersistentVolumeClaim, error) {
+func startVolume(ctx context.Context, engine *kube, name, namespace string) (*kube_core_v1.PersistentVolumeClaim, error) {
 	engineConfig := engine.getConfig()
 	pvc, err := mkPersistentVolumeClaim(engineConfig, name, namespace)
 	if err != nil {
@@ -83,10 +83,10 @@ func startVolume(ctx context.Context, engine *kube, name, namespace string) (*v1
 	}
 
 	log.Trace().Msgf("creating volume: %s", pvc.Name)
-	return engine.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, pvc, meta_v1.CreateOptions{})
+	return engine.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, pvc, kube_meta_v1.CreateOptions{})
 }
 
-func stopVolume(ctx context.Context, engine *kube, name, namespace string, deleteOpts meta_v1.DeleteOptions) error {
+func stopVolume(ctx context.Context, engine *kube, name, namespace string, deleteOpts kube_meta_v1.DeleteOptions) error {
 	pvcName, err := volumeName(name)
 	if err != nil {
 		return err

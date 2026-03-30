@@ -34,7 +34,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/yaronf/httpsign"
 
-	host_matcher "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 )
 
@@ -46,9 +46,9 @@ func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*
 	timeout := 10 * time.Second //nolint:mnd
 
 	if allowedHostListValue == "" {
-		allowedHostListValue = host_matcher.MatchBuiltinExternal
+		allowedHostListValue = hostmatcher.MatchBuiltinExternal
 	}
-	allowedHostMatcher := host_matcher.ParseHostMatchList("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS", allowedHostListValue)
+	allowedHostMatcher := hostmatcher.ParseHostMatchList("WOODPECKER_EXTENSIONS_ALLOWED_HOSTS", allowedHostListValue)
 
 	pubKeyID := "woodpecker-ci-extensions"
 
@@ -68,7 +68,7 @@ func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*
 	baseTransport := httputil.NewUserAgentRoundTripper(
 		&http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-			DialContext:     host_matcher.NewDialContext("extensions", allowedHostMatcher),
+			DialContext:     hostmatcher.NewDialContext("extensions", allowedHostMatcher),
 		},
 		"server-extensions",
 	)
@@ -136,7 +136,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 		// Create new request for each attempt
 		req, err := http.NewRequestWithContext(ctx, method, uri.String(), body)
 		if err != nil {
-			return 0, err
+			return 0, httputil.EnhanceHTTPError(err, method, path)
 		}
 		if in != nil {
 			req.Header.Set("Content-Type", "application/json")

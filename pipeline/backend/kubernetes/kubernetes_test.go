@@ -16,12 +16,17 @@ package kubernetes
 
 import (
 	"context"
+	"fmt"
+	"runtime"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -126,10 +131,10 @@ func TestSetupWorkflow(t *testing.T) {
 	err := engine.SetupWorkflow(context.Background(), conf, taskUUID)
 	assert.NoError(t, err, "SetupWorkflow should not error with minimal config and fake client")
 
-	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), "volume-name", meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), "volume-name", kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "persistent volume should be created during workflow setup")
 
-	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "headless service should be created during workflow setup")
 }
 
@@ -174,4 +179,126 @@ func TestAffinityFromCliContext(t *testing.T) {
 	}
 	err := cmd.Run(context.Background(), []string{"test"})
 	require.NoError(t, err)
+}
+
+func makeStep(uuid string) *types.Step {
+	return &types.Step{
+		UUID:  uuid,
+		Name:  "step-" + uuid,
+		OrgID: 1,
+	}
+}
+
+func makeEngine(client *fake.Clientset) *kube {
+	return &kube{
+		client: client,
+		config: &config{
+			Namespace: "test-ns",
+		},
+	}
+}
+
+func createPod(
+	t *testing.T,
+	client *fake.Clientset,
+	step *types.Step,
+	namespace string,
+) string {
+	t.Helper()
+	podName, err := stepToPodName(step)
+	require.NoError(t, err)
+
+	pod := &kube_core_v1.Pod{
+		ObjectMeta: kube_meta_v1.ObjectMeta{
+			Name:      podName,
+			Namespace: namespace,
+		},
+		Status: kube_core_v1.PodStatus{
+			Phase: kube_core_v1.PodPending,
+		},
+	}
+	_, err = client.CoreV1().Pods(namespace).Create(
+		context.Background(), pod, kube_meta_v1.CreateOptions{},
+	)
+	require.NoError(t, err)
+	return podName
+}
+
+func TestWaitStepReturnsOnContextCancel(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("ctx-cancel-01")
+	namespace := "test-ns"
+
+	createPod(t, client, step, namespace)
+
+	ctx, cancel := context.WithCancelCause(context.Background())
+
+	type result struct {
+		state *types.State
+		err   error
+	}
+	ch := make(chan result, 1)
+
+	go func() {
+		s, err := engine.WaitStep(ctx, step, "task-1")
+		ch <- result{s, err}
+	}()
+
+	// Give the informer time to start and begin watching.
+	time.Sleep(200 * time.Millisecond)
+
+	cancel(nil)
+
+	select {
+	case r := <-ch:
+		assert.Nil(t, r.state)
+		assert.ErrorIs(t, r.err, context.Canceled)
+	case <-time.After(3 * time.Second):
+		t.Fatal("WaitStep did not return after context cancellation")
+	}
+}
+
+func TestWaitStepNoGoroutineLeak(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	namespace := "test-ns"
+	numSteps := 10
+
+	steps := make([]*types.Step, numSteps)
+	for i := range numSteps {
+		steps[i] = makeStep(fmt.Sprintf("leak-%02d", i))
+		createPod(t, client, steps[i], namespace)
+	}
+
+	runtime.GC()
+	time.Sleep(100 * time.Millisecond)
+	baselineGoroutines := runtime.NumGoroutine()
+
+	var wg sync.WaitGroup
+	for i := range numSteps {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			ctx, cancel := context.WithCancelCause(context.Background())
+
+			go func() {
+				_, _ = engine.WaitStep(ctx, steps[i], fmt.Sprintf("task-%d", i))
+			}()
+
+			time.Sleep(200 * time.Millisecond)
+			cancel(nil)
+		}()
+	}
+	wg.Wait()
+
+	time.Sleep(1 * time.Second)
+
+	afterCancelGoroutines := runtime.NumGoroutine()
+	leaked := afterCancelGoroutines - baselineGoroutines
+
+	assert.Less(t, leaked, numSteps,
+		"goroutines leaked after canceling %d WaitStep calls: got %d leaked",
+		numSteps, leaked)
 }

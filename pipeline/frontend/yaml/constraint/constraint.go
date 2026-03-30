@@ -24,8 +24,13 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
+)
+
+const (
+	statusFailure = "failure"
+	statusSuccess = "success"
 )
 
 type (
@@ -36,18 +41,18 @@ type (
 	}
 
 	Constraint struct {
-		Ref      List                        `yaml:"ref,omitempty"`
-		Repo     List                        `yaml:"repo,omitempty"`
-		Instance List                        `yaml:"instance,omitempty"`
-		Platform List                        `yaml:"platform,omitempty"`
-		Branch   List                        `yaml:"branch,omitempty"`
-		Cron     List                        `yaml:"cron,omitempty"`
-		Status   List                        `yaml:"status,omitempty"`
-		Matrix   Map                         `yaml:"matrix,omitempty"`
-		Local    optional.Option[bool]       `yaml:"local,omitempty"`
-		Path     Path                        `yaml:"path,omitempty"`
-		Evaluate string                      `yaml:"evaluate,omitempty"`
-		Event    yamlBaseTypes.StringOrSlice `yaml:"event,omitempty"`
+		Ref      List                          `yaml:"ref,omitempty"`
+		Repo     List                          `yaml:"repo,omitempty"`
+		Instance List                          `yaml:"instance,omitempty"`
+		Platform List                          `yaml:"platform,omitempty"`
+		Branch   List                          `yaml:"branch,omitempty"`
+		Cron     List                          `yaml:"cron,omitempty"`
+		Status   []string                      `yaml:"status,omitempty"`
+		Matrix   Map                           `yaml:"matrix,omitempty"`
+		Local    optional.Option[bool]         `yaml:"local,omitempty"`
+		Path     Path                          `yaml:"path,omitempty"`
+		Evaluate string                        `yaml:"evaluate,omitempty"`
+		Event    yaml_base_types.StringOrSlice `yaml:"event,omitempty"`
 	}
 )
 
@@ -75,17 +80,19 @@ func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]
 	return false, nil
 }
 
-func (when *When) IncludesStatusFailure() bool {
+func (when *When) IncludesStatusFailure(metadata metadata.Metadata, global bool, env map[string]string) bool {
 	for _, c := range when.Constraints {
-		if c.Status.Includes("failure") {
-			return true
+		if matches, err := c.Match(metadata, global, env); err == nil && matches {
+			if slices.Contains(c.Status, statusFailure) {
+				return true
+			}
 		}
 	}
 
 	return false
 }
 
-func (when *When) IncludesStatusSuccess() bool {
+func (when *When) IncludesStatusSuccess(metadata metadata.Metadata, global bool, env map[string]string) bool {
 	// "success" acts differently than "failure" in that it's
 	// presumed to be included unless it's specifically not part
 	// of the list
@@ -93,11 +100,15 @@ func (when *When) IncludesStatusSuccess() bool {
 		return true
 	}
 	for _, c := range when.Constraints {
-		if len(c.Status.Include) == 0 || c.Status.Includes("success") {
-			return true
+		matches, err := c.Match(metadata, global, env)
+		fmt.Println("mat", matches, err, c.Status)
+		if matches, err := c.Match(metadata, global, env); err == nil && matches {
+			if len(c.Status) > 0 && !slices.Contains(c.Status, statusSuccess) {
+				return false
+			}
 		}
 	}
-	return false
+	return true
 }
 
 // False if (any) non local.
