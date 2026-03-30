@@ -78,8 +78,12 @@ func CreatePipeline(c *gin.Context) {
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
+	}
+
+	if pl != nil {
+		c.JSON(http.StatusOK, pl.ToAPIModel())
 	} else {
-		c.JSON(http.StatusOK, pl)
+		c.Status(http.StatusNoContent)
 	}
 }
 
@@ -175,7 +179,12 @@ func GetPipelines(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, pipelines)
+
+	pls := make([]*model.APIPipeline, len(pipelines))
+	for _, p := range pipelines {
+		pls = append(pls, p.ToAPIModel())
+	}
+	c.JSON(http.StatusOK, pls)
 }
 
 // DeletePipeline
@@ -252,7 +261,7 @@ func GetPipeline(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, pl)
+	c.JSON(http.StatusOK, pl.ToAPIModel())
 }
 
 func GetPipelineLastByBranch(c *gin.Context) {
@@ -270,7 +279,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, pl)
+	c.JSON(http.StatusOK, pl.ToAPIModel())
 }
 
 // GetStepLogs
@@ -530,7 +539,7 @@ func PostApproval(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newPipeline)
+		c.JSON(http.StatusOK, newPipeline.ToAPIModel())
 	}
 }
 
@@ -562,7 +571,7 @@ func PostDecline(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, pl)
+		c.JSON(http.StatusOK, pl.ToAPIModel())
 	}
 }
 
@@ -662,7 +671,7 @@ func PostPipeline(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newPipeline)
+		c.JSON(http.StatusOK, newPipeline.ToAPIModel())
 	}
 }
 

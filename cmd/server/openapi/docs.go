@@ -5011,6 +5011,10 @@ const docTemplate = `{
                 "created": {
                     "type": "integer"
                 },
+                "cron": {
+                    "description": "name of the cron job",
+                    "type": "string"
+                },
                 "deploy_task": {
                     "type": "string"
                 },
@@ -5078,7 +5082,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sender": {
-                    "description": "uses reported user for webhooks and name of cron for cron pipelines",
+                    "description": "deprecated, use author instead",
                     "type": "string"
                 },
                 "started": {
@@ -5374,7 +5378,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "last_pipeline": {
-                    "$ref": "#/definitions/Pipeline"
+                    "$ref": "#/definitions/model.Pipeline"
                 },
                 "name": {
                     "type": "string"
@@ -6111,6 +6115,142 @@ const docTemplate = `{
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
             ]
+        },
+        "model.Pipeline": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "author_avatar": {
+                    "type": "string"
+                },
+                "author_email": {
+                    "type": "string"
+                },
+                "branch": {
+                    "type": "string"
+                },
+                "cancel_info": {
+                    "$ref": "#/definitions/CancelInfo"
+                },
+                "changed_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "commit": {
+                    "type": "string"
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "cron": {
+                    "description": "name of the cron job",
+                    "type": "string"
+                },
+                "deploy_task": {
+                    "type": "string"
+                },
+                "deploy_to": {
+                    "type": "string"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/errors.PipelineError"
+                    }
+                },
+                "event": {
+                    "$ref": "#/definitions/WebhookEvent"
+                },
+                "event_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "finished": {
+                    "type": "integer"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "from_fork": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "type": "integer"
+                },
+                "pr_labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "pr_milestone": {
+                    "type": "string"
+                },
+                "ref": {
+                    "type": "string"
+                },
+                "refspec": {
+                    "type": "string"
+                },
+                "reviewed": {
+                    "type": "integer"
+                },
+                "reviewed_by": {
+                    "type": "string"
+                },
+                "sender": {
+                    "description": "uses reported user for webhooks and name of cron for cron pipelines",
+                    "type": "string"
+                },
+                "started": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/StatusValue"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated": {
+                    "type": "integer"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "version": {
+                    "type": "string"
+                },
+                "workflows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Workflow"
+                    }
+                }
+            }
         },
         "model.QueueTask": {
             "type": "object",

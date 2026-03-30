@@ -68,7 +68,7 @@ func TestCreatePipeline(t *testing.T) {
 		ForgeURL: "https://example.com/sha1",
 		Message:  "test",
 		Ref:      "refs/heads/default",
-		Sender:   "test",
+		Cron:     "test",
 	}, pipeline)
 }
 
