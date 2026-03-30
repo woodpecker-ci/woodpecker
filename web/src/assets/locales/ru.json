@@ -330,7 +330,9 @@
                 "superseded_by": "Заменено на #{pipelineId}",
                 "canceled_by_step": "Отменено из-за шага {step}"
             },
-            "load_more": "Загрузить ещё"
+            "load_more": "Загрузить ещё",
+            "version_header": "Версия Woodpecker",
+            "version": "Версия Woodpecker, на которой был выполнен этот конвейер."
         },
         "pull_requests": "Запросы на слияние",
         "settings": {
