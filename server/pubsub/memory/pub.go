@@ -39,7 +39,7 @@ func New() pubsub.PubSub {
 }
 
 func (p *publisher) Publish(_ context.Context, topics pubsub.Topics, message pubsub.Message) error {
-	if topics == nil || len(topics) == 0 {
+	if len(topics) == 0 {
 		return fmt.Errorf("%w: specify at least one", pubsub.ErrNoTopic)
 	}
 
