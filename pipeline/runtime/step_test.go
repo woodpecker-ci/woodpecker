@@ -30,8 +30,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	backend_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types/mocks"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types/mocks"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
@@ -45,7 +45,7 @@ const testWorkflowID = "WID_test"
 func newDummyRuntime(t *testing.T, tracer *tracer_mocks.MockTracer) *Runtime {
 	t.Helper()
 	engine := dummy.New()
-	r := New(&backend.Config{}, engine,
+	r := New(&backend_types.Config{}, engine,
 		WithTracer(tracer),
 		WithTaskUUID(testWorkflowID),
 		WithLogger(newTestLogger(t)),
@@ -54,11 +54,11 @@ func newDummyRuntime(t *testing.T, tracer *tracer_mocks.MockTracer) *Runtime {
 	return r
 }
 
-func dummyStep(name string) *backend.Step {
-	return &backend.Step{
+func dummyStep(name string) *backend_types.Step {
+	return &backend_types.Step{
 		Name:        name,
 		UUID:        name + "-uuid",
-		Type:        backend.StepTypeCommands,
+		Type:        backend_types.StepTypeCommands,
 		OnSuccess:   true,
 		OnFailure:   false,
 		Environment: map[string]string{},
@@ -72,7 +72,7 @@ func TestShouldSkipStep(t *testing.T) {
 	t.Run("NoErrorOnSuccessTrue", func(t *testing.T) {
 		t.Parallel()
 		r := newDummyRuntime(t, newTestTracer(t))
-		step := &backend.Step{Name: "s", OnSuccess: true, OnFailure: false}
+		step := &backend_types.Step{Name: "s", OnSuccess: true, OnFailure: false}
 
 		assert.False(t, r.shouldSkipStep(step))
 	})
@@ -80,7 +80,7 @@ func TestShouldSkipStep(t *testing.T) {
 	t.Run("NoErrorOnSuccessFalse", func(t *testing.T) {
 		t.Parallel()
 		r := newDummyRuntime(t, newTestTracer(t))
-		step := &backend.Step{Name: "s", OnSuccess: false, OnFailure: true}
+		step := &backend_types.Step{Name: "s", OnSuccess: false, OnFailure: true}
 
 		assert.True(t, r.shouldSkipStep(step))
 	})
@@ -89,7 +89,7 @@ func TestShouldSkipStep(t *testing.T) {
 		t.Parallel()
 		r := newDummyRuntime(t, newTestTracer(t))
 		r.err.Set(errors.New("previous failure"))
-		step := &backend.Step{Name: "s", OnSuccess: false, OnFailure: true}
+		step := &backend_types.Step{Name: "s", OnSuccess: false, OnFailure: true}
 
 		assert.False(t, r.shouldSkipStep(step))
 	})
@@ -98,7 +98,7 @@ func TestShouldSkipStep(t *testing.T) {
 		t.Parallel()
 		r := newDummyRuntime(t, newTestTracer(t))
 		r.err.Set(errors.New("previous failure"))
-		step := &backend.Step{Name: "s", OnSuccess: true, OnFailure: false}
+		step := &backend_types.Step{Name: "s", OnSuccess: true, OnFailure: false}
 
 		assert.True(t, r.shouldSkipStep(step))
 	})
@@ -148,7 +148,7 @@ func TestTraceStep(t *testing.T) {
 
 		r := newDummyRuntime(t, tracer)
 		step := dummyStep("s1")
-		ps := &backend.State{Exited: true, ExitCode: 0, Started: 42}
+		ps := &backend_types.State{Exited: true, ExitCode: 0, Started: 42}
 
 		err := r.traceStep(ps, nil, step)
 
@@ -166,7 +166,7 @@ func TestTraceStep(t *testing.T) {
 
 		r := newDummyRuntime(t, tracer)
 		step := dummyStep("s1")
-		ps := &backend.State{Exited: true, Skipped: true}
+		ps := &backend_types.State{Exited: true, Skipped: true}
 
 		err := r.traceStep(ps, nil, step)
 
@@ -237,7 +237,7 @@ func TestStartStep(t *testing.T) {
 		r := newDummyRuntime(t, newTestTracer(t))
 		step := dummyStep("tail-fail")
 		step.Environment[dummy.EnvKeyStepTailFail] = "true"
-		r.logger = logging.Logger(func(_ *backend.Step, _ io.ReadCloser) error { return nil })
+		r.logger = logging.Logger(func(_ *backend_types.Step, _ io.ReadCloser) error { return nil })
 
 		_, _, err := r.startStep(step)
 
@@ -247,13 +247,13 @@ func TestStartStep(t *testing.T) {
 	t.Run("WithLogger", func(t *testing.T) {
 		t.Parallel()
 		var logCalled int32
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(io.NopCloser(strings.NewReader("log line")), nil)
 
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)),
-			WithLogger(logging.Logger(func(_ *backend.Step, rc io.ReadCloser) error {
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)),
+			WithLogger(logging.Logger(func(_ *backend_types.Step, rc io.ReadCloser) error {
 				atomic.AddInt32(&logCalled, 1)
 				_, _ = io.ReadAll(rc)
 				return nil
@@ -271,14 +271,14 @@ func TestStartStep(t *testing.T) {
 		t.Parallel()
 		logErr := errors.New("log stream broken")
 
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(io.NopCloser(strings.NewReader("data")), nil)
 
-		r := New(&backend.Config{}, engine,
+		r := New(&backend_types.Config{}, engine,
 			WithTracer(newTestTracer(t)),
-			WithLogger(logging.Logger(func(_ *backend.Step, rc io.ReadCloser) error {
+			WithLogger(logging.Logger(func(_ *backend_types.Step, rc io.ReadCloser) error {
 				_, _ = io.ReadAll(rc)
 				return logErr // triggers the error-log branch in the goroutine
 			})),
@@ -299,11 +299,11 @@ func TestCompleteStep(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
+			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -314,11 +314,11 @@ func TestCompleteStep(t *testing.T) {
 
 	t.Run("NonZeroExitCode", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, ExitCode: 1}, nil)
+			Return(&backend_types.State{Exited: true, ExitCode: 1}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -330,11 +330,11 @@ func TestCompleteStep(t *testing.T) {
 
 	t.Run("OOMKilled", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, OOMKilled: true, ExitCode: 137}, nil)
+			Return(&backend_types.State{Exited: true, OOMKilled: true, ExitCode: 137}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -345,11 +345,11 @@ func TestCompleteStep(t *testing.T) {
 
 	t.Run("ContextCanceledNilState", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, context.Canceled)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -360,11 +360,11 @@ func TestCompleteStep(t *testing.T) {
 
 	t.Run("ContextCanceledWithState", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, ExitCode: 0}, context.Canceled)
+			Return(&backend_types.State{Exited: true, ExitCode: 0}, context.Canceled)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -374,11 +374,11 @@ func TestCompleteStep(t *testing.T) {
 
 	t.Run("WaitStepNonCancelError", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, errors.New("engine exploded"))
 		// DestroyStep should NOT be called — early return.
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -388,12 +388,12 @@ func TestCompleteStep(t *testing.T) {
 
 	t.Run("DestroyStepError", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
+			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(errors.New("cleanup failed"))
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
@@ -403,11 +403,11 @@ func TestCompleteStep(t *testing.T) {
 
 	t.Run("SetsStartTime", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
+			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, 9999)
 
@@ -422,12 +422,12 @@ func TestCompleteStep(t *testing.T) {
 		canceledCtx, cancel := context.WithCancelCause(context.Background())
 		cancel(nil) // pre-cancel
 
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
+			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		r := New(&backend.Config{},
+		r := New(&backend_types.Config{},
 			engine,
 			WithTracer(newTestTracer(t)),
 			WithLogger(newTestLogger(t)),
@@ -451,9 +451,9 @@ func TestExecuteStep(t *testing.T) {
 		t.Parallel()
 		tracer := newTestTracer(t)
 		r := newDummyRuntime(t, tracer)
-		step := &backend.Step{
+		step := &backend_types.Step{
 			Name: "skip-me", UUID: "skip-uuid",
-			Type: backend.StepTypeCommands, Environment: map[string]string{},
+			Type: backend_types.StepTypeCommands, Environment: map[string]string{},
 			OnSuccess: false, OnFailure: true,
 		}
 
@@ -508,7 +508,7 @@ func TestExecuteStep(t *testing.T) {
 		r := newDummyRuntime(t, tracer)
 		step := dummyStep("svc")
 		step.Detached = true
-		step.Type = backend.StepTypeService
+		step.Type = backend_types.StepTypeService
 		step.Environment[dummy.EnvKeyStepSleep] = "1ms"
 
 		err := r.executeStep(t.Context(), step)
@@ -578,16 +578,16 @@ func TestRunBlockingStep(t *testing.T) {
 
 	t.Run("DestroyStepErrorMappedToErrCancel", func(t *testing.T) {
 		t.Parallel()
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
+			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(context.Canceled)
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("")), nil)
 
 		tracer := newTestTracer(t)
-		r := New(&backend.Config{}, engine, WithTracer(tracer), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, engine, WithTracer(tracer), WithLogger(newTestLogger(t)))
 
 		err := r.runBlockingStep(t.Context(), dummyStep("s1"))
 
@@ -646,7 +646,7 @@ func TestRunDetachedStep(t *testing.T) {
 			Run(func(mock.Arguments) { atomic.AddInt32(&traced, 1) }).
 			Return(nil).Maybe()
 
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(io.NopCloser(strings.NewReader("")), nil)
@@ -654,7 +654,7 @@ func TestRunDetachedStep(t *testing.T) {
 			Return(nil, context.Canceled)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		r := New(&backend.Config{},
+		r := New(&backend_types.Config{},
 			engine,
 			WithTracer(tracer),
 			WithLogger(newTestLogger(t)),
@@ -675,12 +675,12 @@ func TestRunDetachedStep(t *testing.T) {
 		t.Parallel()
 		traceErr := errors.New("trace failed in background")
 
-		engine := backend_mocks.NewMockBackend(t)
+		engine := mocks.NewMockBackend(t)
 		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(io.NopCloser(strings.NewReader("")), nil)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend.State{Exited: true, ExitCode: 0}, nil)
+			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		var traced int32
@@ -689,7 +689,7 @@ func TestRunDetachedStep(t *testing.T) {
 			Run(func(_ mock.Arguments) { atomic.AddInt32(&traced, 1) }).
 			Return(traceErr) // every Trace call fails
 
-		r := New(&backend.Config{},
+		r := New(&backend_types.Config{},
 			engine,
 			WithTracer(tracer),
 			WithLogger(newTestLogger(t)),

@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
@@ -29,14 +29,14 @@ import (
 // executeStep is the single entry point called per step from runStage.
 // It checks whether the step should be skipped, emits a "started" trace,
 // sets up drone-compat env vars, then hands off to blocking or detached execution.
-func (r *Runtime) executeStep(runnerCtx context.Context, step *backend.Step) error {
+func (r *Runtime) executeStep(runnerCtx context.Context, step *backend_types.Step) error {
 	logger := r.makeLogger()
 	logger.Debug().Str("step", step.Name).Msg("prepare")
 
 	if r.shouldSkipStep(step) {
 		// Trace the skip so the server marks the step as skipped immediately,
 		// rather than leaving it in "pending" until workflow Done.
-		return r.traceStep(&backend.State{Skipped: true}, nil, step)
+		return r.traceStep(&backend_types.State{Skipped: true}, nil, step)
 	}
 
 	// Emit a "step started" trace before doing any real work.
@@ -45,7 +45,7 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend.Step) err
 	}
 
 	// Add compatibility environment variables for drone-ci plugins.
-	if step.Type == backend.StepTypePlugin {
+	if step.Type == backend_types.StepTypePlugin {
 		metadata.SetDroneEnviron(step.Environment)
 	}
 
@@ -60,7 +60,7 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend.Step) err
 // shouldSkipStep returns true when the step should not run based on the current
 // pipeline error state and the step's OnSuccess / OnFailure flags.
 // It logs the reason for skipping before returning.
-func (r *Runtime) shouldSkipStep(step *backend.Step) bool {
+func (r *Runtime) shouldSkipStep(step *backend_types.Step) bool {
 	logger := r.makeLogger()
 	currentErr := r.err.Get()
 
@@ -92,7 +92,7 @@ func (r *Runtime) shouldSkipStep(step *backend.Step) bool {
 //
 // If StartStep or TailStep fail, startStep returns a non-nil error and the caller
 // must not call waitForLogs.
-func (r *Runtime) startStep(step *backend.Step) (func(), int64, error) {
+func (r *Runtime) startStep(step *backend_types.Step) (func(), int64, error) {
 	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, 0, err
 	}
@@ -104,15 +104,13 @@ func (r *Runtime) startStep(step *backend.Step) (func(), int64, error) {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		logger := r.makeLogger()
 		if err := r.logger(step, rc); err != nil {
 			logger.Error().Err(err).Str("step", step.Name).Msg("step log streaming failed")
 		}
 		_ = rc.Close()
-	}()
+	})
 
 	return wg.Wait, startTime, nil
 }
@@ -123,7 +121,7 @@ func (r *Runtime) startStep(step *backend.Step) (func(), int64, error) {
 //
 // The runnerCtx is intentionally used for DestroyStep so that container cleanup can
 // still reach the backend even after the workflow context (r.ctx) is canceled.
-func (r *Runtime) completeStep(runnerCtx context.Context, step *backend.Step, waitForLogs func(), startTime int64) (*backend.State, error) {
+func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.Step, waitForLogs func(), startTime int64) (*backend_types.State, error) {
 	// Drain the log stream before waiting on the process exit.
 	waitForLogs()
 
@@ -131,7 +129,7 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend.Step, wa
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			if waitState == nil {
-				waitState = &backend.State{}
+				waitState = &backend_types.State{}
 			}
 			waitState.Error = pipeline_errors.ErrCancel
 		} else {
@@ -171,7 +169,7 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend.Step, wa
 // runBlockingStep starts the step and blocks until it fully completes.
 // The error is traced and returned to runStage, which feeds it into the
 // stage error group.
-func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend.Step) error {
+func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types.Step) error {
 	logger := r.makeLogger()
 
 	waitForLogs, startTime, err := r.startStep(step)
@@ -199,7 +197,7 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend.Step)
 //
 // Any error that occurs after setup is logged but not propagated — it cannot
 // influence the pipeline outcome at that point.
-func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step) error {
+func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types.Step) error {
 	waitForLogs, startTime, err := r.startStep(step)
 	if err != nil {
 		// Setup failed before the container was running — treat it like a
@@ -236,7 +234,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend.Step)
 //   - processState != nil              →  step has finished (err may or may not be set)
 //
 // Always returns err unchanged so callers can write: return r.traceStep(state, err, step).
-func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
+func (r *Runtime) traceStep(processState *backend_types.State, err error, step *backend_types.Step) error {
 	s := new(state.State)
 	s.Workflow.Started = r.started
 	s.CurrStep = step
@@ -245,7 +243,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	switch {
 	case processState == nil && err != nil:
 		// Step failed to start — create an dummy exited process state.
-		s.CurrStepState = backend.State{
+		s.CurrStepState = backend_types.State{
 			Error:     err,
 			Exited:    true,
 			OOMKilled: false,

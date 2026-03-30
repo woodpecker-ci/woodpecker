@@ -25,7 +25,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/metadata"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -38,10 +38,10 @@ type Runner struct {
 	filter   rpc.Filter
 	hostname string
 	counter  *State
-	backend  backend.Backend
+	backend  backend_types.Backend
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend backend.Backend) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend backend_types.Backend) Runner {
 	return Runner{
 		client:   workEngine,
 		filter:   f,
@@ -206,10 +206,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	return nil
 }
 
-func extractRepositoryName(config *backend.Config) string {
+func extractRepositoryName(config *backend_types.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
-func extractPipelineNumber(config *backend.Config) string {
+func extractPipelineNumber(config *backend_types.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

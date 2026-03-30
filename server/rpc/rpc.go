@@ -27,7 +27,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
-	grpcMetadata "google.golang.org/grpc/metadata"
+	grpc_metadata "google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -618,7 +618,7 @@ func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := grpcMetadata.FromIncomingContext(ctx)
+	md, ok := grpc_metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, errors.New("metadata is not provided")
 	}
@@ -638,7 +638,7 @@ func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 }
 
 func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	metadata, ok := grpc_metadata.FromIncomingContext(ctx)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {

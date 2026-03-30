@@ -23,10 +23,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*step_builder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if item.Workflow.State == model.StatusSkipped {
@@ -63,7 +63,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
 }
 
-func getTaskDependencies(dependsOn []string, items []*stepbuilder.Item) (taskIDs []string) {
+func getTaskDependencies(dependsOn []string, items []*step_builder.Item) (taskIDs []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range items {
 			if pipelineItem.Workflow.Name == dep {

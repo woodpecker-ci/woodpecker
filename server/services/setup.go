@@ -54,7 +54,7 @@ func setupRegistryService(store store.Store, dockerConfig, endpoint string, clie
 	return service
 }
 
-func setupSecretService(store store.Store) secret.Service {
+func setupSecretService(store store.Store, endpoint string, client *utils.Client, includeNetrc bool) secret.Service {
 	// TODO(1544): fix encrypted store
 	// // encryption
 	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
@@ -62,6 +62,10 @@ func setupSecretService(store store.Store) secret.Service {
 	// if err != nil {
 	// 	log.Fatal().Err(err).Msg("could not create encryption service")
 	// }
+
+	if endpoint != "" {
+		return secret.NewCombined(secret.NewDB(store), secret.NewHTTP(endpoint, client, includeNetrc))
+	}
 
 	return secret.NewDB(store)
 }
@@ -74,9 +78,9 @@ func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, e
 	}
 	configFetcher := config.NewForge(timeout, retries)
 
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+	if endpoint := c.String("config-extension-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, client)
-		if c.Bool("config-service-exclusive") {
+		if c.Bool("config-extension-exclusive") {
 			return httpFetcher, nil
 		}
 		return config.NewCombined(configFetcher, httpFetcher), nil

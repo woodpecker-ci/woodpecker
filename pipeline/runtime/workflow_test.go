@@ -27,15 +27,15 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	backend_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types/mocks"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types/mocks"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	tracer_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks"
 )
 
 func TestRunNilTracer(t *testing.T) {
 	t.Parallel()
-	r := New(&backend.Config{}, dummy.New(), WithLogger(newTestLogger(t)))
+	r := New(&backend_types.Config{}, dummy.New(), WithLogger(newTestLogger(t)))
 
 	err := r.Run(t.Context())
 
@@ -47,11 +47,11 @@ func TestRunSuccess(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{{
-				Steps: []*backend.Step{{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{{
+				Steps: []*backend_types.Step{{
 					Name: "build", UUID: "u1",
-					Type: backend.StepTypeCommands, OnSuccess: true,
+					Type: backend_types.StepTypeCommands, OnSuccess: true,
 					Environment: map[string]string{}, Commands: []string{"echo hello"},
 				}},
 			}},
@@ -72,16 +72,16 @@ func TestRunMultipleStages(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{{
 					Name: "stage1", UUID: "u1",
-					Type: backend.StepTypeCommands, OnSuccess: true,
+					Type: backend_types.StepTypeCommands, OnSuccess: true,
 					Environment: map[string]string{}, Commands: []string{"echo 1"},
 				}}},
-				{Steps: []*backend.Step{{
+				{Steps: []*backend_types.Step{{
 					Name: "stage2", UUID: "u2",
-					Type: backend.StepTypeCommands, OnSuccess: true,
+					Type: backend_types.StepTypeCommands, OnSuccess: true,
 					Environment: map[string]string{}, Commands: []string{"echo 2"},
 				}}},
 			},
@@ -102,11 +102,11 @@ func TestRunStepError(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{{
-				Steps: []*backend.Step{{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{{
+				Steps: []*backend_types.Step{{
 					Name: "fail", UUID: "u1",
-					Type: backend.StepTypeCommands, OnSuccess: true,
+					Type: backend_types.StepTypeCommands, OnSuccess: true,
 					Environment: map[string]string{dummy.EnvKeyStepExitCode: "1"},
 					Commands:    []string{"exit 1"},
 				}},
@@ -131,11 +131,11 @@ func TestRunContextCanceled(t *testing.T) {
 	cancel(nil)
 
 	r := New(
-		&backend.Config{
-			Stages: []*backend.Stage{{
-				Steps: []*backend.Step{{
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{{
+				Steps: []*backend_types.Step{{
 					Name: "s1", UUID: "u1",
-					Type: backend.StepTypeCommands, OnSuccess: true,
+					Type: backend_types.StepTypeCommands, OnSuccess: true,
 					Environment: map[string]string{}, Commands: []string{"echo hello"},
 				}},
 			}},
@@ -154,7 +154,7 @@ func TestRunContextCanceled(t *testing.T) {
 func TestRunSetupWorkflowError(t *testing.T) {
 	t.Parallel()
 	r := New(
-		&backend.Config{},
+		&backend_types.Config{},
 		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		WithTaskUUID(dummy.WorkflowSetupFailUUID),
@@ -169,16 +169,16 @@ func TestRunSetupWorkflowError(t *testing.T) {
 func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 	t.Parallel()
 	tracer := newTestTracer(t)
-	step := &backend.Step{Name: "clone", UUID: "clone-uuid"}
+	step := &backend_types.Step{Name: "clone", UUID: "clone-uuid"}
 	setupErr := &pipeline_errors.ErrInvalidWorkflowSetup{
 		Err:  errors.New("bad image"),
 		Step: step,
 	}
-	engine := backend_mocks.NewMockBackend(t)
+	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(setupErr)
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	r := New(&backend.Config{}, engine, WithTracer(tracer), WithLogger(newTestLogger(t)))
+	r := New(&backend_types.Config{}, engine, WithTracer(tracer), WithLogger(newTestLogger(t)))
 
 	err := r.Run(t.Context())
 
@@ -193,12 +193,12 @@ func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 func TestRunDestroyWorkflowAlwaysCalled(t *testing.T) {
 	t.Parallel()
 	var destroyed int32
-	engine := backend_mocks.NewMockBackend(t)
+	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
 
-	r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+	r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 	_ = r.Run(t.Context())
 
@@ -208,13 +208,13 @@ func TestRunDestroyWorkflowAlwaysCalled(t *testing.T) {
 func TestRunDestroyWorkflowCalledOnSetupError(t *testing.T) {
 	t.Parallel()
 	var destroyed int32
-	engine := backend_mocks.NewMockBackend(t)
+	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Return(errors.New("setup boom"))
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
 
-	r := New(&backend.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+	r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 	_ = r.Run(t.Context())
 
@@ -227,8 +227,8 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 	t.Run("MatchingError", func(t *testing.T) {
 		t.Parallel()
 		tracer := newTestTracer(t)
-		r := New(&backend.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
-		step := &backend.Step{Name: "setup", UUID: "su"}
+		r := New(&backend_types.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
+		step := &backend_types.Step{Name: "setup", UUID: "su"}
 		err := &pipeline_errors.ErrInvalidWorkflowSetup{Err: errors.New("bad"), Step: step}
 
 		r.traceWorkflowSetupError(err)
@@ -244,7 +244,7 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 		t.Parallel()
 		tracer := tracer_mocks.NewMockTracer(t)
 		// Trace should NOT be called — no .On() setup means test panics if called.
-		r := New(&backend.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
+		r := New(&backend_types.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
 
 		r.traceWorkflowSetupError(errors.New("generic error"))
 	})
@@ -253,8 +253,8 @@ func TestTraceWorkflowSetupError(t *testing.T) {
 		t.Parallel()
 		tracer := tracer_mocks.NewMockTracer(t)
 		tracer.On("Trace", mock.Anything).Return(errors.New("trace failed"))
-		r := New(&backend.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
-		step := &backend.Step{Name: "setup", UUID: "su"}
+		r := New(&backend_types.Config{}, dummy.New(), WithTracer(tracer), WithLogger(newTestLogger(t)))
+		step := &backend_types.Step{Name: "setup", UUID: "su"}
 
 		// Should not panic — the error is logged, not returned.
 		r.traceWorkflowSetupError(&pipeline_errors.ErrInvalidWorkflowSetup{
@@ -271,10 +271,10 @@ func TestRunStage(t *testing.T) {
 		tracer := newTestTracer(t)
 		r := newDummyRuntime(t, tracer)
 
-		steps := []*backend.Step{
-			{Name: "a", UUID: "ua", Type: backend.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo a"}},
-			{Name: "b", UUID: "ub", Type: backend.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo b"}},
-			{Name: "c", UUID: "uc", Type: backend.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo c"}},
+		steps := []*backend_types.Step{
+			{Name: "a", UUID: "ua", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo a"}},
+			{Name: "b", UUID: "ub", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo b"}},
+			{Name: "c", UUID: "uc", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo c"}},
 		}
 
 		err := <-r.runStage(t.Context(), steps)
@@ -288,9 +288,9 @@ func TestRunStage(t *testing.T) {
 		tracer := newTestTracer(t)
 		r := newDummyRuntime(t, tracer)
 
-		steps := []*backend.Step{
-			{Name: "good", UUID: "ug", Type: backend.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo ok"}},
-			{Name: "bad", UUID: "ub", Type: backend.StepTypeCommands, OnSuccess: true, Environment: map[string]string{dummy.EnvKeyStepExitCode: "1"}, Commands: []string{"exit 1"}},
+		steps := []*backend_types.Step{
+			{Name: "good", UUID: "ug", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo ok"}},
+			{Name: "bad", UUID: "ub", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{dummy.EnvKeyStepExitCode: "1"}, Commands: []string{"exit 1"}},
 		}
 
 		err := <-r.runStage(t.Context(), steps)
@@ -301,7 +301,7 @@ func TestRunStage(t *testing.T) {
 
 func TestNewDefaults(t *testing.T) {
 	t.Parallel()
-	spec := &backend.Config{}
+	spec := &backend_types.Config{}
 
 	r := New(spec, dummy.New())
 
@@ -320,7 +320,7 @@ func TestWithOptions(t *testing.T) {
 	ctx := context.Background()
 	desc := map[string]string{"repo": "test"}
 
-	r := New(&backend.Config{},
+	r := New(&backend_types.Config{},
 		engine,
 		WithTracer(tracer),
 		WithContext(ctx),
@@ -347,7 +347,7 @@ func TestGetShutdownCtx(t *testing.T) {
 // Gap A: logger == nil guard.
 func TestRunNilLogger(t *testing.T) {
 	t.Parallel()
-	r := New(&backend.Config{},
+	r := New(&backend_types.Config{},
 		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		// WithLogger intentionally omitted
@@ -362,7 +362,7 @@ func TestRunNilLogger(t *testing.T) {
 // Gap B: runnerCtx is already done inside the defer → GetShutdownCtx() fallback.
 func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 	t.Parallel()
-	engine := backend_mocks.NewMockBackend(t)
+	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	var destroyCtx context.Context
@@ -375,7 +375,7 @@ func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 	runnerCtx, cancel := context.WithCancelCause(context.Background())
 	cancel(nil)
 
-	r := New(&backend.Config{},
+	r := New(&backend_types.Config{},
 		engine,
 		WithTracer(newTestTracer(t)),
 		WithLogger(newTestLogger(t)),

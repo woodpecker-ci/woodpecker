@@ -25,7 +25,7 @@ import (
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	shared_pipeline "go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
@@ -40,7 +40,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 		Event: model.EventPush,
 	}
 
-	pipelineItems := []*shared_pipeline.Item{{
+	pipelineItems := []*step_builder.Item{{
 		Workflow: &model.Workflow{
 			PID: 1,
 		},
@@ -132,7 +132,7 @@ steps:
 	server.Config.Services.Manager = mockManager
 
 	secretService := secret_service_mocks.NewMockService(t)
-	secretService.On("SecretListPipeline", mock.Anything, mock.Anything).Return([]*model.Secret{
+	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{
 		{
 			Name:  "hello",
 			Value: "secret world",
