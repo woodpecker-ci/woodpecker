@@ -271,6 +271,11 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 	buildTrace := findLastTraceByName(traces, "build")
 	require.NotNil(t, buildTrace, "build step should fail")
 	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
+	assert.True(t, buildTrace.CurrStepState.Exited, "build should have started")
+
+	buildTrace = findLastTraceByName(traces, "build")
+	require.NotNil(t, buildTrace, "build step should fail")
+	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
 
 	deployTrace := findLastTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace, "deploy step should still be traced")
@@ -386,6 +391,7 @@ func TestWorkflowFailureIgnoreDoesNotSetWorkflowError(t *testing.T) {
 
 func TestWorkflowPluginStep(t *testing.T) {
 	t.Parallel()
+	tracer := newTestTracer(t)
 	r := New(
 		&backend_types.Config{
 			Stages: []*backend_types.Stage{
@@ -394,11 +400,21 @@ func TestWorkflowPluginStep(t *testing.T) {
 			},
 		},
 		dummy.New(),
-		WithTracer(newTestTracer(t)),
+		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
+
+	lastPluginTrace := findLastTraceByName(getTracerStates(tracer), "publish")
+	if assert.NotNil(t, lastPluginTrace) {
+		assert.EqualValues(t, map[string]string{
+			"DRONE_BUILD_STATUS":             "success",
+			"DRONE_REPO_SCM":                 "git",
+			"EXPECT_TYPE":                    "plugin",
+			"PULLREQUEST_DRONE_PULL_REQUEST": "0",
+		}, lastPluginTrace.CurrStep.Environment)
+	}
 }
 
 func TestWorkflowOOMKilledStep(t *testing.T) {
@@ -591,6 +607,7 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	assert.Error(t, err)
 	traces := getTracerStates(tracer)
 
+	assert.NotNil(t, findStartedTrace(traces, "notify"), "notify (OnFailure) should have started")
 	notifyTrace := findLastTraceByName(traces, "notify")
 	require.NotNil(t, notifyTrace)
 	assert.True(t, notifyTrace.CurrStepState.Exited, "notify should exited")
@@ -604,9 +621,6 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	deployTrace := findFirstTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace)
 	assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after lint failure")
-
-	assert.NotNil(t, findStartedTrace(traces, "notify"),
-		"notify (OnFailure) should have started")
 }
 
 func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
