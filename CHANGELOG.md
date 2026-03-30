@@ -96,7 +96,6 @@
 ### 📚 Documentation
 
 - chore(deps): update dependency typescript to v6 [[#6336](https://github.com/woodpecker-ci/woodpecker/pull/6336)]
-- chore(deps): lock file maintenance [[#6344](https://github.com/woodpecker-ci/woodpecker/pull/6344)]
 - chore(deps): update docs npm deps non-major [[#6335](https://github.com/woodpecker-ci/woodpecker/pull/6335)]
 - Add CI check for docs on feature PRs [[#6315](https://github.com/woodpecker-ci/woodpecker/pull/6315)]
 - chore(deps): update dependency isomorphic-dompurify to v3.6.0 [[#6288](https://github.com/woodpecker-ci/woodpecker/pull/6288)]
@@ -135,6 +134,7 @@
 ### 📦️ Dependency
 
 - fix(deps): update golang-packages [[#6343](https://github.com/woodpecker-ci/woodpecker/pull/6343)]
+- chore(deps): lock file maintenance [[#6344](https://github.com/woodpecker-ci/woodpecker/pull/6344)]
 - chore(deps): update dependency simple-icons to v16.14.0 [[#6341](https://github.com/woodpecker-ci/woodpecker/pull/6341)]
 - fix(deps): update golang-packages [[#6340](https://github.com/woodpecker-ci/woodpecker/pull/6340)]
 - chore(deps): update web npm deps non-major [[#6334](https://github.com/woodpecker-ci/woodpecker/pull/6334)]
