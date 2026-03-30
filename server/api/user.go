@@ -171,9 +171,15 @@ func GetRepos(c *gin.Context) {
 
 	repos := make([]*model.RepoLastPipeline, len(activeRepos))
 	for i, repo := range activeRepos {
+		var lastAPIPipeline *model.APIPipeline
+		lastPipeline, ok := latestPipelines[repo.ID]
+		if ok {
+			lastAPIPipeline = lastPipeline.ToAPIModel()
+		}
+
 		repos[i] = &model.RepoLastPipeline{
 			Repo:         repo,
-			LastPipeline: latestPipelines[repo.ID],
+			LastPipeline: lastAPIPipeline,
 		}
 	}
 

@@ -1,3 +1,5 @@
+<!-- markdownlint-disable no-duplicate-heading -->
+
 # Migrations
 
 To enhance the usability of Woodpecker and meet evolving security standards, occasional migrations are necessary. While we aim to minimize these changes, some are unavoidable. If you experience significant issues during a migration to a new version, please let us know so maintainers can reassess the updates.
@@ -17,6 +19,12 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 #### Extensions
 
 Extension HTTP calls (as of now the configuration extension) will by default only be allowed to contact external hosts. Set `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS` accordingly to allow additional hosts as needed.
+
+### API changes
+
+- The pipeline model has been changed to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pr.title`). Following properties are deprecated and should be replaced by the their new counterparts:
+  - `sender` =>
+    - `cron` for cron events
 
 ### Internal changes
 
