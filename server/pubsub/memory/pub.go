@@ -65,7 +65,7 @@ func (p *publisher) Publish(_ context.Context, topics pubsub.Topics, message pub
 }
 
 func (p *publisher) Subscribe(c context.Context, topics pubsub.Topics, receiver pubsub.Receiver) error {
-	if topics == nil || len(topics) == 0 {
+	if len(topics) == 0 {
 		return fmt.Errorf("%w: subscribe to at least one", pubsub.ErrNoTopic)
 	}
 
