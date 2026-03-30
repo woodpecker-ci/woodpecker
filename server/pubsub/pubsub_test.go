@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 )
@@ -46,8 +47,8 @@ func testPubSub(t *testing.T, adapter pubsub.PubSub) {
 		assert.Len(t, getMSGs(), 0)
 
 		time.Sleep(10 * time.Millisecond)
-		adapter.Publish(t.Context(), pubsub.Topics{"tree": {}, "raspberry": {}, "tails": {}}, pubsub.Message{ID: "2"})
-		adapter.Publish(t.Context(), pubsub.Topics{"apples": {}, "raspberry": {}, "tails": {}}, pubsub.Message{ID: "3"})
+		assert.NoError(t, adapter.Publish(t.Context(), pubsub.Topics{"tree": {}, "raspberry": {}, "tails": {}}, pubsub.Message{ID: "2"}))
+		assert.NoError(t, adapter.Publish(t.Context(), pubsub.Topics{"apples": {}, "raspberry": {}, "tails": {}}, pubsub.Message{ID: "3"}))
 		time.Sleep(100 * time.Millisecond)
 
 		if assert.Len(t, getMSGs(), 2) {
