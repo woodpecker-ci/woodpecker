@@ -121,9 +121,7 @@ func (e *docker) Load(ctx context.Context) (*backend_types.BackendInfo, error) {
 		dockerClientOpts = append(dockerClientOpts, client.WithHost(dockerHost))
 	}
 	if dockerAPIVersion := c.String("backend-docker-api-version"); dockerAPIVersion != "" {
-		dockerClientOpts = append(dockerClientOpts, client.WithVersion(dockerAPIVersion))
-	} else {
-		dockerClientOpts = append(dockerClientOpts, client.WithAPIVersionNegotiation())
+		dockerClientOpts = append(dockerClientOpts, client.WithAPIVersion(dockerAPIVersion))
 	}
 
 	cl, err := client.New(dockerClientOpts...)
