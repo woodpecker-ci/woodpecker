@@ -55,11 +55,26 @@ linters:
             - '**/cmd/agent/**/*.go'
           deny:
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
-            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/server
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd
             - pkg: go.woodpecker-ci.org/woodpecker/v3/server
             - pkg: go.woodpecker-ci.org/woodpecker/v3/web
             - pkg: go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker
+          allow:
+            - go.woodpecker-ci.org/woodpecker/v3/cmd/agent/core
+        cmd:
+          list-mode: lax
+          files:
+            - '**/cmd/**/*.go'
+          deny:
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/rpc
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/tools
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/web
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/woodpecker-go
+          allow:
+            - go.woodpecker-ci.org/woodpecker/v3/pipeline/backend
+            # todo: currently cmd/server/grpc_server.go imports rpc but we should move that into server/*
+            - go.woodpecker-ci.org/woodpecker/v3/rpc/proto
         cli:
           list-mode: lax
           files:

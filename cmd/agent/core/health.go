@@ -24,14 +24,14 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v3/agent"
+	"go.woodpecker-ci.org/woodpecker/v3/agent/runner"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // The file implements some basic healthcheck logic based on the
 // following specification:
-//   https://github.com/mozilla-services/Dockerflow
-
+//
+//	https://github.com/mozilla-services/Dockerflow
 func initHealth() {
 	http.HandleFunc("/varz", handleStats)
 	http.HandleFunc("/healthz", handleHeartbeat)
@@ -75,13 +75,13 @@ type versionResp struct {
 	Source  string `json:"source"`
 }
 
-// Default statistics counter.
-var counter = &agent.State{
-	Metadata: map[string]agent.Info{},
+// counter is the shared workflow state used by all health endpoints.
+var counter = &runner.State{
+	Metadata: map[string]runner.Info{},
 }
 
-// handles pinging the endpoint and returns an error if the
-// agent is in an unhealthy state.
+// pinger handles the "ping" subcommand — hits the local healthcheck endpoint
+// and returns an error if the agent is in an unhealthy state.
 func pinger(ctx context.Context, c *cli.Command) error {
 	healthcheckAddress := c.String("healthcheck-addr")
 	if strings.HasPrefix(healthcheckAddress, ":") {

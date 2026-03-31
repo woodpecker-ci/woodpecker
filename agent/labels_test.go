@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package core
+package agent
 
 import (
 	"testing"
@@ -63,7 +63,7 @@ func TestStringSliceAddToMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := stringSliceAddToMap(tt.sl, tt.m)
+			err := StringSliceAddToMap(tt.sl, tt.m)
 
 			if tt.err {
 				assert.Error(t, err)
