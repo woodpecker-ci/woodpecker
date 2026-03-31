@@ -58,13 +58,14 @@ func startCancelListener(workflowCtx context.Context, cancelFn context.CancelCau
 		logger.Debug().Msg("start listening for server side cancel signal")
 
 		canceled, err := client.Wait(workflowCtx, workflowID)
-		if err != nil {
+		switch {
+		case err != nil:
 			logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
 			cancelFn(err)
-		} else if canceled {
+		case canceled:
 			logger.Debug().Msg("server side cancel signal received")
 			cancelFn(pipeline_errors.ErrCancel)
-		} else {
+		default:
 			logger.Debug().Msg("cancel listener exited normally")
 		}
 	}()

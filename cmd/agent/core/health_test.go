@@ -20,12 +20,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v3/agent"
+	"go.woodpecker-ci.org/woodpecker/v3/agent/runner"
 )
 
 func TestHealthy(t *testing.T) {
-	s := agent.State{}
-	s.Metadata = map[string]agent.Info{}
+	s := runner.State{}
+	s.Metadata = map[string]runner.Info{}
 
 	s.Add("1", time.Hour, "octocat/hello-world", "42")
 
@@ -33,18 +33,18 @@ func TestHealthy(t *testing.T) {
 	assert.Equal(t, time.Hour, s.Metadata["1"].Timeout)
 	assert.Equal(t, "octocat/hello-world", s.Metadata["1"].Repo)
 
-	s.Metadata["1"] = agent.Info{
+	s.Metadata["1"] = runner.Info{
 		Timeout: time.Hour,
 		Started: time.Now().UTC(),
 	}
 	assert.True(t, s.Healthy(), "want healthy status when timeout not exceeded, got false")
 
-	s.Metadata["1"] = agent.Info{
+	s.Metadata["1"] = runner.Info{
 		Started: time.Now().UTC().Add(-(time.Minute * 30)),
 	}
 	assert.True(t, s.Healthy(), "want healthy status when timeout+buffer not exceeded, got false")
 
-	s.Metadata["1"] = agent.Info{
+	s.Metadata["1"] = runner.Info{
 		Started: time.Now().UTC().Add(-(time.Hour + time.Minute)),
 	}
 	assert.False(t, s.Healthy(), "want unhealthy status when timeout+buffer not exceeded, got true")
