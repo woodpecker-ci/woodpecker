@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### ✨ Features
 
+- Support one-shot agent execution mode [[#6150](https://github.com/woodpecker-ci/woodpecker/pull/6150)]
 - Add external secret extension implementation [[#6252](https://github.com/woodpecker-ci/woodpecker/pull/6252)]
 - make it possible to disable the isolated home for local agents [[#6251](https://github.com/woodpecker-ci/woodpecker/pull/6251)]
 - Add Container Registry credential extension [[#5993](https://github.com/woodpecker-ci/woodpecker/pull/5993)]
@@ -24,6 +25,7 @@
 
 ### 📈 Enhancement
 
+- Add netrc option for config/registry extension [[#6333](https://github.com/woodpecker-ci/woodpecker/pull/6333)]
 - Migrate to moby [[#6357](https://github.com/woodpecker-ci/woodpecker/pull/6357)]
 - Deprecate commit avatar envs [[#6356](https://github.com/woodpecker-ci/woodpecker/pull/6356)]
 - Refactor server/pubsub into interface [[#6318](https://github.com/woodpecker-ci/woodpecker/pull/6318)]
@@ -63,6 +65,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix workflow beeing skipped and marked as failed when agent starts before server [[#6361](https://github.com/woodpecker-ci/woodpecker/pull/6361)]
 - Only redirect after login [[#6348](https://github.com/woodpecker-ci/woodpecker/pull/6348)]
 - Set workflow services stuck in running state to finished [[#6337](https://github.com/woodpecker-ci/woodpecker/pull/6337)]
 - Fix bitbucket api deprecations [[#6324](https://github.com/woodpecker-ci/woodpecker/pull/6324)]
