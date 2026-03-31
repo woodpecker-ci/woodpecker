@@ -22,7 +22,7 @@ you share your Woodpecker server with others as they will also use your registry
 If both the global and the repo-level extension return credentials for a registry, it will use the credentials from the repo extension.
 
 ```ini title="Server"
-WOODPECKER_REGISTRY_SERVICE_ENDPOINT=https://example.com/ciconfig
+WOODPECKER_REGISTRY_EXTENSION_ENDPOINT=https://example.com/ciconfig
 ```
 
 ## How it works
@@ -33,10 +33,15 @@ When a pipeline is triggered, Woodpecker will fetch the credentials from your se
 
 The extension receives an HTTP POST request with the following JSON payload:
 
+:::info
+The `netrc` field is only included in the request when the global `WOODPECKER_REGISTRY_EXTENSION_NETRC` is set to `true` (default: `false`) or the per-repo "Send netrc credentials" is checked.
+:::
+
 ```ts
 class Request {
   repo: Repo;
   pipeline: Pipeline;
+  netrc?: Netrc; // only included when netrc sending is enabled (see above)
 }
 ```
 
@@ -44,6 +49,11 @@ Checkout the following models for more information:
 
 - [repo model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/repo.go)
 - [pipeline model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/pipeline.go)
+- [netrc model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/netrc.go)
+
+:::tip
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) API to get more information about the repository.
+:::
 
 Example request:
 
@@ -111,6 +121,11 @@ Example request:
     "title": "",
     "updated_at": 0,
     "verified": false
+  },
+  "netrc": {
+    "machine": "myforge.com",
+    "login": "myUser",
+    "password": "forge-access-token"
   }
 }
 ```

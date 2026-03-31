@@ -19,29 +19,29 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func Test_parseBackendOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		step    *backend.Step
+		step    *backend_types.Step
 		want    BackendOptions
 		wantErr bool
 	}{
 		{
 			name: "nil options",
-			step: &backend.Step{BackendOptions: nil},
+			step: &backend_types.Step{BackendOptions: nil},
 			want: BackendOptions{},
 		},
 		{
 			name: "empty options",
-			step: &backend.Step{BackendOptions: map[string]any{}},
+			step: &backend_types.Step{BackendOptions: map[string]any{}},
 			want: BackendOptions{},
 		},
 		{
 			name: "with user option",
-			step: &backend.Step{BackendOptions: map[string]any{
+			step: &backend_types.Step{BackendOptions: map[string]any{
 				"docker": map[string]any{
 					"user": "1000:1000",
 				},
@@ -50,7 +50,7 @@ func Test_parseBackendOptions(t *testing.T) {
 		},
 		{
 			name:    "invalid backend options",
-			step:    &backend.Step{BackendOptions: map[string]any{"docker": "invalid"}},
+			step:    &backend_types.Step{BackendOptions: map[string]any{"docker": "invalid"}},
 			want:    BackendOptions{},
 			wantErr: true,
 		},

@@ -873,8 +873,8 @@ func (_c *MockService_RegistryList_Call) RunAndReturn(run func(repo *model.Repo,
 }
 
 // RegistryListPipeline provides a mock function for the type MockService
-func (_mock *MockService) RegistryListPipeline(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
-	ret := _mock.Called(context1, repo, pipeline)
+func (_mock *MockService) RegistryListPipeline(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Registry, error) {
+	ret := _mock.Called(context1, repo, pipeline, netrc)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RegistryListPipeline")
@@ -882,18 +882,18 @@ func (_mock *MockService) RegistryListPipeline(context1 context.Context, repo *m
 
 	var r0 []*model.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline) ([]*model.Registry, error)); ok {
-		return returnFunc(context1, repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) ([]*model.Registry, error)); ok {
+		return returnFunc(context1, repo, pipeline, netrc)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline) []*model.Registry); ok {
-		r0 = returnFunc(context1, repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) []*model.Registry); ok {
+		r0 = returnFunc(context1, repo, pipeline, netrc)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.Repo, *model.Pipeline) error); ok {
-		r1 = returnFunc(context1, repo, pipeline)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) error); ok {
+		r1 = returnFunc(context1, repo, pipeline, netrc)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -909,11 +909,12 @@ type MockService_RegistryListPipeline_Call struct {
 //   - context1 context.Context
 //   - repo *model.Repo
 //   - pipeline *model.Pipeline
-func (_e *MockService_Expecter) RegistryListPipeline(context1 interface{}, repo interface{}, pipeline interface{}) *MockService_RegistryListPipeline_Call {
-	return &MockService_RegistryListPipeline_Call{Call: _e.mock.On("RegistryListPipeline", context1, repo, pipeline)}
+//   - netrc *model.Netrc
+func (_e *MockService_Expecter) RegistryListPipeline(context1 interface{}, repo interface{}, pipeline interface{}, netrc interface{}) *MockService_RegistryListPipeline_Call {
+	return &MockService_RegistryListPipeline_Call{Call: _e.mock.On("RegistryListPipeline", context1, repo, pipeline, netrc)}
 }
 
-func (_c *MockService_RegistryListPipeline_Call) Run(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline)) *MockService_RegistryListPipeline_Call {
+func (_c *MockService_RegistryListPipeline_Call) Run(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc)) *MockService_RegistryListPipeline_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -927,10 +928,15 @@ func (_c *MockService_RegistryListPipeline_Call) Run(run func(context1 context.C
 		if args[2] != nil {
 			arg2 = args[2].(*model.Pipeline)
 		}
+		var arg3 *model.Netrc
+		if args[3] != nil {
+			arg3 = args[3].(*model.Netrc)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -941,7 +947,7 @@ func (_c *MockService_RegistryListPipeline_Call) Return(registrys []*model.Regis
 	return _c
 }
 
-func (_c *MockService_RegistryListPipeline_Call) RunAndReturn(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error)) *MockService_RegistryListPipeline_Call {
+func (_c *MockService_RegistryListPipeline_Call) RunAndReturn(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Registry, error)) *MockService_RegistryListPipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }
