@@ -5451,7 +5451,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "last_pipeline": {
-                    "$ref": "#/definitions/model.Pipeline"
+                    "$ref": "#/definitions/Pipeline"
                 },
                 "name": {
                     "type": "string"
@@ -6231,125 +6231,6 @@ const docTemplate = `{
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
             ]
-        },
-        "model.Pipeline": {
-            "type": "object",
-            "properties": {
-                "author": {
-                    "description": "The user sending the webhook data or triggering the pipeline event",
-                    "type": "string"
-                },
-                "author_avatar": {
-                    "description": "Avatar URL of the author of the commit",
-                    "type": "string"
-                },
-                "branch": {
-                    "type": "string"
-                },
-                "cancel_info": {
-                    "$ref": "#/definitions/CancelInfo"
-                },
-                "changed_files": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "commit_pipeline": {
-                    "description": "TODO change json to 'commit' in next major",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/model.Commit"
-                        }
-                    ]
-                },
-                "created": {
-                    "type": "integer"
-                },
-                "cron": {
-                    "description": "name of the cron job",
-                    "type": "string"
-                },
-                "deployment": {
-                    "$ref": "#/definitions/model.Deployment"
-                },
-                "errors": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/errors.PipelineError"
-                    }
-                },
-                "event": {
-                    "$ref": "#/definitions/WebhookEvent"
-                },
-                "event_reason": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "finished": {
-                    "type": "integer"
-                },
-                "forge_url": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "number": {
-                    "type": "integer"
-                },
-                "parent": {
-                    "type": "integer"
-                },
-                "pull_request": {
-                    "$ref": "#/definitions/PullRequest"
-                },
-                "ref": {
-                    "type": "string"
-                },
-                "refspec": {
-                    "type": "string"
-                },
-                "release": {
-                    "$ref": "#/definitions/model.Release"
-                },
-                "reviewed": {
-                    "description": "timestamp of the review",
-                    "type": "integer"
-                },
-                "reviewed_by": {
-                    "type": "string"
-                },
-                "started": {
-                    "type": "integer"
-                },
-                "status": {
-                    "$ref": "#/definitions/StatusValue"
-                },
-                "tag_title": {
-                    "type": "string"
-                },
-                "updated": {
-                    "type": "integer"
-                },
-                "variables": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "version": {
-                    "type": "string"
-                },
-                "workflows": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Workflow"
-                    }
-                }
-            }
         },
         "model.QueueTask": {
             "type": "object",
