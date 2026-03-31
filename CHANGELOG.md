@@ -92,6 +92,7 @@
 
 ### 🧪 Tests
 
+- Extend workflow integration tests [[#6272](https://github.com/woodpecker-ci/woodpecker/pull/6272)]
 - Add registry service tests [[#6330](https://github.com/woodpecker-ci/woodpecker/pull/6330)]
 - Add workflow integration test [[#6270](https://github.com/woodpecker-ci/woodpecker/pull/6270)]
 - Increase timeout for migration tests [[#6206](https://github.com/woodpecker-ci/woodpecker/pull/6206)]
