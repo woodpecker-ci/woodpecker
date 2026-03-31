@@ -88,7 +88,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 }
 
 // serveHealthcheck starts the HTTP health endpoint and shuts it down when ctx
-// is cancelled. It is intentionally non-blocking — the caller runs it in a
+// is canceled. It is intentionally non-blocking — the caller runs it in a
 // goroutine.
 func serveHealthcheck(ctx context.Context, addr string) {
 	server := &http.Server{Addr: addr}

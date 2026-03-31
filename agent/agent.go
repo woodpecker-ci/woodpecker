@@ -36,11 +36,11 @@ import (
 // Run is the main agent lifecycle:
 //
 //  1. Establish gRPC connections and verify protocol version.
-//  2. Initialise the pipeline backend.
+//  2. Initialize the pipeline backend.
 //  3. Register with the server; persist the assigned AgentID if configured.
 //  4. Start background goroutines: health reporting, unregister-on-shutdown,
 //     and one runner goroutine per MaxWorkflows slot.
-//  5. Block until all goroutines finish (i.e. until ctx is cancelled).
+//  5. Block until all goroutines finish (i.e. until ctx is canceled).
 //
 // cfg is expected to have been fully populated by the caller (typically
 // cmd/agent/core) from CLI flags / environment variables.
@@ -57,7 +57,7 @@ func Run(ctx context.Context, cfg Config, backends []types.Backend) error {
 		cfg.ShutdownTimeout = DefaultShutdownTimeout
 	}
 
-	// agentCtx is cancelled when the agent should stop accepting new work.
+	// agentCtx is canceled when the agent should stop accepting new work.
 	// shutdownCtx gives in-flight RPCs a grace period after agentCtx is done.
 	agentCtx, cancelAgent := context.WithCancelCause(ctx)
 	defer cancelAgent(nil)
@@ -70,7 +70,7 @@ func Run(ctx context.Context, cfg Config, backends []types.Backend) error {
 	// -------------------------------------------------------------------------
 
 	// grpcClientCtx is independent of agentCtx so we can still call
-	// UnregisterAgent after agentCtx is cancelled.
+	// UnregisterAgent after agentCtx is canceled.
 	grpcClientCtx, cancelGRPC := context.WithCancelCause(context.Background())
 	defer cancelGRPC(nil)
 

@@ -61,7 +61,7 @@ func persistAgentID(agentID int64, writeFn func(int64) error) bool {
 }
 
 // startUnregisterOnShutdown spawns a goroutine that waits for agentCtx to be
-// cancelled and then, if the agent was not persisted, unregisters it from the
+// canceled and then, if the agent was not persisted, unregisters it from the
 // server using the still-valid grpcCtx.
 //
 // It returns a channel that is closed once the goroutine has completed so the
