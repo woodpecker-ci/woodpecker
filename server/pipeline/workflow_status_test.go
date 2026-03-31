@@ -294,6 +294,7 @@ func TestUpdateWorkflowStatusToDone(t *testing.T) {
 		result, err := UpdateWorkflowStatusToDone(mockStore, workflow, state)
 
 		assert.NoError(t, err)
+		assert.Equal(t, model.StatusSuccess, result.State)
 		assert.Equal(t, int64(1234567900), result.Finished)
 	})
 }

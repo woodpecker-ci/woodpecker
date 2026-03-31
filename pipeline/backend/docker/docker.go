@@ -267,6 +267,8 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
 	case err := <-errC:
 		log.Trace().Msgf("ContainerWait returned with err: %v", err)
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	}
 
 	info, err := e.client.ContainerInspect(ctx, containerName)

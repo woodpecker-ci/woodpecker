@@ -31,7 +31,7 @@ import (
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
@@ -264,7 +264,7 @@ func TestCancelPipeline(t *testing.T) {
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Pubsub = memory.New()
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -315,7 +315,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Pubsub = memory.New()
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
@@ -388,7 +388,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Pubsub = memory.New()
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
@@ -444,7 +444,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Pubsub = memory.New()
 
 		// return nil config with error
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(nil, http.ErrHandlerTimeout)
