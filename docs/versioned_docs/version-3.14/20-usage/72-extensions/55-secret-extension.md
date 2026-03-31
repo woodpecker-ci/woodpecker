@@ -1,40 +1,40 @@
-# Registry extension
+# Secret extension
 
-Woodpecker uses the registry extension to get registry credentials. You can configure an HTTP endpoint in the repository settings in the extensions tab.
+Woodpecker uses the secret extension to get secrets from an external service. You can configure an HTTP endpoint in the repository settings in the extensions tab.
 
 Using such an extension can be useful if you want to:
 
-- Centralize registry credential management
-- Use an external storage for credentials
-- Dynamically manage which credentials Woodpecker should use
+- Centralize secret management (e.g. HashiCorp Vault, AWS Secrets Manager)
+- Dynamically generate secrets per pipeline
 
 ## Security
 
 :::warning
-As Woodpecker will pass private information like tokens and will execute the returned configuration, it is extremely important to secure the external extension. Therefore Woodpecker signs every request. Read more about it in the [security section](./index.md#security).
+As Woodpecker will pass private information like tokens and will execute the returned configuration, it is extremely important to secure the external extension. Therefore Woodpecker signs every request. Read more about it in the security section.
 :::
 
 ## Global configuration
 
 In addition to the ability to configure the extension per repository, you can also configure a global endpoint in the Woodpecker server configuration. This can be useful if you want to use the extension for all repositories. Be careful if
-you share your Woodpecker server with others as they will also use your registry extension.
+you share your Woodpecker server with others as they will also use your secret extension.
 
-If both the global and the repo-level extension return credentials for a registry, it will use the credentials from the repo extension.
+If both the global and the repo-level extension return a secret with the same name, it will use the secret from the repo extension.
 
 ```ini title="Server"
-WOODPECKER_REGISTRY_EXTENSION_ENDPOINT=https://example.com/ciconfig
+WOODPECKER_SECRET_EXTENSION_ENDPOINT=https://example.com/secrets
+WOODPECKER_SECRET_EXTENSION_NETRC=false
 ```
 
 ## How it works
 
-When a pipeline is triggered, Woodpecker will fetch the credentials from your service. As fallback, it uses the credentials configured directly in Woodpecker.
+When a pipeline is triggered, Woodpecker will fetch secrets from your service. The extension secrets are merged with the secrets configured directly in Woodpecker, with extension secrets taking priority by name. If the extension is unavailable, Woodpecker falls back to the locally configured secrets.
 
 ### Request
 
 The extension receives an HTTP POST request with the following JSON payload:
 
 :::info
-The `netrc` field is only included in the request when the global `WOODPECKER_REGISTRY_EXTENSION_NETRC` is set to `true` (default: `false`) or the per-repo "Send netrc credentials" is checked.
+The `netrc` field is only included in the request when the global `WOODPECKER_SECRET_EXTENSION_NETRC` is set to `true` (default: `false`) or the per-repo "Send netrc credentials" is checked.
 :::
 
 ```ts
@@ -128,19 +128,21 @@ Example request:
     "password": "forge-access-token"
   }
 }
+// Note: the "netrc" field is omitted when netrc sending is not enabled.
 ```
 
 ### Response
 
-The extension should respond with a JSON payload containing the new configuration files in Woodpecker's official YAML format.
-If the extension wants to keep the existing configuration files, it can respond with HTTP status `204 No Content`.
+The extension should respond with a JSON object containing a `secrets` array.
+If the extension wants to keep the existing secrets without adding any, it can respond with HTTP status `204 No Content`.
 
 ```ts
 class Response {
-  registries: {
-    address: string; // the docker registry address
-    username: string; // registry username
-    password: string; // registry password
+  secrets: {
+    name: string; // the secret name, matched by from_secret in pipeline config
+    value: string; // the secret value
+    images?: string[]; // optional: restrict to specific plugins
+    events?: string[]; // optional: restrict to specific pipeline events
   }[];
 }
 ```
@@ -149,11 +151,15 @@ Example response:
 
 ```json
 {
-  "registries": [
+  "secrets": [
     {
-      "address": "docker.io",
-      "username": "woodpecker-bot",
-      "password": "your-pass-word-123"
+      "name": "docker_password",
+      "value": "your-secret-password-123"
+    },
+    {
+      "name": "deploy_token",
+      "value": "super-secret-token",
+      "events": ["push", "tag"]
     }
   ]
 }
