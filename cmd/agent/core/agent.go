@@ -331,8 +331,13 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		})
 	}
 
-	log.Info().Str("version", version.String()).Str("backend", backendEngine.Name()).Str("platform", engInfo.Platform).Int("parallel workflows", maxWorkflows).Bool("single workflow", singleWorkflow).Msg(
-		"starting Woodpecker agent")
+	log.Info().
+		Str("version", version.String()).
+		Str("backend", backendEngine.Name()).
+		Str("platform", engInfo.Platform).
+		Int("parallel workflows", maxWorkflows).
+		Bool("single workflow", singleWorkflow).
+		Msg("starting Woodpecker agent")
 
 	return serviceWaitingGroup.Wait()
 }
