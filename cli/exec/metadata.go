@@ -106,6 +106,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "commit-message", func(s string) { m.Curr.Commit.Message = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-author-name", func(s string) { m.Curr.Commit.Author.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-author-email", func(s string) { m.Curr.Commit.Author.Email = s }, c.String)
+	// TODO remove in next major
 	metadataFileAndOverrideOrDefault(c, "commit-author-avatar", func(s string) { m.Curr.Avatar = s }, c.String)
 
 	metadataFileAndOverrideOrDefault(c, "commit-pull-labels", func(sl []string) { m.Curr.Commit.PullRequestLabels = sl }, c.StringSlice)
@@ -129,6 +130,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "prev-commit-message", func(s string) { m.Prev.Commit.Message = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-commit-author-name", func(s string) { m.Prev.Commit.Author.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-commit-author-email", func(s string) { m.Prev.Commit.Author.Email = s }, c.String)
+	// TODO remove in next major
 	metadataFileAndOverrideOrDefault(c, "prev-commit-author-avatar", func(s string) { m.Prev.Avatar = s }, c.String)
 
 	// Workflow
