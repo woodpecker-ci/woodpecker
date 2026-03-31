@@ -51,6 +51,8 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
+// TODO: refactor this big function into subfunctions in it's own subpackage
+
 // Run executes a workflow using a backend, tracks its state and reports the state back to the server.
 func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	log.Debug().Msg("request next execution")
@@ -105,7 +107,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	// Listen for remote cancel events (UI / API).
 	// When canceled, we MUST cancel the workflow context
-	// so that workflow execution stop immediately.
+	// so that workflow execution stops immediately.
 	go func() {
 		logger.Debug().Msg("start listening for server side cancel signal")
 
