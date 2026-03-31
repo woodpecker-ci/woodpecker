@@ -61,6 +61,7 @@
 
 ### 🐛 Bug Fixes
 
+- Only redirect after login [[#6348](https://github.com/woodpecker-ci/woodpecker/pull/6348)]
 - Set workflow services stuck in running state to finished [[#6337](https://github.com/woodpecker-ci/woodpecker/pull/6337)]
 - Fix bitbucket api deprecations [[#6324](https://github.com/woodpecker-ci/woodpecker/pull/6324)]
 - Fix workflow serialize to omit skip_clone if false [[#6319](https://github.com/woodpecker-ci/woodpecker/pull/6319)]
