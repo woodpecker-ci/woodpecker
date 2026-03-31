@@ -67,7 +67,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline)
+	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
