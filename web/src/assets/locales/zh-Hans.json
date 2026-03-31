@@ -238,7 +238,7 @@
                 "delete": "删除变量"
             },
             "show_pipelines": "查看流水线",
-            "no_manual_workflows": "无手动触发的工作流，或已被全部筛选。"
+            "no_manual_workflows": "未找到匹配的工作流。请确保至少有一个手动触发的工作流运行。"
         },
         "not_allowed": "你没有权限访问这个仓库",
         "open_in_forge": "在代码托管平台中打开",
@@ -253,7 +253,8 @@
                 "log_download": "下载",
                 "restart": "重启",
                 "restart_success": "流水线已重启",
-                "log_delete": "删除"
+                "log_delete": "删除",
+                "skipped": "此步骤已被跳过。"
             },
             "config": "配置",
             "errors": "错误",
@@ -300,7 +301,8 @@
                 "skipped": "已跳过",
                 "started": "已启动",
                 "status": "状态：{status}",
-                "success": "成功"
+                "success": "成功",
+                "canceled": "已取消"
             },
             "step_not_started": "该步骤尚未启动。",
             "tasks": "任务",
@@ -323,9 +325,12 @@
             "view": "查看流水线",
             "cancel_info": {
                 "superseded_by": "#{pipelineId} 已取消",
-                "canceled_by_user": "{user} 已取消"
+                "canceled_by_user": "{user} 已取消",
+                "canceled_by_step": "因 {step} 而取消"
             },
-            "load_more": "加载更多"
+            "load_more": "加载更多",
+            "version": "此流水线在该 Woodpecker 版本上执行。",
+            "version_header": "Woodpecker 版本"
         },
         "pull_requests": "合并请求",
         "settings": {
@@ -751,5 +756,11 @@
     "executable_desc": "Addon 的可执行文件的路径。",
     "developer_settings_to_create": "前往 {0} 并设置 OAuth 应用。",
     "config_extension_exclusive": "独占",
-    "config_extension_exclusive_desc": "启用后，将跳过所有其他代码托管平台的配置获取方式。"
+    "config_extension_exclusive_desc": "启用后，将跳过所有其他代码托管平台的配置获取方式。",
+    "registry_extension_endpoint": "注册扩展程序端点",
+    "global_level_registry": "全局注册表",
+    "org_level_registry": "组织注册表",
+    "secret_extension_endpoint": "密钥扩展程序端点",
+    "secret_extension_netrc": "包含 netrc 凭证",
+    "secret_extension_netrc_desc": "将代码托管平台 netrc 凭证发送给密钥扩展程序。"
 }
