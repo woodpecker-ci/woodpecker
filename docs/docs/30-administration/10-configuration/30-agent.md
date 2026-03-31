@@ -148,7 +148,7 @@ Configures the number of parallel workflows.
 
 ---
 
-### WOODPECKER_AGENT_SINGLE_WORKFLOW
+### AGENT_SINGLE_WORKFLOW
 
 - Name: `WOODPECKER_AGENT_SINGLE_WORKFLOW`
 - Default: `false`
