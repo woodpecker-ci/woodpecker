@@ -57,9 +57,7 @@ type (
 		Parent      int64    `json:"parent,omitempty"`
 		Cron        string   `json:"cron,omitempty"`
 		Author      string   `json:"author,omitempty"`
-
-		// Deprecated: remove in next major
-		Avatar string `json:"avatar,omitempty"`
+		Avatar      string   `json:"avatar,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
