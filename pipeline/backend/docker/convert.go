@@ -99,6 +99,7 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 			a, err := netip.ParseAddr(dns)
 			if err != nil {
 				log.Error().Err(err).Str("address", dns).Msg("could not parse dns address")
+				continue
 			}
 			addrs[i] = a
 		}
