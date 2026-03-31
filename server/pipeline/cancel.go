@@ -89,7 +89,10 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err
 	}
-	publishToTopic(killedPipeline, repo)
+
+	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {
+		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
+	}
 
 	return nil
 }

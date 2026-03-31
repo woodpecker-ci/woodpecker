@@ -5011,6 +5011,10 @@ const docTemplate = `{
                 "created": {
                     "type": "integer"
                 },
+                "cron": {
+                    "description": "name of the cron job",
+                    "type": "string"
+                },
                 "deploy_task": {
                     "type": "string"
                 },
@@ -5822,9 +5826,6 @@ const docTemplate = `{
         "metadata.Author": {
             "type": "object",
             "properties": {
-                "avatar": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
