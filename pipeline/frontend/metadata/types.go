@@ -58,9 +58,7 @@ type (
 		Cron        string   `json:"cron,omitempty"`
 		Release     string   `json:"release,omitempty"`
 		Author      string   `json:"author,omitempty"`
-
-		// Deprecated: remove in next major
-		Avatar string `json:"avatar,omitempty"`
+		Avatar      string   `json:"avatar,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
