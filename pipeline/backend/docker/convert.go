@@ -17,13 +17,13 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"maps"
 	"net/netip"
 	"regexp"
 	"strings"
 
 	"github.com/moby/moby/api/types/container"
-	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -74,7 +74,7 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
+func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error) {
 	config := &container.HostConfig{
 		Resources: container.Resources{
 			CPUQuota:   conf.resourceLimit.CPUQuota,
@@ -98,8 +98,7 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 		for i, dns := range step.DNS {
 			a, err := netip.ParseAddr(dns)
 			if err != nil {
-				log.Error().Err(err).Str("address", dns).Msg("could not parse dns address")
-				continue
+				return nil, fmt.Errorf("could not parse DNS address [%s]: %w", dns, err)
 			}
 			addrs[i] = a
 		}
@@ -134,7 +133,7 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 		config.Tmpfs[parts[0]] = parts[1]
 	}
 
-	return config
+	return config, nil
 }
 
 // helper function that converts a slice of volume paths to a set of
