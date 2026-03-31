@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-30
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -137,6 +137,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/lib/pq to v1.12.1 [[#6354](https://github.com/woodpecker-ci/woodpecker/pull/6354)]
 - fix(deps): update golang-packages [[#6343](https://github.com/woodpecker-ci/woodpecker/pull/6343)]
 - chore(deps): lock file maintenance [[#6344](https://github.com/woodpecker-ci/woodpecker/pull/6344)]
 - chore(deps): update dependency simple-icons to v16.14.0 [[#6341](https://github.com/woodpecker-ci/woodpecker/pull/6341)]
