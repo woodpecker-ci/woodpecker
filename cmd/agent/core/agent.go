@@ -97,7 +97,7 @@ func serveHealthcheck(ctx context.Context, addr string) {
 		log.Info().Msg("shutdown healthcheck server ...")
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), agent.DefaultShutdownTimeout)
 		defer cancel()
-		if err := server.Shutdown(shutdownCtx); err != nil {
+		if err := server.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
 			log.Error().Err(err).Msg("shutdown healthcheck server failed")
 		} else {
 			log.Info().Msg("healthcheck server stopped")

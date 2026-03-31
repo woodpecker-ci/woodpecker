@@ -74,7 +74,7 @@ func Run(ctx context.Context, cfg Config, backends []types.Backend) error {
 	grpcClientCtx, cancelGRPC := context.WithCancelCause(context.Background())
 	defer cancelGRPC(nil)
 
-	conns, _, err := ConnectGRPC(grpcClientCtx, cfg)
+	conns, _, err := ConnectGRPC(grpcClientCtx, cfg) //nolint:contextcheck
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func Run(ctx context.Context, cfg Config, backends []types.Backend) error {
 
 	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", cfg.Hostname))
 
-	if err := CheckGRPCVersion(grpcCtx, client); err != nil {
+	if err := CheckGRPCVersion(grpcCtx, client); err != nil { //nolint:contextcheck
 		log.Error().Err(err).Msg("gRPC version check failed")
 		return err
 	}
@@ -117,7 +117,7 @@ func Run(ctx context.Context, cfg Config, backends []types.Backend) error {
 	// Registration
 	// -------------------------------------------------------------------------
 
-	agentID, err := registerAgent(grpcCtx, client, cfg, engInfo.Platform)
+	agentID, err := registerAgent(grpcCtx, client, cfg, engInfo.Platform) //nolint:contextcheck
 	if err != nil {
 		return err
 	}
