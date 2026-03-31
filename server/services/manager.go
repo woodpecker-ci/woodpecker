@@ -88,7 +88,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
 		secret:              setupSecretService(store, c.String("secret-extension-endpoint"), client, c.Bool("secret-extension-netrc")),
-		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), client),
+		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), c.Bool("registry-extension-netrc"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
 		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
@@ -115,7 +115,7 @@ func (m *manager) SecretService() secret.Service {
 
 func (m *manager) RegistryServiceFromRepo(repo *model.Repo) registry.Service {
 	if repo.RegistryExtensionEndpoint != "" {
-		return registry.NewWithExtension(m.registry, registry.NewHTTP(strings.TrimRight(repo.RegistryExtensionEndpoint, "/"), m.client))
+		return registry.NewWithExtension(m.registry, registry.NewHTTP(strings.TrimRight(repo.RegistryExtensionEndpoint, "/"), m.client, repo.RegistryExtensionNetrc))
 	}
 	return m.RegistryService()
 }
@@ -127,9 +127,9 @@ func (m *manager) RegistryService() registry.Service {
 func (m *manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
 	if repo.ConfigExtensionEndpoint != "" {
 		if repo.ConfigExtensionExclusive {
-			return config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.client)
+			return config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.client, repo.ConfigExtensionNetrc)
 		}
-		return config.NewCombined(m.config, config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.client))
+		return config.NewCombined(m.config, config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.client, repo.ConfigExtensionNetrc))
 	}
 
 	return m.config

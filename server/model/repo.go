@@ -74,7 +74,9 @@ type Repo struct {
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 	ConfigExtensionExclusive     bool                 `json:"config_extension_exclusive"      xorm:"DEFAULT FALSE 'config_extension_exclusive'"`
+	ConfigExtensionNetrc         bool                 `json:"config_extension_netrc"          xorm:"DEFAULT FALSE 'config_extension_netrc'"`
 	RegistryExtensionEndpoint    string               `json:"registry_extension_endpoint"     xorm:"varchar(500) 'registry_extension_endpoint'"`
+	RegistryExtensionNetrc       bool                 `json:"registry_extension_netrc"          xorm:"DEFAULT FALSE 'registry_extension_netrc'"`
 	SecretExtensionEndpoint      string               `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
 	SecretExtensionNetrc         bool                 `json:"secret_extension_netrc"          xorm:"DEFAULT FALSE 'secret_extension_netrc'"`
 } //	@name	Repo
@@ -149,7 +151,9 @@ type RepoPatch struct {
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
 	ConfigExtensionEndpoint      *string                    `json:"config_extension_endpoint,omitempty"`
 	ConfigExtensionExclusive     *bool                      `json:"config_extension_exclusive"`
+	ConfigExtensionNetrc         *bool                      `json:"config_extension_netrc"`
 	RegistryExtensionEndpoint    *string                    `json:"registry_extension_endpoint,omitempty"`
+	RegistryExtensionNetrc       *bool                      `json:"registry_extension_netrc"`
 	SecretExtensionEndpoint      *string                    `json:"secret_extension_endpoint,omitempty"`
 	SecretExtensionNetrc         *bool                      `json:"secret_extension_netrc,omitempty"`
 } //	@name	RepoPatch
