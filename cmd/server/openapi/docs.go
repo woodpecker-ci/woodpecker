@@ -5995,7 +5995,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "avatar": {
-                    "description": "Deprecated: remove in next major",
                     "type": "string"
                 },
                 "commit": {
