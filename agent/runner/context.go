@@ -1,4 +1,5 @@
-// Copyright 2026 Woodpecker Authors
+// Copyright 2022 Woodpecker Authors
+// Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,87 +27,64 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-// buildWorkflowContext creates the single context used for workflow execution.
-// It layers timeout, SIGTERM handling, a server-side cancel listener, and
-// periodic lease extension on top of the provided parent context.
-//
-// The returned context.CancelCauseFunc must be deferred by the caller to ensure
-// all spawned goroutines are cleaned up.
-func buildWorkflowContext(
-	parent context.Context,
-	timeout time.Duration,
-	workflowID string,
-	client rpc.Peer,
-	logger zerolog.Logger,
-) (context.Context, context.CancelCauseFunc) {
-	// Apply the workflow timeout.
-	ctx, _ := context.WithTimeout(parent, timeout) //nolint:govet
+// computeTimeout returns the workflow timeout derived from the workflow spec.
+// Defaults to one hour when no timeout is configured.
+func computeTimeout(workflow *rpc.Workflow) time.Duration {
+	if minutes := workflow.Timeout; minutes != 0 {
+		return time.Duration(minutes) * time.Minute
+	}
+	return time.Hour
+}
 
-	// Wrap with CancelCause so every cancellation carries a reason.
-	ctx, cancel := context.WithCancelCause(ctx)
+// buildWorkflowContext creates the workflow-scoped context with a timeout and
+// sigterm handler. The returned CancelCauseFunc must be deferred by the caller.
+func buildWorkflowContext(ctxMeta context.Context, timeout time.Duration, logger zerolog.Logger) (context.Context, context.CancelCauseFunc) {
+	workflowCtx, _ := context.WithTimeout(ctxMeta, timeout) //nolint:govet
+	workflowCtx, cancelFn := context.WithCancelCause(workflowCtx)
 
-	// Cancel on SIGTERM so the agent can be stopped gracefully.
-	ctx = utils.WithContextSigtermCallback(ctx, func() {
+	// Add sigterm support — allows external signals to cancel the running workflow.
+	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
-		cancel(pipeline_errors.ErrCancel)
+		cancelFn(pipeline_errors.ErrCancel)
 	})
 
-	// Listen for server-side cancel events (UI / API).
-	go listenForCancel(ctx, cancel, workflowID, client, logger)
-
-	// Periodically extend the workflow lease while the context is alive.
-	go extendLease(ctx, workflowID, client, logger)
-
-	return ctx, cancel
+	return workflowCtx, cancelFn
 }
 
-// listenForCancel blocks until the server signals that the workflow should be
-// canceled, or until the context is done.
-func listenForCancel(
-	ctx context.Context,
-	cancel context.CancelCauseFunc,
-	workflowID string,
-	client rpc.Peer,
-	logger zerolog.Logger,
-) {
-	logger.Debug().Msg("start listening for server side cancel signal")
+// startCancelListener spawns a goroutine that waits for the server to signal
+// cancellation (e.g. via UI or API) and cancels the workflow context accordingly.
+func startCancelListener(workflowCtx context.Context, cancelFn context.CancelCauseFunc, client rpc.Peer, workflowID string, logger zerolog.Logger) {
+	go func() {
+		logger.Debug().Msg("start listening for server side cancel signal")
 
-	canceled, err := client.Wait(ctx, workflowID)
-	if err != nil {
-		logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
-		cancel(err)
-		return
-	}
-
-	if canceled {
-		logger.Debug().Msg("server side cancel signal received")
-		cancel(pipeline_errors.ErrCancel)
-		return
-	}
-
-	// Wait returned without error and without cancel — workflow finished normally.
-	logger.Debug().Msg("cancel listener exited normally")
+		canceled, err := client.Wait(workflowCtx, workflowID)
+		if err != nil {
+			logger.Error().Err(err).Msg("server returned unexpected err while waiting for workflow to finish run")
+			cancelFn(err)
+		} else if canceled {
+			logger.Debug().Msg("server side cancel signal received")
+			cancelFn(pipeline_errors.ErrCancel)
+		} else {
+			logger.Debug().Msg("cancel listener exited normally")
+		}
+	}()
 }
 
-// extendLease periodically renews the workflow lease on the server so the
-// server knows the agent is still working on it.
-func extendLease(
-	ctx context.Context,
-	workflowID string,
-	client rpc.Peer,
-	logger zerolog.Logger,
-) {
-	for {
-		select {
-		case <-ctx.Done():
-			logger.Debug().Msg("workflow context done")
-			return
-
-		case <-time.After(constant.TaskTimeout / 3):
-			logger.Debug().Msg("renewing workflow lease")
-			if err := client.Extend(ctx, workflowID); err != nil {
-				logger.Error().Err(err).Msg("failed to extend workflow lease")
+// startLeaseExtender spawns a goroutine that periodically extends the workflow
+// deadline on the server so that long-running workflows are not reclaimed.
+func startLeaseExtender(workflowCtx context.Context, client rpc.Peer, workflowID string, logger zerolog.Logger) {
+	go func() {
+		for {
+			select {
+			case <-workflowCtx.Done():
+				logger.Debug().Msg("workflow context done")
+				return
+			case <-time.After(constant.TaskTimeout / 3):
+				logger.Debug().Msg("renewing workflow lease")
+				if err := client.Extend(workflowCtx, workflowID); err != nil {
+					logger.Error().Err(err).Msg("failed to extend workflow lease")
+				}
 			}
 		}
-	}
+	}()
 }
