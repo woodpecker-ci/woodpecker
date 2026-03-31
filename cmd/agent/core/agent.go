@@ -38,8 +38,8 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"go.woodpecker-ci.org/woodpecker/v3/agent"
 	agent_rpc "go.woodpecker-ci.org/woodpecker/v3/agent/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/agent/runner"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -288,7 +288,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	// https://go.dev/blog/go1.22 fixed scope for goroutines in loops
 	for i := range maxWorkflows {
 		serviceWaitingGroup.Go(func() error {
-			runner := agent.NewRunner(client, filter, hostname, counter, backendEngine)
+			r := runner.NewRunner(client, filter, hostname, counter, backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
@@ -297,7 +297,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				}
 
 				log.Debug().Msg("polling new workflow")
-				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
+				if err := r.Run(agentCtx, shutdownCtx); err != nil {
 					log.Error().Err(err).Msg("runner error, retrying...")
 					// Check if context is canceled
 					if agentCtx.Err() != nil {

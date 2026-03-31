@@ -24,7 +24,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v3/agent"
+	"go.woodpecker-ci.org/woodpecker/v3/agent/runner"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
@@ -76,8 +76,8 @@ type versionResp struct {
 }
 
 // Default statistics counter.
-var counter = &agent.State{
-	Metadata: map[string]agent.Info{},
+var counter = &runner.State{
+	Metadata: map[string]runner.Info{},
 }
 
 // handles pinging the endpoint and returns an error if the

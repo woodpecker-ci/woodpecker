@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package agent
+package runner
 
 import (
 	"encoding/json"
@@ -22,6 +22,7 @@ import (
 	"time"
 )
 
+// State tracks the workflows currently polling and running on this agent.
 type State struct {
 	sync.Mutex `json:"-"`
 	Polling    int             `json:"polling_count"`
@@ -29,6 +30,7 @@ type State struct {
 	Metadata   map[string]Info `json:"running"`
 }
 
+// Info holds metadata about a single running workflow.
 type Info struct {
 	ID       string        `json:"id"`
 	Repo     string        `json:"repository"`
@@ -37,6 +39,7 @@ type Info struct {
 	Timeout  time.Duration `json:"pipeline_timeout"`
 }
 
+// Add records a workflow as running.
 func (s *State) Add(id string, timeout time.Duration, repo, pipeline string) {
 	s.Lock()
 	s.Polling--
@@ -51,6 +54,7 @@ func (s *State) Add(id string, timeout time.Duration, repo, pipeline string) {
 	s.Unlock()
 }
 
+// Done records a workflow as finished.
 func (s *State) Done(id string) {
 	s.Lock()
 	s.Polling++
@@ -59,6 +63,8 @@ func (s *State) Done(id string) {
 	s.Unlock()
 }
 
+// Healthy reports whether all running workflows are within their expected
+// timeout window (plus a one-hour buffer).
 func (s *State) Healthy() bool {
 	s.Lock()
 	defer s.Unlock()
@@ -72,6 +78,7 @@ func (s *State) Healthy() bool {
 	return true
 }
 
+// WriteTo serializes the state as JSON into w.
 func (s *State) WriteTo(w io.Writer) (int64, error) {
 	s.Lock()
 	out, err := json.Marshal(s)
