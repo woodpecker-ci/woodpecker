@@ -24,6 +24,7 @@
 
 ### 📈 Enhancement
 
+- Migrate to moby [[#6357](https://github.com/woodpecker-ci/woodpecker/pull/6357)]
 - Deprecate commit avatar envs [[#6356](https://github.com/woodpecker-ci/woodpecker/pull/6356)]
 - Refactor server/pubsub into interface [[#6318](https://github.com/woodpecker-ci/woodpecker/pull/6318)]
 - Separate cron field [[#6346](https://github.com/woodpecker-ci/woodpecker/pull/6346)]
