@@ -5250,6 +5250,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5295,6 +5298,9 @@ const docTemplate = `{
                 },
                 "registry_extension_endpoint": {
                     "type": "string"
+                },
+                "registry_extension_netrc": {
+                    "type": "boolean"
                 },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
@@ -5355,6 +5361,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5404,6 +5413,9 @@ const docTemplate = `{
                 "registry_extension_endpoint": {
                     "type": "string"
                 },
+                "registry_extension_netrc": {
+                    "type": "boolean"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
@@ -5451,6 +5463,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5462,6 +5477,9 @@ const docTemplate = `{
                 },
                 "registry_extension_endpoint": {
                     "type": "string"
+                },
+                "registry_extension_netrc": {
+                    "type": "boolean"
                 },
                 "require_approval": {
                     "type": "string"

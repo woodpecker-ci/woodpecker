@@ -145,7 +145,7 @@ func TestWithExtensionRegistryListPipeline(t *testing.T) {
 	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
 	require.NoError(t, err)
 
-	httpExtension := NewHTTP(ts.URL, client)
+	httpExtension := NewHTTP(ts.URL, client, true)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
@@ -158,6 +158,7 @@ func TestWithExtensionRegistryListPipeline(t *testing.T) {
 				t.Context(),
 				&model.Repo{ID: 1, Name: tt.repoName},
 				&model.Pipeline{},
+				nil,
 			)
 			if tt.expectedError {
 				require.Error(t, err, "expected an error")
