@@ -18,10 +18,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"maps"
+	"net/netip"
 	"regexp"
 	"strings"
 
-	"github.com/docker/docker/api/types/container"
+	"github.com/moby/moby/api/types/container"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -51,9 +53,7 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 
 	if len(step.Commands) > 0 {
 		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
-		for k, v := range env {
-			configEnv[k] = v
-		}
+		maps.Copy(configEnv, env)
 		config.Entrypoint = entry
 
 		// step.WorkingDir will be respected by the generated script
@@ -94,7 +94,15 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}
 	if len(step.DNS) != 0 {
-		config.DNS = step.DNS
+		addrs := make([]netip.Addr, len(step.DNS))
+		for i, dns := range step.DNS {
+			a, err := netip.ParseAddr(dns)
+			if err != nil {
+				log.Error().Err(err).Str("address", dns).Msg("could not parse dns address")
+			}
+			addrs[i] = a
+		}
+		config.DNS = addrs
 	}
 	if len(step.DNSSearch) != 0 {
 		config.DNSSearch = step.DNSSearch
