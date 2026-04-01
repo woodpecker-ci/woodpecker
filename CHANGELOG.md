@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0-rc.0) - 2026-04-01
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -49,6 +49,7 @@
 - refactor: use upstream slices.Concat and remove utils.MergeSlices [[#6185](https://github.com/woodpecker-ci/woodpecker/pull/6185)]
 - Add enhanced function for error message handling in http request for configuration fetching [[#5712](https://github.com/woodpecker-ci/woodpecker/pull/5712)]
 - Remove fixed badge width in UI [[#6157](https://github.com/woodpecker-ci/woodpecker/pull/6157)]
+- Improve Debian packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
 - Refactor pipeline engine [[#6073](https://github.com/woodpecker-ci/woodpecker/pull/6073)]
 - Added cancel info so one can see why it was cancelled [[#6072](https://github.com/woodpecker-ci/woodpecker/pull/6072)]
 - Document required forge methods [[#6049](https://github.com/woodpecker-ci/woodpecker/pull/6049)]
@@ -203,7 +204,6 @@
 
 - Fix license headers [[#6205](https://github.com/woodpecker-ci/woodpecker/pull/6205)]
 - Add agentscan plugin [[#6284](https://github.com/woodpecker-ci/woodpecker/pull/6284)]
-- Improve Debian packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
 
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
 
