@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 )
 
@@ -64,7 +64,7 @@ func TestInitRecoveryState(t *testing.T) {
 		client := &mockRecoveryClient{}
 		mgr := NewRecoveryManager(client, "wf-1", false)
 
-		err := mgr.InitRecoveryState(t.Context(), &backend.Config{}, 300)
+		err := mgr.InitRecoveryState(t.Context(), &backend_types.Config{}, 300)
 		require.NoError(t, err)
 		assert.False(t, client.initCalled)
 	})
@@ -78,10 +78,10 @@ func TestInitRecoveryState(t *testing.T) {
 		client := &mockRecoveryClient{initResult: initResult}
 		mgr := NewRecoveryManager(client, "wf-1", true)
 
-		config := &backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{{UUID: "uuid-1"}, {UUID: "uuid-2"}}},
-				{Steps: []*backend.Step{{UUID: "uuid-3"}}},
+		config := &backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{{UUID: "uuid-1"}, {UUID: "uuid-2"}}},
+				{Steps: []*backend_types.Step{{UUID: "uuid-3"}}},
 			},
 		}
 
@@ -95,11 +95,11 @@ func TestInitRecoveryState(t *testing.T) {
 		assert.Equal(t, int64(300), client.initTimeout)
 
 		// Verify cache is populated
-		step1 := &backend.Step{UUID: "uuid-1"}
+		step1 := &backend_types.Step{UUID: "uuid-1"}
 		state := mgr.GetStepState(step1)
 		assert.Equal(t, types.RecoveryStatusPending, state.Status)
 
-		step3 := &backend.Step{UUID: "uuid-3"}
+		step3 := &backend_types.Step{UUID: "uuid-3"}
 		state = mgr.GetStepState(step3)
 		assert.Equal(t, types.RecoveryStatusSuccess, state.Status)
 	})
@@ -110,9 +110,9 @@ func TestInitRecoveryState(t *testing.T) {
 		}}
 		mgr := NewRecoveryManager(client, "wf-1", true)
 
-		config := &backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{{UUID: "uuid-1"}, {UUID: ""}}},
+		config := &backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{{UUID: "uuid-1"}, {UUID: ""}}},
 			},
 		}
 
@@ -125,9 +125,9 @@ func TestInitRecoveryState(t *testing.T) {
 		client := &mockRecoveryClient{initErr: errors.New("rpc failed")}
 		mgr := NewRecoveryManager(client, "wf-1", true)
 
-		config := &backend.Config{
-			Stages: []*backend.Stage{
-				{Steps: []*backend.Step{{UUID: "uuid-1"}}},
+		config := &backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{{UUID: "uuid-1"}}},
 			},
 		}
 
@@ -136,7 +136,7 @@ func TestInitRecoveryState(t *testing.T) {
 	})
 }
 
-func TestShouldSkipStep(t *testing.T) {
+func TestShouldSkipCompletedSteps(t *testing.T) {
 	tests := []struct {
 		name     string
 		status   types.RecoveryStatus
@@ -158,15 +158,15 @@ func TestShouldSkipStep(t *testing.T) {
 			}
 			mgr := NewRecoveryManager(client, "wf-1", true)
 
-			config := &backend.Config{
-				Stages: []*backend.Stage{
-					{Steps: []*backend.Step{{UUID: "step-1"}}},
+			config := &backend_types.Config{
+				Stages: []*backend_types.Stage{
+					{Steps: []*backend_types.Step{{UUID: "step-1"}}},
 				},
 			}
 			err := mgr.InitRecoveryState(t.Context(), config, 300)
 			require.NoError(t, err)
 
-			skip, state := mgr.ShouldSkipStep(&backend.Step{UUID: "step-1"})
+			skip, state := mgr.ShouldSkipStep(&backend_types.Step{UUID: "step-1"})
 			assert.Equal(t, tt.wantSkip, skip)
 			assert.Equal(t, tt.status, state.Status)
 		})
@@ -174,7 +174,7 @@ func TestShouldSkipStep(t *testing.T) {
 
 	t.Run("disabled manager returns false nil", func(t *testing.T) {
 		mgr := NewRecoveryManager(nil, "wf-1", false)
-		skip, state := mgr.ShouldSkipStep(&backend.Step{UUID: "step-1"})
+		skip, state := mgr.ShouldSkipStep(&backend_types.Step{UUID: "step-1"})
 		assert.False(t, skip)
 		assert.Nil(t, state)
 	})
@@ -224,7 +224,7 @@ func TestMarkStepMethods(t *testing.T) {
 	t.Run("MarkStepRunning calls client with correct args", func(t *testing.T) {
 		client := &mockRecoveryClient{}
 		mgr := NewRecoveryManager(client, "wf-1", true)
-		step := &backend.Step{UUID: "step-1"}
+		step := &backend_types.Step{UUID: "step-1"}
 
 		err := mgr.MarkStepRunning(t.Context(), step)
 		require.NoError(t, err)
@@ -238,7 +238,7 @@ func TestMarkStepMethods(t *testing.T) {
 	t.Run("MarkStepSuccess calls client with correct args", func(t *testing.T) {
 		client := &mockRecoveryClient{}
 		mgr := NewRecoveryManager(client, "wf-1", true)
-		step := &backend.Step{UUID: "step-2"}
+		step := &backend_types.Step{UUID: "step-2"}
 
 		err := mgr.MarkStepSuccess(t.Context(), step)
 		require.NoError(t, err)
@@ -250,7 +250,7 @@ func TestMarkStepMethods(t *testing.T) {
 	t.Run("MarkStepFailed calls client with correct args", func(t *testing.T) {
 		client := &mockRecoveryClient{}
 		mgr := NewRecoveryManager(client, "wf-1", true)
-		step := &backend.Step{UUID: "step-3"}
+		step := &backend_types.Step{UUID: "step-3"}
 
 		err := mgr.MarkStepFailed(t.Context(), step, 137)
 		require.NoError(t, err)
@@ -262,7 +262,7 @@ func TestMarkStepMethods(t *testing.T) {
 	t.Run("disabled manager returns nil without calling client", func(t *testing.T) {
 		client := &mockRecoveryClient{}
 		mgr := NewRecoveryManager(client, "wf-1", false)
-		step := &backend.Step{UUID: "step-1"}
+		step := &backend_types.Step{UUID: "step-1"}
 
 		require.NoError(t, mgr.MarkStepRunning(t.Context(), step))
 		require.NoError(t, mgr.MarkStepSuccess(t.Context(), step))
@@ -277,15 +277,15 @@ func TestGetStepStateCacheMiss(t *testing.T) {
 	}}
 	mgr := NewRecoveryManager(client, "wf-1", true)
 
-	config := &backend.Config{
-		Stages: []*backend.Stage{
-			{Steps: []*backend.Step{{UUID: "uuid-1"}}},
+	config := &backend_types.Config{
+		Stages: []*backend_types.Stage{
+			{Steps: []*backend_types.Step{{UUID: "uuid-1"}}},
 		},
 	}
 	err := mgr.InitRecoveryState(t.Context(), config, 300)
 	require.NoError(t, err)
 
 	// Unknown UUID returns default Pending state
-	state := mgr.GetStepState(&backend.Step{UUID: "unknown-uuid"})
+	state := mgr.GetStepState(&backend_types.Step{UUID: "unknown-uuid"})
 	assert.Equal(t, types.RecoveryStatusPending, state.Status)
 }

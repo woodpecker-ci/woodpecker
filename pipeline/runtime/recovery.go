@@ -18,7 +18,7 @@ import (
 	"context"
 	"sync/atomic"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 )
 
@@ -49,7 +49,7 @@ func NewRecoveryManager(client RecoveryClient, workflowID string, enabled bool) 
 // InitRecoveryState initializes recovery state for all steps in the config.
 // On first run, creates recovery states for all steps.
 // On agent restart, loads existing states into cache.
-func (m *RecoveryManager) InitRecoveryState(ctx context.Context, config *backend.Config, timeoutSeconds int64) error {
+func (m *RecoveryManager) InitRecoveryState(ctx context.Context, config *backend_types.Config, timeoutSeconds int64) error {
 	if !m.enabled {
 		return nil
 	}
@@ -65,7 +65,7 @@ func (m *RecoveryManager) InitRecoveryState(ctx context.Context, config *backend
 }
 
 // GetStepState retrieves the recovery state for a step from cache.
-func (m *RecoveryManager) GetStepState(step *backend.Step) *types.RecoveryState {
+func (m *RecoveryManager) GetStepState(step *backend_types.Step) *types.RecoveryState {
 	if !m.enabled || m.stateCache == nil {
 		return &types.RecoveryState{Status: types.RecoveryStatusPending}
 	}
@@ -77,7 +77,7 @@ func (m *RecoveryManager) GetStepState(step *backend.Step) *types.RecoveryState 
 }
 
 // MarkStepRunning marks a step as running.
-func (m *RecoveryManager) MarkStepRunning(ctx context.Context, step *backend.Step) error {
+func (m *RecoveryManager) MarkStepRunning(ctx context.Context, step *backend_types.Step) error {
 	if !m.enabled {
 		return nil
 	}
@@ -86,7 +86,7 @@ func (m *RecoveryManager) MarkStepRunning(ctx context.Context, step *backend.Ste
 }
 
 // MarkStepSuccess marks a step as successfully completed.
-func (m *RecoveryManager) MarkStepSuccess(ctx context.Context, step *backend.Step) error {
+func (m *RecoveryManager) MarkStepSuccess(ctx context.Context, step *backend_types.Step) error {
 	if !m.enabled {
 		return nil
 	}
@@ -95,7 +95,7 @@ func (m *RecoveryManager) MarkStepSuccess(ctx context.Context, step *backend.Ste
 }
 
 // MarkStepFailed marks a step as failed.
-func (m *RecoveryManager) MarkStepFailed(ctx context.Context, step *backend.Step, exitCode int) error {
+func (m *RecoveryManager) MarkStepFailed(ctx context.Context, step *backend_types.Step, exitCode int) error {
 	if !m.enabled {
 		return nil
 	}
@@ -111,7 +111,7 @@ func (m *RecoveryManager) IsRecoverable(ctx context.Context) bool {
 
 // ShouldSkipStep determines if a step should be skipped based on its recovery state.
 // Returns true if the step was already completed (success, failed, or skipped).
-func (m *RecoveryManager) ShouldSkipStep(step *backend.Step) (bool, *types.RecoveryState) {
+func (m *RecoveryManager) ShouldSkipStep(step *backend_types.Step) (bool, *types.RecoveryState) {
 	if !m.enabled {
 		return false, nil
 	}
@@ -151,7 +151,7 @@ func (m *RecoveryManager) WasCanceled() bool {
 }
 
 // collectStepUUIDs extracts all step UUIDs from the config.
-func collectStepUUIDs(config *backend.Config) []string {
+func collectStepUUIDs(config *backend_types.Config) []string {
 	var uuids []string
 	for _, stage := range config.Stages {
 		for _, step := range stage.Steps {

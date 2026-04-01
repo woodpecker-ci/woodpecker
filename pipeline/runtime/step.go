@@ -317,7 +317,7 @@ func (r *Runtime) updateStepRecoveryState(step *backend_types.Step, processState
 	case recoverable:
 		logger.Debug().Str("step", step.Name).Msg("workflow is recoverable, not updating step state")
 	case processState != nil && processState.ExitCode == 0 && err == nil:
-		if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil { //nolint:contextcheck
+		if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil {
 			logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as success")
 		}
 	default:
@@ -325,7 +325,7 @@ func (r *Runtime) updateStepRecoveryState(step *backend_types.Step, processState
 		if processState != nil {
 			exitCode = processState.ExitCode
 		}
-		if markErr := r.recoveryManager.MarkStepFailed(r.ctx, step, exitCode); markErr != nil { //nolint:contextcheck
+		if markErr := r.recoveryManager.MarkStepFailed(r.ctx, step, exitCode); markErr != nil {
 			logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as failed")
 		}
 	}
@@ -336,7 +336,7 @@ func (r *Runtime) execReconnected(step *backend_types.Step) error {
 	logger := r.makeLogger()
 
 	var wg sync.WaitGroup
-	rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
+	rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
 	if err != nil {
 		logger.Warn().Err(err).Str("step", step.Name).Msg("failed to retrieve logs for reconnected step, continuing without logs")
 	} else {
@@ -353,7 +353,7 @@ func (r *Runtime) execReconnected(step *backend_types.Step) error {
 	}
 
 	wg.Wait()
-	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
+	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			return pipeline_errors.ErrCancel
@@ -362,11 +362,11 @@ func (r *Runtime) execReconnected(step *backend_types.Step) error {
 	}
 
 	if waitState.ExitCode == 0 {
-		if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil { //nolint:contextcheck
+		if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil {
 			logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as success")
 		}
 	} else {
-		if markErr := r.recoveryManager.MarkStepFailed(r.ctx, step, waitState.ExitCode); markErr != nil { //nolint:contextcheck
+		if markErr := r.recoveryManager.MarkStepFailed(r.ctx, step, waitState.ExitCode); markErr != nil {
 			logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as failed")
 		}
 	}
