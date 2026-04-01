@@ -368,25 +368,20 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of pod: %s", podName)
 
+	up := make(chan struct{})
 	var upOnce sync.Once
-	up := make(chan bool, 1) // buffered to avoid blocking in handlers
 
-	checkPodReady := func(pod *kube_core_v1.Pod) {
-		if pod.Name == podName {
-			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				select {
-				case up <- true:
-				default:
-				}
-				return
-			}
-			switch pod.Status.Phase {
-			case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
-				select {
-				case up <- true:
-				default:
-				}
-			}
+	signalReady := func(pod *kube_core_v1.Pod) {
+		if pod.Name != podName {
+			return
+		}
+		if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
+			upOnce.Do(func() { close(up) })
+			return
+		}
+		switch pod.Status.Phase {
+		case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
+			upOnce.Do(func() { close(up) })
 		}
 	}
 
@@ -396,7 +391,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 			log.Error().Msgf("could not parse pod: %v", obj)
 			return
 		}
-		checkPodReady(pod)
+		signalReady(pod)
 	}
 
 	podUpdated := func(_, newPod any) {
@@ -405,17 +400,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
-
-		if pod.Name == podName {
-			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				upOnce.Do(func() { close(up) })
-			}
-			switch pod.Status.Phase {
-			case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
-				upOnce.Do(func() { close(up) })
-			}
-		}
-		checkPodReady(pod)
+		signalReady(pod)
 	}
 
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
