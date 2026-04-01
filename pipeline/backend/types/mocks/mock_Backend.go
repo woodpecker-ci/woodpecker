@@ -369,6 +369,69 @@ func (_c *MockBackend_Name_Call) RunAndReturn(run func() string) *MockBackend_Na
 	return _c
 }
 
+// Reconnect provides a mock function for the type MockBackend
+func (_mock *MockBackend) Reconnect(ctx context.Context, step *types.Step, taskUUID string) error {
+	ret := _mock.Called(ctx, step, taskUUID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Reconnect")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *types.Step, string) error); ok {
+		r0 = returnFunc(ctx, step, taskUUID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockBackend_Reconnect_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Reconnect'
+type MockBackend_Reconnect_Call struct {
+	*mock.Call
+}
+
+// Reconnect is a helper method to define mock.On call
+//   - ctx context.Context
+//   - step *types.Step
+//   - taskUUID string
+func (_e *MockBackend_Expecter) Reconnect(ctx interface{}, step interface{}, taskUUID interface{}) *MockBackend_Reconnect_Call {
+	return &MockBackend_Reconnect_Call{Call: _e.mock.On("Reconnect", ctx, step, taskUUID)}
+}
+
+func (_c *MockBackend_Reconnect_Call) Run(run func(ctx context.Context, step *types.Step, taskUUID string)) *MockBackend_Reconnect_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *types.Step
+		if args[1] != nil {
+			arg1 = args[1].(*types.Step)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBackend_Reconnect_Call) Return(err error) *MockBackend_Reconnect_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockBackend_Reconnect_Call) RunAndReturn(run func(ctx context.Context, step *types.Step, taskUUID string) error) *MockBackend_Reconnect_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SetupWorkflow provides a mock function for the type MockBackend
 func (_mock *MockBackend) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	ret := _mock.Called(ctx, conf, taskUUID)
