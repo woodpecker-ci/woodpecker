@@ -26,7 +26,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
-	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v3/server/rpc"
+	server_rpc "go.woodpecker-ci.org/woodpecker/v3/server/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
@@ -37,9 +37,9 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 	}
 
 	jwtSecret := c.String("grpc-secret")
-	jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
+	jwtManager := server_rpc.NewJWTManager(jwtSecret)
 
-	authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
+	authorizer := server_rpc.NewAuthorizer(jwtManager)
 	grpcServer := grpc.NewServer(
 		grpc.StreamInterceptor(authorizer.StreamInterceptor),
 		grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
@@ -48,7 +48,7 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 		}),
 	)
 
-	woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
+	woodpeckerServer := server_rpc.NewWoodpeckerServer(
 		server.Config.Services.Queue,
 		server.Config.Services.Logs,
 		server.Config.Services.Pubsub,
@@ -57,7 +57,7 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 	)
 	proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
 
-	woodpeckerAuthServer := woodpeckerGrpcServer.NewWoodpeckerAuthServer(
+	woodpeckerAuthServer := server_rpc.NewWoodpeckerAuthServer(
 		jwtManager,
 		server.Config.Server.AgentToken,
 		_store,

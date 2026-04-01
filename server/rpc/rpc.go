@@ -25,9 +25,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
-	grpcMetadata "google.golang.org/grpc/metadata"
+	grpc_metadata "google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -49,7 +50,7 @@ var ErrRecoveryDisabled = errors.New("pipeline recovery is not enabled on this s
 
 type RPC struct {
 	queue           queue.Queue
-	pubsub          *pubsub.Publisher
+	pubsub          pubsub.PubSub
 	logger          logging.Log
 	store           store.Store
 	pipelineTime    *prometheus.GaugeVec
@@ -121,13 +122,16 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 	if err := s.queue.Wait(c, workflowID); err != nil {
 		if errors.Is(err, queue.ErrCancel) {
 			// we explicit send a cancel signal
+			log.Debug().Str("workflowID", workflowID).Msg("while waiting the queue reported the workflow as canceled")
 			return true, nil
 		}
 		// unknown error happened
+		log.Error().Err(err).Str("workflowID", workflowID).Msg("while waiting the queue returned an unexpected error")
 		return false, err
 	}
 
 	// workflow finished and on issues appeared
+	log.Debug().Str("workflowID", workflowID).Msg("queue reported the workflow as finished")
 	return false, nil
 }
 
@@ -212,22 +216,8 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err
 	}
-	message := pubsub.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsSCMPrivate),
-		},
-	}
-	message.Data, err = json.Marshal(model.Event{
-		Repo:     *repo,
-		Pipeline: *currentPipeline,
-	})
-	if err != nil {
-		return err
-	}
-	s.pubsub.Publish(message)
 
-	return nil
+	return s.notify(c, repo, currentPipeline)
 }
 
 // Init signals the workflow is initialized.
@@ -277,21 +267,10 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	defer func() {
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
-		message := pubsub.Message{
-			Labels: map[string]string{
-				"repo":    repo.FullName,
-				"private": strconv.FormatBool(repo.IsSCMPrivate),
-			},
+
+		if err := s.notify(c, repo, currentPipeline); err != nil {
+			log.Error().Err(err).Msg("could not publish pipeline state change to pubsub")
 		}
-		message.Data, err = json.Marshal(model.Event{
-			Repo:     *repo,
-			Pipeline: *currentPipeline,
-		})
-		if err != nil {
-			log.Error().Err(err).Msg("could not marshal JSON")
-			return
-		}
-		s.pubsub.Publish(message)
 	}()
 
 	workflow, err = pipeline.UpdateWorkflowStatusToRunning(s.store, *workflow, state)
@@ -351,6 +330,10 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	logger.Debug().Msgf("workflow state in store: %#v", workflow)
 	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
+	// Complete any still-running children (e.g. service containers) before
+	// computing the workflow status, so their final state is reflected.
+	s.completeChildrenIfParentCompleted(workflow, state.Finished)
+
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
 	}
@@ -377,7 +360,6 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
-	s.completeChildrenIfParentCompleted(workflow)
 
 	if !model.IsThereRunningStage(currentPipeline.Workflows) {
 		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
@@ -396,7 +378,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}()
 
-	if err := s.notify(repo, currentPipeline); err != nil {
+	if err := s.notify(c, repo, currentPipeline); err != nil {
 		return err
 	}
 
@@ -570,11 +552,15 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 	return errors.New(msg)
 }
 
-func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
+func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
-			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Finished, model.StatusSkipped); err != nil {
+			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusSkipped); err != nil {
 				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
+			} else {
+				// Update in-memory state so WorkflowStatus sees the final state
+				c.State = updated.State
+				c.Finished = updated.Finished
 			}
 		}
 	}
@@ -604,26 +590,30 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 	}
 }
 
-func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
-	message := pubsub.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsSCMPrivate),
-		},
-	}
+// Notify push to our pubsub infra pipeline state changes.
+func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline) (err error) {
+	message := pubsub.Message{ID: ulid.Make().String()}
 	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *pipeline,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("can't marshal JSON: %w", err)
 	}
-	s.pubsub.Publish(message)
-	return nil
+
+	subTopics := make(map[string]struct{})
+	// if repo is public, push to public topic
+	if !repo.IsSCMPrivate {
+		subTopics[pubsub.PublicTopic] = struct{}{}
+	}
+	// publish to repo specific topic
+	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
+
+	return s.pubsub.Publish(c, subTopics, message)
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := grpcMetadata.FromIncomingContext(ctx)
+	md, ok := grpc_metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, errors.New("metadata is not provided")
 	}
@@ -643,7 +633,7 @@ func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 }
 
 func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	metadata, ok := grpc_metadata.FromIncomingContext(ctx)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {

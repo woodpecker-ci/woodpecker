@@ -214,10 +214,14 @@ func TestBadHabits(t *testing.T) {
 	}{
 		{
 			from: "steps: { build: { image: golang } }",
-			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
+			want: "Consider adding a `when` block with an `event` filter to this step or the entire workflow",
 		},
 		{
 			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
+			want: "Consider adding a `when` block with an `event` filter to this step or the entire workflow",
+		},
+		{
+			from: "steps: { build: { image: golang, when: [{branch: main}] } }",
 			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
 		},
 	}

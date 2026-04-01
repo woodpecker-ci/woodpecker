@@ -241,7 +241,7 @@
                 "delete": "Variable löschen"
             },
             "show_pipelines": "Pipelines anzeigen",
-            "no_manual_workflows": "Es wurden keine manuell ausführbaren Workflows gefunden, oder alle wurden gefiltert."
+            "no_manual_workflows": "Keine manuell ausführbaren Workflows gefunden. Stelle sicher, dass es mindestens einen Workflow gibt, der beim „manual“-Event läuft."
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
         "open_in_forge": "Repository in der Code-Plattform öffnen",
@@ -331,7 +331,9 @@
                 "canceled_by_user": "Abgebrochen von {user}",
                 "canceled_by_step": "Wegen Schritt {step} abgebrochen"
             },
-            "load_more": "Mehr laden"
+            "load_more": "Mehr laden",
+            "version": "Die Woodpecker-Version, mit der diese Pipeline ausgeführt wurde.",
+            "version_header": "Woodpecker-Version"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -774,5 +776,10 @@
     "disabled": "Deaktiviert",
     "config_extension_exclusive": "Exklusiv",
     "config_extension_exclusive_desc": "Wenn aktiviert, werden alle anderen Möglichkeiten zum Laden der Konfiguration, einschließlich der Code-Plattform, übersprungen.",
-    "registry_extension_endpoint": "Endpunkt der Register-Erweiterung"
+    "registry_extension_endpoint": "Endpunkt der Register-Erweiterung",
+    "global_level_registry": "globales Register",
+    "org_level_registry": "Organisationsregister",
+    "secret_extension_endpoint": "Endpunkt der Geheimnis-Erweiterung",
+    "secret_extension_netrc": "Netrc-Zugangsdaten senden",
+    "secret_extension_netrc_desc": "Die Netrc-Zugangsdaten für die Code-Plattform an die Geheimnis-Erweiterung senden."
 }

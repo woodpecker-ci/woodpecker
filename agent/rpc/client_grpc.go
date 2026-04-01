@@ -25,9 +25,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	grpcproto "google.golang.org/protobuf/proto"
+	grpc_proto "google.golang.org/protobuf/proto"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
@@ -142,7 +142,7 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 	w := new(rpc.Workflow)
 	w.ID = res.GetWorkflow().GetId()
 	w.Timeout = res.GetWorkflow().GetTimeout()
-	w.Config = new(backend.Config)
+	w.Config = new(backend_types.Config)
 	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
 		log.Error().Err(err).Msgf("could not unmarshal workflow config of '%s'", w.ID)
 	}
@@ -431,7 +431,7 @@ func (c *client) processLogs(ctx context.Context) {
 			}
 
 			entries = append(entries, entry)
-			bytes += grpcproto.Size(entry) // cspell:words grpcproto
+			bytes += grpc_proto.Size(entry)
 
 			if bytes >= maxLogBatchSize {
 				send()
@@ -496,7 +496,7 @@ func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (rpc.Age
 
 	res, err := c.client.RegisterAgent(ctx, req)
 	if err != nil {
-		return nil, err
+		return rpc.AgentConfig{}, err
 	}
 	protoConfig := res.GetConfig()
 	return rpc.AgentConfig{

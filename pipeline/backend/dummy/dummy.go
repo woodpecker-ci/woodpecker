@@ -28,7 +28,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 type dummy struct {
@@ -52,7 +52,7 @@ const (
 )
 
 // New returns a dummy backend.
-func New() backend.Backend {
+func New() backend_types.Backend {
 	return &dummy{
 		kv: sync.Map{},
 	}
@@ -71,13 +71,13 @@ func (e *dummy) Flags() []cli.Flag {
 }
 
 // Load new client for Docker Backend using environment variables.
-func (e *dummy) Load(_ context.Context) (*backend.BackendInfo, error) {
-	return &backend.BackendInfo{
+func (e *dummy) Load(_ context.Context) (*backend_types.BackendInfo, error) {
+	return &backend_types.BackendInfo{
 		Platform: "dummy",
 	}, nil
 }
 
-func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) SetupWorkflow(_ context.Context, _ *backend_types.Config, taskUUID string) error {
 	if taskUUID == WorkflowSetupFailUUID {
 		return fmt.Errorf("expected fail to setup workflow")
 	}
@@ -86,7 +86,7 @@ func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID str
 	return nil
 }
 
-func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) StartStep(_ context.Context, step *backend_types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	// internal state checks
@@ -113,24 +113,24 @@ func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string
 	return nil
 }
 
-func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
 	if !exist {
 		err := fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
-		return &backend.State{Error: err}, err
+		return &backend_types.State{Error: err}, err
 	}
 
 	// check state
 	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
 	if !stepExist {
 		err := fmt.Errorf("WaitStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
-		return &backend.State{Error: err}, err
+		return &backend_types.State{Error: err}, err
 	}
 	if stepState != stepStateStarted {
 		err := fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
-		return &backend.State{Error: err}, err
+		return &backend_types.State{Error: err}, err
 	}
 
 	// extend wait time logic
@@ -138,15 +138,15 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID strin
 		toSleep, err := time.ParseDuration(sleep)
 		if err != nil {
 			err = fmt.Errorf("WaitStep fail to parse sleep duration: %w", err)
-			return &backend.State{Error: err}, err
+			return &backend_types.State{Error: err}, err
 		}
 		time.Sleep(toSleep)
 	} else {
-		if step.Type == backend.StepTypeService {
+		if step.Type == backend_types.StepTypeService {
 			select {
 			case <-time.NewTimer(testServiceTimeout).C:
 				err := fmt.Errorf("WaitStep fail due to timeout of service after 1 second")
-				return &backend.State{Error: err}, err
+				return &backend_types.State{Error: err}, err
 			case <-ctx.Done():
 				// context for service closed ... we can move forward
 			}
@@ -164,14 +164,14 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID strin
 		exitCode, _ = strconv.Atoi(strings.TrimSpace(code))
 	}
 
-	return &backend.State{
+	return &backend_types.State{
 		ExitCode:  exitCode,
 		Exited:    true,
 		OOMKilled: oomKilled,
 	}, nil
 }
 
-func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+func (e *dummy) TailStep(_ context.Context, step *backend_types.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -195,7 +195,7 @@ func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string)
 	return io.NopCloser(strings.NewReader(dummyExecStepOutput(step))), nil
 }
 
-func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) DestroyStep(_ context.Context, step *backend_types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -216,11 +216,11 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID stri
 	return nil
 }
 
-func (e *dummy) Reconnect(_ context.Context, _ *backend.Step, _ string) error {
-	return backend.ErrWorkflowRecoveryNotSupported
+func (e *dummy) Reconnect(_ context.Context, _ *backend_types.Step, _ string) error {
+	return backend_types.ErrWorkflowRecoveryNotSupported
 }
 
-func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend_types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -231,7 +231,7 @@ func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID s
 	return nil
 }
 
-func dummyExecStepOutput(step *backend.Step) string {
+func dummyExecStepOutput(step *backend_types.Step) string {
 	return fmt.Sprintf(`StepName: %s
 StepType: %s
 StepUUID: %s

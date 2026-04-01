@@ -16,7 +16,7 @@ package kubernetes
 
 import (
 	"context"
-	std_errs "errors"
+	"errors"
 	"fmt"
 	"io"
 	"maps"
@@ -28,11 +28,11 @@ import (
 	"sync"
 	"time"
 
-	backoff "github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	v1 "k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -72,7 +72,7 @@ type config struct {
 	PodNodeSelector             map[string]string
 	PodTolerationsAllowFromStep bool
 	PodTolerations              []Toleration
-	PodAffinity                 *v1.Affinity
+	PodAffinity                 *kube_core_v1.Affinity
 	PodAffinityAllowFromStep    bool
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
@@ -92,11 +92,11 @@ type SecurityContextConfig struct {
 	FSGroup      *int64
 }
 
-func newDefaultDeleteOptions() meta_v1.DeleteOptions {
+func newDefaultDeleteOptions() kube_meta_v1.DeleteOptions {
 	gracePeriodSeconds := int64(0) // immediately
-	propagationPolicy := meta_v1.DeletePropagationBackground
+	propagationPolicy := kube_meta_v1.DeletePropagationBackground
 
-	return meta_v1.DeleteOptions{
+	return kube_meta_v1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 		PropagationPolicy:  &propagationPolicy,
 	}
@@ -292,7 +292,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	var finishedOnce sync.Once
 
 	podUpdated := func(_, newPod any) {
-		pod, ok := newPod.(*v1.Pod)
+		pod, ok := newPod.(*kube_core_v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
@@ -304,7 +304,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 			}
 
 			switch pod.Status.Phase {
-			case v1.PodSucceeded, v1.PodFailed, v1.PodUnknown:
+			case kube_core_v1.PodSucceeded, kube_core_v1.PodFailed, kube_core_v1.PodUnknown:
 				finishedOnce.Do(func() { close(finished) })
 			}
 		}
@@ -329,7 +329,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, ctx.Err()
 	}
 
-	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, meta_v1.GetOptions{})
+	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -371,7 +371,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	var upOnce sync.Once
 	up := make(chan bool, 1) // buffered to avoid blocking in handlers
 
-	checkPodReady := func(pod *v1.Pod) {
+	checkPodReady := func(pod *kube_core_v1.Pod) {
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				select {
@@ -381,7 +381,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 				return
 			}
 			switch pod.Status.Phase {
-			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
+			case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
 				select {
 				case up <- true:
 				default:
@@ -391,7 +391,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	podAdded := func(obj any) {
-		pod, ok := obj.(*v1.Pod)
+		pod, ok := obj.(*kube_core_v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", obj)
 			return
@@ -400,7 +400,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	podUpdated := func(_, newPod any) {
-		pod, ok := newPod.(*v1.Pod)
+		pod, ok := newPod.(*kube_core_v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
@@ -411,7 +411,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 				upOnce.Do(func() { close(up) })
 			}
 			switch pod.Status.Phase {
-			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
+			case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
 				upOnce.Do(func() { close(up) })
 			}
 		}
@@ -438,7 +438,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, ctx.Err()
 	}
 
-	opts := &v1.PodLogOptions{
+	opts := &kube_core_v1.PodLogOptions{
 		Follow:    true,
 		Container: podName,
 	}
@@ -497,7 +497,7 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	if err != nil {
 		errs = append(errs, err)
 	}
-	return std_errs.Join(errs...)
+	return errors.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.
@@ -538,7 +538,7 @@ func (e *kube) Reconnect(ctx context.Context, step *types.Step, taskUUID string)
 	}
 
 	namespace := e.config.GetNamespace(step.OrgID)
-	_, err = e.client.CoreV1().Pods(namespace).Get(ctx, name, meta_v1.GetOptions{})
+	_, err = e.client.CoreV1().Pods(namespace).Get(ctx, name, kube_meta_v1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("pod %s not found: %w", name, err)
 	}

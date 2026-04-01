@@ -18,7 +18,7 @@ import (
 	"context"
 	"sync"
 
-	logger "github.com/rs/zerolog/log"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -52,7 +52,7 @@ type stream struct {
 	done   chan struct{}
 }
 
-type log struct {
+type logger struct {
 	sync.Mutex
 
 	streams map[int64]*stream
@@ -60,12 +60,12 @@ type log struct {
 
 // New returns a new logger.
 func New() Log {
-	return &log{
+	return &logger{
 		streams: map[int64]*stream{},
 	}
 }
 
-func (l *log) Open(_ context.Context, stepID int64) error {
+func (l *logger) Open(_ context.Context, stepID int64) error {
 	l.Lock()
 	_, ok := l.streams[stepID]
 	if !ok {
@@ -79,7 +79,7 @@ func (l *log) Open(_ context.Context, stepID int64) error {
 	return nil
 }
 
-func (l *log) Write(ctx context.Context, stepID int64, entries []*model.LogEntry) error {
+func (l *logger) Write(ctx context.Context, stepID int64, entries []*model.LogEntry) error {
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
@@ -99,7 +99,7 @@ func (l *log) Write(ctx context.Context, stepID int64, entries []*model.LogEntry
 		select {
 		case sub.receiver <- entries:
 		default:
-			logger.Info().Msgf("subscriber channel is full -- dropping logs for step %d", stepID)
+			log.Info().Msgf("subscriber channel is full -- dropping logs for step %d", stepID)
 		}
 	}
 	s.Unlock()
@@ -107,7 +107,7 @@ func (l *log) Write(ctx context.Context, stepID int64, entries []*model.LogEntry
 	return nil
 }
 
-func (l *log) Tail(c context.Context, stepID int64, receiver LogChan) error {
+func (l *logger) Tail(c context.Context, stepID int64, receiver LogChan) error {
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
@@ -136,7 +136,7 @@ func (l *log) Tail(c context.Context, stepID int64, receiver LogChan) error {
 	return nil
 }
 
-func (l *log) Close(_ context.Context, stepID int64) error {
+func (l *logger) Close(_ context.Context, stepID int64) error {
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()

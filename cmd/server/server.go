@@ -27,14 +27,14 @@ import (
 
 	"github.com/cenkalti/backoff/v5"
 	"github.com/gin-gonic/gin"
-	prometheus_http "github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
-	"go.woodpecker-ci.org/woodpecker/v3/server/cron"
+	cron_scheduler "go.woodpecker-ci.org/woodpecker/v3/server/cron"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -126,7 +126,7 @@ func run(ctx context.Context, c *cli.Command) error {
 
 	serviceWaitingGroup.Go(func() error {
 		log.Info().Msg("starting cron service ...")
-		if err := cron.Run(ctx, _store); err != nil {
+		if err := cron_scheduler.Run(ctx, _store); err != nil {
 			go stopServerFunc(err)
 			return err
 		}
@@ -295,7 +295,7 @@ func run(ctx context.Context, c *cli.Command) error {
 	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
 		serviceWaitingGroup.Go(func() error {
 			metricsRouter := gin.New()
-			metricsRouter.GET("/metrics", gin.WrapH(prometheus_http.Handler()))
+			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 			metricsServer := &http.Server{
 				Addr:    metricsServerAddr,

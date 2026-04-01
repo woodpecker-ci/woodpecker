@@ -184,6 +184,10 @@ func PostRepo(c *gin.Context) {
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {
+		if errors.Is(err, types.ErrInsertDuplicateDetected) {
+			c.String(http.StatusConflict, "Repository already exists in Woodpecker. Remove the stale repository entry and try again.")
+			return
+		}
 		msg := "could not create/update repo in store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
@@ -292,8 +296,20 @@ func PatchRepo(c *gin.Context) {
 	if in.ConfigExtensionExclusive != nil {
 		repo.ConfigExtensionExclusive = *in.ConfigExtensionExclusive
 	}
+	if in.ConfigExtensionNetrc != nil {
+		repo.ConfigExtensionNetrc = *in.ConfigExtensionNetrc
+	}
 	if in.RegistryExtensionEndpoint != nil {
 		repo.RegistryExtensionEndpoint = *in.RegistryExtensionEndpoint
+	}
+	if in.RegistryExtensionNetrc != nil {
+		repo.RegistryExtensionNetrc = *in.RegistryExtensionNetrc
+	}
+	if in.SecretExtensionEndpoint != nil {
+		repo.SecretExtensionEndpoint = *in.SecretExtensionEndpoint
+	}
+	if in.SecretExtensionNetrc != nil {
+		repo.SecretExtensionNetrc = *in.SecretExtensionNetrc
 	}
 
 	err := _store.UpdateRepo(repo)
