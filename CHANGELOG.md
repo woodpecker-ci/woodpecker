@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-03-31
+## [3.14.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0-rc.0) - 2026-04-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -144,6 +144,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module google.golang.org/grpc to v1.80.0 [[#6363](https://github.com/woodpecker-ci/woodpecker/pull/6363)]
 - fix(deps): update module github.com/lib/pq to v1.12.1 [[#6354](https://github.com/woodpecker-ci/woodpecker/pull/6354)]
 - fix(deps): update golang-packages [[#6343](https://github.com/woodpecker-ci/woodpecker/pull/6343)]
 - chore(deps): lock file maintenance [[#6344](https://github.com/woodpecker-ci/woodpecker/pull/6344)]
@@ -173,7 +174,6 @@
 - chore(deps): update pre-commit non-major [[#6212](https://github.com/woodpecker-ci/woodpecker/pull/6212)]
 - chore(deps): update dependency simple-icons to v16.11.0 [[#6220](https://github.com/woodpecker-ci/woodpecker/pull/6220)]
 - chore(deps): update dependency vue-i18n to v11.3.0 [[#6217](https://github.com/woodpecker-ci/woodpecker/pull/6217)]
-- fix(deps): update module google.golang.org/grpc to v1.79.2 [[#6208](https://github.com/woodpecker-ci/woodpecker/pull/6208)]
 - chore(deps): update dependency golang to v1.26.1 [[#6207](https://github.com/woodpecker-ci/woodpecker/pull/6207)]
 - fix(deps): update module github.com/docker/cli to v29.3.0+incompatible [[#6201](https://github.com/woodpecker-ci/woodpecker/pull/6201)]
 - fix(deps): update module github.com/yaronf/httpsign to v0.4.2 [[#6188](https://github.com/woodpecker-ci/woodpecker/pull/6188)]
@@ -190,7 +190,6 @@
 - chore(deps): update postgres docker tag to v18.2 [[#6124](https://github.com/woodpecker-ci/woodpecker/pull/6124)]
 - chore(deps): update docker.io/golang docker tag to v1.26 [[#6121](https://github.com/woodpecker-ci/woodpecker/pull/6121)]
 - chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.23.0 [[#6122](https://github.com/woodpecker-ci/woodpecker/pull/6122)]
-- fix(deps): update module google.golang.org/grpc to v1.79.0 [[#6117](https://github.com/woodpecker-ci/woodpecker/pull/6117)]
 - chore(deps): update dependency @types/node to v24.10.12 [[#6087](https://github.com/woodpecker-ci/woodpecker/pull/6087)]
 - chore(deps): update eslint monorepo to v10 (major) [[#6083](https://github.com/woodpecker-ci/woodpecker/pull/6083)]
 - chore(deps): update dependency @antfu/eslint-config to v7.3.0 [[#6084](https://github.com/woodpecker-ci/woodpecker/pull/6084)]
