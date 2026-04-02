@@ -75,8 +75,8 @@
       "enabled": "Already enabled",
       "disabled": "Disabled",
       "success": "Repository enabled",
-      "new_forge_repo": "new on forge",
-      "stale_wp_repo": "outdated Woodpecker entry",
+      "new_forge_repo": "new repo on forge",
+      "stale_wp_repo": "outdated Woodpecker repo",
       "conflict": "Conflict",
       "conflict_desc": "This repository was recreated on the forge with a new ID, but an outdated entry with the same name still exists in Woodpecker. Delete the outdated entry first, then you can enable the new one."
     },
