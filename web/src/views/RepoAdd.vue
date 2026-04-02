@@ -104,7 +104,6 @@ const conflictMap = computed(() => {
   const storedRepos = [...repoStore.repos.values()];
 
   for (const forgeRepo of repos.value) {
-    // Only check inactive forge repos — active ones are fine
     if (forgeRepo.active) continue;
 
     const staleWpRepo = storedRepos.find(
