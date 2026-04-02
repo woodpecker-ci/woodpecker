@@ -1,3 +1,17 @@
+// Copyright 2024 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package api_test
 
 import (
@@ -18,7 +32,7 @@ import (
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	services_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -70,7 +84,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should fail if the state is wrong", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
@@ -103,7 +117,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should redirect to forge login page", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
@@ -139,7 +153,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should register a new user", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
@@ -175,7 +189,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should login an existing user", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
@@ -208,7 +222,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should deny a new user if registration is closed", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
@@ -237,7 +251,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should deny a user with missing org access", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
@@ -269,7 +283,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should create an user org if it does not exists", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
@@ -304,7 +318,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should link an user org if it has the same name as the user", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
@@ -339,7 +353,7 @@ func TestHandleAuth(t *testing.T) {
 	})
 
 	t.Run("should update an user org if the user name was changed", func(t *testing.T) {
-		_manager := services_mocks.NewMockManager(t)
+		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager

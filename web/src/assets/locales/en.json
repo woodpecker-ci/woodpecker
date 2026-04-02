@@ -49,7 +49,7 @@
         "value": "Variable value"
       },
       "show_pipelines": "Show pipelines",
-      "no_manual_workflows": "There were no manually executable workflows, or the filter exclude all of them."
+      "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
@@ -224,6 +224,7 @@
         "cancel": "Cancel",
         "restart": "Restart",
         "canceled": "This step has been canceled.",
+        "skipped": "This step has been skipped.",
         "cancel_success": "Pipeline canceled",
         "deploy": "Deploy",
         "restart_success": "Pipeline restarted",
@@ -258,6 +259,7 @@
         "running": "running",
         "started": "started",
         "skipped": "skipped",
+        "canceled": "canceled",
         "success": "success",
         "declined": "declined",
         "error": "error",
@@ -270,6 +272,8 @@
       "we_got_some_errors": "Oh no, an error occurred!",
       "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
+      "version": "The Woodpecker version this pipeline was executed on.",
+      "version_header": "Woodpecker version",
       "cancel_info": {
         "superseded_by": "Superseded by #{pipelineId}",
         "canceled_by_user": "Canceled by {user}",
@@ -515,6 +519,8 @@
   "update_woodpecker": "Please update your Woodpecker instance to {0}",
   "global_level_secret": "global secret",
   "org_level_secret": "organization secret",
+  "global_level_registry": "global registry",
+  "org_level_registry": "organization registry",
   "login_to_cli": "Login to CLI",
   "login_to_cli_description": "If you continue, you will be logged in to the CLI.",
   "abort": "Abort",
@@ -536,6 +542,9 @@
   "registry_extension_endpoint": "Registry extension endpoint",
   "config_extension_exclusive": "Exclusive",
   "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
+  "secret_extension_endpoint": "Secret extension endpoint",
+  "extension_netrc": "Include netrc credentials",
+  "extension_netrc_desc": "Send forge netrc credentials to the extension.",
   "extensions_signatures_public_key": "Public key for signatures",
   "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
   "extensions_configuration_saved": "Extensions configuration saved",

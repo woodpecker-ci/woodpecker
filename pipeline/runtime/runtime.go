@@ -21,7 +21,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -33,8 +33,8 @@ type Runtime struct {
 	// err holds the first error that occurred in the workflow.
 	err utils.Protected[error]
 
-	spec    *backend.Config
-	engine  backend.Backend
+	spec    *backend_types.Config
+	engine  backend_types.Backend
 	started int64
 
 	// ctx is the context for the current workflow execution.
@@ -50,11 +50,12 @@ type Runtime struct {
 }
 
 // New returns a new Runtime for the given workflow spec and options.
-func New(spec *backend.Config, opts ...Option) *Runtime {
+func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Option) *Runtime {
 	r := new(Runtime)
 	r.err = utils.NewProtected[error](nil)
 	r.description = map[string]string{}
 	r.spec = spec
+	r.engine = backend
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
 	for _, opt := range opts {
