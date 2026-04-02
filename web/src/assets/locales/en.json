@@ -78,7 +78,7 @@
       "new_forge_repo": "new repo on forge",
       "stale_wp_repo": "outdated Woodpecker repo",
       "conflict": "Conflict",
-      "conflict_desc": "This repository was recreated on the forge with a new ID, but an outdated entry with the same name still exists in Woodpecker. Delete the outdated entry first, then you can enable the new one."
+      "conflict_desc": "This repository was recreated on the forge with a new ID, but an outdated entry with the same name still exists in Woodpecker. Delete the outdated to enable the new one or Repair the old."
     },
     "open_in_forge": "Open repository in forge",
     "visibility": {
