@@ -54,33 +54,14 @@ const (
 	authInterceptorRefreshInterval = time.Minute * 30
 )
 
-const (
-	shutdownTimeout = time.Second * 5
-)
-
-var (
-	stopAgentFunc      context.CancelCauseFunc = func(error) {}
-	shutdownCancelFunc context.CancelFunc      = func() {}
-	shutdownCtx                                = context.Background()
-)
-
 func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	log.Info().Str("version", version.String()).Msg("Starting Woodpecker agent")
 
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
-	stopAgentFunc = func(err error) {
-		msg := "shutdown of whole agent"
-		if err != nil {
-			log.Error().Err(err).Msg(msg)
-		} else {
-			log.Info().Msg(msg)
-		}
-		stopAgentFunc = func(error) {}
-		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
-		ctxCancel(err)
-	}
-	defer stopAgentFunc(nil)
-	defer shutdownCancelFunc()
+	defer func() {
+		log.Info().Msg("shutdown of whole agent")
+		ctxCancel(nil)
+	}()
 
 	serviceWaitingGroup := errgroup.Group{}
 
@@ -107,6 +88,10 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				go func() {
 					<-agentCtx.Done()
 					log.Info().Msg("shutdown healthcheck server ...")
+
+					shutdownCtx, shutdownCtxCancel := agent.GetShutdownContext()
+					defer shutdownCtxCancel()
+
 					if err := server.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
 						log.Error().Err(err).Msg("shutdown healthcheck server failed")
 					} else {
@@ -302,7 +287,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				}
 
 				log.Debug().Msg("polling new workflow")
-				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
+				if err := runner.Run(agentCtx); err != nil {
 					if singleWorkflow {
 						log.Error().Err(err).Msg("runner done with error")
 						ctxCancel(nil)
