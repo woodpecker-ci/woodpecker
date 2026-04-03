@@ -8,7 +8,7 @@
       <template v-if="repos !== undefined && repos.length > 0">
         <template v-for="repo in searchedRepos" :key="repo.forge_remote_id">
           <!-- Conflict case: forge repo exists but a stale Woodpecker repo with same name blocks activation -->
-          <div v-if="getConflict(repo)" class="space-y-0">
+          <div v-if="repo.has_forge_name_conflict" class="space-y-0">
             <!-- New forge repo (greyed out enable) -->
             <ListItem class="items-center rounded-b-none! border-b-0!">
               <div class="flex w-full items-center">
@@ -24,16 +24,16 @@
 
             <!-- Old stale Woodpecker repo (clickable link + repair & delete) -->
             <ListItem
-              :to="{ name: 'repo', params: { repoId: getConflict(repo)!.id } }"
+              :to="{ name: 'repo', params: { repoId: repo.id } }"
               class="items-center rounded-t-none! border-t-0! opacity-80"
             >
-              <span class="text-wp-text-alt-100">{{ getConflict(repo)!.full_name }}</span>
+              <span class="text-wp-text-alt-100">{{ repo.full_name }}</span>
               <span class="text-wp-text-alt-100 ml-2 text-xs">{{ $t('repo.enable.stale_wp_repo') }}</span>
               <div class="ml-auto" @click.prevent.stop>
                 <Button
                   start-icon="toolbox"
                   :text="$t('repo.settings.actions.actions')"
-                  :to="{ name: 'repo-settings-actions', params: { repoId: getConflict(repo)!.id } }"
+                  :to="{ name: 'repo-settings-actions', params: { repoId: repo.id } }"
                 />
               </div>
             </ListItem>
@@ -46,7 +46,11 @@
           </ListItem>
 
           <!-- Normal case: can be enabled -->
-          <ListItem v-else class="items-center">
+          <ListItem
+            v-else
+            class="items-center"
+            :to="repo.id ? { name: 'repo', params: { repoId: repo.id } } : undefined"
+          >
             <span class="text-wp-text-100">{{ repo.full_name }}</span>
             <div class="ml-auto flex items-center">
               <Badge v-if="repo.id" class="md:display-unset mr-2 hidden" :value="$t('repo.enable.disabled')" />
@@ -83,12 +87,10 @@ import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Repo } from '~/lib/api/types';
-import { useRepoStore } from '~/store/repos';
 
 const router = useRouter();
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const repoStore = useRepoStore();
 const repos = ref<Repo[]>();
 const repoToActivate = ref<Repo>();
 const search = ref('');
@@ -97,37 +99,8 @@ const loading = ref(false);
 
 const { searchedRepos } = useRepoSearch(repos, search);
 
-const conflictMap = computed(() => {
-  const map = new Map<string, Repo>();
-  if (!repos.value) return map;
-
-  const storedRepos = [...repoStore.repos.values()];
-
-  for (const forgeRepo of repos.value) {
-    if (forgeRepo.active) continue;
-
-    const staleWpRepo = storedRepos.find(
-      (stored) =>
-        stored.full_name === forgeRepo.full_name &&
-        stored.forge_remote_id !== forgeRepo.forge_remote_id &&
-        stored.id > 0,
-    );
-
-    if (staleWpRepo) {
-      map.set(forgeRepo.full_name, staleWpRepo);
-    }
-  }
-
-  return map;
-});
-
-function getConflict(repo: Repo): Repo | undefined {
-  return conflictMap.value.get(repo.full_name);
-}
-
 onMounted(async () => {
   loading.value = true;
-  await repoStore.loadRepos();
   repos.value = await apiClient.getRepoList({ all: true });
   loading.value = false;
 });

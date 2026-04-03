@@ -5272,6 +5272,10 @@ const docTemplate = `{
                 "full_name": {
                     "type": "string"
                 },
+                "has_forge_name_conflict": {
+                    "description": "True if forge returned a repo with same name but different forge remote id",
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -5382,6 +5386,10 @@ const docTemplate = `{
                 },
                 "full_name": {
                     "type": "string"
+                },
+                "has_forge_name_conflict": {
+                    "description": "True if forge returned a repo with same name but different forge remote id",
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
