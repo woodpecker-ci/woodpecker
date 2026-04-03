@@ -745,7 +745,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 		if errors.Is(err, forge_types.ErrRepoNotFound) && repo.ForgeRemoteID.IsValid() {
 			from, err = _forge.Repo(c, repoUser, "", repo.Owner, repo.Name)
 			if err == nil {
-				log.Info().Str("repoFullName", repo.FullName).
+				log.Debug().Str("repoFullName", repo.FullName).
 					Str("old ForgeRemoteID", string(repo.ForgeRemoteID)).Str("new ForgeRemoteID", string(from.ForgeRemoteID)).
 					Msgf("RepoRepair detected remote repo ID change and updated it")
 			}
