@@ -537,44 +537,6 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	return s.store.AgentUpdate(agent)
 }
 
-func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
-	var err error
-	if repo == nil && pipeline == nil {
-		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		workflow, err := s.store.WorkflowLoad(workflowID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
-			return err
-		}
-
-		pipeline, err = s.store.GetPipeline(workflow.PipelineID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
-			return err
-		}
-	}
-
-	if repo == nil {
-		repo, err = s.store.GetRepo(pipeline.RepoID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find repo with id %d", pipeline.RepoID)
-			return err
-		}
-	}
-
-	if agent.CanAccessRepo(repo) {
-		return nil
-	}
-
-	msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
-	log.Error().Int64("repoId", repo.ID).Msg(msg)
-	return errors.New(msg)
-}
-
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {

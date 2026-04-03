@@ -29,7 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	queueMocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	logMocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	storeMocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
@@ -50,7 +50,7 @@ func newTestRPC(t *testing.T, mockStore *storeMocks.MockStore) RPC {
 
 	return RPC{
 		store:         mockStore,
-		pubsub:        pubsub.New(),
+		pubsub:        memory.New(),
 		logger:        logging.New(),
 		pipelineTime:  pipelineTime,
 		pipelineCount: pipelineCount,
