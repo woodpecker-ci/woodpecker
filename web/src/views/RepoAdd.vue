@@ -9,20 +9,18 @@
         <template v-for="repo in searchedRepos" :key="repo.forge_remote_id">
           <!-- Conflict case: forge repo exists but a stale Woodpecker repo with same name blocks activation -->
           <div v-if="repo.has_forge_name_conflict" class="space-y-0">
-            <!-- New forge repo (greyed out enable) -->
+            <!-- New forge repo (that causes conflict) -->
             <ListItem class="items-center rounded-b-none! border-b-0!">
               <div class="flex w-full items-center">
                 <span class="text-wp-text-100">{{ repo.full_name }}</span>
                 <span class="text-wp-text-alt-100 ml-2 text-xs">{{ $t('repo.enable.new_forge_repo') }}</span>
                 <div class="ml-auto flex items-center">
-                  <span class="text-wp-text-alt-100 cursor-help text-sm" :title="$t('repo.enable.conflict_desc')">
-                    {{ $t('repo.enable.conflict') }}
-                  </span>
+                  <Button :text="$t('repo.enable.conflict')" :title="$t('repo.enable.conflict_desc')" disabled />
                 </div>
               </div>
             </ListItem>
 
-            <!-- Old stale Woodpecker repo (clickable link + repair & delete) -->
+            <!-- Old stale Woodpecker repo -->
             <ListItem
               :to="{ name: 'repo', params: { repoId: repo.id } }"
               class="items-center rounded-t-none! border-t-0! opacity-80"
