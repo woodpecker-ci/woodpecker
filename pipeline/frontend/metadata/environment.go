@@ -84,6 +84,7 @@ func (m *Metadata) Environ() map[string]string {
 
 	step := m.Step
 	setNonEmptyEnvVar(params, "CI_STEP_NAME", step.Name)
+	setNonEmptyEnvVar(params, "CI_STEP_TYPE", step.Type)
 	setNonEmptyEnvVar(params, "CI_STEP_NUMBER", strconv.Itoa(step.Number))
 	setNonEmptyEnvVar(params, "CI_STEP_URL", m.getPipelineWebURL(pipeline, step.Number))
 	// CI_STEP_STARTED will be set by agent
