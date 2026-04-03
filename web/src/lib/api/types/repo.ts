@@ -14,6 +14,9 @@ export interface Repo {
   // The id of the forge that the repository is on.
   forge_id: number;
 
+  // The id of the user that owns the repository. Will be used for api requests to the forge.
+  user_id: number;
+
   // The source control management being used.
   // Currently, this is either 'git' or 'hg' (Mercurial).
   scm: string;
