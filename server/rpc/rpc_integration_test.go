@@ -30,13 +30,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
-	queueMocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
-	logMocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
-	storeMocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
+	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 // newTestRPC creates an RPC instance with common test infrastructure.
-func newTestRPC(t *testing.T, mockStore *storeMocks.MockStore) RPC {
+func newTestRPC(t *testing.T, mockStore *store_mocks.MockStore) RPC {
 	t.Helper()
 
 	pipelineTime := prometheus.NewGaugeVec(prometheus.GaugeOpts{
@@ -112,8 +112,8 @@ func defaultStep(state model.StatusValue) *model.Step {
 
 func TestRPCUpdate(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
-		mockLogStore := logMocks.NewMockService(t)
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
 		origLogStore := server.Config.Services.LogStore
 		server.Config.Services.LogStore = mockLogStore
 		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
@@ -145,7 +145,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject pipeline already succeeded", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusSuccess)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -165,7 +165,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject pipeline already failed", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusFailure)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -185,7 +185,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject pipeline blocked", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusBlocked)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -205,7 +205,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject workflow already finished", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusSuccess) // finished
@@ -225,7 +225,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject step already finished", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -245,7 +245,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject step belongs to different pipeline", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -270,7 +270,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject agent from wrong org", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := orgAgent999()
 		repo := defaultRepo() // org 100
 		pipeline := defaultPipeline(model.StatusRunning)
@@ -292,7 +292,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
@@ -301,7 +301,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject nonexistent workflow", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("WorkflowLoad", int64(999)).Return(nil, errors.New("not found"))
 
 		rpcInst := newTestRPC(t, mockStore)
@@ -312,7 +312,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject nonexistent step UUID", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -330,7 +330,7 @@ func TestRPCUpdate(t *testing.T) {
 	})
 
 	t.Run("reject missing agent metadata", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusRunning)
 
@@ -348,7 +348,7 @@ func TestRPCUpdate(t *testing.T) {
 
 func TestRPCInit(t *testing.T) {
 	t.Run("happy path - pending pipeline", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		repo := defaultRepo()
 		pipeline := defaultPipeline(model.StatusPending)
@@ -377,7 +377,7 @@ func TestRPCInit(t *testing.T) {
 	})
 
 	t.Run("happy path - already running pipeline", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		repo := defaultRepo()
 		pipeline := defaultPipeline(model.StatusRunning) // another workflow already started it
@@ -401,7 +401,7 @@ func TestRPCInit(t *testing.T) {
 	})
 
 	t.Run("reject pipeline already succeeded", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusSuccess)
 		workflow := defaultWorkflow(model.StatusPending)
@@ -419,7 +419,7 @@ func TestRPCInit(t *testing.T) {
 	})
 
 	t.Run("reject pipeline blocked", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusBlocked)
 		workflow := defaultWorkflow(model.StatusPending)
@@ -437,7 +437,7 @@ func TestRPCInit(t *testing.T) {
 	})
 
 	t.Run("reject workflow already finished", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusSuccess)
@@ -455,7 +455,7 @@ func TestRPCInit(t *testing.T) {
 	})
 
 	t.Run("reject workflow blocked", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusBlocked)
@@ -473,7 +473,7 @@ func TestRPCInit(t *testing.T) {
 	})
 
 	t.Run("reject agent wrong org", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := orgAgent999()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusPending)
@@ -492,7 +492,7 @@ func TestRPCInit(t *testing.T) {
 	})
 
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
@@ -503,9 +503,9 @@ func TestRPCInit(t *testing.T) {
 
 func TestRPCDone(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
-		mockQueue := queueMocks.NewMockQueue(t)
-		mockLogStore := logMocks.NewMockService(t)
+		mockStore := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
+		mockLogStore := log_mocks.NewMockService(t)
 		origLogStore := server.Config.Services.LogStore
 		server.Config.Services.LogStore = mockLogStore
 		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
@@ -537,7 +537,7 @@ func TestRPCDone(t *testing.T) {
 	})
 
 	t.Run("reject pipeline already succeeded", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusSuccess)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -556,7 +556,7 @@ func TestRPCDone(t *testing.T) {
 	})
 
 	t.Run("reject pipeline killed", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusKilled)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -575,7 +575,7 @@ func TestRPCDone(t *testing.T) {
 	})
 
 	t.Run("reject pipeline blocked", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusBlocked)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -594,7 +594,7 @@ func TestRPCDone(t *testing.T) {
 	})
 
 	t.Run("reject workflow already finished", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusSuccess)
@@ -613,7 +613,7 @@ func TestRPCDone(t *testing.T) {
 	})
 
 	t.Run("reject agent wrong org", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := orgAgent999()
 		pipeline := defaultPipeline(model.StatusRunning)
 		workflow := defaultWorkflow(model.StatusRunning)
@@ -633,7 +633,7 @@ func TestRPCDone(t *testing.T) {
 	})
 
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
@@ -659,8 +659,8 @@ func TestRPCLog(t *testing.T) {
 	}
 
 	t.Run("happy path: step running, pipeline running", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
-		mockLogStore := logMocks.NewMockService(t)
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
 		origLogStore := server.Config.Services.LogStore
 		server.Config.Services.LogStore = mockLogStore
 		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
@@ -688,8 +688,8 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("allow: step finished but pipeline still running (logs draining)", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
-		mockLogStore := logMocks.NewMockService(t)
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
 		origLogStore := server.Config.Services.LogStore
 		server.Config.Services.LogStore = mockLogStore
 		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
@@ -715,8 +715,8 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("allow: step running even though pipeline finished stale (step takes priority)", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
-		mockLogStore := logMocks.NewMockService(t)
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
 		origLogStore := server.Config.Services.LogStore
 		server.Config.Services.LogStore = mockLogStore
 		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
@@ -742,8 +742,8 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("allow: pipeline finished recently — within drain window", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
-		mockLogStore := logMocks.NewMockService(t)
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
 		origLogStore := server.Config.Services.LogStore
 		server.Config.Services.LogStore = mockLogStore
 		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
@@ -773,7 +773,7 @@ func TestRPCLog(t *testing.T) {
 		// Previously the rejection came from checkPipelineState returning
 		// ErrAgentIllegalPipelineWorkflowReRunStateChange.
 		// Now it comes from allowAppendingLogs returning ErrAgentIllegalLogStreaming.
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := stalePipeline(model.StatusSuccess)
 		step := defaultStep(model.StatusSuccess)
@@ -798,7 +798,7 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject: pipeline failed stale and step not running", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := stalePipeline(model.StatusFailure)
 		step := defaultStep(model.StatusFailure)
@@ -819,7 +819,7 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject: step pending (not running), pipeline not running, outside drain window", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := stalePipeline(model.StatusKilled)
 		step := defaultStep(model.StatusPending)
@@ -841,7 +841,7 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject: step already succeeded, pipeline succeeded stale", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := stalePipeline(model.StatusSuccess)
 		step := defaultStep(model.StatusSuccess)
@@ -862,7 +862,7 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject: step killed, pipeline killed stale", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := stalePipeline(model.StatusKilled)
 		step := defaultStep(model.StatusKilled)
@@ -883,8 +883,8 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject mismatched step UUID in log entry", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
-		mockLogStore := logMocks.NewMockService(t)
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
 		origLogStore := server.Config.Services.LogStore
 		server.Config.Services.LogStore = mockLogStore
 		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
@@ -913,7 +913,7 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject agent wrong org", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := orgAgent999()
 		pipeline := defaultPipeline(model.StatusRunning)
 		step := defaultStep(model.StatusRunning)
@@ -934,7 +934,7 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject nonexistent step UUID", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("StepByUUID", "nonexistent").Return(nil, errors.New("not found"))
 
 		rpcInst := newTestRPC(t, mockStore)
@@ -950,7 +950,7 @@ func TestRPCLog(t *testing.T) {
 
 func TestRPCExtend(t *testing.T) {
 	t.Run("reject agent wrong org via permission check", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := orgAgent999()
 		workflow := defaultWorkflow(model.StatusRunning)
 		pipeline := defaultPipeline(model.StatusRunning)
@@ -973,7 +973,7 @@ func TestRPCExtend(t *testing.T) {
 
 func TestRPCWait(t *testing.T) {
 	t.Run("reject agent wrong org", func(t *testing.T) {
-		mockStore := storeMocks.NewMockStore(t)
+		mockStore := store_mocks.NewMockStore(t)
 		agent := orgAgent999()
 		workflow := defaultWorkflow(model.StatusRunning)
 		pipeline := defaultPipeline(model.StatusRunning)

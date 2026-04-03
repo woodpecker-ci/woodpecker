@@ -23,14 +23,14 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	storeMocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // newAuthServer is a test helper that wires up a WoodpeckerAuthServer with the
 // given master token and a mock store, then returns both so tests can set
 // expectations before calling Auth / getAgent.
-func newAuthServer(t *testing.T, masterToken string, store *storeMocks.MockStore) *WoodpeckerAuthServer {
+func newAuthServer(t *testing.T, masterToken string, store *store_mocks.MockStore) *WoodpeckerAuthServer {
 	t.Helper()
 	jwtManager := NewJWTManager("test-secret")
 	return NewWoodpeckerAuthServer(jwtManager, masterToken, store)
@@ -42,7 +42,7 @@ func TestAuth(t *testing.T) {
 	t.Run("master token with agentID=-1 creates new system agent and returns access token", func(t *testing.T) {
 		t.Parallel()
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentCreate", &model.Agent{
 			OwnerID:  model.IDNotSet,
 			OrgID:    model.IDNotSet,
@@ -75,7 +75,7 @@ func TestAuth(t *testing.T) {
 			OwnerID: model.IDNotSet,
 		}
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFind", int64(42)).Return(existingAgent, nil).Once()
 
 		srv := newAuthServer(t, "master-secret", store)
@@ -95,7 +95,7 @@ func TestAuth(t *testing.T) {
 
 		agent := &model.Agent{ID: 7, Token: "individual-token"}
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFindByToken", "individual-token").Return(agent, nil).Once()
 
 		// no master token configured
@@ -113,7 +113,7 @@ func TestAuth(t *testing.T) {
 	t.Run("bad token returns error", func(t *testing.T) {
 		t.Parallel()
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFindByToken", "wrong-token").
 			Return(nil, types.ErrRecordNotExist).Once()
 
@@ -133,7 +133,7 @@ func TestGetAgent(t *testing.T) {
 	t.Run("master token + agentID=-1 creates and returns a new system agent", func(t *testing.T) {
 		t.Parallel()
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentCreate", &model.Agent{
 			OwnerID:  model.IDNotSet,
 			OrgID:    model.IDNotSet,
@@ -153,7 +153,7 @@ func TestGetAgent(t *testing.T) {
 	t.Run("master token + agentID=-1 propagates AgentCreate error", func(t *testing.T) {
 		t.Parallel()
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentCreate", &model.Agent{
 			OwnerID:  model.IDNotSet,
 			OrgID:    model.IDNotSet,
@@ -173,7 +173,7 @@ func TestGetAgent(t *testing.T) {
 
 		systemAgent := &model.Agent{ID: 99, OrgID: model.IDNotSet, OwnerID: model.IDNotSet}
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFind", int64(99)).Return(systemAgent, nil).Once()
 
 		srv := newAuthServer(t, "master", store)
@@ -186,7 +186,7 @@ func TestGetAgent(t *testing.T) {
 	t.Run("master token + agentID not found in database returns error", func(t *testing.T) {
 		t.Parallel()
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFind", int64(404)).Return(nil, types.ErrRecordNotExist).Once()
 
 		srv := newAuthServer(t, "master", store)
@@ -199,7 +199,7 @@ func TestGetAgent(t *testing.T) {
 	t.Run("master token + agentID store returns unexpected error is propagated", func(t *testing.T) {
 		t.Parallel()
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFind", int64(1)).Return(nil, errors.New("connection reset")).Once()
 
 		srv := newAuthServer(t, "master", store)
@@ -215,7 +215,7 @@ func TestGetAgent(t *testing.T) {
 		// An agent with a non-IDNotSet OrgID is not a system agent.
 		orgAgent := &model.Agent{ID: 5, OrgID: 100, OwnerID: model.IDNotSet}
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFind", int64(5)).Return(orgAgent, nil).Once()
 
 		srv := newAuthServer(t, "master", store)
@@ -229,7 +229,7 @@ func TestGetAgent(t *testing.T) {
 		t.Parallel()
 
 		agent := &model.Agent{ID: 3, Token: "ind-token"}
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFindByToken", "ind-token").Return(agent, nil).Once()
 
 		// No master token set – falls straight to individual auth.
@@ -243,7 +243,7 @@ func TestGetAgent(t *testing.T) {
 	t.Run("individual token not found returns wrapped error", func(t *testing.T) {
 		t.Parallel()
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFindByToken", "bad-token").
 			Return(nil, types.ErrRecordNotExist).Once()
 
@@ -257,7 +257,7 @@ func TestGetAgent(t *testing.T) {
 	t.Run("individual token store returns unexpected error is propagated", func(t *testing.T) {
 		t.Parallel()
 
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		store.On("AgentFindByToken", "token").
 			Return(nil, errors.New("timeout")).Once()
 
@@ -272,7 +272,7 @@ func TestGetAgent(t *testing.T) {
 		t.Parallel()
 
 		agent := &model.Agent{ID: 8, Token: "ind-token"}
-		store := storeMocks.NewMockStore(t)
+		store := store_mocks.NewMockStore(t)
 		// master token is "master" but caller sends "ind-token" → individual path
 		store.On("AgentFindByToken", "ind-token").Return(agent, nil).Once()
 
