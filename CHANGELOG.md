@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-02
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -146,6 +146,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/lib/pq to v1.12.2 [[#6371](https://github.com/woodpecker-ci/woodpecker/pull/6371)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.13.0 [[#6366](https://github.com/woodpecker-ci/woodpecker/pull/6366)]
 - fix(deps): update module google.golang.org/grpc to v1.80.0 [[#6363](https://github.com/woodpecker-ci/woodpecker/pull/6363)]
 - fix(deps): update module github.com/lib/pq to v1.12.1 [[#6354](https://github.com/woodpecker-ci/woodpecker/pull/6354)]
 - fix(deps): update golang-packages [[#6343](https://github.com/woodpecker-ci/woodpecker/pull/6343)]
