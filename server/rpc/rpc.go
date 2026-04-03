@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grpc
+package rpc
 
 import (
 	"context"
@@ -199,6 +199,14 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
+	// sanitize agent input
+	if err := checkPipelineState(currentPipeline); err != nil {
+		return err
+	}
+	if err := checkWorkflowStepStates(workflow, step); err != nil {
+		return err
+	}
+
 	if err := pipeline.UpdateStepStatus(c, s.store, step, state); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
@@ -249,6 +257,14 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	// check before agent can alter some state
 	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
+		return err
+	}
+
+	// sanitize agent input
+	if err := checkPipelineState(currentPipeline); err != nil {
+		return err
+	}
+	if err := checkWorkflowStepStates(workflow, nil); err != nil {
 		return err
 	}
 
@@ -317,6 +333,14 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	// sanitize agent input
+	if err := checkPipelineState(currentPipeline); err != nil {
+		return err
+	}
+	if err := checkWorkflowStepStates(workflow, nil); err != nil {
+		return err
+	}
+
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
@@ -367,8 +391,10 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
 		for _, step := range workflow.Children {
-			if err := s.logger.Close(c, step.ID); err != nil {
-				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+			if step.State != model.StatusSkipped {
+				if err := s.logger.Close(c, step.ID); err != nil {
+					logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+				}
 			}
 		}
 	}()
@@ -410,6 +436,11 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 	// check before agent can alter some state
 	if err := s.checkAgentPermissionByWorkflow(c, agent, "", currentPipeline, nil); err != nil {
 		return err
+	}
+
+	// sanitize agent input
+	if err := allowAppendingLogs(currentPipeline, step); err != nil {
+		return fmt.Errorf("can not alter logs: %w", err)
 	}
 
 	err = s.updateAgentLastWork(agent)
@@ -506,48 +537,10 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	return s.store.AgentUpdate(agent)
 }
 
-func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
-	var err error
-	if repo == nil && pipeline == nil {
-		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		workflow, err := s.store.WorkflowLoad(workflowID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
-			return err
-		}
-
-		pipeline, err = s.store.GetPipeline(workflow.PipelineID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
-			return err
-		}
-	}
-
-	if repo == nil {
-		repo, err = s.store.GetRepo(pipeline.RepoID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find repo with id %d", pipeline.RepoID)
-			return err
-		}
-	}
-
-	if agent.CanAccessRepo(repo) {
-		return nil
-	}
-
-	msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
-	log.Error().Int64("repoId", repo.ID).Msg(msg)
-	return errors.New(msg)
-}
-
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
-			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusSkipped); err != nil {
+			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusKilled); err != nil {
 				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			} else {
 				// Update in-memory state so WorkflowStatus sees the final state
