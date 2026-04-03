@@ -102,6 +102,9 @@ export interface Repo {
 
   // True if forge returned a repo with same name but different forge remote id
   has_forge_name_conflict?: boolean;
+
+  // True if repo only exist in the woodpecker store and not at the forge anymore
+  has_no_forge_repo?: boolean;
 }
 
 /* eslint-disable no-unused-vars */

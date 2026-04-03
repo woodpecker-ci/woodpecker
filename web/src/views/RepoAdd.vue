@@ -37,6 +37,16 @@
             </ListItem>
           </div>
 
+          <!-- Conflict case: has no forge counterpart -->
+          <ListItem
+            v-else-if="repo.has_no_forge_repo"
+            :to="{ name: 'repo', params: { repoId: repo.id } }"
+            class="items-center"
+          >
+            <span class="text-wp-text-100">{{ repo.full_name }}</span>
+            <span class="text-wp-text-alt-100 ml-auto">{{ $t('repo.enable.forge_repo_missing') }}</span>
+          </ListItem>
+
           <!-- Normal case: already active -->
           <ListItem v-else-if="repo.active" :to="{ name: 'repo', params: { repoId: repo.id } }" class="items-center">
             <span class="text-wp-text-100">{{ repo.full_name }}</span>

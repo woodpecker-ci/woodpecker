@@ -84,6 +84,9 @@ type Repo struct {
 	// True if forge returned a repo with same name but different forge remote id
 	HasForgeNameConflict bool `json:"has_forge_name_conflict,omitempty"    xorm:"-"`
 
+	// True if repo only exist in the woodpecker store and not at the forge anymore
+	HasNoForgeRepo bool `      json:"has_no_forge_repo,omitempty"          xorm:"-"`
+
 	// internal usage
 
 	Perm *Perm `json:"-"    xorm:"-"`

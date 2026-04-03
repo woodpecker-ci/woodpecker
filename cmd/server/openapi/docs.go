@@ -5276,6 +5276,10 @@ const docTemplate = `{
                     "description": "True if forge returned a repo with same name but different forge remote id",
                     "type": "boolean"
                 },
+                "has_no_forge_repo": {
+                    "description": "True if repo only exist in the woodpecker store and not at the forge anymore",
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -5389,6 +5393,10 @@ const docTemplate = `{
                 },
                 "has_forge_name_conflict": {
                     "description": "True if forge returned a repo with same name but different forge remote id",
+                    "type": "boolean"
+                },
+                "has_no_forge_repo": {
+                    "description": "True if repo only exist in the woodpecker store and not at the forge anymore",
                     "type": "boolean"
                 },
                 "id": {

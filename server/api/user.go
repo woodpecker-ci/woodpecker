@@ -111,10 +111,12 @@ func GetRepos(c *gin.Context) {
 		}
 
 		dbReposMap := map[model.ForgeRemoteID]*model.Repo{}
+		dbStaleReposMap := map[int64]*model.Repo{}
 		dbReposFullNameMap := map[string]*model.Repo{}
 		for _, r := range dbRepos {
 			dbReposMap[r.ForgeRemoteID] = r
 			dbReposFullNameMap[strings.ToLower(r.FullName)] = r
+			dbStaleReposMap[r.ID] = r
 		}
 
 		_repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
@@ -141,6 +143,8 @@ func GetRepos(c *gin.Context) {
 					existingRepo.IsActive = dbReposMap[r.ForgeRemoteID].IsActive
 					// add to final return list
 					repos = append(repos, existingRepo)
+					// not stale, so remove it
+					delete(dbStaleReposMap, existingRepo.ID)
 				} else if r.Perm.Admin {
 					// you must be admin of the remote repo to enable the repo
 					repos = append(repos, r)
@@ -154,7 +158,16 @@ func GetRepos(c *gin.Context) {
 			if existingRepo := dbReposFullNameMap[strings.ToLower(r.FullName)]; existingRepo != nil && existingRepo.ForgeRemoteID != r.ForgeRemoteID {
 				r.ID = existingRepo.ID
 				r.HasForgeNameConflict = true
+
+				// not stale, so remove it
+				delete(dbStaleReposMap, existingRepo.ID)
 			}
+		}
+
+		// return stale repos
+		for _, staleRepo := range dbStaleReposMap {
+			staleRepo.HasNoForgeRepo = true
+			repos = append(repos, staleRepo)
 		}
 
 		c.JSON(http.StatusOK, repos)
