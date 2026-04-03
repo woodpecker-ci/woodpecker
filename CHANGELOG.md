@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Sanitize agent introduced pipeline/workflow/step state changes and log streaming [[#6308](https://github.com/woodpecker-ci/woodpecker/pull/6308)]
 - chore(deps): update dependency lodash to v4.18.1 [security] [[#6367](https://github.com/woodpecker-ci/woodpecker/pull/6367)]
 - Send 404 if logs are not allowed to access [[#6349](https://github.com/woodpecker-ci/woodpecker/pull/6349)]
 - Prevent registering as arbitrary agents with system token [[#6283](https://github.com/woodpecker-ci/woodpecker/pull/6283)]
