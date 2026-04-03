@@ -45,13 +45,13 @@ func (mode ApprovalMode) Valid() bool {
 type Repo struct {
 	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
 	UserID  int64 `json:"-"                               xorm:"INDEX 'user_id'"`
-	ForgeID int64 `json:"forge_id,omitempty"              xorm:"UNIQUE(forge) UNIQUE(name) UNIQUE(full_name) forge_id"`
+	ForgeID int64 `json:"forge_id,omitempty"              xorm:"UNIQUE(forge) forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
 	ForgeRemoteID                ForgeRemoteID        `json:"forge_remote_id"                 xorm:"UNIQUE(forge) forge_remote_id"`
 	OrgID                        int64                `json:"org_id"                          xorm:"INDEX 'org_id'"`
 	Owner                        string               `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
 	Name                         string               `json:"name"                            xorm:"UNIQUE(name) 'name'"`
-	FullName                     string               `json:"full_name"                       xorm:"UNIQUE(full_name) 'full_name'"`
+	FullName                     string               `json:"full_name"                       xorm:"UNIQUE 'full_name'"`
 	Avatar                       string               `json:"avatar_url,omitempty"            xorm:"varchar(500) 'avatar'"`
 	ForgeURL                     string               `json:"forge_url,omitempty"             xorm:"varchar(1000) 'forge_url'"`
 	Clone                        string               `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
