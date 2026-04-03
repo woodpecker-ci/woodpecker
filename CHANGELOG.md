@@ -68,6 +68,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix enable repo with same name and owner on second forge [[#6375](https://github.com/woodpecker-ci/woodpecker/pull/6375)]
 - Fix workflow beeing skipped and marked as failed when agent starts before server [[#6361](https://github.com/woodpecker-ci/woodpecker/pull/6361)]
 - Only redirect after login [[#6348](https://github.com/woodpecker-ci/woodpecker/pull/6348)]
 - Set workflow services stuck in running state to finished [[#6337](https://github.com/woodpecker-ci/woodpecker/pull/6337)]
