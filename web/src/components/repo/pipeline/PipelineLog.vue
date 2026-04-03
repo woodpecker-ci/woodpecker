@@ -60,43 +60,73 @@
       <div
         v-show="hasLogs && loadedLogs && (log?.length || 0) > 0"
         ref="consoleElement"
-        class="grid w-full max-w-full grow auto-rows-min grid-cols-[min-content_minmax(0,1fr)_min-content] overflow-x-hidden overflow-y-auto p-4 text-xs md:text-sm"
+        class="grid w-full max-w-full grow auto-rows-min grid-cols-[min-content_minmax(0,1fr)_min-content] overflow-x-hidden overflow-y-auto p-4 text-xs md:text-sm scroll-pt-8"
       >
-        <div v-for="line in log" :key="line.index" class="contents font-mono">
-          <a
-            :id="`L${line.number}`"
-            :href="`#L${line.number}`"
-            class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
-            :class="{
-              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-              'bg-blue-600/30': isSelected(line),
-              underline: isSelected(line),
-            }"
+        <div v-for="group in groupedLogs" :key="group.id" class="contents">
+          <div
+            v-if="group.isActualCommand"
+            class="sticky -top-4 z-10 col-span-3 my-1 flex cursor-pointer items-center rounded-sm px-2 py-1 font-mono text-sm shadow-xs"
+            :class="[group.command && isSelected(group.command) ? 'bg-blue-900' : 'bg-wp-code-100']"
+            @click="toggleGroup(group.id)"
           >
-            {{ line.number }}
-          </a>
-          <!-- eslint-disable vue/no-v-html -->
-          <span
-            class="wrap-break-words align-top whitespace-pre-wrap"
-            :class="{
-              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-              'bg-blue-600/30': isSelected(line),
-            }"
-            v-html="line.text"
-          />
-          <!-- eslint-enable vue/no-v-html -->
-          <span
-            class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none"
-            :class="{
-              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-              'bg-blue-600/30': isSelected(line),
-            }"
-          >
-            {{ formatTime(line.time) }}
-          </span>
+            <Icon
+              name="chevron-right"
+              class="mr-2 transition-transform"
+              :class="{
+                'rotate-90': !collapsedCommands.has(group.id),
+                invisible: group.lines.length === 0,
+              }"
+            />
+            <a
+              :id="`L${group.command?.number}`"
+              :href="`#L${group.command?.number}`"
+              class="text-wp-code-text-alt-100 mr-4 select-none"
+              :class="{
+                underline: group.command && isSelected(group.command),
+              }"
+              >{{ group.command?.number }}</a>
+            <!-- eslint-disable vue/no-v-html -->
+            <span v-if="group.command" class="flex-1 truncate" v-html="group.command.text" />
+          </div>
+
+          <template v-if="!collapsedCommands.has(group.id)">
+            <div v-for="line in group.lines" :key="line.index" class="contents font-mono">
+              <a
+                :id="`L${line.number}`"
+                :href="`#L${line.number}`"
+                class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
+                :class="{
+                  'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
+                  'bg-blue-600/30': isSelected(line),
+                  underline: isSelected(line),
+                }"
+              >
+                {{ line.number }}
+              </a>
+              <!-- eslint-disable vue/no-v-html -->
+              <span
+                class="wrap-break-words align-top whitespace-pre-wrap"
+                :class="{
+                  'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
+                  'bg-blue-600/30': isSelected(line),
+                }"
+                v-html="line.text"
+              />
+              <!-- eslint-enable vue/no-v-html -->
+              <span
+                class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none"
+                :class="{
+                  'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
+                  'bg-blue-600/30': isSelected(line),
+                }"
+              >
+                {{ formatTime(line.time) }}
+              </span>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -131,6 +161,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } fro
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -138,13 +169,22 @@ import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import type { PipelineConfig } from '~/lib/api/types/pipelineConfig';
 
 interface LogLine {
   index: number;
   number: number;
   text?: string;
+  rawText?: string;
   time?: number;
   type: 'error' | 'warning' | null;
+}
+
+interface LogBlock {
+  command: LogLine | null;
+  lines: LogLine[];
+  id: number;
+  isActualCommand: boolean;
 }
 
 const props = defineProps<{
@@ -162,6 +202,7 @@ const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = requiredInject('repo');
 const repoPermissions = requiredInject('repo-permissions');
+const pipelineConfigs = requiredInject('pipeline-configs');
 const apiClient = useApiClient();
 const route = useRoute();
 
@@ -191,6 +232,82 @@ const config = useConfig();
 const maxLineCount = config.maxPipelineLogLineCount; // TODO(2653): implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
+const collapsedCommands = ref(new Set<number>());
+
+const commandRegex = /^\s*-\s(.+)$/gm;
+const specialCharsRegex = /[.*+?^${}()|[\]\\]/g;
+const matrixVariableRegex = /\\\$(\\\{\w+\\\})/g;
+
+const knownCommandMatchers = computed(() => {
+  if (!pipelineConfigs.value) return [];
+  const patterns: RegExp[] = [];
+  pipelineConfigs.value.forEach((config: PipelineConfig) => {
+    const decoded = decode(config.data);
+    const matches = decoded.matchAll(commandRegex);
+    for (const match of matches) {
+      const rawCommand = match[1].trim();
+      // Replace matrix variable ${VAR} with a wildcard match (non-greedy)
+      const patternString = rawCommand
+        .replace(specialCharsRegex, '\\$&') // escape all
+        .replace(matrixVariableRegex, '.*'); // match ${VAR}
+
+      patterns.push(new RegExp(`^${patternString}$`));
+    }
+  });
+  return patterns;
+});
+
+const groupedLogs = computed(() => {
+  if (!log.value) return [];
+
+  if (!pipelineConfigs.value || pipelineConfigs.value.length === 0) {
+    return [
+      {
+        id: 0,
+        command: null,
+        lines: log.value,
+        isActualCommand: false,
+      },
+    ];
+  }
+
+  const blocks: LogBlock[] = [];
+  let currentBlock: LogBlock | null = null;
+
+  log.value.forEach((line) => {
+    const trimmedText = (line.rawText || '').trim();
+
+    let isCommand = false;
+    if (trimmedText.startsWith('+ ')) {
+      const cmdPart = trimmedText.slice(2).trim();
+      isCommand = knownCommandMatchers.value.some((matcher) => matcher.test(cmdPart));
+    }
+
+    if (isCommand) {
+      currentBlock = {
+        command: line,
+        lines: [],
+        id: line.number,
+        isActualCommand: true,
+      };
+      blocks.push(currentBlock);
+    } else {
+      if (!currentBlock) {
+        currentBlock = {
+          command: { number: 0, text: 'Initialization', type: null, index: -1 } as LogLine,
+          lines: [],
+          id: 0,
+          isActualCommand: false,
+        };
+        blocks.push(currentBlock);
+      }
+      currentBlock.lines.push(line);
+    }
+  });
+
+  return blocks;
+});
+
 const urlRegex = /https?:\/\/\S+/g;
 
 function isScrolledToBottom(): boolean {
@@ -209,6 +326,14 @@ function formatTime(time?: number): string {
   return time === undefined ? '' : `${time}s`;
 }
 
+function toggleGroup(id: number) {
+  if (collapsedCommands.value.has(id)) {
+    collapsedCommands.value.delete(id);
+  } else {
+    collapsedCommands.value.add(id);
+  }
+}
+
 function processText(text: string): string {
   let txt = ansiUp.value.ansi_to_html(`${decode(text)}\n`);
   txt = txt.replace(
@@ -219,10 +344,12 @@ function processText(text: string): string {
 }
 
 function writeLog(line: Partial<LogLine>) {
+  const rawText = decode(line.text ?? '');
   logBuffer.value.push({
     index: line.index ?? 0,
     number: (line.index ?? 0) + 1,
     text: processText(line.text ?? ''),
+    rawText,
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
   });
@@ -405,4 +532,32 @@ watch(step, async (newStep, oldStep) => {
     }
   }
 });
+
+// When logs from new command come, collapse logs from previous command
+watch(
+  () => groupedLogs.value.length,
+  (newLength, oldLength) => {
+    if (newLength > oldLength && oldLength > 0) {
+      const prevCommandId = groupedLogs.value[oldLength - 1].id;
+      if (prevCommandId !== 0) {
+        collapsedCommands.value.add(prevCommandId);
+      }
+    }
+  },
+);
+
+// If route hash contain line that is in a collapsed log group, expand it
+watch(
+  () => route.hash,
+  (newHash) => {
+    if (newHash.startsWith('#L')) {
+      const lineNum = Number.parseInt(newHash.substring(2));
+      const parentGroup = groupedLogs.value.find((g) => lineNum === g.id || g.lines.some((l) => l.number === lineNum));
+      if (parentGroup && collapsedCommands.value.has(parentGroup.id)) {
+        collapsedCommands.value.delete(parentGroup.id);
+      }
+    }
+  },
+  { immediate: true },
+);
 </script>
