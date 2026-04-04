@@ -105,7 +105,7 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 		},
 		{
 			name: "delete event with zero ToHash",
-			from: &bb.RepositoryPushEvent{
+			from: &bitbucket.RepositoryPushEvent{
 				Changes: []bitbucket.RepositoryPushEventChange{
 					{
 						FromHash: "1234567890abcdef",
@@ -171,24 +171,24 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 		},
 		{
 			name: "tag push event",
-			from: &bb.RepositoryPushEvent{
-				Event: bb.Event{
-					Date: bb.ISOTime(now),
-					Actor: bb.User{
+			from: &bitbucket.RepositoryPushEvent{
+				Event: bitbucket.Event{
+					Date: bitbucket.ISOTime(now),
+					Actor: bitbucket.User{
 						Name:  "John Doe",
 						Email: "john.doe@mail.com",
 						Slug:  "john.doe_mail.com",
 					},
 				},
-				Repository: bb.Repository{
+				Repository: bitbucket.Repository{
 					Slug: "REPO",
-					Project: &bb.Project{
+					Project: &bitbucket.Project{
 						Key: "PRJ",
 					},
 				},
-				Changes: []bb.RepositoryPushEventChange{
+				Changes: []bitbucket.RepositoryPushEventChange{
 					{
-						Ref: bb.RepositoryPushEventRef{
+						Ref: bitbucket.RepositoryPushEventRef{
 							ID:        "refs/tags/v1.0.0",
 							DisplayID: "v1.0.0",
 						},
