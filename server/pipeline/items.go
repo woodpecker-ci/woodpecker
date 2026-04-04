@@ -29,11 +29,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
+func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*step_builder.Item, error) {
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
@@ -46,7 +46,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	}
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	secs, err := secretService.SecretListPipeline(repo, currentPipeline)
+	secs, err := secretService.SecretListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
@@ -67,7 +67,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	regs, err := registryService.RegistryListPipeline(repo, currentPipeline)
+	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
@@ -95,7 +95,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 
 	maps.Copy(envs, currentPipeline.AdditionalVariables)
 
-	b := stepbuilder.StepBuilder{
+	b := step_builder.StepBuilder{
 		Repo:                repo,
 		Curr:                currentPipeline,
 		Prev:                prev,
@@ -140,8 +140,8 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 func createPipelineItems(c context.Context, forge forge.Forge, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string,
-) (*model.Pipeline, []*stepbuilder.Item, error) {
-	pipelineItems, err := parsePipeline(forge, store, currentPipeline, user, repo, yamls, envs)
+) (*model.Pipeline, []*step_builder.Item, error) {
+	pipelineItems, err := parsePipeline(c, forge, store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(err) {
 		currentPipeline, uErr := UpdateToStatusError(store, *currentPipeline, err)
 		if uErr != nil {
@@ -164,7 +164,7 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 // setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
 // a pipeline that can be stored in the database by the server.
-func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
+func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*step_builder.Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		if pidSequence < item.Workflow.PID {

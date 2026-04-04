@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grpc
+package rpc
 
 import (
 	"testing"
@@ -25,6 +25,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
@@ -106,6 +107,43 @@ func TestRegisterAgent(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.EqualValues(t, 1337, agentID)
+	})
+}
+
+func TestCompleteChildrenIfParentCompleted(t *testing.T) {
+	t.Run("When a service step is still running it should update state so workflow finishes as success", func(t *testing.T) {
+		successStep := &model.Step{
+			ID:      1,
+			State:   model.StatusSuccess,
+			Started: 1234567800,
+		}
+		runningService := &model.Step{
+			ID:      2,
+			State:   model.StatusRunning,
+			Started: 1234567800,
+		}
+		workflow := model.Workflow{
+			ID:       7,
+			State:    model.StatusRunning,
+			Children: []*model.Step{successStep, runningService},
+		}
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+
+		s := RPC{store: mockStore}
+		s.completeChildrenIfParentCompleted(&workflow, 1234567900)
+
+		assert.Equal(t, model.StatusSuccess, runningService.State)
+		assert.Equal(t, int64(1234567900), runningService.Finished)
+
+		result, err := pipeline.UpdateWorkflowStatusToDone(mockStore, workflow, rpc.WorkflowState{
+			Started:  1234567800,
+			Finished: 1234567900,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, model.StatusSuccess, result.State)
 	})
 }
 

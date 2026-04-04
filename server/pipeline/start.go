@@ -21,12 +21,12 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // start a pipeline, make sure it was stored persistent in the store before.
-func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*stepbuilder.Item) (*model.Pipeline, error) {
+func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*step_builder.Item) (*model.Pipeline, error) {
 	// call to cancel previous pipelines if needed
 	if err := cancelPreviousPipelines(ctx, forge, store, activePipeline, repo, user); err != nil {
 		// should be not breaking
@@ -54,6 +54,8 @@ func prepareStart(ctx context.Context, forge forge.Forge, store store.Store, act
 }
 
 func publishPipeline(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
-	publishToTopic(pipeline, repo)
+	if err := publishToTopic(ctx, pipeline, repo); err != nil {
+		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
+	}
 	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
 }

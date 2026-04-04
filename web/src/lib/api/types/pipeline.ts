@@ -9,6 +9,7 @@ export interface PipelineError<D = unknown> {
 
 export interface CancelInfo {
   canceled_by_user: string;
+  canceled_by_step: string;
   superseded_by: number;
 }
 
@@ -94,6 +95,8 @@ export interface Pipeline {
   changed_files?: string[];
 
   cancel_info: CancelInfo;
+
+  version: string;
 }
 
 export type PipelineStatus =

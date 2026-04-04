@@ -31,7 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -78,8 +78,13 @@ func CreatePipeline(c *gin.Context) {
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
+		return
+	}
+
+	if pl != nil {
+		c.JSON(http.StatusOK, pl.ToAPIModel())
 	} else {
-		c.JSON(http.StatusOK, pl)
+		c.Status(http.StatusNoContent)
 	}
 }
 
@@ -175,7 +180,12 @@ func GetPipelines(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, pipelines)
+
+	pls := make([]*model.APIPipeline, len(pipelines))
+	for i, p := range pipelines {
+		pls[i] = p.ToAPIModel()
+	}
+	c.JSON(http.StatusOK, pls)
 }
 
 // DeletePipeline
@@ -252,7 +262,7 @@ func GetPipeline(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, pl)
+	c.JSON(http.StatusOK, pl.ToAPIModel())
 }
 
 func GetPipelineLastByBranch(c *gin.Context) {
@@ -270,7 +280,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, pl)
+	c.JSON(http.StatusOK, pl.ToAPIModel())
 }
 
 // GetStepLogs
@@ -316,7 +326,7 @@ func GetStepLogs(c *gin.Context) {
 
 	if step.PipelineID != pl.ID {
 		// make sure we cannot read arbitrary logs by id
-		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
@@ -455,12 +465,12 @@ func GetPipelineMetadata(c *gin.Context) {
 	}
 
 	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		handleDBError(c, err)
 		return
 	}
 
-	metadata := stepbuilder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
+	metadata := step_builder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
 	c.JSON(http.StatusOK, metadata)
 }
 
@@ -530,7 +540,7 @@ func PostApproval(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newPipeline)
+		c.JSON(http.StatusOK, newPipeline.ToAPIModel())
 	}
 }
 
@@ -562,7 +572,7 @@ func PostDecline(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, pl)
+		c.JSON(http.StatusOK, pl.ToAPIModel())
 	}
 }
 
@@ -662,7 +672,7 @@ func PostPipeline(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newPipeline)
+		c.JSON(http.StatusOK, newPipeline.ToAPIModel())
 	}
 }
 

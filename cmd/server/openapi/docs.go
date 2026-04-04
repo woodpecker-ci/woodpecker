@@ -4681,6 +4681,9 @@ const docTemplate = `{
         "CancelInfo": {
             "type": "object",
             "properties": {
+                "canceled_by_step": {
+                    "type": "string"
+                },
                 "canceled_by_user": {
                     "type": "string"
                 },
@@ -5008,6 +5011,10 @@ const docTemplate = `{
                 "created": {
                     "type": "integer"
                 },
+                "cron": {
+                    "description": "name of the cron job",
+                    "type": "string"
+                },
                 "deploy_task": {
                     "type": "string"
                 },
@@ -5098,6 +5105,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "version": {
+                    "type": "string"
                 },
                 "workflows": {
                     "type": "array",
@@ -5240,6 +5250,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5283,8 +5296,20 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
+                "registry_extension_netrc": {
+                    "type": "boolean"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
+                },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
                 },
                 "timeout": {
                     "type": "integer"
@@ -5336,6 +5361,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5382,8 +5410,20 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
+                "registry_extension_netrc": {
+                    "type": "boolean"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
+                },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
                 },
                 "timeout": {
                     "type": "integer"
@@ -5423,6 +5463,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5432,8 +5475,20 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
+                "registry_extension_netrc": {
+                    "type": "boolean"
+                },
                 "require_approval": {
                     "type": "string"
+                },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
                 },
                 "timeout": {
                     "type": "integer"
@@ -5545,11 +5600,11 @@ const docTemplate = `{
                 "StatusKilled": "killed by user",
                 "StatusPending": "pending to be executed",
                 "StatusRunning": "currently running",
-                "StatusSkipped": "skipped as another step failed",
+                "StatusSkipped": "skipped as per condition of current workflow failed/success state",
                 "StatusSuccess": "successfully finished"
             },
             "x-enum-descriptions": [
-                "skipped as another step failed",
+                "skipped as per condition of current workflow failed/success state",
                 "pending to be executed",
                 "currently running",
                 "successfully finished",
@@ -5789,9 +5844,6 @@ const docTemplate = `{
         "metadata.Author": {
             "type": "object",
             "properties": {
-                "avatar": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },

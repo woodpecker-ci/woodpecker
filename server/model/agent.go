@@ -52,7 +52,8 @@ func (Agent) TableName() string {
 }
 
 func (a *Agent) IsSystemAgent() bool {
-	return a.OwnerID == IDNotSet
+	return a.OwnerID == IDNotSet &&
+		a.OrgID == IDNotSet
 }
 
 func GenerateNewAgentToken() string {

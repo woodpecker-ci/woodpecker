@@ -971,24 +971,81 @@ Supported variables:
 
 ---
 
-### CONFIG_SERVICE_ENDPOINT
+### CONFIG_EXTENSION_ENDPOINT
 
-- Name: `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
+- Name: `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
 - Default: none
 
-Specify a configuration service endpoint, see [Configuration Extension](../../20-usage/72-extensions/40-configuration-extension.md)
+Specify a configuration extension endpoint, see [Configuration Extension](../../20-usage/72-extensions/40-configuration-extension.md)
 
 ---
 
-### CONFIG_SERVICE_EXCLUSIVE
+### CONFIG_EXTENSION_EXCLUSIVE
 
-- Name: `CONFIG_SERVICE_EXCLUSIVE`
+- Name: `CONFIG_EXTENSION_EXCLUSIVE`
 - Default: false
 
 Whether the forge request should be skipped for the global configuration endpoint.
 
 :::warning
 If you enable this, all repos will exclusively use the global config service endpoint. There is no possibility to directly define pipelines in the forge, except the extension handles this case itself as well.
+:::
+
+---
+
+### CONFIG_EXTENSION_NETRC
+
+- Name: `WOODPECKER_CONFIG_EXTENSION_NETRC`
+- Default: false
+
+Send `netrc` to the config extension endpoint.
+
+:::warning
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge API to get more information about the repository.
+:::
+
+---
+
+### SECRET_EXTENSION_ENDPOINT
+
+- Name: `WOODPECKER_SECRET_EXTENSION_ENDPOINT`
+- Default: none
+
+Specify a secret extension endpoint, see [Secret Extension](../../20-usage/72-extensions/55-secret-extension.md)
+
+---
+
+### SECRET_EXTENSION_NETRC
+
+- Name: `WOODPECKER_SECRET_EXTENSION_NETRC`
+- Default: false
+
+Send `netrc` to the secret extension endpoint.
+
+:::warning
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge API to get more information about the repository.
+:::
+
+---
+
+### REGISTRY_EXTENSION_ENDPOINT
+
+- Name: `WOODPECKER_REGISTRY_EXTENSION_ENDPOINT`
+- Default: none
+
+Specify a registry extension endpoint, see [Registry Extension](../../20-usage/72-extensions/50-registry-extension.md)
+
+---
+
+### REGISTRY_EXTENSION_NETRC
+
+- Name: `WOODPECKER_REGISTRY_EXTENSION_NETRC`
+- Default: false
+
+Send `netrc` to the registry extension endpoint.
+
+:::warning
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge API to get more information about the repository.
 :::
 
 ---

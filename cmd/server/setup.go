@@ -34,10 +34,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
-	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
@@ -122,7 +122,7 @@ func setupMembershipService(_ context.Context, _store store.Store) cache.Members
 	return cache.NewMembershipService(_store)
 }
 
-func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
+func setupLogStore(c *cli.Command, s store.Store) (service_log.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
@@ -137,7 +137,7 @@ const jwtSecretID = "jwt-secret"
 
 func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		jwtSecret := base32.StdEncoding.EncodeToString(
 			random.GetRandomBytes(32),
 		)
@@ -159,7 +159,7 @@ func setupJWTSecret(_store store.Store) (string, error) {
 func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Pubsub = pubsub.New()
+	server.Config.Services.Pubsub = memory.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
 	server.Config.Services.Queue, err = setupQueue(ctx, s)
 	if err != nil {
