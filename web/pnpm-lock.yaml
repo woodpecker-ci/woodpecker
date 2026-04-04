@@ -28,7 +28,7 @@ importers:
         version: 3.3.3
       fuse.js:
         specifier: ^7.1.0
-        version: 7.2.0
+        version: 7.3.0
       js-base64:
         specifier: ^3.7.7
         version: 3.7.8
@@ -2009,8 +2009,8 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  fuse.js@7.2.0:
-    resolution: {integrity: sha512-zf4vdcIGpjNKTuXwug33Hm2okqX6a0t2ZEbez+o9oBJQSNhVJ5AqERfeiRD3r8HcLqP66MrjdkmzxrncbAOTUQ==}
+  fuse.js@7.3.0:
+    resolution: {integrity: sha512-plz8RVjfcDedTGfVngWH1jmJvBvAwi1v2jecfDerbEnMcmOYUEEwKFTHbNoCiYyzaK2Ws8lABkTCcRSqCY1q4w==}
     engines: {node: '>=10'}
 
   gensync@1.0.0-beta.2:
@@ -5135,7 +5135,7 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  fuse.js@7.2.0: {}
+  fuse.js@7.3.0: {}
 
   gensync@1.0.0-beta.2: {}
 
