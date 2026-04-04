@@ -108,6 +108,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency fuse.js to v7.3.0 [[#6382](https://github.com/woodpecker-ci/woodpecker/pull/6382)]
 - chore(deps): update docs npm deps non-major [[#6376](https://github.com/woodpecker-ci/woodpecker/pull/6376)]
 - chore(deps): update dependency typescript to v6 [[#6336](https://github.com/woodpecker-ci/woodpecker/pull/6336)]
 - chore(deps): update docs npm deps non-major [[#6335](https://github.com/woodpecker-ci/woodpecker/pull/6335)]
@@ -147,6 +148,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency fuse.js to v7.3.0 [[#6383](https://github.com/woodpecker-ci/woodpecker/pull/6383)]
 - chore(deps): update dependency @antfu/eslint-config to v8 [[#6378](https://github.com/woodpecker-ci/woodpecker/pull/6378)]
 - chore(deps): update web npm deps non-major [[#6377](https://github.com/woodpecker-ci/woodpecker/pull/6377)]
 - fix(deps): update module github.com/lib/pq to v1.12.2 [[#6371](https://github.com/woodpecker-ci/woodpecker/pull/6371)]
