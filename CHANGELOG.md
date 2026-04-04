@@ -111,6 +111,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#6376](https://github.com/woodpecker-ci/woodpecker/pull/6376)]
 - chore(deps): update dependency typescript to v6 [[#6336](https://github.com/woodpecker-ci/woodpecker/pull/6336)]
 - chore(deps): update docs npm deps non-major [[#6335](https://github.com/woodpecker-ci/woodpecker/pull/6335)]
 - Add CI check for docs on feature PRs [[#6315](https://github.com/woodpecker-ci/woodpecker/pull/6315)]
