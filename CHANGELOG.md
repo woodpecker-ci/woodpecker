@@ -68,6 +68,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix CLI exec with workflow matrix feature, where variables are not substituted. [[#6162](https://github.com/woodpecker-ci/woodpecker/pull/6162)]
 - Fix enable repo with same name and owner on second forge [[#6375](https://github.com/woodpecker-ci/woodpecker/pull/6375)]
 - Fix workflow beeing skipped and marked as failed when agent starts before server [[#6361](https://github.com/woodpecker-ci/woodpecker/pull/6361)]
 - Only redirect after login [[#6348](https://github.com/woodpecker-ci/woodpecker/pull/6348)]
@@ -148,6 +149,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @antfu/eslint-config to v8 [[#6378](https://github.com/woodpecker-ci/woodpecker/pull/6378)]
 - chore(deps): update web npm deps non-major [[#6377](https://github.com/woodpecker-ci/woodpecker/pull/6377)]
 - fix(deps): update module github.com/lib/pq to v1.12.2 [[#6371](https://github.com/woodpecker-ci/woodpecker/pull/6371)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.13.0 [[#6366](https://github.com/woodpecker-ci/woodpecker/pull/6366)]
