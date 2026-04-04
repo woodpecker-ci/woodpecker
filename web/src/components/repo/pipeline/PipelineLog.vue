@@ -126,7 +126,6 @@ import '~/style/console.css';
 import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
-import { debounce } from 'lodash';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -138,6 +137,7 @@ import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import { debounce } from '~/lib/utils';
 
 interface LogLine {
   index: number;

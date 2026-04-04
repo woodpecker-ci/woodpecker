@@ -86,7 +86,6 @@
 </template>
 
 <script lang="ts" setup>
-import { cloneDeep } from 'lodash';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -153,11 +152,11 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 });
 
 function editUser(user: User) {
-  selectedUser.value = cloneDeep(user);
+  selectedUser.value = structuredClone(user);
 }
 
 function showAddUser() {
-  selectedUser.value = cloneDeep({ login: '' });
+  selectedUser.value = { login: '' };
 }
 
 useWPTitle(computed(() => [t('admin.settings.users.users'), t('admin.settings.settings')]));
