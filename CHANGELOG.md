@@ -149,6 +149,7 @@
 
 ### 📦️ Dependency
 
+- WebUI: remove "lodash" dep [[#6369](https://github.com/woodpecker-ci/woodpecker/pull/6369)]
 - chore(deps): update dependency @antfu/eslint-config to v8 [[#6378](https://github.com/woodpecker-ci/woodpecker/pull/6378)]
 - chore(deps): update web npm deps non-major [[#6377](https://github.com/woodpecker-ci/woodpecker/pull/6377)]
 - fix(deps): update module github.com/lib/pq to v1.12.2 [[#6371](https://github.com/woodpecker-ci/woodpecker/pull/6371)]
