@@ -107,7 +107,7 @@ importers:
         version: 2.4.6
       dotenv:
         specifier: ^17.2.0
-        version: 17.4.0
+        version: 17.4.1
       eslint:
         specifier: ^10.0.0
         version: 10.2.0(jiti@2.6.1)
@@ -1619,8 +1619,8 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  dotenv@17.4.0:
-    resolution: {integrity: sha512-kCKF62fwtzwYm0IGBNjRUjtJgMfGapII+FslMHIjMR5KTnwEmBmWLDRSnc3XSNP8bNy34tekgQyDT0hr7pERRQ==}
+  dotenv@17.4.1:
+    resolution: {integrity: sha512-k8DaKGP6r1G30Lx8V4+pCsLzKr8vLmV2paqEj1Y55GdAgJuIqpRp5FfajGF8KtwMxCz9qJc6wUIJnm053d/WCw==}
     engines: {node: '>=12'}
 
   eastasianwidth@0.2.0:
@@ -4668,7 +4668,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  dotenv@17.4.0: {}
+  dotenv@17.4.1: {}
 
   eastasianwidth@0.2.0: {}
 
