@@ -148,6 +148,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency simple-icons to v16.15.0 [[#6385](https://github.com/woodpecker-ci/woodpecker/pull/6385)]
 - fix(deps): update golang-packages [[#6384](https://github.com/woodpecker-ci/woodpecker/pull/6384)]
 - chore(deps): update dependency fuse.js to v7.3.0 [[#6383](https://github.com/woodpecker-ci/woodpecker/pull/6383)]
 - chore(deps): update dependency @antfu/eslint-config to v8 [[#6378](https://github.com/woodpecker-ci/woodpecker/pull/6378)]
