@@ -49,6 +49,12 @@ const (
 	stepStateStarted   = "started"
 	stepStateDone      = "done"
 	testServiceTimeout = 1 * time.Second
+
+	// exitCodeCancelled is the exit code returned when a step's context is
+	// cancelled while it is sleeping. 130 matches the SIGINT shell convention
+	// (128 + signal 2) used by real container runtimes.
+	// ExitCodeCancelled is exported so tests can assert on cancel behaviour.
+	ExitCodeCancelled = 130
 )
 
 // New returns a dummy backend.
@@ -140,7 +146,20 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 			err = fmt.Errorf("WaitStep fail to parse sleep duration: %w", err)
 			return &backend_types.State{Error: err}, err
 		}
-		time.Sleep(toSleep)
+		// Use a timer channel so context cancellation is honoured immediately.
+		// A cancelled step exits with code 130 (SIGINT convention), matching
+		// real container runtime behavior and enabling cancel tests to assert
+		// on a specific exit code.
+		select {
+		case <-time.NewTimer(toSleep).C:
+			// sleep completed normally — fall through to exit-code handling below
+		case <-ctx.Done():
+			e.kv.Store(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID), stepStateDone)
+			return &backend_types.State{
+				ExitCode: ExitCodeCancelled,
+				Exited:   true,
+			}, nil
+		}
 	} else {
 		if step.Type == backend_types.StepTypeService {
 			select {
@@ -208,8 +227,11 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend_types.Step, taskUUI
 	if !stepExist {
 		return fmt.Errorf("WaitStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
 	}
-	if stepState != stepStateDone {
-		return fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateDone, stepState)
+	// Allow destroying a step that is still in 'started' state: this happens
+	// when the workflow context is cancelled before WaitStep completes (e.g.
+	// a pipeline cancel test). The step was interrupted so we just clean up.
+	if stepState != stepStateDone && stepState != stepStateStarted {
+		return fmt.Errorf("DestroyStep expect step '%s' (%s) to be '%s' or '%s' but it is: %s", step.Name, step.UUID, stepStateDone, stepStateStarted, stepState)
 	}
 
 	e.kv.Delete(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))

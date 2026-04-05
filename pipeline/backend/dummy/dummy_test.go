@@ -15,10 +15,13 @@
 package dummy_test
 
 import (
+	"context"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -31,7 +34,7 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 	assert.True(t, dummyEngine.IsAvailable(ctx))
 	assert.EqualValues(t, "dummy", dummyEngine.Name())
 	_, err := dummyEngine.Load(ctx)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Error(t, dummyEngine.SetupWorkflow(ctx, nil, dummy.WorkflowSetupFailUUID))
 
@@ -161,4 +164,41 @@ echo nein
 
 		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
+}
+
+func TestWaitStepCancelledBySleep(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	dummyEngine := dummy.New()
+	_, err := dummyEngine.Load(ctx)
+	require.NoError(t, err)
+
+	const taskUUID = "cancel-task"
+	assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, taskUUID))
+
+	step := &types.Step{
+		Name: "slow-step",
+		UUID: "slow-uuid",
+		Type: types.StepTypeCommands,
+		Environment: map[string]string{
+			dummy.EnvKeyStepSleep: "30s", // would block for 30 seconds
+		},
+	}
+	assert.NoError(t, dummyEngine.StartStep(ctx, step, taskUUID))
+
+	// Cancel the context shortly after WaitStep starts blocking.
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		cancel(nil)
+	}()
+
+	state, err := dummyEngine.WaitStep(ctx, step, taskUUID)
+	assert.NoError(t, err, "WaitStep should not return an error on cancellation")
+	assert.True(t, state.Exited, "step should be marked as exited")
+	assert.Equal(t, dummy.ExitCodeCancelled, state.ExitCode,
+		"cancelled step must exit with code %d", dummy.ExitCodeCancelled)
+
+	// DestroyStep must succeed even though the step was cancelled mid-sleep.
+	assert.NoError(t, dummyEngine.DestroyStep(ctx, step, taskUUID))
+	assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, taskUUID))
 }
