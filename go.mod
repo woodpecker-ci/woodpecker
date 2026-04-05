@@ -34,11 +34,11 @@ require (
 	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kinbiko/jsonassert v1.2.0
-	github.com/lib/pq v1.12.2
-	github.com/mattn/go-sqlite3 v1.14.38
+	github.com/lib/pq v1.12.3
+	github.com/mattn/go-sqlite3 v1.14.40
 	github.com/migueleliasweb/go-github-mock v1.5.0
-	github.com/moby/moby/api v1.54.0
-	github.com/moby/moby/client v0.3.0
+	github.com/moby/moby/api v1.54.1
+	github.com/moby/moby/client v0.4.0
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
 	github.com/neticdk/go-bitbucket v1.0.5
@@ -55,7 +55,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.5.1
 	github.com/zalando/go-keyring v0.2.8
-	gitlab.com/gitlab-org/api/client-go/v2 v2.13.0
+	gitlab.com/gitlab-org/api/client-go/v2 v2.16.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.49.0
 	golang.org/x/image v0.38.0
