@@ -108,6 +108,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency marked to v17.0.6 [[#6386](https://github.com/woodpecker-ci/woodpecker/pull/6386)]
 - chore(deps): update dependency fuse.js to v7.3.0 [[#6382](https://github.com/woodpecker-ci/woodpecker/pull/6382)]
 - chore(deps): update docs npm deps non-major [[#6376](https://github.com/woodpecker-ci/woodpecker/pull/6376)]
 - chore(deps): update dependency typescript to v6 [[#6336](https://github.com/woodpecker-ci/woodpecker/pull/6336)]
@@ -148,6 +149,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency marked to v17.0.6 [[#6387](https://github.com/woodpecker-ci/woodpecker/pull/6387)]
 - chore(deps): update dependency simple-icons to v16.15.0 [[#6385](https://github.com/woodpecker-ci/woodpecker/pull/6385)]
 - fix(deps): update golang-packages [[#6384](https://github.com/woodpecker-ci/woodpecker/pull/6384)]
 - chore(deps): update dependency fuse.js to v7.3.0 [[#6383](https://github.com/woodpecker-ci/woodpecker/pull/6383)]
