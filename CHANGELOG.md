@@ -149,6 +149,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency dotenv to v17.4.1 [[#6389](https://github.com/woodpecker-ci/woodpecker/pull/6389)]
 - chore(deps): update dependency marked to v17.0.6 [[#6387](https://github.com/woodpecker-ci/woodpecker/pull/6387)]
 - chore(deps): update dependency simple-icons to v16.15.0 [[#6385](https://github.com/woodpecker-ci/woodpecker/pull/6385)]
 - fix(deps): update golang-packages [[#6384](https://github.com/woodpecker-ci/woodpecker/pull/6384)]
