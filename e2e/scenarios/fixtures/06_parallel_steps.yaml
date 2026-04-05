@@ -1,0 +1,23 @@
+steps:
+  - name: clone
+    image: dummy
+    commands:
+      - echo cloning
+
+  - name: test-unit
+    image: dummy
+    commands:
+      - echo unit tests
+    depends_on: [clone]
+
+  - name: test-integration
+    image: dummy
+    commands:
+      - echo integration tests
+    depends_on: [clone]
+
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying
+    depends_on: [test-unit, test-integration]

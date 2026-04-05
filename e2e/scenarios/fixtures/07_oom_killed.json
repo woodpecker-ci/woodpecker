@@ -1,0 +1,8 @@
+{
+  "name": "OOM killed step fails pipeline",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_steps": [
+    {"name": "hungry", "status": "failure", "exit_code": 137}
+  ]
+}
