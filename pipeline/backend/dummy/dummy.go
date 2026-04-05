@@ -50,10 +50,9 @@ const (
 	stepStateDone      = "done"
 	testServiceTimeout = 1 * time.Second
 
-	// exitCodeCancelled is the exit code returned when a step's context is
+	// ExitCodeCancelled is the exit code returned when a step's context is
 	// cancelled while it is sleeping. 130 matches the SIGINT shell convention
 	// (128 + signal 2) used by real container runtimes.
-	// ExitCodeCancelled is exported so tests can assert on cancel behaviour.
 	ExitCodeCancelled = 130
 )
 
@@ -148,8 +147,17 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 		}
 		// Use a timer channel so context cancellation is honoured immediately.
 		// A cancelled step exits with code 130 (SIGINT convention), matching
-		// real container runtime behavior and enabling cancel tests to assert
-		// on a specific exit code.
+		// real container runtime behaviour.
+		//
+		// Check ctx.Err() before the select so we deterministically take
+		// the cancel path when the context is already done.
+		if ctx.Err() != nil {
+			e.kv.Store(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID), stepStateDone)
+			return &backend_types.State{
+				ExitCode: ExitCodeCancelled,
+				Exited:   true,
+			}, nil
+		}
 		select {
 		case <-time.NewTimer(toSleep).C:
 			// sleep completed normally — fall through to exit-code handling below

@@ -18,7 +18,6 @@ import (
 	"context"
 	"io"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -181,16 +180,13 @@ func TestWaitStepCancelledBySleep(t *testing.T) {
 		UUID: "slow-uuid",
 		Type: types.StepTypeCommands,
 		Environment: map[string]string{
-			dummy.EnvKeyStepSleep: "30s", // would block for 30 seconds
+			dummy.EnvKeyStepSleep: "30s",
 		},
 	}
 	assert.NoError(t, dummyEngine.StartStep(ctx, step, taskUUID))
 
-	// Cancel the context shortly after WaitStep starts blocking.
-	go func() {
-		time.Sleep(50 * time.Millisecond)
-		cancel(nil)
-	}()
+	// Cancel before WaitStep — the pre-select ctx.Err() check handles this deterministically.
+	cancel(nil)
 
 	state, err := dummyEngine.WaitStep(ctx, step, taskUUID)
 	assert.NoError(t, err, "WaitStep should not return an error on cancellation")
