@@ -3,9 +3,9 @@
   "event": "push",
   "expected_status": "success",
   "expected_steps": [
-    {"name": "clone",            "status": "success", "exit_code": 0},
-    {"name": "test-unit",        "status": "success", "exit_code": 0},
-    {"name": "test-integration", "status": "success", "exit_code": 0},
-    {"name": "deploy",           "status": "success", "exit_code": 0}
+    { "name": "clone", "status": "success", "exit_code": 0 },
+    { "name": "test-unit", "status": "success", "exit_code": 0 },
+    { "name": "test-integration", "status": "success", "exit_code": 0 },
+    { "name": "deploy", "status": "success", "exit_code": 0 }
   ]
 }

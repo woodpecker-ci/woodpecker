@@ -3,7 +3,7 @@
   "event": "push",
   "expected_status": "failure",
   "expected_steps": [
-    {"name": "build",  "status": "failure", "exit_code": 2},
-    {"name": "notify", "status": "success", "exit_code": 0}
+    { "name": "build", "status": "failure", "exit_code": 2 },
+    { "name": "notify", "status": "success", "exit_code": 0 }
   ]
 }

@@ -3,8 +3,8 @@
   "event": "push",
   "expected_status": "success",
   "expected_steps": [
-    {"name": "clone",  "status": "success", "exit_code": 0},
-    {"name": "build",  "status": "success", "exit_code": 0},
-    {"name": "test",   "status": "success", "exit_code": 0}
+    { "name": "clone", "status": "success", "exit_code": 0 },
+    { "name": "build", "status": "success", "exit_code": 0 },
+    { "name": "test", "status": "success", "exit_code": 0 }
   ]
 }

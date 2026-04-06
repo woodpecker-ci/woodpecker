@@ -3,7 +3,7 @@
   "event": "push",
   "expected_status": "success",
   "expected_steps": [
-    {"name": "lint",  "status": "failure", "exit_code": 1},
-    {"name": "build", "status": "success", "exit_code": 0}
+    { "name": "lint", "status": "failure", "exit_code": 1 },
+    { "name": "build", "status": "success", "exit_code": 0 }
   ]
 }
