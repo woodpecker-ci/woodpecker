@@ -102,6 +102,13 @@ func checkWorkflowStepStates(currWorkflow *model.Workflow, currStep *model.Step)
 		case model.StatusBlocked:
 			err = ErrAgentIllegalWorkflowRun
 
+		case model.StatusCanceled:
+			if currStep.State != model.StatusCanceled &&
+				currStep.State != model.StatusKilled &&
+				currStep.State != model.StatusSkipped {
+				err = ErrAgentIllegalWorkflowReRunStateChange
+			}
+
 		default:
 			err = ErrAgentIllegalWorkflowReRunStateChange
 		}

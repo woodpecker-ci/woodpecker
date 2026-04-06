@@ -200,9 +200,6 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 	}
 
 	// sanitize agent input
-	if err := checkPipelineState(currentPipeline); err != nil {
-		return err
-	}
 	if err := checkWorkflowStepStates(workflow, step); err != nil {
 		return err
 	}
