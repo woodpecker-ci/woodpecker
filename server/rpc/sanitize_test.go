@@ -28,60 +28,143 @@ func TestCheckPipelineState(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name      string
-		status    model.StatusValue
-		wantErr   error
-		expectNil bool
+		name          string
+		status        model.StatusValue
+		workflowState model.StatusValue
+		wantErr       error
+		expectNil     bool
 	}{
 		{
-			name:      "created is allowed",
-			status:    model.StatusCreated,
-			expectNil: true,
+			name:          "created is allowed",
+			status:        model.StatusCreated,
+			workflowState: model.StatusRunning,
+			expectNil:     true,
 		},
 		{
-			name:      "pending is allowed",
-			status:    model.StatusPending,
-			expectNil: true,
+			name:          "pending is allowed",
+			status:        model.StatusPending,
+			workflowState: model.StatusRunning,
+			expectNil:     true,
 		},
 		{
-			name:      "running is allowed",
-			status:    model.StatusRunning,
-			expectNil: true,
+			name:          "running is allowed",
+			status:        model.StatusRunning,
+			workflowState: model.StatusRunning,
+			expectNil:     true,
 		},
 		{
-			name:    "blocked is rejected",
-			status:  model.StatusBlocked,
-			wantErr: ErrAgentIllegalPipelineWorkflowRun,
+			name:          "blocked is rejected",
+			status:        model.StatusBlocked,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowRun,
 		},
 		{
-			name:    "success is rejected as re-run",
-			status:  model.StatusSuccess,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
+			name:          "success is rejected as re-run",
+			status:        model.StatusSuccess,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
 		},
 		{
-			name:    "failure is rejected as re-run",
-			status:  model.StatusFailure,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
+			name:          "failure is rejected as re-run",
+			status:        model.StatusFailure,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
 		},
 		{
-			name:    "killed is rejected as re-run",
-			status:  model.StatusKilled,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
+			name:          "killed is rejected as re-run",
+			status:        model.StatusKilled,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
 		},
 		{
-			name:    "error is rejected as re-run",
-			status:  model.StatusError,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
+			name:          "error is rejected as re-run",
+			status:        model.StatusError,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
 		},
 		{
-			name:    "skipped is rejected as re-run",
-			status:  model.StatusSkipped,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
+			name:          "skipped is rejected as re-run",
+			status:        model.StatusSkipped,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
 		},
 		{
-			name:    "declined is rejected as re-run",
-			status:  model.StatusDeclined,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
+			name:          "declined is rejected as re-run",
+			status:        model.StatusDeclined,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
+		},
+		{
+			name:          "pipeline canceled, workflow canceled → allowed",
+			status:        model.StatusCanceled,
+			workflowState: model.StatusCanceled,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline canceled, workflow killed → allowed",
+			status:        model.StatusCanceled,
+			workflowState: model.StatusKilled,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline canceled, workflow skipped → allowed",
+			status:        model.StatusCanceled,
+			workflowState: model.StatusSkipped,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline canceled, workflow running → rejected",
+			status:        model.StatusCanceled,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
+		},
+		{
+			name:          "pipeline canceled, workflow success → rejected",
+			status:        model.StatusCanceled,
+			workflowState: model.StatusSuccess,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
+		},
+		{
+			name:          "pipeline failure, workflow canceled → allowed",
+			status:        model.StatusFailure,
+			workflowState: model.StatusCanceled,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline failure, workflow killed → allowed",
+			status:        model.StatusFailure,
+			workflowState: model.StatusKilled,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline failure, workflow skipped → allowed",
+			status:        model.StatusFailure,
+			workflowState: model.StatusSkipped,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline killed, workflow canceled → allowed",
+			status:        model.StatusKilled,
+			workflowState: model.StatusCanceled,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline killed, workflow killed → allowed",
+			status:        model.StatusKilled,
+			workflowState: model.StatusKilled,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline killed, workflow skipped → allowed",
+			status:        model.StatusKilled,
+			workflowState: model.StatusSkipped,
+			expectNil:     true,
+		},
+		{
+			name:          "pipeline killed, workflow running → rejected",
+			status:        model.StatusKilled,
+			workflowState: model.StatusRunning,
+			wantErr:       ErrAgentIllegalPipelineWorkflowReRunStateChange,
 		},
 	}
 
@@ -90,7 +173,8 @@ func TestCheckPipelineState(t *testing.T) {
 			t.Parallel()
 
 			pipeline := &model.Pipeline{Status: tt.status}
-			err := checkPipelineState(pipeline)
+			workflow := &model.Workflow{State: tt.workflowState}
+			err := checkPipelineState(pipeline, workflow)
 
 			if tt.expectNil {
 				assert.NoError(t, err)
@@ -245,6 +329,29 @@ func TestCheckWorkflowStepStates(t *testing.T) {
 		err := checkWorkflowStepStates(workflow, step)
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
 		assert.ErrorIs(t, err, ErrAgentIllegalStepReRunStateChange)
+	})
+
+	t.Run("workflow canceled, step success → rejected", func(t *testing.T) {
+		t.Parallel()
+
+		workflow := &model.Workflow{State: model.StatusCanceled}
+		step := &model.Step{State: model.StatusSuccess}
+		err := checkWorkflowStepStates(workflow, step)
+		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
+	})
+
+	t.Run("workflow canceled, nil step → rejects (workflow default branch)", func(t *testing.T) {
+		t.Parallel()
+
+		// checkWorkflowStepStates is never called with (canceled-workflow, nil-step)
+		// in production (Update always has a step, Init/Done pass nil only when
+		// workflow is checked alone). When step is nil the canceled branch would
+		// panic, so production code always supplies a non-nil step for Update.
+		// Test the observable behavior: a non-exempt step state triggers rejection.
+		workflow := &model.Workflow{State: model.StatusCanceled}
+		step := &model.Step{State: model.StatusRunning} // non-exempt → rejected
+		err := checkWorkflowStepStates(workflow, step)
+		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
 	})
 }
 

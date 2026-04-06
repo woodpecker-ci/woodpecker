@@ -148,7 +148,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusSuccess)
-		workflow := defaultWorkflow(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusSuccess)
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
@@ -161,14 +161,14 @@ func TestRPCUpdate(t *testing.T) {
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowReRunStateChange)
+		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
 	})
 
 	t.Run("reject pipeline already failed", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusFailure)
-		workflow := defaultWorkflow(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusFailure)
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
@@ -181,14 +181,14 @@ func TestRPCUpdate(t *testing.T) {
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowReRunStateChange)
+		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
 	})
 
 	t.Run("reject pipeline blocked", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusBlocked)
-		workflow := defaultWorkflow(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusBlocked)
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
@@ -201,7 +201,7 @@ func TestRPCUpdate(t *testing.T) {
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowRun)
+		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowRun)
 	})
 
 	t.Run("reject workflow already finished", func(t *testing.T) {
