@@ -51,7 +51,7 @@ const (
 	testServiceTimeout = 1 * time.Second
 
 	// ExitCodeCancelled is the exit code returned when a step's context is
-	// cancelled while it is sleeping. 130 matches the SIGINT shell convention
+	// canceled while it is sleeping. 130 matches the SIGINT shell convention
 	// (128 + signal 2) used by real container runtimes.
 	ExitCodeCancelled = 130
 )
@@ -124,14 +124,14 @@ func (e *dummy) StartStep(_ context.Context, step *backend_types.Step, taskUUID 
 	return nil
 }
 
-// cancelledState returns the state for a step whose context was cancelled.
-func cancelledState() *backend_types.State {
+// canceledState returns the state for a step whose context was canceled.
+func canceledState() *backend_types.State {
 	return &backend_types.State{ExitCode: ExitCodeCancelled, Exited: true}
 }
 
-// sleepWithContext blocks for the given duration or until ctx is cancelled.
-// Returns true if cancelled, false if the sleep completed normally.
-func sleepWithContext(ctx context.Context, d time.Duration) (cancelled bool) {
+// sleepWithContext blocks for the given duration or until ctx is canceled.
+// Returns true if canceled, false if the sleep completed normally.
+func sleepWithContext(ctx context.Context, d time.Duration) (canceled bool) {
 	if ctx.Err() != nil {
 		return true
 	}
@@ -175,7 +175,7 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 		}
 		if sleepWithContext(ctx, toSleep) {
 			e.kv.Store(key, stepStateDone)
-			return cancelledState(), nil
+			return canceledState(), nil
 		}
 	} else if step.Type == backend_types.StepTypeService {
 		if sleepWithContext(ctx, testServiceTimeout) {
@@ -246,7 +246,7 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend_types.Step, taskUUI
 		return fmt.Errorf("DestroyStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
 	}
 	// Allow destroying a step in 'started' state: this happens when the
-	// workflow context is cancelled before WaitStep completes.
+	// workflow context is canceled before WaitStep completes.
 	if stepState != stepStateDone && stepState != stepStateStarted {
 		return fmt.Errorf("DestroyStep expect step '%s' (%s) to be '%s' or '%s' but it is: %s", step.Name, step.UUID, stepStateDone, stepStateStarted, stepState)
 	}

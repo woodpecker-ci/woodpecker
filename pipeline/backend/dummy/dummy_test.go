@@ -192,9 +192,9 @@ func TestWaitStepCancelledBySleep(t *testing.T) {
 	assert.NoError(t, err, "WaitStep should not return an error on cancellation")
 	assert.True(t, state.Exited, "step should be marked as exited")
 	assert.Equal(t, dummy.ExitCodeCancelled, state.ExitCode,
-		"cancelled step must exit with code %d", dummy.ExitCodeCancelled)
+		"canceled step must exit with code %d", dummy.ExitCodeCancelled)
 
-	// DestroyStep must succeed even though the step was cancelled mid-sleep.
+	// DestroyStep must succeed even though the step was canceled mid-sleep.
 	assert.NoError(t, dummyEngine.DestroyStep(ctx, step, taskUUID))
 	assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, taskUUID))
 }
