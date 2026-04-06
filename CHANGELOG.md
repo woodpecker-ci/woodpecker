@@ -109,6 +109,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#6392](https://github.com/woodpecker-ci/woodpecker/pull/6392)]
 - chore(deps): update dependency marked to v17.0.6 [[#6386](https://github.com/woodpecker-ci/woodpecker/pull/6386)]
 - chore(deps): update dependency fuse.js to v7.3.0 [[#6382](https://github.com/woodpecker-ci/woodpecker/pull/6382)]
 - chore(deps): update docs npm deps non-major [[#6376](https://github.com/woodpecker-ci/woodpecker/pull/6376)]
