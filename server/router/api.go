@@ -120,8 +120,8 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
 					repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
 
-					repo.GET("/logs/:number/:stepId", api.GetStepLogs)
-					repo.DELETE("/logs/:number/:stepId", session.MustPush, api.DeleteStepLogs)
+					repo.GET("/logs/:number/:step_id", api.GetStepLogs)
+					repo.DELETE("/logs/:number/:step_id", session.MustPush, api.DeleteStepLogs)
 
 					// requires push permissions
 					repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
@@ -234,13 +234,13 @@ func apiRoutes(e *gin.RouterGroup) {
 		}
 
 		apiBase.GET("/forges", api.GetForges)
-		apiBase.GET("/forges/:forgeId", api.GetForge)
+		apiBase.GET("/forges/:forge_id", api.GetForge)
 		forgeBase := apiBase.Group("/forges")
 		{
 			forgeBase.Use(session.MustAdmin())
 			forgeBase.POST("", api.PostForge)
-			forgeBase.PATCH("/:forgeId", api.PatchForge)
-			forgeBase.DELETE("/:forgeId", api.DeleteForge)
+			forgeBase.PATCH("/:forge_id", api.PatchForge)
+			forgeBase.DELETE("/:forge_id", api.DeleteForge)
 		}
 
 		apiBase.GET("/signature/public-key", api.GetSignaturePublicKey)
@@ -249,7 +249,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 		stream := apiBase.Group("/stream")
 		{
-			stream.GET("/logs/:repo_id/:pipeline/:stepId",
+			stream.GET("/logs/:repo_id/:pipeline/:step_id",
 				session.SetRepo(),
 				session.SetPerm(),
 				session.MustPull,
