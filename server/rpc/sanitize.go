@@ -68,7 +68,7 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 
 // checkPipelineState checks if an agent is allowed to change/update a workflow/pipeline state
 // by the state the parent pipeline is in.
-func checkPipelineState(currPipeline *model.Pipeline) (err error) {
+func checkPipelineState(currPipeline *model.Pipeline, currWorkflow *model.Workflow) (err error) {
 	// check if pipeline was already run and marked finished or is blocked
 	switch currPipeline.Status {
 	case model.StatusCreated,
@@ -78,6 +78,15 @@ func checkPipelineState(currPipeline *model.Pipeline) (err error) {
 
 	case model.StatusBlocked:
 		err = ErrAgentIllegalPipelineWorkflowRun
+
+	case model.StatusCanceled,
+		model.StatusFailure,
+		model.StatusKilled:
+		if currWorkflow.State != model.StatusCanceled &&
+			currWorkflow.State != model.StatusKilled &&
+			currWorkflow.State != model.StatusSkipped {
+			err = ErrAgentIllegalPipelineWorkflowReRunStateChange
+		}
 
 	default:
 		err = ErrAgentIllegalPipelineWorkflowReRunStateChange
