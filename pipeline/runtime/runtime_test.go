@@ -1156,7 +1156,7 @@ func TestWorkflowContextCancelWithServiceStep(t *testing.T) {
 	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
 }
 
-// TestWorkflowCancelDuringStepSleep verifies that cancelling the workflow context
+// TestWorkflowCancelDuringStepSleep verifies that canceling the workflow context
 // while a step is sleeping (via SLEEP env) causes the runtime to return ErrCancel
 // promptly — without waiting the full sleep duration — and that subsequent stages
 // are never executed.
@@ -1169,7 +1169,7 @@ func TestWorkflowContextCancelWithServiceStep(t *testing.T) {
 // return (via ctx.Done()) before the stage goroutine's WaitStep completes,
 // causing DestroyWorkflow to clean up state that WaitStep still needs. The
 // exit-code-130 behavior of a canceled sleep is verified at the backend unit
-// level in TestWaitStepCancelledBySleep.
+// level in TestWaitStepCanceledBySleep.
 func TestWorkflowCancelDuringStepSleep(t *testing.T) {
 	t.Parallel()
 
