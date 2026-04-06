@@ -50,10 +50,10 @@ const (
 	stepStateDone      = "done"
 	testServiceTimeout = 1 * time.Second
 
-	// ExitCodeCancelled is the exit code returned when a step's context is
+	// ExitCodeCanceled is the exit code returned when a step's context is
 	// canceled while it is sleeping. 130 matches the SIGINT shell convention
 	// (128 + signal 2) used by real container runtimes.
-	ExitCodeCancelled = 130
+	ExitCodeCanceled = 130
 )
 
 // stepKey returns the kv-store key for a step's state.
@@ -126,7 +126,7 @@ func (e *dummy) StartStep(_ context.Context, step *backend_types.Step, taskUUID 
 
 // canceledState returns the state for a step whose context was canceled.
 func canceledState() *backend_types.State {
-	return &backend_types.State{ExitCode: ExitCodeCancelled, Exited: true}
+	return &backend_types.State{ExitCode: ExitCodeCanceled, Exited: true}
 }
 
 // sleepWithContext blocks for the given duration or until ctx is canceled.
