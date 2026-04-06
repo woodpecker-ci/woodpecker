@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-05
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -51,7 +51,7 @@
 - Remove fixed badge width in UI [[#6157](https://github.com/woodpecker-ci/woodpecker/pull/6157)]
 - Improve Debian packages [[#6085](https://github.com/woodpecker-ci/woodpecker/pull/6085)]
 - Refactor pipeline engine [[#6073](https://github.com/woodpecker-ci/woodpecker/pull/6073)]
-- Added cancel info so one can see why it was cancelled [[#6072](https://github.com/woodpecker-ci/woodpecker/pull/6072)]
+- Added cancel info so one can see why it was canceled [[#6072](https://github.com/woodpecker-ci/woodpecker/pull/6072)]
 - Document required forge methods [[#6049](https://github.com/woodpecker-ci/woodpecker/pull/6049)]
 - Dynamic log following [[#6036](https://github.com/woodpecker-ci/woodpecker/pull/6036)]
 - Per-Workflow and Per-Workflow-Step badge generation [[#5977](https://github.com/woodpecker-ci/woodpecker/pull/5977)]
@@ -76,7 +76,7 @@
 - Enable crons if created via CLI [[#6228](https://github.com/woodpecker-ci/woodpecker/pull/6228)]
 - Fix message on gitlab tag event [[#6196](https://github.com/woodpecker-ci/woodpecker/pull/6196)]
 - fix(bbdc): resolve annotated tag object SHA to commit SHA before posting build status [[#6203](https://github.com/woodpecker-ci/woodpecker/pull/6203)]
-- Prevent leaking goroutines on cancelled steps [[#6186](https://github.com/woodpecker-ci/woodpecker/pull/6186)]
+- Prevent leaking goroutines on canceled steps [[#6186](https://github.com/woodpecker-ci/woodpecker/pull/6186)]
 - Independently evaluate status filter and support on workflows [[#6183](https://github.com/woodpecker-ci/woodpecker/pull/6183)]
 - Fix status merging with skipped pipelines [[#6176](https://github.com/woodpecker-ci/woodpecker/pull/6176)]
 - Update pipeline config schema [[#6156](https://github.com/woodpecker-ci/woodpecker/pull/6156)]
