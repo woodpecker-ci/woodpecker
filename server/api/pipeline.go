@@ -191,7 +191,7 @@ func GetPipelines(c *gin.Context) {
 // DeletePipeline
 //
 //	@Summary	Delete a pipeline
-//	@Router		/repos/{repo_id}/pipelines/{number} [delete]
+//	@Router		/repos/{repo_id}/pipelines/{pipeline_number} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Pipelines
@@ -231,7 +231,7 @@ func DeletePipeline(c *gin.Context) {
 // GetPipeline
 //
 //	@Summary	Get a repositories pipeline
-//	@Router		/repos/{repo_id}/pipelines/{number} [get]
+//	@Router		/repos/{repo_id}/pipelines/{pipeline_number} [get]
 //	@Produce	json
 //	@Success	200	{object}	Pipeline
 //	@Tags		Pipelines
@@ -240,7 +240,7 @@ func DeletePipeline(c *gin.Context) {
 //	@Param		pipeline_number			path	int		true	"the number of the pipeline, OR 'latest'"
 func GetPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
-	if c.Param("number") == "latest" {
+	if c.Param("pipeline_number") == "latest" {
 		GetPipelineLastByBranch(c)
 		return
 	}
@@ -286,7 +286,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 // GetStepLogs
 //
 //	@Summary	Get logs for a pipeline step
-//	@Router		/repos/{repo_id}/logs/{number}/{step_id} [get]
+//	@Router		/repos/{repo_id}/logs/{pipeline_number}/{step_id} [get]
 //	@Produce	json
 //	@Success	200	{array}	LogEntry
 //	@Tags		Pipeline logs
@@ -342,7 +342,7 @@ func GetStepLogs(c *gin.Context) {
 // DeleteStepLogs
 //
 //	@Summary	Delete step logs of a pipeline
-//	@Router		/repos/{repo_id}/logs/{number}/{step_id} [delete]
+//	@Router		/repos/{repo_id}/logs/{pipeline_number}/{step_id} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Pipeline logs
@@ -402,7 +402,7 @@ func DeleteStepLogs(c *gin.Context) {
 // GetPipelineConfig
 //
 //	@Summary	Get configuration files for a pipeline
-//	@Router		/repos/{repo_id}/pipelines/{number}/config [get]
+//	@Router		/repos/{repo_id}/pipelines/{pipeline_number}/config [get]
 //	@Produce	json
 //	@Success	200	{array}	Config
 //	@Tags		Pipelines
@@ -436,7 +436,7 @@ func GetPipelineConfig(c *gin.Context) {
 // GetPipelineMetadata
 //
 //	@Summary	Get metadata for a pipeline or a specific workflow, including previous pipeline info
-//	@Router		/repos/{repo_id}/pipelines/{number}/metadata [get]
+//	@Router		/repos/{repo_id}/pipelines/{pipeline_number}/metadata [get]
 //	@Produce	json
 //	@Success	200	{object}	metadata.Metadata
 //	@Tags		Pipelines
@@ -477,7 +477,7 @@ func GetPipelineMetadata(c *gin.Context) {
 // CancelPipeline
 //
 //	@Summary	Cancel a pipeline
-//	@Router		/repos/{repo_id}/pipelines/{number}/cancel [post]
+//	@Router		/repos/{repo_id}/pipelines/{pipeline_number}/cancel [post]
 //	@Produce	plain
 //	@Success	200
 //	@Tags		Pipelines
@@ -515,7 +515,7 @@ func CancelPipeline(c *gin.Context) {
 // PostApproval
 //
 //	@Summary	Approve and start a pipeline
-//	@Router		/repos/{repo_id}/pipelines/{number}/approve [post]
+//	@Router		/repos/{repo_id}/pipelines/{pipeline_number}/approve [post]
 //	@Produce	json
 //	@Success	200	{object}	Pipeline
 //	@Tags		Pipelines
@@ -547,7 +547,7 @@ func PostApproval(c *gin.Context) {
 // PostDecline
 //
 //	@Summary	Decline a pipeline
-//	@Router		/repos/{repo_id}/pipelines/{number}/decline [post]
+//	@Router		/repos/{repo_id}/pipelines/{pipeline_number}/decline [post]
 //	@Produce	json
 //	@Success	200	{object}	Pipeline
 //	@Tags		Pipelines
@@ -597,7 +597,7 @@ func GetPipelineQueue(c *gin.Context) {
 //
 //	@Summary		Restart a pipeline
 //	@Description	Restarts a pipeline optional with altered event, deploy or environment
-//	@Router			/repos/{repo_id}/pipelines/{number} [post]
+//	@Router			/repos/{repo_id}/pipelines/{pipeline_number} [post]
 //	@Produce		json
 //	@Success		200	{object}	Pipeline
 //	@Tags			Pipelines
@@ -679,7 +679,7 @@ func PostPipeline(c *gin.Context) {
 // DeletePipelineLogs
 //
 //	@Summary	Deletes all logs of a pipeline
-//	@Router		/repos/{repo_id}/logs/{number} [delete]
+//	@Router		/repos/{repo_id}/logs/{pipeline_number} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Pipeline logs

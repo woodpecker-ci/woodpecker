@@ -59,7 +59,7 @@ func GetForges(c *gin.Context) {
 // GetForge
 //
 //	@Summary	Get a forge
-//	@Router		/forges/{forgeId} [get]
+//	@Router		/forges/{forge_id} [get]
 //	@Produce	json
 //	@Success	200	{object}	Forge
 //	@Tags		Forges
@@ -89,7 +89,7 @@ func GetForge(c *gin.Context) {
 // PatchForge
 //
 //	@Summary	Update a forge
-//	@Router		/forges/{forgeId} [patch]
+//	@Router		/forges/{forge_id} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Forge
 //	@Tags		Forges
@@ -173,7 +173,7 @@ func PostForge(c *gin.Context) {
 // DeleteForge
 //
 //	@Summary	Delete a forge
-//	@Router		/forges/{forgeId} [delete]
+//	@Router		/forges/{forge_id} [delete]
 //	@Produce	plain
 //	@Success	200
 //	@Tags		Forges
