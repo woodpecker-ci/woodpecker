@@ -29,6 +29,7 @@ import (
 
 const (
 	defaultTimeout  = 30 * time.Second
+	shortTimeout    = 10 * time.Second
 	defaultInterval = 100 * time.Millisecond
 )
 
@@ -81,7 +82,7 @@ func WaitForPipelineStatus(t *testing.T, s store.Store, pipelineID int64, wantSt
 func WaitForAgentRegistered(t *testing.T, s store.Store, agents ...*AgentEnv) {
 	t.Helper()
 
-	deadline := time.Now().Add(10 * time.Second)
+	deadline := time.Now().Add(shortTimeout)
 	for time.Now().Before(deadline) {
 		allFound := true
 		for _, env := range agents {

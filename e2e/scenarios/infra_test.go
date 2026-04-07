@@ -32,7 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/e2e/setup"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	server_pipeline "go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 )
 
 // TestMain sets global log level to warn so test output isn't buried in JSON.
@@ -74,7 +74,7 @@ func TestInfraSmoke(t *testing.T) {
 	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	pipeline := &model.Pipeline{
+	draftPipeline := &model.Pipeline{
 		Event:  model.EventPush,
 		Branch: "main",
 		Commit: "deadbeef",
@@ -82,11 +82,11 @@ func TestInfraSmoke(t *testing.T) {
 		Author: env.Fixtures.Owner.Login,
 		Sender: env.Fixtures.Owner.Login,
 	}
-	created, err := server_pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, pipeline)
+	createdPipeline, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, draftPipeline)
 	require.NoError(t, err, "create pipeline")
-	require.NotNil(t, created)
-	t.Logf("pipeline %d created with status=%s", created.ID, created.Status)
+	require.NotNil(t, createdPipeline)
+	t.Logf("pipeline %d created with status=%s", createdPipeline.ID, createdPipeline.Status)
 
-	finished := setup.WaitForPipeline(t, env.Store, created.ID)
+	finished := setup.WaitForPipeline(t, env.Store, createdPipeline.ID)
 	assert.Equal(t, model.StatusSuccess, finished.Status, "pipeline should succeed")
 }

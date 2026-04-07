@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/e2e/setup"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	server_pipeline "go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 )
 
 // labelRoutingYAML is a single-workflow pipeline that requires the label
@@ -62,7 +62,7 @@ func TestAgentLabelRouting(t *testing.T) {
 
 	setup.WaitForAgentRegistered(t, env.Store, plainAgent, gpuAgent)
 
-	created, err := server_pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 		Event:  model.EventPush,
 		Branch: "main",
 		Commit: "deadbeef",
@@ -110,7 +110,7 @@ func TestOrgAgentPreferredOverGlobal(t *testing.T) {
 
 	setup.WaitForAgentRegistered(t, env.Store, globalAgent, orgAgent)
 
-	created, err := server_pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 		Event:  model.EventPush,
 		Branch: "main",
 		Commit: "deadbeef",

@@ -26,11 +26,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/e2e/setup"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	server_pipeline "go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 )
 
 // cancelPipelineYAML has one long-sleeping step followed by one that must
-// be skipped when the pipeline is cancelled.
+// be skipped when the pipeline is canceled.
 var cancelPipelineYAML = []byte(`
 steps:
   - name: long-running
@@ -58,7 +58,7 @@ func TestCancelRunningPipeline(t *testing.T) {
 	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	created, err := server_pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 		Event:  model.EventPush,
 		Branch: "main",
 		Commit: "deadbeef",
@@ -76,17 +76,17 @@ func TestCancelRunningPipeline(t *testing.T) {
 	forge, err := env.Manager.ForgeByID(env.Fixtures.Forge.ID)
 	require.NoError(t, err, "resolve forge")
 
-	// Fetch the latest pipeline state from the store before cancelling.
+	// Fetch the latest pipeline state from the store before canceling.
 	running, err := env.Store.GetPipeline(created.ID)
 	require.NoError(t, err, "get running pipeline")
 
 	// Cancel through the normal server API path — same as the HTTP handler does.
-	err = server_pipeline.Cancel(t.Context(), forge, env.Store, env.Fixtures.Repo, env.Fixtures.Owner, running, nil)
+	err = pipeline.Cancel(t.Context(), forge, env.Store, env.Fixtures.Repo, env.Fixtures.Owner, running, nil)
 	require.NoError(t, err, "cancel pipeline")
 
 	// Wait for the pipeline to reach a terminal state.
 	finished := setup.WaitForPipeline(t, env.Store, created.ID)
-	assert.Equal(t, model.StatusKilled, finished.Status, "cancelled pipeline should be killed")
+	assert.Equal(t, model.StatusKilled, finished.Status, "canceled pipeline should be killed")
 
 	// The agent updates step state asynchronously over gRPC after the pipeline
 	// reaches its terminal state, so we wait for each step individually.
@@ -111,7 +111,7 @@ func TestCancelRunningPipeline(t *testing.T) {
 
 	t.Run("after-cancel step is canceled", func(t *testing.T) {
 		// Pending steps get StatusCanceled (not StatusSkipped) when the pipeline
-		// is cancelled before they start executing.
+		// is canceled before they start executing.
 		step, ok := byName["after-cancel"]
 		require.True(t, ok, "after-cancel step must exist")
 		assert.Equal(t, model.StatusCanceled, step.State)

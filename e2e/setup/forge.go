@@ -22,7 +22,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	forge_mock "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -39,12 +39,9 @@ import (
 //
 // Note: Refresh is a separate optional interface (forge.Refresher) checked via
 // type assertion — MockForge does not implement it, so token refresh is skipped.
-func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mock.MockForge {
+func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.MockForge {
 	t.Helper()
-
-	m := &forge_mock.MockForge{}
-	m.Mock.Test(t)
-	t.Cleanup(func() { m.AssertExpectations(t) })
+	m := forge_mocks.NewMockForge(t)
 
 	// Identity.
 	m.On("Name").Return("mock").Maybe()

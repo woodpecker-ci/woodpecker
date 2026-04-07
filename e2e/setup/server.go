@@ -20,7 +20,6 @@ import (
 	"context"
 	"net"
 	"testing"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
@@ -31,8 +30,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
-	server_forge "go.woodpecker-ci.org/woodpecker/v3/server/forge"
-	forge_mock "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -58,7 +57,7 @@ type ServerEnv struct {
 	GRPCAddr string
 	Store    store.Store
 	Fixtures *Fixtures
-	Forge    *forge_mock.MockForge
+	Forge    *forge_mocks.MockForge
 	Manager  services.Manager
 }
 
@@ -128,7 +127,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 
 // newTestManager builds a services.Manager whose SetupForge always returns
 // the provided MockForge, bypassing real forge instantiation.
-func newTestManager(s store.Store, mockForge *forge_mock.MockForge) (services.Manager, error) {
+func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.Manager, error) {
 	cmd := &cli.Command{
 		Flags: []cli.Flag{
 			// Extensions (all empty → disabled).
@@ -142,8 +141,8 @@ func newTestManager(s store.Store, mockForge *forge_mock.MockForge) (services.Ma
 			&cli.BoolFlag{Name: "config-extension-netrc"},
 			&cli.BoolFlag{Name: "config-extension-exclusive"},
 			// Config fetch tuning.
-			&cli.DurationFlag{Name: "forge-timeout", Value: 30 * time.Second},
-			&cli.UintFlag{Name: "forge-retry", Value: 3},
+			&cli.DurationFlag{Name: "forge-timeout", Value: defaultTimeout},
+			&cli.UintFlag{Name: "forge-retry", Value: 3}, //nolint:mnd
 			&cli.StringSliceFlag{Name: "environment"},
 			// Forge flags — gitea=true satisfies setupForgeService's type switch.
 			&cli.BoolFlag{Name: "gitea", Value: true},
@@ -167,7 +166,7 @@ func newTestManager(s store.Store, mockForge *forge_mock.MockForge) (services.Ma
 		},
 	}
 
-	setupForge := services.SetupForge(func(_ *model.Forge) (server_forge.Forge, error) {
+	setupForge := services.SetupForge(func(_ *model.Forge) (forge.Forge, error) {
 		return mockForge, nil
 	})
 
@@ -190,7 +189,7 @@ func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 		grpc.StreamInterceptor(authorizer.StreamInterceptor),
 		grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
 		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-			MinTime: 5 * time.Second,
+			MinTime: shortTimeout,
 		}),
 	)
 

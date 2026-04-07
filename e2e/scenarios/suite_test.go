@@ -24,7 +24,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/e2e/setup"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	server_pipeline "go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 )
 
 // TestScenarios is the table-driven runner for all fixture-based scenarios.
@@ -50,7 +50,7 @@ func runScenario(t *testing.T, sc Scenario) {
 	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	created, err := server_pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 		Event:  sc.Event,
 		Branch: "main",
 		Commit: "deadbeef",

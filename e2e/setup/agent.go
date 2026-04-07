@@ -27,7 +27,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
-	wp_agent "go.woodpecker-ci.org/woodpecker/v3/agent"
+	"go.woodpecker-ci.org/woodpecker/v3/agent"
 	agent_rpc "go.woodpecker-ci.org/woodpecker/v3/agent/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -67,7 +67,7 @@ type agentConfig struct {
 	// They are matched against task Labels set in pipeline YAML (labels: key: value).
 	customLabels map[string]string
 
-	// orgID pins the agent to a specific organisation (-1 = global).
+	// orgID pins the agent to a specific organization (-1 = global).
 	// Org agents score higher than global agents for tasks in the same org,
 	// so they are always preferred by the queue when available.
 	orgID int64
@@ -95,7 +95,7 @@ func WithCustomLabels(labels map[string]string) AgentOption {
 	}
 }
 
-// WithOrgID restricts the agent to a specific organisation. Org agents score
+// WithOrgID restricts the agent to a specific organization. Org agents score
 // 10× higher than global agents (score 1) for tasks from the same org, so the
 // queue always prefers them when both are available. Pass model.IDNotSet (-1)
 // for a global agent (the default).
@@ -107,7 +107,7 @@ func WithOrgID(id int64) AgentOption {
 // server at grpcAddr and returns an *AgentEnv whose AgentID is populated once
 // the agent has registered. Pass AgentOption values to configure labels, hostname,
 // or org-scoping; multiple agents can be started in the same test.
-func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
+func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv { //nolint:contextcheck
 	t.Helper()
 
 	cfg := &agentConfig{
@@ -123,8 +123,8 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 
 	transport := grpc.WithTransportCredentials(insecure.NewCredentials())
 	keepaliveOpts := grpc.WithKeepaliveParams(keepalive.ClientParameters{
-		Time:    30 * time.Second,
-		Timeout: 10 * time.Second,
+		Time:    defaultTimeout,
+		Timeout: shortTimeout,
 	})
 
 	authCtx, authCancel := context.WithCancelCause(context.Background())
@@ -137,7 +137,7 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 	t.Cleanup(func() { authConn.Close() })
 
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, TestAgentToken, -1)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(authCtx, authClient, agentAuthRefreshEvery)
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(authCtx, authClient, agentAuthRefreshEvery) //nolint:contextcheck
 	if err != nil {
 		t.Fatalf("StartAgent(%s): authenticate with server: %v", cfg.hostname, err)
 	}
@@ -158,7 +158,7 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 
 	grpcCtx := metadata.NewOutgoingContext(authCtx, metadata.Pairs("hostname", cfg.hostname))
 
-	serverVersion, err := client.Version(grpcCtx)
+	serverVersion, err := client.Version(grpcCtx) //nolint:contextcheck
 	if err != nil {
 		t.Fatalf("StartAgent(%s): get server version: %v", cfg.hostname, err)
 	}
@@ -176,7 +176,7 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 		t.Fatalf("StartAgent(%s): load dummy backend: %v", cfg.hostname, err)
 	}
 
-	agentID, err := client.RegisterAgent(grpcCtx, rpc.AgentInfo{
+	agentID, err := client.RegisterAgent(grpcCtx, rpc.AgentInfo{ //nolint:contextcheck
 		Version:      version.String(),
 		Backend:      backend.Name(),
 		Platform:     engInfo.Platform,
@@ -220,14 +220,14 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 		filter.Labels[k] = v
 	}
 
-	counter := &wp_agent.State{
+	counter := &agent.State{
 		Polling:  agentMaxWorkflows,
-		Metadata: make(map[string]wp_agent.Info),
+		Metadata: make(map[string]agent.Info),
 	}
 
 	for i := range agentMaxWorkflows {
 		go func(slot int) {
-			runner := wp_agent.NewRunner(client, filter, cfg.hostname, counter, backend)
+			runner := agent.NewRunner(client, filter, cfg.hostname, counter, backend)
 			log.Debug().Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner started")
 			for {
 				if ctx.Err() != nil {
