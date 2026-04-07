@@ -33,7 +33,7 @@ const (
 	pathUser          = "%s/2.0/user/"
 	pathEmails        = "%s/2.0/user/emails"
 	pathPermissions   = "%s/2.0/user/workspaces/%s/permissions/repositories?%s"
-	pathWorkspaces    = "%s/2.0/user/workspaces/?%s"
+	pathWorkspaces    = "%s/2.0/user/workspaces?%s"
 	pathWorkspace     = "%s/2.0/workspaces/%s"
 	pathRepo          = "%s/2.0/repositories/%s/%s"
 	pathRepos         = "%s/2.0/repositories/%s?%s"
