@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
@@ -60,7 +61,7 @@ func newStore(ctx context.Context, t *testing.T) store.Store {
 
 // seedFixtures creates the minimal set of DB records every test needs:
 // one Forge, one owner User, one Repo linked to both.
-func seedFixtures(t *testing.T, s store.Store) *Fixtures {
+func seedFixtures(t *testing.T, s store.Store, files []*forge_types.FileMeta) *Fixtures {
 	t.Helper()
 
 	forge := &model.Forge{
@@ -88,9 +89,10 @@ func seedFixtures(t *testing.T, s store.Store) *Fixtures {
 		Name:          "test-repo",
 		Clone:         "https://forge.example.test/test-owner/test-repo.git",
 		Branch:        "main",
-		// Empty Config means the config service will look for .woodpecker.yaml,
-		// which MockForge.File() will intercept and return the scenario YAML.
-		Config:    ".woodpecker.yaml",
+		// Config controls which path the config service fetches.
+		// Single-workflow: ".woodpecker.yaml" → File() is called.
+		// Multi-workflow:  ".woodpecker/"     → Dir() is called and returns all files.
+		Config:    repoConfig(files),
 		IsActive:  true,
 		AllowPull: true,
 	}
@@ -101,4 +103,14 @@ func seedFixtures(t *testing.T, s store.Store) *Fixtures {
 		Owner: owner,
 		Repo:  repo,
 	}
+}
+
+// repoConfig returns the repo.Config path based on the number of workflow files.
+// Single-workflow → ".woodpecker.yaml" (File() path).
+// Multi-workflow  → ".woodpecker/"     (Dir() path; trailing slash required).
+func repoConfig(files []*forge_types.FileMeta) string {
+	if len(files) == 1 {
+		return ".woodpecker.yaml"
+	}
+	return ".woodpecker/"
 }

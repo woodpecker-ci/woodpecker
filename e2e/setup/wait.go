@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -69,25 +70,88 @@ func WaitForPipelineStatus(t *testing.T, s store.Store, pipelineID int64, wantSt
 		time.Sleep(defaultInterval)
 	}
 
-	// Fetch final state for a useful failure message.
 	p, _ := s.GetPipeline(pipelineID)
 	t.Fatalf("timeout waiting for pipeline %d: last status=%q (want %q)", pipelineID, p.Status, wantStatus)
 	return nil
 }
 
-// WaitForAgentRegistered polls the store until at least one agent is registered.
-// This ensures the agent is ready to accept work before a test triggers a pipeline.
-func WaitForAgentRegistered(t *testing.T, s store.Store) {
+// WaitForAgentRegistered polls until all provided agents appear in the store
+// (by AgentID), then applies any deferred DB patches (e.g. OrgID).
+// Pass every *AgentEnv returned by StartAgent before triggering pipelines.
+func WaitForAgentRegistered(t *testing.T, s store.Store, agents ...*AgentEnv) {
 	t.Helper()
 
 	deadline := time.Now().Add(10 * time.Second)
 	for time.Now().Before(deadline) {
-		agents, err := s.AgentList(&model.ListOptions{All: true})
-		require.NoError(t, err, "list agents")
-		if len(agents) > 0 {
+		allFound := true
+		for _, env := range agents {
+			if env.AgentID == 0 {
+				allFound = false
+				break
+			}
+			if _, err := s.AgentFind(env.AgentID); err != nil {
+				allFound = false
+				break
+			}
+		}
+		if allFound {
+			// Apply any deferred OrgID patches.
+			for _, env := range agents {
+				if env.requestOrgID == model.IDNotSet {
+					continue
+				}
+				agent, err := s.AgentFind(env.AgentID)
+				require.NoError(t, err, "find agent %d to patch OrgID", env.AgentID)
+				agent.OrgID = env.requestOrgID
+				require.NoError(t, s.AgentUpdate(agent),
+					"patch OrgID on agent %d", env.AgentID)
+			}
 			return
 		}
 		time.Sleep(defaultInterval)
 	}
-	t.Fatal("timeout: no agent registered with the server")
+
+	t.Fatal("timeout: not all agents registered with the server")
+}
+
+// WaitForStep polls the store until a named step in the given pipeline reaches
+// a terminal status. It returns the final step state. Fails the test on timeout.
+func WaitForStep(t *testing.T, s store.Store, pipeline *model.Pipeline, stepName string) *model.Step {
+	t.Helper()
+
+	deadline := time.Now().Add(defaultTimeout)
+	for time.Now().Before(deadline) {
+		steps, err := s.StepList(pipeline)
+		require.NoError(t, err, "list steps for pipeline %d", pipeline.ID)
+
+		for _, step := range steps {
+			if step.Name == stepName && isTerminal(step.State) {
+				return step
+			}
+		}
+		time.Sleep(defaultInterval)
+	}
+
+	t.Fatalf("timeout waiting for step %q in pipeline %d to reach terminal state", stepName, pipeline.ID)
+	return nil
+}
+
+// AssertWorkflowRanOnAgent asserts that the named workflow in the finished
+// pipeline was executed by the given agent. Use this to verify label-based
+// routing and org-agent preference.
+func AssertWorkflowRanOnAgent(t *testing.T, s store.Store, pipeline *model.Pipeline, workflowName string, agent *AgentEnv) {
+	t.Helper()
+
+	workflows, err := s.WorkflowGetTree(pipeline)
+	require.NoError(t, err, "get workflow tree for pipeline %d", pipeline.ID)
+
+	for _, wf := range workflows {
+		if wf.Name == workflowName {
+			assert.Equalf(t, agent.AgentID, wf.AgentID,
+				"workflow %q should have run on agent %d (%s) but ran on agent %d",
+				workflowName, agent.AgentID, agent.name, wf.AgentID)
+			return
+		}
+	}
+	t.Errorf("workflow %q not found in pipeline %d", workflowName, pipeline.ID)
 }

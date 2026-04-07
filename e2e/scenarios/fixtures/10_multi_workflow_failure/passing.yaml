@@ -1,0 +1,5 @@
+steps:
+  - name: ok-step
+    image: dummy
+    commands:
+      - echo this is fine

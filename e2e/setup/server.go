@@ -33,6 +33,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
 	server_forge "go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_mock "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
@@ -58,21 +59,26 @@ type ServerEnv struct {
 	Store    store.Store
 	Fixtures *Fixtures
 	Forge    *forge_mock.MockForge
+	Manager  services.Manager
 }
 
 // StartServer wires up the full in-process server stack:
 //   - in-memory sqlite store (fully migrated) with seeded fixtures
 //   - in-memory queue, pubsub, and logging
-//   - MockForge that serves the provided configYAML
+//   - MockForge that serves the provided workflow files
 //   - gRPC server on a random TCP port
 //
+// files must contain at least one entry. Single-workflow scenarios pass one
+// file named ".woodpecker.yaml"; multi-workflow scenarios pass multiple files
+// named ".woodpecker/foo.yaml" etc. The repo's Config path is set accordingly.
+//
 // All resources are cleaned up via t.Cleanup.
-func StartServer(ctx context.Context, t *testing.T, configYAML []byte) *ServerEnv {
+func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMeta) *ServerEnv {
 	t.Helper()
 
 	s := newStore(ctx, t)
-	fixtures := seedFixtures(t, s)
-	mockForge := newMockForge(t, configYAML)
+	fixtures := seedFixtures(t, s, files)
+	mockForge := newMockForge(t, files)
 
 	mgr, err := newTestManager(s, mockForge)
 	require.NoError(t, err, "create services manager")
@@ -84,7 +90,6 @@ func StartServer(ctx context.Context, t *testing.T, configYAML []byte) *ServerEn
 	// package-level global read by server/pipeline and server/rpc. Tests run
 	// sequentially within a package, but we still need to clean up so the next
 	// subtest starts from a known-zero state rather than the previous test's values.
-	// This mirrors the origLogStore pattern used in server/rpc tests.
 	orig := server.Config
 	t.Cleanup(func() { server.Config = orig })
 
@@ -117,15 +122,12 @@ func StartServer(ctx context.Context, t *testing.T, configYAML []byte) *ServerEn
 		Store:    s,
 		Fixtures: fixtures,
 		Forge:    mockForge,
+		Manager:  mgr,
 	}
 }
 
 // newTestManager builds a services.Manager whose SetupForge always returns
 // the provided MockForge, bypassing real forge instantiation.
-//
-// We still need to satisfy setupForgeService (called inside NewManager) which
-// requires at least one forge-type flag. We set --gitea=true so it doesn't
-// error; the actual forge instance is replaced by our callback.
 func newTestManager(s store.Store, mockForge *forge_mock.MockForge) (services.Manager, error) {
 	cmd := &cli.Command{
 		Flags: []cli.Flag{
@@ -165,7 +167,6 @@ func newTestManager(s store.Store, mockForge *forge_mock.MockForge) (services.Ma
 		},
 	}
 
-	// SetupForge ignores the model.Forge record and always returns our mock.
 	setupForge := services.SetupForge(func(_ *model.Forge) (server_forge.Forge, error) {
 		return mockForge, nil
 	})
@@ -175,7 +176,6 @@ func newTestManager(s store.Store, mockForge *forge_mock.MockForge) (services.Ma
 
 // startGRPCServer binds to a random TCP port, registers Woodpecker's gRPC
 // services, and starts serving. Shutdown happens via t.Cleanup.
-// Returns the "host:port" address string.
 func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 	t.Helper()
 
@@ -194,9 +194,6 @@ func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 		}),
 	)
 
-	// Use a fresh per-test prometheus registry to avoid "duplicate metrics
-	// collector registration" panics — NewWoodpeckerServer uses promauto which
-	// registers into the global default registry and panics on duplicate names.
 	proto.RegisterWoodpeckerServer(grpcServer, server_rpc.NewWoodpeckerServerWithRegistry(
 		server.Config.Services.Queue,
 		server.Config.Services.Logs,

@@ -30,6 +30,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/e2e/setup"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	server_pipeline "go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 )
@@ -67,9 +68,11 @@ steps:
 // pipeline, run it through the dummy backend, and reach StatusSuccess.
 // This is the "does the plumbing work at all" gate — it runs first.
 func TestInfraSmoke(t *testing.T) {
-	env := setup.StartServer(t.Context(), t, simpleSuccessYAML)
-	setup.StartAgent(t.Context(), t, env.GRPCAddr)
-	setup.WaitForAgentRegistered(t, env.Store)
+	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
+		{Name: ".woodpecker.yaml", Data: simpleSuccessYAML},
+	})
+	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	pipeline := &model.Pipeline{
 		Event:  model.EventPush,

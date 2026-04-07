@@ -27,12 +27,19 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// newMockForge builds a MockForge that serves configYAML for any config-fetch
-// call, no-ops status reporting, and stubs all other methods safely.
+// newMockForge builds a MockForge that serves the given files for any
+// config-fetch call, no-ops status reporting, and stubs all other methods safely.
+//
+// Single-workflow (len(files)==1, name ".woodpecker.yaml"): File() returns the
+// raw YAML bytes; Dir() is not called but is stubbed for safety.
+//
+// Multi-workflow (len(files)>1, names ".woodpecker/foo.yaml"): File() returns
+// empty (causing the config service to fall through to Dir()); Dir() returns
+// all files.
 //
 // Note: Refresh is a separate optional interface (forge.Refresher) checked via
 // type assertion — MockForge does not implement it, so token refresh is skipped.
-func newMockForge(t *testing.T, configYAML []byte) *forge_mock.MockForge {
+func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mock.MockForge {
 	t.Helper()
 
 	m := &forge_mock.MockForge{}
@@ -43,17 +50,24 @@ func newMockForge(t *testing.T, configYAML []byte) *forge_mock.MockForge {
 	m.On("Name").Return("mock").Maybe()
 	m.On("URL").Return("https://forge.example.test").Maybe()
 
-	// Pipeline config fetching: configService calls File() for ".woodpecker.yaml"
-	// then may fall back to Dir(".woodpecker").
-	m.On("File",
-		mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-	).Return(configYAML, nil).Maybe()
-
-	m.On("Dir",
-		mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-	).Return([]*forge_types.FileMeta{
-		{Name: ".woodpecker.yaml", Data: configYAML},
-	}, nil).Maybe()
+	if len(files) == 1 {
+		// Single-workflow: config service calls File(".woodpecker.yaml").
+		m.On("File",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+		).Return(files[0].Data, nil).Maybe()
+		m.On("Dir",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+		).Return(files, nil).Maybe()
+	} else {
+		// Multi-workflow: config service calls Dir(".woodpecker").
+		// File() must return empty so the service falls through to Dir().
+		m.On("File",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+		).Return([]byte(nil), nil).Maybe()
+		m.On("Dir",
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+		).Return(files, nil).Maybe()
+	}
 
 	// Status reporting back to forge — no-op.
 	m.On("Status",

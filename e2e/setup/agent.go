@@ -31,6 +31,7 @@ import (
 	agent_rpc "go.woodpecker-ci.org/woodpecker/v3/agent/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
@@ -39,11 +40,86 @@ const (
 	agentAuthRefreshEvery = 30 * time.Minute
 )
 
-// StartAgent connects an in-process agent using the dummy backend to the
-// gRPC server at grpcAddr. The agent runs agentMaxWorkflows concurrent
-// polling loops and stops when ctx is cancelled (wired via t.Cleanup).
-func StartAgent(ctx context.Context, t *testing.T, grpcAddr string) {
+// AgentEnv holds the running state of one in-process test agent.
+// Use AgentID to assert which agent picked up a workflow.
+type AgentEnv struct {
+	// AgentID is the server-assigned ID after registration.
+	// Valid only after WaitForAgentRegistered returns.
+	AgentID int64
+
+	// name is used for logging and as the hostname label.
+	name string
+
+	// requestedOrgID is applied to the DB record by WaitForAgentRegistered
+	// so the server's GetServerLabels returns the right org-id filter.
+	// model.IDNotSet (-1) means global (default).
+	requestOrgID int64
+}
+
+// AgentOption configures an agent before it registers with the server.
+type AgentOption func(*agentConfig)
+
+type agentConfig struct {
+	// hostname is sent to the server as the agent's hostname metadata and label.
+	hostname string
+
+	// customLabels are merged into the agent's filter labels.
+	// They are matched against task Labels set in pipeline YAML (labels: key: value).
+	customLabels map[string]string
+
+	// orgID pins the agent to a specific organisation (-1 = global).
+	// Org agents score higher than global agents for tasks in the same org,
+	// so they are always preferred by the queue when available.
+	orgID int64
+}
+
+// WithHostname sets the agent's hostname label (default: "test-agent").
+func WithHostname(name string) AgentOption {
+	return func(c *agentConfig) { c.hostname = name }
+}
+
+// WithCustomLabels merges extra labels into the agent's filter set.
+// Use this to test label-based task routing, e.g.:
+//
+//	setup.StartAgent(ctx, t, addr, setup.WithCustomLabels(map[string]string{"gpu": "true"}))
+//
+// The pipeline YAML must set a matching label:
+//
+//	labels:
+//	  gpu: "true"
+func WithCustomLabels(labels map[string]string) AgentOption {
+	return func(c *agentConfig) {
+		for k, v := range labels {
+			c.customLabels[k] = v
+		}
+	}
+}
+
+// WithOrgID restricts the agent to a specific organisation. Org agents score
+// 10× higher than global agents (score 1) for tasks from the same org, so the
+// queue always prefers them when both are available. Pass model.IDNotSet (-1)
+// for a global agent (the default).
+func WithOrgID(id int64) AgentOption {
+	return func(c *agentConfig) { c.orgID = id }
+}
+
+// StartAgent connects an in-process agent using the dummy backend to the gRPC
+// server at grpcAddr and returns an *AgentEnv whose AgentID is populated once
+// the agent has registered. Pass AgentOption values to configure labels, hostname,
+// or org-scoping; multiple agents can be started in the same test.
+func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 	t.Helper()
+
+	cfg := &agentConfig{
+		hostname:     "test-agent",
+		customLabels: make(map[string]string),
+		orgID:        model.IDNotSet, // global by default
+	}
+	for _, o := range opts {
+		o(cfg)
+	}
+
+	env := &AgentEnv{name: cfg.hostname}
 
 	transport := grpc.WithTransportCredentials(insecure.NewCredentials())
 	keepaliveOpts := grpc.WithKeepaliveParams(keepalive.ClientParameters{
@@ -51,25 +127,21 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string) {
 		Timeout: 10 * time.Second,
 	})
 
-	// Separate auth connection: used only to exchange the agent token for a JWT.
-	// Runs on a background context so it outlives the test context slightly
-	// during cleanup ordering.
 	authCtx, authCancel := context.WithCancelCause(context.Background())
 	t.Cleanup(func() { authCancel(nil) })
 
 	authConn, err := grpc.NewClient(grpcAddr, transport, keepaliveOpts)
 	if err != nil {
-		t.Fatalf("StartAgent: create auth gRPC connection: %v", err)
+		t.Fatalf("StartAgent(%s): create auth gRPC connection: %v", cfg.hostname, err)
 	}
 	t.Cleanup(func() { authConn.Close() })
 
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, TestAgentToken, -1)
 	authInterceptor, err := agent_rpc.NewAuthInterceptor(authCtx, authClient, agentAuthRefreshEvery)
 	if err != nil {
-		t.Fatalf("StartAgent: authenticate with server: %v", err)
+		t.Fatalf("StartAgent(%s): authenticate with server: %v", cfg.hostname, err)
 	}
 
-	// Main orchestration connection: carries all Next/Update/Done/Log calls.
 	conn, err := grpc.NewClient(
 		grpcAddr,
 		transport,
@@ -78,61 +150,74 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string) {
 		grpc.WithStreamInterceptor(authInterceptor.Stream()),
 	)
 	if err != nil {
-		t.Fatalf("StartAgent: create main gRPC connection: %v", err)
+		t.Fatalf("StartAgent(%s): create main gRPC connection: %v", cfg.hostname, err)
 	}
 	t.Cleanup(func() { conn.Close() })
 
 	client := agent_rpc.NewGrpcClient(ctx, conn)
 
-	// Attach hostname metadata — the server uses this for logging/assignment.
-	const hostname = "test-agent"
-	grpcCtx := metadata.NewOutgoingContext(authCtx, metadata.Pairs("hostname", hostname))
+	grpcCtx := metadata.NewOutgoingContext(authCtx, metadata.Pairs("hostname", cfg.hostname))
 
-	// Verify gRPC protocol version compatibility.
 	serverVersion, err := client.Version(grpcCtx)
 	if err != nil {
-		t.Fatalf("StartAgent: get server version: %v", err)
+		t.Fatalf("StartAgent(%s): get server version: %v", cfg.hostname, err)
 	}
 	if serverVersion.GrpcVersion != agent_rpc.ClientGrpcVersion {
-		t.Fatalf("StartAgent: gRPC version mismatch: server=%d client=%d",
-			serverVersion.GrpcVersion, agent_rpc.ClientGrpcVersion)
+		t.Fatalf("StartAgent(%s): gRPC version mismatch: server=%d client=%d",
+			cfg.hostname, serverVersion.GrpcVersion, agent_rpc.ClientGrpcVersion)
 	}
 
-	// Load the dummy backend (available only when compiled with -tags test).
 	backend := dummy.New()
 	if !backend.IsAvailable(ctx) {
-		t.Fatal("StartAgent: dummy backend is not available")
+		t.Fatalf("StartAgent(%s): dummy backend is not available", cfg.hostname)
 	}
 	engInfo, err := backend.Load(ctx)
 	if err != nil {
-		t.Fatalf("StartAgent: load dummy backend: %v", err)
+		t.Fatalf("StartAgent(%s): load dummy backend: %v", cfg.hostname, err)
 	}
 
-	// Register with the server.
 	agentID, err := client.RegisterAgent(grpcCtx, rpc.AgentInfo{
-		Version:  version.String(),
-		Backend:  backend.Name(),
-		Platform: engInfo.Platform,
-		Capacity: agentMaxWorkflows,
+		Version:      version.String(),
+		Backend:      backend.Name(),
+		Platform:     engInfo.Platform,
+		Capacity:     agentMaxWorkflows,
+		CustomLabels: cfg.customLabels,
 	})
 	if err != nil {
-		t.Fatalf("StartAgent: register with server: %v", err)
+		t.Fatalf("StartAgent(%s): register with server: %v", cfg.hostname, err)
 	}
-	log.Debug().Int64("agent_id", agentID).Msg("test agent registered")
+	env.AgentID = agentID
+	log.Debug().Int64("agent_id", agentID).Str("hostname", cfg.hostname).Msg("test agent registered")
+
+	// If a non-global org is requested, update the agent's OrgID in the DB so
+	// the server's GetServerLabels returns the right org-id filter (score 10).
+	if cfg.orgID != model.IDNotSet {
+		// The server stores agents; we patch via the store after registration.
+		// This is done in WaitForAgentRegistered which the caller must invoke.
+		// We stash the requested orgID so the wait helper can apply it.
+		env.requestOrgID = cfg.orgID
+	}
 
 	t.Cleanup(func() {
 		if err := client.UnregisterAgent(grpcCtx); err != nil {
-			log.Warn().Err(err).Msg("test agent: unregister failed (expected during teardown)")
+			log.Warn().Err(err).Str("hostname", cfg.hostname).Msg("test agent: unregister failed (expected during teardown)")
 		}
 	})
 
+	// Build the filter labels the agent advertises to the queue.
+	// org-id is handled server-side via GetServerLabels; we only set
+	// the labels the agent explicitly provides (platform, backend, repo wildcard,
+	// and any custom labels).
 	filter := rpc.Filter{
 		Labels: map[string]string{
-			"hostname": hostname,
+			"hostname": cfg.hostname,
 			"platform": engInfo.Platform,
 			"backend":  backend.Name(),
 			"repo":     "*",
 		},
+	}
+	for k, v := range cfg.customLabels {
+		filter.Labels[k] = v
 	}
 
 	counter := &wp_agent.State{
@@ -140,11 +225,10 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string) {
 		Metadata: make(map[string]wp_agent.Info),
 	}
 
-	// Start one polling goroutine per workflow slot.
 	for i := range agentMaxWorkflows {
 		go func(slot int) {
-			runner := wp_agent.NewRunner(client, filter, hostname, counter, backend)
-			log.Debug().Int("slot", slot).Msg("test agent: runner started")
+			runner := wp_agent.NewRunner(client, filter, cfg.hostname, counter, backend)
+			log.Debug().Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner started")
 			for {
 				if ctx.Err() != nil {
 					return
@@ -153,7 +237,7 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string) {
 					if ctx.Err() != nil {
 						return
 					}
-					log.Error().Err(err).Int("slot", slot).Msg("test agent: runner error, retrying")
+					log.Error().Err(err).Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner error, retrying")
 					select {
 					case <-ctx.Done():
 						return
@@ -163,4 +247,6 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string) {
 			}
 		}(i)
 	}
+
+	return env
 }

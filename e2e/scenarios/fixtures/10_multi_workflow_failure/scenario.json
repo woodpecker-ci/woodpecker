@@ -1,0 +1,13 @@
+{
+  "name": "one workflow fails pipeline is failure",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_workflows": [
+    { "name": "failing", "status": "failure" },
+    { "name": "passing", "status": "success" }
+  ],
+  "expected_steps": [
+    { "name": "ok-step", "status": "success", "exit_code": 0 },
+    { "name": "bad-step", "status": "failure", "exit_code": 1 }
+  ]
+}

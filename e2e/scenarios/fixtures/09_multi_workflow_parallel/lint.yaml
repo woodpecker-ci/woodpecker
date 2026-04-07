@@ -1,0 +1,5 @@
+steps:
+  - name: lint
+    image: dummy
+    commands:
+      - echo linting

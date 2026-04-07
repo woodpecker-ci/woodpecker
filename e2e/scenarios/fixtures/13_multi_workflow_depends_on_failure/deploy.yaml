@@ -1,0 +1,8 @@
+depends_on:
+  - build
+
+steps:
+  - name: deploy
+    image: dummy
+    commands:
+      - echo this should not run

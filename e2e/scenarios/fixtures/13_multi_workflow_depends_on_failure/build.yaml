@@ -1,0 +1,7 @@
+steps:
+  - name: compile
+    image: dummy
+    environment:
+      STEP_EXIT_CODE: "1"
+    commands:
+      - echo compile failed

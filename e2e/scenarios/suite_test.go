@@ -46,9 +46,9 @@ func TestScenarios(t *testing.T) {
 func runScenario(t *testing.T, sc Scenario) {
 	t.Helper()
 
-	env := setup.StartServer(t.Context(), t, sc.PipelineYAML)
-	setup.StartAgent(t.Context(), t, env.GRPCAddr)
-	setup.WaitForAgentRegistered(t, env.Store)
+	env := setup.StartServer(t.Context(), t, sc.Files)
+	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	created, err := server_pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 		Event:  sc.Event,
@@ -86,5 +86,25 @@ func runScenario(t *testing.T, sc Scenario) {
 		if want.ExitCode != 0 || step.ExitCode != 0 {
 			assert.Equalf(t, want.ExitCode, step.ExitCode, "step %q exit code", want.Name)
 		}
+	}
+
+	if len(sc.ExpectedWorkflows) == 0 {
+		return
+	}
+
+	workflows, err := env.Store.WorkflowGetTree(finished)
+	require.NoError(t, err, "list workflows for pipeline %d", finished.ID)
+
+	byWorkflowName := make(map[string]*model.Workflow, len(workflows))
+	for _, w := range workflows {
+		byWorkflowName[w.Name] = w
+	}
+
+	for _, want := range sc.ExpectedWorkflows {
+		wf, ok := byWorkflowName[want.Name]
+		if !assert.Truef(t, ok, "workflow %q not found in pipeline %d", want.Name, finished.ID) {
+			continue
+		}
+		assert.Equalf(t, want.Status, wf.State, "workflow %q status", want.Name)
 	}
 }
