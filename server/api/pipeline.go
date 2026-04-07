@@ -197,12 +197,12 @@ func GetPipelines(c *gin.Context) {
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 func DeletePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	repo := session.Repo(c)
-	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -237,7 +237,7 @@ func DeletePipeline(c *gin.Context) {
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline, OR 'latest'"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline, OR 'latest'"
 func GetPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	if c.Param("number") == "latest" {
@@ -246,7 +246,7 @@ func GetPipeline(c *gin.Context) {
 	}
 
 	repo := session.Repo(c)
-	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -292,7 +292,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 //	@Tags		Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 //	@Param		step_id			path	int		true	"the step id"
 func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -300,7 +300,7 @@ func GetStepLogs(c *gin.Context) {
 
 	// parse the pipeline number and step sequence number from
 	// the request parameter.
-	num, err := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	num, err := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -348,13 +348,13 @@ func GetStepLogs(c *gin.Context) {
 //	@Tags		Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 //	@Param		step_id			path	int		true	"the step id"
 func DeleteStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	pipelineNumber, err := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	pipelineNumber, err := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -408,11 +408,11 @@ func DeleteStepLogs(c *gin.Context) {
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 func GetPipelineConfig(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
-	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -442,10 +442,10 @@ func GetPipelineConfig(c *gin.Context) {
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 func GetPipelineMetadata(c *gin.Context) {
 	repo := session.Repo(c)
-	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -483,7 +483,7 @@ func GetPipelineMetadata(c *gin.Context) {
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 func CancelPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -495,7 +495,7 @@ func CancelPipeline(c *gin.Context) {
 		return
 	}
 
-	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	num, _ := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
@@ -521,13 +521,13 @@ func CancelPipeline(c *gin.Context) {
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 func PostApproval(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
 		repo   = session.Repo(c)
 		user   = session.User(c)
-		num, _ = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+		num, _ = strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
 	)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
@@ -553,13 +553,13 @@ func PostApproval(c *gin.Context) {
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 func PostDecline(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
 		repo   = session.Repo(c)
 		user   = session.User(c)
-		num, _ = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+		num, _ = strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
 	)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
@@ -603,14 +603,14 @@ func GetPipelineQueue(c *gin.Context) {
 //	@Tags			Pipelines
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			repo_id			path	int		true	"the repository id"
-//	@Param			number			path	int		true	"the number of the pipeline"
+//	@Param			pipeline_number			path	int		true	"the number of the pipeline"
 //	@Param			event			query	string	false	"override the event type"
 //	@Param			deploy_to		query	string	false	"override the target deploy value"
 func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -685,12 +685,12 @@ func PostPipeline(c *gin.Context) {
 //	@Tags		Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pipeline_number			path	int		true	"the number of the pipeline"
 func DeletePipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	repo := session.Repo(c)
-	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	num, _ := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
