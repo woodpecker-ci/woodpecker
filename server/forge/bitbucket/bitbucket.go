@@ -191,7 +191,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if err != nil {
 		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
 	}
-	perm, err := client.GetPermission(repo.FullName)
+	perm, err := client.GetPermission(owner, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
