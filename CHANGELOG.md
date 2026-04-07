@@ -65,6 +65,7 @@
 
 ### 🐛 Bug Fixes
 
+- Remove usage of deprecated /user/permissions/repositories [[#6401](https://github.com/woodpecker-ci/woodpecker/pull/6401)]
 - Fix parsing /user/workspaces response [[#6396](https://github.com/woodpecker-ci/woodpecker/pull/6396)]
 - Fix CLI exec with workflow matrix feature, where variables are not substituted. [[#6162](https://github.com/woodpecker-ci/woodpecker/pull/6162)]
 - Fix enable repo with same name and owner on second forge [[#6375](https://github.com/woodpecker-ci/woodpecker/pull/6375)]
