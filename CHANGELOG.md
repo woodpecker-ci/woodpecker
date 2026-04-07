@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting
 
 ### 🔒 Security
 
@@ -65,6 +65,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix parsing /user/workspaces response [[#6396](https://github.com/woodpecker-ci/woodpecker/pull/6396)]
 - Fix CLI exec with workflow matrix feature, where variables are not substituted. [[#6162](https://github.com/woodpecker-ci/woodpecker/pull/6162)]
 - Fix enable repo with same name and owner on second forge [[#6375](https://github.com/woodpecker-ci/woodpecker/pull/6375)]
 - Fix workflow beeing skipped and marked as failed when agent starts before server [[#6361](https://github.com/woodpecker-ci/woodpecker/pull/6361)]
@@ -109,7 +110,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#6392](https://github.com/woodpecker-ci/woodpecker/pull/6392)]
 - chore(deps): update dependency marked to v17.0.6 [[#6386](https://github.com/woodpecker-ci/woodpecker/pull/6386)]
 - chore(deps): update dependency fuse.js to v7.3.0 [[#6382](https://github.com/woodpecker-ci/woodpecker/pull/6382)]
 - chore(deps): update docs npm deps non-major [[#6376](https://github.com/woodpecker-ci/woodpecker/pull/6376)]
@@ -152,6 +152,7 @@
 ### 📦️ Dependency
 
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.41 [[#6397](https://github.com/woodpecker-ci/woodpecker/pull/6397)]
+- chore(deps): lock file maintenance [[#6392](https://github.com/woodpecker-ci/woodpecker/pull/6392)]
 - chore(deps): update dependency dotenv to v17.4.1 [[#6389](https://github.com/woodpecker-ci/woodpecker/pull/6389)]
 - chore(deps): update dependency marked to v17.0.6 [[#6387](https://github.com/woodpecker-ci/woodpecker/pull/6387)]
 - chore(deps): update dependency simple-icons to v16.15.0 [[#6385](https://github.com/woodpecker-ci/woodpecker/pull/6385)]
