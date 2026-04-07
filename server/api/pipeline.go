@@ -286,14 +286,14 @@ func GetPipelineLastByBranch(c *gin.Context) {
 // GetStepLogs
 //
 //	@Summary	Get logs for a pipeline step
-//	@Router		/repos/{repo_id}/logs/{number}/{stepID} [get]
+//	@Router		/repos/{repo_id}/logs/{number}/{step_id} [get]
 //	@Produce	json
 //	@Success	200	{array}	LogEntry
 //	@Tags		Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		stepID			path	int		true	"the step id"
+//	@Param		step_id			path	int		true	"the step id"
 func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -312,7 +312,7 @@ func GetStepLogs(c *gin.Context) {
 		return
 	}
 
-	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
+	stepID, err := strconv.ParseInt(c.Params.ByName("step_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -342,14 +342,14 @@ func GetStepLogs(c *gin.Context) {
 // DeleteStepLogs
 //
 //	@Summary	Delete step logs of a pipeline
-//	@Router		/repos/{repo_id}/logs/{number}/{stepId} [delete]
+//	@Router		/repos/{repo_id}/logs/{number}/{step_id} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		stepId			path	int		true	"the step id"
+//	@Param		step_id			path	int		true	"the step id"
 func DeleteStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -366,7 +366,7 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
+	stepID, err := strconv.ParseInt(c.Params.ByName("step_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
