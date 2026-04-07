@@ -539,19 +539,19 @@ const workspacesPayload = `
 	"size": 1,
 	"values": [
 		{
-			"type": "workspace",
-			"uuid": "{c7a04a76-fa20-43e4-dc42-a7506db4c95b}",
-			"name": "Ueber Dev",
-			"slug": "test_name",
-			"links": {
-				"avatar": {
-					"href": "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964"
-				},
-				"html": {
-					"href": "https://bitbucket.org/ueberdev42/"
-				},
-				"self": {
-					"href": "https://api.bitbucket.org/2.0/workspaces/ueberdev42"
+			"type": "workspace_access",
+			"administrator": true,
+			"workspace": {
+				"type": "workspace_base",
+				"uuid": "{c7a04a76-fa20-43e4-dc42-a7506db4c95b}",
+				"slug": "test_name",
+				"links": {
+					"avatar": {
+						"href": "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964"
+					},
+					"self": {
+						"href": "https://api.bitbucket.org/2.0/workspaces/ueberdev42"
+					}
 				}
 			}
 		}
