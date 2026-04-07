@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-06
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -151,6 +151,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.41 [[#6397](https://github.com/woodpecker-ci/woodpecker/pull/6397)]
 - chore(deps): update dependency dotenv to v17.4.1 [[#6389](https://github.com/woodpecker-ci/woodpecker/pull/6389)]
 - chore(deps): update dependency marked to v17.0.6 [[#6387](https://github.com/woodpecker-ci/woodpecker/pull/6387)]
 - chore(deps): update dependency simple-icons to v16.15.0 [[#6385](https://github.com/woodpecker-ci/woodpecker/pull/6385)]
