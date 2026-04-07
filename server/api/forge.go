@@ -64,9 +64,9 @@ func GetForges(c *gin.Context) {
 //	@Success	200	{object}	Forge
 //	@Tags		Forges
 //	@Param		Authorization	header	string	false	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forgeId			path	int		true	"the forge's id"
+//	@Param		forge_id			path	int		true	"the forge's id"
 func GetForge(c *gin.Context) {
-	forgeID, err := strconv.ParseInt(c.Param("forgeId"), 10, 64)
+	forgeID, err := strconv.ParseInt(c.Param("forge_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -94,7 +94,7 @@ func GetForge(c *gin.Context) {
 //	@Success	200	{object}	Forge
 //	@Tags		Forges
 //	@Param		Authorization	header	string						true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forgeId			path	int							true	"the forge's id"
+//	@Param		forge_id			path	int							true	"the forge's id"
 //	@Param		forgeData		body	ForgeWithOAuthClientSecret	true	"the forge's data"
 func PatchForge(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -106,7 +106,7 @@ func PatchForge(c *gin.Context) {
 		return
 	}
 
-	forgeID, err := strconv.ParseInt(c.Param("forgeId"), 10, 64)
+	forgeID, err := strconv.ParseInt(c.Param("forge_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -178,11 +178,11 @@ func PostForge(c *gin.Context) {
 //	@Success	200
 //	@Tags		Forges
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forgeId			path	int		true	"the forge's id"
+//	@Param		forge_id			path	int		true	"the forge's id"
 func DeleteForge(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	forgeID, err := strconv.ParseInt(c.Param("forgeId"), 10, 64)
+	forgeID, err := strconv.ParseInt(c.Param("forge_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
