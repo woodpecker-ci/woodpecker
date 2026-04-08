@@ -468,7 +468,7 @@ func (c *client) StreamLogEntries(repoID, num, step int64) (<-chan *LogEntry, <-
 							errCh <- nil
 							return
 						default:
-							errCh <- fmt.Errorf("UNKNOWN!%s: %s", msgEvent, msgData)
+							errCh <- fmt.Errorf("unknown event %s: %s", msgEvent, msgData)
 							return
 						}
 					}
