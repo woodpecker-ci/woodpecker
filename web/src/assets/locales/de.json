@@ -783,5 +783,5 @@
     "secret_extension_netrc": "Netrc-Zugangsdaten senden",
     "secret_extension_netrc_desc": "Die Netrc-Zugangsdaten für die Code-Plattform an die Geheimnis-Erweiterung senden.",
     "extension_netrc": "Netrc-Zugangsdaten bereitstellen",
-    "extension_netrc_desc": "Gibt die Netrc-Zugangsdaten der Forge an die Erweiterung weiter."
+    "extension_netrc_desc": "Die Netrc-Zugangsdaten der Code-Plattform an die Erweiterung weitergeben."
 }
