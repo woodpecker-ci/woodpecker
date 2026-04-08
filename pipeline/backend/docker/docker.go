@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/cenkalti/backoff/v5"
 	"github.com/containerd/errdefs"
 	"github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/api/pkg/stdcopy"
@@ -42,9 +43,9 @@ import (
 )
 
 const (
-	containerKillTimeout = 5 // seconds
-	volumeRetryWait      = 1 // seconds
-	maxRetry             = 3
+	containerKillTimeout               = 5 // seconds
+	volumeRetryWait      time.Duration = 1 * time.Second
+	maxRetry             uint          = 3
 )
 
 type docker struct {
@@ -372,16 +373,19 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend_types.Config
 	}
 
 	var err error
-	for retryCount := 0; retryCount < maxRetry; retryCount++ {
+	_, _ = backoff.Retry(ctx, func() (any, error) {
 		_, err = e.client.VolumeRemove(ctx, conf.Volume, client.VolumeRemoveOptions{
 			Force: true,
 		})
 		if err == nil || !isErrVolumeInUse(err) {
-			// if it worked or if we have no in use error do not retry
-			break
+			// if it worked or if we have no "in use error" do not retry
+			return nil, nil
 		}
-		time.Sleep(volumeRetryWait * time.Second)
-	}
+		return nil, err
+	}, backoff.WithMaxTries(maxRetry), backoff.WithBackOff(&backoff.ExponentialBackOff{
+		InitialInterval: volumeRetryWait,
+		Multiplier:      2, //nolint:mnd
+	}))
 	if err != nil {
 		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume)
 	}
