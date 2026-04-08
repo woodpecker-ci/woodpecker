@@ -199,11 +199,8 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	// sanitize agent input
-	if err := checkPipelineState(currentPipeline); err != nil {
-		return err
-	}
-	if err := checkWorkflowStepStates(workflow, step); err != nil {
+	// sanitize agent input: only allow step updates that the workflow state permits
+	if err := checkWorkflowAllowsStepUpdate(workflow.State, step, state); err != nil {
 		return err
 	}
 
@@ -260,11 +257,8 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	// sanitize agent input
-	if err := checkPipelineState(currentPipeline); err != nil {
-		return err
-	}
-	if err := checkWorkflowStepStates(workflow, nil); err != nil {
+	// check workflow's own state to prevent re-initializing a finished or blocked workflow
+	if err := checkWorkflowState(workflow.State); err != nil {
 		return err
 	}
 
@@ -293,7 +287,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	return s.updateAgentLastWork(agent)
 }
 
-// Done marks the workflow with the given ID as stope.
+// Done marks the workflow with the given ID as stopped.
 func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -333,11 +327,8 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	// sanitize agent input
-	if err := checkPipelineState(currentPipeline); err != nil {
-		return err
-	}
-	if err := checkWorkflowStepStates(workflow, nil); err != nil {
+	// check workflow's own state to prevent finishing an already-finished or blocked workflow
+	if err := checkWorkflowState(workflow.State); err != nil {
 		return err
 	}
 
