@@ -146,7 +146,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
 	require.NoError(t, err)
 
-	httpExtension := secret.NewHTTP(ts.URL, client, false)
+	httpExtension := secret.NewHTTP(ts.URL, client, true)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {

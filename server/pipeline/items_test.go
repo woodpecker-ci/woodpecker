@@ -136,7 +136,7 @@ steps:
 	server.Config.Services.Manager = mockManager
 
 	secretService := secret_service_mocks.NewMockService(t)
-	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{
+	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{
 		{
 			Name:  "hello",
 			Value: "secret world",
@@ -145,7 +145,7 @@ steps:
 	mockManager.On("SecretServiceFromRepo", mock.Anything).Return(secretService, nil)
 
 	registryService := registry_service_mocks.NewMockService(t)
-	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything, mock.Anything).Return([]*model.Registry{
+	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Registry{
 		{
 			Address:  "docker.io",
 			Username: "user",

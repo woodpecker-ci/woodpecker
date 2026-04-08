@@ -770,5 +770,7 @@
     "org_level_registry": "реестр организации",
     "secret_extension_endpoint": "Конечная точка расширения секретов",
     "secret_extension_netrc": "Включить учётные данные netrc",
-    "secret_extension_netrc_desc": "Отправлять расширению учётные данные netrc платформы."
+    "secret_extension_netrc_desc": "Отправлять расширению учётные данные netrc платформы.",
+    "extension_netrc_desc": "Передавать учётные данные netrc расширению.",
+    "extension_netrc": "Включить учётные данные netrc"
 }

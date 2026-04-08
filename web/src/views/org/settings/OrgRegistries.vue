@@ -34,7 +34,6 @@
 </template>
 
 <script lang="ts" setup>
-import { cloneDeep } from 'lodash';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -131,11 +130,11 @@ const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async
 });
 
 function editRegistry(registry: Registry) {
-  selectedRegistry.value = cloneDeep(registry);
+  selectedRegistry.value = structuredClone(registry);
 }
 
 function showAddRegistry() {
-  selectedRegistry.value = cloneDeep(emptyRegistry);
+  selectedRegistry.value = structuredClone(emptyRegistry);
 }
 
 useWPTitle(computed(() => [i18n.t('registries.registries'), org.value.name]));
