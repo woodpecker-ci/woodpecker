@@ -679,7 +679,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/forges/{forgeId}": {
+        "/forges/{forge_id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -699,7 +699,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forgeId",
+                        "name": "forge_id",
                         "in": "path",
                         "required": true
                     }
@@ -733,7 +733,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forgeId",
+                        "name": "forge_id",
                         "in": "path",
                         "required": true
                     }
@@ -764,7 +764,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forgeId",
+                        "name": "forge_id",
                         "in": "path",
                         "required": true
                     },
@@ -2695,7 +2695,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/logs/{number}": {
+        "/repos/{repo_id}/logs/{pipeline_number}": {
             "delete": {
                 "produces": [
                     "text/plain"
@@ -2723,7 +2723,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -2735,7 +2735,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/logs/{number}/{stepID}": {
+        "/repos/{repo_id}/logs/{pipeline_number}/{step_id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2763,14 +2763,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "the step id",
-                        "name": "stepID",
+                        "name": "step_id",
                         "in": "path",
                         "required": true
                     }
@@ -2786,9 +2786,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/repos/{repo_id}/logs/{number}/{stepId}": {
+            },
             "delete": {
                 "produces": [
                     "text/plain"
@@ -2816,14 +2814,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "the step id",
-                        "name": "stepId",
+                        "name": "step_id",
                         "in": "path",
                         "required": true
                     }
@@ -3045,7 +3043,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -3073,7 +3071,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline, OR 'latest'",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3115,7 +3113,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     },
@@ -3174,7 +3172,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3186,7 +3184,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/approve": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/approve": {
             "post": {
                 "produces": [
                     "application/json"
@@ -3214,7 +3212,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3229,7 +3227,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/cancel": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/cancel": {
             "post": {
                 "produces": [
                     "text/plain"
@@ -3257,7 +3255,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3269,7 +3267,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/config": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/config": {
             "get": {
                 "produces": [
                     "application/json"
@@ -3297,7 +3295,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3315,7 +3313,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/decline": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/decline": {
             "post": {
                 "produces": [
                     "application/json"
@@ -3343,7 +3341,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3358,7 +3356,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/metadata": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/metadata": {
             "get": {
                 "produces": [
                     "application/json"
@@ -3386,7 +3384,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -4176,7 +4174,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/logs/{repo_id}/{pipeline}/{stepID}": {
+        "/stream/logs/{repo_id}/{pipeline}/{step_id}": {
             "get": {
                 "produces": [
                     "text/plain"
@@ -4203,7 +4201,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the step id",
-                        "name": "stepID",
+                        "name": "step_id",
                         "in": "path",
                         "required": true
                     }
