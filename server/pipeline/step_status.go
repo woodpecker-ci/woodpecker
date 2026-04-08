@@ -28,8 +28,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func CalcStepStatus(step *model.Step, state rpc.StepState) (_ *model.Step, cancelPipelineFromStep bool, _ error) {
-	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", *step, state)
+func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancelPipelineFromStep bool, _ error) {
+	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", step, state)
 
 	switch step.State {
 	case model.StatusPending:
@@ -40,7 +40,7 @@ func CalcStepStatus(step *model.Step, state rpc.StepState) (_ *model.Step, cance
 			if state.Finished != 0 {
 				step.Finished = state.Finished
 			}
-			return step, false, nil
+			return &step, false, nil
 		}
 
 		// Transition from pending to running when started
@@ -105,14 +105,14 @@ func CalcStepStatus(step *model.Step, state rpc.StepState) (_ *model.Step, cance
 		}
 	}
 
-	return step, cancelPipelineFromStep, nil
+	return &step, cancelPipelineFromStep, nil
 }
 
 // UpdateStepStatus updates step status based on agent reports via RPC.
 func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, state rpc.StepState) error {
 	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", *step, state)
 
-	step, shouldCancelPipelineFromStep, err := CalcStepStatus(step, state)
+	step, shouldCancelPipelineFromStep, err := CalcStepStatus(*step, state)
 	if err != nil {
 		return err
 	}

@@ -22,14 +22,16 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 )
 
 const logStreamDelayAllowed = 5 * time.Minute
 
-func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
+func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, _pipeline *model.Pipeline, repo *model.Repo) error {
 	var err error
-	if repo == nil && pipeline == nil {
+	if repo == nil && _pipeline == nil {
 		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 		if err != nil {
 			return err
@@ -41,7 +43,7 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 			return err
 		}
 
-		pipeline, err = s.store.GetPipeline(workflow.PipelineID)
+		_pipeline, err = s.store.GetPipeline(workflow.PipelineID)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 			return err
@@ -49,9 +51,9 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 	}
 
 	if repo == nil {
-		repo, err = s.store.GetRepo(pipeline.RepoID)
+		repo, err = s.store.GetRepo(_pipeline.RepoID)
 		if err != nil {
-			log.Error().Err(err).Msgf("cannot find repo with id %d", pipeline.RepoID)
+			log.Error().Err(err).Msgf("cannot find repo with id %d", _pipeline.RepoID)
 			return err
 		}
 	}
@@ -64,55 +66,56 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 	return fmt.Errorf("%w: agentId=%d repoID=%d", ErrAgentIllegalRepo, agent.ID, repo.ID)
 }
 
-// checkParentState checks if an agent is allowed to change/update a workflow/step state
-// by the state the parent pipeline/workflow.
-func checkParentState(parentState, childState model.StatusValue, isStep bool) (err error) {
-	// check if pipeline was already run and marked finished or is blocked
-	switch parentState {
+// isActiveState returns true for states where work is in progress or not yet started.
+func isActiveState(state model.StatusValue) bool {
+	switch state {
 	case model.StatusCreated,
 		model.StatusPending,
 		model.StatusRunning:
-		return nil
-
-	case model.StatusBlocked:
-		if isStep {
-			err = ErrAgentIllegalWorkflowRun
-		} else {
-			err = ErrAgentIllegalPipelineWorkflowRun
-		}
-
-	case model.StatusCanceled,
-		model.StatusFailure,
-		model.StatusKilled:
-
-		switch childState {
-		case model.StatusCanceled,
-			model.StatusKilled,
-			model.StatusSkipped,
-			model.StatusFailure,
-			model.StatusSuccess:
-			return nil
-
-		default:
-			if isStep {
-				err = ErrAgentIllegalWorkflowReRunStateChange
-			} else {
-				err = ErrAgentIllegalPipelineWorkflowReRunStateChange
-			}
-		}
-
+		return true
 	default:
-		if isStep {
-			err = ErrAgentIllegalWorkflowReRunStateChange
-		} else {
-			err = ErrAgentIllegalPipelineWorkflowReRunStateChange
-		}
+		return false
+	}
+}
+
+// isDoneState returns true for terminal states where no further work will happen.
+func isDoneState(state model.StatusValue) bool {
+	switch state {
+	case model.StatusSuccess,
+		model.StatusFailure,
+		model.StatusKilled,
+		model.StatusCanceled,
+		model.StatusSkipped,
+		model.StatusError,
+		model.StatusDeclined:
+		return true
+	default:
+		return false
+	}
+}
+
+// checkWorkflowAllowsStepUpdate validates whether the workflow state permits
+// the given step state update. If the workflow is active (created/pending/running),
+// any step update is allowed. If the workflow is in a terminal state, only
+// updates that would move the step into a terminal state are permitted — this
+// lets the agent report final results for steps that completed after the
+// workflow was already marked done.
+func checkWorkflowAllowsStepUpdate(workflowState model.StatusValue, step *model.Step, state rpc.StepState) error {
+	if isActiveState(workflowState) {
+		return nil
 	}
 
+	newStep, _, err := pipeline.CalcStepStatus(*step, state)
 	if err != nil {
-		log.Error().Err(err).Msg("caught agent performing illegal instruction")
+		return err
 	}
-	return err
+	if isDoneState(newStep.State) {
+		return nil
+	}
+
+	retErr := ErrAgentIllegalWorkflowReRunStateChange
+	log.Error().Err(retErr).Msg("caught agent performing illegal instruction")
+	return retErr
 }
 
 // checkWorkflowState checks if a workflow's own state allows it to be

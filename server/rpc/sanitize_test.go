@@ -21,120 +21,90 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// TestCheckParentState covers checkParentState for both pipeline-level
-// (isStep=false) and workflow-level (isStep=true) checks in a single
-// table-driven test, eliminating duplicate cases shared by the two levels.
-func TestCheckParentState(t *testing.T) {
+func TestCheckWorkflowAllowsStepUpdate(t *testing.T) {
 	t.Parallel()
 
-	// States that always allow a child to proceed, regardless of level.
-	allowedParents := []model.StatusValue{
-		model.StatusCreated,
-		model.StatusPending,
-		model.StatusRunning,
-	}
+	t.Run("workflow running allows any step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		// Non-terminal update (step stays running)
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusRunning, step, rpc.StepState{}))
+	})
 
-	// Terminal parent states that reject a running child as an illegal re-run.
-	terminalParents := []model.StatusValue{
-		model.StatusSuccess,
-		model.StatusFailure,
-		model.StatusKilled,
-		model.StatusError,
-		model.StatusSkipped,
-	}
+	t.Run("workflow pending allows any step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusPending}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusPending, step, rpc.StepState{}))
+	})
 
-	// Parents whose terminal children are exempt (allowed through).
-	exemptParents := []model.StatusValue{
-		model.StatusCanceled,
-		model.StatusFailure,
-		model.StatusKilled,
-	}
+	t.Run("workflow created allows any step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusPending}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusCreated, step, rpc.StepState{}))
+	})
 
-	// Child states considered exempt under a terminal/canceled parent.
-	exemptChildren := []model.StatusValue{
-		model.StatusCanceled,
-		model.StatusKilled,
-		model.StatusSkipped,
-	}
+	t.Run("workflow finished allows terminal step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		// Step exits with code 0 → CalcStepStatus produces StatusSuccess (terminal)
+		state := rpc.StepState{Exited: true, ExitCode: 0}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state))
+	})
 
-	// Error sentinels per level.
-	type levelConfig struct {
-		isStep       bool
-		blockedErr   error
-		reRunErr     error
-		extraExempt  []model.StatusValue // additional exempt child states beyond the shared set
-		extraRejects []model.StatusValue // additional terminal parents beyond the shared set
-	}
+	t.Run("workflow finished allows failed step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		state := rpc.StepState{Exited: true, ExitCode: 1}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusFailure, step, state))
+	})
 
-	levels := []levelConfig{
-		{
-			isStep:       false,
-			blockedErr:   ErrAgentIllegalPipelineWorkflowRun,
-			reRunErr:     ErrAgentIllegalPipelineWorkflowReRunStateChange,
-			extraExempt:  []model.StatusValue{model.StatusFailure, model.StatusSuccess},
-			extraRejects: []model.StatusValue{model.StatusDeclined},
-		},
-		{
-			isStep:      true,
-			blockedErr:  ErrAgentIllegalWorkflowRun,
-			reRunErr:    ErrAgentIllegalWorkflowReRunStateChange,
-			extraExempt: []model.StatusValue{model.StatusFailure, model.StatusSuccess},
-		},
-	}
+	t.Run("workflow finished allows canceled step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		state := rpc.StepState{Canceled: true}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusKilled, step, state))
+	})
 
-	for _, lc := range levels {
-		label := "pipeline"
-		if lc.isStep {
-			label = "step"
-		}
+	t.Run("workflow finished allows skipped step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusPending}
+		state := rpc.StepState{Skipped: true}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state))
+	})
 
-		t.Run(label, func(t *testing.T) {
-			t.Parallel()
+	t.Run("workflow finished rejects non-terminal step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		// No exit, no cancel → step stays Running (non-terminal)
+		state := rpc.StepState{}
+		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
 
-			// Allowed parent states.
-			for _, ps := range allowedParents {
-				t.Run(fmt.Sprintf("%s allows", ps), func(t *testing.T) {
-					t.Parallel()
-					assert.NoError(t, checkParentState(ps, model.StatusRunning, lc.isStep))
-				})
-			}
+	t.Run("workflow killed rejects non-terminal step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		state := rpc.StepState{}
+		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusKilled, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
 
-			// Blocked parent.
-			t.Run("blocked rejects", func(t *testing.T) {
-				t.Parallel()
-				assert.ErrorIs(t, checkParentState(model.StatusBlocked, model.StatusRunning, lc.isStep), lc.blockedErr)
-			})
+	t.Run("workflow blocked rejects non-terminal step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		state := rpc.StepState{}
+		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusBlocked, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
 
-			// Terminal parents reject a running child.
-			allTerminal := append(terminalParents, lc.extraRejects...)
-			for _, ps := range allTerminal {
-				t.Run(fmt.Sprintf("%s running child rejected", ps), func(t *testing.T) {
-					t.Parallel()
-					assert.ErrorIs(t, checkParentState(ps, model.StatusRunning, lc.isStep), lc.reRunErr)
-				})
-			}
-
-			// Canceled parent with running child is also rejected.
-			t.Run("canceled running child rejected", func(t *testing.T) {
-				t.Parallel()
-				assert.ErrorIs(t, checkParentState(model.StatusCanceled, model.StatusRunning, lc.isStep), lc.reRunErr)
-			})
-
-			// Exempt parent + exempt child combinations → allowed.
-			allExemptChildren := append(exemptChildren, lc.extraExempt...)
-			for _, ps := range exemptParents {
-				for _, cs := range allExemptChildren {
-					t.Run(fmt.Sprintf("%s parent %s child allowed", ps, cs), func(t *testing.T) {
-						t.Parallel()
-						assert.NoError(t, checkParentState(ps, cs, lc.isStep))
-					})
-				}
-			}
-		})
-	}
+	t.Run("workflow finished rejects pending-to-running transition", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusPending}
+		// No skip, no exit → CalcStepStatus produces Running (non-terminal)
+		state := rpc.StepState{Started: 100}
+		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
 }
 
 func TestCheckWorkflowState(t *testing.T) {
@@ -176,6 +146,57 @@ func TestCheckWorkflowState(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestIsActiveState(t *testing.T) {
+	t.Parallel()
+
+	active := []model.StatusValue{model.StatusCreated, model.StatusPending, model.StatusRunning}
+	inactive := []model.StatusValue{
+		model.StatusSuccess, model.StatusFailure, model.StatusKilled,
+		model.StatusBlocked, model.StatusCanceled, model.StatusSkipped,
+		model.StatusError, model.StatusDeclined,
+	}
+
+	for _, s := range active {
+		t.Run(fmt.Sprintf("%s is active", s), func(t *testing.T) {
+			t.Parallel()
+			assert.True(t, isActiveState(s))
+		})
+	}
+	for _, s := range inactive {
+		t.Run(fmt.Sprintf("%s is not active", s), func(t *testing.T) {
+			t.Parallel()
+			assert.False(t, isActiveState(s))
+		})
+	}
+}
+
+func TestIsDoneState(t *testing.T) {
+	t.Parallel()
+
+	done := []model.StatusValue{
+		model.StatusSuccess, model.StatusFailure, model.StatusKilled,
+		model.StatusCanceled, model.StatusSkipped, model.StatusError,
+		model.StatusDeclined,
+	}
+	notDone := []model.StatusValue{
+		model.StatusCreated, model.StatusPending, model.StatusRunning,
+		model.StatusBlocked,
+	}
+
+	for _, s := range done {
+		t.Run(fmt.Sprintf("%s is done", s), func(t *testing.T) {
+			t.Parallel()
+			assert.True(t, isDoneState(s))
+		})
+	}
+	for _, s := range notDone {
+		t.Run(fmt.Sprintf("%s is not done", s), func(t *testing.T) {
+			t.Parallel()
+			assert.False(t, isDoneState(s))
+		})
+	}
 }
 
 func TestAllowAppendingLogs(t *testing.T) {
