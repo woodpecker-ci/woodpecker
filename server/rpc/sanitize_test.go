@@ -137,6 +137,47 @@ func TestCheckParentState(t *testing.T) {
 	}
 }
 
+func TestCheckWorkflowState(t *testing.T) {
+	t.Parallel()
+
+	t.Run("allowed states", func(t *testing.T) {
+		t.Parallel()
+		for _, s := range []model.StatusValue{
+			model.StatusCreated,
+			model.StatusPending,
+			model.StatusRunning,
+		} {
+			t.Run(string(s), func(t *testing.T) {
+				t.Parallel()
+				assert.NoError(t, checkWorkflowState(s))
+			})
+		}
+	})
+
+	t.Run("blocked rejects", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkWorkflowState(model.StatusBlocked), ErrAgentIllegalWorkflowRun)
+	})
+
+	t.Run("terminal states reject", func(t *testing.T) {
+		t.Parallel()
+		for _, s := range []model.StatusValue{
+			model.StatusSuccess,
+			model.StatusFailure,
+			model.StatusKilled,
+			model.StatusError,
+			model.StatusSkipped,
+			model.StatusCanceled,
+			model.StatusDeclined,
+		} {
+			t.Run(string(s), func(t *testing.T) {
+				t.Parallel()
+				assert.ErrorIs(t, checkWorkflowState(s), ErrAgentIllegalWorkflowReRunStateChange)
+			})
+		}
+	})
+}
+
 func TestAllowAppendingLogs(t *testing.T) {
 	t.Parallel()
 

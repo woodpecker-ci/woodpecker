@@ -426,15 +426,6 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-		// Init calls updateForgeStatus (→ GetUser) before UpdateWorkflowStatusToRunning
-		// checks the workflow state. UpdateWorkflowStatusToRunning itself calls
-		// WorkflowUpdate, and the deferred notify calls WorkflowGetTree — all of
-		// these execute even though the function ultimately returns an error.
-		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
-		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
-		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		// updateAgentLastWork -> AgentUpdate (agent.LastWork is 0, so it always updates)
-		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
@@ -453,13 +444,6 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-		// Same as above: updateForgeStatus, WorkflowUpdate, and the deferred
-		// WorkflowGetTree all run before the error surfaces to the caller.
-		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
-		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
-		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		// updateAgentLastWork -> AgentUpdate (agent.LastWork is 0, so it always updates)
-		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
@@ -600,11 +584,6 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-		// checkParentState passes (pipeline=running), so UpdateWorkflowStatusToDone
-		// runs (→ WorkflowUpdate) and Done then calls WorkflowGetTree before the
-		// error from UpdateWorkflowStatusToDone propagates to the caller.
-		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
-		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
 
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))

@@ -115,6 +115,30 @@ func checkParentState(parentState, childState model.StatusValue, isStep bool) (e
 	return err
 }
 
+// checkWorkflowState checks if a workflow's own state allows it to be
+// initialized or marked as done. A workflow that is already in a terminal
+// state (success, failure, killed, …) must not be re-run, and a blocked
+// workflow must not be started by an agent.
+func checkWorkflowState(state model.StatusValue) (err error) {
+	switch state {
+	case model.StatusCreated,
+		model.StatusPending,
+		model.StatusRunning:
+		return nil
+
+	case model.StatusBlocked:
+		err = ErrAgentIllegalWorkflowRun
+
+	default:
+		err = ErrAgentIllegalWorkflowReRunStateChange
+	}
+
+	if err != nil {
+		log.Error().Err(err).Msg("caught agent performing illegal instruction")
+	}
+	return err
+}
+
 func allowAppendingLogs(currPipeline *model.Pipeline, currStep *model.Step) error {
 	// As long as pipeline is running just let the agent send logs
 	if currStep.State == model.StatusRunning || currPipeline.Status == model.StatusRunning {
