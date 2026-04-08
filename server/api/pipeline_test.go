@@ -134,7 +134,7 @@ func TestDeletePipeline(t *testing.T) {
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		DeletePipeline(c)
 
@@ -160,7 +160,7 @@ func TestDeletePipeline(t *testing.T) {
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		DeletePipeline(c)
 
@@ -197,7 +197,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		t.Run("should get pipeline metadata", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "2"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 			c.Set("store", mockStore)
 			c.Set("forge", mockForge)
 			c.Set("repo", fakeRepo)
@@ -218,7 +218,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		t.Run("should return bad request for invalid pipeline number", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "invalid"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "invalid"}}
 
 			GetPipelineMetadata(c)
 
@@ -231,7 +231,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "3"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "3"}}
 			c.Set("store", mockStore)
 			c.Set("repo", fakeRepo)
 
@@ -271,7 +271,7 @@ func TestCancelPipeline(t *testing.T) {
 		c.Set("store", mockStore)
 		c.Set("repo", fakeRepo)
 		c.Set("user", fakeUser)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		CancelPipeline(c)
 

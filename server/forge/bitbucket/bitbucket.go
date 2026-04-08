@@ -160,7 +160,13 @@ func (c *config) Teams(ctx context.Context, u *model.User, p *model.ListOptions)
 	if err != nil {
 		return nil, err
 	}
-	return convertWorkspaceList(resp.Values), nil
+	var workspaces []*internal.Workspace
+	for _, access := range resp.Values {
+		if access.Workspace != nil {
+			workspaces = append(workspaces, access.Workspace)
+		}
+	}
+	return convertWorkspaceList(workspaces), nil
 }
 
 // Repo returns the named Bitbucket repository.
@@ -185,7 +191,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if err != nil {
 		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
 	}
-	perm, err := client.GetPermission(repo.FullName)
+	perm, err := client.GetPermission(owner, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +220,12 @@ func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 	}
 
 	var all []*model.Repo
-	for _, workspace := range resp.Values {
+	for _, access := range resp.Values {
+		if access.Workspace == nil {
+			continue
+		}
+		workspace := access.Workspace
+
 		repos, err := client.ListReposAll(workspace.Slug)
 		if err != nil {
 			return nil, err
