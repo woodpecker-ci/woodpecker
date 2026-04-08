@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting
+@6543, @CrimsonFez, @LUKIEYF, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting
 
 ### 🔒 Security
 
@@ -26,6 +26,7 @@
 
 ### 📈 Enhancement
 
+- refactor(server): unify api parameters to snake case [[#6404](https://github.com/woodpecker-ci/woodpecker/pull/6404)]
 - Add netrc option for config/registry extension [[#6333](https://github.com/woodpecker-ci/woodpecker/pull/6333)]
 - Migrate to moby [[#6357](https://github.com/woodpecker-ci/woodpecker/pull/6357)]
 - Deprecate commit avatar envs [[#6356](https://github.com/woodpecker-ci/woodpecker/pull/6356)]
