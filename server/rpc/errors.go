@@ -17,9 +17,6 @@ package rpc
 import "errors"
 
 var (
-	ErrAgentIllegalPipelineWorkflowReRunStateChange = errors.New("workflow has parent pipeline marked as finished")
-	ErrAgentIllegalPipelineWorkflowRun              = errors.New("workflow has parent pipeline in blocked state")
-
 	ErrAgentIllegalWorkflowReRunStateChange = errors.New("workflow was already marked as finished")
 	ErrAgentIllegalWorkflowRun              = errors.New("workflow is currently in blocked state")
 
