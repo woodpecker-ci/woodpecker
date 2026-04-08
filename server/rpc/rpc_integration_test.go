@@ -144,11 +144,18 @@ func TestRPCUpdate(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("reject pipeline already succeeded", func(t *testing.T) {
+	t.Run("allow terminal step update when workflow already finished", func(t *testing.T) {
+		// When the workflow is already finished, a step update that moves the
+		// step to a terminal state (e.g. reporting exit code) should be allowed.
 		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
 		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusSuccess)
-		workflow := defaultWorkflow(model.StatusRunning)
+		pipeline := defaultPipeline(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusSuccess) // finished
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
@@ -156,55 +163,25 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("StepUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+		mockLogStore.On("StepFinished", mock.Anything).Return()
 
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
-		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowReRunStateChange)
+		// Step reports exit → it will transition to success/failure (terminal)
+		err := rpcInst.Update(ctx, "30", rpc.StepState{
+			StepUUID: "step-uuid-123",
+			Exited:   true,
+			ExitCode: 0,
+		})
+		assert.NoError(t, err)
 	})
 
-	t.Run("reject pipeline already failed", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
-		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusFailure)
-		workflow := defaultWorkflow(model.StatusRunning)
-		step := defaultStep(model.StatusRunning)
-
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
-		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
-		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-
-		rpcInst := newTestRPC(t, mockStore)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
-
-		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowReRunStateChange)
-	})
-
-	t.Run("reject pipeline blocked", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
-		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusBlocked)
-		workflow := defaultWorkflow(model.StatusRunning)
-		step := defaultStep(model.StatusRunning)
-
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
-		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
-		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-
-		rpcInst := newTestRPC(t, mockStore)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
-
-		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowRun)
-	})
-
-	t.Run("reject workflow already finished", func(t *testing.T) {
+	t.Run("reject non-terminal step update when workflow already finished", func(t *testing.T) {
+		// When the workflow is already finished, a step update that would keep
+		// the step in a non-terminal state (e.g. just started, no exit) is rejected.
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := defaultPipeline(model.StatusRunning)
@@ -220,16 +197,17 @@ func TestRPCUpdate(t *testing.T) {
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
+		// Step reports started but not exited → still running (non-terminal)
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
 	})
 
-	t.Run("reject step already finished", func(t *testing.T) {
+	t.Run("reject step update when workflow blocked", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusRunning)
-		workflow := defaultWorkflow(model.StatusRunning)
-		step := defaultStep(model.StatusSuccess) // finished
+		pipeline := defaultPipeline(model.StatusBlocked)
+		workflow := defaultWorkflow(model.StatusBlocked)
+		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
@@ -241,7 +219,7 @@ func TestRPCUpdate(t *testing.T) {
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
-		assert.ErrorIs(t, err, ErrAgentIllegalStepReRunStateChange)
+		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
 	})
 
 	t.Run("reject step belongs to different pipeline", func(t *testing.T) {
@@ -400,42 +378,6 @@ func TestRPCInit(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("reject pipeline already succeeded", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
-		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusSuccess)
-		workflow := defaultWorkflow(model.StatusPending)
-
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
-		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-
-		rpcInst := newTestRPC(t, mockStore)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
-
-		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowReRunStateChange)
-	})
-
-	t.Run("reject pipeline blocked", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
-		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusBlocked)
-		workflow := defaultWorkflow(model.StatusPending)
-
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
-		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-
-		rpcInst := newTestRPC(t, mockStore)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
-
-		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowRun)
-	})
-
 	t.Run("reject workflow already finished", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
@@ -536,63 +478,6 @@ func TestRPCDone(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("reject pipeline already succeeded", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
-		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusSuccess)
-		workflow := defaultWorkflow(model.StatusRunning)
-
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("StepListFromWorkflowFind", mock.Anything).Return([]*model.Step{}, nil)
-		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
-		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-
-		rpcInst := newTestRPC(t, mockStore)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
-
-		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowReRunStateChange)
-	})
-
-	t.Run("reject pipeline killed", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
-		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusKilled)
-		workflow := defaultWorkflow(model.StatusRunning)
-
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("StepListFromWorkflowFind", mock.Anything).Return([]*model.Step{}, nil)
-		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
-		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-
-		rpcInst := newTestRPC(t, mockStore)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
-
-		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowReRunStateChange)
-	})
-
-	t.Run("reject pipeline blocked", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
-		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusBlocked)
-		workflow := defaultWorkflow(model.StatusRunning)
-
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("StepListFromWorkflowFind", mock.Anything).Return([]*model.Step{}, nil)
-		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
-		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-
-		rpcInst := newTestRPC(t, mockStore)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
-
-		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
-		assert.ErrorIs(t, err, ErrAgentIllegalPipelineWorkflowRun)
-	})
-
 	t.Run("reject workflow already finished", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
@@ -610,6 +495,25 @@ func TestRPCDone(t *testing.T) {
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
+	})
+
+	t.Run("reject workflow blocked", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		agent := defaultAgent()
+		pipeline := defaultPipeline(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusBlocked)
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("StepListFromWorkflowFind", mock.Anything).Return([]*model.Step{}, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+
+		rpcInst := newTestRPC(t, mockStore)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+
+		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
+		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowRun)
 	})
 
 	t.Run("reject agent wrong org", func(t *testing.T) {
@@ -769,10 +673,6 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject: pipeline finished stale and step not running", func(t *testing.T) {
-		// This replaces the old "reject pipeline already finished" test.
-		// Previously the rejection came from checkPipelineState returning
-		// ErrAgentIllegalPipelineWorkflowReRunStateChange.
-		// Now it comes from allowAppendingLogs returning ErrAgentIllegalLogStreaming.
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := stalePipeline(model.StatusSuccess)
@@ -792,9 +692,6 @@ func TestRPCLog(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "can not alter logs")
 		assert.ErrorIs(t, err, ErrAgentIllegalLogStreaming)
-		// The old error is no longer returned from Log() — allowAppendingLogs
-		// now handles the pipeline-finished case itself.
-		assert.False(t, errors.Is(err, ErrAgentIllegalPipelineWorkflowReRunStateChange))
 	})
 
 	t.Run("reject: pipeline failed stale and step not running", func(t *testing.T) {
