@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -91,7 +91,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 });
 
 function editAgent(agent: Agent) {
-  selectedAgent.value = structuredClone(agent);
+  selectedAgent.value = structuredClone(toRaw(agent));
 }
 
 function showAddAgent() {

@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -130,11 +130,11 @@ const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async
 });
 
 function editRegistry(registry: Registry) {
-  selectedRegistry.value = structuredClone(registry);
+  selectedRegistry.value = structuredClone(toRaw(registry));
 }
 
 function showAddRegistry() {
-  selectedRegistry.value = structuredClone(emptyRegistry);
+  selectedRegistry.value = structuredClone(toRaw(emptyRegistry));
 }
 
 useWPTitle(computed(() => [i18n.t('registries.registries'), org.value.name]));

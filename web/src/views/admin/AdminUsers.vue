@@ -86,7 +86,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -152,7 +152,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 });
 
 function editUser(user: User) {
-  selectedUser.value = structuredClone(user);
+  selectedUser.value = structuredClone(toRaw(user));
 }
 
 function showAddUser() {

@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -94,11 +94,11 @@ const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (
 });
 
 function editSecret(secret: Secret) {
-  selectedSecret.value = structuredClone(secret);
+  selectedSecret.value = structuredClone(toRaw(secret));
 }
 
 function showAddSecret() {
-  selectedSecret.value = structuredClone(emptySecret);
+  selectedSecret.value = structuredClone(toRaw(emptySecret));
 }
 
 useWPTitle(computed(() => [i18n.t('secrets.secrets'), i18n.t('admin.settings.settings')]));
