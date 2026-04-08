@@ -31,7 +31,6 @@
 </template>
 
 <script lang="ts" setup>
-import { cloneDeep } from 'lodash';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -92,7 +91,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 });
 
 function editAgent(agent: Agent) {
-  selectedAgent.value = cloneDeep(agent);
+  selectedAgent.value = structuredClone(agent);
 }
 
 function showAddAgent() {
