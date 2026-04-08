@@ -49,7 +49,17 @@ const (
 	stepStateStarted   = "started"
 	stepStateDone      = "done"
 	testServiceTimeout = 1 * time.Second
+
+	// ExitCodeCanceled is the exit code returned when a step's context is
+	// canceled while it is sleeping. 130 matches the SIGINT shell convention
+	// (128 + signal 2) used by real container runtimes.
+	ExitCodeCanceled = 130
 )
+
+// stepKey returns the kv-store key for a step's state.
+func stepKey(taskUUID, stepUUID string) string {
+	return "task_" + taskUUID + "_step_" + stepUUID
+}
 
 // New returns a dummy backend.
 func New() backend_types.Backend {
@@ -94,7 +104,8 @@ func (e *dummy) StartStep(_ context.Context, step *backend_types.Step, taskUUID 
 	if !exist {
 		return fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
 	}
-	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	key := stepKey(taskUUID, step.UUID)
+	stepState, stepExist := e.kv.Load(key)
 	if stepExist {
 		// Detect issues like https://github.com/woodpecker-ci/woodpecker/issues/3494
 		return fmt.Errorf("StartStep detected already started step '%s' (%s) in state: %s", step.Name, step.UUID, stepState)
@@ -109,8 +120,29 @@ func (e *dummy) StartStep(_ context.Context, step *backend_types.Step, taskUUID 
 		return fmt.Errorf("expected step type '%s' but got '%s'", expectStepType, step.Type)
 	}
 
-	e.kv.Store(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID), stepStateStarted)
+	e.kv.Store(key, stepStateStarted)
 	return nil
+}
+
+// canceledState returns the state for a step whose context was canceled.
+func canceledState() *backend_types.State {
+	return &backend_types.State{ExitCode: ExitCodeCanceled, Exited: true}
+}
+
+// sleepWithContext blocks for the given duration or until ctx is canceled.
+// Returns true if canceled, false if the sleep completed normally.
+func sleepWithContext(ctx context.Context, d time.Duration) (canceled bool) {
+	if ctx.Err() != nil {
+		return true
+	}
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-t.C:
+		return false
+	case <-ctx.Done():
+		return true
+	}
 }
 
 func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
@@ -122,8 +154,10 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 		return &backend_types.State{Error: err}, err
 	}
 
+	key := stepKey(taskUUID, step.UUID)
+
 	// check state
-	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	stepState, stepExist := e.kv.Load(key)
 	if !stepExist {
 		err := fmt.Errorf("WaitStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
 		return &backend_types.State{Error: err}, err
@@ -133,29 +167,28 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 		return &backend_types.State{Error: err}, err
 	}
 
-	// extend wait time logic
 	if sleep, sleepExist := step.Environment[EnvKeyStepSleep]; sleepExist {
 		toSleep, err := time.ParseDuration(sleep)
 		if err != nil {
 			err = fmt.Errorf("WaitStep fail to parse sleep duration: %w", err)
 			return &backend_types.State{Error: err}, err
 		}
-		time.Sleep(toSleep)
-	} else {
-		if step.Type == backend_types.StepTypeService {
-			select {
-			case <-time.NewTimer(testServiceTimeout).C:
-				err := fmt.Errorf("WaitStep fail due to timeout of service after 1 second")
-				return &backend_types.State{Error: err}, err
-			case <-ctx.Done():
-				// context for service closed ... we can move forward
-			}
-		} else {
-			time.Sleep(time.Nanosecond)
+		if sleepWithContext(ctx, toSleep) {
+			e.kv.Store(key, stepStateDone)
+			return canceledState(), nil
 		}
+	} else if step.Type == backend_types.StepTypeService {
+		if sleepWithContext(ctx, testServiceTimeout) {
+			// context for service closed — we can move forward
+		} else {
+			err := fmt.Errorf("WaitStep fail due to timeout of service after 1 second")
+			return &backend_types.State{Error: err}, err
+		}
+	} else {
+		time.Sleep(time.Nanosecond)
 	}
 
-	e.kv.Store(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID), stepStateDone)
+	e.kv.Store(key, stepStateDone)
 
 	oomKilled, _ := strconv.ParseBool(step.Environment[EnvKeyStepOOMKilled])
 	exitCode := 0
@@ -179,13 +212,15 @@ func (e *dummy) TailStep(_ context.Context, step *backend_types.Step, taskUUID s
 		return nil, fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
 	}
 
+	key := stepKey(taskUUID, step.UUID)
+
 	// check state
-	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	stepState, stepExist := e.kv.Load(key)
 	if !stepExist {
-		return nil, fmt.Errorf("WaitStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
+		return nil, fmt.Errorf("TailStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
 	}
 	if stepState != stepStateStarted {
-		return nil, fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
+		return nil, fmt.Errorf("TailStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
 	}
 
 	if tailShouldFail, _ := strconv.ParseBool(step.Environment[EnvKeyStepTailFail]); tailShouldFail {
@@ -203,16 +238,20 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend_types.Step, taskUUI
 		return nil
 	}
 
+	key := stepKey(taskUUID, step.UUID)
+
 	// check state
-	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	stepState, stepExist := e.kv.Load(key)
 	if !stepExist {
-		return fmt.Errorf("WaitStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
+		return fmt.Errorf("DestroyStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
 	}
-	if stepState != stepStateDone {
-		return fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateDone, stepState)
+	// Allow destroying a step in 'started' state: this happens when the
+	// workflow context is canceled before WaitStep completes.
+	if stepState != stepStateDone && stepState != stepStateStarted {
+		return fmt.Errorf("DestroyStep expect step '%s' (%s) to be '%s' or '%s' but it is: %s", step.Name, step.UUID, stepStateDone, stepStateStarted, stepState)
 	}
 
-	e.kv.Delete(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	e.kv.Delete(key)
 	return nil
 }
 
