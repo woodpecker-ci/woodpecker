@@ -29,9 +29,9 @@ import (
 
 const logStreamDelayAllowed = 5 * time.Minute
 
-func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, _pipeline *model.Pipeline, repo *model.Repo) error {
+func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, p *model.Pipeline, repo *model.Repo) error {
 	var err error
-	if repo == nil && _pipeline == nil {
+	if repo == nil && p == nil {
 		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 		if err != nil {
 			return err
@@ -43,7 +43,7 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 			return err
 		}
 
-		_pipeline, err = s.store.GetPipeline(workflow.PipelineID)
+		p, err = s.store.GetPipeline(workflow.PipelineID)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 			return err
@@ -51,9 +51,9 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 	}
 
 	if repo == nil {
-		repo, err = s.store.GetRepo(_pipeline.RepoID)
+		repo, err = s.store.GetRepo(p.RepoID)
 		if err != nil {
-			log.Error().Err(err).Msgf("cannot find repo with id %d", _pipeline.RepoID)
+			log.Error().Err(err).Msgf("cannot find repo with id %d", p.RepoID)
 			return err
 		}
 	}
