@@ -17,6 +17,7 @@
 package setup
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -24,6 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
@@ -119,21 +121,51 @@ func WaitForAgentRegistered(t *testing.T, s store.Store, agents ...*AgentEnv) {
 // a terminal status. It returns the final step state. Fails the test on timeout.
 func WaitForStep(t *testing.T, s store.Store, pipeline *model.Pipeline, stepName string) *model.Step {
 	t.Helper()
+	return WaitForStepStatus(t, s, pipeline, stepName, "", defaultTimeout)
+}
 
-	deadline := time.Now().Add(defaultTimeout)
+// WaitForStepStatus polls until a named step reaches wantState (or any terminal
+// state when wantState is empty). This is useful after a pipeline.Cancel() call
+// where the agent sends its final step status asynchronously via gRPC Done(),
+// independently of the pipeline itself reaching a terminal status.
+func WaitForStepStatus(t *testing.T, s store.Store, pipeline *model.Pipeline, stepName string, wantState model.StatusValue, timeout time.Duration) *model.Step {
+	t.Helper()
+
+	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		steps, err := s.StepList(pipeline)
 		require.NoError(t, err, "list steps for pipeline %d", pipeline.ID)
 
 		for _, step := range steps {
-			if step.Name == stepName && isTerminal(step.State) {
+			if step.Name != stepName {
+				continue
+			}
+			if wantState != "" {
+				if step.State == wantState {
+					return step
+				}
+			} else if isTerminal(step.State) {
 				return step
 			}
 		}
 		time.Sleep(defaultInterval)
 	}
 
-	t.Fatalf("timeout waiting for step %q in pipeline %d to reach terminal state", stepName, pipeline.ID)
+	steps, _ := s.StepList(pipeline)
+	var lastState model.StatusValue
+	for _, step := range steps {
+		if step.Name == stepName {
+			lastState = step.State
+			break
+		}
+	}
+	if wantState != "" {
+		t.Fatalf("timeout waiting for step %q in pipeline %d to reach state %q: last state=%q",
+			stepName, pipeline.ID, wantState, lastState)
+	} else {
+		t.Fatalf("timeout waiting for step %q in pipeline %d to reach terminal state: last state=%q",
+			stepName, pipeline.ID, lastState)
+	}
 	return nil
 }
 
@@ -155,4 +187,27 @@ func AssertWorkflowRanOnAgent(t *testing.T, s store.Store, pipeline *model.Pipel
 		}
 	}
 	t.Errorf("workflow %q not found in pipeline %d", workflowName, pipeline.ID)
+}
+
+// WaitForWorkersReady polls the queue until at least minWorkers worker slots
+// are active (i.e. agents have connected and are blocking on Poll). Call this
+// after WaitForAgentRegistered and before pipeline.Create in tests that rely
+// on specific routing: the org-id label is read from the DB at Poll time, so
+// the org-agent must have started its poll loop *after* its OrgID has been
+// patched — otherwise the global agent can win the race and steal the task
+// before the org-agent advertises its exact org-id label.
+func WaitForWorkersReady(t *testing.T, q queue.Queue, minWorkers int) {
+	t.Helper()
+
+	deadline := time.Now().Add(shortTimeout)
+	for time.Now().Before(deadline) {
+		info := q.Info(context.Background())
+		if info.Stats.Workers >= minWorkers {
+			return
+		}
+		time.Sleep(defaultInterval)
+	}
+
+	info := q.Info(context.Background())
+	t.Fatalf("timeout waiting for %d workers to be ready in queue: got %d", minWorkers, info.Stats.Workers)
 }

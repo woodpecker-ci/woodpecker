@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	agentMaxWorkflows     = 4
+	AgentMaxWorkflows     = 4
 	agentAuthRefreshEvery = 30 * time.Minute
 )
 
@@ -180,7 +180,7 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 		Version:      version.String(),
 		Backend:      backend.Name(),
 		Platform:     engInfo.Platform,
-		Capacity:     agentMaxWorkflows,
+		Capacity:     AgentMaxWorkflows,
 		CustomLabels: cfg.customLabels,
 	})
 	if err != nil {
@@ -221,11 +221,11 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 	}
 
 	counter := &agent.State{
-		Polling:  agentMaxWorkflows,
+		Polling:  AgentMaxWorkflows,
 		Metadata: make(map[string]agent.Info),
 	}
 
-	for i := range agentMaxWorkflows {
+	for i := range AgentMaxWorkflows {
 		go func(slot int) {
 			runner := agent.NewRunner(client, filter, cfg.hostname, counter, backend)
 			log.Debug().Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner started")

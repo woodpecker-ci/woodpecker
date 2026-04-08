@@ -62,6 +62,13 @@ func TestAgentLabelRouting(t *testing.T) {
 
 	setup.WaitForAgentRegistered(t, env.Store, plainAgent, gpuAgent)
 
+	// Ensure both agents are actively polling before enqueuing the task.
+	// Without this, the plain agent (which polls with repo=* and no gpu label)
+	// could theoretically win if the queue tries to assign before the gpu-agent
+	// has connected its poll goroutines. In practice label filtering prevents a
+	// wrong assignment here, but waiting avoids any startup-ordering flakiness.
+	setup.WaitForWorkersReady(t, env.Queue, 2*setup.AgentMaxWorkflows)
+
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 		Event:  model.EventPush,
 		Branch: "main",
@@ -109,6 +116,13 @@ func TestOrgAgentPreferredOverGlobal(t *testing.T) {
 	)
 
 	setup.WaitForAgentRegistered(t, env.Store, globalAgent, orgAgent)
+
+	// Wait until both agents have connected their poll goroutines to the queue.
+	// The org-agent reads its OrgID label from the DB at Poll time — if we
+	// create the pipeline before the org-agent is polling, the global agent
+	// can steal the task first (it's already blocking on Poll and wins the
+	// race). agentMaxWorkflows slots per agent = 8 workers total.
+	setup.WaitForWorkersReady(t, env.Queue, 2*setup.AgentMaxWorkflows)
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 		Event:  model.EventPush,

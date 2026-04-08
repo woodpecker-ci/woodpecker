@@ -56,6 +56,7 @@ const (
 type ServerEnv struct {
 	GRPCAddr string
 	Store    store.Store
+	Queue    queue.Queue
 	Fixtures *Fixtures
 	Forge    *forge_mocks.MockForge
 	Manager  services.Manager
@@ -119,6 +120,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	return &ServerEnv{
 		GRPCAddr: grpcAddr,
 		Store:    s,
+		Queue:    q,
 		Fixtures: fixtures,
 		Forge:    mockForge,
 		Manager:  mgr,

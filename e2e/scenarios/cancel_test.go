@@ -88,32 +88,21 @@ func TestCancelRunningPipeline(t *testing.T) {
 	finished := setup.WaitForPipeline(t, env.Store, created.ID)
 	assert.Equal(t, model.StatusKilled, finished.Status, "canceled pipeline should be killed")
 
-	// The agent updates step state asynchronously over gRPC after the pipeline
-	// reaches its terminal state, so we wait for each step individually.
-
-	steps, err := env.Store.StepList(finished)
-	require.NoError(t, err, "list steps")
-
-	byName := make(map[string]*model.Step, len(steps))
-	for _, s := range steps {
-		byName[s.Name] = s
-	}
-
 	t.Run("long-running step is killed", func(t *testing.T) {
-		// Cancel() now marks running steps as StatusKilled directly in the DB.
-		// The exit code is not set here because the agent's gRPC Done() call is
-		// rejected once the pipeline is already marked killed — the server writes
-		// the kill status itself without knowing the process exit code.
-		step, ok := byName["long-running"]
-		require.True(t, ok, "long-running step must exist")
+		// After pipeline.Cancel() the pipeline itself reaches a terminal state
+		// immediately, but the running step's status is written asynchronously
+		// by the agent's gRPC Done() call — which arrives *after* the cancel
+		// signal is processed. We therefore wait explicitly for the step to
+		// leave "running", giving the agent enough time to finish cleanup and
+		// report back.
+		step := setup.WaitForStepStatus(t, env.Store, finished, "long-running", model.StatusKilled, 30*time.Second)
 		assert.Equal(t, model.StatusKilled, step.State)
 	})
 
 	t.Run("after-cancel step is canceled", func(t *testing.T) {
-		// Pending steps get StatusCanceled (not StatusSkipped) when the pipeline
-		// is canceled before they start executing.
-		step, ok := byName["after-cancel"]
-		require.True(t, ok, "after-cancel step must exist")
+		// Pending steps get StatusCanceled synchronously by pipeline.Cancel()
+		// before any agent is involved, so this should already be set.
+		step := setup.WaitForStep(t, env.Store, finished, "after-cancel")
 		assert.Equal(t, model.StatusCanceled, step.State)
 	})
 }
