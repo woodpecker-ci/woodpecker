@@ -5271,11 +5271,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "has_forge_name_conflict": {
-                    "description": "True if forge returned a repo with same name but different forge remote id",
+                    "description": "HasForgeNameConflict is true if forge returned a repo with same name but different forge remote id",
                     "type": "boolean"
                 },
                 "has_no_forge_repo": {
-                    "description": "True if repo only exist in the woodpecker store and not at the forge anymore",
+                    "description": "HasNoForgeRepo is true if repo only exist in the woodpecker store and not at the forge anymore",
                     "type": "boolean"
                 },
                 "id": {
@@ -5390,11 +5390,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "has_forge_name_conflict": {
-                    "description": "True if forge returned a repo with same name but different forge remote id",
+                    "description": "HasForgeNameConflict is true if forge returned a repo with same name but different forge remote id",
                     "type": "boolean"
                 },
                 "has_no_forge_repo": {
-                    "description": "True if repo only exist in the woodpecker store and not at the forge anymore",
+                    "description": "HasNoForgeRepo is true if repo only exist in the woodpecker store and not at the forge anymore",
                     "type": "boolean"
                 },
                 "id": {
