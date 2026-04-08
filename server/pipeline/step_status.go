@@ -116,12 +116,12 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 	if err != nil {
 		return err
 	}
+	*step = *updatedStep // update step for external callers
 	if shouldCancelPipelineFromStep {
 		if err := cancelPipelineFromStep(ctx, store, step); err != nil {
 			return err
 		}
 	}
-	*step = *updatedStep // update step for external callers
 	return store.StepUpdate(step)
 }
 
