@@ -16,7 +16,6 @@ package rpc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -61,80 +60,52 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 		return nil
 	}
 
-	msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
-	log.Error().Int64("repoId", repo.ID).Msg(msg)
-	return errors.New(msg)
+	log.Error().Err(ErrAgentIllegalRepo).Int64("agentID", agent.ID).Int64("repoId", repo.ID).Send()
+	return fmt.Errorf("%w: agentId=%d repoID=%d", ErrAgentIllegalRepo, agent.ID, repo.ID)
 }
 
-// checkPipelineState checks if an agent is allowed to change/update a workflow/pipeline state
-// by the state the parent pipeline is in.
-func checkPipelineState(currPipeline *model.Pipeline, currWorkflow *model.Workflow) (err error) {
+// checkParentState checks if an agent is allowed to change/update a workflow/step state
+// by the state the parent pipeline/workflow.
+func checkParentState(parentState, childState model.StatusValue, isStep bool) (err error) {
 	// check if pipeline was already run and marked finished or is blocked
-	switch currPipeline.Status {
+	switch parentState {
 	case model.StatusCreated,
 		model.StatusPending,
 		model.StatusRunning:
-		break
+		return nil
 
 	case model.StatusBlocked:
-		err = ErrAgentIllegalPipelineWorkflowRun
+		if isStep {
+			err = ErrAgentIllegalWorkflowRun
+		} else {
+			err = ErrAgentIllegalPipelineWorkflowRun
+		}
 
 	case model.StatusCanceled,
 		model.StatusFailure,
 		model.StatusKilled:
-		if currWorkflow.State != model.StatusCanceled &&
-			currWorkflow.State != model.StatusKilled &&
-			currWorkflow.State != model.StatusSkipped {
-			err = ErrAgentIllegalPipelineWorkflowReRunStateChange
+
+		switch childState {
+		case model.StatusCanceled,
+			model.StatusKilled,
+			model.StatusSkipped,
+			model.StatusFailure,
+			model.StatusSuccess:
+			return nil
+
+		default:
+			if isStep {
+				err = ErrAgentIllegalWorkflowReRunStateChange
+			} else {
+				err = ErrAgentIllegalPipelineWorkflowReRunStateChange
+			}
 		}
 
 	default:
-		err = ErrAgentIllegalPipelineWorkflowReRunStateChange
-	}
-
-	if err != nil {
-		log.Error().Err(err).Msg("caught agent performing illegal instruction")
-	}
-	return err
-}
-
-// checkWorkflowStepStates checks if a workflow/step state or its logs can be altered
-// depending on what state the workflow and step currently is in.
-func checkWorkflowStepStates(currWorkflow *model.Workflow, currStep *model.Step) (err error) {
-	if currWorkflow != nil {
-		switch currWorkflow.State {
-		case model.StatusCreated,
-			model.StatusPending,
-			model.StatusRunning:
-			break
-
-		case model.StatusBlocked:
-			err = ErrAgentIllegalWorkflowRun
-
-		case model.StatusCanceled:
-			if currStep.State != model.StatusCanceled &&
-				currStep.State != model.StatusKilled &&
-				currStep.State != model.StatusSkipped {
-				err = ErrAgentIllegalWorkflowReRunStateChange
-			}
-
-		default:
+		if isStep {
 			err = ErrAgentIllegalWorkflowReRunStateChange
-		}
-	}
-
-	if currStep != nil {
-		switch currStep.State {
-		case model.StatusCreated,
-			model.StatusPending,
-			model.StatusRunning:
-			break
-
-		case model.StatusBlocked:
-			err = errors.Join(err, ErrAgentIllegalStepRun)
-
-		default:
-			err = errors.Join(err, ErrAgentIllegalStepReRunStateChange)
+		} else {
+			err = ErrAgentIllegalPipelineWorkflowReRunStateChange
 		}
 	}
 

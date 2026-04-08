@@ -200,7 +200,10 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 	}
 
 	// sanitize agent input
-	if err := checkWorkflowStepStates(workflow, step); err != nil {
+	if err := checkParentState(currentPipeline.Status, step.State, true); err != nil {
+		return err
+	}
+	if err := checkParentState(workflow.State, step.State, true); err != nil {
 		return err
 	}
 
@@ -258,10 +261,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 
 	// sanitize agent input
-	if err := checkPipelineState(currentPipeline, workflow); err != nil {
-		return err
-	}
-	if err := checkWorkflowStepStates(workflow, nil); err != nil {
+	if err := checkParentState(currentPipeline.Status, workflow.State, false); err != nil {
 		return err
 	}
 
@@ -331,10 +331,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 
 	// sanitize agent input
-	if err := checkPipelineState(currentPipeline, workflow); err != nil {
-		return err
-	}
-	if err := checkWorkflowStepStates(workflow, nil); err != nil {
+	if err := checkParentState(currentPipeline.Status, workflow.State, false); err != nil {
 		return err
 	}
 

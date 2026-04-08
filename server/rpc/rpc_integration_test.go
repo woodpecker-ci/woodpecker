@@ -224,26 +224,6 @@ func TestRPCUpdate(t *testing.T) {
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
 	})
 
-	t.Run("reject step already finished", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
-		agent := defaultAgent()
-		pipeline := defaultPipeline(model.StatusRunning)
-		workflow := defaultWorkflow(model.StatusRunning)
-		step := defaultStep(model.StatusSuccess) // finished
-
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
-		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
-		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
-		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
-
-		rpcInst := newTestRPC(t, mockStore)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
-
-		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
-		assert.ErrorIs(t, err, ErrAgentIllegalStepReRunStateChange)
-	})
-
 	t.Run("reject step belongs to different pipeline", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
@@ -446,6 +426,15 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		// Init calls updateForgeStatus (→ GetUser) before UpdateWorkflowStatusToRunning
+		// checks the workflow state. UpdateWorkflowStatusToRunning itself calls
+		// WorkflowUpdate, and the deferred notify calls WorkflowGetTree — all of
+		// these execute even though the function ultimately returns an error.
+		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+		// updateAgentLastWork -> AgentUpdate (agent.LastWork is 0, so it always updates)
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
@@ -464,6 +453,13 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		// Same as above: updateForgeStatus, WorkflowUpdate, and the deferred
+		// WorkflowGetTree all run before the error surfaces to the caller.
+		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+		// updateAgentLastWork -> AgentUpdate (agent.LastWork is 0, so it always updates)
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
@@ -604,6 +600,11 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		// checkParentState passes (pipeline=running), so UpdateWorkflowStatusToDone
+		// runs (→ WorkflowUpdate) and Done then calls WorkflowGetTree before the
+		// error from UpdateWorkflowStatusToDone propagates to the caller.
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
 
 		rpcInst := newTestRPC(t, mockStore)
 		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
@@ -769,10 +770,6 @@ func TestRPCLog(t *testing.T) {
 	})
 
 	t.Run("reject: pipeline finished stale and step not running", func(t *testing.T) {
-		// This replaces the old "reject pipeline already finished" test.
-		// Previously the rejection came from checkPipelineState returning
-		// ErrAgentIllegalPipelineWorkflowReRunStateChange.
-		// Now it comes from allowAppendingLogs returning ErrAgentIllegalLogStreaming.
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
 		pipeline := stalePipeline(model.StatusSuccess)
@@ -792,8 +789,6 @@ func TestRPCLog(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "can not alter logs")
 		assert.ErrorIs(t, err, ErrAgentIllegalLogStreaming)
-		// The old error is no longer returned from Log() — allowAppendingLogs
-		// now handles the pipeline-finished case itself.
 		assert.False(t, errors.Is(err, ErrAgentIllegalPipelineWorkflowReRunStateChange))
 	})
 
