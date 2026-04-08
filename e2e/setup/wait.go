@@ -211,3 +211,30 @@ func WaitForWorkersReady(t *testing.T, q queue.Queue, minWorkers int) {
 	info := q.Info(context.Background())
 	t.Fatalf("timeout waiting for %d workers to be ready in queue: got %d", minWorkers, info.Stats.Workers)
 }
+
+// WaitForStepRunning polls the store until a named step in the pipeline with
+// the given ID reaches StatusRunning. This is used before triggering a cancel
+// so we know the dummy backend's sleepWithContext is genuinely blocking — if
+// we cancel before the step is running, the step may finish with StatusSuccess
+// before the cancel context propagates to WaitStep.
+func WaitForStepRunning(t *testing.T, s store.Store, pipelineID int64, stepName string) {
+	t.Helper()
+
+	deadline := time.Now().Add(shortTimeout)
+	for time.Now().Before(deadline) {
+		p, err := s.GetPipeline(pipelineID)
+		require.NoError(t, err, "get pipeline %d", pipelineID)
+
+		steps, err := s.StepList(p)
+		require.NoError(t, err, "list steps for pipeline %d", pipelineID)
+
+		for _, step := range steps {
+			if step.Name == stepName && step.State == model.StatusRunning {
+				return
+			}
+		}
+		time.Sleep(defaultInterval)
+	}
+
+	t.Fatalf("timeout waiting for step %q in pipeline %d to reach StatusRunning", stepName, pipelineID)
+}

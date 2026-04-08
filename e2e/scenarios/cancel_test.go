@@ -72,6 +72,15 @@ func TestCancelRunningPipeline(t *testing.T) {
 	// Wait until the agent has picked it up and set it to running.
 	setup.WaitForPipelineStatus(t, env.Store, created.ID, model.StatusRunning, 10*time.Second)
 
+	// Also wait for the specific step to reach StatusRunning in the DB.
+	// The pipeline transitions to StatusRunning as soon as the agent starts
+	// the workflow, but the step itself may not yet have entered its
+	// sleepWithContext call in the dummy backend. If we cancel before the
+	// step is actually sleeping, WaitStep returns immediately with success
+	// before the cancel context propagates — causing "success" instead of
+	// "killed". Waiting here ensures the dummy sleep is genuinely in progress.
+	setup.WaitForStepRunning(t, env.Store, created.ID, "long-running")
+
 	// Resolve the forge instance (MockForge) via the manager.
 	forge, err := env.Manager.ForgeByID(env.Fixtures.Forge.ID)
 	require.NoError(t, err, "resolve forge")
