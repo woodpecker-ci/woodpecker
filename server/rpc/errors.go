@@ -17,14 +17,10 @@ package rpc
 import "errors"
 
 var (
-	ErrAgentIllegalPipelineWorkflowReRunStateChange = errors.New("workflow has parent pipeline marked as finished")
-	ErrAgentIllegalPipelineWorkflowRun              = errors.New("workflow has parent pipeline in blocked state")
-
 	ErrAgentIllegalWorkflowReRunStateChange = errors.New("workflow was already marked as finished")
 	ErrAgentIllegalWorkflowRun              = errors.New("workflow is currently in blocked state")
 
-	ErrAgentIllegalStepReRunStateChange = errors.New("step was already marked as finished")
-	ErrAgentIllegalStepRun              = errors.New("step is currently in blocked state")
-
 	ErrAgentIllegalLogStreaming = errors.New("agent can not append logs to a step that is marked not running")
+
+	ErrAgentIllegalRepo = errors.New("agent is not allowed to interact with repo")
 )
