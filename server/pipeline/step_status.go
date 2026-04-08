@@ -112,7 +112,7 @@ func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancel
 func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, state rpc.StepState) error {
 	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", *step, state)
 
-	step, shouldCancelPipelineFromStep, err := CalcStepStatus(*step, state)
+	updatedStep, shouldCancelPipelineFromStep, err := CalcStepStatus(*step, state)
 	if err != nil {
 		return err
 	}
@@ -121,6 +121,7 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 			return err
 		}
 	}
+	*step = *updatedStep // update step for external callers
 	return store.StepUpdate(step)
 }
 
