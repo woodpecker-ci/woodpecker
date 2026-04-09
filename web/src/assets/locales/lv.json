@@ -236,6 +236,8 @@
                 "deploy": "Uzstādīt",
                 "log_auto_scroll": "Automātiski ritināt",
                 "log_auto_scroll_off": "Atslēgt automātisko ritināšanu",
+                "expand_all": "Izvērst visu",
+                "collapse_all": "Sakļaut visu",
                 "log_download": "Lejupielādēt",
                 "restart": "Pārstartēt",
                 "restart_success": "Konvejerdarbs pārstartēts",

@@ -187,6 +187,8 @@
                 "log_delete": "Elimina",
                 "log_auto_scroll": "Abilita scorrimento automatico",
                 "log_auto_scroll_off": "Disattiva scorrimento automatico",
+                "expand_all": "Espandi tutto",
+                "collapse_all": "Comprimi tutto",
                 "restart": "Riavvia",
                 "canceled": "Questo step è stato annullato.",
                 "cancel_success": "Pipeline annullata",

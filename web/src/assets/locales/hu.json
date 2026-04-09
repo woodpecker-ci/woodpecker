@@ -138,6 +138,8 @@
                 "cancel_success": "Pipeline leállítva",
                 "deploy": "Üzembe helyezés",
                 "log_auto_scroll_off": "Automata görgetés kikapcsolása",
+                "expand_all": "Összes kinyitása",
+                "collapse_all": "Összes összecsukása",
                 "cancel": "Mégse",
                 "restart": "Újraindítás"
             },
