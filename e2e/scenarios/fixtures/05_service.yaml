@@ -8,4 +8,4 @@ services:
   - name: db
     image: dummy
     environment:
-      SLEEP: "100ms"
+      SLEEP: '100ms'

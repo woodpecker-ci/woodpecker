@@ -5,7 +5,7 @@ steps:
       - echo linting
     failure: ignore
     environment:
-      STEP_EXIT_CODE: "1"
+      STEP_EXIT_CODE: '1'
 
   - name: build
     image: dummy
