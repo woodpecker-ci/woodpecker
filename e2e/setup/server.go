@@ -81,14 +81,14 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	configLock.Lock()
 	defer configLock.Unlock()
 
-	s := newStore(ctx, t)
-	fixtures := seedFixtures(t, s, files)
+	memStore := newStore(ctx, t)
+	fixtures := seedFixtures(t, memStore)
 	mockForge := newMockForge(t, files)
 
-	mgr, err := newTestManager(s, mockForge)
+	mgr, err := newTestManager(memStore, mockForge)
 	require.NoError(t, err, "create services manager")
 
-	q, err := queue.New(ctx, queue.Config{Backend: queue.TypeMemory})
+	memQueue, err := queue.New(ctx, queue.Config{Backend: queue.TypeMemory})
 	require.NoError(t, err, "create queue")
 
 	// Save and restore server.Config around the test. server.Config is a
@@ -104,10 +104,10 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = memory.New()
-	server.Config.Services.Queue = q
-	server.Config.Services.Membership = cache.NewMembershipService(s)
+	server.Config.Services.Queue = memQueue
+	server.Config.Services.Membership = cache.NewMembershipService(memStore)
 	server.Config.Services.Manager = mgr
-	server.Config.Services.LogStore = s // datastore implements log.Service
+	server.Config.Services.LogStore = memStore
 
 	server.Config.Server.AgentToken = TestAgentToken
 	server.Config.Server.Host = "http://localhost"
@@ -124,12 +124,12 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	server.Config.Permissions.Orgs = permissions.NewOrgs([]string{})
 	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist([]string{})
 
-	grpcAddr := startGRPCServer(ctx, t, s)
+	grpcAddr := startGRPCServer(ctx, t, memStore)
 
 	return &ServerEnv{
 		GRPCAddr: grpcAddr,
-		Store:    s,
-		Queue:    q,
+		Store:    memStore,
+		Queue:    memQueue,
 		Fixtures: fixtures,
 		Forge:    mockForge,
 		Manager:  mgr,

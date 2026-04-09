@@ -22,7 +22,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
@@ -61,7 +60,7 @@ func newStore(ctx context.Context, t *testing.T) store.Store {
 
 // seedFixtures creates the minimal set of DB records every test needs:
 // one Forge, one owner User, one Repo linked to both.
-func seedFixtures(t *testing.T, s store.Store, files []*forge_types.FileMeta) *Fixtures {
+func seedFixtures(t *testing.T, s store.Store) *Fixtures {
 	t.Helper()
 
 	forge := &model.Forge{
