@@ -90,6 +90,7 @@ func (l *logger) Write(ctx context.Context, stepID int64, entries []*model.LogEn
 		// Auto-open the stream while still holding the logger lock so that a
 		// concurrent Write for the same step cannot race on l.streams.
 		l.open(stepID)
+		s = l.streams[stepID]
 	}
 	l.Unlock()
 
