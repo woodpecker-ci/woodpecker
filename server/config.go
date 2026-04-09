@@ -16,6 +16,7 @@
 package server
 
 import (
+	"sync"
 	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
@@ -28,6 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 )
 
+var ConfigLock = sync.Mutex{}
 var Config = struct {
 	Services struct {
 		Pubsub     pubsub.PubSub

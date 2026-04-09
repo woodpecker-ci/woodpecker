@@ -75,6 +75,8 @@ type ServerEnv struct {
 // All resources are cleaned up via t.Cleanup.
 func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMeta) *ServerEnv {
 	t.Helper()
+	server.ConfigLock.Lock()
+	defer server.ConfigLock.Unlock()
 
 	s := newStore(ctx, t)
 	fixtures := seedFixtures(t, s, files)
@@ -91,7 +93,11 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	// sequentially within a package, but we still need to clean up so the next
 	// subtest starts from a known-zero state rather than the previous test's values.
 	orig := server.Config
-	t.Cleanup(func() { server.Config = orig })
+	t.Cleanup(func() {
+		server.ConfigLock.Lock()
+		defer server.ConfigLock.Unlock()
+		server.Config = orig
+	})
 
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = memory.New()
