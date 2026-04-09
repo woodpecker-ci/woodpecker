@@ -594,6 +594,16 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 	req.Status = "I am alive!"
 
 	for {
+
+		if !c.IsConnected() {
+			if c.shouldGiveUp() {
+				log.Error().Msg("grpc: connection lost, giving up")
+				return ErrConnectionLost
+			}
+			log.Warn().Msg("grpc: waiting for server connection...")
+			time.Sleep(retry.NextBackOff())
+			continue
+		}
 		_, err = c.client.ReportHealth(ctx, req)
 		if err == nil {
 			return nil
