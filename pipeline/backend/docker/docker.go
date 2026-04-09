@@ -391,7 +391,7 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend_types.Config
 var removeOpts = client.ContainerRemoveOptions{
 	RemoveVolumes: true,
 	RemoveLinks:   false,
-	Force:         false,
+	Force:         true,
 }
 
 func isErrContainerNotFoundOrNotRunning(err error) bool {
