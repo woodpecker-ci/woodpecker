@@ -143,6 +143,7 @@ steps:
         - coverage.out
         - server-coverage.out
         - datastore-coverage.out
+        - e2e-coverage.out
       token:
         from_secret: codecov_token
     when:

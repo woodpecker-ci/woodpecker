@@ -144,16 +144,6 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.Manager, error) {
 	cmd := &cli.Command{
 		Flags: []cli.Flag{
-			// Extensions (all empty → disabled).
-			&cli.StringFlag{Name: "extensions-allowed-hosts"},
-			&cli.StringFlag{Name: "secret-extension-endpoint"},
-			&cli.BoolFlag{Name: "secret-extension-netrc"},
-			&cli.StringFlag{Name: "docker-config"},
-			&cli.StringFlag{Name: "registry-extension-endpoint"},
-			&cli.BoolFlag{Name: "registry-extension-netrc"},
-			&cli.StringFlag{Name: "config-extension-endpoint"},
-			&cli.BoolFlag{Name: "config-extension-netrc"},
-			&cli.BoolFlag{Name: "config-extension-exclusive"},
 			// Config fetch tuning.
 			&cli.DurationFlag{Name: "forge-timeout", Value: defaultTimeout},
 			&cli.UintFlag{Name: "forge-retry", Value: defaultRetry},
@@ -161,14 +151,10 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 			// Forge flags — gitea=true satisfies setupForgeService's type switch.
 			&cli.BoolFlag{Name: string(TestForgeType), Value: true},
 			&cli.StringFlag{Name: "forge-url", Value: "https://forge.example.test"},
-			&cli.StringFlag{Name: "forge-oauth-client"},
-			&cli.StringFlag{Name: "forge-oauth-secret"},
-			&cli.BoolFlag{Name: "forge-skip-verify"},
-			&cli.StringFlag{Name: "forge-oauth-host"},
 		},
 	}
 
-	setupForge := services.SetupForge(func(_ *model.Forge) (forge.Forge, error) {
+	setupForge := services.SetupForge(func(*model.Forge) (forge.Forge, error) {
 		return mockForge, nil
 	})
 

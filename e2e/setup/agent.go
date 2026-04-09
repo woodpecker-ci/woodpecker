@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
@@ -158,15 +159,6 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 
 	grpcCtx := metadata.NewOutgoingContext(authCtx, metadata.Pairs("hostname", cfg.hostname))
 
-	serverVersion, err := client.Version(grpcCtx) //nolint:contextcheck
-	if err != nil {
-		t.Fatalf("StartAgent(%s): get server version: %v", cfg.hostname, err)
-	}
-	if serverVersion.GrpcVersion != agent_rpc.ClientGrpcVersion {
-		t.Fatalf("StartAgent(%s): gRPC version mismatch: server=%d client=%d",
-			cfg.hostname, serverVersion.GrpcVersion, agent_rpc.ClientGrpcVersion)
-	}
-
 	backend := dummy.New()
 	if !backend.IsAvailable(ctx) {
 		t.Fatalf("StartAgent(%s): dummy backend is not available", cfg.hostname)
@@ -176,18 +168,14 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 		t.Fatalf("StartAgent(%s): load dummy backend: %v", cfg.hostname, err)
 	}
 
-	agentID, err := client.RegisterAgent(grpcCtx, rpc.AgentInfo{ //nolint:contextcheck
+	env.AgentID, err = client.RegisterAgent(grpcCtx, rpc.AgentInfo{ //nolint:contextcheck
 		Version:      version.String(),
 		Backend:      backend.Name(),
 		Platform:     engInfo.Platform,
 		Capacity:     AgentMaxWorkflows,
 		CustomLabels: cfg.customLabels,
 	})
-	if err != nil {
-		t.Fatalf("StartAgent(%s): register with server: %v", cfg.hostname, err)
-	}
-	env.AgentID = agentID
-	log.Debug().Int64("agent_id", agentID).Str("hostname", cfg.hostname).Msg("test agent registered")
+	require.NoErrorf(t, err, "StartAgent(%s): register with server: %v", cfg.hostname, err)
 
 	// If a non-global org is requested, update the agent's OrgID in the DB so
 	// the server's GetServerLabels returns the right org-id filter (score 10).
