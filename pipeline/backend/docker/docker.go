@@ -279,8 +279,12 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 	select {
 	case resp := <-wait.Result:
 		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
+		if resp.Error != nil {
+			return nil, fmt.Errorf("ContainerWait error: %s", resp.Error.Message)
+		}
 	case err := <-wait.Error:
 		log.Trace().Msgf("ContainerWait returned with err: %v", err)
+		return nil, err
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
@@ -290,9 +294,15 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 		return nil, err
 	}
 
+	exitCode := info.Container.State.ExitCode
+	// Windows Docker may return 4294967295 (uint32 max, i.e. int32(-1)) for abnormal exits.
+	if exitCode == int(^uint32(0)) {
+		exitCode = int(int32(exitCode))
+	}
+
 	return &backend_types.State{
 		Exited:    true,
-		ExitCode:  info.Container.State.ExitCode,
+		ExitCode:  exitCode,
 		OOMKilled: info.Container.State.OOMKilled,
 	}, nil
 }
