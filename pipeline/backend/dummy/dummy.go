@@ -255,6 +255,10 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend_types.Step, taskUUI
 	return nil
 }
 
+func (e *dummy) Reconnect(_ context.Context, _ *backend_types.Step, _ string) error {
+	return backend_types.ErrWorkflowRecoveryNotSupported
+}
+
 func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend_types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 

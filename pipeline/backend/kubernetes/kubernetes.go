@@ -371,27 +371,42 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	up := make(chan struct{})
 	var upOnce sync.Once
 
+	signalReady := func(pod *kube_core_v1.Pod) {
+		if pod.Name != podName {
+			return
+		}
+		if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
+			upOnce.Do(func() { close(up) })
+			return
+		}
+		switch pod.Status.Phase {
+		case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
+			upOnce.Do(func() { close(up) })
+		}
+	}
+
+	podAdded := func(obj any) {
+		pod, ok := obj.(*kube_core_v1.Pod)
+		if !ok {
+			log.Error().Msgf("could not parse pod: %v", obj)
+			return
+		}
+		signalReady(pod)
+	}
+
 	podUpdated := func(_, newPod any) {
 		pod, ok := newPod.(*kube_core_v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
-
-		if pod.Name == podName {
-			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				upOnce.Do(func() { close(up) })
-			}
-			switch pod.Status.Phase {
-			case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
-				upOnce.Do(func() { close(up) })
-			}
-		}
+		signalReady(pod)
 	}
 
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
+			AddFunc:    podAdded,
 			UpdateFunc: podUpdated,
 		},
 	); err != nil {
@@ -497,5 +512,22 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		return err
 	}
 
+	return nil
+}
+
+// Reconnect attempts to reconnect to a running pod.
+func (e *kube) Reconnect(ctx context.Context, step *types.Step, taskUUID string) error {
+	name, err := podName(step)
+	if err != nil {
+		return fmt.Errorf("pod name error: %w", err)
+	}
+
+	namespace := e.config.GetNamespace(step.OrgID)
+	_, err = e.client.CoreV1().Pods(namespace).Get(ctx, name, kube_meta_v1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("pod %s not found: %w", name, err)
+	}
+
+	log.Debug().Str("taskUUID", taskUUID).Str("pod", name).Msg("reconnected to existing pod")
 	return nil
 }

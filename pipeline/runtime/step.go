@@ -39,6 +39,44 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend_types.Ste
 		return r.traceStep(&backend_types.State{Skipped: true}, nil, step)
 	}
 
+	// Check recovery state if recovery is enabled
+	if r.recoveryManager.Enabled() {
+		shouldSkip, recoveryState := r.recoveryManager.ShouldSkipStep(step)
+		if shouldSkip {
+			logger.Info().
+				Str("step", step.Name).
+				Int("status", int(recoveryState.Status)).
+				Int("exit_code", recoveryState.ExitCode).
+				Msg("skipping step due to recovery state")
+
+			processState := &backend_types.State{
+				Exited:   true,
+				ExitCode: recoveryState.ExitCode,
+			}
+			if traceErr := r.traceStep(processState, nil, step); traceErr != nil {
+				return traceErr
+			}
+			if recoveryState.ExitCode != 0 {
+				return &pipeline_errors.ExitError{
+					UUID: step.UUID,
+					Code: recoveryState.ExitCode,
+				}
+			}
+			return nil
+		} else if r.recoveryManager.ShouldReconnect(recoveryState) {
+			reconnectErr := r.engine.Reconnect(r.ctx, step, r.taskUUID) //nolint:contextcheck
+			if reconnectErr == nil {
+				logger.Info().Str("step", step.Name).Msg("reconnecting to existing step")
+				return r.execReconnected(step)
+			}
+			logger.Debug().Err(reconnectErr).Str("step", step.Name).Msg("cannot reconnect, re-executing step")
+		}
+
+		if err := r.recoveryManager.MarkStepRunning(r.ctx, step); err != nil { //nolint:contextcheck
+			logger.Warn().Err(err).Str("step", step.Name).Msg("failed to mark step as running")
+		}
+	}
+
 	// Emit a "step started" trace before doing any real work.
 	if err := r.traceStep(nil, nil, step); err != nil {
 		return err
@@ -185,7 +223,12 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types
 		err = pipeline_errors.ErrCancel
 	}
 
-	err = r.traceStep(processState, err, step)
+	recoverable := r.recoveryManager.IsRecoverable(r.ctx) //nolint:contextcheck
+	r.updateStepRecoveryState(step, processState, err, recoverable)
+
+	if !recoverable {
+		err = r.traceStep(processState, err, step)
+	}
 	if err != nil && step.Failure == metadata.FailureIgnore {
 		return nil
 	}
@@ -219,8 +262,13 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed after while running")
 		}
 
-		if traceErr := r.traceStep(processState, err, step); traceErr != nil {
-			logger.Error().Err(traceErr).Str("step", step.Name).Msg("failed to trace detached step result")
+		recoverable := r.recoveryManager.IsRecoverable(r.ctx) //nolint:contextcheck
+		r.updateStepRecoveryState(step, processState, err, recoverable)
+
+		if !recoverable {
+			if traceErr := r.traceStep(processState, err, step); traceErr != nil {
+				logger.Error().Err(traceErr).Str("step", step.Name).Msg("failed to trace detached step result")
+			}
 		}
 	}()
 
@@ -257,4 +305,88 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		return traceErr
 	}
 	return err
+}
+
+// updateStepRecoveryState updates the recovery state for a step based on its execution result.
+func (r *Runtime) updateStepRecoveryState(step *backend_types.Step, processState *backend_types.State, err error, recoverable bool) {
+	if !r.recoveryManager.Enabled() {
+		return
+	}
+	logger := r.makeLogger()
+	switch {
+	case recoverable:
+		logger.Debug().Str("step", step.Name).Msg("workflow is recoverable, not updating step state")
+	case processState != nil && processState.ExitCode == 0 && err == nil:
+		if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil {
+			logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as success")
+		}
+	default:
+		exitCode := 1
+		if processState != nil {
+			exitCode = processState.ExitCode
+		}
+		if markErr := r.recoveryManager.MarkStepFailed(r.ctx, step, exitCode); markErr != nil {
+			logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as failed")
+		}
+	}
+}
+
+// execReconnected handles a reconnected step (waiting for completion without re-executing).
+func (r *Runtime) execReconnected(step *backend_types.Step) error {
+	logger := r.makeLogger()
+
+	var wg sync.WaitGroup
+	rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
+	if err != nil {
+		logger.Warn().Err(err).Str("step", step.Name).Msg("failed to retrieve logs for reconnected step, continuing without logs")
+	} else {
+		wg.Go(func() {
+			if err := r.logger(step, rc); err != nil {
+				logger.Error().Err(err).Str("step", step.Name).Msg("process logging failed")
+			}
+			_ = rc.Close()
+		})
+	}
+
+	if step.Detached {
+		return nil
+	}
+
+	wg.Wait()
+	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
+	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			return pipeline_errors.ErrCancel
+		}
+		return err
+	}
+
+	if waitState.ExitCode == 0 {
+		if markErr := r.recoveryManager.MarkStepSuccess(r.ctx, step); markErr != nil {
+			logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as success")
+		}
+	} else {
+		if markErr := r.recoveryManager.MarkStepFailed(r.ctx, step, waitState.ExitCode); markErr != nil {
+			logger.Warn().Err(markErr).Str("step", step.Name).Msg("failed to mark step as failed")
+		}
+	}
+
+	if err := r.traceStep(waitState, nil, step); err != nil {
+		return err
+	}
+
+	if waitState.OOMKilled {
+		return &pipeline_errors.OomError{
+			UUID: step.UUID,
+			Code: waitState.ExitCode,
+		}
+	}
+	if waitState.ExitCode != 0 {
+		return &pipeline_errors.ExitError{
+			UUID: step.UUID,
+			Code: waitState.ExitCode,
+		}
+	}
+
+	return nil
 }

@@ -1,10 +1,10 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,9 +14,19 @@
 
 package types
 
-import "errors"
+// RecoveryStatus represents the recovery state of a step.
+type RecoveryStatus int
 
-var (
-	ErrNoCliContextFound            = errors.New("no CliContext in context found")
-	ErrWorkflowRecoveryNotSupported = errors.New("workflow recovery not supported")
+// RecoveryState represents the recovery state for a step.
+type RecoveryState struct {
+	Status   RecoveryStatus `json:"status"`
+	ExitCode int            `json:"exit_code"`
+}
+
+const (
+	RecoveryStatusPending RecoveryStatus = iota
+	RecoveryStatusRunning
+	RecoveryStatusSuccess
+	RecoveryStatusFailed
+	RecoveryStatusSkipped
 )

@@ -41,6 +41,12 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 
 	// we make sure cleanup always happens
 	defer func() {
+		// Skip destroying workflow if recovery is enabled and context was canceled but NOT by user.
+		if r.recoveryManager.IsRecoverable(runnerCtx) {
+			logger.Info().Msg("skipping workflow destruction, preserving for recovery")
+			return
+		}
+
 		ctx := runnerCtx //nolint:contextcheck
 		if ctx.Err() != nil {
 			// runnerCtx itself is done — fall back to a short-lived shutdown context.

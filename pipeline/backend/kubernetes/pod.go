@@ -648,7 +648,16 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 	}
 
 	log.Trace().Msgf("creating pod: %s", pod.Name)
-	return engine.client.CoreV1().Pods(engineConfig.GetNamespace(step.OrgID)).Create(ctx, pod, kube_meta_v1.CreateOptions{})
+	createdPod, err := engine.client.CoreV1().Pods(engineConfig.GetNamespace(step.OrgID)).Create(ctx, pod, kube_meta_v1.CreateOptions{})
+	if err != nil {
+		if errors.IsAlreadyExists(err) {
+			// Pod already exists (recovery scenario), continue without error
+			log.Trace().Msgf("pod already exists, reusing: %s", pod.Name)
+			return pod, nil
+		}
+		return nil, err
+	}
+	return createdPod, nil
 }
 
 func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts kube_meta_v1.DeleteOptions) error {

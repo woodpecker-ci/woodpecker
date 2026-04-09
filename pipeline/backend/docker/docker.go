@@ -154,8 +154,11 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend_types.Config, 
 		Name:   conf.Volume,
 		Driver: volumeDriver,
 	})
-	if err != nil {
+	if err != nil && !errdefs.IsAlreadyExists(err) && !errdefs.IsConflict(err) {
 		return err
+	}
+	if err != nil {
+		log.Trace().Str("taskUUID", taskUUID).Msg("volume already exists, reusing")
 	}
 
 	networkDriver := networkDriverBridge
@@ -166,7 +169,13 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend_types.Config, 
 		Driver:     networkDriver,
 		EnableIPv6: &e.config.enableIPv6,
 	})
-	return err
+	if err != nil && !errdefs.IsAlreadyExists(err) && !errdefs.IsConflict(err) {
+		return err
+	}
+	if err != nil {
+		log.Trace().Str("taskUUID", taskUUID).Msg("network already exists, reusing")
+	}
+	return nil
 }
 
 func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUUID string) error {
@@ -238,7 +247,12 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 		})
 	}
 	if err != nil {
-		return err
+		// Container already exists (recovery scenario), continue without error
+		if errdefs.IsAlreadyExists(err) || errdefs.IsConflict(err) {
+			log.Trace().Str("container", containerName).Msg("container already exists, reusing")
+		} else {
+			return err
+		}
 	}
 
 	if len(step.NetworkMode) == 0 {
@@ -249,7 +263,8 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 				},
 				Container: containerName,
 			})
-			if err != nil {
+			// Ignore error if container is already connected to network (recovery scenario)
+			if err != nil && !errdefs.IsAlreadyExists(err) && !errdefs.IsConflict(err) {
 				return err
 			}
 		}
@@ -259,14 +274,19 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 			_, err = e.client.NetworkConnect(ctx, e.config.network, client.NetworkConnectOptions{
 				Container: containerName,
 			})
-			if err != nil {
+			// Ignore error if container is already connected to network (recovery scenario)
+			if err != nil && !errdefs.IsAlreadyExists(err) && !errdefs.IsConflict(err) {
 				return err
 			}
 		}
 	}
 
 	_, err = e.client.ContainerStart(ctx, containerName, client.ContainerStartOptions{})
-	return err
+	// Ignore error if container is already running (recovery scenario)
+	if err != nil && !isErrContainerAlreadyStarted(err) {
+		return err
+	}
+	return nil
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
@@ -388,6 +408,18 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend_types.Config
 	return nil
 }
 
+// Reconnect attempts to reconnect to a running container.
+// This is used for recovery after agent restart.
+func (e *docker) Reconnect(ctx context.Context, step *backend_types.Step, taskUUID string) error {
+	containerName := toContainerName(step)
+	_, err := e.client.ContainerInspect(ctx, containerName, client.ContainerInspectOptions{})
+	if err != nil {
+		return err
+	}
+	log.Debug().Str("taskUUID", taskUUID).Str("container", containerName).Msg("reconnected to existing container")
+	return nil
+}
+
 var removeOpts = client.ContainerRemoveOptions{
 	RemoveVolumes: true,
 	RemoveLinks:   false,
@@ -405,6 +437,12 @@ func isErrContainerNotFoundOrNotRunning(err error) bool {
 			strings.Contains(err.Error(), "is not running") ||
 			strings.Contains(err.Error(), "can only kill running containers") ||
 			(strings.Contains(err.Error(), "removal of container") && strings.Contains(err.Error(), "is already in progress")))
+}
+
+func isErrContainerAlreadyStarted(err error) bool {
+	// Error response from daemon: Container ... is already started
+	// Error response from podman daemon: container ... is already running
+	return err != nil && (strings.Contains(err.Error(), "is already started") || strings.Contains(err.Error(), "is already running"))
 }
 
 // normalizeArchType converts the arch type reported by docker info into
