@@ -99,7 +99,9 @@
               :class="{
                 underline: group.command && isSelected(group.command),
               }"
-              >{{ group.command?.number }}</a>
+            >
+              {{ group.command?.number }}
+            </a>
             <!-- eslint-disable vue/no-v-html -->
             <span v-if="group.command" class="flex-1 truncate" v-html="group.command.text" />
           </div>
