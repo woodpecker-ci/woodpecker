@@ -86,7 +86,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRaw } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -104,6 +104,7 @@ import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { User } from '~/lib/api/types';
+import { deepClone } from '~/lib/utils';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -152,7 +153,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 });
 
 function editUser(user: User) {
-  selectedUser.value = structuredClone(toRaw(user));
+  selectedUser.value = deepClone(user);
 }
 
 function showAddUser() {
