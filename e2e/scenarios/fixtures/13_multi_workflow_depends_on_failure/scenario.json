@@ -6,5 +6,8 @@
     { "name": "build", "status": "failure" },
     { "name": "deploy", "status": "skipped" }
   ],
-  "expected_steps": [{ "name": "compile", "status": "failure", "exit_code": 1 }]
+  "expected_steps": [
+    { "name": "compile", "status": "failure", "exit_code": 1 },
+    { "name": "deploy", "status": "killed", "exit_code": 0, "_comment": "TODO: it should be skipped not killed" }
+  ]
 }

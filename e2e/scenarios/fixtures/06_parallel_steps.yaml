@@ -3,13 +3,13 @@ steps:
     image: dummy
     commands:
       - echo unit tests
-    depends_on: [clone]
+    depends_on: []
 
   - name: test-integration
     image: dummy
     commands:
       - echo integration tests
-    depends_on: [clone]
+    depends_on: []
 
   - name: deploy
     image: dummy
