@@ -65,7 +65,7 @@ func seedFixtures(t *testing.T, s store.Store, files []*forge_types.FileMeta) *F
 	t.Helper()
 
 	forge := &model.Forge{
-		Type: model.ForgeTypeGitea, // type doesn't matter; mock always intercepts
+		Type: model.ForgeTypeGitea,
 		URL:  "https://forge.example.test",
 	}
 	require.NoError(t, s.ForgeCreate(forge), "seed forge")
@@ -75,8 +75,6 @@ func seedFixtures(t *testing.T, s store.Store, files []*forge_types.FileMeta) *F
 		ForgeRemoteID: "1",
 		Login:         "test-owner",
 		Email:         "owner@example.test",
-		// AccessToken is intentionally empty - the mock forge never validates it.
-		AccessToken: "test-token",
 	}
 	require.NoError(t, s.CreateUser(owner), "seed user")
 
@@ -89,12 +87,8 @@ func seedFixtures(t *testing.T, s store.Store, files []*forge_types.FileMeta) *F
 		Name:          "test-repo",
 		Clone:         "https://forge.example.test/test-owner/test-repo.git",
 		Branch:        "main",
-		// Config controls which path the config service fetches.
-		// Single-workflow: ".woodpecker.yaml" → File() is called.
-		// Multi-workflow:  ".woodpecker/"     → Dir() is called and returns all files.
-		Config:    repoConfig(files),
-		IsActive:  true,
-		AllowPull: true,
+		IsActive:      true,
+		AllowPull:     true,
 	}
 	require.NoError(t, s.CreateRepo(repo), "seed repo")
 
@@ -103,14 +97,4 @@ func seedFixtures(t *testing.T, s store.Store, files []*forge_types.FileMeta) *F
 		Owner: owner,
 		Repo:  repo,
 	}
-}
-
-// repoConfig returns the repo.Config path based on the number of workflow files.
-// Single-workflow → ".woodpecker.yaml" (File() path).
-// Multi-workflow  → ".woodpecker/"     (Dir() path; trailing slash required).
-func repoConfig(files []*forge_types.FileMeta) string {
-	if len(files) == 1 {
-		return ".woodpecker.yaml"
-	}
-	return ".woodpecker/"
 }

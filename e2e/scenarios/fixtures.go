@@ -170,7 +170,7 @@ func loadMultiWorkflowScenario(t *testing.T, dirName string) Scenario {
 		switch {
 		case name == "scenario.json":
 			require.NoError(t, json.Unmarshal(data, &s), "parse %s/scenario.json", dirName)
-		case strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml"):
+		case strings.HasSuffix(name, ".yaml"):
 			// Serve under .woodpecker/<filename> so Dir() returns them.
 			files = append(files, &forge_types.FileMeta{
 				Name: ".woodpecker/" + name,

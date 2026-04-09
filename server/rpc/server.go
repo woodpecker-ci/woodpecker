@@ -59,12 +59,11 @@ func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub pubsub.Pu
 	return &WoodpeckerServer{peer: peer}
 }
 
-// NewWoodpeckerServerWithRegistry creates a WoodpeckerServer using a caller-
-// supplied prometheus registry. Use this in tests to avoid "duplicate metrics
-// collector registration" panics when the server is created multiple times in
-// the same process (promauto in NewWoodpeckerServer registers into the global
-// default registry, which panics on duplicate names).
-func NewWoodpeckerServerWithRegistry(queue queue.Queue, logger logging.Log, pubsub pubsub.PubSub, store store.Store, registry *prometheus.Registry) proto.WoodpeckerServer {
+// NewTestWoodpeckerServer creates a WoodpeckerServer for e2e tests.
+// It is using a caller-supplied prometheus registry.
+// Use this in tests to avoid "duplicate metrics collector registration" panics when the server is created multiple times.
+// (promauto in NewWoodpeckerServer registers into the global default registry, which panics on duplicate names).
+func NewTestWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub pubsub.PubSub, store store.Store, registry *prometheus.Registry) proto.WoodpeckerServer {
 	factory := promauto.With(registry)
 	pipelineTime := factory.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",

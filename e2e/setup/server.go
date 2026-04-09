@@ -204,7 +204,7 @@ func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 		}),
 	)
 
-	proto.RegisterWoodpeckerServer(grpcServer, server_rpc.NewWoodpeckerServerWithRegistry(
+	proto.RegisterWoodpeckerServer(grpcServer, server_rpc.NewTestWoodpeckerServer(
 		server.Config.Services.Queue,
 		server.Config.Services.Logs,
 		server.Config.Services.Pubsub,
