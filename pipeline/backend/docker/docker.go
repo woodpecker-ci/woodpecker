@@ -296,8 +296,8 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 
 	exitCode := info.Container.State.ExitCode
 	// Windows Docker may return 4294967295 (uint32 max, i.e. int32(-1)) for abnormal exits.
-	if exitCode == 4294967295 { //nolint:mnd // because it is int(^uint32(0))
-		exitCode = int(int32(exitCode))
+	if int64(exitCode) == int64(4294967295) { //nolint:mnd // because it is int(^uint32(0))
+		exitCode = -1
 	}
 
 	return &backend_types.State{
