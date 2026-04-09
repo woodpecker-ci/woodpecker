@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- fix(deps): update go.opentelemetry.io/otel to v1.43.0 [[#6416](https://github.com/woodpecker-ci/woodpecker/pull/6416)]
 - WebUI: remove "lodash" dep [[#6369](https://github.com/woodpecker-ci/woodpecker/pull/6369)]
 - Sanitize agent introduced pipeline/workflow/step state changes and log streaming [[#6308](https://github.com/woodpecker-ci/woodpecker/pull/6308)]
 
