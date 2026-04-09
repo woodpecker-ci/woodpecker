@@ -565,18 +565,19 @@ watch(step, async (newStep, oldStep) => {
   }
 });
 
-// When logs from new command come, collapse logs from previous command
-watch(
-  () => groupedLogs.value.length,
-  (newLength, oldLength) => {
-    if (newLength > oldLength && oldLength > 0) {
-      const prevCommandId = groupedLogs.value[oldLength - 1].id;
-      if (prevCommandId !== 0) {
-        collapsedCommands.value.add(prevCommandId);
-      }
+// When user click on a step, if the step has already finished running, show user the
+// only the outline by collapse all log groups
+watch(loadedLogs, async (isLoaded, wasLoaded) => {
+  // Only trigger when transitioning from unloaded to loaded state
+  if (isLoaded && !wasLoaded) {
+    const isFinished = step.value && !['running', 'pending', 'started'].includes(step.value.state);
+    if (isFinished) {
+      // Wait for groupedLogs computed property to update
+      await nextTick();
+      collapseAll();
     }
-  },
-);
+  }
+});
 
 // If route hash contain line that is in a collapsed log group, expand it
 watch(
