@@ -40,7 +40,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import type { Agent } from '~/lib/api/types';
-import { deepToRaw } from '~/lib/utils';
+import { deepClone } from '~/lib/utils';
 
 import AgentForm from './AgentForm.vue';
 import AgentList from './AgentList.vue';
@@ -92,7 +92,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 });
 
 function editAgent(agent: Agent) {
-  selectedAgent.value = deepToRaw(agent);
+  selectedAgent.value = deepClone(agent);
 }
 
 function showAddAgent() {
