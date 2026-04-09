@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-08
+## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -34,6 +34,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6410](https://github.com/woodpecker-ci/woodpecker/pull/6410)]
 - fix(deps): update module github.com/docker/cli to v29.4.0+incompatible [[#6403](https://github.com/woodpecker-ci/woodpecker/pull/6403)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.41 [[#6397](https://github.com/woodpecker-ci/woodpecker/pull/6397)]
 - chore(deps): lock file maintenance [[#6392](https://github.com/woodpecker-ci/woodpecker/pull/6392)]
