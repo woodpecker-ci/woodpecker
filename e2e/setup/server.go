@@ -19,6 +19,7 @@ package setup
 import (
 	"context"
 	"net"
+	"sync"
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -52,6 +53,8 @@ const (
 	TestJWTSecret = "test-jwt-secret-for-integration-tests"
 )
 
+var configLock = sync.Mutex{}
+
 // ServerEnv holds all the pieces of a running test server environment.
 type ServerEnv struct {
 	GRPCAddr string
@@ -75,8 +78,8 @@ type ServerEnv struct {
 // All resources are cleaned up via t.Cleanup.
 func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMeta) *ServerEnv {
 	t.Helper()
-	server.ConfigLock.Lock()
-	defer server.ConfigLock.Unlock()
+	configLock.Lock()
+	defer configLock.Unlock()
 
 	s := newStore(ctx, t)
 	fixtures := seedFixtures(t, s, files)
@@ -94,8 +97,8 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	// subtest starts from a known-zero state rather than the previous test's values.
 	orig := server.Config
 	t.Cleanup(func() {
-		server.ConfigLock.Lock()
-		defer server.ConfigLock.Unlock()
+		configLock.Lock()
+		defer configLock.Unlock()
 		server.Config = orig
 	})
 
