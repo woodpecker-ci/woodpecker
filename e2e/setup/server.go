@@ -51,6 +51,9 @@ const (
 
 	// TestJWTSecret is used for signing gRPC auth JWTs.
 	TestJWTSecret = "test-jwt-secret-for-integration-tests"
+
+	// TestForgeType is the forge type the mock pretends to bee.
+	TestForgeType = model.ForgeTypeGitea
 )
 
 var configLock = sync.Mutex{}
@@ -153,27 +156,15 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 			&cli.BoolFlag{Name: "config-extension-exclusive"},
 			// Config fetch tuning.
 			&cli.DurationFlag{Name: "forge-timeout", Value: defaultTimeout},
-			&cli.UintFlag{Name: "forge-retry", Value: 3}, //nolint:mnd
+			&cli.UintFlag{Name: "forge-retry", Value: defaultRetry},
 			&cli.StringSliceFlag{Name: "environment"},
 			// Forge flags — gitea=true satisfies setupForgeService's type switch.
-			&cli.BoolFlag{Name: "gitea", Value: true},
+			&cli.BoolFlag{Name: string(TestForgeType), Value: true},
 			&cli.StringFlag{Name: "forge-url", Value: "https://forge.example.test"},
 			&cli.StringFlag{Name: "forge-oauth-client"},
 			&cli.StringFlag{Name: "forge-oauth-secret"},
 			&cli.BoolFlag{Name: "forge-skip-verify"},
 			&cli.StringFlag{Name: "forge-oauth-host"},
-			// Other forge type flags (all false).
-			&cli.StringFlag{Name: "addon-forge"},
-			&cli.BoolFlag{Name: "github"},
-			&cli.BoolFlag{Name: "github-merge-ref"},
-			&cli.BoolFlag{Name: "github-public-only"},
-			&cli.BoolFlag{Name: "gitlab"},
-			&cli.BoolFlag{Name: "forgejo"},
-			&cli.BoolFlag{Name: "bitbucket"},
-			&cli.BoolFlag{Name: "bitbucket-dc"},
-			&cli.StringFlag{Name: "bitbucket-dc-git-username"},
-			&cli.StringFlag{Name: "bitbucket-dc-git-password"},
-			&cli.BoolFlag{Name: "bitbucket-dc-oauth-enable-oauth2-scope-project-admin"},
 		},
 	}
 

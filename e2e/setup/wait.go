@@ -31,6 +31,7 @@ import (
 
 const (
 	defaultTimeout  = 30 * time.Second
+	defaultRetry    = 3
 	shortTimeout    = 10 * time.Second
 	defaultInterval = 100 * time.Millisecond
 )

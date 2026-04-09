@@ -64,7 +64,7 @@ func seedFixtures(t *testing.T, s store.Store) *Fixtures {
 	t.Helper()
 
 	forge := &model.Forge{
-		Type: model.ForgeTypeGitea,
+		Type: TestForgeType,
 		URL:  "https://forge.example.test",
 	}
 	require.NoError(t, s.ForgeCreate(forge), "seed forge")
