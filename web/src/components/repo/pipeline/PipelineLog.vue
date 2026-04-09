@@ -53,14 +53,29 @@
             :icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
             @click="autoScroll = !autoScroll"
           />
-          <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:step-id', null)" />
+          <template v-if="hasGroupedLogs">
+            <div class="border-wp-background-400 dark:border-wp-background-100 mx-1 h-5 border-l" />
+            <IconButton
+              :title="$t('repo.pipeline.actions.expand_all')"
+              class="hover:bg-white/10!"
+              icon="expand-all"
+              @click="expandAll"
+            />
+            <IconButton
+              :title="$t('repo.pipeline.actions.collapse_all')"
+              class="hover:bg-white/10!"
+              icon="collapse-all"
+              @click="collapseAll"
+            />
+            <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:step-id', null)" />
+          </template>
         </div>
       </div>
 
       <div
         v-show="hasLogs && loadedLogs && (log?.length || 0) > 0"
         ref="consoleElement"
-        class="grid w-full max-w-full grow auto-rows-min grid-cols-[min-content_minmax(0,1fr)_min-content] overflow-x-hidden overflow-y-auto p-4 text-xs md:text-sm scroll-pt-8"
+        class="grid w-full max-w-full grow scroll-pt-8 auto-rows-min grid-cols-[min-content_minmax(0,1fr)_min-content] overflow-x-hidden overflow-y-auto p-4 text-xs md:text-sm"
       >
         <div v-for="group in groupedLogs" :key="group.id" class="contents">
           <div
@@ -307,6 +322,10 @@ const groupedLogs = computed(() => {
   return blocks;
 });
 
+const hasGroupedLogs = computed(() => {
+  return groupedLogs.value.find((g) => g.isActualCommand);
+});
+
 const urlRegex = /https?:\/\/\S+/g;
 
 function isScrolledToBottom(): boolean {
@@ -331,6 +350,20 @@ function toggleGroup(id: number) {
   } else {
     collapsedCommands.value.add(id);
   }
+}
+
+function expandAll() {
+  collapsedCommands.value.clear();
+}
+
+function collapseAll() {
+  const newSet = new Set<number>();
+  groupedLogs.value.forEach((group) => {
+    if (group.isActualCommand) {
+      newSet.add(group.id);
+    }
+  });
+  collapsedCommands.value = newSet;
 }
 
 function processText(text: string): string {
