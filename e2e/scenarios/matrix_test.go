@@ -246,7 +246,7 @@ steps:
 }
 
 // TestMatrixNoMatrix is a regression guard: a YAML without a matrix section
-// must produce exactly one workflow (the existing behaviour must not break).
+// must produce exactly one workflow (the existing behavior must not break).
 func TestMatrixNoMatrix(t *testing.T) {
 	yaml := []byte(`
 steps:
