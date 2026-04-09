@@ -567,6 +567,16 @@ watch(step, async (newStep, oldStep) => {
   }
 });
 
+const expandLogGroupWithPageHash = (hash: string) => {
+  if (hash.startsWith('#L')) {
+      const lineNum = Number.parseInt(hash.substring(2));
+      const parentGroup = groupedLogs.value.find((g) => lineNum === g.id || g.lines.some((l) => l.number === lineNum));
+      if (parentGroup && collapsedCommands.value.has(parentGroup.id)) {
+        collapsedCommands.value.delete(parentGroup.id);
+      }
+    }
+}
+
 // When user click on a step, if the step has already finished running, show user the
 // only the outline by collapse all log groups
 watch(loadedLogs, async (isLoaded, wasLoaded) => {
@@ -577,6 +587,7 @@ watch(loadedLogs, async (isLoaded, wasLoaded) => {
       // Wait for groupedLogs computed property to update
       await nextTick();
       collapseAll();
+      expandLogGroupWithPageHash(route.hash)
     }
   }
 });
@@ -585,13 +596,7 @@ watch(loadedLogs, async (isLoaded, wasLoaded) => {
 watch(
   () => route.hash,
   (newHash) => {
-    if (newHash.startsWith('#L')) {
-      const lineNum = Number.parseInt(newHash.substring(2));
-      const parentGroup = groupedLogs.value.find((g) => lineNum === g.id || g.lines.some((l) => l.number === lineNum));
-      if (parentGroup && collapsedCommands.value.has(parentGroup.id)) {
-        collapsedCommands.value.delete(parentGroup.id);
-      }
-    }
+    expandLogGroupWithPageHash(newHash)
   },
   { immediate: true },
 );
