@@ -71,6 +71,8 @@ func runScenario(t *testing.T, sc Scenario) {
 	steps, err := env.Store.StepList(finished)
 	require.NoError(t, err, "list steps for pipeline %d", finished.ID)
 
+	require.ElementsMatch(t, expStepsToName(sc.ExpectedSteps), modelStepsToName(steps), "we got different steps reported back as we expected")
+
 	// Index steps by name for O(1) lookup.
 	byName := make(map[string]*model.Step, len(steps))
 	for _, s := range steps {
@@ -83,9 +85,7 @@ func runScenario(t *testing.T, sc Scenario) {
 			continue
 		}
 		assert.Equalf(t, want.Status, step.State, "step %q status", want.Name)
-		if want.ExitCode != 0 || step.ExitCode != 0 {
-			assert.Equalf(t, want.ExitCode, step.ExitCode, "step %q exit code", want.Name)
-		}
+		assert.Equalf(t, want.ExitCode, step.ExitCode, "step %q exit code", want.Name)
 	}
 
 	if len(sc.ExpectedWorkflows) == 0 {
@@ -94,6 +94,8 @@ func runScenario(t *testing.T, sc Scenario) {
 
 	workflows, err := env.Store.WorkflowGetTree(finished)
 	require.NoError(t, err, "list workflows for pipeline %d", finished.ID)
+
+	require.ElementsMatch(t, expWorkflowsToName(sc.ExpectedWorkflows), modelWorkflowsToName(workflows), "we got different workflows reported back as we expected")
 
 	byWorkflowName := make(map[string]*model.Workflow, len(workflows))
 	for _, w := range workflows {
@@ -107,4 +109,36 @@ func runScenario(t *testing.T, sc Scenario) {
 		}
 		assert.Equalf(t, want.Status, wf.State, "workflow %q status", want.Name)
 	}
+}
+
+func expStepsToName(in []ExpectedStep) []string {
+	out := make([]string, 0, len(in))
+	for _, s := range in {
+		out = append(out, s.Name)
+	}
+	return out
+}
+
+func modelStepsToName(in []*model.Step) []string {
+	out := make([]string, 0, len(in))
+	for _, s := range in {
+		out = append(out, s.Name)
+	}
+	return out
+}
+
+func expWorkflowsToName(in []ExpectedWorkflow) []string {
+	out := make([]string, 0, len(in))
+	for _, s := range in {
+		out = append(out, s.Name)
+	}
+	return out
+}
+
+func modelWorkflowsToName(in []*model.Workflow) []string {
+	out := make([]string, 0, len(in))
+	for _, s := range in {
+		out = append(out, s.Name)
+	}
+	return out
 }

@@ -2,5 +2,8 @@
   "name": "service runs alongside steps",
   "event": "push",
   "expected_status": "success",
-  "expected_steps": [{ "name": "test", "status": "success", "exit_code": 0 }]
+  "expected_steps": [
+    { "name": "clone", "status": "success", "exit_code": 0 },
+    { "name": "test", "status": "success", "exit_code": 0 }
+  ]
 }

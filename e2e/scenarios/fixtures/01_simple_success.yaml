@@ -1,9 +1,4 @@
 steps:
-  - name: clone
-    image: dummy
-    commands:
-      - echo cloning
-
   - name: build
     image: dummy
     commands:
