@@ -76,7 +76,8 @@ func (c *client) Close() error {
 }
 
 func (c *client) IsConnected() bool {
-	connected := c.conn.GetState() == connectivity.Ready
+	state := c.conn.GetState()
+	connected := state == connectivity.Ready || state == connectivity.Idle
 	if !connected && c.connectionLostAt.IsZero() {
 		c.connectionLostAt = time.Now()
 	} else if connected && !c.connectionLostAt.IsZero() {
