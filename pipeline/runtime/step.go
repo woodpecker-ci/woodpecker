@@ -253,6 +253,8 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
 	}
 
+	r.tracerLock.Lock()
+	defer r.tracerLock.Unlock()
 	if traceErr := r.tracer.Trace(s); traceErr != nil {
 		return traceErr
 	}
