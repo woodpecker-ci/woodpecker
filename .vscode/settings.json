@@ -18,8 +18,8 @@
   },
   "yaml.schemas": {
     "./pipeline/frontend/yaml/linter/schema/schema.json": [
-      "file:///home/maddl/git/own/woodpecker/e2e/scenarios/fixtures/*.yaml",
-      "file:///home/maddl/git/own/woodpecker/e2e/scenarios/fixtures/*/*.yaml"
+      "file:///./e2e/scenarios/fixtures/*.yaml",
+      "file:///./e2e/scenarios/fixtures/*/*.yaml"
     ]
   }
 }
