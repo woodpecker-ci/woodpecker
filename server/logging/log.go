@@ -67,6 +67,12 @@ func New() Log {
 
 func (l *logger) Open(_ context.Context, stepID int64) error {
 	l.Lock()
+	l.open(stepID)
+	l.Unlock()
+	return nil
+}
+
+func (l *logger) open(stepID int64) {
 	_, ok := l.streams[stepID]
 	if !ok {
 		l.streams[stepID] = &stream{
@@ -75,8 +81,6 @@ func (l *logger) Open(_ context.Context, stepID int64) error {
 			done:   make(chan struct{}),
 		}
 	}
-	l.Unlock()
-	return nil
 }
 
 func (l *logger) Write(ctx context.Context, stepID int64, entries []*model.LogEntry) error {
@@ -85,12 +89,7 @@ func (l *logger) Write(ctx context.Context, stepID int64, entries []*model.LogEn
 	if !ok {
 		// Auto-open the stream while still holding the logger lock so that a
 		// concurrent Write for the same step cannot race on l.streams.
-		l.streams[stepID] = &stream{
-			stepID: stepID,
-			subs:   make(map[*subscriber]struct{}),
-			done:   make(chan struct{}),
-		}
-		s = l.streams[stepID]
+		l.open(stepID)
 	}
 	l.Unlock()
 
