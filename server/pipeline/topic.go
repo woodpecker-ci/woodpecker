@@ -45,5 +45,5 @@ func publishToTopic(c context.Context, pipeline *model.Pipeline, repo *model.Rep
 	// publish to repo specific topic
 	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
 
-	return server.Config.Services.Pubsub.Publish(c, subTopics, message)
+	return server.Config.Services.Scheduler.Publish(c, subTopics, message)
 }
