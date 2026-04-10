@@ -15,6 +15,7 @@
 
 ### 📈 Enhancement
 
+- Init server/scheduler package and use it as proxy for queue&pubsub [[#6418](https://github.com/woodpecker-ci/woodpecker/pull/6418)]
 - refactor(server): unify api parameters to snake case [[#6404](https://github.com/woodpecker-ci/woodpecker/pull/6404)]
 
 ### 🐛 Bug Fixes
