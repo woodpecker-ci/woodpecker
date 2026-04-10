@@ -78,7 +78,7 @@ func logShow(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("invalid step '%s': %w", stepArg, err)
 	}
 
-	if c.Bool("follow") {
+	if followArg {
 		err := streamLog(client, repoID, number, step)
 		if err != nil && err.Error() == "step not running (anymore)" {
 			return stepLog(client, repoID, number, step)
@@ -138,7 +138,6 @@ func streamLog(client woodpecker.Client, repoID, number, step int64) error {
 		select {
 		case log := <-logs:
 			fmt.Println(string(log.Data))
-			// fmt.Printf("%d: %s\n", log.Line, string(log.Data))
 		case err := <-errs:
 			return err
 		}
