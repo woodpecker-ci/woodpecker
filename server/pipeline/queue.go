@@ -60,7 +60,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*step_
 
 		tasks = append(tasks, task)
 	}
-	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
+	return server.Config.Services.Scheduler.PushAtOnce(ctx, tasks)
 }
 
 func getTaskDependencies(dependsOn []string, items []*step_builder.Item) (taskIDs []string) {
