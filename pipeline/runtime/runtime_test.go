@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -1153,4 +1154,72 @@ func TestWorkflowContextCancelWithServiceStep(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+}
+
+// TestWorkflowCancelDuringStepSleep verifies that canceling the workflow context
+// while a step is sleeping (via SLEEP env) causes the runtime to return ErrCancel
+// promptly — without waiting the full sleep duration — and that subsequent stages
+// are never executed.
+//
+// The tracer callback cancels the context the moment the first stage ("prepare")
+// completes. The "slow" step uses a short sleep so that even if WaitStep enters
+// the sleep select, the context cancellation unblocks it quickly.
+//
+// Note: we do not assert on the slow step's exit code here because Run() may
+// return (via ctx.Done()) before the stage goroutine's WaitStep completes,
+// causing DestroyWorkflow to clean up state that WaitStep still needs. The
+// exit-code-130 behavior of a canceled sleep is verified at the backend unit
+// level in TestWaitStepCanceledBySleep.
+func TestWorkflowCancelDuringStepSleep(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var prepareExited int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s == nil || s.CurrStep == nil {
+			return
+		}
+		// Cancel as soon as the first stage ("prepare") finishes.
+		if s.CurrStep.Name == "prepare" && s.CurrStepState.Exited {
+			prepareExited++
+			if prepareExited >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("prepare"),
+				}},
+				{Steps: []*backend_types.Step{
+					// Short sleep so the test doesn't hang if WaitStep enters the timer.
+					cmdStep("slow", func(s *backend_types.Step) {
+						s.Environment[dummy.EnvKeyStepSleep] = "100ms"
+					}),
+				}},
+				{Steps: []*backend_types.Step{
+					cmdStep("never-reached"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel, "canceled workflow must return ErrCancel")
+
+	// Give the orphaned stage goroutine a moment to finish tracing (best effort).
+	time.Sleep(200 * time.Millisecond)
+
+	assert.Nil(t, findFirstTraceByName(getTracerStates(tracer), "never-reached"),
+		"never-reached must not have been traced")
 }

@@ -47,7 +47,7 @@ type (
 		Platform List                          `yaml:"platform,omitempty"`
 		Branch   List                          `yaml:"branch,omitempty"`
 		Cron     List                          `yaml:"cron,omitempty"`
-		Status   []string                      `yaml:"status,omitempty"`
+		Status   yaml_base_types.StringOrSlice `yaml:"status,omitempty"`
 		Matrix   Map                           `yaml:"matrix,omitempty"`
 		Local    optional.Option[bool]         `yaml:"local,omitempty"`
 		Path     Path                          `yaml:"path,omitempty"`

@@ -56,7 +56,8 @@ steps:
     commands:
       - echo "test"
     when:
-      status: [success, failure]
+      - status: [success, failure]
+      - status: failure
 
   when-platform:
     image: alpine

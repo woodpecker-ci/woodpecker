@@ -95,7 +95,7 @@ func EventStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		err := server.Config.Services.Pubsub.Subscribe(ctx, subTopics,
+		err := server.Config.Services.Scheduler.Subscribe(ctx, subTopics,
 			func(m pubsub.Message) {
 				select {
 				case <-ctx.Done():
@@ -130,13 +130,13 @@ func EventStreamSSE(c *gin.Context) {
 // LogStreamSSE
 //
 //	@Summary	Stream logs of a pipeline step
-//	@Router		/stream/logs/{repo_id}/{pipeline}/{stepID} [get]
+//	@Router		/stream/logs/{repo_id}/{pipeline}/{step_id} [get]
 //	@Produce	plain
 //	@Success	200
 //	@Tags		Pipeline logs
 //	@Param		repo_id		path	int	true	"the repository id"
 //	@Param		pipeline	path	int	true	"the number of the pipeline"
-//	@Param		stepID		path	int	true	"the step id"
+//	@Param		step_id		path	int	true	"the step id"
 func LogStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -170,7 +170,7 @@ func LogStreamSSE(c *gin.Context) {
 		return
 	}
 
-	stepID, err := strconv.ParseInt(c.Param("stepId"), 10, 64)
+	stepID, err := strconv.ParseInt(c.Param("step_id"), 10, 64)
 	if err != nil {
 		log.Debug().Err(err).Msg("step id invalid")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step id invalid\n\n"))
