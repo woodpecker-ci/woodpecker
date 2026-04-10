@@ -216,8 +216,6 @@
                 "deploy": "Wdrażanie",
                 "log_auto_scroll": "Przewijaj automatycznie",
                 "log_auto_scroll_off": "Wyłącz automatyczne przewijanie",
-                "expand_all": "Rozwiń wszystkie",
-                "collapse_all": "Zwiń wszystkie",
                 "log_download": "Pobierz",
                 "restart": "Uruchom ponownie",
                 "restart_success": "Uruchomiono potok ponownie",

@@ -238,8 +238,6 @@
                 "deploy": "Déployer",
                 "log_auto_scroll": "Automatiquement défiler vers le bas",
                 "log_auto_scroll_off": "Désactiver le défilement automatique",
-                "expand_all": "Tout développer",
-                "collapse_all": "Tout réduire",
                 "log_download": "Télécharger",
                 "restart": "Redémarrer",
                 "restart_success": "Pipeline redémarré",

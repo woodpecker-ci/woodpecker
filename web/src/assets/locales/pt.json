@@ -259,8 +259,6 @@
             "log_download_error": "Ocorreu um erro ao fazer o download do arquivo de registro",
             "actions": {
                 "log_auto_scroll_off": "Desabilitar rolagem automática",
-                "expand_all": "Expandir tudo",
-                "collapse_all": "Recolher tudo",
                 "cancel": "Cancelar",
                 "restart": "Reiniciar",
                 "canceled": "Essa etapa foi cancelada.",

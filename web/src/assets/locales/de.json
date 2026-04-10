@@ -253,8 +253,6 @@
                 "deploy": "Deploy",
                 "log_auto_scroll": "Automatisches Scrollen aktivieren",
                 "log_auto_scroll_off": "Automatisches Scrollen deaktivieren",
-                "expand_all": "Alle erweitern",
-                "collapse_all": "Alle reduzieren",
                 "log_download": "Herunterladen",
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",

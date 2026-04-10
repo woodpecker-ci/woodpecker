@@ -250,8 +250,6 @@
                 "deploy": "部署",
                 "log_auto_scroll": "启用自动滚动",
                 "log_auto_scroll_off": "禁用自动滚动",
-                "expand_all": "全部展开",
-                "collapse_all": "全部折叠",
                 "log_download": "下载",
                 "restart": "重启",
                 "restart_success": "流水线已重启",

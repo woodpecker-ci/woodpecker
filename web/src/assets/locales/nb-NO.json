@@ -310,8 +310,6 @@
                 "log_download": "Last ned",
                 "log_delete": "Slett",
                 "log_auto_scroll_off": "Deaktiver automatisk scrolling",
-                "expand_all": "Utvid alle",
-                "collapse_all": "Slå sammen alle",
                 "deploy": "Rull ut",
                 "log_auto_scroll": "Aktiver automatisk scrolling"
             },

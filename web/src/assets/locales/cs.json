@@ -219,8 +219,6 @@
                 "deploy": "Nasazení",
                 "log_auto_scroll": "Automatické posouvání dolů",
                 "log_auto_scroll_off": "Vypnutí automatického posouvání",
-                "expand_all": "Rozbalit vše",
-                "collapse_all": "Sbalit vše",
                 "log_download": "Stáhnout",
                 "restart": "Restart",
                 "restart_success": "Opětovné spuštění potrubí"

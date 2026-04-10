@@ -228,8 +228,6 @@
                 "deploy": "Luncurkan",
                 "log_auto_scroll": "Gulir ke bawah secara otomatis",
                 "log_auto_scroll_off": "Matikan pengguliran otomatis",
-                "expand_all": "Perluas semua",
-                "collapse_all": "Ciutkan semua",
                 "log_download": "Unduh",
                 "restart": "Mulai ulang",
                 "restart_success": "Jalur pipa dimulai ulang"

@@ -166,9 +166,7 @@
                 "log_download": "Elŝuti",
                 "log_delete": "Forigi",
                 "log_auto_scroll": "Ŝalti aŭtomatan rulumigon",
-                "log_auto_scroll_off": "Malŝalti aŭtomatan rulumigon",
-                "expand_all": "Malfaldi ĉion",
-                "collapse_all": "Kunfaldi ĉion"
+                "log_auto_scroll_off": "Malŝalti aŭtomatan rulumigon"
             },
             "protected": {
                 "awaits": "Ĉi tiu pipeline atendas aprobon de prizorganto!",

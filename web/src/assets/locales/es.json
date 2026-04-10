@@ -229,8 +229,6 @@
                 "deploy": "Despliegue",
                 "log_auto_scroll": "Desplazarse automáticamente hacia abajo",
                 "log_auto_scroll_off": "Desactivar el desplazamiento automático",
-                "expand_all": "Expandir todo",
-                "collapse_all": "Colapsar todo",
                 "log_download": "Descargar",
                 "restart": "Reiniciar",
                 "restart_success": "Pipeline reiniciado"
