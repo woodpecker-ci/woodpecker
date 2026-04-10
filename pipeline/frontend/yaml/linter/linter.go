@@ -145,7 +145,21 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 	case "steps":
 		containers = config.Workflow.Steps.ContainerList
 	case "services":
-		containers = config.Workflow.Services.ContainerList
+		if len(config.Workflow.Services.Duplicated) != 0 {
+			linterErr = multierr.Append(linterErr, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeBadHabit,
+				Message: "Services have duplicated names declaired, second ones are ignored and should be removed",
+				Data: errors.BadHabitErrorData{
+					File:  config.File,
+					Field: "services",
+					Docs:  "https://woodpecker-ci.org/docs/usage/services",
+				},
+				IsWarning: true,
+			})
+		}
+		for _, v := range config.Workflow.Services.ContainerMap {
+			containers = append(containers, v)
+		}
 	}
 
 	for _, container := range containers {
