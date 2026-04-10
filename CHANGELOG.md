@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#6419](https://github.com/woodpecker-ci/woodpecker/pull/6419)]
 - fix(deps): update golang-packages [[#6410](https://github.com/woodpecker-ci/woodpecker/pull/6410)]
 - fix(deps): update module github.com/docker/cli to v29.4.0+incompatible [[#6403](https://github.com/woodpecker-ci/woodpecker/pull/6403)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.41 [[#6397](https://github.com/woodpecker-ci/woodpecker/pull/6397)]
