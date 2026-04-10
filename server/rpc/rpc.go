@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
@@ -45,8 +46,7 @@ import (
 const updateAgentLastWorkDelay = time.Minute
 
 type RPC struct {
-	queue         queue.Queue
-	pubsub        pubsub.PubSub
+	scheduler     scheduler.Scheduler
 	logger        logging.Log
 	store         store.Store
 	pipelineTime  *prometheus.GaugeVec
@@ -84,7 +84,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	for {
 		// poll blocks until a task is available or the context is canceled / worker is kicked
-		task, err := s.queue.Poll(c, agent.ID, filterFn)
+		task, err := s.scheduler.Poll(c, agent.ID, filterFn)
 		if err != nil || task == nil {
 			return nil, err
 		}
@@ -114,7 +114,7 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 		return false, err
 	}
 
-	if err := s.queue.Wait(c, workflowID); err != nil {
+	if err := s.scheduler.Wait(c, workflowID); err != nil {
 		if errors.Is(err, queue.ErrCancel) {
 			// we explicit send a cancel signal
 			log.Debug().Str("workflowID", workflowID).Msg("while waiting the queue reported the workflow as canceled")
@@ -146,7 +146,7 @@ func (s *RPC) Extend(c context.Context, workflowID string) error {
 		return err
 	}
 
-	return s.queue.Extend(c, agent.ID, workflowID)
+	return s.scheduler.Extend(c, agent.ID, workflowID)
 }
 
 // Update let agent updates the step state at the server.
@@ -199,11 +199,8 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	// sanitize agent input
-	if err := checkPipelineState(currentPipeline); err != nil {
-		return err
-	}
-	if err := checkWorkflowStepStates(workflow, step); err != nil {
+	// sanitize agent input: only allow step updates that the workflow state permits
+	if err := checkWorkflowAllowsStepUpdate(workflow.State, step, state); err != nil {
 		return err
 	}
 
@@ -260,11 +257,8 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	// sanitize agent input
-	if err := checkPipelineState(currentPipeline); err != nil {
-		return err
-	}
-	if err := checkWorkflowStepStates(workflow, nil); err != nil {
+	// check workflow's own state to prevent re-initializing a finished or blocked workflow
+	if err := checkWorkflowState(workflow.State); err != nil {
 		return err
 	}
 
@@ -293,7 +287,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	return s.updateAgentLastWork(agent)
 }
 
-// Done marks the workflow with the given ID as stope.
+// Done marks the workflow with the given ID as stopped.
 func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -333,11 +327,8 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	// sanitize agent input
-	if err := checkPipelineState(currentPipeline); err != nil {
-		return err
-	}
-	if err := checkWorkflowStepStates(workflow, nil); err != nil {
+	// check workflow's own state to prevent finishing an already-finished or blocked workflow
+	if err := checkWorkflowState(workflow.State); err != nil {
 		return err
 	}
 
@@ -360,15 +351,15 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	var queueErr error
 	if !state.Canceled {
 		if workflow.Failing() {
-			queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
+			queueErr = s.scheduler.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
 		} else {
-			queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
+			queueErr = s.scheduler.Done(c, strWorkflowID, workflow.State)
 		}
 	} else {
 		if workflow.Started > 0 {
-			queueErr = s.queue.Done(c, strWorkflowID, model.StatusKilled)
+			queueErr = s.scheduler.Done(c, strWorkflowID, model.StatusKilled)
 		} else {
-			queueErr = s.queue.Done(c, strWorkflowID, model.StatusCanceled)
+			queueErr = s.scheduler.Done(c, strWorkflowID, model.StatusCanceled)
 		}
 	}
 	if queueErr != nil {
@@ -594,7 +585,7 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 	// publish to repo specific topic
 	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
 
-	return s.pubsub.Publish(c, subTopics, message)
+	return s.scheduler.Publish(c, subTopics, message)
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
