@@ -95,7 +95,7 @@ func EventStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		err := server.Config.Services.Pubsub.Subscribe(ctx, subTopics,
+		err := server.Config.Services.Scheduler.Subscribe(ctx, subTopics,
 			func(m pubsub.Message) {
 				select {
 				case <-ctx.Done():

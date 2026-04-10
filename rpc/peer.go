@@ -302,4 +302,14 @@ type Peer interface {
 	//   - nil on success
 	//   - error if communication fails
 	ReportHealth(c context.Context) error
+
+	// IsConnected returns true if the gRPC connection to the server is in Ready state.
+	//
+	// This can be used to check if the server is reachable before attempting
+	// operations that require a connection (like UnregisterAgent).
+	//
+	// Returns:
+	//   - true if connection is Ready
+	//   - false otherwise (Idle, Connecting, Shutdown, or TransientFailure)
+	IsConnected() bool
 }
