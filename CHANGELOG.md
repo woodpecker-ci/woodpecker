@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-09
+## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @M31ancholy, @lephuongbg, @utafrali
+@6543, @AhmadNajiKam, @M31ancholy, @lephuongbg, @utafrali
 
 ### 🔒 Security
 
@@ -18,6 +18,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix: add connection timeout and graceful shutdown to agent RPC client [[#6414](https://github.com/woodpecker-ci/woodpecker/pull/6414)]
 - Fix Windows container exit code handling and error checks [[#6411](https://github.com/woodpecker-ci/woodpecker/pull/6411)]
 - Remove usage of deprecated /user/permissions/repositories [[#6401](https://github.com/woodpecker-ci/woodpecker/pull/6401)]
 - Fix parsing /user/workspaces response [[#6396](https://github.com/woodpecker-ci/woodpecker/pull/6396)]
