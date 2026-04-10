@@ -126,7 +126,7 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 				log.Error().Msg("grpc: connection lost, giving up")
 				return nil, ErrConnectionLost
 			}
-			log.Warn().Msg("grpc: waiting for server connection...")
+			log.Warn().Msg("grpc: next() waiting for server connection...")
 			time.Sleep(retry.NextBackOff())
 			continue
 		}
@@ -196,7 +196,7 @@ func (c *client) Wait(ctx context.Context, workflowID string) (canceled bool, er
 				log.Error().Msg("grpc: connection lost, giving up")
 				return false, ErrConnectionLost
 			}
-			log.Warn().Msg("grpc: waiting for server connection...")
+			log.Warn().Msg("grpc: wait() waiting for server connection...")
 			time.Sleep(retry.NextBackOff())
 			continue
 		}
@@ -253,7 +253,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 				log.Error().Msg("grpc: connection lost, giving up")
 				return ErrConnectionLost
 			}
-			log.Warn().Msg("grpc: waiting for server connection...")
+			log.Warn().Msg("grpc: init() waiting for server connection...")
 			time.Sleep(retry.NextBackOff())
 			continue
 		}
@@ -312,7 +312,7 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 				log.Error().Msg("grpc: connection lost, giving up")
 				return ErrConnectionLost
 			}
-			log.Warn().Msg("grpc: waiting for server connection...")
+			log.Warn().Msg("grpc: done() waiting for server connection...")
 			time.Sleep(retry.NextBackOff())
 			continue
 		}
@@ -366,7 +366,7 @@ func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 				log.Error().Msg("grpc: connection lost, giving up")
 				return ErrConnectionLost
 			}
-			log.Warn().Msg("grpc: waiting for server connection...")
+			log.Warn().Msg("grpc: extend() waiting for server connection...")
 			time.Sleep(retry.NextBackOff())
 			continue
 		}
@@ -429,7 +429,7 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 				log.Error().Msg("grpc: connection lost, giving up")
 				return ErrConnectionLost
 			}
-			log.Warn().Msg("grpc: waiting for server connection...")
+			log.Warn().Msg("grpc: update() waiting for server connection...")
 			time.Sleep(retry.NextBackOff())
 			continue
 		}
@@ -600,7 +600,7 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 				log.Error().Msg("grpc: connection lost, giving up")
 				return ErrConnectionLost
 			}
-			log.Warn().Msg("grpc: waiting for server connection...")
+			log.Warn().Msg("grpc: report_health() waiting for server connection...")
 			time.Sleep(retry.NextBackOff())
 			continue
 		}
