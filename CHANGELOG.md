@@ -39,6 +39,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6423](https://github.com/woodpecker-ci/woodpecker/pull/6423)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.8.2 [[#6421](https://github.com/woodpecker-ci/woodpecker/pull/6421)]
 - Update dependency golang to v1.26.2 [[#6420](https://github.com/woodpecker-ci/woodpecker/pull/6420)]
 - fix(deps): update golang-packages [[#6419](https://github.com/woodpecker-ci/woodpecker/pull/6419)]
