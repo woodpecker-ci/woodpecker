@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @M31ancholy, @lephuongbg, @utafrali
+@6543, @AhmadNajiKam, @M31ancholy, @lephuongbg, @packrat386, @utafrali
 
 ### 🔒 Security
 
@@ -20,6 +20,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix erroneous linter error for plugin privileges [[#6424](https://github.com/woodpecker-ci/woodpecker/pull/6424)]
 - fix: add connection timeout and graceful shutdown to agent RPC client [[#6414](https://github.com/woodpecker-ci/woodpecker/pull/6414)]
 - Fix Windows container exit code handling and error checks [[#6411](https://github.com/woodpecker-ci/woodpecker/pull/6411)]
 - Remove usage of deprecated /user/permissions/repositories [[#6401](https://github.com/woodpecker-ci/woodpecker/pull/6401)]
