@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-11
+## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -59,6 +59,10 @@
 - chore(deps): update web npm deps non-major [[#6377](https://github.com/woodpecker-ci/woodpecker/pull/6377)]
 - fix(deps): update module github.com/lib/pq to v1.12.2 [[#6371](https://github.com/woodpecker-ci/woodpecker/pull/6371)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.13.0 [[#6366](https://github.com/woodpecker-ci/woodpecker/pull/6366)]
+
+### Misc
+
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.17.0 [[#6426](https://github.com/woodpecker-ci/woodpecker/pull/6426)]
 
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
 
