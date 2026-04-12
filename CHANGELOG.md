@@ -42,6 +42,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency dotenv to v17.4.2 [[#6428](https://github.com/woodpecker-ci/woodpecker/pull/6428)]
 - Update dependency simple-icons to v16.16.0 [[#6427](https://github.com/woodpecker-ci/woodpecker/pull/6427)]
 - Update web npm deps non-major [[#6423](https://github.com/woodpecker-ci/woodpecker/pull/6423)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.8.2 [[#6421](https://github.com/woodpecker-ci/woodpecker/pull/6421)]
