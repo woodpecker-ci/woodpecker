@@ -86,7 +86,7 @@ var validDockerImageString = regexp.MustCompile(
 		`(:\d+)?` + // optional port
 		`/)?` + // optional hostname + port
 		`([\w\d\-_\.][\w\d\-_\.\/]*/)?` + // optional url prefix
-		`([\w\d\-_]+)` + // image name
+		`([\w\d\-_\.]+)` + // image name
 		`(:[\w\d\-_]+)?` + // optional image tag
 		`$`,
 )
