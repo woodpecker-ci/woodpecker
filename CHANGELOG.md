@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @M31ancholy, @lephuongbg, @packrat386, @utafrali
+@6543, @AhmadNajiKam, @M31ancholy, @lephuongbg, @packrat386, @qwerty287, @utafrali
 
 ### 🔒 Security
 
@@ -20,6 +20,7 @@
 
 ### 🐛 Bug Fixes
 
+- Support dots in image names [[#6431](https://github.com/woodpecker-ci/woodpecker/pull/6431)]
 - Fix erroneous linter error for plugin privileges [[#6424](https://github.com/woodpecker-ci/woodpecker/pull/6424)]
 - fix: add connection timeout and graceful shutdown to agent RPC client [[#6414](https://github.com/woodpecker-ci/woodpecker/pull/6414)]
 - Fix Windows container exit code handling and error checks [[#6411](https://github.com/woodpecker-ci/woodpecker/pull/6411)]
@@ -34,7 +35,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#6430](https://github.com/woodpecker-ci/woodpecker/pull/6430)]
 - Update dependency marked to v18 [[#6425](https://github.com/woodpecker-ci/woodpecker/pull/6425)]
 - Update docs npm deps non-major [[#6422](https://github.com/woodpecker-ci/woodpecker/pull/6422)]
 - chore(deps): update dependency marked to v17.0.6 [[#6386](https://github.com/woodpecker-ci/woodpecker/pull/6386)]
@@ -43,6 +43,7 @@
 
 ### 📦️ Dependency
 
+- Lock file maintenance [[#6430](https://github.com/woodpecker-ci/woodpecker/pull/6430)]
 - Update dependency dotenv to v17.4.2 [[#6428](https://github.com/woodpecker-ci/woodpecker/pull/6428)]
 - Update dependency simple-icons to v16.16.0 [[#6427](https://github.com/woodpecker-ci/woodpecker/pull/6427)]
 - Update web npm deps non-major [[#6423](https://github.com/woodpecker-ci/woodpecker/pull/6423)]
