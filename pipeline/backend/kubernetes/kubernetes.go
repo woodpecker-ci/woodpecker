@@ -75,7 +75,8 @@ type config struct {
 	PodAffinity                 *kube_core_v1.Affinity
 	PodAffinityAllowFromStep    bool
 	ImagePullSecretNames        []string
-	SecurityContext             SecurityContextConfig
+	DefaultSecurityContext      SecurityContext
+	EnforcedSecurityContext     SecurityContext
 	NativeSecretsAllowFromStep  bool
 	PriorityClassName           string
 }
@@ -85,11 +86,6 @@ func (c *config) GetNamespace(orgID int64) string {
 		return strings.ToLower(fmt.Sprintf("%s-%s", c.Namespace, strconv.FormatInt(orgID, 10)))
 	}
 	return c.Namespace
-}
-
-type SecurityContextConfig struct {
-	RunAsNonRoot bool
-	FSGroup      *int64
 }
 
 func newDefaultDeleteOptions() kube_meta_v1.DeleteOptions {
@@ -120,10 +116,10 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
 				PodAffinityAllowFromStep:    c.Bool("backend-k8s-pod-affinity-allow-from-step"),
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
-				SecurityContext: SecurityContextConfig{
-					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
-					FSGroup:      newInt64(defaultFSGroup),
+				DefaultSecurityContext: SecurityContext{
+					FSGroup: newInt64(defaultFSGroup),
 				},
+				EnforcedSecurityContext:    SecurityContext{},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
@@ -156,6 +152,25 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					log.Error().Err(err).Msgf("could not unmarshal pod affinity '%s'", podAffinity)
 					return nil, err
 				}
+			}
+			if defaultSecCtx := c.String("backend-k8s-default-secctx"); defaultSecCtx != "" {
+				var sc SecurityContext
+				if err := yaml.Unmarshal([]byte(defaultSecCtx), &sc); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal default security context '%s'", defaultSecCtx)
+					return nil, err
+				}
+				config.DefaultSecurityContext = sc
+			}
+			if enforcedSecCtx := c.String("backend-k8s-enforced-secctx"); enforcedSecCtx != "" {
+				var sc SecurityContext
+				if err := yaml.Unmarshal([]byte(enforcedSecCtx), &sc); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal enforced security context '%s'", enforcedSecCtx)
+					return nil, err
+				}
+				config.EnforcedSecurityContext = sc
+			}
+			if c.Bool("backend-k8s-secctx-nonroot") {
+				config.EnforcedSecurityContext.RunAsNonRoot = newBool(true)
 			}
 
 			return &config, nil

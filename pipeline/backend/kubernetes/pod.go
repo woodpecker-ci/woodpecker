@@ -60,7 +60,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	container, err := podContainer(step, podName, goos, options, nsp)
+	container, err := podContainer(step, podName, goos, config, options, nsp)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +190,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		Affinity:           affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
-		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
+		SecurityContext:    podSecurityContext(options.SecurityContext, config, step.Privileged),
 	}
 
 	// If there are tolerations and they are allowed
@@ -231,14 +231,14 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (kube_core_v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, config *config, options BackendOptions, nsp nativeSecretsProcessor) (kube_core_v1.Container, error) {
 	var err error
 	container := kube_core_v1.Container{
 		Name:            podName,
 		Image:           step.Image,
 		WorkingDir:      step.WorkingDir,
 		Ports:           containerPorts(step.Ports),
-		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
+		SecurityContext: containerSecurityContext(options.SecurityContext, config, step.Privileged),
 	}
 
 	if step.Pull {
@@ -492,70 +492,84 @@ func affinity(stepAffinity, agentAffinity *kube_core_v1.Affinity, allowFromStep 
 	return nil
 }
 
-func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *kube_core_v1.PodSecurityContext {
-	var (
-		nonRoot             *bool
-		user                *int64
-		group               *int64
-		fsGroup             *int64
-		fsGroupChangePolicy *kube_core_v1.PodFSGroupChangePolicy
-		seccomp             *kube_core_v1.SeccompProfile
-		apparmor            *kube_core_v1.AppArmorProfile
-	)
+func mergePodSecurityContext(target *kube_core_v1.PodSecurityContext, mergeFrom SecurityContext) {
+	if mergeFrom.RunAsNonRoot != nil {
+		target.RunAsNonRoot = mergeFrom.RunAsNonRoot
+	}
+	if mergeFrom.RunAsUser != nil {
+		target.RunAsUser = mergeFrom.RunAsUser
+	}
+	if mergeFrom.RunAsGroup != nil {
+		target.RunAsGroup = mergeFrom.RunAsGroup
+	}
+	if mergeFrom.FSGroup != nil {
+		target.FSGroup = mergeFrom.FSGroup
+	}
+	if mergeFrom.FsGroupChangePolicy != nil {
+		target.FSGroupChangePolicy = mergeFrom.FsGroupChangePolicy
+	}
+	if mergeFrom.SeccompProfile != nil {
+		target.SeccompProfile = seccompProfile(mergeFrom.SeccompProfile)
+	}
+	if mergeFrom.ApparmorProfile != nil {
+		target.AppArmorProfile = apparmorProfile(mergeFrom.ApparmorProfile)
+	}
+}
 
-	if secCtxConf.RunAsNonRoot {
-		nonRoot = newBool(true)
-	}
-	if secCtxConf.FSGroup != nil {
-		fsGroup = secCtxConf.FSGroup
-	}
+func podSecurityContext(sc *SecurityContext, config *config, stepPrivileged bool) *kube_core_v1.PodSecurityContext {
+	podsc := &kube_core_v1.PodSecurityContext{}
+
+	mergePodSecurityContext(podsc, config.DefaultSecurityContext)
 
 	if sc != nil {
 		// only allow to set user if its not root or step is privileged
 		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || stepPrivileged) {
-			user = sc.RunAsUser
+			podsc.RunAsUser = sc.RunAsUser
 		}
 
 		// only allow to set group if its not root or step is privileged
 		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || stepPrivileged) {
-			group = sc.RunAsGroup
+			podsc.RunAsGroup = sc.RunAsGroup
 		}
 
 		// only allow to set fsGroup if its not root or step is privileged
 		if sc.FSGroup != nil && (*sc.FSGroup != 0 || stepPrivileged) {
-			fsGroup = sc.FSGroup
+			podsc.FSGroup = sc.FSGroup
 		}
 
 		// if unset, set fsGroup to 1000 by default to support non-root images
 		if sc.FSGroup != nil {
-			fsGroup = sc.FSGroup
+			podsc.FSGroup = sc.FSGroup
 		}
 
-		// only allow to set nonRoot if it's not set globally already
-		if nonRoot == nil && sc.RunAsNonRoot != nil {
-			nonRoot = sc.RunAsNonRoot
+		if sc.RunAsNonRoot != nil {
+			podsc.RunAsNonRoot = sc.RunAsNonRoot
 		}
 
-		seccomp = seccompProfile(sc.SeccompProfile)
-		apparmor = apparmorProfile(sc.ApparmorProfile)
-		fsGroupChangePolicy = sc.FsGroupChangePolicy
+		podsc.SeccompProfile = seccompProfile(sc.SeccompProfile)
+		podsc.AppArmorProfile = apparmorProfile(sc.ApparmorProfile)
+		podsc.FSGroupChangePolicy = sc.FsGroupChangePolicy
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil && apparmor == nil {
+	mergePodSecurityContext(podsc, config.EnforcedSecurityContext)
+
+	// prefer nil over default values in kubernetes
+	if podsc.RunAsNonRoot != nil && !*podsc.RunAsNonRoot {
+		podsc.RunAsNonRoot = nil
+	}
+
+	if podsc.RunAsNonRoot == nil &&
+		podsc.RunAsUser == nil &&
+		podsc.RunAsGroup == nil &&
+		podsc.FSGroup == nil &&
+		podsc.FSGroupChangePolicy == nil &&
+		podsc.SeccompProfile == nil &&
+		podsc.AppArmorProfile == nil {
 		return nil
 	}
 
-	securityContext := &kube_core_v1.PodSecurityContext{
-		RunAsNonRoot:        nonRoot,
-		RunAsUser:           user,
-		RunAsGroup:          group,
-		FSGroup:             fsGroup,
-		FSGroupChangePolicy: fsGroupChangePolicy,
-		SeccompProfile:      seccomp,
-		AppArmorProfile:     apparmor,
-	}
-	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
-	return securityContext
+	log.Trace().Msgf("pod security context that will be used: %v", podsc)
+	return podsc
 }
 
 func seccompProfile(scp *SecProfile) *kube_core_v1.SeccompProfile {
@@ -590,33 +604,82 @@ func apparmorProfile(scp *SecProfile) *kube_core_v1.AppArmorProfile {
 	return apparmorProfile
 }
 
-func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *kube_core_v1.SecurityContext {
-	if !stepPrivileged {
+func containerCapabilities(capabilities *Capabilities) *kube_core_v1.Capabilities {
+	if capabilities == nil || len(capabilities.Drop) == 0 {
 		return nil
 	}
 
-	//nolint:staticcheck
-	privileged := false
+	drop := make([]kube_core_v1.Capability, len(capabilities.Drop))
 
-	// if security context privileged is set explicitly
-	if sc != nil && sc.Privileged != nil && *sc.Privileged {
-		privileged = true
+	for i, c := range capabilities.Drop {
+		drop[i] = kube_core_v1.Capability(c)
 	}
 
-	// if security context privileged is not set explicitly, but step is privileged
-	if (sc == nil || sc.Privileged == nil) && stepPrivileged {
-		privileged = true
+	return &kube_core_v1.Capabilities{
+		Drop: drop,
+	}
+}
+
+func containerSecurityContext(sc *SecurityContext, config *config, stepPrivileged bool) *kube_core_v1.SecurityContext {
+	var (
+		privileged               *bool
+		allowPrivilegeEscalation *bool
+		capabilities             *kube_core_v1.Capabilities
+	)
+
+	if config.DefaultSecurityContext.AllowPrivilegeEscalation != nil {
+		allowPrivilegeEscalation = config.DefaultSecurityContext.AllowPrivilegeEscalation
+	}
+	if config.DefaultSecurityContext.Capabilities != nil {
+		capabilities = containerCapabilities(config.DefaultSecurityContext.Capabilities)
 	}
 
-	if privileged {
-		securityContext := &kube_core_v1.SecurityContext{
-			Privileged: newBool(true),
+	// A container may only run privileged when the step itself is privileged.
+	// If the step is privileged, the container is privileged by default unless
+	// explicitly disabled via securityContext.privileged=false.
+	if stepPrivileged && (sc == nil || sc.Privileged == nil || *sc.Privileged) {
+		privileged = newBool(true)
+	}
+
+	if sc != nil {
+		// allowPrivilegeEscalation can only be set to false.
+		if sc.AllowPrivilegeEscalation != nil && !*sc.AllowPrivilegeEscalation {
+			allowPrivilegeEscalation = sc.AllowPrivilegeEscalation
 		}
-		log.Trace().Msgf("container security context that will be used: %v", securityContext)
-		return securityContext
+
+		capabilities = containerCapabilities(sc.Capabilities)
 	}
 
-	return nil
+	if config.EnforcedSecurityContext.AllowPrivilegeEscalation != nil {
+		allowPrivilegeEscalation = config.EnforcedSecurityContext.AllowPrivilegeEscalation
+	}
+	if config.EnforcedSecurityContext.Privileged != nil {
+		privileged = config.EnforcedSecurityContext.Privileged
+	}
+	if config.EnforcedSecurityContext.Capabilities != nil {
+		capabilities = containerCapabilities(config.EnforcedSecurityContext.Capabilities)
+	}
+
+	// prefer nil over default values in kubernetes
+	if allowPrivilegeEscalation != nil && *allowPrivilegeEscalation {
+		allowPrivilegeEscalation = nil
+	}
+	if privileged != nil && !*privileged {
+		privileged = nil
+	}
+
+	if privileged == nil && capabilities == nil && allowPrivilegeEscalation == nil {
+		return nil
+	}
+
+	securityContext := &kube_core_v1.SecurityContext{
+		Privileged:               privileged,
+		AllowPrivilegeEscalation: allowPrivilegeEscalation,
+		Capabilities:             capabilities,
+	}
+
+	log.Trace().Msgf("container security context that will be used: %v", securityContext)
+	return securityContext
 }
 
 func mapToEnvVars(m map[string]string) []kube_core_v1.EnvVar {

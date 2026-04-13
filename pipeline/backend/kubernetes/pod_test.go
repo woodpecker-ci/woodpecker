@@ -300,7 +300,11 @@ func TestFullPod(t *testing.T) {
 					],
 					"imagePullPolicy": "Always",
 					"securityContext": {
-						"privileged": true
+						"privileged": true,
+						"allowPrivilegeEscalation": false,
+						"capabilities": {
+							"drop": ["ALL"]
+						}
 					}
 				}
 			],
@@ -378,12 +382,16 @@ func TestFullPod(t *testing.T) {
 	}
 	fsGroupChangePolicy := kube_core_v1.PodFSGroupChangePolicy("OnRootMismatch")
 	secCtx := SecurityContext{
-		Privileged:          newBool(true),
-		RunAsNonRoot:        newBool(true),
-		RunAsUser:           newInt64(101),
-		RunAsGroup:          newInt64(101),
-		FSGroup:             newInt64(101),
-		FsGroupChangePolicy: &fsGroupChangePolicy,
+		Privileged:               newBool(true),
+		RunAsNonRoot:             newBool(true),
+		RunAsUser:                newInt64(101),
+		RunAsGroup:               newInt64(101),
+		FSGroup:                  newInt64(101),
+		FsGroupChangePolicy:      &fsGroupChangePolicy,
+		AllowPrivilegeEscalation: newBool(false),
+		Capabilities: &Capabilities{
+			Drop: []string{"ALL"},
+		},
 		SeccompProfile: &SecProfile{
 			Type:             "Localhost",
 			LocalhostProfile: "profiles/audit.json",
@@ -419,7 +427,7 @@ func TestFullPod(t *testing.T) {
 		PodAnnotationsAllowFromStep: true,
 		PodTolerationsAllowFromStep: true,
 		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
-		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
+		DefaultSecurityContext:      SecurityContext{RunAsNonRoot: newBool(false)},
 	},
 		"wp-01he8bebctabr3kgk0qj36d2me-0",
 		"linux/amd64",
@@ -446,15 +454,23 @@ func TestFullPod(t *testing.T) {
 }
 
 func TestPodPrivilege(t *testing.T) {
-	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*kube_core_v1.Pod, error) {
+	createTestPod := func(stepPrivileged, globalRunAsNonRoot bool, secCtx SecurityContext) (*kube_core_v1.Pod, error) {
+		defaultSecurityContext := SecurityContext{}
+		enforcedSecurityContext := SecurityContext{}
+		if globalRunAsNonRoot {
+			enforcedSecurityContext.RunAsNonRoot = newBool(globalRunAsNonRoot)
+		} else {
+			defaultSecurityContext.RunAsNonRoot = newBool(globalRunAsNonRoot)
+		}
 		return mkPod(&types.Step{
 			Name:       "go-test",
 			Image:      "golang:1.16",
 			UUID:       "01he8bebctabr3kgk0qj36d2me-0",
 			Privileged: stepPrivileged,
 		}, &config{
-			Namespace:       "woodpecker",
-			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
+			Namespace:               "woodpecker",
+			EnforcedSecurityContext: enforcedSecurityContext,
+			DefaultSecurityContext:  defaultSecurityContext,
 		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 			SecurityContext: &secCtx,
 		}, "11301")
@@ -526,6 +542,201 @@ func TestPodPrivilege(t *testing.T) {
 	pod, err = createTestPod(false, true, secCtx)
 	assert.NoError(t, err)
 	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+
+	// non-privileged step with allowPrivilegeEscalation=false: applied
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(false),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// non-privileged step with allowPrivilegeEscalation=true: ignored
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(true),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// privileged step with allowPrivilegeEscalation=true: ignored
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(true),
+	}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+
+	// non-privileged step with capabilities drop: applied
+	secCtx = SecurityContext{
+		Capabilities: &Capabilities{Drop: []string{"ALL"}},
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Equal(t, []kube_core_v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// non-privileged step with drop capabilities and allowPrivilegeEscalation=false: both applied
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(false),
+		Capabilities:             &Capabilities{Drop: []string{"ALL"}},
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, []kube_core_v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+}
+
+func TestDefaultSecurityContext(t *testing.T) {
+	step := &types.Step{
+		Name:       "test",
+		Image:      "alpine",
+		UUID:       "01he8bebctabr3kgk0qj36d2me-0",
+		Privileged: true,
+	}
+
+	// default security context is applied when step has no security context
+	fsGroupChangePolicy := kube_core_v1.FSGroupChangeOnRootMismatch
+	pod, err := mkPod(step, &config{
+		Namespace: "woodpecker",
+		DefaultSecurityContext: SecurityContext{
+			RunAsNonRoot:             newBool(true),
+			RunAsUser:                newInt64(1000),
+			RunAsGroup:               newInt64(2000),
+			FSGroup:                  newInt64(2000),
+			FsGroupChangePolicy:      &fsGroupChangePolicy,
+			SeccompProfile:           &SecProfile{Type: "RuntimeDefault"},
+			Capabilities:             &Capabilities{Drop: []string{"ALL"}},
+			AllowPrivilegeEscalation: newBool(false),
+		},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+	assert.Equal(t, int64(1000), *pod.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.RunAsGroup)
+	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.FSGroup)
+	assert.Equal(t, kube_core_v1.FSGroupChangeOnRootMismatch, *pod.Spec.SecurityContext.FSGroupChangePolicy)
+	assert.Equal(t, kube_core_v1.SeccompProfileTypeRuntimeDefault, pod.Spec.SecurityContext.SeccompProfile.Type)
+	assert.Equal(t, []kube_core_v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
+	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+
+	// step security context overrides individual fields from the default
+	pod, err = mkPod(step, &config{
+		Namespace: "woodpecker",
+		DefaultSecurityContext: SecurityContext{
+			RunAsUser:  newInt64(1000),
+			RunAsGroup: newInt64(2000),
+			FSGroup:    newInt64(2000),
+		},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsGroup: newInt64(999),
+			FSGroup:    newInt64(999),
+		},
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(999), *pod.Spec.SecurityContext.RunAsGroup)
+	assert.Equal(t, int64(999), *pod.Spec.SecurityContext.FSGroup)
+	// RunAsUser from default is preserved since the step does not override it
+	assert.Equal(t, int64(1000), *pod.Spec.SecurityContext.RunAsUser)
+
+	// step can override default runAsNonRoot
+	pod, err = mkPod(step, &config{
+		Namespace: "woodpecker",
+		DefaultSecurityContext: SecurityContext{
+			RunAsNonRoot: newBool(true),
+		},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(false),
+		},
+	}, taskUUID)
+	assert.NoError(t, err)
+	// false is normalized to nil; with no other fields set, the security context is absent entirely
+	assert.Nil(t, pod.Spec.SecurityContext)
+}
+
+func TestEnforcedSecurityContext(t *testing.T) {
+	step := &types.Step{
+		Name:       "test",
+		Image:      "alpine",
+		UUID:       "01he8bebctabr3kgk0qj36d2me-0",
+		Privileged: true,
+	}
+
+	// enforced security context overrides step security context
+	pod, err := mkPod(step, &config{
+		Namespace: "woodpecker",
+		EnforcedSecurityContext: SecurityContext{
+			RunAsNonRoot:             newBool(true),
+			RunAsUser:                newInt64(1000),
+			RunAsGroup:               newInt64(2000),
+			FSGroup:                  newInt64(2000),
+			SeccompProfile:           &SecProfile{Type: "RuntimeDefault"},
+			ApparmorProfile:          &SecProfile{Type: "RuntimeDefault"},
+			Capabilities:             &Capabilities{Drop: []string{"ALL"}},
+			AllowPrivilegeEscalation: newBool(false),
+			Privileged:               newBool(false),
+		},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot:             newBool(false),
+			RunAsUser:                newInt64(0),
+			RunAsGroup:               newInt64(0),
+			FSGroup:                  newInt64(0),
+			SeccompProfile:           nil,
+			ApparmorProfile:          &SecProfile{Type: "Unconfined"},
+			Capabilities:             &Capabilities{Drop: []string{""}},
+			AllowPrivilegeEscalation: newBool(true),
+			Privileged:               newBool(true),
+		},
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+	assert.Equal(t, int64(1000), *pod.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.RunAsGroup)
+	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.FSGroup)
+	assert.Equal(t, kube_core_v1.SeccompProfileTypeRuntimeDefault, pod.Spec.SecurityContext.SeccompProfile.Type)
+	assert.Equal(t, kube_core_v1.AppArmorProfileTypeRuntimeDefault, pod.Spec.SecurityContext.AppArmorProfile.Type)
+	assert.Equal(t, []kube_core_v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
+	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// enforced security context is applied when no step security context is set
+	pod, err = mkPod(step, &config{
+		Namespace: "woodpecker",
+		EnforcedSecurityContext: SecurityContext{
+			RunAsUser: newInt64(1000),
+			FSGroup:   newInt64(2000),
+		},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(1000), *pod.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.FSGroup)
+
+	// enforced security context overrides default security context
+	pod, err = mkPod(step, &config{
+		Namespace: "woodpecker",
+		DefaultSecurityContext: SecurityContext{
+			RunAsUser:  newInt64(1000),
+			RunAsGroup: newInt64(2000),
+		},
+		EnforcedSecurityContext: SecurityContext{
+			RunAsUser: newInt64(1001),
+		},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(1001), *pod.Spec.SecurityContext.RunAsUser)
+	// RunAsGroup from default is preserved since the enforced security context does not override it
+	assert.Equal(t, int64(2000), *pod.Spec.SecurityContext.RunAsGroup)
 }
 
 func TestScratchPod(t *testing.T) {

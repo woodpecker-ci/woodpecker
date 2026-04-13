@@ -359,6 +359,26 @@ backend_options:
 The feature requires Kubernetes v1.30 or above.
 :::
 
+You can set `allowPrivilegeEscalation` to `false` to prevent a container from gaining more privileges than its parent process.
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      allowPrivilegeEscalation: false
+```
+
+You can also drop [Linux capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html) from a container. Adding capabilities is not allowed.
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      capabilities:
+        drop:
+          - ALL
+```
+
 ### Annotations and labels
 
 You can specify arbitrary [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) and [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) to be set on the Pod definition for a given workflow step using the following configuration:
@@ -427,6 +447,82 @@ steps:
 ```
 
 If ports are defined on a service, then woodpecker will create a normal service for the pod, which use hosts override using the services cluster IP.
+
+## Running in an unprivileged namespace
+
+Woodpecker by default requires the namespace where workflow pods run to be privileged.
+
+However, it's possible to configure the agent in such a way that allows workflow pods to run in an unprivileged namespace.
+This comes with some drawbacks and it's the reason why its disabled by default.
+
+Major drawbacks are:
+
+- You won't be able to use commands like `apk add` or `apt install` in most images.
+  The easiest way to workaround this is by building your own image with the tools you require already prebundled in it.
+  This also have the advantage that workflows will run faster, since it won't need to fetch packages during each run.
+- If you need to build Docker/OCI images, you'll need to use a rootless builder like Buildah or BuildKit in rootless mode.
+- The default clone step currently doesn't work in unprivileged namespaces, however its possible to define your own clone step that can run unprivileged. More details below.
+
+Please note, this guide assumes you already have a working woodpecker instance running in your kubernetes cluster in a privileged namespace.
+
+### Setting security context environment variables
+
+Depending on how you installed the woodpecker server and agent, this step may be different.
+To make this guide as generic as possible, we will only list the environment variables that need to be updated.
+
+On your woodpecker-agent Deployment/StatefulSet, set this environment variables:
+
+```sh
+WOODPECKER_BACKEND_K8S_DEFAULT_SECCTX='{"runAsUser":1000,"runAsGroup":1000,"fsGroup":1000,"fsGroupChangePolicy": "OnRootMismatch"}'
+WOODPECKER_BACKEND_K8S_ENFORCED_SECCTX='{"privileged":false,"runAsNonRoot":true,"allowPrivilegeEscalation":false,"seccompProfile": {"type": "RuntimeDefault"}, "capabilities": {"drop": ["ALL"]}}'
+```
+
+Wait until the update rolls out.
+
+### Setting up the namespace
+
+Make the namespace where woodpecker worker pods run restricted, if you haven't done it yet:
+
+```sh
+kubectl label namespace woodpecker \
+  pod-security.kubernetes.io/enforce=restricted \
+  pod-security.kubernetes.io/audit=restricted \
+  pod-security.kubernetes.io/warn=restricted \
+  --overwrite
+```
+
+Please note here we use the namespace name `woodpecker`, but you should replace it with the actual namespace name you're using for woodpecker worker pods. If you have set `WOODPECKER_BACKEND_K8S_NAMESPACE`, then this is the namespace you should update. If you haven't, worker pods will run by default in the same namespace as the `woodpecker-agent`.
+
+### Unprivileged clone step
+
+Currently, the default git clone step depends on the kubernetes container runtime to create its working directory.
+Most container runtimes will create it owned by root by default, which will make the plugin fail with `Permission denied` errors if we dont precreate it, since the container will run unprivileged.
+
+Also, the default git clone plugin will use /app as its home, which is owned by root and writable only by root in the image, so we'll need to change that too.
+
+This is how our workflow should look like:
+
+```yaml
+# skip the default clone step since we're replacing it with our own.
+skip_clone: true
+
+steps:
+  # precreate the `plugin-git` working directory, so it won't fail with `Permission denied` errors later.
+  - name: prepare
+    image: alpine
+    commands:
+      - mkdir -p $CI_WORKSPACE
+
+  - name: clone
+    image: quay.io/woodpeckerci/plugin-git
+    settings:
+      # set home to /tmp, which is writable by everybody in the `plugin-git` image.
+      home: /tmp
+```
+
+### Final notes about unprivileged namespaces
+
+Please note this setup is experimental, and you may encounter permission issues with other plugins.
 
 ## Environment variables
 
@@ -548,6 +644,30 @@ Additional node selector to apply to worker pods. Must be a YAML object, e.g. `{
 - Default: `false`
 
 Determines if containers must be required to run as non-root users.
+
+---
+
+### BACKEND_K8S_DEFAULT_SECCTX <!-- cspell:ignore SECCTX NONROOT -->
+
+- Name: `WOODPECKER_BACKEND_K8S_DEFAULT_SECCTX`
+- Default: none
+
+The default security context that will be applied to all step pods.
+
+Must be a YAML object, e.g. `{"runAsUser":1000,"runAsGroup":1000,"fsGroup":1000,"fsGroupChangePolicy": "OnRootMismatch"}`
+
+The security context defined here can be overriden by workflow steps. If you want to define a security context that cannot be overriden, check the next option.
+
+---
+
+### BACKEND_K8S_ENFORCED_SECCTX <!-- cspell:ignore SECCTX NONROOT -->
+
+- Name: `WOODPECKER_BACKEND_K8S_ENFORCED_SECCTX`
+- Default: none
+
+The security context that will be applied to all step pods. Cannot be overriden by workflow steps.
+
+Must be a YAML object, e.g. `{"privileged":false,"runAsNonRoot":true,"allowPrivilegeEscalation":false,"seccompProfile": {"type": "RuntimeDefault"}, "capabilities": {"drop": ["ALL"]}}`
 
 ---
 
