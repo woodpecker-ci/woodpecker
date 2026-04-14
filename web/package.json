@@ -25,7 +25,7 @@
     "dompurify": "^3.3.2",
     "fuse.js": "^7.1.0",
     "js-base64": "^3.7.7",
-    "marked": "^17.0.0",
+    "marked": "^18.0.0",
     "node-emoji": "^2.2.0",
     "pinia": "^3.0.3",
     "prismjs": "^1.30.0",
