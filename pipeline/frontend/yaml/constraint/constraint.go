@@ -104,12 +104,12 @@ func (when *When) IncludesStatusSuccess(metadata metadata.Metadata, global bool,
 	}
 	for _, c := range when.Constraints {
 		if matches, err := c.Match(metadata, global, env); err == nil && matches {
-			if len(c.Status) > 0 && !slices.Contains(c.Status, statusSuccess) {
-				return false
+			if len(c.Status) == 0 || slices.Contains(c.Status, statusSuccess) {
+				return true
 			}
 		}
 	}
-	return true
+	return false
 }
 
 // False if (any) non local.
