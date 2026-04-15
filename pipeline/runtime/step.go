@@ -253,6 +253,10 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
 	}
 
+	// The tracer should just trace changes, but it currently also updates step env vars used in various ways:
+	// https://github.com/woodpecker-ci/woodpecker/blob/7efe8bf510cd4587b1492ee260b56a0f5e24bb84/agent/tracer.go#L79-L86 .
+	r.tracerLock.Lock()
+	defer r.tracerLock.Unlock()
 	if traceErr := r.tracer.Trace(s); traceErr != nil {
 		return traceErr
 	}
