@@ -56,8 +56,8 @@ func TestStepToPodName(t *testing.T) {
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService, Ports: []types.Port{{Number: 5432}}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
-	// Detached service
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true, Ports: []types.Port{{Number: 5432}}})
+	// Service
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true, Type: types.StepTypeService, Ports: []types.Port{{Number: 5432}}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
 	// Detached long running container
@@ -82,11 +82,12 @@ func TestPodMeta(t *testing.T) {
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", meta.Labels[ServiceLabel])
 	assert.EqualValues(t, taskUUID, meta.Labels[TaskUUIDLabel])
 
-	// Detached service
+	// Service
 	meta, err = podMeta(&types.Step{
 		Name:        "postgres",
 		UUID:        "01he8bebctabr3kg",
 		Detached:    true,
+		Type:        types.StepTypeService,
 		Image:       "postgres:16",
 		WorkingDir:  "/woodpecker/src",
 		Environment: map[string]string{"CI": "woodpecker"},

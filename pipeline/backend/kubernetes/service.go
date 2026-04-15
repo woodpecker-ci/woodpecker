@@ -60,7 +60,7 @@ func serviceName(step *types.Step) (string, error) {
 }
 
 func isService(step *types.Step) bool {
-	return step.Type == types.StepTypeService || (step.Detached && dnsPattern.FindStringIndex(step.Name) != nil)
+	return step.Type == types.StepTypeService
 }
 
 func subdomain(taskUUID string) (string, error) {
