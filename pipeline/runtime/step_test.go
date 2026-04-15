@@ -553,7 +553,7 @@ func TestRunBlockingStep(t *testing.T) {
 		t.Parallel()
 		r := newDummyRuntime(t, newTestTracer(t))
 		step := dummyStep("s1")
-		step.Failure = metadata.FailureIgnore
+		step.Failure = string(metadata.FailureIgnore)
 		step.Environment[dummy.EnvKeyStepExitCode] = "1"
 
 		err := r.runBlockingStep(t.Context(), step)

@@ -186,7 +186,7 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types
 	}
 
 	err = r.traceStep(processState, err, step)
-	if err != nil && step.Failure == metadata.FailureIgnore {
+	if err != nil && metadata.Failure(step.Failure) == metadata.FailureIgnore {
 		return nil
 	}
 	return err

@@ -172,13 +172,13 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 	}
 
 	match = match && c.Platform.Match(m.Sys.Platform) &&
-		(len(c.Event) == 0 || slices.Contains(c.Event, m.Curr.Event)) &&
+		(len(c.Event) == 0 || slices.Contains(c.Event, string(m.Curr.Event))) &&
 		c.Repo.Match(path.Join(m.Repo.Owner, m.Repo.Name)) &&
 		c.Ref.Match(m.Curr.Commit.Ref) &&
 		c.Instance.Match(m.Sys.Host)
 
 	// changed files filter apply only for pull-request and push events
-	if metadata.EventIsPull(m.Curr.Event) || m.Curr.Event == metadata.EventPush {
+	if m.Curr.Event.IsPull() || m.Curr.Event == metadata.EventPush {
 		match = match && c.Path.Match(m.Curr.Commit.ChangedFiles, m.Curr.Commit.Message)
 	}
 

@@ -112,7 +112,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		Started:     pipeline.Started,
 		Finished:    pipeline.Finished,
 		Status:      string(pipeline.Status),
-		Event:       string(pipeline.Event),
+		Event:       metadata.Event(pipeline.Event),
 		EventReason: pipeline.EventReason,
 		ForgeURL:    pipeline.ForgeURL,
 		DeployTo:    pipeline.DeployTo,
