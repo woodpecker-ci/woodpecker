@@ -107,8 +107,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	})
 
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Pubsub = memory.New()
-	server.Config.Services.Queue = memQueue
+	server.Config.Services.Scheduler = scheduler.NewScheduler(memQueue, memory.New())
 	server.Config.Services.Membership = cache.NewMembershipService(memStore)
 	server.Config.Services.Manager = mgr
 	server.Config.Services.LogStore = memStore
@@ -183,7 +182,7 @@ func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 	)
 
 	proto.RegisterWoodpeckerServer(grpcServer, server_rpc.NewTestWoodpeckerServer(
-		scheduler.NewScheduler(server.Config.Services.Queue, server.Config.Services.Pubsub),
+		server.Config.Services.Scheduler,
 		server.Config.Services.Logs,
 		s,
 		prometheus.NewRegistry(),
