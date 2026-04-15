@@ -153,7 +153,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 
 	failure := container.Failure
 	if container.Failure == "" {
-		failure = metadata.FailureFail
+		failure = string(metadata.FailureFail)
 	}
 
 	return &backend_types.Step{

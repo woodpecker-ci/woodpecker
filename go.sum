@@ -620,8 +620,8 @@ github.com/zalando/go-keyring v0.2.8 h1:6sD/Ucpl7jNq10rM2pgqTs0sZ9V3qMrqfIIy5YPc
 github.com/zalando/go-keyring v0.2.8/go.mod h1:tsMo+VpRq5NGyKfxoBVjCuMrG47yj8cmakZDO5QGii0=
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
-gitlab.com/gitlab-org/api/client-go/v2 v2.16.0 h1:uRuXOlrfI4/OlSB8TmP7sLTgLACYOfYWz0ILun8YKFo=
-gitlab.com/gitlab-org/api/client-go/v2 v2.16.0/go.mod h1:nwCC627kJqfhrjsK9+yM2hRGmXFbtR5hrIhsav0+EGk=
+gitlab.com/gitlab-org/api/client-go/v2 v2.18.0 h1:TrmwF2mE7wL24XbWlrrjkOk5Ri6wfuXwhJMolRLcDz4=
+gitlab.com/gitlab-org/api/client-go/v2 v2.18.0/go.mod h1:z5jZC+dtZpCiZzyM+ke0+y3GYlH24nRR0Av28Eb1LUg=
 go.mongodb.org/mongo-driver v1.17.6 h1:87JUG1wZfWsr6rIz3ZmpH90rL5tea7O3IHuSwHUpsss=
 go.mongodb.org/mongo-driver v1.17.6/go.mod h1:Hy04i7O2kC4RS06ZrhPRqj/u4DTYkFDAAccj+rVKqgQ=
 go.mongodb.org/mongo-driver/v2 v2.5.0 h1:yXUhImUjjAInNcpTcAlPHiT7bIXhshCTL3jVBkF3xaE=
