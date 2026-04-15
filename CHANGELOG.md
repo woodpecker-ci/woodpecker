@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-13
+## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
