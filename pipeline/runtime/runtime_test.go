@@ -62,7 +62,7 @@ func withExitCode(code int) func(*backend_types.Step) {
 }
 
 func withIgnoreFailure() func(*backend_types.Step) {
-	return func(s *backend_types.Step) { s.Failure = metadata.FailureIgnore }
+	return func(s *backend_types.Step) { s.Failure = string(metadata.FailureIgnore) }
 }
 
 func withOnFailure() func(*backend_types.Step) {
