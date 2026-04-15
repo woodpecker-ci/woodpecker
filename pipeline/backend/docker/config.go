@@ -17,6 +17,7 @@ package docker
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -27,6 +28,7 @@ type config struct {
 	network       string
 	volumes       []string
 	resourceLimit resourceLimit
+	stopTimeout   time.Duration
 }
 
 type resourceLimit struct {
@@ -50,6 +52,7 @@ func configFromCli(c *cli.Command) (config, error) {
 			CPUShares:    c.Int64("backend-docker-limit-cpu-shares"),
 			CPUSet:       c.String("backend-docker-limit-cpu-set"),
 		},
+		stopTimeout: c.Int64("backend-docker-stop-timeout"),
 	}
 
 	volumes := strings.Split(c.String("backend-docker-volumes"), ",")

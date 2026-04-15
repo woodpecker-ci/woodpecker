@@ -51,8 +51,6 @@ const (
 	maxRetryDuration      = 1 * time.Minute
 )
 
-var defaultDeleteOptions = newDefaultDeleteOptions()
-
 type kube struct {
 	client kubernetes.Interface
 	config *config
@@ -78,6 +76,7 @@ type config struct {
 	SecurityContext             SecurityContextConfig
 	NativeSecretsAllowFromStep  bool
 	PriorityClassName           string
+	StopTimeout                 int64
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -92,12 +91,11 @@ type SecurityContextConfig struct {
 	FSGroup      *int64
 }
 
-func newDefaultDeleteOptions() kube_meta_v1.DeleteOptions {
-	gracePeriodSeconds := int64(0) // immediately
+func (c *config) newDefaultDeleteOptions() kube_meta_v1.DeleteOptions {
 	propagationPolicy := kube_meta_v1.DeletePropagationBackground
 
 	return kube_meta_v1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriodSeconds,
+		GracePeriodSeconds: &c.StopTimeout,
 		PropagationPolicy:  &propagationPolicy,
 	}
 }
@@ -125,6 +123,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					FSGroup:      newInt64(defaultFSGroup),
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
+				StopTimeout:                c.Int64("backend-k8s-stop-timeout"),
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -450,20 +449,20 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	if needsRegistrySecret(step) {
-		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		err := stopRegistrySecret(ctx, e, step, e.config.newDefaultDeleteOptions())
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
 	if needsStepSecret(step) {
-		err := stopStepSecret(ctx, e, step, defaultDeleteOptions)
+		err := stopStepSecret(ctx, e, step, e.config.newDefaultDeleteOptions())
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	err := stopPod(ctx, e, step, defaultDeleteOptions)
+	err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -476,7 +475,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, defaultDeleteOptions)
+			err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
 			if err != nil {
 				return err
 			}
@@ -492,7 +491,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow volume")
-	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
+	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), e.config.newDefaultDeleteOptions())
 	if err != nil {
 		return err
 	}

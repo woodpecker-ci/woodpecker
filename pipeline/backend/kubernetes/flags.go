@@ -128,4 +128,10 @@ var Flags = []cli.Flag{
 		Usage:   "which kubernetes priority class to assign to created job pods",
 		Value:   "",
 	},
+	&cli.Int64Flag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_STOP_TIMEOUT"),
+		Name:    "backend-k8s-stop-timeout",
+		Usage:   "seconds woodpecker waits for graceful stopping pods till forcefully killing them",
+		Value:   180,
+	},
 }
