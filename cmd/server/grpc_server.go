@@ -49,9 +49,8 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 	)
 
 	woodpeckerServer := server_rpc.NewWoodpeckerServer(
-		server.Config.Services.Queue,
+		server.Config.Services.Scheduler,
 		server.Config.Services.Logs,
-		server.Config.Services.Pubsub,
 		_store,
 	)
 	proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)

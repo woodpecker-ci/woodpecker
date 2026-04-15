@@ -226,6 +226,8 @@ linters:
           alias: store_mocks
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks
           alias: config_service_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks
+          alias: log_mocks
 
         # kubernetes
         - pkg: k8s.io/api/core/v1

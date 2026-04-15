@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grpc
+package rpc
 
 import (
 	"context"
@@ -25,8 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
@@ -37,7 +36,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub pubsub.PubSub, store store.Store) proto.WoodpeckerServer {
+func NewWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, store store.Store) proto.WoodpeckerServer {
 	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
@@ -50,8 +49,7 @@ func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub pubsub.Pu
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
 		store:         store,
-		queue:         queue,
-		pubsub:        pubsub,
+		scheduler:     scheduler,
 		logger:        logger,
 		pipelineTime:  pipelineTime,
 		pipelineCount: pipelineCount,

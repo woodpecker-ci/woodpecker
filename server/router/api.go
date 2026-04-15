@@ -109,22 +109,22 @@ func apiRoutes(e *gin.RouterGroup) {
 
 					repo.GET("/pipelines", api.GetPipelines)
 					repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
-					repo.DELETE("/pipelines/:number", session.MustRepoAdmin(), api.DeletePipeline)
-					repo.GET("/pipelines/:number", api.GetPipeline)
-					repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
-					repo.GET("/pipelines/:number/metadata", session.MustPush, api.GetPipelineMetadata)
+					repo.DELETE("/pipelines/:pipeline_number", session.MustRepoAdmin(), api.DeletePipeline)
+					repo.GET("/pipelines/:pipeline_number", api.GetPipeline)
+					repo.GET("/pipelines/:pipeline_number/config", api.GetPipelineConfig)
+					repo.GET("/pipelines/:pipeline_number/metadata", session.MustPush, api.GetPipelineMetadata)
 
 					// requires push permissions
-					repo.POST("/pipelines/:number", session.MustPush, api.PostPipeline)
-					repo.POST("/pipelines/:number/cancel", session.MustPush, api.CancelPipeline)
-					repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
-					repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
+					repo.POST("/pipelines/:pipeline_number", session.MustPush, api.PostPipeline)
+					repo.POST("/pipelines/:pipeline_number/cancel", session.MustPush, api.CancelPipeline)
+					repo.POST("/pipelines/:pipeline_number/approve", session.MustPush, api.PostApproval)
+					repo.POST("/pipelines/:pipeline_number/decline", session.MustPush, api.PostDecline)
 
-					repo.GET("/logs/:number/:stepId", api.GetStepLogs)
-					repo.DELETE("/logs/:number/:stepId", session.MustPush, api.DeleteStepLogs)
+					repo.GET("/logs/:pipeline_number/:step_id", api.GetStepLogs)
+					repo.DELETE("/logs/:pipeline_number/:step_id", session.MustPush, api.DeleteStepLogs)
 
 					// requires push permissions
-					repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
+					repo.DELETE("/logs/:pipeline_number", session.MustPush, api.DeletePipelineLogs)
 
 					// requires push permissions
 					repo.GET("/secrets", session.MustPush, api.GetSecretList)
@@ -234,13 +234,13 @@ func apiRoutes(e *gin.RouterGroup) {
 		}
 
 		apiBase.GET("/forges", api.GetForges)
-		apiBase.GET("/forges/:forgeId", api.GetForge)
+		apiBase.GET("/forges/:forge_id", api.GetForge)
 		forgeBase := apiBase.Group("/forges")
 		{
 			forgeBase.Use(session.MustAdmin())
 			forgeBase.POST("", api.PostForge)
-			forgeBase.PATCH("/:forgeId", api.PatchForge)
-			forgeBase.DELETE("/:forgeId", api.DeleteForge)
+			forgeBase.PATCH("/:forge_id", api.PatchForge)
+			forgeBase.DELETE("/:forge_id", api.DeleteForge)
 		}
 
 		apiBase.GET("/signature/public-key", api.GetSignaturePublicKey)
@@ -249,7 +249,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 		stream := apiBase.Group("/stream")
 		{
-			stream.GET("/logs/:repo_id/:pipeline/:stepId",
+			stream.GET("/logs/:repo_id/:pipeline/:step_id",
 				session.SetRepo(),
 				session.SetPerm(),
 				session.MustPull,

@@ -33,6 +33,10 @@ import (
 func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w *metadata.Workflow) (*metadata.Metadata, error) {
 	m := &metadata.Metadata{}
 
+	if w != nil {
+		m.Workflow = *w
+	}
+
 	if c.IsSet("metadata-file") {
 		metadataFile, err := os.Open(c.String("metadata-file"))
 		if err != nil {
@@ -93,7 +97,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "pipeline-started", func(i int64) { m.Curr.Started = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-finished", func(i int64) { m.Curr.Finished = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-status", func(s string) { m.Curr.Status = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "pipeline-event", func(s string) { m.Curr.Event = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "pipeline-event", func(s string) { m.Curr.Event = metadata.Event(s) }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-url", func(s string) { m.Curr.ForgeURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-deploy-to", func(s string) { m.Curr.DeployTo = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-deploy-task", func(s string) { m.Curr.DeployTask = s }, c.String)
@@ -119,7 +123,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-started", func(i int64) { m.Prev.Started = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-finished", func(i int64) { m.Prev.Finished = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-status", func(s string) { m.Prev.Status = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "prev-pipeline-event", func(s string) { m.Prev.Event = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "prev-pipeline-event", func(s string) { m.Prev.Event = metadata.Event(s) }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-url", func(s string) { m.Prev.ForgeURL = s }, c.String)
 
 	// Previous Pipeline Commit
@@ -148,10 +152,6 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	// Forge
 	metadataFileAndOverrideOrDefault(c, "forge-type", func(s string) { m.Forge.Type = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "forge-url", func(s string) { m.Forge.URL = s }, c.String)
-
-	if w != nil {
-		m.Workflow = *w
-	}
 
 	return m, nil
 }

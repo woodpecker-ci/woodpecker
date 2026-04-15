@@ -1,5 +1,74 @@
 # Changelog
 
+## [3.14.0-rc.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0-rc.1) - 2026-04-15
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @AhmadNajiKam, @M31ancholy, @lephuongbg, @packrat386, @qwerty287, @utafrali
+
+### 🔒 Security
+
+- chore(deps): update dependency axios to v1.15.0 [security] [[#6417](https://github.com/woodpecker-ci/woodpecker/pull/6417)]
+- fix(deps): update go.opentelemetry.io/otel to v1.43.0 [[#6416](https://github.com/woodpecker-ci/woodpecker/pull/6416)]
+- WebUI: remove "lodash" dep [[#6369](https://github.com/woodpecker-ci/woodpecker/pull/6369)]
+- Sanitize agent introduced pipeline/workflow/step state changes and log streaming [[#6308](https://github.com/woodpecker-ci/woodpecker/pull/6308)]
+
+### 📈 Enhancement
+
+- Move skip pipeline by commit message into pipeline/frontend package [[#6437](https://github.com/woodpecker-ci/woodpecker/pull/6437)]
+- Init server/scheduler package and use it as proxy for queue&pubsub [[#6418](https://github.com/woodpecker-ci/woodpecker/pull/6418)]
+- refactor(server): unify api parameters to snake case [[#6404](https://github.com/woodpecker-ci/woodpecker/pull/6404)]
+
+### 🐛 Bug Fixes
+
+- Support dots in image names [[#6431](https://github.com/woodpecker-ci/woodpecker/pull/6431)]
+- Fix erroneous linter error for plugin privileges [[#6424](https://github.com/woodpecker-ci/woodpecker/pull/6424)]
+- fix: add connection timeout and graceful shutdown to agent RPC client [[#6414](https://github.com/woodpecker-ci/woodpecker/pull/6414)]
+- Fix Windows container exit code handling and error checks [[#6411](https://github.com/woodpecker-ci/woodpecker/pull/6411)]
+- Bitbucket: Remove usage of deprecated /user/permissions/repositories [[#6401](https://github.com/woodpecker-ci/woodpecker/pull/6401)]
+- Bitbucket: Fix parsing /user/workspaces response [[#6396](https://github.com/woodpecker-ci/woodpecker/pull/6396)]
+- Fix CLI exec with workflow matrix feature, where variables are not substituted. [[#6162](https://github.com/woodpecker-ci/woodpecker/pull/6162)]
+- Fix enable repo with same name and owner on second forge [[#6375](https://github.com/woodpecker-ci/woodpecker/pull/6375)]
+
+### 🧪 Tests
+
+- Dummy backend support cancel [[#6390](https://github.com/woodpecker-ci/woodpecker/pull/6390)]
+
+### 📚 Documentation
+
+- Update dependency marked to v18 [[#6425](https://github.com/woodpecker-ci/woodpecker/pull/6425)]
+- Update docs npm deps non-major [[#6422](https://github.com/woodpecker-ci/woodpecker/pull/6422)]
+- chore(deps): update dependency marked to v17.0.6 [[#6386](https://github.com/woodpecker-ci/woodpecker/pull/6386)]
+- chore(deps): update dependency fuse.js to v7.3.0 [[#6382](https://github.com/woodpecker-ci/woodpecker/pull/6382)]
+- chore(deps): update docs npm deps non-major [[#6376](https://github.com/woodpecker-ci/woodpecker/pull/6376)]
+
+### 📦️ Dependency
+
+- Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.1 [[#6440](https://github.com/woodpecker-ci/woodpecker/pull/6440)]
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.18.0 [[#6439](https://github.com/woodpecker-ci/woodpecker/pull/6439)]
+- Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.1 [[#6438](https://github.com/woodpecker-ci/woodpecker/pull/6438)]
+- Lock file maintenance [[#6430](https://github.com/woodpecker-ci/woodpecker/pull/6430)]
+- Update dependency dotenv to v17.4.2 [[#6428](https://github.com/woodpecker-ci/woodpecker/pull/6428)]
+- Update dependency simple-icons to v16.16.0 [[#6427](https://github.com/woodpecker-ci/woodpecker/pull/6427)]
+- Update web npm deps non-major [[#6423](https://github.com/woodpecker-ci/woodpecker/pull/6423)]
+- Update pre-commit hook rbubley/mirrors-prettier to v3.8.2 [[#6421](https://github.com/woodpecker-ci/woodpecker/pull/6421)]
+- Update dependency golang to v1.26.2 [[#6420](https://github.com/woodpecker-ci/woodpecker/pull/6420)]
+- fix(deps): update module github.com/docker/cli to v29.4.0+incompatible [[#6403](https://github.com/woodpecker-ci/woodpecker/pull/6403)]
+- fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.41 [[#6397](https://github.com/woodpecker-ci/woodpecker/pull/6397)]
+- chore(deps): lock file maintenance [[#6392](https://github.com/woodpecker-ci/woodpecker/pull/6392)]
+- chore(deps): update dependency dotenv to v17.4.1 [[#6389](https://github.com/woodpecker-ci/woodpecker/pull/6389)]
+- chore(deps): update dependency marked to v17.0.6 [[#6387](https://github.com/woodpecker-ci/woodpecker/pull/6387)]
+- chore(deps): update dependency simple-icons to v16.15.0 [[#6385](https://github.com/woodpecker-ci/woodpecker/pull/6385)]
+- fix(deps): update golang-packages [[#6384](https://github.com/woodpecker-ci/woodpecker/pull/6384)]
+- chore(deps): update dependency fuse.js to v7.3.0 [[#6383](https://github.com/woodpecker-ci/woodpecker/pull/6383)]
+- chore(deps): update dependency @antfu/eslint-config to v8 [[#6378](https://github.com/woodpecker-ci/woodpecker/pull/6378)]
+- chore(deps): update web npm deps non-major [[#6377](https://github.com/woodpecker-ci/woodpecker/pull/6377)]
+- fix(deps): update module github.com/lib/pq to v1.12.2 [[#6371](https://github.com/woodpecker-ci/woodpecker/pull/6371)]
+
+### Misc
+
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.17.0 [[#6426](https://github.com/woodpecker-ci/woodpecker/pull/6426)]
+
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
 
 ### ❤️ Thanks to all contributors! ❤️

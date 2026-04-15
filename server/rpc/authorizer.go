@@ -44,7 +44,7 @@
 //	resp, _ := authClient.Auth(ctx, &proto.AuthRequest{AgentToken: "secret", AgentId: -1})
 //	ctx = metadata.AppendToOutgoingContext(ctx, "token", resp.AccessToken)
 //	workflow, _ := woodpeckerClient.Next(ctx, &proto.NextRequest{...})
-package grpc
+package rpc
 
 import (
 	"context"
