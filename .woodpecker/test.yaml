@@ -128,7 +128,7 @@ steps:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.2.2
+    image: docker.io/woodpeckerci/plugin-codecov:2.3.1
     settings:
       files:
         - agent-coverage.out

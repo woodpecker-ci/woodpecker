@@ -15,419 +15,299 @@
 package rpc
 
 import (
-	"errors"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func TestCheckPipelineState(t *testing.T) {
+func TestCheckWorkflowAllowsStepUpdate(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name      string
-		status    model.StatusValue
-		wantErr   error
-		expectNil bool
-	}{
-		{
-			name:      "created is allowed",
-			status:    model.StatusCreated,
-			expectNil: true,
-		},
-		{
-			name:      "pending is allowed",
-			status:    model.StatusPending,
-			expectNil: true,
-		},
-		{
-			name:      "running is allowed",
-			status:    model.StatusRunning,
-			expectNil: true,
-		},
-		{
-			name:    "blocked is rejected",
-			status:  model.StatusBlocked,
-			wantErr: ErrAgentIllegalPipelineWorkflowRun,
-		},
-		{
-			name:    "success is rejected as re-run",
-			status:  model.StatusSuccess,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
-		},
-		{
-			name:    "failure is rejected as re-run",
-			status:  model.StatusFailure,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
-		},
-		{
-			name:    "killed is rejected as re-run",
-			status:  model.StatusKilled,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
-		},
-		{
-			name:    "error is rejected as re-run",
-			status:  model.StatusError,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
-		},
-		{
-			name:    "skipped is rejected as re-run",
-			status:  model.StatusSkipped,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
-		},
-		{
-			name:    "declined is rejected as re-run",
-			status:  model.StatusDeclined,
-			wantErr: ErrAgentIllegalPipelineWorkflowReRunStateChange,
-		},
+	t.Run("workflow running allows any step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		// Non-terminal update (step stays running)
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusRunning, step, rpc.StepState{}))
+	})
+
+	t.Run("workflow pending allows any step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusPending}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusPending, step, rpc.StepState{}))
+	})
+
+	t.Run("workflow created allows any step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusPending}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusCreated, step, rpc.StepState{}))
+	})
+
+	t.Run("workflow finished allows terminal step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		// Step exits with code 0 → CalcStepStatus produces StatusSuccess (terminal)
+		state := rpc.StepState{Exited: true, ExitCode: 0}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state))
+	})
+
+	t.Run("workflow finished allows failed step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		state := rpc.StepState{Exited: true, ExitCode: 1}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusFailure, step, state))
+	})
+
+	t.Run("workflow finished allows canceled step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		state := rpc.StepState{Canceled: true}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusKilled, step, state))
+	})
+
+	t.Run("workflow finished allows skipped step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusPending}
+		state := rpc.StepState{Skipped: true}
+		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state))
+	})
+
+	t.Run("workflow finished rejects non-terminal step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		// No exit, no cancel → step stays Running (non-terminal)
+		state := rpc.StepState{}
+		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
+
+	t.Run("workflow killed rejects non-terminal step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		state := rpc.StepState{}
+		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusKilled, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
+
+	t.Run("workflow blocked rejects non-terminal step update", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusRunning}
+		state := rpc.StepState{}
+		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusBlocked, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
+
+	t.Run("workflow finished rejects pending-to-running transition", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusPending}
+		// No skip, no exit → CalcStepStatus produces Running (non-terminal)
+		state := rpc.StepState{Started: 100}
+		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
+}
+
+func TestCheckWorkflowState(t *testing.T) {
+	t.Parallel()
+
+	t.Run("allowed states", func(t *testing.T) {
+		t.Parallel()
+		for _, s := range []model.StatusValue{
+			model.StatusCreated,
+			model.StatusPending,
+			model.StatusRunning,
+		} {
+			t.Run(string(s), func(t *testing.T) {
+				t.Parallel()
+				assert.NoError(t, checkWorkflowState(s))
+			})
+		}
+	})
+
+	t.Run("blocked rejects", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkWorkflowState(model.StatusBlocked), ErrAgentIllegalWorkflowRun)
+	})
+
+	t.Run("terminal states reject", func(t *testing.T) {
+		t.Parallel()
+		for _, s := range []model.StatusValue{
+			model.StatusSuccess,
+			model.StatusFailure,
+			model.StatusKilled,
+			model.StatusError,
+			model.StatusSkipped,
+			model.StatusCanceled,
+			model.StatusDeclined,
+		} {
+			t.Run(string(s), func(t *testing.T) {
+				t.Parallel()
+				assert.ErrorIs(t, checkWorkflowState(s), ErrAgentIllegalWorkflowReRunStateChange)
+			})
+		}
+	})
+}
+
+func TestIsActiveState(t *testing.T) {
+	t.Parallel()
+
+	active := []model.StatusValue{model.StatusCreated, model.StatusPending, model.StatusRunning}
+	inactive := []model.StatusValue{
+		model.StatusSuccess, model.StatusFailure, model.StatusKilled,
+		model.StatusBlocked, model.StatusCanceled, model.StatusSkipped,
+		model.StatusError, model.StatusDeclined,
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, s := range active {
+		t.Run(fmt.Sprintf("%s is active", s), func(t *testing.T) {
 			t.Parallel()
-
-			pipeline := &model.Pipeline{Status: tt.status}
-			err := checkPipelineState(pipeline)
-
-			if tt.expectNil {
-				assert.NoError(t, err)
-			} else {
-				assert.ErrorIs(t, err, tt.wantErr)
-			}
+			assert.True(t, isActiveState(s))
+		})
+	}
+	for _, s := range inactive {
+		t.Run(fmt.Sprintf("%s is not active", s), func(t *testing.T) {
+			t.Parallel()
+			assert.False(t, isActiveState(s))
 		})
 	}
 }
 
-func TestCheckWorkflowStepStates(t *testing.T) {
+func TestIsDoneState(t *testing.T) {
 	t.Parallel()
 
-	t.Run("workflow only", func(t *testing.T) {
-		t.Parallel()
+	done := []model.StatusValue{
+		model.StatusSuccess, model.StatusFailure, model.StatusKilled,
+		model.StatusCanceled, model.StatusSkipped, model.StatusError,
+		model.StatusDeclined,
+	}
+	notDone := []model.StatusValue{
+		model.StatusCreated, model.StatusPending, model.StatusRunning,
+		model.StatusBlocked,
+	}
 
-		tests := []struct {
-			name    string
-			state   model.StatusValue
-			wantErr error
-		}{
-			{"created allows", model.StatusCreated, nil},
-			{"pending allows", model.StatusPending, nil},
-			{"running allows", model.StatusRunning, nil},
-			{"blocked rejects", model.StatusBlocked, ErrAgentIllegalWorkflowRun},
-			{"success rejects", model.StatusSuccess, ErrAgentIllegalWorkflowReRunStateChange},
-			{"failure rejects", model.StatusFailure, ErrAgentIllegalWorkflowReRunStateChange},
-			{"killed rejects", model.StatusKilled, ErrAgentIllegalWorkflowReRunStateChange},
-			{"error rejects", model.StatusError, ErrAgentIllegalWorkflowReRunStateChange},
-			{"skipped rejects", model.StatusSkipped, ErrAgentIllegalWorkflowReRunStateChange},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				t.Parallel()
-
-				workflow := &model.Workflow{State: tt.state}
-				err := checkWorkflowStepStates(workflow, nil)
-
-				if tt.wantErr == nil {
-					assert.NoError(t, err)
-				} else {
-					assert.ErrorIs(t, err, tt.wantErr)
-				}
-			})
-		}
-	})
-
-	t.Run("step only (nil workflow)", func(t *testing.T) {
-		t.Parallel()
-
-		tests := []struct {
-			name    string
-			state   model.StatusValue
-			wantErr error
-		}{
-			{"created allows", model.StatusCreated, nil},
-			{"pending allows", model.StatusPending, nil},
-			{"running allows", model.StatusRunning, nil},
-			{"blocked rejects", model.StatusBlocked, ErrAgentIllegalStepRun},
-			{"success rejects", model.StatusSuccess, ErrAgentIllegalStepReRunStateChange},
-			{"failure rejects", model.StatusFailure, ErrAgentIllegalStepReRunStateChange},
-			{"killed rejects", model.StatusKilled, ErrAgentIllegalStepReRunStateChange},
-			{"error rejects", model.StatusError, ErrAgentIllegalStepReRunStateChange},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				t.Parallel()
-
-				step := &model.Step{State: tt.state}
-				err := checkWorkflowStepStates(nil, step)
-
-				if tt.wantErr == nil {
-					assert.NoError(t, err)
-				} else {
-					assert.ErrorIs(t, err, tt.wantErr)
-				}
-			})
-		}
-	})
-
-	t.Run("nil workflow and nil step", func(t *testing.T) {
-		t.Parallel()
-
-		assert.NoError(t, checkWorkflowStepStates(nil, nil))
-	})
-
-	t.Run("workflow running, step running", func(t *testing.T) {
-		t.Parallel()
-
-		workflow := &model.Workflow{State: model.StatusRunning}
-		step := &model.Step{State: model.StatusRunning}
-		assert.NoError(t, checkWorkflowStepStates(workflow, step))
-	})
-
-	t.Run("workflow running, step finished", func(t *testing.T) {
-		t.Parallel()
-
-		workflow := &model.Workflow{State: model.StatusRunning}
-		step := &model.Step{State: model.StatusSuccess}
-		err := checkWorkflowStepStates(workflow, step)
-		assert.ErrorIs(t, err, ErrAgentIllegalStepReRunStateChange)
-		// should not contain workflow error
-		assert.False(t, errors.Is(err, ErrAgentIllegalWorkflowReRunStateChange))
-	})
-
-	t.Run("workflow running, step blocked", func(t *testing.T) {
-		t.Parallel()
-
-		workflow := &model.Workflow{State: model.StatusRunning}
-		step := &model.Step{State: model.StatusBlocked}
-		err := checkWorkflowStepStates(workflow, step)
-		assert.ErrorIs(t, err, ErrAgentIllegalStepRun)
-	})
-
-	t.Run("both finished - joined errors", func(t *testing.T) {
-		t.Parallel()
-
-		workflow := &model.Workflow{State: model.StatusSuccess}
-		step := &model.Step{State: model.StatusSuccess}
-		err := checkWorkflowStepStates(workflow, step)
-		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
-		assert.ErrorIs(t, err, ErrAgentIllegalStepReRunStateChange)
-	})
-
-	t.Run("both blocked - joined errors", func(t *testing.T) {
-		t.Parallel()
-
-		workflow := &model.Workflow{State: model.StatusBlocked}
-		step := &model.Step{State: model.StatusBlocked}
-		err := checkWorkflowStepStates(workflow, step)
-		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowRun)
-		assert.ErrorIs(t, err, ErrAgentIllegalStepRun)
-	})
-
-	t.Run("workflow finished, step blocked - joined errors", func(t *testing.T) {
-		t.Parallel()
-
-		workflow := &model.Workflow{State: model.StatusKilled}
-		step := &model.Step{State: model.StatusBlocked}
-		err := checkWorkflowStepStates(workflow, step)
-		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
-		assert.ErrorIs(t, err, ErrAgentIllegalStepRun)
-	})
-
-	t.Run("workflow finished (failure), step finished (failure) - joined errors", func(t *testing.T) {
-		t.Parallel()
-
-		workflow := &model.Workflow{State: model.StatusFailure}
-		step := &model.Step{State: model.StatusFailure}
-		err := checkWorkflowStepStates(workflow, step)
-		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
-		assert.ErrorIs(t, err, ErrAgentIllegalStepReRunStateChange)
-	})
+	for _, s := range done {
+		t.Run(fmt.Sprintf("%s is done", s), func(t *testing.T) {
+			t.Parallel()
+			assert.True(t, isDoneState(s))
+		})
+	}
+	for _, s := range notDone {
+		t.Run(fmt.Sprintf("%s is not done", s), func(t *testing.T) {
+			t.Parallel()
+			assert.False(t, isDoneState(s))
+		})
+	}
 }
-
-// AllowAppendingLogs — updated for the new (pipeline, step) signature
-//
-// New logic:
-//   Allow if step.State == Running  (step is actively running)
-//   Allow if pipeline.Status == Running  (pipeline still running, step may
-//     have just finished but pipeline hasn't caught up yet)
-//   Allow if pipeline.Finished is within the last logStreamDelayAllowed
-//     (drain window after a server restart / network blip)
-//   Reject otherwise.
 
 func TestAllowAppendingLogs(t *testing.T) {
 	t.Parallel()
 
-	// recentFinish is a pipeline.Finished timestamp just 30 seconds ago —
-	// well within the 5-minute drain window.
 	recentFinish := time.Now().Add(-30 * time.Second).Unix()
-
-	// staleFinish is a pipeline.Finished timestamp 10 minutes ago —
-	// outside the drain window.
 	staleFinish := time.Now().Add(-10 * time.Minute).Unix()
 
-	tests := []struct {
-		name           string
-		pipelineStatus model.StatusValue
-		pipelineFinish int64
-		stepState      model.StatusValue
-		wantErr        error
-	}{
-		// --- step is running: always allowed regardless of pipeline state ----
-		{
-			name:           "step running, pipeline running → allow",
-			pipelineStatus: model.StatusRunning,
-			stepState:      model.StatusRunning,
-		},
-		{
-			name:           "step running, pipeline success → allow (step takes priority)",
-			pipelineStatus: model.StatusSuccess,
-			pipelineFinish: staleFinish,
-			stepState:      model.StatusRunning,
-		},
-		{
-			name:           "step running, pipeline failure → allow",
-			pipelineStatus: model.StatusFailure,
-			pipelineFinish: staleFinish,
-			stepState:      model.StatusRunning,
-		},
-		{
-			name:           "step running, pipeline killed → allow",
-			pipelineStatus: model.StatusKilled,
-			pipelineFinish: staleFinish,
-			stepState:      model.StatusRunning,
-		},
+	// Step running always allows logs, regardless of pipeline state or age.
+	t.Run("step running always allowed", func(t *testing.T) {
+		t.Parallel()
 
-		// --- pipeline still running: allow even if step finished ------------
-		{
-			name:           "step success, pipeline still running → allow",
-			pipelineStatus: model.StatusRunning,
-			stepState:      model.StatusSuccess,
-		},
-		{
-			name:           "step failure, pipeline still running → allow",
-			pipelineStatus: model.StatusRunning,
-			stepState:      model.StatusFailure,
-		},
-		{
-			name:           "step pending, pipeline still running → allow",
-			pipelineStatus: model.StatusRunning,
-			stepState:      model.StatusPending,
-		},
-		{
-			name:           "step killed, pipeline still running → allow",
-			pipelineStatus: model.StatusRunning,
-			stepState:      model.StatusKilled,
-		},
+		for _, tc := range []struct {
+			name   string
+			status model.StatusValue
+			finish int64
+		}{
+			{"pipeline running", model.StatusRunning, 0},
+			{"pipeline success stale", model.StatusSuccess, staleFinish},
+			{"pipeline failure stale", model.StatusFailure, staleFinish},
+			{"pipeline killed stale", model.StatusKilled, staleFinish},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				t.Parallel()
+				p := &model.Pipeline{Status: tc.status, Finished: tc.finish}
+				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: model.StatusRunning}))
+			})
+		}
+	})
 
-		// --- pipeline finished recently: drain window allows logs -----------
-		{
-			name:           "step success, pipeline finished recently → allow (drain window)",
-			pipelineStatus: model.StatusSuccess,
-			pipelineFinish: recentFinish,
-			stepState:      model.StatusSuccess,
-		},
-		{
-			name:           "step failure, pipeline failed recently → allow (drain window)",
-			pipelineStatus: model.StatusFailure,
-			pipelineFinish: recentFinish,
-			stepState:      model.StatusFailure,
-		},
-		{
-			name:           "step pending, pipeline killed recently → allow (drain window)",
-			pipelineStatus: model.StatusKilled,
-			pipelineFinish: recentFinish,
-			stepState:      model.StatusPending,
-		},
+	// Pipeline running allows logs for any step state.
+	t.Run("pipeline running any step allowed", func(t *testing.T) {
+		t.Parallel()
 
-		// --- pipeline finished and drain window expired: reject -------------
-		{
-			name:           "step success, pipeline success, stale finish → reject",
-			pipelineStatus: model.StatusSuccess,
-			pipelineFinish: staleFinish,
-			stepState:      model.StatusSuccess,
-			wantErr:        ErrAgentIllegalLogStreaming,
-		},
-		{
-			name:           "step failure, pipeline failure, stale finish → reject",
-			pipelineStatus: model.StatusFailure,
-			pipelineFinish: staleFinish,
-			stepState:      model.StatusFailure,
-			wantErr:        ErrAgentIllegalLogStreaming,
-		},
-		{
-			name:           "step pending, pipeline killed, stale finish → reject",
-			pipelineStatus: model.StatusKilled,
-			pipelineFinish: staleFinish,
-			stepState:      model.StatusPending,
-			wantErr:        ErrAgentIllegalLogStreaming,
-		},
-		{
-			name:           "step created, pipeline error, stale finish → reject",
-			pipelineStatus: model.StatusError,
-			pipelineFinish: staleFinish,
-			stepState:      model.StatusCreated,
-			wantErr:        ErrAgentIllegalLogStreaming,
-		},
+		for _, ss := range []model.StatusValue{
+			model.StatusSuccess, model.StatusFailure, model.StatusPending, model.StatusKilled,
+		} {
+			t.Run(string(ss), func(t *testing.T) {
+				t.Parallel()
+				p := &model.Pipeline{Status: model.StatusRunning}
+				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: ss}))
+			})
+		}
+	})
 
-		// --- zero Finished timestamp (never recorded): outside drain window -
-		{
-			name:           "step success, pipeline success, Finished=0 → reject",
-			pipelineStatus: model.StatusSuccess,
-			pipelineFinish: 0,
-			stepState:      model.StatusSuccess,
-			wantErr:        ErrAgentIllegalLogStreaming,
-		},
-	}
+	// Recent finish → drain window allows logs.
+	t.Run("recent finish drain allowed", func(t *testing.T) {
+		t.Parallel()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+		for _, tc := range []struct {
+			pStatus model.StatusValue
+			sState  model.StatusValue
+		}{
+			{model.StatusSuccess, model.StatusSuccess},
+			{model.StatusFailure, model.StatusFailure},
+			{model.StatusKilled, model.StatusPending},
+		} {
+			t.Run(fmt.Sprintf("%s/%s", tc.pStatus, tc.sState), func(t *testing.T) {
+				t.Parallel()
+				p := &model.Pipeline{Status: tc.pStatus, Finished: recentFinish}
+				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: tc.sState}))
+			})
+		}
+	})
 
-			pipeline := &model.Pipeline{
-				Status:   tt.pipelineStatus,
-				Finished: tt.pipelineFinish,
-			}
-			step := &model.Step{State: tt.stepState}
+	// Stale finish → drain window expired → reject.
+	t.Run("stale finish drain rejected", func(t *testing.T) {
+		t.Parallel()
 
-			err := allowAppendingLogs(pipeline, step)
-
-			if tt.wantErr == nil {
-				assert.NoError(t, err)
-			} else {
-				assert.ErrorIs(t, err, tt.wantErr)
-			}
-		})
-	}
+		for _, tc := range []struct {
+			pStatus model.StatusValue
+			sState  model.StatusValue
+			finish  int64
+		}{
+			{model.StatusSuccess, model.StatusSuccess, staleFinish},
+			{model.StatusFailure, model.StatusFailure, staleFinish},
+			{model.StatusKilled, model.StatusPending, staleFinish},
+			{model.StatusError, model.StatusCreated, staleFinish},
+			{model.StatusSuccess, model.StatusSuccess, 0}, // zero = never recorded
+		} {
+			t.Run(fmt.Sprintf("%s/%s/fin=%d", tc.pStatus, tc.sState, tc.finish), func(t *testing.T) {
+				t.Parallel()
+				p := &model.Pipeline{Status: tc.pStatus, Finished: tc.finish}
+				assert.ErrorIs(t, allowAppendingLogs(p, &model.Step{State: tc.sState}), ErrAgentIllegalLogStreaming)
+			})
+		}
+	})
 }
 
-// TestAllowAppendingLogsDrainBoundary checks the exact boundary of the
-// 5-minute drain window to guard against off-by-one errors.
+// TestAllowAppendingLogsDrainBoundary guards the exact edge of the 5-minute
+// drain window against off-by-one errors.
 func TestAllowAppendingLogsDrainBoundary(t *testing.T) {
 	t.Parallel()
 
 	step := &model.Step{State: model.StatusSuccess}
 
-	t.Run("finished exactly at drain window boundary is allowed", func(t *testing.T) {
+	t.Run("just inside drain window allowed", func(t *testing.T) {
 		t.Parallel()
-
-		// Finished just barely inside the window (1 second of headroom).
-		finishedAt := time.Now().Add(-(logStreamDelayAllowed - time.Second)).Unix()
-		pipeline := &model.Pipeline{Status: model.StatusSuccess, Finished: finishedAt}
-
-		assert.NoError(t, allowAppendingLogs(pipeline, step))
+		p := &model.Pipeline{
+			Status:   model.StatusSuccess,
+			Finished: time.Now().Add(-(logStreamDelayAllowed - time.Second)).Unix(),
+		}
+		assert.NoError(t, allowAppendingLogs(p, step))
 	})
 
-	t.Run("finished just outside drain window is rejected", func(t *testing.T) {
+	t.Run("just outside drain window rejected", func(t *testing.T) {
 		t.Parallel()
-
-		// Finished 1 second past the allowed window.
-		finishedAt := time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix()
-		pipeline := &model.Pipeline{Status: model.StatusSuccess, Finished: finishedAt}
-
-		assert.ErrorIs(t, allowAppendingLogs(pipeline, step), ErrAgentIllegalLogStreaming)
+		p := &model.Pipeline{
+			Status:   model.StatusSuccess,
+			Finished: time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix(),
+		}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
 	})
 }

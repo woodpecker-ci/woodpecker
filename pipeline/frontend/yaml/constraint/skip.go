@@ -12,15 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpc
+package constraint
 
-import "errors"
+import (
+	"regexp"
 
-var (
-	ErrAgentIllegalWorkflowReRunStateChange = errors.New("workflow was already marked as finished")
-	ErrAgentIllegalWorkflowRun              = errors.New("workflow is currently in blocked state")
-
-	ErrAgentIllegalLogStreaming = errors.New("agent can not append logs to a step that is marked not running")
-
-	ErrAgentIllegalRepo = errors.New("agent is not allowed to interact with repo")
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
+
+var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
+
+func IsSkipCommitMessage(event metadata.Event, commitMessage string) bool {
+	if event == metadata.EventPush || event.IsPull() {
+		skipMatch := skipPipelineRegex.FindString(commitMessage)
+		if len(skipMatch) > 0 {
+			return true
+		}
+	}
+	return false
+}
