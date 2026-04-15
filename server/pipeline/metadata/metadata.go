@@ -44,6 +44,7 @@ func NewServerMetadata(forge metadata.ServerForge, repo *model.Repo, pipeline, p
 }
 
 // GetWorkflowMetadata return the metadata from a pipeline will run with.
+// TODO: builder should depend on metadata not the other way around
 func (s *ServerMetadata) GetWorkflowMetadata(workflow *builder.Workflow) metadata.Metadata {
 	host := s.sysURL
 	uri, err := url.Parse(s.sysURL)
