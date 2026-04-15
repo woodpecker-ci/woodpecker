@@ -45,13 +45,13 @@ func (mode ApprovalMode) Valid() bool {
 type Repo struct {
 	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
 	UserID  int64 `json:"-"                               xorm:"INDEX 'user_id'"`
-	ForgeID int64 `json:"forge_id,omitempty"              xorm:"UNIQUE(forge) forge_id"`
+	ForgeID int64 `json:"forge_id,omitempty"              xorm:"UNIQUE(forge) UNIQUE(name) UNIQUE(full_name) forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
 	ForgeRemoteID                ForgeRemoteID        `json:"forge_remote_id"                 xorm:"UNIQUE(forge) forge_remote_id"`
 	OrgID                        int64                `json:"org_id"                          xorm:"INDEX 'org_id'"`
 	Owner                        string               `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
 	Name                         string               `json:"name"                            xorm:"UNIQUE(name) 'name'"`
-	FullName                     string               `json:"full_name"                       xorm:"UNIQUE 'full_name'"`
+	FullName                     string               `json:"full_name"                       xorm:"UNIQUE(full_name) 'full_name'"`
 	Avatar                       string               `json:"avatar_url,omitempty"            xorm:"varchar(500) 'avatar'"`
 	ForgeURL                     string               `json:"forge_url,omitempty"             xorm:"varchar(1000) 'forge_url'"`
 	Clone                        string               `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
@@ -69,14 +69,19 @@ type Repo struct {
 	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
 	Config                       string               `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
 	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
-	Perm                         *Perm                `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 	ConfigExtensionExclusive     bool                 `json:"config_extension_exclusive"      xorm:"DEFAULT FALSE 'config_extension_exclusive'"`
+	ConfigExtensionNetrc         bool                 `json:"config_extension_netrc"          xorm:"DEFAULT FALSE 'config_extension_netrc'"`
 	RegistryExtensionEndpoint    string               `json:"registry_extension_endpoint"     xorm:"varchar(500) 'registry_extension_endpoint'"`
+	RegistryExtensionNetrc       bool                 `json:"registry_extension_netrc"          xorm:"DEFAULT FALSE 'registry_extension_netrc'"`
 	SecretExtensionEndpoint      string               `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
 	SecretExtensionNetrc         bool                 `json:"secret_extension_netrc"          xorm:"DEFAULT FALSE 'secret_extension_netrc'"`
+
+	// internal usage
+
+	Perm *Perm `json:"-"    xorm:"-"`
 } //	@name	Repo
 
 // TableName return database table name for xorm.
@@ -149,7 +154,9 @@ type RepoPatch struct {
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
 	ConfigExtensionEndpoint      *string                    `json:"config_extension_endpoint,omitempty"`
 	ConfigExtensionExclusive     *bool                      `json:"config_extension_exclusive"`
+	ConfigExtensionNetrc         *bool                      `json:"config_extension_netrc"`
 	RegistryExtensionEndpoint    *string                    `json:"registry_extension_endpoint,omitempty"`
+	RegistryExtensionNetrc       *bool                      `json:"registry_extension_netrc"`
 	SecretExtensionEndpoint      *string                    `json:"secret_extension_endpoint,omitempty"`
 	SecretExtensionNetrc         *bool                      `json:"secret_extension_netrc,omitempty"`
 } //	@name	RepoPatch
@@ -175,5 +182,5 @@ type TrustedConfigurationPatch struct {
 // RepoLastPipeline represents a repository with last pipeline execution information.
 type RepoLastPipeline struct {
 	*Repo
-	LastPipeline *Pipeline `json:"last_pipeline,omitempty"`
+	LastPipeline *APIPipeline `json:"last_pipeline,omitempty"`
 } //	@name	RepoLastPipeline

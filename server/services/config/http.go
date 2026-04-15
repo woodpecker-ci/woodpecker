@@ -28,8 +28,9 @@ import (
 )
 
 type httpService struct {
-	endpoint string
-	client   *utils.Client
+	endpoint     string
+	client       *utils.Client
+	includeNetrc bool
 }
 
 // configData same as forge.FileMeta but with json tags and string data.
@@ -49,16 +50,11 @@ type responseStructure struct {
 	Configs []*configData `json:"configs"`
 }
 
-func NewHTTP(endpoint string, client *utils.Client) Service {
-	return &httpService{endpoint, client}
+func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) Service {
+	return &httpService{endpoint, client, includeNetrc}
 }
 
 func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
-	netrc, err := forge.Netrc(user, repo)
-	if err != nil {
-		return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
-	}
-
 	configuration := make([]*configData, len(oldConfigData))
 	for i, oldConfig := range oldConfigData {
 		configuration[i] = &configData{Name: oldConfig.Name, Data: string(oldConfig.Data)}
@@ -68,8 +64,15 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 	body := requestStructure{
 		Repo:          repo,
 		Pipeline:      pipeline,
-		Netrc:         netrc,
 		Configuration: configuration,
+	}
+
+	if h.includeNetrc {
+		netrc, err := forge.Netrc(user, repo)
+		if err != nil {
+			return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
+		}
+		body.Netrc = netrc
 	}
 
 	status, err := h.client.Send(ctx, http.MethodPost, h.endpoint, body, response)

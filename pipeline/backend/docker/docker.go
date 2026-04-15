@@ -22,18 +22,16 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
+	"time"
 
+	"github.com/cenkalti/backoff/v5"
 	"github.com/containerd/errdefs"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/api/types/system"
-	"github.com/docker/docker/api/types/volume"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/jsonmessage"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/tlsconfig"
+	"github.com/moby/moby/api/pkg/stdcopy"
+	"github.com/moby/moby/api/types/network"
+	"github.com/moby/moby/api/types/system"
+	"github.com/moby/moby/client"
+	"github.com/moby/moby/client/pkg/jsonmessage"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -44,7 +42,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-var containerKillTimeout = 5 // seconds
+const (
+	containerKillTimeout               = 5 // seconds
+	volumeRetryWait      time.Duration = 1 * time.Second
+	maxRetry             uint          = 3
+)
 
 type docker struct {
 	client client.APIClient
@@ -124,21 +126,21 @@ func (e *docker) Load(ctx context.Context) (*backend_types.BackendInfo, error) {
 		dockerClientOpts = append(dockerClientOpts, client.WithHost(dockerHost))
 	}
 	if dockerAPIVersion := c.String("backend-docker-api-version"); dockerAPIVersion != "" {
-		dockerClientOpts = append(dockerClientOpts, client.WithVersion(dockerAPIVersion))
-	} else {
-		dockerClientOpts = append(dockerClientOpts, client.WithAPIVersionNegotiation())
+		dockerClientOpts = append(dockerClientOpts, client.WithAPIVersion(dockerAPIVersion))
 	}
 
-	cl, err := client.NewClientWithOpts(dockerClientOpts...)
+	cl, err := client.New(dockerClientOpts...)
 	if err != nil {
 		return nil, err
 	}
 	e.client = cl
 
-	e.info, err = cl.Info(ctx)
+	info, err := cl.Info(ctx, client.InfoOptions{})
 	if err != nil {
 		return nil, err
 	}
+
+	e.info = info.Info
 
 	e.config, err = configFromCli(c)
 	if err != nil {
@@ -153,7 +155,7 @@ func (e *docker) Load(ctx context.Context) (*backend_types.BackendInfo, error) {
 func (e *docker) SetupWorkflow(ctx context.Context, conf *backend_types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
-	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
+	_, err := e.client.VolumeCreate(ctx, client.VolumeCreateOptions{
 		Name:   conf.Volume,
 		Driver: volumeDriver,
 	})
@@ -165,7 +167,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend_types.Config, 
 	if e.info.OSType == "windows" {
 		networkDriver = networkDriverNAT
 	}
-	_, err = e.client.NetworkCreate(ctx, conf.Network, network.CreateOptions{
+	_, err = e.client.NetworkCreate(ctx, conf.Network, client.NetworkCreateOptions{
 		Driver:     networkDriver,
 		EnableIPv6: &e.config.enableIPv6,
 	})
@@ -181,11 +183,14 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	config := e.toConfig(step, options)
-	hostConfig := toHostConfig(step, &e.config)
+	hostConfig, err := toHostConfig(step, &e.config)
+	if err != nil {
+		return err
+	}
 	containerName := toContainerName(step)
 
 	// create pull options with encoded authorization credentials.
-	pullOpts := image.PullOptions{}
+	pullOpts := client.ImagePullOptions{}
 	if step.AuthConfig.Username != "" && step.AuthConfig.Password != "" {
 		pullOpts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
 	}
@@ -212,7 +217,11 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 	// add default volumes to the host configuration
 	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
 
-	_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
+	_, err = e.client.ContainerCreate(ctx, client.ContainerCreateOptions{
+		Config:     config,
+		HostConfig: hostConfig,
+		Name:       containerName,
+	})
 	if errdefs.IsNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
@@ -227,7 +236,11 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 		}
 		responseBody.Close()
 
-		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
+		_, err = e.client.ContainerCreate(ctx, client.ContainerCreateOptions{
+			Config:     config,
+			HostConfig: hostConfig,
+			Name:       containerName,
+		})
 	}
 	if err != nil {
 		return err
@@ -235,8 +248,11 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 
 	if len(step.NetworkMode) == 0 {
 		for _, net := range step.Networks {
-			err = e.client.NetworkConnect(ctx, net.Name, containerName, &network.EndpointSettings{
-				Aliases: net.Aliases,
+			_, err = e.client.NetworkConnect(ctx, net.Name, client.NetworkConnectOptions{
+				EndpointConfig: &network.EndpointSettings{
+					Aliases: net.Aliases,
+				},
+				Container: containerName,
 			})
 			if err != nil {
 				return err
@@ -245,14 +261,17 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 
 		// join the container to an existing network
 		if e.config.network != "" {
-			err = e.client.NetworkConnect(ctx, e.config.network, containerName, &network.EndpointSettings{})
+			_, err = e.client.NetworkConnect(ctx, e.config.network, client.NetworkConnectOptions{
+				Container: containerName,
+			})
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	return e.client.ContainerStart(ctx, containerName, container.StartOptions{})
+	_, err = e.client.ContainerStart(ctx, containerName, client.ContainerStartOptions{})
+	return err
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
@@ -261,30 +280,42 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 
 	containerName := toContainerName(step)
 
-	wait, errC := e.client.ContainerWait(ctx, containerName, "")
+	wait := e.client.ContainerWait(ctx, containerName, client.ContainerWaitOptions{})
 	select {
-	case resp := <-wait:
+	case resp := <-wait.Result:
 		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
-	case err := <-errC:
+		if resp.Error != nil {
+			return nil, fmt.Errorf("ContainerWait error: %s", resp.Error.Message)
+		}
+	case err := <-wait.Error:
 		log.Trace().Msgf("ContainerWait returned with err: %v", err)
+		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	}
 
-	info, err := e.client.ContainerInspect(ctx, containerName)
+	info, err := e.client.ContainerInspect(ctx, containerName, client.ContainerInspectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
+	exitCode := info.Container.State.ExitCode
+	// Windows Docker may return 4294967295 (uint32 max, i.e. int32(-1)) for abnormal exits.
+	if int64(exitCode) == int64(4294967295) { //nolint:mnd // because it is int(^uint32(0))
+		exitCode = -1
+	}
+
 	return &backend_types.State{
 		Exited:    true,
-		ExitCode:  info.State.ExitCode,
-		OOMKilled: info.State.OOMKilled,
+		ExitCode:  exitCode,
+		OOMKilled: info.Container.State.OOMKilled,
 	}, nil
 }
 
 func (e *docker) TailStep(ctx context.Context, step *backend_types.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
-	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), container.LogsOptions{
+	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), client.ContainerLogsOptions{
 		Follow:     true,
 		ShowStdout: true,
 		ShowStderr: true,
@@ -312,20 +343,22 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend_types.Step, task
 	var stopErr error
 
 	// we first signal to the container to stop ...
-	if err := e.client.ContainerStop(ctx, containerName, container.StopOptions{
-		Timeout: &containerKillTimeout,
+	if _, err := e.client.ContainerStop(ctx, containerName, client.ContainerStopOptions{
+		Timeout: toRef(containerKillTimeout),
 	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		// we do not return error yet as we try to kill it first
 		stopErr = fmt.Errorf("could not stop container '%s': %w", step.Name, err)
 	}
 
 	// ... and if stop does not work just force kill it
-	if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+	if _, err := e.client.ContainerKill(ctx, containerName, client.ContainerKillOptions{
+		Signal: "9",
+	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		return errors.Join(stopErr, fmt.Errorf("could not kill container '%s': %w", step.Name, err))
 	}
 
 	// now we clean up files left
-	if err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+	if _, err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		return fmt.Errorf("could not remove container '%s': %w", step.Name, err)
 	}
 
@@ -349,32 +382,34 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend_types.Config
 		log.Error().Err(err).Msgf("could not destroy all containers")
 	}
 
-	if err := e.client.VolumeRemove(ctx, conf.Volume, true); err != nil {
+	var err error
+	_, _ = backoff.Retry(ctx, func() (any, error) {
+		_, err = e.client.VolumeRemove(ctx, conf.Volume, client.VolumeRemoveOptions{
+			Force: true,
+		})
+		if err == nil || !isErrVolumeInUse(err) {
+			// if it worked or if we have no "in use error" do not retry
+			return nil, nil
+		}
+		return nil, err
+	}, backoff.WithMaxTries(maxRetry), backoff.WithBackOff(&backoff.ExponentialBackOff{
+		InitialInterval: volumeRetryWait,
+		Multiplier:      2, //nolint:mnd
+	}))
+	if err != nil {
 		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume)
 	}
-	if err := e.client.NetworkRemove(ctx, conf.Network); err != nil {
+
+	if _, err := e.client.NetworkRemove(ctx, conf.Network, client.NetworkRemoveOptions{}); err != nil {
 		log.Error().Err(err).Msgf("could not remove network '%s'", conf.Network)
 	}
 	return nil
 }
 
-var removeOpts = container.RemoveOptions{
+var removeOpts = client.ContainerRemoveOptions{
 	RemoveVolumes: true,
 	RemoveLinks:   false,
 	Force:         false,
-}
-
-func isErrContainerNotFoundOrNotRunning(err error) bool {
-	// Error response from daemon: Cannot kill container: ...: No such container: ...
-	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
-	// Error response from podman daemon: can only kill running containers. ... is in state exited
-	// Error response from daemon: removal of container ... is already in progress
-	// Error: No such container: ...
-	return err != nil &&
-		(strings.Contains(err.Error(), "No such container") ||
-			strings.Contains(err.Error(), "is not running") ||
-			strings.Contains(err.Error(), "can only kill running containers") ||
-			(strings.Contains(err.Error(), "removal of container") && strings.Contains(err.Error(), "is already in progress")))
 }
 
 // normalizeArchType converts the arch type reported by docker info into

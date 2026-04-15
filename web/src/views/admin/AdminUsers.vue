@@ -86,7 +86,6 @@
 </template>
 
 <script lang="ts" setup>
-import { cloneDeep } from 'lodash';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -105,6 +104,7 @@ import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { User } from '~/lib/api/types';
+import { deepClone } from '~/lib/utils';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -153,11 +153,11 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 });
 
 function editUser(user: User) {
-  selectedUser.value = cloneDeep(user);
+  selectedUser.value = deepClone(user);
 }
 
 function showAddUser() {
-  selectedUser.value = cloneDeep({ login: '' });
+  selectedUser.value = { login: '' };
 }
 
 useWPTitle(computed(() => [t('admin.settings.users.users'), t('admin.settings.settings')]));

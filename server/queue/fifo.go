@@ -169,7 +169,11 @@ func (q *fifo) Wait(ctx context.Context, taskID string) error {
 		select {
 		case <-ctx.Done():
 		case <-state.done:
-			// only return queue errors and no workflow errors
+			// check if we have a wrapped cancel error and unwrap it
+			if errors.Is(state.error, ErrCancel) {
+				return ErrCancel
+			}
+			// or return queue errors and no workflow errors
 			if !errors.Is(state.error, new(ErrExternal)) {
 				return state.error
 			}

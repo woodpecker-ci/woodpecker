@@ -53,9 +53,9 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 	var secrets []compiler.Secret
 	for _, sec := range secs {
-		var events []string
+		var events []pipeline_metadata.Event
 		for _, event := range sec.Events {
-			events = append(events, string(event))
+			events = append(events, pipeline_metadata.Event(event))
 		}
 
 		secrets = append(secrets, compiler.Secret{
@@ -67,7 +67,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline)
+	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}

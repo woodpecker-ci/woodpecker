@@ -38,7 +38,6 @@ func Handler() http.Handler {
 	e.GET("/2.0/repositories/:owner", getUserRepos)
 	e.GET("/2.0/user/", getUser)
 	e.GET("/2.0/user/emails", getEmails)
-	e.GET("/2.0/user/permissions/repositories", getPermission)
 	e.GET("/2.0/user/workspaces/:workspace/permissions/repositories", getPermissions)
 	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
 	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
@@ -200,27 +199,33 @@ func getUserRepos(c *gin.Context) {
 	}
 }
 
-func getPermission(c *gin.Context) {
+func getPermissions(c *gin.Context) {
+	workspace := c.Param("workspace")
+	q := c.Query("q")
+
 	if c.Query("page") == "" || c.Query("page") == "1" {
-		switch c.Query("q") {
-		case "repository.full_name=\"test_name/repo_name\"":
-			c.String(http.StatusOK, permissionPayLoad)
-			return
-		case "repository.full_name=\"martinherren1984/publictestrepo\"":
-			c.String(http.StatusOK, permissionHookPayLoad)
-			return
+		switch workspace {
+		case "test_name":
+			// Handle query for specific repo (new GetPermission format)
+			if q == "repository.full_name=\"test_name/repo_name\"" {
+				c.String(http.StatusOK, permissionPayLoad)
+				return
+			}
+			// Handle listing all permissions (ListPermissionsAll)
+			if q == "" {
+				c.String(http.StatusOK, permissionsPayLoad)
+				return
+			}
+		case "martinherren1984":
+			// Handle hook test cases
+			if q == "repository.full_name=\"martinherren1984/publictestrepo\"" {
+				c.String(http.StatusOK, permissionHookPayLoad)
+				return
+			}
 		}
 	}
 
 	c.String(http.StatusOK, "{\"values\":[]}")
-}
-
-func getPermissions(c *gin.Context) {
-	if (c.Query("page") == "" || c.Query("page") == "1") && c.Param("workspace") == "test_name" {
-		c.String(http.StatusOK, permissionsPayLoad)
-	} else {
-		c.String(http.StatusOK, "{\"values\":[]}")
-	}
 }
 
 const tokenPayload = `
@@ -534,19 +539,19 @@ const workspacesPayload = `
 	"size": 1,
 	"values": [
 		{
-			"type": "workspace",
-			"uuid": "{c7a04a76-fa20-43e4-dc42-a7506db4c95b}",
-			"name": "Ueber Dev",
-			"slug": "test_name",
-			"links": {
-				"avatar": {
-					"href": "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964"
-				},
-				"html": {
-					"href": "https://bitbucket.org/ueberdev42/"
-				},
-				"self": {
-					"href": "https://api.bitbucket.org/2.0/workspaces/ueberdev42"
+			"type": "workspace_access",
+			"administrator": true,
+			"workspace": {
+				"type": "workspace_base",
+				"uuid": "{c7a04a76-fa20-43e4-dc42-a7506db4c95b}",
+				"slug": "test_name",
+				"links": {
+					"avatar": {
+						"href": "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964"
+					},
+					"self": {
+						"href": "https://api.bitbucket.org/2.0/workspaces/ueberdev42"
+					}
 				}
 			}
 		}

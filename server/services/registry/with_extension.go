@@ -34,15 +34,15 @@ func NewWithExtension(base Service, extension *httpExtension) Service {
 	return &withExtension{base, extension}
 }
 
-func (w *withExtension) RegistryListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
+func (w *withExtension) RegistryListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Registry, error) {
 	// Get registries from base service
-	baseRegistries, err := w.base.RegistryListPipeline(ctx, repo, pipeline)
+	baseRegistries, err := w.base.RegistryListPipeline(ctx, repo, pipeline, netrc)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get registries from HTTP extension
-	extensionRegistries, err := w.extension.RegistryListPipeline(ctx, repo, pipeline)
+	extensionRegistries, err := w.extension.RegistryListPipeline(ctx, repo, pipeline, netrc)
 	if err != nil {
 		// Log the error but don't fail - use base registries only
 		log.Warn().Err(err).Msg("failed to fetch registries from extension")

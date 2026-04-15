@@ -54,6 +54,8 @@ func prepareStart(ctx context.Context, forge forge.Forge, store store.Store, act
 }
 
 func publishPipeline(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
-	publishToTopic(pipeline, repo)
+	if err := publishToTopic(ctx, pipeline, repo); err != nil {
+		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
+	}
 	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
 }

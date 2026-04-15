@@ -331,7 +331,9 @@
                 "canceled_by_user": "Abgebrochen von {user}",
                 "canceled_by_step": "Wegen Schritt {step} abgebrochen"
             },
-            "load_more": "Mehr laden"
+            "load_more": "Mehr laden",
+            "version": "Die Woodpecker-Version, mit der diese Pipeline ausgeführt wurde.",
+            "version_header": "Woodpecker-Version"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -779,5 +781,7 @@
     "org_level_registry": "Organisationsregister",
     "secret_extension_endpoint": "Endpunkt der Geheimnis-Erweiterung",
     "secret_extension_netrc": "Netrc-Zugangsdaten senden",
-    "secret_extension_netrc_desc": "Die Netrc-Zugangsdaten für die Code-Plattform an die Geheimnis-Erweiterung senden."
+    "secret_extension_netrc_desc": "Die Netrc-Zugangsdaten für die Code-Plattform an die Geheimnis-Erweiterung senden.",
+    "extension_netrc": "Netrc-Zugangsdaten bereitstellen",
+    "extension_netrc_desc": "Die Netrc-Zugangsdaten der Code-Plattform an die Erweiterung weitergeben."
 }

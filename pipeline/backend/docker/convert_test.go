@@ -21,8 +21,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/system"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/system"
 	"github.com/stretchr/testify/assert"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"

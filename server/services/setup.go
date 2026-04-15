@@ -35,7 +35,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-func setupRegistryService(store store.Store, dockerConfig, endpoint string, client *utils.Client) registry.Service {
+func setupRegistryService(store store.Store, dockerConfig, endpoint string, includeNetrc bool, client *utils.Client) registry.Service {
 	var service registry.Service
 	if dockerConfig != "" {
 		service = registry.NewCombined(
@@ -48,7 +48,7 @@ func setupRegistryService(store store.Store, dockerConfig, endpoint string, clie
 
 	// Wrap with global HTTP extension if configured
 	if endpoint != "" {
-		service = registry.NewWithExtension(service, registry.NewHTTP(endpoint, client))
+		service = registry.NewWithExtension(service, registry.NewHTTP(endpoint, client, includeNetrc))
 	}
 
 	return service
@@ -79,7 +79,7 @@ func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, e
 	configFetcher := config.NewForge(timeout, retries)
 
 	if endpoint := c.String("config-extension-endpoint"); endpoint != "" {
-		httpFetcher := config.NewHTTP(endpoint, client)
+		httpFetcher := config.NewHTTP(endpoint, client, c.Bool("config-extension-netrc"))
 		if c.Bool("config-extension-exclusive") {
 			return httpFetcher, nil
 		}

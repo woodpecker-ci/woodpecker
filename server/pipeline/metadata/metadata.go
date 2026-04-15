@@ -119,11 +119,6 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		return metadata.Pipeline{}
 	}
 
-	cron := ""
-	if pipeline.Event == model.EventCron {
-		cron = pipeline.Sender
-	}
-
 	parent := int64(0)
 	if includeParent {
 		parent = pipeline.Parent
@@ -136,7 +131,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		Started:     pipeline.Started,
 		Finished:    pipeline.Finished,
 		Status:      string(pipeline.Status),
-		Event:       string(pipeline.Event),
+		Event:       metadata.Event(pipeline.Event),
 		EventReason: pipeline.EventReason,
 		ForgeURL:    pipeline.ForgeURL,
 		DeployTo:    pipeline.DeployTo,
@@ -148,16 +143,15 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 			Branch:  pipeline.Branch,
 			Message: pipeline.Message,
 			Author: metadata.Author{
-				Name:   pipeline.Author,
-				Email:  pipeline.Email,
-				Avatar: pipeline.Avatar,
+				Name:  pipeline.Author,
+				Email: pipeline.Email,
 			},
 			ChangedFiles:         pipeline.ChangedFiles,
 			PullRequestLabels:    pipeline.PullRequestLabels,
 			PullRequestMilestone: pipeline.PullRequestMilestone,
 			IsPrerelease:         pipeline.IsPrerelease,
 		},
-		Cron:   cron,
+		Cron:   pipeline.Cron,
 		Author: pipeline.Author,
 		Avatar: pipeline.Avatar,
 	}

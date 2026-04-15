@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pubsub
+package memory
 
 import (
 	"context"
@@ -21,13 +21,17 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 )
 
 func TestPubsub(t *testing.T) {
 	var (
 		wg sync.WaitGroup
 
-		testMessage = Message{
+		testTopic = map[string]struct{}{"test": {}}
+
+		testMessage = pubsub.Message{
 			Data: []byte("test"),
 		}
 	)
@@ -35,20 +39,21 @@ func TestPubsub(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(
 		t.Context(),
 	)
-
 	broker := New()
+
+	assert.Error(t, broker.Subscribe(ctx, nil, func(pubsub.Message) {}))
 	go func() {
-		broker.Subscribe(ctx, func(message Message) { assert.Equal(t, testMessage, message); wg.Done() })
+		assert.NoError(t, broker.Subscribe(ctx, testTopic, func(message pubsub.Message) { assert.Equal(t, testMessage, message); wg.Done() }))
 	}()
 	go func() {
-		broker.Subscribe(ctx, func(_ Message) { wg.Done() })
+		assert.NoError(t, broker.Subscribe(ctx, testTopic, func(pubsub.Message) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)
 
 	wg.Add(2)
 	go func() {
-		broker.Publish(testMessage)
+		assert.NoError(t, broker.Publish(ctx, testTopic, testMessage))
 	}()
 
 	wg.Wait()

@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -60,8 +61,8 @@ func withExitCode(code int) func(*backend_types.Step) {
 	}
 }
 
-func withFailure(mode string) func(*backend_types.Step) {
-	return func(s *backend_types.Step) { s.Failure = mode }
+func withIgnoreFailure() func(*backend_types.Step) {
+	return func(s *backend_types.Step) { s.Failure = string(metadata.FailureIgnore) }
 }
 
 func withOnFailure() func(*backend_types.Step) {
@@ -271,6 +272,11 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 	buildTrace := findLastTraceByName(traces, "build")
 	require.NotNil(t, buildTrace, "build step should fail")
 	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
+	assert.True(t, buildTrace.CurrStepState.Exited, "build should have started")
+
+	buildTrace = findLastTraceByName(traces, "build")
+	require.NotNil(t, buildTrace, "build step should fail")
+	assert.EqualValues(t, 1, buildTrace.CurrStepState.ExitCode)
 
 	deployTrace := findLastTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace, "deploy step should still be traced")
@@ -336,7 +342,7 @@ func TestWorkflowFailureIgnore(t *testing.T) {
 		&backend_types.Config{
 			Stages: []*backend_types.Stage{
 				{Steps: []*backend_types.Step{
-					cmdStep("lint", withExitCode(1), withFailure(metadata.FailureIgnore)),
+					cmdStep("lint", withExitCode(1), withIgnoreFailure()),
 				}},
 				{Steps: []*backend_types.Step{cmdStep("build")}},
 			},
@@ -364,7 +370,7 @@ func TestWorkflowFailureIgnoreDoesNotSetWorkflowError(t *testing.T) {
 		&backend_types.Config{
 			Stages: []*backend_types.Stage{
 				{Steps: []*backend_types.Step{
-					cmdStep("flaky-test", withExitCode(1), withFailure(metadata.FailureIgnore)),
+					cmdStep("flaky-test", withExitCode(1), withIgnoreFailure()),
 				}},
 				{Steps: []*backend_types.Step{cmdStep("deploy")}},
 			},
@@ -386,6 +392,7 @@ func TestWorkflowFailureIgnoreDoesNotSetWorkflowError(t *testing.T) {
 
 func TestWorkflowPluginStep(t *testing.T) {
 	t.Parallel()
+	tracer := newTestTracer(t)
 	r := New(
 		&backend_types.Config{
 			Stages: []*backend_types.Stage{
@@ -394,11 +401,21 @@ func TestWorkflowPluginStep(t *testing.T) {
 			},
 		},
 		dummy.New(),
-		WithTracer(newTestTracer(t)),
+		WithTracer(tracer),
 		WithLogger(newTestLogger(t)),
 	)
 
 	assert.NoError(t, r.Run(t.Context()))
+
+	lastPluginTrace := findLastTraceByName(getTracerStates(tracer), "publish")
+	if assert.NotNil(t, lastPluginTrace) {
+		assert.EqualValues(t, map[string]string{
+			"DRONE_BUILD_STATUS":             "success",
+			"DRONE_REPO_SCM":                 "git",
+			"EXPECT_TYPE":                    "plugin",
+			"PULLREQUEST_DRONE_PULL_REQUEST": "0",
+		}, lastPluginTrace.CurrStep.Environment)
+	}
 }
 
 func TestWorkflowOOMKilledStep(t *testing.T) {
@@ -591,6 +608,7 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	assert.Error(t, err)
 	traces := getTracerStates(tracer)
 
+	assert.NotNil(t, findStartedTrace(traces, "notify"), "notify (OnFailure) should have started")
 	notifyTrace := findLastTraceByName(traces, "notify")
 	require.NotNil(t, notifyTrace)
 	assert.True(t, notifyTrace.CurrStepState.Exited, "notify should exited")
@@ -604,9 +622,6 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 	deployTrace := findFirstTraceByName(traces, "deploy")
 	require.NotNil(t, deployTrace)
 	assert.True(t, deployTrace.CurrStepState.Skipped, "deploy should be skipped after lint failure")
-
-	assert.NotNil(t, findStartedTrace(traces, "notify"),
-		"notify (OnFailure) should have started")
 }
 
 func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
@@ -616,7 +631,7 @@ func TestWorkflowIgnoredFailureFollowedByOnFailureStep(t *testing.T) {
 		&backend_types.Config{
 			Stages: []*backend_types.Stage{
 				{Steps: []*backend_types.Step{
-					cmdStep("lint", withExitCode(1), withFailure(metadata.FailureIgnore)),
+					cmdStep("lint", withExitCode(1), withIgnoreFailure()),
 				}},
 				{Steps: []*backend_types.Step{cmdStep("error-notify", withOnFailure())}},
 				{Steps: []*backend_types.Step{cmdStep("build")}},
@@ -653,4 +668,558 @@ func TestWorkflowEmptyStages(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Empty(t, getTracerStates(tracer))
+}
+
+//
+// outcome: failure
+//
+
+func TestPluginStepFailure(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("publish", withPlugin(), withExitCode(1))}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	var exitErr *pipeline_errors.ExitError
+	require.True(t, errors.As(err, &exitErr))
+	assert.Equal(t, 1, exitErr.Code)
+
+	last := findLastTraceByName(getTracerStates(tracer), "publish")
+	require.NotNil(t, last)
+	assert.True(t, last.CurrStepState.Exited)
+	assert.Equal(t, 1, last.CurrStepState.ExitCode)
+}
+
+func TestDetachedStepFailure(t *testing.T) {
+	t.Parallel()
+	// A detached step that exits non-zero; since it is detached the runtime
+	// only waits for setup, so the pipeline itself should still succeed.
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("background", withDetached(), withExitCode(1)),
+					cmdStep("build"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	// Detached step errors are not propagated to the pipeline result.
+	assert.NoError(t, r.Run(t.Context()))
+}
+
+func TestServiceStepFailure(t *testing.T) {
+	t.Parallel()
+	// A service that exits non-zero; same semantics as detached — the pipeline
+	// should still complete because services are fire-and-forget from the
+	// runtime's perspective.
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("db", withService(), withExitCode(1)),
+					cmdStep("test"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	assert.NoError(t, r.Run(t.Context()))
+}
+
+//
+// outcome: start failure
+//
+
+func TestPluginStepStartFailure(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("publish", withPlugin(), withStartFail())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+}
+
+func TestDetachedStepStartFailure(t *testing.T) {
+	t.Parallel()
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("background", withDetached(), withStartFail()),
+					cmdStep("build"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	// A detached step that fails to start should surface the error, since the
+	// runtime waits for setup to complete before continuing.
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+}
+
+func TestServiceStepStartFailure(t *testing.T) {
+	t.Parallel()
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("db", withService(), withStartFail()),
+					cmdStep("test"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+}
+
+//
+// Run condition: OnFailure for plugin / detached / service.
+//
+
+func TestPluginOnFailureStepRuns(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend_types.Step{cmdStep("notify", withPlugin(), withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "notify"),
+		"plugin OnFailure step should have started")
+
+	last := findLastTraceByName(getTracerStates(tracer), "notify")
+	require.NotNil(t, last)
+	assert.True(t, last.CurrStepState.Exited)
+	assert.Equal(t, 0, last.CurrStepState.ExitCode)
+}
+
+func TestPluginOnFailureStepSkippedOnSuccess(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("notify", withPlugin(), withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err)
+	trace := findLastTraceByName(getTracerStates(tracer), "notify")
+	trace.CurrStepState.Started = 0
+	assert.EqualValues(t, backend_types.State{Skipped: true}, trace.CurrStepState,
+		"plugin OnFailure step should not run when pipeline succeeds")
+}
+
+func TestDetachedOnFailureStepRuns(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend_types.Step{cmdStep("cleanup", withDetached(), withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "cleanup"),
+		"detached OnFailure step should have started")
+}
+
+func TestDetachedOnFailureStepSkippedOnSuccess(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("cleanup", withDetached(), withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err)
+	trace := findLastTraceByName(getTracerStates(tracer), "cleanup")
+	trace.CurrStepState.Started = 0
+	assert.EqualValues(t, backend_types.State{Skipped: true}, trace.CurrStepState,
+		"detached OnFailure step should not run when pipeline succeeds")
+}
+
+//
+// Run condition: OnSuccess=true + OnFailure=true (always-run).
+//
+
+func withAlwaysRun() func(*backend_types.Step) {
+	return func(s *backend_types.Step) { s.OnSuccess = true; s.OnFailure = true }
+}
+
+func TestAlwaysRunStepRunsOnSuccess(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("report", withAlwaysRun())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err)
+	last := findLastTraceByName(getTracerStates(tracer), "report")
+	require.NotNil(t, last, "always-run step should be traced")
+	assert.True(t, last.CurrStepState.Exited)
+	assert.Equal(t, 0, last.CurrStepState.ExitCode)
+}
+
+func TestAlwaysRunStepRunsOnFailure(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend_types.Step{cmdStep("report", withAlwaysRun())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "report"),
+		"always-run step should start even when pipeline is failing")
+
+	last := findLastTraceByName(getTracerStates(tracer), "report")
+	require.NotNil(t, last)
+	assert.True(t, last.CurrStepState.Exited)
+	assert.Equal(t, 0, last.CurrStepState.ExitCode)
+}
+
+func TestAlwaysRunPluginRunsOnFailure(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend_types.Step{cmdStep("report", withPlugin(), withAlwaysRun())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.Error(t, err)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "report"),
+		"always-run plugin step should start even when pipeline is failing")
+}
+
+//
+// Failure handling: failure=ignore for plugin.
+//
+
+func TestPluginFailureIgnore(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("lint", withPlugin(), withExitCode(1), withIgnoreFailure()),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err, "pipeline should succeed when failing plugin has failure=ignore")
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "build"),
+		"build step should run after ignored plugin failure")
+}
+
+func TestDetachedFailureIgnore(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("watcher", withDetached(), withExitCode(1), withIgnoreFailure()),
+					cmdStep("build"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.NoError(t, err)
+}
+
+//
+// Cancellation.
+//
+
+func TestWorkflowContextCancelWithPluginStep(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var stageCount int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s.CurrStepState.Exited {
+			stageCount++
+			if stageCount >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+				{Steps: []*backend_types.Step{cmdStep("publish", withPlugin())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+}
+
+func TestWorkflowContextCancelWithDetachedStep(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var stageCount int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s.CurrStepState.Exited {
+			stageCount++
+			if stageCount >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("background", withDetached()),
+					cmdStep("build"),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+}
+
+func TestWorkflowContextCancelWithServiceStep(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var stageCount int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s.CurrStepState.Exited {
+			stageCount++
+			if stageCount >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("db", withService()),
+					cmdStep("build"),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+}
+
+// TestWorkflowCancelDuringStepSleep verifies that canceling the workflow context
+// while a step is sleeping (via SLEEP env) causes the runtime to return ErrCancel
+// promptly — without waiting the full sleep duration — and that subsequent stages
+// are never executed.
+//
+// The tracer callback cancels the context the moment the first stage ("prepare")
+// completes. The "slow" step uses a short sleep so that even if WaitStep enters
+// the sleep select, the context cancellation unblocks it quickly.
+//
+// Note: we do not assert on the slow step's exit code here because Run() may
+// return (via ctx.Done()) before the stage goroutine's WaitStep completes,
+// causing DestroyWorkflow to clean up state that WaitStep still needs. The
+// exit-code-130 behavior of a canceled sleep is verified at the backend unit
+// level in TestWaitStepCanceledBySleep.
+func TestWorkflowCancelDuringStepSleep(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+
+	var prepareExited int
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).Run(func(args mock.Arguments) {
+		s, _ := args.Get(0).(*state.State)
+		if s == nil || s.CurrStep == nil {
+			return
+		}
+		// Cancel as soon as the first stage ("prepare") finishes.
+		if s.CurrStep.Name == "prepare" && s.CurrStepState.Exited {
+			prepareExited++
+			if prepareExited >= 1 {
+				cancel(nil)
+			}
+		}
+	}).Return(nil).Maybe()
+
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("prepare"),
+				}},
+				{Steps: []*backend_types.Step{
+					// Short sleep so the test doesn't hang if WaitStep enters the timer.
+					cmdStep("slow", func(s *backend_types.Step) {
+						s.Environment[dummy.EnvKeyStepSleep] = "100ms"
+					}),
+				}},
+				{Steps: []*backend_types.Step{
+					cmdStep("never-reached"),
+				}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	err := r.Run(t.Context())
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel, "canceled workflow must return ErrCancel")
+
+	// Give the orphaned stage goroutine a moment to finish tracing (best effort).
+	time.Sleep(200 * time.Millisecond)
+
+	assert.Nil(t, findFirstTraceByName(getTracerStates(tracer), "never-reached"),
+		"never-reached must not have been traced")
 }

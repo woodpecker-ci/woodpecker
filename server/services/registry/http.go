@@ -24,13 +24,15 @@ import (
 )
 
 type httpExtension struct {
-	endpoint string
-	client   *utils.Client
+	endpoint     string
+	client       *utils.Client
+	includeNetrc bool
 }
 
 type requestStructure struct {
 	Repo     *model.Repo     `json:"repo"`
 	Pipeline *model.Pipeline `json:"pipeline"`
+	Netrc    *model.Netrc    `json:"netrc,omitempty"`
 }
 
 type responseStructure struct {
@@ -44,16 +46,19 @@ type registryData struct {
 }
 
 // NewHTTP returns a new HTTP registry extension client.
-func NewHTTP(endpoint string, client *utils.Client) *httpExtension {
-	return &httpExtension{endpoint, client}
+func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) *httpExtension {
+	return &httpExtension{endpoint, client, includeNetrc}
 }
 
 // RegistryListPipeline fetches registry credentials from an external HTTP extension.
-func (h *httpExtension) RegistryListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
+func (h *httpExtension) RegistryListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Registry, error) {
 	response := new(responseStructure)
 	body := requestStructure{
 		Repo:     repo,
 		Pipeline: pipeline,
+	}
+	if h.includeNetrc {
+		body.Netrc = netrc
 	}
 
 	status, err := h.client.Send(ctx, http.MethodPost, h.endpoint, body, response)

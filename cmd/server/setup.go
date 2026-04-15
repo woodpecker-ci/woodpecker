@@ -34,8 +34,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
 	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
@@ -159,12 +160,13 @@ func setupJWTSecret(_store store.Store) (string, error) {
 func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
-	server.Config.Services.Queue, err = setupQueue(ctx, s)
+	pubsub := memory.New()
+	queue, err := setupQueue(ctx, s)
 	if err != nil {
 		return fmt.Errorf("could not setup queue: %w", err)
 	}
+	server.Config.Services.Scheduler = scheduler.NewScheduler(queue, pubsub)
 	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)

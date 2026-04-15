@@ -54,33 +54,14 @@ const (
 	authInterceptorRefreshInterval = time.Minute * 30
 )
 
-const (
-	shutdownTimeout = time.Second * 5
-)
-
-var (
-	stopAgentFunc      context.CancelCauseFunc = func(error) {}
-	shutdownCancelFunc context.CancelFunc      = func() {}
-	shutdownCtx                                = context.Background()
-)
-
 func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	log.Info().Str("version", version.String()).Msg("Starting Woodpecker agent")
 
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
-	stopAgentFunc = func(err error) {
-		msg := "shutdown of whole agent"
-		if err != nil {
-			log.Error().Err(err).Msg(msg)
-		} else {
-			log.Info().Msg(msg)
-		}
-		stopAgentFunc = func(error) {}
-		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
-		ctxCancel(err)
-	}
-	defer stopAgentFunc(nil)
-	defer shutdownCancelFunc()
+	defer func() {
+		log.Info().Msg("shutdown of whole agent")
+		ctxCancel(nil)
+	}()
 
 	serviceWaitingGroup := errgroup.Group{}
 
@@ -90,7 +71,14 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = c.Int("max-workflows")
+	maxWorkflows := c.Int("max-workflows")
+	singleWorkflow := c.Bool("single-workflow")
+	if singleWorkflow && maxWorkflows > 1 {
+		log.Warn().Msgf("max-workflows forced from %d to 1 due to agent running single workflow mode.", maxWorkflows)
+		maxWorkflows = 1
+	}
+
+	counter.Polling = maxWorkflows
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -100,6 +88,10 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				go func() {
 					<-agentCtx.Done()
 					log.Info().Msg("shutdown healthcheck server ...")
+
+					shutdownCtx, shutdownCtxCancel := agent.GetShutdownContext()
+					defer shutdownCtxCancel()
+
 					if err := server.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
 						log.Error().Err(err).Msg("shutdown healthcheck server failed")
 					} else {
@@ -201,8 +193,6 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	maxWorkflows := c.Int("max-workflows")
-
 	customLabels := make(map[string]string)
 	if err := stringSliceAddToMap(c.StringSlice("labels"), customLabels); err != nil {
 		return err
@@ -229,13 +219,16 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		<-agentCtx.Done()
 		// Remove stateless agents from server
 		if !agentConfigPersisted.Load() {
-			log.Debug().Msg("unregister agent from server ...")
-			// we want to run it explicit run when context got canceled so run it in background
-			err := client.UnregisterAgent(grpcClientCtx)
-			if err != nil {
-				log.Err(err).Msg("failed to unregister agent from server")
+			if client.IsConnected() {
+				log.Debug().Msg("unregister agent from server ...")
+				err := client.UnregisterAgent(grpcClientCtx)
+				if err != nil {
+					log.Err(err).Msg("failed to unregister agent from server")
+				} else {
+					log.Info().Msg("agent unregistered from server")
+				}
 			} else {
-				log.Info().Msg("agent unregistered from server")
+				log.Debug().Msg("skipping unregister: server not connected")
 			}
 		}
 		return nil
@@ -297,7 +290,17 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				}
 
 				log.Debug().Msg("polling new workflow")
-				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
+				if err := runner.Run(agentCtx); err != nil {
+					if errors.Is(err, agent_rpc.ErrConnectionLost) {
+						log.Error().Err(err).Msg("connection to server lost, shutting down agent")
+						ctxCancel(err)
+						return nil
+					}
+					if singleWorkflow {
+						log.Error().Err(err).Msg("runner done with error")
+						ctxCancel(nil)
+						return nil
+					}
 					log.Error().Err(err).Msg("runner error, retrying...")
 					// Check if context is canceled
 					if agentCtx.Err() != nil {
@@ -311,13 +314,23 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 						// Continue to next iteration
 					}
 				}
+
+				if singleWorkflow {
+					log.Info().Msg("shutdown single workflow runner")
+					ctxCancel(nil)
+					return nil
+				}
 			}
 		})
 	}
 
-	log.Info().Msgf(
-		"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-		version.String(), backendEngine.Name(), engInfo.Platform, maxWorkflows)
+	log.Info().
+		Str("version", version.String()).
+		Str("backend", backendEngine.Name()).
+		Str("platform", engInfo.Platform).
+		Int("parallel workflows", maxWorkflows).
+		Bool("single workflow", singleWorkflow).
+		Msg("starting Woodpecker agent")
 
 	return serviceWaitingGroup.Wait()
 }

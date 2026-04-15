@@ -78,6 +78,12 @@ var flags = []cli.Flag{
 		Value:   1,
 	},
 	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_AGENT_SINGLE_WORKFLOW"),
+		Name:    "single-workflow",
+		Usage:   "exit the agent after first workflow",
+		Value:   false,
+	},
+	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_HEALTHCHECK"),
 		Name:    "healthcheck",
 		Usage:   "enable healthcheck endpoint",

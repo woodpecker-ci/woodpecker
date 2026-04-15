@@ -51,7 +51,7 @@
             "trigger": "Executar pipeline",
             "select_branch": "Selecionar branch",
             "show_pipelines": "Mostrar pipelines",
-            "no_manual_workflows": "Não havia fluxos de trabalho executáveis manualmente, ou o filtro os excluía todos."
+            "no_manual_workflows": "Nenhum fluxo de trabalho correspondente foi encontrado. Certifique-se de que pelo menos um fluxo de trabalho seja executado no evento manual."
         },
         "not_allowed": "Você não está autorizado a acessar este repositório",
         "open_in_forge": "Abrir repositório na forja",
@@ -316,7 +316,9 @@
                 "canceled_by_user": "Cancelado por {user}",
                 "canceled_by_step": "Cancelada por causa de {step}"
             },
-            "load_more": "Carregar mais"
+            "load_more": "Carregar mais",
+            "version": "A versão do Woodpecker na qual este pipeline foi executado.",
+            "version_header": "Versão do Woodpecker"
         },
         "branches": "Branches",
         "pull_requests": "Pull requests",
@@ -685,7 +687,7 @@
     "access_denied": "Você não tem permissão para acessar esta instância",
     "no_search_results": "Nenhum resultado encontrado",
     "invalid_state": "O estado de OAuth é inválido",
-    "org_access_denied": "Você não tem permissão para acessa esta organização",
+    "org_access_denied": "Você não tem permissão para acessar esta organização",
     "login_to_cli": "Acessar com CLI",
     "abort": "Abortar",
     "cli_login_success": "Login na CLI bem-sucedido",
@@ -748,9 +750,9 @@
     "weblate": "nosso Weblate",
     "help_translating": "Você pode ajudar a traduzir Woodpecker para o seu idioma em {0}.",
     "extensions": "Extensões",
-    "extensions_description": "Extensões são serviços HTTP que podem ser chamados pelo Woodpecker em vez de usar os embutidos.",
+    "extensions_description": "Extensões são serviços HTTP que podem ser chamados pelo Woodpecker em vez de usar os nativos.",
     "extension_endpoint_placeholder": "p.ex., https://example.com/api",
-    "config_extension_endpoint": "endpoint da extensão de configuração",
+    "config_extension_endpoint": "Endpoint da extensão de configuração",
     "extensions_signatures_public_key": "Chave pública para assinaturas",
     "extensions_signatures_public_key_description": "Esta chave pública deve ser usada por suas extensões para verificar se o chamadas de webhook do Woodpecker.",
     "extensions_configuration_saved": "Configuração de extensões salva",
@@ -758,5 +760,11 @@
     "config_extension_exclusive": "Exclusiva",
     "config_extension_exclusive_desc": "Se habilitada, essa opção ignorará todas as outras formas de obter configurações, incluindo a forja.",
     "global_level_registry": "registry global",
-    "org_level_registry": "registry de organização"
+    "org_level_registry": "registry de organização",
+    "registry_extension_endpoint": "Endpoint da extensão de registry",
+    "secret_extension_endpoint": "Endpoint da extensão de segredos",
+    "secret_extension_netrc": "Incluir cerdenciais de netrc",
+    "secret_extension_netrc_desc": "Envia as credenciais de netrc da forja para a extensão de segredos.",
+    "extension_netrc": "Incluir credenciais netrc",
+    "extension_netrc_desc": "Envia credenciais netrc da forja para a extensão."
 }

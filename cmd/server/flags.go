@@ -284,10 +284,20 @@ var flags = append([]cli.Flag{
 		Name:    "config-extension-exclusive",
 		Usage:   "whether global configuration service endpoint should be exclusive (skip forge)",
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_NETRC"),
+		Name:    "config-extension-netrc",
+		Usage:   "whether global configuration extension should receive netrc data",
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_REGISTRY_EXTENSION_ENDPOINT"),
 		Name:    "registry-extension-endpoint",
 		Usage:   "url used for calling registry service endpoint",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_REGISTRY_EXTENSION_NETRC"),
+		Name:    "registry-extension-netrc",
+		Usage:   "whether global registry extension should receive netrc data",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SECRET_EXTENSION_ENDPOINT"),

@@ -21,8 +21,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
@@ -30,8 +29,7 @@ import (
 
 var Config = struct {
 	Services struct {
-		Pubsub     *pubsub.Publisher
-		Queue      queue.Queue
+		Scheduler  scheduler.Scheduler
 		Logs       logging.Log
 		Membership cache.MembershipService
 		Manager    services.Manager

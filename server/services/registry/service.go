@@ -22,7 +22,7 @@ import (
 
 // Service defines a service for managing registries.
 type Service interface {
-	RegistryListPipeline(context.Context, *model.Repo, *model.Pipeline) ([]*model.Registry, error)
+	RegistryListPipeline(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) ([]*model.Registry, error)
 	// Repository registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
 	RegistryList(*model.Repo, *model.ListOptions) ([]*model.Registry, error)

@@ -48,12 +48,12 @@ type (
 		Started     int64    `json:"started,omitempty"`
 		Finished    int64    `json:"finished,omitempty"`
 		Status      string   `json:"status,omitempty"`
-		Event       string   `json:"event,omitempty"`
+		Event       Event    `json:"event,omitempty"`
 		EventReason []string `json:"event_reason,omitempty"`
 		ForgeURL    string   `json:"forge_url,omitempty"`
 		DeployTo    string   `json:"target,omitempty"`
 		DeployTask  string   `json:"task,omitempty"`
-		Commit      Commit   `json:"commit,omitempty"`
+		Commit      Commit   `json:"commit"`
 		Parent      int64    `json:"parent,omitempty"`
 		Cron        string   `json:"cron,omitempty"`
 		Author      string   `json:"author,omitempty"`
@@ -67,7 +67,7 @@ type (
 		Refspec              string   `json:"refspec,omitempty"`
 		Branch               string   `json:"branch,omitempty"`
 		Message              string   `json:"message,omitempty"`
-		Author               Author   `json:"author,omitempty"`
+		Author               Author   `json:"author"`
 		ChangedFiles         []string `json:"changed_files,omitempty"`
 		PullRequestLabels    []string `json:"labels,omitempty"`
 		PullRequestMilestone string   `json:"milestone,omitempty"`
@@ -76,9 +76,8 @@ type (
 
 	// Author defines runtime metadata for a commit author.
 	Author struct {
-		Name   string `json:"name,omitempty"`
-		Email  string `json:"email,omitempty"`
-		Avatar string `json:"avatar,omitempty"`
+		Name  string `json:"name,omitempty"`
+		Email string `json:"email,omitempty"`
 	}
 
 	// Workflow defines runtime metadata for a workflow.

@@ -39,12 +39,16 @@ You can enable the exclusive setting (both globally and on a per-repo level). Th
 
 The extension receives an HTTP POST request with the following JSON payload:
 
+:::info
+The `netrc` field is only included in the request when the global `WOODPECKER_CONFIG_EXTENSION_NETRC` is set to `true` (default: `false`) or the per-repo "Send netrc credentials" is checked.
+:::
+
 ```ts
 class Request {
   repo: Repo;
   pipeline: Pipeline;
-  netrc: Netrc;
-  configuration: {
+  netrc?: Netrc; // only included when netrc sending is enabled (see above)
+  configuration?: {
     // list of configurations. Not send if there was none.
     name: string; // filename of the configuration file
     data: string; // content of the configuration file
@@ -131,7 +135,12 @@ Example request:
       "name": ".woodpecker.yaml",
       "data": "steps:\n  - name: backend\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yaml)\"\n"
     }
-  ]
+  ],
+  "netrc": {
+    "machine": "myforge.com",
+    "login": "myUser",
+    "password": "forge-access-token"
+  }
 }
 ```
 
