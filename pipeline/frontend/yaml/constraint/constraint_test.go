@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
@@ -33,16 +34,29 @@ func TestConstraintStatusSuccessFailure(t *testing.T) {
 		{conf: "{status: [failure]}", wantSuccess: false, wantFail: true},
 		{conf: "{status: [success]}", wantSuccess: true, wantFail: false},
 		{conf: "{status: [failure, success]}", wantSuccess: true, wantFail: true},
-		{conf: "{event: push, status: [failure, success]}", wantSuccess: true, wantFail: false},
+		{conf: "{event: push, status: [failure, success]}", wantSuccess: false, wantFail: false},
 		{conf: "{event: pull_request, status: [failure, success]}", wantSuccess: true, wantFail: true},
-		{conf: "{event: push, status: [failure]}", wantSuccess: true, wantFail: false},
+		{conf: "{event: push, status: failure}", wantSuccess: false, wantFail: false},
 		{conf: "{event: pull_request, status: [failure]}", wantSuccess: false, wantFail: true},
 		{conf: "{status: success}", wantSuccess: true, wantFail: false},
+		{conf: "[{}]", wantSuccess: true, wantFail: false},
+		{conf: "[{status: success}]", wantSuccess: true, wantFail: false},
+		{conf: "[{},{status: failure}]", wantSuccess: true, wantFail: true},
+		{conf: "[{event: push, status: success},{status: failure}]", wantSuccess: false, wantFail: true},
+		{conf: "[{status: failure},{event: push, status: success}]", wantSuccess: false, wantFail: true},
 	}
 	for _, test := range testdata {
-		c := parseConstraints(t, test.conf)
-		assert.Equal(t, test.wantSuccess, c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}), "when: '%s'", test.conf)
-		assert.Equal(t, test.wantFail, c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}), "when: '%s'", test.conf)
+		t.Run(test.conf, func(t *testing.T) {
+			c := parseConstraints(t, test.conf)
+			assert.Equalf(t,
+				test.wantSuccess,
+				c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
+				"include success is wrong for when: '%s'", test.conf)
+			assert.Equal(t,
+				test.wantFail,
+				c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
+				"include fail is wrong for when: '%s'", test.conf)
+		})
 	}
 }
 
@@ -186,7 +200,8 @@ func TestConstraints(t *testing.T) {
 }
 
 func parseConstraints(t *testing.T, s string) *When {
+	t.Helper()
 	c := &When{}
-	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
+	require.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }

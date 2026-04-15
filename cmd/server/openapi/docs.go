@@ -5964,6 +5964,31 @@ const docTemplate = `{
                 }
             }
         },
+        "metadata.Event": {
+            "type": "string",
+            "enum": [
+                "push",
+                "pull_request",
+                "pull_request_closed",
+                "pull_request_metadata",
+                "tag",
+                "release",
+                "deployment",
+                "cron",
+                "manual"
+            ],
+            "x-enum-varnames": [
+                "EventPush",
+                "EventPull",
+                "EventPullClosed",
+                "EventPullMetadata",
+                "EventTag",
+                "EventRelease",
+                "EventDeploy",
+                "EventCron",
+                "EventManual"
+            ]
+        },
         "metadata.Forge": {
             "type": "object",
             "properties": {
@@ -6023,7 +6048,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "event": {
-                    "type": "string"
+                    "$ref": "#/definitions/metadata.Event"
                 },
                 "event_reason": {
                     "type": "array",
