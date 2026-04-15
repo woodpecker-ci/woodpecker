@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -166,6 +167,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		Labels:    parsed.Labels,
 		DependsOn: parsed.DependsOn,
 		RunsOn:    parsed.RunsOn, //nolint:staticcheck // TODO: remove in next major.
+		Pending:   true,
 	}
 	if len(item.Labels) == 0 {
 		item.Labels = make(map[string]string, len(b.DefaultLabels))
@@ -180,7 +182,8 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		item.RunsOn = append(item.RunsOn, "success")
 	}
 
-	// "woodpecker-ci.org" namespace is reserved for internal use
+	// "woodpecker-ci.org" namespace is reserved for internal use — drop any
+	// user-defined labels that try to use it.
 	for key := range item.Labels {
 		if strings.HasPrefix(key, pipeline.InternalLabelPrefix) {
 			log.Debug().Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
@@ -188,22 +191,15 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		}
 	}
 
-	// TODO: handle labels for steps
-	// Add Woodpecker managed labels to the pipeline
-	// item.Labels[pipeline.LabelForgeRemoteID] = b.Forge.Name()
-	// item.Labels[pipeline.LabelRepoForgeID] = string(b.Repo.ForgeRemoteID)
-	// item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
-	// item.Labels[pipeline.LabelRepoName] = b.Repo.Name
-	// item.Labels[pipeline.LabelRepoFullName] = b.Repo.FullName
-	// item.Labels[pipeline.LabelBranch] = b.Repo.Branch
-	// item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(b.Repo.OrgID, 10)
-
-	// for stageI := range item.Config.Stages {
-	// 	for stepI := range item.Config.Stages[stageI].Steps {
-	// 		item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
-	// 		item.Config.Stages[stageI].Steps[stepI].OrgID = b.Repo.OrgID
-	// 	}
-	// }
+	// Stamp Woodpecker-managed internal labels onto the item so that the server
+	// and backends can use them for routing, observability, etc.
+	item.Labels[pipeline.LabelForgeRemoteID] = workflowMetadata.Forge.Type
+	item.Labels[pipeline.LabelRepoForgeID] = workflowMetadata.Repo.RemoteID
+	item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(workflowMetadata.Repo.ID, 10)
+	item.Labels[pipeline.LabelRepoName] = workflowMetadata.Repo.Name
+	item.Labels[pipeline.LabelRepoFullName] = workflowMetadata.Repo.Owner + "/" + workflowMetadata.Repo.Name
+	item.Labels[pipeline.LabelBranch] = workflowMetadata.Repo.Branch
+	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(workflowMetadata.Repo.OrgID, 10)
 
 	return item, errorsAndWarnings
 }

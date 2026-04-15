@@ -681,7 +681,7 @@ steps:
 }
 
 type testMetadata struct {
-	pipelineEvent string
+	pipelineEvent metadata.Event
 	branch        string
 	repo          string
 }

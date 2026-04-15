@@ -65,6 +65,7 @@ func (s *ServerMetadata) GetWorkflowMetadata(workflow *builder.Workflow) metadat
 			ID:          s.repo.ID,
 			Name:        s.repo.Name,
 			Owner:       s.repo.Owner,
+			OrgID:       s.repo.OrgID,
 			RemoteID:    fmt.Sprint(s.repo.ForgeRemoteID),
 			ForgeURL:    s.repo.ForgeURL,
 			CloneURL:    s.repo.Clone,

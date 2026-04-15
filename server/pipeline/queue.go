@@ -26,19 +26,19 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*builder.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if !item.Pending {
 			continue
 		}
 		task := &model.Task{
-			ID:     fmt.Sprint(item.Workflow.ID),
-			PID:    item.Workflow.PID,
-			Name:   item.Workflow.Name,
-			Labels: make(map[string]string),
-			// PipelineID: item.Workflow.PipelineID, // TODO
-			RepoID: repo.ID,
+			ID:         fmt.Sprint(item.Workflow.ID),
+			PID:        item.Workflow.PID,
+			Name:       item.Workflow.Name,
+			Labels:     make(map[string]string),
+			PipelineID: activePipeline.ID,
+			RepoID:     repo.ID,
 		}
 		maps.Copy(task.Labels, item.Labels)
 		err := task.ApplyLabelsFromRepo(repo)

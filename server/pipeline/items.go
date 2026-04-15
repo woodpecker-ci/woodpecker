@@ -162,9 +162,27 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 		err = updatePipelinePending(c, forge, store, currentPipeline, repo, user)
 	}
 
+	enrichPipelineItemSteps(pipelineItems, repo)
 	currentPipeline = applyWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems)
 
 	return currentPipeline, pipelineItems, err
+}
+
+// enrichPipelineItemSteps stamps server-side fields onto the backend step
+// definitions inside each item's compiled config.
+//
+// TODO(6444): OrgID and WorkflowLabels on backend/types.Step are Kubernetes-specific
+// and should be moved to step.BackendOptions so that generic step types carry
+// no backend-specific fields.
+func enrichPipelineItemSteps(items []*builder.Item, repo *model.Repo) {
+	for _, item := range items {
+		for stageI := range item.Config.Stages {
+			for stepI := range item.Config.Stages[stageI].Steps {
+				item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+				item.Config.Stages[stageI].Steps[stepI].OrgID = repo.OrgID
+			}
+		}
+	}
 }
 
 // applyWorkflowsFromPipelineBuilder is the link between pipeline representation in "pipeline package" and server
@@ -189,6 +207,8 @@ func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeli
 			return nil
 		}
 
+		workflow.PipelineID = pipeline.ID
+
 		if pipeline.Status == model.StatusBlocked {
 			workflow.State = model.StatusBlocked
 		}
@@ -207,11 +227,6 @@ func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeli
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
 				}
-
-				// TODO: this was added why?
-				// if !item.Pending {
-				// 	step.State = model.StatusSkipped
-				// }
 
 				if pipeline.Status == model.StatusBlocked {
 					step.State = model.StatusBlocked
