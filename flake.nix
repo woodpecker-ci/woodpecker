@@ -29,8 +29,8 @@
               # frontend
               nodejs_24
               pnpm
-              nodePackages.typescript
-              nodePackages.typescript-language-server
+              typescript
+              typescript-language-server
 
               # backend
               go

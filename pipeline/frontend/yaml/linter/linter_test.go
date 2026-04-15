@@ -88,6 +88,9 @@ steps:
     <<: *base-step
     image: golang:latest
 `,
+	}, {
+		Title: "explicitly privileged container",
+		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
 	}}
 
 	for _, testd := range testdatas {
