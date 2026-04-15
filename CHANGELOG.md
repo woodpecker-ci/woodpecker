@@ -15,6 +15,7 @@
 
 ### 📈 Enhancement
 
+- Move skip pipeline by commit message into pipeline/frontend package [[#6437](https://github.com/woodpecker-ci/woodpecker/pull/6437)]
 - Init server/scheduler package and use it as proxy for queue&pubsub [[#6418](https://github.com/woodpecker-ci/woodpecker/pull/6418)]
 - refactor(server): unify api parameters to snake case [[#6404](https://github.com/woodpecker-ci/woodpecker/pull/6404)]
 
@@ -43,6 +44,8 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.18.0 [[#6439](https://github.com/woodpecker-ci/woodpecker/pull/6439)]
+- Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.1 [[#6438](https://github.com/woodpecker-ci/woodpecker/pull/6438)]
 - Lock file maintenance [[#6430](https://github.com/woodpecker-ci/woodpecker/pull/6430)]
 - Update dependency dotenv to v17.4.2 [[#6428](https://github.com/woodpecker-ci/woodpecker/pull/6428)]
 - Update dependency simple-icons to v16.16.0 [[#6427](https://github.com/woodpecker-ci/woodpecker/pull/6427)]
