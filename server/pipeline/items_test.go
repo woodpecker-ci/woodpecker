@@ -20,12 +20,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types" //nolint:depguard // needed to construct builder.Item.Config in tests; will be resolved when backend-specific fields move to BackendOptions (see enrichPipelineItemSteps TODO)
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
@@ -40,8 +40,13 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 		Event: model.EventPush,
 	}
 
-	pipelineItems := []*step_builder.Item{{
-		Workflow: &model.Workflow{
+	workflow := &model.Workflow{
+		ID: 1,
+	}
+
+	pipelineItems := []*builder.Item{{
+		Workflow: &builder.Workflow{
+			ID:  1,
 			PID: 1,
 		},
 		Config: &backend_types.Config{
@@ -63,7 +68,11 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 			},
 		},
 	}}
-	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
+
+	s := store_mocks.NewMockStore(t)
+	s.On("WorkflowLoad", mock.Anything).Return(workflow, nil)
+
+	pipeline = applyWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems)
 	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}
