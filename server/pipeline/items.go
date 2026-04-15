@@ -51,6 +51,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
+
 	var secrets []compiler.Secret
 	for _, sec := range secs {
 		var events []pipeline_metadata.Event
@@ -71,6 +72,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
+
 	var registries []compiler.Registry
 	for _, reg := range regs {
 		registries = append(registries, compiler.Registry{
@@ -139,7 +141,6 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
 		},
 	}
-
 	return b.Build()
 }
 
