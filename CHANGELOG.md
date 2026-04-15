@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0-rc.0) - 2026-04-15
+## [3.14.0-rc.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0-rc.1) - 2026-04-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.1 [[#6440](https://github.com/woodpecker-ci/woodpecker/pull/6440)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.18.0 [[#6439](https://github.com/woodpecker-ci/woodpecker/pull/6439)]
 - Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.1 [[#6438](https://github.com/woodpecker-ci/woodpecker/pull/6438)]
 - Lock file maintenance [[#6430](https://github.com/woodpecker-ci/woodpecker/pull/6430)]
