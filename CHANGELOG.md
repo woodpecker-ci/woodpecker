@@ -72,6 +72,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix race in server LogEntry logger [[#6449](https://github.com/woodpecker-ci/woodpecker/pull/6449)]
 - Kubernetes: detached steps are no services [[#6435](https://github.com/woodpecker-ci/woodpecker/pull/6435)]
 - Support dots in image names [[#6431](https://github.com/woodpecker-ci/woodpecker/pull/6431)]
 - Fix erroneous linter error for plugin privileges [[#6424](https://github.com/woodpecker-ci/woodpecker/pull/6424)]
@@ -111,6 +112,7 @@
 
 ### 🧪 Tests
 
+- Enhance datastore DB test setup [[#6450](https://github.com/woodpecker-ci/woodpecker/pull/6450)]
 - Dummy backend support cancel [[#6390](https://github.com/woodpecker-ci/woodpecker/pull/6390)]
 - Extend workflow integration tests [[#6272](https://github.com/woodpecker-ci/woodpecker/pull/6272)]
 - Add registry service tests [[#6330](https://github.com/woodpecker-ci/woodpecker/pull/6330)]
