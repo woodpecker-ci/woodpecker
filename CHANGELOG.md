@@ -165,6 +165,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.4.5 [[#6447](https://github.com/woodpecker-ci/woodpecker/pull/6447)]
 - Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.1 [[#6440](https://github.com/woodpecker-ci/woodpecker/pull/6440)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.18.0 [[#6439](https://github.com/woodpecker-ci/woodpecker/pull/6439)]
 - Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.1 [[#6438](https://github.com/woodpecker-ci/woodpecker/pull/6438)]
