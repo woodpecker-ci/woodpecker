@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- docs: bump follow-redirects [[#6441](https://github.com/woodpecker-ci/woodpecker/pull/6441)]
 - chore(deps): update dependency axios to v1.15.0 [security] [[#6417](https://github.com/woodpecker-ci/woodpecker/pull/6417)]
 - fix(deps): update go.opentelemetry.io/otel to v1.43.0 [[#6416](https://github.com/woodpecker-ci/woodpecker/pull/6416)]
 - WebUI: remove "lodash" dep [[#6369](https://github.com/woodpecker-ci/woodpecker/pull/6369)]
@@ -30,7 +31,7 @@
 
 - Docker backend should retry to delete volume on "in use" error [[#6381](https://github.com/woodpecker-ci/woodpecker/pull/6381)]
 - Move skip pipeline by commit message into pipeline/frontend package [[#6437](https://github.com/woodpecker-ci/woodpecker/pull/6437)]
-- Init server/scheduler package and use it as proxy for queue&pubsub [[#6418](https://github.com/woodpecker-ci/woodpecker/pull/6418)]
+- Init `server/scheduler` package and use it as proxy for queue & pubsub [[#6418](https://github.com/woodpecker-ci/woodpecker/pull/6418)]
 - refactor(server): unify api parameters to snake case [[#6404](https://github.com/woodpecker-ci/woodpecker/pull/6404)]
 - Add netrc option for config/registry extension [[#6333](https://github.com/woodpecker-ci/woodpecker/pull/6333)]
 - Migrate to moby [[#6357](https://github.com/woodpecker-ci/woodpecker/pull/6357)]
@@ -123,7 +124,6 @@
 
 - Update dependency marked to v18 [[#6425](https://github.com/woodpecker-ci/woodpecker/pull/6425)]
 - Update docs npm deps non-major [[#6422](https://github.com/woodpecker-ci/woodpecker/pull/6422)]
-- chore(deps): update dependency marked to v17.0.6 [[#6386](https://github.com/woodpecker-ci/woodpecker/pull/6386)]
 - chore(deps): update dependency fuse.js to v7.3.0 [[#6382](https://github.com/woodpecker-ci/woodpecker/pull/6382)]
 - chore(deps): update docs npm deps non-major [[#6376](https://github.com/woodpecker-ci/woodpecker/pull/6376)]
 - chore(deps): update dependency typescript to v6 [[#6336](https://github.com/woodpecker-ci/woodpecker/pull/6336)]
