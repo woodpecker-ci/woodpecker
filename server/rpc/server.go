@@ -61,7 +61,7 @@ func NewWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, stor
 // It is using a caller-supplied prometheus registry.
 // Use this in tests to avoid "duplicate metrics collector registration" panics when the server is created multiple times.
 // (promauto in NewWoodpeckerServer registers into the global default registry, which panics on duplicate names).
-func NewTestWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub pubsub.PubSub, store store.Store, registry *prometheus.Registry) proto.WoodpeckerServer {
+func NewTestWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, store store.Store, registry *prometheus.Registry) proto.WoodpeckerServer {
 	factory := promauto.With(registry)
 	pipelineTime := factory.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
@@ -75,8 +75,7 @@ func NewTestWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub pubsu
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
 		store:         store,
-		queue:         queue,
-		pubsub:        pubsub,
+		scheduler:     scheduler,
 		logger:        logger,
 		pipelineTime:  pipelineTime,
 		pipelineCount: pipelineCount,

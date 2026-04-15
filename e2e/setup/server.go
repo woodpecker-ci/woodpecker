@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	server_rpc "go.woodpecker-ci.org/woodpecker/v3/server/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -182,9 +183,8 @@ func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 	)
 
 	proto.RegisterWoodpeckerServer(grpcServer, server_rpc.NewTestWoodpeckerServer(
-		server.Config.Services.Queue,
+		scheduler.NewScheduler(server.Config.Services.Queue, server.Config.Services.Pubsub),
 		server.Config.Services.Logs,
-		server.Config.Services.Pubsub,
 		s,
 		prometheus.NewRegistry(),
 	))
