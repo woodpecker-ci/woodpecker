@@ -81,6 +81,9 @@ func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]
 }
 
 func (when *When) IncludesStatusFailure(metadata metadata.Metadata, global bool, env map[string]string) bool {
+	if when.IsEmpty() {
+		return false
+	}
 	for _, c := range when.Constraints {
 		if matches, err := c.Match(metadata, global, env); err == nil && matches {
 			if slices.Contains(c.Status, statusFailure) {
@@ -100,14 +103,13 @@ func (when *When) IncludesStatusSuccess(metadata metadata.Metadata, global bool,
 		return true
 	}
 	for _, c := range when.Constraints {
-		matches, err := c.Match(metadata, global, env)
 		if matches, err := c.Match(metadata, global, env); err == nil && matches {
-			if len(c.Status) > 0 && !slices.Contains(c.Status, statusSuccess) {
-				return false
+			if len(c.Status) == 0 || slices.Contains(c.Status, statusSuccess) {
+				return true
 			}
 		}
 	}
-	return true
+	return false
 }
 
 // False if (any) non local.
