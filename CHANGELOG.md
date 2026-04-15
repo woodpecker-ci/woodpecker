@@ -25,8 +25,8 @@
 - Fix erroneous linter error for plugin privileges [[#6424](https://github.com/woodpecker-ci/woodpecker/pull/6424)]
 - fix: add connection timeout and graceful shutdown to agent RPC client [[#6414](https://github.com/woodpecker-ci/woodpecker/pull/6414)]
 - Fix Windows container exit code handling and error checks [[#6411](https://github.com/woodpecker-ci/woodpecker/pull/6411)]
-- Remove usage of deprecated /user/permissions/repositories [[#6401](https://github.com/woodpecker-ci/woodpecker/pull/6401)]
-- Fix parsing /user/workspaces response [[#6396](https://github.com/woodpecker-ci/woodpecker/pull/6396)]
+- Bitbucket: Remove usage of deprecated /user/permissions/repositories [[#6401](https://github.com/woodpecker-ci/woodpecker/pull/6401)]
+- Bitbucket: Fix parsing /user/workspaces response [[#6396](https://github.com/woodpecker-ci/woodpecker/pull/6396)]
 - Fix CLI exec with workflow matrix feature, where variables are not substituted. [[#6162](https://github.com/woodpecker-ci/woodpecker/pull/6162)]
 - Fix enable repo with same name and owner on second forge [[#6375](https://github.com/woodpecker-ci/woodpecker/pull/6375)]
 
@@ -53,8 +53,6 @@
 - Update web npm deps non-major [[#6423](https://github.com/woodpecker-ci/woodpecker/pull/6423)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.8.2 [[#6421](https://github.com/woodpecker-ci/woodpecker/pull/6421)]
 - Update dependency golang to v1.26.2 [[#6420](https://github.com/woodpecker-ci/woodpecker/pull/6420)]
-- fix(deps): update golang-packages [[#6419](https://github.com/woodpecker-ci/woodpecker/pull/6419)]
-- fix(deps): update golang-packages [[#6410](https://github.com/woodpecker-ci/woodpecker/pull/6410)]
 - fix(deps): update module github.com/docker/cli to v29.4.0+incompatible [[#6403](https://github.com/woodpecker-ci/woodpecker/pull/6403)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.41 [[#6397](https://github.com/woodpecker-ci/woodpecker/pull/6397)]
 - chore(deps): lock file maintenance [[#6392](https://github.com/woodpecker-ci/woodpecker/pull/6392)]
@@ -66,7 +64,6 @@
 - chore(deps): update dependency @antfu/eslint-config to v8 [[#6378](https://github.com/woodpecker-ci/woodpecker/pull/6378)]
 - chore(deps): update web npm deps non-major [[#6377](https://github.com/woodpecker-ci/woodpecker/pull/6377)]
 - fix(deps): update module github.com/lib/pq to v1.12.2 [[#6371](https://github.com/woodpecker-ci/woodpecker/pull/6371)]
-- fix(deps): update module gitlab.com/gitlab-org/api/client-go/v2 to v2.13.0 [[#6366](https://github.com/woodpecker-ci/woodpecker/pull/6366)]
 
 ### Misc
 
