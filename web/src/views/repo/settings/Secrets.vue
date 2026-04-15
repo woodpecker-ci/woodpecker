@@ -40,6 +40,7 @@ import { usePagination } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import { WebhookEvents } from '~/lib/api/types';
 import type { Secret } from '~/lib/api/types';
+import { deepClone } from '~/lib/utils';
 
 const emptySecret: Partial<Secret> = {
   name: '',
@@ -128,11 +129,11 @@ const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (
 });
 
 function editSecret(secret: Secret) {
-  selectedSecret.value = structuredClone(secret);
+  selectedSecret.value = deepClone(secret);
 }
 
 function showAddSecret() {
-  selectedSecret.value = structuredClone(emptySecret);
+  selectedSecret.value = deepClone(emptySecret);
 }
 
 useWPTitle(computed(() => [i18n.t('secrets.secrets'), repo.value.full_name]));
