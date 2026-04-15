@@ -72,6 +72,7 @@
 
 ### 🐛 Bug Fixes
 
+- Kubernetes: detached steps are no services [[#6435](https://github.com/woodpecker-ci/woodpecker/pull/6435)]
 - Support dots in image names [[#6431](https://github.com/woodpecker-ci/woodpecker/pull/6431)]
 - Fix erroneous linter error for plugin privileges [[#6424](https://github.com/woodpecker-ci/woodpecker/pull/6424)]
 - fix: add connection timeout and graceful shutdown to agent RPC client [[#6414](https://github.com/woodpecker-ci/woodpecker/pull/6414)]
