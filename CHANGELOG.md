@@ -72,6 +72,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix race in pipeline runtime [[#6451](https://github.com/woodpecker-ci/woodpecker/pull/6451)]
 - Fix race in server LogEntry logger [[#6449](https://github.com/woodpecker-ci/woodpecker/pull/6449)]
 - Kubernetes: detached steps are no services [[#6435](https://github.com/woodpecker-ci/woodpecker/pull/6435)]
 - Support dots in image names [[#6431](https://github.com/woodpecker-ci/woodpecker/pull/6431)]
