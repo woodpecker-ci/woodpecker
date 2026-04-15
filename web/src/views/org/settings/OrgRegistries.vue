@@ -48,6 +48,7 @@ import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Registry } from '~/lib/api/types';
+import { deepClone } from '~/lib/utils';
 
 const emptyRegistry: Partial<Registry> = {
   address: '',
@@ -130,11 +131,11 @@ const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async
 });
 
 function editRegistry(registry: Registry) {
-  selectedRegistry.value = structuredClone(registry);
+  selectedRegistry.value = deepClone(registry);
 }
 
 function showAddRegistry() {
-  selectedRegistry.value = structuredClone(emptyRegistry);
+  selectedRegistry.value = deepClone(emptyRegistry);
 }
 
 useWPTitle(computed(() => [i18n.t('registries.registries'), org.value.name]));

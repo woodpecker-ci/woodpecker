@@ -17,6 +17,7 @@ package model
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
 type Pipeline struct {
@@ -100,7 +101,7 @@ func (p Pipeline) IsMultiPipeline() bool {
 
 // IsPullRequest checks if it's a PR event.
 func (p Pipeline) IsPullRequest() bool {
-	return p.Event == EventPull || p.Event == EventPullClosed || p.Event == EventPullMetadata
+	return metadata.Event(p.Event).IsPull()
 }
 
 type PipelineOptions struct {

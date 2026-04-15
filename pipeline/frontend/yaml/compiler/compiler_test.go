@@ -29,7 +29,7 @@ import (
 func TestSecretAvailable(t *testing.T) {
 	secret := Secret{
 		AllowedPlugins: []string{},
-		Events:         []string{"push"},
+		Events:         []metadata.Event{"push"},
 	}
 	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
@@ -40,7 +40,7 @@ func TestSecretAvailable(t *testing.T) {
 	secret = Secret{
 		Name:           "foo",
 		AllowedPlugins: []string{"golang"},
-		Events:         []string{"push"},
+		Events:         []metadata.Event{"push"},
 	}
 	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Name:     "step",
@@ -440,18 +440,18 @@ func TestSecretMatch(t *testing.T) {
 	tcl := []*struct {
 		name   string
 		secret Secret
-		event  string
+		event  metadata.Event
 		match  bool
 	}{
 		{
 			name:   "should match event",
-			secret: Secret{Events: []string{"pull_request"}},
+			secret: Secret{Events: []metadata.Event{"pull_request"}},
 			event:  "pull_request",
 			match:  true,
 		},
 		{
 			name:   "should not match event",
-			secret: Secret{Events: []string{"pull_request"}},
+			secret: Secret{Events: []metadata.Event{"pull_request"}},
 			event:  "push",
 			match:  false,
 		},
@@ -463,13 +463,13 @@ func TestSecretMatch(t *testing.T) {
 		},
 		{
 			name:   "pull close should match pull",
-			secret: Secret{Events: []string{"pull_request"}},
+			secret: Secret{Events: []metadata.Event{"pull_request"}},
 			event:  "pull_request_closed",
 			match:  true,
 		},
 		{
 			name:   "pull metadata change should match pull",
-			secret: Secret{Events: []string{"pull_request"}},
+			secret: Secret{Events: []metadata.Event{"pull_request"}},
 			event:  "pull_request_metadata",
 			match:  true,
 		},
