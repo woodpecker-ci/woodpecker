@@ -92,18 +92,13 @@
                 invisible: group.lines.length === 0,
               }"
             />
-            <a
-              :id="`L${group.command?.number}`"
-              :href="`#L${group.command?.number}`"
-              class="text-wp-code-text-alt-100 mr-4 select-none"
-              :class="{
-                underline: group.command && isSelected(group.command),
-              }"
-            >
-              {{ group.command?.number }}
-            </a>
             <!-- eslint-disable vue/no-v-html -->
-            <span v-if="group.command" class="flex-1 truncate" v-html="group.command.text" />
+            <span
+              v-if="group.command"
+              :id="`L${group.command?.number}`"
+              class="flex-1 truncate"
+              v-html="group.command.text?.substring(2)"
+            />
           </div>
 
           <template v-if="!collapsedCommands.has(group.id)">
@@ -569,13 +564,13 @@ watch(step, async (newStep, oldStep) => {
 
 const expandLogGroupWithPageHash = (hash: string) => {
   if (hash.startsWith('#L')) {
-      const lineNum = Number.parseInt(hash.substring(2));
-      const parentGroup = groupedLogs.value.find((g) => lineNum === g.id || g.lines.some((l) => l.number === lineNum));
-      if (parentGroup && collapsedCommands.value.has(parentGroup.id)) {
-        collapsedCommands.value.delete(parentGroup.id);
-      }
+    const lineNum = Number.parseInt(hash.substring(2));
+    const parentGroup = groupedLogs.value.find((g) => lineNum === g.id || g.lines.some((l) => l.number === lineNum));
+    if (parentGroup && collapsedCommands.value.has(parentGroup.id)) {
+      collapsedCommands.value.delete(parentGroup.id);
     }
-}
+  }
+};
 
 // When user click on a step, if the step has already finished running, show user the
 // only the outline by collapse all log groups
@@ -587,7 +582,7 @@ watch(loadedLogs, async (isLoaded, wasLoaded) => {
       // Wait for groupedLogs computed property to update
       await nextTick();
       collapseAll();
-      expandLogGroupWithPageHash(route.hash)
+      expandLogGroupWithPageHash(route.hash);
     }
   }
 });
@@ -596,7 +591,7 @@ watch(loadedLogs, async (isLoaded, wasLoaded) => {
 watch(
   () => route.hash,
   (newHash) => {
-    expandLogGroupWithPageHash(newHash)
+    expandLogGroupWithPageHash(newHash);
   },
   { immediate: true },
 );
