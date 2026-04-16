@@ -253,6 +253,7 @@
   ],
   "ignorePaths": [
     ".cspell.json",
+    "e2e/**",
     ".git/**/*",
     ".gitignore",
     ".golangci.yaml",

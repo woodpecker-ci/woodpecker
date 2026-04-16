@@ -1,3 +1,4 @@
 ignore:
   - '**/mocks/mock_*.go'
   - '**/fixtures/*.go'
+  - 'e2e/**/*.go'

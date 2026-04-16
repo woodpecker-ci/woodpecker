@@ -1,0 +1,11 @@
+steps:
+  - name: test
+    image: dummy
+    commands:
+      - echo running tests
+
+services:
+  - name: db
+    image: dummy
+    environment:
+      SLEEP: '100ms'
