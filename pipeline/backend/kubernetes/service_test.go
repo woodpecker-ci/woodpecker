@@ -120,7 +120,7 @@ func TestStopHeadlessService(t *testing.T) {
 		assert.NoError(t, err, "expected no error when getting the created service")
 
 		// act
-		err = stopHeadlessService(context.Background(), engine, "foo", "11301")
+		err = engine.stopHeadlessService(context.Background(), engine, "foo", "11301")
 		assert.NoError(t, err, "expected no error when deleting headless service")
 
 		// assert
@@ -135,7 +135,7 @@ func TestStopHeadlessService(t *testing.T) {
 			config: &config{Namespace: "test-namespace"},
 		}
 
-		err := stopHeadlessService(context.Background(), engine, "foo", "nonexistent")
+		err := engine.stopHeadlessService(context.Background(), engine, "foo", "nonexistent")
 		assert.NoError(t, err, "expected no error when deleting a non-existent service")
 	})
 
@@ -145,7 +145,7 @@ func TestStopHeadlessService(t *testing.T) {
 			config: &config{Namespace: "test-namespace"},
 		}
 
-		err := stopHeadlessService(context.Background(), engine, "test-namespace", "invalid_task_uuid!")
+		err := engine.stopHeadlessService(context.Background(), engine, "test-namespace", "invalid_task_uuid!")
 		assert.Error(t, err, "expected error due to invalid task UUID")
 	})
 }
