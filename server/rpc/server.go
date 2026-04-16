@@ -57,6 +57,32 @@ func NewWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, stor
 	return &WoodpeckerServer{peer: peer}
 }
 
+// NewTestWoodpeckerServer creates a WoodpeckerServer for e2e tests.
+// It is using a caller-supplied prometheus registry.
+// Use this in tests to avoid "duplicate metrics collector registration" panics when the server is created multiple times.
+// (promauto in NewWoodpeckerServer registers into the global default registry, which panics on duplicate names).
+func NewTestWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, store store.Store, registry *prometheus.Registry) proto.WoodpeckerServer {
+	factory := promauto.With(registry)
+	pipelineTime := factory.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "woodpecker",
+		Name:      "pipeline_time",
+		Help:      "Pipeline time.",
+	}, []string{"repo", "branch", "status", "pipeline"})
+	pipelineCount := factory.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "woodpecker",
+		Name:      "pipeline_count",
+		Help:      "Pipeline count.",
+	}, []string{"repo", "branch", "status", "pipeline"})
+	peer := RPC{
+		store:         store,
+		scheduler:     scheduler,
+		logger:        logger,
+		pipelineTime:  pipelineTime,
+		pipelineCount: pipelineCount,
+	}
+	return &WoodpeckerServer{peer: peer}
+}
+
 // Version returns the server- & grpc-version.
 func (s *WoodpeckerServer) Version(_ context.Context, _ *proto.Empty) (*proto.VersionResponse, error) {
 	return &proto.VersionResponse{

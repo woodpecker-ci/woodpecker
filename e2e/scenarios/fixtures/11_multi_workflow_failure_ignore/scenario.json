@@ -1,0 +1,13 @@
+{
+  "name": "two workflows one fails pipeline is failure",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_workflows": [
+    { "name": "flaky", "status": "failure" },
+    { "name": "main", "status": "success" }
+  ],
+  "expected_steps": [
+    { "name": "build", "status": "success", "exit_code": 0 },
+    { "name": "flaky", "status": "failure", "exit_code": 1 }
+  ]
+}
