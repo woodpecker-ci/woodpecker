@@ -17,7 +17,6 @@ package docker
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -28,7 +27,7 @@ type config struct {
 	network       string
 	volumes       []string
 	resourceLimit resourceLimit
-	stopTimeout   time.Duration
+	stopTimeout   int64
 }
 
 type resourceLimit struct {
