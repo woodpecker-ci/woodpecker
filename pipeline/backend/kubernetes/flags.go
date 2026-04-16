@@ -131,7 +131,7 @@ var Flags = []cli.Flag{
 	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_STOP_TIMEOUT"),
 		Name:    "backend-k8s-stop-timeout",
-		Usage:   "seconds woodpecker waits for graceful stopping pods till forcefully killing them",
+		Usage:   "seconds Woodpecker waits for pods to stop gracefully before forcefully killing them",
 		Value:   180,
 	},
 }
