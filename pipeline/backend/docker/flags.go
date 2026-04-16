@@ -56,6 +56,12 @@ var Flags = []cli.Flag{
 		Name:    "backend-docker-volumes",
 		Usage:   "backend docker volumes (comma separated)",
 	},
+	&cli.Int64Flag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_STOP_TIMEOUT"),
+		Name:    "backend-docker-stop-timeout",
+		Usage:   "seconds Woodpecker waits for a container to stop gracefully before forcefully killing it",
+		Value:   180, //nolint:mnd
+	},
 	//
 	// resource limit parameters
 	//
