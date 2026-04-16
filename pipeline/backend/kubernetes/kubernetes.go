@@ -485,7 +485,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
-	err := stopHeadlessService(ctx, e, namespace, taskUUID)
+	err := e.stopHeadlessService(ctx, e, namespace, taskUUID)
 	if err != nil {
 		return err
 	}
