@@ -1152,10 +1152,9 @@ Fully qualified public forge URL, used if forge url is not a public URL. Format:
 - Default: true
 
 :::warning
-Since v3.14.0, woodpecker is able to report status of services and detached steps back.
-As they now can also fail, till we release a v4.0.0, we have to preserve the old behavior,
-to do this we force ignore status changes by default.
-Still we encourage you to disable this option and fix your pipeline config.
+Since v3.14.0, Woodpecker can report the status of services and detached steps.
+Because these can now fail, until v4.0.0 is released, service failures are ignored by default to preserve backward compatibility.
+We encourage you to disable this option and update your pipeline configuration.
 :::
 
 ---

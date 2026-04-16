@@ -266,7 +266,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	// TODO: remove with version 4.x
 	server.Config.Pipeline.ForceIgnoreServiceFailure = c.Bool("force-ignore-service-failure")
 	if server.Config.Pipeline.ForceIgnoreServiceFailure {
-		log.Info().Msg("WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE is true by default, to prepare for upcoming versions set it to false and update your pipeline definitions if needed")
+		log.Info().Msg("WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE is true by default. To prepare for v4.0.0, set it to false and update your pipeline definitions if needed.")
 	}
 
 	// prometheus

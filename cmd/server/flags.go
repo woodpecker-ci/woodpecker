@@ -410,7 +410,7 @@ var flags = append([]cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE"),
 		Name:    "force-ignore-service-failure",
-		Usage:   "from v3.14.0 onwards detached steps & services do report it's status back, to preserver old behavior we still ignore fails by default",
+		Usage:   "From v3.14.0 onwards, detached steps and services report their status back. To preserve the old behavior, service failures are ignored by default until v4.0.0.",
 		Value:   true,
 	},
 	//
