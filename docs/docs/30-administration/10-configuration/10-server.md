@@ -1146,6 +1146,20 @@ Fully qualified public forge URL, used if forge url is not a public URL. Format:
 
 ---
 
+### FORCE_IGNORE_SERVICE_FAILURE
+
+- Name: `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE`
+- Default: true
+
+:::warning
+Since v3.14.0, woodpecker is able to report status of services and detached steps back.
+As they now can also fail, till we release a v4.0.0, we have to preserve the old behavior,
+to do this we force ignore status changes by default.
+Still we encourage you to disable this option and fix your pipeline config.
+:::
+
+---
+
 ### GITHUB\_\*
 
 See [GitHub configuration](./12-forges/20-github.md#configuration)
