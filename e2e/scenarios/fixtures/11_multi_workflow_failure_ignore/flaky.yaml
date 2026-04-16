@@ -1,0 +1,11 @@
+skip_clone: true
+
+steps:
+  - name: flaky
+    image: dummy
+    environment:
+      STEP_EXIT_CODE: '1'
+    commands:
+      - echo flaky step
+    when:
+      - failure: ignore
