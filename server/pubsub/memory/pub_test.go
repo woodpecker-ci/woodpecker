@@ -30,11 +30,14 @@ func TestPubsubConcurrentCancel(t *testing.T) {
 	testTopic := map[string]struct{}{"test": {}}
 	broker := New()
 
-	for range 50 {
+	for range 100 {
 		ctx, cancel := context.WithCancelCause(t.Context())
-		ch := make(chan []byte, 1)
+		ch := make(chan []byte) // Unbuffered to force blocking sends
 
+		var wg sync.WaitGroup
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			_ = broker.Subscribe(ctx, testTopic, func(m pubsub.Message) {
 				select {
 				case <-ctx.Done():
@@ -43,17 +46,19 @@ func TestPubsubConcurrentCancel(t *testing.T) {
 			})
 		}()
 
-		<-time.After(10 * time.Millisecond)
-
-		var wg sync.WaitGroup
-		for range 10 {
-			wg.Add(1)
+		// Start publishing many messages to increase chance of blocking send
+		var pubWg sync.WaitGroup
+		for range 100 {
+			pubWg.Add(1)
 			go func() {
-				defer wg.Done()
+				defer pubWg.Done()
 				_ = broker.Publish(ctx, testTopic, pubsub.Message{Data: []byte("x")})
 			}()
 		}
+
+		// Cancel while publishes are in flight to race with pending sends
 		cancel(nil)
+		pubWg.Wait()
 		wg.Wait()
 	}
 }
