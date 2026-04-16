@@ -90,7 +90,6 @@ func EventStreamSSE(c *gin.Context) {
 
 	defer func() {
 		cancel(nil)
-		close(eventChan)
 		log.Debug().Msg("user feed: connection closed")
 	}()
 
@@ -99,9 +98,7 @@ func EventStreamSSE(c *gin.Context) {
 			func(m pubsub.Message) {
 				select {
 				case <-ctx.Done():
-					return
-				default:
-					eventChan <- m.Data
+				case eventChan <- m.Data:
 				}
 			})
 		cancel(err)
@@ -207,7 +204,6 @@ func LogStreamSSE(c *gin.Context) {
 
 	defer func() {
 		cancel(nil)
-		close(logChan)
 		log.Debug().Msg("log stream: connection closed")
 	}()
 
@@ -230,15 +226,14 @@ func LogStreamSSE(c *gin.Context) {
 
 			for entries := range batches {
 				for _, entry := range entries {
-					select {
-					case <-ctx.Done():
-						return
-					default:
-						if ee, err := json.Marshal(entry); err == nil {
-							logChan <- ee
-						} else {
-							log.Error().Err(err).Msg("unable to serialize log entry")
+					if ee, err := json.Marshal(entry); err == nil {
+						select {
+						case <-ctx.Done():
+							return
+						case logChan <- ee:
 						}
+					} else {
+						log.Error().Err(err).Msg("unable to serialize log entry")
 					}
 				}
 			}

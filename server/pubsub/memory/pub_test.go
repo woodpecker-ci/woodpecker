@@ -25,6 +25,39 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 )
 
+// TestPubsubConcurrentCancel verifies no panic occurs when publish and cancel race.
+func TestPubsubConcurrentCancel(t *testing.T) {
+	testTopic := map[string]struct{}{"test": {}}
+	broker := New()
+
+	for range 50 {
+		ctx, cancel := context.WithCancelCause(t.Context())
+		ch := make(chan []byte, 1)
+
+		go func() {
+			_ = broker.Subscribe(ctx, testTopic, func(m pubsub.Message) {
+				select {
+				case <-ctx.Done():
+				case ch <- m.Data:
+				}
+			})
+		}()
+
+		<-time.After(10 * time.Millisecond)
+
+		var wg sync.WaitGroup
+		for range 10 {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				_ = broker.Publish(ctx, testTopic, pubsub.Message{Data: []byte("x")})
+			}()
+		}
+		cancel(nil)
+		wg.Wait()
+	}
+}
+
 func TestPubsub(t *testing.T) {
 	var (
 		wg sync.WaitGroup
