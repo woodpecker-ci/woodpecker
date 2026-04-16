@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-15
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -113,6 +113,7 @@
 
 ### 🧪 Tests
 
+- Init minimal e2e tests [[#6391](https://github.com/woodpecker-ci/woodpecker/pull/6391)]
 - Enhance datastore DB test setup [[#6450](https://github.com/woodpecker-ci/woodpecker/pull/6450)]
 - Dummy backend support cancel [[#6390](https://github.com/woodpecker-ci/woodpecker/pull/6390)]
 - Extend workflow integration tests [[#6272](https://github.com/woodpecker-ci/woodpecker/pull/6272)]
