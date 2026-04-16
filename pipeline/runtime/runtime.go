@@ -16,6 +16,7 @@ package runtime
 
 import (
 	"context"
+	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
@@ -42,8 +43,9 @@ type Runtime struct {
 	// Cleanup operations should use the runnerCtx passed to Run().
 	ctx context.Context
 
-	tracer tracing.Tracer
-	logger logging.Logger
+	tracer     tracing.Tracer
+	tracerLock sync.Mutex
+	logger     logging.Logger
 
 	taskUUID    string
 	description map[string]string
@@ -58,6 +60,7 @@ func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Opti
 	r.engine = backend
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
+	r.tracerLock = sync.Mutex{}
 	for _, opt := range opts {
 		opt(r)
 	}
