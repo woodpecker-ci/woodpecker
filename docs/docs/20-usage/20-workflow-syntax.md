@@ -750,7 +750,7 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is not included in the pipeline. Other workflows that have a `depends_on` referencing a skipped workflow will also be excluded. Use [`optional_depends_on`](./25-workflows.md#optional-dependencies) if you want a dependency to be ignored when the referenced workflow is not part of the pipeline.
 
 For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 
@@ -774,6 +774,10 @@ The workflow now triggers on `main`, but also if the target branch of a pull req
 <!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
+
+## `optional_depends_on`
+
+Similar to `depends_on`, but the listed workflows are optional: if they are not part of the pipeline (e.g. filtered out by `when` conditions), they are silently ignored instead of blocking the workflow. If the optional dependency is present, the workflow waits for it to finish and checks its status as usual. See [`optional_depends_on`](./25-workflows.md#optional-dependencies) for details.
 
 ## Advanced network options for steps
 

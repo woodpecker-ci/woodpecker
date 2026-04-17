@@ -45,6 +45,14 @@
         "type": "string"
       }
     },
+    "optional_depends_on": {
+      "description": "Wait for these workflows if they run, but don't block if they are not executed. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
+      "type": "array",
+      "minLength": 1,
+      "items": {
+        "type": "string"
+      }
+    },
     "runs_on": {
       "type": "array",
       "description": "Deprecated: use `when.status` instead. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",

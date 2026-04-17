@@ -1,0 +1,13 @@
+skip_clone: true
+
+depends_on:
+  - check-a
+
+optional_depends_on:
+  - check-b
+
+steps:
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying

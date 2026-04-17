@@ -57,11 +57,12 @@ type StepBuilder struct {
 }
 
 type Item struct {
-	Workflow  *model.Workflow // TODO: get rid of server dependency
-	Labels    map[string]string
-	DependsOn []string
-	RunsOn    []string
-	Config    *backend_types.Config
+	Workflow          *model.Workflow // TODO: get rid of server dependency
+	Labels            map[string]string
+	DependsOn         []string
+	OptionalDependsOn []string
+	RunsOn            []string
+	Config            *backend_types.Config
 }
 
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -107,6 +108,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		// depend on https://github.com/woodpecker-ci/woodpecker/issues/778
 	}
 
+	items = dropMissingOptionalDependencies(items)
 	items = filterItemsWithMissingDependencies(items)
 
 	return items, errorsAndWarnings
@@ -178,11 +180,12 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	item = &Item{
-		Workflow:  workflow,
-		Config:    ir,
-		Labels:    parsed.Labels,
-		DependsOn: parsed.DependsOn,
-		RunsOn:    parsed.RunsOn, //nolint:staticcheck // TODO: remove in next major.
+		Workflow:          workflow,
+		Config:            ir,
+		Labels:            parsed.Labels,
+		DependsOn:         parsed.DependsOn,
+		OptionalDependsOn: parsed.OptionalDependsOn,
+		RunsOn:            parsed.RunsOn, //nolint:staticcheck // TODO: remove in next major.
 	}
 	if len(item.Labels) == 0 {
 		item.Labels = make(map[string]string, len(b.DefaultLabels))
@@ -222,6 +225,24 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	return item, errorsAndWarnings
+}
+
+// dropMissingOptionalDependencies removes optional dependency entries that
+// reference workflows not present in the pipeline. Surviving optional deps
+// are promoted into DependsOn so they are treated as normal dependencies
+// at runtime.
+func dropMissingOptionalDependencies(items []*Item) []*Item {
+	for _, item := range items {
+		for _, dep := range item.OptionalDependsOn {
+			if containsItemWithName(dep, items) {
+				if !slices.Contains(item.DependsOn, dep) {
+					item.DependsOn = append(item.DependsOn, dep)
+				}
+			}
+		}
+		item.OptionalDependsOn = nil
+	}
+	return items
 }
 
 func filterItemsWithMissingDependencies(items []*Item) []*Item {

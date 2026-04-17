@@ -1,0 +1,10 @@
+skip_clone: true
+
+when:
+  event: tag
+
+steps:
+  - name: check-b
+    image: dummy
+    commands:
+      - echo checking app b
