@@ -29,6 +29,7 @@
 
 ### 📈 Enhancement
 
+- Add `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE` config to preserve non breaking behavior by default [[#6448](https://github.com/woodpecker-ci/woodpecker/pull/6448)]
 - Docker/K8s: add config for stop timeout [[#6445](https://github.com/woodpecker-ci/woodpecker/pull/6445)]
 - Docker backend should retry to delete volume on "in use" error [[#6381](https://github.com/woodpecker-ci/woodpecker/pull/6381)]
 - Move skip pipeline by commit message into pipeline/frontend package [[#6437](https://github.com/woodpecker-ci/woodpecker/pull/6437)]
