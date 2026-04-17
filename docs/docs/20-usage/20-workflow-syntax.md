@@ -750,7 +750,10 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is not included in the pipeline. Other workflows that have a `depends_on` referencing a skipped workflow will also be excluded. Use [`optional_depends_on`](./25-workflows.md#optional-dependencies) if you want a dependency to be ignored when the referenced workflow is not part of the pipeline.
+Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block.
+If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is not included in the pipeline.
+Other workflows that have a `depends_on` referencing a skipped workflow will also be excluded.
+Use [`optional_depends_on`](./25-workflows.md#optional-dependencies) if you want a dependency to be ignored when the referenced workflow is not part of the pipeline.
 
 For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 
