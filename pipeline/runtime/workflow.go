@@ -59,10 +59,12 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}
 
 	for _, stage := range r.spec.Stages {
+		stageChan := r.runStage(runnerCtx, stage.Steps)
 		select {
 		case <-r.ctx.Done():
+			<-stageChan
 			return pipeline_errors.ErrCancel
-		case err := <-r.runStage(runnerCtx, stage.Steps):
+		case err := <-stageChan:
 			if err != nil {
 				r.err.Set(err)
 			}
