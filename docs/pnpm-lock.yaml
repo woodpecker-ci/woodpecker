@@ -115,7 +115,7 @@ importers:
         version: 3.9.0
       marked:
         specifier: ^18.0.0
-        version: 18.0.1
+        version: 18.0.2
       slugify:
         specifier: ^1.6.6
         version: 1.6.9
@@ -4151,8 +4151,8 @@ packages:
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
-  marked@18.0.1:
-    resolution: {integrity: sha512-IILJE4Aap/KIGu4ZRCzQcYMxkhumblXnbqfQe+HAD4f982wrRAsJEGKGM653yAioS6g3Yq3yOhjrUebcrtOgRA==}
+  marked@18.0.2:
+    resolution: {integrity: sha512-NsmlUYBS/Zg57rgDWMYdnre6OTj4e+qq/JS2ot3KrYLSoHLw+sDu0Nm1ZGpRgYAq6c+b1ekaY5NzVchMCQnzcg==}
     engines: {node: '>= 20'}
     hasBin: true
 
@@ -11328,7 +11328,7 @@ snapshots:
 
   markdown-table@3.0.4: {}
 
-  marked@18.0.1: {}
+  marked@18.0.2: {}
 
   marked@4.3.0: {}
 
