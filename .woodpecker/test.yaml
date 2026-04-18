@@ -96,6 +96,8 @@ steps:
     image: *golang_image
     commands:
       - make test-e2e
+    when:
+      - path: *when_path
 
   sqlite:
     depends_on:
