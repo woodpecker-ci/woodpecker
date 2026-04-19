@@ -260,26 +260,25 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
 	}
 
-	if traceErr := r.tracer.Trace(s); traceErr != nil {
-		return traceErr
-	}
-
 	// The traceStep should just trace changes, but it currently also updates step env vars.
 	{
 		r.tracerLock.Lock()
 		defer r.tracerLock.Unlock()
 
 		if s.CurrStepState.Exited {
-			return err
-		}
+			if s.CurrStep.Environment == nil {
+				s.CurrStep.Environment = map[string]string{}
+			}
 
-		if s.CurrStep.Environment == nil {
-			s.CurrStep.Environment = map[string]string{}
+			// TODO: find better way to insert runtime step environment variables.
+			s.CurrStep.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(s.Workflow.Started, 10)
+			s.CurrStep.Environment["CI_STEP_STARTED"] = strconv.FormatInt(s.Workflow.Started, 10)
 		}
+	}
 
-		// TODO: find better way to insert runtime step environment variables.
-		s.CurrStep.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(s.Workflow.Started, 10)
-		s.CurrStep.Environment["CI_STEP_STARTED"] = strconv.FormatInt(s.Workflow.Started, 10)
+	if traceErr := r.tracer.Trace(s); traceErr != nil {
+		logger := r.makeLogger()
+		logger.Error().Err(traceErr).Msg("could not trace step state change")
 	}
 
 	return err

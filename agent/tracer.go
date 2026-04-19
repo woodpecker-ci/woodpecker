@@ -52,18 +52,13 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 			stepState.Finished = time.Now().Unix()
 		}
 
-		defer func() {
-			stepLogger.Debug().Msg("update step status")
+		stepLogger.Debug().Msg("update step status")
 
-			if err := r.client.Update(ctxMeta, workflow.ID, stepState); err != nil {
-				stepLogger.Debug().
-					Err(err).
-					Msg("update step status error")
-			}
+		if err := r.client.Update(ctxMeta, workflow.ID, stepState); err != nil {
+			return err
+		}
 
-			stepLogger.Debug().Msg("update step status complete")
-		}()
-
+		stepLogger.Debug().Msg("update step status complete")
 		return nil
 	}
 }
