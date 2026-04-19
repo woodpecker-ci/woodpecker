@@ -17,6 +17,7 @@ package runtime
 import (
 	"context"
 	"errors"
+	"strconv"
 	"sync"
 	"time"
 
@@ -122,6 +123,8 @@ func (r *Runtime) startStep(step *backend_types.Step) (func(), int64, error) {
 // The runnerCtx is intentionally used for DestroyStep so that container cleanup can
 // still reach the backend even after the workflow context (r.ctx) is canceled.
 func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.Step, waitForLogs func(), startTime int64) (*backend_types.State, error) {
+	defer r.uploadSignal()()
+
 	// Drain the log stream before waiting on the process exit.
 	waitForLogs()
 
@@ -235,6 +238,8 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 //
 // Always returns err unchanged so callers can write: return r.traceStep(state, err, step).
 func (r *Runtime) traceStep(processState *backend_types.State, err error, step *backend_types.Step) error {
+	defer r.uploadSignal()()
+
 	s := new(state.State)
 	s.Workflow.Started = r.started
 	s.CurrStep = step
@@ -253,12 +258,27 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
 	}
 
-	// The tracer should just trace changes, but it currently also updates step env vars used in various ways:
-	// https://github.com/woodpecker-ci/woodpecker/blob/main/agent/tracer.go#L79-L86 .
-	r.tracerLock.Lock()
-	defer r.tracerLock.Unlock()
 	if traceErr := r.tracer.Trace(s); traceErr != nil {
 		return traceErr
 	}
+
+	// The traceStep should just trace changes, but it currently also updates step env vars.
+	{
+		r.tracerLock.Lock()
+		defer r.tracerLock.Unlock()
+
+		if s.CurrStepState.Exited {
+			return err
+		}
+
+		if s.CurrStep.Environment == nil {
+			s.CurrStep.Environment = map[string]string{}
+		}
+
+		// TODO: find better way to insert runtime step environment variables.
+		s.CurrStep.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(s.Workflow.Started, 10)
+		s.CurrStep.Environment["CI_STEP_STARTED"] = strconv.FormatInt(s.Workflow.Started, 10)
+	}
+
 	return err
 }

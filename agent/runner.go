@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 
@@ -161,19 +162,29 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 	var uploads sync.WaitGroup
 
+	// Enrich workflow env with agent info
+	// TODO: find better way to track this state
+	for _, stage := range workflow.Config.Stages {
+		for _, step := range stage.Steps {
+			step.Environment["CI_MACHINE"] = r.hostname
+			step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
+		}
+	}
+
 	// Run pipeline
 	err = pipeline_runtime.New(
 		workflow.Config,
 		r.backend,
 		pipeline_runtime.WithContext(workflowCtx),
 		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
-		pipeline_runtime.WithLogger(r.createLogger(logger, &uploads, workflow)),
-		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
+		pipeline_runtime.WithLogger(r.createLogger(logger, workflow)),
+		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
 		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,
 			"pipeline_number": pipelineNumber,
 		}),
+		pipeline_runtime.WithUploadLock(&uploads),
 	).Run(runnerCtx)
 
 	state.Finished = time.Now().Unix()

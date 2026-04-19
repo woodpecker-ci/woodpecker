@@ -17,9 +17,6 @@ package agent
 import (
 	"context"
 	"errors"
-	"runtime"
-	"strconv"
-	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -30,11 +27,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
-func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) tracing.TraceFunc {
+func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) tracing.TraceFunc {
 	return func(state *state.State) error {
-		uploads.Add(1)
-		defer uploads.Done()
-
 		stepLogger := logger.With().
 			Str("image", state.CurrStep.Image).
 			Str("workflow_id", workflow.ID).
@@ -69,21 +63,6 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 
 			stepLogger.Debug().Msg("update step status complete")
 		}()
-		if state.CurrStepState.Exited {
-			return nil
-		}
-		if state.CurrStep.Environment == nil {
-			state.CurrStep.Environment = map[string]string{}
-		}
-
-		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
-		state.CurrStep.Environment["CI_MACHINE"] = r.hostname
-
-		state.CurrStep.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
-
-		state.CurrStep.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
-
-		state.CurrStep.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		return nil
 	}

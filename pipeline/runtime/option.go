@@ -16,6 +16,7 @@ package runtime
 
 import (
 	"context"
+	"sync"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
@@ -56,5 +57,11 @@ func WithDescription(desc map[string]string) Option {
 func WithTaskUUID(uuid string) Option {
 	return func(r *Runtime) {
 		r.taskUUID = uuid
+	}
+}
+
+func WithUploadLock(up *sync.WaitGroup) Option {
+	return func(r *Runtime) {
+		r.uploadWait = up
 	}
 }
