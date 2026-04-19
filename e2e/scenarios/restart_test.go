@@ -30,9 +30,7 @@ import (
 
 // TestRestartPipeline verifies pipeline.Restart produces a distinct pipeline
 // linked to the original via Parent, with its own fresh workflow rows, and
-// that the original's workflows are untouched. This exercises the same
-// workflow-persistence path as Create (saveWorkflowsFromPipelineBuilder →
-// WorkflowsCreate) — guarding against double-insert and ID-reuse regressions.
+// that the original's workflows are untouched.
 func TestRestartPipeline(t *testing.T) {
 	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
 		{Name: ".woodpecker.yaml", Data: simpleSuccessYAML},
