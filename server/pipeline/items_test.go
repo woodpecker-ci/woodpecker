@@ -73,7 +73,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	s := store_mocks.NewMockStore(t)
 	s.On("WorkflowLoad", mock.Anything).Return(workflow, nil)
 
-	pipeline, err := applyWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems)
+	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems)
 	require.NoError(t, err)
 	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")

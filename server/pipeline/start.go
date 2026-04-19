@@ -44,11 +44,6 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 }
 
 func prepareStart(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo) error {
-	if err := store.WorkflowsCreate(activePipeline.Workflows); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, activePipeline.Number)
-		return err
-	}
-
 	publishPipeline(ctx, forge, activePipeline, repo, user)
 	return nil
 }

@@ -112,9 +112,9 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	enrichPipelineItemSteps(pipelineItems, repo)
-	pipeline, err = applyWorkflowsFromPipelineBuilder(_store, pipeline, pipelineItems)
+	pipeline, err = saveWorkflowsFromPipelineBuilder(_store, pipeline, pipelineItems)
 	if err != nil {
-		return nil, fmt.Errorf("applyWorkflowsFromPipelineBuilder failed: %w", err)
+		return nil, fmt.Errorf("saveWorkflowsFromPipelineBuilder failed: %w", err)
 	}
 
 	// persist the pipeline config for historical correctness, restarts, etc

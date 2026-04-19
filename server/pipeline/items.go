@@ -177,7 +177,7 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 	}
 
 	enrichPipelineItemSteps(pipelineItems, repo)
-	currentPipeline, err = applyWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems)
+	currentPipeline, err = saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems)
 
 	return currentPipeline, pipelineItems, err
 }
@@ -199,10 +199,10 @@ func enrichPipelineItemSteps(items []*builder.Item, repo *model.Repo) {
 	}
 }
 
-// applyWorkflowsFromPipelineBuilder is the link between pipeline representation in "pipeline package" and server
+// saveWorkflowsFromPipelineBuilder is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by PipelineBuilder.Build()) into
-// a pipeline that can be stored in the database by the server.
-func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) (*model.Pipeline, error) {
+// a pipeline that can be stored in the database by the server and save converted workflows.
+func saveWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) (*model.Pipeline, error) {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		if pidSequence < item.Workflow.PID {
@@ -215,13 +215,13 @@ func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeli
 	pipeline.Workflows = nil
 
 	for _, item := range pipelineItems {
-		// TODO: should / could we prevent loading all workflow again?
-		workflow, err := store.WorkflowLoad(item.Workflow.ID)
-		if err != nil {
-			return nil, err
+		workflow := &model.Workflow{
+			ID:         item.Workflow.ID,
+			Name:       item.Workflow.Name,
+			PID:        item.Workflow.PID,
+			PipelineID: pipeline.ID,
+			State:      model.StatusPending,
 		}
-
-		workflow.PipelineID = pipeline.ID
 
 		if pipeline.Status == model.StatusBlocked {
 			workflow.State = model.StatusBlocked
@@ -250,6 +250,15 @@ func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeli
 		}
 
 		pipeline.Workflows = append(pipeline.Workflows, workflow)
+	}
+
+	if err := store.WorkflowsCreate(pipeline.Workflows); err != nil {
+		return nil, err
+	}
+
+	// now thread IDs back to the builder items
+	for i, wf := range pipeline.Workflows {
+		pipelineItems[i].Workflow.ID = wf.ID
 	}
 
 	return pipeline, nil
