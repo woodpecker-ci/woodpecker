@@ -94,6 +94,8 @@ type Compiler struct {
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
 	securityTrustedPipeline bool
+	// TODO: remove with version 4.x
+	forceIgnoreServiceFailure bool
 }
 
 // New creates a new Compiler with options.
