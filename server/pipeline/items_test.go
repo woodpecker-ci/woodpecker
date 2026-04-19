@@ -19,6 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types" //nolint:depguard // needed to construct builder.Item.Config in tests; will be resolved when backend-specific fields move to BackendOptions (see enrichPipelineItemSteps TODO)
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
@@ -72,7 +73,8 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	s := store_mocks.NewMockStore(t)
 	s.On("WorkflowLoad", mock.Anything).Return(workflow, nil)
 
-	pipeline = applyWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems)
+	pipeline, err := applyWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems)
+	require.NoError(t, err)
 	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}

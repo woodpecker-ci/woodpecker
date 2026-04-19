@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"maps"
 
 	"github.com/rs/zerolog/log"
@@ -38,6 +39,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
+		netrc = &model.Netrc{}
 	}
 
 	// get the previous pipeline so that we can send status change notifications
@@ -49,7 +51,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
 	secs, err := secretService.SecretListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
-		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
+		return nil, fmt.Errorf("error getting secrets for %s#%d: %w", repo.FullName, currentPipeline.Number, err)
 	}
 
 	var secrets []compiler.Secret
@@ -70,7 +72,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
-		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
+		return nil, fmt.Errorf("error getting registry credentials for %s#%d: %w", repo.FullName, currentPipeline.Number, err)
 	}
 
 	var registries []compiler.Registry
@@ -88,7 +90,10 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 
 	environmentService := server.Config.Services.Manager.EnvironmentService()
 	if environmentService != nil {
-		globals, _ := environmentService.EnvironList(repo)
+		globals, err := environmentService.EnvironList(repo)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list global environment for repo %s: %w", repo.FullName, err)
+		}
 		for _, global := range globals {
 			envs[global.Name] = global.Value
 		}
@@ -166,11 +171,13 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 		return currentPipeline, nil, err
 	} else if err != nil {
 		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
-		err = updatePipelinePending(c, forge, store, currentPipeline, repo, user)
+		err = errors.Join(err,
+			updatePipelinePending(c, forge, store, currentPipeline, repo, user),
+		)
 	}
 
 	enrichPipelineItemSteps(pipelineItems, repo)
-	currentPipeline = applyWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems)
+	currentPipeline, err = applyWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems)
 
 	return currentPipeline, pipelineItems, err
 }
@@ -195,7 +202,7 @@ func enrichPipelineItemSteps(items []*builder.Item, repo *model.Repo) {
 // applyWorkflowsFromPipelineBuilder is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by PipelineBuilder.Build()) into
 // a pipeline that can be stored in the database by the server.
-func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) *model.Pipeline {
+func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) (*model.Pipeline, error) {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		if pidSequence < item.Workflow.PID {
@@ -211,7 +218,7 @@ func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeli
 		// TODO: should / could we prevent loading all workflow again?
 		workflow, err := store.WorkflowLoad(item.Workflow.ID)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 
 		workflow.PipelineID = pipeline.ID
@@ -245,5 +252,5 @@ func applyWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeli
 		pipeline.Workflows = append(pipeline.Workflows, workflow)
 	}
 
-	return pipeline
+	return pipeline, nil
 }
