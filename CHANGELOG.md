@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-18
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -23,13 +23,12 @@
 
 - Support one-shot agent execution mode [[#6150](https://github.com/woodpecker-ci/woodpecker/pull/6150)]
 - Add external secret extension implementation [[#6252](https://github.com/woodpecker-ci/woodpecker/pull/6252)]
-- make it possible to disable the isolated home for local agents [[#6251](https://github.com/woodpecker-ci/woodpecker/pull/6251)]
+- Allow disabling isolated home directory for local agents [[#6251](https://github.com/woodpecker-ci/woodpecker/pull/6251)]
 - Add Container Registry credential extension [[#5993](https://github.com/woodpecker-ci/woodpecker/pull/5993)]
 - Support exclusive config extensions [[#5978](https://github.com/woodpecker-ci/woodpecker/pull/5978)]
 
 ### 📈 Enhancement
 
-- Add `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE` config to preserve non breaking behavior by default [[#6448](https://github.com/woodpecker-ci/woodpecker/pull/6448)]
 - Docker/K8s: add config for stop timeout [[#6445](https://github.com/woodpecker-ci/woodpecker/pull/6445)]
 - Docker backend should retry to delete volume on "in use" error [[#6381](https://github.com/woodpecker-ci/woodpecker/pull/6381)]
 - Move skip pipeline by commit message into pipeline/frontend package [[#6437](https://github.com/woodpecker-ci/woodpecker/pull/6437)]
@@ -47,7 +46,7 @@
 - Improve error message when no workflows for manual were found [[#6313](https://github.com/woodpecker-ci/woodpecker/pull/6313)]
 - Server return conflict status when stale repo causes duplicate insert [[#6276](https://github.com/woodpecker-ci/woodpecker/pull/6276)]
 - Show global/org registries in org/repo registries tab [[#6291](https://github.com/woodpecker-ci/woodpecker/pull/6291)]
-- Forward skipped step state once it's known [[#6295](https://github.com/woodpecker-ci/woodpecker/pull/6295)]
+- Report skipped step state as soon as it's determined [[#6295](https://github.com/woodpecker-ci/woodpecker/pull/6295)]
 - Only add compatibility environment variables for drone-ci to plugins [[#6271](https://github.com/woodpecker-ci/woodpecker/pull/6271)]
 - Creating new engine runtime now requires backend as argument [[#6268](https://github.com/woodpecker-ci/woodpecker/pull/6268)]
 - Compare admins case-insensitively [[#6261](https://github.com/woodpecker-ci/woodpecker/pull/6261)]
@@ -70,10 +69,11 @@
 - Implement retry logic in HTTP Send method [[#5857](https://github.com/woodpecker-ci/woodpecker/pull/5857)]
 - CLI: Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
 - Improve service syntax related docs and tests nits [[#5991](https://github.com/woodpecker-ci/woodpecker/pull/5991)]
-- Remove deactivated secrets type from container defintion [[#5983](https://github.com/woodpecker-ci/woodpecker/pull/5983)]
+- Remove deactivated secrets type from container definition [[#5983](https://github.com/woodpecker-ci/woodpecker/pull/5983)]
 
 ### 🐛 Bug Fixes
 
+- Add `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE` config to preserve non-breaking behavior by default [[#6448](https://github.com/woodpecker-ci/woodpecker/pull/6448)]
 - Fix race in pipeline runtime [[#6451](https://github.com/woodpecker-ci/woodpecker/pull/6451)]
 - Fix race in server LogEntry logger [[#6449](https://github.com/woodpecker-ci/woodpecker/pull/6449)]
 - Kubernetes: detached steps are no services [[#6435](https://github.com/woodpecker-ci/woodpecker/pull/6435)]
@@ -85,7 +85,7 @@
 - Bitbucket: Fix parsing /user/workspaces response [[#6396](https://github.com/woodpecker-ci/woodpecker/pull/6396)]
 - Fix CLI exec with workflow matrix feature, where variables are not substituted. [[#6162](https://github.com/woodpecker-ci/woodpecker/pull/6162)]
 - Fix enable repo with same name and owner on second forge [[#6375](https://github.com/woodpecker-ci/woodpecker/pull/6375)]
-- Fix workflow beeing skipped and marked as failed when agent starts before server [[#6361](https://github.com/woodpecker-ci/woodpecker/pull/6361)]
+- Fix workflow being skipped and marked as failed when agent starts before server [[#6361](https://github.com/woodpecker-ci/woodpecker/pull/6361)]
 - Only redirect after login [[#6348](https://github.com/woodpecker-ci/woodpecker/pull/6348)]
 - Set workflow services stuck in running state to finished [[#6337](https://github.com/woodpecker-ci/woodpecker/pull/6337)]
 - Fix bitbucket api deprecations [[#6324](https://github.com/woodpecker-ci/woodpecker/pull/6324)]
@@ -99,10 +99,10 @@
 - Fix status merging with skipped pipelines [[#6176](https://github.com/woodpecker-ci/woodpecker/pull/6176)]
 - Update pipeline config schema [[#6156](https://github.com/woodpecker-ci/woodpecker/pull/6156)]
 - Fix OAuth token refresh race condition with singleflight [[#6153](https://github.com/woodpecker-ci/woodpecker/pull/6153)]
-- Fully merge statuses [[#6119](https://github.com/woodpecker-ci/woodpecker/pull/6119)]
+- Use priority-based merging to determine pipeline and workflow status [[#6119](https://github.com/woodpecker-ci/woodpecker/pull/6119)]
 - Only set tag env on tags [[#6142](https://github.com/woodpecker-ci/woodpecker/pull/6142)]
 - Fix bitbucket email [[#6102](https://github.com/woodpecker-ci/woodpecker/pull/6102)]
-- Detached or service steps report back too [[#6039](https://github.com/woodpecker-ci/woodpecker/pull/6039)]
+- Report status for detached steps and services [[#6039](https://github.com/woodpecker-ci/woodpecker/pull/6039)]
 - Don't propagate workflow error from agent back to agent [[#6056](https://github.com/woodpecker-ci/woodpecker/pull/6056)]
 - Fix pipeline cancellation status handling and step state synchronization [[#6011](https://github.com/woodpecker-ci/woodpecker/pull/6011)]
 - Add retry logic for CreatePipeline with backoff [[#6067](https://github.com/woodpecker-ci/woodpecker/pull/6067)]
@@ -124,11 +124,12 @@
 - Increase timeout for migration tests [[#6206](https://github.com/woodpecker-ci/woodpecker/pull/6206)]
 - Ignore fixtures for coverage [[#6197](https://github.com/woodpecker-ci/woodpecker/pull/6197)]
 - Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
-- Add some tests [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
+- Add tests for CLI output formatting and pipeline metadata environment variables [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
 - Ignore mocks for coverage [[#6074](https://github.com/woodpecker-ci/woodpecker/pull/6074)]
 
 ### 📚 Documentation
 
+- Update dependency marked to v18.0.2 [[#6465](https://github.com/woodpecker-ci/woodpecker/pull/6465)]
 - Update docs npm deps non-major [[#6463](https://github.com/woodpecker-ci/woodpecker/pull/6463)]
 - Update dependency marked to v18 [[#6425](https://github.com/woodpecker-ci/woodpecker/pull/6425)]
 - Update docs npm deps non-major [[#6422](https://github.com/woodpecker-ci/woodpecker/pull/6422)]
@@ -140,7 +141,7 @@
 - chore(deps): update dependency isomorphic-dompurify to v3.6.0 [[#6288](https://github.com/woodpecker-ci/woodpecker/pull/6288)]
 - chore(deps): update dependency yaml to v2.8.3 [[#6287](https://github.com/woodpecker-ci/woodpecker/pull/6287)]
 - Add agentscan to plugin docs [[#6285](https://github.com/woodpecker-ci/woodpecker/pull/6285)]
-- Adding opengrep plugin [[#6282](https://github.com/woodpecker-ci/woodpecker/pull/6282)]
+- Add opengrep plugin [[#6282](https://github.com/woodpecker-ci/woodpecker/pull/6282)]
 - chore(deps): update docs npm deps non-major [[#6281](https://github.com/woodpecker-ci/woodpecker/pull/6281)]
 - Sorted the glossary items [[#6255](https://github.com/woodpecker-ci/woodpecker/pull/6255)]
 - chore(deps): update docs npm deps non-major [[#6240](https://github.com/woodpecker-ci/woodpecker/pull/6240)]
@@ -154,7 +155,7 @@
 - Add deprecation policy [[#6068](https://github.com/woodpecker-ci/woodpecker/pull/6068)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.55.0 [[#6125](https://github.com/woodpecker-ci/woodpecker/pull/6125)]
 - Improve selinux docs [[#6066](https://github.com/woodpecker-ci/woodpecker/pull/6066)]
-- document how to ignore failure on services [[#6106](https://github.com/woodpecker-ci/woodpecker/pull/6106)]
+- Document how to ignore failure on services [[#6106](https://github.com/woodpecker-ci/woodpecker/pull/6106)]
 - chore(deps): update docs npm deps non-major [[#6109](https://github.com/woodpecker-ci/woodpecker/pull/6109)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.54.0 [[#6091](https://github.com/woodpecker-ci/woodpecker/pull/6091)]
 - chore(deps): update dependency axios to v1.13.5 [[#6090](https://github.com/woodpecker-ci/woodpecker/pull/6090)]
