@@ -41,10 +41,6 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 		Event: model.EventPush,
 	}
 
-	workflow := &model.Workflow{
-		ID: 1,
-	}
-
 	pipelineItems := []*builder.Item{{
 		Workflow: &builder.Workflow{
 			ID:  1,
@@ -71,7 +67,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	}}
 
 	s := store_mocks.NewMockStore(t)
-	s.On("WorkflowLoad", mock.Anything).Return(workflow, nil)
+	s.On("WorkflowsCreate", mock.Anything).Return(nil)
 
 	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems)
 	require.NoError(t, err)

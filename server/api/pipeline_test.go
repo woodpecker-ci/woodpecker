@@ -329,7 +329,7 @@ func TestCreatePipeline(t *testing.T) {
 
 		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
 		mockStore.On("CreatePipeline", mock.Anything).Return(nil)
-		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(&model.Pipeline{}, nil).Maybe()
+		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(nil, types.ErrRecordNotExist).Maybe()
 		mockStore.On("ConfigPersist", mock.Anything).Return(&model.Config{ID: 1}, nil).Maybe()
 		mockStore.On("ConfigFindIdentical", mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
