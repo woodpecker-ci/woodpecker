@@ -221,6 +221,8 @@ func saveWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipelin
 			PID:        item.Workflow.PID,
 			PipelineID: pipeline.ID,
 			State:      model.StatusPending,
+			Environ:    item.Workflow.Environ,
+			AxisID:     item.Workflow.AxisID,
 		}
 
 		if pipeline.Status == model.StatusBlocked {
