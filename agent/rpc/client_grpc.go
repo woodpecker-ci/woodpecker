@@ -64,7 +64,6 @@ func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn, opts ...ClientOpt
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
 	client.logs = make(chan *proto.LogEntry, 10) // max memory use: 10 lines * 1 MiB
-	client.connectionRetryTimeout = 2 * time.Minute
 
 	for _, opt := range opts {
 		opt(client)
