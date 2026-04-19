@@ -47,7 +47,7 @@ type Runtime struct {
 	tracerLock sync.Mutex
 	logger     logging.Logger
 
-	uploadWait *sync.WaitGroup
+	uploadWait sync.WaitGroup
 
 	taskUUID    string
 	description map[string]string
@@ -76,13 +76,4 @@ func (r *Runtime) makeLogger() zerolog.Logger {
 		logCtx = logCtx.Str(key, val)
 	}
 	return logCtx.Logger()
-}
-
-func (r *Runtime) uploadSignal() func() {
-	if r.uploadWait == nil {
-		// no wait group, so we just return a noop
-		return func() {}
-	}
-	r.uploadWait.Add(1)
-	return r.uploadWait.Done
 }

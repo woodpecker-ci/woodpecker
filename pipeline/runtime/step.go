@@ -123,7 +123,8 @@ func (r *Runtime) startStep(step *backend_types.Step) (func(), int64, error) {
 // The runnerCtx is intentionally used for DestroyStep so that container cleanup can
 // still reach the backend even after the workflow context (r.ctx) is canceled.
 func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.Step, waitForLogs func(), startTime int64) (*backend_types.State, error) {
-	defer r.uploadSignal()()
+	r.uploadWait.Add(1)
+	defer r.uploadWait.Done()
 
 	// Drain the log stream before waiting on the process exit.
 	waitForLogs()
@@ -238,7 +239,8 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 //
 // Always returns err unchanged so callers can write: return r.traceStep(state, err, step).
 func (r *Runtime) traceStep(processState *backend_types.State, err error, step *backend_types.Step) error {
-	defer r.uploadSignal()()
+	r.uploadWait.Add(1)
+	defer r.uploadWait.Done()
 
 	s := new(state.State)
 	s.Workflow.Started = r.started
