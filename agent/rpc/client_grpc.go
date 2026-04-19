@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
@@ -50,10 +51,11 @@ const (
 )
 
 type client struct {
-	client           proto.WoodpeckerClient
-	conn             *grpc.ClientConn
-	logs             chan *proto.LogEntry
-	connectionLostAt time.Time
+	client             proto.WoodpeckerClient
+	conn               *grpc.ClientConn
+	logs               chan *proto.LogEntry
+	connectionLostAt   time.Time
+	connectionLostLock sync.Mutex
 	// connectionRetryTimeout is the maximum time to wait for a connection to be restored before the agent gives up and exits.
 	connectionRetryTimeout time.Duration
 }
@@ -92,6 +94,8 @@ func (c *client) Close() error {
 func (c *client) IsConnected() bool {
 	state := c.conn.GetState()
 	connected := state == connectivity.Ready || state == connectivity.Idle
+	c.connectionLostLock.Lock()
+	defer c.connectionLostLock.Unlock()
 	if !connected && c.connectionLostAt.IsZero() {
 		c.connectionLostAt = time.Now()
 	} else if connected && !c.connectionLostAt.IsZero() {
