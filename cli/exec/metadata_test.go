@@ -30,7 +30,7 @@ import (
 
 func TestMetadataFromContext(t *testing.T) {
 	sampleMetadata := &metadata.Metadata{
-		Repo: metadata.Repo{Owner: "test-user", Name: "test-repo", OrgID: 1},
+		Repo: metadata.Repo{Owner: "test-user", Name: "test-repo"},
 		Curr: metadata.Pipeline{Number: 5},
 	}
 
