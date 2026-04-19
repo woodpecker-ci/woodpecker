@@ -334,7 +334,6 @@ func TestCreatePipeline(t *testing.T) {
 		mockStore.On("ConfigFindIdentical", mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
-		mockStore.On("WorkflowLoad", mock.Anything).Return(&model.Workflow{}, nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
 
 		w := httptest.NewRecorder()
@@ -407,7 +406,6 @@ func TestCreatePipeline(t *testing.T) {
 		mockStore.On("ConfigFindIdentical", mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
-		mockStore.On("WorkflowLoad", mock.Anything).Return(&model.Workflow{}, nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
 
 		w := httptest.NewRecorder()
