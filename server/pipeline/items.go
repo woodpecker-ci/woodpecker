@@ -171,9 +171,9 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 		return currentPipeline, nil, err
 	} else if err != nil {
 		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
-		err = errors.Join(err,
-			updatePipelinePending(c, forge, store, currentPipeline, repo, user),
-		)
+		if err := updatePipelinePending(c, forge, store, currentPipeline, repo, user); err != nil {
+			return nil, nil, err
+		}
 	}
 
 	enrichPipelineItemSteps(pipelineItems, repo)

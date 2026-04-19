@@ -25,7 +25,6 @@ type Item struct {
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string
-	Pending   bool
 	Config    *backend_types.Config
 }
 

@@ -166,7 +166,6 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		Config:    ir,
 		Labels:    parsed.Labels,
 		DependsOn: parsed.DependsOn,
-		Pending:   true,
 		// TODO: remove in next major.
 		RunsOn: parsed.RunsOn, //nolint:staticcheck
 	}

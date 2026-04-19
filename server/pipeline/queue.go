@@ -29,9 +29,6 @@ import (
 func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
-		if !item.Pending {
-			continue
-		}
 		task := &model.Task{
 			ID:         fmt.Sprint(item.Workflow.ID),
 			PID:        item.Workflow.PID,
