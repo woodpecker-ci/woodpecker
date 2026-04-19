@@ -145,7 +145,6 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantMatched: true,
 			wantScore:   10,
 		},
-		// TODO
 		{
 			name: "Agent without labels",
 			agentFilter: rpc.Filter{
@@ -166,9 +165,8 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{},
 			},
 			wantMatched: true,
-			wantScore:   0, // ???
+			wantScore:   0,
 		},
-		// ??
 		{
 			name: "Agent and task without labels",
 			agentFilter: rpc.Filter{
