@@ -173,6 +173,7 @@
 
 ### 📦️ Dependency
 
+- Update gitea/gitea Docker tag to v1.26 [[#6466](https://github.com/woodpecker-ci/woodpecker/pull/6466)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.8.3 [[#6462](https://github.com/woodpecker-ci/woodpecker/pull/6462)]
 - Update module k8s.io/client-go to v0.35.4 [[#6460](https://github.com/woodpecker-ci/woodpecker/pull/6460)]
 - Update golang-packages [[#6459](https://github.com/woodpecker-ci/woodpecker/pull/6459)]
