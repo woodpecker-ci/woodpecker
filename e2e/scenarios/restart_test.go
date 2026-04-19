@@ -54,7 +54,6 @@ func TestRestartPipeline(t *testing.T) {
 	originalWorkflows, err := env.Store.WorkflowGetTree(originalFinished)
 	require.NoError(t, err)
 	require.Len(t, originalWorkflows, 1, "original should have exactly one workflow")
-	originalWorkflowID := originalWorkflows[0].ID
 
 	// Restart it.
 	restarted, err := pipeline.Restart(t.Context(), env.Store, originalFinished, env.Fixtures.Owner, env.Fixtures.Repo, nil)
@@ -74,7 +73,7 @@ func TestRestartPipeline(t *testing.T) {
 	restartedWorkflows, err := env.Store.WorkflowGetTree(restartedFinished)
 	require.NoError(t, err)
 	require.Len(t, restartedWorkflows, 1, "restart should produce its own workflow")
-	assert.NotEqual(t, originalWorkflowID, restartedWorkflows[0].ID,
+	assert.NotEqual(t, originalWorkflows[0].ID, restartedWorkflows[0].ID,
 		"restart should insert a new workflow row, not reassign the original")
 	assert.Equal(t, restartedFinished.ID, restartedWorkflows[0].PipelineID,
 		"restarted workflow must be linked to the restarted pipeline")
@@ -85,7 +84,7 @@ func TestRestartPipeline(t *testing.T) {
 	originalAfter, err := env.Store.WorkflowGetTree(originalFinished)
 	require.NoError(t, err)
 	require.Len(t, originalAfter, 1)
-	assert.Equal(t, originalWorkflowID, originalAfter[0].ID,
+	assert.Equal(t, originalWorkflows[0].ID, originalAfter[0].ID,
 		"restart must not mutate the original's workflow row")
 	assert.Equal(t, originalFinished.ID, originalAfter[0].PipelineID,
 		"original's workflow must still be linked to the original pipeline")
