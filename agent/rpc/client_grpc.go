@@ -47,10 +47,6 @@ const (
 	// Maximum amount of time between sending consecutive batched log messages.
 	// Controls the delay between the CI job generating a log record, and web users receiving it.
 	maxLogFlushPeriod time.Duration = time.Second
-
-	// ConnectionRetryTimeout is the maximum time to wait for a connection to be restored
-	// before the agent gives up and exits.
-	ConnectionRetryTimeout = 2 * time.Minute
 )
 
 type client struct {
@@ -58,16 +54,35 @@ type client struct {
 	conn             *grpc.ClientConn
 	logs             chan *proto.LogEntry
 	connectionLostAt time.Time
+	// connectionRetryTimeout is the maximum time to wait for a connection to be restored before the agent gives up and exits.
+	connectionRetryTimeout time.Duration
 }
 
 // NewGrpcClient returns a new grpc Client.
-func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn) rpc.Peer {
+func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn, opts ...ClientOption) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
 	client.logs = make(chan *proto.LogEntry, 10) // max memory use: 10 lines * 1 MiB
+	client.connectionRetryTimeout = 2 * time.Minute
+
+	for _, opt := range opts {
+		opt(client)
+	}
+
 	go client.processLogs(ctx)
 	return client
+}
+
+type ClientOption func(c *client)
+
+func SetConnectionRetryTimeout(d time.Duration) ClientOption {
+	if d == 0 {
+		log.Warn().Msg("connection retry timeout set to infinite")
+	}
+	return func(c *client) {
+		c.connectionRetryTimeout = d
+	}
 }
 
 func (c *client) Close() error {
@@ -87,10 +102,10 @@ func (c *client) IsConnected() bool {
 }
 
 func (c *client) shouldGiveUp() bool {
-	if c.connectionLostAt.IsZero() {
+	if c.connectionRetryTimeout == 0 || c.connectionLostAt.IsZero() {
 		return false
 	}
-	return time.Since(c.connectionLostAt) > ConnectionRetryTimeout
+	return time.Since(c.connectionLostAt) > c.connectionRetryTimeout
 }
 
 func (c *client) newBackOff() backoff.BackOff {
