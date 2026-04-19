@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @packrat386, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting, @utafrali
+@6543, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @packrat386, @paulovitorbal, @qwerty287, @samoli, @savv, @stardothosting, @utafrali
 
 ### 🔒 Security
 
@@ -238,6 +238,7 @@
 
 ### Misc
 
+- Add s3 cache plugin to docs [[#6467](https://github.com/woodpecker-ci/woodpecker/pull/6467)]
 - Fix license headers [[#6205](https://github.com/woodpecker-ci/woodpecker/pull/6205)]
 - Add agentscan plugin [[#6284](https://github.com/woodpecker-ci/woodpecker/pull/6284)]
 
