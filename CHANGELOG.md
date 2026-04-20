@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-19
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -129,6 +129,7 @@
 
 ### 📚 Documentation
 
+- Update dependency axios to v1.15.1 [[#6468](https://github.com/woodpecker-ci/woodpecker/pull/6468)]
 - Update dependency marked to v18.0.2 [[#6465](https://github.com/woodpecker-ci/woodpecker/pull/6465)]
 - Update docs npm deps non-major [[#6463](https://github.com/woodpecker-ci/woodpecker/pull/6463)]
 - Update dependency marked to v18 [[#6425](https://github.com/woodpecker-ci/woodpecker/pull/6425)]
