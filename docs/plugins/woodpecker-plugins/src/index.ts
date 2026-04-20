@@ -54,10 +54,9 @@ async function loadContent(): Promise<Content> {
 
             const imgType = response.headers['content-type'];
             if (imgType) {
-              pluginIconDataUrl = `data:${imgType.toString()};base64,${Buffer.from(
-                response.data,
-                'binary',
-              ).toString('base64')}`;
+              pluginIconDataUrl = `data:${imgType.toString()};base64,${Buffer.from(response.data, 'binary').toString(
+                'base64',
+              )}`;
             }
           } catch (e) {
             console.error("Can't fetch plugin icon", docsHeader.icon, (e as AxiosError).message);
