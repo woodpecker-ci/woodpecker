@@ -210,9 +210,12 @@ func saveWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipelin
 		}
 	}
 
-	// the workflows in the pipeline should be empty as only we do populate them,
-	// but if a pipeline was already loaded form database it might contain things, so we just clean it
-	pipeline.Workflows = nil
+	// The workflows in the pipeline should be empty, only we populate them.
+	// But if a pipeline was already loaded from the database and contains workflows,
+	// we error out to prevent harm.
+	if pipeline.Workflows != nil {
+		return nil, errors.New("cannot save new workflows from pipeline builder: pipeline already has workflows loaded")
+	}
 
 	for _, item := range pipelineItems {
 		workflow := &model.Workflow{
