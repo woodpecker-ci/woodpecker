@@ -1268,3 +1268,102 @@ func TestWorkflowCancelDuringStepSleep(t *testing.T) {
 	assert.Nil(t, findFirstTraceByName(getTracerStates(tracer), "never-reached"),
 		"never-reached must not have been traced")
 }
+
+// TestWorkflowFailingServiceDoesNotFailWorkflow pins down the intentional design:
+// a service/detached step that fails in the background has its failure logged
+// and traced, but it must NOT propagate to the workflow error. Subsequent
+// stages must still run, and Run() must return nil.
+//
+// This is the explicit contract in runDetachedStep:
+// "Any error that occurs after setup is logged but not propagated — it cannot
+//
+//	influence the pipeline outcome at that point."
+func TestWorkflowFailingServiceDoesNotFailWorkflow(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					// Service runs ~100ms (from withService), then exits non-zero.
+					cmdStep("db", withService(), withExitCode(1)),
+					cmdStep("build"),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	// Contract 1: workflow succeeds even though the service failed.
+	assert.NoError(t, r.Run(t.Context()),
+		"service failure must not fail the workflow (detached errors are not propagated)")
+
+	traces := getTracerStates(tracer)
+
+	// Contract 2: the service's failure IS visible in traces. This is the
+	// observability guarantee — the failure is logged and recorded even though
+	// it doesn't kill the workflow.
+	dbExit := findLastTraceByName(traces, "db")
+	require.NotNil(t, dbExit, "db must have an exit trace")
+	assert.True(t, dbExit.CurrStepState.Exited, "db should be marked exited")
+	assert.Equal(t, 1, dbExit.CurrStepState.ExitCode, "db exit code must be preserved in trace")
+
+	// Contract 3: deploy must run normally — NOT skipped — because the service
+	// failure didn't set r.err.
+	deployExit := findLastTraceByName(traces, "deploy")
+	require.NotNil(t, deployExit, "deploy must be traced")
+	assert.False(t, deployExit.CurrStepState.Skipped, "deploy must run when only a service failed")
+	assert.True(t, deployExit.CurrStepState.Exited, "deploy should complete normally")
+	assert.Equal(t, 0, deployExit.CurrStepState.ExitCode)
+
+	// Contract 4: uploadWait at the end of Run() guarantees the detached trace
+	// has been emitted BEFORE Run() returns. This is non-timing-dependent:
+	// if Run() returned, the exit trace for every detached step must exist.
+	// This is what the uploadWait plumbing in this PR is actually for.
+	assert.NotNil(t, findLastTraceByName(traces, "db"),
+		"detached step exit trace must be emitted before Run() returns (uploadWait contract)")
+}
+
+// TestWorkflowFailingDetachedStepDoesNotFailWorkflow is the non-service
+// counterpart: Detached=true, Type=commands (a background worker). Same
+// contract — failures don't propagate.
+func TestWorkflowFailingDetachedStepDoesNotFailWorkflow(t *testing.T) {
+	t.Parallel()
+	tracer := newTestTracer(t)
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					// Detached (non-service) worker, ~100ms (from withDetached), exits code 2.
+					cmdStep("background-worker", withDetached(), withExitCode(2)),
+					cmdStep("main-build"),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	assert.NoError(t, r.Run(t.Context()),
+		"detached worker failure must not fail the workflow")
+
+	traces := getTracerStates(tracer)
+
+	workerExit := findLastTraceByName(traces, "background-worker")
+	require.NotNil(t, workerExit, "background-worker must have an exit trace")
+	assert.True(t, workerExit.CurrStepState.Exited)
+	assert.Equal(t, 2, workerExit.CurrStepState.ExitCode,
+		"exit code from detached step must be preserved in trace")
+
+	deployExit := findLastTraceByName(traces, "deploy")
+	require.NotNil(t, deployExit, "deploy must be traced")
+	assert.False(t, deployExit.CurrStepState.Skipped,
+		"deploy must run when only a detached worker failed")
+	assert.True(t, deployExit.CurrStepState.Exited)
+	assert.Equal(t, 0, deployExit.CurrStepState.ExitCode)
+}
