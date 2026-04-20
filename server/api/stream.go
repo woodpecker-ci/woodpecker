@@ -90,18 +90,27 @@ func EventStreamSSE(c *gin.Context) {
 
 	defer func() {
 		cancel(nil)
-		close(eventChan)
+		// Intentionally do not close(eventChan). Publish fans each
+		// message out in a fresh goroutine, so there is no single
+		// producer we can drain and no way to close the channel without
+		// racing those in-flight publishes - closing it used to crash
+		// the whole server with "send on closed channel" as soon as an
+		// SSE client disconnected while the pubsub was still publishing
+		// (#6454). The channel is unreferenced once this handler
+		// returns and is collected by the GC.
 		log.Debug().Msg("user feed: connection closed")
 	}()
 
 	go func() {
 		err := server.Config.Services.Scheduler.Subscribe(ctx, subTopics,
 			func(m pubsub.Message) {
+				// Race ctx.Done against the send so a publish that
+				// arrives after the handler has returned cannot block
+				// forever on a reader that will never come back.
 				select {
 				case <-ctx.Done():
 					return
-				default:
-					eventChan <- m.Data
+				case eventChan <- m.Data:
 				}
 			})
 		cancel(err)
