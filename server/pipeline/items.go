@@ -134,6 +134,12 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
 		},
 	}
+
+	// TODO: remove with version 4.x
+	if server.Config.Pipeline.ForceIgnoreServiceFailure {
+		b.CompilerOptions = append(b.CompilerOptions, compiler.WithForceIgnoreServiceFailure())
+	}
+
 	return b.Build()
 }
 
