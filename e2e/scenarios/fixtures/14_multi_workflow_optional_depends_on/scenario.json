@@ -1,5 +1,5 @@
 {
-  "name": "optional_depends_on drops missing dependency without blocking workflow",
+  "name": "optional depends_on drops missing dependency without blocking workflow",
   "event": "push",
   "expected_status": "success",
   "expected_workflows": [

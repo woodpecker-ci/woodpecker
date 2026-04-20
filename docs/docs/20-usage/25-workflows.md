@@ -119,7 +119,7 @@ This works just like the [`status` filter for steps](./20-workflow-syntax.md#sta
 
 In a monorepo, workflows often use `when: path` to only run when relevant files change. A deploy workflow may need to wait for all check workflows, but some of them might not run because their path filter didn't match. With `depends_on`, this would block the deploy workflow entirely.
 
-Use `optional_depends_on` to declare dependencies that are only enforced when the referenced workflow is part of the pipeline. If the dependency is not built (e.g. its `when` conditions don't match), it is silently ignored.
+Mark a dependency as `optional: true` so it is only enforced when the referenced workflow is part of the pipeline. If the dependency is not built (e.g. its `when` conditions don't match), it is silently ignored.
 
 ```diff
  steps:
@@ -130,13 +130,15 @@ Use `optional_depends_on` to declare dependencies that are only enforced when th
 
  depends_on:
    - check-a
-
-+optional_depends_on:
-+  - check-b
-+  - check-c
++  - name: check-b
++    optional: true
++  - name: check-c
++    optional: true
 ```
 
 In this example, `deploy` always waits for `check-a`. It also waits for `check-b` and `check-c` if they are part of the pipeline, but runs without them if they were filtered out.
+
+The same syntax works at the step level within a workflow: if a step uses `depends_on` with `optional: true` on another step that was filtered out by a `when` condition, the dependency is silently dropped.
 
 :::info
 Some workflows don't need the source code, like creating a notification on failure.

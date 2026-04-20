@@ -181,9 +181,12 @@ func (l *Linter) lintDependsOn(config *WorkflowConfig, c *types.Container, area 
 check:
 	for _, dep := range c.DependsOn {
 		for _, step := range config.Workflow.Steps.ContainerList {
-			if dep == step.Name {
+			if dep.Name == step.Name {
 				continue check
 			}
+		}
+		if dep.Optional {
+			continue
 		}
 		linterErr = multierr.Append(linterErr,
 			newLinterError(

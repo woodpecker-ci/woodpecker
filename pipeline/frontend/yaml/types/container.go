@@ -32,10 +32,10 @@ type Container struct {
 	Settings    map[string]any     `yaml:"settings,omitempty"`
 	Environment map[string]any     `yaml:"environment,omitempty"`
 	// flow control
-	DependsOn base.StringOrSlice `yaml:"depends_on,omitempty"`
-	When      constraint.When    `yaml:"when,omitempty"`
-	Failure   string             `yaml:"failure,omitempty"`
-	Detached  bool               `yaml:"detach,omitempty"`
+	DependsOn base.DependsOn  `yaml:"depends_on,omitempty"`
+	When      constraint.When `yaml:"when,omitempty"`
+	Failure   string          `yaml:"failure,omitempty"`
+	Detached  bool            `yaml:"detach,omitempty"`
 	// state
 	Volumes Volumes `yaml:"volumes,omitempty"`
 	// network

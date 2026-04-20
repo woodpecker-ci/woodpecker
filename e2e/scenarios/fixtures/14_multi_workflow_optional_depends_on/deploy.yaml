@@ -2,9 +2,8 @@ skip_clone: true
 
 depends_on:
   - check-a
-
-optional_depends_on:
-  - check-b
+  - name: check-b
+    optional: true
 
 steps:
   - name: deploy

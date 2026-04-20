@@ -39,19 +39,8 @@
       "$ref": "#/definitions/labels"
     },
     "depends_on": {
-      "type": "array",
-      "minLength": 1,
-      "items": {
-        "type": "string"
-      }
-    },
-    "optional_depends_on": {
-      "description": "Wait for these workflows if they run, but don't block if they are not executed. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
-      "type": "array",
-      "minLength": 1,
-      "items": {
-        "type": "string"
-      }
+      "description": "List of workflow dependencies. Accepts strings or objects with name and optional fields. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
+      "$ref": "#/definitions/depends_on_list"
     },
     "runs_on": {
       "type": "array",
@@ -74,6 +63,44 @@
         },
         {
           "type": "string"
+        }
+      ]
+    },
+    "depends_on_item": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the dependency (step or workflow)."
+            },
+            "optional": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, the dependency is silently dropped when not present in the pipeline."
+            }
+          }
+        }
+      ]
+    },
+    "depends_on_list": {
+      "description": "A dependency or list of dependencies. Each item can be a string or an object with name and optional fields.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "$ref": "#/definitions/depends_on_item"
+          }
         }
       ]
     },
@@ -333,8 +360,8 @@
           "$ref": "#/definitions/step_volumes"
         },
         "depends_on": {
-          "description": "Execute a step after another step has finished.",
-          "$ref": "#/definitions/string_or_string_slice"
+          "description": "Execute a step after another step has finished. Accepts strings or objects with name and optional fields.",
+          "$ref": "#/definitions/depends_on_list"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -395,8 +422,8 @@
           "$ref": "#/definitions/step_volumes"
         },
         "depends_on": {
-          "description": "Execute a step after another step has finished.",
-          "$ref": "#/definitions/string_or_string_slice"
+          "description": "Execute a step after another step has finished. Accepts strings or objects with name and optional fields.",
+          "$ref": "#/definitions/depends_on_list"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",

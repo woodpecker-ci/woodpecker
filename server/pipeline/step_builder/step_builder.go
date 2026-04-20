@@ -36,6 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -57,12 +58,11 @@ type StepBuilder struct {
 }
 
 type Item struct {
-	Workflow          *model.Workflow // TODO: get rid of server dependency
-	Labels            map[string]string
-	DependsOn         []string
-	OptionalDependsOn []string
-	RunsOn            []string
-	Config            *backend_types.Config
+	Workflow  *model.Workflow // TODO: get rid of server dependency
+	Labels    map[string]string
+	DependsOn base.DependsOn
+	RunsOn    []string
+	Config    *backend_types.Config
 }
 
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -108,7 +108,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		// depend on https://github.com/woodpecker-ci/woodpecker/issues/778
 	}
 
-	items = dropMissingOptionalDependencies(items)
+	items = resolveOptionalDependencies(items)
 	items = filterItemsWithMissingDependencies(items)
 
 	return items, errorsAndWarnings
@@ -180,12 +180,11 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	item = &Item{
-		Workflow:          workflow,
-		Config:            ir,
-		Labels:            parsed.Labels,
-		DependsOn:         parsed.DependsOn,
-		OptionalDependsOn: parsed.OptionalDependsOn,
-		RunsOn:            parsed.RunsOn, //nolint:staticcheck // TODO: remove in next major.
+		Workflow:  workflow,
+		Config:    ir,
+		Labels:    parsed.Labels,
+		DependsOn: parsed.DependsOn,
+		RunsOn:    parsed.RunsOn, //nolint:staticcheck // TODO: remove in next major.
 	}
 	if len(item.Labels) == 0 {
 		item.Labels = make(map[string]string, len(b.DefaultLabels))
@@ -227,20 +226,19 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	return item, errorsAndWarnings
 }
 
-// dropMissingOptionalDependencies removes optional dependency entries that
-// reference workflows not present in the pipeline. Surviving optional deps
-// are promoted into DependsOn so they are treated as normal dependencies
-// at runtime.
-func dropMissingOptionalDependencies(items []*Item) []*Item {
+// resolveOptionalDependencies drops optional dependencies whose target
+// workflow is not present in the pipeline. Required dependencies are
+// left untouched (filterItemsWithMissingDependencies handles them).
+func resolveOptionalDependencies(items []*Item) []*Item {
 	for _, item := range items {
-		for _, dep := range item.OptionalDependsOn {
-			if containsItemWithName(dep, items) {
-				if !slices.Contains(item.DependsOn, dep) {
-					item.DependsOn = append(item.DependsOn, dep)
-				}
+		var resolved base.DependsOn
+		for _, dep := range item.DependsOn {
+			if dep.Optional && !containsItemWithName(dep.Name, items) {
+				continue
 			}
+			resolved = append(resolved, base.Dependency{Name: dep.Name})
 		}
-		item.OptionalDependsOn = nil
+		item.DependsOn = resolved
 	}
 	return items
 }
@@ -250,7 +248,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
+			if !containsItemWithName(dep.Name, items) {
 				itemsToRemove = append(itemsToRemove, item)
 			}
 		}
@@ -263,7 +261,6 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 				filtered = append(filtered, item)
 			}
 		}
-		// Recursive to handle transitive deps
 		return filterItemsWithMissingDependencies(filtered)
 	}
 

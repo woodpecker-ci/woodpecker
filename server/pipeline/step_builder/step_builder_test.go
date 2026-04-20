@@ -23,6 +23,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -226,7 +227,7 @@ depends_on:
 	assert.NoError(t, err)
 	assert.Len(t, items, 3, "Should have generated 3 items")
 	assert.Len(t, items[0].DependsOn, 2, "Should have 2 dependencies")
-	assert.Equal(t, "test", items[0].DependsOn[1], "Should depend on test")
+	assert.Equal(t, "test", items[0].DependsOn[1].Name, "Should depend on test")
 }
 
 func TestRunsOn(t *testing.T) {
@@ -577,7 +578,7 @@ depends_on:
 	assert.Empty(t, items, "Workflows with missing dependencies should be filtered out")
 }
 
-func TestOptionalDependsOn(t *testing.T) {
+func TestDependsOnOptionalFlag(t *testing.T) {
 	t.Parallel()
 
 	t.Run("missing optional dep is dropped", func(t *testing.T) {
@@ -603,8 +604,8 @@ steps:
     image: scratch
 depends_on:
   - check-a
-optional_depends_on:
-  - check-b
+  - name: check-b
+    optional: true
 `)},
 			},
 		}
@@ -616,7 +617,7 @@ optional_depends_on:
 		if deploy.Workflow.Name != "deploy" {
 			deploy = items[1]
 		}
-		assert.Equal(t, []string{"check-a"}, deploy.DependsOn, "only check-a should remain as dependency")
+		assert.Equal(t, base.DependsOn{{Name: "check-a"}}, deploy.DependsOn, "only check-a should remain as dependency")
 	})
 
 	t.Run("present optional dep is promoted", func(t *testing.T) {
@@ -649,8 +650,8 @@ steps:
     image: scratch
 depends_on:
   - check-a
-optional_depends_on:
-  - check-b
+  - name: check-b
+    optional: true
 `)},
 			},
 		}
@@ -664,7 +665,7 @@ optional_depends_on:
 				deploy = item
 			}
 		}
-		assert.ElementsMatch(t, []string{"check-a", "check-b"}, deploy.DependsOn, "both deps should be present")
+		assert.ElementsMatch(t, base.DependsOn{{Name: "check-a"}, {Name: "check-b"}}, deploy.DependsOn, "both deps should be present")
 	})
 
 	t.Run("missing required dep still removes workflow", func(t *testing.T) {
@@ -690,8 +691,8 @@ steps:
     image: scratch
 depends_on:
   - missing
-optional_depends_on:
-  - check-a
+  - name: check-a
+    optional: true
 `)},
 			},
 		}
@@ -732,8 +733,8 @@ steps:
     image: scratch
 depends_on:
   - check-a
-optional_depends_on:
-  - check-b
+  - name: check-b
+    optional: true
 `)},
 			},
 		}
@@ -747,7 +748,7 @@ optional_depends_on:
 				deploy = item
 			}
 		}
-		assert.Equal(t, []string{"check-a"}, deploy.DependsOn)
+		assert.Equal(t, base.DependsOn{{Name: "check-a"}}, deploy.DependsOn)
 	})
 }
 
