@@ -193,39 +193,77 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	assert.NoError(t, r.Run(t.Context()))
+	require.NoError(t, r.Run(t.Context()))
 	traces := getTracerStates(tracer)
-	if assert.Len(t, traces, 6) {
-		assert.EqualValues(t, backend_types.State{}, traces[0].CurrStepState)
-		assert.Greater(t, traces[2].CurrStepState.Started, int64(0))
-		assert.EqualValues(t, backend_types.State{Started: traces[2].CurrStepState.Started, Exited: true}, traces[2].CurrStepState)
-		assert.EqualValues(t, backend_types.State{}, traces[3].CurrStepState)
-		assert.Greater(t, traces[4].CurrStepState.Started, int64(0))
-		assert.EqualValues(t, backend_types.State{Started: traces[4].CurrStepState.Started, Exited: true}, traces[4].CurrStepState)
-		assert.Greater(t, traces[5].CurrStepState.Started, int64(0))
-		assert.EqualValues(t, backend_types.State{Started: traces[5].CurrStepState.Started, Exited: true}, traces[5].CurrStepState)
 
-		assert.Greater(t, traces[4].Workflow.Started, int64(0))
-		delete(traces[4].CurrStep.Environment, "CI_PIPELINE_STARTED")
-		delete(traces[4].CurrStep.Environment, "CI_STEP_STARTED")
-		assert.EqualValues(t, state.State{
-			Workflow: state.Workflow{
-				Started: traces[4].Workflow.Started,
-			},
-			CurrStep: &backend_types.Step{
-				Name:        "test",
-				UUID:        "test-uuid",
-				Type:        "commands",
-				OnSuccess:   true,
-				Environment: map[string]string{},
-				Commands:    []string{"echo test"},
-			},
-			CurrStepState: backend_types.State{
-				Started: traces[4].CurrStepState.Started,
-				Exited:  true,
-			},
-		}, traces[4])
+	// Each step should emit exactly one "started" and one "exited" trace:
+	// db (service/detached), build, test — 3 * 2 = 6 traces total.
+	require.Len(t, traces, 6)
+
+	// Per-step invariants: started trace is the zero state, exited trace is
+	// Exited=true with a monotonic Started timestamp.
+	for _, name := range []string{"db", "build", "test"} {
+		started := findFirstTraceByName(traces, name)
+		require.NotNil(t, started, "%s should have a started trace", name)
+		assert.EqualValues(t, backend_types.State{}, started.CurrStepState,
+			"%s started trace should be zero-valued", name)
+
+		last := findLastTraceByName(traces, name)
+		require.NotNil(t, last, "%s should have an exited trace", name)
+		assert.True(t, last.CurrStepState.Exited, "%s should be exited", name)
+		assert.Equal(t, 0, last.CurrStepState.ExitCode, "%s should exit 0", name)
+		assert.Greater(t, last.CurrStepState.Started, int64(0),
+			"%s should have a non-zero Started timestamp", name)
 	}
+
+	// Per-step ordering: started trace precedes exited trace for the same step.
+	for _, name := range []string{"db", "build", "test"} {
+		startedIdx := indexOfTrace(traces, func(s state.State) bool {
+			return s.CurrStep != nil && s.CurrStep.Name == name && !s.CurrStepState.Exited
+		})
+		exitedIdx := indexOfTrace(traces, func(s state.State) bool {
+			return s.CurrStep != nil && s.CurrStep.Name == name && s.CurrStepState.Exited
+		})
+		assert.Less(t, startedIdx, exitedIdx, "%s started must precede %s exited", name, name)
+	}
+
+	// The contract of a service/detached step in stage 1: its exit trace arrives
+	// AFTER stage 2's steps have already been traced. That's the whole point of
+	// detaching — it must not block the next stage.
+	dbExitIdx := indexOfTrace(traces, func(s state.State) bool {
+		return s.CurrStep != nil && s.CurrStep.Name == "db" && s.CurrStepState.Exited
+	})
+	testExitIdx := indexOfTrace(traces, func(s state.State) bool {
+		return s.CurrStep != nil && s.CurrStep.Name == "test" && s.CurrStepState.Exited
+	})
+	assert.Greater(t, dbExitIdx, testExitIdx,
+		"db (service) must complete after test (next stage) — otherwise it wasn't really detached")
+
+	// Runtime-injected env vars should be present on the test step's exit trace.
+	testExit := findLastTraceByName(traces, "test")
+	require.NotNil(t, testExit)
+	assert.NotEmpty(t, testExit.CurrStep.Environment["CI_PIPELINE_STARTED"])
+	assert.NotEmpty(t, testExit.CurrStep.Environment["CI_STEP_STARTED"])
+	assert.Greater(t, testExit.Workflow.Started, int64(0))
+
+	// Strip runtime-injected env for a structural comparison of the step itself.
+	delete(testExit.CurrStep.Environment, "CI_PIPELINE_STARTED")
+	delete(testExit.CurrStep.Environment, "CI_STEP_STARTED")
+	assert.EqualValues(t, state.State{
+		Workflow: state.Workflow{Started: testExit.Workflow.Started},
+		CurrStep: &backend_types.Step{
+			Name:        "test",
+			UUID:        "test-uuid",
+			Type:        "commands",
+			OnSuccess:   true,
+			Environment: map[string]string{},
+			Commands:    []string{"echo test"},
+		},
+		CurrStepState: backend_types.State{
+			Started: testExit.CurrStepState.Started,
+			Exited:  true,
+		},
+	}, *testExit)
 }
 
 func TestWorkflowDetachedStepDoesNotBlockWorkflow(t *testing.T) {
@@ -413,7 +451,6 @@ func TestWorkflowPluginStep(t *testing.T) {
 
 	lastPluginTrace := findLastTraceByName(getTracerStates(tracer), "publish")
 	if assert.NotNil(t, lastPluginTrace) {
-
 		delete(lastPluginTrace.CurrStep.Environment, "CI_PIPELINE_STARTED")
 		delete(lastPluginTrace.CurrStep.Environment, "CI_STEP_STARTED")
 

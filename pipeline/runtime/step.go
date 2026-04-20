@@ -31,9 +31,6 @@ import (
 // It checks whether the step should be skipped, emits a "started" trace,
 // sets up drone-compat env vars, then hands off to blocking or detached execution.
 func (r *Runtime) executeStep(runnerCtx context.Context, step *backend_types.Step) error {
-	r.uploadWait.Add(1)
-	defer r.uploadWait.Done()
-
 	logger := r.makeLogger()
 	logger.Debug().Str("step", step.Name).Msg("prepare")
 
@@ -202,18 +199,15 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types
 // Any error that occurs after setup is logged but not propagated — it cannot
 // influence the pipeline outcome at that point.
 func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types.Step) error {
-	r.uploadWait.Add(1)
-
 	waitForLogs, startTime, err := r.startStep(step)
 	if err != nil {
-		defer r.uploadWait.Done()
-
 		// Setup failed before the container was running — treat it like a
 		// blocking failure so the pipeline is aware.
 		return r.traceStep(nil, err, step)
 	}
 
 	// Container is up and logging is streaming — hand off to background.
+	r.uploadWait.Add(1)
 	go func() {
 		defer r.uploadWait.Done()
 
