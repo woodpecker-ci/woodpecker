@@ -406,6 +406,13 @@ var flags = append([]cli.Flag{
 		Usage:   "if set, pass the environment variable down as \"HTTPS_PROXY\" to steps",
 		Name:    "backend-https-proxy",
 	},
+	// setting to have non breaking behavior till v4.0.0
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE"),
+		Name:    "force-ignore-service-failure",
+		Usage:   "From v3.14.0 onwards, detached steps and services report their status back. To preserve the old behavior, service failures are ignored by default until v4.0.0.",
+		Value:   true,
+	},
 	//
 	// resource limit parameters
 	//

@@ -1,0 +1,13 @@
+{
+  "name": "downstream workflow skipped when dependency fails",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_workflows": [
+    { "name": "build", "status": "failure" },
+    { "name": "deploy", "status": "skipped" }
+  ],
+  "expected_steps": [
+    { "name": "compile", "status": "failure", "exit_code": 1 },
+    { "name": "deploy", "status": "killed", "exit_code": 0, "_comment": "TODO: it should be skipped not killed" }
+  ]
+}

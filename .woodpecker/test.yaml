@@ -90,6 +90,15 @@ steps:
     when:
       - path: *when_path
 
+  test-e2e:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - make test-e2e
+    when:
+      - path: *when_path
+
   sqlite:
     depends_on:
       - vendor
@@ -136,6 +145,7 @@ steps:
         - coverage.out
         - server-coverage.out
         - datastore-coverage.out
+        - e2e-coverage.out
       token:
         from_secret: codecov_token
     when:
