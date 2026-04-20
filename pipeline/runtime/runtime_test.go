@@ -195,15 +195,19 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 
 	assert.NoError(t, r.Run(t.Context()))
 	traces := getTracerStates(tracer)
-	if assert.Len(t, traces, 5) {
+	if assert.Len(t, traces, 6) {
 		assert.EqualValues(t, backend_types.State{}, traces[0].CurrStepState)
 		assert.Greater(t, traces[2].CurrStepState.Started, int64(0))
 		assert.EqualValues(t, backend_types.State{Started: traces[2].CurrStepState.Started, Exited: true}, traces[2].CurrStepState)
 		assert.EqualValues(t, backend_types.State{}, traces[3].CurrStepState)
 		assert.Greater(t, traces[4].CurrStepState.Started, int64(0))
 		assert.EqualValues(t, backend_types.State{Started: traces[4].CurrStepState.Started, Exited: true}, traces[4].CurrStepState)
+		assert.Greater(t, traces[5].CurrStepState.Started, int64(0))
+		assert.EqualValues(t, backend_types.State{Started: traces[5].CurrStepState.Started, Exited: true}, traces[5].CurrStepState)
 
 		assert.Greater(t, traces[4].Workflow.Started, int64(0))
+		delete(traces[4].CurrStep.Environment, "CI_PIPELINE_STARTED")
+		delete(traces[4].CurrStep.Environment, "CI_STEP_STARTED")
 		assert.EqualValues(t, state.State{
 			Workflow: state.Workflow{
 				Started: traces[4].Workflow.Started,
@@ -409,6 +413,10 @@ func TestWorkflowPluginStep(t *testing.T) {
 
 	lastPluginTrace := findLastTraceByName(getTracerStates(tracer), "publish")
 	if assert.NotNil(t, lastPluginTrace) {
+
+		delete(lastPluginTrace.CurrStep.Environment, "CI_PIPELINE_STARTED")
+		delete(lastPluginTrace.CurrStep.Environment, "CI_STEP_STARTED")
+
 		assert.EqualValues(t, map[string]string{
 			"DRONE_BUILD_STATUS":             "success",
 			"DRONE_REPO_SCM":                 "git",
