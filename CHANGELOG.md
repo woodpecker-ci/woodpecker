@@ -73,6 +73,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix send on closed channel panic in SSE stream handlers [[#6456](https://github.com/woodpecker-ci/woodpecker/pull/6456)]
 - Add `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE` config to preserve non-breaking behavior by default [[#6448](https://github.com/woodpecker-ci/woodpecker/pull/6448)]
 - Fix race in pipeline runtime [[#6451](https://github.com/woodpecker-ci/woodpecker/pull/6451)]
 - Fix race in server LogEntry logger [[#6449](https://github.com/woodpecker-ci/woodpecker/pull/6449)]
