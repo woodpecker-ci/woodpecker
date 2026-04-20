@@ -41,6 +41,9 @@ const (
 	// How many batches of logs to keep for each client before starting to
 	// drop them if the client is not consuming them faster than they arrive.
 	maxQueuedBatchesPerClient int = 30
+
+	// idlePingTime is the time till we send a ping to keep the connection alive.
+	idlePingTime = time.Second * 30
 )
 
 // EventStreamSSE
@@ -111,7 +114,7 @@ func EventStreamSSE(c *gin.Context) {
 			return
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Second * 30):
+		case <-time.After(idlePingTime):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
 		case buf, ok := <-eventChan:
@@ -257,11 +260,6 @@ func LogStreamSSE(c *gin.Context) {
 
 	for {
 		select {
-		// after 1 hour of idle (no response) end the stream.
-		// this is more of a safety mechanism than anything,
-		// and can be removed once the code is more mature.
-		case <-time.After(time.Hour):
-			return
 		case <-ctx.Done(): // Monitor if the "tail" context is canceled.
 			if err := context.Cause(ctx); errors.Is(err, context.Canceled) {
 				log.Debug().Msg("log stream: eof")
@@ -272,7 +270,7 @@ func LogStreamSSE(c *gin.Context) {
 		case <-requestCtx.Done(): // Monitor the request context for cancellation when the client has gone away.
 			log.Debug().Msg("log stream: closed, client has gone away")
 			return
-		case <-time.After(time.Second * 30):
+		case <-time.After(idlePingTime):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
 		case buf, ok := <-logChan:
