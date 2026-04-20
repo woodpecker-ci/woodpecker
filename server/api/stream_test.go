@@ -16,6 +16,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -36,49 +37,52 @@ import (
 
 func TestEventStreamSSEConcurrentDisconnect(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	broker := memory.New()
+	server.Config.Services.Scheduler = scheduler.NewScheduler(nil, broker)
+	t.Cleanup(func() { server.Config.Services.Scheduler = nil })
 
-	for range 50 {
-		broker := memory.New()
-		server.Config.Services.Scheduler = scheduler.NewScheduler(nil, broker)
+	for i := range 50 {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			t.Parallel()
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
 
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
+			ctx, cancel := context.WithCancelCause(t.Context())
+			req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/stream/events", nil)
+			c.Request = req
 
-		ctx, cancel := context.WithCancelCause(t.Context())
-		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/stream/events", nil)
-		c.Request = req
+			topic := map[string]struct{}{pubsub.PublicTopic: {}}
 
-		topic := map[string]struct{}{pubsub.PublicTopic: {}}
-
-		done := make(chan struct{})
-		go func() {
-			defer close(done)
-			EventStreamSSE(c)
-		}()
-
-		// Let the event handler subscribe
-		time.Sleep(20 * time.Millisecond)
-
-		// Fire concurrent publishes while canceling the request.
-		var wg sync.WaitGroup
-		for range 20 {
-			wg.Add(1)
+			done := make(chan struct{})
 			go func() {
-				defer wg.Done()
-				_ = broker.Publish(ctx, topic, pubsub.Message{
-					Data: []byte(`{"pipeline":1}`),
-				})
+				defer close(done)
+				EventStreamSSE(c)
 			}()
-		}
 
-		// Simulate client disconnect mid-publish.
-		cancel(nil)
-		wg.Wait()
-		<-done
+			// Let the event handler subscribe
+			time.Sleep(20 * time.Millisecond)
+
+			// Fire concurrent publishes while canceling the request.
+			var wg sync.WaitGroup
+			for range 20 {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					_ = broker.Publish(ctx, topic, pubsub.Message{
+						Data: []byte(`{"pipeline":1}`),
+					})
+				}()
+			}
+
+			// Simulate client disconnect mid-publish.
+			cancel(nil)
+			wg.Wait()
+			<-done
+		})
 	}
 }
 
-func setupLogStreamContext(t *testing.T, logService logging.Log) (*httptest.ResponseRecorder, *gin.Context, context.CancelCauseFunc) {
+func setupLogStreamContext(t *testing.T) (*httptest.ResponseRecorder, *gin.Context, context.CancelCauseFunc) {
 	t.Helper()
 
 	const stepID int64 = 42
@@ -93,8 +97,6 @@ func setupLogStreamContext(t *testing.T, logService logging.Log) (*httptest.Resp
 			PipelineID: pipelineID,
 			State:      model.StatusRunning,
 		}, nil)
-
-	server.Config.Services.Logs = logService
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -116,36 +118,43 @@ func setupLogStreamContext(t *testing.T, logService logging.Log) (*httptest.Resp
 func TestLogStreamSSEConcurrentDisconnect(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
+	logService := logging.New()
+	server.Config.Services.Logs = logService
+	t.Cleanup(func() { server.Config.Services.Logs = nil })
+
 	const stepID int64 = 42
 
-	for range 50 {
-		logService := logging.New()
-		_, c, cancel := setupLogStreamContext(t, logService)
+	for i := range 50 {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			t.Parallel()
+			done := make(chan struct{})
 
-		done := make(chan struct{})
-		go func() {
-			defer close(done)
-			LogStreamSSE(c)
-		}()
+			_, c, cancel := setupLogStreamContext(t)
 
-		// Let LogStreamSSE open the stream and start tailing.
-		time.Sleep(20 * time.Millisecond)
-
-		// Fire concurrent log writes while canceling the request.
-		var wg sync.WaitGroup
-		for i := range 20 {
-			wg.Add(1)
 			go func() {
-				defer wg.Done()
-				_ = logService.Write(t.Context(), stepID, []*model.LogEntry{
-					{Line: i, Data: []byte("log line")},
-				})
+				defer close(done)
+				LogStreamSSE(c)
 			}()
-		}
 
-		// Simulate client disconnect mid-write.
-		cancel(nil)
-		wg.Wait()
-		<-done
+			// Let LogStreamSSE open the stream and start tailing.
+			time.Sleep(20 * time.Millisecond)
+
+			// Fire concurrent log writes while canceling the request.
+			var wg sync.WaitGroup
+			for i := range 20 {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					_ = logService.Write(t.Context(), stepID, []*model.LogEntry{
+						{Line: i, Data: []byte("log line")},
+					})
+				}()
+			}
+
+			// Simulate client disconnect mid-write.
+			cancel(nil)
+			wg.Wait()
+			<-done
+		})
 	}
 }
