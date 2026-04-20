@@ -42,7 +42,7 @@ const (
 	// drop them if the client is not consuming them faster than they arrive.
 	maxQueuedBatchesPerClient int = 30
 
-	// idlePingTime is the time till we send a ping to keep the connection alive.
+	// Is the time till we send a ping to keep the connection alive.
 	idlePingTime = time.Second * 30
 )
 
