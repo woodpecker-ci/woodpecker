@@ -16,21 +16,27 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
-func TestEventStreamSSE_ConcurrentDisconnect(t *testing.T) {
+func TestEventStreamSSEConcurrentDisconnect(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	for range 50 {
@@ -40,7 +46,7 @@ func TestEventStreamSSE_ConcurrentDisconnect(t *testing.T) {
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 
-		ctx, cancel := context.WithCancel(t.Context())
+		ctx, cancel := context.WithCancelCause(t.Context())
 		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/stream/events", nil)
 		c.Request = req
 
@@ -55,7 +61,7 @@ func TestEventStreamSSE_ConcurrentDisconnect(t *testing.T) {
 		// Let the event handler subscribe
 		time.Sleep(20 * time.Millisecond)
 
-		// Fire concurrent publishes while cancelling the request.
+		// Fire concurrent publishes while canceling the request.
 		var wg sync.WaitGroup
 		for range 20 {
 			wg.Add(1)
@@ -68,8 +74,130 @@ func TestEventStreamSSE_ConcurrentDisconnect(t *testing.T) {
 		}
 
 		// Simulate client disconnect mid-publish.
-		cancel()
+		cancel(nil)
 		wg.Wait()
 		<-done
+	}
+}
+
+func setupLogStreamContext(t *testing.T, logService logging.Log) (*httptest.ResponseRecorder, *gin.Context, context.CancelCauseFunc) {
+	t.Helper()
+
+	const stepID int64 = 42
+	const pipelineID int64 = 10
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetPipelineNumber", mock.Anything, mock.Anything).
+		Return(&model.Pipeline{ID: pipelineID}, nil)
+	mockStore.On("StepLoad", mock.Anything).
+		Return(&model.Step{
+			ID:         stepID,
+			PipelineID: pipelineID,
+			State:      model.StatusRunning,
+		}, nil)
+
+	server.Config.Services.Logs = logService
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/stream/logs/1/1/42", nil)
+	c.Request = req
+	c.Params = gin.Params{
+		{Key: "repo_id", Value: "1"},
+		{Key: "pipeline", Value: "1"},
+		{Key: "step_id", Value: "42"},
+	}
+	c.Set("repo", &model.Repo{ID: 1, FullName: "owner/repo"})
+	c.Set("store", mockStore)
+
+	return w, c, cancel
+}
+
+func TestLogStreamSSEConcurrentDisconnect(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const stepID int64 = 42
+
+	for range 50 {
+		logService := logging.New()
+		_, c, cancel := setupLogStreamContext(t, logService)
+
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+			LogStreamSSE(c)
+		}()
+
+		// Let LogStreamSSE open the stream and start tailing.
+		time.Sleep(20 * time.Millisecond)
+
+		// Fire concurrent log writes while canceling the request.
+		var wg sync.WaitGroup
+		for i := range 20 {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				_ = logService.Write(t.Context(), stepID, []*model.LogEntry{
+					{Line: i, Data: []byte("log line")},
+				})
+			}()
+		}
+
+		// Simulate client disconnect mid-write.
+		cancel(nil)
+		wg.Wait()
+		<-done
+	}
+}
+
+func TestLogStreamSSEDrainBeforeEOF(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const stepID int64 = 42
+
+	logService := logging.New()
+	w, c, cancel := setupLogStreamContext(t, logService)
+	defer cancel(nil)
+
+	// Buffer log entries before starting LogStreamSSE. Write auto-opens the
+	// stream, and Tail replays s.list on subscribe, so no timing dependency.
+	for i := range 5 {
+		_ = logService.Write(t.Context(), stepID, []*model.LogEntry{
+			{Line: i, Data: []byte("line")},
+		})
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		LogStreamSSE(c)
+	}()
+
+	// Let LogStreamSSE open the stream and start tailing (replays buffered entries).
+	time.Sleep(20 * time.Millisecond)
+
+	// Close the stream to signal pipeline finished.
+	_ = logService.Close(t.Context(), stepID)
+
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("LogStreamSSE did not exit after stream close")
+	}
+
+	body := w.Body.String()
+
+	// All 5 log entries should appear before the eof event.
+	for i := 1; i <= 5; i++ {
+		idLine := fmt.Sprintf("id: %d", i)
+		if !strings.Contains(body, idLine) {
+			t.Errorf("missing log entry with id %d in SSE output", i)
+		}
+	}
+
+	if !strings.Contains(body, "event: eof") {
+		t.Error("missing eof event in SSE output")
 	}
 }

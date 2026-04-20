@@ -23,6 +23,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -217,7 +218,10 @@ func LogStreamSSE(c *gin.Context) {
 	go func() {
 		batches := make(logging.LogChan, maxQueuedBatchesPerClient)
 
+		var innerDone sync.WaitGroup
+		innerDone.Add(1)
 		go func() {
+			defer innerDone.Done()
 			for entries := range batches {
 				for _, entry := range entries {
 					if ee, err := json.Marshal(entry); err == nil {
@@ -239,6 +243,7 @@ func LogStreamSSE(c *gin.Context) {
 		}
 
 		close(batches)
+		innerDone.Wait()
 		cancel(err)
 	}()
 
