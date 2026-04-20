@@ -1,0 +1,10 @@
+{
+  "name": "always-run step executes on failure",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_steps": [
+    { "name": "build", "status": "failure", "exit_code": 1 },
+    { "name": "always-cleanup", "status": "success", "exit_code": 0 },
+    { "name": "deploy", "status": "skipped", "exit_code": 0 }
+  ]
+}

@@ -199,3 +199,10 @@ func WithProxy(opt ProxyOptions) Option {
 		},
 	)
 }
+
+// TODO: remove with version 4.x
+func WithForceIgnoreServiceFailure() Option {
+	return func(c *Compiler) {
+		c.forceIgnoreServiceFailure = true
+	}
+}
