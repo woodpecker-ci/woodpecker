@@ -20,24 +20,21 @@ import (
 	"fmt"
 	"maps"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*step_builder.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
-		if item.Workflow.State == model.StatusSkipped {
-			continue
-		}
 		task := &model.Task{
 			ID:         fmt.Sprint(item.Workflow.ID),
 			PID:        item.Workflow.PID,
 			Name:       item.Workflow.Name,
 			Labels:     make(map[string]string),
-			PipelineID: item.Workflow.PipelineID,
+			PipelineID: activePipeline.ID,
 			RepoID:     repo.ID,
 		}
 		maps.Copy(task.Labels, item.Labels)
@@ -63,7 +60,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*step_
 	return server.Config.Services.Scheduler.PushAtOnce(ctx, tasks)
 }
 
-func getTaskDependencies(dependsOn []string, items []*step_builder.Item) (taskIDs []string) {
+func getTaskDependencies(dependsOn []string, items []*builder.Item) (taskIDs []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range items {
 			if pipelineItem.Workflow.Name == dep {

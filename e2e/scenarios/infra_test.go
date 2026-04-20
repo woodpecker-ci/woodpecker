@@ -89,4 +89,11 @@ func TestInfraSmoke(t *testing.T) {
 
 	finished := setup.WaitForPipeline(t, env.Store, createdPipeline.ID)
 	assert.Equal(t, model.StatusSuccess, finished.Status, "pipeline should succeed")
+
+	workflows, err := env.Store.WorkflowGetTree(finished)
+	require.NoError(t, err)
+	require.Len(t, workflows, 1, "smoke test expects exactly one workflow")
+	assert.Equal(t, "woodpecker", workflows[0].Name)
+	assert.Equal(t, model.StatusSuccess, workflows[0].State)
+	assert.Greater(t, workflows[0].AgentID, int64(0), "workflow should record agent that ran it")
 }

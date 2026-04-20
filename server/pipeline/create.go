@@ -57,7 +57,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	// If the forge has a refresh token, the current access token
+	// If the repoUser has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
 	forge.Refresh(ctx, _forge, _store, repoUser)
@@ -111,7 +111,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	}
 
-	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
+	enrichPipelineItemSteps(pipelineItems, repo)
+	pipeline, err = saveWorkflowsFromPipelineBuilder(_store, pipeline, pipelineItems)
+	if err != nil {
+		return nil, fmt.Errorf("saveWorkflowsFromPipelineBuilder failed: %w", err)
+	}
 
 	// persist the pipeline config for historical correctness, restarts, etc
 	var configs []*model.Config
@@ -131,10 +135,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	if err := prepareStart(ctx, _forge, _store, pipeline, repoUser, repo); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error preparing pipeline for %s#%d", repo.FullName, pipeline.Number)
-		return nil, err
-	}
+	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 
 	if pipeline.Status == model.StatusBlocked {
 		return pipeline, nil
