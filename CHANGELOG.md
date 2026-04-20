@@ -115,6 +115,7 @@
 
 ### 🧪 Tests
 
+- Add e2e pipeline restart test [[#6469](https://github.com/woodpecker-ci/woodpecker/pull/6469)]
 - Init minimal e2e tests [[#6391](https://github.com/woodpecker-ci/woodpecker/pull/6391)]
 - Enhance datastore DB test setup [[#6450](https://github.com/woodpecker-ci/woodpecker/pull/6450)]
 - Dummy backend support cancel [[#6390](https://github.com/woodpecker-ci/woodpecker/pull/6390)]
@@ -129,6 +130,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#6472](https://github.com/woodpecker-ci/woodpecker/pull/6472)]
 - Update dependency axios to v1.15.1 [[#6468](https://github.com/woodpecker-ci/woodpecker/pull/6468)]
 - Update dependency marked to v18.0.2 [[#6465](https://github.com/woodpecker-ci/woodpecker/pull/6465)]
 - Update docs npm deps non-major [[#6463](https://github.com/woodpecker-ci/woodpecker/pull/6463)]
