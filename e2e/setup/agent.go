@@ -138,7 +138,7 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 	t.Cleanup(func() { authConn.Close() })
 
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, TestAgentToken, -1)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(agentCtx, authClient, agentAuthRefreshEvery) //nolint:contextcheck
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(agentCtx, authClient, agentAuthRefreshEvery)
 	if err != nil {
 		t.Fatalf("StartAgent(%s): authenticate with server: %v", cfg.hostname, err)
 	}
@@ -168,7 +168,7 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 		t.Fatalf("StartAgent(%s): load dummy backend: %v", cfg.hostname, err)
 	}
 
-	env.AgentID, err = client.RegisterAgent(grpcCtx, rpc.AgentInfo{ //nolint:contextcheck
+	env.AgentID, err = client.RegisterAgent(grpcCtx, rpc.AgentInfo{
 		Version:      version.String(),
 		Backend:      backend.Name(),
 		Platform:     engInfo.Platform,
