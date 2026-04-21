@@ -163,6 +163,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 				assert.Equal(t, "develop", hookRepo.Branch)
 				assert.Equal(t, "refs/tags/v22", pipeline.Ref)
+				assert.Equal(t, "http://10.40.8.5:3200/test/woodpecker/-/tags/v22", pipeline.ForgeURL)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventTag, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
@@ -185,7 +186,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker", hookRepo.Name)
-				assert.Equal(t, "Update client.go 🎉", pipeline.Title)
+				assert.Equal(t, "Update client.go 🎉", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
@@ -207,7 +208,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README.md for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README.md for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
@@ -265,7 +266,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker-test", hookRepo.Name)
-				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Equal(t, "Add new file", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullClosed, pipeline.Event)
 			}
@@ -285,7 +286,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Some ned more AAAA", pipeline.Title)
+				assert.Equal(t, "Some ned more AAAA", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPull, pipeline.Event)
 			}
@@ -306,7 +307,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker-test", hookRepo.Name)
-				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Equal(t, "Add new file", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullClosed, pipeline.Event)
 			}
@@ -327,7 +328,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
 				assert.Equal(t, []string{"title_edited", "description_edited"}, pipeline.EventReason)
@@ -347,7 +348,7 @@ func Test_GitLab(t *testing.T) {
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
 				assert.Equal(t, "ci", hookRepo.Name)
-				assert.Equal(t, "created release Awesome version 0.0.2", pipeline.Message)
+				assert.Equal(t, "Awesome version 0.0.2", pipeline.Release.Title)
 				assert.Equal(t, model.EventRelease, pipeline.Event)
 			}
 		})
@@ -380,7 +381,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
 				assert.Equal(t, []string{"review_requested"}, pipeline.EventReason)

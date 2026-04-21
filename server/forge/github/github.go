@@ -265,7 +265,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	client := c.newClientToken(ctx, u.AccessToken)
 
 	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = b.Commit
+	opts.Ref = b.Commit.SHA
 	content, _, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -284,7 +284,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	client := c.newClientToken(ctx, u.AccessToken)
 
 	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = b.Commit
+	opts.Ref = b.Commit.SHA
 	_, data, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -347,10 +347,7 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
-		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(pullRequests[i].GetNumber())),
-			Title: pullRequests[i].GetTitle(),
-		}
+		result[i] = convertPullRequest(pullRequests[i])
 	}
 	return result, err
 }
@@ -574,7 +571,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, github.RepoStatus{
+	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit.SHA, github.RepoStatus{
 		Context:     github.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 		State:       github.Ptr(convertStatus(workflow.State)),
 		Description: github.Ptr(common.GetPipelineStatusDescription(workflow.State)),
@@ -636,10 +633,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	return &model.Commit{
-		SHA:      b.GetCommit().GetSHA(),
-		ForgeURL: b.GetCommit().GetHTMLURL(),
-	}, nil
+	return convertCommit(b.GetCommit().GetCommit()), nil
 }
 
 // Hook parses the post-commit hook from the Request body
@@ -650,13 +644,22 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
-		tagName := strings.Split(pipeline.Ref, "/")[2]
-		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
-		if err != nil {
-			return nil, nil, err
+	if pipeline != nil {
+		switch pipeline.Event {
+		case model.EventRelease:
+			tagName := strings.Split(pipeline.Ref, "/")[2]
+			commit, err := c.getCommitAndMessageFromTag(ctx, repo, tagName)
+			if err != nil {
+				return nil, nil, err
+			}
+			pipeline.Commit = commit
+		case model.EventDeploy, model.EventPull, model.EventPullClosed:
+			commit, err := c.getCommitFromSHA(ctx, repo, pipeline.Commit.SHA)
+			if err != nil {
+				return nil, nil, err
+			}
+			pipeline.Commit = commit
 		}
-		pipeline.Commit = sha
 	}
 
 	if pull != nil {
@@ -718,21 +721,20 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	return pipeline, err
 }
 
-func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+func (c *client) getCommitAndMessageFromTag(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
-		log.Error().Msg("could not get store from context")
-		return "", nil
+		return nil, fmt.Errorf("could not get store from context")
 	}
 
 	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Refresh the OAuth token before making API calls.
@@ -747,7 +749,7 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	for {
 		tags, _, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, &github.ListOptions{Page: page})
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		for _, t := range tags {
@@ -761,9 +763,35 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		}
 	}
 	if tag == nil {
-		return "", fmt.Errorf("could not find tag %s", tagName)
+		return nil, fmt.Errorf("could not find tag %s", tagName)
 	}
-	return tag.GetCommit().GetSHA(), nil
+	return convertCommit(tag.GetCommit()), nil
+}
+
+func (c *client) getCommitFromSHA(ctx context.Context, repo *model.Repo, sha string) (*model.Commit, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("could not get store from context")
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeID, repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	gh := c.newClientToken(ctx, user.AccessToken)
+
+	commit, _, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, sha, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return convertCommit(commit.GetCommit()), nil
 }
 
 func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, curr, prev string) (*model.Pipeline, error) {

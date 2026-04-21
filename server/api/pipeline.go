@@ -90,19 +90,15 @@ func CreatePipeline(c *gin.Context) {
 
 func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
 	return &model.Pipeline{
-		Event:     event,
-		Commit:    commit.SHA,
-		Branch:    opts.Branch,
-		Timestamp: time.Now().UTC().Unix(),
-
-		Avatar:  user.Avatar,
-		Message: "MANUAL PIPELINE @ " + opts.Branch,
+		Event:  event,
+		Commit: commit,
+		Branch: opts.Branch,
 
 		Ref:                 opts.Branch,
 		AdditionalVariables: opts.Variables,
 
-		Author: user.Login,
-		Email:  user.Email,
+		Author:       user.Login,
+		AuthorAvatar: user.Avatar,
 
 		ForgeURL: commit.ForgeURL,
 	}
@@ -605,7 +601,8 @@ func GetPipelineQueue(c *gin.Context) {
 //	@Param			repo_id			path	int		true	"the repository id"
 //	@Param			pipeline_number	path	int		true	"the number of the pipeline"
 //	@Param			event			query	string	false	"override the event type"
-//	@Param			deploy_to		query	string	false	"override the target deploy value"
+//	@Param			deploy_to		query	string	false	"deprecated use deploy_target instead"
+//	@Param			deploy_target	query	string	false	"override the deployment target value"
 func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -634,7 +631,10 @@ func PostPipeline(c *gin.Context) {
 	// make Deploy overridable
 
 	// make Deploy task overridable
-	pl.DeployTask = c.DefaultQuery("deploy_task", pl.DeployTask)
+	if pl.Deployment == nil {
+		pl.Deployment = new(model.Deployment)
+	}
+	pl.Deployment.Task = c.DefaultQuery("deploy_task", pl.Deployment.Task)
 
 	// make Event overridable to deploy
 	// TODO: refactor to use own proper API for deploy
@@ -650,7 +650,8 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
-		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
+		// TODO drop deploy_to in next major
+		pl.Deployment.Target = c.DefaultQuery("deploy_target", c.DefaultQuery("deploy_to", pl.Deployment.Target))
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params

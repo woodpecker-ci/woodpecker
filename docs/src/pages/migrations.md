@@ -12,6 +12,32 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 - deprecated `runs_on` workflow property in favor of `when.status`.
 
+### API changes
+
+- The pipeline model has been changed to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pr.title`). Following properties are deprecated and should be replaced by the their new counterparts:
+  - `deploy_to` => `deployment.target`
+  - `deploy_task` => `deployment.task`
+  - `commit` (SHA) => `commit_pipeline.sha`
+  - `title` =>
+    - `release.title`: for release events
+    - `pull_request.title` for pull-request events
+  - `message` =>
+    - `commit.message` for push and pull-request events
+    - `tag_title` for tag events
+    - `cron` for cron events
+    - `deployment.description` for deployment events
+    - dropped for manual events (was a combination of `MANUAL PIPELINE` and branch)
+  - `timestamp` => was never actively used, use `created` instead
+  - `sender` => `author`
+  - `avatar` => `author_avatar`
+  - `author` => `commit.author.name`
+  - `email` => `commit.author.email` (not correct as it actually is the sender's email, but this is the closest we can get)
+  - `pr_labels` => `pull_request.labels`
+  - `is_prerelease` => `release.is_prerelease`
+  - `from_fork` => `pull_request.from_fork`
+  - extraction from `ref` => `release.tag_title`
+  - `refspec` => `pull_request.source_branch` and `pull_request.target_branch`
+
 ### Admin-facing migrations
 
 - changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`

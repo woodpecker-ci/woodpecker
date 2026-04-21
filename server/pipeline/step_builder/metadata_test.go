@@ -41,6 +41,8 @@ func TestMetadataFromStruct(t *testing.T) {
 	}{
 		{
 			name:             "Test with empty info",
+			pipeline:         &model.Pipeline{Commit: &model.Commit{}},
+			prev:             &model.Pipeline{Commit: &model.Commit{}},
 			expectedMetadata: metadata.Metadata{Sys: metadata.System{Name: "woodpecker"}},
 			expectedEnviron: map[string]string{
 				"CI":                  "woodpecker",
@@ -58,8 +60,8 @@ func TestMetadataFromStruct(t *testing.T) {
 			name:     "Test with forge",
 			forge:    forge,
 			repo:     &model.Repo{FullName: "testUser/testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
-			pipeline: &model.Pipeline{Number: 3, ChangedFiles: []string{"test.go", "markdown file.md"}},
-			prev:     &model.Pipeline{Number: 2},
+			pipeline: &model.Pipeline{Number: 3, ChangedFiles: []string{"test.go", "markdown file.md"}, Commit: &model.Commit{}},
+			prev:     &model.Pipeline{Number: 2, Commit: &model.Commit{}},
 			workflow: &model.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
