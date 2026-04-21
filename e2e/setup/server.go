@@ -50,7 +50,7 @@ const (
 	// TestJWTSecret is used for signing gRPC auth JWTs.
 	TestJWTSecret = "test-jwt-secret-for-integration-tests"
 
-	// TestForgeType is the forge type the mock pretends to bee.
+	// TestForgeType is the forge type the mock pretends to be.
 	TestForgeType = model.ForgeTypeGitea
 )
 
@@ -145,7 +145,10 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 			&cli.DurationFlag{Name: "forge-timeout", Value: defaultTimeout},
 			&cli.UintFlag{Name: "forge-retry", Value: defaultRetry},
 			&cli.StringSliceFlag{Name: "environment"},
-			// Forge flags — gitea=true satisfies setupForgeService's type switch.
+			// services.NewManager reads the forge type from a cli flag and
+			// drives a type-switch in setupForgeService. We set the gitea flag
+			// to satisfy that switch; the actual forge instance is overridden
+			// below via the SetupForge hook, so the switch result is unused.
 			&cli.BoolFlag{Name: string(TestForgeType), Value: true},
 			&cli.StringFlag{Name: "forge-url", Value: "https://forge.example.test"},
 		},

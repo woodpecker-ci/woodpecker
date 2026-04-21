@@ -17,7 +17,6 @@
 package setup
 
 import (
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -29,13 +28,6 @@ import (
 
 // newMockForge builds a MockForge that serves the given files for any
 // config-fetch call, no-ops status reporting, and stubs all other methods safely.
-//
-// Single-workflow (len(files)==1, name ".woodpecker.yaml"): File() returns the
-// raw YAML bytes; Dir() is not called but is stubbed for safety.
-//
-// Multi-workflow (len(files)>1, names ".woodpecker/foo.yaml"): File() returns
-// empty (causing the config service to fall through to Dir()); Dir() returns
-// all files.
 func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.MockForge {
 	t.Helper()
 	m := forge_mocks.NewMockForge(t)
@@ -44,25 +36,14 @@ func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.Mock
 	m.On("Name").Return("mock").Maybe()
 	m.On("URL").Return("https://forge.example.test").Maybe()
 
-	if len(files) == 1 {
-		// Single-workflow: config service calls File(".woodpecker.yaml").
-		m.On("File",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker.yaml",
-		).Return(files[0].Data, nil).Maybe()
+	// we just use multi workflows
+	m.On("File",
+		mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+	).Return(nil, nil).Maybe()
 
-		m.On("Dir",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker",
-		).Return(files, nil).Maybe()
-	} else {
-		// Multi-workflow: config service calls Dir(".woodpecker").
-		// File() must return empty so the service falls through to Dir().
-		m.On("File",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker.yaml",
-		).Return([]byte(nil), nil).Maybe()
-		m.On("Dir",
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker",
-		).Return(files, nil).Maybe()
-	}
+	m.On("Dir",
+		mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker",
+	).Return(files, nil).Maybe()
 
 	// Status reporting back to forge — no-op.
 	m.On("Status",
@@ -76,6 +57,3 @@ func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.Mock
 
 	return m
 }
-
-// compile-time import guard.
-var _ *http.Request

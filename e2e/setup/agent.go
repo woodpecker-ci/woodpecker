@@ -48,9 +48,8 @@ type AgentEnv struct {
 	// name is used for logging and as the hostname label.
 	name string
 
-	// requestedOrgID is applied to the DB record by WaitForAgentRegistered
-	// so the server's GetServerLabels returns the right org-id filter.
-	// model.IDNotSet (-1) means global (default).
+	// requestOrgID is applied to the DB record by WaitForAgentRegistered.
+	// See WithOrgID. model.IDNotSet (-1) means global (default).
 	requestOrgID int64
 }
 
@@ -65,9 +64,7 @@ type agentConfig struct {
 	// They are matched against task Labels set in pipeline YAML (labels: key: value).
 	customLabels map[string]string
 
-	// orgID pins the agent to a specific organization (-1 = global).
-	// Org agents score higher than global agents for tasks in the same org,
-	// so they are always preferred by the queue when available.
+	// orgID pins the agent to a specific organization. See WithOrgID.
 	orgID int64
 }
 

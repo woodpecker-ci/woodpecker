@@ -36,6 +36,21 @@ const (
 	defaultInterval = 100 * time.Millisecond
 )
 
+// pollUntil polls condition every defaultInterval until it returns true or
+// timeout is exceeded. Returns true if condition was met, false on timeout.
+// Callers are expected to handle the timeout case themselves, typically with
+// a t.Fatalf that reports the last observed state.
+func pollUntil(timeout time.Duration, condition func() bool) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if condition() {
+			return true
+		}
+		time.Sleep(defaultInterval)
+	}
+	return condition()
+}
+
 // isTerminal returns true if the status is a final (non-running) state.
 func isTerminal(s model.StatusValue) bool {
 	switch s {
@@ -58,23 +73,20 @@ func WaitForPipeline(t *testing.T, s store.Store, pipelineID int64) *model.Pipel
 func WaitForPipelineStatus(t *testing.T, s store.Store, pipelineID int64, wantStatus model.StatusValue, timeout time.Duration) *model.Pipeline {
 	t.Helper()
 
-	deadline := time.Now().Add(timeout)
-	for time.Now().Before(deadline) {
-		p, err := s.GetPipeline(pipelineID)
+	var p *model.Pipeline
+	ok := pollUntil(timeout, func() bool {
+		var err error
+		p, err = s.GetPipeline(pipelineID)
 		require.NoError(t, err, "get pipeline %d", pipelineID)
-
 		if wantStatus != "" {
-			if p.Status == wantStatus {
-				return p
-			}
-		} else if isTerminal(p.Status) {
-			return p
+			return p.Status == wantStatus
 		}
-
-		time.Sleep(defaultInterval)
+		return isTerminal(p.Status)
+	})
+	if ok {
+		return p
 	}
 
-	p, _ := s.GetPipeline(pipelineID)
 	t.Fatalf("timeout waiting for pipeline %d: last status=%q (want %q)", pipelineID, p.Status, wantStatus)
 	return nil
 }
@@ -85,37 +97,32 @@ func WaitForPipelineStatus(t *testing.T, s store.Store, pipelineID int64, wantSt
 func WaitForAgentRegistered(t *testing.T, s store.Store, agents ...*AgentEnv) {
 	t.Helper()
 
-	deadline := time.Now().Add(shortTimeout)
-	for time.Now().Before(deadline) {
-		allFound := true
+	allRegistered := func() bool {
 		for _, env := range agents {
 			if env.AgentID == 0 {
-				allFound = false
-				break
+				return false
 			}
 			if _, err := s.AgentFind(env.AgentID); err != nil {
-				allFound = false
-				break
+				return false
 			}
 		}
-		if allFound {
-			// Apply any deferred OrgID patches.
-			for _, env := range agents {
-				if env.requestOrgID == model.IDNotSet {
-					continue
-				}
-				agent, err := s.AgentFind(env.AgentID)
-				require.NoError(t, err, "find agent %d to patch OrgID", env.AgentID)
-				agent.OrgID = env.requestOrgID
-				require.NoError(t, s.AgentUpdate(agent),
-					"patch OrgID on agent %d", env.AgentID)
-			}
-			return
-		}
-		time.Sleep(defaultInterval)
+		return true
+	}
+	if !pollUntil(shortTimeout, allRegistered) {
+		t.Fatal("timeout: not all agents registered with the server")
 	}
 
-	t.Fatal("timeout: not all agents registered with the server")
+	// Apply any deferred OrgID patches.
+	for _, env := range agents {
+		if env.requestOrgID == model.IDNotSet {
+			continue
+		}
+		agent, err := s.AgentFind(env.AgentID)
+		require.NoError(t, err, "find agent %d to patch OrgID", env.AgentID)
+		agent.OrgID = env.requestOrgID
+		require.NoError(t, s.AgentUpdate(agent),
+			"patch OrgID on agent %d", env.AgentID)
+	}
 }
 
 // WaitForStep polls the store until a named step in the given pipeline reaches
@@ -132,33 +139,29 @@ func WaitForStep(t *testing.T, s store.Store, pipeline *model.Pipeline, stepName
 func WaitForStepStatus(t *testing.T, s store.Store, pipeline *model.Pipeline, stepName string, wantState model.StatusValue, timeout time.Duration) *model.Step {
 	t.Helper()
 
-	deadline := time.Now().Add(timeout)
-	for time.Now().Before(deadline) {
+	var found *model.Step
+	ok := pollUntil(timeout, func() bool {
 		steps, err := s.StepList(pipeline)
 		require.NoError(t, err, "list steps for pipeline %d", pipeline.ID)
-
 		for _, step := range steps {
 			if step.Name != stepName {
 				continue
 			}
+			found = step
 			if wantState != "" {
-				if step.State == wantState {
-					return step
-				}
-			} else if isTerminal(step.State) {
-				return step
+				return step.State == wantState
 			}
+			return isTerminal(step.State)
 		}
-		time.Sleep(defaultInterval)
+		return false
+	})
+	if ok {
+		return found
 	}
 
-	steps, _ := s.StepList(pipeline)
 	var lastState model.StatusValue
-	for _, step := range steps {
-		if step.Name == stepName {
-			lastState = step.State
-			break
-		}
+	if found != nil {
+		lastState = found.State
 	}
 	if wantState != "" {
 		t.Fatalf("timeout waiting for step %q in pipeline %d to reach state %q: last state=%q",
@@ -200,13 +203,10 @@ func AssertWorkflowRanOnAgent(t *testing.T, s store.Store, pipeline *model.Pipel
 func WaitForWorkersReady(t *testing.T, q queue.Queue, minWorkers int) {
 	t.Helper()
 
-	deadline := time.Now().Add(shortTimeout)
-	for time.Now().Before(deadline) {
-		info := q.Info(context.Background())
-		if info.Stats.Workers >= minWorkers {
-			return
-		}
-		time.Sleep(defaultInterval)
+	if pollUntil(shortTimeout, func() bool {
+		return q.Info(context.Background()).Stats.Workers >= minWorkers
+	}) {
+		return
 	}
 
 	info := q.Info(context.Background())
@@ -221,21 +221,19 @@ func WaitForWorkersReady(t *testing.T, q queue.Queue, minWorkers int) {
 func WaitForStepRunning(t *testing.T, s store.Store, pipelineID int64, stepName string) {
 	t.Helper()
 
-	deadline := time.Now().Add(shortTimeout)
-	for time.Now().Before(deadline) {
+	running := pollUntil(shortTimeout, func() bool {
 		p, err := s.GetPipeline(pipelineID)
 		require.NoError(t, err, "get pipeline %d", pipelineID)
-
 		steps, err := s.StepList(p)
 		require.NoError(t, err, "list steps for pipeline %d", pipelineID)
-
 		for _, step := range steps {
 			if step.Name == stepName && step.State == model.StatusRunning {
-				return
+				return true
 			}
 		}
-		time.Sleep(defaultInterval)
+		return false
+	})
+	if !running {
+		t.Fatalf("timeout waiting for step %q in pipeline %d to reach StatusRunning", stepName, pipelineID)
 	}
-
-	t.Fatalf("timeout waiting for step %q in pipeline %d to reach StatusRunning", stepName, pipelineID)
 }

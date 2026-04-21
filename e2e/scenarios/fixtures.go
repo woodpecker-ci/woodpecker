@@ -137,9 +137,8 @@ func LoadScenarios(t *testing.T) []Scenario {
 			{Name: ".woodpecker.yaml", Data: yamlData},
 		}
 
-		if s.Event == "" {
-			s.Event = model.EventPush
-		}
+		s.check(t, stem+".json")
+
 		scenarios = append(scenarios, s)
 	}
 
@@ -178,13 +177,24 @@ func loadMultiWorkflowScenario(t *testing.T, dirName string) Scenario {
 			})
 		}
 	}
-
 	require.NotEmpty(t, files, "no YAML files in multi-workflow dir %s", dirName)
-	require.NotEmpty(t, s.Name, "scenario.json missing 'name' in %s", dirName)
+
+	s.check(t, dirName+"/scenario.json")
 
 	s.Files = forge_types.SortByName(files)
 	if s.Event == "" {
 		s.Event = model.EventPush
 	}
 	return s
+}
+
+func (s Scenario) check(t *testing.T, location string) {
+	t.Helper()
+
+	if s.Name == "" {
+		t.Fatalf("fixture '%s' missing name", location)
+	}
+	if s.Event == "" {
+		t.Fatalf("fixture '%s' missing event", location)
+	}
 }
