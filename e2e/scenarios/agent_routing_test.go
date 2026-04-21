@@ -108,12 +108,12 @@ Func TestOrgAgentPreferredOverGlobal(t *testing.T) {
 	})
 
 	// Global agent: matches org-id=* (score 1).
-	globalAgent := setup.StartAgent( t, env.GRPCAddr,
+	globalAgent := setup.StartAgent(t, env.GRPCAddr,
 		setup.WithHostname("global-agent"),
 	)
 
 	// Org agent: will be patched with the repo's OrgID (score 10).
-	orgAgent := setup.StartAgent( t, env.GRPCAddr,
+	orgAgent := setup.StartAgent(t, env.GRPCAddr,
 		setup.WithHostname("org-agent"),
 		setup.WithOrgID(env.Fixtures.Repo.OrgID),
 	)

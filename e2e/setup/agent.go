@@ -108,7 +108,7 @@ func WithOrgID(id int64) AgentOption {
 // server at grpcAddr and returns an *AgentEnv whose AgentID is populated once
 // the agent has registered. Pass AgentOption values to configure labels, hostname,
 // or org-scoping; multiple agents can be started in the same test.
-func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv { //nolint:contextcheck
+func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 	t.Helper()
 
 	cfg := &agentConfig{
