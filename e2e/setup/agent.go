@@ -108,7 +108,7 @@ func WithOrgID(id int64) AgentOption {
 // server at grpcAddr and returns an *AgentEnv whose AgentID is populated once
 // the agent has registered. Pass AgentOption values to configure labels, hostname,
 // or org-scoping; multiple agents can be started in the same test.
-func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv { //nolint:contextcheck
+func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv { //nolint:contextcheck
 	t.Helper()
 
 	cfg := &agentConfig{
@@ -128,8 +128,8 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 		Timeout: shortTimeout,
 	})
 
-	authCtx, authCancel := context.WithCancelCause(context.Background())
-	t.Cleanup(func() { authCancel(nil) })
+	agentCtx, agentCancel := context.WithCancelCause(context.Background())
+	t.Cleanup(func() { agentCancel(nil) })
 
 	authConn, err := grpc.NewClient(grpcAddr, transport, keepaliveOpts)
 	if err != nil {
@@ -138,7 +138,7 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 	t.Cleanup(func() { authConn.Close() })
 
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, TestAgentToken, -1)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(authCtx, authClient, agentAuthRefreshEvery) //nolint:contextcheck
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(agentCtx, authClient, agentAuthRefreshEvery) //nolint:contextcheck
 	if err != nil {
 		t.Fatalf("StartAgent(%s): authenticate with server: %v", cfg.hostname, err)
 	}
@@ -155,15 +155,15 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 	}
 	t.Cleanup(func() { conn.Close() })
 
-	client := agent_rpc.NewGrpcClient(ctx, conn)
+	client := agent_rpc.NewGrpcClient(agentCtx, conn)
 
-	grpcCtx := metadata.NewOutgoingContext(authCtx, metadata.Pairs("hostname", cfg.hostname))
+	grpcCtx := metadata.NewOutgoingContext(agentCtx, metadata.Pairs("hostname", cfg.hostname))
 
 	backend := dummy.New()
-	if !backend.IsAvailable(ctx) {
+	if !backend.IsAvailable(agentCtx) {
 		t.Fatalf("StartAgent(%s): dummy backend is not available", cfg.hostname)
 	}
-	engInfo, err := backend.Load(ctx)
+	engInfo, err := backend.Load(agentCtx)
 	if err != nil {
 		t.Fatalf("StartAgent(%s): load dummy backend: %v", cfg.hostname, err)
 	}
@@ -218,16 +218,16 @@ func StartAgent(ctx context.Context, t *testing.T, grpcAddr string, opts ...Agen
 			runner := agent.NewRunner(client, filter, cfg.hostname, counter, backend)
 			log.Debug().Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner started")
 			for {
-				if ctx.Err() != nil {
+				if agentCtx.Err() != nil {
 					return
 				}
-				if err := runner.Run(ctx); err != nil {
-					if ctx.Err() != nil {
+				if err := runner.Run(agentCtx); err != nil {
+					if agentCtx.Err() != nil {
 						return
 					}
 					log.Error().Err(err).Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner error, retrying")
 					select {
-					case <-ctx.Done():
+					case <-agentCtx.Done():
 						return
 					case <-time.After(500 * time.Millisecond):
 					}
