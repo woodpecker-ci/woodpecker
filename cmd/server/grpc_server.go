@@ -19,12 +19,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/rs/zerolog/log"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/urfave/cli/v3"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	server_rpc "go.woodpecker-ci.org/woodpecker/v3/server/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -36,52 +33,14 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 		return fmt.Errorf("failed to listen on grpc-addr: %w", err)
 	}
 
-	jwtSecret := c.String("grpc-secret")
-	jwtManager := server_rpc.NewJWTManager(jwtSecret)
-
-	authorizer := server_rpc.NewAuthorizer(jwtManager)
-	grpcServer := grpc.NewServer(
-		grpc.StreamInterceptor(authorizer.StreamInterceptor),
-		grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
-		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-			MinTime: c.Duration("keepalive-min-time"),
-		}),
-	)
-
-	woodpeckerServer := server_rpc.NewWoodpeckerServer(
-		server.Config.Services.Scheduler,
-		server.Config.Services.Logs,
-		_store,
-	)
-	proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
-
-	woodpeckerAuthServer := server_rpc.NewWoodpeckerAuthServer(
-		jwtManager,
-		server.Config.Server.AgentToken,
-		_store,
-	)
-	proto.RegisterWoodpeckerAuthServer(grpcServer, woodpeckerAuthServer)
-
-	grpcCtx, cancel := context.WithCancelCause(ctx)
-	defer cancel(nil)
-
-	go func() {
-		<-grpcCtx.Done()
-		if grpcServer == nil {
-			return
-		}
-		log.Info().Msg("terminating grpc service gracefully")
-		grpcServer.GracefulStop()
-		log.Info().Msg("grpc service stopped")
-	}()
-
-	if err := grpcServer.Serve(lis); err != nil {
-		// signal that we don't have to stop the server gracefully anymore
-		grpcServer = nil
-
-		// wrap the error so we know where it did come from
-		return fmt.Errorf("grpc server failed: %w", err)
-	}
-
-	return nil
+	return server_rpc.Serve(ctx, server_rpc.ServeConfig{
+		Listener:         lis,
+		Store:            _store,
+		Scheduler:        server.Config.Services.Scheduler,
+		Logger:           server.Config.Services.Logs,
+		JWTSecret:        c.String("grpc-secret"),
+		AgentToken:       server.Config.Server.AgentToken,
+		KeepaliveMinTime: c.Duration("keepalive-min-time"),
+		Registerer:       prometheus.DefaultRegisterer,
+	})
 }

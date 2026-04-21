@@ -25,10 +25,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -161,8 +158,14 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 	return services.NewManager(cmd, s, setupForge)
 }
 
-// startGRPCServer binds to a random TCP port, registers Woodpecker's gRPC
-// services, and starts serving. Shutdown happens via t.Cleanup.
+// startGRPCServer binds to a random TCP port and serves Woodpecker's gRPC
+// services via the shared server_rpc.Serve helper. A fresh prometheus.Registry
+// is passed so subtests don't collide on metric names.
+//
+// Shutdown is synchronous: t.Cleanup cancels the serve context (triggering
+// GracefulStop inside Serve) and then blocks until Serve has returned.
+// Without this wait, the next subtest can start while the previous server's
+// goroutines are still live, which races on shared state like server.Config.
 func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 	t.Helper()
 
@@ -170,44 +173,24 @@ func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 	require.NoError(t, err, "listen on random port for gRPC")
 	addr := lis.Addr().String()
 
-	jwtManager := server_rpc.NewJWTManager(TestJWTSecret)
-	authorizer := server_rpc.NewAuthorizer(jwtManager)
-
-	grpcServer := grpc.NewServer(
-		grpc.StreamInterceptor(authorizer.StreamInterceptor),
-		grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
-		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-			MinTime: shortTimeout,
-		}),
-	)
-
-	proto.RegisterWoodpeckerServer(grpcServer, server_rpc.NewTestWoodpeckerServer(
-		server.Config.Services.Scheduler,
-		server.Config.Services.Logs,
-		s,
-		prometheus.NewRegistry(),
-	))
-	proto.RegisterWoodpeckerAuthServer(grpcServer, server_rpc.NewWoodpeckerAuthServer(
-		jwtManager,
-		TestAgentToken,
-		s,
-	))
-
+	serveCtx, cancel := context.WithCancelCause(ctx)
 	stopped := make(chan struct{})
-	grpcCtx, grpcCancel := context.WithCancelCause(ctx)
 	go func() {
-		<-grpcCtx.Done()
-		grpcServer.GracefulStop()
-		close(stopped)
-	}()
-	go func() {
-		if err := grpcServer.Serve(lis); err != nil {
-			grpcCancel(err)
-		}
+		defer close(stopped)
+		_ = server_rpc.Serve(serveCtx, server_rpc.ServeConfig{
+			Listener:         lis,
+			Store:            s,
+			Scheduler:        server.Config.Services.Scheduler,
+			Logger:           server.Config.Services.Logs,
+			JWTSecret:        TestJWTSecret,
+			AgentToken:       TestAgentToken,
+			KeepaliveMinTime: shortTimeout,
+			Registerer:       prometheus.NewRegistry(),
+		})
 	}()
 
 	t.Cleanup(func() {
-		grpcCancel(nil)
+		cancel(nil)
 		<-stopped
 	})
 	return addr
