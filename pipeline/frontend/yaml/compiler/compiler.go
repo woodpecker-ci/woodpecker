@@ -42,10 +42,10 @@ type Secret struct {
 	Name           string
 	Value          string
 	AllowedPlugins []string
-	Events         []string
+	Events         []metadata.Event
 }
 
-func (s *Secret) Available(event string, container *yaml_types.Container) error {
+func (s *Secret) Available(event metadata.Event, container *yaml_types.Container) error {
 	onlyAllowSecretForPlugins := len(s.AllowedPlugins) > 0
 	if onlyAllowSecretForPlugins && !container.IsPlugin() {
 		return fmt.Errorf("secret %q is only allowed to be used by plugins (a filter has been set on the secret). Note: Image filters do not work for normal steps", s.Name)
@@ -64,13 +64,13 @@ func (s *Secret) Available(event string, container *yaml_types.Container) error 
 
 // Match returns true if an image and event match the restricted list.
 // Note that EventPullClosed are treated as EventPull.
-func (s *Secret) Match(event string) bool {
+func (s *Secret) Match(event metadata.Event) bool {
 	// if there is no filter set secret matches all webhook events
 	if len(s.Events) == 0 {
 		return true
 	}
 	// treat all pull events the same way
-	if metadata.EventIsPull(event) {
+	if event.IsPull() {
 		event = metadata.EventPull
 	}
 	// one match is enough
@@ -94,6 +94,8 @@ type Compiler struct {
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
 	securityTrustedPipeline bool
+	// TODO: remove with version 4.x
+	forceIgnoreServiceFailure bool
 }
 
 // New creates a new Compiler with options.

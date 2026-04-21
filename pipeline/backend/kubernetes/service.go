@@ -60,7 +60,7 @@ func serviceName(step *types.Step) (string, error) {
 }
 
 func isService(step *types.Step) bool {
-	return step.Type == types.StepTypeService || (step.Detached && dnsPattern.FindStringIndex(step.Name) != nil)
+	return step.Type == types.StepTypeService
 }
 
 func subdomain(taskUUID string) (string, error) {
@@ -77,7 +77,7 @@ func startHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID
 	return engine.client.CoreV1().Services(namespace).Create(ctx, svc, kube_meta_v1.CreateOptions{})
 }
 
-func stopHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID string) error {
+func (e *kube) stopHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID string) error {
 	name, err := subdomain(taskUUID)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func stopHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID 
 
 	log.Trace().Str("name", name).Msg("deleting headless service")
 
-	err = engine.client.CoreV1().Services(namespace).Delete(ctx, name, defaultDeleteOptions)
+	err = engine.client.CoreV1().Services(namespace).Delete(ctx, name, e.config.newDefaultDeleteOptions())
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
 		log.Trace().Err(err).Msgf("unable to delete headless service %s", name)

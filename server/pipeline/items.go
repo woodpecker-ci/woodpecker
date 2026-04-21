@@ -53,9 +53,9 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 
 	var secrets []compiler.Secret
 	for _, sec := range secs {
-		var events []string
+		var events []pipeline_metadata.Event
 		for _, event := range sec.Events {
-			events = append(events, string(event))
+			events = append(events, pipeline_metadata.Event(event))
 		}
 
 		secrets = append(secrets, compiler.Secret{
@@ -134,6 +134,12 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
 		},
 	}
+
+	// TODO: remove with version 4.x
+	if server.Config.Pipeline.ForceIgnoreServiceFailure {
+		b.CompilerOptions = append(b.CompilerOptions, compiler.WithForceIgnoreServiceFailure())
+	}
+
 	return b.Build()
 }
 

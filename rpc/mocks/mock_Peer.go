@@ -261,6 +261,50 @@ func (_c *MockPeer_Init_Call) RunAndReturn(run func(c context.Context, workflowI
 	return _c
 }
 
+// IsConnected provides a mock function for the type MockPeer
+func (_mock *MockPeer) IsConnected() bool {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsConnected")
+	}
+
+	var r0 bool
+	if returnFunc, ok := ret.Get(0).(func() bool); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	return r0
+}
+
+// MockPeer_IsConnected_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsConnected'
+type MockPeer_IsConnected_Call struct {
+	*mock.Call
+}
+
+// IsConnected is a helper method to define mock.On call
+func (_e *MockPeer_Expecter) IsConnected() *MockPeer_IsConnected_Call {
+	return &MockPeer_IsConnected_Call{Call: _e.mock.On("IsConnected")}
+}
+
+func (_c *MockPeer_IsConnected_Call) Run(run func()) *MockPeer_IsConnected_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockPeer_IsConnected_Call) Return(b bool) *MockPeer_IsConnected_Call {
+	_c.Call.Return(b)
+	return _c
+}
+
+func (_c *MockPeer_IsConnected_Call) RunAndReturn(run func() bool) *MockPeer_IsConnected_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Next provides a mock function for the type MockPeer
 func (_mock *MockPeer) Next(c context.Context, f rpc.Filter) (*rpc.Workflow, error) {
 	ret := _mock.Called(c, f)

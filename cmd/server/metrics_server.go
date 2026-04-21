@@ -68,7 +68,7 @@ func startMetricsCollector(ctx context.Context, _store store.Store) {
 		log.Info().Msg("queue metric collector started")
 
 		for {
-			stats := server.Config.Services.Queue.Info(ctx)
+			stats := server.Config.Services.Scheduler.Info(ctx)
 			pendingSteps.Set(float64(stats.Stats.Pending))
 			waitingSteps.Set(float64(stats.Stats.WaitingOnDeps))
 			runningSteps.Set(float64(stats.Stats.Running))

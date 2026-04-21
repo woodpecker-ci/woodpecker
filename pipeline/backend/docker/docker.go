@@ -22,8 +22,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
+	"time"
 
+	"github.com/cenkalti/backoff/v5"
 	"github.com/containerd/errdefs"
 	"github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/api/pkg/stdcopy"
@@ -41,7 +42,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-var containerKillTimeout = 5 // seconds
+const (
+	containerKillTimeout               = 5 // seconds
+	volumeRetryWait      time.Duration = 1 * time.Second
+	maxRetry             uint          = 3
+)
 
 type docker struct {
 	client client.APIClient
@@ -279,8 +284,12 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 	select {
 	case resp := <-wait.Result:
 		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
+		if resp.Error != nil {
+			return nil, fmt.Errorf("ContainerWait error: %s", resp.Error.Message)
+		}
 	case err := <-wait.Error:
 		log.Trace().Msgf("ContainerWait returned with err: %v", err)
+		return nil, err
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
@@ -290,9 +299,15 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 		return nil, err
 	}
 
+	exitCode := info.Container.State.ExitCode
+	// Windows Docker may return 4294967295 (uint32 max, i.e. int32(-1)) for abnormal exits.
+	if int64(exitCode) == int64(4294967295) { //nolint:mnd // because it is int(^uint32(0))
+		exitCode = -1
+	}
+
 	return &backend_types.State{
 		Exited:    true,
-		ExitCode:  info.Container.State.ExitCode,
+		ExitCode:  exitCode,
 		OOMKilled: info.Container.State.OOMKilled,
 	}, nil
 }
@@ -329,7 +344,7 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend_types.Step, task
 
 	// we first signal to the container to stop ...
 	if _, err := e.client.ContainerStop(ctx, containerName, client.ContainerStopOptions{
-		Timeout: &containerKillTimeout,
+		Timeout: toRef(int(e.config.stopTimeout)),
 	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		// we do not return error yet as we try to kill it first
 		stopErr = fmt.Errorf("could not stop container '%s': %w", step.Name, err)
@@ -367,11 +382,24 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend_types.Config
 		log.Error().Err(err).Msgf("could not destroy all containers")
 	}
 
-	if _, err := e.client.VolumeRemove(ctx, conf.Volume, client.VolumeRemoveOptions{
-		Force: true,
-	}); err != nil {
+	var err error
+	_, _ = backoff.Retry(ctx, func() (any, error) {
+		_, err = e.client.VolumeRemove(ctx, conf.Volume, client.VolumeRemoveOptions{
+			Force: true,
+		})
+		if err == nil || !isErrVolumeInUse(err) {
+			// if it worked or if we have no "in use error" do not retry
+			return nil, nil
+		}
+		return nil, err
+	}, backoff.WithMaxTries(maxRetry), backoff.WithBackOff(&backoff.ExponentialBackOff{
+		InitialInterval: volumeRetryWait,
+		Multiplier:      2, //nolint:mnd
+	}))
+	if err != nil {
 		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume)
 	}
+
 	if _, err := e.client.NetworkRemove(ctx, conf.Network, client.NetworkRemoveOptions{}); err != nil {
 		log.Error().Err(err).Msgf("could not remove network '%s'", conf.Network)
 	}
@@ -382,19 +410,6 @@ var removeOpts = client.ContainerRemoveOptions{
 	RemoveVolumes: true,
 	RemoveLinks:   false,
 	Force:         false,
-}
-
-func isErrContainerNotFoundOrNotRunning(err error) bool {
-	// Error response from daemon: Cannot kill container: ...: No such container: ...
-	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
-	// Error response from podman daemon: can only kill running containers. ... is in state exited
-	// Error response from daemon: removal of container ... is already in progress
-	// Error: No such container: ...
-	return err != nil &&
-		(strings.Contains(err.Error(), "No such container") ||
-			strings.Contains(err.Error(), "is not running") ||
-			strings.Contains(err.Error(), "can only kill running containers") ||
-			(strings.Contains(err.Error(), "removal of container") && strings.Contains(err.Error(), "is already in progress")))
 }
 
 // normalizeArchType converts the arch type reported by docker info into
