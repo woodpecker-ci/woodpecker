@@ -91,7 +91,7 @@ func setupLogStreamContext(t *testing.T) (*httptest.ResponseRecorder, *gin.Conte
 	mockStore := store_mocks.NewMockStore(t)
 	mockStore.On("GetPipelineNumber", mock.Anything, mock.Anything).
 		Return(&model.Pipeline{ID: pipelineID}, nil)
-	mockStore.On("StepLoad", mock.Anything).
+	mockStore.On("StepLoad", mock.Anything, mock.Anything).
 		Return(&model.Step{
 			ID:         stepID,
 			PipelineID: pipelineID,

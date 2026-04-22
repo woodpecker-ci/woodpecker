@@ -21,16 +21,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) StepLoad(id int64) (*model.Step, error) {
+func (s storage) StepLoad(pipelineID, stepID int64) (*model.Step, error) {
 	step := new(model.Step)
-	return step, wrapGet(s.engine.ID(id).Get(step))
-}
-
-func (s storage) StepFind(pipeline *model.Pipeline, pid int) (*model.Step, error) {
-	step := new(model.Step)
-	return step, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_id": pipeline.ID, "pid": pid},
-	).Get(step))
+	return step, wrapGet(s.engine.ID(stepID).Where(builder.Eq{"pipeline_id": pipelineID}).Get(step))
 }
 
 func (s storage) StepByUUID(uuid string) (*model.Step, error) {
@@ -40,17 +33,10 @@ func (s storage) StepByUUID(uuid string) (*model.Step, error) {
 	).Get(step))
 }
 
-func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*model.Step, error) {
-	step := new(model.Step)
-	return step, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_id": pipeline.ID, "ppid": ppid, "name": child},
-	).Get(step))
-}
-
-func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
+func (s storage) StepList(pipelineID int64) ([]*model.Step, error) {
 	stepList := make([]*model.Step, 0)
 	return stepList, s.engine.
-		Where("pipeline_id = ?", pipeline.ID).
+		Where("pipeline_id = ?", pipelineID).
 		OrderBy("pid").
 		Find(&stepList)
 }
