@@ -29,6 +29,7 @@
 
 ### 📈 Enhancement
 
+- Cleanup server store step interface [[#6476](https://github.com/woodpecker-ci/woodpecker/pull/6476)]
 - Docker/K8s: add config for stop timeout [[#6445](https://github.com/woodpecker-ci/woodpecker/pull/6445)]
 - Docker backend should retry to delete volume on "in use" error [[#6381](https://github.com/woodpecker-ci/woodpecker/pull/6381)]
 - Move skip pipeline by commit message into pipeline/frontend package [[#6437](https://github.com/woodpecker-ci/woodpecker/pull/6437)]
@@ -117,6 +118,8 @@
 
 ### 🧪 Tests
 
+- Add more test cases for rpc label filter [[#6483](https://github.com/woodpecker-ci/woodpecker/pull/6483)]
+- Fix flaky TestJWTManager [[#6478](https://github.com/woodpecker-ci/woodpecker/pull/6478)]
 - Add e2e pipeline restart test [[#6469](https://github.com/woodpecker-ci/woodpecker/pull/6469)]
 - Init minimal e2e tests [[#6391](https://github.com/woodpecker-ci/woodpecker/pull/6391)]
 - Enhance datastore DB test setup [[#6450](https://github.com/woodpecker-ci/woodpecker/pull/6450)]
