@@ -136,11 +136,9 @@ type Store interface {
 	GlobalRegistryList(*model.ListOptions) ([]*model.Registry, error)
 
 	// Steps
-	StepLoad(int64) (*model.Step, error)
-	StepFind(*model.Pipeline, int) (*model.Step, error)
-	StepByUUID(string) (*model.Step, error)
-	StepChild(*model.Pipeline, int, string) (*model.Step, error)
-	StepList(*model.Pipeline) ([]*model.Step, error)
+	StepLoad(pipelineID, stepID int64) (*model.Step, error)
+	StepByUUID(uuid string) (*model.Step, error)
+	StepList(pipelineID int64) ([]*model.Step, error)
 	StepUpdate(*model.Step) error
 	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
