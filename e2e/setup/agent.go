@@ -128,7 +128,7 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 		Timeout: shortTimeout,
 	})
 
-	agentCtx, agentCancel := context.WithCancelCause(context.Background())
+	agentCtx, agentCancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { agentCancel(nil) })
 
 	authConn, err := grpc.NewClient(grpcAddr, transport, keepaliveOpts)
