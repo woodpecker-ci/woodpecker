@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-21
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -73,6 +73,7 @@
 
 ### 🐛 Bug Fixes
 
+- Add refname to bitbucket commit status [[#6482](https://github.com/woodpecker-ci/woodpecker/pull/6482)]
 - Fix send on closed channel panic in SSE stream handlers [[#6456](https://github.com/woodpecker-ci/woodpecker/pull/6456)]
 - Add `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE` config to preserve non-breaking behavior by default [[#6448](https://github.com/woodpecker-ci/woodpecker/pull/6448)]
 - Fix race in pipeline runtime [[#6451](https://github.com/woodpecker-ci/woodpecker/pull/6451)]
