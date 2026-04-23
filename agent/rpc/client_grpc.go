@@ -70,11 +70,6 @@ func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn) rpc.Peer {
 	return client
 }
 
-func (c *client) Close() error {
-	close(c.logs)
-	return c.conn.Close()
-}
-
 func (c *client) IsConnected() bool {
 	state := c.conn.GetState()
 	connected := state == connectivity.Ready || state == connectivity.Idle
@@ -506,9 +501,10 @@ func (c *client) processLogs(ctx context.Context) {
 		bytes = 0
 	}
 
-	// ctx.Done() is covered by the log channel being closed
 	for {
 		select {
+		case <-ctx.Done():
+			return
 		case entry, ok := <-c.logs:
 			if !ok {
 				log.Info().Msg("log drain: channel closed")
