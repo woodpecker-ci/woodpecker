@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"codeberg.org/6543/xyaml"
-	"github.com/oklog/ulid/v2"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
@@ -152,14 +151,19 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	privilegedPlugins := c.StringSlice("plugins-privileged")
 
-	// emulate server prefix for volume/network naming
-	prefix := "wp_" + ulid.Make().String()
+	// NOTE: we deliberately do NOT set compiler.WithPrefix here.
+	// The pipeline builder (pipeline/frontend/builder) generates a
+	// unique prefix per workflow of the form wp_<ULID>_<workflowID>,
+	// which becomes the workflow's docker network and volume name.
+	// Passing a shared WithPrefix would override that per-workflow
+	// value and cause parallel workflows to collide on the same
+	// docker network/volume — the exact symptom that appeared when
+	// the scheduler started running workflows concurrently.
 
 	// build compiler options — mirrors server behavior
 	compilerOpts := []compiler.Option{
 		compiler.WithEscalated(privilegedPlugins...),
 		compiler.WithNetworks(c.StringSlice("network")...),
-		compiler.WithPrefix(prefix),
 		compiler.WithProxy(compiler.ProxyOptions{
 			NoProxy:    c.String("backend-no-proxy"),
 			HTTPProxy:  c.String("backend-http-proxy"),
@@ -177,23 +181,21 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	// configure volumes for local execution
 	volumes := c.StringSlice("volumes")
+	compilerOpts = append(compilerOpts,
+		compiler.WithWorkspace(
+			c.String("workspace-base"),
+			c.String("workspace-path"),
+		),
+	)
 	if c.Bool("local") {
-		compilerOpts = append(compilerOpts,
-			compiler.WithWorkspace(
-				c.String("workspace-base"),
-				c.String("workspace-path"),
-			),
-		)
+		// In local mode we bind-mount the user's repo directory into
+		// each step so the step sees the working tree as-is instead
+		// of a cloned copy. The per-workflow workspace volume mount
+		// (<prefix>_default:<workspace-base>) is added later, after
+		// the builder has assigned each workflow its own prefix —
+		// see injectLocalWorkspaceMounts below.
 		volumes = append(volumes,
-			prefix+"_default:"+c.String("workspace-base"),
 			repoPath+":"+c.String("workspace-base")+"/"+c.String("workspace-path"),
-		)
-	} else {
-		compilerOpts = append(compilerOpts,
-			compiler.WithWorkspace(
-				c.String("workspace-base"),
-				c.String("workspace-path"),
-			),
 		)
 	}
 	compilerOpts = append(compilerOpts, compiler.WithVolumes(volumes...))
@@ -241,6 +243,17 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	if len(items) == 0 {
 		return fmt.Errorf("no workflows to execute (all filtered out)")
+	}
+
+	// Local mode: mount each workflow's docker volume into every
+	// step's workspace path. This used to be done globally via
+	// compiler.WithVolumes with a shared prefix, but with parallel
+	// workflows that collided on the same docker volume name — all
+	// workflows used "<shared-prefix>_default". The builder now
+	// generates a per-workflow prefix, so we injecting the mount
+	// here after the build gives each workflow its own volume.
+	if c.Bool("local") {
+		injectLocalWorkspaceMounts(items, c.String("workspace-base"))
 	}
 
 	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
@@ -361,6 +374,40 @@ func handleLineModeEvent(out io.Writer, ev scheduler.Event) {
 		}
 	case scheduler.StateCanceled:
 		fmt.Fprintf(out, "# %s: canceled\n", ev.Workflow)
+	}
+}
+
+// injectLocalWorkspaceMounts adds the per-workflow workspace volume
+// binding to every step in every item. In local-mode runs (the
+// default when invoking `woodpecker-cli exec` directly), steps need
+// to share a named docker volume for the workspace so files written
+// by one step are visible to the next; the volume itself is created
+// by the backend in SetupWorkflow using the name in item.Config.Volume.
+//
+// Previously the CLI computed one shared prefix upfront and added
+// "<prefix>_default:<workspace-base>" to compiler.WithVolumes(),
+// which applied to all workflows. That worked when exec ran
+// workflows sequentially but collided on the first parallel run:
+// every workflow tried to create the same docker volume and docker
+// network, producing "already exists" and "unknown network" errors.
+//
+// Now the builder emits a unique prefix per workflow (see
+// pipeline/frontend/builder/builder.go). We read the per-workflow
+// volume name off each item's compiled Config and inject the binding
+// into every step's Volumes slice. Per-step injection matches what
+// compiler.WithVolumes already does internally for the non-local
+// path, so the runtime sees an identical shape either way.
+func injectLocalWorkspaceMounts(items []*builder.Item, workspaceBase string) {
+	for _, item := range items {
+		if item == nil || item.Config == nil || item.Config.Volume == "" {
+			continue
+		}
+		mount := item.Config.Volume + ":" + workspaceBase
+		for _, stage := range item.Config.Stages {
+			for _, step := range stage.Steps {
+				step.Volumes = append(step.Volumes, mount)
+			}
+		}
 	}
 }
 
