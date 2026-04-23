@@ -51,6 +51,12 @@ var flags = []cli.Flag{
 		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
 		Value:   true,
 	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_RETRY_TIMEOUT"),
+		Name:    "retry-timeout",
+		Usage:   "how long the agent keeps retrying to reconnect to the server after the gRPC connection is lost before giving up, set to 0 to retry forever",
+		Value:   2 * time.Minute,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_HOSTNAME"),
 		Name:    "hostname",
