@@ -331,7 +331,7 @@ func PatchOrgAgent(c *gin.Context) {
 	}
 
 	if agent.OrgID != org.ID {
-		c.String(http.StatusBadRequest, "Agent does not belong to this organization")
+		c.String(http.StatusNotFound, "Agent not found")
 		return
 	}
 
@@ -383,7 +383,7 @@ func DeleteOrgAgent(c *gin.Context) {
 	}
 
 	if agent.OrgID != org.ID {
-		c.String(http.StatusBadRequest, "Agent does not belong to this organization")
+		c.String(http.StatusNotFound, "Agent not found")
 		return
 	}
 
