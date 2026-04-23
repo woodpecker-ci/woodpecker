@@ -121,7 +121,7 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 
 	env := &AgentEnv{name: cfg.hostname}
 
-	agentCtx, agentCancel := context.WithCancelCause(context.Background())
+	agentCtx, agentCancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { agentCancel(nil) })
 
 	agentConn, err := agent_rpc.Dial(agentCtx, agent_rpc.DialConfig{

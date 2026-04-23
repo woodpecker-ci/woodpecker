@@ -141,7 +141,7 @@ func WaitForStepStatus(t *testing.T, s store.Store, pipeline *model.Pipeline, st
 
 	var found *model.Step
 	ok := pollUntil(timeout, func() bool {
-		steps, err := s.StepList(pipeline)
+		steps, err := s.StepList(pipeline.ID)
 		require.NoError(t, err, "list steps for pipeline %d", pipeline.ID)
 		for _, step := range steps {
 			if step.Name != stepName {
@@ -224,7 +224,8 @@ func WaitForStepRunning(t *testing.T, s store.Store, pipelineID int64, stepName 
 	running := pollUntil(shortTimeout, func() bool {
 		p, err := s.GetPipeline(pipelineID)
 		require.NoError(t, err, "get pipeline %d", pipelineID)
-		steps, err := s.StepList(p)
+
+		steps, err := s.StepList(p.ID)
 		require.NoError(t, err, "list steps for pipeline %d", pipelineID)
 		for _, step := range steps {
 			if step.Name == stepName && step.State == model.StatusRunning {
