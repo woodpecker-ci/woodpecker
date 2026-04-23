@@ -228,6 +228,19 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 
 ---
 
+## RETRY_TIMEOUT
+
+- Name: `WOODPECKER_RETRY_TIMEOUT`
+- Default: `2m`
+
+Set how long the agent keeps retrying to reconnect to the server after the gRPC connection is lost before giving up.
+
+:::warning
+If set to 0 we retry forever.
+:::
+
+---
+
 ### BACKEND
 
 - Name: `WOODPECKER_BACKEND`
