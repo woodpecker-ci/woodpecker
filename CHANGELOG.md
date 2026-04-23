@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-22
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -181,6 +181,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages to v0.36.0 [[#6485](https://github.com/woodpecker-ci/woodpecker/pull/6485)]
 - Update golang-packages [[#6477](https://github.com/woodpecker-ci/woodpecker/pull/6477)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.8.3 [[#6462](https://github.com/woodpecker-ci/woodpecker/pull/6462)]
 - Update module k8s.io/client-go to v0.35.4 [[#6460](https://github.com/woodpecker-ci/woodpecker/pull/6460)]
