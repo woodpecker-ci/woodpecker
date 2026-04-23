@@ -47,7 +47,7 @@ func runScenario(t *testing.T, sc Scenario) {
 	t.Helper()
 
 	env := setup.StartServer(t.Context(), t, sc.Files)
-	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
