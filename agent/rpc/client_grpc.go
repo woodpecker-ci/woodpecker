@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
@@ -47,37 +48,49 @@ const (
 	// Maximum amount of time between sending consecutive batched log messages.
 	// Controls the delay between the CI job generating a log record, and web users receiving it.
 	maxLogFlushPeriod time.Duration = time.Second
-
-	// ConnectionRetryTimeout is the maximum time to wait for a connection to be restored
-	// before the agent gives up and exits.
-	ConnectionRetryTimeout = 2 * time.Minute
 )
 
 type client struct {
-	client           proto.WoodpeckerClient
-	conn             *grpc.ClientConn
-	logs             chan *proto.LogEntry
-	connectionLostAt time.Time
+	client             proto.WoodpeckerClient
+	conn               *grpc.ClientConn
+	logs               chan *proto.LogEntry
+	connectionLostAt   time.Time
+	connectionLostLock sync.Mutex
+	// connectionRetryTimeout is the maximum time to wait for a connection to be restored before the agent gives up and exits.
+	connectionRetryTimeout time.Duration
 }
 
 // NewGrpcClient returns a new grpc Client.
-func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn) rpc.Peer {
+func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn, opts ...ClientOption) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
 	client.logs = make(chan *proto.LogEntry, 10) // max memory use: 10 lines * 1 MiB
+
+	for _, opt := range opts {
+		opt(client)
+	}
+
 	go client.processLogs(ctx)
 	return client
 }
 
-func (c *client) Close() error {
-	close(c.logs)
-	return c.conn.Close()
+type ClientOption func(c *client)
+
+func SetConnectionRetryTimeout(d time.Duration) ClientOption {
+	if d == 0 {
+		log.Warn().Msg("connection retry timeout set to infinite")
+	}
+	return func(c *client) {
+		c.connectionRetryTimeout = d
+	}
 }
 
 func (c *client) IsConnected() bool {
 	state := c.conn.GetState()
 	connected := state == connectivity.Ready || state == connectivity.Idle
+	c.connectionLostLock.Lock()
+	defer c.connectionLostLock.Unlock()
 	if !connected && c.connectionLostAt.IsZero() {
 		c.connectionLostAt = time.Now()
 	} else if connected && !c.connectionLostAt.IsZero() {
@@ -87,10 +100,10 @@ func (c *client) IsConnected() bool {
 }
 
 func (c *client) shouldGiveUp() bool {
-	if c.connectionLostAt.IsZero() {
+	if c.connectionRetryTimeout == 0 || c.connectionLostAt.IsZero() {
 		return false
 	}
-	return time.Since(c.connectionLostAt) > ConnectionRetryTimeout
+	return time.Since(c.connectionLostAt) > c.connectionRetryTimeout
 }
 
 func (c *client) newBackOff() backoff.BackOff {
@@ -506,9 +519,10 @@ func (c *client) processLogs(ctx context.Context) {
 		bytes = 0
 	}
 
-	// ctx.Done() is covered by the log channel being closed
 	for {
 		select {
+		case <-ctx.Done():
+			return
 		case entry, ok := <-c.logs:
 			if !ok {
 				log.Info().Msg("log drain: channel closed")

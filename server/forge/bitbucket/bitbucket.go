@@ -327,6 +327,11 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		Key:   common.GetPipelineStatusContext(repo, pipeline, workflow),
 		URL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
 	}
+
+	if pipeline.Event == model.EventPush || pipeline.IsPullRequest() {
+		status.Refname = pipeline.Branch
+	}
+
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
 
