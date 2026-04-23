@@ -193,10 +193,12 @@ func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 		s,
 	))
 
+	stopped := make(chan struct{})
 	grpcCtx, grpcCancel := context.WithCancelCause(ctx)
 	go func() {
 		<-grpcCtx.Done()
 		grpcServer.GracefulStop()
+		close(stopped)
 	}()
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
@@ -204,6 +206,9 @@ func startGRPCServer(ctx context.Context, t *testing.T, s store.Store) string {
 		}
 	}()
 
-	t.Cleanup(func() { grpcCancel(nil) })
+	t.Cleanup(func() {
+		grpcCancel(nil)
+		<-stopped
+	})
 	return addr
 }
