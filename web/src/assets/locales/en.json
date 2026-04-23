@@ -74,7 +74,12 @@
       "enable": "Enable",
       "enabled": "Already enabled",
       "disabled": "Disabled",
-      "success": "Repository enabled"
+      "success": "Repository enabled",
+      "new_forge_repo": "new repo on forge",
+      "stale_wp_repo": "outdated Woodpecker repo",
+      "conflict": "Conflict",
+      "conflict_desc": "This repository was recreated on the forge with a new ID, but an outdated entry with the same name still exists in Woodpecker. Delete the outdated to enable the new one or Repair the old.",
+      "forge_repo_missing": "Forge repo is missing!"
     },
     "open_in_forge": "Open repository in forge",
     "visibility": {
