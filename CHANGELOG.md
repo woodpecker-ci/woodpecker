@@ -29,6 +29,7 @@
 
 ### 📈 Enhancement
 
+- Make agent reconnect retry timeout configurable [[#6470](https://github.com/woodpecker-ci/woodpecker/pull/6470)]
 - Handle re-created forge repos gracefully [[#6370](https://github.com/woodpecker-ci/woodpecker/pull/6370)]
 - Cleanup server store step interface [[#6476](https://github.com/woodpecker-ci/woodpecker/pull/6476)]
 - Docker/K8s: add config for stop timeout [[#6445](https://github.com/woodpecker-ci/woodpecker/pull/6445)]
