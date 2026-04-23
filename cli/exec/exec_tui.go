@@ -90,9 +90,20 @@ func runTUIMode(pipelineCtx context.Context, items []*builder.Item, backendEngin
 	ringWriter := tui.NewRingWriter(model.DebugRing())
 	restoreLog := logger.SetOutput(ringWriter, false, true)
 	defer func() {
-		// Flush any carried-over fragment and restore the logger.
-		ringWriter.Flush()
+		// Order is critical: restore the logger first so any log
+		// calls emitted during the flush itself (unlikely but
+		// possible) go to real stderr rather than back into the
+		// ring we're draining. Then flush the ring content to
+		// stderr so diagnostics survive the alt-screen tear-down.
+		// Finally drain any carried-over fragment from the writer.
+		//
+		// This runs on any return path from runTUIMode — success,
+		// error, or panic — because it is deferred. That is the
+		// whole point: if prog.Run panics, we still want the user
+		// to see what zerolog captured on the way down.
 		restoreLog()
+		ringWriter.Flush()
+		flushDebugRingToStderr(model.DebugRing())
 	}()
 
 	prog := tea.NewProgram(model,
@@ -170,10 +181,6 @@ func runTUIMode(pipelineCtx context.Context, items []*builder.Item, backendEngin
 		// User quit before the scheduler finished. Wait for it.
 		execErr = <-schedDone
 	}
-
-	// Flush the zerolog ring to the real stderr so any diagnostics
-	// accumulated during the run survive the alt-screen restore.
-	flushDebugRingToStderr(model.DebugRing())
 
 	if retErr != nil {
 		return retErr

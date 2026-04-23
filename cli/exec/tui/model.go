@@ -30,6 +30,8 @@
 package tui
 
 import (
+	"time"
+
 	"charm.land/bubbles/v2/viewport"
 	"charm.land/bubbletea/v2"
 
@@ -198,10 +200,29 @@ func (m *Model) StepRing(workflow, stepUUID, stepName string) *Ring {
 	return r
 }
 
-// Init implements tea.Model. The TUI does not start any commands on
-// init — all inputs arrive as Send-ed messages from the caller.
+// debugTickInterval is the rate at which the TUI refreshes the
+// zerolog debug pane and enforces the memory budget. A slow tick is
+// fine: zerolog writes are rare compared to step output, and budget
+// eviction is cheap enough that a lazy schedule beats re-doing it
+// on every log line.
+const debugTickInterval = 250 * time.Millisecond
+
+// Init implements tea.Model. Most inputs arrive as Send-ed messages
+// from the caller, but the debug tick is internal — we schedule it
+// at startup and the handler re-schedules itself to keep the loop
+// alive until tea.Quit is issued.
 func (m *Model) Init() tea.Cmd {
-	return nil
+	return tickDebug()
+}
+
+// tickDebug returns a command that will fire a DebugTickMsg after
+// the debugTickInterval. The model's Update handler should return
+// another tickDebug() after processing the message so the loop
+// continues.
+func tickDebug() tea.Cmd {
+	return tea.Tick(debugTickInterval, func(time.Time) tea.Msg {
+		return DebugTickMsg{}
+	})
 }
 
 // Update implements tea.Model. It dispatches each message to a
@@ -252,7 +273,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// eviction work to roughly the tick rate.
 		m.budget.Enforce()
 		m.refreshDebugView()
-		return m, nil
+		// Re-arm the ticker so the loop continues until tea.Quit.
+		return m, tickDebug()
 
 	case CancelingMsg:
 		m.canceling = true
