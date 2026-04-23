@@ -30,6 +30,7 @@
 package tui
 
 import (
+	"charm.land/bubbles/v2/viewport"
 	"charm.land/bubbletea/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/exec/scheduler"
@@ -65,6 +66,18 @@ type stepNode struct {
 	log *Ring
 }
 
+// Focus identifies which pane currently accepts keyboard input.
+type Focus int
+
+const (
+	// FocusTree is the default: the workflow/step tree on the left.
+	FocusTree Focus = iota
+	// FocusLog is the log viewport on the right.
+	FocusLog
+	// FocusDebug is the debug tab (zerolog ring) on the right.
+	FocusDebug
+)
+
 // Model is the bubbletea Model for the cli exec TUI.
 //
 // Construct with New. Send scheduler and pipeline messages via
@@ -87,6 +100,25 @@ type Model struct {
 	// is NOT registered here — it has its own separate cap.
 	budget *Budget
 
+	// UI state.
+	width, height int
+	focus         Focus
+	// cursor is the index into the flattened navigable-items list
+	// produced by flatten(). It points at either a workflow or a
+	// step; the setter clamps it to the list bounds so out-of-range
+	// values from a collapse/terminate cannot desync the view.
+	cursor int
+	// logView is the right-pane viewport for step logs. It is reused
+	// across selections — SetContent is called when the selection
+	// changes.
+	logView viewport.Model
+	// debugView is the right-pane viewport for the zerolog debug tab.
+	debugView viewport.Model
+	// viewReady gates rendering on the first WindowSizeMsg. Before
+	// the first size message we don't know how wide the panes should
+	// be, so we fall back to the placeholder view.
+	viewReady bool
+
 	// Terminal state flags.
 	canceling bool
 	done      bool
@@ -99,9 +131,12 @@ type Model struct {
 // the order from the yaml build output.
 func New(workflowNames []string) *Model {
 	m := &Model{
-		byName: make(map[string]*workflowNode, len(workflowNames)),
-		debug:  NewRing(DebugLogCapBytes),
-		budget: NewBudget(GlobalLogCapBytes),
+		byName:    make(map[string]*workflowNode, len(workflowNames)),
+		debug:     NewRing(DebugLogCapBytes),
+		budget:    NewBudget(GlobalLogCapBytes),
+		focus:     FocusTree,
+		logView:   viewport.New(),
+		debugView: viewport.New(),
 	}
 	for _, name := range workflowNames {
 		n := &workflowNode{
@@ -178,6 +213,17 @@ func (m *Model) Init() tea.Cmd {
 // through tea.Program.Send so writes are naturally serialized.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+		m.resizeViewports()
+		m.viewReady = true
+		// Refresh both viewports on resize so reflow picks up new
+		// width.
+		m.refreshLogView()
+		m.refreshDebugView()
+		return m, nil
+
 	case tea.KeyPressMsg:
 		return m.handleKey(msg)
 
@@ -191,6 +237,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case LogLineMsg:
 		m.handleLogLine(msg)
+		// If the line belongs to the step currently displayed in the
+		// log viewport, refresh so the user sees it immediately. A
+		// timer-driven debounce could batch these for very chatty
+		// steps; chunk 7 can add that if it becomes an issue.
+		if m.logLineBelongsToSelection(msg) {
+			m.refreshLogView()
+		}
 		return m, nil
 
 	case DebugTickMsg:
@@ -198,9 +251,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// just a redraw trigger. Enforcing the budget here debounces
 		// eviction work to roughly the tick rate.
 		m.budget.Enforce()
+		m.refreshDebugView()
 		return m, nil
 
-	case CancellingMsg:
+	case CancelingMsg:
 		m.canceling = true
 		return m, nil
 
@@ -213,12 +267,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// View implements tea.Model. Chunk 4 ships a placeholder so the
-// program is runnable; real rendering lands in the next chunk.
+// View implements tea.Model. Renders the split-pane layout once the
+// first WindowSizeMsg has arrived; before that, the placeholder
+// view keeps the program runnable.
 func (m *Model) View() tea.View {
-	// Placeholder. The real view will join a tree panel with a log +
-	// debug panel and render a footer.
-	return tea.NewView(placeholderView(m))
+	return renderViewTea(m)
 }
 
 // handleWorkflowState applies a scheduler.Event to the model's
@@ -281,14 +334,153 @@ func (m *Model) handleLogLine(msg LogLineMsg) {
 	ring.Append(msg.Line)
 }
 
-// handleKey is the keybind dispatcher. Chunk 4 only wires the quit
-// key so the program is exitable; fuller keybinds land in chunk 5.
+// handleKey dispatches key presses according to the focus. Tree
+// navigation is shared across modes; pane-specific keys (viewport
+// scrolling) only fire when that pane is focused.
+//
+// Two-stage ctrl-c will land in chunk 6 once the sigint plumbing is
+// on the cli/exec side; here the key just quits the program.
 func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
+	key := msg.String()
+
+	// Global keys that fire regardless of focus.
+	switch key {
 	case "q", "ctrl+c":
-		// chunk 6 will turn this into two-stage sigint; for now a
-		// single press quits.
 		return m, tea.Quit
+	case "tab":
+		m.cycleFocus()
+		return m, nil
+	case "L":
+		m.focus = FocusDebug
+		return m, nil
+	}
+
+	// Focus-specific handling.
+	switch m.focus {
+	case FocusTree:
+		return m.handleKeyTree(msg)
+	case FocusLog:
+		return m.handleKeyViewport(msg, &m.logView)
+	case FocusDebug:
+		return m.handleKeyViewport(msg, &m.debugView)
 	}
 	return m, nil
+}
+
+// handleKeyTree handles keys when the tree pane has focus.
+func (m *Model) handleKeyTree(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "up", "k":
+		m.moveCursor(-1)
+		return m, nil
+	case "down", "j":
+		m.moveCursor(1)
+		return m, nil
+	case "enter", " ":
+		m.activateCursor()
+		return m, nil
+	case "g", "home":
+		m.cursor = 0
+		m.refreshLogView()
+		return m, nil
+	case "G", "end":
+		items := m.flatten()
+		if len(items) > 0 {
+			m.cursor = len(items) - 1
+		}
+		m.refreshLogView()
+		return m, nil
+	}
+	return m, nil
+}
+
+// handleKeyViewport forwards a key to a bubbles viewport and handles
+// generic viewport-scope keys (g/G/etc.) consistently with the tree.
+// The viewport's own KeyMap covers page-up/page-down; we just
+// translate single-key navigation on top of that.
+func (m *Model) handleKeyViewport(msg tea.KeyPressMsg, vp *viewport.Model) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	// Extra keybinds that the viewport's default KeyMap does not
+	// include.
+	switch msg.String() {
+	case "g", "home":
+		vp.GotoTop()
+		return m, nil
+	case "G", "end":
+		vp.GotoBottom()
+		return m, nil
+	}
+	updated, cmd := vp.Update(msg)
+	*vp = updated
+	return m, cmd
+}
+
+// cycleFocus advances the focus ring: tree → log → debug → tree.
+func (m *Model) cycleFocus() {
+	switch m.focus {
+	case FocusTree:
+		m.focus = FocusLog
+	case FocusLog:
+		m.focus = FocusDebug
+	case FocusDebug:
+		m.focus = FocusTree
+	}
+}
+
+// moveCursor applies a delta to the tree cursor, clamped to the
+// bounds of the currently-flattened items list. Out-of-range deltas
+// are silently saturated so holding a key down does not underflow.
+func (m *Model) moveCursor(delta int) {
+	items := m.flatten()
+	if len(items) == 0 {
+		m.cursor = 0
+		return
+	}
+	m.cursor += delta
+	if m.cursor < 0 {
+		m.cursor = 0
+	}
+	if m.cursor >= len(items) {
+		m.cursor = len(items) - 1
+	}
+	m.refreshLogView()
+}
+
+// activateCursor implements the enter-key semantics on the tree. On
+// a workflow row, it toggles expanded. On a step row, it focuses the
+// log pane so the user can scroll that step's output.
+func (m *Model) activateCursor() {
+	items := m.flatten()
+	if m.cursor < 0 || m.cursor >= len(items) {
+		return
+	}
+	it := items[m.cursor]
+	switch it.kind {
+	case flatKindWorkflow:
+		it.workflow.expanded = !it.workflow.expanded
+		// Expanded/collapsed changes the list length; clamp cursor.
+		m.moveCursor(0)
+	case flatKindStep:
+		m.focus = FocusLog
+		m.refreshLogView()
+	}
+}
+
+// logLineBelongsToSelection returns true when the incoming log line
+// targets the step currently selected in the tree. Used to decide
+// whether a refresh is worth doing; for non-selected steps the
+// viewport will pick up the new lines on the next selection change.
+func (m *Model) logLineBelongsToSelection(msg LogLineMsg) bool {
+	if msg.Step == nil {
+		return false
+	}
+	items := m.flatten()
+	if m.cursor < 0 || m.cursor >= len(items) {
+		return false
+	}
+	it := items[m.cursor]
+	if it.kind != flatKindStep {
+		return false
+	}
+	return it.workflow.name == msg.Workflow && it.step.uuid == msg.Step.UUID
 }

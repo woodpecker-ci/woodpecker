@@ -18,8 +18,56 @@ import (
 	"fmt"
 	"strings"
 
+	"charm.land/lipgloss/v2"
+
 	"go.woodpecker-ci.org/woodpecker/v3/cli/exec/scheduler"
 )
+
+// Color palette. Intentionally minimal and terminal-friendly: all
+// colors are drawn from the standard 16-color ANSI range so they
+// adapt to the user's terminal theme rather than clashing with it.
+// A theming pass can come later; v1 stays neutral.
+var (
+	colorAccent = lipgloss.Color("6") // cyan
+	colorMuted  = lipgloss.Color("8") // bright black / gray
+)
+
+// selectedRowStyle highlights the tree row under the cursor when
+// the tree has focus. Reverse video works across every terminal that
+// supports ANSI at all, including ones without truecolor.
+var selectedRowStyle = lipgloss.NewStyle().Reverse(true)
+
+// tabActiveStyle renders the currently-focused tab header in the
+// right pane; tabInactiveStyle renders the other tab.
+var (
+	tabActiveStyle = lipgloss.NewStyle().
+			Foreground(colorAccent).
+			Bold(true).
+			Underline(true)
+
+	tabInactiveStyle = lipgloss.NewStyle().
+				Foreground(colorMuted).
+				Faint(true)
+)
+
+// footerStyle is the keybind hint strip at the bottom of the view.
+var footerStyle = lipgloss.NewStyle().
+	Foreground(colorMuted).
+	Faint(true)
+
+// paneStyle returns the border style for a pane. Focused panes get
+// the accent color; unfocused panes get a muted border so the focus
+// indicator is unambiguous without stealing too much attention.
+func paneStyle(focused bool) lipgloss.Style {
+	color := colorMuted
+	if focused {
+		color = colorAccent
+	}
+	return lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(color).
+		Padding(0, 1)
+}
 
 // Status glyphs rendered next to each workflow and step. Unicode
 // round-trips fine in every modern terminal; ASCII fallbacks can be
