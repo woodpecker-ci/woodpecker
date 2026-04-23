@@ -271,7 +271,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // first WindowSizeMsg has arrived; before that, the placeholder
 // view keeps the program runnable.
 func (m *Model) View() tea.View {
-	return renderViewTea(m)
+	v := renderViewTea(m)
+	// AltScreen puts the TUI in the terminal's alternate buffer, so
+	// the user's scrollback is preserved and is restored on exit.
+	v.AltScreen = true
+	return v
 }
 
 // handleWorkflowState applies a scheduler.Event to the model's
