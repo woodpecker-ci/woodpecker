@@ -247,7 +247,7 @@ execute a local pipeline
 
 **--backend-docker-network**="": backend docker network
 
-**--backend-docker-stop-timeout**="": seconds Woodpecker waits for a container to stop gracefully before forcefully killing it (default: 180)
+**--backend-docker-stop-timeout**="": seconds Woodpecker waits for a container to stop gracefully before forcefully killing it (default: 20)
 
 **--backend-docker-tls-verify**: enable or disable TLS verification for connecting to docker server (default: true)
 
@@ -289,7 +289,7 @@ execute a local pipeline
 
 **--backend-k8s-secctx-nonroot**: `run as non root` Kubernetes security context option (default: false)
 
-**--backend-k8s-stop-timeout**="": seconds Woodpecker waits for pods to stop gracefully before forcefully killing them (default: 180)
+**--backend-k8s-stop-timeout**="": seconds Woodpecker waits for pods to stop gracefully before forcefully killing them (default: 20)
 
 **--backend-k8s-storage-class**="": backend k8s storage class
 
