@@ -342,8 +342,7 @@
           "$ref": "#/definitions/step_backend_options"
         },
         "entrypoint": {
-          "description": "Defines container entrypoint.",
-          "$ref": "#/definitions/string_or_string_slice"
+          "$ref": "#/definitions/step_entrypoint"
         },
         "dns": {
           "description": "Change DNS server for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
@@ -630,6 +629,10 @@
         "type": ["boolean", "string", "number", "array", "object"]
       }
     },
+    "step_entrypoint": {
+      "description": "Defines container entrypoint.",
+      "$ref": "#/definitions/string_or_string_slice"
+    },
     "step_settings": {
       "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/overview",
       "type": "object",
@@ -884,6 +887,9 @@
         },
         "environment": {
           "$ref": "#/definitions/step_environment"
+        },
+        "entrypoint": {
+          "$ref": "#/definitions/step_entrypoint"
         },
         "directory": {
           "$ref": "#/definitions/step_directory"
