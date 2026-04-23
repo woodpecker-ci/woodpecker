@@ -29,6 +29,7 @@
 
 ### 📈 Enhancement
 
+- Handle re-created forge repos gracefully [[#6370](https://github.com/woodpecker-ci/woodpecker/pull/6370)]
 - Cleanup server store step interface [[#6476](https://github.com/woodpecker-ci/woodpecker/pull/6476)]
 - Docker/K8s: add config for stop timeout [[#6445](https://github.com/woodpecker-ci/woodpecker/pull/6445)]
 - Docker backend should retry to delete volume on "in use" error [[#6381](https://github.com/woodpecker-ci/woodpecker/pull/6381)]
@@ -118,6 +119,7 @@
 
 ### 🧪 Tests
 
+- e2e test wait for grpc server teardown and stop agents [[#6479](https://github.com/woodpecker-ci/woodpecker/pull/6479)]
 - Add more test cases for rpc label filter [[#6483](https://github.com/woodpecker-ci/woodpecker/pull/6483)]
 - Fix flaky TestJWTManager [[#6478](https://github.com/woodpecker-ci/woodpecker/pull/6478)]
 - Add e2e pipeline restart test [[#6469](https://github.com/woodpecker-ci/woodpecker/pull/6469)]
