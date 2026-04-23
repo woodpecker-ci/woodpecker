@@ -27,9 +27,9 @@ import (
 	"codeberg.org/6543/xyaml"
 	"github.com/oklog/ulid/v2"
 	"github.com/urfave/cli/v3"
-	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/exec/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
@@ -67,9 +67,7 @@ func run(ctx context.Context, c *cli.Command) error {
 	return common.RunPipelineFunc(ctx, c, execFile, execDir)
 }
 
-// TODO: do parallel runs with output to multiple _windows_ e.g. tmux like
 func execDir(ctx context.Context, c *cli.Command, dir string) error {
-	// TODO: respect pipeline dependency
 	repoPath := c.String("repo-path")
 	if repoPath != "" {
 		repoPath, _ = filepath.Abs(repoPath)
@@ -253,32 +251,91 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		return err
 	}
 
-	var execErr error
-	// TODO: respect depends_on and run in parallel where possible
-	for _, item := range items {
-		fmt.Println("#", item.Workflow.Name)
+	// The pipeline context carries timeout + SIGTERM cancellation for
+	// the entire DAG run. Every workflow's runtime derives its own ctx
+	// from this one, so cancellation fans out to all of them at once.
+	pipelineCtx, cancel := context.WithTimeout(ctx, c.Duration("timeout"))
+	defer cancel()
+	pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
+		fmt.Fprintln(os.Stderr, "ctrl+c received, terminating pipeline")
+	})
 
-		pipelineCtx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
-		defer cancel()
-		pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
-			fmt.Printf("ctrl+c received, terminating workflow '%s'\n", item.Workflow.Name)
+	// Whether to emit workflow names in the per-step log prefix. With
+	// a single workflow the prefix stays terse as "[step]"; with
+	// multiple workflows running in parallel, interleaved output needs
+	// the workflow qualifier to stay attributable.
+	multiWorkflow := len(items) > 1
+
+	// Per-workflow logger factory. The runtime calls this once per
+	// step with an io.ReadCloser streaming that step's stdout+stderr;
+	// we pipe each line through the workflow-aware LineWriter.
+	newLogger := func(workflowName string) logging.Logger {
+		return logging.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
+			var lw io.WriteCloser
+			if multiWorkflow {
+				lw = NewWorkflowLineWriter(workflowName, step.Name, step.UUID)
+			} else {
+				lw = NewLineWriter(step.Name, step.UUID)
+			}
+			return pipeline_utils.CopyLineByLine(lw, rc, pipeline.MaxLogLineLength)
 		})
+	}
 
-		err := pipeline_runtime.New(item.Config, backendEngine,
-			pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
+	// Events channel: consumed by a goroutine that turns scheduler
+	// state transitions into user-visible banners and diagnostics.
+	// Buffered generously so a slow terminal never back-pressures the
+	// scheduler's control loop.
+	events := make(chan scheduler.Event, 64)
+	eventsDone := make(chan struct{})
+	go func() {
+		defer close(eventsDone)
+		for ev := range events {
+			handleLineModeEvent(os.Stderr, ev)
+		}
+	}()
+
+	runFunc := func(runCtx context.Context, item *builder.Item) error {
+		return pipeline_runtime.New(item.Config, backendEngine,
+			pipeline_runtime.WithContext(runCtx),
 			pipeline_runtime.WithTracer(tracing.DefaultTracer),
-			pipeline_runtime.WithLogger(defaultLogger),
+			pipeline_runtime.WithLogger(newLogger(item.Workflow.Name)),
 			pipeline_runtime.WithDescription(map[string]string{
 				"CLI": "exec",
 			}),
-		).Run(ctx)
-		if err != nil {
-			fmt.Println(err)
-			execErr = multierr.Append(execErr, err)
-		}
-		fmt.Println("")
+		).Run(runCtx)
 	}
+
+	sched := scheduler.New(scheduler.Options{
+		Items:  items,
+		Run:    runFunc,
+		Events: events,
+	})
+
+	execErr := sched.Run(pipelineCtx)
+	<-eventsDone
 	return execErr
+}
+
+// handleLineModeEvent renders a workflow-level state transition to
+// the given writer for the plain (non-TUI) output path. It emits:
+//
+//   - a "# <name>" banner when a workflow starts running, matching
+//     the legacy sequential output,
+//   - a short diagnostic line when a workflow is blocked by a failed
+//     dependency (so the user understands the skip),
+//   - nothing for other states — per-step output and the final error
+//     return already cover success/failure reporting.
+func handleLineModeEvent(out io.Writer, ev scheduler.Event) {
+	switch ev.State {
+	case scheduler.StateRunning:
+		WorkflowHeader(out, ev.Workflow)
+	case scheduler.StateBlocked:
+		if ev.Err != nil {
+			fmt.Fprintf(out, "# %s: %s\n", ev.Workflow, ev.Err.Error())
+		}
+	case scheduler.StateCanceled:
+		fmt.Fprintf(out, "# %s: canceled\n", ev.Workflow)
+	}
 }
 
 // convertPathForWindows converts a path to use slash separators
@@ -299,8 +356,3 @@ func convertPathForWindows(path string) string {
 
 	return filepath.ToSlash(path)
 }
-
-var defaultLogger = logging.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
-	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipeline_utils.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
-})
