@@ -15,8 +15,6 @@
 package tracing
 
 import (
-	"strconv"
-
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
 
