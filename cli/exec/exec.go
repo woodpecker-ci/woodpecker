@@ -232,10 +232,28 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		},
 	}
 
-	items, err := b.Build()
-	if err != nil {
-		str, fmtErr := lint.FormatLintError("pipeline", err, false)
-		fmt.Print(str)
+	items, buildErr := b.Build()
+
+	// Decide output mode up front. We need this before printing any
+	// warnings: in TUI mode the warnings must be captured into the
+	// model's messages ring so they render in the bottom pane,
+	// rather than being smeared across the terminal right before the
+	// alt-screen swap wipes them.
+	useTUI := !c.Bool("no-tui") && logger.IsInteractiveTerminal()
+
+	// preRunMessages collects pre-run diagnostic text (lint
+	// warnings, "Config is valid" banners, etc.) destined for the
+	// TUI messages pane. In line mode this stays empty and the
+	// output goes to stdout as before.
+	var preRunMessages strings.Builder
+
+	if buildErr != nil {
+		str, fmtErr := lint.FormatLintError("pipeline", buildErr, false)
+		if useTUI {
+			preRunMessages.WriteString(str)
+		} else {
+			fmt.Print(str)
+		}
 		if fmtErr != nil {
 			return fmtErr
 		}
@@ -271,13 +289,8 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	pipelineCtx, cancel := context.WithTimeout(ctx, c.Duration("timeout"))
 	defer cancel()
 
-	// Decide output mode. The TUI is the default on an interactive
-	// terminal; callers with --no-tui or a non-interactive stdout
-	// (pipe, CI log) get the plain per-line stderr stream.
-	useTUI := !c.Bool("no-tui") && logger.IsInteractiveTerminal()
-
 	if useTUI {
-		return runTUIMode(pipelineCtx, items, backendEngine)
+		return runTUIMode(pipelineCtx, items, backendEngine, preRunMessages.String())
 	}
 	return runLineMode(pipelineCtx, items, backendEngine)
 }

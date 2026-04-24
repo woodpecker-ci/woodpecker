@@ -31,11 +31,11 @@ import (
 // environments. A flag to tune it can be added later if needed.
 const GlobalLogCapBytes = 200 * 1024 * 1024
 
-// DebugLogCapBytes is the separate cap for the zerolog debug tab.
+// MessagesLogCapBytes is the separate cap for the zerolog debug tab.
 // It is small because zerolog output is diagnostic noise, not the
 // user's primary signal. Counted separately from the step budget so
 // debug spam cannot crowd out step logs.
-const DebugLogCapBytes = 5 * 1024 * 1024
+const MessagesLogCapBytes = 5 * 1024 * 1024
 
 // Budget tracks a set of rings against a shared byte cap. Call
 // Register for each ring when it is created, then Enforce after each

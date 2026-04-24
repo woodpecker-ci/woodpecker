@@ -72,12 +72,17 @@ type stepNode struct {
 type Focus int
 
 const (
-	// FocusTree is the default: the workflow/step tree on the left.
+	// FocusTree is the default: the workflow/step tree on the top left.
 	FocusTree Focus = iota
-	// FocusLog is the log viewport on the right.
+	// FocusLog is the log viewport on the top right.
 	FocusLog
-	// FocusDebug is the debug tab (zerolog ring) on the right.
-	FocusDebug
+	// FocusMessages is the bottom-strip pane that collects pre-run
+	// output (lint warnings, metadata, anything printed before the
+	// TUI took over stdout) plus zerolog diagnostics captured
+	// during the run. It replaces the earlier "debug tab" concept:
+	// one dedicated pane for everything that is neither the tree
+	// nor a step's own log output.
+	FocusMessages
 )
 
 // Model is the bubbletea Model for the cli exec TUI.
@@ -93,13 +98,15 @@ type Model struct {
 	// byName indexes into workflows for O(1) event dispatch.
 	byName map[string]*workflowNode
 
-	// Log ring for the zerolog debug tab. Populated by a RingWriter
-	// that cli/exec installs as the zerolog destination before the
-	// tea program starts.
-	debug *Ring
+	// Ring for the messages pane: pre-run output (lint warnings,
+	// metadata diagnostics, anything printed before the TUI took
+	// over stdout) plus zerolog log output captured during the run
+	// via a RingWriter installed as the zerolog destination.
+	messages *Ring
 
-	// budget is the shared cap across all step rings. The debug ring
-	// is NOT registered here — it has its own separate cap.
+	// budget is the shared cap across all step rings. The messages
+	// ring is NOT registered here — it has its own separate cap so
+	// diagnostic noise cannot crowd out step logs.
 	budget *Budget
 
 	// UI state.
@@ -110,12 +117,12 @@ type Model struct {
 	// step; the setter clamps it to the list bounds so out-of-range
 	// values from a collapse/terminate cannot desync the view.
 	cursor int
-	// logView is the right-pane viewport for step logs. It is reused
+	// logView is the top-right viewport for step logs. It is reused
 	// across selections — SetContent is called when the selection
 	// changes.
 	logView viewport.Model
-	// debugView is the right-pane viewport for the zerolog debug tab.
-	debugView viewport.Model
+	// messagesView is the bottom-strip viewport for diagnostics.
+	messagesView viewport.Model
 	// viewReady gates rendering on the first WindowSizeMsg. Before
 	// the first size message we don't know how wide the panes should
 	// be, so we fall back to the placeholder view.
@@ -133,12 +140,12 @@ type Model struct {
 // the order from the yaml build output.
 func New(workflowNames []string) *Model {
 	m := &Model{
-		byName:    make(map[string]*workflowNode, len(workflowNames)),
-		debug:     NewRing(DebugLogCapBytes),
-		budget:    NewBudget(GlobalLogCapBytes),
-		focus:     FocusTree,
-		logView:   viewport.New(),
-		debugView: viewport.New(),
+		byName:       make(map[string]*workflowNode, len(workflowNames)),
+		messages:     NewRing(MessagesLogCapBytes),
+		budget:       NewBudget(GlobalLogCapBytes),
+		focus:        FocusTree,
+		logView:      viewport.New(),
+		messagesView: viewport.New(),
 	}
 	for _, name := range workflowNames {
 		n := &workflowNode{
@@ -152,11 +159,13 @@ func New(workflowNames []string) *Model {
 	return m
 }
 
-// DebugRing returns the Ring backing the zerolog debug tab. Exposed
-// so callers can wrap it in a RingWriter and install as the zerolog
-// destination before starting the program.
-func (m *Model) DebugRing() *Ring {
-	return m.debug
+// MessagesRing returns the Ring backing the bottom messages pane.
+// Exposed so callers can wrap it in a RingWriter and install it as
+// the zerolog destination before starting the program, and/or seed
+// the ring with pre-run output (lint warnings, metadata) that was
+// produced before the TUI took control.
+func (m *Model) MessagesRing() *Ring {
+	return m.messages
 }
 
 // fallbackStepRingCapBytes is the per-ring cap used only for the
@@ -242,7 +251,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Refresh both viewports on resize so reflow picks up new
 		// width.
 		m.refreshLogView()
-		m.refreshDebugView()
+		m.refreshMessagesView()
 		return m, nil
 
 	case tea.KeyPressMsg:
@@ -272,7 +281,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// just a redraw trigger. Enforcing the budget here debounces
 		// eviction work to roughly the tick rate.
 		m.budget.Enforce()
-		m.refreshDebugView()
+		m.refreshMessagesView()
 		// Re-arm the ticker so the loop continues until tea.Quit.
 		return m, tickDebug()
 
@@ -377,7 +386,7 @@ func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		m.cycleFocus()
 		return m, nil
 	case "L":
-		m.focus = FocusDebug
+		m.focus = FocusMessages
 		return m, nil
 	}
 
@@ -387,8 +396,8 @@ func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		return m.handleKeyTree(msg)
 	case FocusLog:
 		return m.handleKeyViewport(msg, &m.logView)
-	case FocusDebug:
-		return m.handleKeyViewport(msg, &m.debugView)
+	case FocusMessages:
+		return m.handleKeyViewport(msg, &m.messagesView)
 	}
 	return m, nil
 }
@@ -447,8 +456,8 @@ func (m *Model) cycleFocus() {
 	case FocusTree:
 		m.focus = FocusLog
 	case FocusLog:
-		m.focus = FocusDebug
-	case FocusDebug:
+		m.focus = FocusMessages
+	case FocusMessages:
 		m.focus = FocusTree
 	}
 }

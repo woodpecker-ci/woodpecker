@@ -50,9 +50,24 @@ const (
 	// lipgloss draws around each pane.
 	paneBorderWidth = 2
 
-	// RightPaneTabsHeight accounts for the tab header row plus the
-	// top/bottom border rows of the right pane.
-	rightPaneTabsHeight = 3
+	// PaneBorderHeight accounts for the top and bottom border rows
+	// lipgloss draws around each pane.
+	paneBorderHeight = 2
+
+	// DefaultMessagesHeight is how many terminal rows the messages
+	// strip takes by default. Small enough to keep the primary tree
+	// + log focus dominant, large enough to show several lint
+	// warnings or diagnostic lines without scrolling.
+	defaultMessagesHeight = 8
+
+	// MinTopRowHeight is the smallest acceptable height for the top
+	// row (tree + log). Below this, the messages pane gets squeezed
+	// so the primary workflow view stays usable.
+	minTopRowHeight = 6
+
+	// MinMessagesHeight is the smallest useful height for the
+	// messages pane on a tight terminal.
+	minMessagesHeight = 3
 
 	// MinTotalWidthMultiple keeps the combined tree+log width above
 	// twice the minimum tree width so both panes stay legible when
@@ -115,10 +130,20 @@ func (m *Model) selectedStep() (wf *workflowNode, st *stepNode) {
 	return it.workflow, it.step
 }
 
-// layout computes the two pane widths plus the body height (rows
-// available for content after reserving the footer). Called from
-// resizeViewports and View so both agree on sizes.
-func (m *Model) layout() (treeWidth, logWidth, bodyHeight int) {
+// layout computes the widths for the top row (tree + log) and the
+// heights for each row (top row + messages strip), after reserving
+// the footer. Called from resizeViewports and View so both agree on
+// sizes.
+//
+//	┌────────────┬────────────────────────┐
+//	│  tree      │  log                   │  <- topRowHeight
+//	│  (treeW)   │  (logW)                │
+//	├────────────┴────────────────────────┤
+//	│  messages                           │  <- messagesHeight
+//	├─────────────────────────────────────┤
+//	│  footer                             │  <- footerHeight
+//	└─────────────────────────────────────┘
+func (m *Model) layout() (treeWidth, logWidth, topRowHeight, messagesHeight int) {
 	totalWidth := m.width
 	if totalWidth < minTreeWidth*minTotalWidthMultiple {
 		totalWidth = minTreeWidth * minTotalWidthMultiple
@@ -131,30 +156,61 @@ func (m *Model) layout() (treeWidth, logWidth, bodyHeight int) {
 	if logWidth < minTreeWidth {
 		logWidth = minTreeWidth
 	}
-	bodyHeight = m.height - footerHeight
-	if bodyHeight < 1 {
-		bodyHeight = 1
+
+	bodyHeight := m.height - footerHeight
+	if bodyHeight < minTopRowHeight+minMessagesHeight {
+		// Very short terminal: cede as much as possible to the top
+		// row but keep at least one row for messages so the pane is
+		// not invisible.
+		if bodyHeight < minTopRowHeight+1 {
+			topRowHeight = bodyHeight - 1
+			messagesHeight = 1
+		} else {
+			topRowHeight = bodyHeight - minMessagesHeight
+			messagesHeight = minMessagesHeight
+		}
+		if topRowHeight < 1 {
+			topRowHeight = 1
+		}
+		return treeWidth, logWidth, topRowHeight, messagesHeight
 	}
-	return treeWidth, logWidth, bodyHeight
+	// Default allocation: a fixed-ish number of rows to messages,
+	// rest to the top row. The messages strip is small by default
+	// because the primary signal is step output; diagnostics and
+	// pre-run warnings are secondary.
+	messagesHeight = defaultMessagesHeight
+	topRowHeight = bodyHeight - messagesHeight
+	return treeWidth, logWidth, topRowHeight, messagesHeight
 }
 
 // resizeViewports propagates the current terminal size into the two
 // bubbles viewports. Called from the WindowSizeMsg handler.
 func (m *Model) resizeViewports() {
-	_, logWidth, bodyHeight := m.layout()
-	// Leave one column for the pane border on the right side.
-	innerWidth := logWidth - paneBorderWidth
-	if innerWidth < 1 {
-		innerWidth = 1
+	_, logWidth, topRowHeight, messagesHeight := m.layout()
+
+	// Log pane: top-right. Subtract border width/height for inside.
+	logInnerWidth := logWidth - paneBorderWidth - rowInnerPadding
+	if logInnerWidth < 1 {
+		logInnerWidth = 1
 	}
-	innerHeight := bodyHeight - rightPaneTabsHeight
-	if innerHeight < 1 {
-		innerHeight = 1
+	logInnerHeight := topRowHeight - paneBorderHeight
+	if logInnerHeight < 1 {
+		logInnerHeight = 1
 	}
-	m.logView.SetWidth(innerWidth)
-	m.logView.SetHeight(innerHeight)
-	m.debugView.SetWidth(innerWidth)
-	m.debugView.SetHeight(innerHeight)
+	m.logView.SetWidth(logInnerWidth)
+	m.logView.SetHeight(logInnerHeight)
+
+	// Messages pane: full-width strip across the bottom.
+	msgInnerWidth := m.width - paneBorderWidth - rowInnerPadding
+	if msgInnerWidth < 1 {
+		msgInnerWidth = 1
+	}
+	msgInnerHeight := messagesHeight - paneBorderHeight
+	if msgInnerHeight < 1 {
+		msgInnerHeight = 1
+	}
+	m.messagesView.SetWidth(msgInnerWidth)
+	m.messagesView.SetHeight(msgInnerHeight)
 }
 
 // refreshLogView rebuilds the log viewport contents from the ring
@@ -184,9 +240,9 @@ func (m *Model) refreshLogView() {
 	}
 }
 
-// refreshDebugView rebuilds the debug viewport contents.
-func (m *Model) refreshDebugView() {
-	lines, truncated := m.debug.Snapshot()
+// refreshMessagesView rebuilds the debug viewport contents.
+func (m *Model) refreshMessagesView() {
+	lines, truncated := m.messages.Snapshot()
 	var b strings.Builder
 	if truncated > 0 {
 		fmt.Fprintf(&b, "[… %d line(s) truncated]\n", truncated)
@@ -194,26 +250,34 @@ func (m *Model) refreshDebugView() {
 	for _, ln := range lines {
 		b.WriteString(ln)
 	}
-	m.debugView.SetContent(b.String())
-	if m.debugView.AtBottom() {
-		m.debugView.GotoBottom()
+	m.messagesView.SetContent(b.String())
+	if m.messagesView.AtBottom() {
+		m.messagesView.GotoBottom()
 	}
 }
 
 // renderView composes the full TUI frame from the current model
 // state. Split out of Model.View so the tea.View wrapper stays thin.
+//
+// Layout:
+//
+//	top row   = tree (left) + log (right)
+//	bottom    = messages (full width)
+//	footer    = one-line keybind hint
 func renderView(m *Model) string {
 	if !m.viewReady {
 		return placeholderView(m)
 	}
-	treeWidth, logWidth, bodyHeight := m.layout()
+	treeWidth, logWidth, topRowHeight, messagesHeight := m.layout()
 
-	tree := renderTree(m, treeWidth, bodyHeight)
-	right := renderRightPane(m, logWidth, bodyHeight)
+	tree := renderTree(m, treeWidth, topRowHeight)
+	logPane := renderLogPane(m, logWidth, topRowHeight)
+	topRow := lipgloss.JoinHorizontal(lipgloss.Top, tree, logPane)
 
-	body := lipgloss.JoinHorizontal(lipgloss.Top, tree, right)
+	messages := renderMessagesPane(m, m.width, messagesHeight)
+
 	footer := renderFooter(m, m.width)
-	return lipgloss.JoinVertical(lipgloss.Left, body, footer)
+	return lipgloss.JoinVertical(lipgloss.Left, topRow, messages, footer)
 }
 
 // renderTree draws the left-hand workflow/step tree.
@@ -276,41 +340,40 @@ func renderTreeRow(it flatItem, selected bool, width int) string {
 	return body
 }
 
-// renderRightPane renders the tab header plus the active viewport.
-func renderRightPane(m *Model, width, height int) string {
-	focused := m.focus == FocusLog || m.focus == FocusDebug
-
-	tabs := renderTabs(m, width)
-	var body string
-	switch m.focus {
-	case FocusDebug:
-		body = m.debugView.View()
-	default:
-		// Log is the default right-pane view even when focus is on
-		// the tree. This matches the "inspect what you clicked last"
-		// mental model users bring from IDE tree views.
-		body = m.logView.View()
+// renderLogPane renders the top-right log viewport with a titled
+// border. Replaces the earlier tabbed-right-pane design; the log is
+// always the entire top-right, and the bottom strip holds what used
+// to be the "debug" tab.
+func renderLogPane(m *Model, width, height int) string {
+	focused := m.focus == FocusLog
+	title := " logs "
+	if wf, st := m.selectedStep(); st != nil {
+		// Annotate the pane title with which step's output is shown
+		// so the user always knows what they're reading without
+		// cross-referencing the tree cursor.
+		title = " logs: " + wf.name + "/" + st.name + " "
 	}
-
-	panel := lipgloss.JoinVertical(lipgloss.Left, tabs, body)
-	return paneStyle(focused).Width(width).Height(height).Render(panel)
+	body := m.logView.View()
+	return paneStyle(focused).Width(width).Height(height).Render(
+		paneTitle(title) + "\n" + body,
+	)
 }
 
-// renderTabs renders the "logs | debug" header at the top of the
-// right pane.
-func renderTabs(m *Model, width int) string {
-	logs := " logs "
-	dbg := " debug "
-	if m.focus == FocusDebug {
-		dbg = tabActiveStyle.Render(dbg)
-		logs = tabInactiveStyle.Render(logs)
-	} else {
-		logs = tabActiveStyle.Render(logs)
-		dbg = tabInactiveStyle.Render(dbg)
-	}
-	header := logs + " " + dbg
-	_ = width // retained for future alignment
-	return header
+// renderMessagesPane renders the bottom-strip messages viewport. It
+// carries pre-run output (lint warnings, metadata) and zerolog
+// output captured during the run.
+func renderMessagesPane(m *Model, width, height int) string {
+	focused := m.focus == FocusMessages
+	body := m.messagesView.View()
+	return paneStyle(focused).Width(width).Height(height).Render(
+		paneTitle(" messages ") + "\n" + body,
+	)
+}
+
+// paneTitle renders a short title strip used at the top of each
+// pane. Centralized so all panes share the same look.
+func paneTitle(text string) string {
+	return paneTitleStyle.Render(text)
 }
 
 // renderFooter renders the keybind hint strip at the bottom.
@@ -319,8 +382,8 @@ func renderFooter(m *Model, width int) string {
 	switch m.focus {
 	case FocusLog:
 		focusName = "log"
-	case FocusDebug:
-		focusName = "debug"
+	case FocusMessages:
+		focusName = "messages"
 	}
 	done, total := m.progressCounts()
 	status := fmt.Sprintf("%d/%d", done, total)
@@ -333,7 +396,7 @@ func renderFooter(m *Model, width int) string {
 		status = "done"
 	}
 	hint := fmt.Sprintf(
-		"[%s] %s  j/k: move  enter: expand  tab: focus  L: debug  q: quit",
+		"[%s] %s  j/k: move  enter: expand  tab: focus  L: messages  q: quit",
 		focusName, status,
 	)
 	_ = width

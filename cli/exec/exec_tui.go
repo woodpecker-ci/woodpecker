@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"charm.land/bubbletea/v2"
@@ -69,7 +70,7 @@ const sigChanBuffer = 2
 //  7. On exit, flush the debug ring back to the original stderr so
 //     nothing diagnostic is lost, restore the zerolog output, and
 //     return the aggregated scheduler error.
-func runTUIMode(pipelineCtx context.Context, items []*builder.Item, backendEngine backend_types.Backend) (retErr error) {
+func runTUIMode(pipelineCtx context.Context, items []*builder.Item, backendEngine backend_types.Backend, preRunMessages string) (retErr error) {
 	// The TUI owns the alt-screen buffer. sigint cancels via the
 	// pipeline context, not via os.Exit, so the program can flush and
 	// restore on shutdown.
@@ -83,11 +84,25 @@ func runTUIMode(pipelineCtx context.Context, items []*builder.Item, backendEngin
 	}
 	model := tui.New(workflowNames)
 
-	// Route zerolog into the debug ring so stderr writes don't tear
-	// the alt-screen view. Non-pretty + no-color: the TUI will style
-	// what it displays; raw json lines in the ring keep rendering
-	// flexibility.
-	ringWriter := tui.NewRingWriter(model.DebugRing())
+	// Seed the messages pane with pre-run output (lint warnings,
+	// validator output, anything printed before the TUI took over).
+	// Each line goes in as its own ring entry so the viewport
+	// wraps/scrolls correctly.
+	if preRunMessages != "" {
+		msgRing := model.MessagesRing()
+		for _, line := range strings.SplitAfter(preRunMessages, "\n") {
+			if line == "" {
+				continue
+			}
+			msgRing.Append(line)
+		}
+	}
+
+	// Route zerolog into the messages ring so stderr writes don't
+	// tear the alt-screen view. Non-pretty + no-color: the TUI will
+	// style what it displays; raw json lines in the ring keep
+	// rendering flexibility.
+	ringWriter := tui.NewRingWriter(model.MessagesRing())
 	restoreLog := logger.SetOutput(ringWriter, false, true)
 	defer func() {
 		// Order is critical: restore the logger first so any log
@@ -103,7 +118,7 @@ func runTUIMode(pipelineCtx context.Context, items []*builder.Item, backendEngin
 		// to see what zerolog captured on the way down.
 		restoreLog()
 		ringWriter.Flush()
-		flushDebugRingToStderr(model.DebugRing())
+		flushMessagesRingToStderr(model.MessagesRing())
 	}()
 
 	prog := tea.NewProgram(model,
@@ -262,11 +277,11 @@ func (w *tuiStepWriter) Write(p []byte) (int, error) {
 // resources that need releasing.
 func (w *tuiStepWriter) Close() error { return nil }
 
-// flushDebugRingToStderr writes the accumulated debug ring contents
+// flushMessagesRingToStderr writes the accumulated debug ring contents
 // to os.Stderr after the TUI has exited. This preserves any zerolog
 // output the user might want to see (errors, warnings) that was
 // collected while the alt-screen was active.
-func flushDebugRingToStderr(ring *tui.Ring) {
+func flushMessagesRingToStderr(ring *tui.Ring) {
 	lines, truncated := ring.Snapshot()
 	if truncated == 0 && len(lines) == 0 {
 		return
