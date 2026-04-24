@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-23
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @packrat386, @paulovitorbal, @qwerty287, @rhafer, @samoli, @savv, @stardothosting, @utafrali
+@6543, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rhafer, @samoli, @savv, @stardothosting, @utafrali
 
 ### 🔒 Security
 
@@ -138,6 +138,7 @@
 
 ### 📚 Documentation
 
+- Add Laravel Forge plugin [[#6491](https://github.com/woodpecker-ci/woodpecker/pull/6491)]
 - Add 'entrypoint' property to service in schema [[#6487](https://github.com/woodpecker-ci/woodpecker/pull/6487)]
 - Lock file maintenance [[#6472](https://github.com/woodpecker-ci/woodpecker/pull/6472)]
 - Update dependency axios to v1.15.1 [[#6468](https://github.com/woodpecker-ci/woodpecker/pull/6468)]
