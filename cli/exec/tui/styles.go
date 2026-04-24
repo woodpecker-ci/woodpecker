@@ -123,18 +123,7 @@ func placeholderView(m *Model) string {
 
 		if wf.expanded {
 			for _, s := range wf.steps {
-				glyph := glyphPending
-				switch {
-				case s.skipped:
-					glyph = glyphSkipped
-				case s.exited && s.exitCode == 0:
-					glyph = glyphSuccess
-				case s.exited:
-					glyph = glyphFailure
-				case s.errText != "":
-					glyph = glyphFailure
-				}
-				fmt.Fprintf(&b, "      %s %s\n", glyph, s.name)
+				fmt.Fprintf(&b, "      %s %s\n", stepGlyph(s), s.name)
 			}
 		}
 	}

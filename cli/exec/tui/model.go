@@ -36,6 +36,7 @@ import (
 	"charm.land/bubbletea/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/exec/scheduler"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // workflowNode is the model's per-workflow bookkeeping. It mirrors
@@ -55,9 +56,21 @@ type workflowNode struct {
 }
 
 // stepNode is the model's per-step bookkeeping inside a workflow.
+//
+// The step is seeded from the compiled workflow config at model
+// construction time, so it appears in the tree with a 'pending'
+// glyph before it starts running. Subsequent tracer events flip
+// started/exited/skipped, driving the visual transition
+// pending → running → (success | failure | skipped).
 type stepNode struct {
-	name     string
-	uuid     string
+	name string
+	uuid string
+	// started flips true the first time a tracer event reports a
+	// non-zero Started timestamp for this step. It distinguishes
+	// pending (not yet started) from running (started, not yet
+	// exited). Without this we'd have no way to separate the two
+	// from the tracer fields alone — Exited=false matches both.
+	started  bool
 	exited   bool
 	exitCode int
 	skipped  bool
@@ -138,23 +151,81 @@ type Model struct {
 // Workflow order here determines rendering order. The caller should
 // pass names in the same order as scheduler.Options.Items, which is
 // the order from the yaml build output.
+//
+// Steps are not seeded by this constructor — they materialize
+// lazily as tracer events arrive. For a version that shows steps in
+// a 'pending' state before they start running (the usual production
+// case), use NewFromSeeds.
 func New(workflowNames []string) *Model {
+	seeds := make([]WorkflowSeed, len(workflowNames))
+	for i, name := range workflowNames {
+		seeds[i] = WorkflowSeed{Name: name}
+	}
+	return NewFromSeeds(seeds)
+}
+
+// WorkflowSeed is the per-workflow input to NewFromSeeds: a name
+// plus the ordered list of steps the workflow will run. Used so
+// the tree can show every step in a 'pending' state before
+// execution starts, giving the user an upfront picture of the plan
+// instead of having rows pop into existence as each step begins.
+//
+// The type is declared here rather than taking a *builder.Item
+// directly so the tui package does not depend on the builder; the
+// caller translates whatever it has (builder.Item, manual fixture,
+// future server-side stream) into WorkflowSeed.
+type WorkflowSeed struct {
+	// Name identifies the workflow in the tree and routes tracer
+	// and log messages to the right node.
+	Name string
+	// Steps is the ordered list of step descriptors. An empty
+	// slice is allowed — the workflow will behave the same as
+	// before NewFromSeeds existed, with steps materializing on
+	// first event.
+	Steps []StepSeed
+}
+
+// StepSeed is one step within a WorkflowSeed. UUID must match the
+// UUID the runtime will later report via tracer events; if it
+// doesn't, the model's StepStateMsg handler falls back to matching
+// by name, and failing that creates a new node as before.
+type StepSeed struct {
+	Name string
+	UUID string
+}
+
+// NewFromSeeds constructs a Model with the given workflows AND their
+// full step lists, so every step is visible in the tree with a
+// 'pending' glyph before the scheduler starts running any of them.
+// Subsequent tracer events transition each step pending → running →
+// (success | failure | skipped).
+func NewFromSeeds(seeds []WorkflowSeed) *Model {
 	m := &Model{
-		byName:       make(map[string]*workflowNode, len(workflowNames)),
+		byName:       make(map[string]*workflowNode, len(seeds)),
 		messages:     NewRing(MessagesLogCapBytes),
 		budget:       NewBudget(GlobalLogCapBytes),
 		focus:        FocusTree,
 		logView:      viewport.New(),
 		messagesView: viewport.New(),
 	}
-	for _, name := range workflowNames {
+	for _, s := range seeds {
 		n := &workflowNode{
-			name:     name,
+			name:     s.Name,
 			state:    scheduler.StatePending,
 			expanded: true,
 		}
+		// Seed steps so they show up pending before execution starts.
+		for _, step := range s.Steps {
+			ring := NewRing(0)
+			m.budget.Register(ring)
+			n.steps = append(n.steps, &stepNode{
+				name: step.Name,
+				uuid: step.UUID,
+				log:  ring,
+			})
+		}
 		m.workflows = append(m.workflows, n)
-		m.byName[name] = n
+		m.byName[s.Name] = n
 	}
 	return m
 }
@@ -178,12 +249,16 @@ const fallbackStepRingCapBytes = 1024 * 1024
 // given workflow/step pair. The ring is registered with the model's
 // shared budget on creation so eviction policy applies from line one.
 //
-// Called by the pipeline logger callback (once per step, before the
-// first log line). Thread-safe: the model's map is mutated only here
-// and only from callers guarded by the caller's own serialization.
-// Because the pipeline runtime creates one logger goroutine per step
-// and Go's map access is not safe for concurrent writers, callers
-// that may interleave must go through tea.Program.Send instead.
+// In the common case (the model was built with NewFromSeeds from the
+// compiled config) the step is already present and this is just a
+// lookup. Called by the pipeline logger callback (once per step,
+// before the first log line).
+//
+// Thread-safety: the model's map is mutated only here and only from
+// callers guarded by the caller's own serialization. Because the
+// pipeline runtime creates one logger goroutine per step and Go's
+// map access is not safe for concurrent writers, callers that may
+// interleave must go through tea.Program.Send instead.
 func (m *Model) StepRing(workflow, stepUUID, stepName string) *Ring {
 	wf := m.byName[workflow]
 	if wf == nil {
@@ -192,21 +267,8 @@ func (m *Model) StepRing(workflow, stepUUID, stepName string) *Ring {
 		// lines.
 		return NewRing(fallbackStepRingCapBytes)
 	}
-	for _, s := range wf.steps {
-		if s.uuid == stepUUID {
-			return s.log
-		}
-	}
-	// Per-step cap is generous; the global budget enforces the real
-	// ceiling across all steps.
-	r := NewRing(0)
-	m.budget.Register(r)
-	wf.steps = append(wf.steps, &stepNode{
-		name: stepName,
-		uuid: stepUUID,
-		log:  r,
-	})
-	return r
+	step := &backend_types.Step{Name: stepName, UUID: stepUUID}
+	return findOrCreateStep(wf, step, m.budget).log
 }
 
 // debugTickInterval is the rate at which the TUI refreshes the
@@ -326,31 +388,29 @@ func (m *Model) handleWorkflowState(msg WorkflowStateMsg) {
 }
 
 // handleStepState applies a tracer-sourced step update.
+//
+// The step node is usually pre-seeded from NewFromSeeds so the tree
+// shows it as pending before execution starts. If for some reason
+// the incoming UUID doesn't match a seeded step (mismatch between
+// compiled config and what the runtime actually runs, or a caller
+// using the bare New() constructor for tests), we fall back to
+// matching by name, and failing that create a fresh node. The
+// fallback keeps the model defensible without silently dropping
+// state.
 func (m *Model) handleStepState(msg StepStateMsg) {
 	wf := m.byName[msg.Workflow]
 	if wf == nil || msg.Step == nil || msg.State == nil {
 		return
 	}
-	// Find or create the step node. StepRing also does this lazily,
-	// so in practice the step already exists by the time its first
-	// state update arrives; the find path is expected.
-	var sn *stepNode
-	for _, s := range wf.steps {
-		if s.uuid == msg.Step.UUID {
-			sn = s
-			break
-		}
-	}
-	if sn == nil {
-		sn = &stepNode{
-			name: msg.Step.Name,
-			uuid: msg.Step.UUID,
-			log:  NewRing(0),
-		}
-		m.budget.Register(sn.log)
-		wf.steps = append(wf.steps, sn)
-	}
+	sn := findOrCreateStep(wf, msg.Step, m.budget)
 	st := msg.State.CurrStepState
+	// started flips true when the runtime first reports a non-zero
+	// Started timestamp. Once true it stays true — a subsequent
+	// update that happens to carry a zeroed state (shouldn't, but
+	// defensive) won't toggle us back to pending.
+	if st.Started != 0 {
+		sn.started = true
+	}
 	sn.exited = st.Exited
 	sn.exitCode = st.ExitCode
 	sn.skipped = st.Skipped
@@ -358,6 +418,46 @@ func (m *Model) handleStepState(msg StepStateMsg) {
 	if st.Error != nil {
 		sn.errText = st.Error.Error()
 	}
+}
+
+// findOrCreateStep locates a pre-seeded step node by UUID (preferred)
+// or by name (fallback), creating a new one if neither matches.
+// Centralized so handleStepState and handleLogLine agree on the
+// lookup rules.
+func findOrCreateStep(wf *workflowNode, step *backend_types.Step, budget *Budget) *stepNode {
+	// UUID match — the happy path when NewFromSeeds was used with
+	// the compiled config.
+	if step.UUID != "" {
+		for _, s := range wf.steps {
+			if s.uuid == step.UUID {
+				return s
+			}
+		}
+	}
+	// Name match — falls through here when the test fixture seeded
+	// only a name or the caller used the bare New() constructor.
+	for _, s := range wf.steps {
+		if s.name == step.Name {
+			// Backfill UUID if we learned it now.
+			if s.uuid == "" {
+				s.uuid = step.UUID
+			}
+			return s
+		}
+	}
+	// Create new — defensive path; normal runs seed every step
+	// upfront via NewFromSeeds.
+	ring := NewRing(0)
+	if budget != nil {
+		budget.Register(ring)
+	}
+	sn := &stepNode{
+		name: step.Name,
+		uuid: step.UUID,
+		log:  ring,
+	}
+	wf.steps = append(wf.steps, sn)
+	return sn
 }
 
 // handleLogLine routes a log line to the appropriate per-step ring.

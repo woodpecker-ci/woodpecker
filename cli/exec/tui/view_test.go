@@ -287,9 +287,128 @@ func TestGotoTopAndBottomKeys(t *testing.T) {
 	t.Fatal("no selected row found in output")
 }
 
-// assertErr produces a minimal error for test fixture data.
-func assertErr(s string) error { return &staticErr{s: s} }
+func TestSeededStepsAppearAsPendingBeforeRunning(t *testing.T) {
+	// Build a model with NewFromSeeds — the production path — and
+	// verify every step shows up in the tree with a pending glyph
+	// before any tracer event fires. This is the whole point of
+	// pre-seeding: users see the plan upfront, not pop-ins as each
+	// step begins.
+	m := tui.NewFromSeeds([]tui.WorkflowSeed{
+		{
+			Name: "build",
+			Steps: []tui.StepSeed{
+				{Name: "compile", UUID: "u-compile"},
+				{Name: "test", UUID: "u-test"},
+				{Name: "deploy", UUID: "u-deploy"},
+			},
+		},
+	})
+	u, _ := m.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
+	m = asModel(t, u)
+
+	out := plainView(m)
+
+	// All three step names must appear in the tree.
+	assert.Contains(t, out, "compile")
+	assert.Contains(t, out, "test")
+	assert.Contains(t, out, "deploy")
+
+	// None of them has a running, success, failure, or skipped
+	// glyph yet — they're all pending. We check by counting
+	// running glyphs: zero.
+	assert.NotContains(t, out, "●", "no step should be running yet")
+	assert.NotContains(t, out, "✓", "no step should be successful yet")
+	assert.NotContains(t, out, "✗", "no step should be failed yet")
+}
+
+func TestStepTransitionsPendingToRunningToSuccess(t *testing.T) {
+	m := tui.NewFromSeeds([]tui.WorkflowSeed{
+		{
+			Name:  "build",
+			Steps: []tui.StepSeed{{Name: "compile", UUID: "u-1"}},
+		},
+	})
+	u, _ := m.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
+	m = asModel(t, u)
+
+	// Pending: no running, no success.
+	assert.NotContains(t, plainView(m), "●")
+	assert.NotContains(t, plainView(m), "✓")
+
+	// Running: tracer reports Started=<now>, Exited=false.
+	step := &backend_types.Step{Name: "compile", UUID: "u-1"}
+	u, _ = m.Update(tui.StepStateMsg{
+		Workflow: "build",
+		Step:     step,
+		State: &state.State{
+			CurrStep: step,
+			CurrStepState: backend_types.State{
+				Started: 1700000000,
+				Exited:  false,
+			},
+		},
+	})
+	m = asModel(t, u)
+	assert.Contains(t, plainView(m), "●", "step should render as running after Started != 0")
+	assert.NotContains(t, plainView(m), "✓")
+
+	// Success: Exited=true, ExitCode=0.
+	u, _ = m.Update(tui.StepStateMsg{
+		Workflow: "build",
+		Step:     step,
+		State: &state.State{
+			CurrStep: step,
+			CurrStepState: backend_types.State{
+				Started:  1700000000,
+				Exited:   true,
+				ExitCode: 0,
+			},
+		},
+	})
+	m = asModel(t, u)
+	assert.Contains(t, plainView(m), "✓", "step should render as success after Exited && ExitCode==0")
+}
+
+func TestStepSeededByUUIDDoesNotDuplicate(t *testing.T) {
+	// Seed a step, then send a tracer event for the same UUID:
+	// the model must update the existing node, not create a
+	// duplicate row in the tree.
+	m := tui.NewFromSeeds([]tui.WorkflowSeed{
+		{
+			Name:  "build",
+			Steps: []tui.StepSeed{{Name: "compile", UUID: "u-1"}},
+		},
+	})
+	u, _ := m.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
+	m = asModel(t, u)
+
+	step := &backend_types.Step{Name: "compile", UUID: "u-1"}
+	u, _ = m.Update(tui.StepStateMsg{
+		Workflow: "build",
+		Step:     step,
+		State: &state.State{
+			CurrStep:      step,
+			CurrStepState: backend_types.State{Started: 1, Exited: true, ExitCode: 0},
+		},
+	})
+	m = asModel(t, u)
+
+	out := plainView(m)
+	// The word "compile" should appear exactly once in the tree
+	// rows (we ignore the matching log-pane title that says
+	// "logs: build/compile" by counting only before that prefix).
+	treeRegion := out
+	if idx := strings.Index(out, "logs:"); idx >= 0 {
+		treeRegion = out[:idx]
+	}
+	count := strings.Count(treeRegion, "compile")
+	assert.Equal(t, 1, count,
+		"step 'compile' must not be duplicated in the tree (UUID match)")
+}
 
 type staticErr struct{ s string }
 
 func (e *staticErr) Error() string { return e.s }
+
+// assertErr produces a minimal error for test fixture data.
+func assertErr(s string) error { return &staticErr{s: s} }
