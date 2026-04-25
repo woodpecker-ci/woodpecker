@@ -47,6 +47,8 @@ type Runtime struct {
 	tracerLock sync.Mutex
 	logger     logging.Logger
 
+	uploadWait sync.WaitGroup
+
 	taskUUID    string
 	description map[string]string
 }

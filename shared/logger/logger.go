@@ -43,13 +43,13 @@ var GlobalLoggerFlags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_DEBUG_PRETTY"),
 		Name:    "pretty",
 		Usage:   "enable pretty-printed debug output",
-		Value:   isInteractiveTerminal(), // make pretty on interactive terminal by default
+		Value:   IsInteractiveTerminal(), // make pretty on interactive terminal by default
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEBUG_NOCOLOR"),
 		Name:    "nocolor",
 		Usage:   "disable colored debug output, only has effect if pretty output is set too",
-		Value:   !isInteractiveTerminal(), // do color on interactive terminal by default
+		Value:   !IsInteractiveTerminal(), // do color on interactive terminal by default
 	},
 }
 
@@ -103,4 +103,41 @@ func SetupGlobalLogger(ctx context.Context, c *cli.Command, outputLvl bool) erro
 	}
 
 	return nil
+}
+
+// SetOutput overrides the zerolog global logger's destination at runtime.
+//
+// It is intended for cases where a caller needs to temporarily redirect
+// log output after SetupGlobalLogger has already run — in particular,
+// the cli exec TUI, which routes zerolog into an in-memory buffer so
+// stderr writes do not tear the alt-screen display.
+//
+// The returned restore func reverts the global logger to the state it
+// had before the call. Callers should defer it to guarantee cleanup on
+// panic or clean exit.
+//
+// When pretty is true, the zerolog ConsoleWriter human formatting
+// is used. When noColor is true, ANSI color sequences are disabled —
+// generally desired when the destination is not a user-facing
+// terminal (file, ring buffer, …).
+//
+// The configured log level is preserved; only the sink changes.
+func SetOutput(w io.Writer, pretty, noColor bool) (restore func()) {
+	prev := log.Logger
+
+	if pretty {
+		log.Logger = zerolog.New(
+			zerolog.ConsoleWriter{Out: w, NoColor: noColor},
+		).With().Timestamp().Logger()
+	} else {
+		log.Logger = zerolog.New(w).With().Timestamp().Logger()
+	}
+
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.Logger.With().Caller().Logger()
+	}
+
+	return func() {
+		log.Logger = prev
+	}
 }

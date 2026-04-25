@@ -32,6 +32,7 @@ type (
 		ID          int64                `json:"id,omitempty"`
 		Name        string               `json:"name,omitempty"`
 		Owner       string               `json:"owner,omitempty"`
+		OrgID       int64                `json:"org_id,omitempty"`
 		RemoteID    string               `json:"remote_id,omitempty"`
 		ForgeURL    string               `json:"forge_url,omitempty"`
 		CloneURL    string               `json:"clone_url,omitempty"`
