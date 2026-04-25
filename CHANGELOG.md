@@ -187,6 +187,8 @@
 
 ### 📦️ Dependency
 
+- Update woodpeckerci/plugin-git Docker tag to v2.9.0 [[#6499](https://github.com/woodpecker-ci/woodpecker/pull/6499)]
+- Update docker.io/mysql Docker tag to v9.7.0 [[#6498](https://github.com/woodpecker-ci/woodpecker/pull/6498)]
 - Update docker.io/lycheeverse/lychee Docker tag to v0.24.1 [[#6497](https://github.com/woodpecker-ci/woodpecker/pull/6497)]
 - Update golang-packages to v0.36.0 [[#6485](https://github.com/woodpecker-ci/woodpecker/pull/6485)]
 - Update golang-packages [[#6477](https://github.com/woodpecker-ci/woodpecker/pull/6477)]
