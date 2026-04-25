@@ -15,8 +15,6 @@
 package tracing
 
 import (
-	"strconv"
-
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
 
@@ -34,19 +32,7 @@ func (f TraceFunc) Trace(state *state.State) error {
 	return f(state)
 }
 
-// DefaultTracer provides a tracer that updates the CI_ environment
-// variables to include the correct timestamp and status.
-// TODO: find either a new home or better name for this.
-var DefaultTracer = TraceFunc(func(state *state.State) error {
-	if state.CurrStepState.Exited {
-		return nil
-	}
-	if state.CurrStep.Environment == nil {
-		return nil
-	}
-	state.CurrStep.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
-
-	state.CurrStep.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Workflow.Started, 10)
-
+// NoOpTracer provides a tracer that does nothing.
+var NoOpTracer = TraceFunc(func(state *state.State) error {
 	return nil
 })

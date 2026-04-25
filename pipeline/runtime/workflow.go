@@ -71,6 +71,11 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		}
 	}
 
+	// Ensure all logs/traces are uploaded before finishing
+	logger.Debug().Msg("waiting for logs and traces upload")
+	r.uploadWait.Wait()
+	logger.Debug().Msg("logs and traces uploaded")
+
 	return r.err.Get()
 }
 
