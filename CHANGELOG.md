@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-24
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -138,6 +138,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6496](https://github.com/woodpecker-ci/woodpecker/pull/6496)]
 - Add Laravel Forge plugin [[#6491](https://github.com/woodpecker-ci/woodpecker/pull/6491)]
 - Add 'entrypoint' property to service in schema [[#6487](https://github.com/woodpecker-ci/woodpecker/pull/6487)]
 - Lock file maintenance [[#6472](https://github.com/woodpecker-ci/woodpecker/pull/6472)]
@@ -186,6 +187,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/lycheeverse/lychee Docker tag to v0.24.1 [[#6497](https://github.com/woodpecker-ci/woodpecker/pull/6497)]
 - Update golang-packages to v0.36.0 [[#6485](https://github.com/woodpecker-ci/woodpecker/pull/6485)]
 - Update golang-packages [[#6477](https://github.com/woodpecker-ci/woodpecker/pull/6477)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.8.3 [[#6462](https://github.com/woodpecker-ci/woodpecker/pull/6462)]
