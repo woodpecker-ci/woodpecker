@@ -234,7 +234,9 @@ func PatchRepo(c *gin.Context) {
 	}
 
 	if in.Trusted != nil {
-		if (*in.Trusted.Network != repo.Trusted.Network || *in.Trusted.Volumes != repo.Trusted.Volumes || *in.Trusted.Security != repo.Trusted.Security) && !user.Admin {
+		if ((in.Trusted.Network != nil && *in.Trusted.Network != repo.Trusted.Network) ||
+			(in.Trusted.Volumes != nil && *in.Trusted.Volumes != repo.Trusted.Volumes) ||
+			(in.Trusted.Security != nil && *in.Trusted.Security != repo.Trusted.Security)) && !user.Admin {
 			log.Trace().Msgf("user '%s' wants to change trusted without being an instance admin", user.Login)
 			c.String(http.StatusForbidden, "Insufficient privileges")
 			return
