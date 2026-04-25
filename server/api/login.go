@@ -293,19 +293,37 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	err = updateRepoPermissions(c, user, _store, _forge, forgeID)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
+	var noStoredRepositories bool
+	if repos, err := _store.RepoList(user, false, false, &model.RepoFilter{}); err != nil {
+		log.Error().Err(err).Msgf("Could not list stored repositories for user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
+	} else {
+		noStoredRepositories = len(repos) == 0
+	}
+
+	if !server.Config.Server.AsyncRepositoryUpdate || noStoredRepositories {
+		if err := updateRepoPermissions(c, user, _store, _forge, forgeID); err != nil {
+			if err != nil {
+				log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
+			}
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+	} else {
+		go func() {
+			if err := updateRepoPermissions(c, user, _store, _forge, forgeID); err != nil {
+				log.Error().Err(err).Msgf("could not update repo permissions for user %s in background", user.Login)
+			}
+		}()
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
-
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
 func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {
+	start := time.Now()
 	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
 		return _forge.Repos(c, user, &model.ListOptions{
 			Page:    page,
@@ -350,6 +368,7 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		return err
 	}
 
+	log.Debug().Msgf("update repo permissions for user %s in %dms", user.Login, time.Since(start).Milliseconds())
 	return nil
 }
 

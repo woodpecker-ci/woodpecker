@@ -32,9 +32,13 @@ func apiRoutes(e *gin.RouterGroup) {
 			user.Use(session.MustUser())
 			user.GET("", api.GetSelf)
 			user.GET("/feed", api.GetFeed)
-			user.GET("/repos", api.GetRepos)
 			user.POST("/token", api.PostToken)
 			user.DELETE("/token", api.DeleteToken)
+			repoUserBase := user.Group("/repos")
+			{
+				repoUserBase.GET("", api.GetRepos)
+				repoUserBase.POST("/refresh", api.RefreshRepos)
+			}
 		}
 
 		users := apiBase.Group("/users")

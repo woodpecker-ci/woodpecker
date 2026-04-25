@@ -179,6 +179,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -212,6 +213,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgGet", org.ID).Return(org, nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -308,6 +310,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -343,6 +346,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgUpdate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -378,6 +382,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgUpdate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
