@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rhafer, @samoli, @savv, @stardothosting, @utafrali
+@6543, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @bclermont, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rhafer, @samoli, @savv, @stardothosting, @utafrali
 
 ### 🔒 Security
 
@@ -77,6 +77,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(cli,server): fix trusted flags copy-paste bug and server nil pointer panic [[#6501](https://github.com/woodpecker-ci/woodpecker/pull/6501)]
 - Add refname to bitbucket commit status [[#6482](https://github.com/woodpecker-ci/woodpecker/pull/6482)]
 - Fix send on closed channel panic in SSE stream handlers [[#6456](https://github.com/woodpecker-ci/woodpecker/pull/6456)]
 - Add `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE` config to preserve non-breaking behavior by default [[#6448](https://github.com/woodpecker-ci/woodpecker/pull/6448)]
