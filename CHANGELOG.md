@@ -29,6 +29,7 @@
 
 ### 📈 Enhancement
 
+- Move wait for log uploads logic out of logger and tracer into pipeline runtime [[#6471](https://github.com/woodpecker-ci/woodpecker/pull/6471)]
 - Make agent reconnect retry timeout configurable [[#6470](https://github.com/woodpecker-ci/woodpecker/pull/6470)]
 - Handle re-created forge repos gracefully [[#6370](https://github.com/woodpecker-ci/woodpecker/pull/6370)]
 - Cleanup server store step interface [[#6476](https://github.com/woodpecker-ci/woodpecker/pull/6476)]
