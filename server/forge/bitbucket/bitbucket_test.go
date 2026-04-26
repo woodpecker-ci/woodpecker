@@ -234,11 +234,6 @@ var (
 		RefreshToken: "refresh_token_is_empty",
 	}
 
-	fakeUserNotFound = &model.User{
-		Login:       "superman",
-		AccessToken: "user_not_found",
-	}
-
 	fakeUserNoTeams = &model.User{
 		Login:       "superman",
 		AccessToken: "teams_not_found",
