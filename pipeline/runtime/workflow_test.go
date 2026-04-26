@@ -35,7 +35,7 @@ import (
 
 func TestRunNilTracer(t *testing.T) {
 	t.Parallel()
-	r := New(&backend_types.Config{}, dummy.New(), WithLogger(newTestLogger(t)))
+	r := New(&backend_types.Config{}, dummy.New(), WithLogger(newTestLogger(t)), WithTracer(nil))
 
 	err := r.Run(t.Context())
 
@@ -308,7 +308,7 @@ func TestNewDefaults(t *testing.T) {
 	assert.Equal(t, spec, r.spec)
 	assert.NotEmpty(t, r.taskUUID)
 	assert.NotNil(t, r.ctx)
-	assert.Nil(t, r.tracer)
+	assert.NotNil(t, r.tracer)
 	assert.NotNil(t, r.engine)
 	assert.NoError(t, r.err.Get())
 }
