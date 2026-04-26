@@ -279,7 +279,7 @@ func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend_types.Config, task
 	}
 	close(wc)
 
-	e.kv.Delete("task_" + taskUUID)
+	e.kv.Delete(workflowKey(taskUUID))
 	return nil
 }
 
