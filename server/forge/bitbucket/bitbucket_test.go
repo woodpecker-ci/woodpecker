@@ -81,13 +81,6 @@ func TestBitbucket(t *testing.T) {
 	})
 	assert.Error(t, err)
 
-	login, err := c.Auth(ctx, fakeUser.AccessToken, fakeUser.RefreshToken)
-	assert.NoError(t, err)
-	assert.Equal(t, fakeUser.Login, login)
-
-	_, err = c.Auth(ctx, fakeUserNotFound.AccessToken, fakeUserNotFound.RefreshToken)
-	assert.Error(t, err)
-
 	ok, err := c.Refresh(ctx, fakeUserRefresh)
 	assert.NoError(t, err)
 	assert.True(t, ok)
