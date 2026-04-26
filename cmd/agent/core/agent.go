@@ -17,7 +17,6 @@ package core
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"maps"
@@ -30,11 +29,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	grpc_credentials "google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
@@ -105,54 +100,31 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 			})
 	}
 
-	var transport grpc.DialOption
-	if c.Bool("grpc-secure") {
-		log.Trace().Msg("use ssl for grpc")
-		transport = grpc.WithTransportCredentials(grpc_credentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
-	} else {
-		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
-	}
-
-	authConn, err := grpc.NewClient(
-		c.String("server"),
-		transport,
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:    c.Duration("grpc-keepalive-time"),
-			Timeout: c.Duration("grpc-keepalive-timeout"),
-		}),
-	)
-	if err != nil {
-		return fmt.Errorf("could not create new gRPC 'channel' for authentication: %w", err)
-	}
-	defer authConn.Close()
-
 	agentConfig := readAgentConfig(agentConfigPath)
 
-	agentToken := c.String("grpc-token")
 	grpcClientCtx, grpcClientCtxCancel := context.WithCancelCause(context.Background())
 	defer grpcClientCtxCancel(nil)
-	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval) //nolint:contextcheck
-	if err != nil {
-		return fmt.Errorf("agent could not auth: %w", err)
+
+	if c.Bool("grpc-secure") {
+		log.Trace().Msg("use ssl for grpc")
 	}
 
-	conn, err := grpc.NewClient(
-		c.String("server"),
-		transport,
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:    c.Duration("grpc-keepalive-time"),
-			Timeout: c.Duration("grpc-keepalive-timeout"),
-		}),
-		grpc.WithUnaryInterceptor(authInterceptor.Unary()),
-		grpc.WithStreamInterceptor(authInterceptor.Stream()),
-	)
+	agentConn, err := agent_rpc.Dial(grpcClientCtx, agent_rpc.DialConfig{ //nolint:contextcheck
+		ServerAddr:       c.String("server"),
+		AgentToken:       c.String("grpc-token"),
+		AgentID:          agentConfig.AgentID,
+		Secure:           c.Bool("grpc-secure"),
+		SkipTLSVerify:    c.Bool("grpc-skip-insecure"),
+		KeepaliveTime:    c.Duration("grpc-keepalive-time"),
+		KeepaliveTimeout: c.Duration("grpc-keepalive-timeout"),
+		AuthRefreshEvery: authInterceptorRefreshInterval,
+	})
 	if err != nil {
-		return fmt.Errorf("could not create new gRPC 'channel' for normal orchestration: %w", err)
+		return err
 	}
-	defer conn.Close()
+	defer agentConn.Close()
 
-	client := agent_rpc.NewGrpcClient(ctx, conn,
+	client := agent_rpc.NewGrpcClient(ctx, agentConn.MainConn,
 		agent_rpc.SetConnectionRetryTimeout(c.Duration("retry-timeout")),
 	)
 	agentConfigPersisted := atomic.Bool{}
