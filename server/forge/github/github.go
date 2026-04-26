@@ -149,16 +149,6 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	}, redirectURL, nil
 }
 
-// Auth returns the GitHub user login for the given access token.
-func (c *client) Auth(ctx context.Context, token, _ string) (string, error) {
-	client := c.newClientToken(ctx, token)
-	user, _, err := client.Users.Get(ctx, "")
-	if err != nil {
-		return "", err
-	}
-	return *user.Login, nil
-}
-
 // Refresh refreshes the Gitlab oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
