@@ -189,6 +189,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/google/go-github/v84 to v85 [[#6500](https://github.com/woodpecker-ci/woodpecker/pull/6500)]
 - Update module github.com/getkin/kin-openapi to v0.136.0 [[#6503](https://github.com/woodpecker-ci/woodpecker/pull/6503)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.0 [[#6499](https://github.com/woodpecker-ci/woodpecker/pull/6499)]
 - Update docker.io/mysql Docker tag to v9.7.0 [[#6498](https://github.com/woodpecker-ci/woodpecker/pull/6498)]
