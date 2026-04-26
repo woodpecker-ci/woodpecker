@@ -48,7 +48,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -324,7 +323,6 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 
 	return pipeline_runtime.New(compiled, backendEngine,
 		pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
-		pipeline_runtime.WithTracer(tracing.NoOpTracer),
 		pipeline_runtime.WithLogger(defaultLogger),
 		pipeline_runtime.WithDescription(map[string]string{
 			"CLI": "exec",
