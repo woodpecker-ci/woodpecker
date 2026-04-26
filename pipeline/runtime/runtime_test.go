@@ -255,10 +255,10 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	// reported its exit — i.e. test was running in parallel with db, not
 	// queued behind it.
 	dbExitIdx := indexOfTrace(traces, func(s state.State) bool {
-		return s.CurrStep != nil && s.CurrStep.Name == "db" && s.CurrStepState.Exited
+		return s == *findLastTraceByName(traces, "db")
 	})
 	testStartedIdx := indexOfTrace(traces, func(s state.State) bool {
-		return s.CurrStep != nil && s.CurrStep.Name == "test" && !s.CurrStepState.Exited
+		return s == *findFirstTraceByName(traces, "test")
 	})
 	assert.Less(t, testStartedIdx, dbExitIdx,
 		"test (next stage) must start before db (service) exits — otherwise db blocked stage 2")
@@ -1360,7 +1360,7 @@ func TestWorkflowFailingDetachedStepDoesNotFailWorkflow(t *testing.T) {
 					cmdStep("background-worker", withDetached(), withExitCode(2)),
 					cmdStep("main-build"),
 				}},
-				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy", withSleep("120ms"))}},
 			},
 		},
 		dummy.New(),
@@ -1370,8 +1370,6 @@ func TestWorkflowFailingDetachedStepDoesNotFailWorkflow(t *testing.T) {
 
 	assert.NoError(t, r.Run(t.Context()),
 		"detached worker failure must not fail the workflow")
-
-	time.Sleep(100 * time.Millisecond)
 
 	traces := getTracerStates(tracer)
 
