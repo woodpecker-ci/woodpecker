@@ -118,11 +118,11 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		}
 		if c.IsSet("trusted-network") {
 			t := c.Bool("trusted-network")
-			patch.Trusted.Security = &t
+			patch.Trusted.Network = &t
 		}
 		if c.IsSet("trusted-volumes") {
 			t := c.Bool("trusted-volumes")
-			patch.Trusted.Security = &t
+			patch.Trusted.Volumes = &t
 		}
 	}
 

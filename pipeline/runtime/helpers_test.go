@@ -57,3 +57,13 @@ func getTracerStates(tracer *tracer_mocks.MockTracer) []state.State {
 	}
 	return states
 }
+
+// indexOfTrace returns the first index where predicate matches, or -1.
+func indexOfTrace(traces []state.State, match func(s state.State) bool) int {
+	for i := range traces {
+		if match(traces[i]) {
+			return i
+		}
+	}
+	return -1
+}

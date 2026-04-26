@@ -124,7 +124,9 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	defer agentConn.Close()
 
-	client := agent_rpc.NewGrpcClient(ctx, agentConn.MainConn)
+	client := agent_rpc.NewGrpcClient(ctx, agentConn.MainConn,
+		agent_rpc.SetConnectionRetryTimeout(c.Duration("retry-timeout")),
+	)
 	agentConfigPersisted := atomic.Bool{}
 
 	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
