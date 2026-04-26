@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-25
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -189,6 +189,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/getkin/kin-openapi to v0.136.0 [[#6503](https://github.com/woodpecker-ci/woodpecker/pull/6503)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.0 [[#6499](https://github.com/woodpecker-ci/woodpecker/pull/6499)]
 - Update docker.io/mysql Docker tag to v9.7.0 [[#6498](https://github.com/woodpecker-ci/woodpecker/pull/6498)]
 - Update docker.io/lycheeverse/lychee Docker tag to v0.24.1 [[#6497](https://github.com/woodpecker-ci/woodpecker/pull/6497)]
