@@ -455,7 +455,7 @@ lint a pipeline configuration file
 
 **--plugins-privileged**="": allow plugins to run in privileged mode, if set empty, there is no
 
-**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: "docker.io/woodpeckerci/plugin-git:2.8.1", "docker.io/woodpeckerci/plugin-git", "quay.io/woodpeckerci/plugin-git")
+**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: "docker.io/woodpeckerci/plugin-git:2.9.0", "docker.io/woodpeckerci/plugin-git", "quay.io/woodpeckerci/plugin-git")
 
 **--strict**: treat warnings as errors (default: false)
 
