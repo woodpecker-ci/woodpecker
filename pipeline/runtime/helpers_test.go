@@ -50,7 +50,7 @@ func newTestLogger(t *testing.T) logging.Logger {
 // is append-only and we only read after the workflow completes.
 func getTracerStates(tracer *tracer_mocks.MockTracer) []state.State {
 	// for systems under load we wait for tracer to make it's calls
-	time.Sleep(100 * time.Microsecond)
+	time.Sleep(120 * time.Microsecond)
 
 	var states []state.State
 	for _, call := range tracer.Calls {

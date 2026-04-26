@@ -1308,7 +1308,7 @@ func TestWorkflowFailingServiceDoesNotFailWorkflow(t *testing.T) {
 					cmdStep("db", withService(), withExitCode(1)),
 					cmdStep("build"),
 				}},
-				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy", withSleep("120ms"))}},
 			},
 		},
 		dummy.New(),
