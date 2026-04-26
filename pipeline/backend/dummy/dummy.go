@@ -97,7 +97,7 @@ func (e *dummy) SetupWorkflow(_ context.Context, _ *backend_types.Config, taskUU
 		return fmt.Errorf("expected fail to setup workflow")
 	}
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
-	e.kv.Store(workflowKey(taskUUID), "setup")
+	e.kv.Store(workflowKey(taskUUID), make(chan struct{}))
 	return nil
 }
 
@@ -155,10 +155,14 @@ func sleepWithContext(ctx context.Context, stop <-chan struct{}, d time.Duration
 func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
-	_, exist := e.kv.Load(workflowKey(taskUUID))
+	rawWC, exist := e.kv.Load(workflowKey(taskUUID))
 	if !exist {
 		err := fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
 		return &backend_types.State{Error: err}, err
+	}
+	wc, ok := rawWC.(chan struct{})
+	if !ok {
+		return nil, fmt.Errorf("workflow stop chan not found")
 	}
 
 	key := stepKey(taskUUID, step.UUID)
@@ -180,12 +184,12 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 			err = fmt.Errorf("WaitStep fail to parse sleep duration: %w", err)
 			return &backend_types.State{Error: err}, err
 		}
-		if sleepWithContext(ctx, toSleep) {
+		if sleepWithContext(ctx, wc, toSleep) {
 			e.kv.Store(key, stepStateDone)
 			return canceledState(), nil
 		}
 	} else if step.Type == backend_types.StepTypeService {
-		if sleepWithContext(ctx, testServiceTimeout) {
+		if sleepWithContext(ctx, wc, testServiceTimeout) {
 			// context for service closed — we can move forward
 		} else {
 			err := fmt.Errorf("WaitStep fail due to timeout of service after 1 second")
@@ -265,10 +269,16 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend_types.Step, taskUUI
 func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend_types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
-	_, exist := e.kv.Load(workflowKey(taskUUID))
+	rawWC, exist := e.kv.Load(workflowKey(taskUUID))
 	if !exist {
 		return fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
 	}
+	wc, ok := rawWC.(chan struct{})
+	if !ok {
+		return fmt.Errorf("workflow stop chan not found")
+	}
+	close(wc)
+
 	e.kv.Delete("task_" + taskUUID)
 	return nil
 }
