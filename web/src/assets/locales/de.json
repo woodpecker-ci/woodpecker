@@ -226,7 +226,12 @@
             "enabled": "Bereits aktiviert",
             "list_reloaded": "Repository-Liste neu geladen",
             "reload": "Repositorys neu laden",
-            "success": "Repository aktiviert"
+            "success": "Repository aktiviert",
+            "new_forge_repo": "neues Repo auf der Code-Plattform",
+            "stale_wp_repo": "veraltetes Woodpecker-Repo",
+            "conflict": "Konflikt",
+            "conflict_desc": "Dieses Repository wurde auf der Code-Plattform mit einer neuen ID erstellt, aber ein alter Eintrag mit demselben Namen existiert noch in Woodpecker. Lösche das alte Repo, um das neue zu aktivieren, oder repariere das alte.",
+            "forge_repo_missing": "Repo auf der Code-Plattform fehlt!"
         },
         "manual_pipeline": {
             "select_branch": "Branch auswählen",
