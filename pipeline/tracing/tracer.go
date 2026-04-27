@@ -33,6 +33,4 @@ func (f TraceFunc) Trace(state *state.State) error {
 }
 
 // NoOpTracer provides a tracer that does nothing.
-var NoOpTracer = TraceFunc(func(state *state.State) error {
-	return nil
-})
+var NoOpTracer = TraceFunc(func(*state.State) error { return nil })

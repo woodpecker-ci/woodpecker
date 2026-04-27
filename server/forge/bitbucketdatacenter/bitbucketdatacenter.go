@@ -142,15 +142,6 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	return u, "", nil
 }
 
-func (c *client) Auth(ctx context.Context, accessToken, _ string) (string, error) {
-	config := c.newOAuth2Config()
-	token := &oauth2.Token{
-		AccessToken: accessToken,
-	}
-	client := internal.NewClientWithToken(ctx, config.TokenSource(ctx, token), c.url)
-	return client.FindCurrentUser(ctx)
-}
-
 func (c *client) Refresh(ctx context.Context, u *model.User) (bool, error) {
 	config := c.newOAuth2Config()
 	t := &oauth2.Token{

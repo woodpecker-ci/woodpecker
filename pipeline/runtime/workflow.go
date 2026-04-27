@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -39,8 +40,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.makeLogger()
 	r.logStages()
 
-	// we make sure cleanup always happens
-	defer func() {
+	destroyWorkflowFunc := sync.OnceFunc(func() {
 		ctx := runnerCtx //nolint:contextcheck
 		if ctx.Err() != nil {
 			// runnerCtx itself is done — fall back to a short-lived shutdown context.
@@ -49,7 +49,10 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy workflow")
 		}
-	}()
+	})
+
+	// we make sure cleanup always happens
+	defer destroyWorkflowFunc()
 
 	r.started = time.Now().Unix()
 
@@ -70,6 +73,9 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 			}
 		}
 	}
+
+	// Now we can shutdown the workflow
+	destroyWorkflowFunc()
 
 	// Ensure all logs/traces are uploaded before finishing
 	logger.Debug().Msg("waiting for logs and traces upload")
