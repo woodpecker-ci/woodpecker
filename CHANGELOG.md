@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-26
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -141,6 +141,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#6508](https://github.com/woodpecker-ci/woodpecker/pull/6508)]
 - Update docs npm deps non-major [[#6496](https://github.com/woodpecker-ci/woodpecker/pull/6496)]
 - Add Laravel Forge plugin [[#6491](https://github.com/woodpecker-ci/woodpecker/pull/6491)]
 - Add 'entrypoint' property to service in schema [[#6487](https://github.com/woodpecker-ci/woodpecker/pull/6487)]
