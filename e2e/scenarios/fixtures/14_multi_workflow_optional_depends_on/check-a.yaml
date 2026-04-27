@@ -1,0 +1,7 @@
+skip_clone: true
+
+steps:
+  - name: check-a
+    image: dummy
+    commands:
+      - echo checking app a

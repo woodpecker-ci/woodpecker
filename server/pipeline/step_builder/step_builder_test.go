@@ -23,6 +23,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -226,7 +227,7 @@ depends_on:
 	assert.NoError(t, err)
 	assert.Len(t, items, 3, "Should have generated 3 items")
 	assert.Len(t, items[0].DependsOn, 2, "Should have 2 dependencies")
-	assert.Equal(t, "test", items[0].DependsOn[1], "Should depend on test")
+	assert.Equal(t, "test", items[0].DependsOn[1].Name, "Should depend on test")
 }
 
 func TestRunsOn(t *testing.T) {
@@ -575,6 +576,180 @@ depends_on:
 	items, err := b.Build()
 	assert.NoError(t, err)
 	assert.Empty(t, items, "Workflows with missing dependencies should be filtered out")
+}
+
+func TestDependsOnOptionalFlag(t *testing.T) {
+	t.Parallel()
+
+	t.Run("missing optional dep is dropped", func(t *testing.T) {
+		b := StepBuilder{
+			Forge:       getMockForge(t),
+			RepoTrusted: &metadata.TrustedConfiguration{},
+			Repo:        &model.Repo{},
+			Curr:        &model.Pipeline{Event: model.EventPush},
+			Prev:        &model.Pipeline{},
+			Yamls: []*forge_types.FileMeta{
+				{Name: "check-a", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: check
+    image: scratch
+`)},
+				{Name: "deploy", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: deploy
+    image: scratch
+depends_on:
+  - check-a
+  - name: check-b
+    optional: true
+`)},
+			},
+		}
+
+		items, err := b.Build()
+		assert.NoError(t, err)
+		assert.Len(t, items, 2, "deploy should not be filtered out")
+		deploy := items[0]
+		if deploy.Workflow.Name != "deploy" {
+			deploy = items[1]
+		}
+		assert.Equal(t, base.DependsOn{{Name: "check-a"}}, deploy.DependsOn, "only check-a should remain as dependency")
+	})
+
+	t.Run("present optional dep is promoted", func(t *testing.T) {
+		b := StepBuilder{
+			Forge:       getMockForge(t),
+			RepoTrusted: &metadata.TrustedConfiguration{},
+			Repo:        &model.Repo{},
+			Curr:        &model.Pipeline{Event: model.EventPush},
+			Prev:        &model.Pipeline{},
+			Yamls: []*forge_types.FileMeta{
+				{Name: "check-a", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: check
+    image: scratch
+`)},
+				{Name: "check-b", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: check
+    image: scratch
+`)},
+				{Name: "deploy", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: deploy
+    image: scratch
+depends_on:
+  - check-a
+  - name: check-b
+    optional: true
+`)},
+			},
+		}
+
+		items, err := b.Build()
+		assert.NoError(t, err)
+		assert.Len(t, items, 3)
+		deploy := items[0]
+		for _, item := range items {
+			if item.Workflow.Name == "deploy" {
+				deploy = item
+			}
+		}
+		assert.ElementsMatch(t, base.DependsOn{{Name: "check-a"}, {Name: "check-b"}}, deploy.DependsOn, "both deps should be present")
+	})
+
+	t.Run("missing required dep still removes workflow", func(t *testing.T) {
+		b := StepBuilder{
+			Forge:       getMockForge(t),
+			RepoTrusted: &metadata.TrustedConfiguration{},
+			Repo:        &model.Repo{},
+			Curr:        &model.Pipeline{Event: model.EventPush},
+			Prev:        &model.Pipeline{},
+			Yamls: []*forge_types.FileMeta{
+				{Name: "check-a", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: check
+    image: scratch
+`)},
+				{Name: "deploy", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: deploy
+    image: scratch
+depends_on:
+  - missing
+  - name: check-a
+    optional: true
+`)},
+			},
+		}
+
+		items, err := b.Build()
+		assert.NoError(t, err)
+		assert.Len(t, items, 1, "deploy should be filtered out due to missing required dep")
+		assert.Equal(t, "check-a", items[0].Workflow.Name)
+	})
+
+	t.Run("optional dep filtered by when is dropped", func(t *testing.T) {
+		b := StepBuilder{
+			Forge:       getMockForge(t),
+			RepoTrusted: &metadata.TrustedConfiguration{},
+			Repo:        &model.Repo{},
+			Curr:        &model.Pipeline{Event: model.EventPush},
+			Prev:        &model.Pipeline{},
+			Yamls: []*forge_types.FileMeta{
+				{Name: "check-a", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: check
+    image: scratch
+`)},
+				{Name: "check-b", Data: []byte(`
+when:
+  event: tag
+steps:
+  - name: check
+    image: scratch
+`)},
+				{Name: "deploy", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: deploy
+    image: scratch
+depends_on:
+  - check-a
+  - name: check-b
+    optional: true
+`)},
+			},
+		}
+
+		items, err := b.Build()
+		assert.NoError(t, err)
+		assert.Len(t, items, 2, "check-b filtered by when, deploy should still run")
+		deploy := items[0]
+		for _, item := range items {
+			if item.Workflow.Name == "deploy" {
+				deploy = item
+			}
+		}
+		assert.Equal(t, base.DependsOn{{Name: "check-a"}}, deploy.DependsOn)
+	})
 }
 
 func TestInvalidYAML(t *testing.T) {

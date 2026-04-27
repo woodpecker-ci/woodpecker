@@ -18,13 +18,14 @@ import (
 	"sort"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 )
 
 type dagCompilerStep struct {
 	step      *backend_types.Step
 	position  int
 	name      string
-	dependsOn []string
+	dependsOn base.DependsOn
 }
 
 type dagCompiler struct {
@@ -82,7 +83,7 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 	path = append(path, name)
 
 	for _, dep := range steps[name].dependsOn {
-		if err := dfsVisit(steps, dep, visited, path); err != nil {
+		if err := dfsVisit(steps, dep.Name, visited, path); err != nil {
 			return err
 		}
 	}
@@ -97,12 +98,17 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 	stages := make([]*backend_types.Stage, 0)
 
 	for name, step := range steps {
-		// check if all depends_on are valid
+		var resolved base.DependsOn
 		for _, dep := range step.dependsOn {
-			if _, ok := steps[dep]; !ok {
-				return nil, &ErrStepMissingDependency{name: name, dep: dep}
+			if _, ok := steps[dep.Name]; !ok {
+				if dep.Optional {
+					continue
+				}
+				return nil, &ErrStepMissingDependency{name: name, dep: dep.Name}
 			}
+			resolved = append(resolved, dep)
 		}
+		step.dependsOn = resolved
 
 		// check if there are cycles
 		visited := make(map[string]struct{})
@@ -145,9 +151,8 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 }
 
 func allDependenciesSatisfied(step *dagCompilerStep, addedSteps map[string]struct{}) bool {
-	for _, childName := range step.dependsOn {
-		_, ok := addedSteps[childName]
-		if !ok {
+	for _, dep := range step.dependsOn {
+		if _, ok := addedSteps[dep.Name]; !ok {
 			return false
 		}
 	}

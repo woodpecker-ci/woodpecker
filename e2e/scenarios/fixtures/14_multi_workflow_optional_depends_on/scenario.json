@@ -1,0 +1,13 @@
+{
+  "name": "optional depends_on drops missing dependency without blocking workflow",
+  "event": "push",
+  "expected_status": "success",
+  "expected_workflows": [
+    { "name": "check-a", "status": "success" },
+    { "name": "deploy", "status": "success" }
+  ],
+  "expected_steps": [
+    { "name": "check-a", "status": "success", "exit_code": 0 },
+    { "name": "deploy", "status": "success", "exit_code": 0 }
+  ]
+}

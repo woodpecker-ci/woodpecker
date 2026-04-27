@@ -36,6 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -59,7 +60,7 @@ type StepBuilder struct {
 type Item struct {
 	Workflow  *model.Workflow // TODO: get rid of server dependency
 	Labels    map[string]string
-	DependsOn []string
+	DependsOn base.DependsOn
 	RunsOn    []string
 	Config    *backend_types.Config
 }
@@ -107,6 +108,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		// depend on https://github.com/woodpecker-ci/woodpecker/issues/778
 	}
 
+	items = resolveOptionalDependencies(items)
 	items = filterItemsWithMissingDependencies(items)
 
 	return items, errorsAndWarnings
@@ -224,12 +226,29 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	return item, errorsAndWarnings
 }
 
+// resolveOptionalDependencies drops optional dependencies whose target
+// workflow is not present in the pipeline. Required dependencies are
+// left untouched (filterItemsWithMissingDependencies handles them).
+func resolveOptionalDependencies(items []*Item) []*Item {
+	for _, item := range items {
+		var resolved base.DependsOn
+		for _, dep := range item.DependsOn {
+			if dep.Optional && !containsItemWithName(dep.Name, items) {
+				continue
+			}
+			resolved = append(resolved, base.Dependency{Name: dep.Name})
+		}
+		item.DependsOn = resolved
+	}
+	return items
+}
+
 func filterItemsWithMissingDependencies(items []*Item) []*Item {
 	itemsToRemove := make([]*Item, 0)
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
+			if !containsItemWithName(dep.Name, items) {
 				itemsToRemove = append(itemsToRemove, item)
 			}
 		}
@@ -242,7 +261,6 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 				filtered = append(filtered, item)
 			}
 		}
-		// Recursive to handle transitive deps
 		return filterItemsWithMissingDependencies(filtered)
 	}
 

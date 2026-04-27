@@ -20,21 +20,22 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 )
 
 func TestConvertDAGToStages(t *testing.T) {
 	steps := map[string]*dagCompilerStep{
 		"step1": {
 			step:      &backend_types.Step{},
-			dependsOn: []string{"step3"},
+			dependsOn: base.DependsOn{{Name: "step3"}},
 		},
 		"step2": {
 			step:      &backend_types.Step{},
-			dependsOn: []string{"step1"},
+			dependsOn: base.DependsOn{{Name: "step1"}},
 		},
 		"step3": {
 			step:      &backend_types.Step{},
-			dependsOn: []string{"step2"},
+			dependsOn: base.DependsOn{{Name: "step2"}},
 		},
 	}
 	_, err := convertDAGToStages(steps)
@@ -43,7 +44,7 @@ func TestConvertDAGToStages(t *testing.T) {
 	steps = map[string]*dagCompilerStep{
 		"step1": {
 			step:      &backend_types.Step{},
-			dependsOn: []string{"step2"},
+			dependsOn: base.DependsOn{{Name: "step2"}},
 		},
 		"step2": {
 			step: &backend_types.Step{},
@@ -58,15 +59,15 @@ func TestConvertDAGToStages(t *testing.T) {
 		},
 		"b": {
 			step:      &backend_types.Step{},
-			dependsOn: []string{"a"},
+			dependsOn: base.DependsOn{{Name: "a"}},
 		},
 		"c": {
 			step:      &backend_types.Step{},
-			dependsOn: []string{"a"},
+			dependsOn: base.DependsOn{{Name: "a"}},
 		},
 		"d": {
 			step:      &backend_types.Step{},
-			dependsOn: []string{"b", "c"},
+			dependsOn: base.DependsOn{{Name: "b"}, {Name: "c"}},
 		},
 	}
 	_, err = convertDAGToStages(steps)
@@ -75,7 +76,7 @@ func TestConvertDAGToStages(t *testing.T) {
 	steps = map[string]*dagCompilerStep{
 		"step1": {
 			step:      &backend_types.Step{},
-			dependsOn: []string{"not-existing-step"},
+			dependsOn: base.DependsOn{{Name: "not-existing-step"}},
 		},
 	}
 	_, err = convertDAGToStages(steps)
@@ -95,7 +96,7 @@ func TestConvertDAGToStages(t *testing.T) {
 		"echo 1": {
 			position:  1,
 			name:      "echo 1",
-			dependsOn: []string{"echo env", "echo 2"},
+			dependsOn: base.DependsOn{{Name: "echo env"}, {Name: "echo 2"}},
 			step: &backend_types.Step{
 				UUID:  "01HJDPF770QGRZER8RF79XVS4M",
 				Type:  "commands",
@@ -138,6 +139,74 @@ func TestConvertDAGToStages(t *testing.T) {
 	}}, stages)
 }
 
+func TestOptionalStepDependency(t *testing.T) {
+	t.Run("missing optional step dep is dropped", func(t *testing.T) {
+		steps := map[string]*dagCompilerStep{
+			"build": {
+				position: 0,
+				name:     "build",
+				step:     &backend_types.Step{Name: "build"},
+			},
+			"deploy": {
+				position: 1,
+				name:     "deploy",
+				step:     &backend_types.Step{Name: "deploy"},
+				dependsOn: base.DependsOn{
+					{Name: "build"},
+					{Name: "lint", Optional: true},
+				},
+			},
+		}
+		stages, err := convertDAGToStages(steps)
+		assert.NoError(t, err)
+		assert.Len(t, stages, 2, "should produce 2 stages (build then deploy)")
+	})
+
+	t.Run("missing required step dep still errors", func(t *testing.T) {
+		steps := map[string]*dagCompilerStep{
+			"deploy": {
+				name: "deploy",
+				step: &backend_types.Step{Name: "deploy"},
+				dependsOn: base.DependsOn{
+					{Name: "build"},
+				},
+			},
+		}
+		_, err := convertDAGToStages(steps)
+		assert.ErrorIs(t, err, &ErrStepMissingDependency{})
+	})
+
+	t.Run("present optional step dep is kept", func(t *testing.T) {
+		steps := map[string]*dagCompilerStep{
+			"build": {
+				position: 0,
+				name:     "build",
+				step:     &backend_types.Step{Name: "build"},
+			},
+			"lint": {
+				position: 1,
+				name:     "lint",
+				step:     &backend_types.Step{Name: "lint"},
+			},
+			"deploy": {
+				position: 2,
+				name:     "deploy",
+				step:     &backend_types.Step{Name: "deploy"},
+				dependsOn: base.DependsOn{
+					{Name: "build"},
+					{Name: "lint", Optional: true},
+				},
+			},
+		}
+		stages, err := convertDAGToStages(steps)
+		assert.NoError(t, err)
+		assert.Len(t, stages, 2, "build+lint in stage 1, deploy in stage 2")
+		assert.Len(t, stages[0].Steps, 2)
+		assert.Len(t, stages[1].Steps, 1)
+		assert.Equal(t, "deploy", stages[1].Steps[0].Name)
+	})
+}
+
 func TestIsDag(t *testing.T) {
 	steps := []*dagCompilerStep{
 		{
@@ -150,7 +219,7 @@ func TestIsDag(t *testing.T) {
 	steps = []*dagCompilerStep{
 		{
 			step:      &backend_types.Step{},
-			dependsOn: []string{},
+			dependsOn: base.DependsOn{},
 		},
 	}
 	c = newDAGCompiler(steps)

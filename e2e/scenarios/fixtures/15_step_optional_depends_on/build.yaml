@@ -1,0 +1,26 @@
+skip_clone: true
+
+when:
+  event: push
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+
+  - name: lint
+    image: dummy
+    when:
+      event: tag
+    commands:
+      - echo linting
+
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying
+    depends_on:
+      - build
+      - name: lint
+        optional: true

@@ -16,6 +16,7 @@ package types
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -27,7 +28,7 @@ type (
 		Steps     ContainerList     `yaml:"steps,omitempty"`
 		Services  ContainerList     `yaml:"services,omitempty"`
 		Labels    map[string]string `yaml:"labels,omitempty"`
-		DependsOn []string          `yaml:"depends_on,omitempty"`
+		DependsOn base.DependsOn    `yaml:"depends_on,omitempty"`
 		SkipClone bool              `yaml:"skip_clone,omitempty"`
 		// Deprecated: use when.status. TODO remove in next major.
 		RunsOn []string `yaml:"runs_on,omitempty"`
