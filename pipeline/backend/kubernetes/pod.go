@@ -590,33 +590,57 @@ func apparmorProfile(scp *SecProfile) *kube_core_v1.AppArmorProfile {
 	return apparmorProfile
 }
 
-func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *kube_core_v1.SecurityContext {
-	if !stepPrivileged {
+func containerCapabilities(capabilities *Capabilities) *kube_core_v1.Capabilities {
+	if capabilities == nil || len(capabilities.Drop) == 0 {
 		return nil
 	}
 
-	//nolint:staticcheck
-	privileged := false
+	drop := make([]kube_core_v1.Capability, len(capabilities.Drop))
 
-	// if security context privileged is set explicitly
-	if sc != nil && sc.Privileged != nil && *sc.Privileged {
-		privileged = true
+	for i, c := range capabilities.Drop {
+		drop[i] = kube_core_v1.Capability(c)
 	}
 
-	// if security context privileged is not set explicitly, but step is privileged
-	if (sc == nil || sc.Privileged == nil) && stepPrivileged {
-		privileged = true
+	return &kube_core_v1.Capabilities{
+		Drop: drop,
+	}
+}
+
+func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *kube_core_v1.SecurityContext {
+	var (
+		privileged               *bool
+		allowPrivilegeEscalation *bool
+		capabilities             *kube_core_v1.Capabilities
+	)
+
+	// A container may only run privileged when the step itself is privileged.
+	// If the step is privileged, the container is privileged by default unless
+	// explicitly disabled via securityContext.privileged=false.
+	if stepPrivileged && (sc == nil || sc.Privileged == nil || *sc.Privileged) {
+		privileged = newBool(true)
 	}
 
-	if privileged {
-		securityContext := &kube_core_v1.SecurityContext{
-			Privileged: newBool(true),
+	if sc != nil {
+		// allowPrivilegeEscalation can only be set to false.
+		if sc.AllowPrivilegeEscalation != nil && !*sc.AllowPrivilegeEscalation {
+			allowPrivilegeEscalation = sc.AllowPrivilegeEscalation
 		}
-		log.Trace().Msgf("container security context that will be used: %v", securityContext)
-		return securityContext
+
+		capabilities = containerCapabilities(sc.Capabilities)
 	}
 
-	return nil
+	if privileged == nil && capabilities == nil && allowPrivilegeEscalation == nil {
+		return nil
+	}
+
+	securityContext := &kube_core_v1.SecurityContext{
+		Privileged:               privileged,
+		AllowPrivilegeEscalation: allowPrivilegeEscalation,
+		Capabilities:             capabilities,
+	}
+
+	log.Trace().Msgf("container security context that will be used: %v", securityContext)
+	return securityContext
 }
 
 func mapToEnvVars(m map[string]string) []kube_core_v1.EnvVar {

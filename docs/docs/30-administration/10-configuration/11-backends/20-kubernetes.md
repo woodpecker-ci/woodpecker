@@ -359,6 +359,26 @@ backend_options:
 The feature requires Kubernetes v1.30 or above.
 :::
 
+You can set `allowPrivilegeEscalation` to `false` to prevent a container from gaining more privileges than its parent process.
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      allowPrivilegeEscalation: false
+```
+
+You can also drop [Linux capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html) from a container. Adding capabilities is not allowed.
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      capabilities:
+        drop:
+          - ALL
+```
+
 ### Annotations and labels
 
 You can specify arbitrary [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) and [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) to be set on the Pod definition for a given workflow step using the following configuration:
