@@ -151,7 +151,11 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// add default clone step
 	if !c.local && len(conf.Clone.ContainerList) == 0 && !conf.SkipClone && len(c.defaultClonePlugin) != 0 {
-		cloneSettings := map[string]any{"depth": "0"}
+		cloneSettings := map[string]any{
+			"depth":  "0",
+			"home":   "/tmp",
+			"target": path.Join(pluginWorkspaceBase, c.workspacePath),
+		}
 		if c.metadata.Curr.Event == metadata.EventTag {
 			cloneSettings["tags"] = "true"
 		}
@@ -160,6 +164,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Image:       c.defaultClonePlugin,
 			Settings:    cloneSettings,
 			Environment: make(map[string]any),
+			Directory:   pluginWorkspaceBase,
 		}
 		for k, v := range c.cloneEnv {
 			container.Environment[k] = v
