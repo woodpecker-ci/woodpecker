@@ -76,11 +76,29 @@ func withDetached() func(*backend_types.Step) {
 	}
 }
 
+// withUnboundedDetached models a detached step that runs until the workflow tears it down.
+func withUnboundedDetached() func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
+		s.Type = backend_types.StepTypeService
+		s.Detached = true
+		s.Environment[dummy.EnvKeyStepSleep] = "3m"
+	}
+}
+
 func withService() func(*backend_types.Step) {
 	return func(s *backend_types.Step) {
 		s.Type = backend_types.StepTypeService
 		s.Detached = true
 		s.Environment[dummy.EnvKeyStepSleep] = "100ms"
+	}
+}
+
+// withUnboundedService models a real-world service that runs until the workflow tears it down.
+func withUnboundedService() func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
+		s.Type = backend_types.StepTypeService
+		s.Detached = true
+		s.Environment[dummy.EnvKeyStepSleep] = "3m"
 	}
 }
 
@@ -101,6 +119,12 @@ func withOOM() func(*backend_types.Step) {
 func withStartFail() func(*backend_types.Step) {
 	return func(s *backend_types.Step) {
 		s.Environment[dummy.EnvKeyStepStartFail] = "true"
+	}
+}
+
+func withSleep(d string) func(*backend_types.Step) {
+	return func(s *backend_types.Step) {
+		s.Environment[dummy.EnvKeyStepSleep] = d
 	}
 }
 
@@ -155,9 +179,8 @@ func TestWorkflowCloneBuildDeploy(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	err := r.Run(t.Context())
+	assert.NoError(t, r.Run(t.Context()))
 
-	assert.NoError(t, err)
 	traces := getTracerStates(tracer)
 	assert.Len(t, traces, 6)
 	for i := 0; i < 6; i += 2 {
@@ -185,7 +208,7 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 					cmdStep("db", withService()),
 					cmdStep("build"),
 				}},
-				{Steps: []*backend_types.Step{cmdStep("test")}},
+				{Steps: []*backend_types.Step{cmdStep("test", withSleep("250ms"))}},
 			},
 		},
 		dummy.New(),
@@ -227,17 +250,18 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 		assert.Less(t, startedIdx, exitedIdx, "%s started must precede %s exited", name, name)
 	}
 
-	// The contract of a service/detached step in stage 1: its exit trace arrives
-	// AFTER stage 2's steps have already been traced. That's the whole point of
-	// detaching — it must not block the next stage.
+	// The contract of a service/detached step: it does not block the next
+	// stage. Verify that stage 2's `test` step started before db (in stage 1)
+	// reported its exit — i.e. test was running in parallel with db, not
+	// queued behind it.
 	dbExitIdx := indexOfTrace(traces, func(s state.State) bool {
-		return s.CurrStep != nil && s.CurrStep.Name == "db" && s.CurrStepState.Exited
+		return s == *findLastTraceByName(traces, "db")
 	})
-	testExitIdx := indexOfTrace(traces, func(s state.State) bool {
-		return s.CurrStep != nil && s.CurrStep.Name == "test" && s.CurrStepState.Exited
+	testStartedIdx := indexOfTrace(traces, func(s state.State) bool {
+		return s == *findFirstTraceByName(traces, "test")
 	})
-	assert.Greater(t, dbExitIdx, testExitIdx,
-		"db (service) must complete after test (next stage) — otherwise it wasn't really detached")
+	assert.Less(t, testStartedIdx, dbExitIdx,
+		"test (next stage) must start before db (service) exits — otherwise db blocked stage 2")
 
 	// Runtime-injected env vars should be present on the test step's exit trace.
 	testExit := findLastTraceByName(traces, "test")
@@ -249,6 +273,7 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	// Strip runtime-injected env for a structural comparison of the step itself.
 	delete(testExit.CurrStep.Environment, "CI_PIPELINE_STARTED")
 	delete(testExit.CurrStep.Environment, "CI_STEP_STARTED")
+	delete(testExit.CurrStep.Environment, dummy.EnvKeyStepSleep)
 	assert.EqualValues(t, state.State{
 		Workflow: state.Workflow{Started: testExit.Workflow.Started},
 		CurrStep: &backend_types.Step{
@@ -367,8 +392,8 @@ func TestWorkflowOnFailureStepSkippedOnSuccess(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	err := r.Run(t.Context())
-	require.NoError(t, err)
+	require.NoError(t, r.Run(t.Context()))
+
 	traces := getTracerStates(tracer)
 
 	firstCleanupTrace := findFirstTraceByName(traces, "cleanup-on-fail")
@@ -394,9 +419,8 @@ func TestWorkflowFailureIgnore(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	err := r.Run(t.Context())
+	assert.NoError(t, r.Run(t.Context()), "pipeline should succeed when failing step has failure=ignore")
 
-	assert.NoError(t, err, "pipeline should succeed when failing step has failure=ignore")
 	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "build"), "build step should run after ignored failure")
 
 	last := findLastTraceByName(getTracerStates(tracer), "build")
@@ -422,9 +446,8 @@ func TestWorkflowFailureIgnoreDoesNotSetWorkflowError(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	err := r.Run(t.Context())
+	assert.NoError(t, r.Run(t.Context()))
 
-	assert.NoError(t, err)
 	traces := getTracerStates(tracer)
 	firstDeployTrace := findFirstTraceByName(traces, "deploy")
 	lastDeployTrace := findLastTraceByName(traces, "deploy")
@@ -509,9 +532,8 @@ func TestWorkflowParallelStepsInStage(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	err := r.Run(t.Context())
+	assert.NoError(t, r.Run(t.Context()))
 
-	assert.NoError(t, err)
 	assert.Len(t, getTracerStates(tracer), 10)
 }
 
@@ -532,9 +554,8 @@ func TestWorkflowParallelStepOneFailsOthersComplete(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	err := r.Run(t.Context())
+	assert.Error(t, r.Run(t.Context()))
 
-	assert.Error(t, err)
 	assert.Len(t, getTracerStates(tracer), 4, "both parallel steps should complete and be traced")
 
 	lastFast := findLastTraceByName(getTracerStates(tracer), "test-fast")
@@ -563,9 +584,8 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	err := r.Run(t.Context())
+	assert.Error(t, r.Run(t.Context()))
 
-	assert.Error(t, err)
 	deployTrace := findFirstTraceByName(getTracerStates(tracer), "build")
 	require.NotNil(t, deployTrace)
 	assert.EqualValues(t, backend_types.State{}, deployTrace.CurrStepState)
@@ -648,9 +668,8 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	err := r.Run(t.Context())
+	assert.Error(t, r.Run(t.Context()))
 
-	assert.Error(t, err)
 	traces := getTracerStates(tracer)
 
 	assert.NotNil(t, findStartedTrace(traces, "notify"), "notify (OnFailure) should have started")
@@ -1289,7 +1308,7 @@ func TestWorkflowFailingServiceDoesNotFailWorkflow(t *testing.T) {
 					cmdStep("db", withService(), withExitCode(1)),
 					cmdStep("build"),
 				}},
-				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy", withSleep("120ms"))}},
 			},
 		},
 		dummy.New(),
@@ -1341,7 +1360,7 @@ func TestWorkflowFailingDetachedStepDoesNotFailWorkflow(t *testing.T) {
 					cmdStep("background-worker", withDetached(), withExitCode(2)),
 					cmdStep("main-build"),
 				}},
-				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("deploy", withSleep("120ms"))}},
 			},
 		},
 		dummy.New(),
@@ -1366,4 +1385,77 @@ func TestWorkflowFailingDetachedStepDoesNotFailWorkflow(t *testing.T) {
 		"deploy must run when only a detached worker failed")
 	assert.True(t, deployExit.CurrStepState.Exited)
 	assert.Equal(t, 0, deployExit.CurrStepState.ExitCode)
+}
+
+// TestWorkflowUnboundedServiceDoesNotHang asserts that when all normal steps
+// have finished, a long-running service does NOT keep the workflow blocked
+// forever. The runtime must tear the service down on its own (the whole point
+// of declaring a step as a service is that it runs alongside the build, not
+// that the build waits for it).
+//
+// Regression for https://github.com/woodpecker-ci/woodpecker/commit/4dd3be7f96
+// which moved the upload waitgroup from per-upload (logger/tracer) to
+// per-detached-goroutine. The detached goroutine wraps WaitStep, which on
+// services blocks until the workflow context is canceled — so the workflow
+// hangs waiting for its own service to exit.
+func TestWorkflowUnboundedServiceDoesNotHang(t *testing.T) {
+	t.Parallel()
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("db", withUnboundedService()),
+					cmdStep("build"),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("test")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	// Use a deadline well below the dummy backend's testServiceTimeout (1s) so
+	// that if this test "passes" it's because the runtime tore the service down,
+	// not because dummy's safety timeout fired.
+	done := make(chan error, 1)
+	go func() { done <- r.Run(t.Context()) }()
+
+	select {
+	case err := <-done:
+		assert.NoError(t, err)
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("workflow hung: runtime did not tear down the unbounded service after normal steps finished")
+	}
+}
+
+// TestWorkflowUnboundedDetachedDoesNotHang is the same as the service test but
+// for plain detached steps (Detached=true, Type=commands). The bug is the same
+// — a long-running detached step also pins the upload waitgroup.
+func TestWorkflowUnboundedDetachedDoesNotHang(t *testing.T) {
+	t.Parallel()
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("background-worker", withUnboundedDetached()),
+					cmdStep("build"),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("test")}},
+			},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+	)
+
+	done := make(chan error, 1)
+	go func() { done <- r.Run(t.Context()) }()
+
+	select {
+	case err := <-done:
+		assert.NoError(t, err)
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("workflow hung: runtime did not tear down the unbounded detached step after normal steps finished")
+	}
 }
