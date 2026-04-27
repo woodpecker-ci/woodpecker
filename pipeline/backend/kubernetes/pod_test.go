@@ -1210,3 +1210,110 @@ func TestPodAffinityStepOverridesAgent(t *testing.T) {
 	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expected)
 }
+
+func TestInitContainer(t *testing.T) {
+	const expected = `
+	{
+		"name": "init-wp-01he8bebctabr3kgk0qj36d2me-0",
+		"image": "busybox:stable-musl",
+		"imagePullPolicy": "Always",
+		"args": [
+			"mkdir",
+			"-p",
+			"/woodpecker/src/github.com/woodpecker-ci/woodpecker"
+		],
+		"resources": {
+			"requests": {
+				"cpu": "5m",
+				"memory": "5Mi"
+			},
+			"limits": {
+				"cpu": "5m",
+				"memory": "5Mi"
+			}
+		},
+		"securityContext": {
+			"allowPrivilegeEscalation": false,
+			"capabilities": {"drop": ["ALL"]}
+		},
+		"volumeMounts": [
+			{
+				"name": "workspace",
+				"mountPath": "/woodpecker/src"
+			}
+		]
+	}`
+
+	pod, err := mkPod(&types.Step{
+		Name:       "clone",
+		Image:      "docker.io/woodpeckerci/plugin-git",
+		UUID:       "01he8bebctabr3kgk0qj36d2me-0",
+		WorkingDir: "/woodpecker/src/github.com/woodpecker-ci/woodpecker",
+		Volumes:    []string{"workspace:/woodpecker/src", "other:/other"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(true),
+			RunAsUser:    newInt64(1000),
+		},
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	assert.NotNil(t, pod.Spec.InitContainers)
+	assert.NotEmpty(t, pod.Spec.InitContainers)
+	assert.Len(t, pod.Spec.InitContainers, 1)
+	podJSON, err := json.Marshal(pod.Spec.InitContainers[0])
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestUnrequiredInitContainer(t *testing.T) {
+	createTestPod := func(workingDir string, backendOpts BackendOptions) (*kube_core_v1.Pod, error) {
+		return mkPod(&types.Step{
+			Name:       "init-container-test",
+			Image:      "docker.io/woodpeckerci/plugin-git",
+			UUID:       "01he8bebctabr3kgk0qj36d2me-0",
+			WorkingDir: workingDir,
+			Volumes:    []string{"workspace:/woodpecker/src"},
+		}, &config{
+			Namespace: "woodpecker",
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", backendOpts, taskUUID)
+	}
+	// no security context (pod running as root), does not need init container
+	pod, err := createTestPod("/woodpecker/src/github.com/woodpecker-ci/woodpecker", BackendOptions{})
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.InitContainers)
+
+	// explicit security context requesting root, does not need init container
+	pod, err = createTestPod("/woodpecker/src/github.com/woodpecker-ci/woodpecker", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(false),
+			RunAsUser:    newInt64(0),
+		},
+	})
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.InitContainers)
+
+	// working dir is outside of the workspace volume, does not need init container
+	pod, err = createTestPod("/tmp", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(true),
+			RunAsUser:    newInt64(1000),
+		},
+	})
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.InitContainers)
+
+	// workingDir is exactly the same as the workspace volume mount path, does not need init container
+	pod, err = createTestPod("/woodpecker/src", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(true),
+			RunAsUser:    newInt64(1000),
+		},
+	})
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.InitContainers)
+}
