@@ -105,15 +105,11 @@ export const usePipelineStore = defineStore('pipelines', () => {
   const pipelineFeed = computed(() =>
     [...pipelines.entries()]
       .reduce<PipelineFeed[]>((acc, [_repoId, repoPipelines]) => {
-        const repoPipelinesArray = Array.from(
-          repoPipelines.entries(),
-          ([_pipelineNumber, pipeline]) =>
-            <PipelineFeed>{
-              ...pipeline,
-              repo_id: _repoId,
-              number: _pipelineNumber,
-            },
-        );
+        const repoPipelinesArray = Array.from(repoPipelines.entries(), ([_pipelineNumber, pipeline]) => ({
+          ...pipeline,
+          repo_id: _repoId,
+          number: _pipelineNumber,
+        }));
         return [...acc, ...repoPipelinesArray];
       }, [])
       .sort(comparePipelinesWithStatus)
