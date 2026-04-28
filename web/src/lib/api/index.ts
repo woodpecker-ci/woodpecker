@@ -429,7 +429,7 @@ export default class WoodpeckerClient extends ApiClient {
 
   // eslint-disable-next-line promise/prefer-await-to-callbacks
   on(callback: (data: { pipeline?: Pipeline; repo?: Repo }) => void): { close: () => void } {
-    return this._subscribeWS('/api/stream/events/ws', callback, {
+    return this._subscribeStream('/api/stream/ws/events', '/api/stream/sse/events', callback, {
       reconnect: true,
     });
   }
@@ -441,8 +441,11 @@ export default class WoodpeckerClient extends ApiClient {
     // eslint-disable-next-line promise/prefer-await-to-callbacks
     callback: (data: PipelineLog) => void,
   ): { close: () => void } {
-    return this._subscribeWS(`/api/stream/logs/${repoId}/${pipeline}/${step}/ws`, callback, {
-      reconnect: true,
-    });
+    return this._subscribeStream(
+      `/api/stream/ws/logs/${repoId}/${pipeline}/${step}`,
+      `/api/stream/sse/logs/${repoId}/${pipeline}/${step}`,
+      callback,
+      { reconnect: true },
+    );
   }
 }

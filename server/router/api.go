@@ -249,6 +249,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 		stream := apiBase.Group("/stream")
 		{
+			// Back-compat aliases (no prefix). TODO: remove with 4.0.0
 			stream.GET("/logs/:repo_id/:pipeline/:step_id",
 				session.SetRepo(),
 				session.SetPerm(),
@@ -256,15 +257,25 @@ func apiRoutes(e *gin.RouterGroup) {
 				api.LogStreamSSE)
 			stream.GET("/events", api.EventStreamSSE)
 
-			// WebSocket variants — same payloads as SSE, but each open
-			// connection only consumes one slot in the browser's per-origin
-			// HTTP/1.1 connection budget shared with regular requests.
-			stream.GET("/logs/:repo_id/:pipeline/:step_id/ws",
-				session.SetRepo(),
-				session.SetPerm(),
-				session.MustPull,
-				api.LogStreamWS)
-			stream.GET("/events/ws", api.EventStreamWS)
+			sse := stream.Group("/sse")
+			{
+				sse.GET("/logs/:repo_id/:pipeline/:step_id",
+					session.SetRepo(),
+					session.SetPerm(),
+					session.MustPull,
+					api.LogStreamSSE)
+				sse.GET("/events", api.EventStreamSSE)
+			}
+
+			ws := stream.Group("/ws")
+			{
+				ws.GET("/logs/:repo_id/:pipeline/:step_id",
+					session.SetRepo(),
+					session.SetPerm(),
+					session.MustPull,
+					api.LogStreamWS)
+				ws.GET("/events", api.EventStreamWS)
+			}
 		}
 
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {

@@ -155,6 +155,22 @@ You must configure Apache to set `X-Forwarded-Proto` when using https.
  ProxyPassReverse / http://127.0.0.1:8000/
 ```
 
+The Web UI uses WebSocket connections under `/stream/ws/` for live pipeline
+and log updates (with automatic fallback to Server-Sent Events under
+`/stream/sse/` if the upgrade is blocked). To let the WebSocket upgrade pass
+through, enable `mod_proxy_wstunnel` and add a dedicated `ProxyPass` for the
+WS path **before** the catch-all `ProxyPass /`:
+
+```apacheconf
+ProxyPass /stream/ws/ ws://127.0.0.1:8000/stream/ws/
+ProxyPassReverse /stream/ws/ ws://127.0.0.1:8000/stream/ws/
+
+ProxyPass / http://127.0.0.1:8000/
+ProxyPassReverse / http://127.0.0.1:8000/
+```
+
+Required Apache modules: `proxy`, `proxy_http`, `proxy_wstunnel`.
+
 ### Nginx
 
 This guide provides a basic overview for installing Woodpecker server behind the Nginx web-server. For more advanced configuration options please consult the official Nginx [documentation](https://docs.nginx.com/nginx/admin-guide).
@@ -202,6 +218,53 @@ You must configure the proxy to set `X-Forwarded` proxy headers:
  }
 ```
 
+The Web UI uses WebSocket connections under `/stream/ws/` for live pipeline
+and log updates (with automatic fallback to Server-Sent Events under
+`/stream/sse/` if the upgrade is blocked). To allow the WebSocket upgrade,
+forward the `Upgrade` and `Connection` headers. The standard pattern is a
+top-level `map` plus a dedicated `location`:
+
+```nginx
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 80;
+    server_name woodpecker.example.com;
+
+    location /stream/ws/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400s;
+    }
+
+    location / {
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+
+        proxy_pass http://127.0.0.1:8000;
+        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+
+        chunked_transfer_encoding off;
+    }
+}
+```
+
+The long `proxy_read_timeout` keeps idle WebSocket connections from being
+killed by Nginx's default 60-second read timeout — Woodpecker's keepalive
+ping runs every 30 seconds, but a generous timeout avoids drops if a ping
+is briefly delayed.
+
 ### Caddy
 
 This guide provides a brief overview for installing Woodpecker server behind the [Caddy web-server](https://caddyserver.com/). This is an example caddyfile proxy configuration:
@@ -217,6 +280,10 @@ woodpecker-agent.example.com {
   reverse_proxy h2c://woodpecker-server:9000
 }
 ```
+
+Caddy's `reverse_proxy` directive forwards WebSocket upgrade headers
+automatically, so the WebSocket-based live updates (`/stream/ws/`) work with
+the configuration above without any extra directives.
 
 ### Tunnelmole
 
