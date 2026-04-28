@@ -47,7 +47,9 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend_types.Ste
 	}
 
 	// Set runtime specific step environment
-	r.setStepEnv(step)
+	if err := r.setStepEnv(step); err != nil {
+		return err
+	}
 
 	logger.Debug().Str("step", step.Name).Msg("executing")
 
