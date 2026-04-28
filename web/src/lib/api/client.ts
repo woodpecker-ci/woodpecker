@@ -1,7 +1,16 @@
+import { notify } from '@kyvg/vue3-notification';
+
+import { i18n } from '~/compositions/useI18n';
+
 export interface ApiError {
   status: number;
   message: string;
 }
+
+// Tracks whether we have already shown the user the WS-fallback toast in this
+// session. Without this, every subscription that falls back (global events,
+// each opened log view, ...) would fire its own toast.
+let wsFallbackToastShown = false;
 
 type QueryParams = Record<string, string | number | boolean>;
 
@@ -285,11 +294,16 @@ export default class ApiClient {
     const fallbackToSSE = () => {
       if (closedByUser) return;
 
-      console.warn(
-        `[woodpecker] WebSocket connection to ${wsPath} failed; falling back to SSE at ${ssePath}. ` +
-          `If this happens consistently, your reverse proxy may not be forwarding the WebSocket Upgrade ` +
-          `headers — see the "Reverse Proxy" section of the Woodpecker server docs.`,
-      );
+      // Surface the fallback to the user so they (or whoever runs the
+      // deployment) notice that the WebSocket upgrade is being blocked.
+      if (!wsFallbackToastShown) {
+        wsFallbackToastShown = true;
+        notify({
+          type: 'warn',
+          title: i18n.global.t('live_updates.ws_fallback_title'),
+          text: i18n.global.t('live_updates.ws_fallback_text'),
+        });
+      }
       active = this._subscribeSSE(ssePath, callback, opts);
     };
 
