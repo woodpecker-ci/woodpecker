@@ -52,11 +52,12 @@ type WorkspacesResp struct {
 }
 
 type PipelineStatus struct {
-	State string `json:"state"`
-	Key   string `json:"key"`
-	Name  string `json:"name,omitempty"`
-	URL   string `json:"url"`
-	Desc  string `json:"description,omitempty"`
+	State   string `json:"state"`
+	Key     string `json:"key"`
+	Name    string `json:"name,omitempty"`
+	URL     string `json:"url"`
+	Desc    string `json:"description,omitempty"`
+	Refname string `json:"refname,omitempty"`
 }
 
 type Email struct {

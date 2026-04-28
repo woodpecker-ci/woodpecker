@@ -54,7 +54,8 @@
   "pnpm": {
     "overrides": {
       "serialize-javascript": "^7.0.3",
-      "follow-redirects": "^1.16.0"
+      "follow-redirects": "^1.16.0",
+      "uuid": "^14.0.0"
     }
   }
 }
