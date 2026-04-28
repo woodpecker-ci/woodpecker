@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @bclermont, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rhafer, @samoli, @savv, @stardothosting, @utafrali
+@6543, @Aex12, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @bclermont, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rhafer, @samoli, @savv, @stardothosting, @utafrali
 
 ### 🔒 Security
 
@@ -26,6 +26,8 @@
 
 ### 📈 Enhancement
 
+- Kubernetes: precreate workingDir as nonroot when required [[#6322](https://github.com/woodpecker-ci/woodpecker/pull/6322)]
+- Kubernetes: Support allowPrivilegeEscalation and capabilities backend_options [[#6307](https://github.com/woodpecker-ci/woodpecker/pull/6307)]
 - Refactor: remove Auth() from Forge interface [[#6505](https://github.com/woodpecker-ci/woodpecker/pull/6505)]
 - Move wait for log uploads logic out of logger and tracer into pipeline runtime [[#6471](https://github.com/woodpecker-ci/woodpecker/pull/6471)]
 - Make agent reconnect retry timeout configurable [[#6470](https://github.com/woodpecker-ci/woodpecker/pull/6470)]
