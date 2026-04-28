@@ -50,7 +50,7 @@ var wsAcceptOptions = &websocket.AcceptOptions{
 //	@Summary		Stream events like pipeline updates over WebSocket
 //	@Description	WebSocket variant of /stream/events. Each text frame contains the
 //	@Description	same JSON payload that the SSE endpoint emits in `data:` lines.
-//	@Router			/stream/events/ws [get]
+//	@Router			/stream/ws/events [get]
 //	@Produce		json
 //	@Success		101
 //	@Tags			Events
@@ -136,7 +136,7 @@ func EventStreamWS(c *gin.Context) {
 // LogStreamWS
 //
 //	@Summary	Stream logs of a pipeline step over WebSocket
-//	@Router		/stream/logs/{repo_id}/{pipeline}/{step_id}/ws [get]
+//	@Router		/stream/ws/logs/{repo_id}/{pipeline}/{step_id} [get]
 //	@Produce	json
 //	@Success	101
 //	@Tags		Pipeline logs

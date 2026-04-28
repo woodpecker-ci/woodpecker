@@ -4151,7 +4151,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/events": {
+        "/stream/sse/events": {
             "get": {
                 "description": "With quic and http2 support",
                 "produces": [
@@ -4168,24 +4168,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/events/ws": {
-            "get": {
-                "description": "WebSocket variant of /stream/events. Each text frame contains the\nsame JSON payload that the SSE endpoint emits in ` + "`" + `data:` + "`" + ` lines.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Events"
-                ],
-                "summary": "Stream events like pipeline updates over WebSocket",
-                "responses": {
-                    "101": {
-                        "description": "Switching Protocols"
-                    }
-                }
-            }
-        },
-        "/stream/logs/{repo_id}/{pipeline}/{step_id}": {
+        "/stream/sse/logs/{repo_id}/{pipeline}/{step_id}": {
             "get": {
                 "produces": [
                     "text/plain"
@@ -4224,7 +4207,24 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/logs/{repo_id}/{pipeline}/{step_id}/ws": {
+        "/stream/ws/events": {
+            "get": {
+                "description": "WebSocket variant of /stream/events. Each text frame contains the\nsame JSON payload that the SSE endpoint emits in ` + "`" + `data:` + "`" + ` lines.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Stream events like pipeline updates over WebSocket",
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols"
+                    }
+                }
+            }
+        },
+        "/stream/ws/logs/{repo_id}/{pipeline}/{step_id}": {
             "get": {
                 "produces": [
                     "application/json"
