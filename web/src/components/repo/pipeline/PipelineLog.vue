@@ -101,7 +101,8 @@
       </div>
 
       <div class="text-wp-text-alt-100 m-auto text-xl">
-        <span v-if="step?.state === 'skipped'">{{ $t('repo.pipeline.actions.canceled') }}</span>
+        <span v-if="step?.state === 'canceled'">{{ $t('repo.pipeline.actions.canceled') }}</span>
+        <span v-else-if="step?.state === 'skipped'">{{ $t('repo.pipeline.actions.skipped') }}</span>
         <span v-else-if="!step?.started">{{ $t('repo.pipeline.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
         <div v-else-if="log?.length === 0">{{ $t('repo.pipeline.no_logs') }}</div>
@@ -125,7 +126,6 @@ import '~/style/console.css';
 import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
-import { debounce } from 'lodash';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -133,9 +133,11 @@ import { useRoute } from 'vue-router';
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import { debounce } from '~/lib/utils';
 
 interface LogLine {
   index: number;
@@ -174,18 +176,30 @@ const fullscreen = ref(false);
 const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(
   () =>
-    // we do not have logs for skipped steps
-    repo?.value && pipeline.value && step.value && step.value.state !== 'skipped',
+    // we do not have logs for skipped/canceled steps
+    repo?.value && pipeline.value && step.value && step.value.state !== 'skipped' && step.value.state !== 'canceled',
 );
-const autoScroll = useStorage('woodpecker:log-auto-scroll', false);
+const autoScroll = useStorage('woodpecker:log-auto-scroll', true);
 const showActions = ref(false);
 const downloadInProgress = ref(false);
 const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
-const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
+const config = useConfig();
+
+const maxLineCount = config.maxPipelineLogLineCount; // TODO(2653): implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
+
+const urlRegex = /https?:\/\/\S+/g;
+
+function isScrolledToBottom(): boolean {
+  if (!consoleElement.value) {
+    return false;
+  }
+  // we use 5 as threshold
+  return consoleElement.value.scrollHeight - consoleElement.value.scrollTop - consoleElement.value.clientHeight < 5;
+}
 
 function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
@@ -196,7 +210,6 @@ function formatTime(time?: number): string {
 }
 
 function processText(text: string): string {
-  const urlRegex = /https?:\/\/\S+/g;
   let txt = ansiUp.value.ansi_to_html(`${decode(text)}\n`);
   txt = txt.replace(
     urlRegex,
@@ -259,7 +272,7 @@ const flushLogs = debounce((scroll: boolean) => {
 
   if (route.hash.length > 0) {
     nextTick(() => document.getElementById(route.hash.substring(1))?.scrollIntoView());
-  } else if (scroll && autoScroll.value) {
+  } else if (scroll && autoScroll.value && isScrolledToBottom()) {
     scrollDown();
   }
 }, 500);
@@ -383,7 +396,7 @@ watch(stepSlug, async () => {
 
 watch(step, async (newStep, oldStep) => {
   if (oldStep?.name === newStep?.name) {
-    if (oldStep?.finished !== newStep?.finished && autoScroll.value) {
+    if (oldStep?.finished !== newStep?.finished && autoScroll.value && isScrolledToBottom()) {
       scrollDown();
     }
 

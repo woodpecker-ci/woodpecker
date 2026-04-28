@@ -8,7 +8,7 @@
 ## Addons and extensions
 
 If you are wondering whether your contribution will be accepted to be merged in the Woodpecker core, or whether it's better to write an
-[addon](../30-administration/10-configuration/100-addons.md), [extension](../30-administration/10-configuration/10-server.md#external-configuration-api) or an
+[addon](../30-administration/10-configuration/100-addons.md), [extension](../20-usage/72-extensions/40-configuration-extension.md) or an
 [external custom backend](../30-administration/10-configuration/11-backends/50-custom.md), please check these points:
 
 - Is your change very specific to your setup and unlikely to be used by anyone else?

@@ -36,7 +36,38 @@ var (
 
 	// ErrTaskExpired indicates a running task exceeded its lease/deadline and was resubmitted.
 	ErrTaskExpired = errors.New("queue: task expired")
+
+	// ErrWorkerKicked worker of an agent got kicked.
+	ErrWorkerKicked = errors.New("worker was kicked")
 )
+
+// ErrExternal wraps an external error.
+type ErrExternal struct {
+	err error
+}
+
+func (e *ErrExternal) Error() string {
+	return fmt.Sprintf("external error: %s", e.err)
+}
+
+// Unwrap allows errors.Is and errors.As to work with the wrapped error.
+func (e *ErrExternal) Unwrap() error {
+	return e.err
+}
+
+// Is allows errors.Is to match against ErrExternal types.
+func (e *ErrExternal) Is(target error) bool {
+	_, ok := target.(*ErrExternal)
+	return ok
+}
+
+// NewErrExternal wraps an error as external one so queue can filter it out if needed.
+func NewErrExternal(err error) error {
+	if err == nil {
+		return nil
+	}
+	return &ErrExternal{err: err}
+}
 
 // InfoT provides runtime information.
 type InfoT struct {
@@ -93,13 +124,12 @@ type Queue interface {
 	// Error signals the task is done with an error.
 	Error(c context.Context, id string, err error) error
 
-	// ErrorAtOnce signals multiple done are complete with an error.
+	// ErrorAtOnce signals multiple tasks are done and complete with an error.
+	// If still pending they will just get removed from the queue.
 	ErrorAtOnce(c context.Context, ids []string, err error) error
 
-	// EvictAtOnce removes multiple pending tasks from the queue.
-	EvictAtOnce(c context.Context, ids []string) error
-
 	// Wait waits until the task is complete.
+	// Also signals via error ErrCancel if workflow got canceled.
 	Wait(c context.Context, id string) error
 
 	// Info returns internal queue information.

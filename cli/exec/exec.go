@@ -23,6 +23,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 
 	"codeberg.org/6543/xyaml"
@@ -36,16 +37,18 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
-	backend_docker "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
-	backend_kubernetes "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
-	backend_local "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
-	pipelineLog "go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
+	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
+	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
@@ -56,13 +59,13 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(flags, backend_docker.Flags, backend_kubernetes.Flags, backend_local.Flags),
+	Flags:     slices.Concat(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
 var backends = []backend_types.Backend{
-	backend_kubernetes.New(),
-	backend_docker.New(),
-	backend_local.New(),
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
 }
 
 func run(ctx context.Context, c *cli.Command) error {
@@ -132,7 +135,7 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string, singleE
 
 	// if we use the local backend we should signal to run at $repoPath
 	if c.String("backend-engine") == "local" {
-		backend_local.CLIWorkaroundExecAtDir = repoPath
+		local.CLIWorkaroundExecAtDir = repoPath
 	}
 
 	axes, err := matrix.ParseString(string(dat))
@@ -318,12 +321,10 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		fmt.Printf("ctrl+c received, terminating current pipeline '%s'\n", confStr)
 	})
 
-	return pipeline.New(compiled,
-		pipeline.WithContext(pipelineCtx), //nolint:contextcheck
-		pipeline.WithTracer(pipeline.DefaultTracer),
-		pipeline.WithLogger(defaultLogger),
-		pipeline.WithBackend(backendEngine),
-		pipeline.WithDescription(map[string]string{
+	return pipeline_runtime.New(compiled, backendEngine,
+		pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
+		pipeline_runtime.WithLogger(defaultLogger),
+		pipeline_runtime.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
 	).Run(ctx)
@@ -348,7 +349,7 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
+var defaultLogger = logging.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
 	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipelineLog.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
+	return pipeline_utils.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
 })

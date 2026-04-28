@@ -3,8 +3,7 @@
 Woodpecker provides a [Helm chart](https://github.com/woodpecker-ci/helm) for Kubernetes environments:
 
 ```bash
-helm repo add woodpecker oci://ghcr.io/woodpecker-ci/helm
-helm install woodpecker woodpecker/woodpecker
+helm install woodpecker oci://ghcr.io/woodpecker-ci/helm/woodpecker --version <VERSION>
 ```
 
 ## Metrics

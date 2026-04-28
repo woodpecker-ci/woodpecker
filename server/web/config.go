@@ -40,13 +40,14 @@ func Config(c *gin.Context) {
 	}
 
 	configData := map[string]any{
-		"user":                   user,
-		"csrf":                   csrf,
-		"version":                version.String(),
-		"skip_version_check":     server.Config.WebUI.SkipVersionCheck,
-		"root_path":              server.Config.Server.RootPath,
-		"enable_swagger":         server.Config.WebUI.EnableSwagger,
-		"user_registered_agents": !server.Config.Agent.DisableUserRegisteredAgentRegistration,
+		"user":                        user,
+		"csrf":                        csrf,
+		"version":                     version.String(),
+		"skip_version_check":          server.Config.WebUI.SkipVersionCheck,
+		"root_path":                   server.Config.Server.RootPath,
+		"enable_swagger":              server.Config.WebUI.EnableSwagger,
+		"user_registered_agents":      !server.Config.Agent.DisableUserRegisteredAgentRegistration,
+		"max_pipeline_log_line_count": server.Config.WebUI.MaxPipelineLogLineCount,
 	}
 
 	// default func map with json parser.
@@ -81,4 +82,5 @@ window.WOODPECKER_ROOT_PATH = "{{ .root_path }}";
 window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};
 window.WOODPECKER_SKIP_VERSION_CHECK = {{ .skip_version_check }}
 window.WOODPECKER_USER_REGISTERED_AGENTS = {{ .user_registered_agents }}
+window.WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT = {{ .max_pipeline_log_line_count }}
 `

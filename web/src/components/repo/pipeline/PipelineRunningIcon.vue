@@ -27,7 +27,7 @@ import WoodpeckerIcon from '~/assets/woodpecker.svg?component';
   }
 }
 
-.woodpecker ::v-deep(path) {
+.woodpecker :deep(path) {
   animation: peck 1s ease infinite;
   @apply fill-wp-text-100;
 }

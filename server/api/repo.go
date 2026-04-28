@@ -29,6 +29,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -55,6 +56,8 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, user)
+
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
 	if !forgeRemoteID.IsValid() {
 		c.String(http.StatusBadRequest, "No forge_remote_id provided")
@@ -66,7 +69,7 @@ func PostRepo(c *gin.Context) {
 	if enabledOnce && repo.IsActive {
 		c.String(http.StatusConflict, "Repository is already active.")
 		return
-	} else if err != nil && !errors.Is(err, types.RecordNotExist) {
+	} else if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		msg := "could not get repo by remote id from store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
@@ -122,13 +125,13 @@ func PostRepo(c *gin.Context) {
 	// find org of repo
 	var org *model.Org
 	org, err = _store.OrgFindByName(repo.Owner, user.ForgeID)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// create an org if it doesn't exist yet
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		org, err = _forge.Org(c, user, repo.Owner)
 		if err != nil {
 			msg := fmt.Sprintf("Organization %s not found in DB. Attempting to create new one.", repo.Owner)
@@ -181,6 +184,10 @@ func PostRepo(c *gin.Context) {
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {
+		if errors.Is(err, types.ErrInsertDuplicateDetected) {
+			c.String(http.StatusConflict, "Repository already exists in Woodpecker. Remove the stale repository entry and try again.")
+			return
+		}
 		msg := "could not create/update repo in store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
@@ -191,7 +198,6 @@ func PostRepo(c *gin.Context) {
 	repo.Perm.Synced = time.Now().Unix()
 	repo.Perm.UserID = user.ID
 	repo.Perm.RepoID = repo.ID
-	repo.Perm.Repo = repo
 	err = _store.PermUpsert(repo.Perm)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -228,8 +234,14 @@ func PatchRepo(c *gin.Context) {
 	}
 
 	if in.Trusted != nil {
-		if (*in.Trusted.Network != repo.Trusted.Network || *in.Trusted.Volumes != repo.Trusted.Volumes || *in.Trusted.Security != repo.Trusted.Security) && !user.Admin {
+		// if user is not admin
+		if !user.Admin &&
+			// and some trusted settings got changed
+			((in.Trusted.Network != nil && *in.Trusted.Network != repo.Trusted.Network) ||
+				(in.Trusted.Volumes != nil && *in.Trusted.Volumes != repo.Trusted.Volumes) ||
+				(in.Trusted.Security != nil && *in.Trusted.Security != repo.Trusted.Security)) {
 			log.Trace().Msgf("user '%s' wants to change trusted without being an instance admin", user.Login)
+			// return error
 			c.String(http.StatusForbidden, "Insufficient privileges")
 			return
 		}
@@ -286,6 +298,24 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.ConfigExtensionEndpoint != nil {
 		repo.ConfigExtensionEndpoint = *in.ConfigExtensionEndpoint
+	}
+	if in.ConfigExtensionExclusive != nil {
+		repo.ConfigExtensionExclusive = *in.ConfigExtensionExclusive
+	}
+	if in.ConfigExtensionNetrc != nil {
+		repo.ConfigExtensionNetrc = *in.ConfigExtensionNetrc
+	}
+	if in.RegistryExtensionEndpoint != nil {
+		repo.RegistryExtensionEndpoint = *in.RegistryExtensionEndpoint
+	}
+	if in.RegistryExtensionNetrc != nil {
+		repo.RegistryExtensionNetrc = *in.RegistryExtensionNetrc
+	}
+	if in.SecretExtensionEndpoint != nil {
+		repo.SecretExtensionEndpoint = *in.SecretExtensionEndpoint
+	}
+	if in.SecretExtensionNetrc != nil {
+		repo.SecretExtensionNetrc = *in.SecretExtensionNetrc
 	}
 
 	err := _store.UpdateRepo(repo)
@@ -388,8 +418,12 @@ func GetRepoBranches(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, repoUser)
+
 	branches, err := _forge.Branches(c, repoUser, repo, session.Pagination(c))
-	if err != nil {
+	if errors.Is(err, forge_types.ErrNotImplemented) {
+		log.Debug().Msg("Could not fetch repo branch list as forge adapter did not implement it")
+	} else if err != nil {
 		log.Error().Err(err).Msg("failed to load branches")
 		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
 		return
@@ -428,7 +462,9 @@ func GetRepoPullRequests(c *gin.Context) {
 	forge.Refresh(c, _forge, _store, repoUser)
 
 	prs, err := _forge.PullRequests(c, repoUser, repo, session.Pagination(c))
-	if err != nil {
+	if errors.Is(err, forge_types.ErrNotImplemented) {
+		log.Debug().Msg("Could not fetch repo pull-request list as forge adapter did not implement it")
+	} else if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -457,9 +493,19 @@ func DeleteRepo(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, user)
+
 	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
+		log.Error().Err(err).Msgf("could not deactivate repo [%d] on forge", repo.ID)
+
+		// in case we want to delete the repo on our side we should not worry to much on the forge side
+		// also if we get signalized that the repo on the forge is gone we can just ignore that
+		if errors.Is(err, forge_types.ErrRepoNotFound) || remove {
+			log.Debug().Msg("ignore deactivating repo on forge")
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 	}
 
 	if remove {
@@ -522,6 +568,8 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
+	forge.Refresh(c, _forge, _store, user)
+
 	to, exists := c.GetQuery("to")
 	if !exists {
 		err := fmt.Errorf("missing required to query value")
@@ -559,6 +607,9 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 	repo.Perm = from.Perm
+	repo.Perm.Synced = time.Now().Unix()
+	repo.Perm.UserID = user.ID
+	repo.Perm.RepoID = repo.ID
 	errStore = _store.PermUpsert(repo.Perm)
 	if errStore != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errStore)
@@ -695,9 +746,22 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 
 	from, err := _forge.Repo(c, repoUser, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
-		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
-		return err
+		// If we have valid ForgeRemoteID and can not find the repo,
+		// we assume the repo was deleted and try to get a new one if it was re-created.
+		if errors.Is(err, forge_types.ErrRepoNotFound) && repo.ForgeRemoteID.IsValid() {
+			from, err = _forge.Repo(c, repoUser, "", repo.Owner, repo.Name)
+			if err == nil {
+				log.Debug().Str("repoFullName", repo.FullName).
+					Str("old ForgeRemoteID", string(repo.ForgeRemoteID)).Str("new ForgeRemoteID", string(from.ForgeRemoteID)).
+					Msgf("RepoRepair detected remote repo ID change and updated it")
+			}
+		}
 	}
+	if err != nil {
+		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
+		return fmt.Errorf("fetching repo from forge: %w", err)
+	}
+
 	from.ForgeID = repo.ForgeID
 
 	if repo.FullName != from.FullName {
@@ -714,9 +778,10 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 	}
 
 	if updatePermissions {
-		repo.Perm.Pull = from.Perm.Pull
-		repo.Perm.Push = from.Perm.Push
-		repo.Perm.Admin = from.Perm.Admin
+		repo.Perm = from.Perm
+		repo.Perm.Synced = time.Now().Unix()
+		repo.Perm.UserID = repoUser.ID
+		repo.Perm.RepoID = repo.ID
 		if err := _store.PermUpsert(repo.Perm); err != nil {
 			return err
 		}
@@ -733,7 +798,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 func repairRepoUser(c *gin.Context, repo *model.Repo, _store store.Store) (*model.User, error) {
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
+		if errors.Is(err, types.ErrRecordNotExist) {
 			oldUserID := repo.UserID
 			sessionUser := session.User(c)
 			repo.UserID = sessionUser.ID

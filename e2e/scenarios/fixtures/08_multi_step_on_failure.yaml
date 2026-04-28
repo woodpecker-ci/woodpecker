@@ -1,0 +1,21 @@
+skip_clone: true
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+    environment:
+      STEP_EXIT_CODE: '1'
+
+  - name: always-cleanup
+    image: dummy
+    commands:
+      - echo cleaning up
+    when:
+      - status: [success, failure]
+
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying

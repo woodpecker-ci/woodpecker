@@ -21,7 +21,10 @@ import (
 	"strings"
 )
 
-var ErrNotImplemented = errors.New("not implemented")
+var (
+	ErrNotImplemented = errors.New("not implemented")
+	ErrRepoNotFound   = errors.New("repo not found")
+)
 
 type ErrIgnoreEvent struct {
 	Event  string

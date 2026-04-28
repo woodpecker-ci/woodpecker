@@ -88,7 +88,7 @@ type (
 	RepoPatch struct {
 		Config *string `json:"config_file,omitempty"`
 		// Deprecated: use Trusted (broken - only exists for backwards compatibility)
-		IsTrusted       *bool                      `json:"-,omitempty"`
+		IsTrusted       *bool                      `json:"-"`
 		Trusted         *TrustedConfigurationPatch `json:"trusted,omitempty"`
 		RequireApproval *ApprovalMode              `json:"require_approval,omitempty"`
 		Timeout         *int64                     `json:"timeout,omitempty"`
@@ -183,6 +183,7 @@ type (
 		Value  string   `json:"value,omitempty"`
 		Images []string `json:"images"`
 		Events []string `json:"events"`
+		Note   string   `json:"note"`
 	}
 
 	// Feed represents an item in the user's feed or timeline.
@@ -256,6 +257,7 @@ type (
 		Schedule  string `json:"schedule"`
 		Created   int64  `json:"created"`
 		Branch    string `json:"branch"`
+		Enabled   bool   `json:"enabled"`
 	}
 
 	// PipelineOptions is the JSON data for creating a new pipeline.

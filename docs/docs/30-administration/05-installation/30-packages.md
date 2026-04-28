@@ -92,6 +92,7 @@ Woodpecker itself is not responsible for creating these packages. Please reach o
 - [YunoHost](https://apps.yunohost.org/app/woodpecker)
 - [Cloudron](https://www.cloudron.io/store/org.woodpecker_ci.cloudronapp.html)
 - [Easypanel](https://easypanel.io/docs/templates/woodpeckerci)
+- [Homebrew](https://formulae.brew.sh/formula/woodpecker-cli) (CLI only)
 
 ### NixOS
 

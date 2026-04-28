@@ -7,6 +7,12 @@ export interface PipelineError<D = unknown> {
   is_warning: boolean;
 }
 
+export interface CancelInfo {
+  canceled_by_user: string;
+  canceled_by_step: string;
+  superseded_by: number;
+}
+
 // A pipeline for a repository.
 export interface Pipeline {
   id: number;
@@ -87,6 +93,10 @@ export interface Pipeline {
   workflows?: PipelineWorkflow[];
 
   changed_files?: string[];
+
+  cancel_info: CancelInfo;
+
+  version: string;
 }
 
 export type PipelineStatus =
@@ -99,7 +109,8 @@ export type PipelineStatus =
   | 'running'
   | 'skipped'
   | 'started'
-  | 'success';
+  | 'success'
+  | 'canceled';
 
 export interface PipelineWorkflow {
   id: number;

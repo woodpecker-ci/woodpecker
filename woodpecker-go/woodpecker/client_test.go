@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_LogLevel(t *testing.T) {
@@ -30,9 +31,7 @@ func Test_LogLevel(t *testing.T) {
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			var ll LogLevel
-			if !assert.NoError(t, json.NewDecoder(r.Body).Decode(&ll)) {
-				return
-			}
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&ll))
 			logLevel = ll.Level
 		}
 

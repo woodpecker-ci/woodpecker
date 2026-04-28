@@ -15,10 +15,11 @@
 package pipeline
 
 import (
+	"context"
 	"encoding/json"
-	"strconv"
+	"fmt"
 
-	"github.com/rs/zerolog/log"
+	"github.com/oklog/ulid/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -26,23 +27,23 @@ import (
 )
 
 // publishToTopic publishes message to UI clients.
-func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) {
-	message := pubsub.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsSCMPrivate),
-		},
-	}
-	pipelineCopy := *pipeline
-
-	var err error
+func publishToTopic(c context.Context, pipeline *model.Pipeline, repo *model.Repo) (err error) {
+	message := pubsub.Message{ID: ulid.Make().String()}
 	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
-		Pipeline: pipelineCopy,
+		Pipeline: *pipeline,
 	})
 	if err != nil {
-		log.Error().Err(err).Msg("can't marshal JSON")
-		return
+		return fmt.Errorf("can't marshal JSON: %w", err)
 	}
-	server.Config.Services.Pubsub.Publish(message)
+
+	subTopics := make(map[string]struct{})
+	// if repo is public, push to public topic
+	if !repo.IsSCMPrivate {
+		subTopics[pubsub.PublicTopic] = struct{}{}
+	}
+	// publish to repo specific topic
+	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
+
+	return server.Config.Services.Scheduler.Publish(c, subTopics, message)
 }

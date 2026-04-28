@@ -17,9 +17,7 @@ export const useRepoStore = defineStore('repos', () => {
   const ownedRepoIds = ref<number[]>([]);
 
   const ownedRepos = computed(() =>
-    Array.from(repos.entries())
-      .filter(([repoId]) => ownedRepoIds.value.includes(repoId))
-      .map(([, repo]) => repo),
+    [...repos.entries()].filter(([repoId]) => ownedRepoIds.value.includes(repoId)).map(([, repo]) => repo),
   );
 
   function getRepo(repoId: Ref<number>) {

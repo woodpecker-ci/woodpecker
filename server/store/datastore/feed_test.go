@@ -43,7 +43,7 @@ func TestGetPipelineQueue(t *testing.T) {
 
 	assert.NoError(t, store.CreateRepo(repo1))
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+		{UserID: user.ID, RepoID: repo1.ID, Push: true, Admin: false},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
@@ -111,7 +111,7 @@ func TestUserFeed(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo2))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+		{UserID: user.ID, RepoID: repo1.ID, Push: true, Admin: false},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
@@ -167,8 +167,8 @@ func TestRepoListLatest(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo3))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
-		{UserID: user.ID, Repo: repo2, Push: true, Admin: true},
+		{UserID: user.ID, RepoID: repo1.ID, Push: true, Admin: false},
+		{UserID: user.ID, RepoID: repo2.ID, Push: true, Admin: true},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}

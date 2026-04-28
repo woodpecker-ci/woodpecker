@@ -16,11 +16,14 @@ package schema_test
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 )
 
@@ -133,6 +136,13 @@ func TestSchema(t *testing.T) {
 				}
 			} else {
 				assert.NoError(t, err, fmt.Sprintf("Validation failed: %v", configErrors))
+				t.Run("parse", func(t *testing.T) {
+					config, err := io.ReadAll(fi)
+					require.NoError(t, err)
+					parsedConfig, err := yaml.ParseBytes(config)
+					assert.NoError(t, err, "if schema lint passes, we should be able to parse it")
+					assert.NotNil(t, parsedConfig)
+				})
 			}
 		})
 	}

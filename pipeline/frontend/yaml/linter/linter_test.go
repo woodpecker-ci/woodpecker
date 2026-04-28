@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
@@ -87,6 +88,9 @@ steps:
     <<: *base-step
     image: golang:latest
 `,
+	}, {
+		Title: "explicitly privileged container",
+		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
 	}}
 
 	for _, testd := range testdatas {
@@ -178,14 +182,6 @@ func TestLintErrors(t *testing.T) {
 			want: "Specified clone image does not match allow list, netrc is not injected",
 		},
 		{
-			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",
-			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-		},
-		{
-			from: "steps: { build: { image: golang, secrets: [ 'mysql_username' ] } }",
-			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
-		},
-		{
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
 			want: "One or more of the specified dependencies do not exist",
 		},
@@ -193,7 +189,7 @@ func TestLintErrors(t *testing.T) {
 
 	for _, test := range testdata {
 		conf, err := yaml.ParseString(test.from)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      test.from,
@@ -221,10 +217,14 @@ func TestBadHabits(t *testing.T) {
 	}{
 		{
 			from: "steps: { build: { image: golang } }",
-			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
+			want: "Consider adding a `when` block with an `event` filter to this step or the entire workflow",
 		},
 		{
 			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
+			want: "Consider adding a `when` block with an `event` filter to this step or the entire workflow",
+		},
+		{
+			from: "steps: { build: { image: golang, when: [{branch: main}] } }",
 			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
 		},
 	}

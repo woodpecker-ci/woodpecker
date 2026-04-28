@@ -80,7 +80,7 @@ func SetRepo() gin.HandlerFunc {
 			return
 		}
 
-		if errors.Is(err, types.RecordNotExist) {
+		if errors.Is(err, types.ErrRecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
@@ -128,7 +128,6 @@ func SetPerm() gin.HandlerFunc {
 					log.Debug().Msgf("synced user permission for %s %s", user.Login, repo.FullName)
 					_repo.ForgeID = user.ForgeID
 					perm = _repo.Perm
-					perm.Repo = repo
 					perm.RepoID = repo.ID
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()

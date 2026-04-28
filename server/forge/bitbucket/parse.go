@@ -31,7 +31,6 @@ const (
 	hookPullUpdated  = "pullrequest:updated"
 	hookPullMerged   = "pullrequest:fulfilled"
 	hookPullDeclined = "pullrequest:rejected"
-	stateOpen        = "OPEN"
 	stateClosed      = "MERGED"
 	stateDeclined    = "DECLINED"
 )

@@ -16,50 +16,73 @@
 package model
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
 type Pipeline struct {
-	ID                   int64                  `json:"id"                      xorm:"pk autoincr 'id'"`
-	RepoID               int64                  `json:"-"                       xorm:"UNIQUE(s) INDEX 'repo_id'"`
-	Number               int64                  `json:"number"                  xorm:"UNIQUE(s) 'number'"`
-	Author               string                 `json:"author"                  xorm:"INDEX 'author'"`
-	Parent               int64                  `json:"parent"                  xorm:"parent"`
-	Event                WebhookEvent           `json:"event"                   xorm:"event"`
-	EventReason          []string               `json:"event_reason"            xorm:"json 'event_reason'"`
-	Status               StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
-	Errors               []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
-	Created              int64                  `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
-	Updated              int64                  `json:"updated"                 xorm:"'updated' NOT NULL DEFAULT 0 updated"`
-	Started              int64                  `json:"started"                 xorm:"started"`
-	Finished             int64                  `json:"finished"                xorm:"finished"`
-	DeployTo             string                 `json:"deploy_to"               xorm:"deploy"`
-	DeployTask           string                 `json:"deploy_task"             xorm:"deploy_task"`
-	Commit               string                 `json:"commit"                  xorm:"commit"`
-	Branch               string                 `json:"branch"                  xorm:"branch"`
-	Ref                  string                 `json:"ref"                     xorm:"ref"`
-	Refspec              string                 `json:"refspec"                 xorm:"refspec"`
-	Title                string                 `json:"title"                   xorm:"title"`
-	Message              string                 `json:"message"                 xorm:"TEXT 'message'"`
-	Timestamp            int64                  `json:"timestamp"               xorm:"'timestamp'"`
-	Sender               string                 `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Avatar               string                 `json:"author_avatar"           xorm:"varchar(500) avatar"`
-	Email                string                 `json:"author_email"            xorm:"varchar(500) email"`
-	ForgeURL             string                 `json:"forge_url"               xorm:"forge_url"`
-	Reviewer             string                 `json:"reviewed_by"             xorm:"reviewer"`
-	Reviewed             int64                  `json:"reviewed"                xorm:"reviewed"`
-	Workflows            []*Workflow            `json:"workflows,omitempty"     xorm:"-"`
-	ChangedFiles         []string               `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
-	AdditionalVariables  map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
-	PullRequestLabels    []string               `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
-	PullRequestMilestone string                 `json:"pr_milestone,omitempty"  xorm:"pr_milestone"`
-	IsPrerelease         bool                   `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
-	FromFork             bool                   `json:"from_fork,omitempty"     xorm:"from_fork"`
+	ID                   int64                   `json:"id"                      xorm:"pk autoincr 'id'"`
+	RepoID               int64                   `json:"-"                       xorm:"UNIQUE(s) INDEX 'repo_id'"`
+	Number               int64                   `json:"number"                  xorm:"UNIQUE(s) 'number'"`
+	Author               string                  `json:"author"                  xorm:"INDEX 'author'"`
+	Parent               int64                   `json:"parent"                  xorm:"parent"`
+	Event                WebhookEvent            `json:"event"                   xorm:"event"`
+	EventReason          []string                `json:"event_reason"            xorm:"json 'event_reason'"`
+	Status               StatusValue             `json:"status"                  xorm:"INDEX 'status'"`
+	Errors               []*errors.PipelineError `json:"errors"                  xorm:"json 'errors'"`
+	Created              int64                   `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
+	Updated              int64                   `json:"updated"                 xorm:"'updated' NOT NULL DEFAULT 0 updated"`
+	Started              int64                   `json:"started"                 xorm:"started"`
+	Finished             int64                   `json:"finished"                xorm:"finished"`
+	DeployTo             string                  `json:"deploy_to"               xorm:"deploy"`
+	DeployTask           string                  `json:"deploy_task"             xorm:"deploy_task"`
+	Commit               string                  `json:"commit"                  xorm:"commit"`
+	Branch               string                  `json:"branch"                  xorm:"branch"`
+	Ref                  string                  `json:"ref"                     xorm:"ref"`
+	Refspec              string                  `json:"refspec"                 xorm:"refspec"`
+	Title                string                  `json:"title"                   xorm:"title"`
+	Message              string                  `json:"message"                 xorm:"TEXT 'message'"`
+	Timestamp            int64                   `json:"timestamp"               xorm:"'timestamp'"`
+	Sender               string                  `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
+	Avatar               string                  `json:"author_avatar"           xorm:"varchar(500) avatar"`
+	Email                string                  `json:"author_email"            xorm:"varchar(500) email"`
+	ForgeURL             string                  `json:"forge_url"               xorm:"forge_url"`
+	Reviewer             string                  `json:"reviewed_by"             xorm:"reviewer"`
+	Reviewed             int64                   `json:"reviewed"                xorm:"reviewed"`
+	CancelInfo           *CancelInfo             `json:"cancel_info,omitempty"   xorm:"json 'cancel_info'"`
+	Workflows            []*Workflow             `json:"workflows,omitempty"     xorm:"-"`
+	ChangedFiles         []string                `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
+	AdditionalVariables  map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
+	PullRequestLabels    []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
+	PullRequestMilestone string                  `json:"pr_milestone,omitempty"  xorm:"pr_milestone"`
+	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
+	IsPrerelease         bool                    `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
+	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
+	Version              string                  `json:"version"                 xorm:"'version'"`
+}
+
+// APIPipeline TODO remove deprecated properties in next major.
+type APIPipeline struct {
+	*Pipeline
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
 func (Pipeline) TableName() string {
 	return "pipelines"
+}
+
+func (p *Pipeline) ToAPIModel() *APIPipeline {
+	ap := &APIPipeline{
+		Pipeline: p,
+	}
+
+	switch p.Event { //nolint:gocritic
+	case EventCron:
+		ap.Message = p.Cron
+		ap.Sender = p.Cron
+	}
+
+	return ap
 }
 
 type PipelineFilter struct {
@@ -78,10 +101,16 @@ func (p Pipeline) IsMultiPipeline() bool {
 
 // IsPullRequest checks if it's a PR event.
 func (p Pipeline) IsPullRequest() bool {
-	return p.Event == EventPull || p.Event == EventPullClosed || p.Event == EventPullMetadata
+	return metadata.Event(p.Event).IsPull()
 }
 
 type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name	PipelineOptions
+
+type CancelInfo struct {
+	CanceledByUser string `json:"canceled_by_user,omitempty"`
+	SupersededBy   int64  `json:"superseded_by,omitempty"`
+	CanceledByStep string `json:"canceled_by_step,omitempty"`
+} //	@name	CancelInfo

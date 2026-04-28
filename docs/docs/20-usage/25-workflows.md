@@ -97,7 +97,7 @@ The name for a `depends_on` entry is the filename without the path, leading dots
 +  - test
 ```
 
-Workflows that need to run even on failures should set the `runs_on` tag.
+Workflows that need to run even on failures should set the `status` filter.
 
 ```diff
  steps:
@@ -109,8 +109,11 @@ Workflows that need to run even on failures should set the `runs_on` tag.
  depends_on:
    - deploy
 
-+runs_on: [ success, failure ]
++when:
++  - status: [ success, failure ]
 ```
+
+This works just like the [`status` filter for steps](./20-workflow-syntax.md#status).
 
 :::info
 Some workflows don't need the source code, like creating a notification on failure.

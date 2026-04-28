@@ -57,11 +57,11 @@ func (s storage) CreateUser(user *model.User) error {
 	}
 
 	existingOrg, err := s.orgFindByName(sess, org.Name, user.ForgeID)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return fmt.Errorf("failed to check if org exists: %w", err)
 	}
 
-	if !errors.Is(err, types.RecordNotExist) {
+	if !errors.Is(err, types.ErrRecordNotExist) {
 		org = existingOrg
 		org.IsUser = true
 		org.Name = user.Login
@@ -77,8 +77,7 @@ func (s storage) CreateUser(user *model.User) error {
 	}
 	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
-	_, err = sess.Insert(user)
-	return err
+	return wrapInsert(sess.Insert(user))
 }
 
 func (s storage) UpdateUser(user *model.User) error {

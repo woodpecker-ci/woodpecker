@@ -23,26 +23,33 @@ As Woodpecker will pass private information like tokens and will execute the ret
 In addition to the ability to configure the extension per repository, you can also configure a global endpoint in the Woodpecker server configuration. This can be useful if you want to use the extension for all repositories. Be careful if
 you share your Woodpecker server with others as they will also use your configuration extension.
 
-The global configuration will be called before the repository specific configuration extension if both are configured.
+The global configuration will be called before the repository specific configuration extension if both are configured and the repository has not enabled the exclusive setting.
 
 ```ini title="Server"
-WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
+WOODPECKER_CONFIG_EXTENSION_ENDPOINT=https://example.com/ciconfig
 ```
 
 ## How it works
 
 When a pipeline is triggered Woodpecker will fetch the pipeline configuration from the repository, then make a HTTP POST request to the configured extension with a JSON payload containing some data like the repository, pipeline information and the current config files retrieved from the repository. The extension can then send back modified or even new pipeline configurations following Woodpeckers official yaml format that should be used.
 
+You can enable the exclusive setting (both globally and on a per-repo level). Then Woodpecker will only call your extension, but nothing else. This allows you to completely skip the forge. Requests sent to the extension will not have the configuration files added.
+
 ### Request
 
 The extension receives an HTTP POST request with the following JSON payload:
+
+:::info
+The `netrc` field is only included in the request when the global `WOODPECKER_CONFIG_EXTENSION_NETRC` is set to `true` (default: `false`) or the per-repo "Send netrc credentials" is checked.
+:::
 
 ```ts
 class Request {
   repo: Repo;
   pipeline: Pipeline;
-  netrc: Netrc;
-  configuration: {
+  netrc?: Netrc; // only included when netrc sending is enabled (see above)
+  configuration?: {
+    // list of configurations. Not send if there was none.
     name: string; // filename of the configuration file
     data: string; // content of the configuration file
   }[];
@@ -123,12 +130,17 @@ Example request:
     "updated_at": 0,
     "verified": false
   },
-  "configs": [
+  "configuration": [
     {
       "name": ".woodpecker.yaml",
       "data": "steps:\n  - name: backend\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yaml)\"\n"
     }
-  ]
+  ],
+  "netrc": {
+    "machine": "myforge.com",
+    "login": "myUser",
+    "password": "forge-access-token"
+  }
 }
 ```
 
