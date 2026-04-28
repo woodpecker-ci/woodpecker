@@ -255,6 +255,16 @@ func apiRoutes(e *gin.RouterGroup) {
 				session.MustPull,
 				api.LogStreamSSE)
 			stream.GET("/events", api.EventStreamSSE)
+
+			// WebSocket variants — same payloads as SSE, but each open
+			// connection only consumes one slot in the browser's per-origin
+			// HTTP/1.1 connection budget shared with regular requests.
+			stream.GET("/logs/:repo_id/:pipeline/:step_id/ws",
+				session.SetRepo(),
+				session.SetPerm(),
+				session.MustPull,
+				api.LogStreamWS)
+			stream.GET("/events/ws", api.EventStreamWS)
 		}
 
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {
