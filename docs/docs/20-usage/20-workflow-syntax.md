@@ -342,7 +342,7 @@ when:
 
 #### `status`
 
-By default, steps only run when the workflow has succeeded up to that point,  
+By default, steps only run when the workflow has succeeded up to that point,<br>
 which is equivalent to `status: [ success ]`.
 
 The `status` filter lets you override this behavior.
