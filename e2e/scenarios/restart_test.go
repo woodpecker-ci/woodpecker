@@ -39,14 +39,7 @@ func TestRestartPipeline(t *testing.T) {
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	// First run.
-	original, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	original, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create original pipeline")
 	originalFinished := setup.WaitForPipeline(t, env.Store, original.ID)
 	require.Equal(t, model.StatusSuccess, originalFinished.Status, "original should succeed")

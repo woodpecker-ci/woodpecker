@@ -69,6 +69,18 @@ type ServerEnv struct {
 	Manager  services.Manager
 }
 
+func (env *ServerEnv) DummyPipeline(event model.WebhookEvent) *model.Pipeline {
+	return &model.Pipeline{
+		Event:  event,
+		Branch: "main",
+		Commit: &model.Commit{
+			SHA: "deadbeef",
+		},
+		Ref:    "refs/heads/main",
+		Author: env.Fixtures.Owner.Login,
+	}
+}
+
 // StartServer wires up the full in-process server stack:
 //   - in-memory sqlite store (fully migrated) with seeded fixtures
 //   - in-memory queue, pubsub, and logging

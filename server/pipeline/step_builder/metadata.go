@@ -116,20 +116,21 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		EventReason: pipeline.EventReason,
 		ForgeURL:    pipeline.ForgeURL,
 		Commit: metadata.Commit{
-			Sha:     pipeline.Commit.SHA,
-			Ref:     pipeline.Ref,
-			Refspec: pipeline.Refspec,
-			Branch:  pipeline.Branch,
-			Message: pipeline.Commit.Message,
-			Author: metadata.Author{
-				Name:  pipeline.Commit.Author.Name,
-				Email: pipeline.Commit.Author.Email,
-			},
+			Ref:          pipeline.Ref,
+			Refspec:      pipeline.Refspec,
+			Branch:       pipeline.Branch,
 			ChangedFiles: pipeline.ChangedFiles,
 		},
 		Cron:   pipeline.Cron,
 		Author: pipeline.Author,
 		Avatar: pipeline.AuthorAvatar,
+	}
+
+	if pipeline.Commit != nil {
+		metadata.Commit.Sha = pipeline.Commit.SHA
+		metadata.Commit.Message = pipeline.Commit.Message
+		metadata.Commit.Author.Name = pipeline.Commit.Author.Name
+		metadata.Commit.Author.Email = pipeline.Commit.Author.Email
 	}
 
 	if pipeline.PullRequest != nil {
