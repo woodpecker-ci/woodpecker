@@ -86,3 +86,13 @@ Each subcommand is organized into its own package under `cli/<subcommand>/`.
 The `cli/exec` subcommand allows local pipeline execution for testing and development by combining pipeline parsing and execution without requiring a running server or agent.
 
 - `../` = `cli/`
+
+### Engine
+
+The engine is the shared kernel that validates, parses frontend facing config files, enrich it by the provided forge metadata and produce config for the backends to execute on based on that. It also contains the default backend implementations.
+
+#### Runtime
+
+The runtime is the package controlling how a workflow is executed, and can be found at `pipeline/runtime`.
+
+<img src="/svg/woodpecker-workflow-run-flowchart.svg" alt="Pipeline/runtime flow diagram" style="max-width: 600px; width: 100%;" />

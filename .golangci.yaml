@@ -164,6 +164,98 @@ linters:
         - '^\s*TODO:'
       capital: true
       period: true
+    importas:
+      no-extra-aliases: true
+      alias:
+        # stdlib
+        - pkg: log
+          alias: std_log
+
+        # grpc / protobuf
+        - pkg: google.golang.org/grpc/metadata
+          alias: grpc_metadata
+        - pkg: google.golang.org/grpc/credentials
+          alias: grpc_credentials
+        - pkg: google.golang.org/protobuf/proto
+          alias: grpc_proto
+
+        # woodpecker internal
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types
+          alias: backend_types
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/errors
+          alias: pipeline_errors
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime
+          alias: pipeline_runtime
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/utils
+          alias: pipeline_utils
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/store/types
+          alias: store_types
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/forge/types
+          alias: forge_types
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/log
+          alias: service_log
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/rpc
+          alias: server_rpc
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/agent/rpc
+          alias: agent_rpc
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/shared/utils
+          alias: shared_utils
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata
+          alias: pipeline_metadata
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base
+          alias: yaml_base_types
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types
+          alias: yaml_types
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/cron
+          alias: cron_scheduler
+
+        # mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks
+          alias: secret_service_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks
+          alias: registry_service_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/mocks
+          alias: manager_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks
+          alias: forge_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks
+          alias: tracer_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks
+          alias: queue_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/store/mocks
+          alias: store_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks
+          alias: config_service_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks
+          alias: log_mocks
+
+        # kubernetes
+        - pkg: k8s.io/api/core/v1
+          alias: kube_core_v1
+        - pkg: k8s.io/apimachinery/pkg/apis/meta/v1
+          alias: kube_meta_v1
+        - pkg: k8s.io/apimachinery/pkg/api/errors
+          alias: kube_errors
+        - pkg: k8s.io/client-go/tools/clientcmd
+          alias: kube_client_cmd
+
+        # docker
+        - pkg: github.com/docker/cli/cli/config/types
+          alias: docker_config_types
+
+        # misc third-party
+        - pkg: github.com/swaggo/files
+          alias: swaggo_files
+        - pkg: github.com/swaggo/gin-swagger
+          alias: swaggo_gin_swagger
+        - pkg: xorm.io/xorm/log
+          alias: xlog
+        - pkg: github.com/tink-crypto/tink-go/v2/insecurecleartextkeyset
+          alias: insecure_clear_text_keyset
+        - pkg: github.com/migueleliasweb/go-github-mock/src/mock
+          alias: github_mock
+        - pkg: gitlab.com/gitlab-org/api/client-go/v2
+          alias: gitlab
     misspell:
       locale: US
     mnd:

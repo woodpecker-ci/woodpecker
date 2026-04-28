@@ -1,5 +1,73 @@
 # Changelog
 
+## [3.14.0-rc.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0-rc.2) - 2026-04-27
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @LoricAndre, @bclermont, @hhamalai, @lephuongbg, @njaaazi, @rhafer
+
+### 🔒 Security
+
+- docs: bump follow-redirects [[#6441](https://github.com/woodpecker-ci/woodpecker/pull/6441)]
+
+### 📈 Enhancement
+
+- Refactor: remove Auth() from Forge interface [[#6505](https://github.com/woodpecker-ci/woodpecker/pull/6505)]
+- Move wait for log uploads logic out of logger and tracer into pipeline runtime [[#6471](https://github.com/woodpecker-ci/woodpecker/pull/6471)]
+- Make agent reconnect retry timeout configurable [[#6470](https://github.com/woodpecker-ci/woodpecker/pull/6470)]
+- Handle re-created forge repos gracefully [[#6370](https://github.com/woodpecker-ci/woodpecker/pull/6370)]
+- Cleanup server store step interface [[#6476](https://github.com/woodpecker-ci/woodpecker/pull/6476)]
+- Docker/K8s: add config for stop timeout [[#6445](https://github.com/woodpecker-ci/woodpecker/pull/6445)]
+- Docker backend should retry to delete volume on "in use" error [[#6381](https://github.com/woodpecker-ci/woodpecker/pull/6381)]
+
+### 🐛 Bug Fixes
+
+- fix(cli,server): fix trusted flags copy-paste bug and server nil pointer panic [[#6501](https://github.com/woodpecker-ci/woodpecker/pull/6501)]
+- Add refname to bitbucket commit status [[#6482](https://github.com/woodpecker-ci/woodpecker/pull/6482)]
+- Fix send on closed channel panic in SSE stream handlers [[#6456](https://github.com/woodpecker-ci/woodpecker/pull/6456)]
+- Add `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE` config to preserve non-breaking behavior by default [[#6448](https://github.com/woodpecker-ci/woodpecker/pull/6448)]
+- Fix race in pipeline runtime [[#6451](https://github.com/woodpecker-ci/woodpecker/pull/6451)]
+- Fix race in server LogEntry logger [[#6449](https://github.com/woodpecker-ci/woodpecker/pull/6449)]
+- Kubernetes: detached steps are no services [[#6435](https://github.com/woodpecker-ci/woodpecker/pull/6435)]
+
+### 🧪 Tests
+
+- e2e test wait for grpc server teardown and stop agents [[#6479](https://github.com/woodpecker-ci/woodpecker/pull/6479)]
+- Add more test cases for rpc label filter [[#6483](https://github.com/woodpecker-ci/woodpecker/pull/6483)]
+- Fix flaky TestJWTManager [[#6478](https://github.com/woodpecker-ci/woodpecker/pull/6478)]
+- Add e2e pipeline restart test [[#6469](https://github.com/woodpecker-ci/woodpecker/pull/6469)]
+- Init minimal e2e tests [[#6391](https://github.com/woodpecker-ci/woodpecker/pull/6391)]
+- Enhance datastore DB test setup [[#6450](https://github.com/woodpecker-ci/woodpecker/pull/6450)]
+
+### 📚 Documentation
+
+- Lock file maintenance [[#6508](https://github.com/woodpecker-ci/woodpecker/pull/6508)]
+- Update docs npm deps non-major [[#6496](https://github.com/woodpecker-ci/woodpecker/pull/6496)]
+- Add Laravel Forge plugin [[#6491](https://github.com/woodpecker-ci/woodpecker/pull/6491)]
+- Add 'entrypoint' property to service in schema [[#6487](https://github.com/woodpecker-ci/woodpecker/pull/6487)]
+- Lock file maintenance [[#6472](https://github.com/woodpecker-ci/woodpecker/pull/6472)]
+- Update dependency axios to v1.15.1 [[#6468](https://github.com/woodpecker-ci/woodpecker/pull/6468)]
+- Update dependency marked to v18.0.2 [[#6465](https://github.com/woodpecker-ci/woodpecker/pull/6465)]
+- Update docs npm deps non-major [[#6463](https://github.com/woodpecker-ci/woodpecker/pull/6463)]
+
+### 📦️ Dependency
+
+- Update module github.com/google/go-github/v84 to v85 [[#6500](https://github.com/woodpecker-ci/woodpecker/pull/6500)]
+- Update module github.com/getkin/kin-openapi to v0.136.0 [[#6503](https://github.com/woodpecker-ci/woodpecker/pull/6503)]
+- Update woodpeckerci/plugin-git Docker tag to v2.9.0 [[#6499](https://github.com/woodpecker-ci/woodpecker/pull/6499)]
+- Update docker.io/mysql Docker tag to v9.7.0 [[#6498](https://github.com/woodpecker-ci/woodpecker/pull/6498)]
+- Update docker.io/lycheeverse/lychee Docker tag to v0.24.1 [[#6497](https://github.com/woodpecker-ci/woodpecker/pull/6497)]
+- Update golang-packages to v0.36.0 [[#6485](https://github.com/woodpecker-ci/woodpecker/pull/6485)]
+- Update golang-packages [[#6477](https://github.com/woodpecker-ci/woodpecker/pull/6477)]
+- Update pre-commit hook rbubley/mirrors-prettier to v3.8.3 [[#6462](https://github.com/woodpecker-ci/woodpecker/pull/6462)]
+- Update module k8s.io/client-go to v0.35.4 [[#6460](https://github.com/woodpecker-ci/woodpecker/pull/6460)]
+- Update golang-packages [[#6459](https://github.com/woodpecker-ci/woodpecker/pull/6459)]
+- Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.4.5 [[#6447](https://github.com/woodpecker-ci/woodpecker/pull/6447)]
+
+### Misc
+
+- Add s3 cache plugin to docs [[#6467](https://github.com/woodpecker-ci/woodpecker/pull/6467)]
+
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
 
 ### ❤️ Thanks to all contributors! ❤️

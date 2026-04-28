@@ -319,6 +319,16 @@
       "name": "AgentScan",
       "docs": "https://codeberg.org/woodpecker-plugins/agentscan/raw/branch/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "S3 Cache",
+      "docs": "https://codeberg.org/landre/woodpecker-plugins/raw/branch/main/cache/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Laravel Forge",
+      "docs": "https://raw.githubusercontent.com/njaaazi/laravel-forge-woodpecker/main/docs.md",
+      "verified": false
     }
   ]
 }

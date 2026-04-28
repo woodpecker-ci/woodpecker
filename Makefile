@@ -203,8 +203,11 @@ test-ui: ui-dependencies ## Test UI code
 test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
+test-e2e: ## Test by running yaml config and compare expected result
+	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...
+
 .PHONY: test
-test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
+test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests
 
 ##@ Build
 
@@ -334,7 +337,7 @@ release-checksums: ## Create checksums for all release files
 release: release-frontend release-server release-agent release-cli ## Release all binaries
 
 bundle-prepare: ## Prepare the bundles
-	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
+	CGO_ENABLED=0 go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.45.0
 
 bundle-agent: bundle-prepare ## Create bundles for agent
 	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ${DIST_DIR} --packager deb

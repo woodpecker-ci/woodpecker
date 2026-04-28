@@ -17,20 +17,25 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/status"
-	grpcproto "google.golang.org/protobuf/proto"
+	grpc_proto "google.golang.org/protobuf/proto"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 )
+
+var ErrConnectionLost = errors.New("connection to server lost")
 
 const (
 	// Set grpc version on compile time to compare against server version response.
@@ -46,24 +51,59 @@ const (
 )
 
 type client struct {
-	client proto.WoodpeckerClient
-	conn   *grpc.ClientConn
-	logs   chan *proto.LogEntry
+	client             proto.WoodpeckerClient
+	conn               *grpc.ClientConn
+	logs               chan *proto.LogEntry
+	connectionLostAt   time.Time
+	connectionLostLock sync.Mutex
+	// connectionRetryTimeout is the maximum time to wait for a connection to be restored before the agent gives up and exits.
+	connectionRetryTimeout time.Duration
 }
 
 // NewGrpcClient returns a new grpc Client.
-func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn) rpc.Peer {
+func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn, opts ...ClientOption) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
 	client.logs = make(chan *proto.LogEntry, 10) // max memory use: 10 lines * 1 MiB
+
+	for _, opt := range opts {
+		opt(client)
+	}
+
 	go client.processLogs(ctx)
 	return client
 }
 
-func (c *client) Close() error {
-	close(c.logs)
-	return c.conn.Close()
+type ClientOption func(c *client)
+
+func SetConnectionRetryTimeout(d time.Duration) ClientOption {
+	if d == 0 {
+		log.Warn().Msg("connection retry timeout set to infinite")
+	}
+	return func(c *client) {
+		c.connectionRetryTimeout = d
+	}
+}
+
+func (c *client) IsConnected() bool {
+	state := c.conn.GetState()
+	connected := state == connectivity.Ready || state == connectivity.Idle
+	c.connectionLostLock.Lock()
+	defer c.connectionLostLock.Unlock()
+	if !connected && c.connectionLostAt.IsZero() {
+		c.connectionLostAt = time.Now()
+	} else if connected && !c.connectionLostAt.IsZero() {
+		c.connectionLostAt = time.Time{}
+	}
+	return connected
+}
+
+func (c *client) shouldGiveUp() bool {
+	if c.connectionRetryTimeout == 0 || c.connectionLostAt.IsZero() {
+		return false
+	}
+	return time.Since(c.connectionLostAt) > c.connectionRetryTimeout
 }
 
 func (c *client) newBackOff() backoff.BackOff {
@@ -94,6 +134,16 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 	req.Filter = new(proto.Filter)
 	req.Filter.Labels = filter.Labels
 	for {
+		if !c.IsConnected() {
+			if c.shouldGiveUp() {
+				log.Error().Msg("grpc: connection lost, giving up")
+				return nil, ErrConnectionLost
+			}
+			log.Warn().Msg("grpc: next() waiting for server connection...")
+			time.Sleep(retry.NextBackOff())
+			continue
+		}
+
 		res, err = c.client.Next(ctx, req)
 		if err == nil {
 			break
@@ -141,7 +191,7 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 	w := new(rpc.Workflow)
 	w.ID = res.GetWorkflow().GetId()
 	w.Timeout = res.GetWorkflow().GetTimeout()
-	w.Config = new(backend.Config)
+	w.Config = new(backend_types.Config)
 	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
 		log.Error().Err(err).Msgf("could not unmarshal workflow config of '%s'", w.ID)
 	}
@@ -154,6 +204,16 @@ func (c *client) Wait(ctx context.Context, workflowID string) (canceled bool, er
 	req := new(proto.WaitRequest)
 	req.Id = workflowID
 	for {
+		if !c.IsConnected() {
+			if c.shouldGiveUp() {
+				log.Error().Msg("grpc: connection lost, giving up")
+				return false, ErrConnectionLost
+			}
+			log.Warn().Msg("grpc: wait() waiting for server connection...")
+			time.Sleep(retry.NextBackOff())
+			continue
+		}
+
 		resp, err := c.client.Wait(ctx, req)
 		if err == nil {
 			// wait block was released normally as expected by server
@@ -201,6 +261,16 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 	req.State.Error = state.Error
 	req.State.Canceled = state.Canceled
 	for {
+		if !c.IsConnected() {
+			if c.shouldGiveUp() {
+				log.Error().Msg("grpc: connection lost, giving up")
+				return ErrConnectionLost
+			}
+			log.Warn().Msg("grpc: init() waiting for server connection...")
+			time.Sleep(retry.NextBackOff())
+			continue
+		}
+
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
 			break
@@ -250,6 +320,16 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 	req.State.Error = state.Error
 	req.State.Canceled = state.Canceled
 	for {
+		if !c.IsConnected() {
+			if c.shouldGiveUp() {
+				log.Error().Msg("grpc: connection lost, giving up")
+				return ErrConnectionLost
+			}
+			log.Warn().Msg("grpc: done() waiting for server connection...")
+			time.Sleep(retry.NextBackOff())
+			continue
+		}
+
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
 			break
@@ -294,6 +374,16 @@ func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 	req := new(proto.ExtendRequest)
 	req.Id = workflowID
 	for {
+		if !c.IsConnected() {
+			if c.shouldGiveUp() {
+				log.Error().Msg("grpc: connection lost, giving up")
+				return ErrConnectionLost
+			}
+			log.Warn().Msg("grpc: extend() waiting for server connection...")
+			time.Sleep(retry.NextBackOff())
+			continue
+		}
+
 		_, err = c.client.Extend(ctx, req)
 		if err == nil {
 			break
@@ -347,6 +437,16 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	req.State.Canceled = state.Canceled
 	req.State.Skipped = state.Skipped
 	for {
+		if !c.IsConnected() {
+			if c.shouldGiveUp() {
+				log.Error().Msg("grpc: connection lost, giving up")
+				return ErrConnectionLost
+			}
+			log.Warn().Msg("grpc: update() waiting for server connection...")
+			time.Sleep(retry.NextBackOff())
+			continue
+		}
+
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
 			break
@@ -419,9 +519,10 @@ func (c *client) processLogs(ctx context.Context) {
 		bytes = 0
 	}
 
-	// ctx.Done() is covered by the log channel being closed
 	for {
 		select {
+		case <-ctx.Done():
+			return
 		case entry, ok := <-c.logs:
 			if !ok {
 				log.Info().Msg("log drain: channel closed")
@@ -430,7 +531,7 @@ func (c *client) processLogs(ctx context.Context) {
 			}
 
 			entries = append(entries, entry)
-			bytes += grpcproto.Size(entry) // cspell:words grpcproto
+			bytes += grpc_proto.Size(entry)
 
 			if bytes >= maxLogBatchSize {
 				send()
@@ -508,6 +609,15 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 	req.Status = "I am alive!"
 
 	for {
+		if !c.IsConnected() {
+			if c.shouldGiveUp() {
+				log.Error().Msg("grpc: connection lost, giving up")
+				return ErrConnectionLost
+			}
+			log.Warn().Msg("grpc: report_health() waiting for server connection...")
+			time.Sleep(retry.NextBackOff())
+			continue
+		}
 		_, err = c.client.ReportHealth(ctx, req)
 		if err == nil {
 			return nil

@@ -31,12 +31,13 @@ import (
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
-	config_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
+	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
-	registry_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
-	secret_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
+	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
+	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -134,7 +135,7 @@ func TestDeletePipeline(t *testing.T) {
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		DeletePipeline(c)
 
@@ -160,7 +161,7 @@ func TestDeletePipeline(t *testing.T) {
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		DeletePipeline(c)
 
@@ -197,7 +198,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		t.Run("should get pipeline metadata", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "2"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 			c.Set("store", mockStore)
 			c.Set("forge", mockForge)
 			c.Set("repo", fakeRepo)
@@ -218,7 +219,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		t.Run("should return bad request for invalid pipeline number", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "invalid"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "invalid"}}
 
 			GetPipelineMetadata(c)
 
@@ -231,7 +232,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "3"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "3"}}
 			c.Set("store", mockStore)
 			c.Set("repo", fakeRepo)
 
@@ -264,14 +265,14 @@ func TestCancelPipeline(t *testing.T) {
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(nil, memory.New())
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", mockStore)
 		c.Set("repo", fakeRepo)
 		c.Set("user", fakeUser)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		CancelPipeline(c)
 
@@ -285,9 +286,9 @@ func TestCreatePipeline(t *testing.T) {
 	// 1. normal: config fetch succeeds (no error, returns config) -> success
 	t.Run("normal workflow - config can be read", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
-		mockConfigService := config_mocks.NewMockService(t)
-		mockSecretService := secret_mocks.NewMockService(t)
-		mockRegistryService := registry_mocks.NewMockService(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
+		mockSecretService := secret_service_mocks.NewMockService(t)
+		mockRegistryService := registry_service_mocks.NewMockService(t)
 
 		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
 		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}
@@ -304,8 +305,8 @@ func TestCreatePipeline(t *testing.T) {
 		}, nil).Maybe()
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
 
-		mockSecretService.On("SecretListPipeline", fakeRepo, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
-		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
 
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
@@ -315,11 +316,10 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
-		server.Config.Services.Pubsub = pubsub.New()
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
-		server.Config.Services.Queue = mockQueue
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
 
 		// mimic the valid config data
 		configData := []*forge_types.FileMeta{
@@ -357,9 +357,9 @@ func TestCreatePipeline(t *testing.T) {
 	// 2. abnormal with oldconfig: config fetch fails but returns config data (error + non-nil config) -> continues with fallback
 	t.Run("abnormal workflow - cannot read config but has oldconfig", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
-		mockConfigService := config_mocks.NewMockService(t)
-		mockSecretService := secret_mocks.NewMockService(t)
-		mockRegistryService := registry_mocks.NewMockService(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
+		mockSecretService := secret_service_mocks.NewMockService(t)
+		mockRegistryService := registry_service_mocks.NewMockService(t)
 
 		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
 		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}
@@ -377,8 +377,8 @@ func TestCreatePipeline(t *testing.T) {
 		}, nil).Maybe()
 
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
-		mockSecretService.On("SecretListPipeline", fakeRepo, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
-		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
 
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
@@ -388,11 +388,10 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
-		server.Config.Services.Pubsub = pubsub.New()
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
-		server.Config.Services.Queue = mockQueue
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
 
 		// mimic the old config data
 		oldConfigData := []*forge_types.FileMeta{
@@ -429,7 +428,7 @@ func TestCreatePipeline(t *testing.T) {
 	// 3. abnormal without oldconfig: config fetch fails without config data (error + nil config) -> fails immediately
 	t.Run("abnormal workflow - cannot read config and no oldconfig", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
-		mockConfigService := config_mocks.NewMockService(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
 
 		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
 		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}
@@ -444,7 +443,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Pubsub = pubsub.New()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(nil, memory.New())
 
 		// return nil config with error
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(nil, http.ErrHandlerTimeout)

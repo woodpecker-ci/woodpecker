@@ -148,6 +148,19 @@ Configures the number of parallel workflows.
 
 ---
 
+### AGENT_SINGLE_WORKFLOW
+
+- Name: `WOODPECKER_AGENT_SINGLE_WORKFLOW`
+- Default: `false`
+
+Configures the agent to exit (shutdown) after executing one workflow. When configured,
+`WOODPECKER_MAX_WORKFLOWS` is forced to 1.
+
+This one-shot mode is useful in ephemeral environments that are provisioned on demand
+by external automation — for example, when an autoscaler spins up a dedicated machine. In these setups, the agent starts, executes exactly one workflow, and exits, allowing the environment to be cleanly torn down afterward.
+
+---
+
 ### AGENT_LABELS
 
 - Name: `WOODPECKER_AGENT_LABELS`
@@ -212,6 +225,19 @@ Configures if the connection to `WOODPECKER_SERVER` should be made using a secur
 - Default: `true`
 
 Configures if the gRPC server certificate should be verified, only valid when `WOODPECKER_GRPC_SECURE` is `true`.
+
+---
+
+## RETRY_TIMEOUT
+
+- Name: `WOODPECKER_RETRY_TIMEOUT`
+- Default: `2m`
+
+Set how long the agent keeps retrying to reconnect to the server after the gRPC connection is lost before giving up.
+
+:::warning
+If set to 0 we retry forever.
+:::
 
 ---
 

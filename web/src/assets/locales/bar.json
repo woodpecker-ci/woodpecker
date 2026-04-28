@@ -17,7 +17,12 @@
             "success": "Repo is jez o",
             "enable": "Oschoidn",
             "enabled": "Is scho o",
-            "disabled": "Is aus"
+            "disabled": "Is aus",
+            "new_forge_repo": "Neis Repo auf da Forge",
+            "stale_wp_repo": "Oids Woodpecker Repo",
+            "conflict": "Konflikt",
+            "conflict_desc": "Des Repo is auf da Forge mid na nein ID erstäid woan, aba in Woodpecker is no a oids repo mim selbn Nama gspeichert. Entweda schmeist's oide weg und aktivierst's neue, oda du reparierst's alte.",
+            "forge_repo_missing": "Forge repo is ned do!"
         },
         "visibility": {
             "public": {
@@ -69,7 +74,8 @@
                 "log_download": "Runterladn",
                 "log_delete": "Löschn",
                 "log_auto_scroll": "Automatisch scrollen oschoidn",
-                "log_auto_scroll_off": "Automatisch scrollen ausschoidn"
+                "log_auto_scroll_off": "Automatisch scrollen ausschoidn",
+                "skipped": "Da Schrid is ausglosn woan."
             },
             "event": {
                 "push": "Push",
@@ -93,7 +99,8 @@
                 "declined": "obglehnt",
                 "error": "Fella",
                 "failure": "is schiaf ganga",
-                "killed": "obgwürgt"
+                "killed": "obgwürgt",
+                "canceled": "abgwürgt"
             },
             "errors": "Fella",
             "warnings": "Warnunga",
@@ -110,7 +117,15 @@
                 "metadata_exec_title": "Pipeline lokal neistarten",
                 "metadata_exec_desc": "Load de Metadaten vo dera Pipeline runter um se lokal laufa zu lassn. So kost Probleme fixen und Änderunga testn bevors'd sie commitest. De Woodpecker CLI muas lokal in da gleichn Version wia da Server sei."
             },
-            "view": "Pipeline oschaun"
+            "view": "Pipeline oschaun",
+            "load_more": "Zoag mea o",
+            "cancel_info": {
+                "superseded_by": "Ersetzt duach #{pipelineId}",
+                "canceled_by_user": "Abgewürgt duach {user}",
+                "canceled_by_step": "Abgwürgt wenga {step}"
+            },
+            "version": "De Woodpecker Version auf dea die Pipeline ausgefüad wurde.",
+            "version_header": "Woodpecker Version"
         },
         "manual_pipeline": {
             "title": "Pipeline vo Hand starten",
@@ -124,7 +139,7 @@
                 "value": "Variabl-Wert"
             },
             "show_pipelines": "Pipelines zoang",
-            "no_manual_workflows": "Koane Workflows gfundn die ma von hand lafa losn ko, oder se san ausa gsiebt woan."
+            "no_manual_workflows": "Koane basadn Workflows gfundn. Bas auf das zumindest oa Workflow auf des von hand lafa Ereignis head."
         },
         "activity": "Ois da Reih nach",
         "branches": "Branches",
@@ -595,5 +610,11 @@
     "weblate": "unserm Weblate",
     "disabled": "Abgschoidn",
     "config_extension_exclusive": "Ganz Alloa",
-    "config_extension_exclusive_desc": "Wenn ogschoid, werdn alle anderen konfigurations Möglichkeitn überganga, a de Forge."
+    "config_extension_exclusive_desc": "Wenn ogschoid, werdn alle anderen konfigurations Möglichkeitn überganga, a de Forge.",
+    "global_level_registry": "Globale Registry",
+    "org_level_registry": "Organisations-Registry",
+    "registry_extension_endpoint": "Registry-Erweiterungs-Endpunkt",
+    "secret_extension_endpoint": "Secret-Erweitarung-Endpunkt",
+    "extension_netrc": "Dua Netrc Anmeldedaten dazua",
+    "extension_netrc_desc": "Schig de Forge Netrc Anmeldetaten zua Erweiterung mid."
 }

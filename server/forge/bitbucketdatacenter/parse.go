@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"net/http"
 
-	bb "github.com/neticdk/go-bitbucket/bitbucket"
+	"github.com/neticdk/go-bitbucket/bitbucket"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -32,7 +32,7 @@ type HookResult struct {
 }
 
 func parseHook(r *http.Request, baseURL string) (*HookResult, string, string, error) {
-	ev, payload, err := bb.ParsePayloadWithoutSignature(r)
+	ev, payload, err := bitbucket.ParsePayloadWithoutSignature(r)
 	if err != nil {
 		return nil, "", "", fmt.Errorf("unable to parse payload from webhook invocation: %w", err)
 	}
@@ -43,12 +43,12 @@ func parseHook(r *http.Request, baseURL string) (*HookResult, string, string, er
 	}
 
 	switch e := ev.(type) {
-	case *bb.RepositoryPushEvent:
+	case *bitbucket.RepositoryPushEvent:
 		result.Repo = convertRepo(&e.Repository, nil, "")
 		result.Pipeline = convertRepositoryPushEvent(e, baseURL)
 		currCommit, prevCommit := convertGetCommitRange(e)
 		return result, currCommit, prevCommit, nil
-	case *bb.PullRequestEvent:
+	case *bitbucket.PullRequestEvent:
 		result.Repo = convertRepo(&e.PullRequest.Target.Repository, nil, "")
 		result.Pipeline = convertPullRequestEvent(e, baseURL)
 		return result, "", "", nil

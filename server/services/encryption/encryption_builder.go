@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
-	storeTypes "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
+	store_types "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (b builder) getService(keyType string) (types.EncryptionService, error) {
@@ -41,7 +41,7 @@ func (b builder) getService(keyType string) (types.EncryptionService, error) {
 
 func (b builder) isEnabled() (bool, error) {
 	_, err := b.store.ServerConfigGet(ciphertextSampleConfigKey)
-	if err != nil && !errors.Is(err, storeTypes.ErrRecordNotExist) {
+	if err != nil && !errors.Is(err, store_types.ErrRecordNotExist) {
 		return false, fmt.Errorf(errTemplateFailedLoadingServerConfig, err)
 	}
 	return err == nil, nil

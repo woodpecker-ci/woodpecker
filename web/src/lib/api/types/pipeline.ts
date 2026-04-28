@@ -95,6 +95,8 @@ export interface Pipeline {
   changed_files?: string[];
 
   cancel_info: CancelInfo;
+
+  version: string;
 }
 
 export type PipelineStatus =

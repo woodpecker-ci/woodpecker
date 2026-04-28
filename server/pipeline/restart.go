@@ -25,6 +25,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // Restart a pipeline by creating a new one out of the old and start it.
@@ -63,6 +64,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	newPipeline := createNewOutOfOld(lastPipeline)
 	newPipeline.Parent = lastPipeline.Number
+	newPipeline.Version = version.String()
 
 	err = store.CreatePipeline(newPipeline)
 	if err != nil {
