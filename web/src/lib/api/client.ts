@@ -284,7 +284,7 @@ export default class ApiClient {
 
     const fallbackToSSE = () => {
       if (closedByUser) return;
-      // eslint-disable-next-line no-console
+
       console.warn(
         `[woodpecker] WebSocket connection to ${wsPath} failed; falling back to SSE at ${ssePath}. ` +
           `If this happens consistently, your reverse proxy may not be forwarding the WebSocket Upgrade ` +
