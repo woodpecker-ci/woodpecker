@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-28
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -182,6 +182,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6519](https://github.com/woodpecker-ci/woodpecker/pull/6519)]
 - Update module github.com/google/go-github/v84 to v85 [[#6500](https://github.com/woodpecker-ci/woodpecker/pull/6500)]
 - Update module github.com/getkin/kin-openapi to v0.136.0 [[#6503](https://github.com/woodpecker-ci/woodpecker/pull/6503)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.0 [[#6499](https://github.com/woodpecker-ci/woodpecker/pull/6499)]
