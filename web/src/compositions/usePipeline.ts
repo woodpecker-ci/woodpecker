@@ -75,10 +75,19 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return prettyDuration(durationElapsed.value);
   });
 
-  const message = computed(() => emojify(pipeline.value?.message ?? ''));
+  function escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  }
+
+  const message = computed(() => emojify(escapeHtml(pipeline.value?.message ?? '')));
   const shortMessage = computed(() => message.value.split('\n')[0]);
 
-  const prTitleWithDescription = computed(() => emojify(pipeline.value?.title ?? ''));
+  const prTitleWithDescription = computed(() => emojify(escapeHtml(pipeline.value?.title ?? '')));
   const prTitle = computed(() => prTitleWithDescription.value.split('\n')[0]);
 
   const prettyRef = computed(() => {
