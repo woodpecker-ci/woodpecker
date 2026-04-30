@@ -342,7 +342,14 @@ when:
 
 #### `status`
 
-There are use cases for executing steps on failure, such as sending notifications for failed workflow/pipeline. Use the status constraint to execute steps even when the workflow fails:
+By default, steps only run when the workflow has succeeded up to that point,<br>
+which is equivalent to `status: [ success ]`.
+
+The `status` filter lets you override this behavior.
+The only accepted values are `success` and `failure`.
+
+A common use case is executing a step on failure, such as sending notifications for a failed workflow/pipeline.
+To run a step regardless of outcome, list both values:
 
 ```diff
  steps:
