@@ -1,14 +1,16 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-29
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Aex12, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @bclermont, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rhafer, @samoli, @savv, @stardothosting, @utafrali
+@6543, @Aex12, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @bclermont, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rfinnie, @rhafer, @samoli, @savv, @stardothosting, @utafrali
 
 ### 🔒 Security
 
 - docs: bump follow-redirects [[#6441](https://github.com/woodpecker-ci/woodpecker/pull/6441)]
+- chore(deps): update dependency axios to v1.15.0 [security] [[#6417](https://github.com/woodpecker-ci/woodpecker/pull/6417)]
+- fix(deps): update go.opentelemetry.io/otel to v1.43.0 [[#6416](https://github.com/woodpecker-ci/woodpecker/pull/6416)]
 - WebUI: remove "lodash" dep [[#6369](https://github.com/woodpecker-ci/woodpecker/pull/6369)]
 - Sanitize agent introduced pipeline/workflow/step state changes and log streaming [[#6308](https://github.com/woodpecker-ci/woodpecker/pull/6308)]
 - Send 404 if logs are not allowed to access [[#6349](https://github.com/woodpecker-ci/woodpecker/pull/6349)]
@@ -22,6 +24,7 @@
 - Support one-shot agent execution mode [[#6150](https://github.com/woodpecker-ci/woodpecker/pull/6150)]
 - Add external secret extension implementation [[#6252](https://github.com/woodpecker-ci/woodpecker/pull/6252)]
 - Allow disabling isolated home directory for local agents [[#6251](https://github.com/woodpecker-ci/woodpecker/pull/6251)]
+- Add Container Registry credential extension [[#5993](https://github.com/woodpecker-ci/woodpecker/pull/5993)]
 - Support exclusive config extensions [[#5978](https://github.com/woodpecker-ci/woodpecker/pull/5978)]
 
 ### 📈 Enhancement
@@ -51,6 +54,8 @@
 - Server return conflict status when stale repo causes duplicate insert [[#6276](https://github.com/woodpecker-ci/woodpecker/pull/6276)]
 - Show global/org registries in org/repo registries tab [[#6291](https://github.com/woodpecker-ci/woodpecker/pull/6291)]
 - Report skipped step state as soon as it's determined [[#6295](https://github.com/woodpecker-ci/woodpecker/pull/6295)]
+- Only add compatibility environment variables for drone-ci to plugins [[#6271](https://github.com/woodpecker-ci/woodpecker/pull/6271)]
+- Refactor: pass backend explicitly when creating pipeline engine runtime [[#6268](https://github.com/woodpecker-ci/woodpecker/pull/6268)]
 - Compare admins case-insensitively [[#6261](https://github.com/woodpecker-ci/woodpecker/pull/6261)]
 - Allow to cancel on failure [[#6158](https://github.com/woodpecker-ci/woodpecker/pull/6158)]
 - Refactor so storage detects if Insert fails because of unique constraint [[#6259](https://github.com/woodpecker-ci/woodpecker/pull/6259)]
@@ -68,6 +73,7 @@
 - Render MD in pipeline titles [[#5999](https://github.com/woodpecker-ci/woodpecker/pull/5999)]
 - Simplify and Fix server task queue [[#6017](https://github.com/woodpecker-ci/woodpecker/pull/6017)]
 - Update Architecture: move `pipeline/rpc` => `rpc` & `server/{grpc => rpc}` [[#6012](https://github.com/woodpecker-ci/woodpecker/pull/6012)]
+- Implement retry logic in HTTP Send method [[#5857](https://github.com/woodpecker-ci/woodpecker/pull/5857)]
 - CLI: Allow single output template [[#5882](https://github.com/woodpecker-ci/woodpecker/pull/5882)]
 - Improve service syntax related docs and tests nits [[#5991](https://github.com/woodpecker-ci/woodpecker/pull/5991)]
 - Remove deactivated secrets type from container definition [[#5983](https://github.com/woodpecker-ci/woodpecker/pull/5983)]
@@ -83,6 +89,7 @@
 - Kubernetes: detached steps are no services [[#6435](https://github.com/woodpecker-ci/woodpecker/pull/6435)]
 - Support dots in image names [[#6431](https://github.com/woodpecker-ci/woodpecker/pull/6431)]
 - Fix erroneous linter error for plugin privileges [[#6424](https://github.com/woodpecker-ci/woodpecker/pull/6424)]
+- Add connection timeout and graceful shutdown to agent RPC client [[#6414](https://github.com/woodpecker-ci/woodpecker/pull/6414)]
 - Fix Windows container exit code handling and error checks [[#6411](https://github.com/woodpecker-ci/woodpecker/pull/6411)]
 - Bitbucket: Remove usage of deprecated /user/permissions/repositories [[#6401](https://github.com/woodpecker-ci/woodpecker/pull/6401)]
 - Bitbucket: Fix parsing /user/workspaces response [[#6396](https://github.com/woodpecker-ci/woodpecker/pull/6396)]
@@ -92,6 +99,7 @@
 - Only redirect after login [[#6348](https://github.com/woodpecker-ci/woodpecker/pull/6348)]
 - Set workflow services stuck in running state to finished [[#6337](https://github.com/woodpecker-ci/woodpecker/pull/6337)]
 - Fix bitbucket api deprecations [[#6324](https://github.com/woodpecker-ci/woodpecker/pull/6324)]
+- Fix workflow serialize to omit skip_clone if false [[#6319](https://github.com/woodpecker-ci/woodpecker/pull/6319)]
 - Fix build deb rpm packages [[#6309](https://github.com/woodpecker-ci/woodpecker/pull/6309)]
 - Enable crons if created via CLI [[#6228](https://github.com/woodpecker-ci/woodpecker/pull/6228)]
 - Fix message on gitlab tag event [[#6196](https://github.com/woodpecker-ci/woodpecker/pull/6196)]
@@ -124,7 +132,10 @@
 - Init minimal e2e tests [[#6391](https://github.com/woodpecker-ci/woodpecker/pull/6391)]
 - Enhance datastore DB test setup [[#6450](https://github.com/woodpecker-ci/woodpecker/pull/6450)]
 - Dummy backend support cancel [[#6390](https://github.com/woodpecker-ci/woodpecker/pull/6390)]
+- Extend workflow integration tests [[#6272](https://github.com/woodpecker-ci/woodpecker/pull/6272)]
 - Add registry service tests [[#6330](https://github.com/woodpecker-ci/woodpecker/pull/6330)]
+- Add workflow integration test [[#6270](https://github.com/woodpecker-ci/woodpecker/pull/6270)]
+- Increase timeout for migration tests [[#6206](https://github.com/woodpecker-ci/woodpecker/pull/6206)]
 - Ignore fixtures for coverage [[#6197](https://github.com/woodpecker-ci/woodpecker/pull/6197)]
 - Use tabs for indentation in embedded JSON [[#6103](https://github.com/woodpecker-ci/woodpecker/pull/6103)]
 - Add tests for CLI output formatting and pipeline metadata environment variables [[#6076](https://github.com/woodpecker-ci/woodpecker/pull/6076)]
@@ -132,6 +143,7 @@
 
 ### 📚 Documentation
 
+- docs: Add woodpecker-shellcheck lint to awesome list [[#6521](https://github.com/woodpecker-ci/woodpecker/pull/6521)]
 - Lock file maintenance [[#6508](https://github.com/woodpecker-ci/woodpecker/pull/6508)]
 - Update docs npm deps non-major [[#6496](https://github.com/woodpecker-ci/woodpecker/pull/6496)]
 - Add Laravel Forge plugin [[#6491](https://github.com/woodpecker-ci/woodpecker/pull/6491)]
@@ -255,6 +267,7 @@
 ### Misc
 
 - Add s3 cache plugin to docs [[#6467](https://github.com/woodpecker-ci/woodpecker/pull/6467)]
+- Fix license headers [[#6205](https://github.com/woodpecker-ci/woodpecker/pull/6205)]
 - Add agentscan plugin [[#6284](https://github.com/woodpecker-ci/woodpecker/pull/6284)]
 
 ## [3.13.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.13.0) - 2026-01-14
