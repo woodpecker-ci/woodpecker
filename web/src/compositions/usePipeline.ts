@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import type { Pipeline } from '~/lib/api/types';
+import { escapeHtml } from '~/lib/utils';
 
 const { toLocaleString, timeAgo, prettyDuration } = useDate();
 
@@ -74,15 +75,6 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
 
     return prettyDuration(durationElapsed.value);
   });
-
-  function escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;');
-  }
 
   const message = computed(() => emojify(escapeHtml(pipeline.value?.message ?? '')));
   const shortMessage = computed(() => message.value.split('\n')[0]);
