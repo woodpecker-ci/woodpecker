@@ -143,6 +143,7 @@
 
 ### 📚 Documentation
 
+- docs: better description for when.status filter [[#6517](https://github.com/woodpecker-ci/woodpecker/pull/6517)]
 - docs: Add woodpecker-shellcheck lint to awesome list [[#6521](https://github.com/woodpecker-ci/woodpecker/pull/6521)]
 - Lock file maintenance [[#6508](https://github.com/woodpecker-ci/woodpecker/pull/6508)]
 - Update docs npm deps non-major [[#6496](https://github.com/woodpecker-ci/woodpecker/pull/6496)]
