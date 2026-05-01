@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-01
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543
+
+### 📈 Enhancement
+
+- Refactor agent rpc retry [[#6515](https://github.com/woodpecker-ci/woodpecker/pull/6515)]
+
 ## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-05-01
 
 ### ❤️ Thanks to all contributors! ❤️
