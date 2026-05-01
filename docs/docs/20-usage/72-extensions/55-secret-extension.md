@@ -164,3 +164,9 @@ Example response:
   ]
 }
 ```
+
+## 3rd Party Extensions
+
+| Secrets Provider | Licence | Link/Notes|
+|------------------|---------|-----------|
+| OpenBao | Apache 2.0 | [https://github.com/vcheesbrough/woodpecker-openbao-broker](https://github.com/vcheesbrough/woodpecker-openbao-broker), at this time immature/experimental |
