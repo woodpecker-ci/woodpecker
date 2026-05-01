@@ -43,8 +43,8 @@ func (c *combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*mode
 	return c.dbRegistry.RegistryList(repo, p)
 }
 
-func (c *combined) RegistryListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
-	dbRegistries, err := c.dbRegistry.RegistryListPipeline(ctx, repo, pipeline)
+func (c *combined) RegistryListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Registry, error) {
+	dbRegistries, err := c.dbRegistry.RegistryListPipeline(ctx, repo, pipeline, netrc)
 	if err != nil {
 		return nil, err
 	}

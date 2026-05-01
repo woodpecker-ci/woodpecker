@@ -1,0 +1,10 @@
+skip_clone: true
+
+steps:
+  - name: hungry
+    image: dummy
+    commands:
+      - echo eating memory
+    environment:
+      STEP_OOM_KILLED: 'true'
+      STEP_EXIT_CODE: '137'

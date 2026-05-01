@@ -85,8 +85,26 @@ export interface Repo {
 
   config_extension_exclusive: boolean;
 
+  // Whether to include netrc credentials in config extension requests
+  config_extension_netrc: boolean;
+
   // Endpoint for registry extensions
   registry_extension_endpoint: string;
+
+  // Whether to include netrc credentials in registry extension requests
+  registry_extension_netrc: boolean;
+
+  // Endpoint for secret extensions
+  secret_extension_endpoint: string;
+
+  // Whether to include netrc credentials in secret extension requests
+  secret_extension_netrc: boolean;
+
+  // True if forge returned a repo with same name but different forge remote id
+  has_forge_name_conflict?: boolean;
+
+  // True if repo only exist in the woodpecker store and not at the forge anymore
+  has_no_forge_repo?: boolean;
 }
 
 /* eslint-disable no-unused-vars */
@@ -120,7 +138,13 @@ export type RepoSettings = Pick<
 
 export type ExtensionSettings = Pick<
   Repo,
-  'config_extension_endpoint' | 'config_extension_exclusive' | 'registry_extension_endpoint'
+  | 'config_extension_endpoint'
+  | 'config_extension_exclusive'
+  | 'config_extension_netrc'
+  | 'registry_extension_endpoint'
+  | 'registry_extension_netrc'
+  | 'secret_extension_endpoint'
+  | 'secret_extension_netrc'
 >;
 
 export interface RepoPermissions {

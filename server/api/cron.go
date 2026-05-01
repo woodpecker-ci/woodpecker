@@ -24,7 +24,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
-	cronScheduler "go.woodpecker-ci.org/woodpecker/v3/server/cron"
+	cron_scheduler "go.woodpecker-ci.org/woodpecker/v3/server/cron"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
@@ -83,7 +83,7 @@ func RunCron(c *gin.Context) {
 		return
 	}
 
-	repo, newPipeline, err := cronScheduler.CreatePipeline(c, _store, cron)
+	repo, newPipeline, err := cron_scheduler.CreatePipeline(c, _store, cron)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error creating pipeline for cron %q. %s", id, err)
 		return
@@ -138,7 +138,7 @@ func PostCron(c *gin.Context) {
 		return
 	}
 
-	nextExec, err := cronScheduler.CalcNewNext(in.Schedule, time.Now())
+	nextExec, err := cron_scheduler.CalcNewNext(in.Schedule, time.Now())
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 		return
@@ -216,7 +216,7 @@ func PatchCron(c *gin.Context) {
 	}
 	if in.Schedule != nil && *in.Schedule != "" {
 		cron.Schedule = *in.Schedule
-		nextExec, err := cronScheduler.CalcNewNext(*in.Schedule, time.Now())
+		nextExec, err := cron_scheduler.CalcNewNext(*in.Schedule, time.Now())
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 			return
@@ -230,7 +230,7 @@ func PatchCron(c *gin.Context) {
 		cron.Enabled = *in.Enabled
 		// if we re-enable a cron we have to calc NextExec because it was not while disabled
 		if cron.Enabled {
-			nextExec, err := cronScheduler.CalcNewNext(*in.Schedule, time.Now())
+			nextExec, err := cron_scheduler.CalcNewNext(*in.Schedule, time.Now())
 			if err != nil {
 				c.String(http.StatusInternalServerError, "Cron schedule could not parsed: %s", err)
 				return

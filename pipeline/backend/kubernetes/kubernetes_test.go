@@ -25,8 +25,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
-	v1 "k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -131,10 +131,10 @@ func TestSetupWorkflow(t *testing.T) {
 	err := engine.SetupWorkflow(context.Background(), conf, taskUUID)
 	assert.NoError(t, err, "SetupWorkflow should not error with minimal config and fake client")
 
-	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), "volume-name", meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), "volume-name", kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "persistent volume should be created during workflow setup")
 
-	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "headless service should be created during workflow setup")
 }
 
@@ -208,17 +208,17 @@ func createPod(
 	podName, err := stepToPodName(step)
 	require.NoError(t, err)
 
-	pod := &v1.Pod{
-		ObjectMeta: meta_v1.ObjectMeta{
+	pod := &kube_core_v1.Pod{
+		ObjectMeta: kube_meta_v1.ObjectMeta{
 			Name:      podName,
 			Namespace: namespace,
 		},
-		Status: v1.PodStatus{
-			Phase: v1.PodPending,
+		Status: kube_core_v1.PodStatus{
+			Phase: kube_core_v1.PodPending,
 		},
 	}
 	_, err = client.CoreV1().Pods(namespace).Create(
-		context.Background(), pod, meta_v1.CreateOptions{},
+		context.Background(), pod, kube_meta_v1.CreateOptions{},
 	)
 	require.NoError(t, err)
 	return podName

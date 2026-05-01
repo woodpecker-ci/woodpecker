@@ -10,6 +10,7 @@ services:
     image: mysql
     ports:
       - 3306
+    entrypoint: ['entrypoint.sh']
     environment:
       MYSQL_DATABASE: test
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'

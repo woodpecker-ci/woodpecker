@@ -28,9 +28,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-// UpdateStepStatus updates step status based on agent reports via RPC.
-func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, state rpc.StepState) error {
-	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", *step, state)
+func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancelPipelineFromStep bool, _ error) {
+	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", step, state)
 
 	switch step.State {
 	case model.StatusPending:
@@ -41,7 +40,7 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 			if state.Finished != 0 {
 				step.Finished = state.Finished
 			}
-			return store.StepUpdate(step)
+			return &step, false, nil
 		}
 
 		// Transition from pending to running when started
@@ -68,10 +67,7 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 				step.State = model.StatusFailure
 
 				if step.Failure == model.FailureCancel {
-					err := cancelPipelineFromStep(ctx, store, step)
-					if err != nil {
-						return err
-					}
+					cancelPipelineFromStep = true
 				}
 			}
 		}
@@ -92,16 +88,13 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 				step.State = model.StatusFailure
 
 				if step.Failure == model.FailureCancel {
-					err := cancelPipelineFromStep(ctx, store, step)
-					if err != nil {
-						return err
-					}
+					cancelPipelineFromStep = true
 				}
 			}
 		}
 
 	default:
-		return fmt.Errorf("step has state %s and does not expect rpc state updates", step.State)
+		return nil, false, fmt.Errorf("step has state %s and does not expect rpc state updates", step.State)
 	}
 
 	// Handle cancellation across both cases
@@ -112,6 +105,24 @@ func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, 
 		}
 	}
 
+	return &step, cancelPipelineFromStep, nil
+}
+
+// UpdateStepStatus updates step status based on agent reports via RPC.
+func UpdateStepStatus(ctx context.Context, store store.Store, step *model.Step, state rpc.StepState) error {
+	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", *step, state)
+
+	updatedStep, shouldCancelPipelineFromStep, err := CalcStepStatus(*step, state)
+	if err != nil {
+		return err
+	}
+	*step = *updatedStep // update step for external callers
+
+	if shouldCancelPipelineFromStep {
+		if err := cancelPipelineFromStep(ctx, store, step); err != nil {
+			return err
+		}
+	}
 	return store.StepUpdate(step)
 }
 

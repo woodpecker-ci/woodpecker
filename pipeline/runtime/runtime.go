@@ -16,12 +16,13 @@ package runtime
 
 import (
 	"context"
+	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -33,8 +34,8 @@ type Runtime struct {
 	// err holds the first error that occurred in the workflow.
 	err utils.Protected[error]
 
-	spec    *backend.Config
-	engine  backend.Backend
+	spec    *backend_types.Config
+	engine  backend_types.Backend
 	started int64
 
 	// ctx is the context for the current workflow execution.
@@ -45,12 +46,14 @@ type Runtime struct {
 	tracer tracing.Tracer
 	logger logging.Logger
 
+	uploadWait sync.WaitGroup
+
 	taskUUID    string
 	description map[string]string
 }
 
 // New returns a new Runtime for the given workflow spec and options.
-func New(spec *backend.Config, backend backend.Backend, opts ...Option) *Runtime {
+func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Option) *Runtime {
 	r := new(Runtime)
 	r.err = utils.NewProtected[error](nil)
 	r.description = map[string]string{}
@@ -58,6 +61,7 @@ func New(spec *backend.Config, backend backend.Backend, opts ...Option) *Runtime
 	r.engine = backend
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
+	r.tracer = tracing.NoOpTracer
 	for _, opt := range opts {
 		opt(r)
 	}

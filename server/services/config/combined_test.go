@@ -191,7 +191,7 @@ func TestFetchFromConfigService(t *testing.T) {
 	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
 	require.NoError(t, err)
 
-	httpFetcher := config.NewHTTP(ts.URL+"/", client)
+	httpFetcher := config.NewHTTP(ts.URL+"/", client, true)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {

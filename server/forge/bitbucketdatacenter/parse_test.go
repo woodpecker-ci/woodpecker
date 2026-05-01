@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"testing"
 
-	bb "github.com/neticdk/go-bitbucket/bitbucket"
+	"github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/fixtures"
@@ -40,7 +40,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, result)
 		assert.Empty(t, curCommit)
 		assert.Empty(t, prevCommit)
-		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
+		assert.IsType(t, &bitbucket.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)
@@ -62,7 +62,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, result)
 		assert.Empty(t, curCommit)
 		assert.Empty(t, prevCommit)
-		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
+		assert.IsType(t, &bitbucket.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)
@@ -82,7 +82,7 @@ func Test_parseHook(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
-		assert.IsType(t, &bb.RepositoryPushEvent{}, result.Event)
+		assert.IsType(t, &bitbucket.RepositoryPushEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)
@@ -106,7 +106,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, result)
 		assert.Empty(t, curCommit)
 		assert.Empty(t, prevCommit)
-		assert.IsType(t, &bb.PullRequestEvent{}, result.Event)
+		assert.IsType(t, &bitbucket.PullRequestEvent{}, result.Event)
 		assert.NotNil(t, result.Repo)
 		assert.NotNil(t, result.Pipeline)
 		assert.NotNil(t, result.Payload)

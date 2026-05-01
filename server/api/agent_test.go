@@ -27,8 +27,10 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -196,7 +198,7 @@ func TestDeleteAgent(t *testing.T) {
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Info", mock.Anything).Return(queue.InfoT{})
 		mockQueue.On("KickAgentWorkers", int64(1)).Return()
-		server.Config.Services.Queue = mockQueue
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -223,7 +225,7 @@ func TestDeleteAgent(t *testing.T) {
 		mockQueue.On("Info", mock.Anything).Return(queue.InfoT{
 			Running: []*model.Task{{AgentID: 1}},
 		})
-		server.Config.Services.Queue = mockQueue
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)

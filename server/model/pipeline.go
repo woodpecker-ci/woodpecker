@@ -17,6 +17,7 @@ package model
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
 type Pipeline struct {
@@ -54,13 +55,34 @@ type Pipeline struct {
 	AdditionalVariables  map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels    []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 	PullRequestMilestone string                  `json:"pr_milestone,omitempty"  xorm:"pr_milestone"`
+	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
 	IsPrerelease         bool                    `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
 	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
+	Version              string                  `json:"version"                 xorm:"'version'"`
+}
+
+// APIPipeline TODO remove deprecated properties in next major.
+type APIPipeline struct {
+	*Pipeline
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
 func (Pipeline) TableName() string {
 	return "pipelines"
+}
+
+func (p *Pipeline) ToAPIModel() *APIPipeline {
+	ap := &APIPipeline{
+		Pipeline: p,
+	}
+
+	switch p.Event { //nolint:gocritic
+	case EventCron:
+		ap.Message = p.Cron
+		ap.Sender = p.Cron
+	}
+
+	return ap
 }
 
 type PipelineFilter struct {
@@ -79,7 +101,7 @@ func (p Pipeline) IsMultiPipeline() bool {
 
 // IsPullRequest checks if it's a PR event.
 func (p Pipeline) IsPullRequest() bool {
-	return p.Event == EventPull || p.Event == EventPullClosed || p.Event == EventPullMetadata
+	return metadata.Event(p.Event).IsPull()
 }
 
 type PipelineOptions struct {
