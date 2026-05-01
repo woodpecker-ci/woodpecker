@@ -36,7 +36,12 @@
             "list_reloaded": "Lista de repositório recarregada",
             "reload": "Recarregar repositórios",
             "success": "Repositório habilitado",
-            "disabled": "Desativado"
+            "disabled": "Desativado",
+            "new_forge_repo": "novo repositório na forja",
+            "stale_wp_repo": "repositório Woodpecker desatualizado",
+            "conflict": "Conflito",
+            "conflict_desc": "Este repositório foi recriado na forja com um novo ID, mas uma entrada desatualizada com o mesmo nome ainda existe no Woodpecker. Exclua o desatualizado para habilitar o novo, ou corrija o antigo.",
+            "forge_repo_missing": "O repositório da forja está faltando!"
         },
         "manual_pipeline": {
             "variables": {

@@ -223,7 +223,12 @@
             "enabled": "已经启用了",
             "list_reloaded": "仓库列表已刷新",
             "reload": "刷新项目列表",
-            "success": "此仓库已成功启用"
+            "success": "此仓库已成功启用",
+            "new_forge_repo": "代码托管平台上的新仓库",
+            "stale_wp_repo": "Woodpecker 仓库已过期",
+            "conflict": "冲突",
+            "conflict_desc": "该仓库已在代码托管平台上使用新 ID 重新创建，但 Woodpecker 中仍存在一个同名的过期记录。请删除过期记录以启用新记录，或者修复旧记录。",
+            "forge_repo_missing": "代码托管平台仓库已缺失！"
         },
         "manual_pipeline": {
             "select_branch": "选择分支",

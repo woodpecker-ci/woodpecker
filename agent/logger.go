@@ -16,7 +16,6 @@ package agent
 
 import (
 	"io"
-	"sync"
 
 	"github.com/rs/zerolog"
 
@@ -28,16 +27,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
-func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) logging.Logger {
+func (r *Runner) createLogger(_logger zerolog.Logger, workflow *rpc.Workflow) logging.Logger {
 	return func(step *backend_types.Step, rc io.ReadCloser) error {
 		defer rc.Close()
 
 		logger := _logger.With().
 			Str("image", step.Image).
 			Logger()
-
-		uploads.Add(1)
-		defer uploads.Done()
 
 		var secrets []string
 		for _, secret := range workflow.Config.Secrets {

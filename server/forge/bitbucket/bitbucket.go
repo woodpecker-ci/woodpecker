@@ -119,17 +119,6 @@ func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	return convertUser(curr, token, primaryEmail), redirectURL, nil
 }
 
-// Auth uses the Bitbucket oauth2 access token and refresh token to authenticate
-// a session and return the Bitbucket account login.
-func (c *config) Auth(ctx context.Context, token, secret string) (string, error) {
-	client := c.newClientToken(ctx, token, secret)
-	user, err := client.FindCurrent()
-	if err != nil {
-		return "", err
-	}
-	return user.Login, nil
-}
-
 // Refresh refreshes the Bitbucket oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
