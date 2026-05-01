@@ -261,6 +261,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 				filtered = append(filtered, item)
 			}
 		}
+		// Recursive to handle transitive deps
 		return filterItemsWithMissingDependencies(filtered)
 	}
 
