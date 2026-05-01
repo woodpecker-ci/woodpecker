@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- pipeline runtime: move setting step environment variables into own func and add `CI_PIPELINE_STATUS` back [[#6516](https://github.com/woodpecker-ci/woodpecker/pull/6516)]
 - Refactor agent rpc retry [[#6515](https://github.com/woodpecker-ci/woodpecker/pull/6515)]
 
 ## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-05-01
