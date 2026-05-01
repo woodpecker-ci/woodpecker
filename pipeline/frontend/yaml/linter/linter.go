@@ -242,7 +242,9 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	yamlPath := fmt.Sprintf("%s.%s", area, c.Name)
 	errors := []string{}
 	if !l.trusted.Security {
-		if c.Privileged {
+		// Allow plugins in WOODPECKER_PLUGINS_PRIVILEGED to run in privileged mode
+		// even on non-trusted repos, since they are explicitly configured as trusted
+		if c.Privileged && (l.privilegedPlugins == nil || !utils.MatchImageDynamic(c.Image, *l.privilegedPlugins...)) {
 			errors = append(errors, "Insufficient trust level to use `privileged` mode")
 		}
 	}
