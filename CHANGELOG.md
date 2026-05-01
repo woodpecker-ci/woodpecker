@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-04-30
+## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-05-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Aex12, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @bclermont, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rfinnie, @rhafer, @samoli, @savv, @stardothosting, @utafrali
+@6543, @Aex12, @AhmadNajiKam, @CrimsonFez, @LUKIEYF, @LoricAndre, @M31ancholy, @MartinSchmidt, @Pnkcaht, @Sim-hu, @TumbleOwlee, @api2062, @bclermont, @brainbaking, @cliffmccarthy, @confusedsushi, @dccdis, @hhamalai, @hnb2, @lephuongbg, @mehrdadbn9, @mofr93, @myers, @myselfghost, @njaaazi, @packrat386, @paulovitorbal, @qwerty287, @rfinnie, @rhafer, @samoli, @savv, @stardothosting, @utafrali, @wucm667
 
 ### 🔒 Security
 
@@ -80,6 +80,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(web): escape HTML in commit messages to prevent XSS [[#6523](https://github.com/woodpecker-ci/woodpecker/pull/6523)]
 - fix(cli,server): fix trusted flags copy-paste bug and server nil pointer panic [[#6501](https://github.com/woodpecker-ci/woodpecker/pull/6501)]
 - Add refname to bitbucket commit status [[#6482](https://github.com/woodpecker-ci/woodpecker/pull/6482)]
 - Fix send on closed channel panic in SSE stream handlers [[#6456](https://github.com/woodpecker-ci/woodpecker/pull/6456)]
