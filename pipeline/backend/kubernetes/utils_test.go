@@ -71,3 +71,19 @@ func TestToDnsName(t *testing.T) {
 	_, err = toDNSName("-build-and-deploy")
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
+
+func TestGetHostnameOrEmpty(t *testing.T) {
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"Update repos", "update-repos"},
+		{"MY_STEP", "my-step"},
+		{"Build 🚀", ""},
+	}
+
+	for _, tt := range tests {
+		got := getHostnameOrEmpty(tt.in)
+		assert.Equal(t, tt.want, got, "input: %q", tt.in)
+	}
+}

@@ -17,7 +17,12 @@
             "success": "Repo is jez o",
             "enable": "Oschoidn",
             "enabled": "Is scho o",
-            "disabled": "Is aus"
+            "disabled": "Is aus",
+            "new_forge_repo": "Neis Repo auf da Forge",
+            "stale_wp_repo": "Oids Woodpecker Repo",
+            "conflict": "Konflikt",
+            "conflict_desc": "Des Repo is auf da Forge mid na nein ID erstäid woan, aba in Woodpecker is no a oids repo mim selbn Nama gspeichert. Entweda schmeist's oide weg und aktivierst's neue, oda du reparierst's alte.",
+            "forge_repo_missing": "Forge repo is ned do!"
         },
         "visibility": {
             "public": {
@@ -41,7 +46,7 @@
             "loading": "Lod grod…",
             "no_logs": "Koane Logs",
             "pipeline": "Pipeline #{pipelineId}",
-            "log_title": "Step-Logs",
+            "log_title": "Schrid-Logs",
             "log_download_error": "Beim Runterladn vom Log-File is wos schiaf ganga",
             "protected": {
                 "decline": "Oblehnen",
@@ -57,7 +62,7 @@
             "no_pipelines": "Do san no koane Pipelines gstartet worn.",
             "no_pipeline_steps": "Koane Pipeline-Schrid do!",
             "step_not_started": "Der Schrid hod no ned ogfangd.",
-            "log_delete_confirm": "Wuisd du wirkli de Step-Logs löschn?",
+            "log_delete_confirm": "Wuisd du wirkli de Schrid-Logs löschn?",
             "log_delete_error": "'Da ganze Bus is hi!'",
             "actions": {
                 "cancel": "Abbrechn",
@@ -69,7 +74,8 @@
                 "log_download": "Runterladn",
                 "log_delete": "Löschn",
                 "log_auto_scroll": "Automatisch scrollen oschoidn",
-                "log_auto_scroll_off": "Automatisch scrollen ausschoidn"
+                "log_auto_scroll_off": "Automatisch scrollen ausschoidn",
+                "skipped": "Da Schrid is ausglosn woan."
             },
             "event": {
                 "push": "Push",
@@ -93,7 +99,8 @@
                 "declined": "obglehnt",
                 "error": "Fella",
                 "failure": "is schiaf ganga",
-                "killed": "obgwürgt"
+                "killed": "obgwürgt",
+                "canceled": "abgwürgt"
             },
             "errors": "Fella",
             "warnings": "Warnunga",
@@ -110,7 +117,15 @@
                 "metadata_exec_title": "Pipeline lokal neistarten",
                 "metadata_exec_desc": "Load de Metadaten vo dera Pipeline runter um se lokal laufa zu lassn. So kost Probleme fixen und Änderunga testn bevors'd sie commitest. De Woodpecker CLI muas lokal in da gleichn Version wia da Server sei."
             },
-            "view": "Pipeline oschaun"
+            "view": "Pipeline oschaun",
+            "load_more": "Zoag mea o",
+            "cancel_info": {
+                "superseded_by": "Ersetzt duach #{pipelineId}",
+                "canceled_by_user": "Abgewürgt duach {user}",
+                "canceled_by_step": "Abgwürgt wenga {step}"
+            },
+            "version": "De Woodpecker Version auf dea die Pipeline ausgefüad wurde.",
+            "version_header": "Woodpecker Version"
         },
         "manual_pipeline": {
             "title": "Pipeline vo Hand starten",
@@ -123,7 +138,8 @@
                 "name": "Variabl-Nama",
                 "value": "Variabl-Wert"
             },
-            "show_pipelines": "Pipelines zoang"
+            "show_pipelines": "Pipelines zoang",
+            "no_manual_workflows": "Koane basadn Workflows gfundn. Bas auf das zumindest oa Workflow auf des von hand lafa Ereignis head."
         },
         "activity": "Ois da Reih nach",
         "branches": "Branches",
@@ -207,7 +223,8 @@
                     "placeholder": "Zeitplan"
                 },
                 "edit": "Cron endan",
-                "delete": "Cron löschn"
+                "delete": "Cron löschn",
+                "enabled": "Eigscheudn"
             },
             "badge": {
                 "badge": "Plakettl",
@@ -215,7 +232,10 @@
                 "type_url": "URL",
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
-                "branch": "Branch"
+                "branch": "Branch",
+                "events": "Events",
+                "step": "Schrid",
+                "workflow": "Workflow"
             },
             "actions": {
                 "actions": "Aktiona",
@@ -383,14 +403,15 @@
         "saved": "Secret gspeichert",
         "plugins": {
             "images": "Nur verfügbar füa de folgenden Plugins",
-            "desc": "Liste vo Plugin-Images wo des Secret verfügbar is. Leer lassn zum olle Plugins und normale Steps erlaubn."
+            "desc": "Liste vo Plugin-Images wo des Secret verfügbar is. Leer lassn zum olle Plugins und normale Schrid erlaubn."
         },
         "events": {
             "events": "Verfügbar bei de folgenden Events",
             "warning": "Aufpassn: Secrets bei Pull Requests freigem ko gfährlich sei, weil böswillige Leit mid am bösen Pull Request dei Secrets klaubn kennan."
         },
         "edit": "Secret beabadn",
-        "delete": "Secret löschn"
+        "delete": "Secret löschn",
+        "note": "Notizn"
     },
     "info": "Info",
     "cli_login_failed": "CLI-Login is schiaf ganga",
@@ -587,5 +608,13 @@
     "exit_fullscreen": "Vollbild verlassn",
     "help_translating": "Du kost helfa Woodpecker in dei Sproch zu übersetzen auf {0}.",
     "weblate": "unserm Weblate",
-    "disabled": "Abgschoidn"
+    "disabled": "Abgschoidn",
+    "config_extension_exclusive": "Ganz Alloa",
+    "config_extension_exclusive_desc": "Wenn ogschoid, werdn alle anderen konfigurations Möglichkeitn überganga, a de Forge.",
+    "global_level_registry": "Globale Registry",
+    "org_level_registry": "Organisations-Registry",
+    "registry_extension_endpoint": "Registry-Erweiterungs-Endpunkt",
+    "secret_extension_endpoint": "Secret-Erweitarung-Endpunkt",
+    "extension_netrc": "Dua Netrc Anmeldedaten dazua",
+    "extension_netrc_desc": "Schig de Forge Netrc Anmeldetaten zua Erweiterung mid."
 }

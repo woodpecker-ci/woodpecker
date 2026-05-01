@@ -72,8 +72,8 @@ type Store interface {
 	GetPipelineNumber(*model.Repo, int64) (*model.Pipeline, error)
 	// GetPipelineBadge gets the last relevant pipeline for the badge.
 	GetPipelineBadge(*model.Repo, string, []model.WebhookEvent) (*model.Pipeline, error)
-	// GetPipelineLast gets the last pipeline for the branch.
-	GetPipelineLast(*model.Repo, string) (*model.Pipeline, error)
+	// GetPipelineLastByBranch gets the last pipeline for the branch.
+	GetPipelineLastByBranch(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository
@@ -136,11 +136,9 @@ type Store interface {
 	GlobalRegistryList(*model.ListOptions) ([]*model.Registry, error)
 
 	// Steps
-	StepLoad(int64) (*model.Step, error)
-	StepFind(*model.Pipeline, int) (*model.Step, error)
-	StepByUUID(string) (*model.Step, error)
-	StepChild(*model.Pipeline, int, string) (*model.Step, error)
-	StepList(*model.Pipeline) ([]*model.Step, error)
+	StepLoad(pipelineID, stepID int64) (*model.Step, error)
+	StepByUUID(uuid string) (*model.Step, error)
+	StepList(pipelineID int64) ([]*model.Step, error)
 	StepUpdate(*model.Step) error
 	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 

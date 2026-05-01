@@ -80,7 +80,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SECRETS_FILE"),
-		Name:    "secrets",
+		Name:    "secrets-file",
 		Usage:   "path to yaml file with secrets map",
 	},
 

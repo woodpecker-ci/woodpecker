@@ -20,8 +20,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	openapi_files "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	swaggo_files "github.com/swaggo/files"
+	swaggo_gin_swagger "github.com/swaggo/gin-swagger"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -80,7 +80,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 func setupSwaggerConfigAndRoutes(e *gin.Engine) {
 	openapi.SwaggerInfo.Host = getHost(server.Config.Server.Host)
 	openapi.SwaggerInfo.BasePath = server.Config.Server.RootPath + "/api"
-	e.GET(server.Config.Server.RootPath+"/swagger/*any", ginSwagger.WrapHandler(openapi_files.Handler))
+	e.GET(server.Config.Server.RootPath+"/swagger/*any", swaggo_gin_swagger.WrapHandler(swaggo_files.Handler))
 }
 
 func getHost(s string) string {

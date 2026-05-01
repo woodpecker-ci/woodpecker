@@ -34,7 +34,7 @@ func TestCreatePipeline(t *testing.T) {
 	store := store_mocks.NewMockStore(t)
 	ctx := t.Context()
 
-	creator := &model.User{
+	repoUser := &model.User{
 		ID:    1,
 		Login: "user1",
 	}
@@ -44,12 +44,13 @@ func TestCreatePipeline(t *testing.T) {
 		Owner:    "owner1",
 		FullName: "repo1/owner1",
 		Branch:   "default",
+		UserID:   repoUser.ID,
 	}
 
 	// mock things
 	store.On("GetRepo", mock.Anything).Return(repo1, nil)
-	store.On("GetUser", mock.Anything).Return(creator, nil)
-	_forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return(&model.Commit{
+	store.On("GetUser", mock.Anything).Return(repoUser, nil)
+	_forge.On("BranchHead", mock.Anything, repoUser, repo1, "default").Return(&model.Commit{
 		ForgeURL: "https://example.com/sha1",
 		SHA:      "sha1",
 	}, nil)
@@ -65,9 +66,8 @@ func TestCreatePipeline(t *testing.T) {
 		Commit:   "sha1",
 		Event:    "cron",
 		ForgeURL: "https://example.com/sha1",
-		Message:  "test",
 		Ref:      "refs/heads/default",
-		Sender:   "test",
+		Cron:     "test",
 	}, pipeline)
 }
 

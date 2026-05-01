@@ -36,7 +36,7 @@ func TestStringOrSliceYaml(t *testing.T) {
 		assert.Equal(t, StringOrSlice{"bar", "baz"}, s.Foo)
 
 		d, err := yaml.Marshal(&s)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		s2 := StructStringOrSlice{}
 		assert.NoError(t, yaml.Unmarshal(d, &s2))

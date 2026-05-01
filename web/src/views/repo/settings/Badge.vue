@@ -39,6 +39,12 @@
         @update:model-value="eventsChanged"
       />
     </InputField>
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.workflow')">
+      <TextField :id="id" v-model="workflow" />
+    </InputField>
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.step')">
+      <TextField :id="id" v-model="step" />
+    </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
       <div>
@@ -57,6 +63,7 @@ import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import type { CheckboxOption, SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
+import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
@@ -74,6 +81,8 @@ const defaultBranch = computed(() => repo.value.default_branch);
 const branches = ref<SelectOption[]>([]);
 const branch = ref<string>('');
 const events = ref<string[]>([WebhookEvents.Push]);
+const workflow = ref<string>('');
+const step = ref<string>('');
 
 async function loadBranches() {
   branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
@@ -103,6 +112,14 @@ const badgeUrl = computed(() => {
     // dont set events parameters, if only WebhookEvents.Push is selected, as this is the default behaviour
     if (events.value.length !== 1 || events.value.at(0) !== WebhookEvents.Push) {
       params.push(`events=${encodeURIComponent(events.value.join(','))}`);
+    }
+  }
+
+  if (workflow.value.trim().length > 0) {
+    params.push(`workflow=${encodeURIComponent(workflow.value.trim())}`);
+
+    if (step.value.trim().length > 0) {
+      params.push(`step=${encodeURIComponent(step.value.trim())}`);
     }
   }
 

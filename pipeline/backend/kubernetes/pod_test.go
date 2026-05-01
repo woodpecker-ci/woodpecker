@@ -20,7 +20,8 @@ import (
 
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -55,8 +56,8 @@ func TestStepToPodName(t *testing.T) {
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService, Ports: []types.Port{{Number: 5432}}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
-	// Detached service
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true, Ports: []types.Port{{Number: 5432}}})
+	// Service
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true, Type: types.StepTypeService, Ports: []types.Port{{Number: 5432}}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
 	// Detached long running container
@@ -81,11 +82,12 @@ func TestPodMeta(t *testing.T) {
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", meta.Labels[ServiceLabel])
 	assert.EqualValues(t, taskUUID, meta.Labels[TaskUUIDLabel])
 
-	// Detached service
+	// Service
 	meta, err = podMeta(&types.Step{
 		Name:        "postgres",
 		UUID:        "01he8bebctabr3kg",
 		Detached:    true,
+		Type:        types.StepTypeService,
 		Image:       "postgres:16",
 		WorkingDir:  "/woodpecker/src",
 		Environment: map[string]string{"CI": "woodpecker"},
@@ -118,6 +120,18 @@ func TestStepLabel(t *testing.T) {
 
 	_, err = stepLabel(&types.Step{Name: ".build.image"})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+}
+
+func TestPodHostnameSanitized(t *testing.T) {
+	pod, err := mkPod(&types.Step{
+		Name:        "Update repos",
+		Image:       "alpine:latest",
+		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
+		WorkingDir:  "/woodpecker/src",
+		Environment: map[string]string{},
+	}, &config{Namespace: "woodpecker"}, "wp-01he8bebctabr3kgk0qj36d2me-1", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "update-repos", pod.Spec.Hostname)
 }
 
 func TestTinyPod(t *testing.T) {
@@ -287,7 +301,11 @@ func TestFullPod(t *testing.T) {
 					],
 					"imagePullPolicy": "Always",
 					"securityContext": {
-						"privileged": true
+						"privileged": true,
+						"allowPrivilegeEscalation": false,
+						"capabilities": {
+							"drop": ["ALL"]
+						}
 					}
 				}
 			],
@@ -363,14 +381,18 @@ func TestFullPod(t *testing.T) {
 		{Number: 2345, Protocol: "tcp"},
 		{Number: 3456, Protocol: "udp"},
 	}
-	fsGroupChangePolicy := v1.PodFSGroupChangePolicy("OnRootMismatch")
+	fsGroupChangePolicy := kube_core_v1.PodFSGroupChangePolicy("OnRootMismatch")
 	secCtx := SecurityContext{
-		Privileged:          newBool(true),
-		RunAsNonRoot:        newBool(true),
-		RunAsUser:           newInt64(101),
-		RunAsGroup:          newInt64(101),
-		FSGroup:             newInt64(101),
-		FsGroupChangePolicy: &fsGroupChangePolicy,
+		Privileged:               newBool(true),
+		RunAsNonRoot:             newBool(true),
+		RunAsUser:                newInt64(101),
+		RunAsGroup:               newInt64(101),
+		FSGroup:                  newInt64(101),
+		FsGroupChangePolicy:      &fsGroupChangePolicy,
+		AllowPrivilegeEscalation: newBool(false),
+		Capabilities: &Capabilities{
+			Drop: []string{"ALL"},
+		},
 		SeccompProfile: &SecProfile{
 			Type:             "Localhost",
 			LocalhostProfile: "profiles/audit.json",
@@ -433,7 +455,7 @@ func TestFullPod(t *testing.T) {
 }
 
 func TestPodPrivilege(t *testing.T) {
-	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*v1.Pod, error) {
+	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*kube_core_v1.Pod, error) {
 		return mkPod(&types.Step{
 			Name:       "go-test",
 			Image:      "golang:1.16",
@@ -467,19 +489,19 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(false, false, secCtx)
 	assert.NoError(t, err)
-	assert.Equal(t, &v1.PodSecurityContext{
-		SELinuxOptions:           (*v1.SELinuxOptions)(nil),
-		WindowsOptions:           (*v1.WindowsSecurityContextOptions)(nil),
+	assert.Equal(t, &kube_core_v1.PodSecurityContext{
+		SELinuxOptions:           (*kube_core_v1.SELinuxOptions)(nil),
+		WindowsOptions:           (*kube_core_v1.WindowsSecurityContextOptions)(nil),
 		RunAsUser:                (*int64)(nil),
 		RunAsGroup:               (*int64)(nil),
 		RunAsNonRoot:             (*bool)(nil),
 		SupplementalGroups:       []int64(nil),
-		SupplementalGroupsPolicy: (*v1.SupplementalGroupsPolicy)(nil),
+		SupplementalGroupsPolicy: (*kube_core_v1.SupplementalGroupsPolicy)(nil),
 		FSGroup:                  newInt64(0),
-		Sysctls:                  []v1.Sysctl(nil),
-		FSGroupChangePolicy:      (*v1.PodFSGroupChangePolicy)(nil),
-		SeccompProfile:           (*v1.SeccompProfile)(nil),
-		AppArmorProfile:          (*v1.AppArmorProfile)(nil),
+		Sysctls:                  []kube_core_v1.Sysctl(nil),
+		FSGroupChangePolicy:      (*kube_core_v1.PodFSGroupChangePolicy)(nil),
+		SeccompProfile:           (*kube_core_v1.SeccompProfile)(nil),
+		AppArmorProfile:          (*kube_core_v1.AppArmorProfile)(nil),
 	}, pod.Spec.SecurityContext)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
 
@@ -490,7 +512,7 @@ func TestPodPrivilege(t *testing.T) {
 	pod, err = createTestPod(false, false, secCtx)
 	assert.NoError(t, err)
 	assert.Nil(t, pod.Spec.SecurityContext)
-	assert.Equal(t, (*v1.PodSecurityContext)(nil), pod.Spec.SecurityContext)
+	assert.Equal(t, (*kube_core_v1.PodSecurityContext)(nil), pod.Spec.SecurityContext)
 
 	// step is privileged and security context is requesting privileged
 	secCtx = SecurityContext{
@@ -513,6 +535,55 @@ func TestPodPrivilege(t *testing.T) {
 	pod, err = createTestPod(false, true, secCtx)
 	assert.NoError(t, err)
 	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+
+	// non-privileged step with allowPrivilegeEscalation=false: applied
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(false),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// non-privileged step with allowPrivilegeEscalation=true: ignored
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(true),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// privileged step with allowPrivilegeEscalation=true: ignored
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(true),
+	}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+
+	// non-privileged step with capabilities drop: applied
+	secCtx = SecurityContext{
+		Capabilities: &Capabilities{Drop: []string{"ALL"}},
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Equal(t, []kube_core_v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Capabilities.Add)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// non-privileged step with drop capabilities and allowPrivilegeEscalation=false: both applied
+	secCtx = SecurityContext{
+		AllowPrivilegeEscalation: newBool(false),
+		Capabilities:             &Capabilities{Drop: []string{"ALL"}},
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext.Privileged)
+	assert.False(t, *pod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, []kube_core_v1.Capability{"ALL"}, pod.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 }
 
 func TestScratchPod(t *testing.T) {
@@ -891,4 +962,415 @@ func TestStepSecret(t *testing.T) {
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(secretJSON), expected)
+}
+
+func TestPodAffinity(t *testing.T) {
+	const expected = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "affinity-test",
+				"woodpecker-ci.org/step": "affinity-test",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never",
+			"affinity": {
+				"podAffinity": {
+					"requiredDuringSchedulingIgnoredDuringExecution": [
+						{
+							"labelSelector": {},
+							"matchLabelKeys": ["woodpecker-ci.org/task-uuid"],
+							"topologyKey": "kubernetes.io/hostname"
+						}
+					]
+				}
+			},
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "affinity-test"
+		},
+		"status": {}
+	}`
+
+	agentAffinity := &kube_core_v1.Affinity{
+		PodAffinity: &kube_core_v1.PodAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: []kube_core_v1.PodAffinityTerm{
+				{
+					LabelSelector:  &kube_meta_v1.LabelSelector{},
+					MatchLabelKeys: []string{"woodpecker-ci.org/task-uuid"},
+					TopologyKey:    "kubernetes.io/hostname",
+				},
+			},
+		},
+	}
+
+	pod, err := mkPod(&types.Step{
+		Name:  "affinity-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}, &config{
+		Namespace:                "woodpecker",
+		PodAffinity:              agentAffinity,
+		PodAffinityAllowFromStep: false,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestPodAffinityAllowFromStep(t *testing.T) {
+	const expectedDisallow = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "affinity-test",
+				"woodpecker-ci.org/step": "affinity-test",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never",
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "affinity-test"
+		},
+		"status": {}
+	}`
+	const expectedAllow = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "affinity-test",
+				"woodpecker-ci.org/step": "affinity-test",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never",
+			"affinity": {
+				"podAntiAffinity": {
+					"preferredDuringSchedulingIgnoredDuringExecution": [
+						{
+							"weight": 100,
+							"podAffinityTerm": {
+								"labelSelector": {
+									"matchLabels": {
+										"app": "woodpecker"
+									}
+								},
+								"topologyKey": "kubernetes.io/hostname"
+							}
+						}
+					]
+				}
+			},
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "affinity-test"
+		},
+		"status": {}
+	}`
+
+	stepAffinity := &kube_core_v1.Affinity{
+		PodAntiAffinity: &kube_core_v1.PodAntiAffinity{
+			PreferredDuringSchedulingIgnoredDuringExecution: []kube_core_v1.WeightedPodAffinityTerm{
+				{
+					Weight: 100,
+					PodAffinityTerm: kube_core_v1.PodAffinityTerm{
+						LabelSelector: &kube_meta_v1.LabelSelector{
+							MatchLabels: map[string]string{
+								"app": "woodpecker",
+							},
+						},
+						TopologyKey: "kubernetes.io/hostname",
+					},
+				},
+			},
+		},
+	}
+
+	step := &types.Step{
+		Name:  "affinity-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}
+
+	pod, err := mkPod(step, &config{
+		Namespace:                "woodpecker",
+		PodAffinity:              nil,
+		PodAffinityAllowFromStep: false,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Affinity: stepAffinity,
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expectedDisallow)
+
+	pod, err = mkPod(step, &config{
+		Namespace:                "woodpecker",
+		PodAffinity:              nil,
+		PodAffinityAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Affinity: stepAffinity,
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err = json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja = jsonassert.New(t)
+	ja.Assertf(string(podJSON), expectedAllow)
+}
+
+func TestPodAffinityStepOverridesAgent(t *testing.T) {
+	const expected = `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"labels": {
+				"step": "affinity-test",
+				"woodpecker-ci.org/step": "affinity-test",
+				"woodpecker-ci.org/task-uuid": "11301"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "alpine",
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never",
+			"affinity": {
+				"nodeAffinity": {
+					"requiredDuringSchedulingIgnoredDuringExecution": {
+						"nodeSelectorTerms": [
+							{
+								"matchExpressions": [
+									{
+										"key": "disk-type",
+										"operator": "In",
+										"values": ["ssd"]
+									}
+								]
+							}
+						]
+					}
+				}
+			},
+			"dnsConfig": {
+				"searches": ["wp-hsvc-11301.woodpecker.svc.cluster.local"]
+			},
+			"subdomain": "wp-hsvc-11301",
+			"hostname": "affinity-test"
+		},
+		"status": {}
+	}`
+
+	agentAffinity := &kube_core_v1.Affinity{
+		NodeAffinity: &kube_core_v1.NodeAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: &kube_core_v1.NodeSelector{
+				NodeSelectorTerms: []kube_core_v1.NodeSelectorTerm{
+					{
+						MatchExpressions: []kube_core_v1.NodeSelectorRequirement{
+							{
+								Key:      "topology.kubernetes.io/zone",
+								Operator: kube_core_v1.NodeSelectorOpIn,
+								Values:   []string{"eu-central-1a"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	stepAffinity := &kube_core_v1.Affinity{
+		NodeAffinity: &kube_core_v1.NodeAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: &kube_core_v1.NodeSelector{
+				NodeSelectorTerms: []kube_core_v1.NodeSelectorTerm{
+					{
+						MatchExpressions: []kube_core_v1.NodeSelectorRequirement{
+							{
+								Key:      "disk-type",
+								Operator: kube_core_v1.NodeSelectorOpIn,
+								Values:   []string{"ssd"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	pod, err := mkPod(&types.Step{
+		Name:  "affinity-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}, &config{
+		Namespace:                "woodpecker",
+		PodAffinity:              agentAffinity,
+		PodAffinityAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Affinity: stepAffinity,
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestInitContainer(t *testing.T) {
+	const expected = `
+	{
+		"name": "init-wp-01he8bebctabr3kgk0qj36d2me-0",
+		"image": "busybox:stable-musl",
+		"imagePullPolicy": "Always",
+		"args": [
+			"mkdir",
+			"-p",
+			"/woodpecker/src/github.com/woodpecker-ci/woodpecker"
+		],
+		"resources": {
+			"requests": {
+				"cpu": "5m",
+				"memory": "5Mi"
+			},
+			"limits": {
+				"cpu": "5m",
+				"memory": "5Mi"
+			}
+		},
+		"securityContext": {
+			"allowPrivilegeEscalation": false,
+			"capabilities": {"drop": ["ALL"]}
+		},
+		"volumeMounts": [
+			{
+				"name": "workspace",
+				"mountPath": "/woodpecker/src"
+			}
+		]
+	}`
+
+	pod, err := mkPod(&types.Step{
+		Name:       "clone",
+		Image:      "docker.io/woodpeckerci/plugin-git",
+		UUID:       "01he8bebctabr3kgk0qj36d2me-0",
+		WorkingDir: "/woodpecker/src/github.com/woodpecker-ci/woodpecker",
+		Volumes:    []string{"workspace:/woodpecker/src", "other:/other"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(true),
+			RunAsUser:    newInt64(1000),
+		},
+	}, taskUUID)
+	assert.NoError(t, err)
+
+	assert.NotNil(t, pod.Spec.InitContainers)
+	assert.NotEmpty(t, pod.Spec.InitContainers)
+	assert.Len(t, pod.Spec.InitContainers, 1)
+	podJSON, err := json.Marshal(pod.Spec.InitContainers[0])
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestUnrequiredInitContainer(t *testing.T) {
+	createTestPod := func(workingDir string, backendOpts BackendOptions) (*kube_core_v1.Pod, error) {
+		return mkPod(&types.Step{
+			Name:       "init-container-test",
+			Image:      "docker.io/woodpeckerci/plugin-git",
+			UUID:       "01he8bebctabr3kgk0qj36d2me-0",
+			WorkingDir: workingDir,
+			Volumes:    []string{"workspace:/woodpecker/src"},
+		}, &config{
+			Namespace: "woodpecker",
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", backendOpts, taskUUID)
+	}
+	// no security context (pod running as root), does not need init container
+	pod, err := createTestPod("/woodpecker/src/github.com/woodpecker-ci/woodpecker", BackendOptions{})
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.InitContainers)
+
+	// explicit security context requesting root, does not need init container
+	pod, err = createTestPod("/woodpecker/src/github.com/woodpecker-ci/woodpecker", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(false),
+			RunAsUser:    newInt64(0),
+		},
+	})
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.InitContainers)
+
+	// working dir is outside of the workspace volume, does not need init container
+	pod, err = createTestPod("/tmp", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(true),
+			RunAsUser:    newInt64(1000),
+		},
+	})
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.InitContainers)
+
+	// workingDir is exactly the same as the workspace volume mount path, does not need init container
+	pod, err = createTestPod("/woodpecker/src", BackendOptions{
+		SecurityContext: &SecurityContext{
+			RunAsNonRoot: newBool(true),
+			RunAsUser:    newInt64(1000),
+		},
+	})
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.InitContainers)
 }

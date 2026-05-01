@@ -114,12 +114,10 @@ func TestRegistryDelete(t *testing.T) {
 		Username: "foo",
 		Password: "bar",
 	}
-	if !assert.NoError(t, store.RegistryCreate(reg1)) {
-		return
-	}
+	require.NoError(t, store.RegistryCreate(reg1))
 
 	assert.NoError(t, store.RegistryDelete(reg1))
-	assert.ErrorIs(t, store.RegistryDelete(reg1), types.RecordNotExist)
+	assert.ErrorIs(t, store.RegistryDelete(reg1), types.ErrRecordNotExist)
 }
 
 func createTestRegistries(t *testing.T, store *storage) {

@@ -5,7 +5,7 @@
       :key="secret.id"
       class="bg-wp-background-200! dark:bg-wp-background-200! items-center"
     >
-      <span>{{ secret.name }}</span>
+      <span :title="secret.note">{{ secret.name }}</span>
       <Badge
         v-if="secret.edit === false"
         class="ml-2"

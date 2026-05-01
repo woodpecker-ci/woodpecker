@@ -3,9 +3,10 @@
     <input
       :id="`radio-${id}-${option.value}`"
       type="radio"
-      class="radio border-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-full border"
+      class="radio border-wp-control-neutral-200 disabled:border-wp-control-neutral-200 disabled:bg-wp-control-neutral-100 dark:disabled:bg-wp-control-neutral-200 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-full border"
       :value="option.value"
       :checked="innerValue?.includes(option.value)"
+      :disabled="disabled || false"
       @click="innerValue = option.value"
     />
     <div class="ml-4 flex flex-col">
@@ -23,6 +24,7 @@ import type { RadioOption } from './form.types';
 const props = defineProps<{
   modelValue: string;
   options: RadioOption[];
+  disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -64,6 +66,10 @@ const id = (Math.random() + 1).toString(36).substring(7);
   background: white;
   transform: translate(-50%, -50%);
   opacity: 0;
+}
+
+.radio:disabled::before {
+  border-color: var(--wp-text-alt-100);
 }
 
 .radio:checked::before {

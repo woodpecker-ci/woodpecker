@@ -28,7 +28,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 type dummy struct {
@@ -49,10 +49,25 @@ const (
 	stepStateStarted   = "started"
 	stepStateDone      = "done"
 	testServiceTimeout = 1 * time.Second
+
+	// ExitCodeCanceled is the exit code returned when a step's context is
+	// canceled while it is sleeping. 130 matches the SIGINT shell convention
+	// (128 + signal 2) used by real container runtimes.
+	ExitCodeCanceled = 130
 )
 
+// stepKey returns the kv-store key for a step's state.
+func stepKey(taskUUID, stepUUID string) string {
+	return "task_" + taskUUID + "_step_" + stepUUID
+}
+
+// workflowKey returns the kv-store key for a workflow's state.
+func workflowKey(taskUUID string) string {
+	return "task_" + taskUUID
+}
+
 // New returns a dummy backend.
-func New() backend.Backend {
+func New() backend_types.Backend {
 	return &dummy{
 		kv: sync.Map{},
 	}
@@ -71,30 +86,31 @@ func (e *dummy) Flags() []cli.Flag {
 }
 
 // Load new client for Docker Backend using environment variables.
-func (e *dummy) Load(_ context.Context) (*backend.BackendInfo, error) {
-	return &backend.BackendInfo{
+func (e *dummy) Load(_ context.Context) (*backend_types.BackendInfo, error) {
+	return &backend_types.BackendInfo{
 		Platform: "dummy",
 	}, nil
 }
 
-func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) SetupWorkflow(_ context.Context, _ *backend_types.Config, taskUUID string) error {
 	if taskUUID == WorkflowSetupFailUUID {
 		return fmt.Errorf("expected fail to setup workflow")
 	}
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
-	e.kv.Store("task_"+taskUUID, "setup")
+	e.kv.Store(workflowKey(taskUUID), make(chan struct{}))
 	return nil
 }
 
-func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) StartStep(_ context.Context, step *backend_types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	// internal state checks
-	_, exist := e.kv.Load("task_" + taskUUID)
+	_, exist := e.kv.Load(workflowKey(taskUUID))
 	if !exist {
 		return fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
 	}
-	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	key := stepKey(taskUUID, step.UUID)
+	stepState, stepExist := e.kv.Load(key)
 	if stepExist {
 		// Detect issues like https://github.com/woodpecker-ci/woodpecker/issues/3494
 		return fmt.Errorf("StartStep detected already started step '%s' (%s) in state: %s", step.Name, step.UUID, stepState)
@@ -109,53 +125,81 @@ func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string
 		return fmt.Errorf("expected step type '%s' but got '%s'", expectStepType, step.Type)
 	}
 
-	e.kv.Store(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID), stepStateStarted)
+	e.kv.Store(key, stepStateStarted)
 	return nil
 }
 
-func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+// canceledState returns the state for a step whose context was canceled.
+func canceledState() *backend_types.State {
+	return &backend_types.State{ExitCode: ExitCodeCanceled, Exited: true}
+}
+
+// sleepWithContext blocks for the given duration or until ctx is canceled.
+// Returns true if canceled, false if the sleep completed normally.
+func sleepWithContext(ctx context.Context, stop <-chan struct{}, d time.Duration) (canceled bool) {
+	if ctx.Err() != nil {
+		return true
+	}
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-t.C:
+		return false
+	case <-ctx.Done():
+		return true
+	case <-stop:
+		return false
+	}
+}
+
+func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
-	_, exist := e.kv.Load("task_" + taskUUID)
+	rawWC, exist := e.kv.Load(workflowKey(taskUUID))
 	if !exist {
 		err := fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
-		return &backend.State{Error: err}, err
+		return &backend_types.State{Error: err}, err
+	}
+	wc, ok := rawWC.(chan struct{})
+	if !ok {
+		return nil, fmt.Errorf("workflow stop chan not found")
 	}
 
+	key := stepKey(taskUUID, step.UUID)
+
 	// check state
-	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	stepState, stepExist := e.kv.Load(key)
 	if !stepExist {
 		err := fmt.Errorf("WaitStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
-		return &backend.State{Error: err}, err
+		return &backend_types.State{Error: err}, err
 	}
 	if stepState != stepStateStarted {
 		err := fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
-		return &backend.State{Error: err}, err
+		return &backend_types.State{Error: err}, err
 	}
 
-	// extend wait time logic
 	if sleep, sleepExist := step.Environment[EnvKeyStepSleep]; sleepExist {
 		toSleep, err := time.ParseDuration(sleep)
 		if err != nil {
 			err = fmt.Errorf("WaitStep fail to parse sleep duration: %w", err)
-			return &backend.State{Error: err}, err
+			return &backend_types.State{Error: err}, err
 		}
-		time.Sleep(toSleep)
-	} else {
-		if step.Type == backend.StepTypeService {
-			select {
-			case <-time.NewTimer(testServiceTimeout).C:
-				err := fmt.Errorf("WaitStep fail due to timeout of service after 1 second")
-				return &backend.State{Error: err}, err
-			case <-ctx.Done():
-				// context for service closed ... we can move forward
-			}
+		if sleepWithContext(ctx, wc, toSleep) {
+			e.kv.Store(key, stepStateDone)
+			return canceledState(), nil
+		}
+	} else if step.Type == backend_types.StepTypeService {
+		if sleepWithContext(ctx, wc, testServiceTimeout) {
+			// context for service closed — we can move forward
 		} else {
-			time.Sleep(time.Nanosecond)
+			err := fmt.Errorf("WaitStep fail due to timeout of service after 1 second")
+			return &backend_types.State{Error: err}, err
 		}
+	} else {
+		time.Sleep(time.Nanosecond)
 	}
 
-	e.kv.Store(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID), stepStateDone)
+	e.kv.Store(key, stepStateDone)
 
 	oomKilled, _ := strconv.ParseBool(step.Environment[EnvKeyStepOOMKilled])
 	exitCode := 0
@@ -164,28 +208,30 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID strin
 		exitCode, _ = strconv.Atoi(strings.TrimSpace(code))
 	}
 
-	return &backend.State{
+	return &backend_types.State{
 		ExitCode:  exitCode,
 		Exited:    true,
 		OOMKilled: oomKilled,
 	}, nil
 }
 
-func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+func (e *dummy) TailStep(_ context.Context, step *backend_types.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
-	_, exist := e.kv.Load("task_" + taskUUID)
+	_, exist := e.kv.Load(workflowKey(taskUUID))
 	if !exist {
 		return nil, fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
 	}
 
+	key := stepKey(taskUUID, step.UUID)
+
 	// check state
-	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	stepState, stepExist := e.kv.Load(key)
 	if !stepExist {
-		return nil, fmt.Errorf("WaitStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
+		return nil, fmt.Errorf("TailStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
 	}
 	if stepState != stepStateStarted {
-		return nil, fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
+		return nil, fmt.Errorf("TailStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
 	}
 
 	if tailShouldFail, _ := strconv.ParseBool(step.Environment[EnvKeyStepTailFail]); tailShouldFail {
@@ -195,39 +241,49 @@ func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string)
 	return io.NopCloser(strings.NewReader(dummyExecStepOutput(step))), nil
 }
 
-func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) DestroyStep(_ context.Context, step *backend_types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
-	_, exist := e.kv.Load("task_" + taskUUID)
+	_, exist := e.kv.Load(workflowKey(taskUUID))
 	if !exist {
-		return fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
+		return nil
 	}
+
+	key := stepKey(taskUUID, step.UUID)
 
 	// check state
-	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	stepState, stepExist := e.kv.Load(key)
 	if !stepExist {
-		return fmt.Errorf("WaitStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
+		return fmt.Errorf("DestroyStep expect step '%s' (%s) to be created but found none", step.Name, step.UUID)
 	}
-	if stepState != stepStateDone {
-		return fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateDone, stepState)
+	// Allow destroying a step in 'started' state: this happens when the
+	// workflow context is canceled before WaitStep completes.
+	if stepState != stepStateDone && stepState != stepStateStarted {
+		return fmt.Errorf("DestroyStep expect step '%s' (%s) to be '%s' or '%s' but it is: %s", step.Name, step.UUID, stepStateDone, stepStateStarted, stepState)
 	}
 
-	e.kv.Delete(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	e.kv.Delete(key)
 	return nil
 }
 
-func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend_types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
-	_, exist := e.kv.Load("task_" + taskUUID)
+	rawWC, exist := e.kv.Load(workflowKey(taskUUID))
 	if !exist {
 		return fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
 	}
-	e.kv.Delete("task_" + taskUUID)
+	wc, ok := rawWC.(chan struct{})
+	if !ok {
+		return fmt.Errorf("workflow stop chan not found")
+	}
+	close(wc)
+
+	e.kv.Delete(workflowKey(taskUUID))
 	return nil
 }
 
-func dummyExecStepOutput(step *backend.Step) string {
+func dummyExecStepOutput(step *backend_types.Step) string {
 	return fmt.Sprintf(`StepName: %s
 StepType: %s
 StepUUID: %s

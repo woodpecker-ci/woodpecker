@@ -15,6 +15,7 @@
 package registry
 
 import (
+	"context"
 	"errors"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -42,8 +43,8 @@ func (c *combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*mode
 	return c.dbRegistry.RegistryList(repo, p)
 }
 
-func (c *combined) RegistryListPipeline(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
-	dbRegistries, err := c.dbRegistry.RegistryListPipeline(repo, pipeline)
+func (c *combined) RegistryListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Registry, error) {
+	dbRegistries, err := c.dbRegistry.RegistryListPipeline(ctx, repo, pipeline, netrc)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +109,7 @@ func (c *combined) OrgRegistryDelete(owner int64, addr string) error {
 
 func (c *combined) GlobalRegistryFind(addr string) (*model.Registry, error) {
 	registry, err := c.dbRegistry.GlobalRegistryFind(addr)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return nil, err
 	}
 	if registry != nil {
@@ -119,7 +120,7 @@ func (c *combined) GlobalRegistryFind(addr string) (*model.Registry, error) {
 			return registry, nil
 		}
 	}
-	return nil, types.RecordNotExist
+	return nil, types.ErrRecordNotExist
 }
 
 func (c *combined) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {

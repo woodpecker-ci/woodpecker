@@ -20,10 +20,10 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/google/tink/go/aead"
-	insecure_clear_text_keyset "github.com/google/tink/go/insecurecleartextkeyset"
-	"github.com/google/tink/go/keyset"
 	"github.com/rs/zerolog/log"
+	"github.com/tink-crypto/tink-go/v2/aead"
+	insecure_clear_text_keyset "github.com/tink-crypto/tink-go/v2/insecurecleartextkeyset"
+	"github.com/tink-crypto/tink-go/v2/keyset"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -58,7 +58,7 @@ func (svc *tinkEncryptionService) loadKeyset() error {
 
 func (svc *tinkEncryptionService) validateKeyset() error {
 	ciphertextSample, err := svc.store.ServerConfigGet(ciphertextSampleConfigKey)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		return errEncryptionNotEnabled
 	} else if err != nil {
 		return fmt.Errorf(errTemplateFailedLoadingServerConfig, err)

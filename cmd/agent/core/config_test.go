@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadAgentIDFileNotExists(t *testing.T) {
@@ -27,16 +28,12 @@ func TestReadAgentIDFileNotExists(t *testing.T) {
 
 func TestReadAgentIDFileExists(t *testing.T) {
 	tmpF, errTmpF := os.CreateTemp(t.TempDir(), "tmp_")
-	if !assert.NoError(t, errTmpF) {
-		return
-	}
+	require.NoError(t, errTmpF)
 	defer os.Remove(tmpF.Name())
 
 	// there is an existing config
 	errWrite := os.WriteFile(tmpF.Name(), []byte(`{"agent_id":3}`), 0o644)
-	if !assert.NoError(t, errWrite) {
-		return
-	}
+	require.NoError(t, errWrite)
 
 	// read existing config
 	actual := readAgentConfig(tmpF.Name())
@@ -49,9 +46,7 @@ func TestReadAgentIDFileExists(t *testing.T) {
 	assert.EqualValues(t, 33, actual.AgentID)
 
 	tmpF2, errTmpF := os.CreateTemp(t.TempDir(), "tmp_")
-	if !assert.NoError(t, errTmpF) {
-		return
-	}
+	require.NoError(t, errTmpF)
 	defer os.Remove(tmpF2.Name())
 
 	// write new config

@@ -1,21 +1,35 @@
+// Copyright 2025 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package kubernetes
 
 import (
 	"context"
 
 	"github.com/rs/zerolog/log"
-	v1 "k8s.io/api/core/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type K8sNamespaceClient interface {
-	Get(ctx context.Context, name string, opts metav1.GetOptions) (*v1.Namespace, error)
-	Create(ctx context.Context, namespace *v1.Namespace, opts metav1.CreateOptions) (*v1.Namespace, error)
+	Get(ctx context.Context, name string, opts kube_meta_v1.GetOptions) (*kube_core_v1.Namespace, error)
+	Create(ctx context.Context, namespace *kube_core_v1.Namespace, opts kube_meta_v1.CreateOptions) (*kube_core_v1.Namespace, error)
 }
 
 func mkNamespace(ctx context.Context, client K8sNamespaceClient, namespace string) error {
-	_, err := client.Get(ctx, namespace, metav1.GetOptions{})
+	_, err := client.Get(ctx, namespace, kube_meta_v1.GetOptions{})
 	if err == nil {
 		log.Trace().Str("namespace", namespace).Msg("Kubernetes namespace already exists")
 		return nil
@@ -28,9 +42,9 @@ func mkNamespace(ctx context.Context, client K8sNamespaceClient, namespace strin
 
 	log.Trace().Str("namespace", namespace).Msg("creating Kubernetes namespace")
 
-	_, err = client.Create(ctx, &v1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{Name: namespace},
-	}, metav1.CreateOptions{})
+	_, err = client.Create(ctx, &kube_core_v1.Namespace{
+		ObjectMeta: kube_meta_v1.ObjectMeta{Name: namespace},
+	}, kube_meta_v1.CreateOptions{})
 	if err != nil {
 		log.Error().Err(err).Str("namespace", namespace).Msg("failed to create Kubernetes namespace")
 		return err

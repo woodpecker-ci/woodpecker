@@ -1,3 +1,5 @@
+<!-- markdownlint-disable no-duplicate-heading -->
+
 # Migrations
 
 To enhance the usability of Woodpecker and meet evolving security standards, occasional migrations are necessary. While we aim to minimize these changes, some are unavoidable. If you experience significant issues during a migration to a new version, please let us know so maintainers can reassess the updates.
@@ -8,12 +10,25 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
+- deprecated `runs_on` workflow property in favor of `when.status`.
 
 ### Admin-facing migrations
+
+- changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
 
 #### Extensions
 
 Extension HTTP calls (as of now the configuration extension) will by default only be allowed to contact external hosts. Set `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS` accordingly to allow additional hosts as needed.
+
+### API changes
+
+- The pipeline model has been changed to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pr.title`). Following properties are deprecated and should be replaced by the their new counterparts:
+  - `sender` =>
+    - `cron` for cron events
+
+### Internal changes
+
+- Renamed the server flag `config-service-endpoint` to `config-extension-endpoint`
 
 ## 3.0.0
 
@@ -240,7 +255,7 @@ Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4
 
 ## 1.0.0
 
-- The signature used to verify extension calls (like those used for the [config-extension](/docs/administration/configuration/server#external-configuration-api)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](/docs/administration/configuration/server#external-configuration-api) documentation.
+- The signature used to verify extension calls (like those used for the [config-extension](/docs/next/usage/extensions/configuration-extension)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](/docs/next/usage/extensions/configuration-extension) documentation.
 - Refactored support for old agent filter labels and expressions. Learn how to use the new [filter](/docs/usage/workflow-syntax#labels)
 - Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated

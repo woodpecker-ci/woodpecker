@@ -71,7 +71,12 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 
 	// TODO: allow the users / the admin to set a specific timezone
 
-	c, err := cron.ParseStandard(schedule)
+	parser, err := cron.NewDefaultParser(cron.StandardOptions)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("can't create parser: %w", err)
+	}
+
+	c, err := parser.Parse(schedule)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("cron parse schedule: %w", err)
 	}
@@ -121,7 +126,7 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 		cron.Branch = repo.Branch
 	}
 
-	creator, err := store.GetUser(cron.CreatorID)
+	repoUser, err := store.GetUser(repo.UserID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -129,21 +134,21 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 	// If the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	forge.Refresh(ctx, _forge, store, creator)
+	forge.Refresh(ctx, _forge, store, repoUser)
 
-	commit, err := _forge.BranchHead(ctx, creator, repo, cron.Branch)
+	commit, err := _forge.BranchHead(ctx, repoUser, repo, cron.Branch)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return repo, &model.Pipeline{
-		Event:     model.EventCron,
-		Commit:    commit.SHA,
-		Ref:       "refs/heads/" + cron.Branch,
-		Branch:    cron.Branch,
-		Message:   cron.Name,
-		Timestamp: cron.NextExec,
-		Sender:    cron.Name,
-		ForgeURL:  commit.ForgeURL,
+		Event:               model.EventCron,
+		Commit:              commit.SHA,
+		Ref:                 "refs/heads/" + cron.Branch,
+		Branch:              cron.Branch,
+		Timestamp:           cron.NextExec,
+		Cron:                cron.Name,
+		ForgeURL:            commit.ForgeURL,
+		AdditionalVariables: cron.Variables,
 	}, nil
 }

@@ -57,7 +57,7 @@ func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow
 		if err := s.stepCreate(sess, workflows[i].Children); err != nil {
 			return err
 		}
-		if _, err := sess.Insert(workflows[i]); err != nil {
+		if err := wrapInsert(sess.Insert(workflows[i])); err != nil {
 			return err
 		}
 	}
@@ -85,9 +85,9 @@ func (s storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.W
 
 func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 	// delete related steps
-	for startSteps := 0; ; startSteps += perPage {
+	for {
 		stepIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("id").Where("pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
+		if err := sess.Limit(perPage).Table("steps").Cols("id").Where("pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
 			return err
 		}
 		if len(stepIDs) == 0 {

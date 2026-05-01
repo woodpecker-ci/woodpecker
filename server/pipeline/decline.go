@@ -64,7 +64,9 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 
 	updatePipelineStatus(ctx, forge, pipeline, repo, user)
 
-	publishToTopic(pipeline, repo)
+	if err := publishToTopic(ctx, pipeline, repo); err != nil {
+		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
+	}
 
 	return pipeline, nil
 }

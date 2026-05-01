@@ -1,0 +1,14 @@
+{
+  "name": "two parallel workflows both succeed",
+  "event": "push",
+  "expected_status": "success",
+  "expected_workflows": [
+    { "name": "build", "status": "success" },
+    { "name": "lint", "status": "success" }
+  ],
+  "expected_steps": [
+    { "name": "compile", "status": "success", "exit_code": 0 },
+    { "name": "test", "status": "success", "exit_code": 0 },
+    { "name": "lint", "status": "success", "exit_code": 0 }
+  ]
+}

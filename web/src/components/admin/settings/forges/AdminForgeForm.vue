@@ -247,12 +247,14 @@ function setAdditionalOptions<T extends keyof Record<string, unknown>>(
   };
 }
 
+const replaceRegex = /\/$/;
+
 const oauthAppForgeUrl = computed(() => {
   if (!forge.value || !forge.value.type || !forge.value.url) {
     return '';
   }
 
-  const forgeUrl = `${forge.value.url.startsWith('http') ? '' : 'https://'}${forge.value.url.replace(/\/$/, '')}`;
+  const forgeUrl = `${forge.value.url.startsWith('http') ? '' : 'https://'}${forge.value.url.replace(replaceRegex, '')}`;
 
   switch (forge.value.type) {
     case 'github':
