@@ -43,9 +43,8 @@ type Runtime struct {
 	// Cleanup operations should use the runnerCtx passed to Run().
 	ctx context.Context
 
-	tracer     tracing.Tracer
-	tracerLock sync.Mutex
-	logger     logging.Logger
+	tracer tracing.Tracer
+	logger logging.Logger
 
 	uploadWait sync.WaitGroup
 
@@ -63,7 +62,6 @@ func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Opti
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
 	r.tracer = tracing.NoOpTracer
-	r.tracerLock = sync.Mutex{}
 	for _, opt := range opts {
 		opt(r)
 	}
