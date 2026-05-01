@@ -37,10 +37,10 @@ directive @scopehelp(details: String!) on ENUM_VALUE
 
 enum AccessScope {
   AUDIT_LOG @scopehelp(details: "audit log")
-  BILLING   @scopehelp(details: "billing history")
-  PGP_KEYS  @scopehelp(details: "PGP keys")
-  SSH_KEYS  @scopehelp(details: "SSH keys")
-  PROFILE   @scopehelp(details: "profile information")
+  BILLING @scopehelp(details: "billing history")
+  PGP_KEYS @scopehelp(details: "PGP keys")
+  SSH_KEYS @scopehelp(details: "SSH keys")
+  PROFILE @scopehelp(details: "profile information")
 }
 
 enum AccessKind {
@@ -355,9 +355,13 @@ type Invoice {
   entity: Entity! @access(scope: PROFILE, kind: RO)
 
   product: Product!
-  """Start of service period for which this invoice applies"""
+  """
+  Start of service period for which this invoice applies
+  """
   serviceStart: Time!
-  """End of service period for which this invoice applies"""
+  """
+  End of service period for which this invoice applies
+  """
   serviceEnd: Time!
 
   currency: Currency!
@@ -739,19 +743,15 @@ type Mutation {
   """
   Update an active billing subscription.
   """
-  updateBillingSubscription(
-    subscriptionID: Int!,
-    input: UpdateBillingSubscriptionInput!,
-  ): BillingSubscription @access(scope: BILLING, kind: RW)
+  updateBillingSubscription(subscriptionID: Int!, input: UpdateBillingSubscriptionInput!): BillingSubscription
+    @access(scope: BILLING, kind: RW)
 
   """
   Cancels an active billing subscription. The changes will not take effect
   until the end of the paid term (unless the account is past due, in which case
   it applies immediately).
   """
-  cancelBillingSubscription(
-    subscriptionID: Int!,
-  ): BillingSubscription @private
+  cancelBillingSubscription(subscriptionID: Int!): BillingSubscription @private
 
   # TODO: Allow removal of the last payment method if the user has disabled
   # automatic renewal (blocker: allow users to disable autorenew)
@@ -819,10 +819,7 @@ type Mutation {
   ###                                               ###
 
   "Registers a new account."
-  registerAccount(email: String!,
-    username: String!,
-    password: String!,
-    pgpKey: String): User @anoninternal
+  registerAccount(email: String!, username: String!, password: String!, pgpKey: String): User @anoninternal
 
   "Requests a password reset. The return value is meaningless."
   resetPassword(email: String!): Int @anoninternal
@@ -834,10 +831,7 @@ type Mutation {
   confirmEmailChange(token: String!): User @anoninternal
 
   "Confirm a user's password change"
-  confirmPasswordChange(
-    token: String!,
-    newPassword: String!,
-  ): User @anoninternal
+  confirmPasswordChange(token: String!, newPassword: String!): User @anoninternal
 
   """
   Enables TOTP for the user account. The secret is 20 base32-encoded bytes.
@@ -853,10 +847,11 @@ type Mutation {
   supported.
   """
   registerOAuthClient(
-    redirectUri: String!,
-    clientName: String!,
-    clientDescription: String,
-    clientUrl: String): OAuthClientRegistration! @internal
+    redirectUri: String!
+    clientName: String!
+    clientDescription: String
+    clientUrl: String
+  ): OAuthClientRegistration! @internal
 
   """
   Revokes this OAuth client, revoking all tokens for it and preventing future
@@ -868,8 +863,7 @@ type Mutation {
   revokeOAuthGrant(hash: String!): OAuthGrant @internal
 
   "Issues an OAuth personal access token."
-  issuePersonalAccessToken(grants: String, comment: String):
-    OAuthPersonalTokenRegistration! @internal
+  issuePersonalAccessToken(grants: String, comment: String): OAuthPersonalTokenRegistration! @internal
 
   "Revokes a personal access token."
   revokePersonalAccessToken(id: Int!): OAuthPersonalToken @internal
@@ -884,15 +878,23 @@ type Mutation {
   Completes the OAuth 2.0 grant process and issues an OAuth token for a
   specific OAuth client.
   """
-  issueOAuthGrant(authorization: String!, clientUUID: String,
-    clientSecret: String!, redirectUri: String): OAuthGrantRegistration @internal
+  issueOAuthGrant(
+    authorization: String!
+    clientUUID: String
+    clientSecret: String!
+    redirectUri: String
+  ): OAuthGrantRegistration @internal
 
   """
   Refreshes an existing OAuth 2.0 grant. This invalidates the previous grant
   and returns a new one.
   """
-  refreshOAuthGrant(refreshToken: String!, clientUUID: String!,
-    clientSecret: String!, grants: String): OAuthGrantRegistration @internal
+  refreshOAuthGrant(
+    refreshToken: String!
+    clientUUID: String!
+    clientSecret: String!
+    grants: String
+  ): OAuthGrantRegistration @internal
 
   """
   Send a notification email.
@@ -918,18 +920,18 @@ type Mutation {
   state. The payment intent should be completed to proceed.
   """
   orderProductSubscription(
-    productID: Int!,
-    currency: Currency!,
-    interval: PaymentInterval!,
-    autorenew: Boolean!,
+    productID: Int!
+    currency: Currency!
+    interval: PaymentInterval!
+    autorenew: Boolean!
     """
     Optional: update the user's billing address at the same time
     """
-    address: BillingAddressInput,
+    address: BillingAddressInput
     """
     Optional: include this if retrying the same request
     """
-    idempotencyKey: String,
+    idempotencyKey: String
   ): PaymentIntent @internal
 
   """
@@ -937,11 +939,11 @@ type Mutation {
   interactively. The subscription must be past due.
   """
   beginSubscriptionRenewal(
-    subscriptionID: Int!,
+    subscriptionID: Int!
     """
     Optional: include this if retrying the same request
     """
-    idempotencyKey: String,
+    idempotencyKey: String
   ): PaymentIntent! @internal
 
   """

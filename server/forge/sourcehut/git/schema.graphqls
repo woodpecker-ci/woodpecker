@@ -27,10 +27,10 @@ directive @internal on FIELD_DEFINITION
 directive @anoninternal on FIELD_DEFINITION
 
 enum AccessScope {
-  PROFILE      @scopehelp(details: "profile information")
+  PROFILE @scopehelp(details: "profile information")
   REPOSITORIES @scopehelp(details: "repository metadata")
-  OBJECTS      @scopehelp(details: "git objects & references")
-  ACLS         @scopehelp(details: "access control lists")
+  OBJECTS @scopehelp(details: "git objects & references")
+  ACLS @scopehelp(details: "access control lists")
 }
 
 enum AccessKind {
@@ -675,7 +675,8 @@ type Mutation {
   Creates a new git repository. If the cloneUrl parameter is specified, the
   repository will be cloned from the given URL.
   """
-  createRepository(name: String!, visibility: Visibility!, description: String, cloneUrl: String): Repository @access(scope: REPOSITORIES, kind: RW)
+  createRepository(name: String!, visibility: Visibility!, description: String, cloneUrl: String): Repository
+    @access(scope: REPOSITORIES, kind: RW)
 
   "Updates the metadata for a git repository"
   updateRepository(id: Int!, input: RepoInput!): Repository @access(scope: REPOSITORIES, kind: RW)

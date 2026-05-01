@@ -2,23 +2,27 @@ query GetRepos($cursor: Cursor) {
   me {
     repositories(cursor: $cursor) {
       results {
-        ... repoDetails
+        ...repoDetails
       }
       cursor
     }
   }
 
-  version { ... versionDetails }
+  version {
+    ...versionDetails
+  }
 }
 
 query GetRepo($owner: String!, $repoName: String!) {
   user(username: $owner) {
     repository(name: $repoName) {
-      ... repoDetails
+      ...repoDetails
     }
   }
 
-  version { ... versionDetails }
+  version {
+    ...versionDetails
+  }
 }
 
 query GetReferences($owner: String!, $repoName: String!, $cursor: Cursor) {
@@ -100,12 +104,7 @@ query GetPushWebhooks($repoID: Int!) {
 }
 
 mutation RegisterPushWebhook($repoID: Int!, $payload: String!, $url: String!) {
-  createGitWebhook(config: {
-    repositoryID: $repoID,
-    url: $url,
-    events: [GIT_POST_RECEIVE],
-    query: $payload,
-  }) {
+  createGitWebhook(config: { repositoryID: $repoID, url: $url, events: [GIT_POST_RECEIVE], query: $payload }) {
     id
   }
 }

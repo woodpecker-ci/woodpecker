@@ -40,11 +40,11 @@ normal API users.
 directive @anoninternal on FIELD_DEFINITION
 
 enum AccessScope {
-  ACLS          @scopehelp(details: "access control lists")
-  EMAILS        @scopehelp(details: "emails")
-  LISTS         @scopehelp(details: "mailing lists")
-  PATCHES       @scopehelp(details: "patches")
-  PROFILE       @scopehelp(details: "profile information")
+  ACLS @scopehelp(details: "access control lists")
+  EMAILS @scopehelp(details: "emails")
+  LISTS @scopehelp(details: "mailing lists")
+  PATCHES @scopehelp(details: "patches")
+  PROFILE @scopehelp(details: "profile information")
   SUBSCRIPTIONS @scopehelp(details: "tracker & ticket subscriptions")
 }
 
@@ -731,38 +731,26 @@ input PreferencesInput {
 
 type Mutation {
   "Creates a new mailing list"
-  createMailingList(
-    name: String!,
-    description: String,
-    visibility: Visibility!): MailingList! @access(scope: LISTS, kind: RW)
+  createMailingList(name: String!, description: String, visibility: Visibility!): MailingList!
+    @access(scope: LISTS, kind: RW)
 
   "Updates a mailing list."
-  updateMailingList(
-    id: Int!,
-    input: MailingListInput!): MailingList @access(scope: LISTS, kind: RW)
+  updateMailingList(id: Int!, input: MailingListInput!): MailingList @access(scope: LISTS, kind: RW)
 
   "Deletes a mailing list"
   deleteMailingList(id: Int!): MailingList @access(scope: LISTS, kind: RW)
 
   "Adds or updates the ACL for a user on a mailing list"
-  updateUserACL(
-    listID: Int!,
-    userID: Int!,
-    input: ACLInput!): MailingListACL @access(scope: ACLS, kind: RW)
+  updateUserACL(listID: Int!, userID: Int!, input: ACLInput!): MailingListACL @access(scope: ACLS, kind: RW)
 
   "Adds or updates the ACL for an email address on a mailing list"
-  updateSenderACL(
-    listID: Int!,
-    address: String!,
-    input: ACLInput!): MailingListACL @access(scope: ACLS, kind: RW)
+  updateSenderACL(listID: Int!, address: String!, input: ACLInput!): MailingListACL @access(scope: ACLS, kind: RW)
 
   """
   Updates the default ACL for a mailing list, which applies to users and
   senders for whom a more specific ACL does not exist.
   """
-  updateMailingListACL(
-    listID: Int!,
-    input: ACLInput!): MailingList @access(scope: ACLS, kind: RW)
+  updateMailingListACL(listID: Int!, input: ACLInput!): MailingList @access(scope: ACLS, kind: RW)
 
   """
   Removes a mailing list ACL. Following this, the default mailing list ACL will
