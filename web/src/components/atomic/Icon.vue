@@ -96,7 +96,7 @@
     :path="mdiBitbucket"
     size="1.3rem"
   />
-  <SvgIcon v-else-if="name === 'sourcehut'" :path="siSourcehut.path" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'sourcehut'" :bg-circle="bgCircle" :path="siSourcehut.path" size="1.3rem" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -255,6 +255,7 @@ export type IconNames =
   | 'bug-outline'
   | 'list-group'
   | 'secret'
+  | 'sourcehut'
   | 'docker'
   | 'console'
   | 'agent'
