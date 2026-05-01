@@ -104,7 +104,7 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		}
 		ap.Message = "created release " + p.TagTitle
 	case EventManual:
-		ap.Message = "MANUAL PIPELINE" + p.Branch
+		ap.Message = "MANUAL PIPELINE @ " + p.Branch
 	case EventDeploy:
 		if p.Deployment != nil {
 			ap.DeployTo = p.Deployment.Target
