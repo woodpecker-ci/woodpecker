@@ -271,18 +271,20 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	assert.Greater(t, testExit.Workflow.Started, int64(0))
 
 	// Strip runtime-injected env for a structural comparison of the step itself.
-	delete(testExit.CurrStep.Environment, "CI_PIPELINE_STARTED")
 	delete(testExit.CurrStep.Environment, "CI_STEP_STARTED")
 	delete(testExit.CurrStep.Environment, dummy.EnvKeyStepSleep)
 	assert.EqualValues(t, state.State{
 		Workflow: state.Workflow{Started: testExit.Workflow.Started},
 		CurrStep: &backend_types.Step{
-			Name:        "test",
-			UUID:        "test-uuid",
-			Type:        "commands",
-			OnSuccess:   true,
-			Environment: map[string]string{},
-			Commands:    []string{"echo test"},
+			Name:      "test",
+			UUID:      "test-uuid",
+			Type:      "commands",
+			OnSuccess: true,
+			Environment: map[string]string{
+				"CI_PIPELINE_STARTED": fmt.Sprintf("%d", r.started),
+				"CI_PIPELINE_STATUS":  "success",
+			},
+			Commands: []string{"echo test"},
 		},
 		CurrStepState: backend_types.State{
 			Started: testExit.CurrStepState.Started,
@@ -478,6 +480,7 @@ func TestWorkflowPluginStep(t *testing.T) {
 		delete(lastPluginTrace.CurrStep.Environment, "CI_STEP_STARTED")
 
 		assert.EqualValues(t, map[string]string{
+			"CI_PIPELINE_STATUS":             "success",
 			"DRONE_BUILD_STATUS":             "success",
 			"DRONE_REPO_SCM":                 "git",
 			"EXPECT_TYPE":                    "plugin",

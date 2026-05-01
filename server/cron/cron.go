@@ -71,7 +71,12 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 
 	// TODO: allow the users / the admin to set a specific timezone
 
-	c, err := cron.ParseStandard(schedule)
+	parser, err := cron.NewDefaultParser(cron.StandardOptions)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("can't create parser: %w", err)
+	}
+
+	c, err := parser.Parse(schedule)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("cron parse schedule: %w", err)
 	}
