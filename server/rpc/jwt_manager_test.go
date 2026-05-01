@@ -110,8 +110,14 @@ func TestJWTManager(t *testing.T) {
 		token, err := manager.Generate(42)
 		require.NoError(t, err)
 
-		// flip a character in the signature portion
-		tampered := token[:len(token)-1] + "X"
+		// Flip a byte inside the decoded signature, then re-encode.
+		parts := strings.Split(token, ".")
+		require.Len(t, parts, 3)
+		sig, err := base64.RawURLEncoding.DecodeString(parts[2])
+		require.NoError(t, err)
+		sig[0] ^= 0xFF
+		parts[2] = base64.RawURLEncoding.EncodeToString(sig)
+		tampered := strings.Join(parts, ".")
 
 		_, err = manager.Verify(tampered)
 		assert.Error(t, err)

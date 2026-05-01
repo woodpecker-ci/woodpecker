@@ -47,7 +47,7 @@ func runScenario(t *testing.T, sc Scenario) {
 	t.Helper()
 
 	env := setup.StartServer(t.Context(), t, sc.Files)
-	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
@@ -68,7 +68,7 @@ func runScenario(t *testing.T, sc Scenario) {
 		return
 	}
 
-	steps, err := env.Store.StepList(finished)
+	steps, err := env.Store.StepList(finished.ID)
 	require.NoError(t, err, "list steps for pipeline %d", finished.ID)
 
 	require.ElementsMatch(t, expStepsToName(sc.ExpectedSteps), modelStepsToName(steps), "we got different steps reported back as we expected")

@@ -178,20 +178,6 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	return true, nil
 }
 
-// Auth authenticates the session and returns the forge user login for the given token.
-func (g *GitLab) Auth(ctx context.Context, token, _ string) (string, error) {
-	client, err := newClient(g.url, token, g.skipVerify)
-	if err != nil {
-		return "", err
-	}
-
-	login, _, err := client.Users.CurrentUser(gitlab.WithContext(ctx))
-	if err != nil {
-		return "", err
-	}
-	return login.Username, nil
-}
-
 // Teams fetches a list of team memberships from the forge.
 func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptions) ([]*model.Team, error) {
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)

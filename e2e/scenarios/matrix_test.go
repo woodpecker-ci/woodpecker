@@ -73,7 +73,7 @@ func TestMatrixPipeline(t *testing.T) {
 	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
 		{Name: ".woodpecker.yaml", Data: matrixPipelineYAML},
 	})
-	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
@@ -139,7 +139,7 @@ func TestMatrixIncludePipeline(t *testing.T) {
 	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
 		{Name: ".woodpecker.yaml", Data: matrixIncludePipelineYAML},
 	})
-	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
@@ -211,7 +211,7 @@ steps:
 	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
 		{Name: ".woodpecker.yaml", Data: yaml},
 	})
-	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
@@ -259,7 +259,7 @@ steps:
 	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
 		{Name: ".woodpecker.yaml", Data: yaml},
 	})
-	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{

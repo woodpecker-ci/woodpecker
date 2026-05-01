@@ -234,8 +234,14 @@ func PatchRepo(c *gin.Context) {
 	}
 
 	if in.Trusted != nil {
-		if (*in.Trusted.Network != repo.Trusted.Network || *in.Trusted.Volumes != repo.Trusted.Volumes || *in.Trusted.Security != repo.Trusted.Security) && !user.Admin {
+		// if user is not admin
+		if !user.Admin &&
+			// and some trusted settings got changed
+			((in.Trusted.Network != nil && *in.Trusted.Network != repo.Trusted.Network) ||
+				(in.Trusted.Volumes != nil && *in.Trusted.Volumes != repo.Trusted.Volumes) ||
+				(in.Trusted.Security != nil && *in.Trusted.Security != repo.Trusted.Security)) {
 			log.Trace().Msgf("user '%s' wants to change trusted without being an instance admin", user.Login)
+			// return error
 			c.String(http.StatusForbidden, "Insufficient privileges")
 			return
 		}
@@ -740,9 +746,22 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 
 	from, err := _forge.Repo(c, repoUser, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
-		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
-		return err
+		// If we have valid ForgeRemoteID and can not find the repo,
+		// we assume the repo was deleted and try to get a new one if it was re-created.
+		if errors.Is(err, forge_types.ErrRepoNotFound) && repo.ForgeRemoteID.IsValid() {
+			from, err = _forge.Repo(c, repoUser, "", repo.Owner, repo.Name)
+			if err == nil {
+				log.Debug().Str("repoFullName", repo.FullName).
+					Str("old ForgeRemoteID", string(repo.ForgeRemoteID)).Str("new ForgeRemoteID", string(from.ForgeRemoteID)).
+					Msgf("RepoRepair detected remote repo ID change and updated it")
+			}
+		}
 	}
+	if err != nil {
+		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
+		return fmt.Errorf("fetching repo from forge: %w", err)
+	}
+
 	from.ForgeID = repo.ForgeID
 
 	if repo.FullName != from.FullName {

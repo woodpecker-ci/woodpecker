@@ -318,15 +318,9 @@ func GetStepLogs(c *gin.Context) {
 		return
 	}
 
-	step, err := _store.StepLoad(stepID)
+	step, err := _store.StepLoad(pl.ID, stepID)
 	if err != nil {
 		handleDBError(c, err)
-		return
-	}
-
-	if step.PipelineID != pl.ID {
-		// make sure we cannot read arbitrary logs by id
-		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
@@ -372,15 +366,9 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	_step, err := _store.StepLoad(stepID)
+	_step, err := _store.StepLoad(_pipeline.ID, stepID)
 	if err != nil {
 		handleDBError(c, err)
-		return
-	}
-
-	if _step.PipelineID != _pipeline.ID {
-		// make sure we cannot read arbitrary logs by id
-		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
 		return
 	}
 
@@ -698,7 +686,7 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	steps, err := _store.StepList(pl)
+	steps, err := _store.StepList(pl.ID)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return

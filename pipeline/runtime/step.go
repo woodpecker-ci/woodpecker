@@ -17,6 +17,7 @@ package runtime
 import (
 	"context"
 	"errors"
+	"strconv"
 	"sync"
 	"time"
 
@@ -206,7 +207,10 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 	}
 
 	// Container is up and logging is streaming — hand off to background.
+	r.uploadWait.Add(1)
 	go func() {
+		defer r.uploadWait.Done()
+
 		logger := r.makeLogger()
 
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
@@ -253,12 +257,26 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
 	}
 
-	// The tracer should just trace changes, but it currently also updates step env vars used in various ways:
-	// https://github.com/woodpecker-ci/woodpecker/blob/main/agent/tracer.go#L79-L86 .
-	r.tracerLock.Lock()
-	defer r.tracerLock.Unlock()
-	if traceErr := r.tracer.Trace(s); traceErr != nil {
-		return traceErr
+	// The traceStep should just trace changes, but it currently also updates step env vars.
+	{
+		r.tracerLock.Lock()
+		defer r.tracerLock.Unlock()
+
+		if s.CurrStepState.Exited {
+			if s.CurrStep.Environment == nil {
+				s.CurrStep.Environment = map[string]string{}
+			}
+
+			// TODO: find better way to insert runtime step environment variables.
+			s.CurrStep.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(s.Workflow.Started, 10)
+			s.CurrStep.Environment["CI_STEP_STARTED"] = strconv.FormatInt(s.Workflow.Started, 10)
+		}
 	}
+
+	if traceErr := r.tracer.Trace(s); traceErr != nil {
+		logger := r.makeLogger()
+		logger.Error().Err(traceErr).Msg("could not trace step state change")
+	}
+
 	return err
 }

@@ -50,12 +50,12 @@ func TestAgentLabelRouting(t *testing.T) {
 	})
 
 	// Plain agent: wildcard repo label only — cannot satisfy gpu=true.
-	plainAgent := setup.StartAgent(t.Context(), t, env.GRPCAddr,
+	plainAgent := setup.StartAgent(t, env.GRPCAddr,
 		setup.WithHostname("plain-agent"),
 	)
 
 	// GPU agent: carries gpu=true — the only agent that can accept the task.
-	gpuAgent := setup.StartAgent(t.Context(), t, env.GRPCAddr,
+	gpuAgent := setup.StartAgent(t, env.GRPCAddr,
 		setup.WithHostname("gpu-agent"),
 		setup.WithCustomLabels(map[string]string{"gpu": "true"}),
 	)
@@ -108,12 +108,12 @@ Func TestOrgAgentPreferredOverGlobal(t *testing.T) {
 	})
 
 	// Global agent: matches org-id=* (score 1).
-	globalAgent := setup.StartAgent(t.Context(), t, env.GRPCAddr,
+	globalAgent := setup.StartAgent(t, env.GRPCAddr,
 		setup.WithHostname("global-agent"),
 	)
 
 	// Org agent: will be patched with the repo's OrgID (score 10).
-	orgAgent := setup.StartAgent(t.Context(), t, env.GRPCAddr,
+	orgAgent := setup.StartAgent(t, env.GRPCAddr,
 		setup.WithHostname("org-agent"),
 		setup.WithOrgID(env.Fixtures.Repo.OrgID),
 	)
