@@ -17,6 +17,7 @@
 
 ### 📦️ Dependency
 
+- Update woodpeckerci/plugin-release Docker tag to v0.3.1 [[#6531](https://github.com/woodpecker-ci/woodpecker/pull/6531)]
 - Update docker.io/lycheeverse/lychee Docker tag to v0.24.2 [[#6529](https://github.com/woodpecker-ci/woodpecker/pull/6529)]
 
 ## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-05-01
