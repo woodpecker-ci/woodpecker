@@ -11,6 +11,10 @@
 - pipeline runtime: move setting step environment variables into own func and add `CI_PIPELINE_STATUS` back [[#6516](https://github.com/woodpecker-ci/woodpecker/pull/6516)]
 - Refactor agent rpc retry [[#6515](https://github.com/woodpecker-ci/woodpecker/pull/6515)]
 
+### 📚 Documentation
+
+- Update docs npm deps non-major [[#6530](https://github.com/woodpecker-ci/woodpecker/pull/6530)]
+
 ### 📦️ Dependency
 
 - Update docker.io/lycheeverse/lychee Docker tag to v0.24.2 [[#6529](https://github.com/woodpecker-ci/woodpecker/pull/6529)]
