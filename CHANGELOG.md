@@ -13,6 +13,7 @@
 
 ### 📚 Documentation
 
+- Update dependency yaml to v2.8.4 [[#6536](https://github.com/woodpecker-ci/woodpecker/pull/6536)]
 - Update dependency isomorphic-dompurify to v3.12.0 [[#6532](https://github.com/woodpecker-ci/woodpecker/pull/6532)]
 - Update docs npm deps non-major [[#6530](https://github.com/woodpecker-ci/woodpecker/pull/6530)]
 
