@@ -18,6 +18,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v6.1.0 [[#6534](https://github.com/woodpecker-ci/woodpecker/pull/6534)]
 - Update dependency golangci/golangci-lint to v2.12.0 [[#6533](https://github.com/woodpecker-ci/woodpecker/pull/6533)]
 - Update woodpeckerci/plugin-release Docker tag to v0.3.1 [[#6531](https://github.com/woodpecker-ci/woodpecker/pull/6531)]
 - Update docker.io/lycheeverse/lychee Docker tag to v0.24.2 [[#6529](https://github.com/woodpecker-ci/woodpecker/pull/6529)]
