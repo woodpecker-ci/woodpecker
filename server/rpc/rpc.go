@@ -42,6 +42,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
+type ctxKey struct{}
+
+// agentIDKey is a non imitable context key.
+var agentIDKey = &ctxKey{}
+
 // updateAgentLastWorkDelay the delay before the LastWork info should be updated.
 const updateAgentLastWorkDelay = time.Minute
 
@@ -589,19 +594,12 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := grpc_metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, errors.New("metadata is not provided")
-	}
-
-	values := md["agent_id"]
-	if len(values) == 0 {
+	rawAgentID := ctx.Value(agentIDKey)
+	if rawAgentID == nil {
 		return nil, errors.New("agent_id is not provided")
 	}
-
-	_agentID := values[0]
-	agentID, err := strconv.ParseInt(_agentID, 10, 64)
-	if err != nil {
+	agentID, ok := rawAgentID.(int64)
+	if !ok {
 		return nil, errors.New("agent_id is not a valid integer")
 	}
 

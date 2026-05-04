@@ -15,6 +15,7 @@
 package rpc
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -136,7 +137,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{
 			StepUUID: "step-uuid-123",
@@ -170,7 +171,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockLogStore.On("StepFinished", mock.Anything).Return()
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		// Step reports exit → it will transition to success/failure (terminal)
 		err := rpcInst.Update(ctx, "30", rpc.StepState{
@@ -197,7 +198,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		// Step reports started but not exited → still running (non-terminal)
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
@@ -218,7 +219,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
@@ -242,7 +243,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		require.Error(t, err)
@@ -264,7 +265,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		require.Error(t, err)
@@ -274,7 +275,7 @@ func TestRPCUpdate(t *testing.T) {
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "not-a-number", rpc.StepState{StepUUID: "step-uuid-123"})
 		assert.Error(t, err)
@@ -285,7 +286,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("WorkflowLoad", int64(999)).Return(nil, errors.New("not found"))
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "999", rpc.StepState{StepUUID: "step-uuid-123"})
 		assert.Error(t, err)
@@ -303,7 +304,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("StepByUUID", "nonexistent").Return(nil, errors.New("not found"))
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "nonexistent"})
 		assert.Error(t, err)
@@ -350,7 +351,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		assert.NoError(t, err)
@@ -374,7 +375,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		assert.NoError(t, err)
@@ -392,7 +393,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
@@ -410,7 +411,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowRun)
@@ -428,7 +429,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		require.Error(t, err)
@@ -438,7 +439,7 @@ func TestRPCInit(t *testing.T) {
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "not-a-number", rpc.WorkflowState{})
 		assert.Error(t, err)
@@ -473,7 +474,7 @@ func TestRPCDone(t *testing.T) {
 		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, mockQueue)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Started: 100, Finished: 200})
 		assert.NoError(t, err)
@@ -492,7 +493,7 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
@@ -511,7 +512,7 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowRun)
@@ -530,7 +531,7 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("AgentFind", int64(2)).Return(agent, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
 		require.Error(t, err)
@@ -540,7 +541,7 @@ func TestRPCDone(t *testing.T) {
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Done(ctx, "invalid", rpc.WorkflowState{})
 		assert.Error(t, err)
@@ -582,7 +583,7 @@ func TestRPCLog(t *testing.T) {
 		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		entries := []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Line: 0, Data: []byte("hello")},
@@ -611,7 +612,7 @@ func TestRPCLog(t *testing.T) {
 		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("late log")},
@@ -638,7 +639,7 @@ func TestRPCLog(t *testing.T) {
 		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("running log")},
@@ -665,7 +666,7 @@ func TestRPCLog(t *testing.T) {
 		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("drain log")},
@@ -685,7 +686,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -707,7 +708,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -728,7 +729,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -750,7 +751,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -771,7 +772,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -798,7 +799,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		// Second entry has a rogue UUID — agent trying to inject into another step.
 		entries := []*rpc.LogEntry{
@@ -822,7 +823,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -836,7 +837,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("StepByUUID", "nonexistent").Return(nil, errors.New("not found"))
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "nonexistent", []*rpc.LogEntry{
 			{StepUUID: "nonexistent", Data: []byte("test")},
@@ -861,7 +862,7 @@ func TestRPCExtend(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Extend(ctx, "30")
 		require.Error(t, err)
@@ -883,7 +884,7 @@ func TestRPCWait(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		_, err := rpcInst.Wait(ctx, "30")
 		require.Error(t, err)
