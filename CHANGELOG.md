@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-03
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -13,6 +13,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#6540](https://github.com/woodpecker-ci/woodpecker/pull/6540)]
 - Update dependency axios to v1.16.0 [[#6538](https://github.com/woodpecker-ci/woodpecker/pull/6538)]
 - Update dependency yaml to v2.8.4 [[#6536](https://github.com/woodpecker-ci/woodpecker/pull/6536)]
 - Update dependency isomorphic-dompurify to v3.12.0 [[#6532](https://github.com/woodpecker-ci/woodpecker/pull/6532)]
