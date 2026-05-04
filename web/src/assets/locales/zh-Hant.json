@@ -22,7 +22,7 @@
         "manual_pipeline": {
             "select_branch": "選擇分支",
             "show_pipelines": "顯示 pipeline",
-            "title": "手動觸發 pipeline",
+            "title": "手動觸發 pipeline 執行",
             "trigger": "執行 pipeline",
             "variables": {
                 "value": "變數值",
@@ -34,30 +34,117 @@
         },
         "pipeline": {
             "actions": {
-                "cancel": "取消"
+                "cancel": "取消",
+                "restart": "重新啟動",
+                "deploy": "部署",
+                "log_download": "下載",
+                "log_delete": "刪除"
             },
             "tasks": "任務",
             "status": {
-                "skipped": "跳過",
+                "skipped": "已略過",
                 "success": "成功",
-                "failure": "失敗"
+                "failure": "失敗",
+                "error": "錯誤",
+                "running": "執行中",
+                "pending": "等待中",
+                "declined": "已拒絕"
             },
-            "load_more": "載入更多"
+            "load_more": "載入更多",
+            "config": "配置",
+            "event": {
+                "deploy": "部署",
+                "push": "推送",
+                "tag": "標記",
+                "manual": "手動",
+                "release": "發佈"
+            },
+            "errors": "錯誤",
+            "warnings": "警告",
+            "show_errors": "顯示錯誤",
+            "debug": {
+                "title": "除錯",
+                "download_metadata": "下載詮釋資料",
+                "metadata_download_successful": "詮釋資料下載成功"
+            },
+            "no_logs": "無紀錄",
+            "loading": "載入中…",
+            "exit_code": "退出代碼 {exitCode}",
+            "pipeline": "Pipeline #{pipelineId}",
+            "protected": {
+                "approve": "核准",
+                "decline": "拒絕"
+            },
+            "version_header": "Woodpecker 版本",
+            "created": ""
         },
         "settings": {
             "general": {
-                "save": "存儲設定",
+                "save": "儲存設定",
                 "timeout": {
-                    "timeout": "逾時"
+                    "timeout": "逾時",
+                    "minutes": "分鐘"
                 },
-                "general": "一般設定"
+                "general": "專案",
+                "project": "專案設定",
+                "allow_deploy": {
+                    "allow": "允許部署"
+                },
+                "trusted": {
+                    "security": {
+                        "security": "安全"
+                    },
+                    "network": {
+                        "network": "網路"
+                    },
+                    "volumes": {
+                        "volumes": "儲存區"
+                    }
+                },
+                "pipeline_path": {
+                    "path": "Pipeline 路徑",
+                    "desc_path_example": "my/path/"
+                }
             },
             "badge": {
-                "branch": "分支"
+                "branch": "分支",
+                "badge": "徽章",
+                "type": "語法",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "events": "事件",
+                "workflow": "工作流程"
             },
             "crons": {
                 "schedule": {
                     "placeholder": "排程"
+                },
+                "run": "現在執行",
+                "branch": {
+                    "title": "分支"
+                },
+                "name": {
+                    "name": "名稱"
+                },
+                "enabled": "已啟用"
+            },
+            "actions": {
+                "repair": {
+                    "repair": "修復儲存庫",
+                    "success": "儲存庫已修復"
+                },
+                "disable": {
+                    "disable": "停用儲存庫",
+                    "success": "儲存庫已停用"
+                },
+                "enable": {
+                    "enable": "啟用儲存庫",
+                    "success": "儲存庫已啟用"
+                },
+                "delete": {
+                    "delete": "刪除儲存庫",
+                    "success": "儲存庫已刪除"
                 }
             }
         },
@@ -86,17 +173,19 @@
                 "value": "變數值"
             },
             "trigger": "部署",
-            "enter_task": "部屬任務"
+            "enter_task": "部署任務"
         },
         "pull_requests": "合併請求",
         "add": "新增儲存庫",
         "user_none": "這個組織/使用者還沒有任何專案",
-        "not_allowed": "你沒有權限存取這個儲存庫",
+        "not_allowed": "你不被允許存取這個儲存庫",
         "enable": {
             "enable": "啟用",
-            "enabled": "已經啟用",
-            "disabled": "禁用",
-            "success": "儲存庫已啟用"
+            "enabled": "已啟用",
+            "disabled": "已停用",
+            "success": "儲存庫已啟用",
+            "stale_wp_repo": "過時的 Woodpecker 儲存庫",
+            "conflict": "衝突"
         },
         "open_in_forge": "在版本控制系統中打開",
         "activity": "活動",
@@ -111,8 +200,65 @@
             "users": {
                 "cancel": "取消",
                 "login": "登入",
-                "email": "Email",
-                "avatar_url": "Avatar URL"
+                "email": "電子郵件",
+                "avatar_url": "Avatar URL",
+                "save": "儲存使用者",
+                "show": "顯示使用者",
+                "add": "新增使用者",
+                "admin": {
+                    "admin": "管理員"
+                },
+                "delete_user": "刪除使用者",
+                "edit_user": "編輯使用者",
+                "users": "使用者",
+                "deleted": "使用者已刪除",
+                "created": "使用者已建立",
+                "saved": "使用者已儲存"
+            },
+            "agents": {
+                "name": {
+                    "name": "名稱"
+                },
+                "id": "ID",
+                "token": "權杖",
+                "platform": {
+                    "platform": "平臺",
+                    "badge": "平臺"
+                },
+                "backend": {
+                    "backend": "後端",
+                    "badge": "後端"
+                },
+                "capacity": {
+                    "capacity": "容量",
+                    "badge": "容量"
+                },
+                "version": "版本"
+            },
+            "repos": {
+                "disabled": "已停用",
+                "settings": "儲存庫設定",
+                "repos": "儲存庫",
+                "view": "檢視儲存庫"
+            },
+            "queue": {
+                "queue": "佇列",
+                "pause": "暫停",
+                "resume": "恢復",
+                "paused": "佇列已暫停",
+                "resumed": "佇列已恢復",
+                "tasks": "任務",
+                "stats": {
+                    "running_count": "執行中",
+                    "pending_count": "等待中"
+                }
+            },
+            "orgs": {
+                "orgs": "組織",
+                "delete_org": "刪除組織",
+                "org_settings": "組織設定",
+                "deleted": "組織已刪除",
+                "view": "檢視組織"
             }
         }
     },
@@ -121,8 +267,79 @@
         "just_now": "剛剛",
         "not_started": "尚未開始"
     },
-    "empty_list": "找不到{entity}！",
+    "empty_list": "找不到 {entity}！",
     "default": "預設",
     "info": "資訊",
-    "login_to_woodpecker_with": "使用以下方式登入 Woodpecker"
+    "login_to_woodpecker_with": "使用以下方式登入 Woodpecker",
+    "docs": "說明文件",
+    "secrets": {
+        "name": "名稱",
+        "value": "值"
+    },
+    "settings": "設定",
+    "extensions": "擴充功能",
+    "require_approval": {
+        "none": "無",
+        "require_approval_for": "批准要求"
+    },
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "save": "儲存",
+    "add": "新增",
+    "skip_verify": "略過 SSL 驗證",
+    "advanced_options": "進階選項",
+    "git_username": "Git 使用者名稱",
+    "git_password": "Git 密碼",
+    "oauth_redirect_url": "OAuth 重新導向 URL",
+    "fullscreen": "全螢幕",
+    "exit_fullscreen": "退出全螢幕",
+    "weblate": "我們的 Weblate",
+    "disabled": "已停用",
+    "user": {
+        "settings": {
+            "settings": "使用者設定",
+            "general": {
+                "general": "帳號",
+                "language": "語言",
+                "theme": {
+                    "theme": "主題",
+                    "light": "亮色",
+                    "dark": "暗色",
+                    "auto": "自動"
+                }
+            },
+            "cli_and_api": {
+                "download_cli": "下載 CLI",
+                "reset_token": "重設權杖",
+                "swagger_ui": "Swagger UI",
+                "api_usage": "API 使用範例",
+                "cli_usage": "CLI 使用範例"
+            }
+        }
+    },
+    "registries": {
+        "address": {
+            "address": "位址",
+            "desc": "註冊表位址 (例如 docker.io)"
+        },
+        "registries": "註冊表",
+        "credentials": "註冊表憑證",
+        "show": "顯示註冊表",
+        "save": "儲存註冊表",
+        "add": "新增註冊表",
+        "view": "檢視註冊表",
+        "edit": "編輯註冊表",
+        "delete": "刪除註冊表"
+    },
+    "developer_settings": "開發者設定",
+    "oauth_host": "OAuth 主機",
+    "extension_endpoint_placeholder": "例如 https://example.com/api",
+    "global_level_registry": "全域註冊表",
+    "org_level_registry": "組織註冊表",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "public_only": "僅公開",
+    "public_only_desc": "僅顯示公開儲存庫。"
 }
