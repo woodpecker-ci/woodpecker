@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-04
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6542](https://github.com/woodpecker-ci/woodpecker/pull/6542)]
 - Update module github.com/docker/cli to v29.4.2+incompatible [[#6539](https://github.com/woodpecker-ci/woodpecker/pull/6539)]
 - Update golangci/golangci-lint Docker tag to v2.12.1 [[#6537](https://github.com/woodpecker-ci/woodpecker/pull/6537)]
 - Update pre-commit hook golangci/golangci-lint to v2.12.1 [[#6535](https://github.com/woodpecker-ci/woodpecker/pull/6535)]
