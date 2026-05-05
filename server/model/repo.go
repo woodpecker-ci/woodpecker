@@ -138,14 +138,16 @@ func (r *Repo) Update(from *Repo) {
 		r.CloneSSH = from.CloneSSH
 	}
 	r.Branch = from.Branch
-	if from.IsSCMPrivate != r.IsSCMPrivate {
-		if from.IsSCMPrivate {
-			r.Visibility = VisibilityPrivate
-		} else {
-			r.Visibility = VisibilityPublic
-		}
+	// Only propagate visibility when the source supplies it. Some webhook
+	// payloads (notably GitLab push/tag/merge events) do not include project
+	// visibility, leaving from.Visibility empty and from.IsSCMPrivate at the
+	// zero value. Updating the stored fields from those payloads would
+	// overwrite the authoritative value previously synced from the forge API
+	// during activation or repair, breaking netrc-protected clones.
+	if from.Visibility != "" {
+		r.Visibility = from.Visibility
+		r.IsSCMPrivate = from.IsSCMPrivate
 	}
-	r.IsSCMPrivate = from.IsSCMPrivate
 }
 
 // RepoPatch represents a repository patch object.
