@@ -48,7 +48,12 @@ func (c *Cron) Validate() error {
 		return fmt.Errorf("schedule is required")
 	}
 
-	_, err := cron.ParseStandard(c.Schedule)
+	parser, err := cron.NewDefaultParser(cron.StandardOptions)
+	if err != nil {
+		return fmt.Errorf("can't create parser: %w", err)
+	}
+
+	_, err = parser.Parse(c.Schedule)
 	if err != nil {
 		return fmt.Errorf("can't parse schedule: %w", err)
 	}

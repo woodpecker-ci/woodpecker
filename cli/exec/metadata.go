@@ -33,6 +33,10 @@ import (
 func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w *metadata.Workflow) (*metadata.Metadata, error) {
 	m := &metadata.Metadata{}
 
+	if w != nil {
+		m.Workflow = *w
+	}
+
 	if c.IsSet("metadata-file") {
 		metadataFile, err := os.Open(c.String("metadata-file"))
 		if err != nil {
@@ -93,7 +97,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "pipeline-started", func(i int64) { m.Curr.Started = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-finished", func(i int64) { m.Curr.Finished = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-status", func(s string) { m.Curr.Status = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "pipeline-event", func(s string) { m.Curr.Event = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "pipeline-event", func(s string) { m.Curr.Event = metadata.Event(s) }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-url", func(s string) { m.Curr.ForgeURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-deploy-to", func(s string) { m.Curr.DeployTo = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-deploy-task", func(s string) { m.Curr.DeployTask = s }, c.String)
@@ -106,7 +110,8 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "commit-message", func(s string) { m.Curr.Commit.Message = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-author-name", func(s string) { m.Curr.Commit.Author.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-author-email", func(s string) { m.Curr.Commit.Author.Email = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "commit-author-avatar", func(s string) { m.Curr.Commit.Author.Avatar = s }, c.String)
+	// TODO remove in next major
+	metadataFileAndOverrideOrDefault(c, "commit-author-avatar", func(s string) { m.Curr.Avatar = s }, c.String)
 
 	metadataFileAndOverrideOrDefault(c, "commit-pull-labels", func(sl []string) { m.Curr.Commit.PullRequestLabels = sl }, c.StringSlice)
 	metadataFileAndOverrideOrDefault(c, "commit-pull-milestone", func(s string) { m.Curr.Commit.PullRequestMilestone = s }, c.String)
@@ -118,7 +123,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-started", func(i int64) { m.Prev.Started = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-finished", func(i int64) { m.Prev.Finished = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-status", func(s string) { m.Prev.Status = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "prev-pipeline-event", func(s string) { m.Prev.Event = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "prev-pipeline-event", func(s string) { m.Prev.Event = metadata.Event(s) }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-url", func(s string) { m.Prev.ForgeURL = s }, c.String)
 
 	// Previous Pipeline Commit
@@ -129,7 +134,8 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "prev-commit-message", func(s string) { m.Prev.Commit.Message = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-commit-author-name", func(s string) { m.Prev.Commit.Author.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-commit-author-email", func(s string) { m.Prev.Commit.Author.Email = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "prev-commit-author-avatar", func(s string) { m.Prev.Commit.Author.Avatar = s }, c.String)
+	// TODO remove in next major
+	metadataFileAndOverrideOrDefault(c, "prev-commit-author-avatar", func(s string) { m.Prev.Avatar = s }, c.String)
 
 	// Workflow
 	metadataFileAndOverrideOrDefault(c, "workflow-name", func(s string) { m.Workflow.Name = s }, c.String)
@@ -146,10 +152,6 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	// Forge
 	metadataFileAndOverrideOrDefault(c, "forge-type", func(s string) { m.Forge.Type = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "forge-url", func(s string) { m.Forge.URL = s }, c.String)
-
-	if w != nil {
-		m.Workflow = *w
-	}
 
 	return m, nil
 }

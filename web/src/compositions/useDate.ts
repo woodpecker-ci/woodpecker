@@ -29,7 +29,7 @@ function toLocaleString(date: Date) {
 }
 
 function timeAgo(date: number) {
-  const seconds = Math.floor((new Date().getTime() - date) / 1000);
+  const seconds = Math.floor((Date.now() - date) / 1000);
 
   const formatter = new Intl.RelativeTimeFormat(currentLocale);
 

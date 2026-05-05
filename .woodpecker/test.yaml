@@ -56,7 +56,7 @@ steps:
   lint:
     depends_on:
       - vendor
-    image: golangci/golangci-lint:v2.9.0
+    image: golangci/golangci-lint:v2.12.1
     commands:
       - make lint
     when: *when
@@ -75,7 +75,7 @@ steps:
     image: *golang_image
     commands:
       - make install-addlicense # cspell:words addlicense
-      - 'addlicense -check -ignore "vendor/**" **/*.go'
+      - bash -c 'shopt -s globstar; addlicense -check -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go'
     when: *when
 
   test:
@@ -87,6 +87,15 @@ steps:
       - make test-server
       - make test-cli
       - make test-lib
+    when:
+      - path: *when_path
+
+  test-e2e:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - make test-e2e
     when:
       - path: *when_path
 
@@ -128,7 +137,7 @@ steps:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.2.2
+    image: docker.io/woodpeckerci/plugin-codecov:2.3.1
     settings:
       files:
         - agent-coverage.out
@@ -136,6 +145,7 @@ steps:
         - coverage.out
         - server-coverage.out
         - datastore-coverage.out
+        - e2e-coverage.out
       token:
         from_secret: codecov_token
     when:
@@ -152,7 +162,7 @@ services:
     when: *when
 
   mysql:
-    image: docker.io/mysql:9.6.0
+    image: docker.io/mysql:9.7.0
     ports: ['3306']
     environment:
       MYSQL_DATABASE: test

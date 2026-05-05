@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -142,20 +142,6 @@ func (c *Forgejo) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mo
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(account.ID)),
 		Avatar:        expandAvatar(c.url, account.AvatarURL),
 	}, redirectURL, nil
-}
-
-// Auth uses the Forgejo oauth2 access token and refresh token to authenticate
-// a session and return the Forgejo account login.
-func (c *Forgejo) Auth(ctx context.Context, token, _ string) (string, error) {
-	client, err := c.newClientToken(ctx, token)
-	if err != nil {
-		return "", err
-	}
-	user, _, err := client.GetMyUserInfo()
-	if err != nil {
-		return "", err
-	}
-	return user.UserName, nil
 }
 
 // Refresh refreshes the Forgejo oauth2 access token. If the token is

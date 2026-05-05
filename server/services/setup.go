@@ -35,18 +35,26 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-func setupRegistryService(store store.Store, dockerConfig string) registry.Service {
+func setupRegistryService(store store.Store, dockerConfig, endpoint string, includeNetrc bool, client *utils.Client) registry.Service {
+	var service registry.Service
 	if dockerConfig != "" {
-		return registry.NewCombined(
+		service = registry.NewCombined(
 			registry.NewDB(store),
 			registry.NewFilesystem(dockerConfig),
 		)
+	} else {
+		service = registry.NewDB(store)
 	}
 
-	return registry.NewDB(store)
+	// Wrap with global HTTP extension if configured
+	if endpoint != "" {
+		service = registry.NewWithExtension(service, registry.NewHTTP(endpoint, client, includeNetrc))
+	}
+
+	return service
 }
 
-func setupSecretService(store store.Store) secret.Service {
+func setupSecretService(store store.Store, endpoint string, client *utils.Client, includeNetrc bool) secret.Service {
 	// TODO(1544): fix encrypted store
 	// // encryption
 	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
@@ -54,6 +62,10 @@ func setupSecretService(store store.Store) secret.Service {
 	// if err != nil {
 	// 	log.Fatal().Err(err).Msg("could not create encryption service")
 	// }
+
+	if endpoint != "" {
+		return secret.NewCombined(secret.NewDB(store), secret.NewHTTP(endpoint, client, includeNetrc))
+	}
 
 	return secret.NewDB(store)
 }
@@ -66,9 +78,9 @@ func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, e
 	}
 	configFetcher := config.NewForge(timeout, retries)
 
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		httpFetcher := config.NewHTTP(endpoint, client)
-		if c.Bool("config-service-exclusive") {
+	if endpoint := c.String("config-extension-endpoint"); endpoint != "" {
+		httpFetcher := config.NewHTTP(endpoint, client, c.Bool("config-extension-netrc"))
+		if c.Bool("config-extension-exclusive") {
 			return httpFetcher, nil
 		}
 		return config.NewCombined(configFetcher, httpFetcher), nil
@@ -82,7 +94,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 	privKeyID := "signature-private-key"
 
 	privKey, err := _store.ServerConfigGet(privKeyID)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to generate private key: %w", err)
@@ -106,7 +118,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 
 func setupForgeService(c *cli.Command, _store store.Store) error {
 	_forge, err := _store.ForgeGet(1)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return err
 	}
 	forgeExists := err == nil

@@ -190,6 +190,7 @@ func TestRunStep(t *testing.T) {
 
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
+	backend.isolatedHome = true
 	ctx := t.Context()
 	taskUUID := "test-run-tasks"
 

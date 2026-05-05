@@ -80,7 +80,7 @@ func SetRepo() gin.HandlerFunc {
 			return
 		}
 
-		if errors.Is(err, types.RecordNotExist) {
+		if errors.Is(err, types.ErrRecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}

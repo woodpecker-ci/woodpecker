@@ -11,8 +11,9 @@ import (
 	"io"
 	"sync"
 
-	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
+	"golang.org/x/image/font/sfnt"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/badges/fonts"
 )
@@ -116,15 +117,21 @@ func initDrawer() (*badgeDrawer, error) {
 }
 
 func mustNewFontDrawer(size, dpi float64) (*font.Drawer, error) {
-	ttf, err := truetype.Parse(fonts.DejaVuSans)
+	f, err := sfnt.Parse(fonts.DejaVuSans)
 	if err != nil {
 		return nil, err
 	}
+
+	face, err := opentype.NewFace(f, &opentype.FaceOptions{
+		Size:    size,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &font.Drawer{
-		Face: truetype.NewFace(ttf, &truetype.Options{
-			Size:    size,
-			DPI:     dpi,
-			Hinting: font.HintingFull,
-		}),
+		Face: face,
 	}, nil
 }

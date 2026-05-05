@@ -1,3 +1,6 @@
+when:
+  status: [success, failure]
+
 steps:
   when-branch:
     image: alpine
@@ -43,14 +46,18 @@ steps:
     commands:
       - echo "test"
     when:
-      ref: 'refs/tags/v**'
+      - ref: 'refs/tags/v**'
+      - ref:
+          include: 'refs/tags/v**'
+          exclude: 'refs/tags/v1.**'
 
   when-status:
     image: alpine
     commands:
       - echo "test"
     when:
-      status: [success, failure]
+      - status: [success, failure]
+      - status: failure
 
   when-platform:
     image: alpine

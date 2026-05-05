@@ -1,0 +1,16 @@
+skip_clone: true
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+    environment:
+      STEP_EXIT_CODE: '2'
+
+  - name: notify
+    image: dummy
+    commands:
+      - echo notifying
+    when:
+      - status: [failure]

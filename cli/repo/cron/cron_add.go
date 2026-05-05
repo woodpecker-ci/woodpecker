@@ -47,6 +47,11 @@ var cronCreateCmd = &cli.Command{
 			Usage:    "cron schedule",
 			Required: true,
 		},
+		&cli.BoolFlag{
+			Name:  "enabled",
+			Usage: "whether cron is enabled",
+			Value: true,
+		},
 		common.FormatFlag(tmplCronList, true),
 	},
 }
@@ -58,6 +63,7 @@ func cronCreate(ctx context.Context, c *cli.Command) error {
 		schedule         = c.String("schedule")
 		repoIDOrFullName = c.String("repository")
 		format           = c.String("format") + "\n"
+		enabled          = c.Bool("enabled")
 	)
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
@@ -77,6 +83,7 @@ func cronCreate(ctx context.Context, c *cli.Command) error {
 		Name:     cronName,
 		Branch:   branch,
 		Schedule: schedule,
+		Enabled:  enabled,
 	}
 	cron, err = client.CronCreate(repoID, cron)
 	if err != nil {

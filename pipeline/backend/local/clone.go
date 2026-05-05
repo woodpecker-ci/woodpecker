@@ -124,6 +124,11 @@ func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, erro
 		return "", nil
 	}
 
+	if !e.isolatedHome {
+		log.Trace().Msg("writing .netrc skipped due to disabled isolated home")
+		return "", nil
+	}
+
 	file := filepath.Join(state.homeDir, ".netrc")
 	rmCmd := fmt.Sprintf("rm \"%s\"", file)
 	if e.os == "windows" {

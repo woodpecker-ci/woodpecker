@@ -3,10 +3,12 @@ arch: amd64
 platform: linux
 version: ${VERSION_NUMBER}
 description: Woodpecker Agent
-homepage: https://github.com/woodpecker-ci/woodpecker
+homepage: https://woodpecker-ci.org/
 license: Apache 2.0
 maintainer: Woodpecker Authors <maintainer@woodpecker-ci.org>
 section: daemon/system
+scripts:
+  preinstall: ./nfpm/woodpecker-system-user.preinstall.sh
 contents:
   - src: ./dist/agent/linux_amd64/woodpecker-agent
     dst: /usr/local/bin/woodpecker-agent
@@ -14,3 +16,9 @@ contents:
     dst: /usr/local/lib/systemd/system/woodpecker-agent.service
   - src: ./nfpm/woodpecker-agent.env.example
     dst: /etc/woodpecker/woodpecker-agent.env.example
+  - dst: /var/lib/woodpecker/
+    type: dir
+    file_info:
+      owner: woodpecker
+      group: woodpecker
+      mode: 0750

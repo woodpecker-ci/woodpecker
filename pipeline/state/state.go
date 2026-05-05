@@ -15,23 +15,24 @@
 package state
 
 import (
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
-type (
-	// State defines the pipeline and process state.
-	State struct {
-		// Global state of the pipeline.
-		Pipeline struct {
-			// Pipeline time started
-			Started int64 `json:"time"`
-			// Current pipeline step
-			Step *backend.Step `json:"step"`
-			// Current pipeline error state
-			Error error `json:"error"`
-		}
+// State is used to signal the current workflow and step state.
+// Only steps using the trace func report back what's going on.
+// And the workflow is updated alongside it.
+type State struct {
+	// Global state of the currently running Workflow.
+	Workflow Workflow
+	// Current step that updates the step and workflow state
+	CurrStep *backend_types.Step `json:"step"`
+	// Current step state
+	CurrStepState backend_types.State
+}
 
-		// Current process state.
-		Process backend.State
-	}
-)
+type Workflow struct {
+	// Workflow start time
+	Started int64 `json:"time"`
+	// Current workflow error state
+	Error error `json:"error"`
+}

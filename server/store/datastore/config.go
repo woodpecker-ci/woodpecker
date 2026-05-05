@@ -55,7 +55,7 @@ func (s storage) ConfigPersist(conf *model.Config) (*model.Config, error) {
 	}
 
 	existingConfig, err := s.configFindIdentical(sess, conf.RepoID, conf.Hash, conf.Name)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return nil, err
 	}
 	if existingConfig != nil {
@@ -79,12 +79,10 @@ func (s storage) configCreate(sess *xorm.Session, config *model.Config) error {
 	}
 
 	// only Insert set auto created ID back to object
-	_, err := sess.Insert(config)
-	return err
+	return wrapInsert(sess.Insert(config))
 }
 
 func (s storage) PipelineConfigCreate(config *model.PipelineConfig) error {
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(config)
-	return err
+	return wrapInsert(s.engine.Insert(config))
 }

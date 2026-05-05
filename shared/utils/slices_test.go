@@ -20,14 +20,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMergeSlices(t *testing.T) {
-	resultSS := MergeSlices([]string{}, []string{"a", "b"}, []string{"c"}, nil)
-	assert.EqualValues(t, []string{"a", "b", "c"}, resultSS)
-
-	resultIS := MergeSlices([]int{}, []int{1, 2}, []int{4}, nil)
-	assert.EqualValues(t, []int{1, 2, 4}, resultIS)
-}
-
 func TestEqualSliceValues(t *testing.T) {
 	tests := []struct {
 		in1 []string

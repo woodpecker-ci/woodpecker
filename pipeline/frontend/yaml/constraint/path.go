@@ -21,7 +21,7 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 	"gopkg.in/yaml.v3"
 
-	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
 )
 
@@ -36,13 +36,13 @@ type Path struct {
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include       yamlBaseTypes.StringOrSlice `yaml:"include"`
-		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude"`
-		IgnoreMessage string                      `yaml:"ignore_message"`
-		OnEmpty       optional.Option[bool]       `yaml:"on_empty"`
+		Include       yaml_base_types.StringOrSlice `yaml:"include"`
+		Exclude       yaml_base_types.StringOrSlice `yaml:"exclude"`
+		IgnoreMessage string                        `yaml:"ignore_message"`
+		OnEmpty       optional.Option[bool]         `yaml:"on_empty"`
 	}{}
 
-	var out2 yamlBaseTypes.StringOrSlice
+	var out2 yaml_base_types.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -72,7 +72,7 @@ func (c Path) MarshalYAML() (any, error) {
 		if len(c.Include) == 0 {
 			return nil, nil
 		}
-		return yamlBaseTypes.StringOrSlice(c.Include), nil
+		return yaml_base_types.StringOrSlice(c.Include), nil
 	}
 
 	// clean up on_empty if true make it none as we will default to true
@@ -82,10 +82,10 @@ func (c Path) MarshalYAML() (any, error) {
 
 	// we can not return type Path as it would lead to infinite recursion :/
 	return struct {
-		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
-		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
-		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
-		OnEmpty       optional.Option[bool]       `yaml:"on_empty,omitempty"`
+		Include       yaml_base_types.StringOrSlice `yaml:"include,omitempty"`
+		Exclude       yaml_base_types.StringOrSlice `yaml:"exclude,omitempty"`
+		IgnoreMessage string                        `yaml:"ignore_message,omitempty"`
+		OnEmpty       optional.Option[bool]         `yaml:"on_empty,omitempty"`
 	}{
 		Include:       c.Include,
 		Exclude:       c.Exclude,

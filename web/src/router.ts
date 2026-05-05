@@ -380,14 +380,14 @@ router.beforeEach(async (to, _, next) => {
   const config = useUserConfig();
   const { redirectUrl } = config.userConfig.value;
 
+  const { isAuthenticated } = useAuthentication();
+
   // redirect to saved url when not on login page
-  if (redirectUrl !== '' && authenticationMode !== 'guest-only') {
+  if (redirectUrl !== '' && isAuthenticated && authenticationMode !== 'guest-only') {
     config.setUserConfig('redirectUrl', '');
     next(redirectUrl);
     return;
   }
-
-  const { isAuthenticated } = useAuthentication();
 
   if (authenticationMode === 'required' && !isAuthenticated) {
     config.setUserConfig('redirectUrl', to.fullPath);

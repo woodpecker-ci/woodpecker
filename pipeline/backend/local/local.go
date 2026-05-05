@@ -47,6 +47,7 @@ type stepState struct {
 
 type local struct {
 	tempDir         string
+	isolatedHome    bool
 	workflows       sync.Map
 	pluginGitBinary string
 	os, arch        string
@@ -84,6 +85,7 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	c, ok := ctx.Value(types.CliCommand).(*cli.Command)
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
+		e.isolatedHome = c.Bool("backend-local-isolated-home")
 	}
 
 	e.loadClone()
@@ -154,9 +156,11 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 		}
 	}
 
-	// Set HOME and CI_WORKSPACE
-	env = append(env, "HOME="+state.homeDir)
-	env = append(env, "USERPROFILE="+state.homeDir)
+	if e.isolatedHome {
+		env = append(env, "HOME="+state.homeDir)
+		env = append(env, "USERPROFILE="+state.homeDir)
+	}
+
 	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
 
 	switch step.Type {

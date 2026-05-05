@@ -98,7 +98,7 @@ func TestUpdateToStatusKilled(t *testing.T) {
 		SupersededBy: 2,
 	}
 
-	pipeline, _ := UpdateToStatusKilled(mockStorePipeline(t), model.Pipeline{}, cancelInfo)
+	pipeline, _ := UpdateToStatusKilled(mockStorePipeline(t), model.Pipeline{}, cancelInfo, model.StatusKilled)
 
 	assert.Equal(t, model.StatusKilled, pipeline.Status)
 	assert.NotNil(t, pipeline.CancelInfo)

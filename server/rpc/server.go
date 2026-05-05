@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grpc
+package rpc
 
 import (
 	"context"
 	"encoding/json"
 
 	"github.com/prometheus/client_golang/prometheus"
-	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
@@ -37,21 +36,46 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
-	pipelineTime := prometheus_auto.NewGaugeVec(prometheus.GaugeOpts{
+func NewWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, store store.Store) proto.WoodpeckerServer {
+	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
 		Help:      "Pipeline time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
-	pipelineCount := prometheus_auto.NewCounterVec(prometheus.CounterOpts{
+	pipelineCount := promauto.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_count",
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
 		store:         store,
-		queue:         queue,
-		pubsub:        pubsub,
+		scheduler:     scheduler,
+		logger:        logger,
+		pipelineTime:  pipelineTime,
+		pipelineCount: pipelineCount,
+	}
+	return &WoodpeckerServer{peer: peer}
+}
+
+// NewTestWoodpeckerServer creates a WoodpeckerServer for e2e tests.
+// It is using a caller-supplied prometheus registry.
+// Use this in tests to avoid "duplicate metrics collector registration" panics when the server is created multiple times.
+// (promauto in NewWoodpeckerServer registers into the global default registry, which panics on duplicate names).
+func NewTestWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, store store.Store, registry *prometheus.Registry) proto.WoodpeckerServer {
+	factory := promauto.With(registry)
+	pipelineTime := factory.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "woodpecker",
+		Name:      "pipeline_time",
+		Help:      "Pipeline time.",
+	}, []string{"repo", "branch", "status", "pipeline"})
+	pipelineCount := factory.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "woodpecker",
+		Name:      "pipeline_count",
+		Help:      "Pipeline count.",
+	}, []string{"repo", "branch", "status", "pipeline"})
+	peer := RPC{
+		store:         store,
+		scheduler:     scheduler,
 		logger:        logger,
 		pipelineTime:  pipelineTime,
 		pipelineCount: pipelineCount,
@@ -109,6 +133,7 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
 		Canceled: req.GetState().GetCanceled(),
+		Skipped:  req.GetState().GetSkipped(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Update(c, req.GetId(), state)

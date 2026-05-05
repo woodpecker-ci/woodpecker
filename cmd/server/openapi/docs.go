@@ -679,7 +679,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/forges/{forgeId}": {
+        "/forges/{forge_id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -699,7 +699,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forgeId",
+                        "name": "forge_id",
                         "in": "path",
                         "required": true
                     }
@@ -733,7 +733,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forgeId",
+                        "name": "forge_id",
                         "in": "path",
                         "required": true
                     }
@@ -764,7 +764,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forgeId",
+                        "name": "forge_id",
                         "in": "path",
                         "required": true
                     },
@@ -2695,7 +2695,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/logs/{number}": {
+        "/repos/{repo_id}/logs/{pipeline_number}": {
             "delete": {
                 "produces": [
                     "text/plain"
@@ -2723,7 +2723,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -2735,7 +2735,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/logs/{number}/{stepID}": {
+        "/repos/{repo_id}/logs/{pipeline_number}/{step_id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2763,14 +2763,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "the step id",
-                        "name": "stepID",
+                        "name": "step_id",
                         "in": "path",
                         "required": true
                     }
@@ -2786,9 +2786,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/repos/{repo_id}/logs/{number}/{stepId}": {
+            },
             "delete": {
                 "produces": [
                     "text/plain"
@@ -2816,14 +2814,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "the step id",
-                        "name": "stepId",
+                        "name": "step_id",
                         "in": "path",
                         "required": true
                     }
@@ -3045,7 +3043,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -3073,7 +3071,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline, OR 'latest'",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3115,7 +3113,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     },
@@ -3168,7 +3166,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3180,7 +3178,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/approve": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/approve": {
             "post": {
                 "produces": [
                     "application/json"
@@ -3208,7 +3206,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3223,7 +3221,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/cancel": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/cancel": {
             "post": {
                 "produces": [
                     "text/plain"
@@ -3251,7 +3249,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3263,7 +3261,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/config": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/config": {
             "get": {
                 "produces": [
                     "application/json"
@@ -3291,7 +3289,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3309,7 +3307,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/decline": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/decline": {
             "post": {
                 "produces": [
                     "application/json"
@@ -3337,7 +3335,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -3352,7 +3350,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/pipelines/{number}/metadata": {
+        "/repos/{repo_id}/pipelines/{pipeline_number}/metadata": {
             "get": {
                 "produces": [
                     "application/json"
@@ -3380,7 +3378,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the number of the pipeline",
-                        "name": "number",
+                        "name": "pipeline_number",
                         "in": "path",
                         "required": true
                     }
@@ -4170,7 +4168,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/logs/{repo_id}/{pipeline}/{stepID}": {
+        "/stream/logs/{repo_id}/{pipeline}/{step_id}": {
             "get": {
                 "produces": [
                     "text/plain"
@@ -4197,7 +4195,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the step id",
-                        "name": "stepID",
+                        "name": "step_id",
                         "in": "path",
                         "required": true
                     }
@@ -4681,6 +4679,9 @@ const docTemplate = `{
         "CancelInfo": {
             "type": "object",
             "properties": {
+                "canceled_by_step": {
+                    "type": "string"
+                },
                 "canceled_by_user": {
                     "type": "string"
                 },
@@ -5008,6 +5009,10 @@ const docTemplate = `{
                 "created": {
                     "type": "integer"
                 },
+                "cron": {
+                    "description": "name of the cron job",
+                    "type": "string"
+                },
                 "deploy_task": {
                     "type": "string"
                 },
@@ -5098,6 +5103,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "version": {
+                    "type": "string"
                 },
                 "workflows": {
                     "type": "array",
@@ -5240,6 +5248,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5258,6 +5269,14 @@ const docTemplate = `{
                 },
                 "full_name": {
                     "type": "string"
+                },
+                "has_forge_name_conflict": {
+                    "description": "HasForgeNameConflict is true if forge returned a repo with same name but different forge remote id",
+                    "type": "boolean"
+                },
+                "has_no_forge_repo": {
+                    "description": "HasNoForgeRepo is true if repo only exist in the woodpecker store and not at the forge anymore",
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
@@ -5283,8 +5302,20 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
+                "registry_extension_netrc": {
+                    "type": "boolean"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
+                },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
                 },
                 "timeout": {
                     "type": "integer"
@@ -5336,6 +5367,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5354,6 +5388,14 @@ const docTemplate = `{
                 },
                 "full_name": {
                     "type": "string"
+                },
+                "has_forge_name_conflict": {
+                    "description": "HasForgeNameConflict is true if forge returned a repo with same name but different forge remote id",
+                    "type": "boolean"
+                },
+                "has_no_forge_repo": {
+                    "description": "HasNoForgeRepo is true if repo only exist in the woodpecker store and not at the forge anymore",
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
@@ -5382,8 +5424,20 @@ const docTemplate = `{
                 "private": {
                     "type": "boolean"
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
+                "registry_extension_netrc": {
+                    "type": "boolean"
+                },
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
+                },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
                 },
                 "timeout": {
                     "type": "integer"
@@ -5423,6 +5477,9 @@ const docTemplate = `{
                 "config_extension_exclusive": {
                     "type": "boolean"
                 },
+                "config_extension_netrc": {
+                    "type": "boolean"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -5432,8 +5489,20 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "registry_extension_endpoint": {
+                    "type": "string"
+                },
+                "registry_extension_netrc": {
+                    "type": "boolean"
+                },
                 "require_approval": {
                     "type": "string"
+                },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
+                "secret_extension_netrc": {
+                    "type": "boolean"
                 },
                 "timeout": {
                     "type": "integer"
@@ -5529,6 +5598,7 @@ const docTemplate = `{
                 "success",
                 "failure",
                 "killed",
+                "canceled",
                 "error",
                 "blocked",
                 "declined",
@@ -5536,6 +5606,7 @@ const docTemplate = `{
             ],
             "x-enum-comments": {
                 "StatusBlocked": "waiting for approval",
+                "StatusCanceled": "canceled but hasn't been started",
                 "StatusCreated": "created / internal use only",
                 "StatusDeclined": "blocked and declined",
                 "StatusError": "error with the config / while parsing / some other system problem",
@@ -5543,16 +5614,17 @@ const docTemplate = `{
                 "StatusKilled": "killed by user",
                 "StatusPending": "pending to be executed",
                 "StatusRunning": "currently running",
-                "StatusSkipped": "skipped as another step failed",
+                "StatusSkipped": "skipped as per condition of current workflow failed/success state",
                 "StatusSuccess": "successfully finished"
             },
             "x-enum-descriptions": [
-                "skipped as another step failed",
+                "skipped as per condition of current workflow failed/success state",
                 "pending to be executed",
                 "currently running",
                 "successfully finished",
                 "failed to finish (exit code != 0)",
                 "killed by user",
+                "canceled but hasn't been started",
                 "error with the config / while parsing / some other system problem",
                 "waiting for approval",
                 "blocked and declined",
@@ -5565,6 +5637,7 @@ const docTemplate = `{
                 "StatusSuccess",
                 "StatusFailure",
                 "StatusKilled",
+                "StatusCanceled",
                 "StatusError",
                 "StatusBlocked",
                 "StatusDeclined",
@@ -5785,9 +5858,6 @@ const docTemplate = `{
         "metadata.Author": {
             "type": "object",
             "properties": {
-                "avatar": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -5836,6 +5906,31 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "metadata.Event": {
+            "type": "string",
+            "enum": [
+                "push",
+                "pull_request",
+                "pull_request_closed",
+                "pull_request_metadata",
+                "tag",
+                "release",
+                "deployment",
+                "cron",
+                "manual"
+            ],
+            "x-enum-varnames": [
+                "EventPush",
+                "EventPull",
+                "EventPullClosed",
+                "EventPullMetadata",
+                "EventTag",
+                "EventRelease",
+                "EventDeploy",
+                "EventCron",
+                "EventManual"
+            ]
         },
         "metadata.Forge": {
             "type": "object",
@@ -5896,7 +5991,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "event": {
-                    "type": "string"
+                    "$ref": "#/definitions/metadata.Event"
                 },
                 "event_reason": {
                     "type": "array",

@@ -223,7 +223,7 @@ func TestDeletePipeline(t *testing.T) {
 		new(model.Step), new(model.LogEntry), new(model.PipelineConfig), new(model.Config))
 	defer closer()
 
-	_, err := store.engine.Insert(
+	err := wrapInsert(store.engine.Insert(
 		&model.Pipeline{
 			ID:     2,
 			Number: 2,
@@ -263,11 +263,11 @@ func TestDeletePipeline(t *testing.T) {
 			PipelineID: 8,
 			ConfigID:   25,
 		},
-	)
+	))
 	assert.NoError(t, err)
 
 	// delete non existing pipeline
-	assert.ErrorIs(t, types.RecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
+	assert.ErrorIs(t, types.ErrRecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
 
 	// delete pipeline with shares config
 	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 2}))
