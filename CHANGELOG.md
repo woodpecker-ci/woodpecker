@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter
+@6543, @EdwardSalter, @qwerty287
 
 ### 📈 Enhancement
 
@@ -17,6 +17,7 @@
 
 ### 📚 Documentation
 
+- Add 3rd party secret extensions list [[#6546](https://github.com/woodpecker-ci/woodpecker/pull/6546)]
 - Lock file maintenance [[#6540](https://github.com/woodpecker-ci/woodpecker/pull/6540)]
 - Update dependency axios to v1.16.0 [[#6538](https://github.com/woodpecker-ci/woodpecker/pull/6538)]
 - Update dependency yaml to v2.8.4 [[#6536](https://github.com/woodpecker-ci/woodpecker/pull/6536)]
