@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-06
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @qwerty287
+@6543, @EdwardSalter, @qwerty287, @wucm667
 
 ### 📈 Enhancement
 
@@ -13,6 +13,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(agent): persist agent ID after auth to prevent crashloop duplicates [[#6543](https://github.com/woodpecker-ci/woodpecker/pull/6543)]
 - fix(gitlab): preserve private flag when webhook payload omits project visibility [[#6544](https://github.com/woodpecker-ci/woodpecker/pull/6544)]
 
 ### 📚 Documentation
