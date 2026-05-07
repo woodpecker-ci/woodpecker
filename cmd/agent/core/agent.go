@@ -377,7 +377,11 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 		before, after, _ := strings.Cut(v, "=")
 		switch {
 		case before != "" && after != "":
-			m[before] = after
+			if existing, ok := m[before]; ok {
+				m[before] = existing + "," + after
+			} else {
+				m[before] = after
+			}
 		case before != "":
 			return fmt.Errorf("key '%s' does not have a value assigned", before)
 		default:

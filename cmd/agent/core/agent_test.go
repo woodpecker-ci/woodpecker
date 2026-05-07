@@ -59,6 +59,15 @@ func TestStringSliceAddToMap(t *testing.T) {
 			expected: map[string]string{"foo": "bar", "baz": "qux"},
 			err:      false,
 		},
+		{
+			name: "duplicate keys (Issue #3571)",
+			sl:   []string{"test_selector=a", "test_selector=b"},
+			m:    make(map[string]string),
+			expected: map[string]string{
+				"test_selector": "a,b", // We'd want them both
+			},
+			err: false,
+		},
 	}
 
 	for _, tt := range tests {

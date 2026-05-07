@@ -57,15 +57,20 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 				}
 			}
 
-			switch agentLabelValue {
-			// if agent label has a wildcard
-			case "*":
-				score++
-			// if agent label has an exact match
-			case taskLabelValue:
-				score += 10
-			// agent doesn't match
-			default:
+			matched := false
+			for _, val := range strings.Split(agentLabelValue, ",") {
+				if val == "*" || val == taskLabelValue {
+					matched = true
+					if val == "*" {
+						score++
+					} else {
+						score += 10
+					}
+					break
+				}
+			}
+
+			if !matched {
 				return false, 0
 			}
 		}
@@ -77,7 +82,18 @@ func requiredLabelsMissing(taskLabels, agentLabels map[string]string) bool {
 	for label, value := range agentLabels {
 		if len(label) > 0 && label[0] == '!' {
 			val, ok := taskLabels[label[1:]]
-			if !ok || val != value {
+			if !ok {
+				return true
+			}
+
+			found := false
+			for _, v := range strings.Split(value, ",") {
+				if val == v {
+					found = true
+					break
+				}
+			}
+			if !found {
 				return true
 			}
 		}
