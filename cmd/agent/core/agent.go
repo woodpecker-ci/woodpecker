@@ -137,6 +137,15 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		return fmt.Errorf("agent could not auth: %w", err)
 	}
 
+	// Persist the agent ID received during auth so that crashloops reuse the
+	// same server-side entry instead of creating a new one on every restart.
+	if agentConfigPath != "" {
+		agentConfig.AgentID = authClient.AgentID()
+		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
+			log.Debug().Msgf("persisted agent ID %d after auth", agentConfig.AgentID)
+		}
+	}
+
 	conn, err := grpc.NewClient(
 		c.String("server"),
 		transport,
@@ -152,7 +161,9 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	defer conn.Close()
 
-	client := agent_rpc.NewGrpcClient(ctx, conn)
+	client := agent_rpc.NewGrpcClient(ctx, conn,
+		agent_rpc.SetConnectionRetryTimeout(c.Duration("retry-timeout")),
+	)
 	agentConfigPersisted := atomic.Bool{}
 
 	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))

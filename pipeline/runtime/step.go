@@ -17,6 +17,8 @@ package runtime
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strconv"
 	"sync"
 	"time"
 
@@ -44,9 +46,9 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend_types.Ste
 		return err
 	}
 
-	// Add compatibility environment variables for drone-ci plugins.
-	if step.Type == backend_types.StepTypePlugin {
-		metadata.SetDroneEnviron(step.Environment)
+	// Set runtime specific step environment
+	if err := r.setStepEnv(step); err != nil {
+		return err
 	}
 
 	logger.Debug().Str("step", step.Name).Msg("executing")
@@ -80,6 +82,31 @@ func (r *Runtime) shouldSkipStep(step *backend_types.Step) bool {
 	}
 
 	return false
+}
+
+// setStepEnv sets runtime specific step environment variables.
+// It also adds the drone plugin compatibility layer.
+func (r *Runtime) setStepEnv(step *backend_types.Step) error {
+	if step.Environment == nil {
+		return fmt.Errorf("step %q (%q) has no environment variables initialized", step.Name, step.UUID)
+	}
+
+	// Add compatibility environment variables for drone-ci plugins.
+	if step.Type == backend_types.StepTypePlugin {
+		metadata.SetDroneEnviron(step.Environment)
+	}
+
+	if r.err.Get() != nil {
+		step.Environment["CI_PIPELINE_STATUS"] = "failure"
+	} else {
+		step.Environment["CI_PIPELINE_STATUS"] = "success"
+	}
+	step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(r.started, 10)
+	step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(time.Now().Unix(), 10)
+	step.Environment["CI_STEP_TYPE"] = string(step.Type)
+	step.Environment["CI_STEP_NAME"] = step.Name
+
+	return nil
 }
 
 // startStep starts the step container and spawns a goroutine to stream its logs.
@@ -206,7 +233,10 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 	}
 
 	// Container is up and logging is streaming — hand off to background.
+	r.uploadWait.Add(1)
 	go func() {
+		defer r.uploadWait.Done()
+
 		logger := r.makeLogger()
 
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
@@ -216,7 +246,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 			err = pipeline_errors.ErrCancel
 		}
 		if err != nil {
-			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed after while running")
+			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed while running")
 		}
 
 		if traceErr := r.traceStep(processState, err, step); traceErr != nil {
@@ -253,12 +283,10 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
 	}
 
-	// The tracer should just trace changes, but it currently also updates step env vars used in various ways:
-	// https://github.com/woodpecker-ci/woodpecker/blob/main/agent/tracer.go#L79-L86 .
-	r.tracerLock.Lock()
-	defer r.tracerLock.Unlock()
 	if traceErr := r.tracer.Trace(s); traceErr != nil {
-		return traceErr
+		logger := r.makeLogger()
+		logger.Error().Err(traceErr).Msg("could not trace step state change")
 	}
+
 	return err
 }

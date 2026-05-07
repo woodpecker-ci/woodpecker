@@ -71,7 +71,7 @@ func TestInfraSmoke(t *testing.T) {
 	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
 		{Name: ".woodpecker.yaml", Data: simpleSuccessYAML},
 	})
-	agent := setup.StartAgent(t.Context(), t, env.GRPCAddr)
+	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	draftPipeline := &model.Pipeline{

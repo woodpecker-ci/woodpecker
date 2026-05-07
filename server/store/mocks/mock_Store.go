@@ -5557,8 +5557,8 @@ func (_c *MockStore_ServerConfigSet_Call) RunAndReturn(run func(s string, s1 str
 }
 
 // StepByUUID provides a mock function for the type MockStore
-func (_mock *MockStore) StepByUUID(s string) (*model.Step, error) {
-	ret := _mock.Called(s)
+func (_mock *MockStore) StepByUUID(uuid string) (*model.Step, error) {
+	ret := _mock.Called(uuid)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StepByUUID")
@@ -5567,17 +5567,17 @@ func (_mock *MockStore) StepByUUID(s string) (*model.Step, error) {
 	var r0 *model.Step
 	var r1 error
 	if returnFunc, ok := ret.Get(0).(func(string) (*model.Step, error)); ok {
-		return returnFunc(s)
+		return returnFunc(uuid)
 	}
 	if returnFunc, ok := ret.Get(0).(func(string) *model.Step); ok {
-		r0 = returnFunc(s)
+		r0 = returnFunc(uuid)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Step)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(s)
+		r1 = returnFunc(uuid)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -5590,12 +5590,12 @@ type MockStore_StepByUUID_Call struct {
 }
 
 // StepByUUID is a helper method to define mock.On call
-//   - s string
-func (_e *MockStore_Expecter) StepByUUID(s interface{}) *MockStore_StepByUUID_Call {
-	return &MockStore_StepByUUID_Call{Call: _e.mock.On("StepByUUID", s)}
+//   - uuid string
+func (_e *MockStore_Expecter) StepByUUID(uuid interface{}) *MockStore_StepByUUID_Call {
+	return &MockStore_StepByUUID_Call{Call: _e.mock.On("StepByUUID", uuid)}
 }
 
-func (_c *MockStore_StepByUUID_Call) Run(run func(s string)) *MockStore_StepByUUID_Call {
+func (_c *MockStore_StepByUUID_Call) Run(run func(uuid string)) *MockStore_StepByUUID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 string
 		if args[0] != nil {
@@ -5613,149 +5613,7 @@ func (_c *MockStore_StepByUUID_Call) Return(step *model.Step, err error) *MockSt
 	return _c
 }
 
-func (_c *MockStore_StepByUUID_Call) RunAndReturn(run func(s string) (*model.Step, error)) *MockStore_StepByUUID_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// StepChild provides a mock function for the type MockStore
-func (_mock *MockStore) StepChild(pipeline *model.Pipeline, n int, s string) (*model.Step, error) {
-	ret := _mock.Called(pipeline, n, s)
-
-	if len(ret) == 0 {
-		panic("no return value specified for StepChild")
-	}
-
-	var r0 *model.Step
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Pipeline, int, string) (*model.Step, error)); ok {
-		return returnFunc(pipeline, n, s)
-	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Pipeline, int, string) *model.Step); ok {
-		r0 = returnFunc(pipeline, n, s)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Step)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Pipeline, int, string) error); ok {
-		r1 = returnFunc(pipeline, n, s)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_StepChild_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepChild'
-type MockStore_StepChild_Call struct {
-	*mock.Call
-}
-
-// StepChild is a helper method to define mock.On call
-//   - pipeline *model.Pipeline
-//   - n int
-//   - s string
-func (_e *MockStore_Expecter) StepChild(pipeline interface{}, n interface{}, s interface{}) *MockStore_StepChild_Call {
-	return &MockStore_StepChild_Call{Call: _e.mock.On("StepChild", pipeline, n, s)}
-}
-
-func (_c *MockStore_StepChild_Call) Run(run func(pipeline *model.Pipeline, n int, s string)) *MockStore_StepChild_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Pipeline
-		if args[0] != nil {
-			arg0 = args[0].(*model.Pipeline)
-		}
-		var arg1 int
-		if args[1] != nil {
-			arg1 = args[1].(int)
-		}
-		var arg2 string
-		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_StepChild_Call) Return(step *model.Step, err error) *MockStore_StepChild_Call {
-	_c.Call.Return(step, err)
-	return _c
-}
-
-func (_c *MockStore_StepChild_Call) RunAndReturn(run func(pipeline *model.Pipeline, n int, s string) (*model.Step, error)) *MockStore_StepChild_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// StepFind provides a mock function for the type MockStore
-func (_mock *MockStore) StepFind(pipeline *model.Pipeline, n int) (*model.Step, error) {
-	ret := _mock.Called(pipeline, n)
-
-	if len(ret) == 0 {
-		panic("no return value specified for StepFind")
-	}
-
-	var r0 *model.Step
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Pipeline, int) (*model.Step, error)); ok {
-		return returnFunc(pipeline, n)
-	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Pipeline, int) *model.Step); ok {
-		r0 = returnFunc(pipeline, n)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Step)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Pipeline, int) error); ok {
-		r1 = returnFunc(pipeline, n)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_StepFind_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepFind'
-type MockStore_StepFind_Call struct {
-	*mock.Call
-}
-
-// StepFind is a helper method to define mock.On call
-//   - pipeline *model.Pipeline
-//   - n int
-func (_e *MockStore_Expecter) StepFind(pipeline interface{}, n interface{}) *MockStore_StepFind_Call {
-	return &MockStore_StepFind_Call{Call: _e.mock.On("StepFind", pipeline, n)}
-}
-
-func (_c *MockStore_StepFind_Call) Run(run func(pipeline *model.Pipeline, n int)) *MockStore_StepFind_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Pipeline
-		if args[0] != nil {
-			arg0 = args[0].(*model.Pipeline)
-		}
-		var arg1 int
-		if args[1] != nil {
-			arg1 = args[1].(int)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_StepFind_Call) Return(step *model.Step, err error) *MockStore_StepFind_Call {
-	_c.Call.Return(step, err)
-	return _c
-}
-
-func (_c *MockStore_StepFind_Call) RunAndReturn(run func(pipeline *model.Pipeline, n int) (*model.Step, error)) *MockStore_StepFind_Call {
+func (_c *MockStore_StepByUUID_Call) RunAndReturn(run func(uuid string) (*model.Step, error)) *MockStore_StepByUUID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5801,8 +5659,8 @@ func (_c *MockStore_StepFinished_Call) RunAndReturn(run func(step *model.Step)) 
 }
 
 // StepList provides a mock function for the type MockStore
-func (_mock *MockStore) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
-	ret := _mock.Called(pipeline)
+func (_mock *MockStore) StepList(pipelineID int64) ([]*model.Step, error) {
+	ret := _mock.Called(pipelineID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StepList")
@@ -5810,18 +5668,18 @@ func (_mock *MockStore) StepList(pipeline *model.Pipeline) ([]*model.Step, error
 
 	var r0 []*model.Step
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Pipeline) ([]*model.Step, error)); ok {
-		return returnFunc(pipeline)
+	if returnFunc, ok := ret.Get(0).(func(int64) ([]*model.Step, error)); ok {
+		return returnFunc(pipelineID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Pipeline) []*model.Step); ok {
-		r0 = returnFunc(pipeline)
+	if returnFunc, ok := ret.Get(0).(func(int64) []*model.Step); ok {
+		r0 = returnFunc(pipelineID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Step)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Pipeline) error); ok {
-		r1 = returnFunc(pipeline)
+	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = returnFunc(pipelineID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -5834,16 +5692,16 @@ type MockStore_StepList_Call struct {
 }
 
 // StepList is a helper method to define mock.On call
-//   - pipeline *model.Pipeline
-func (_e *MockStore_Expecter) StepList(pipeline interface{}) *MockStore_StepList_Call {
-	return &MockStore_StepList_Call{Call: _e.mock.On("StepList", pipeline)}
+//   - pipelineID int64
+func (_e *MockStore_Expecter) StepList(pipelineID interface{}) *MockStore_StepList_Call {
+	return &MockStore_StepList_Call{Call: _e.mock.On("StepList", pipelineID)}
 }
 
-func (_c *MockStore_StepList_Call) Run(run func(pipeline *model.Pipeline)) *MockStore_StepList_Call {
+func (_c *MockStore_StepList_Call) Run(run func(pipelineID int64)) *MockStore_StepList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Pipeline
+		var arg0 int64
 		if args[0] != nil {
-			arg0 = args[0].(*model.Pipeline)
+			arg0 = args[0].(int64)
 		}
 		run(
 			arg0,
@@ -5857,7 +5715,7 @@ func (_c *MockStore_StepList_Call) Return(steps []*model.Step, err error) *MockS
 	return _c
 }
 
-func (_c *MockStore_StepList_Call) RunAndReturn(run func(pipeline *model.Pipeline) ([]*model.Step, error)) *MockStore_StepList_Call {
+func (_c *MockStore_StepList_Call) RunAndReturn(run func(pipelineID int64) ([]*model.Step, error)) *MockStore_StepList_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5925,8 +5783,8 @@ func (_c *MockStore_StepListFromWorkflowFind_Call) RunAndReturn(run func(workflo
 }
 
 // StepLoad provides a mock function for the type MockStore
-func (_mock *MockStore) StepLoad(n int64) (*model.Step, error) {
-	ret := _mock.Called(n)
+func (_mock *MockStore) StepLoad(pipelineID int64, stepID int64) (*model.Step, error) {
+	ret := _mock.Called(pipelineID, stepID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StepLoad")
@@ -5934,18 +5792,18 @@ func (_mock *MockStore) StepLoad(n int64) (*model.Step, error) {
 
 	var r0 *model.Step
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*model.Step, error)); ok {
-		return returnFunc(n)
+	if returnFunc, ok := ret.Get(0).(func(int64, int64) (*model.Step, error)); ok {
+		return returnFunc(pipelineID, stepID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *model.Step); ok {
-		r0 = returnFunc(n)
+	if returnFunc, ok := ret.Get(0).(func(int64, int64) *model.Step); ok {
+		r0 = returnFunc(pipelineID, stepID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Step)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = returnFunc(n)
+	if returnFunc, ok := ret.Get(1).(func(int64, int64) error); ok {
+		r1 = returnFunc(pipelineID, stepID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -5958,19 +5816,25 @@ type MockStore_StepLoad_Call struct {
 }
 
 // StepLoad is a helper method to define mock.On call
-//   - n int64
-func (_e *MockStore_Expecter) StepLoad(n interface{}) *MockStore_StepLoad_Call {
-	return &MockStore_StepLoad_Call{Call: _e.mock.On("StepLoad", n)}
+//   - pipelineID int64
+//   - stepID int64
+func (_e *MockStore_Expecter) StepLoad(pipelineID interface{}, stepID interface{}) *MockStore_StepLoad_Call {
+	return &MockStore_StepLoad_Call{Call: _e.mock.On("StepLoad", pipelineID, stepID)}
 }
 
-func (_c *MockStore_StepLoad_Call) Run(run func(n int64)) *MockStore_StepLoad_Call {
+func (_c *MockStore_StepLoad_Call) Run(run func(pipelineID int64, stepID int64)) *MockStore_StepLoad_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 int64
 		if args[0] != nil {
 			arg0 = args[0].(int64)
 		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -5981,7 +5845,7 @@ func (_c *MockStore_StepLoad_Call) Return(step *model.Step, err error) *MockStor
 	return _c
 }
 
-func (_c *MockStore_StepLoad_Call) RunAndReturn(run func(n int64) (*model.Step, error)) *MockStore_StepLoad_Call {
+func (_c *MockStore_StepLoad_Call) RunAndReturn(run func(pipelineID int64, stepID int64) (*model.Step, error)) *MockStore_StepLoad_Call {
 	_c.Call.Return(run)
 	return _c
 }
