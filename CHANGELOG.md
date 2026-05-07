@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6548](https://github.com/woodpecker-ci/woodpecker/pull/6548)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.24.1 [[#6545](https://github.com/woodpecker-ci/woodpecker/pull/6545)]
 - Update golang-packages [[#6542](https://github.com/woodpecker-ci/woodpecker/pull/6542)]
 - Update module github.com/docker/cli to v29.4.2+incompatible [[#6539](https://github.com/woodpecker-ci/woodpecker/pull/6539)]
