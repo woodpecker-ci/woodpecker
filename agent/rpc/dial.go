@@ -46,6 +46,7 @@ type AgentConn struct {
 	AuthConn        *grpc.ClientConn
 	MainConn        *grpc.ClientConn
 	AuthInterceptor *AuthInterceptor
+	AgentID         int64
 }
 
 // Close closes both connections. Safe to call even if one or both are nil.
@@ -85,6 +86,7 @@ func Dial(authCtx context.Context, cfg DialConfig) (*AgentConn, error) {
 	}
 
 	authClient := NewAuthGrpcClient(authConn, cfg.AgentToken, cfg.AgentID)
+	reportedAgentID := authClient.AgentID()
 	authInterceptor, err := NewAuthInterceptor(authCtx, authClient, cfg.AuthRefreshEvery)
 	if err != nil {
 		_ = authConn.Close()
@@ -105,5 +107,6 @@ func Dial(authCtx context.Context, cfg DialConfig) (*AgentConn, error) {
 		AuthConn:        authConn,
 		MainConn:        mainConn,
 		AuthInterceptor: authInterceptor,
+		AgentID:         reportedAgentID,
 	}, nil
 }
