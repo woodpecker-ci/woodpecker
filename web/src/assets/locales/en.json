@@ -1,7 +1,7 @@
 {
   "cancel": "Cancel",
-  "login_to_woodpecker_with": "Login to Woodpecker with",
-  "login": "Login",
+  "login_to_woodpecker_with": "Log in to Woodpecker with",
+  "login": "Log in",
   "repos": "Repos",
   "repositories": {
     "title": "Repositories",
@@ -16,7 +16,7 @@
   },
   "docs": "Docs",
   "api": "API",
-  "logout": "Logout",
+  "logout": "Log out",
   "search": "Search…",
   "username": "Username",
   "password": "Password",
@@ -526,7 +526,7 @@
   "org_level_secret": "organization secret",
   "global_level_registry": "global registry",
   "org_level_registry": "organization registry",
-  "login_to_cli": "Login to CLI",
+  "login_to_cli": "Log in to CLI",
   "login_to_cli_description": "If you continue, you will be logged in to the CLI.",
   "abort": "Abort",
   "cli_login_success": "Login to CLI successful",
