@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-09
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -14,12 +14,12 @@
 
 ### 🐛 Bug Fixes
 
-- Pin pnpm to v10.33.4 [[#6559](https://github.com/woodpecker-ci/woodpecker/pull/6559)]
 - fix(agent): persist agent ID after auth to prevent crashloop duplicates [[#6543](https://github.com/woodpecker-ci/woodpecker/pull/6543)]
 - fix(gitlab): preserve private flag when webhook payload omits project visibility [[#6544](https://github.com/woodpecker-ci/woodpecker/pull/6544)]
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
 - Add 3rd party secret extensions list [[#6546](https://github.com/woodpecker-ci/woodpecker/pull/6546)]
 - Lock file maintenance [[#6540](https://github.com/woodpecker-ci/woodpecker/pull/6540)]
 - Update dependency axios to v1.16.0 [[#6538](https://github.com/woodpecker-ci/woodpecker/pull/6538)]
