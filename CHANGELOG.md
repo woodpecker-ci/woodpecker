@@ -19,6 +19,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#6563](https://github.com/woodpecker-ci/woodpecker/pull/6563)]
 - Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
 - Add 3rd party secret extensions list [[#6546](https://github.com/woodpecker-ci/woodpecker/pull/6546)]
 - Lock file maintenance [[#6540](https://github.com/woodpecker-ci/woodpecker/pull/6540)]
