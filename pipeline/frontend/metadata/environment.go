@@ -82,12 +82,6 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_WORKFLOW_NAME", workflow.Name)
 	setNonEmptyEnvVar(params, "CI_WORKFLOW_NUMBER", strconv.Itoa(workflow.Number))
 
-	step := m.Step
-	setNonEmptyEnvVar(params, "CI_STEP_NAME", step.Name)
-	setNonEmptyEnvVar(params, "CI_STEP_NUMBER", strconv.Itoa(step.Number))
-	setNonEmptyEnvVar(params, "CI_STEP_URL", m.getPipelineWebURL(pipeline, step.Number))
-	// CI_STEP_STARTED will be set by agent
-
 	commit := pipeline.Commit
 	setNonEmptyEnvVar(params, "CI_COMMIT_SHA", commit.Sha)
 	setNonEmptyEnvVar(params, "CI_COMMIT_REF", commit.Ref)

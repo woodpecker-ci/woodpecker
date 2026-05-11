@@ -22,7 +22,6 @@ type (
 		Curr     Pipeline `json:"curr,omitempty"`
 		Prev     Pipeline `json:"prev,omitempty"`
 		Workflow Workflow `json:"workflow,omitempty"`
-		Step     Step     `json:"step,omitempty"`
 		Sys      System   `json:"sys,omitempty"`
 		Forge    Forge    `json:"forge,omitempty"`
 	}
