@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @qwerty287, @wucm667
+@6543, @EdwardSalter, @lephuongbg, @qwerty287, @wucm667
 
 ### 📈 Enhancement
 
+- Group logs by command in step logs UI and make them collapsible [[#6398](https://github.com/woodpecker-ci/woodpecker/pull/6398)]
 - Expose step type to step env [[#4290](https://github.com/woodpecker-ci/woodpecker/pull/4290)]
 - pipeline runtime: move setting step environment variables into own func and add `CI_PIPELINE_STATUS` back [[#6516](https://github.com/woodpecker-ci/woodpecker/pull/6516)]
 - Refactor agent rpc retry [[#6515](https://github.com/woodpecker-ci/woodpecker/pull/6515)]
