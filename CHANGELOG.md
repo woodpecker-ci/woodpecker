@@ -19,7 +19,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#6563](https://github.com/woodpecker-ci/woodpecker/pull/6563)]
 - Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
 - Add 3rd party secret extensions list [[#6546](https://github.com/woodpecker-ci/woodpecker/pull/6546)]
 - Lock file maintenance [[#6540](https://github.com/woodpecker-ci/woodpecker/pull/6540)]
@@ -30,6 +29,8 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/google/go-github/v85 to v86 [[#6560](https://github.com/woodpecker-ci/woodpecker/pull/6560)]
+- Lock file maintenance [[#6563](https://github.com/woodpecker-ci/woodpecker/pull/6563)]
 - Update golang-packages [[#6562](https://github.com/woodpecker-ci/woodpecker/pull/6562)]
 - Update dependency mvdan/gofumpt to v0.10.0 [[#6558](https://github.com/woodpecker-ci/woodpecker/pull/6558)]
 - Update dependency golangci/golangci-lint to v2.12.2 [[#6556](https://github.com/woodpecker-ci/woodpecker/pull/6556)]
