@@ -83,6 +83,8 @@
   <SvgIcon v-else-if="name === 'forge'" :bg-circle="bgCircle" :path="mdiCodeBraces" size="1.3rem" />
   <SvgIcon v-else-if="name === 'fullscreen'" :bg-circle="bgCircle" :path="mdiFullscreen" size="1.3rem" />
   <SvgIcon v-else-if="name === 'exit-fullscreen'" :bg-circle="bgCircle" :path="mdiFullscreenExit" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'expand-all'" :bg-circle="bgCircle" :path="mdiUnfoldMoreHorizontal" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'collapse-all'" :bg-circle="bgCircle" :path="mdiUnfoldLessHorizontal" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :bg-circle="bgCircle" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :bg-circle="bgCircle" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -187,6 +189,8 @@ import {
   mdiToolboxOutline,
   mdiTrashCanOutline,
   mdiTrayFull,
+  mdiUnfoldLessHorizontal,
+  mdiUnfoldMoreHorizontal,
   mdiWrenchCogOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
@@ -267,6 +271,8 @@ export type IconNames =
   | 'forge'
   | 'fullscreen'
   | 'exit-fullscreen'
+  | 'expand-all'
+  | 'collapse-all'
   | 'folder'
   | 'folder-open'
   | 'file';
