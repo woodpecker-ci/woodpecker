@@ -263,6 +263,18 @@ func TestMissingRequiredLabels(t *testing.T) {
 			requiredLabels: map[string]string{},
 			want:           false,
 		},
+		// Multi-value required label (Issue #3571 closure)
+		{
+			taskLabels:     map[string]string{"type": "pro"},
+			requiredLabels: map[string]string{"!type": "pro,all"},
+			want:           false,
+		},
+		// Multi-value required label mismatch
+		{
+			taskLabels:     map[string]string{"type": "free"},
+			requiredLabels: map[string]string{"!type": "pro,all"},
+			want:           true,
+		},
 	}
 
 	for _, tt := range testdata {
