@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-10
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -29,6 +29,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6562](https://github.com/woodpecker-ci/woodpecker/pull/6562)]
 - Update dependency mvdan/gofumpt to v0.10.0 [[#6558](https://github.com/woodpecker-ci/woodpecker/pull/6558)]
 - Update dependency golangci/golangci-lint to v2.12.2 [[#6556](https://github.com/woodpecker-ci/woodpecker/pull/6556)]
 - Update pre-commit hook golangci/golangci-lint to v2.12.2 [[#6557](https://github.com/woodpecker-ci/woodpecker/pull/6557)]
