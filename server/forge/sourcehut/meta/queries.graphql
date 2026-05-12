@@ -1,0 +1,15 @@
+query FetchLoginUser {
+  me {
+    id
+    username
+    email
+  }
+}
+
+query FetchUser($username: String!) {
+  userByName(username: $username) {
+    id
+    username
+    email
+  }
+}
