@@ -30,6 +30,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6446](https://github.com/woodpecker-ci/woodpecker/pull/6446)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.25.0 [[#6566](https://github.com/woodpecker-ci/woodpecker/pull/6566)]
 - Update module github.com/google/go-github/v85 to v86 [[#6560](https://github.com/woodpecker-ci/woodpecker/pull/6560)]
 - Lock file maintenance [[#6563](https://github.com/woodpecker-ci/woodpecker/pull/6563)]
