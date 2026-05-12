@@ -8,7 +8,7 @@
 
 ### 🔒 Security
 
-- server: for grpc store extracted agentID in context [[#6569](https://github.com/woodpecker-ci/woodpecker/pull/6569)]
+- Server: for grpc store extracted agentID in context [[#6569](https://github.com/woodpecker-ci/woodpecker/pull/6569)]
 
 ### 📈 Enhancement
 
@@ -53,6 +53,18 @@
 - Update dependency golangci/golangci-lint to v2.12.0 [[#6533](https://github.com/woodpecker-ci/woodpecker/pull/6533)]
 - Update woodpeckerci/plugin-release Docker tag to v0.3.1 [[#6531](https://github.com/woodpecker-ci/woodpecker/pull/6531)]
 - Update docker.io/lycheeverse/lychee Docker tag to v0.24.2 [[#6529](https://github.com/woodpecker-ci/woodpecker/pull/6529)]
+
+## [3.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.1) - 2026-05-12
+
+### ❤️ Special thanks the security researchers and those who fixed them ❤️
+
+- Thanks to **Shivam Kumar ([@shivamkumarcyber](https://github.com/shivamkumarcyber))** and
+  **Ranganatha Rao Sridhar (Praetorian)** _independently finding and reporting the bug_
+- And [@6543](https://github.com/6543) _fixing the bugs and orchestrating the communication_
+
+### 🔒 Security
+
+- Server: make sure agent_id can not be spoofed by agent [[#6567](https://github.com/woodpecker-ci/woodpecker/pull/6567)]
 
 ## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-05-01
 
