@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.1) - 2026-05-12
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543
+
+### 🔒 Security
+
+- Set grpc metadata correctly [[#6567](https://github.com/woodpecker-ci/woodpecker/pull/6567)]
+
 ## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-05-01
 
 ### ❤️ Thanks to all contributors! ❤️
