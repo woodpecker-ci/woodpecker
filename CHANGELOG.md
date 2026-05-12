@@ -2,13 +2,15 @@
 
 ## [3.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.1) - 2026-05-12
 
-### ❤️ Thanks to all contributors! ❤️
+### ❤️ Special thanks the security researchers and those who fixed them ❤️
 
-@6543
+- Thanks to **Shivam Kumar ([@shivamkumarcyber](https://github.com/shivamkumarcyber))** and
+  **Ranganatha Rao Sridhar (Praetorian)** _independently finding and reporting the bug_
+- And [@6543](https://github.com/6543) _fixing the bugs and orchestrating the communication_
 
 ### 🔒 Security
 
-- Set grpc metadata correctly [[#6567](https://github.com/woodpecker-ci/woodpecker/pull/6567)]
+- Server: make sure agent_id can not be spoofed by agent [[#6567](https://github.com/woodpecker-ci/woodpecker/pull/6567)]
 
 ## [3.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.0) - 2026-05-01
 
