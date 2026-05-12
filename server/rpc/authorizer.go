@@ -140,7 +140,7 @@ func (a *Authorizer) authorize(ctx context.Context, fullMethod string) (context.
 		return ctx, status.Errorf(codes.Unauthenticated, "access token is invalid: %v", err)
 	}
 
-	md.Append("agent_id", fmt.Sprintf("%d", claims.AgentID))
+	md.Set("agent_id", fmt.Sprintf("%d", claims.AgentID))
 
 	return metadata.NewIncomingContext(ctx, md), nil
 }
