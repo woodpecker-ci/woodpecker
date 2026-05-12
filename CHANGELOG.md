@@ -6,6 +6,10 @@
 
 @6543, @EdwardSalter, @lephuongbg, @qwerty287, @wucm667
 
+### 🔒 Security
+
+- server: for grpc store extracted agentID in context [[#6569](https://github.com/woodpecker-ci/woodpecker/pull/6569)]
+
 ### 📈 Enhancement
 
 - Group logs by command in step logs UI and make them collapsible [[#6398](https://github.com/woodpecker-ci/woodpecker/pull/6398)]
