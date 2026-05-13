@@ -262,7 +262,9 @@
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",
                 "log_delete": "Löschen",
-                "skipped": "Dieser Schritt wurde übersprungen."
+                "skipped": "Dieser Schritt wurde übersprungen.",
+                "expand_all": "Alle ausklappen",
+                "collapse_all": "Alle einklappen"
             },
             "config": "Konfiguration",
             "errors": "Fehler",

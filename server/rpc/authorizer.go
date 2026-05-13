@@ -26,7 +26,7 @@
 // Authorizer interceptors validate JWT tokens on every request:
 //  1. Extract JWT from metadata["token"]
 //  2. Verify signature and expiration
-//  3. Extract and add agent_id to metadata for downstream handlers
+//  3. Extract agent_id from JWT claims and store in context
 //
 // Auth endpoint (/proto.WoodpeckerAuth/Auth) bypasses validation to allow initial authentication.
 //
@@ -48,7 +48,6 @@ package rpc
 
 import (
 	"context"
-	"fmt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -116,7 +115,7 @@ func (a *Authorizer) UnaryInterceptor(ctx context.Context, req any, info *grpc.U
 	return handler(newCtx, req)
 }
 
-// authorize validates JWT and enriches context with agent_id metadata.
+// authorize validates JWT and injects verified agent_id into the context.
 // Bypasses validation for /proto.WoodpeckerAuth/Auth endpoint.
 func (a *Authorizer) authorize(ctx context.Context, fullMethod string) (context.Context, error) {
 	// bypass auth for token endpoint
@@ -140,7 +139,8 @@ func (a *Authorizer) authorize(ctx context.Context, fullMethod string) (context.
 		return ctx, status.Errorf(codes.Unauthenticated, "access token is invalid: %v", err)
 	}
 
-	md.Append("agent_id", fmt.Sprintf("%d", claims.AgentID))
+	// inject agentID into context
+	ctx = context.WithValue(ctx, agentIDKey, claims.AgentID)
 
-	return metadata.NewIncomingContext(ctx, md), nil
+	return ctx, nil
 }
