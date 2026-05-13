@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -97,7 +98,7 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 
 	log.Trace().Msgf("configFetcher[%s]: user did not define own config, following default procedure", f.repo.FullName)
 	// for the order see shared/constants/constants.go
-	fileMetas, err := f.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
+	fileMetas, err := f.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder)
 	if err == nil {
 		return fileMetas, nil
 	}
@@ -114,7 +115,8 @@ func filterPipelineFiles(files []*types.FileMeta) []*types.FileMeta {
 	var res []*types.FileMeta
 
 	for _, file := range files {
-		if strings.HasSuffix(file.Name, ".yml") || strings.HasSuffix(file.Name, ".yaml") {
+		ext := filepath.Ext(file.Name)
+		if _, ok := constant.ConfigExtensions[ext]; ok {
 			res = append(res, file)
 		}
 	}

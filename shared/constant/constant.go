@@ -16,13 +16,16 @@ package constant
 
 import "time"
 
-// DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
-// folders are indicated by supplying a trailing slash.
-var DefaultConfigOrder = [...]string{
-	".woodpecker/",
-	".woodpecker.yaml",
-	".woodpecker.yml",
-}
+var (
+	// DefaultConfigOrder represent the priority in which woodpecker searches for a pipeline config by default
+	// folders are indicated by supplying a trailing slash.
+	DefaultConfigOrder = []string{
+		".woodpecker/",
+		".woodpecker.yaml",
+		".woodpecker.yml",
+	}
+	ConfigExtensions = make(map[string]struct{})
+)
 
 const (
 	// DefaultClonePlugin can be changed by 'WOODPECKER_DEFAULT_CLONE_PLUGIN' at runtime.
