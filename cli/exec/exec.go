@@ -321,7 +321,8 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		fmt.Printf("ctrl+c received, terminating current pipeline '%s'\n", confStr)
 	})
 
-	return pipeline_runtime.New(compiled, backendEngine,
+	return pipeline_runtime.New(
+		compiled, backendEngine,
 		pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
 		pipeline_runtime.WithLogger(defaultLogger),
 		pipeline_runtime.WithDescription(map[string]string{

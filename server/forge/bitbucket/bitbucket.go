@@ -124,7 +124,8 @@ func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := c.newOAuth2Config()
 	source := config.TokenSource(
-		ctx, &oauth2.Token{RefreshToken: user.RefreshToken})
+		ctx, &oauth2.Token{RefreshToken: user.RefreshToken},
+	)
 
 	token, err := source.Token()
 	if err != nil || len(token.AccessToken) == 0 {

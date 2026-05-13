@@ -109,7 +109,8 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_GRPC_SECRET_FILE")),
-			cli.EnvVar("WOODPECKER_GRPC_SECRET")),
+			cli.EnvVar("WOODPECKER_GRPC_SECRET"),
+		),
 		Name:  "grpc-secret",
 		Usage: "grpc jwt secret",
 		Value: "secret",
@@ -256,7 +257,8 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")),
-			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
+			cli.EnvVar("WOODPECKER_AGENT_SECRET"),
+		),
 		Name:  "agent-secret",
 		Usage: "server-agent shared password",
 		Config: cli.StringConfig{
@@ -325,7 +327,8 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE")),
-			cli.EnvVar("WOODPECKER_DATABASE_DATASOURCE")),
+			cli.EnvVar("WOODPECKER_DATABASE_DATASOURCE"),
+		),
 		Name:    "db-datasource",
 		Aliases: []string{"datasource"}, // TODO: remove in v4.0.0
 		Usage:   "database driver configuration string",
@@ -337,7 +340,8 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE")),
-			cli.EnvVar("WOODPECKER_PROMETHEUS_AUTH_TOKEN")),
+			cli.EnvVar("WOODPECKER_PROMETHEUS_AUTH_TOKEN"),
+		),
 		Name:  "prometheus-auth-token",
 		Usage: "token to secure prometheus metrics endpoint",
 		Config: cli.StringConfig{
@@ -445,14 +449,16 @@ var flags = append([]cli.Flag{
 				"WOODPECKER_GITEA_CLIENT_FILE",
 				"WOODPECKER_FORGEJO_CLIENT_FILE",
 				"WOODPECKER_BITBUCKET_CLIENT_FILE",
-				"WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE")),
+				"WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE",
+			)),
 			cli.EnvVar("WOODPECKER_FORGE_CLIENT"),
 			cli.EnvVar("WOODPECKER_GITHUB_CLIENT"),
 			cli.EnvVar("WOODPECKER_GITLAB_CLIENT"),
 			cli.EnvVar("WOODPECKER_GITEA_CLIENT"),
 			cli.EnvVar("WOODPECKER_FORGEJO_CLIENT"),
 			cli.EnvVar("WOODPECKER_BITBUCKET_CLIENT"),
-			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_ID")),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_ID"),
+		),
 		Name:  "forge-oauth-client",
 		Usage: "oauth2 client id",
 		Config: cli.StringConfig{
@@ -476,7 +482,8 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_GITEA_SECRET"),
 			cli.EnvVar("WOODPECKER_FORGEJO_SECRET"),
 			cli.EnvVar("WOODPECKER_BITBUCKET_SECRET"),
-			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET")),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"),
+		),
 		Name:  "forge-oauth-secret",
 		Usage: "oauth2 client secret",
 		Config: cli.StringConfig{
@@ -492,7 +499,8 @@ var flags = append([]cli.Flag{
 			"WOODPECKER_GITLAB_SKIP_VERIFY",
 			"WOODPECKER_GITEA_SKIP_VERIFY",
 			"WOODPECKER_FORGEJO_SKIP_VERIFY",
-			"WOODPECKER_BITBUCKET_SKIP_VERIFY"),
+			"WOODPECKER_BITBUCKET_SKIP_VERIFY",
+		),
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXPERT_FORGE_OAUTH_HOST"),
@@ -570,7 +578,8 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE")),
-			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_USERNAME")),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_USERNAME"),
+		),
 		Name:  "bitbucket-dc-git-username",
 		Usage: "Bitbucket DataCenter/Server service account username",
 		Config: cli.StringConfig{
@@ -580,7 +589,8 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE")),
-			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD")),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD"),
+		),
 		Name:  "bitbucket-dc-git-password",
 		Usage: "Bitbucket DataCenter/Server service account password",
 		Config: cli.StringConfig{
@@ -615,7 +625,8 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE")),
-			cli.EnvVar("WOODPECKER_ENCRYPTION_KEY")),
+			cli.EnvVar("WOODPECKER_ENCRYPTION_KEY"),
+		),
 		Name:  "encryption-raw-key",
 		Usage: "Raw encryption key",
 		Config: cli.StringConfig{
