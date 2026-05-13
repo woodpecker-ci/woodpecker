@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-12
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @lephuongbg, @qwerty287, @wucm667
+@6543, @EdwardSalter, @anbraten, @lephuongbg, @qwerty287, @wucm667
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Refactor `server/.../step_builder` into `pipeline/.../builder` [[#3967](https://github.com/woodpecker-ci/woodpecker/pull/3967)]
 - Group logs by command in step logs UI and make them collapsible [[#6398](https://github.com/woodpecker-ci/woodpecker/pull/6398)]
 - Expose step type to step env [[#4290](https://github.com/woodpecker-ci/woodpecker/pull/4290)]
 - pipeline runtime: move setting step environment variables into own func and add `CI_PIPELINE_STATUS` back [[#6516](https://github.com/woodpecker-ci/woodpecker/pull/6516)]
@@ -34,6 +35,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6571](https://github.com/woodpecker-ci/woodpecker/pull/6571)]
 - Update web npm deps non-major [[#6446](https://github.com/woodpecker-ci/woodpecker/pull/6446)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.25.0 [[#6566](https://github.com/woodpecker-ci/woodpecker/pull/6566)]
 - Update module github.com/google/go-github/v85 to v86 [[#6560](https://github.com/woodpecker-ci/woodpecker/pull/6560)]
