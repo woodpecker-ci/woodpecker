@@ -164,14 +164,6 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		}
 	}()
 
-	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
-		logger.Error().Err(err).Msg("signaling workflow initialization to server failed")
-		// We have an error, maybe the server is currently unreachable or other server-side errors occurred.
-		// So let's clean up and end this not yet started workflow run.
-		cancelWorkflowCtx(err)
-		return err
-	}
-
 	// Enrich workflow env with agent info
 	// TODO: find better way to track this state
 	for _, stage := range workflow.Config.Stages {
