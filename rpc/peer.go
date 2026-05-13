@@ -316,4 +316,14 @@ type Peer interface {
 	// UpdateStepRecoveryState updates the recovery state for a specific step.
 	// Called as steps transition through running, success, failed states.
 	UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, status types.RecoveryStatus, exitCode int) error
+
+	// IsConnected returns true if the gRPC connection to the server is in Ready state.
+	//
+	// This can be used to check if the server is reachable before attempting
+	// operations that require a connection (like UnregisterAgent).
+	//
+	// Returns:
+	//   - true if connection is Ready
+	//   - false otherwise (Idle, Connecting, Shutdown, or TransientFailure)
+	IsConnected() bool
 }

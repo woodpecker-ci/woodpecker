@@ -19,10 +19,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +40,9 @@ const (
 	// How many batches of logs to keep for each client before starting to
 	// drop them if the client is not consuming them faster than they arrive.
 	maxQueuedBatchesPerClient int = 30
+
+	// Is the time till we send a ping to keep the connection alive.
+	idlePingTime = time.Second * 30
 )
 
 // EventStreamSSE
@@ -90,18 +93,15 @@ func EventStreamSSE(c *gin.Context) {
 
 	defer func() {
 		cancel(nil)
-		close(eventChan)
 		log.Debug().Msg("user feed: connection closed")
 	}()
 
 	go func() {
-		err := server.Config.Services.Pubsub.Subscribe(ctx, subTopics,
+		err := server.Config.Services.Scheduler.Subscribe(ctx, subTopics,
 			func(m pubsub.Message) {
 				select {
 				case <-ctx.Done():
-					return
-				default:
-					eventChan <- m.Data
+				case eventChan <- m.Data:
 				}
 			})
 		cancel(err)
@@ -113,7 +113,7 @@ func EventStreamSSE(c *gin.Context) {
 			return
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Second * 30):
+		case <-time.After(idlePingTime):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
 		case buf, ok := <-eventChan:
@@ -130,13 +130,13 @@ func EventStreamSSE(c *gin.Context) {
 // LogStreamSSE
 //
 //	@Summary	Stream logs of a pipeline step
-//	@Router		/stream/logs/{repo_id}/{pipeline}/{stepID} [get]
+//	@Router		/stream/logs/{repo_id}/{pipeline}/{step_id} [get]
 //	@Produce	plain
 //	@Success	200
 //	@Tags		Pipeline logs
 //	@Param		repo_id		path	int	true	"the repository id"
 //	@Param		pipeline	path	int	true	"the number of the pipeline"
-//	@Param		stepID		path	int	true	"the step id"
+//	@Param		step_id		path	int	true	"the step id"
 func LogStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -170,24 +170,16 @@ func LogStreamSSE(c *gin.Context) {
 		return
 	}
 
-	stepID, err := strconv.ParseInt(c.Param("stepId"), 10, 64)
+	stepID, err := strconv.ParseInt(c.Param("step_id"), 10, 64)
 	if err != nil {
 		log.Debug().Err(err).Msg("step id invalid")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step id invalid\n\n"))
 		return
 	}
-	step, err := _store.StepLoad(stepID)
+	step, err := _store.StepLoad(pl.ID, stepID)
 	if err != nil {
 		log.Debug().Err(err).Msg("stream cannot get step number")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
-		return
-	}
-
-	if step.PipelineID != pl.ID {
-		// make sure we cannot read arbitrary logs by id
-		err = fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName)
-		log.Debug().Err(err).Msg("event error")
-		logWriteStringErr(io.WriteString(rw, "event: error\ndata: "+err.Error()+"\n\n"))
 		return
 	}
 
@@ -207,7 +199,6 @@ func LogStreamSSE(c *gin.Context) {
 
 	defer func() {
 		cancel(nil)
-		close(logChan)
 		log.Debug().Msg("log stream: connection closed")
 	}()
 
@@ -221,24 +212,20 @@ func LogStreamSSE(c *gin.Context) {
 	go func() {
 		batches := make(logging.LogChan, maxQueuedBatchesPerClient)
 
+		var innerDone sync.WaitGroup
+		innerDone.Add(1)
 		go func() {
-			defer func() {
-				if r := recover(); r != nil {
-					log.Error().Msgf("error sending log message: %v", r)
-				}
-			}()
-
+			defer innerDone.Done()
 			for entries := range batches {
 				for _, entry := range entries {
-					select {
-					case <-ctx.Done():
-						return
-					default:
-						if ee, err := json.Marshal(entry); err == nil {
-							logChan <- ee
-						} else {
-							log.Error().Err(err).Msg("unable to serialize log entry")
+					if ee, err := json.Marshal(entry); err == nil {
+						select {
+						case <-ctx.Done():
+							return
+						case logChan <- ee:
 						}
+					} else {
+						log.Error().Err(err).Msg("unable to serialize log entry")
 					}
 				}
 			}
@@ -249,6 +236,8 @@ func LogStreamSSE(c *gin.Context) {
 			log.Error().Err(err).Msg("tail of logs failed")
 		}
 
+		close(batches)
+		innerDone.Wait()
 		cancel(err)
 	}()
 
@@ -262,11 +251,6 @@ func LogStreamSSE(c *gin.Context) {
 
 	for {
 		select {
-		// after 1 hour of idle (no response) end the stream.
-		// this is more of a safety mechanism than anything,
-		// and can be removed once the code is more mature.
-		case <-time.After(time.Hour):
-			return
 		case <-ctx.Done(): // Monitor if the "tail" context is canceled.
 			if err := context.Cause(ctx); errors.Is(err, context.Canceled) {
 				log.Debug().Msg("log stream: eof")
@@ -277,7 +261,7 @@ func LogStreamSSE(c *gin.Context) {
 		case <-requestCtx.Done(): // Monitor the request context for cancellation when the client has gone away.
 			log.Debug().Msg("log stream: closed, client has gone away")
 			return
-		case <-time.After(time.Second * 30):
+		case <-time.After(idlePingTime):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
 		case buf, ok := <-logChan:

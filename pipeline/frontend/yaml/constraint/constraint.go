@@ -47,7 +47,7 @@ type (
 		Platform List                          `yaml:"platform,omitempty"`
 		Branch   List                          `yaml:"branch,omitempty"`
 		Cron     List                          `yaml:"cron,omitempty"`
-		Status   []string                      `yaml:"status,omitempty"`
+		Status   yaml_base_types.StringOrSlice `yaml:"status,omitempty"`
 		Matrix   Map                           `yaml:"matrix,omitempty"`
 		Local    optional.Option[bool]         `yaml:"local,omitempty"`
 		Path     Path                          `yaml:"path,omitempty"`
@@ -81,6 +81,9 @@ func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]
 }
 
 func (when *When) IncludesStatusFailure(metadata metadata.Metadata, global bool, env map[string]string) bool {
+	if when.IsEmpty() {
+		return false
+	}
 	for _, c := range when.Constraints {
 		if matches, err := c.Match(metadata, global, env); err == nil && matches {
 			if slices.Contains(c.Status, statusFailure) {
@@ -100,15 +103,13 @@ func (when *When) IncludesStatusSuccess(metadata metadata.Metadata, global bool,
 		return true
 	}
 	for _, c := range when.Constraints {
-		matches, err := c.Match(metadata, global, env)
-		fmt.Println("mat", matches, err, c.Status)
 		if matches, err := c.Match(metadata, global, env); err == nil && matches {
-			if len(c.Status) > 0 && !slices.Contains(c.Status, statusSuccess) {
-				return false
+			if len(c.Status) == 0 || slices.Contains(c.Status, statusSuccess) {
+				return true
 			}
 		}
 	}
-	return true
+	return false
 }
 
 // False if (any) non local.
@@ -171,13 +172,13 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 	}
 
 	match = match && c.Platform.Match(m.Sys.Platform) &&
-		(len(c.Event) == 0 || slices.Contains(c.Event, m.Curr.Event)) &&
+		(len(c.Event) == 0 || slices.Contains(c.Event, string(m.Curr.Event))) &&
 		c.Repo.Match(path.Join(m.Repo.Owner, m.Repo.Name)) &&
 		c.Ref.Match(m.Curr.Commit.Ref) &&
 		c.Instance.Match(m.Sys.Host)
 
 	// changed files filter apply only for pull-request and push events
-	if metadata.EventIsPull(m.Curr.Event) || m.Curr.Event == metadata.EventPush {
+	if m.Curr.Event.IsPull() || m.Curr.Event == metadata.EventPush {
 		match = match && c.Path.Match(m.Curr.Commit.ChangedFiles, m.Curr.Commit.Message)
 	}
 

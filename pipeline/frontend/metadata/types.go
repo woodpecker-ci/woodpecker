@@ -32,6 +32,7 @@ type (
 		ID          int64                `json:"id,omitempty"`
 		Name        string               `json:"name,omitempty"`
 		Owner       string               `json:"owner,omitempty"`
+		OrgID       int64                `json:"org_id,omitempty"`
 		RemoteID    string               `json:"remote_id,omitempty"`
 		ForgeURL    string               `json:"forge_url,omitempty"`
 		CloneURL    string               `json:"clone_url,omitempty"`
@@ -48,7 +49,7 @@ type (
 		Started     int64    `json:"started,omitempty"`
 		Finished    int64    `json:"finished,omitempty"`
 		Status      string   `json:"status,omitempty"`
-		Event       string   `json:"event,omitempty"`
+		Event       Event    `json:"event,omitempty"`
 		EventReason []string `json:"event_reason,omitempty"`
 		ForgeURL    string   `json:"forge_url,omitempty"`
 		DeployTo    string   `json:"target,omitempty"`

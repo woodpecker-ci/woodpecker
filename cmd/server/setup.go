@@ -36,6 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
 	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
@@ -159,12 +160,13 @@ func setupJWTSecret(_store store.Store) (string, error) {
 func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Pubsub = memory.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
-	server.Config.Services.Queue, err = setupQueue(ctx, s)
+	pubsub := memory.New()
+	queue, err := setupQueue(ctx, s)
 	if err != nil {
 		return fmt.Errorf("could not setup queue: %w", err)
 	}
+	server.Config.Services.Scheduler = scheduler.NewScheduler(queue, pubsub)
 	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
@@ -260,6 +262,12 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
 	server.Config.WebUI.MaxPipelineLogLineCount = c.Uint("max-pipeline-log-line-count")
 	server.Config.Pipeline.PrivilegedPlugins = c.StringSlice("plugins-privileged")
+
+	// TODO: remove with version 4.x
+	server.Config.Pipeline.ForceIgnoreServiceFailure = c.Bool("force-ignore-service-failure")
+	if server.Config.Pipeline.ForceIgnoreServiceFailure {
+		log.Info().Msg("WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE is true by default. To prepare for v4.0.0, set it to false and update your pipeline definitions if needed.")
+	}
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

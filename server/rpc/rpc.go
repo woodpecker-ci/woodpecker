@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grpc
+package rpc
 
 import (
 	"context"
@@ -39,8 +39,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
+
+type ctxKey struct{}
+
+// agentIDKey is a non imitable context key.
+var agentIDKey = &ctxKey{}
 
 // updateAgentLastWorkDelay the delay before the LastWork info should be updated.
 const updateAgentLastWorkDelay = time.Minute
@@ -49,8 +55,7 @@ const updateAgentLastWorkDelay = time.Minute
 var ErrRecoveryDisabled = errors.New("pipeline recovery is not enabled on this server")
 
 type RPC struct {
-	queue           queue.Queue
-	pubsub          pubsub.PubSub
+	scheduler       scheduler.Scheduler
 	logger          logging.Log
 	store           store.Store
 	pipelineTime    *prometheus.GaugeVec
@@ -89,7 +94,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	for {
 		// poll blocks until a task is available or the context is canceled / worker is kicked
-		task, err := s.queue.Poll(c, agent.ID, filterFn)
+		task, err := s.scheduler.Poll(c, agent.ID, filterFn)
 		if err != nil || task == nil {
 			return nil, err
 		}
@@ -119,7 +124,7 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 		return false, err
 	}
 
-	if err := s.queue.Wait(c, workflowID); err != nil {
+	if err := s.scheduler.Wait(c, workflowID); err != nil {
 		if errors.Is(err, queue.ErrCancel) {
 			// we explicit send a cancel signal
 			log.Debug().Str("workflowID", workflowID).Msg("while waiting the queue reported the workflow as canceled")
@@ -151,7 +156,7 @@ func (s *RPC) Extend(c context.Context, workflowID string) error {
 		return err
 	}
 
-	return s.queue.Extend(c, agent.ID, workflowID)
+	return s.scheduler.Extend(c, agent.ID, workflowID)
 }
 
 // Update let agent updates the step state at the server.
@@ -201,6 +206,11 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 
 	// check before agent can alter some state
 	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
+		return err
+	}
+
+	// sanitize agent input: only allow step updates that the workflow state permits
+	if err := checkWorkflowAllowsStepUpdate(workflow.State, step, state); err != nil {
 		return err
 	}
 
@@ -257,6 +267,11 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	// check workflow's own state to prevent re-initializing a finished or blocked workflow
+	if err := checkWorkflowState(workflow.State); err != nil {
+		return err
+	}
+
 	if currentPipeline.Status == model.StatusPending {
 		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
 			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
@@ -282,7 +297,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	return s.updateAgentLastWork(agent)
 }
 
-// Done marks the workflow with the given ID as stope.
+// Done marks the workflow with the given ID as stopped.
 func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -322,6 +337,11 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	// check workflow's own state to prevent finishing an already-finished or blocked workflow
+	if err := checkWorkflowState(workflow.State); err != nil {
+		return err
+	}
+
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
@@ -341,15 +361,15 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	var queueErr error
 	if !state.Canceled {
 		if workflow.Failing() {
-			queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
+			queueErr = s.scheduler.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
 		} else {
-			queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
+			queueErr = s.scheduler.Done(c, strWorkflowID, workflow.State)
 		}
 	} else {
 		if workflow.Started > 0 {
-			queueErr = s.queue.Done(c, strWorkflowID, model.StatusKilled)
+			queueErr = s.scheduler.Done(c, strWorkflowID, model.StatusKilled)
 		} else {
-			queueErr = s.queue.Done(c, strWorkflowID, model.StatusCanceled)
+			queueErr = s.scheduler.Done(c, strWorkflowID, model.StatusCanceled)
 		}
 	}
 	if queueErr != nil {
@@ -372,8 +392,10 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
 		for _, step := range workflow.Children {
-			if err := s.logger.Close(c, step.ID); err != nil {
-				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+			if step.State != model.StatusSkipped {
+				if err := s.logger.Close(c, step.ID); err != nil {
+					logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+				}
 			}
 		}
 	}()
@@ -415,6 +437,11 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 	// check before agent can alter some state
 	if err := s.checkAgentPermissionByWorkflow(c, agent, "", currentPipeline, nil); err != nil {
 		return err
+	}
+
+	// sanitize agent input
+	if err := allowAppendingLogs(currentPipeline, step); err != nil {
+		return fmt.Errorf("can not alter logs: %w", err)
 	}
 
 	err = s.updateAgentLastWork(agent)
@@ -514,48 +541,10 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	return s.store.AgentUpdate(agent)
 }
 
-func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
-	var err error
-	if repo == nil && pipeline == nil {
-		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		workflow, err := s.store.WorkflowLoad(workflowID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
-			return err
-		}
-
-		pipeline, err = s.store.GetPipeline(workflow.PipelineID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
-			return err
-		}
-	}
-
-	if repo == nil {
-		repo, err = s.store.GetRepo(pipeline.RepoID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find repo with id %d", pipeline.RepoID)
-			return err
-		}
-	}
-
-	if agent.CanAccessRepo(repo) {
-		return nil
-	}
-
-	msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
-	log.Error().Int64("repoId", repo.ID).Msg(msg)
-	return errors.New(msg)
-}
-
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
-			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusSkipped); err != nil {
+			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusKilled); err != nil {
 				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			} else {
 				// Update in-memory state so WorkflowStatus sees the final state
@@ -609,23 +598,16 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 	// publish to repo specific topic
 	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
 
-	return s.pubsub.Publish(c, subTopics, message)
+	return s.scheduler.Publish(c, subTopics, message)
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := grpc_metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, errors.New("metadata is not provided")
-	}
-
-	values := md["agent_id"]
-	if len(values) == 0 {
+	rawAgentID := ctx.Value(agentIDKey)
+	if rawAgentID == nil {
 		return nil, errors.New("agent_id is not provided")
 	}
-
-	_agentID := values[0]
-	agentID, err := strconv.ParseInt(_agentID, 10, 64)
-	if err != nil {
+	agentID, ok := rawAgentID.(int64)
+	if !ok {
 		return nil, errors.New("agent_id is not a valid integer")
 	}
 

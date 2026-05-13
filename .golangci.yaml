@@ -23,7 +23,7 @@ linters:
     - godot
     - goheader
     - gomoddirectives
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
     - govet
     - importas
@@ -104,6 +104,7 @@ linters:
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/agent
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend
             - pkg: go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker
         rpc:
           list-mode: lax
@@ -226,6 +227,8 @@ linters:
           alias: store_mocks
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks
           alias: config_service_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks
+          alias: log_mocks
 
         # kubernetes
         - pkg: k8s.io/api/core/v1

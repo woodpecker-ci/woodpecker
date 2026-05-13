@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grpc
+package rpc
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -56,8 +57,9 @@ func TestRegisterAgent(t *testing.T) {
 		}
 		ctx := metadata.NewIncomingContext(
 			t.Context(),
-			metadata.Pairs("hostname", "hostname", "agent_id", "1337"),
+			metadata.Pairs("hostname", "hostname"),
 		)
+		ctx = context.WithValue(ctx, agentIDKey, int64(1337))
 		agentConfig, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
 			Version:  "version",
 			Platform: "platform",
@@ -96,8 +98,9 @@ func TestRegisterAgent(t *testing.T) {
 		}
 		ctx := metadata.NewIncomingContext(
 			t.Context(),
-			metadata.Pairs("hostname", "newHostname", "agent_id", "1337"),
+			metadata.Pairs("hostname", "newHostname"),
 		)
+		ctx = context.WithValue(ctx, agentIDKey, int64(1337))
 		agentConfig, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
 			Version:  "version",
 			Platform: "platform",

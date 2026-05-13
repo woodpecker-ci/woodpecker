@@ -177,18 +177,6 @@ func TestTraceStep(t *testing.T) {
 		assert.True(t, calls[0].CurrStepState.Exited)
 	})
 
-	t.Run("TracerError", func(t *testing.T) {
-		t.Parallel()
-		traceErr := errors.New("tracer unavailable")
-		tracer := tracer_mocks.NewMockTracer(t)
-		tracer.On("Trace", mock.Anything).Return(traceErr).Maybe()
-		r := newDummyRuntime(t, tracer)
-
-		err := r.traceStep(nil, nil, dummyStep("s1"))
-
-		assert.ErrorIs(t, err, traceErr)
-	})
-
 	t.Run("PipelineErrorPropagated", func(t *testing.T) {
 		t.Parallel()
 		tracer := newTestTracer(t)
@@ -518,23 +506,6 @@ func TestExecuteStep(t *testing.T) {
 			return atomic.LoadInt32(&traced) >= 2
 		}, time.Second, 10*time.Millisecond)
 	})
-
-	t.Run("TracerErrorOnStarted", func(t *testing.T) {
-		t.Parallel()
-		traceErr := errors.New("tracer down")
-		tracer := tracer_mocks.NewMockTracer(t)
-		// First call (skip-check passes, this is the "started" trace) → error.
-		// The step has OnSuccess=true and no prior error, so shouldSkipStep returns false,
-		// meaning executeStep calls traceStep(nil, nil, step) first.
-		tracer.On("Trace", mock.Anything).Return(traceErr).Once()
-
-		r := newDummyRuntime(t, tracer)
-		step := dummyStep("s1") // OnSuccess=true, so not skipped
-
-		err := r.executeStep(t.Context(), step)
-
-		assert.ErrorIs(t, err, traceErr)
-	})
 }
 
 func TestRunBlockingStep(t *testing.T) {
@@ -553,7 +524,7 @@ func TestRunBlockingStep(t *testing.T) {
 		t.Parallel()
 		r := newDummyRuntime(t, newTestTracer(t))
 		step := dummyStep("s1")
-		step.Failure = metadata.FailureIgnore
+		step.Failure = string(metadata.FailureIgnore)
 		step.Environment[dummy.EnvKeyStepExitCode] = "1"
 
 		err := r.runBlockingStep(t.Context(), step)

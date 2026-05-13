@@ -36,7 +36,12 @@
             "list_reloaded": "Lista de repositório recarregada",
             "reload": "Recarregar repositórios",
             "success": "Repositório habilitado",
-            "disabled": "Desativado"
+            "disabled": "Desativado",
+            "new_forge_repo": "novo repositório na forja",
+            "stale_wp_repo": "repositório Woodpecker desatualizado",
+            "conflict": "Conflito",
+            "conflict_desc": "Este repositório foi recriado na forja com um novo ID, mas uma entrada desatualizada com o mesmo nome ainda existe no Woodpecker. Exclua o desatualizado para habilitar o novo, ou corrija o antigo.",
+            "forge_repo_missing": "O repositório da forja está faltando!"
         },
         "manual_pipeline": {
             "variables": {
@@ -687,7 +692,7 @@
     "access_denied": "Você não tem permissão para acessar esta instância",
     "no_search_results": "Nenhum resultado encontrado",
     "invalid_state": "O estado de OAuth é inválido",
-    "org_access_denied": "Você não tem permissão para acessa esta organização",
+    "org_access_denied": "Você não tem permissão para acessar esta organização",
     "login_to_cli": "Acessar com CLI",
     "abort": "Abortar",
     "cli_login_success": "Login na CLI bem-sucedido",
@@ -750,7 +755,7 @@
     "weblate": "nosso Weblate",
     "help_translating": "Você pode ajudar a traduzir Woodpecker para o seu idioma em {0}.",
     "extensions": "Extensões",
-    "extensions_description": "Extensões são serviços HTTP que podem ser chamados pelo Woodpecker em vez de usar os embutidos.",
+    "extensions_description": "Extensões são serviços HTTP que podem ser chamados pelo Woodpecker em vez de usar os nativos.",
     "extension_endpoint_placeholder": "p.ex., https://example.com/api",
     "config_extension_endpoint": "Endpoint da extensão de configuração",
     "extensions_signatures_public_key": "Chave pública para assinaturas",
@@ -764,5 +769,7 @@
     "registry_extension_endpoint": "Endpoint da extensão de registry",
     "secret_extension_endpoint": "Endpoint da extensão de segredos",
     "secret_extension_netrc": "Incluir cerdenciais de netrc",
-    "secret_extension_netrc_desc": "Envia as credenciais de netrc da forja para a extensão de segredos."
+    "secret_extension_netrc_desc": "Envia as credenciais de netrc da forja para a extensão de segredos.",
+    "extension_netrc": "Incluir credenciais netrc",
+    "extension_netrc_desc": "Envia credenciais netrc da forja para a extensão."
 }

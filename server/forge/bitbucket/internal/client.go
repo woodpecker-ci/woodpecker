@@ -32,7 +32,6 @@ import (
 const (
 	pathUser          = "%s/2.0/user/"
 	pathEmails        = "%s/2.0/user/emails"
-	pathPermission    = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
 	pathPermissions   = "%s/2.0/user/workspaces/%s/permissions/repositories?%s"
 	pathWorkspaces    = "%s/2.0/user/workspaces/?%s"
 	pathWorkspace     = "%s/2.0/workspaces/%s"
@@ -156,9 +155,9 @@ func (c *Client) CreateStatus(owner, name, revision string, status *PipelineStat
 	return err
 }
 
-func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
+func (c *Client) GetPermission(owner, fullName string) (*RepoPerm, error) {
 	out := new(RepoPermResp)
-	uri := fmt.Sprintf(pathPermission, c.base, fullName)
+	uri := fmt.Sprintf(pathPermissions, c.base, owner, fmt.Sprintf("q=%s", url.QueryEscape(fmt.Sprintf("repository.full_name=%q", fullName))))
 	_, err := c.do(uri, http.MethodGet, nil, out)
 	if err != nil {
 		return nil, err

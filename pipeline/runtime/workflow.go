@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -39,23 +40,26 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.makeLogger()
 	r.logStages()
 
-	// we make sure cleanup always happens
-	defer func() {
+	destroyWorkflowFunc := sync.OnceFunc(func() {
+		ctx := runnerCtx //nolint:contextcheck
+		if ctx.Err() != nil {
+			// runnerCtx itself is done — fall back to a short-lived shutdown context.
+			ctx = GetShutdownCtx()
+		}
+
 		// Skip destroying workflow if recovery is enabled and context was canceled but NOT by user.
 		if r.recoveryManager.IsRecoverable(runnerCtx) {
 			logger.Info().Msg("skipping workflow destruction, preserving for recovery")
 			return
 		}
 
-		ctx := runnerCtx //nolint:contextcheck
-		if ctx.Err() != nil {
-			// runnerCtx itself is done — fall back to a short-lived shutdown context.
-			ctx = GetShutdownCtx()
-		}
 		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy workflow")
 		}
-	}()
+	})
+
+	// we make sure cleanup always happens
+	defer destroyWorkflowFunc()
 
 	r.started = time.Now().Unix()
 
@@ -65,15 +69,25 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}
 
 	for _, stage := range r.spec.Stages {
+		stageChan := r.runStage(runnerCtx, stage.Steps)
 		select {
 		case <-r.ctx.Done():
+			<-stageChan
 			return pipeline_errors.ErrCancel
-		case err := <-r.runStage(runnerCtx, stage.Steps):
+		case err := <-stageChan:
 			if err != nil {
 				r.err.Set(err)
 			}
 		}
 	}
+
+	// Now we can shutdown the workflow
+	destroyWorkflowFunc()
+
+	// Ensure all logs/traces are uploaded before finishing
+	logger.Debug().Msg("waiting for logs and traces upload")
+	r.uploadWait.Wait()
+	logger.Debug().Msg("logs and traces uploaded")
 
 	return r.err.Get()
 }

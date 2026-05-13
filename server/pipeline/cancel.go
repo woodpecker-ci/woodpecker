@@ -48,7 +48,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 	}
 
 	if len(workflowsToCancel) != 0 {
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, workflowsToCancel, queue.ErrCancel); err != nil {
+		if err := server.Config.Services.Scheduler.ErrorAtOnce(ctx, workflowsToCancel, queue.ErrCancel); err != nil {
 			log.Error().Err(err).Msgf("queue: evict_at_once: %v", workflowsToCancel)
 		}
 	}

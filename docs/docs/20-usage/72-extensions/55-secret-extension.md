@@ -164,3 +164,11 @@ Example response:
   ]
 }
 ```
+
+## 3rd Party Extensions
+
+:::danger
+These extensions are neither developed nor verified by Woodpecker CI. Make sure you trust them before using.
+:::
+
+- [OpenBao extension](https://github.com/vcheesbrough/woodpecker-openbao-broker)

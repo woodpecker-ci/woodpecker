@@ -41,6 +41,10 @@ func NewAuthGrpcClient(conn *grpc.ClientConn, agentToken string, agentID int64) 
 	return client
 }
 
+func (c *AuthClient) AgentID() int64 {
+	return c.agentID
+}
+
 func (c *AuthClient) Auth(ctx context.Context) (string, int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, authClientTimeout)
 	defer cancel()

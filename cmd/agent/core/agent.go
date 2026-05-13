@@ -137,6 +137,15 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		return fmt.Errorf("agent could not auth: %w", err)
 	}
 
+	// Persist the agent ID received during auth so that crashloops reuse the
+	// same server-side entry instead of creating a new one on every restart.
+	if agentConfigPath != "" {
+		agentConfig.AgentID = authClient.AgentID()
+		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
+			log.Debug().Msgf("persisted agent ID %d after auth", agentConfig.AgentID)
+		}
+	}
+
 	conn, err := grpc.NewClient(
 		c.String("server"),
 		transport,
@@ -152,7 +161,9 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	defer conn.Close()
 
-	client := agent_rpc.NewGrpcClient(ctx, conn)
+	client := agent_rpc.NewGrpcClient(ctx, conn,
+		agent_rpc.SetConnectionRetryTimeout(c.Duration("retry-timeout")),
+	)
 	agentConfigPersisted := atomic.Bool{}
 
 	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
@@ -220,13 +231,16 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		<-agentCtx.Done()
 		// Remove stateless agents from server
 		if !agentConfigPersisted.Load() {
-			log.Debug().Msg("unregister agent from server ...")
-			// we want to run it explicit run when context got canceled so run it in background
-			err := client.UnregisterAgent(grpcClientCtx)
-			if err != nil {
-				log.Err(err).Msg("failed to unregister agent from server")
+			if client.IsConnected() {
+				log.Debug().Msg("unregister agent from server ...")
+				err := client.UnregisterAgent(grpcClientCtx)
+				if err != nil {
+					log.Err(err).Msg("failed to unregister agent from server")
+				} else {
+					log.Info().Msg("agent unregistered from server")
+				}
 			} else {
-				log.Info().Msg("agent unregistered from server")
+				log.Debug().Msg("skipping unregister: server not connected")
 			}
 		}
 		return nil
@@ -289,6 +303,11 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 
 				log.Debug().Msg("polling new workflow")
 				if err := runner.Run(agentCtx); err != nil {
+					if errors.Is(err, agent_rpc.ErrConnectionLost) {
+						log.Error().Err(err).Msg("connection to server lost, shutting down agent")
+						ctxCancel(err)
+						return nil
+					}
 					if singleWorkflow {
 						log.Error().Err(err).Msg("runner done with error")
 						ctxCancel(nil)

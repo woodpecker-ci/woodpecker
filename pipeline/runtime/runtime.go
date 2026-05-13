@@ -16,6 +16,7 @@ package runtime
 
 import (
 	"context"
+	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
@@ -46,6 +47,8 @@ type Runtime struct {
 	logger          logging.Logger
 	recoveryManager *RecoveryManager
 
+	uploadWait sync.WaitGroup
+
 	taskUUID    string
 	description map[string]string
 }
@@ -60,6 +63,7 @@ func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Opti
 	r.ctx = context.Background()
 	r.taskUUID = ulid.Make().String()
 	r.recoveryManager = NewRecoveryManager(nil, "", false)
+	r.tracer = tracing.NoOpTracer
 	for _, opt := range opts {
 		opt(r)
 	}

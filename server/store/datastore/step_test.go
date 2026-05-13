@@ -19,69 +19,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
-
-func TestStepFind(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
-	sess := store.engine.NewSession()
-
-	defer closer()
-
-	steps := []*model.Step{
-		{
-			UUID:       "8d89104f-d44e-4b45-b86e-17f8b5e74a0e",
-			PipelineID: 1000,
-			PID:        1,
-			PPID:       2,
-			Name:       "build",
-			State:      model.StatusSuccess,
-			Error:      "pc load letter",
-			ExitCode:   255,
-		},
-	}
-	assert.NoError(t, store.stepCreate(sess, steps))
-	assert.EqualValues(t, 1, steps[0].ID)
-	assert.Error(t, store.stepCreate(sess, steps))
-	assert.NoError(t, sess.Close())
-
-	step, err := store.StepFind(&model.Pipeline{ID: 1000}, 1)
-	require.NoError(t, err)
-	assert.Equal(t, steps[0], step)
-}
-
-func TestStepChild(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
-	defer closer()
-
-	sess := store.engine.NewSession()
-	err := store.stepCreate(sess, []*model.Step{
-		{
-			UUID:       "ea6d4008-8ace-4f8a-ad03-53f1756465d9",
-			PipelineID: 1,
-			PID:        1,
-			PPID:       1,
-			State:      "success",
-		},
-		{
-			UUID:       "2bf387f7-2913-4907-814c-c9ada88707c0",
-			PipelineID: 1,
-			PID:        2,
-			PPID:       1,
-			Name:       "build",
-			State:      "success",
-		},
-	})
-	assert.NoError(t, err)
-	_ = sess.Commit()
-	step, err := store.StepChild(&model.Pipeline{ID: 1}, 1, "build")
-	assert.NoError(t, err)
-	assert.Equal(t, 2, step.PID)
-	assert.Equal(t, "build", step.Name)
-}
 
 func TestStepList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
@@ -115,7 +56,7 @@ func TestStepList(t *testing.T) {
 	assert.NoError(t, err)
 
 	_ = sess.Commit()
-	steps, err := store.StepList(&model.Pipeline{ID: 1})
+	steps, err := store.StepList(1)
 	assert.NoError(t, err)
 	assert.Len(t, steps, 2)
 }
@@ -124,8 +65,9 @@ func TestStepUpdate(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
+	uuid := "fc7c7fd6-553e-480b-8ed7-30d8563d0b79"
 	step := &model.Step{
-		UUID:       "fc7c7fd6-553e-480b-8ed7-30d8563d0b79",
+		UUID:       uuid,
 		PipelineID: 1,
 		PID:        1,
 		PPID:       2,
@@ -139,7 +81,7 @@ func TestStepUpdate(t *testing.T) {
 	_ = sess.Commit()
 	step.State = "running"
 	assert.NoError(t, store.StepUpdate(step))
-	updated, err := store.StepFind(&model.Pipeline{ID: 1}, 1)
+	updated, err := store.StepByUUID(uuid)
 	assert.NoError(t, err)
 	assert.Equal(t, model.StatusRunning, updated.State)
 }
@@ -238,12 +180,12 @@ func TestStepLoad(t *testing.T) {
 	}))
 	_ = sess.Close()
 
-	step, err := store.StepLoad(1)
+	step, err := store.StepLoad(1, 1)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, step)
 	assert.Equal(t, step.UUID, "4db7e5fc-5312-4d02-9e14-b51b9e3242cc")
 
-	step, err = store.StepLoad(5)
+	step, err = store.StepLoad(1, 2)
 	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 	assert.Empty(t, step)
 }

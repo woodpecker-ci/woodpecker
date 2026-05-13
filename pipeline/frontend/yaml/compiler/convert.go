@@ -153,7 +153,12 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 
 	failure := container.Failure
 	if container.Failure == "" {
-		failure = metadata.FailureFail
+		failure = string(metadata.FailureFail)
+	}
+
+	// TODO: remove with version 4.x
+	if c.forceIgnoreServiceFailure && detached {
+		failure = string(metadata.FailureIgnore)
 	}
 
 	return &backend_types.Step{

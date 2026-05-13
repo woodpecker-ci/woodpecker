@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import type { Pipeline } from '~/lib/api/types';
+import { escapeHtml } from '~/lib/utils';
 
 const { toLocaleString, timeAgo, prettyDuration } = useDate();
 
@@ -75,10 +76,10 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return prettyDuration(durationElapsed.value);
   });
 
-  const message = computed(() => emojify(pipeline.value?.message ?? ''));
+  const message = computed(() => emojify(escapeHtml(pipeline.value?.message ?? '')));
   const shortMessage = computed(() => message.value.split('\n')[0]);
 
-  const prTitleWithDescription = computed(() => emojify(pipeline.value?.title ?? ''));
+  const prTitleWithDescription = computed(() => emojify(escapeHtml(pipeline.value?.title ?? '')));
   const prTitle = computed(() => prTitleWithDescription.value.split('\n')[0]);
 
   const prettyRef = computed(() => {

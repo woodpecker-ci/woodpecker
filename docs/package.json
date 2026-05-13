@@ -2,6 +2,7 @@
   "name": "woodpecker",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@10.33.4",
   "scripts": {
     "start": "cd ../ && make generate-docs && cd docs && docusaurus start",
     "build": "pnpm build:woodpecker-plugins && docusaurus build",
@@ -41,7 +42,7 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.9.2",
-    "@docusaurus/tsconfig": "3.9.2",
+    "@docusaurus/tsconfig": "3.10.1",
     "@docusaurus/types": "^3.9.2",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@types/node": "^25.3.3",
@@ -53,7 +54,9 @@
   },
   "pnpm": {
     "overrides": {
-      "serialize-javascript": "^7.0.3"
+      "serialize-javascript": "^7.0.3",
+      "follow-redirects": "^1.16.0",
+      "uuid": "^14.0.0"
     }
   }
 }

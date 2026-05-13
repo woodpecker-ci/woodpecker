@@ -35,7 +35,7 @@ import (
 //	@Tags			Pipeline queues
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetQueueInfo(c *gin.Context) {
-	info := server.Config.Services.Queue.Info(c)
+	info := server.Config.Services.Scheduler.Info(c)
 	_store := store.FromContext(c)
 
 	// Create a map to store agent names by ID
@@ -91,7 +91,7 @@ func GetQueueInfo(c *gin.Context) {
 //	@Tags		Pipeline queues
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PauseQueue(c *gin.Context) {
-	server.Config.Services.Queue.Pause()
+	server.Config.Services.Scheduler.Pause()
 	c.Status(http.StatusNoContent)
 }
 
@@ -104,7 +104,7 @@ func PauseQueue(c *gin.Context) {
 //	@Tags		Pipeline queues
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func ResumeQueue(c *gin.Context) {
-	server.Config.Services.Queue.Resume()
+	server.Config.Services.Scheduler.Resume()
 	c.Status(http.StatusNoContent)
 }
 
@@ -118,7 +118,7 @@ func ResumeQueue(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func BlockTilQueueHasRunningItem(c *gin.Context) {
 	for {
-		info := server.Config.Services.Queue.Info(c)
+		info := server.Config.Services.Scheduler.Info(c)
 		if info.Stats.Running == 0 {
 			break
 		}

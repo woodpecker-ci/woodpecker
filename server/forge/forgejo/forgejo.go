@@ -144,20 +144,6 @@ func (c *Forgejo) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mo
 	}, redirectURL, nil
 }
 
-// Auth uses the Forgejo oauth2 access token and refresh token to authenticate
-// a session and return the Forgejo account login.
-func (c *Forgejo) Auth(ctx context.Context, token, _ string) (string, error) {
-	client, err := c.newClientToken(ctx, token)
-	if err != nil {
-		return "", err
-	}
-	user, _, err := client.GetMyUserInfo()
-	if err != nil {
-		return "", err
-	}
-	return user.UserName, nil
-}
-
 // Refresh refreshes the Forgejo oauth2 access token. If the token is
 // refreshed, the user is updated and a true value is returned.
 func (c *Forgejo) Refresh(ctx context.Context, user *model.User) (bool, error) {

@@ -1,0 +1,11 @@
+skip_clone: true
+
+steps:
+  - name: compile
+    image: dummy
+    commands:
+      - echo compiling
+  - name: test
+    image: dummy
+    commands:
+      - echo testing

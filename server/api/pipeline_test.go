@@ -33,6 +33,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
@@ -134,7 +135,7 @@ func TestDeletePipeline(t *testing.T) {
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		DeletePipeline(c)
 
@@ -160,7 +161,7 @@ func TestDeletePipeline(t *testing.T) {
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		DeletePipeline(c)
 
@@ -197,7 +198,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		t.Run("should get pipeline metadata", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "2"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 			c.Set("store", mockStore)
 			c.Set("forge", mockForge)
 			c.Set("repo", fakeRepo)
@@ -218,7 +219,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		t.Run("should return bad request for invalid pipeline number", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "invalid"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "invalid"}}
 
 			GetPipelineMetadata(c)
 
@@ -231,7 +232,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "3"}}
+			c.Params = gin.Params{{Key: "pipeline_number", Value: "3"}}
 			c.Set("store", mockStore)
 			c.Set("repo", fakeRepo)
 
@@ -264,14 +265,14 @@ func TestCancelPipeline(t *testing.T) {
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Pubsub = memory.New()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(nil, memory.New())
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", mockStore)
 		c.Set("repo", fakeRepo)
 		c.Set("user", fakeUser)
-		c.Params = gin.Params{{Key: "number", Value: "2"}}
+		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 
 		CancelPipeline(c)
 
@@ -315,11 +316,10 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
-		server.Config.Services.Pubsub = memory.New()
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
-		server.Config.Services.Queue = mockQueue
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
 
 		// mimic the valid config data
 		configData := []*forge_types.FileMeta{
@@ -329,11 +329,11 @@ func TestCreatePipeline(t *testing.T) {
 
 		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
 		mockStore.On("CreatePipeline", mock.Anything).Return(nil)
-		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(nil, nil).Maybe()
+		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(nil, types.ErrRecordNotExist).Maybe()
 		mockStore.On("ConfigPersist", mock.Anything).Return(&model.Config{ID: 1}, nil).Maybe()
 		mockStore.On("ConfigFindIdentical", mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
-		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil).Maybe()
+		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
 
 		w := httptest.NewRecorder()
@@ -388,11 +388,10 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
-		server.Config.Services.Pubsub = memory.New()
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
-		server.Config.Services.Queue = mockQueue
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
 
 		// mimic the old config data
 		oldConfigData := []*forge_types.FileMeta{
@@ -402,11 +401,11 @@ func TestCreatePipeline(t *testing.T) {
 
 		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
 		mockStore.On("CreatePipeline", mock.Anything).Return(nil)
-		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(nil, nil).Maybe()
+		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(&model.Pipeline{}, nil).Maybe()
 		mockStore.On("ConfigPersist", mock.Anything).Return(&model.Config{ID: 1}, nil).Maybe()
 		mockStore.On("ConfigFindIdentical", mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
-		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil).Maybe()
+		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
 
 		w := httptest.NewRecorder()
@@ -444,7 +443,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Pubsub = memory.New()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(nil, memory.New())
 
 		// return nil config with error
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(nil, http.ErrHandlerTimeout)

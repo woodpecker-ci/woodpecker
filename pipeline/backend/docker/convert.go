@@ -232,3 +232,7 @@ func splitVolumeParts(volumeParts string) ([]string, error) {
 	}
 	return strings.Split(volumeParts, ":"), nil
 }
+
+func toRef[T any](v T) *T {
+	return &v
+}

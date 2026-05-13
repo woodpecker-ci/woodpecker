@@ -1,0 +1,10 @@
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+
+  - name: test
+    image: dummy
+    commands:
+      - echo testing

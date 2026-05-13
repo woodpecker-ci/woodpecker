@@ -1,7 +1,7 @@
 # renovate: datasource=github-releases depName=mvdan/gofumpt
-GOFUMPT_VERSION := v0.9.2
+GOFUMPT_VERSION := v0.10.0
 # renovate: datasource=github-releases depName=golangci/golangci-lint
-GOLANGCI_LINT_VERSION := v2.11.4
+GOLANGCI_LINT_VERSION := v2.12.2
 # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
 XGO_VERSION := go-1.26.x
 
@@ -203,8 +203,11 @@ test-ui: ui-dependencies ## Test UI code
 test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
+test-e2e: ## Test by running yaml config and compare expected result
+	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...
+
 .PHONY: test
-test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
+test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests
 
 ##@ Build
 

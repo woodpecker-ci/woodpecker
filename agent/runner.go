@@ -19,7 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
+	"runtime"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -164,7 +164,22 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		}
 	}()
 
-	var uploads sync.WaitGroup
+	if err := r.client.Init(runnerCtx, workflow.ID, state); err != nil {
+		logger.Error().Err(err).Msg("signaling workflow initialization to server failed")
+		// We have an error, maybe the server is currently unreachable or other server-side errors occurred.
+		// So let's clean up and end this not yet started workflow run.
+		cancelWorkflowCtx(err)
+		return err
+	}
+
+	// Enrich workflow env with agent info
+	// TODO: find better way to track this state
+	for _, stage := range workflow.Config.Stages {
+		for _, step := range stage.Steps {
+			step.Environment["CI_MACHINE"] = r.hostname
+			step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
+		}
+	}
 
 	// Run pipeline
 	err = pipeline_runtime.New(
@@ -172,9 +187,9 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		r.backend,
 		pipeline_runtime.WithContext(workflowCtx),
 		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
-		pipeline_runtime.WithLogger(r.createLogger(logger, &uploads, workflow)),
-		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
 		pipeline_runtime.WithRecoveryManager(recoveryManager),
+		pipeline_runtime.WithLogger(r.createLogger(logger, workflow)),
+		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
 		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,
@@ -197,11 +212,6 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		Str("error", state.Error).
 		Bool("canceled", state.Canceled).
 		Msg("workflow finished")
-
-	// Ensure all logs/traces are uploaded before finishing
-	logger.Debug().Msg("waiting for logs and traces upload")
-	uploads.Wait()
-	logger.Debug().Msg("logs and traces uploaded")
 
 	// If workflow is recoverable (context canceled, recovery enabled, not user cancel),
 	// skip marking as done. The workflow will be picked up by a new agent after restart.

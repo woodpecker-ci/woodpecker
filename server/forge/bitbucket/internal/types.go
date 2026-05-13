@@ -33,25 +33,31 @@ type Account struct {
 type Workspace struct {
 	UUID  string `json:"uuid"`
 	Slug  string `json:"slug"`
-	Name  string `json:"name"`
 	Type  string `json:"type"`
 	Links Links  `json:"links"`
 }
 
+type WorkspaceAccess struct {
+	Type          string     `json:"type"`
+	Administrator bool       `json:"administrator"`
+	Workspace     *Workspace `json:"workspace"`
+}
+
 type WorkspacesResp struct {
-	Page   int          `json:"page"`
-	Pages  int          `json:"pagelen"`
-	Size   int          `json:"size"`
-	Next   string       `json:"next"`
-	Values []*Workspace `json:"values"`
+	Page   int                `json:"page"`
+	Pages  int                `json:"pagelen"`
+	Size   int                `json:"size"`
+	Next   string             `json:"next"`
+	Values []*WorkspaceAccess `json:"values"`
 }
 
 type PipelineStatus struct {
-	State string `json:"state"`
-	Key   string `json:"key"`
-	Name  string `json:"name,omitempty"`
-	URL   string `json:"url"`
-	Desc  string `json:"description,omitempty"`
+	State   string `json:"state"`
+	Key     string `json:"key"`
+	Name    string `json:"name,omitempty"`
+	URL     string `json:"url"`
+	Desc    string `json:"description,omitempty"`
+	Refname string `json:"refname,omitempty"`
 }
 
 type Email struct {
