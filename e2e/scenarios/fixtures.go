@@ -181,7 +181,7 @@ func loadMultiWorkflowScenario(t *testing.T, dirName string) Scenario {
 
 	s.check(t, dirName+"/scenario.json")
 
-	s.Files = forge_types.SortByName(files)
+	s.Files = files
 	if s.Event == "" {
 		s.Event = model.EventPush
 	}
