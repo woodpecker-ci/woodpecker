@@ -129,11 +129,10 @@ func TestAuthorize(t *testing.T) {
 
 		require.NoError(t, err)
 
-		md, ok := metadata.FromIncomingContext(newCtx)
+		rawAgentID := newCtx.Value(agentIDKey)
+		agentID, ok := rawAgentID.(int64)
 		require.True(t, ok)
-		agentIDs := md["agent_id"]
-		require.Len(t, agentIDs, 1)
-		assert.Equal(t, "77", agentIDs[0])
+		assert.EqualValues(t, 77, agentID)
 	})
 
 	t.Run("valid token preserves existing metadata keys", func(t *testing.T) {
@@ -150,7 +149,9 @@ func TestAuthorize(t *testing.T) {
 		require.NoError(t, err)
 		md, _ := metadata.FromIncomingContext(newCtx)
 		assert.Equal(t, []string{"worker-1"}, md["hostname"])
-		assert.Equal(t, []string{"10"}, md["agent_id"])
+
+		agentID, _ := (newCtx.Value(agentIDKey)).(int64)
+		assert.EqualValues(t, 10, agentID)
 	})
 
 	t.Run("empty token value in metadata slice returns Unauthenticated", func(t *testing.T) {
@@ -191,9 +192,10 @@ func TestUnaryInterceptor(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "ok", resp)
 
-		md, ok := metadata.FromIncomingContext(capturedCtx)
+		_, ok := metadata.FromIncomingContext(capturedCtx)
 		require.True(t, ok)
-		assert.Equal(t, []string{"21"}, md["agent_id"])
+		agentID, _ := (capturedCtx.Value(agentIDKey)).(int64)
+		assert.EqualValues(t, 21, agentID)
 	})
 
 	t.Run("invalid token does not call handler", func(t *testing.T) {
@@ -291,10 +293,12 @@ func TestStreamInterceptor(t *testing.T) {
 		}, handler)
 
 		require.NoError(t, err)
+		capturedCtx := capturedStream.Context()
 
-		md, ok := metadata.FromIncomingContext(capturedStream.Context())
+		_, ok := metadata.FromIncomingContext(capturedCtx)
 		require.True(t, ok)
-		assert.Equal(t, []string{"33"}, md["agent_id"])
+		agentID, _ := (capturedCtx.Value(agentIDKey)).(int64)
+		assert.EqualValues(t, 33, agentID)
 	})
 
 	t.Run("invalid token does not call handler", func(t *testing.T) {

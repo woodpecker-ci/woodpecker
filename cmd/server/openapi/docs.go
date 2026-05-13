@@ -6102,6 +6102,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "org_id": {
+                    "type": "integer"
+                },
                 "owner": {
                     "type": "string"
                 },
