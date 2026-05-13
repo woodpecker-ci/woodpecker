@@ -76,7 +76,12 @@
                 "decline": "拒絕"
             },
             "version_header": "Woodpecker 版本",
-            "created": ""
+            "created": "",
+            "view": "檢視 pipeline",
+            "cancel_info": {
+                "canceled_by_step": "因為 {step} 所以被取消",
+                "canceled_by_user": "被 {user} 取消"
+            }
         },
         "settings": {
             "general": {
@@ -104,6 +109,9 @@
                 "pipeline_path": {
                     "path": "Pipeline 路徑",
                     "desc_path_example": "my/path/"
+                },
+                "allow_pr": {
+                    "allow": "允許拉取請求"
                 }
             },
             "badge": {
@@ -149,7 +157,7 @@
             }
         },
         "visibility": {
-            "visibility": "專案能見度",
+            "visibility": "專案可見性",
             "public": {
                 "public": "公開",
                 "desc": "所有人包含非登入的使用者都可以看到你的專案。"
@@ -175,7 +183,7 @@
             "trigger": "部署",
             "enter_task": "部署任務"
         },
-        "pull_requests": "合併請求",
+        "pull_requests": "拉取請求",
         "add": "新增儲存庫",
         "user_none": "這個組織/使用者還沒有任何專案",
         "not_allowed": "你不被允許存取這個儲存庫",
@@ -187,7 +195,7 @@
             "stale_wp_repo": "過時的 Woodpecker 儲存庫",
             "conflict": "衝突"
         },
-        "open_in_forge": "在版本控制系統中打開",
+        "open_in_forge": "",
         "activity": "活動",
         "branches": "分支"
     },
@@ -233,7 +241,10 @@
                     "capacity": "容量",
                     "badge": "容量"
                 },
-                "version": "版本"
+                "version": "版本",
+                "org": {
+                    "badge": "組織"
+                }
             },
             "repos": {
                 "disabled": "已停用",
@@ -251,7 +262,10 @@
                 "stats": {
                     "running_count": "執行中",
                     "pending_count": "等待中"
-                }
+                },
+                "task_running": "任務執行中",
+                "task_pending": "任務等待中",
+                "waiting_for": "正在等待"
             },
             "orgs": {
                 "orgs": "組織",
@@ -259,7 +273,8 @@
                 "org_settings": "組織設定",
                 "deleted": "組織已刪除",
                 "view": "檢視組織"
-            }
+            },
+            "settings": "管理員設定"
         }
     },
     "username": "帳號",
@@ -274,13 +289,24 @@
     "docs": "說明文件",
     "secrets": {
         "name": "名稱",
-        "value": "值"
+        "value": "值",
+        "secrets": "秘密",
+        "add": "新增秘密",
+        "save": "儲存秘密",
+        "show": "顯示秘密",
+        "deleted": "秘密已刪除",
+        "created": "秘密已建立",
+        "saved": "秘密已儲存",
+        "edit": "編輯秘密",
+        "delete": "刪除秘密",
+        "note": "說明"
     },
     "settings": "設定",
     "extensions": "擴充功能",
     "require_approval": {
         "none": "無",
-        "require_approval_for": "批准要求"
+        "require_approval_for": "批准要求",
+        "pull_requests": "所有拉取請求"
     },
     "github": "GitHub",
     "gitlab": "GitLab",
@@ -316,7 +342,9 @@
                 "reset_token": "重設權杖",
                 "swagger_ui": "Swagger UI",
                 "api_usage": "API 使用範例",
-                "cli_usage": "CLI 使用範例"
+                "cli_usage": "CLI 使用範例",
+                "token": "個人存取權杖",
+                "cli_and_api": "CLI & API"
             }
         }
     },
@@ -341,5 +369,8 @@
     "org_level_registry": "組織註冊表",
     "bitbucket_dc": "Bitbucket Data Center",
     "public_only": "僅公開",
-    "public_only_desc": "僅顯示公開儲存庫。"
+    "public_only_desc": "僅顯示公開儲存庫。",
+    "addon": "附加元件",
+    "config_extension_exclusive": "獨佔",
+    "abort": "中止"
 }
