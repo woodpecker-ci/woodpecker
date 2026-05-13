@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
 	charm.land/huh/v2 v2.0.3
-	code.gitea.io/sdk/gitea v0.25.0
+	code.gitea.io/sdk/gitea v0.25.1
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3 v3.0.0
@@ -51,7 +51,7 @@ require (
 	github.com/swaggo/swag v1.16.6
 	github.com/tink-crypto/tink-go/v2 v2.6.0
 	github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482
-	github.com/urfave/cli/v3 v3.8.0
+	github.com/urfave/cli/v3 v3.9.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.5.1
 	github.com/zalando/go-keyring v0.2.8
@@ -67,9 +67,9 @@ require (
 	google.golang.org/grpc v1.81.0
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.36.0
-	k8s.io/apimachinery v0.36.0
-	k8s.io/client-go v0.36.0
+	k8s.io/api v0.36.1
+	k8s.io/apimachinery v0.36.1
+	k8s.io/client-go v0.36.1
 	sigs.k8s.io/yaml v1.6.0
 	src.techknowlogick.com/xormigrate v1.7.1
 	xorm.io/builder v0.3.13
