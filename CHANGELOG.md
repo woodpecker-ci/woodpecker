@@ -23,6 +23,10 @@
 - fix(agent): persist agent ID after auth to prevent crashloop duplicates [[#6543](https://github.com/woodpecker-ci/woodpecker/pull/6543)]
 - fix(gitlab): preserve private flag when webhook payload omits project visibility [[#6544](https://github.com/woodpecker-ci/woodpecker/pull/6544)]
 
+### 🧪 Tests
+
+- Fix race in local backend tests [[#6574](https://github.com/woodpecker-ci/woodpecker/pull/6574)]
+
 ### 📚 Documentation
 
 - Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
