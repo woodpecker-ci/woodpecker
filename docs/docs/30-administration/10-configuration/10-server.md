@@ -980,6 +980,15 @@ Specify a configuration extension endpoint, see [Configuration Extension](../../
 
 ---
 
+### DEFAULT_PIPELINE_CONFIGS
+
+- Name: `WOODPECKER_DEFAULT_PIPELINE_CONFIGS`
+- Default: `.woodpecker/`, `.woodpecker.yaml`, `.woodpecker.yml`
+
+Specify the default pipeline config paths.
+
+---
+
 ### CONFIG_EXTENSION_EXCLUSIVE
 
 - Name: `CONFIG_EXTENSION_EXCLUSIVE`
