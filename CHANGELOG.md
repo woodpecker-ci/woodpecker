@@ -31,7 +31,6 @@
 
 - Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
 - Add 3rd party secret extensions list [[#6546](https://github.com/woodpecker-ci/woodpecker/pull/6546)]
-- Lock file maintenance [[#6540](https://github.com/woodpecker-ci/woodpecker/pull/6540)]
 - Update dependency axios to v1.16.0 [[#6538](https://github.com/woodpecker-ci/woodpecker/pull/6538)]
 - Update dependency yaml to v2.8.4 [[#6536](https://github.com/woodpecker-ci/woodpecker/pull/6536)]
 - Update dependency isomorphic-dompurify to v3.12.0 [[#6532](https://github.com/woodpecker-ci/woodpecker/pull/6532)]
@@ -53,6 +52,7 @@
 - Update golang-packages [[#6548](https://github.com/woodpecker-ci/woodpecker/pull/6548)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.24.1 [[#6545](https://github.com/woodpecker-ci/woodpecker/pull/6545)]
 - Update golang-packages [[#6542](https://github.com/woodpecker-ci/woodpecker/pull/6542)]
+- Lock file maintenance [[#6540](https://github.com/woodpecker-ci/woodpecker/pull/6540)]
 - Update module github.com/docker/cli to v29.4.2+incompatible [[#6539](https://github.com/woodpecker-ci/woodpecker/pull/6539)]
 - Update golangci/golangci-lint Docker tag to v2.12.1 [[#6537](https://github.com/woodpecker-ci/woodpecker/pull/6537)]
 - Update pre-commit hook golangci/golangci-lint to v2.12.1 [[#6535](https://github.com/woodpecker-ci/woodpecker/pull/6535)]
@@ -60,6 +60,10 @@
 - Update dependency golangci/golangci-lint to v2.12.0 [[#6533](https://github.com/woodpecker-ci/woodpecker/pull/6533)]
 - Update woodpeckerci/plugin-release Docker tag to v0.3.1 [[#6531](https://github.com/woodpecker-ci/woodpecker/pull/6531)]
 - Update docker.io/lycheeverse/lychee Docker tag to v0.24.2 [[#6529](https://github.com/woodpecker-ci/woodpecker/pull/6529)]
+
+### Misc
+
+- Use "sign in/out" [[#6579](https://github.com/woodpecker-ci/woodpecker/pull/6579)]
 
 ## [3.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.1) - 2026-05-12
 
