@@ -204,7 +204,8 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		Avatar:      hook.GetPullRequest().GetUser().GetAvatarURL(),
 		Title:       hook.GetPullRequest().GetTitle(),
 		Sender:      hook.GetSender().GetLogin(),
-		Refspec: fmt.Sprintf(refSpec,
+		Refspec: fmt.Sprintf(
+			refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
 		),

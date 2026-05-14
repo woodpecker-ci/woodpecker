@@ -412,7 +412,8 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		Container: podName,
 	}
 
-	logs, err := backoff.Retry(ctx,
+	logs, err := backoff.Retry(
+		ctx,
 		func() (io.ReadCloser, error) {
 			return e.client.CoreV1().RESTClient().Get().
 				Namespace(e.config.GetNamespace(step.OrgID)).

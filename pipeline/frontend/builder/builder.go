@@ -212,7 +212,8 @@ func (b *PipelineBuilder) environmentVariables(metadata metadata.Metadata, axis 
 
 func (b *PipelineBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	options := []compiler.Option{}
-	options = append(options,
+	options = append(
+		options,
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
 		compiler.WithEscalated(b.PrivilegedPlugins...),

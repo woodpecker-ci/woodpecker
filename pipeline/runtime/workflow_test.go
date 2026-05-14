@@ -320,7 +320,8 @@ func TestWithOptions(t *testing.T) {
 	ctx := context.Background()
 	desc := map[string]string{"repo": "test"}
 
-	r := New(&backend_types.Config{},
+	r := New(
+		&backend_types.Config{},
 		engine,
 		WithTracer(tracer),
 		WithContext(ctx),
@@ -347,7 +348,8 @@ func TestGetShutdownCtx(t *testing.T) {
 // Gap A: logger == nil guard.
 func TestRunNilLogger(t *testing.T) {
 	t.Parallel()
-	r := New(&backend_types.Config{},
+	r := New(
+		&backend_types.Config{},
 		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		// WithLogger intentionally omitted
@@ -375,7 +377,8 @@ func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 	runnerCtx, cancel := context.WithCancelCause(context.Background())
 	cancel(nil)
 
-	r := New(&backend_types.Config{},
+	r := New(
+		&backend_types.Config{},
 		engine,
 		WithTracer(newTestTracer(t)),
 		WithLogger(newTestLogger(t)),

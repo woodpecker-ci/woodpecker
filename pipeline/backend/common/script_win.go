@@ -34,7 +34,8 @@ func generateScriptWindows(commands []string, workDir string) string {
 	for _, command := range commands {
 		escaped := fmt.Sprintf("%q", command)
 		escaped = strings.ReplaceAll(escaped, "$", `\$`)
-		fmt.Fprintf(&buf,
+		fmt.Fprintf(
+			&buf,
 			traceScriptWin,
 			escaped,
 			command,

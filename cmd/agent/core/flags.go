@@ -35,7 +35,8 @@ var flags = []cli.Flag{
 		Usage: "server-agent shared token",
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")),
-			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
+			cli.EnvVar("WOODPECKER_AGENT_SECRET"),
+		),
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},

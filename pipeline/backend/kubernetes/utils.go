@@ -29,9 +29,10 @@ import (
 const maxDNSLabelLen = 63
 
 var (
-	dnsPattern = regexp.MustCompile(`^[a-z0-9]` + // must start with
-		`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
-		`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
+	dnsPattern = regexp.MustCompile(
+		`^[a-z0-9]` + // must start with
+			`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
+			`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
 	)
 	dnsLabelPattern         = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)
 	dnsDisallowedCharacters = regexp.MustCompile(`[^-^.a-z0-9]+`)
