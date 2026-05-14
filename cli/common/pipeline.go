@@ -22,11 +22,11 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func DetectPipelineConfig() (isDir bool, config string, _ error) {
-	for _, config := range server.Config.Pipeline.ConfigPaths {
+	for _, config := range constant.DefaultConfigOrder {
 		shouldBeDir := strings.HasSuffix(config, "/")
 		config = strings.TrimSuffix(config, "/")
 
