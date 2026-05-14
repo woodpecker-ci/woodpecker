@@ -45,7 +45,8 @@ const testWorkflowID = "WID_test"
 func newDummyRuntime(t *testing.T, tracer *tracer_mocks.MockTracer) *Runtime {
 	t.Helper()
 	engine := dummy.New()
-	r := New(&backend_types.Config{}, engine,
+	r := New(
+		&backend_types.Config{}, engine,
 		WithTracer(tracer),
 		WithTaskUUID(testWorkflowID),
 		WithLogger(newTestLogger(t)),
@@ -264,7 +265,8 @@ func TestStartStep(t *testing.T) {
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
 			Return(io.NopCloser(strings.NewReader("data")), nil)
 
-		r := New(&backend_types.Config{}, engine,
+		r := New(
+			&backend_types.Config{}, engine,
 			WithTracer(newTestTracer(t)),
 			WithLogger(logging.Logger(func(_ *backend_types.Step, rc io.ReadCloser) error {
 				_, _ = io.ReadAll(rc)
@@ -415,7 +417,8 @@ func TestCompleteStep(t *testing.T) {
 			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		r := New(&backend_types.Config{},
+		r := New(
+			&backend_types.Config{},
 			engine,
 			WithTracer(newTestTracer(t)),
 			WithLogger(newTestLogger(t)),
@@ -625,7 +628,8 @@ func TestRunDetachedStep(t *testing.T) {
 			Return(nil, context.Canceled)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		r := New(&backend_types.Config{},
+		r := New(
+			&backend_types.Config{},
 			engine,
 			WithTracer(tracer),
 			WithLogger(newTestLogger(t)),
@@ -660,7 +664,8 @@ func TestRunDetachedStep(t *testing.T) {
 			Run(func(_ mock.Arguments) { atomic.AddInt32(&traced, 1) }).
 			Return(traceErr) // every Trace call fails
 
-		r := New(&backend_types.Config{},
+		r := New(
+			&backend_types.Config{},
 			engine,
 			WithTracer(tracer),
 			WithLogger(newTestLogger(t)),

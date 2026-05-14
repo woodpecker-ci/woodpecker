@@ -140,7 +140,8 @@ func TestAuthorize(t *testing.T) {
 
 		a := newAuthorizer(t)
 		token := validTokenForAgent(t, 10)
-		ctx := metadata.NewIncomingContext(t.Context(),
+		ctx := metadata.NewIncomingContext(
+			t.Context(),
 			metadata.Pairs("token", token, "hostname", "worker-1"),
 		)
 
@@ -150,7 +151,7 @@ func TestAuthorize(t *testing.T) {
 		md, _ := metadata.FromIncomingContext(newCtx)
 		assert.Equal(t, []string{"worker-1"}, md["hostname"])
 
-		agentID, _ := (newCtx.Value(agentIDKey)).(int64)
+		agentID, _ := newCtx.Value(agentIDKey).(int64)
 		assert.EqualValues(t, 10, agentID)
 	})
 
@@ -194,7 +195,7 @@ func TestUnaryInterceptor(t *testing.T) {
 
 		_, ok := metadata.FromIncomingContext(capturedCtx)
 		require.True(t, ok)
-		agentID, _ := (capturedCtx.Value(agentIDKey)).(int64)
+		agentID, _ := capturedCtx.Value(agentIDKey).(int64)
 		assert.EqualValues(t, 21, agentID)
 	})
 
@@ -297,7 +298,7 @@ func TestStreamInterceptor(t *testing.T) {
 
 		_, ok := metadata.FromIncomingContext(capturedCtx)
 		require.True(t, ok)
-		agentID, _ := (capturedCtx.Value(agentIDKey)).(int64)
+		agentID, _ := capturedCtx.Value(agentIDKey).(int64)
 		assert.EqualValues(t, 33, agentID)
 	})
 

@@ -102,7 +102,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 					log.Error().Err(err).Msgf("cannot listen on address %s", c.String("healthcheck-addr"))
 				}
 				return nil
-			})
+			},
+		)
 	}
 
 	var transport grpc.DialOption
@@ -161,7 +162,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	defer conn.Close()
 
-	client := agent_rpc.NewGrpcClient(ctx, conn,
+	client := agent_rpc.NewGrpcClient(
+		ctx, conn,
 		agent_rpc.SetConnectionRetryTimeout(c.Duration("retry-timeout")),
 	)
 	agentConfigPersisted := atomic.Bool{}

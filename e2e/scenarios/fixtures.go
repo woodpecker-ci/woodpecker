@@ -182,7 +182,7 @@ func loadMultiWorkflowScenario(t *testing.T, dirName string) Scenario {
 	require.NotEmpty(t, files, "no YAML files in multi-workflow dir %s", dirName)
 	require.NotEmpty(t, s.Name, "scenario.json missing 'name' in %s", dirName)
 
-	s.Files = forge_types.SortByName(files)
+	s.Files = files
 	if s.Event == "" {
 		s.Event = model.EventPush
 	}

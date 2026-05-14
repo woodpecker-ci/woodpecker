@@ -107,7 +107,8 @@ func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipel
 	limit := c.Int("limit")
 
 	pipelines, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
-		return client.PipelineList(repoID,
+		return client.PipelineList(
+			repoID,
 			woodpecker.PipelineListOptions{
 				ListOptions: woodpecker.ListOptions{
 					Page: page,
