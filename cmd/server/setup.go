@@ -46,7 +46,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 const (
@@ -160,11 +159,11 @@ func setupJWTSecret(_store store.Store) (string, error) {
 }
 
 func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
-	// default config paths
-	constant.DefaultConfigOrder = c.StringSlice("default-pipeline-configs")
-	for _, dc := range constant.DefaultConfigOrder {
-		ext := filepath.Ext(dc)
-		constant.ConfigExtensions[ext] = struct{}{}
+	// pipeline config paths
+	server.Config.Pipeline.ConfigPaths = c.StringSlice("default-pipeline-configs")
+	server.Config.Pipeline.ConfigExtensions = make(map[string]struct{})
+	for _, dc := range server.Config.Pipeline.ConfigPaths {
+		server.Config.Pipeline.ConfigExtensions[filepath.Ext(dc)] = struct{}{}
 	}
 
 	// services
