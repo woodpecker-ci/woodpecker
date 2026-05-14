@@ -15,10 +15,10 @@ steps:
       - go test
 
 services:
-  - name: database
+  database:
     image: mysql
 
-  - name: cache
+  cache:
     image: redis
 ```
 
@@ -26,12 +26,12 @@ You can define a port and a protocol explicitly:
 
 ```yaml
 services:
-  - name: database
+  database:
     image: mysql
     ports:
       - 3306
 
-  - name: wireguard
+  wireguard:
     image: wg
     ports:
       - 51820/udp
@@ -57,7 +57,7 @@ Service containers generally expose environment variables to customize service s
 
 ```diff
  services:
-   - name: database
+   database:
      image: mysql
 +    environment:
 +      MYSQL_DATABASE: test
@@ -105,7 +105,7 @@ Service containers require time to initialize and begin to accept connections. I
        - go test
 
  services:
-   - name: database
+   database:
      image: mysql
 ```
 
