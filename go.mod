@@ -15,7 +15,7 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.4.3+incompatible
+	github.com/docker/cli v29.5.0+incompatible
 	github.com/docker/go-connections v0.7.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
@@ -64,7 +64,7 @@ require (
 	golang.org/x/sync v0.20.0
 	golang.org/x/term v0.43.0
 	golang.org/x/text v0.37.0
-	google.golang.org/grpc v1.81.0
+	google.golang.org/grpc v1.81.1
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.36.1
