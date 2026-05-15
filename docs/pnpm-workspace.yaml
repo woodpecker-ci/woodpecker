@@ -2,5 +2,9 @@ packages:
   - '.'
   - 'plugins/**'
 
+allowBuilds:
+  '@swc/core': false
+  core-js: false
+
 overrides:
   webpack-dev-server@<=5.2.0: '>=5.2.1'

@@ -59,6 +59,7 @@
     "doublestar",
     "emojify",
     "envsubst",
+    "esbuild",
     "errgroup",
     "estree",
     "evenodd",

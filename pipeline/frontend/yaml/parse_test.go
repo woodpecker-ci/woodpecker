@@ -341,6 +341,6 @@ func TestSlice(t *testing.T) {
 	t.Run("should marshal an empty slice", func(t *testing.T) {
 		assert.Equal(t, "build", out.Steps.ContainerList[1].Name)
 		assert.NotNil(t, out.Steps.ContainerList[1].DependsOn)
-		assert.Empty(t, (out.Steps.ContainerList[1].DependsOn))
+		assert.Empty(t, out.Steps.ContainerList[1].DependsOn)
 	})
 }
