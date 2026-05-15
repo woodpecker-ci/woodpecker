@@ -46,31 +46,37 @@ func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.Mock
 
 	if len(files) == 1 {
 		// Single-workflow: config service calls File(".woodpecker.yaml").
-		m.On("File",
+		m.On(
+			"File",
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker.yaml",
 		).Return(files[0].Data, nil).Maybe()
 
-		m.On("Dir",
+		m.On(
+			"Dir",
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker",
 		).Return(files, nil).Maybe()
 	} else {
 		// Multi-workflow: config service calls Dir(".woodpecker").
 		// File() must return empty so the service falls through to Dir().
-		m.On("File",
+		m.On(
+			"File",
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker.yaml",
 		).Return([]byte(nil), nil).Maybe()
-		m.On("Dir",
+		m.On(
+			"Dir",
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker",
 		).Return(files, nil).Maybe()
 	}
 
 	// Status reporting back to forge — no-op.
-	m.On("Status",
+	m.On(
+		"Status",
 		mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
 	).Return(nil).Maybe()
 
 	// Netrc for clone steps.
-	m.On("Netrc",
+	m.On(
+		"Netrc",
 		mock.Anything, mock.Anything,
 	).Return(&model.Netrc{}, nil).Maybe()
 
