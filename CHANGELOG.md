@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Fix docs securityscan [[#6585](https://github.com/woodpecker-ci/woodpecker/pull/6585)]
 - server: for grpc store extracted agentID in context [[#6569](https://github.com/woodpecker-ci/woodpecker/pull/6569)]
 
 ### 📈 Enhancement
