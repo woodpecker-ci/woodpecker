@@ -67,10 +67,5 @@
     "vite-svg-loader": "^5.1.1",
     "vitest": "^4.1.4",
     "vue-tsc": "^3.2.6"
-  },
-  "pnpm": {
-    "overrides": {
-      "semver@<7.5.2": ">=7.5.2"
-    }
   }
 }

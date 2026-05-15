@@ -51,12 +51,5 @@
     "@types/react-router-dom": "^5.3.3",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "serialize-javascript": "^7.0.3",
-      "follow-redirects": "^1.16.0",
-      "uuid": "^14.0.0"
-    }
   }
 }
