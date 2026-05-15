@@ -15,7 +15,6 @@
     "module": "Node16",
     "target": "ES6",
     "outDir": "dist",
-    "baseUrl": ".",
     "rootDir": "src",
     "pretty": true,
     "noEmit": false
