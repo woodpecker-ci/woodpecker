@@ -55,6 +55,7 @@ type (
 		DeployTask  string   `json:"task,omitempty"`
 		Commit      Commit   `json:"commit"`
 		Parent      int64    `json:"parent,omitempty"`
+		RerunCount  int64    `json:"rerun_count,omitempty"`
 		Cron        string   `json:"cron,omitempty"`
 		Author      string   `json:"author,omitempty"`
 		Avatar      string   `json:"avatar,omitempty"`

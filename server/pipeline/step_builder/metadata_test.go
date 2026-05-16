@@ -87,6 +87,27 @@ func TestMetadataFromStruct(t *testing.T) {
 				"CI_SYSTEM_NAME": "woodpecker", "CI_SYSTEM_URL": "https://example.com", "CI_WORKFLOW_NAME": "hello", "CI_WORKFLOW_NUMBER": "0",
 			},
 		},
+		{
+			name:     "Test with Pipeline RerunCount",
+			pipeline: &model.Pipeline{Number: 3, Parent: 2, RerunCount: 1},
+			expectedMetadata: metadata.Metadata{Sys: metadata.System{Name: "woodpecker"}, Curr: metadata.Pipeline{
+				Number:     3,
+				Parent:     2,
+				RerunCount: 1,
+			}},
+			expectedEnviron: map[string]string{
+				"CI":                  "woodpecker",
+				"CI_PIPELINE_CREATED": "0", "CI_PIPELINE_FILES": "[]", "CI_PIPELINE_NUMBER": "3",
+				"CI_PIPELINE_PARENT": "2", "CI_PIPELINE_STARTED": "0", "CI_PIPELINE_URL": "/repos/0/pipeline/3",
+				"CI_PIPELINE_RERUNS":        "1",
+				"CI_PREV_PIPELINE_CREATED":  "0",
+				"CI_PREV_PIPELINE_FINISHED": "0", "CI_PREV_PIPELINE_NUMBER": "0", "CI_PREV_PIPELINE_PARENT": "0",
+				"CI_PREV_PIPELINE_STARTED": "0", "CI_PREV_PIPELINE_URL": "/repos/0/pipeline/0",
+				"CI_REPO_PRIVATE": "false", "CI_REPO_TRUSTED": "false", "CI_REPO_TRUSTED_NETWORK": "false", "CI_REPO_TRUSTED_SECURITY": "false", "CI_REPO_TRUSTED_VOLUMES": "false",
+				"CI_STEP_NUMBER": "0", "CI_STEP_URL": "/repos/0/pipeline/3", "CI_SYSTEM_NAME": "woodpecker",
+				"CI_WORKFLOW_NUMBER": "0",
+			},
+		},
 	}
 
 	for _, testCase := range testCases {

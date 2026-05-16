@@ -115,6 +115,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		Event:       metadata.Event(pipeline.Event),
 		EventReason: pipeline.EventReason,
 		ForgeURL:    pipeline.ForgeURL,
+		RerunCount:  pipeline.RerunCount,
 		DeployTo:    pipeline.DeployTo,
 		DeployTask:  pipeline.DeployTask,
 		Commit: metadata.Commit{
