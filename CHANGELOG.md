@@ -41,6 +41,7 @@
 
 ### 📦️ Dependency
 
+- Update postgres Docker tag to v18.4 [[#6590](https://github.com/woodpecker-ci/woodpecker/pull/6590)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.26.1 [[#6587](https://github.com/woodpecker-ci/woodpecker/pull/6587)]
 - Update golang-packages [[#6582](https://github.com/woodpecker-ci/woodpecker/pull/6582)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.26.0 [[#6578](https://github.com/woodpecker-ci/woodpecker/pull/6578)]
