@@ -41,6 +41,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency @antfu/eslint-config to v9 [[#6592](https://github.com/woodpecker-ci/woodpecker/pull/6592)]
 - Update web npm deps non-major [[#6591](https://github.com/woodpecker-ci/woodpecker/pull/6591)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.1 [[#6589](https://github.com/woodpecker-ci/woodpecker/pull/6589)]
 - Update postgres Docker tag to v18.4 [[#6590](https://github.com/woodpecker-ci/woodpecker/pull/6590)]
