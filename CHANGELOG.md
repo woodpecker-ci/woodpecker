@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-15
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,7 +8,6 @@
 
 ### 🔒 Security
 
-- Fix docs securityscan [[#6585](https://github.com/woodpecker-ci/woodpecker/pull/6585)]
 - server: for grpc store extracted agentID in context [[#6569](https://github.com/woodpecker-ci/woodpecker/pull/6569)]
 
 ### 📈 Enhancement
@@ -41,6 +40,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.26.1 [[#6587](https://github.com/woodpecker-ci/woodpecker/pull/6587)]
 - Update golang-packages [[#6582](https://github.com/woodpecker-ci/woodpecker/pull/6582)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.26.0 [[#6578](https://github.com/woodpecker-ci/woodpecker/pull/6578)]
 - Update golang-packages [[#6571](https://github.com/woodpecker-ci/woodpecker/pull/6571)]
