@@ -30,6 +30,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6586](https://github.com/woodpecker-ci/woodpecker/pull/6586)]
 - Update pnpm to v11 [[#6561](https://github.com/woodpecker-ci/woodpecker/pull/6561)]
 - Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
 - Add 3rd party secret extensions list [[#6546](https://github.com/woodpecker-ci/woodpecker/pull/6546)]
