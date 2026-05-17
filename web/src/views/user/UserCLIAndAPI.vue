@@ -56,9 +56,9 @@ const address = `${window.location.protocol}//${window.location.host}${rootPath}
 
 const usageWithCurl = computed(() => {
   let usage = `export WOODPECKER_SERVER="${address}"\n`;
-  usage += `export WOODPECKER_TOKEN="${token.value}"\n`;
+  usage += ` export WOODPECKER_TOKEN="${token.value}"\n`;
   usage += `\n`;
-  usage += `# curl -i \${WOODPECKER_SERVER}/api/user -H "Authorization: Bearer \${WOODPECKER_TOKEN}"`;
+  usage += `curl -v -H "Authorization: Bearer \${WOODPECKER_TOKEN}" "\${WOODPECKER_SERVER}/api/user" | jq .`;
   return usage;
 });
 
