@@ -41,6 +41,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6601](https://github.com/woodpecker-ci/woodpecker/pull/6601)]
 - Update dependency simple-icons to v16.20.0 [[#6596](https://github.com/woodpecker-ci/woodpecker/pull/6596)]
 - Update dependency eslint to v10.4.0 [[#6593](https://github.com/woodpecker-ci/woodpecker/pull/6593)]
 - Update dependency @antfu/eslint-config to v9 [[#6592](https://github.com/woodpecker-ci/woodpecker/pull/6592)]
