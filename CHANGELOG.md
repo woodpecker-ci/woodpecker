@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-16
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @anbraten, @lephuongbg, @qwerty287, @wucm667
+@6543, @EdwardSalter, @anbraten, @lephuongbg, @qwerty287, @rfinnie, @wucm667
 
 ### 🔒 Security
 
@@ -73,6 +73,7 @@
 
 ### Misc
 
+- docs: Change homepage of woodpecker-shellcheck [[#6594](https://github.com/woodpecker-ci/woodpecker/pull/6594)]
 - Use "sign in/out" [[#6579](https://github.com/woodpecker-ci/woodpecker/pull/6579)]
 
 ## [3.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.1) - 2026-05-12
