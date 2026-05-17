@@ -5079,6 +5079,9 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
+                "rerun_count": {
+                    "type": "integer"
+                },
                 "reviewed": {
                     "type": "integer"
                 },
@@ -6015,6 +6018,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "parent": {
+                    "type": "integer"
+                },
+                "rerun_count": {
                     "type": "integer"
                 },
                 "started": {
