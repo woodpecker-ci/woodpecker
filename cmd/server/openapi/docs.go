@@ -4739,6 +4739,9 @@ const docTemplate = `{
                     "description": "@weekly,\t3min, ...",
                     "type": "string"
                 },
+                "timezone": {
+                    "type": "string"
+                },
                 "variables": {
                     "type": "object",
                     "additionalProperties": {
@@ -4760,6 +4763,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "schedule": {
+                    "type": "string"
+                },
+                "timezone": {
                     "type": "string"
                 },
                 "variables": {
