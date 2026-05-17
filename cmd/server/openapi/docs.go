@@ -5756,6 +5756,9 @@ const docTemplate = `{
                     "description": "Admin indicates the user is a system administrator.\n\nNOTE: If the username is part of the WOODPECKER_ADMIN\nenvironment variable, this value will be set to true on login.",
                     "type": "boolean"
                 },
+                "admin_env": {
+                    "type": "boolean"
+                },
                 "avatar_url": {
                     "description": "the avatar url for this user.",
                     "type": "string"
