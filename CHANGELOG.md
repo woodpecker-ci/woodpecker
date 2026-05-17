@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Add placeholders to inputs [[#6599](https://github.com/woodpecker-ci/woodpecker/pull/6599)]
 - Refactor `server/.../step_builder` into `pipeline/.../builder` [[#3967](https://github.com/woodpecker-ci/woodpecker/pull/3967)]
 - Group logs by command in step logs UI and make them collapsible [[#6398](https://github.com/woodpecker-ci/woodpecker/pull/6398)]
 - Expose step type to step env [[#4290](https://github.com/woodpecker-ci/woodpecker/pull/4290)]
