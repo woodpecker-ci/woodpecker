@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Add timezone support for crons [[#6597](https://github.com/woodpecker-ci/woodpecker/pull/6597)]
 - Add CI_PIPELINE_RERUNS environment variable [[#6588](https://github.com/woodpecker-ci/woodpecker/pull/6588)]
 - Add placeholders to inputs [[#6599](https://github.com/woodpecker-ci/woodpecker/pull/6599)]
 - Refactor `server/.../step_builder` into `pipeline/.../builder` [[#3967](https://github.com/woodpecker-ci/woodpecker/pull/3967)]
