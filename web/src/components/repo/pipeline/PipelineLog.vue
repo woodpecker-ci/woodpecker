@@ -67,8 +67,8 @@
               icon="collapse-all"
               @click="collapseAll"
             />
-            <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:step-id', null)" />
           </template>
+          <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:step-id', null)" />
         </div>
       </div>
 

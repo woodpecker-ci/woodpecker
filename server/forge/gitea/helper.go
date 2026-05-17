@@ -175,7 +175,8 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		Sender:   hook.Sender.UserName,
 		Email:    hook.Sender.Email,
 		Title:    hook.PullRequest.Title,
-		Refspec: fmt.Sprintf("%s:%s",
+		Refspec: fmt.Sprintf(
+			"%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
