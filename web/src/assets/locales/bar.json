@@ -75,7 +75,9 @@
                 "log_delete": "Löschn",
                 "log_auto_scroll": "Automatisch scrollen oschoidn",
                 "log_auto_scroll_off": "Automatisch scrollen ausschoidn",
-                "skipped": "Da Schrid is ausglosn woan."
+                "skipped": "Da Schrid is ausglosn woan.",
+                "expand_all": "Erweiter ole",
+                "collapse_all": "Schiab zammad alle"
             },
             "event": {
                 "push": "Push",
@@ -171,7 +173,8 @@
                 },
                 "netrc_only_trusted": {
                     "netrc_only_trusted": "Vatrauenswürdige Clone-Plugins",
-                    "desc": "Plugins de wo Zuagriff auf netrc-Credentials kriagn zum Repos vo da Forge klonen oda eineschiabm."
+                    "desc": "Plugins de wo Zuagriff auf netrc-Credentials kriagn zum Repos vo da Forge klonen oda eineschiabm.",
+                    "placeholder": "Plugin Image"
                 },
                 "trusted": {
                     "trusted": "Vatrauenswürdig",
@@ -219,12 +222,16 @@
                     "placeholder": "Nama vom Cron-Job"
                 },
                 "schedule": {
-                    "title": "Zeitplan (basiert auf UTC)",
+                    "title": "Zeitplan",
                     "placeholder": "Zeitplan"
                 },
                 "edit": "Cron endan",
                 "delete": "Cron löschn",
-                "enabled": "Eigscheudn"
+                "enabled": "Eigscheudn",
+                "next_exec_local": "Naxde Rund: {local}",
+                "next_exec_both": "Naxde Rund: {local} ({zoned} {timezone})",
+                "timezone": "Zeitzon",
+                "your_timezone": "Dei Browsa's Zeitzon."
             },
             "badge": {
                 "badge": "Plakettl",
@@ -357,7 +364,7 @@
             "users": {
                 "users": "Benutzer",
                 "desc": "Benutzer de wo auf dem Server registriert san.",
-                "login": "Login",
+                "login": "Benutzer Nama",
                 "email": "E-Mail",
                 "avatar_url": "Avatar-URL",
                 "save": "Benutzer speichan",
@@ -414,8 +421,8 @@
         "note": "Notizn"
     },
     "info": "Info",
-    "cli_login_failed": "CLI-Login is schiaf ganga",
-    "cli_login_denied": "CLI-Login wurad obglehnt",
+    "cli_login_failed": "CLI-eiglogga is schiaf ganga",
+    "cli_login_denied": "CLI-eiglogga wurad obglehnt",
     "return_to_cli": "Du kost jez den Tab zua macha und zruck zur CLI gehn.",
     "bitbucket_dc": "Bitbucket Data Center",
     "gitea": "Gitea",
@@ -540,7 +547,7 @@
     "login_to_cli": "Bei da CLI eilogga",
     "login_to_cli_description": "Wennd weitermachst, wirst bei da CLI eigloggt.",
     "abort": "Abbrechn",
-    "cli_login_success": "CLI-Login hot klappt",
+    "cli_login_success": "CLI-eiglogga hot klappt",
     "settings": "Eistellunga",
     "oauth_error": "Fella bei da OAuth-Authentifizierung",
     "internal_error": "Interner Fella is passiert",
