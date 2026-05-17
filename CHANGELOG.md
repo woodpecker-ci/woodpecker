@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @anbraten, @lephuongbg, @qwerty287, @rfinnie, @wucm667
+@6543, @EdwardSalter, @M31ancholy, @anbraten, @lephuongbg, @qwerty287, @rfinnie, @wucm667
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- feat: add CI_PIPELINE_RERUNS environment variable [[#6588](https://github.com/woodpecker-ci/woodpecker/pull/6588)]
 - Add placeholders to inputs [[#6599](https://github.com/woodpecker-ci/woodpecker/pull/6599)]
 - Refactor `server/.../step_builder` into `pipeline/.../builder` [[#3967](https://github.com/woodpecker-ci/woodpecker/pull/3967)]
 - Group logs by command in step logs UI and make them collapsible [[#6398](https://github.com/woodpecker-ci/woodpecker/pull/6398)]
