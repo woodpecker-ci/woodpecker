@@ -12,7 +12,7 @@
 
 ### 📈 Enhancement
 
-- feat: add CI_PIPELINE_RERUNS environment variable [[#6588](https://github.com/woodpecker-ci/woodpecker/pull/6588)]
+- Add CI_PIPELINE_RERUNS environment variable [[#6588](https://github.com/woodpecker-ci/woodpecker/pull/6588)]
 - Add placeholders to inputs [[#6599](https://github.com/woodpecker-ci/woodpecker/pull/6599)]
 - Refactor `server/.../step_builder` into `pipeline/.../builder` [[#3967](https://github.com/woodpecker-ci/woodpecker/pull/3967)]
 - Group logs by command in step logs UI and make them collapsible [[#6398](https://github.com/woodpecker-ci/woodpecker/pull/6398)]
@@ -43,6 +43,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6602](https://github.com/woodpecker-ci/woodpecker/pull/6602)]
 - Update web npm deps non-major [[#6601](https://github.com/woodpecker-ci/woodpecker/pull/6601)]
 - Update dependency simple-icons to v16.20.0 [[#6596](https://github.com/woodpecker-ci/woodpecker/pull/6596)]
 - Update dependency eslint to v10.4.0 [[#6593](https://github.com/woodpecker-ci/woodpecker/pull/6593)]
