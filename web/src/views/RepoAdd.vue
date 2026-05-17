@@ -61,7 +61,7 @@
           >
             <span class="text-wp-text-100">{{ repo.full_name }}</span>
             <div class="ml-auto flex items-center">
-              <Badge v-if="repo.id" class="md:display-unset mr-2 hidden" :value="$t('repo.enable.disabled')" />
+              <Badge v-if="repo.id" class="md:display-unset mr-2 hidden" :value="$t('disabled')" />
               <Button
                 :text="$t('repo.enable.enable')"
                 :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
@@ -116,7 +116,7 @@ onMounted(async () => {
 const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
   repoToActivate.value = repo;
   const _repo = await apiClient.activateRepo(repo.forge_remote_id);
-  notifications.notify({ title: i18n.t('repo.enable.success'), type: 'success' });
+  notifications.notify({ title: i18n.t('repo.settings.actions.enable.success'), type: 'success' });
   repoToActivate.value = undefined;
   await router.push({ name: 'repo', params: { repoId: _repo.id } });
 });

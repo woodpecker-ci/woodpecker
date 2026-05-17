@@ -11,18 +11,18 @@
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_task')">
           <TextField :id="id" v-model="payload.task" />
         </InputField>
-        <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.variables.title')">
-          <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
+        <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
+          <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
           <KeyValueEditor
             :id="id"
             v-model="payload.variables"
-            :key-placeholder="$t('repo.deploy_pipeline.variables.name')"
-            :value-placeholder="$t('repo.deploy_pipeline.variables.value')"
-            :delete-title="$t('repo.deploy_pipeline.variables.delete')"
+            :key-placeholder="$t('repo.manual_pipeline.variables.name')"
+            :value-placeholder="$t('repo.manual_pipeline.variables.value')"
+            :delete-title="$t('repo.manual_pipeline.variables.delete')"
             @update:is-valid="isVariablesValid = $event"
           />
         </InputField>
-        <Button type="submit" :text="$t('repo.deploy_pipeline.trigger')" :disabled="!isFormValid" />
+        <Button type="submit" :text="$t('repo.pipeline.actions.deploy')" :disabled="!isFormValid" />
       </form>
     </Panel>
   </Popup>

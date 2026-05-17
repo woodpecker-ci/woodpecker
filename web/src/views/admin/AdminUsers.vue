@@ -47,7 +47,7 @@
     </div>
     <div v-else>
       <form @submit.prevent="saveUser">
-        <InputField v-slot="{ id }" :label="$t('admin.settings.users.login')">
+        <InputField v-slot="{ id }" :label="$t('username')">
           <TextField :id="id" v-model="selectedUser.login" :disabled="isEditingUser" />
         </InputField>
 
@@ -71,7 +71,7 @@
         </InputField>
 
         <div class="flex gap-2">
-          <Button :text="$t('admin.settings.users.cancel')" @click="selectedUser = undefined" />
+          <Button :text="$t('cancel')" @click="selectedUser = undefined" />
 
           <Button
             :is-loading="isSaving"

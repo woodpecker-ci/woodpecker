@@ -13,7 +13,7 @@
         :options="[
           {
             value: 'url',
-            text: $t('repo.settings.badge.type_url'),
+            text: $t('url'),
           },
           {
             value: 'markdown',

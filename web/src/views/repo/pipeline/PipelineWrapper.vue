@@ -37,7 +37,7 @@
             <Button
               v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
               class="shrink-0"
-              :text="$t('repo.pipeline.actions.cancel')"
+              :text="$t('cancel')"
               :is-loading="isCancelingPipeline"
               @click="cancelPipeline"
             />

@@ -1,5 +1,5 @@
 <template>
-  <Settings :title="$t('admin.settings.repos.repos')" :description="$t('admin.settings.repos.desc')">
+  <Settings :title="$t('repositories.title')" :description="$t('admin.settings.repos.desc')">
     <template #headerActions>
       <Button
         start-icon="heal"
@@ -17,11 +17,7 @@
       >
         <span>{{ repo.full_name }}</span>
         <div class="ml-auto flex items-center gap-2">
-          <Badge
-            v-if="!repo.active"
-            class="md:display-unset mr-2 hidden"
-            :value="$t('admin.settings.repos.disabled')"
-          />
+          <Badge v-if="!repo.active" class="md:display-unset mr-2 hidden" :value="$t('disabled')" />
           <IconButton
             icon="chevron-right"
             :title="$t('admin.settings.repos.view')"
@@ -77,5 +73,5 @@ const { doSubmit: repairRepos, isLoading: isRepairingRepos } = useAsyncAction(as
   notifications.notify({ title: i18n.t('admin.settings.repos.repair.success'), type: 'success' });
 });
 
-useWPTitle(computed(() => [i18n.t('admin.settings.repos.repos'), i18n.t('admin.settings.settings')]));
+useWPTitle(computed(() => [i18n.t('repositories.title'), i18n.t('admin.settings.settings')]));
 </script>

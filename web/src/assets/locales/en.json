@@ -54,15 +54,7 @@
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
       "enter_target": "Target environment for deployment",
-      "enter_task": "Deployment task",
-      "trigger": "Deploy",
-      "variables": {
-        "delete": "Delete variable",
-        "title": "Additional pipeline variables",
-        "desc": "Specify additional variables to be used in your pipeline. Variables with the same name are overwritten.",
-        "name": "Variable name",
-        "value": "Variable value"
-      }
+      "enter_task": "Deployment task"
     },
     "activity": "Activity",
     "branches": "Branches",
@@ -73,8 +65,6 @@
     "enable": {
       "enable": "Enable",
       "enabled": "Already enabled",
-      "disabled": "Disabled",
-      "success": "Repository enabled",
       "new_forge_repo": "new repo on forge",
       "stale_wp_repo": "outdated Woodpecker repo",
       "conflict": "Conflict",
@@ -178,7 +168,6 @@
       "badge": {
         "badge": "Badge",
         "type": "Syntax",
-        "type_url": "URL",
         "type_markdown": "Markdown",
         "type_html": "HTML",
         "branch": "Branch",
@@ -226,7 +215,6 @@
       "log_delete_confirm": "Do you really want to delete the step logs?",
       "log_delete_error": "An error occurred when deleting the step logs",
       "actions": {
-        "cancel": "Cancel",
         "restart": "Restart",
         "canceled": "This step has been canceled.",
         "skipped": "This step has been skipped.",
@@ -398,11 +386,9 @@
       "users": {
         "users": "Users",
         "desc": "Users registered for this server.",
-        "login": "Username",
         "email": "Email",
         "avatar_url": "Avatar URL",
         "save": "Save user",
-        "cancel": "Cancel",
         "show": "Show users",
         "add": "Add user",
         "none": "There are no users yet.",
@@ -428,12 +414,10 @@
         "view": "View organization"
       },
       "repos": {
-        "repos": "Repositories",
         "desc": "Repositories that are or were activated on this server.",
         "none": "There are no repositories yet.",
         "view": "View repository",
         "settings": "Repository settings",
-        "disabled": "Disabled",
         "repair": {
           "repair": "Repair all",
           "success": "Repositories repaired"
