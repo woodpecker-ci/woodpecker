@@ -391,7 +391,6 @@
                     "name": "Name",
                     "placeholder": "Name des Cron"
                 },
-                "next_exec": "Nächste Ausführung",
                 "none": "Es gibt noch keine Crons.",
                 "not_executed_yet": "Noch nicht ausgeführt",
                 "run": "Jetzt ausführen",

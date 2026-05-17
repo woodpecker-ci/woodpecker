@@ -156,7 +156,8 @@
         "created": "Cron created",
         "saved": "Cron saved",
         "deleted": "Cron deleted",
-        "next_exec": "Next execution",
+        "next_exec_local": "Next execution: {local}",
+        "next_exec_both": "Next execution: {local} ({zoned} {timezone})",
         "not_executed_yet": "Not executed yet",
         "run": "Run now",
         "branch": {
@@ -168,9 +169,11 @@
           "placeholder": "Name of the cron job"
         },
         "schedule": {
-          "title": "Schedule (based on UTC)",
+          "title": "Schedule",
           "placeholder": "Schedule"
         },
+        "timezone": "Timezone",
+        "your_timezone": "In your browser's timezone.",
         "edit": "Edit cron",
         "delete": "Delete cron",
         "enabled": "Enabled"
