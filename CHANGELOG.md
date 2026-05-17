@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6603](https://github.com/woodpecker-ci/woodpecker/pull/6603)]
 - Update web npm deps non-major [[#6602](https://github.com/woodpecker-ci/woodpecker/pull/6602)]
 - Update web npm deps non-major [[#6601](https://github.com/woodpecker-ci/woodpecker/pull/6601)]
 - Update dependency simple-icons to v16.20.0 [[#6596](https://github.com/woodpecker-ci/woodpecker/pull/6596)]
