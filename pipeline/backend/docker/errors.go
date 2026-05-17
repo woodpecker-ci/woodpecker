@@ -33,3 +33,9 @@ func isErrVolumeInUse(err error) bool {
 	return err != nil &&
 		strings.Contains(err.Error(), "volume is in use")
 }
+
+func isErrContainerAlreadyStarted(err error) bool {
+	// Error response from daemon: Container ... is already started
+	// Error response from podman daemon: container ... is already running
+	return err != nil && (strings.Contains(err.Error(), "is already started") || strings.Contains(err.Error(), "is already running"))
+}

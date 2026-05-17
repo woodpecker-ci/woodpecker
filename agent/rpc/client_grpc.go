@@ -30,6 +30,7 @@ import (
 	grpc_proto "google.golang.org/protobuf/proto"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/types"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 )
@@ -408,7 +409,7 @@ func (c *client) sendLogs(ctx context.Context, entries []*proto.LogEntry) error 
 	return err
 }
 
-func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
+func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (rpc.AgentConfig, error) {
 	req := &proto.RegisterAgentRequest{
 		Info: &proto.AgentInfo{
 			Platform:     info.Platform,
@@ -420,7 +421,14 @@ func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, 
 	}
 
 	res, err := c.client.RegisterAgent(ctx, req)
-	return res.GetAgentId(), err
+	if err != nil {
+		return rpc.AgentConfig{}, err
+	}
+	protoConfig := res.GetConfig()
+	return rpc.AgentConfig{
+		AgentID:         protoConfig.GetAgentId(),
+		RecoveryEnabled: protoConfig.GetRecoveryEnabled(),
+	}, nil
 }
 
 func (c *client) UnregisterAgent(ctx context.Context) error {
@@ -436,6 +444,57 @@ func (c *client) ReportHealth(ctx context.Context) error {
 			return nil, errNotConnected
 		}
 		r, err := c.client.ReportHealth(ctx, req)
+		return r, classifyRPCErr(ctx, err)
+	})
+	return err
+}
+
+// InitWorkflowRecovery initializes recovery state for all steps in a workflow and returns current states.
+func (c *client) InitWorkflowRecovery(ctx context.Context, workflowID string, stepUUIDs []string, timeoutSeconds int64) (map[string]*types.RecoveryState, error) {
+	req := &proto.InitWorkflowRecoveryRequest{
+		WorkflowId:     workflowID,
+		StepUuids:      stepUUIDs,
+		TimeoutSeconds: timeoutSeconds,
+	}
+
+	res, err := retryRPC(ctx, c, "init_workflow_recovery", func() (*proto.InitWorkflowRecoveryResponse, error) {
+		if !c.IsConnected() {
+			return nil, errNotConnected
+		}
+		r, err := c.client.InitWorkflowRecovery(ctx, req)
+		return r, classifyRPCErr(ctx, err)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if res == nil {
+		return nil, nil
+	}
+
+	result := make(map[string]*types.RecoveryState, len(res.GetStates()))
+	for _, state := range res.GetStates() {
+		result[state.GetStepUuid()] = &types.RecoveryState{
+			Status:   types.RecoveryStatus(state.GetStatus()),
+			ExitCode: int(state.GetExitCode()),
+		}
+	}
+	return result, nil
+}
+
+// UpdateStepRecoveryState updates the recovery state for a specific step.
+func (c *client) UpdateStepRecoveryState(ctx context.Context, workflowID, stepUUID string, recoveryStatus types.RecoveryStatus, exitCode int) error {
+	req := &proto.UpdateStepRecoveryStateRequest{
+		WorkflowId: workflowID,
+		StepUuid:   stepUUID,
+		Status:     proto.RecoveryStatus(recoveryStatus),
+		ExitCode:   int32(exitCode),
+	}
+
+	_, err := retryRPC(ctx, c, "update_step_recovery_state", func() (*proto.Empty, error) {
+		if !c.IsConnected() {
+			return nil, errNotConnected
+		}
+		r, err := c.client.UpdateStepRecoveryState(ctx, req)
 		return r, classifyRPCErr(ctx, err)
 	})
 	return err

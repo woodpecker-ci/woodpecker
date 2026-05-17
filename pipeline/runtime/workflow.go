@@ -46,6 +46,13 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 			// runnerCtx itself is done — fall back to a short-lived shutdown context.
 			ctx = GetShutdownCtx()
 		}
+
+		// Skip destroying workflow if recovery is enabled and context was canceled but NOT by user.
+		if r.recoveryManager.IsRecoverable(runnerCtx) {
+			logger.Info().Msg("skipping workflow destruction, preserving for recovery")
+			return
+		}
+
 		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy workflow")
 		}

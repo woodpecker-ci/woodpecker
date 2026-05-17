@@ -1146,6 +1146,13 @@ Fully qualified public forge URL, used if forge url is not a public URL. Format:
 
 ---
 
+### RECOVERY_ENABLED
+
+- Name: `WOODPECKER_RECOVERY_ENABLED`
+- Default: `false`
+
+Enables pipeline recovery state tracking. When enabled, agents can resume workflows after a restart (e.g. during rolling deployments or agent crashes). Steps that already completed successfully are skipped, and running steps are reconnected. Currently, Docker and Kubernetes backends support recovery.
+
 ### FORCE_IGNORE_SERVICE_FAILURE
 
 - Name: `WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE`

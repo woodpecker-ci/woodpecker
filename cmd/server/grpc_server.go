@@ -52,6 +52,7 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 		server.Config.Services.Scheduler,
 		server.Config.Services.Logs,
 		_store,
+		c.Bool("recovery-enabled"),
 	)
 	proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
 

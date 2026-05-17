@@ -83,7 +83,16 @@ func startVolume(ctx context.Context, engine *kube, name, namespace string) (*ku
 	}
 
 	log.Trace().Msgf("creating volume: %s", pvc.Name)
-	return engine.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, pvc, kube_meta_v1.CreateOptions{})
+	createdPVC, err := engine.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, pvc, kube_meta_v1.CreateOptions{})
+	if err != nil {
+		if errors.IsAlreadyExists(err) {
+			// Volume already exists (recovery scenario), continue without error
+			log.Trace().Msgf("volume already exists, reusing: %s", pvc.Name)
+			return pvc, nil
+		}
+		return nil, err
+	}
+	return createdPVC, nil
 }
 
 func stopVolume(ctx context.Context, engine *kube, name, namespace string, deleteOpts kube_meta_v1.DeleteOptions) error {
