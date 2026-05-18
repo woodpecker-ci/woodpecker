@@ -398,10 +398,14 @@
                 "saved": "Задача cron сохранена",
                 "schedule": {
                     "placeholder": "Расписание",
-                    "title": "Расписание (по UTC)"
+                    "title": "Расписание"
                 },
                 "show": "Показать задачи cron",
-                "enabled": "Включено"
+                "enabled": "Включено",
+                "next_exec_local": "Следующее выполнение: {local}",
+                "next_exec_both": "Следующее выполнение: {local} ({zoned} {timezone})",
+                "timezone": "Часовой пояс",
+                "your_timezone": "В часовом поясе вашего браузера."
             },
             "general": {
                 "allow_pr": {
@@ -415,7 +419,8 @@
                 "general": "Проект",
                 "netrc_only_trusted": {
                     "desc": "Плагины, которые получат доступ к учётным данным netrc, которые можно использовать для клонирования или публикации кода на платформу.",
-                    "netrc_only_trusted": "Только доверенные плагины клонирования"
+                    "netrc_only_trusted": "Только доверенные плагины клонирования",
+                    "placeholder": "Образ плагина"
                 },
                 "pipeline_path": {
                     "default": "По умолчанию: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",

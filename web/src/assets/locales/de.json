@@ -406,7 +406,7 @@
                 "next_exec_local": "Nächste Ausführung: {local}",
                 "next_exec_both": "Nächste Ausführung: {local} ({zoned} {timezone})",
                 "timezone": "Zeitzone",
-                "your_timezone": "In deiner Webbrowser Zeitzone."
+                "your_timezone": "In der Zeitzone deines Webbrowsers."
             },
             "general": {
                 "allow_pr": {
@@ -421,7 +421,7 @@
                 "netrc_only_trusted": {
                     "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Code-Plattform zu klonen oder zu pushen.",
                     "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen",
-                    "placeholder": "Plugin Image"
+                    "placeholder": "Plugin-Image"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
