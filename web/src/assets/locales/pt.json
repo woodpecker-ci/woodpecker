@@ -115,7 +115,8 @@
                 },
                 "netrc_only_trusted": {
                     "desc": "Plugins que obtêm acesso para credenciais netrc que podem ser usadas para clonar repositórios da forja ou fazer push para a forja.",
-                    "netrc_only_trusted": "Contêineres confiáveis personalizados"
+                    "netrc_only_trusted": "Contêineres confiáveis personalizados",
+                    "placeholder": "Image do plugin"
                 },
                 "pipeline_path": {
                     "path": "Caminho do pipeline",
@@ -178,11 +179,15 @@
                     "placeholder": "Nome do trabalho cron"
                 },
                 "schedule": {
-                    "title": "Programação (com base no UTC)",
+                    "title": "Programação",
                     "placeholder": "Programação"
                 },
                 "edit": "Editar cron",
-                "enabled": "Habilitado"
+                "enabled": "Habilitado",
+                "next_exec_local": "Próxima execução: {local}",
+                "next_exec_both": "Próxima execução: {local} ({zoned} {timezone})",
+                "timezone": "Fuso horário",
+                "your_timezone": "No fuso horário do seu navegador."
             },
             "actions": {
                 "repair": {
@@ -273,7 +278,9 @@
                 "log_download": "Baixar",
                 "log_auto_scroll": "Habilitar rolagem automática",
                 "log_delete": "Excluir",
-                "skipped": "Essa etapa foi ignorada."
+                "skipped": "Essa etapa foi ignorada.",
+                "expand_all": "Expandir tudo",
+                "collapse_all": "Recolher tudo"
             },
             "tasks": "Tarefas",
             "config": "Configuração",
@@ -400,7 +407,7 @@
                 "edit_user": "Editar usuário",
                 "users": "Usuários",
                 "desc": "Usuários registrados para este servidor.",
-                "login": "Login",
+                "login": "Nome de usuário",
                 "email": "Email",
                 "avatar_url": "URL do avatar",
                 "save": "Salvar usuário",
@@ -650,7 +657,7 @@
         "show": "Mostrar registries"
     },
     "login_to_cli_description": "Se continuar, você será conectado à CLI.",
-    "cli_login_failed": "Login na CLI falhou",
+    "cli_login_failed": "Acesso à CLI falhou",
     "secrets": {
         "add": "Adicionar segredo",
         "plugins": {
@@ -695,14 +702,14 @@
     "org_access_denied": "Você não tem permissão para acessar esta organização",
     "login_to_cli": "Acessar com CLI",
     "abort": "Abortar",
-    "cli_login_success": "Login na CLI bem-sucedido",
+    "cli_login_success": "Acesso à CLI bem-sucedido",
     "settings": "Configurações",
     "oauth_error": "Erro ao autenticar no provedor de OAuth",
     "return_to_cli": "Agora você pode fechar esta aba e retornar à CLI.",
     "internal_error": "Ocorreu um erro interno",
     "registration_closed": "O registro está fechado",
     "login_with": "Acessar com {forge}",
-    "cli_login_denied": "Login na CLI negado",
+    "cli_login_denied": "Acesso à CLI negado",
     "forges": "Forjas",
     "add_forge": "Adicionar forja",
     "show_forges": "Mostrar forjas",
