@@ -374,5 +374,5 @@
     "addon": "附加元件",
     "config_extension_exclusive": "獨佔",
     "abort": "中止",
-    "leave_empty_to_keep_current_value": "留白以保留現有值"
+    "leave_empty_to_keep_current_value": "留白以保留當前值"
 }
