@@ -102,7 +102,8 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 	return &http.Client{
 		Transport: httputil.NewUserAgentRoundTripper(
 			&http.Transport{TLSClientConfig: tlsConf},
-			"backend-docker"),
+			"backend-docker",
+		),
 		CheckRedirect: client.CheckRedirect,
 	}
 }

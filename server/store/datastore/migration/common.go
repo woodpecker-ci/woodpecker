@@ -240,6 +240,8 @@ func normalizeSQLiteTableSchema(schema string) string {
 	return columnSeparator.ReplaceAllString(
 		whitespaces.ReplaceAllString(
 			strings.ReplaceAll(schema, "\n", " "),
-			" "),
-		", ")
+			" ",
+		),
+		", ",
+	)
 }
