@@ -42,8 +42,9 @@ import (
 // do not perform Origin checks themselves.
 var wsAcceptOptions = &websocket.AcceptOptions{
 	InsecureSkipVerify: true,
-	// CompressionMode left at default (disabled) — payloads are small JSON messages,
+	// CompressionMode set as disabled, as payloads are small JSON messages,
 	// and disabling compression avoids the per-message-deflate overhead.
+	CompressionMode: websocket.CompressionDisabled,
 }
 
 // EventStreamWS
@@ -69,7 +70,9 @@ func EventStreamWS(c *gin.Context) {
 
 	user := session.User(c)
 	subTopics := make(map[string]struct{})
+	// subscribe to all public state changes
 	subTopics[pubsub.PublicTopic] = struct{}{}
+	// subscribe to all private state changes or repos the user owns
 	if user != nil {
 		repos, _ := store.FromContext(c).RepoList(user, false, true, nil)
 		for _, r := range repos {
