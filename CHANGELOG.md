@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @M31ancholy, @anbraten, @lephuongbg, @qwerty287, @rfinnie, @wucm667
+@6543, @EdwardSalter, @M31ancholy, @anbraten, @lephuongbg, @qwerty287, @rfinnie, @wucm667, @xoxys
 
 ### 🔒 Security
 
@@ -33,7 +33,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#6606](https://github.com/woodpecker-ci/woodpecker/pull/6606)]
 - Update docs npm deps non-major [[#6586](https://github.com/woodpecker-ci/woodpecker/pull/6586)]
 - Update pnpm to v11 [[#6561](https://github.com/woodpecker-ci/woodpecker/pull/6561)]
 - Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
@@ -45,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- Lock file maintenance [[#6606](https://github.com/woodpecker-ci/woodpecker/pull/6606)]
 - Update web npm deps non-major [[#6604](https://github.com/woodpecker-ci/woodpecker/pull/6604)]
 - Update web npm deps non-major [[#6603](https://github.com/woodpecker-ci/woodpecker/pull/6603)]
 - Update web npm deps non-major [[#6602](https://github.com/woodpecker-ci/woodpecker/pull/6602)]
@@ -82,6 +82,7 @@
 
 ### Misc
 
+- Fix embed for web ui chunks [[#6608](https://github.com/woodpecker-ci/woodpecker/pull/6608)]
 - docs: Change homepage of woodpecker-shellcheck [[#6594](https://github.com/woodpecker-ci/woodpecker/pull/6594)]
 - Use "sign in/out" [[#6579](https://github.com/woodpecker-ci/woodpecker/pull/6579)]
 
