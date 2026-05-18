@@ -196,7 +196,7 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 +    failure: ignore
 ```
 
-If you would like to cancel the full pipeline once the step fails, you can set `failure: cancel`.
+If you would like to cancel the full pipeline once the step fails, you can set `failure: cancel`. For the default behaviour, use `failure: fail`.
 
 ### `when` - Conditional Execution
 
