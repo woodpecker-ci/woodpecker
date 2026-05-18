@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"strconv"
 	"sync"
 	"time"
@@ -62,7 +63,7 @@ func EventStreamWS(c *gin.Context) {
 	}
 	// CloseNow on defer guarantees the underlying TCP connection is released
 	// even if the normal close handshake did not complete.
-	defer conn.CloseNow()
+	defer func() { _ = conn.CloseNow() }()
 
 	log.Debug().Msg("user feed: websocket connection opened")
 
@@ -152,32 +153,32 @@ func LogStreamWS(c *gin.Context) {
 	pipelineNum, err := strconv.ParseInt(c.Param("pipeline"), 10, 64)
 	if err != nil {
 		log.Debug().Err(err).Msg("pipeline number invalid")
-		c.AbortWithStatus(400)
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	pl, err := _store.GetPipelineNumber(repo, pipelineNum)
 	if err != nil {
 		log.Debug().Err(err).Msg("stream cannot get pipeline number")
-		c.AbortWithStatus(404)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	stepID, err := strconv.ParseInt(c.Param("step_id"), 10, 64)
 	if err != nil {
 		log.Debug().Err(err).Msg("step id invalid")
-		c.AbortWithStatus(400)
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	step, err := _store.StepLoad(pl.ID, stepID)
 	if err != nil {
 		log.Debug().Err(err).Msg("stream cannot get step number")
-		c.AbortWithStatus(404)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	if step.State != model.StatusPending && step.State != model.StatusRunning {
 		log.Debug().Msg("step not running (anymore).")
-		c.AbortWithStatus(409)
+		c.AbortWithStatus(http.StatusConflict)
 		return
 	}
 
@@ -186,7 +187,7 @@ func LogStreamWS(c *gin.Context) {
 		log.Debug().Err(err).Msg("log stream: websocket accept failed")
 		return
 	}
-	defer conn.CloseNow()
+	defer func() { _ = conn.CloseNow() }()
 
 	log.Debug().Msg("log stream: websocket connection opened")
 
