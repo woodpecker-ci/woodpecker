@@ -109,7 +109,7 @@ func TestStepInOwnProcessGroup(t *testing.T) {
 	require.NoError(t, backend.DestroyStep(ctx, step, taskUUID))
 }
 
-// TestStepCancelKillsGrandchildren ensures that cancelling a step also kills
+// TestStepCancelKillsGrandchildren ensures that canceling a step also kills
 // processes spawned by the step's shell. Default exec.CommandContext only
 // signals the direct child; without a group-aware cancel hook the
 // grandchildren (e.g. `make`, `nix`, `cc1`) become orphans and keep running.
@@ -123,8 +123,8 @@ func TestStepCancelKillsGrandchildren(t *testing.T) {
 
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
-	ctx, cancel := context.WithCancel(t.Context())
-	defer cancel()
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
 
 	taskUUID := "test-cancel-grandchild"
 	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
@@ -141,7 +141,7 @@ func TestStepCancelKillsGrandchildren(t *testing.T) {
 		Image: "sh",
 		Commands: []string{
 			// Background `sleep` is the "grandchild". Write its PID, then
-			// `wait` so the shell stays alive until the context is cancelled.
+			// `wait` so the shell stays alive until the context is canceled.
 			"sleep 30 & echo $! > " + pidFile + "; wait",
 		},
 	}
@@ -165,7 +165,7 @@ func TestStepCancelKillsGrandchildren(t *testing.T) {
 
 	// Cancel the context — this should fire the step's cancel hook and kill
 	// the entire process group, taking the grandchild with it.
-	cancel()
+	cancel(nil)
 
 	_, _ = backend.WaitStep(context.Background(), step, taskUUID)
 
@@ -176,9 +176,9 @@ func TestStepCancelKillsGrandchildren(t *testing.T) {
 		grandchildPID)
 }
 
-// pidAlive reports whether pid still maps to a non-zombie process.
-// kill(pid, 0) succeeds for zombies too, which would give false positives;
-// /proc/<pid>/status is the more reliable signal on Linux.
+// The pidAlive reports whether pid still maps to a non-zombie process,
+// kill(pid, 0) succeeds for zombies too, which would give false positives,
+// so /proc/<pid>/status is the more reliable signal on Linux.
 func pidAlive(pid int) bool {
 	data, err := os.ReadFile("/proc/" + strconv.Itoa(pid) + "/status")
 	if err != nil {
