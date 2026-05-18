@@ -66,7 +66,7 @@ type User struct {
 	// environment variable, this value will be set to true on login.
 	Admin bool `json:"admin,omitempty" xorm:"admin"`
 
-	AdminEnv bool `json:"admin_env,omitempty"`
+	AdminEnv bool `json:"admin_env,omitempty" xorm:"-"`
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'hash'"`
