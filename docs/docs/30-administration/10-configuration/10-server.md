@@ -281,10 +281,6 @@ woodpecker-agent.example.com {
 }
 ```
 
-Caddy's `reverse_proxy` directive forwards WebSocket upgrade headers
-automatically, so the WebSocket-based live updates (`/stream/ws/`) work with
-the configuration above without any extra directives.
-
 ### Tunnelmole
 
 [Tunnelmole](https://github.com/robbie-cahill/tunnelmole-client) is an open source tunneling tool.
