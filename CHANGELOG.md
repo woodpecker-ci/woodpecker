@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @M31ancholy, @anbraten, @lephuongbg, @qwerty287, @rfinnie, @wucm667, @xoxys
+@6543, @EdwardSalter, @M31ancholy, @anbraten, @lephuongbg, @qwerty287, @rfinnie, @wucm667
 
 ### 🔒 Security
 
@@ -82,7 +82,6 @@
 
 ### Misc
 
-- Fix embed for web ui chunks [[#6608](https://github.com/woodpecker-ci/woodpecker/pull/6608)]
 - docs: Change homepage of woodpecker-shellcheck [[#6594](https://github.com/woodpecker-ci/woodpecker/pull/6594)]
 - Use "sign in/out" [[#6579](https://github.com/woodpecker-ci/woodpecker/pull/6579)]
 
