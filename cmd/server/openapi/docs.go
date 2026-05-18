@@ -4739,6 +4739,9 @@ const docTemplate = `{
                     "description": "@weekly,\t3min, ...",
                     "type": "string"
                 },
+                "timezone": {
+                    "type": "string"
+                },
                 "variables": {
                     "type": "object",
                     "additionalProperties": {
@@ -4760,6 +4763,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "schedule": {
+                    "type": "string"
+                },
+                "timezone": {
                     "type": "string"
                 },
                 "variables": {
@@ -5072,6 +5078,9 @@ const docTemplate = `{
                 },
                 "refspec": {
                     "type": "string"
+                },
+                "rerun_count": {
+                    "type": "integer"
                 },
                 "reviewed": {
                     "type": "integer"
@@ -6012,6 +6021,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "parent": {
+                    "type": "integer"
+                },
+                "rerun_count": {
                     "type": "integer"
                 },
                 "started": {

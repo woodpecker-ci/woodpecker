@@ -399,10 +399,14 @@
                 "saved": "Cron gespeichert",
                 "schedule": {
                     "placeholder": "Zeitplan",
-                    "title": "Zeitplan (basierend auf UTC)"
+                    "title": "Zeitplan"
                 },
                 "show": "Crons anzeigen",
-                "enabled": "Aktiv"
+                "enabled": "Aktiv",
+                "next_exec_local": "Nächste Ausführung: {local}",
+                "next_exec_both": "Nächste Ausführung: {local} ({zoned} {timezone})",
+                "timezone": "Zeitzone",
+                "your_timezone": "In deiner Webbrowser Zeitzone."
             },
             "general": {
                 "allow_pr": {
@@ -416,7 +420,8 @@
                 "general": "Projekt",
                 "netrc_only_trusted": {
                     "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Code-Plattform zu klonen oder zu pushen.",
-                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
+                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen",
+                    "placeholder": "Plugin Image"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",

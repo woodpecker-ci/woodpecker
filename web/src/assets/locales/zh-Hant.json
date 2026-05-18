@@ -15,7 +15,7 @@
         }
     },
     "search": "搜尋…",
-    "unknown_error": "出現未知錯誤",
+    "unknown_error": "發生了未知錯誤",
     "url": "URL",
     "welcome": "歡迎使用 Woodpecker",
     "repo": {
@@ -126,16 +126,23 @@
             },
             "crons": {
                 "schedule": {
-                    "placeholder": "排程"
+                    "placeholder": "排程",
+                    "title": "排程"
                 },
                 "run": "現在執行",
                 "branch": {
                     "title": "分支"
                 },
                 "name": {
-                    "name": "名稱"
+                    "name": "名稱",
+                    "placeholder": "Cron 工作的名稱"
                 },
-                "enabled": "已啟用"
+                "enabled": "已啟用",
+                "timezone": "時區",
+                "edit": "編輯 cron",
+                "delete": "刪除 cron",
+                "save": "儲存 cron",
+                "add": "新增 cron"
             },
             "actions": {
                 "repair": {
@@ -372,5 +379,6 @@
     "public_only_desc": "僅顯示公開儲存庫。",
     "addon": "附加元件",
     "config_extension_exclusive": "獨佔",
-    "abort": "中止"
+    "abort": "中止",
+    "leave_empty_to_keep_current_value": "留白以保留當前值"
 }
