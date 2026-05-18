@@ -38,7 +38,13 @@
                 "restart": "重新啟動",
                 "deploy": "部署",
                 "log_download": "下載",
-                "log_delete": "刪除"
+                "log_delete": "刪除",
+                "expand_all": "展開全部",
+                "collapse_all": "摺疊全部",
+                "log_auto_scroll": "啟用自動滾動",
+                "log_auto_scroll_off": "停用自動滾動",
+                "cancel_success": "Pipeline 已取消",
+                "restart_success": "Pipeline 已重啟"
             },
             "tasks": "任務",
             "status": {
@@ -48,7 +54,10 @@
                 "error": "錯誤",
                 "running": "執行中",
                 "pending": "等待中",
-                "declined": "已拒絕"
+                "declined": "已拒絕",
+                "canceled": "已取消",
+                "started": "已啟動",
+                "killed": "已終止"
             },
             "load_more": "載入更多",
             "config": "配置",
@@ -57,7 +66,10 @@
                 "push": "推送",
                 "tag": "標記",
                 "manual": "手動",
-                "release": "發佈"
+                "release": "發佈",
+                "pr": "拉取請求",
+                "cron": "Cron",
+                "pr_metadata": "拉取請求的詮釋資料已變更"
             },
             "errors": "錯誤",
             "warnings": "警告",
@@ -73,7 +85,9 @@
             "pipeline": "Pipeline #{pipelineId}",
             "protected": {
                 "approve": "核准",
-                "decline": "拒絕"
+                "decline": "拒絕",
+                "approve_success": "Pipeline 已核准",
+                "decline_success": "Pipeline 已拒絕"
             },
             "version_header": "Woodpecker 版本",
             "created": "",
@@ -81,7 +95,8 @@
             "cancel_info": {
                 "canceled_by_step": "因為 {step} 所以被取消",
                 "canceled_by_user": "被 {user} 取消"
-            }
+            },
+            "we_got_some_errors": "喔不，發生了錯誤！"
         },
         "settings": {
             "general": {
@@ -160,7 +175,8 @@
                 "delete": {
                     "delete": "刪除儲存庫",
                     "success": "儲存庫已刪除"
-                }
+                },
+                "actions": "Actions"
             }
         },
         "visibility": {
@@ -214,14 +230,15 @@
         "settings": {
             "users": {
                 "cancel": "取消",
-                "login": "登入",
+                "login": "使用者名稱",
                 "email": "電子郵件",
                 "avatar_url": "Avatar URL",
                 "save": "儲存使用者",
                 "show": "顯示使用者",
                 "add": "新增使用者",
                 "admin": {
-                    "admin": "管理員"
+                    "admin": "管理員",
+                    "placeholder": "使用者是個管理員"
                 },
                 "delete_user": "刪除使用者",
                 "edit_user": "編輯使用者",
@@ -257,7 +274,11 @@
                 "disabled": "已停用",
                 "settings": "儲存庫設定",
                 "repos": "儲存庫",
-                "view": "檢視儲存庫"
+                "view": "檢視儲存庫",
+                "repair": {
+                    "repair": "修復全部",
+                    "success": "儲存庫已修復"
+                }
             },
             "queue": {
                 "queue": "佇列",
@@ -268,7 +289,8 @@
                 "tasks": "任務",
                 "stats": {
                     "running_count": "執行中",
-                    "pending_count": "等待中"
+                    "pending_count": "等待中",
+                    "completed_count": "完成的任務"
                 },
                 "task_running": "任務執行中",
                 "task_pending": "任務等待中",
@@ -367,7 +389,10 @@
         "add": "新增註冊表",
         "view": "檢視註冊表",
         "edit": "編輯註冊表",
-        "delete": "刪除註冊表"
+        "delete": "刪除註冊表",
+        "created": "註冊表憑證已建立",
+        "saved": "註冊表憑證已儲存",
+        "deleted": "註冊表憑證已刪除"
     },
     "developer_settings": "開發者設定",
     "oauth_host": "OAuth 主機",
@@ -380,5 +405,11 @@
     "addon": "附加元件",
     "config_extension_exclusive": "獨佔",
     "abort": "中止",
-    "leave_empty_to_keep_current_value": "留白以保留當前值"
+    "leave_empty_to_keep_current_value": "留白以保留當前值",
+    "documentation_for": "適用於 \"{topic}\" 的說明文件",
+    "global_level_secret": "全域秘密",
+    "org_level_secret": "組織秘密",
+    "extensions_configuration_saved": "擴充功能配置已儲存",
+    "oauth_client_id": "OAuth 用戶端 ID",
+    "oauth_client_secret": "OAuth 用戶端秘密"
 }
