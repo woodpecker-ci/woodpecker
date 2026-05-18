@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"context"
 	"net/http"
 )
 
@@ -25,6 +26,21 @@ type Client interface {
 
 	// SetAddress sets the server address.
 	SetAddress(string)
+
+	// Subscribe opens a stream of repo / pipeline events.
+	//
+	// The client prefers WebSocket and falls back to SSE when the very first
+	// WebSocket handshake fails — the same logic the web UI uses, so both
+	// behave identically against a given deployment / reverse proxy. The
+	// callback runs in the stream's goroutine; do non-trivial work elsewhere.
+	Subscribe(ctx context.Context, callback func(Event)) Stream
+
+	// LogStream opens a log stream for the given step.
+	//
+	// As with Subscribe it prefers WebSocket with a one-way per-subscription
+	// fallback to SSE. The stream terminates cleanly (Done() closed, Err()
+	// nil) once the server signals end-of-stream.
+	LogStream(ctx context.Context, repoID, pipelineNumber, stepID int64, callback func(LogEntry)) Stream
 
 	// Self returns the currently authenticated user.
 	Self() (*User, error)
