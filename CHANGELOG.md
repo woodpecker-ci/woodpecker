@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @M31ancholy, @anbraten, @lephuongbg, @qwerty287, @rfinnie, @wucm667
+@6543, @EdwardSalter, @M31ancholy, @anbraten, @johanvdw, @lephuongbg, @qwerty287, @rfinnie, @wucm667
 
 ### 🔒 Security
 
@@ -33,6 +33,7 @@
 
 ### 📚 Documentation
 
+- Docs: Mention that you can use failure: fail [[#6611](https://github.com/woodpecker-ci/woodpecker/pull/6611)]
 - Update docs npm deps non-major [[#6586](https://github.com/woodpecker-ci/woodpecker/pull/6586)]
 - Update pnpm to v11 [[#6561](https://github.com/woodpecker-ci/woodpecker/pull/6561)]
 - Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
