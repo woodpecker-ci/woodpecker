@@ -68,6 +68,12 @@
         </InputField>
 
         <InputField :label="$t('admin.settings.users.admin.admin')">
+          <Warning
+            v-if="selectedUser.admin_env"
+            class="mb-4 text-sm"
+            :text="$t('admin.settings.users.admin.admin_warning')"
+          />
+
           <Checkbox
             :model-value="selectedUser.admin || false"
             :label="$t('admin.settings.users.admin.placeholder')"
@@ -99,6 +105,7 @@ import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
