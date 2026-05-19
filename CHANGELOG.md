@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- View warning if admin is configured at env level [[#6600](https://github.com/woodpecker-ci/woodpecker/pull/6600)]
 - Add timezone support for crons [[#6597](https://github.com/woodpecker-ci/woodpecker/pull/6597)]
 - Add CI_PIPELINE_RERUNS environment variable [[#6588](https://github.com/woodpecker-ci/woodpecker/pull/6588)]
 - Add placeholders to inputs [[#6599](https://github.com/woodpecker-ci/woodpecker/pull/6599)]
