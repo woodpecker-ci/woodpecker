@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-18
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -45,6 +45,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6614](https://github.com/woodpecker-ci/woodpecker/pull/6614)]
 - Lock file maintenance [[#6606](https://github.com/woodpecker-ci/woodpecker/pull/6606)]
 - Update web npm deps non-major [[#6604](https://github.com/woodpecker-ci/woodpecker/pull/6604)]
 - Update web npm deps non-major [[#6603](https://github.com/woodpecker-ci/woodpecker/pull/6603)]
