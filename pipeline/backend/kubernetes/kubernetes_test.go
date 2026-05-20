@@ -259,6 +259,39 @@ func TestWaitStepReturnsOnContextCancel(t *testing.T) {
 	}
 }
 
+func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("pod-delete-02")
+	namespace := "test-ns"
+
+	podName := createPod(t, client, step, namespace)
+
+	// Delete before WaitStep starts
+	err := client.CoreV1().Pods(namespace).Delete(context.Background(), podName, kube_meta_v1.DeleteOptions{})
+	require.NoError(t, err)
+
+	type result struct {
+		state *types.State
+		err   error
+	}
+	ch := make(chan result, 1)
+	go func() {
+		s, err := engine.WaitStep(context.Background(), step, "task-1")
+		ch <- result{s, err}
+	}()
+
+	select {
+	case r := <-ch:
+		require.NoError(t, r.err)
+		require.NotNil(t, r.state)
+		assert.True(t, r.state.Exited)
+		assert.Equal(t, 0, r.state.ExitCode)
+	case <-time.After(3 * time.Second):
+		t.Fatal("WaitStep did not return for already-deleted pod")
+	}
+}
+
 func TestWaitStepNoGoroutineLeak(t *testing.T) {
 	client := fake.NewClientset()
 	engine := makeEngine(client)
