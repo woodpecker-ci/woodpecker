@@ -15,7 +15,7 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.5.1+incompatible
+	github.com/docker/cli v29.5.2+incompatible
 	github.com/docker/go-connections v0.7.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
@@ -55,7 +55,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.5.1
 	github.com/zalando/go-keyring v0.2.8
-	gitlab.com/gitlab-org/api/client-go/v2 v2.29.0
+	gitlab.com/gitlab-org/api/client-go/v2 v2.30.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.51.0
 	golang.org/x/image v0.40.0
