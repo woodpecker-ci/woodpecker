@@ -17,7 +17,9 @@ package repo
 import (
 	"context"
 	"fmt"
-	"strconv"
+	"io"
+	"os"
+	"strings"
 
 	"github.com/urfave/cli/v3"
 
@@ -28,31 +30,83 @@ import (
 var repoAddCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "add a repository",
-	ArgsUsage: "<forge-remote-id>",
+	ArgsUsage: "<forge-remote-id|repo-full-name>",
 	Action:    repoAdd,
 }
 
 func repoAdd(ctx context.Context, c *cli.Command) error {
-	_forgeRemoteID := c.Args().First()
-	forgeRemoteID, err := strconv.Atoi(_forgeRemoteID)
-	if err != nil {
-		return fmt.Errorf("invalid forge remote id: %s", _forgeRemoteID)
-	}
-
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
+	return repoAddWithClient(c.Args().First(), client, c.Writer)
+}
+
+func repoAddWithClient(repoArg string, client woodpecker.Client, out io.Writer) error {
+	forgeRemoteID, err := repoAddForgeRemoteID(repoArg, client)
+	if err != nil {
+		return err
+	}
+
 	opt := woodpecker.RepoPostOptions{
-		ForgeRemoteID: int64(forgeRemoteID),
+		ForgeRemoteID: forgeRemoteID,
 	}
 
 	repo, err := client.RepoPost(opt)
 	if err != nil {
 		return err
 	}
+	if repo == nil {
+		return fmt.Errorf("server returned no repository")
+	}
 
-	fmt.Printf("Successfully activated repository with forge remote %s\n", repo.FullName)
-	return nil
+	if out == nil {
+		out = os.Stdout
+	}
+	_, err = fmt.Fprintf(out, "Successfully activated repository %s\n", repo.FullName)
+	return err
+}
+
+func repoAddForgeRemoteID(repoArg string, client woodpecker.Client) (string, error) {
+	repoArg = strings.TrimSpace(repoArg)
+	if repoArg == "" {
+		return "", fmt.Errorf("repository or forge remote id required")
+	}
+
+	if !strings.Contains(repoArg, "/") {
+		return repoArg, nil
+	}
+
+	repos, err := client.RepoList(woodpecker.RepoListOptions{
+		All:  true,
+		Name: repoNameFromFullName(repoArg),
+	})
+	if err != nil {
+		return "", fmt.Errorf("lookup repository %q: %w", repoArg, err)
+	}
+
+	for _, repo := range repos {
+		if repo == nil || !strings.EqualFold(repo.FullName, repoArg) {
+			continue
+		}
+		if !validForgeRemoteID(repo.ForgeRemoteID) {
+			return "", fmt.Errorf("repository %q has no forge remote id", repoArg)
+		}
+		return repo.ForgeRemoteID, nil
+	}
+
+	return "", fmt.Errorf("repository %q not found", repoArg)
+}
+
+func repoNameFromFullName(repoFullName string) string {
+	lastSlash := strings.LastIndex(repoFullName, "/")
+	if lastSlash == -1 || lastSlash == len(repoFullName)-1 {
+		return repoFullName
+	}
+	return repoFullName[lastSlash+1:]
+}
+
+func validForgeRemoteID(forgeRemoteID string) bool {
+	return forgeRemoteID != "" && forgeRemoteID != "0"
 }
