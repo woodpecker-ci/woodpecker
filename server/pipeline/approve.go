@@ -21,6 +21,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -52,46 +53,28 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		yamls = append(yamls, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	if currentPipeline.Workflows, err = store.WorkflowGetTree(currentPipeline); err != nil {
-		return nil, fmt.Errorf("error: loading workflows. %w", err)
+	pipelineItems, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, nil)
+	if pipeline_errors.HasBlockingErrors(parseErr) {
+		if err := updatePipelineWithErr(ctx, forge, store, currentPipeline, repo, user, parseErr); err != nil {
+			log.Error().Err(err).Msgf("error setting error status of pipeline for %s#%d after approval", repo.FullName, currentPipeline.Number)
+		}
+		msg := fmt.Sprintf("failure to parse pipeline config for %s", repo.FullName)
+		log.Error().Err(parseErr).Msg(msg)
+		return nil, errors.New(msg)
+	} else if parseErr != nil {
+		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
+	}
+
+	enrichPipelineItemSteps(pipelineItems, repo)
+	currentPipeline.Status = model.StatusPending
+	currentPipeline, err = replaceWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems)
+	if err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting new steps for %s#%d after approval", repo.FullName, currentPipeline.Number)
+		return nil, err
 	}
 
 	if currentPipeline, err = UpdateToStatusPending(store, *currentPipeline, user.Login); err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
-	}
-
-	for _, wf := range currentPipeline.Workflows {
-		if wf.State != model.StatusBlocked {
-			continue
-		}
-		wf.State = model.StatusPending
-		if err := store.WorkflowUpdate(wf); err != nil {
-			return nil, fmt.Errorf("error updating workflow. %w", err)
-		}
-
-		for _, step := range wf.Children {
-			if step.State != model.StatusBlocked {
-				continue
-			}
-			step.State = model.StatusPending
-			if err := store.StepUpdate(step); err != nil {
-				return nil, fmt.Errorf("error updating step. %w", err)
-			}
-		}
-	}
-
-	currentPipeline, pipelineItems, err := createPipelineItems(ctx, forge, store, currentPipeline, user, repo, yamls, nil)
-	if err != nil {
-		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
-	}
-
-	// we have no way to link old workflows and steps in database to new engine generated steps,
-	// so we just delete the old and insert the new ones
-	if err := store.WorkflowsReplace(currentPipeline, currentPipeline.Workflows); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting new steps for %s#%d after approval", repo.FullName, currentPipeline.Number)
-		return nil, err
 	}
 
 	publishPipeline(ctx, forge, currentPipeline, repo, user)

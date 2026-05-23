@@ -203,6 +203,34 @@ func enrichPipelineItemSteps(items []*builder.Item, repo *model.Repo) {
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by PipelineBuilder.Build()) into
 // a pipeline that can be stored in the database by the server and save converted workflows.
 func saveWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) (*model.Pipeline, error) {
+	if pipeline.Workflows != nil {
+		return nil, errors.New("cannot save new workflows from pipeline builder: pipeline already has workflows loaded")
+	}
+
+	workflows := workflowsFromPipelineBuilder(pipeline, pipelineItems)
+	if err := store.WorkflowsCreate(workflows); err != nil {
+		return nil, err
+	}
+
+	pipeline.Workflows = workflows
+	setPipelineItemWorkflowIDs(pipelineItems, pipeline.Workflows)
+
+	return pipeline, nil
+}
+
+func replaceWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) (*model.Pipeline, error) {
+	workflows := workflowsFromPipelineBuilder(pipeline, pipelineItems)
+	if err := store.WorkflowsReplace(pipeline, workflows); err != nil {
+		return nil, err
+	}
+
+	pipeline.Workflows = workflows
+	setPipelineItemWorkflowIDs(pipelineItems, pipeline.Workflows)
+
+	return pipeline, nil
+}
+
+func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*builder.Item) []*model.Workflow {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		if pidSequence < item.Workflow.PID {
@@ -210,12 +238,7 @@ func saveWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipelin
 		}
 	}
 
-	// The workflows in the pipeline should be empty, only we populate them.
-	// But if a pipeline was already loaded from the database and contains workflows,
-	// we error out to prevent harm.
-	if pipeline.Workflows != nil {
-		return nil, errors.New("cannot save new workflows from pipeline builder: pipeline already has workflows loaded")
-	}
+	workflows := make([]*model.Workflow, 0, len(pipelineItems))
 
 	for _, item := range pipelineItems {
 		workflow := &model.Workflow{
@@ -254,17 +277,14 @@ func saveWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipelin
 			}
 		}
 
-		pipeline.Workflows = append(pipeline.Workflows, workflow)
+		workflows = append(workflows, workflow)
 	}
 
-	if err := store.WorkflowsCreate(pipeline.Workflows); err != nil {
-		return nil, err
-	}
+	return workflows
+}
 
-	// now thread IDs back to the builder items
-	for i, wf := range pipeline.Workflows {
+func setPipelineItemWorkflowIDs(pipelineItems []*builder.Item, workflows []*model.Workflow) {
+	for i, wf := range workflows {
 		pipelineItems[i].Workflow.ID = wf.ID
 	}
-
-	return pipeline, nil
 }
