@@ -27,13 +27,15 @@ func TestEnviron(t *testing.T) {
 			Event: EventRelease,
 			Commit: Commit{
 				Ref:          "refs/tags/v1.2.3",
+				Timestamp:    1722617519,
 				IsPrerelease: true,
 			},
 		},
 		Prev: Pipeline{
 			Event: EventPullMetadata,
 			Commit: Commit{
-				Refspec: "branch-a:branch-b",
+				Refspec:   "branch-a:branch-b",
+				Timestamp: 1722610173,
 			},
 		},
 	}
@@ -47,6 +49,8 @@ func TestEnviron(t *testing.T) {
 	assert.Equal(t, "branch-b", envs["CI_PREV_COMMIT_TARGET_BRANCH"])
 	assert.Equal(t, "[]", envs["CI_PIPELINE_FILES"])
 	assert.Equal(t, "v1.2.3", envs["CI_COMMIT_TAG"])
+	assert.Equal(t, "2024-08-02T16:51:59Z", envs["CI_COMMIT_TIMESTAMP"])
+	assert.Equal(t, "2024-08-02T14:49:33Z", envs["CI_PREV_COMMIT_TIMESTAMP"])
 
 	m = Metadata{
 		Sys: System{Name: "wp"},
