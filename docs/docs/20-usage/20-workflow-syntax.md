@@ -757,7 +757,13 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise the complete workflow is skipped.
+
+:::info
+A workflow skipped by a global `when` block does not count as a successful dependency for other workflows using `depends_on`. Those dependent workflows are not executed.
+
+If another workflow should continue after optional work is skipped, move the condition to the relevant steps or keep a lightweight step that can complete successfully.
+:::
 
 For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 

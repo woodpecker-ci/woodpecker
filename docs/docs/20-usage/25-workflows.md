@@ -82,6 +82,8 @@ The workflows run in parallel on separate agents and share nothing.
 
 Dependencies between workflows can be set with the `depends_on` element. A workflow doesn't execute until all of its dependencies finished successfully.
 
+Only workflows that are created and finish successfully satisfy `depends_on`. A workflow skipped by a global [`when` condition](./20-workflow-syntax.md#when---global-workflow-conditions) is not treated as a successful dependency, so workflows depending on it are not executed.
+
 The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml` or `.yaml`. If the project config for example uses `.woodpecker/` as path for CI files with a file named `.woodpecker/.lint.yaml` the corresponding `depends_on` entry would be `lint`.
 
 ```diff
