@@ -304,6 +304,9 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	if err != nil {
 		return err
 	}
+	if len(compiled.Stages) == 0 {
+		return nil
+	}
 
 	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
 	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
