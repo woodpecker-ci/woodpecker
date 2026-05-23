@@ -17,13 +17,13 @@
         class="bg-wp-background-200! dark:bg-wp-background-200! items-center gap-2"
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
-        <span>{{ user.login }}</span>
-        <Badge
-          v-if="user.admin"
-          class="md:display-unset ml-auto hidden"
-          :value="$t('admin.settings.users.admin.admin')"
-        />
-        <div class="flex items-center gap-2" :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }">
+        <span class="truncate">{{ user.login }}</span>
+        <div class="ml-auto flex items-center gap-2">
+          <span :title="userForgeName(user)" class="flex items-center">
+            <Icon :name="userForgeIcon(user)" class="text-wp-text-alt-100" />
+          </span>
+          <Badge class="md:display-unset hidden" :label="$t('forge_type')" :value="userForgeName(user)" />
+          <Badge v-if="user.admin" class="md:display-unset hidden" :value="$t('admin.settings.users.admin.admin')" />
           <IconButton
             icon="edit"
             :title="$t('admin.settings.users.edit_user')"
@@ -67,6 +67,13 @@
           </div>
         </InputField>
 
+        <InputField v-if="isEditingUser" :label="$t('forge_type')">
+          <div class="flex min-h-8 items-center gap-2">
+            <Icon :name="userForgeIcon(selectedUser)" class="text-wp-text-alt-100" />
+            <Badge :value="userForgeName(selectedUser)" />
+          </div>
+        </InputField>
+
         <InputField :label="$t('admin.settings.users.admin.admin')">
           <Warning
             v-if="selectedUser.admin_env"
@@ -97,12 +104,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import type { IconNames } from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Warning from '~/components/atomic/Warning.vue';
@@ -112,24 +120,66 @@ import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
-import type { User } from '~/lib/api/types';
+import type { Forge, User } from '~/lib/api/types';
+import { forgeDisplayName, forgeIconName } from '~/lib/forge-utils';
 import { deepClone } from '~/lib/utils';
 
 const apiClient = useApiClient();
+const forgeStore = useForgeStore();
 const notifications = useNotifications();
 const { t } = useI18n();
 
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
+const userForges = reactive(new Map<number, Forge>());
 
 async function loadUsers(page: number): Promise<User[] | null> {
   return apiClient.getUsers({ page });
 }
 
 const { resetPage, data: users, loading } = usePagination(loadUsers, () => !selectedUser.value);
+
+async function loadForge(forgeId?: number) {
+  if (forgeId === undefined || userForges.has(forgeId)) {
+    return;
+  }
+
+  const forge = (await forgeStore.getForge(forgeId)).value;
+  if (forge) {
+    userForges.set(forgeId, forge);
+  }
+}
+
+function userForge(user?: Partial<User>): Forge | undefined {
+  if (user?.forge_id === undefined) {
+    return undefined;
+  }
+
+  return userForges.get(user.forge_id);
+}
+
+function userForgeName(user?: Partial<User>): string {
+  return forgeDisplayName(userForge(user), user?.forge_id);
+}
+
+function userForgeIcon(user?: Partial<User>): IconNames {
+  return forgeIconName(userForge(user));
+}
+
+watch(
+  users,
+  (loadedUsers) => {
+    const forgeIds = new Set((loadedUsers ?? []).map((user) => user.forge_id));
+    forgeIds.forEach((forgeId) => void loadForge(forgeId));
+  },
+  { immediate: true },
+);
+
+watch(selectedUser, (user) => void loadForge(user?.forge_id));
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedUser.value) {
