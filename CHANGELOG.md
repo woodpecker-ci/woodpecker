@@ -35,6 +35,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6625](https://github.com/woodpecker-ci/woodpecker/pull/6625)]
 - Docs: Mention that you can use failure: fail [[#6611](https://github.com/woodpecker-ci/woodpecker/pull/6611)]
 - Update docs npm deps non-major [[#6586](https://github.com/woodpecker-ci/woodpecker/pull/6586)]
 - Update pnpm to v11 [[#6561](https://github.com/woodpecker-ci/woodpecker/pull/6561)]
