@@ -64,6 +64,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	newPipeline := createNewOutOfOld(lastPipeline)
 	newPipeline.Parent = lastPipeline.Number
+	newPipeline.RerunCount++
 	newPipeline.Version = version.String()
 
 	err = store.CreatePipeline(newPipeline)
@@ -95,11 +96,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	if err := prepareStart(ctx, forge, store, newPipeline, user, repo); err != nil {
-		msg := fmt.Sprintf("failure to prepare pipeline for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
-	}
+	publishPipeline(ctx, forge, newPipeline, repo, user)
 
 	newPipeline, err = start(ctx, forge, store, newPipeline, user, repo, pipelineItems)
 	if err != nil {

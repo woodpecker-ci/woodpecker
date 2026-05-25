@@ -65,11 +65,13 @@ func Run(ctx context.Context, store store.Store) error {
 }
 
 // CalcNewNext parses a cron string and calculates the next exec time based on it.
-func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
-	// remove local timezone
-	now = now.UTC()
+func CalcNewNext(schedule, tzLoc string, now time.Time) (time.Time, error) {
+	zone, err := time.LoadLocation(tzLoc)
+	if err != nil {
+		return time.Time{}, err
+	}
 
-	// TODO: allow the users / the admin to set a specific timezone
+	now = now.In(zone)
 
 	parser, err := cron.NewDefaultParser(cron.StandardOptions)
 	if err != nil {
@@ -86,7 +88,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 func runCron(ctx context.Context, store store.Store, cron *model.Cron, now time.Time) error {
 	log.Trace().Msgf("cron: run id[%d]", cron.ID)
 
-	newNext, err := CalcNewNext(cron.Schedule, now)
+	newNext, err := CalcNewNext(cron.Schedule, cron.Timezone, now)
 	if err != nil {
 		return err
 	}

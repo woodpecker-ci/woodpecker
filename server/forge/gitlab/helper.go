@@ -36,7 +36,8 @@ func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error)
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 				Proxy:           http.ProxyFromEnvironment,
 			},
-			"forge-gitlab"),
+			"forge-gitlab",
+		),
 	}))
 }
 

@@ -2,8 +2,8 @@
     "admin": {
         "settings": {
             "agents": {
-                "add": "添加 Agent",
-                "agents": "Agents",
+                "add": "添加代理",
+                "agents": "代理",
                 "backend": {
                     "backend": "后端",
                     "badge": "后端"
@@ -13,11 +13,11 @@
                     "capacity": "容量",
                     "desc": "该 Agent 并行执行流水线的最大数量。"
                 },
-                "created": "已创建 Agent",
+                "created": "已创建代理",
                 "delete_agent": "删除 Agent",
                 "delete_confirm": "你真的要删除该 Agent 吗？删除后它将无法再次连接到此服务器。",
-                "deleted": "已删除 Agent",
-                "desc": "注册到此服务器的 Agents。",
+                "deleted": "已删除代理",
+                "desc": "注册到此服务器的代理。",
                 "edit_agent": "编辑 Agent",
                 "id": "ID",
                 "last_contact": {
@@ -26,21 +26,21 @@
                 },
                 "name": {
                     "name": "名称",
-                    "placeholder": "Agent 名称"
+                    "placeholder": "代理名称"
                 },
                 "never": "从未",
                 "no_schedule": {
-                    "name": "禁用 Agent",
-                    "placeholder": "阻止 Agent 接受新任务"
+                    "name": "禁用代理",
+                    "placeholder": "阻止代理接受新任务"
                 },
-                "none": "还未添加任何 Agents.",
+                "none": "还未添加任何代理。",
                 "platform": {
                     "badge": "平台",
                     "platform": "平台"
                 },
-                "save": "保存 Agent",
-                "saved": "已保存 Agent",
-                "show": "显示 Agents",
+                "save": "保存代理",
+                "saved": "已保存代理",
+                "show": "查看代理",
                 "token": "Token",
                 "version": "版本",
                 "custom_labels": {
@@ -125,7 +125,7 @@
                     "admin": "管理员",
                     "placeholder": "此用户是管理员"
                 },
-                "avatar_url": "Avatar URL",
+                "avatar_url": "头像链接",
                 "cancel": "取消",
                 "created": "用户已创建",
                 "delete_confirm": "你真的想删除这个用户吗？这也将删除该用户拥有的所有存储库。",
@@ -133,7 +133,7 @@
                 "deleted": "删除用户",
                 "desc": "在此服务器上注册的用户。",
                 "edit_user": "编辑用户",
-                "email": "Email",
+                "email": "邮箱",
                 "login": "登录",
                 "none": "还没有任何用户。",
                 "save": "保存用户",
@@ -190,7 +190,7 @@
             },
             "settings": "设置",
             "agents": {
-                "desc": "注册到此组织的 Agents。"
+                "desc": "注册到此组织代理。"
             },
             "registries": {
                 "desc": "可以为组织添加注册表凭据，以便在所有流水线中使用私有镜像。"

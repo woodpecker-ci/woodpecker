@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v88/github"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -203,7 +203,8 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		Branch:       hook.GetPullRequest().GetBase().GetRef(),
 		AuthorAvatar: hook.GetSender().GetAvatarURL(),
 		Author:       hook.GetSender().GetLogin(),
-		Refspec: fmt.Sprintf(refSpec,
+		Refspec: fmt.Sprintf(
+			refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
 		),

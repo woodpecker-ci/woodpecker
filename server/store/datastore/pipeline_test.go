@@ -156,7 +156,7 @@ func TestPipelineListFilter(t *testing.T) {
 
 	pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, nil)
 	assert.NoError(t, err)
-	assert.Len(t, (pipelines), 2)
+	assert.Len(t, pipelines, 2)
 	assert.Equal(t, pipeline2.ID, pipelines[0].ID)
 	assert.Equal(t, pipeline2.RepoID, pipelines[0].RepoID)
 	assert.Equal(t, pipeline2.Status, pipelines[0].Status)
@@ -180,7 +180,7 @@ func TestPipelineListFilter(t *testing.T) {
 		RefContains: "32",
 	})
 	assert.NoError(t, err)
-	assert.Len(t, (pipelines), 1)
+	assert.Len(t, pipelines, 1)
 	assert.Equal(t, pipeline2.ID, pipelines[0].ID)
 
 	pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, &model.PipelineFilter{Before: before})

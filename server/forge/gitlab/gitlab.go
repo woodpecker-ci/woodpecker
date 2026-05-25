@@ -201,10 +201,11 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 
 	teams := make([]*model.Team, 0, len(groups))
 	for i := range groups {
-		teams = append(teams, &model.Team{
-			Login:  groups[i].Name,
-			Avatar: groups[i].AvatarURL,
-		},
+		teams = append(
+			teams, &model.Team{
+				Login:  groups[i].Name,
+				Avatar: groups[i].AvatarURL,
+			},
 		)
 	}
 

@@ -4745,6 +4745,9 @@ const docTemplate = `{
                     "description": "@weekly,\t3min, ...",
                     "type": "string"
                 },
+                "timezone": {
+                    "type": "string"
+                },
                 "variables": {
                     "type": "object",
                     "additionalProperties": {
@@ -4766,6 +4769,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "schedule": {
+                    "type": "string"
+                },
+                "timezone": {
                     "type": "string"
                 },
                 "variables": {
@@ -5127,6 +5133,9 @@ const docTemplate = `{
                 },
                 "release": {
                     "$ref": "#/definitions/model.Release"
+                },
+                "rerun_count": {
+                    "type": "integer"
                 },
                 "reviewed": {
                     "description": "timestamp of the review",
@@ -5829,6 +5838,9 @@ const docTemplate = `{
                     "description": "Admin indicates the user is a system administrator.\n\nNOTE: If the username is part of the WOODPECKER_ADMIN\nenvironment variable, this value will be set to true on login.",
                     "type": "boolean"
                 },
+                "admin_env": {
+                    "type": "boolean"
+                },
                 "avatar_url": {
                     "description": "the avatar url for this user.",
                     "type": "string"
@@ -6087,6 +6099,9 @@ const docTemplate = `{
                 "release": {
                     "type": "string"
                 },
+                "rerun_count": {
+                    "type": "integer"
+                },
                 "started": {
                     "type": "integer"
                 },
@@ -6121,6 +6136,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "org_id": {
+                    "type": "integer"
                 },
                 "owner": {
                     "type": "string"

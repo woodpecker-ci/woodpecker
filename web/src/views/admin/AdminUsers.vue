@@ -48,21 +48,32 @@
     <div v-else>
       <form @submit.prevent="saveUser">
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.login')">
-          <TextField :id="id" v-model="selectedUser.login" :disabled="isEditingUser" />
+          <TextField :id="id" v-model="selectedUser.login" :disabled="isEditingUser" :placeholder="$t('username')" />
         </InputField>
 
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.email')">
-          <TextField :id="id" v-model="selectedUser.email" />
+          <TextField :id="id" v-model="selectedUser.email" :placeholder="$t('admin.settings.users.email')" />
         </InputField>
 
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.avatar_url')">
           <div class="flex gap-2">
             <img v-if="selectedUser.avatar_url" class="h-8 w-8 rounded-md" :src="selectedUser.avatar_url" />
-            <TextField :id="id" v-model="selectedUser.avatar_url" />
+            <TextField
+              :id="id"
+              v-model="selectedUser.avatar_url"
+              login
+              :placeholder="$t('admin.settings.users.avatar_url')"
+            />
           </div>
         </InputField>
 
         <InputField :label="$t('admin.settings.users.admin.admin')">
+          <Warning
+            v-if="selectedUser.admin_env"
+            class="mb-4 text-sm"
+            :text="$t('admin.settings.users.admin.admin_warning')"
+          />
+
           <Checkbox
             :model-value="selectedUser.admin || false"
             :label="$t('admin.settings.users.admin.placeholder')"
@@ -94,6 +105,7 @@ import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';

@@ -76,10 +76,20 @@ func TestCreatePipeline(t *testing.T) {
 
 func TestCalcNewNext(t *testing.T) {
 	now := time.Unix(1661962369, 0)
-	_, err := CalcNewNext("", now)
+	_, err := CalcNewNext("", "UTC", now)
 	assert.Error(t, err)
 
-	schedule, err := CalcNewNext("@every 5m", now)
+	schedule, err := CalcNewNext("@every 5m", "UTC", now)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1661962669, schedule.Unix())
+
+	// test some timezoning
+	schedule, err = CalcNewNext("@midnight", "UTC", now)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1661990400, schedule.Unix())
+
+	// test some timezoning
+	schedule, err = CalcNewNext("@midnight", "Europe/Bucharest", now)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1661979600, schedule.Unix())
 }

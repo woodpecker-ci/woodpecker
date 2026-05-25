@@ -50,12 +50,14 @@ func TestAgentLabelRouting(t *testing.T) {
 	})
 
 	// Plain agent: wildcard repo label only — cannot satisfy gpu=true.
-	plainAgent := setup.StartAgent(t, env.GRPCAddr,
+	plainAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("plain-agent"),
 	)
 
 	// GPU agent: carries gpu=true — the only agent that can accept the task.
-	gpuAgent := setup.StartAgent(t, env.GRPCAddr,
+	gpuAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("gpu-agent"),
 		setup.WithCustomLabels(map[string]string{"gpu": "true"}),
 	)

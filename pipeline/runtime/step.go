@@ -103,6 +103,8 @@ func (r *Runtime) setStepEnv(step *backend_types.Step) error {
 	}
 	step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(r.started, 10)
 	step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(time.Now().Unix(), 10)
+	step.Environment["CI_STEP_TYPE"] = string(step.Type)
+	step.Environment["CI_STEP_NAME"] = step.Name
 
 	return nil
 }

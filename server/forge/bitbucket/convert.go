@@ -171,7 +171,8 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 			SHA: from.PullRequest.Source.Commit.Hash,
 		},
 		Ref: fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
-		Refspec: fmt.Sprintf("%s:%s",
+		Refspec: fmt.Sprintf(
+			"%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),

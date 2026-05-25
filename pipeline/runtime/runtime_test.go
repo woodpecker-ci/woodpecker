@@ -283,6 +283,8 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 			Environment: map[string]string{
 				"CI_PIPELINE_STARTED": fmt.Sprintf("%d", r.started),
 				"CI_PIPELINE_STATUS":  "success",
+				"CI_STEP_NAME":        "test",
+				"CI_STEP_TYPE":        "commands",
 			},
 			Commands: []string{"echo test"},
 		},
@@ -481,6 +483,8 @@ func TestWorkflowPluginStep(t *testing.T) {
 
 		assert.EqualValues(t, map[string]string{
 			"CI_PIPELINE_STATUS":             "success",
+			"CI_STEP_NAME":                   "publish",
+			"CI_STEP_TYPE":                   "plugin",
 			"DRONE_BUILD_STATUS":             "success",
 			"DRONE_REPO_SCM":                 "git",
 			"EXPECT_TYPE":                    "plugin",

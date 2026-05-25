@@ -36,6 +36,7 @@ type Pipeline struct {
 	Finished            int64                   `json:"finished"                xorm:"finished"`
 	Commit              *Commit                 `json:"commit_pipeline"         xorm:"json 'commit'"` // TODO change json to 'commit' in next major
 	Branch              string                  `json:"branch"                  xorm:"branch"`
+	RerunCount          int64                   `json:"rerun_count"             xorm:"rerun_count"`
 	Ref                 string                  `json:"ref"                     xorm:"ref"`
 	Refspec             string                  `json:"refspec"                 xorm:"refspec"`
 	AuthorAvatar        string                  `json:"author_avatar"           xorm:"varchar(500) 'avatar'"` // Avatar URL of the author of the commit
