@@ -35,7 +35,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#6640](https://github.com/woodpecker-ci/woodpecker/pull/6640)]
 - Update pnpm to v11.3.0 [[#6639](https://github.com/woodpecker-ci/woodpecker/pull/6639)]
 - Update docs npm deps non-major [[#6625](https://github.com/woodpecker-ci/woodpecker/pull/6625)]
 - Docs: Mention that you can use failure: fail [[#6611](https://github.com/woodpecker-ci/woodpecker/pull/6611)]
@@ -51,6 +50,7 @@
 ### 📦️ Dependency
 
 - Update web npm deps non-major [[#6638](https://github.com/woodpecker-ci/woodpecker/pull/6638)]
+- Lock file maintenance [[#6640](https://github.com/woodpecker-ci/woodpecker/pull/6640)]
 - Update module github.com/google/go-github/v86 to v88 [[#6626](https://github.com/woodpecker-ci/woodpecker/pull/6626)]
 - Update web npm deps non-major [[#6624](https://github.com/woodpecker-ci/woodpecker/pull/6624)]
 - Update golang-packages [[#6622](https://github.com/woodpecker-ci/woodpecker/pull/6622)]
