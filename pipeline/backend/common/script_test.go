@@ -33,5 +33,5 @@ func TestGenerateContainerConf(t *testing.T) {
 	gotEnv, gotEntry = GenerateContainerConf([]string{"echo hello world"}, "linux", "/woodpecker/some")
 	assert.Equal(t, posixScriptBase64, gotEnv["CI_SCRIPT"])
 	assert.Equal(t, "/bin/sh", gotEnv["SHELL"])
-	assert.Equal(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, gotEntry)
+	assert.Equal(t, []string{"/bin/sh", "-c", PosixEntrypointCommand}, gotEntry)
 }

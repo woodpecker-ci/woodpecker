@@ -18,6 +18,10 @@ import (
 	"encoding/base64"
 )
 
+// PosixEntrypointCommand decodes CI_SCRIPT to a temp file before execution to avoid
+// intermittent truncation when piping base64 output directly to /bin/sh.
+const PosixEntrypointCommand = `script=$(mktemp /tmp/.woodpecker-ci-script.XXXXXX) && echo $CI_SCRIPT | base64 -d > "$script" && /bin/sh -e "$script"; ret=$?; rm -f "$script"; exit $ret`
+
 func GenerateContainerConf(commands []string, osType, workDir string) (env map[string]string, entry []string) {
 	env = make(map[string]string)
 	if osType == "windows" {
@@ -28,7 +32,7 @@ func GenerateContainerConf(commands []string, osType, workDir string) (env map[s
 	} else {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir)))
 		env["SHELL"] = "/bin/sh"
-		entry = []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+		entry = []string{"/bin/sh", "-c", PosixEntrypointCommand}
 	}
 
 	return env, entry

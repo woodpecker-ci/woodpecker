@@ -162,7 +162,7 @@ func TestTinyPod(t *testing.T) {
 					"command": [
 						"/bin/sh",
 						"-c",
-						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
+						"script=$(mktemp /tmp/.woodpecker-ci-script.XXXXXX) && echo $CI_SCRIPT | base64 -d > \"$script\" && /bin/sh -e \"$script\"; ret=$?; rm -f \"$script\"; exit $ret"
 					],
 					"env": [
 						"<<UNORDERED>>",
