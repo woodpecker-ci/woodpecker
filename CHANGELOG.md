@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-24
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -35,6 +35,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#6640](https://github.com/woodpecker-ci/woodpecker/pull/6640)]
 - Update pnpm to v11.3.0 [[#6639](https://github.com/woodpecker-ci/woodpecker/pull/6639)]
 - Update docs npm deps non-major [[#6625](https://github.com/woodpecker-ci/woodpecker/pull/6625)]
 - Docs: Mention that you can use failure: fail [[#6611](https://github.com/woodpecker-ci/woodpecker/pull/6611)]
