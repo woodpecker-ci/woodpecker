@@ -220,6 +220,51 @@ func TestTinyPod(t *testing.T) {
 	ja.Assertf(string(podJSON), expected)
 }
 
+func TestServiceWorkspaceVolume(t *testing.T) {
+	useWorkspaceVolume := true
+	disableWorkspaceVolume := false
+	step := &types.Step{
+		Name:          "postgres",
+		Image:         "postgres:16",
+		UUID:          "01he8bebctabr3kgk0qj36d2me-0",
+		Type:          types.StepTypeService,
+		WorkingDir:    "/woodpecker/src",
+		WorkspaceBase: "/woodpecker",
+		Environment:   map[string]string{},
+		Volumes:       []string{"workspace:/woodpecker", "cache:/cache"},
+	}
+
+	pod, err := mkPod(step, &config{Namespace: "woodpecker", UseServiceWorkspaceVolume: true}, "wp-svc-postgres", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Len(t, pod.Spec.Volumes, 2)
+	assert.Equal(t, "workspace", pod.Spec.Volumes[0].Name)
+	assert.Equal(t, "/woodpecker", pod.Spec.Containers[0].VolumeMounts[0].MountPath)
+	assert.Equal(t, "cache", pod.Spec.Volumes[1].Name)
+	assert.Equal(t, "/cache", pod.Spec.Containers[0].VolumeMounts[1].MountPath)
+
+	pod, err = mkPod(step, &config{Namespace: "woodpecker", UseServiceWorkspaceVolume: false}, "wp-svc-postgres", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Len(t, pod.Spec.Volumes, 1)
+	assert.Equal(t, "cache", pod.Spec.Volumes[0].Name)
+	assert.Len(t, pod.Spec.Containers[0].VolumeMounts, 1)
+	assert.Equal(t, "/cache", pod.Spec.Containers[0].VolumeMounts[0].MountPath)
+
+	pod, err = mkPod(step, &config{Namespace: "woodpecker", UseServiceWorkspaceVolume: true}, "wp-svc-postgres", "linux/amd64", BackendOptions{WorkspaceVolume: &disableWorkspaceVolume}, taskUUID)
+	assert.NoError(t, err)
+	assert.Len(t, pod.Spec.Volumes, 1)
+	assert.Equal(t, "cache", pod.Spec.Volumes[0].Name)
+	assert.Len(t, pod.Spec.Containers[0].VolumeMounts, 1)
+	assert.Equal(t, "/cache", pod.Spec.Containers[0].VolumeMounts[0].MountPath)
+
+	pod, err = mkPod(step, &config{Namespace: "woodpecker", UseServiceWorkspaceVolume: false}, "wp-svc-postgres", "linux/amd64", BackendOptions{WorkspaceVolume: &useWorkspaceVolume}, taskUUID)
+	assert.NoError(t, err)
+	assert.Len(t, pod.Spec.Volumes, 2)
+	assert.Equal(t, "workspace", pod.Spec.Volumes[0].Name)
+	assert.Equal(t, "/woodpecker", pod.Spec.Containers[0].VolumeMounts[0].MountPath)
+	assert.Equal(t, "cache", pod.Spec.Volumes[1].Name)
+	assert.Equal(t, "/cache", pod.Spec.Containers[0].VolumeMounts[1].MountPath)
+}
+
 func TestFullPod(t *testing.T) {
 	const expected = `
 	{

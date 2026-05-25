@@ -81,6 +81,23 @@ steps:
 
 To give steps access to the Kubernetes API via service account, take a look at [RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 
+### Workspace volume
+
+`workspaceVolume` controls whether the default workspace volume is mounted into a
+service Pod. It only affects service containers and does not disable explicitly
+configured service volumes.
+
+If unset, the value of `WOODPECKER_BACKEND_K8S_SERVICE_WORKSPACE_VOLUME` is used.
+
+```yaml
+services:
+  postgres:
+    image: postgres:16
+    backend_options:
+      kubernetes:
+        workspaceVolume: false
+```
+
 ### Node selector
 
 `nodeSelector` specifies the labels which are used to select the node on which the step will be executed.
@@ -496,6 +513,16 @@ The storage class to use for the pipeline volume.
 - Default: `true`
 
 Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
+
+---
+
+### BACKEND_K8S_SERVICE_WORKSPACE_VOLUME
+
+- Name: `WOODPECKER_BACKEND_K8S_SERVICE_WORKSPACE_VOLUME`
+- Default: `true`
+
+Determines if the default workspace volume should be mounted into service Pods.
+Explicit service volumes are still mounted.
 
 ---
 

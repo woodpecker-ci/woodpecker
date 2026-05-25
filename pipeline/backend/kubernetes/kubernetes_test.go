@@ -181,6 +181,26 @@ func TestAffinityFromCliContext(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestServiceWorkspaceVolumeFromCliContext(t *testing.T) {
+	t.Setenv("WOODPECKER_BACKEND_K8S_SERVICE_WORKSPACE_VOLUME", "false")
+
+	cmd := &cli.Command{
+		Flags: Flags,
+		Action: func(ctx context.Context, c *cli.Command) error {
+			ctx = context.WithValue(ctx, types.CliCommand, c)
+			config, err := configFromCliContext(ctx)
+
+			require.NoError(t, err)
+			require.NotNil(t, config)
+			assert.False(t, config.UseServiceWorkspaceVolume)
+
+			return nil
+		},
+	}
+	err := cmd.Run(context.Background(), []string{"test"})
+	require.NoError(t, err)
+}
+
 func makeStep(uuid string) *types.Step {
 	return &types.Step{
 		UUID:  uuid,
