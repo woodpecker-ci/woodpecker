@@ -779,7 +779,7 @@ func (c *client) getCommitAndMessageFromTag(ctx context.Context, repo *model.Rep
 
 	gh, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	page := 1
@@ -822,7 +822,10 @@ func (c *client) getCommitFromSHA(ctx context.Context, repo *model.Repo, sha str
 		return nil, err
 	}
 
-	gh := c.newClientToken(ctx, user.AccessToken)
+	gh, err := c.newClientToken(ctx, user.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 
 	commit, _, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, sha, nil)
 	if err != nil {
