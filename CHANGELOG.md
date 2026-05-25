@@ -50,6 +50,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6638](https://github.com/woodpecker-ci/woodpecker/pull/6638)]
 - Update module github.com/google/go-github/v86 to v88 [[#6626](https://github.com/woodpecker-ci/woodpecker/pull/6626)]
 - Update web npm deps non-major [[#6624](https://github.com/woodpecker-ci/woodpecker/pull/6624)]
 - Update golang-packages [[#6622](https://github.com/woodpecker-ci/woodpecker/pull/6622)]
