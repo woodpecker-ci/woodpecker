@@ -224,7 +224,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 
 	author := lastCommit.Author
 
-	pipeline.Author = author.Name
+	pipeline.Author = hook.User.Username
 	pipeline.Email = author.Email
 
 	if len(pipeline.Email) != 0 {
@@ -279,11 +279,12 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
 
+	pipeline.Author = hook.UserUsername
+
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
 			pipeline.Timestamp = cm.Timestamp.Unix()
@@ -337,10 +338,10 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 	pipeline.Commit = hook.After
 	pipeline.Branch = refTag
 	pipeline.Ref = hook.Ref
+	pipeline.Author = hook.UserUsername
 
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
 			pipeline.Timestamp = cm.Timestamp.Unix()
@@ -394,6 +395,9 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		ForgeURL: hook.URL,
 		Message:  fmt.Sprintf("created release %s", hook.Name),
 		Sender:   hook.Commit.Author.Name,
+		// Using the commit author here as Gitlab does not send the hook user.
+		// This is not an issue because releases can be created by users with
+		// push permissions only anyways.
 		Author:   hook.Commit.Author.Name,
 		Email:    hook.Commit.Author.Email,
 
