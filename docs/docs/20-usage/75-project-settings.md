@@ -4,6 +4,10 @@ As the owner of a project in Woodpecker you can change project related settings 
 
 ![project settings](./project-settings.png)
 
+:::note
+Woodpecker's permission handling is linked to the forge. A user on your forge that has admin access to the repo will also get admin permissions for the repository in Woodpecker and can then change the settings here.
+:::
+
 ## Pipeline path
 
 The path to the pipeline config file or folder. By default it is left empty which will use the following configuration resolution `.woodpecker/*.{yaml,yml}` -> `.woodpecker.yaml` -> `.woodpecker.yml`. If you set a custom path Woodpecker tries to load your configuration or fails if no configuration could be found at the specified location. To use a [multiple workflows](./25-workflows.md) with a custom path you have to change it to a folder path ending with a `/` like `.woodpecker/`.
