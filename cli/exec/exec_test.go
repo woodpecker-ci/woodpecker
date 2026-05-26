@@ -62,6 +62,7 @@ steps:
 		"--repo-path", repoDir,
 		workflowPath,
 	})
+	require.NoError(t, err)
 
 	// close write end so Read below doesn't block
 	w.Close()
