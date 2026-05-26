@@ -25,6 +25,7 @@
 
 ### 🐛 Bug Fixes
 
+- local backend: on linux / mac start commands in own process group and kill the group on cancel [[#6609](https://github.com/woodpecker-ci/woodpecker/pull/6609)]
 - k8s: add guards to stop pipeline services upon completion [[#6623](https://github.com/woodpecker-ci/woodpecker/pull/6623)]
 - Fix missing log close button [[#6584](https://github.com/woodpecker-ci/woodpecker/pull/6584)]
 - fix(agent): persist agent ID after auth to prevent crashloop duplicates [[#6543](https://github.com/woodpecker-ci/woodpecker/pull/6543)]
