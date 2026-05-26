@@ -129,16 +129,20 @@ func PostCron(c *gin.Context) {
 		Name:      in.Name,
 		CreatorID: user.ID,
 		Schedule:  in.Schedule,
+		Timezone:  in.Timezone,
 		Branch:    in.Branch,
 		Variables: in.Variables,
 		Enabled:   in.Enabled,
+	}
+	if cron.Timezone == "" {
+		cron.Timezone = "UTC"
 	}
 	if err := cron.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
 
-	nextExec, err := cron_scheduler.CalcNewNext(in.Schedule, time.Now())
+	nextExec, err := cron_scheduler.CalcNewNext(in.Schedule, in.Timezone, time.Now())
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 		return
@@ -214,9 +218,18 @@ func PatchCron(c *gin.Context) {
 		}
 		cron.Branch = *in.Branch
 	}
+	if in.Timezone != nil && *in.Timezone != "" {
+		cron.Timezone = *in.Timezone
+		nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, cron.Timezone, time.Now())
+		if err != nil {
+			c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
+			return
+		}
+		cron.NextExec = nextExec.Unix()
+	}
 	if in.Schedule != nil && *in.Schedule != "" {
 		cron.Schedule = *in.Schedule
-		nextExec, err := cron_scheduler.CalcNewNext(*in.Schedule, time.Now())
+		nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, cron.Timezone, time.Now())
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 			return
@@ -230,7 +243,7 @@ func PatchCron(c *gin.Context) {
 		cron.Enabled = *in.Enabled
 		// if we re-enable a cron we have to calc NextExec because it was not while disabled
 		if cron.Enabled {
-			nextExec, err := cron_scheduler.CalcNewNext(*in.Schedule, time.Now())
+			nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, cron.Timezone, time.Now())
 			if err != nil {
 				c.String(http.StatusInternalServerError, "Cron schedule could not parsed: %s", err)
 				return

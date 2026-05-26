@@ -26,7 +26,6 @@ import (
 	"runtime"
 	"slices"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -221,19 +220,17 @@ func TestRunStep(t *testing.T) {
 			stepState, _ := stepStateWraped.(*stepState)
 			assert.NotNil(t, stepState.cmd)
 
-			var outputData []byte
-			outputDataMutex := sync.Mutex{}
-			go t.Run("TailStep", func(t *testing.T) {
-				outputDataMutex.Lock()
-				go outputDataMutex.Unlock()
+			outputDataCh := make(chan []byte)
+			go func() {
 				output, err := backend.TailStep(ctx, step, taskUUID)
 				require.NoError(t, err)
 				assert.NotNil(t, output)
 
 				// Read output
-				outputData, err = io.ReadAll(output)
+				data, err := io.ReadAll(output)
 				require.NoError(t, err)
-			})
+				outputDataCh <- data
+			}()
 
 			// Wait for step to finish
 			t.Run("TestWaitStep", func(t *testing.T) {
@@ -245,8 +242,13 @@ func TestRunStep(t *testing.T) {
 			})
 
 			// Verify output
-			outputDataMutex.Lock()
-			go outputDataMutex.Unlock()
+			var outputData []byte
+			select {
+			case outputData = <-outputDataCh:
+			case <-t.Context().Done():
+				t.Fail()
+				return
+			}
 			outputLines := strings.Split(strings.TrimSpace(string(outputData)), "\n")
 			require.Truef(t, len(outputLines) > 3, "output of lines must be bigger than 3 at least but we got: %#v", outputLines)
 			// we first test output without environments
@@ -423,8 +425,9 @@ func TestConcurrentWorkflows(t *testing.T) {
 
 	counter := atomic.Int32{}
 	counter.Store(0)
+	t.Parallel()
 	for _, uuid := range taskUUIDs {
-		go t.Run("start step in "+uuid, func(t *testing.T) {
+		t.Run("start step in "+uuid, func(t *testing.T) {
 			for i := 0; i < 3; i++ {
 				counter.Store(counter.Load() + 1)
 				step := &types.Step{
