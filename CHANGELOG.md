@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-25
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @lephuongbg, @qwerty287, @rfinnie, @wucm667
+@6543, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @wucm667
 
 ### 🔒 Security
 
@@ -96,6 +96,7 @@
 
 ### Misc
 
+- docs: add GitHub OAuth App setup hint to docker-compose page [[#6643](https://github.com/woodpecker-ci/woodpecker/pull/6643)]
 - docs: Change homepage of woodpecker-shellcheck [[#6594](https://github.com/woodpecker-ci/woodpecker/pull/6594)]
 - Use "sign in/out" [[#6579](https://github.com/woodpecker-ci/woodpecker/pull/6579)]
 
