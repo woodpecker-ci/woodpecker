@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @jolheiser, @julienvincent, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @wucm667
+@6543, @AkashKumar7902, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @jolheiser, @julienvincent, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @wucm667
 
 ### 🔒 Security
 
@@ -27,6 +27,7 @@
 
 ### 🐛 Bug Fixes
 
+- Deduplicate schema linter composition errors [[#6633](https://github.com/woodpecker-ci/woodpecker/pull/6633)]
 - local backend: on linux / mac start commands in own process group and kill the group on cancel [[#6609](https://github.com/woodpecker-ci/woodpecker/pull/6609)]
 - k8s: add guards to stop pipeline services upon completion [[#6623](https://github.com/woodpecker-ci/woodpecker/pull/6623)]
 - Fix missing log close button [[#6584](https://github.com/woodpecker-ci/woodpecker/pull/6584)]
