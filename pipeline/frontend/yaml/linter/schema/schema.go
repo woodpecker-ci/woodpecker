@@ -23,7 +23,7 @@ import (
 	"codeberg.org/6543/go-yaml2json"
 	"codeberg.org/6543/xyaml"
 	"github.com/xeipuuv/gojsonschema"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 //go:embed schema.json

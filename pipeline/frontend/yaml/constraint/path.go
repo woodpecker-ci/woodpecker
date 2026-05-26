@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
