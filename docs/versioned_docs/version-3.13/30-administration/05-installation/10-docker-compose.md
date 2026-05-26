@@ -2,7 +2,7 @@
 
 This example [docker-compose](https://docs.docker.com/compose/) setup shows the deployment of a Woodpecker instance connected to GitHub (`WOODPECKER_GITHUB=true`). If you are using another forge, please change this including the respective secret settings.
 
-Before starting, you will need to register a GitHub OAuth App — see the [GitHub forge documentation](https://woodpecker-ci.org/docs/administration/configuration/forges/github) for instructions, including the required callback URL (`/authorize`).
+Before starting, you will need to register an OAuth App with your forge — see the [forge documentation](https://woodpecker-ci.org/docs/3.13/administration/configuration/forges/overview) for instructions.
 
 It creates persistent volumes for the server and agent config directories. The bundled SQLite DB is stored in `/var/lib/woodpecker` and is the most important part to be persisted as it holds all users and repository information.
 
@@ -42,7 +42,7 @@ volumes:
   woodpecker-agent-config:
 ```
 
-Woodpecker must know its own address. You must therefore specify the public address in the format `<scheme>://<hostname>`. This address is also used as the base for the OAuth callback URL — i.e., for GitHub, the full callback URL to register in your OAuth App will be `<scheme>://<hostname>/authorize`. Please omit any trailing slashes:
+Woodpecker must know its own address. You must therefore specify the public address in the format `<scheme>://<hostname>`. Please omit any trailing slashes:
 
 ```diff title="docker-compose.yaml"
  services:
