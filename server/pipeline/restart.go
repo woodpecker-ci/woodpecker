@@ -108,7 +108,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	publishPipeline(ctx, forge, newPipeline, repo, user)
 
-	newPipeline, err = start(ctx, forge, store, newPipeline, user, repo, pipelineItems)
+	newPipeline, err = dispatchPipeline(ctx, forge, store, newPipeline, user, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

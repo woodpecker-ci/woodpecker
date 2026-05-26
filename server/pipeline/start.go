@@ -25,15 +25,15 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-// start a pipeline, make sure it was stored persistent in the store before.
-func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*builder.Item) (*model.Pipeline, error) {
-	// call to cancel previous pipelines if needed
+// dispatchPipeline cancels superseded pipelines for the same context and
+// pushes the pipeline's workflows onto the agent queue. Publishing the status
+// to subscribers is the caller's responsibility, so the pipeline is not
+// published here.
+func dispatchPipeline(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*builder.Item) (*model.Pipeline, error) {
 	if err := cancelPreviousPipelines(ctx, forge, store, activePipeline, repo, user); err != nil {
-		// should be not breaking
+		// should not be breaking
 		log.Error().Err(err).Msg("failed to cancel previous pipelines")
 	}
-
-	publishPipeline(ctx, forge, activePipeline, repo, user)
 
 	if err := queuePipeline(ctx, repo, activePipeline, pipelineItems); err != nil {
 		log.Error().Err(err).Msg("queuePipeline")
