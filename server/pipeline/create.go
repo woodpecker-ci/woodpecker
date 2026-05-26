@@ -90,14 +90,21 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	case configFetchErr != nil:
 		// error while fetching config - not using the old config
 		log.Error().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s', and did not get any config", repo.Config, pipeline.Ref, repoUser.Login)
-		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
+		if _, err := updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr)); err != nil {
+			return nil, err
+		}
+		return nil, nil
 	}
 
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
-	*pipeline = *currentPipeline
+	pipeline = currentPipeline
 	if handleParseErrors(pipeline, parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
-		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
+		erroredPipeline, uErr := updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
+		if uErr != nil {
+			return pipeline, uErr
+		}
+		return erroredPipeline, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("createPipelineItems failed: %w", err)
@@ -136,7 +143,8 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return pipeline, nil
 	}
 
-	if err := updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser); err != nil {
+	pipeline, err = updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser)
+	if err != nil {
 		return nil, err
 	}
 
@@ -150,28 +158,30 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	return pipeline, nil
 }
 
-func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
-	_pipeline, err := UpdatePipelineToError(_store, *pipeline, err)
-	if err != nil {
-		return err
+// updatePipelineWithErr moves the pipeline to the error state, persists it and
+// publishes the change. It returns the updated pipeline so the caller can use
+// the new value directly instead of relying on in-place mutation.
+func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) (*model.Pipeline, error) {
+	updated, uErr := UpdatePipelineToError(_store, *pipeline, err)
+	if uErr != nil {
+		return nil, uErr
 	}
-	// update value in ref
-	*pipeline = *_pipeline
 
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+	publishPipeline(ctx, _forge, updated, repo, repoUser)
 
-	return nil
+	return updated, nil
 }
 
-func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
-	_pipeline, err := UpdatePipelineToPending(_store, *pipeline, "")
+// updatePipelinePending moves the pipeline to the pending state, persists it
+// and publishes the change. It returns the updated pipeline so the caller can
+// use the new value directly instead of relying on in-place mutation.
+func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) (*model.Pipeline, error) {
+	updated, err := UpdatePipelineToPending(_store, *pipeline, "")
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// update value in ref
-	*pipeline = *_pipeline
 
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+	publishPipeline(ctx, _forge, updated, repo, repoUser)
 
-	return nil
+	return updated, nil
 }
