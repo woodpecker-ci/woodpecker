@@ -49,11 +49,9 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	}
 
-	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	_forge, err := loadForge(repo)
 	if err != nil {
-		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
-		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, errors.New(msg)
+		return nil, err
 	}
 
 	// If the repoUser has a refresh token, the current access token
@@ -137,25 +135,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
-
-	if pipeline.Status == model.StatusBlocked {
-		return pipeline, nil
+	if pipeline.Status != model.StatusBlocked {
+		pipeline, err = updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	pipeline, err = updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser)
-	if err != nil {
-		return nil, err
-	}
-
-	pipeline, err = dispatchPipeline(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
-	if err != nil {
-		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
-	}
-
-	return pipeline, nil
+	return finishPipeline(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
 }
 
 // updatePipelineWithErr moves the pipeline to the error state, persists it and

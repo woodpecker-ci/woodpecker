@@ -30,11 +30,9 @@ import (
 
 // Restart a pipeline by creating a new one out of the old and start it.
 func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
-	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	forge, err := loadForge(repo)
 	if err != nil {
-		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
-		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, errors.New(msg)
+		return nil, err
 	}
 
 	if lastPipeline.Status == model.StatusBlocked {
@@ -106,16 +104,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	publishPipeline(ctx, forge, newPipeline, repo, user)
-
-	newPipeline, err = dispatchPipeline(ctx, forge, store, newPipeline, user, repo, pipelineItems)
-	if err != nil {
-		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
-	}
-
-	return newPipeline, nil
+	return finishPipeline(ctx, forge, store, newPipeline, user, repo, pipelineItems)
 }
 
 func linkPipelineConfigs(store store.Store, configs []*model.Config, pipelineID int64) error {

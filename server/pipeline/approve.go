@@ -21,7 +21,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -33,11 +32,9 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot approve a pipeline with status %s", currentPipeline.Status)}
 	}
 
-	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	forge, err := loadForge(repo)
 	if err != nil {
-		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
-		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, errors.New(msg)
+		return nil, err
 	}
 
 	// fetch the pipeline file from the database
@@ -75,14 +72,5 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
-	publishPipeline(ctx, forge, currentPipeline, repo, user)
-
-	currentPipeline, err = dispatchPipeline(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
-	if err != nil {
-		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
-	}
-
-	return currentPipeline, nil
+	return finishPipeline(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
 }
