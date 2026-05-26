@@ -45,7 +45,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	}
 
 	// Use "image name" as run command (indicate shell)
-	cmd := exec.CommandContext(ctx, step.Image, args...)
+	cmd := newCmd(ctx, step.Image, args...)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
