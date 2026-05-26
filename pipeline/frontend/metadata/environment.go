@@ -77,6 +77,9 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PIPELINE_STARTED", strconv.FormatInt(pipeline.Started, 10))
 	setNonEmptyEnvVar(params, "CI_PIPELINE_AUTHOR", pipeline.Author)
 	setNonEmptyEnvVar(params, "CI_PIPELINE_AVATAR", pipeline.Avatar)
+	if pipeline.RerunCount > 0 {
+		setNonEmptyEnvVar(params, "CI_PIPELINE_RERUNS", strconv.FormatInt(pipeline.RerunCount, 10))
+	}
 
 	workflow := m.Workflow
 	setNonEmptyEnvVar(params, "CI_WORKFLOW_NAME", workflow.Name)

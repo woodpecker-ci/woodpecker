@@ -7,12 +7,12 @@
     </InputField>
 
     <InputField v-if="forge.type !== 'bitbucket'" v-slot="{ id }" :label="$t('url')">
-      <TextField :id="id" v-model="forge.url" required />
+      <TextField :id="id" v-model="forge.url" :placeholder="$t('url')" required />
     </InputField>
 
-    <InputField :label="$t('oauth_redirect_url')" description="foo">
+    <InputField :label="$t('oauth_redirect_url')">
       <template #default="{ id }">
-        <TextField :id="id" class="mt-2" :model-value="redirectUri" disabled />
+        <TextField :id="id" class="mt-2" :model-value="redirectUri" :label="$t('oauth_redirect_url')" disabled />
       </template>
       <template #description>
         {{ $t('use_this_redirect_url_to_create') }}
@@ -26,14 +26,14 @@
 
     <template v-if="forge.type !== 'addon'">
       <InputField v-slot="{ id }" :label="$t('oauth_client_id')">
-        <TextField :id="id" v-model="forge.client" required />
+        <TextField :id="id" v-model="forge.client" required :placeholder="$t('oauth_client_id')" />
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('oauth_client_secret')">
         <TextField
           :id="id"
           v-model="forge.oauth_client_secret"
-          :placeholder="isNew ? '' : $t('leave_empty_to_keep_current_value')"
+          :placeholder="isNew ? $t('oauth_client_secret') : $t('leave_empty_to_keep_current_value')"
           :required="isNew"
         />
       </InputField>
@@ -44,6 +44,7 @@
         <p>{{ $t('executable_desc') }}</p>
         <TextField
           :id="id"
+          :placeholder="$t('executable')"
           :model-value="getAdditionalOptions('addon', 'executable')"
           @update:model-value="setAdditionalOptions('addon', 'executable', $event)"
         />
@@ -83,6 +84,7 @@
           <p>{{ $t('git_username_desc') }}</p>
           <TextField
             :id="id"
+            :placeholder="$t('git_username')"
             :model-value="getAdditionalOptions('bitbucket-dc', 'git-username')"
             @update:model-value="setAdditionalOptions('bitbucket-dc', 'git-username', $event)"
           />
@@ -91,6 +93,7 @@
           <p>{{ $t('git_password_desc') }}</p>
           <TextField
             :id="id"
+            :placeholder="$t('git_password')"
             :model-value="getAdditionalOptions('bitbucket-dc', 'git-password')"
             @update:model-value="setAdditionalOptions('bitbucket-dc', 'git-password', $event)"
           />

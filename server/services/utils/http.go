@@ -121,83 +121,84 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	exponentialBackoff := backoff.NewExponentialBackOff()
 
 	// Execute with backoff retry
-	return backoff.Retry(ctx, func() (int, error) {
-		// Check if context is already canceled
-		if ctx.Err() != nil {
-			return 0, ctx.Err()
-		}
-
-		// Create request body for this attempt
-		var body io.Reader
-		if len(bodyBytes) > 0 {
-			body = bytes.NewReader(bodyBytes)
-		}
-
-		// Create new request for each attempt
-		req, err := http.NewRequestWithContext(ctx, method, uri.String(), body)
-		if err != nil {
-			return 0, httputil.EnhanceHTTPError(err, method, path)
-		}
-		if in != nil {
-			req.Header.Set("Content-Type", "application/json")
-		}
-
-		// Send request
-		resp, err := e.Do(req)
-		if err != nil {
-			// Check if this is a retryable error
-			if !isRetryableError(err) {
-				log.Error().Err(err).Msgf("HTTP request failed (not retryable): %s %s", method, path)
-				return 0, backoff.Permanent(err)
+	return backoff.Retry(
+		ctx, func() (int, error) {
+			// Check if context is already canceled
+			if ctx.Err() != nil {
+				return 0, ctx.Err()
 			}
-			return 0, err
-		}
 
-		statusCode := resp.StatusCode
-		// Read body immediately to ensure proper resource cleanup for retries
-		respBody, readErr := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if readErr != nil {
-			// Check if this is a retryable error
-			if !isRetryableError(readErr) {
-				log.Error().Err(readErr).Msgf("HTTP response read failed (not retryable): %s %s", method, path)
-				return statusCode, backoff.Permanent(readErr)
+			// Create request body for this attempt
+			var body io.Reader
+			if len(bodyBytes) > 0 {
+				body = bytes.NewReader(bodyBytes)
 			}
-			return statusCode, readErr
-		}
 
-		// Check if status code is retryable
-		if isRetryableStatusCode(statusCode) {
-			return statusCode, fmt.Errorf("response: %d", statusCode)
-		}
+			// Create new request for each attempt
+			req, err := http.NewRequestWithContext(ctx, method, uri.String(), body)
+			if err != nil {
+				return 0, httputil.EnhanceHTTPError(err, method, path)
+			}
+			if in != nil {
+				req.Header.Set("Content-Type", "application/json")
+			}
 
-		// If status code is client error (4xx), don't retry
-		if statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError {
-			log.Debug().Int("status", statusCode).Msgf("HTTP request returned client error (not retryable): %s %s", method, path)
+			// Send request
+			resp, err := e.Do(req)
+			if err != nil {
+				// Check if this is a retryable error
+				if !isRetryableError(err) {
+					log.Error().Err(err).Msgf("HTTP request failed (not retryable): %s %s", method, path)
+					return 0, backoff.Permanent(err)
+				}
+				return 0, err
+			}
+
+			statusCode := resp.StatusCode
+			// Read body immediately to ensure proper resource cleanup for retries
+			respBody, readErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if readErr != nil {
+				// Check if this is a retryable error
+				if !isRetryableError(readErr) {
+					log.Error().Err(readErr).Msgf("HTTP response read failed (not retryable): %s %s", method, path)
+					return statusCode, backoff.Permanent(readErr)
+				}
+				return statusCode, readErr
+			}
+
+			// Check if status code is retryable
+			if isRetryableStatusCode(statusCode) {
+				return statusCode, fmt.Errorf("response: %d", statusCode)
+			}
+
+			// If status code is client error (4xx), don't retry
+			if statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError {
+				log.Debug().Int("status", statusCode).Msgf("HTTP request returned client error (not retryable): %s %s", method, path)
+				return statusCode, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
+			}
+
+			// If status code is OK (2xx), parse and return response
+			if statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices {
+				if out != nil {
+					err = json.NewDecoder(bytes.NewReader(respBody)).Decode(out)
+					// Check for EOF error during response body parsing
+					if err != nil && (errors.Is(err, io.EOF) || strings.Contains(err.Error(), "unexpected EOF")) {
+						return statusCode, err
+					}
+					if err != nil {
+						log.Error().Err(err).Msgf("HTTP response parsing failed (not retryable): %s %s", method, path)
+						return statusCode, backoff.Permanent(err)
+					}
+				}
+				log.Debug().Int("status", statusCode).Msgf("HTTP request succeeded: %s %s", method, path)
+				return statusCode, nil
+			}
+
+			// For any other status code, don't retry
+			log.Error().Int("status", statusCode).Msgf("HTTP request returned unexpected status code (not retryable): %s %s", method, path)
 			return statusCode, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
-		}
-
-		// If status code is OK (2xx), parse and return response
-		if statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices {
-			if out != nil {
-				err = json.NewDecoder(bytes.NewReader(respBody)).Decode(out)
-				// Check for EOF error during response body parsing
-				if err != nil && (errors.Is(err, io.EOF) || strings.Contains(err.Error(), "unexpected EOF")) {
-					return statusCode, err
-				}
-				if err != nil {
-					log.Error().Err(err).Msgf("HTTP response parsing failed (not retryable): %s %s", method, path)
-					return statusCode, backoff.Permanent(err)
-				}
-			}
-			log.Debug().Int("status", statusCode).Msgf("HTTP request succeeded: %s %s", method, path)
-			return statusCode, nil
-		}
-
-		// For any other status code, don't retry
-		log.Error().Int("status", statusCode).Msgf("HTTP request returned unexpected status code (not retryable): %s %s", method, path)
-		return statusCode, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
-	}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries),
+		}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries),
 		backoff.WithNotify(func(err error, delay time.Duration) {
 			// Log retry attempts
 			log.Debug().Err(err).Msgf("HTTP request failed, retrying in %v: %s %s", delay, method, path)

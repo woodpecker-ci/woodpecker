@@ -38,6 +38,7 @@ type Pipeline struct {
 	DeployTask           string                  `json:"deploy_task"             xorm:"deploy_task"`
 	Commit               string                  `json:"commit"                  xorm:"commit"`
 	Branch               string                  `json:"branch"                  xorm:"branch"`
+	RerunCount           int64                   `json:"rerun_count"             xorm:"rerun_count"`
 	Ref                  string                  `json:"ref"                     xorm:"ref"`
 	Refspec              string                  `json:"refspec"                 xorm:"refspec"`
 	Title                string                  `json:"title"                   xorm:"title"`
