@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Use refactored pipeline builder in cli exec [[#6453](https://github.com/woodpecker-ci/woodpecker/pull/6453)]
 - Add config to change default pipeline config paths and extensions [[#6580](https://github.com/woodpecker-ci/woodpecker/pull/6580)]
 - Allow disabling service workspace volumes in k8s [[#6644](https://github.com/woodpecker-ci/woodpecker/pull/6644)]
 - View warning if admin is configured at env level [[#6600](https://github.com/woodpecker-ci/woodpecker/pull/6600)]
