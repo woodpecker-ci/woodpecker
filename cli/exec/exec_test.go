@@ -17,14 +17,17 @@
 package exec
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestExecSkipsFilteredWorkflowWithoutBackendSetup(t *testing.T) {
+func TestExecDummy(t *testing.T) {
 	repoDir := t.TempDir()
 	workflowPath := filepath.Join(repoDir, "workflow.yaml")
 	require.NoError(t, os.WriteFile(workflowPath, []byte(`
@@ -38,12 +41,41 @@ steps:
       - echo hello
 `), 0o600))
 
-	err := Command.Run(t.Context(), []string{
+	// LineWriter writes to os.Stderr directly, so redirect the fd
+	oldStderr := os.Stderr
+	r, w, err := os.Pipe()
+	require.NoError(t, err)
+	os.Stderr = w
+
+	t.Cleanup(func() {
+		os.Stderr = oldStderr
+	})
+
+	err = Command.Run(t.Context(), []string{
 		"woodpecker-cli",
 		"--backend-engine", "dummy",
 		"--repo-path", repoDir,
 		workflowPath,
 	})
+
+	// close write end so Read below doesn't block
+	w.Close()
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	r.Close()
+	stdout := buf.String()
+
+	assert.Contains(t, stdout,
+		`[build:L0:0s] StepName: build
+[build:L1:0s] StepType: commands
+[build:L2:0s] StepUUID: `,
+	)
+	assert.Contains(t, stdout,
+		`[build:L3:0s] StepCommands:
+[build:L4:0s] ------------------
+[build:L5:0s] echo hello
+[build:L6:0s] ------------------`,
+	)
 
 	require.NoError(t, err)
 }
