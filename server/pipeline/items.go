@@ -187,6 +187,13 @@ func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Sto
 		return currentPipeline, nil, parseErr, nil
 	}
 
+	// An empty pipeline (e.g. everything filtered out) has no workflows to
+	// persist. Return early so the caller can filter it without us touching
+	// the store.
+	if len(pipelineItems) == 0 {
+		return currentPipeline, pipelineItems, parseErr, nil
+	}
+
 	enrichPipelineItemSteps(pipelineItems, repo)
 	currentPipeline, err = saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems, replaceExisting)
 	if err != nil {
