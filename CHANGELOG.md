@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @wucm667
+@6543, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @julienvincent, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @wucm667
 
 ### 🔒 Security
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Allow disabling service workspace volumes in k8s [[#6644](https://github.com/woodpecker-ci/woodpecker/pull/6644)]
 - View warning if admin is configured at env level [[#6600](https://github.com/woodpecker-ci/woodpecker/pull/6600)]
 - Add timezone support for crons [[#6597](https://github.com/woodpecker-ci/woodpecker/pull/6597)]
 - Add CI_PIPELINE_RERUNS environment variable [[#6588](https://github.com/woodpecker-ci/woodpecker/pull/6588)]
@@ -38,9 +39,11 @@
 ### 📚 Documentation
 
 - Add note about extension permission [[#6646](https://github.com/woodpecker-ci/woodpecker/pull/6646)]
+- Add GitHub OAuth App setup hint to docker-compose page [[#6643](https://github.com/woodpecker-ci/woodpecker/pull/6643)]
 - Update pnpm to v11.3.0 [[#6639](https://github.com/woodpecker-ci/woodpecker/pull/6639)]
 - Update docs npm deps non-major [[#6625](https://github.com/woodpecker-ci/woodpecker/pull/6625)]
 - Docs: Mention that you can use failure: fail [[#6611](https://github.com/woodpecker-ci/woodpecker/pull/6611)]
+- Change homepage of woodpecker-shellcheck [[#6594](https://github.com/woodpecker-ci/woodpecker/pull/6594)]
 - Update docs npm deps non-major [[#6586](https://github.com/woodpecker-ci/woodpecker/pull/6586)]
 - Update pnpm to v11 [[#6561](https://github.com/woodpecker-ci/woodpecker/pull/6561)]
 - Update docs npm deps non-major [[#6555](https://github.com/woodpecker-ci/woodpecker/pull/6555)]
@@ -99,8 +102,6 @@
 
 ### Misc
 
-- docs: add GitHub OAuth App setup hint to docker-compose page [[#6643](https://github.com/woodpecker-ci/woodpecker/pull/6643)]
-- docs: Change homepage of woodpecker-shellcheck [[#6594](https://github.com/woodpecker-ci/woodpecker/pull/6594)]
 - Use "sign in/out" [[#6579](https://github.com/woodpecker-ci/woodpecker/pull/6579)]
 
 ## [3.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.1) - 2026-05-12
