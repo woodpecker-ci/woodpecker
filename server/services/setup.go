@@ -76,7 +76,7 @@ func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, e
 	if retries == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGE_RETRY can not be 0")
 	}
-	configFetcher := config.NewForge(timeout, retries)
+	configFetcher := config.NewForge(timeout, retries, c.StringSlice("default-pipeline-configs"), c.StringSlice("default-pipeline-config-extensions"))
 
 	if endpoint := c.String("config-extension-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, client, c.Bool("config-extension-netrc"))
