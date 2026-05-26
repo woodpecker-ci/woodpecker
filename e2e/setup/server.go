@@ -43,6 +43,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 const (
@@ -151,6 +152,8 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 			// Forge flags — gitea=true satisfies setupForgeService's type switch.
 			&cli.BoolFlag{Name: string(TestForgeType), Value: true},
 			&cli.StringFlag{Name: "forge-url", Value: "https://forge.example.test"},
+			&cli.StringSliceFlag{Name: "default-pipeline-configs", Value: constant.DefaultConfigOrder},
+			&cli.StringSliceFlag{Name: "default-pipeline-config-extensions", Value: []string{".yaml", ".yml"}},
 		},
 	}
 
