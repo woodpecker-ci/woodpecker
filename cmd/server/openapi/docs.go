@@ -990,40 +990,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/orgs/{id}": {
-            "delete": {
-                "description": "Deletes the given org. Requires admin rights.",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Orgs"
-                ],
-                "summary": "Delete an organization",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the org's id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
         "/orgs/{org_id}": {
             "get": {
                 "produces": [
@@ -1059,6 +1025,38 @@ const docTemplate = `{
                                 "$ref": "#/definitions/Org"
                             }
                         }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes the given org. Requires admin rights.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Orgs"
+                ],
+                "summary": "Delete an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }

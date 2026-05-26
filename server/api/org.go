@@ -166,12 +166,12 @@ func LookupOrg(c *gin.Context) {
 //
 //	@Summary		Delete an organization
 //	@Description	Deletes the given org. Requires admin rights.
-//	@Router			/orgs/{id} [delete]
+//	@Router			/orgs/{org_id} [delete]
 //	@Produce		plain
 //	@Success		204
 //	@Tags			Orgs
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			id				path	string	true	"the org's id"
+//	@Param			org_id			path	string	true	"the org's id"
 func DeleteOrg(c *gin.Context) {
 	_store := store.FromContext(c)
 	org := session.Org(c)
