@@ -151,7 +151,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 }
 
 func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
-	_pipeline, err := UpdateToStatusError(_store, *pipeline, err)
+	_pipeline, err := UpdatePipelineToError(_store, *pipeline, err)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store
 }
 
 func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
-	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
+	_pipeline, err := UpdatePipelineToPending(_store, *pipeline, "")
 	if err != nil {
 		return err
 	}

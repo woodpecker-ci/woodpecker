@@ -194,7 +194,7 @@ func TestUpdateWorkflowStatusToRunning(t *testing.T) {
 			return w.ID == 1 && w.State == model.StatusRunning && w.Started == 1234567890
 		})).Return(nil)
 
-		result, err := UpdateWorkflowStatusToRunning(mockStore, workflow, state)
+		result, err := UpdateWorkflowToRunning(mockStore, workflow, state)
 
 		assert.NoError(t, err)
 		assert.Equal(t, model.StatusRunning, result.State)
@@ -215,7 +215,7 @@ func TestUpdateWorkflowToStatusSkipped(t *testing.T) {
 			return w.ID == 2 && w.State == model.StatusSkipped
 		})).Return(nil)
 
-		result, err := UpdateWorkflowToStatusSkipped(mockStore, workflow)
+		result, err := UpdateWorkflowToSkipped(mockStore, workflow)
 
 		assert.NoError(t, err)
 		assert.Equal(t, model.StatusSkipped, result.State)
@@ -241,7 +241,7 @@ func TestUpdateWorkflowStatusToDone(t *testing.T) {
 			return w.State == model.StatusSkipped && w.Finished == 1234567900
 		})).Return(nil)
 
-		result, err := UpdateWorkflowStatusToDone(mockStore, workflow, state)
+		result, err := UpdateWorkflowToDone(mockStore, workflow, state)
 
 		assert.NoError(t, err)
 		assert.Equal(t, model.StatusSkipped, result.State)
@@ -265,7 +265,7 @@ func TestUpdateWorkflowStatusToDone(t *testing.T) {
 			return w.State == model.StatusFailure
 		})).Return(nil)
 
-		result, err := UpdateWorkflowStatusToDone(mockStore, workflow, state)
+		result, err := UpdateWorkflowToDone(mockStore, workflow, state)
 
 		assert.NoError(t, err)
 		assert.Equal(t, model.StatusFailure, result.State)
@@ -291,7 +291,7 @@ func TestUpdateWorkflowStatusToDone(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
 
-		result, err := UpdateWorkflowStatusToDone(mockStore, workflow, state)
+		result, err := UpdateWorkflowToDone(mockStore, workflow, state)
 
 		assert.NoError(t, err)
 		assert.Equal(t, model.StatusSuccess, result.State)

@@ -59,7 +59,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 	// Running ones will be set when the agents stop on the cancel signal
 	for _, workflow := range workflows {
 		if workflow.State == model.StatusPending {
-			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow); err != nil {
+			if _, err = UpdateWorkflowToSkipped(store, *workflow); err != nil {
 				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 			}
 		} else {
@@ -67,7 +67,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		}
 		for _, step := range workflow.Children {
 			if step.State == model.StatusPending {
-				if _, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusCanceled); err != nil {
+				if _, err = UpdateStepToSkipped(store, *step, 0, model.StatusCanceled); err != nil {
 					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 				}
 			}
@@ -78,9 +78,9 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 	if hasPendingOnly {
 		plState = model.StatusCanceled
 	}
-	killedPipeline, err := UpdateToStatusKilled(store, *pipeline, cancelInfo, plState)
+	killedPipeline, err := UpdatePipelineToKilled(store, *pipeline, cancelInfo, plState)
 	if err != nil {
-		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
+		log.Error().Err(err).Msgf("UpdatePipelineToKilled: %v", pipeline)
 		return err
 	}
 

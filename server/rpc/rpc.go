@@ -268,7 +268,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 
 	if currentPipeline.Status == model.StatusPending {
-		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
+		if currentPipeline, err = pipeline.UpdatePipelineToRunning(s.store, *currentPipeline, state.Started); err != nil {
 			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
 		}
 	}
@@ -283,7 +283,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}()
 
-	workflow, err = pipeline.UpdateWorkflowStatusToRunning(s.store, *workflow, state)
+	workflow, err = pipeline.UpdateWorkflowToRunning(s.store, *workflow, state)
 	if err != nil {
 		return err
 	}
@@ -349,8 +349,8 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	// computing the workflow status, so their final state is reflected.
 	s.completeChildrenIfParentCompleted(workflow, state.Finished)
 
-	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
-		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
+	if workflow, err = pipeline.UpdateWorkflowToDone(s.store, *workflow, state); err != nil {
+		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowToDone: cannot update workflow state: %s", err)
 	}
 
 	var queueErr error
@@ -377,8 +377,8 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 
 	if !model.IsThereRunningStage(currentPipeline.Workflows) {
-		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
-			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
+		if currentPipeline, err = pipeline.UpdatePipelineToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
+			logger.Error().Err(err).Msgf("pipeline.UpdatePipelineToDone: cannot update workflows final state")
 		}
 	}
 
@@ -536,7 +536,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
-			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusKilled); err != nil {
+			if updated, err := pipeline.UpdateStepToSkipped(s.store, *c, finished, model.StatusKilled); err != nil {
 				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			} else {
 				// Update in-memory state so WorkflowStatus sees the final state

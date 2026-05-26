@@ -39,7 +39,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		return nil, fmt.Errorf("cannot decline a pipeline with status %s", pipeline.Status)
 	}
 
-	pipeline, err = UpdateToStatusDeclined(store, *pipeline, user.Login)
+	pipeline, err = UpdatePipelineToDeclined(store, *pipeline, user.Login)
 	if err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}

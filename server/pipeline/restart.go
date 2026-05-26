@@ -75,7 +75,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	}
 
 	if len(configs) == 0 {
-		newPipeline, uErr := UpdateToStatusError(store, *newPipeline, errors.New("pipeline definition not found"))
+		newPipeline, uErr := UpdatePipelineToError(store, *newPipeline, errors.New("pipeline definition not found"))
 		if uErr != nil {
 			log.Debug().Err(uErr).Msg("failure to update pipeline status")
 		} else {
@@ -91,7 +91,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	newPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs, false)
 	if handleParseErrors(newPipeline, parseErr) {
-		if newPipeline, uErr := UpdateToStatusError(store, *newPipeline, parseErr); uErr != nil {
+		if newPipeline, uErr := UpdatePipelineToError(store, *newPipeline, parseErr); uErr != nil {
 			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, newPipeline.Number)
 		} else {
 			updatePipelineStatus(ctx, forge, newPipeline, repo, user)

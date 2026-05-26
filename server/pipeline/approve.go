@@ -71,7 +71,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, err
 	}
 
-	if currentPipeline, err = UpdateToStatusPending(store, *currentPipeline, user.Login); err != nil {
+	if currentPipeline, err = UpdatePipelineToPending(store, *currentPipeline, user.Login); err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
