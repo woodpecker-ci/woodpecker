@@ -88,14 +88,12 @@ steps:
 
 func clearEnv(t *testing.T) {
 	t.Helper()
-
 	osEnv := os.Environ()
 	t.Cleanup(func() {
 		for _, env := range osEnv {
 			k, v, _ := strings.Cut(env, "=")
-			os.Setenv(k, v)
+			_ = os.Setenv(k, v) //nolint:usetesting
 		}
 	})
-
 	os.Clearenv()
 }
