@@ -989,6 +989,15 @@ Specify the default pipeline config paths.
 
 ---
 
+### DEFAULT_PIPELINE_CONFIG_EXTENSIONS
+
+- Name: `WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS`
+- Default: `.yaml`, `.yml`
+
+Specify the default pipeline config extensions when scanning a pipeline config directory.
+
+---
+
 ### CONFIG_EXTENSION_EXCLUSIVE
 
 - Name: `CONFIG_EXTENSION_EXCLUSIVE`

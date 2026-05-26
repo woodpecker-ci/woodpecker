@@ -298,6 +298,15 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS"),
+		Name:    "default-pipeline-config-extensions",
+		Usage:   "default pipeline config extensions when scanning a pipeline config directory",
+		Value:   []string{".yaml", ".yml"},
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_REGISTRY_EXTENSION_ENDPOINT"),
 		Name:    "registry-extension-endpoint",

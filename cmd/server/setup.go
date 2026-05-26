@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -159,13 +158,6 @@ func setupJWTSecret(_store store.Store) (string, error) {
 }
 
 func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
-	// pipeline config paths
-	server.Config.Pipeline.ConfigPaths = c.StringSlice("default-pipeline-configs")
-	server.Config.Pipeline.ConfigExtensions = make(map[string]struct{})
-	for _, dc := range server.Config.Pipeline.ConfigPaths {
-		server.Config.Pipeline.ConfigExtensions[filepath.Ext(dc)] = struct{}{}
-	}
-
 	// services
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
