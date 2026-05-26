@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @julienvincent, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @wucm667
+@6543, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @jolheiser, @julienvincent, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @wucm667
 
 ### 🔒 Security
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Add config to change default pipeline config paths and extensions [[#6580](https://github.com/woodpecker-ci/woodpecker/pull/6580)]
 - Allow disabling service workspace volumes in k8s [[#6644](https://github.com/woodpecker-ci/woodpecker/pull/6644)]
 - View warning if admin is configured at env level [[#6600](https://github.com/woodpecker-ci/woodpecker/pull/6600)]
 - Add timezone support for crons [[#6597](https://github.com/woodpecker-ci/woodpecker/pull/6597)]
