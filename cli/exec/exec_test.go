@@ -52,6 +52,8 @@ steps:
 		os.Stderr = oldStderr
 	})
 
+	// This is important, else it will work on your system but if run in woodpecker,
+	// the exec will use the metadata the current test is running in.
 	clearEnv(t)
 
 	err = Command.Run(t.Context(), []string{
