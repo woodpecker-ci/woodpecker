@@ -21,7 +21,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -53,21 +52,20 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		yamls = append(yamls, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	pipelineItems, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, nil)
-	if pipeline_errors.HasBlockingErrors(parseErr) {
+	// Release the gate before building workflows: saveWorkflowsFromPipelineBuilder
+	// derives workflow and step state from the pipeline status, so the status
+	// must already be pending when the new workflows are persisted.
+	currentPipeline.Status = model.StatusPending
+
+	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, currentPipeline, user, repo, yamls, nil, true)
+	if handleParseErrors(currentPipeline, parseErr) {
 		if err := updatePipelineWithErr(ctx, forge, store, currentPipeline, repo, user, parseErr); err != nil {
 			log.Error().Err(err).Msgf("error setting error status of pipeline for %s#%d after approval", repo.FullName, currentPipeline.Number)
 		}
 		msg := fmt.Sprintf("failure to parse pipeline config for %s", repo.FullName)
 		log.Error().Err(parseErr).Msg(msg)
 		return nil, errors.New(msg)
-	} else if parseErr != nil {
-		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
 	}
-
-	enrichPipelineItemSteps(pipelineItems, repo)
-	currentPipeline.Status = model.StatusPending
-	currentPipeline, err = replaceWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems)
 	if err != nil {
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting new steps for %s#%d after approval", repo.FullName, currentPipeline.Number)
 		return nil, err

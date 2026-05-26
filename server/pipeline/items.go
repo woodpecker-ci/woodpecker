@@ -155,31 +155,45 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	return b.Build()
 }
 
-func createPipelineItems(c context.Context, forge forge.Forge, store store.Store,
-	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
-	yamls []*forge_types.FileMeta, envs map[string]string,
-) (*model.Pipeline, []*builder.Item, error) {
-	pipelineItems, err := parsePipeline(c, forge, store, currentPipeline, user, repo, yamls, envs)
-	if pipeline_errors.HasBlockingErrors(err) {
-		currentPipeline, uErr := UpdateToStatusError(store, *currentPipeline, err)
-		if uErr != nil {
-			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
-		} else {
-			updatePipelineStatus(c, forge, currentPipeline, repo, user)
-		}
+// handleParseErrors classifies the error returned by parsePipeline. Blocking
+// errors abort the run, so true is returned and the caller decides how to
+// report and persist the failure. Non-blocking errors are recorded on the
+// pipeline so they surface to the user without stopping the run.
+func handleParseErrors(pipeline *model.Pipeline, parseErr error) (blocking bool) {
+	if pipeline_errors.HasBlockingErrors(parseErr) {
+		return true
+	}
+	if parseErr != nil {
+		pipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
+	}
+	return false
+}
 
-		return currentPipeline, nil, err
-	} else if err != nil {
-		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
-		if err := updatePipelinePending(c, forge, store, currentPipeline, repo, user); err != nil {
-			return nil, nil, err
-		}
+// createPipelineItems parses the pipeline config and persists the resulting
+// workflows. It is the shared core of Create, Approve and Restart.
+//
+// It returns two errors. parseErr carries pipeline config diagnostics: callers
+// classify it with handleParseErrors and report a blocking failure in their
+// own way. err is a hard failure (e.g. persisting workflows) that always
+// aborts the run. When the pipeline already has persisted workflows (a gated
+// pipeline being approved), replaceExisting swaps them for the freshly built
+// ones.
+func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Store,
+	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
+	yamls []*forge_types.FileMeta, envs map[string]string, replaceExisting bool,
+) (pipeline *model.Pipeline, items []*builder.Item, parseErr, err error) {
+	pipelineItems, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
+	if pipeline_errors.HasBlockingErrors(parseErr) {
+		return currentPipeline, nil, parseErr, nil
 	}
 
 	enrichPipelineItemSteps(pipelineItems, repo)
-	currentPipeline, err = saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems)
+	currentPipeline, err = saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems, replaceExisting)
+	if err != nil {
+		return currentPipeline, nil, parseErr, err
+	}
 
-	return currentPipeline, pipelineItems, err
+	return currentPipeline, pipelineItems, parseErr, nil
 }
 
 // enrichPipelineItemSteps stamps server-side fields onto the backend step
@@ -199,28 +213,25 @@ func enrichPipelineItemSteps(items []*builder.Item, repo *model.Repo) {
 	}
 }
 
-// saveWorkflowsFromPipelineBuilder is the link between pipeline representation in "pipeline package" and server
-// to be specific this func currently is used to convert the pipeline.Item list (crafted by PipelineBuilder.Build()) into
-// a pipeline that can be stored in the database by the server and save converted workflows.
-func saveWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) (*model.Pipeline, error) {
-	if pipeline.Workflows != nil {
+// saveWorkflowsFromPipelineBuilder converts the pipeline.Item list crafted by
+// PipelineBuilder.Build() into model workflows and persists them.
+//
+// A freshly created pipeline has no workflows yet, so they are inserted. A
+// gated pipeline already persisted its workflows when it was created, so on
+// approval the stored workflows must be swapped for the freshly built ones:
+// pass replaceExisting to delete the old workflows and steps before inserting.
+func saveWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item, replaceExisting bool) (*model.Pipeline, error) {
+	if pipeline.Workflows != nil && !replaceExisting {
 		return nil, errors.New("cannot save new workflows from pipeline builder: pipeline already has workflows loaded")
 	}
 
 	workflows := workflowsFromPipelineBuilder(pipeline, pipelineItems)
-	if err := store.WorkflowsCreate(workflows); err != nil {
-		return nil, err
-	}
 
-	pipeline.Workflows = workflows
-	setPipelineItemWorkflowIDs(pipelineItems, pipeline.Workflows)
-
-	return pipeline, nil
-}
-
-func replaceWorkflowsFromPipelineBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*builder.Item) (*model.Pipeline, error) {
-	workflows := workflowsFromPipelineBuilder(pipeline, pipelineItems)
-	if err := store.WorkflowsReplace(pipeline, workflows); err != nil {
+	if replaceExisting {
+		if err := store.WorkflowsReplace(pipeline, workflows); err != nil {
+			return nil, err
+		}
+	} else if err := store.WorkflowsCreate(workflows); err != nil {
 		return nil, err
 	}
 
