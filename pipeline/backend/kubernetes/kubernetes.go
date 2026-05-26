@@ -64,7 +64,6 @@ type config struct {
 	StorageClass                string
 	VolumeSize                  string
 	StorageRwx                  bool
-	UseServiceWorkspaceVolume   bool
 	PodLabels                   map[string]string
 	PodLabelsAllowFromStep      bool
 	PodAnnotations              map[string]string
@@ -111,7 +110,6 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				StorageClass:                c.String("backend-k8s-storage-class"),
 				VolumeSize:                  c.String("backend-k8s-volume-size"),
 				StorageRwx:                  c.Bool("backend-k8s-storage-rwx"),
-				UseServiceWorkspaceVolume:   c.Bool("backend-k8s-service-workspace-volume"),
 				PriorityClassName:           c.String("backend-k8s-priority-class"),
 				PodLabels:                   make(map[string]string), // just init empty map to prevent nil panic
 				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),

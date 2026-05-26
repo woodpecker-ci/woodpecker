@@ -61,7 +61,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	container, err := podContainer(step, config, podName, goos, options, nsp)
+	container, err := podContainer(step, podName, goos, options, nsp)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		spec.Tolerations = tolerations(config.PodTolerations)
 	}
 
-	spec.Volumes, err = pvcVolumes(podVolumes(step, config, options))
+	spec.Volumes, err = pvcVolumes(podVolumes(step, options))
 	if err != nil {
 		return spec, err
 	}
@@ -237,7 +237,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	return spec, nil
 }
 
-func podContainer(step *types.Step, config *config, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (kube_core_v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (kube_core_v1.Container, error) {
 	var err error
 	container := kube_core_v1.Container{
 		Name:            podName,
@@ -278,7 +278,7 @@ func podContainer(step *types.Step, config *config, podName, goos string, option
 		return container, err
 	}
 
-	container.VolumeMounts, err = volumeMounts(podVolumes(step, config, options))
+	container.VolumeMounts, err = volumeMounts(podVolumes(step, options))
 	if err != nil {
 		return container, err
 	}
@@ -388,8 +388,8 @@ func pvcVolumes(volumes []string) ([]kube_core_v1.Volume, error) {
 	return vols, nil
 }
 
-func podVolumes(step *types.Step, config *config, options BackendOptions) []string {
-	if !isService(step) || useWorkspaceVolume(config, options) {
+func podVolumes(step *types.Step, options BackendOptions) []string {
+	if !isService(step) || useWorkspaceVolume(options) {
 		return step.Volumes
 	}
 
@@ -402,11 +402,11 @@ func podVolumes(step *types.Step, config *config, options BackendOptions) []stri
 	return volumes
 }
 
-func useWorkspaceVolume(config *config, options BackendOptions) bool {
+func useWorkspaceVolume(options BackendOptions) bool {
 	if options.WorkspaceVolume != nil {
 		return *options.WorkspaceVolume
 	}
-	return config == nil || config.UseServiceWorkspaceVolume
+	return true
 }
 
 func pvcVolume(name string) kube_core_v1.Volume {

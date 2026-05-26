@@ -49,12 +49,6 @@ var Flags = []cli.Flag{
 		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
 		Value:   true,
 	},
-	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SERVICE_WORKSPACE_VOLUME"),
-		Name:    "backend-k8s-service-workspace-volume",
-		Usage:   "whether to mount the default workspace volume into service pods",
-		Value:   true,
-	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_LABELS"),
 		Name:    "backend-k8s-pod-labels",
