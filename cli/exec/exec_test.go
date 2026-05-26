@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -51,6 +52,8 @@ steps:
 		os.Stderr = oldStderr
 	})
 
+	clearEnv(t)
+
 	err = Command.Run(t.Context(), []string{
 		"woodpecker-cli",
 		"--backend-engine", "dummy",
@@ -78,4 +81,18 @@ steps:
 	)
 
 	require.NoError(t, err)
+}
+
+func clearEnv(t *testing.T) {
+	t.Helper()
+
+	osEnv := os.Environ()
+	t.Cleanup(func() {
+		for _, env := range osEnv {
+			k, v, _ := strings.Cut(env, "=")
+			os.Setenv(k, v)
+		}
+	})
+
+	os.Clearenv()
 }
