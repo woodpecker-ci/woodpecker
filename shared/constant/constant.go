@@ -16,9 +16,9 @@ package constant
 
 import "time"
 
-// DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
+// DefaultConfigOrder represent the priority in which woodpecker searches for a pipeline config by default
 // folders are indicated by supplying a trailing slash.
-var DefaultConfigOrder = [...]string{
+var DefaultConfigOrder = []string{
 	".woodpecker/",
 	".woodpecker.yaml",
 	".woodpecker.yml",
