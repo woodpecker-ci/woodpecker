@@ -37,6 +37,7 @@
 
 ### 📚 Documentation
 
+- Add note about extension permission [[#6646](https://github.com/woodpecker-ci/woodpecker/pull/6646)]
 - Update pnpm to v11.3.0 [[#6639](https://github.com/woodpecker-ci/woodpecker/pull/6639)]
 - Update docs npm deps non-major [[#6625](https://github.com/woodpecker-ci/woodpecker/pull/6625)]
 - Docs: Mention that you can use failure: fail [[#6611](https://github.com/woodpecker-ci/woodpecker/pull/6611)]
