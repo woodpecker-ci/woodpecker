@@ -129,13 +129,16 @@ func LookupOrg(c *gin.Context) {
 
 	org, err := _store.OrgFindByName(orgFullName, user.ForgeID)
 	if err != nil {
+		if err.Error() == "found more than one org with this name" {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
 		handleDBError(c, err)
 		return
 	}
 
 	// don't leak private org infos
 	if org.Private {
-		user := session.User(c)
 		if user == nil {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
