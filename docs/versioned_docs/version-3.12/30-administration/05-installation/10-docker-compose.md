@@ -2,6 +2,8 @@
 
 This example [docker-compose](https://docs.docker.com/compose/) setup shows the deployment of a Woodpecker instance connected to GitHub (`WOODPECKER_GITHUB=true`). If you are using another forge, please change this including the respective secret settings.
 
+Before starting, you will need to register an OAuth App with your forge — see the [forge documentation](https://woodpecker-ci.org/docs/3.12/administration/configuration/forges/overview) for instructions.
+
 It creates persistent volumes for the server and agent config directories. The bundled SQLite DB is stored in `/var/lib/woodpecker` and is the most important part to be persisted as it holds all users and repository information.
 
 The server uses the default port `8000` and gets exposed to the host here, so WoodpeckerWO can be accessed through this port on the host or by a reverse proxy sitting in front of it.
