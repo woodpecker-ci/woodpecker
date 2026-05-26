@@ -21,6 +21,7 @@ import (
 	"errors"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -149,6 +150,37 @@ func TestRunContextCanceled(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+}
+
+func TestRunContextCanceledRunsOnFailureStep(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	tracer := newTestTracer(t)
+
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build", withSleep("3s"))}},
+				{Steps: []*backend_types.Step{cmdStep("cleanup", withOnFailure())}},
+			},
+		},
+		dummy.New(),
+		WithTracer(tracer),
+		WithContext(ctx),
+		WithLogger(newTestLogger(t)),
+	)
+
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		cancel(pipeline_errors.ErrCancel)
+	}()
+
+	err := r.Run(t.Context())
+
+	assert.ErrorIs(t, err, pipeline_errors.ErrCancel)
+	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "cleanup"),
+		"OnFailure cleanup step should run when the workflow is canceled")
 }
 
 func TestRunSetupWorkflowError(t *testing.T) {

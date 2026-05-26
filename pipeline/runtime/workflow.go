@@ -66,7 +66,10 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		select {
 		case <-r.ctx.Done():
 			<-stageChan
-			return pipeline_errors.ErrCancel
+			if r.err.Get() == nil {
+				r.err.Set(pipeline_errors.ErrCancel)
+			}
+			continue
 		case err := <-stageChan:
 			if err != nil {
 				r.err.Set(err)
