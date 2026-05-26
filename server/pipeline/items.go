@@ -169,12 +169,12 @@ func handleParseErrors(pipeline *model.Pipeline, parseErr error) (blocking bool)
 	return false
 }
 
-// createPipelineItems parses the pipeline config and persists the resulting
+// The createPipelineItems parses the pipeline config and persists the resulting
 // workflows. It is the shared core of Create, Approve and Restart.
 //
 // It returns two errors. parseErr carries pipeline config diagnostics: callers
 // classify it with handleParseErrors and report a blocking failure in their
-// own way. err is a hard failure (e.g. persisting workflows) that always
+// own way. The err is a hard failure (e.g. persisting workflows) that always
 // aborts the run. When the pipeline already has persisted workflows (a gated
 // pipeline being approved), replaceExisting swaps them for the freshly built
 // ones.
