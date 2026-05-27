@@ -82,7 +82,7 @@ func (q *persistentQueue) Error(c context.Context, id string, err error) error {
 	}
 
 	if deleteErr := q.store.TaskDelete(id); deleteErr != nil {
-		if !errors.Is(deleteErr, types.RecordNotExist) {
+		if !errors.Is(deleteErr, types.ErrRecordNotExist) {
 			return deleteErr
 		}
 		log.Debug().Msgf("task %s already removed from store", id)
@@ -99,7 +99,7 @@ func (q *persistentQueue) ErrorAtOnce(c context.Context, ids []string, err error
 
 	var errs []error
 	for _, id := range ids {
-		if deleteErr := q.store.TaskDelete(id); deleteErr != nil && !errors.Is(deleteErr, types.RecordNotExist) {
+		if deleteErr := q.store.TaskDelete(id); deleteErr != nil && !errors.Is(deleteErr, types.ErrRecordNotExist) {
 			errs = append(errs, fmt.Errorf("task id [%s]: %w", id, deleteErr))
 		}
 	}

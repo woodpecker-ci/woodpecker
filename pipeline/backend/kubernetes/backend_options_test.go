@@ -1,39 +1,54 @@
+// Copyright 2024 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package kubernetes
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func Test_parseBackendOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		step    *backend.Step
+		step    *backend_types.Step
 		want    BackendOptions
 		wantErr bool
 	}{
 		{
 			name: "nil options",
-			step: &backend.Step{BackendOptions: nil},
+			step: &backend_types.Step{BackendOptions: nil},
 			want: BackendOptions{},
 		},
 		{
 			name: "empty options",
-			step: &backend.Step{BackendOptions: map[string]any{}},
+			step: &backend_types.Step{BackendOptions: map[string]any{}},
 			want: BackendOptions{},
 		},
 		{
 			name: "full k8s options",
-			step: &backend.Step{
+			step: &backend_types.Step{
 				BackendOptions: map[string]any{
 					"kubernetes": map[string]any{
 						"nodeSelector":       map[string]string{"storage": "ssd"},
 						"serviceAccountName": "wp-svc-acc",
+						"workspaceVolume":    false,
 						"labels":             map[string]string{"app": "test"},
 						"annotations":        map[string]string{"apps.kubernetes.io/pod-index": "0"},
 						"tolerations": []map[string]any{
@@ -93,14 +108,15 @@ func Test_parseBackendOptions(t *testing.T) {
 			want: BackendOptions{
 				NodeSelector:       map[string]string{"storage": "ssd"},
 				ServiceAccountName: "wp-svc-acc",
+				WorkspaceVolume:    newBool(false),
 				Labels:             map[string]string{"app": "test"},
 				Annotations:        map[string]string{"apps.kubernetes.io/pod-index": "0"},
 				Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
-				Affinity: &v1.Affinity{
-					PodAffinity: &v1.PodAffinity{
-						RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+				Affinity: &kube_core_v1.Affinity{
+					PodAffinity: &kube_core_v1.PodAffinity{
+						RequiredDuringSchedulingIgnoredDuringExecution: []kube_core_v1.PodAffinityTerm{
 							{
-								LabelSelector: &metav1.LabelSelector{},
+								LabelSelector: &kube_meta_v1.LabelSelector{},
 								MatchLabelKeys: []string{
 									"woodpecker-ci.org/task-uuid",
 								},
@@ -144,7 +160,7 @@ func Test_parseBackendOptions(t *testing.T) {
 		},
 		{
 			name: "number options",
-			step: &backend.Step{BackendOptions: map[string]any{
+			step: &backend_types.Step{BackendOptions: map[string]any{
 				"kubernetes": map[string]any{
 					"resources": map[string]any{
 						"requests": map[string]int{"memory": 128, "cpu": 1000},

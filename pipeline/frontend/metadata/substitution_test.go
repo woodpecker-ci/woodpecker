@@ -21,27 +21,13 @@ import (
 )
 
 func TestEnvVarSubst(t *testing.T) {
-	testCases := []struct {
-		name    string
-		yaml    string
-		environ map[string]string
-		want    string
-	}{{
-		name: "simple substitution",
-		yaml: `steps:
+	result, err := EnvVarSubst(`steps:
 		step1:
-			image: ${HELLO_IMAGE}`,
-		environ: map[string]string{"HELLO_IMAGE": "hello-world"},
-		want: `steps:
+			image: ${HELLO_IMAGE}
+			command: echo ${NEWLINE}`, map[string]string{"HELLO_IMAGE": "hello-world", "NEWLINE": "some env\nwith newline"})
+	assert.NoError(t, err)
+	assert.EqualValues(t, `steps:
 		step1:
-			image: hello-world`,
-	}}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			result, err := EnvVarSubst(testCase.yaml, testCase.environ)
-			assert.NoError(t, err)
-			assert.EqualValues(t, testCase.want, result)
-		})
-	}
+			image: hello-world
+			command: echo "some env\nwith newline"`, result)
 }

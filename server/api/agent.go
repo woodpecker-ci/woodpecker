@@ -96,7 +96,7 @@ func GetAgentTasks(c *gin.Context) {
 	}
 
 	var tasks []*model.Task
-	info := server.Config.Services.Queue.Info(c)
+	info := server.Config.Services.Scheduler.Info(c)
 	for _, task := range info.Running {
 		if task.AgentID == agent.ID {
 			tasks = append(tasks, task)
@@ -142,7 +142,7 @@ func PatchAgent(c *gin.Context) {
 	agent.Name = in.Name
 	agent.NoSchedule = in.NoSchedule
 	if agent.NoSchedule {
-		server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+		server.Config.Services.Scheduler.KickAgentWorkers(agent.ID)
 	}
 
 	err = _store.AgentUpdate(agent)
@@ -214,7 +214,7 @@ func DeleteAgent(c *gin.Context) {
 	}
 
 	// prevent deletion of agents with running tasks
-	info := server.Config.Services.Queue.Info(c)
+	info := server.Config.Services.Scheduler.Info(c)
 	for _, task := range info.Running {
 		if task.AgentID == agent.ID {
 			c.String(http.StatusConflict, "Agent has running tasks")
@@ -223,7 +223,7 @@ func DeleteAgent(c *gin.Context) {
 	}
 
 	// kick workers to remove the agent from the queue
-	server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+	server.Config.Services.Scheduler.KickAgentWorkers(agent.ID)
 
 	if err = _store.AgentDelete(agent); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
@@ -333,7 +333,7 @@ func PatchOrgAgent(c *gin.Context) {
 	}
 
 	if agent.OrgID != org.ID {
-		c.String(http.StatusBadRequest, "Agent does not belong to this organization")
+		c.String(http.StatusNotFound, "Agent not found")
 		return
 	}
 
@@ -347,7 +347,7 @@ func PatchOrgAgent(c *gin.Context) {
 	agent.Name = in.Name
 	agent.NoSchedule = in.NoSchedule
 	if agent.NoSchedule {
-		server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+		server.Config.Services.Scheduler.KickAgentWorkers(agent.ID)
 	}
 
 	if err := _store.AgentUpdate(agent); err != nil {
@@ -385,12 +385,12 @@ func DeleteOrgAgent(c *gin.Context) {
 	}
 
 	if agent.OrgID != org.ID {
-		c.String(http.StatusBadRequest, "Agent does not belong to this organization")
+		c.String(http.StatusNotFound, "Agent not found")
 		return
 	}
 
 	// Check if the agent has any running tasks
-	info := server.Config.Services.Queue.Info(c)
+	info := server.Config.Services.Scheduler.Info(c)
 	for _, task := range info.Running {
 		if task.AgentID == agent.ID {
 			c.String(http.StatusConflict, "Agent has running tasks")
@@ -399,7 +399,7 @@ func DeleteOrgAgent(c *gin.Context) {
 	}
 
 	// Kick workers to remove the agent from the queue
-	server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+	server.Config.Services.Scheduler.KickAgentWorkers(agent.ID)
 
 	if err := _store.AgentDelete(agent); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting agent. %s", err)

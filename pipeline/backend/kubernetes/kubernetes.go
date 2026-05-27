@@ -16,7 +16,7 @@ package kubernetes
 
 import (
 	"context"
-	std_errs "errors"
+	"errors"
 	"fmt"
 	"io"
 	"maps"
@@ -25,13 +25,15 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	backoff "github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	v1 "k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_errors "k8s.io/apimachinery/pkg/api/errors"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -49,8 +51,6 @@ const (
 	defaultResyncDuration = 5 * time.Second
 	maxRetryDuration      = 1 * time.Minute
 )
-
-var defaultDeleteOptions = newDefaultDeleteOptions()
 
 type kube struct {
 	client kubernetes.Interface
@@ -71,12 +71,13 @@ type config struct {
 	PodNodeSelector             map[string]string
 	PodTolerationsAllowFromStep bool
 	PodTolerations              []Toleration
-	PodAffinity                 *v1.Affinity
+	PodAffinity                 *kube_core_v1.Affinity
 	PodAffinityAllowFromStep    bool
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 	NativeSecretsAllowFromStep  bool
 	PriorityClassName           string
+	StopTimeout                 int64
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -91,12 +92,11 @@ type SecurityContextConfig struct {
 	FSGroup      *int64
 }
 
-func newDefaultDeleteOptions() meta_v1.DeleteOptions {
-	gracePeriodSeconds := int64(0) // immediately
-	propagationPolicy := meta_v1.DeletePropagationBackground
+func (c *config) newDefaultDeleteOptions() kube_meta_v1.DeleteOptions {
+	propagationPolicy := kube_meta_v1.DeletePropagationBackground
 
-	return meta_v1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriodSeconds,
+	return kube_meta_v1.DeleteOptions{
+		GracePeriodSeconds: &c.StopTimeout,
 		PropagationPolicy:  &propagationPolicy,
 	}
 }
@@ -124,6 +124,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					FSGroup:      newInt64(defaultFSGroup),
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
+				StopTimeout:                c.Int64("backend-k8s-stop-timeout"),
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -287,10 +288,11 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("waiting for pod: %s", podName)
 
-	finished := make(chan bool)
+	finished := make(chan struct{})
+	var finishedOnce sync.Once
 
 	podUpdated := func(_, newPod any) {
-		pod, ok := newPod.(*v1.Pod)
+		pod, ok := newPod.(*kube_core_v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
@@ -298,13 +300,30 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				finished <- true
+				finishedOnce.Do(func() { close(finished) })
 			}
 
 			switch pod.Status.Phase {
-			case v1.PodSucceeded, v1.PodFailed, v1.PodUnknown:
-				finished <- true
+			case kube_core_v1.PodSucceeded, kube_core_v1.PodFailed, kube_core_v1.PodUnknown:
+				finishedOnce.Do(func() { close(finished) })
 			}
+		}
+	}
+
+	podDeleted := func(obj any) {
+		pod, ok := obj.(*kube_core_v1.Pod)
+		if !ok {
+			tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
+			if !ok {
+				return
+			}
+			pod, ok = tombstone.Obj.(*kube_core_v1.Pod)
+			if !ok {
+				return
+			}
+		}
+		if pod.Name == podName {
+			finishedOnce.Do(func() { close(finished) })
 		}
 	}
 
@@ -312,6 +331,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
+			DeleteFunc: podDeleted,
 		},
 	); err != nil {
 		return nil, err
@@ -321,11 +341,23 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// TODO: Cancel on ctx.Done
-	<-finished
+	// If the pod was deleted before the informer started, no events will
+	// ever arrive. Check explicitly so we don't hang forever.
+	if _, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{}); kube_errors.IsNotFound(err) {
+		return &types.State{ExitCode: 0, Exited: true}, nil
+	}
 
-	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, meta_v1.GetOptions{})
+	select {
+	case <-finished:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+
+	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
 	if err != nil {
+		if kube_errors.IsNotFound(err) {
+			return &types.State{ExitCode: 0, Exited: true}, nil
+		}
 		return nil, err
 	}
 
@@ -363,10 +395,11 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of pod: %s", podName)
 
-	up := make(chan bool)
+	up := make(chan struct{})
+	var upOnce sync.Once
 
 	podUpdated := func(_, newPod any) {
-		pod, ok := newPod.(*v1.Pod)
+		pod, ok := newPod.(*kube_core_v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
@@ -374,11 +407,11 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				up <- true
+				upOnce.Do(func() { close(up) })
 			}
 			switch pod.Status.Phase {
-			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
-				up <- true
+			case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
+				upOnce.Do(func() { close(up) })
 			}
 		}
 	}
@@ -396,14 +429,19 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	<-up
+	select {
+	case <-up:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 
-	opts := &v1.PodLogOptions{
+	opts := &kube_core_v1.PodLogOptions{
 		Follow:    true,
 		Container: podName,
 	}
 
-	logs, err := backoff.Retry(ctx,
+	logs, err := backoff.Retry(
+		ctx,
 		func() (io.ReadCloser, error) {
 			return e.client.CoreV1().RESTClient().Get().
 				Namespace(e.config.GetNamespace(step.OrgID)).
@@ -440,24 +478,24 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	if needsRegistrySecret(step) {
-		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		err := stopRegistrySecret(ctx, e, step, e.config.newDefaultDeleteOptions())
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
 	if needsStepSecret(step) {
-		err := stopStepSecret(ctx, e, step, defaultDeleteOptions)
+		err := stopStepSecret(ctx, e, step, e.config.newDefaultDeleteOptions())
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	err := stopPod(ctx, e, step, defaultDeleteOptions)
+	err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
 	if err != nil {
 		errs = append(errs, err)
 	}
-	return std_errs.Join(errs...)
+	return errors.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.
@@ -466,7 +504,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, defaultDeleteOptions)
+			err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
 			if err != nil {
 				return err
 			}
@@ -476,13 +514,13 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
-	err := stopHeadlessService(ctx, e, namespace, taskUUID)
+	err := e.stopHeadlessService(ctx, e, namespace, taskUUID)
 	if err != nil {
 		return err
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow volume")
-	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
+	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), e.config.newDefaultDeleteOptions())
 	if err != nil {
 		return err
 	}

@@ -18,19 +18,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 
 	"github.com/rs/zerolog/log"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
-
-var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 // Create a new pipeline and start it.
 func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
@@ -41,16 +40,13 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	if pipeline.Event == model.EventPush || pipeline.IsPullRequest() {
-		skipMatch := skipPipelineRegex.FindString(pipeline.Message)
-		if len(skipMatch) > 0 {
-			ref := pipeline.Commit
-			if len(ref) == 0 {
-				ref = pipeline.Ref
-			}
-			log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
-			return nil, ErrFiltered
+	if constraint.IsSkipCommitMessage(metadata.Event(pipeline.Event), pipeline.Message) {
+		ref := pipeline.Commit
+		if len(ref) == 0 {
+			ref = pipeline.Ref
 		}
+		log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
+		return nil, ErrFiltered
 	}
 
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
@@ -60,7 +56,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	// If the forge has a refresh token, the current access token
+	// If the repoUser has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
 	forge.Refresh(ctx, _forge, _store, repoUser)
@@ -68,6 +64,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
 	pipeline.Status = model.StatusCreated
+	pipeline.Version = version.String()
 	setApprovalState(repo, pipeline)
 	err = _store.CreatePipeline(pipeline)
 	if err != nil {
@@ -79,24 +76,31 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// fetch the pipeline file from the forge
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
-	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
+	switch {
+	case errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}):
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		if err := _store.DeletePipeline(pipeline); err != nil {
 			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
 		}
 
 		return nil, ErrFiltered
-	} else if configFetchErr != nil {
-		log.Error().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+	case configFetchErr != nil && forgeYamlConfigs != nil:
+		// unexpected status code from config endpoint - using previous config as fallback
+		log.Warn().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s', will fallback to old config", repo.Config, pipeline.Ref, repoUser.Login)
+	case configFetchErr != nil:
+		// error while fetching config - not using the old config
+		log.Error().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s', and did not get any config", repo.Config, pipeline.Ref, repoUser.Login)
 		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
 	}
 
-	pipelineItems, parseErr := parsePipeline(_forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
-	if pipeline_errors.HasBlockingErrors(parseErr) {
+	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
+	*pipeline = *currentPipeline
+	if handleParseErrors(pipeline, parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
-	} else if parseErr != nil {
-		pipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("createPipelineItems failed: %w", err)
 	}
 
 	if len(pipelineItems) == 0 {
@@ -107,8 +111,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 		return nil, ErrFiltered
 	}
-
-	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
 
 	// persist the pipeline config for historical correctness, restarts, etc
 	var configs []*model.Config
@@ -128,10 +130,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	if err := prepareStart(ctx, _forge, _store, pipeline, repoUser, repo); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error preparing pipeline for %s#%d", repo.FullName, pipeline.Number)
-		return nil, err
-	}
+	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 
 	if pipeline.Status == model.StatusBlocked {
 		return pipeline, nil

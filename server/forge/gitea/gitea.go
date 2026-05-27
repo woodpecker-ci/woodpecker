@@ -146,20 +146,6 @@ func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mode
 	}, redirectURL, nil
 }
 
-// Auth uses the Gitea oauth2 access token and refresh token to authenticate
-// a session and return the Gitea account login.
-func (c *Gitea) Auth(ctx context.Context, token, _ string) (string, error) {
-	client, err := c.newClientToken(ctx, token)
-	if err != nil {
-		return "", err
-	}
-	user, _, err := client.GetMyUserInfo()
-	if err != nil {
-		return "", err
-	}
-	return user.UserName, nil
-}
-
 // Refresh refreshes the Gitea oauth2 access token. If the token is
 // refreshed, the user is updated and a true value is returned.
 func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
@@ -659,6 +645,8 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
+	forge.Refresh(ctx, c, _store, user)
+
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
@@ -695,6 +683,8 @@ func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName s
 	if err != nil {
 		return "", err
 	}
+
+	forge.Refresh(ctx, c, _store, user)
 
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {

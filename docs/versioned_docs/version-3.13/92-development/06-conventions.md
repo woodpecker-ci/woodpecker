@@ -4,4 +4,4 @@
 
 Database tables are named plural, columns don't have any prefix.
 
-Example: Table name `agent`, columns `id`, `name`.
+Example: Model name `Agent` with table name `agents` and columns `id`, `name`.

@@ -166,7 +166,7 @@ func HandleAuth(c *gin.Context) {
 
 	// get the user from the database
 	user, err = _store.GetUserByRemoteID(forgeID, userFromForge.ForgeRemoteID)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		log.Error().Err(err).Msgf("cannot get user %s", userFromForge.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
@@ -177,16 +177,16 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	// re-try with login name
-	if user == nil || errors.Is(err, types.RecordNotExist) {
+	if user == nil || errors.Is(err, types.ErrRecordNotExist) {
 		user, err = _store.GetUserByLogin(forgeID, userFromForge.Login)
-		if err != nil && !errors.Is(err, types.RecordNotExist) {
+		if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 			log.Error().Err(err).Msgf("cannot get user %s", userFromForge.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
 	}
 
-	if user == nil || errors.Is(err, types.RecordNotExist) {
+	if user == nil || errors.Is(err, types.ErrRecordNotExist) {
 		// if self-registration is disabled we should return a not authorized error
 		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(userFromForge) {
 			log.Error().Msgf("cannot register %s. registration closed", userFromForge.Login)
@@ -222,7 +222,7 @@ func HandleAuth(c *gin.Context) {
 	if user.OrgID == 0 {
 		// check if an org with the same name exists already and assign it to the user if it does
 		org, err := _store.OrgFindByName(user.Login, forgeID)
-		if err != nil && !errors.Is(err, types.RecordNotExist) {
+		if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 			log.Error().Err(err).Msgf("cannot get org for user %s", user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
@@ -239,7 +239,7 @@ func HandleAuth(c *gin.Context) {
 		}
 
 		// if still no org with the same name exists => create a new org
-		if user.OrgID == 0 || errors.Is(err, types.RecordNotExist) {
+		if user.OrgID == 0 || errors.Is(err, types.ErrRecordNotExist) {
 			org := &model.Org{
 				Name:    user.Login,
 				IsUser:  true,
@@ -323,7 +323,7 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		forgeRepo.ForgeID = forgeID
 
 		dbRepo, err := _store.GetRepoForgeID(forgeID, forgeRepo.ForgeRemoteID)
-		if err != nil && errors.Is(err, types.RecordNotExist) {
+		if err != nil && errors.Is(err, types.ErrRecordNotExist) {
 			continue
 		}
 		if err != nil {

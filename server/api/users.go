@@ -24,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -48,6 +49,9 @@ func GetUsers(c *gin.Context) {
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting user list. %s", err)
 		return
+	}
+	for _, user := range users {
+		user.AdminEnv = server.Config.Permissions.Admins.IsAdmin(user)
 	}
 	c.JSON(http.StatusOK, users)
 }
@@ -113,7 +117,7 @@ func PatchUser(c *gin.Context) {
 	}
 
 	user, err := store.FromContext(c).GetUserByRemoteID(in.ForgeID, in.ForgeRemoteID)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		handleDBError(c, err)
 		return
 	}

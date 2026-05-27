@@ -25,10 +25,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
-	backendTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
-var backends = []backendTypes.Backend{
+var backends = []backend_types.Backend{
 	kubernetes.New(),
 	docker.New(),
 	local.New(),

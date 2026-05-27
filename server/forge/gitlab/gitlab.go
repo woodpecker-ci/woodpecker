@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	gitlab "gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -178,20 +178,6 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	return true, nil
 }
 
-// Auth authenticates the session and returns the forge user login for the given token.
-func (g *GitLab) Auth(ctx context.Context, token, _ string) (string, error) {
-	client, err := newClient(g.url, token, g.skipVerify)
-	if err != nil {
-		return "", err
-	}
-
-	login, _, err := client.Users.CurrentUser(gitlab.WithContext(ctx))
-	if err != nil {
-		return "", err
-	}
-	return login.Username, nil
-}
-
 // Teams fetches a list of team memberships from the forge.
 func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptions) ([]*model.Team, error) {
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
@@ -215,10 +201,11 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 
 	teams := make([]*model.Team, 0, len(groups))
 	for i := range groups {
-		teams = append(teams, &model.Team{
-			Login:  groups[i].Name,
-			Avatar: groups[i].AvatarURL,
-		},
+		teams = append(
+			teams, &model.Team{
+				Login:  groups[i].Name,
+				Avatar: groups[i].AvatarURL,
+			},
 		)
 	}
 
@@ -665,7 +652,14 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
-		return convertTagHook(event)
+		repo, pipeline, cmID, err := convertTagHook(event)
+		if err != nil || pipeline.Message != "" {
+			return repo, pipeline, err
+		}
+
+		// we have to fetch the commit message
+		pipeline, err = g.loadCommitFromSHA(ctx, repo, pipeline, cmID)
+		return repo, pipeline, err
 	case *gitlab.ReleaseEvent:
 		return convertReleaseHook(event)
 	default:
@@ -796,6 +790,8 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		return nil, err
 	}
 
+	forge.Refresh(ctx, g, _store, user)
+
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
 		return nil, err
@@ -823,6 +819,51 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 			return nil, err
 		}
 		pipeline.PullRequestMilestone = milestone.Title
+	}
+
+	return pipeline, nil
+}
+
+func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, sha string) (*model.Pipeline, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return pipeline, nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(g.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	forge.Refresh(ctx, g, _store, user)
+
+	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	cm, _, err := client.Commits.GetCommit(_repo.ID, sha, &gitlab.GetCommitOptions{}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	pipeline.Author = cm.AuthorName
+	pipeline.Email = cm.AuthorEmail
+	pipeline.Message = cm.Message
+	pipeline.Timestamp = cm.CommittedDate.Unix()
+	if len(pipeline.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Email)
 	}
 
 	return pipeline, nil

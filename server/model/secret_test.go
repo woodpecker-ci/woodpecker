@@ -30,7 +30,7 @@ func TestSecretValidate(t *testing.T) {
 				Name:   "secretname",
 				Value:  "secretvalue",
 				Events: []WebhookEvent{EventPush},
-				Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql"},
+				Images: []string{"docker.io/library/mysql:latest", "alpine:latest", "localregistry.test:8443/mysql:latest", "localregistry.test:8443/library/mysql:latest", "docker.io/library/mysql", "alpine", "localregistry.test:8443/mysql", "localregistry.test:8443/library/mysql", "code.thinkaboutit.tech/pandora/woodpecker-config-server.goapp"},
 			},
 			err: false,
 		},

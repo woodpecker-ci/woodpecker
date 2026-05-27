@@ -20,8 +20,7 @@ import (
 	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
-	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
@@ -125,10 +124,12 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 	var linterErr error
 	for _, container := range config.Workflow.Clone.ContainerList {
 		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
-			linterErr = multierr.Append(linterErr,
+			linterErr = multierr.Append(
+				linterErr,
 				newLinterError(
 					"Specified clone image does not match allow list, netrc is not injected",
-					config.File, fmt.Sprintf("clone.%s", container.Name), true),
+					config.File, fmt.Sprintf("clone.%s", container.Name), true,
+				),
 			)
 		}
 	}
@@ -186,7 +187,8 @@ check:
 				continue check
 			}
 		}
-		linterErr = multierr.Append(linterErr,
+		linterErr = multierr.Append(
+			linterErr,
 			newLinterError(
 				"One or more of the specified dependencies do not exist",
 				config.File, fmt.Sprintf("%s.%s.depends_on", area, c.Name), false,
@@ -205,7 +207,7 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 
 func (l *Linter) lintPrivilegedPlugins(config *WorkflowConfig, c *types.Container, area string) error {
 	// lint for conflicts of https://github.com/woodpecker-ci/woodpecker/pull/3918
-	if utils.MatchImage(c.Image, "plugins/docker", "plugins/gcr", "plugins/ecr", "woodpeckerci/plugin-docker-buildx") {
+	if utils.MatchImage(c.Image, "plugins/docker", "plugins/gcr", "plugins/ecr", "woodpeckerci/plugin-docker-buildx") && !c.Privileged {
 		msg := fmt.Sprintf("The formerly privileged plugin `%s` is no longer privileged by default, if required, add it to `WOODPECKER_PLUGINS_PRIVILEGED`", c.Image)
 		// check first if user did not add them back
 		if l.privilegedPlugins != nil && !utils.MatchImageDynamic(c.Image, *l.privilegedPlugins...) {
@@ -302,14 +304,27 @@ func (l *Linter) lintSchema(config *WorkflowConfig) error {
 	return linterErr
 }
 
-func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
+func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 	parsed := new(types.Workflow)
-	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	err := xyaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	if len(parsed.RunsOn) > 0 { //nolint:staticcheck
+		err = multierr.Append(err, &pipeline_errors.PipelineError{
+			Type:      pipeline_errors.PipelineErrorTypeDeprecation,
+			IsWarning: true,
+			Message:   "Usage of `runs_on` is deprecated, use `when.status`",
+			Data: pipeline_errors.DeprecationErrorData{
+				File:  config.File,
+				Field: fmt.Sprintf("%s.runs_on", config.File),
+				Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#status",
+			},
+		})
+	}
+
+	return err
 }
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
@@ -330,8 +345,10 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 		// root whens do not necessarily have an event filter, check steps
 		for _, step := range parsed.Steps.ContainerList {
 			var field string
+			var msg string
 			if len(step.When.Constraints) == 0 {
 				field = fmt.Sprintf("steps.%s", step.Name)
+				msg = "Consider adding a `when` block with an `event` filter to this step or the entire workflow"
 			} else {
 				stepEventIndex := -1
 				for i, c := range step.When.Constraints {
@@ -342,13 +359,14 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 				}
 				if stepEventIndex > -1 {
 					field = fmt.Sprintf("steps.%s.when[%d]", step.Name, stepEventIndex)
+					msg = "Set an event filter for all steps or the entire workflow on all items of the `when` block"
 				}
 			}
 			if field != "" {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeBadHabit,
-					Message: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
-					Data: errors.BadHabitErrorData{
+				err = multierr.Append(err, &pipeline_errors.PipelineError{
+					Type:    pipeline_errors.PipelineErrorTypeBadHabit,
+					Message: msg,
+					Data: pipeline_errors.BadHabitErrorData{
 						File:  config.File,
 						Field: field,
 						Docs:  "https://woodpecker-ci.org/docs/usage/linter#event-filter-for-all-steps",

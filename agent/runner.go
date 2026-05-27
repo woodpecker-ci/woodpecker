@@ -19,28 +19,31 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
+	"runtime"
 	"time"
 
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
+
+const shutdownTimeout = time.Second * 5
 
 type Runner struct {
 	client   rpc.Peer
 	filter   rpc.Filter
 	hostname string
 	counter  *State
-	backend  *backend.Backend
+	backend  backend_types.Backend
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend backend_types.Backend) Runner {
 	return Runner{
 		client:   workEngine,
 		filter:   f,
@@ -50,13 +53,19 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
+func GetShutdownContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), shutdownTimeout)
+}
+
+// TODO: refactor this big function into subfunctions in it's own subpackage
+
 // Run executes a workflow using a backend, tracks its state and reports the state back to the server.
-func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
+func (r *Runner) Run(runnerCtx context.Context) error {
 	log.Debug().Msg("request next execution")
 
 	// Preserve metadata AND cancellation from runnerCtx.
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
-	ctxMeta := metadata.NewOutgoingContext(shutdownCtx, meta)
+	ctxMeta := metadata.NewOutgoingContext(runnerCtx, meta)
 
 	// Fetch next workflow from the queue
 	workflow, err := r.client.Next(runnerCtx, r.filter)
@@ -99,12 +108,12 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("received sigterm termination signal")
 		// WithContextSigtermCallback would cancel the context too, but  we want our own custom error
-		cancelWorkflowCtx(pipeline.ErrCancel)
+		cancelWorkflowCtx(pipeline_errors.ErrCancel)
 	})
 
 	// Listen for remote cancel events (UI / API).
 	// When canceled, we MUST cancel the workflow context
-	// so that workflow execution stop immediately.
+	// so that workflow execution stops immediately.
 	go func() {
 		logger.Debug().Msg("start listening for server side cancel signal")
 
@@ -114,7 +123,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		} else {
 			if canceled {
 				logger.Debug().Err(err).Msg("server side cancel signal received")
-				cancelWorkflowCtx(pipeline.ErrCancel)
+				cancelWorkflowCtx(pipeline_errors.ErrCancel)
 			}
 			// Wait returned without error, meaning the workflow finished normally
 			logger.Debug().Msg("cancel listener exited normally")
@@ -150,17 +159,24 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		return err
 	}
 
-	var uploads sync.WaitGroup
+	// Enrich workflow env with agent info
+	// TODO: find better way to track this state
+	for _, stage := range workflow.Config.Stages {
+		for _, step := range stage.Steps {
+			step.Environment["CI_MACHINE"] = r.hostname
+			step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
+		}
+	}
 
 	// Run pipeline
-	err = pipeline.New(
+	err = pipeline_runtime.New(
 		workflow.Config,
-		pipeline.WithContext(workflowCtx),
-		pipeline.WithTaskUUID(fmt.Sprint(workflow.ID)),
-		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
-		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
-		pipeline.WithBackend(*r.backend),
-		pipeline.WithDescription(map[string]string{
+		r.backend,
+		pipeline_runtime.WithContext(workflowCtx),
+		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
+		pipeline_runtime.WithLogger(r.createLogger(logger, workflow)),
+		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
+		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,
 			"pipeline_number": pipelineNumber,
@@ -171,10 +187,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 
 	if err != nil {
 		state.Error = err.Error()
-		if errors.Is(err, pipeline.ErrCancel) {
+		if errors.Is(err, pipeline_errors.ErrCancel) {
 			state.Canceled = true
 			// cleanup joined error messages
-			state.Error = pipeline.ErrCancel.Error()
+			state.Error = pipeline_errors.ErrCancel.Error()
 		}
 	}
 
@@ -183,14 +199,11 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 		Bool("canceled", state.Canceled).
 		Msg("workflow finished")
 
-	// Ensure all logs/traces are uploaded before finishing
-	logger.Debug().Msg("waiting for logs and traces upload")
-	uploads.Wait()
-	logger.Debug().Msg("logs and traces uploaded")
-
 	// Update workflow state
-	doneCtx := runnerCtx
+	doneCtx := runnerCtx //nolint:contextcheck
 	if doneCtx.Err() != nil {
+		shutdownCtx, shutdownCtxCancel := GetShutdownContext()
+		defer shutdownCtxCancel()
 		doneCtx = shutdownCtx
 	}
 
@@ -203,10 +216,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error {
 	return nil
 }
 
-func extractRepositoryName(config *backend.Config) string {
+func extractRepositoryName(config *backend_types.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
-func extractPipelineNumber(config *backend.Config) string {
+func extractPipelineNumber(config *backend_types.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

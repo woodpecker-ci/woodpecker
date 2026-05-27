@@ -126,7 +126,7 @@ func sshCloneLink(repo *internal.Repo) string {
 
 // convertUser is a helper function used to convert a Bitbucket user account
 // structure to the Woodpecker User structure.
-func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
+func convertUser(from *internal.Account, token *oauth2.Token, email string) *model.User {
 	return &model.User{
 		Login:         from.Login,
 		AccessToken:   token.AccessToken,
@@ -134,6 +134,7 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
+		Email:         email,
 	}
 }
 
@@ -168,7 +169,8 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		Event:  event,
 		Commit: from.PullRequest.Source.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
-		Refspec: fmt.Sprintf("%s:%s",
+		Refspec: fmt.Sprintf(
+			"%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),

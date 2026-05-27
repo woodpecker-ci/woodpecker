@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	vsc_url "github.com/gitsight/go-vcsurl"
+	"github.com/gitsight/go-vcsurl"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/net/proxy"
@@ -65,7 +65,8 @@ func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	client := config.Client(ctx,
+	client := config.Client(
+		ctx,
 		&oauth2.Token{
 			AccessToken: token,
 		},
@@ -112,7 +113,7 @@ func getRepoFromGit(remoteName string) (string, error) {
 		return "", fmt.Errorf("no repository provided")
 	}
 
-	u, err := vsc_url.Parse(gitRemote)
+	u, err := vcsurl.Parse(gitRemote)
 	if err != nil {
 		return "", fmt.Errorf("could not parse git remote url: %w", err)
 	}

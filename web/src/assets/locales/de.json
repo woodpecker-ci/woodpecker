@@ -123,7 +123,8 @@
                 "add": "Benutzer hinzufügen",
                 "admin": {
                     "admin": "Admin",
-                    "placeholder": "Benutzer ist ein Admin"
+                    "placeholder": "Benutzer ist ein Admin",
+                    "admin_warning": "Dieser Benutzer ist ein Admin aufgrund deiner Umgebungs-Konfiguration. Wenn du die Berechtigung hier entziehst, wird sie bei der nächsten Anmeldung wiederhergestellt."
                 },
                 "avatar_url": "URL des Profilbilds",
                 "cancel": "Abbrechen",
@@ -226,7 +227,12 @@
             "enabled": "Bereits aktiviert",
             "list_reloaded": "Repository-Liste neu geladen",
             "reload": "Repositorys neu laden",
-            "success": "Repository aktiviert"
+            "success": "Repository aktiviert",
+            "new_forge_repo": "neues Repo auf der Code-Plattform",
+            "stale_wp_repo": "veraltetes Woodpecker-Repo",
+            "conflict": "Konflikt",
+            "conflict_desc": "Dieses Repository wurde auf der Code-Plattform mit einer neuen ID erstellt, aber ein alter Eintrag mit demselben Namen existiert noch in Woodpecker. Lösche das alte Repo, um das neue zu aktivieren, oder repariere das alte.",
+            "forge_repo_missing": "Repo auf der Code-Plattform fehlt!"
         },
         "manual_pipeline": {
             "select_branch": "Branch auswählen",
@@ -241,7 +247,7 @@
                 "delete": "Variable löschen"
             },
             "show_pipelines": "Pipelines anzeigen",
-            "no_manual_workflows": "Es wurden keine manuell ausführbaren Workflows gefunden, oder alle wurden gefiltert."
+            "no_manual_workflows": "Keine manuell ausführbaren Workflows gefunden. Stelle sicher, dass es mindestens einen Workflow gibt, der beim „manual“-Event läuft."
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
         "open_in_forge": "Repository in der Code-Plattform öffnen",
@@ -256,7 +262,10 @@
                 "log_download": "Herunterladen",
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",
-                "log_delete": "Löschen"
+                "log_delete": "Löschen",
+                "skipped": "Dieser Schritt wurde übersprungen.",
+                "expand_all": "Alle ausklappen",
+                "collapse_all": "Alle einklappen"
             },
             "config": "Konfiguration",
             "errors": "Fehler",
@@ -297,13 +306,14 @@
                 "declined": "abgelehnt",
                 "error": "Fehler",
                 "failure": "fehlgeschlagen",
-                "killed": "abgebrochen",
+                "killed": "getötet",
                 "pending": "ausstehend",
                 "running": "laufend",
                 "skipped": "übersprungen",
                 "started": "gestartet",
                 "status": "Status: {status}",
-                "success": "erfolgreich"
+                "success": "erfolgreich",
+                "canceled": "abgebrochen"
             },
             "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
             "tasks": "Vorgänge",
@@ -323,7 +333,15 @@
                 "metadata_exec_title": "Pipeline lokal erneut ausführen",
                 "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst. Das Woodpecker-CLI muss in der zum Server passenden Version lokal installiert sein."
             },
-            "view": "Pipeline anzeigen"
+            "view": "Pipeline anzeigen",
+            "cancel_info": {
+                "superseded_by": "Ersetzt durch #{pipelineId}",
+                "canceled_by_user": "Abgebrochen von {user}",
+                "canceled_by_step": "Wegen Schritt {step} abgebrochen"
+            },
+            "load_more": "Mehr laden",
+            "version": "Die Woodpecker-Version, mit der diese Pipeline ausgeführt wurde.",
+            "version_header": "Woodpecker-Version"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -382,10 +400,14 @@
                 "saved": "Cron gespeichert",
                 "schedule": {
                     "placeholder": "Zeitplan",
-                    "title": "Zeitplan (basierend auf UTC)"
+                    "title": "Zeitplan"
                 },
                 "show": "Crons anzeigen",
-                "enabled": "Aktiv"
+                "enabled": "Aktiv",
+                "next_exec_local": "Nächste Ausführung: {local}",
+                "next_exec_both": "Nächste Ausführung: {local} ({zoned} {timezone})",
+                "timezone": "Zeitzone",
+                "your_timezone": "In der Zeitzone deines Webbrowsers."
             },
             "general": {
                 "allow_pr": {
@@ -399,7 +421,8 @@
                 "general": "Projekt",
                 "netrc_only_trusted": {
                     "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Code-Plattform zu klonen oder zu pushen.",
-                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
+                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen",
+                    "placeholder": "Plugin-Image"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
@@ -765,5 +788,13 @@
     "extensions_signatures_public_key_description": "Dieser öffentliche Schlüssel sollte von deinen Erweiterungen verwendet werden, um Webhook-Aufrufe von Woodpecker zu verifizieren.",
     "disabled": "Deaktiviert",
     "config_extension_exclusive": "Exklusiv",
-    "config_extension_exclusive_desc": "Wenn aktiviert, werden alle anderen Möglichkeiten zum Laden der Konfiguration, einschließlich der Code-Plattform, übersprungen."
+    "config_extension_exclusive_desc": "Wenn aktiviert, werden alle anderen Möglichkeiten zum Laden der Konfiguration, einschließlich der Code-Plattform, übersprungen.",
+    "registry_extension_endpoint": "Endpunkt der Register-Erweiterung",
+    "global_level_registry": "globales Register",
+    "org_level_registry": "Organisationsregister",
+    "secret_extension_endpoint": "Endpunkt der Geheimnis-Erweiterung",
+    "secret_extension_netrc": "Netrc-Zugangsdaten senden",
+    "secret_extension_netrc_desc": "Die Netrc-Zugangsdaten für die Code-Plattform an die Geheimnis-Erweiterung senden.",
+    "extension_netrc": "Netrc-Zugangsdaten bereitstellen",
+    "extension_netrc_desc": "Die Netrc-Zugangsdaten der Code-Plattform an die Erweiterung weitergeben."
 }

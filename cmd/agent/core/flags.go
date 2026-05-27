@@ -35,7 +35,8 @@ var flags = []cli.Flag{
 		Usage: "server-agent shared token",
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")),
-			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
+			cli.EnvVar("WOODPECKER_AGENT_SECRET"),
+		),
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},
@@ -50,6 +51,12 @@ var flags = []cli.Flag{
 		Name:    "grpc-skip-insecure",
 		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
 		Value:   true,
+	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_RETRY_TIMEOUT"),
+		Name:    "retry-timeout",
+		Usage:   "how long the agent keeps retrying to reconnect to the server after the gRPC connection is lost before giving up, set to 0 to retry forever",
+		Value:   2 * time.Minute,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_HOSTNAME"),
@@ -76,6 +83,12 @@ var flags = []cli.Flag{
 		Name:    "max-workflows",
 		Usage:   "agent parallel workflows",
 		Value:   1,
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_AGENT_SINGLE_WORKFLOW"),
+		Name:    "single-workflow",
+		Usage:   "exit the agent after first workflow",
+		Value:   false,
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_HEALTHCHECK"),

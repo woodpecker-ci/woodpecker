@@ -81,13 +81,6 @@ func TestBitbucket(t *testing.T) {
 	})
 	assert.Error(t, err)
 
-	login, err := c.Auth(ctx, fakeUser.AccessToken, fakeUser.RefreshToken)
-	assert.NoError(t, err)
-	assert.Equal(t, fakeUser.Login, login)
-
-	_, err = c.Auth(ctx, fakeUserNotFound.AccessToken, fakeUserNotFound.RefreshToken)
-	assert.Error(t, err)
-
 	ok, err := c.Refresh(ctx, fakeUserRefresh)
 	assert.NoError(t, err)
 	assert.True(t, ok)
@@ -111,6 +104,7 @@ func TestBitbucket(t *testing.T) {
 
 	repos, err := c.Repos(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.NoError(t, err)
+	assert.Len(t, repos, 1)
 	assert.Equal(t, fakeRepo.FullName, repos[0].FullName)
 
 	_, err = c.Repos(ctx, fakeUserNoTeams, &model.ListOptions{Page: 1, PerPage: 10})
@@ -121,7 +115,7 @@ func TestBitbucket(t *testing.T) {
 
 	teams, err := c.Teams(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.NoError(t, err)
-	assert.Equal(t, "ueberdev42", teams[0].Login)
+	assert.Equal(t, "test_name", teams[0].Login)
 	assert.Equal(t, "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964", teams[0].Avatar)
 
 	_, err = c.Teams(ctx, fakeUserNoTeams, &model.ListOptions{Page: 1, PerPage: 10})
@@ -238,11 +232,6 @@ var (
 	fakeUserRefreshEmpty = &model.User{
 		Login:        "superman",
 		RefreshToken: "refresh_token_is_empty",
-	}
-
-	fakeUserNotFound = &model.User{
-		Login:       "superman",
-		AccessToken: "user_not_found",
 	}
 
 	fakeUserNoTeams = &model.User{

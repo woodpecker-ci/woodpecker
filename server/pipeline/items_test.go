@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package pipeline
 
 import (
@@ -5,13 +19,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types" //nolint:depguard // needed to construct builder.Item.Config in tests; will be resolved when backend-specific fields move to BackendOptions (see enrichPipelineItemSteps TODO)
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	shared_pipeline "go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
@@ -26,8 +41,9 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 		Event: model.EventPush,
 	}
 
-	pipelineItems := []*shared_pipeline.Item{{
-		Workflow: &model.Workflow{
+	pipelineItems := []*builder.Item{{
+		Workflow: &builder.Workflow{
+			ID:  1,
 			PID: 1,
 		},
 		Config: &backend_types.Config{
@@ -49,7 +65,12 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 			},
 		},
 	}}
-	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
+
+	s := store_mocks.NewMockStore(t)
+	s.On("WorkflowsCreate", mock.Anything).Return(nil)
+
+	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems, false)
+	require.NoError(t, err)
 	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}
@@ -59,6 +80,49 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	if pipeline.Workflows[0].Children[0].PPID != 1 {
 		t.Fatal("Should set step PPID")
 	}
+}
+
+func TestSaveWorkflowsReplaceExisting(t *testing.T) {
+	t.Parallel()
+
+	pipeline := &model.Pipeline{
+		ID:    1,
+		Event: model.EventPush,
+		// a gated pipeline already carries persisted workflows on approval
+		Workflows: []*model.Workflow{{ID: 99, PID: 1}},
+	}
+
+	pipelineItems := []*builder.Item{{
+		Workflow: &builder.Workflow{ID: 1, PID: 1},
+		Config: &backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{{Name: "clone"}}},
+			},
+		},
+	}}
+
+	s := store_mocks.NewMockStore(t)
+	s.On("WorkflowsReplace", mock.Anything, mock.Anything).Return(nil)
+
+	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems, true)
+	require.NoError(t, err)
+	assert.Len(t, pipeline.Workflows, 1)
+	assert.Equal(t, int64(1), pipeline.Workflows[0].PipelineID)
+}
+
+func TestSaveWorkflowsRejectsExistingWithoutReplace(t *testing.T) {
+	t.Parallel()
+
+	pipeline := &model.Pipeline{
+		ID:        1,
+		Event:     model.EventPush,
+		Workflows: []*model.Workflow{{ID: 99, PID: 1}},
+	}
+
+	s := store_mocks.NewMockStore(t)
+
+	_, err := saveWorkflowsFromPipelineBuilder(s, pipeline, nil, false)
+	require.Error(t, err)
 }
 
 func TestParsePipeline(t *testing.T) {
@@ -118,7 +182,7 @@ steps:
 	server.Config.Services.Manager = mockManager
 
 	secretService := secret_service_mocks.NewMockService(t)
-	secretService.On("SecretListPipeline", mock.Anything, mock.Anything).Return([]*model.Secret{
+	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{
 		{
 			Name:  "hello",
 			Value: "secret world",
@@ -127,7 +191,7 @@ steps:
 	mockManager.On("SecretServiceFromRepo", mock.Anything).Return(secretService, nil)
 
 	registryService := registry_service_mocks.NewMockService(t)
-	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything).Return([]*model.Registry{
+	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Registry{
 		{
 			Address:  "docker.io",
 			Username: "user",
@@ -138,7 +202,7 @@ steps:
 
 	mockManager.On("EnvironmentService").Return(nil, nil)
 
-	pipelineItems, err := parsePipeline(forge, store, pipeline, user, repo, yamls, envs)
+	pipelineItems, err := parsePipeline(t.Context(), forge, store, pipeline, user, repo, yamls, envs)
 	assert.NoError(t, err)
 
 	assert.Len(t, pipelineItems, 1)

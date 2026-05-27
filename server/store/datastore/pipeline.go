@@ -48,7 +48,7 @@ func (s storage) GetPipelineBadge(repo *model.Repo, branch string, events []mode
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
+func (s storage) GetPipelineLastByBranch(repo *model.Repo, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
@@ -168,7 +168,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 
 		pipeline.Created = time.Now().UTC().Unix()
 		// only Insert set auto created ID back to object
-		if _, err := sess.Insert(pipeline); err != nil {
+		if err := wrapInsert(sess.Insert(pipeline)); err != nil {
 			if isUniqueConstraintError(err) {
 				return struct{}{}, err
 			}
@@ -178,7 +178,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		for i := range stepList {
 			stepList[i].PipelineID = pipeline.ID
 			// only Insert set auto created ID back to object
-			if _, err := sess.Insert(stepList[i]); err != nil {
+			if err := wrapInsert(sess.Insert(stepList[i])); err != nil {
 				if isUniqueConstraintError(err) {
 					return struct{}{}, err
 				}

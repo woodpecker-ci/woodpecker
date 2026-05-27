@@ -48,9 +48,13 @@ func TestParse(t *testing.T) {
 		assert.Equal(t, "build", out.Labels["com.example.type"])
 		assert.Equal(t, "lint", out.DependsOn[0])
 		assert.Equal(t, "test", out.DependsOn[1])
-		assert.Equal(t, ("success"), out.RunsOn[0])
-		assert.Equal(t, ("failure"), out.RunsOn[1])
+		assert.EqualValues(t, []string{"success", "failure"}, out.When.Constraints[0].Status)
 		assert.False(t, out.SkipClone)
+	})
+
+	t.Run("Should fail on invalid yaml", func(t *testing.T) {
+		_, err := ParseString("notvalid")
+		assert.Error(t, err)
 	})
 
 	t.Run("Should handle simple yaml anchors", func(t *testing.T) {
@@ -166,8 +170,10 @@ when:
   - event:
     - tester
     - tester2
+    status: [ success, failure ]
   - branch:
     - tester
+    status: [ success, failure ]
 workspace:
   path: src/github.com/octocat/hello-world
   base: /go
@@ -199,9 +205,6 @@ labels:
 depends_on:
   - lint
   - test
-runs_on:
-  - success
-  - failure
 `
 
 var simpleYamlAnchors = `
@@ -273,7 +276,6 @@ func TestReSerialize(t *testing.T) {
       environment:
         DRIVER: next
         PLATFORM: linux
-skip_clone: false
 `, string(work1Bin))
 
 	work2, err := ParseString(sampleYaml)
@@ -284,10 +286,16 @@ skip_clone: false
 
 	// TODO: fix "steps.[1].depends_on: []" to be re-serialized!
 	assert.EqualValues(t, `when:
-    - event:
+    - status:
+        - success
+        - failure
+      event:
         - tester
         - tester2
     - branch: tester
+      status:
+        - success
+        - failure
 workspace:
     base: /go
     path: src/github.com/octocat/hello-world
@@ -317,10 +325,6 @@ labels:
 depends_on:
     - lint
     - test
-runs_on:
-    - success
-    - failure
-skip_clone: false
 `, string(workBin2))
 }
 
@@ -337,6 +341,6 @@ func TestSlice(t *testing.T) {
 	t.Run("should marshal an empty slice", func(t *testing.T) {
 		assert.Equal(t, "build", out.Steps.ContainerList[1].Name)
 		assert.NotNil(t, out.Steps.ContainerList[1].DependsOn)
-		assert.Empty(t, (out.Steps.ContainerList[1].DependsOn))
+		assert.Empty(t, out.Steps.ContainerList[1].DependsOn)
 	})
 }

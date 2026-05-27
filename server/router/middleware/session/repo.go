@@ -80,7 +80,7 @@ func SetRepo() gin.HandlerFunc {
 			return
 		}
 
-		if errors.Is(err, types.RecordNotExist) {
+		if errors.Is(err, types.ErrRecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
@@ -181,7 +181,8 @@ func MustPull(c *gin.Context) {
 			user.Login, c.Request.URL.Path)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debug().Msgf("guest denied read access to %s %s",
+		log.Debug().Msgf(
+			"guest denied read access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)
@@ -206,7 +207,8 @@ func MustPush(c *gin.Context) {
 			user.Login, c.Request.URL.Path)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debug().Msgf("guest denied write access to %s %s",
+		log.Debug().Msgf(
+			"guest denied write access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)

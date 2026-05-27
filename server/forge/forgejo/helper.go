@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -174,7 +174,8 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		Sender:   hook.Sender.UserName,
 		Email:    hook.Sender.Email,
 		Title:    hook.PullRequest.Title,
-		Refspec: fmt.Sprintf("%s:%s",
+		Refspec: fmt.Sprintf(
+			"%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),

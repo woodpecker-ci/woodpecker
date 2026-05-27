@@ -81,6 +81,22 @@ steps:
 
 To give steps access to the Kubernetes API via service account, take a look at [RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 
+### Workspace volume
+
+`workspaceVolume` controls whether the default workspace volume is mounted into a service Pod. It only affects service
+containers and does not disable explicitly configured service volumes.
+
+If unset, the default workspace volume is mounted.
+
+```yaml
+services:
+  postgres:
+    image: postgres:16
+    backend_options:
+      kubernetes:
+        workspaceVolume: false
+```
+
 ### Node selector
 
 `nodeSelector` specifies the labels which are used to select the node on which the step will be executed.
@@ -358,6 +374,26 @@ backend_options:
 :::note
 The feature requires Kubernetes v1.30 or above.
 :::
+
+You can set `allowPrivilegeEscalation` to `false` to prevent a container from gaining more privileges than its parent process.
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      allowPrivilegeEscalation: false
+```
+
+You can also drop [Linux capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html) from a container. Adding capabilities is not allowed.
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      capabilities:
+        drop:
+          - ALL
+```
 
 ### Annotations and labels
 

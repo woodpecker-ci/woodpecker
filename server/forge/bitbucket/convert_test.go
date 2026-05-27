@@ -86,9 +86,10 @@ func Test_convertUser(t *testing.T) {
 	user := &internal.Account{Login: "octocat"}
 	user.Links.Avatar.Href = "http://..."
 
-	result := convertUser(user, token)
+	result := convertUser(user, token, "test@example.com")
 	assert.Equal(t, user.Links.Avatar.Href, result.Avatar)
 	assert.Equal(t, user.Login, result.Login)
+	assert.Equal(t, "test@example.com", result.Email)
 	assert.Equal(t, token.AccessToken, result.AccessToken)
 	assert.Equal(t, token.RefreshToken, result.RefreshToken)
 	assert.Equal(t, token.Expiry.UTC().Unix(), result.Expiry)

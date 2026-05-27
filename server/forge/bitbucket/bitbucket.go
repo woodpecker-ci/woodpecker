@@ -102,18 +102,21 @@ func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	if err != nil {
 		return nil, redirectURL, err
 	}
-	return convertUser(curr, token), redirectURL, nil
-}
 
-// Auth uses the Bitbucket oauth2 access token and refresh token to authenticate
-// a session and return the Bitbucket account login.
-func (c *config) Auth(ctx context.Context, token, secret string) (string, error) {
-	client := c.newClientToken(ctx, token, secret)
-	user, err := client.FindCurrent()
+	emails, err := client.ListEmail()
 	if err != nil {
-		return "", err
+		return nil, redirectURL, err
 	}
-	return user.Login, nil
+
+	primaryEmail := ""
+	for _, e := range emails.Values {
+		if e.IsPrimary {
+			primaryEmail = e.Email
+			break
+		}
+	}
+
+	return convertUser(curr, token, primaryEmail), redirectURL, nil
 }
 
 // Refresh refreshes the Bitbucket oauth2 access token. If the token is
@@ -121,7 +124,8 @@ func (c *config) Auth(ctx context.Context, token, secret string) (string, error)
 func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := c.newOAuth2Config()
 	source := config.TokenSource(
-		ctx, &oauth2.Token{RefreshToken: user.RefreshToken})
+		ctx, &oauth2.Token{RefreshToken: user.RefreshToken},
+	)
 
 	token, err := source.Token()
 	if err != nil || len(token.AccessToken) == 0 {
@@ -138,16 +142,21 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 func (c *config) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
 	setListOptions(p)
 
-	opts := &internal.ListWorkspacesOpts{
+	opts := &internal.ListOpts{
 		PageLen: p.PerPage,
 		Page:    p.Page,
-		Role:    "member",
 	}
 	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
 	if err != nil {
 		return nil, err
 	}
-	return convertWorkspaceList(resp.Values), nil
+	var workspaces []*internal.Workspace
+	for _, access := range resp.Values {
+		if access.Workspace != nil {
+			workspaces = append(workspaces, access.Workspace)
+		}
+	}
+	return convertWorkspaceList(workspaces), nil
 }
 
 // Repo returns the named Bitbucket repository.
@@ -172,7 +181,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if err != nil {
 		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
 	}
-	perm, err := client.GetPermission(repo.FullName)
+	perm, err := client.GetPermission(owner, repo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -192,31 +201,36 @@ func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 
 	client := c.newClient(ctx, u)
 
-	resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
+	resp, err := client.ListWorkspaces(&internal.ListOpts{
 		Page:    p.Page,
 		PageLen: p.PerPage,
-		Role:    "member",
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	userPermissions, err := client.ListPermissionsAll()
-	if err != nil {
-		return nil, err
-	}
-
-	userPermissionsByRepo := make(map[string]*internal.RepoPerm)
-	for _, permission := range userPermissions {
-		userPermissionsByRepo[permission.Repo.FullName] = permission
-	}
-
 	var all []*model.Repo
-	for _, workspace := range resp.Values {
+	for _, access := range resp.Values {
+		if access.Workspace == nil {
+			continue
+		}
+		workspace := access.Workspace
+
 		repos, err := client.ListReposAll(workspace.Slug)
 		if err != nil {
 			return nil, err
 		}
+
+		userPermissions, err := client.ListPermissionsAll(workspace.Slug)
+		if err != nil {
+			return nil, err
+		}
+
+		userPermissionsByRepo := make(map[string]*internal.RepoPerm)
+		for _, permission := range userPermissions {
+			userPermissionsByRepo[permission.Repo.FullName] = permission
+		}
+
 		for _, repo := range repos {
 			if perm, ok := userPermissionsByRepo[repo.FullName]; ok {
 				all = append(all, convertRepo(repo, perm))
@@ -303,6 +317,11 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		Key:   common.GetPipelineStatusContext(repo, pipeline, workflow),
 		URL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
 	}
+
+	if pipeline.Event == model.EventPush || pipeline.IsPullRequest() {
+		status.Refname = pipeline.Branch
+	}
+
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
 
