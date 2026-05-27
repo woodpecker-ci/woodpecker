@@ -86,7 +86,7 @@ func (s storage) orgFindByName(sess *xorm.Session, name string, forgeID int64) (
 func (s storage) OrgLookup(name string) (*model.Org, error) {
 	var orgs []*model.Org
 	// we limit to 2 orgs, if we have >= 2 we return an error anyways.
-	err := s.engine.Where("LOWER(name) = ?", strings.ToLower(name)).Limit(2).Find(&orgs)
+	err := s.engine.Where("LOWER(name) = ?", strings.ToLower(name)).Limit(2).Find(&orgs) //nolint:mnd
 	if err != nil {
 		return nil, err
 	}
