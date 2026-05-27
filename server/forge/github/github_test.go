@@ -22,10 +22,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v88/github"
 	github_mock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/github/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -148,7 +149,8 @@ func TestHook(t *testing.T) {
 	)
 
 	// Create a GitHub client with the mocked HTTP client
-	gh := github.NewClient(mockedHTTPClient)
+	gh, err := github.NewClient(github.WithHTTPClient(mockedHTTPClient))
+	require.NoError(t, err)
 
 	// Use the custom type as the key
 	ctx := context.WithValue(context.Background(), githubClientKey, gh)

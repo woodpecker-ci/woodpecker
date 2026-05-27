@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package step_builder
+package metadata
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func TestMetadataFromStruct(t *testing.T) {
+func TestGetWorkflowMetadata(t *testing.T) {
 	forge := mocks.NewMockForge(t)
 	forge.On("Name").Return("gitea")
 	forge.On("URL").Return("https://gitea.com")
@@ -34,7 +35,7 @@ func TestMetadataFromStruct(t *testing.T) {
 		forge            metadata.ServerForge
 		repo             *model.Repo
 		pipeline, prev   *model.Pipeline
-		workflow         *model.Workflow
+		workflow         *builder.Workflow
 		sysURL           string
 		expectedMetadata metadata.Metadata
 		expectedEnviron  map[string]string
@@ -60,7 +61,7 @@ func TestMetadataFromStruct(t *testing.T) {
 			repo:     &model.Repo{FullName: "testUser/testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
 			pipeline: &model.Pipeline{Number: 3, ChangedFiles: []string{"test.go", "markdown file.md"}},
 			prev:     &model.Pipeline{Number: 2},
-			workflow: &model.Workflow{Name: "hello"},
+			workflow: &builder.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
 				Forge: metadata.Forge{Type: "gitea", URL: "https://gitea.com"},
@@ -87,11 +88,32 @@ func TestMetadataFromStruct(t *testing.T) {
 				"CI_SYSTEM_NAME": "woodpecker", "CI_SYSTEM_URL": "https://example.com", "CI_WORKFLOW_NAME": "hello", "CI_WORKFLOW_NUMBER": "0",
 			},
 		},
+		{
+			name:     "Test with Pipeline RerunCount",
+			pipeline: &model.Pipeline{Number: 3, Parent: 2, RerunCount: 1},
+			expectedMetadata: metadata.Metadata{Sys: metadata.System{Name: "woodpecker"}, Curr: metadata.Pipeline{
+				Number:     3,
+				Parent:     2,
+				RerunCount: 1,
+			}},
+			expectedEnviron: map[string]string{
+				"CI":                  "woodpecker",
+				"CI_PIPELINE_CREATED": "0", "CI_PIPELINE_FILES": "[]", "CI_PIPELINE_NUMBER": "3",
+				"CI_PIPELINE_PARENT": "2", "CI_PIPELINE_STARTED": "0", "CI_PIPELINE_URL": "/repos/0/pipeline/3",
+				"CI_PIPELINE_RERUNS":        "1",
+				"CI_PREV_PIPELINE_CREATED":  "0",
+				"CI_PREV_PIPELINE_FINISHED": "0", "CI_PREV_PIPELINE_NUMBER": "0", "CI_PREV_PIPELINE_PARENT": "0",
+				"CI_PREV_PIPELINE_STARTED": "0", "CI_PREV_PIPELINE_URL": "/repos/0/pipeline/0",
+				"CI_REPO_PRIVATE": "false", "CI_REPO_TRUSTED": "false", "CI_REPO_TRUSTED_NETWORK": "false", "CI_REPO_TRUSTED_SECURITY": "false", "CI_REPO_TRUSTED_VOLUMES": "false",
+				"CI_STEP_NUMBER": "0", "CI_STEP_URL": "/repos/0/pipeline/3", "CI_SYSTEM_NAME": "woodpecker",
+				"CI_WORKFLOW_NUMBER": "0",
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.workflow, testCase.sysURL)
+			result := NewServerMetadata(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL).GetWorkflowMetadata(testCase.workflow)
 			assert.EqualValues(t, testCase.expectedMetadata, result)
 			assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
 		})

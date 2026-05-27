@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,36 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+//go:build windows
+
+package local
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
+	"context"
+	"os/exec"
 )
 
-func TestSortByName(t *testing.T) {
-	fm := []*FileMeta{
-		{
-			Name: "a",
-		},
-		{
-			Name: "c",
-		},
-		{
-			Name: "b",
-		},
-	}
+func newCmd(ctx context.Context, binary string, args ...string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, binary, args...)
 
-	assert.Equal(t, []*FileMeta{
-		{
-			Name: "a",
-		},
-		{
-			Name: "b",
-		},
-		{
-			Name: "c",
-		},
-	}, SortByName(fm))
+	return cmd
 }

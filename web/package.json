@@ -3,6 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
+  "packageManager": "pnpm@11.3.0",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -37,13 +38,13 @@
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^8.2.0",
+    "@antfu/eslint-config": "^9.0.0",
     "@eslint/js": "^10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
-    "@intlify/eslint-plugin-vue-i18n": "4.3.0",
+    "@intlify/eslint-plugin-vue-i18n": "4.4.0",
     "@intlify/unplugin-vue-i18n": "^11.0.7",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "4.2.2",
+    "@tailwindcss/vite": "4.3.0",
     "@types/node": "^24.12.2",
     "@types/prismjs": "^1.26.6",
     "@types/semver": "^7.7.1",
@@ -57,19 +58,14 @@
     "eslint-plugin-vue-scoped-css": "^3.0.0",
     "jsdom": "^29.0.2",
     "prettier": "^3.8.3",
-    "prettier-plugin-tailwindcss": "^0.7.2",
+    "prettier-plugin-tailwindcss": "^0.8.0",
     "tinycolor2": "^1.6.0",
     "ts-node": "^10.9.2",
-    "typescript": "6.0.2",
+    "typescript": "6.0.3",
     "vite": "^8.0.5",
     "vite-plugin-prismjs": "^0.0.11",
     "vite-svg-loader": "^5.1.1",
     "vitest": "^4.1.4",
     "vue-tsc": "^3.2.6"
-  },
-  "pnpm": {
-    "overrides": {
-      "semver@<7.5.2": ">=7.5.2"
-    }
   }
 }

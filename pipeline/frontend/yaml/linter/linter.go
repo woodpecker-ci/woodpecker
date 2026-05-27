@@ -125,10 +125,12 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 	var linterErr error
 	for _, container := range config.Workflow.Clone.ContainerList {
 		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
-			linterErr = multierr.Append(linterErr,
+			linterErr = multierr.Append(
+				linterErr,
 				newLinterError(
 					"Specified clone image does not match allow list, netrc is not injected",
-					config.File, fmt.Sprintf("clone.%s", container.Name), true),
+					config.File, fmt.Sprintf("clone.%s", container.Name), true,
+				),
 			)
 		}
 	}
@@ -182,13 +184,15 @@ func (l *Linter) lintDependsOn(config *WorkflowConfig, c *types.Container, area 
 	for _, dep := range c.DependsOn {
 		if slices.ContainsFunc(
 			config.Workflow.Steps.ContainerList,
-			func(step *types.Container) bool { return dep.Name == step.Name }) {
+			func(step *types.Container) bool { return dep.Name == step.Name },
+		) {
 			continue
 		}
 		if dep.Optional {
 			continue
 		}
-		linterErr = multierr.Append(linterErr,
+		linterErr = multierr.Append(
+			linterErr,
 			newLinterError(
 				"One or more of the specified dependencies do not exist",
 				config.File, fmt.Sprintf("%s.%s.depends_on", area, c.Name), false,

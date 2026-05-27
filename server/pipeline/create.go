@@ -21,7 +21,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -57,7 +56,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	// If the forge has a refresh token, the current access token
+	// If the repoUser has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
 	forge.Refresh(ctx, _forge, _store, repoUser)
@@ -94,12 +93,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
 	}
 
-	pipelineItems, parseErr := parsePipeline(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
-	if pipeline_errors.HasBlockingErrors(parseErr) {
+	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
+	*pipeline = *currentPipeline
+	if handleParseErrors(pipeline, parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
-	} else if parseErr != nil {
-		pipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("createPipelineItems failed: %w", err)
 	}
 
 	if len(pipelineItems) == 0 {
@@ -110,8 +111,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 		return nil, ErrFiltered
 	}
-
-	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
 
 	// persist the pipeline config for historical correctness, restarts, etc
 	var configs []*model.Config
@@ -131,10 +130,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	if err := prepareStart(ctx, _forge, _store, pipeline, repoUser, repo); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error preparing pipeline for %s#%d", repo.FullName, pipeline.Number)
-		return nil, err
-	}
+	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 
 	if pipeline.Status == model.StatusBlocked {
 		return pipeline, nil

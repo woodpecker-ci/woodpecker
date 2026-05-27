@@ -30,8 +30,13 @@ import (
 )
 
 const (
-	mergeRefs               = "refs/merge-requests/%d/head" // merge request merged with base
-	VisibilityLevelInternal = 10
+	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
+
+	// GitLab project visibility_level values, as sent in webhook payloads.
+	// See https://docs.gitlab.com/api/projects/#project-visibility-level.
+	visibilityLevelPrivate  = 0
+	visibilityLevelInternal = 10
+	visibilityLevelPublic   = 20
 
 	stateOpened = "opened"
 
@@ -219,7 +224,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 
 	author := lastCommit.Author
 
-	pipeline.Author = author.Name
+	pipeline.Author = hook.User.Username
 	pipeline.Email = author.Email
 
 	if len(pipeline.Email) != 0 {
@@ -251,12 +256,21 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
 
+	// GitLab does not send `project.visibility` (string) in push event
+	// payloads — only `project.visibility_level` (numeric), which the
+	// go-gitlab library does not expose on PushEventProject. So this switch
+	// is a no-op for real-world payloads, leaving Visibility/IsSCMPrivate
+	// at zero values. model.Repo.Update() must therefore guard against
+	// overwriting the value previously synced via the forge API.
 	switch hook.Project.Visibility {
 	case gitlab.PrivateVisibility:
+		repo.Visibility = model.VisibilityPrivate
 		repo.IsSCMPrivate = true
 	case gitlab.InternalVisibility:
+		repo.Visibility = model.VisibilityInternal
 		repo.IsSCMPrivate = true
 	case gitlab.PublicVisibility:
+		repo.Visibility = model.VisibilityPublic
 		repo.IsSCMPrivate = false
 	}
 
@@ -265,11 +279,12 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
 
+	pipeline.Author = hook.UserUsername
+
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
 			pipeline.Timestamp = cm.Timestamp.Unix()
@@ -304,12 +319,17 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
 
+	// See note in convertPushHook: tag event payloads also omit
+	// `project.visibility`, so this switch typically does nothing.
 	switch hook.Project.Visibility {
 	case gitlab.PrivateVisibility:
+		repo.Visibility = model.VisibilityPrivate
 		repo.IsSCMPrivate = true
 	case gitlab.InternalVisibility:
+		repo.Visibility = model.VisibilityInternal
 		repo.IsSCMPrivate = true
 	case gitlab.PublicVisibility:
+		repo.Visibility = model.VisibilityPublic
 		repo.IsSCMPrivate = false
 	}
 
@@ -318,10 +338,10 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 	pipeline.Commit = hook.After
 	pipeline.Branch = refTag
 	pipeline.Ref = hook.Ref
+	pipeline.Author = hook.UserUsername
 
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
 			pipeline.Timestamp = cm.Timestamp.Unix()
@@ -353,7 +373,21 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
-	repo.IsSCMPrivate = hook.Project.VisibilityLevel > VisibilityLevelInternal
+
+	// Release events expose visibility as a numeric level (unlike push/tag
+	// which omit it from the payload entirely). Map it to both Visibility
+	// and IsSCMPrivate so model.Repo.Update() will propagate the value.
+	switch hook.Project.VisibilityLevel {
+	case visibilityLevelPrivate:
+		repo.Visibility = model.VisibilityPrivate
+		repo.IsSCMPrivate = true
+	case visibilityLevelInternal:
+		repo.Visibility = model.VisibilityInternal
+		repo.IsSCMPrivate = true
+	case visibilityLevelPublic:
+		repo.Visibility = model.VisibilityPublic
+		repo.IsSCMPrivate = false
+	}
 
 	pipeline := &model.Pipeline{
 		Event:    model.EventRelease,
@@ -361,8 +395,11 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		ForgeURL: hook.URL,
 		Message:  fmt.Sprintf("created release %s", hook.Name),
 		Sender:   hook.Commit.Author.Name,
-		Author:   hook.Commit.Author.Name,
-		Email:    hook.Commit.Author.Email,
+		// Using the commit author here as Gitlab does not send the hook user.
+		// This is not an issue because releases can be created by users with
+		// push permissions only anyways.
+		Author: hook.Commit.Author.Name,
+		Email:  hook.Commit.Author.Email,
 
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)

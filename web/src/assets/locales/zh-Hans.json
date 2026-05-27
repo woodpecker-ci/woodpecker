@@ -2,8 +2,8 @@
     "admin": {
         "settings": {
             "agents": {
-                "add": "添加 Agent",
-                "agents": "Agents",
+                "add": "添加代理",
+                "agents": "代理",
                 "backend": {
                     "backend": "后端",
                     "badge": "后端"
@@ -13,11 +13,11 @@
                     "capacity": "容量",
                     "desc": "该 Agent 并行执行流水线的最大数量。"
                 },
-                "created": "已创建 Agent",
+                "created": "已创建代理",
                 "delete_agent": "删除 Agent",
                 "delete_confirm": "你真的要删除该 Agent 吗？删除后它将无法再次连接到此服务器。",
-                "deleted": "已删除 Agent",
-                "desc": "注册到此服务器的 Agents。",
+                "deleted": "已删除代理",
+                "desc": "注册到此服务器的代理。",
                 "edit_agent": "编辑 Agent",
                 "id": "ID",
                 "last_contact": {
@@ -26,21 +26,21 @@
                 },
                 "name": {
                     "name": "名称",
-                    "placeholder": "Agent 名称"
+                    "placeholder": "代理名称"
                 },
                 "never": "从未",
                 "no_schedule": {
-                    "name": "禁用 Agent",
-                    "placeholder": "阻止 Agent 接受新任务"
+                    "name": "禁用代理",
+                    "placeholder": "阻止代理接受新任务"
                 },
-                "none": "还未添加任何 Agents.",
+                "none": "还未添加任何代理。",
                 "platform": {
                     "badge": "平台",
                     "platform": "平台"
                 },
-                "save": "保存 Agent",
-                "saved": "已保存 Agent",
-                "show": "显示 Agents",
+                "save": "保存代理",
+                "saved": "已保存代理",
+                "show": "查看代理",
                 "token": "Token",
                 "version": "版本",
                 "custom_labels": {
@@ -123,9 +123,10 @@
                 "add": "添加用户",
                 "admin": {
                     "admin": "管理员",
-                    "placeholder": "此用户是管理员"
+                    "placeholder": "此用户是管理员",
+                    "admin_warning": "由于您的环境配置，该用户拥有管理员权限。如果你在这里撤销权限，该用户下次登录时仍会重新获得管理员权限。"
                 },
-                "avatar_url": "Avatar URL",
+                "avatar_url": "头像链接",
                 "cancel": "取消",
                 "created": "用户已创建",
                 "delete_confirm": "你真的想删除这个用户吗？这也将删除该用户拥有的所有存储库。",
@@ -133,8 +134,8 @@
                 "deleted": "删除用户",
                 "desc": "在此服务器上注册的用户。",
                 "edit_user": "编辑用户",
-                "email": "Email",
-                "login": "登录",
+                "email": "邮箱",
+                "login": "用户名",
                 "none": "还没有任何用户。",
                 "save": "保存用户",
                 "saved": "已保存用户",
@@ -190,7 +191,7 @@
             },
             "settings": "设置",
             "agents": {
-                "desc": "注册到此组织的 Agents。"
+                "desc": "注册到此组织代理。"
             },
             "registries": {
                 "desc": "可以为组织添加注册表凭据，以便在所有流水线中使用私有镜像。"
@@ -259,7 +260,9 @@
                 "restart": "重启",
                 "restart_success": "流水线已重启",
                 "log_delete": "删除",
-                "skipped": "此步骤已被跳过。"
+                "skipped": "此步骤已被跳过。",
+                "expand_all": "展开全部",
+                "collapse_all": "收起全部"
             },
             "config": "配置",
             "errors": "错误",
@@ -394,10 +397,14 @@
                 "saved": "计划已保存",
                 "schedule": {
                     "placeholder": "计划任务",
-                    "title": "计划任务（基于 UTC）"
+                    "title": "计划任务"
                 },
                 "show": "显示所有计划",
-                "enabled": "启用"
+                "enabled": "启用",
+                "next_exec_local": "下一次执行时间: {local}",
+                "next_exec_both": "下一次执行时间: {local} ({zoned} {timezone})",
+                "timezone": "时区",
+                "your_timezone": "使用你的当前浏览器时区。"
             },
             "general": {
                 "allow_pr": {
@@ -411,7 +418,8 @@
                 "general": "项目",
                 "netrc_only_trusted": {
                     "desc": "可获取用于克隆或推送仓库至代码托管平台的 netrc 凭证的插件。",
-                    "netrc_only_trusted": "自定义信任的插件"
+                    "netrc_only_trusted": "自定义信任的插件",
+                    "placeholder": "插件镜像"
                 },
                 "pipeline_path": {
                     "default": "默认: .woodpecker/*.yml -> .woodpecker.yml",
@@ -633,7 +641,7 @@
     "abort": "中止",
     "cli_login_success": "登录到 CLI 成功",
     "cli_login_failed": "登录到 CLI 失败",
-    "cli_login_denied": "登录 CLI 被拒绝",
+    "cli_login_denied": "登录到 CLI 时被拒绝",
     "login_to_cli_description": "点击继续以登录到 CLI。",
     "return_to_cli": "您现在可以关闭此选项卡并返回 CLI。",
     "login_with": "使用 {forge} 登录",
