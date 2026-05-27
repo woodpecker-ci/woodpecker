@@ -702,6 +702,40 @@ depends_on:
 		}
 		assert.Equal(t, base.DependsOn{{Name: "check-a"}}, deploy.DependsOn)
 	})
+
+	t.Run("optional dep on workflow removed for own missing required dep is dropped", func(t *testing.T) {
+		b := PipelineBuilder{
+			GetWorkflowMetadata: m.GetWorkflowMetadata,
+			RepoTrusted:         &metadata.TrustedConfiguration{},
+			Yamls: []*YamlFile{
+				{Name: "broken", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: check
+    image: scratch
+depends_on:
+  - missing
+`)},
+				{Name: "deploy", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: deploy
+    image: scratch
+depends_on:
+  - name: broken
+    optional: true
+`)},
+			},
+		}
+
+		items, err := b.Build()
+		assert.NoError(t, err)
+		assert.Len(t, items, 1, "deploy should survive: its only dep is optional and the target was removed")
+		assert.Equal(t, "deploy", items[0].Workflow.Name)
+		assert.Empty(t, items[0].DependsOn, "optional dep on a removed workflow should be dropped")
+	})
 }
 
 func TestInvalidYAML(t *testing.T) {

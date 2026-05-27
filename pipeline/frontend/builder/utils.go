@@ -29,28 +29,47 @@ func SanitizePath(path string) string {
 	return path
 }
 
-func filterItemsWithMissingDependencies(items []*Item) []*Item {
-	itemsToRemove := make([]*Item, 0)
-
-	for _, item := range items {
-		for _, dep := range item.DependsOn {
-			if !ContainsItemWithName(dep.Name, items) {
-				itemsToRemove = append(itemsToRemove, item)
-			}
-		}
-	}
-
-	if len(itemsToRemove) > 0 {
-		filtered := make([]*Item, 0)
+// filterMissingDependencies drops items with missing required deps and
+// drops missing optional deps from items that survive. Loops until stable
+// so a transitive removal doesn't kill an optional consumer.
+func filterMissingDependencies(items []*Item) []*Item {
+	for {
+		kept := make([]*Item, 0, len(items))
+		changed := false
 		for _, item := range items {
-			if !ContainsItemWithName(item.Workflow.Name, itemsToRemove) {
-				filtered = append(filtered, item)
+			var resolved base.DependsOn
+			missingRequired := false
+			for _, dep := range item.DependsOn {
+				if ContainsItemWithName(dep.Name, items) {
+					resolved = append(resolved, dep)
+					continue
+				}
+				if dep.Optional {
+					changed = true
+					continue
+				}
+				missingRequired = true
+				break
 			}
+			if missingRequired {
+				changed = true
+				continue
+			}
+			item.DependsOn = resolved
+			kept = append(kept, item)
 		}
-		// Recursive to handle transitive deps
-		return filterItemsWithMissingDependencies(filtered)
+		items = kept
+		if !changed {
+			break
+		}
 	}
 
+	// surviving deps are all present; flag is no longer relevant
+	for _, item := range items {
+		for i := range item.DependsOn {
+			item.DependsOn[i].Optional = false
+		}
+	}
 	return items
 }
 
@@ -61,21 +80,4 @@ func ContainsItemWithName(name string, items []*Item) bool {
 		}
 	}
 	return false
-}
-
-// resolveOptionalDependencies drops optional dependencies whose target
-// workflow is not present in the pipeline. Required dependencies are
-// left untouched (filterItemsWithMissingDependencies handles them).
-func resolveOptionalDependencies(items []*Item) []*Item {
-	for _, item := range items {
-		var resolved base.DependsOn
-		for _, dep := range item.DependsOn {
-			if dep.Optional && !ContainsItemWithName(dep.Name, items) {
-				continue
-			}
-			resolved = append(resolved, base.Dependency{Name: dep.Name})
-		}
-		item.DependsOn = resolved
-	}
-	return items
 }
