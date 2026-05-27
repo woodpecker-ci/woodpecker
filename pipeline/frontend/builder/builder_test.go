@@ -539,6 +539,8 @@ depends_on:
 func TestDependsOnOptionalFlag(t *testing.T) {
 	t.Parallel()
 
+	m := &testMetadata{}
+
 	t.Run("missing optional dep is dropped", func(t *testing.T) {
 		b := PipelineBuilder{
 			GetWorkflowMetadata: m.GetWorkflowMetadata,
