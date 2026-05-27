@@ -37,11 +37,13 @@ func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.Mock
 	m.On("URL").Return("https://forge.example.test").Maybe()
 
 	// we just use multi workflows
-	m.On("File",
+	m.On(
+		"File",
 		mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
 	).Return(nil, nil).Maybe()
 
-	m.On("Dir",
+	m.On(
+		"Dir",
 		mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker",
 	).Return(files, nil).Maybe()
 
