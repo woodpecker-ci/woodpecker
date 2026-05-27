@@ -43,7 +43,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#6659](https://github.com/woodpecker-ci/woodpecker/pull/6659)]
 - Add note about extension permission [[#6646](https://github.com/woodpecker-ci/woodpecker/pull/6646)]
 - Add GitHub OAuth App setup hint to docker-compose page [[#6643](https://github.com/woodpecker-ci/woodpecker/pull/6643)]
 - Update pnpm to v11.3.0 [[#6639](https://github.com/woodpecker-ci/woodpecker/pull/6639)]
@@ -61,6 +60,8 @@
 
 ### 📦️ Dependency
 
+- Update dependency uuid to v14 [[#6658](https://github.com/woodpecker-ci/woodpecker/pull/6658)]
+- Lock file maintenance [[#6659](https://github.com/woodpecker-ci/woodpecker/pull/6659)]
 - Update golang-packages [[#6637](https://github.com/woodpecker-ci/woodpecker/pull/6637)]
 - Update web npm deps non-major [[#6638](https://github.com/woodpecker-ci/woodpecker/pull/6638)]
 - Lock file maintenance [[#6640](https://github.com/woodpecker-ci/woodpecker/pull/6640)]
