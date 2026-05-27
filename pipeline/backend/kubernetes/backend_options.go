@@ -33,6 +33,7 @@ type BackendOptions struct {
 	Affinity           *kube_core_v1.Affinity `mapstructure:"affinity"`
 	SecurityContext    *SecurityContext       `mapstructure:"securityContext"`
 	Secrets            []SecretRef            `mapstructure:"secrets"`
+	WorkspaceVolume    *bool                  `mapstructure:"workspaceVolume"`
 }
 
 // Resources defines two maps for kubernetes resource definitions.
