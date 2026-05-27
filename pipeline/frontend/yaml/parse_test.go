@@ -284,7 +284,9 @@ func TestReSerialize(t *testing.T) {
 	workBin2, err := yaml.Marshal(work2)
 	require.NoError(t, err)
 
-	// TODO: fix "steps.[1].depends_on: []" to be re-serialized!
+	// `depends_on: []` on the build step round-trips intact; an empty
+	// list keeps the step in DAG mode rather than silently dropping back
+	// to sequential.
 	assert.EqualValues(t, `when:
     - status:
         - success
@@ -308,6 +310,7 @@ steps:
     - name: build
       image: golang
       commands: go build
+      depends_on: []
       when:
         event: push
     - name: notify
