@@ -40,7 +40,7 @@ func newDAGCompiler(steps []*dagCompilerStep) dagCompiler {
 
 func (c dagCompiler) isDAG() bool {
 	for _, v := range c.steps {
-		if v.dependsOn != nil {
+		if !v.dependsOn.IsZero() {
 			return true
 		}
 	}
