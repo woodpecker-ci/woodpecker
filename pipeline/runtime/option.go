@@ -16,6 +16,7 @@ package runtime
 
 import (
 	"context"
+	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
@@ -56,5 +57,13 @@ func WithDescription(desc map[string]string) Option {
 func WithTaskUUID(uuid string) Option {
 	return func(r *Runtime) {
 		r.taskUUID = uuid
+	}
+}
+
+// WithUploadWaitTimeout sets how long Run waits for log-upload goroutines to
+// finish after DestroyWorkflow. Defaults to 30s when unset or zero.
+func WithUploadWaitTimeout(d time.Duration) Option {
+	return func(r *Runtime) {
+		r.uploadWaitTimeout = d
 	}
 }

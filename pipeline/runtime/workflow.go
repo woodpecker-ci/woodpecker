@@ -77,10 +77,25 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	// Now we can shutdown the workflow
 	destroyWorkflowFunc()
 
-	// Ensure all logs/traces are uploaded before finishing
+	// Ensure all logs/traces are uploaded before finishing, with a timeout so
+	// a hung log-upload goroutine (e.g. a service container that is slow to
+	// stop after DestroyWorkflow) cannot prevent the agent from exiting cleanly.
+	timeout := r.uploadWaitTimeout
+	if timeout == 0 {
+		timeout = 30 * time.Second
+	}
 	logger.Debug().Msg("waiting for logs and traces upload")
-	r.uploadWait.Wait()
-	logger.Debug().Msg("logs and traces uploaded")
+	uploadDone := make(chan struct{})
+	go func() {
+		r.uploadWait.Wait()
+		close(uploadDone)
+	}()
+	select {
+	case <-uploadDone:
+		logger.Debug().Msg("logs and traces uploaded")
+	case <-time.After(timeout):
+		logger.Warn().Msgf("timed out waiting for logs and traces upload after %s, proceeding with cleanup", timeout)
+	}
 
 	return r.err.Get()
 }

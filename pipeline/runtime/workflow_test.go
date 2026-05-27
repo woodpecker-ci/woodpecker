@@ -21,6 +21,7 @@ import (
 	"errors"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -391,4 +392,38 @@ func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 	// (or at least not the same canceled one).
 	assert.NotEqual(t, runnerCtx, destroyCtx,
 		"DestroyWorkflow should receive the shutdown fallback context, not the canceled runnerCtx")
+}
+
+func TestRunUploadWaitTimeout(t *testing.T) {
+	t.Parallel()
+	// Regression test: a hung log-upload goroutine (e.g. a service container
+	// still streaming logs after DestroyWorkflow) must not block Run forever.
+	// WithUploadWaitTimeout lets tests use a very short deadline instead of 30s.
+	r := New(
+		&backend_types.Config{
+			Stages: []*backend_types.Stage{{
+				Steps: []*backend_types.Step{{
+					Name: "build", UUID: "u1",
+					Type: backend_types.StepTypeCommands, OnSuccess: true,
+					Environment: map[string]string{}, Commands: []string{"echo hello"},
+				}},
+			}},
+		},
+		dummy.New(),
+		WithTracer(newTestTracer(t)),
+		WithLogger(newTestLogger(t)),
+		WithUploadWaitTimeout(5*time.Millisecond),
+	)
+
+	// Simulate a hung log-upload goroutine by holding uploadWait open without
+	// a corresponding Done — exactly what happens when a service container
+	// keeps streaming logs after DestroyWorkflow.
+	r.uploadWait.Add(1)
+
+	start := time.Now()
+	err := r.Run(t.Context())
+	elapsed := time.Since(start)
+
+	assert.NoError(t, err)                        // pipeline itself succeeded
+	assert.Less(t, elapsed, 5*time.Second)        // did not hang for the full default 30s
 }
