@@ -66,17 +66,17 @@ depends_on:
 		}, s.DependsOn)
 	})
 
-	t.Run("unmarshal empty array", func(t *testing.T) {
+	t.Run("empty array unmarshals non-nil (signals step DAG mode with no edges)", func(t *testing.T) {
 		s := StructDependsOn{}
 		assert.NoError(t, yaml.Unmarshal([]byte(`{depends_on: []}`), &s))
-		assert.NotNil(t, s.DependsOn)
+		assert.NotNil(t, s.DependsOn, "present-but-empty must stay non-nil; the step compiler treats nil as sequential and non-nil as DAG")
 		assert.Empty(t, s.DependsOn)
 	})
 
-	t.Run("unmarshal absent", func(t *testing.T) {
+	t.Run("absent key unmarshals nil (signals sequential step execution)", func(t *testing.T) {
 		s := StructDependsOn{}
 		assert.NoError(t, yaml.Unmarshal([]byte(`{}`), &s))
-		assert.Nil(t, s.DependsOn)
+		assert.Nil(t, s.DependsOn, "absent must stay nil; otherwise plain step lists would be forced into DAG mode")
 	})
 
 	t.Run("unmarshal object missing name", func(t *testing.T) {
@@ -111,12 +111,53 @@ func TestDependsOnMarshal(t *testing.T) {
 		assert.Equal(t, "depends_on:\n    - name: lint\n    - name: test\n      optional: true\n", string(out))
 	})
 
-	t.Run("empty omitted", func(t *testing.T) {
+	t.Run("nil omitted", func(t *testing.T) {
 		s := StructDependsOn{}
 		out, err := yaml.Marshal(s)
 		assert.NoError(t, err)
 		assert.Equal(t, "{}\n", string(out))
 	})
+
+	t.Run("non-nil empty marshals as empty array (preserves step DAG mode signal)", func(t *testing.T) {
+		s := StructDependsOn{DependsOn: DependsOn{}}
+		out, err := yaml.Marshal(s)
+		assert.NoError(t, err)
+		assert.Equal(t, "depends_on: []\n", string(out), "non-nil empty must serialise as []; omitting it would flip step execution from DAG to sequential on the next read")
+	})
+}
+
+// TestDependsOnRoundTrip locks the marshal/unmarshal contract that the
+// step compiler relies on: nil means sequential, non-nil (even empty)
+// means DAG. The contract has to survive a serialise/deserialise cycle,
+// otherwise a config that round-trips through any tooling would silently
+// switch step execution mode.
+func TestDependsOnRoundTrip(t *testing.T) {
+	cases := []struct {
+		name string
+		in   DependsOn
+	}{
+		{"nil stays nil", nil},
+		{"non-nil empty stays non-nil empty", DependsOn{}},
+		{"single required", DependsOn{{Name: "lint"}}},
+		{"multiple required", DependsOn{{Name: "lint"}, {Name: "test"}}},
+		{"mixed required and optional", DependsOn{{Name: "lint"}, {Name: "test", Optional: true}}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			out, err := yaml.Marshal(StructDependsOn{DependsOn: tc.in})
+			assert.NoError(t, err)
+
+			var back StructDependsOn
+			assert.NoError(t, yaml.Unmarshal(out, &back))
+
+			if tc.in == nil {
+				assert.Nil(t, back.DependsOn)
+				return
+			}
+			assert.NotNil(t, back.DependsOn, "non-nil input must round-trip non-nil")
+			assert.Equal(t, tc.in, back.DependsOn)
+		})
+	}
 }
 
 func TestDependsOnHelpers(t *testing.T) {

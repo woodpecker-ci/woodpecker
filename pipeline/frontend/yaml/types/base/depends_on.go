@@ -87,13 +87,12 @@ func dependencyFromMap(m map[string]any) (Dependency, error) {
 	return dep, nil
 }
 
-// MarshalYAML implements custom YAML marshaling.
-// When all dependencies are non-optional, it marshals as a string (single)
-// or string array (multiple) for backward compatibility.
-// When any dependency is optional, it marshals as an object array.
+// MarshalYAML emits a single string for one required dep, a string array
+// for many, an object array if any dep is optional, and an empty array for
+// a non-nil empty slice (the step DAG-mode signal — see IsZero).
 func (d DependsOn) MarshalYAML() (any, error) {
 	if len(d) == 0 {
-		return nil, nil
+		return []string{}, nil
 	}
 
 	hasOptional := false
@@ -121,6 +120,13 @@ func (d DependsOn) MarshalYAML() (any, error) {
 		names[i] = dep.Name
 	}
 	return names, nil
+}
+
+// IsZero treats only a nil DependsOn as empty for omitempty purposes.
+// A non-nil empty slice means depends_on was present in the YAML, which
+// the step compiler reads as DAG mode (vs nil = sequential).
+func (d DependsOn) IsZero() bool {
+	return d == nil
 }
 
 // Names returns all dependency names.
