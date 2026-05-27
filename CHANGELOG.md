@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-26
+## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix org lookup panic [[#6652](https://github.com/woodpecker-ci/woodpecker/pull/6652)]
 - Deduplicate schema linter composition errors [[#6633](https://github.com/woodpecker-ci/woodpecker/pull/6633)]
 - local backend: on linux / mac start commands in own process group and kill the group on cancel [[#6609](https://github.com/woodpecker-ci/woodpecker/pull/6609)]
 - k8s: add guards to stop pipeline services upon completion [[#6623](https://github.com/woodpecker-ci/woodpecker/pull/6623)]
