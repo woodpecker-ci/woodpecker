@@ -107,6 +107,7 @@
 
 ### Misc
 
+- flake.lock: Update [[#6656](https://github.com/woodpecker-ci/woodpecker/pull/6656)]
 - Use "sign in/out" [[#6579](https://github.com/woodpecker-ci/woodpecker/pull/6579)]
 
 ## [3.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.14.1) - 2026-05-12
