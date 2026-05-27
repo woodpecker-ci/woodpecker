@@ -178,18 +178,21 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	// configure volumes for local execution
 	volumes := c.StringSlice("volumes")
 	if c.Bool("local") {
-		compilerOpts = append(compilerOpts,
+		compilerOpts = append(
+			compilerOpts,
 			compiler.WithWorkspace(
 				c.String("workspace-base"),
 				c.String("workspace-path"),
 			),
 		)
-		volumes = append(volumes,
+		volumes = append(
+			volumes,
 			prefix+"_default:"+c.String("workspace-base"),
 			repoPath+":"+c.String("workspace-base")+"/"+c.String("workspace-path"),
 		)
 	} else {
-		compilerOpts = append(compilerOpts,
+		compilerOpts = append(
+			compilerOpts,
 			compiler.WithWorkspace(
 				c.String("workspace-base"),
 				c.String("workspace-path"),

@@ -72,12 +72,14 @@ steps:
 	r.Close()
 	stdout := buf.String()
 
-	assert.Contains(t, stdout,
+	assert.Contains(
+		t, stdout,
 		`[build:L0:0s] StepName: build
 [build:L1:0s] StepType: commands
 [build:L2:0s] StepUUID: `,
 	)
-	assert.Contains(t, stdout,
+	assert.Contains(
+		t, stdout,
 		`[build:L3:0s] StepCommands:
 [build:L4:0s] ------------------
 [build:L5:0s] echo hello
