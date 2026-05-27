@@ -394,6 +394,74 @@ func (_c *MockStore_AgentListForOrg_Call) RunAndReturn(run func(orgID int64, opt
 	return _c
 }
 
+// AgentListForRepo provides a mock function for the type MockStore
+func (_mock *MockStore) AgentListForRepo(repoID int64, opt *model.ListOptions) ([]*model.Agent, error) {
+	ret := _mock.Called(repoID, opt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AgentListForRepo")
+	}
+
+	var r0 []*model.Agent
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptions) ([]*model.Agent, error)); ok {
+		return returnFunc(repoID, opt)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptions) []*model.Agent); ok {
+		r0 = returnFunc(repoID, opt)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Agent)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, *model.ListOptions) error); ok {
+		r1 = returnFunc(repoID, opt)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_AgentListForRepo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentListForRepo'
+type MockStore_AgentListForRepo_Call struct {
+	*mock.Call
+}
+
+// AgentListForRepo is a helper method to define mock.On call
+//   - repoID int64
+//   - opt *model.ListOptions
+func (_e *MockStore_Expecter) AgentListForRepo(repoID interface{}, opt interface{}) *MockStore_AgentListForRepo_Call {
+	return &MockStore_AgentListForRepo_Call{Call: _e.mock.On("AgentListForRepo", repoID, opt)}
+}
+
+func (_c *MockStore_AgentListForRepo_Call) Run(run func(repoID int64, opt *model.ListOptions)) *MockStore_AgentListForRepo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 *model.ListOptions
+		if args[1] != nil {
+			arg1 = args[1].(*model.ListOptions)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_AgentListForRepo_Call) Return(agents []*model.Agent, err error) *MockStore_AgentListForRepo_Call {
+	_c.Call.Return(agents, err)
+	return _c
+}
+
+func (_c *MockStore_AgentListForRepo_Call) RunAndReturn(run func(repoID int64, opt *model.ListOptions) ([]*model.Agent, error)) *MockStore_AgentListForRepo_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AgentUpdate provides a mock function for the type MockStore
 func (_mock *MockStore) AgentUpdate(agent *model.Agent) error {
 	ret := _mock.Called(agent)

@@ -518,7 +518,7 @@ func PatchRepoAgent(c *gin.Context) {
 	agent.Name = in.Name
 	agent.NoSchedule = in.NoSchedule
 	if agent.NoSchedule {
-		server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+		server.Config.Services.Scheduler.KickAgentWorkers(agent.ID)
 	}
 
 	if err := _store.AgentUpdate(agent); err != nil {
@@ -561,7 +561,7 @@ func DeleteRepoAgent(c *gin.Context) {
 	}
 
 	// Check if the agent has any running tasks
-	info := server.Config.Services.Queue.Info(c)
+	info := server.Config.Services.Scheduler.Info(c)
 	for _, task := range info.Running {
 		if task.AgentID == agent.ID {
 			c.String(http.StatusConflict, "Agent has running tasks")
@@ -570,7 +570,7 @@ func DeleteRepoAgent(c *gin.Context) {
 	}
 
 	// Kick workers to remove the agent from the queue
-	server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+	server.Config.Services.Scheduler.KickAgentWorkers(agent.ID)
 
 	if err := _store.AgentDelete(agent); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting agent. %s", err)
