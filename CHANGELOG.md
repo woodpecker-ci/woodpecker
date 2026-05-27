@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Use Gitlab username [[#6653](https://github.com/woodpecker-ci/woodpecker/pull/6653)]
 - Update uuid [[#6647](https://github.com/woodpecker-ci/woodpecker/pull/6647)]
 - server: for grpc store extracted agentID in context [[#6569](https://github.com/woodpecker-ci/woodpecker/pull/6569)]
 
