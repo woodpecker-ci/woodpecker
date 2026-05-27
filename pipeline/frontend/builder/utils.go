@@ -18,7 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
 func SanitizePath(path string) string {
@@ -37,7 +37,7 @@ func filterMissingDependencies(items []*Item) []*Item {
 		kept := make([]*Item, 0, len(items))
 		changed := false
 		for _, item := range items {
-			var resolved base.DependsOn
+			var resolved constraint.DependsOn
 			missingRequired := false
 			for _, dep := range item.DependsOn {
 				if ContainsItemWithName(dep.Name, items) {

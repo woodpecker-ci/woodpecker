@@ -23,7 +23,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {
@@ -578,7 +578,7 @@ depends_on:
 		if deploy.Workflow.Name != "deploy" {
 			deploy = items[1]
 		}
-		assert.Equal(t, base.DependsOn{{Name: "check-a"}}, deploy.DependsOn, "only check-a should remain as dependency")
+		assert.Equal(t, constraint.DependsOn{{Name: "check-a"}}, deploy.DependsOn, "only check-a should remain as dependency")
 	})
 
 	t.Run("present optional dep is promoted", func(t *testing.T) {
@@ -623,7 +623,7 @@ depends_on:
 				deploy = item
 			}
 		}
-		assert.ElementsMatch(t, base.DependsOn{{Name: "check-a"}, {Name: "check-b"}}, deploy.DependsOn, "both deps should be present")
+		assert.ElementsMatch(t, constraint.DependsOn{{Name: "check-a"}, {Name: "check-b"}}, deploy.DependsOn, "both deps should be present")
 	})
 
 	t.Run("missing required dep still removes workflow", func(t *testing.T) {
@@ -700,7 +700,7 @@ depends_on:
 				deploy = item
 			}
 		}
-		assert.Equal(t, base.DependsOn{{Name: "check-a"}}, deploy.DependsOn)
+		assert.Equal(t, constraint.DependsOn{{Name: "check-a"}}, deploy.DependsOn)
 	})
 
 	t.Run("optional dep on workflow removed for own missing required dep is dropped", func(t *testing.T) {

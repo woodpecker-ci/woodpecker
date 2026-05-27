@@ -18,14 +18,14 @@ import (
 	"sort"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
 type dagCompilerStep struct {
 	step      *backend_types.Step
 	position  int
 	name      string
-	dependsOn base.DependsOn
+	dependsOn constraint.DependsOn
 }
 
 type dagCompiler struct {
@@ -98,7 +98,7 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 	stages := make([]*backend_types.Stage, 0)
 
 	for name, step := range steps {
-		var resolved base.DependsOn
+		var resolved constraint.DependsOn
 		for _, dep := range step.dependsOn {
 			if _, ok := steps[dep.Name]; !ok {
 				if dep.Optional {

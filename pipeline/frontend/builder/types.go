@@ -18,13 +18,13 @@ import (
 	"sort"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
 type Item struct {
 	Workflow  *Workflow
 	Labels    map[string]string
-	DependsOn base.DependsOn
+	DependsOn constraint.DependsOn
 	RunsOn    []string
 	Config    *backend_types.Config
 }
