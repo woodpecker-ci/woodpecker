@@ -57,7 +57,8 @@
                 "declined": "已拒絕",
                 "canceled": "已取消",
                 "started": "已啟動",
-                "killed": "已終止"
+                "killed": "已終止",
+                "status": "狀態: {status}"
             },
             "load_more": "載入更多",
             "config": "配置",
@@ -123,10 +124,15 @@
                 },
                 "pipeline_path": {
                     "path": "Pipeline 路徑",
-                    "desc_path_example": "my/path/"
+                    "desc_path_example": "my/path/",
+                    "default": "預設: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml"
                 },
                 "allow_pr": {
                     "allow": "允許拉取請求"
+                },
+                "success": "專案設定已更新",
+                "netrc_only_trusted": {
+                    "placeholder": "外掛映像檔"
                 }
             },
             "badge": {
@@ -146,7 +152,8 @@
                 },
                 "run": "現在執行",
                 "branch": {
-                    "title": "分支"
+                    "title": "分支",
+                    "placeholder": "分支 (如果為空則使用預設分支)"
                 },
                 "name": {
                     "name": "名稱",
@@ -190,7 +197,7 @@
                 "desc": "只有你和其他儲存庫的擁有者可以看到這個專案。"
             },
             "internal": {
-                "internal": "內部的",
+                "internal": "內部",
                 "desc": "只有已認證的使用者可以看到這個專案。"
             }
         },
@@ -306,7 +313,7 @@
             "settings": "管理員設定"
         }
     },
-    "username": "帳號",
+    "username": "使用者名稱",
     "time": {
         "just_now": "剛剛",
         "not_started": "尚未開始"
