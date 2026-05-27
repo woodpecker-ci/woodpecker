@@ -43,6 +43,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#6659](https://github.com/woodpecker-ci/woodpecker/pull/6659)]
 - Add note about extension permission [[#6646](https://github.com/woodpecker-ci/woodpecker/pull/6646)]
 - Add GitHub OAuth App setup hint to docker-compose page [[#6643](https://github.com/woodpecker-ci/woodpecker/pull/6643)]
 - Update pnpm to v11.3.0 [[#6639](https://github.com/woodpecker-ci/woodpecker/pull/6639)]
