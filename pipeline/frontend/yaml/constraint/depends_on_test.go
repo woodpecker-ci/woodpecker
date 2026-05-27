@@ -122,13 +122,13 @@ func TestDependsOnMarshal(t *testing.T) {
 		s := StructDependsOn{DependsOn: DependsOn{}}
 		out, err := yaml.Marshal(s)
 		assert.NoError(t, err)
-		assert.Equal(t, "depends_on: []\n", string(out), "non-nil empty must serialise as []; omitting it would flip step execution from DAG to sequential on the next read")
+		assert.Equal(t, "depends_on: []\n", string(out), "non-nil empty must serialize as []; omitting it would flip step execution from DAG to sequential on the next read")
 	})
 }
 
 // TestDependsOnRoundTrip locks the marshal/unmarshal contract that the
 // step compiler relies on: nil means sequential, non-nil (even empty)
-// means DAG. The contract has to survive a serialise/deserialise cycle,
+// means DAG. The contract has to survive a serialize/deserialize cycle,
 // otherwise a config that round-trips through any tooling would silently
 // switch step execution mode.
 func TestDependsOnRoundTrip(t *testing.T) {
