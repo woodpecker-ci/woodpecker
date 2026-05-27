@@ -539,7 +539,11 @@ depends_on:
 func TestDependsOnOptionalFlag(t *testing.T) {
 	t.Parallel()
 
-	m := &testMetadata{}
+	m := &testMetadata{
+		pipelineEvent: metadata.EventPush,
+		branch:        "main",
+		repo:          "test-repo",
+	}
 
 	t.Run("missing optional dep is dropped", func(t *testing.T) {
 		b := PipelineBuilder{
