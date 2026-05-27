@@ -65,7 +65,8 @@ func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	client := config.Client(ctx,
+	client := config.Client(
+		ctx,
 		&oauth2.Token{
 			AccessToken: token,
 		},

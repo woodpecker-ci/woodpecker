@@ -46,12 +46,14 @@ func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.Mock
 	).Return(files, nil).Maybe()
 
 	// Status reporting back to forge — no-op.
-	m.On("Status",
+	m.On(
+		"Status",
 		mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
 	).Return(nil).Maybe()
 
 	// Netrc for clone steps.
-	m.On("Netrc",
+	m.On(
+		"Netrc",
 		mock.Anything, mock.Anything,
 	).Return(&model.Netrc{}, nil).Maybe()
 

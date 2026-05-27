@@ -97,7 +97,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 					log.Error().Err(err).Msgf("cannot listen on address %s", c.String("healthcheck-addr"))
 				}
 				return nil
-			})
+			},
+		)
 	}
 
 	agentConfig := readAgentConfig(agentConfigPath)
