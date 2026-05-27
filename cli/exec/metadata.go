@@ -30,12 +30,8 @@ import (
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w *metadata.Workflow) (*metadata.Metadata, error) {
+func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*metadata.Metadata, error) {
 	m := &metadata.Metadata{}
-
-	if w != nil {
-		m.Workflow = *w
-	}
 
 	if c.IsSet("metadata-file") {
 		metadataFile, err := os.Open(c.String("metadata-file"))

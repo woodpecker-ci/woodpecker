@@ -32,6 +32,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	kube_core_v1 "k8s.io/api/core/v1"
+	kube_errors "k8s.io/apimachinery/pkg/api/errors"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -309,10 +310,28 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
+	podDeleted := func(obj any) {
+		pod, ok := obj.(*kube_core_v1.Pod)
+		if !ok {
+			tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
+			if !ok {
+				return
+			}
+			pod, ok = tombstone.Obj.(*kube_core_v1.Pod)
+			if !ok {
+				return
+			}
+		}
+		if pod.Name == podName {
+			finishedOnce.Do(func() { close(finished) })
+		}
+	}
+
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
+			DeleteFunc: podDeleted,
 		},
 	); err != nil {
 		return nil, err
@@ -322,6 +341,12 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
+	// If the pod was deleted before the informer started, no events will
+	// ever arrive. Check explicitly so we don't hang forever.
+	if _, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{}); kube_errors.IsNotFound(err) {
+		return &types.State{ExitCode: 0, Exited: true}, nil
+	}
+
 	select {
 	case <-finished:
 	case <-ctx.Done():
@@ -330,6 +355,9 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
 	if err != nil {
+		if kube_errors.IsNotFound(err) {
+			return &types.State{ExitCode: 0, Exited: true}, nil
+		}
 		return nil, err
 	}
 

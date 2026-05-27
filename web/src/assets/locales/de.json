@@ -123,7 +123,8 @@
                 "add": "Benutzer hinzufügen",
                 "admin": {
                     "admin": "Admin",
-                    "placeholder": "Benutzer ist ein Admin"
+                    "placeholder": "Benutzer ist ein Admin",
+                    "admin_warning": "Dieser Benutzer ist ein Admin aufgrund deiner Umgebungs-Konfiguration. Wenn du die Berechtigung hier entziehst, wird sie bei der nächsten Anmeldung wiederhergestellt."
                 },
                 "avatar_url": "URL des Profilbilds",
                 "cancel": "Abbrechen",
