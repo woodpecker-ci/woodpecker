@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-05-28
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543
+
+### 📈 Enhancement
+
+- Cleanup e2e test setup [[#6480](https://github.com/woodpecker-ci/woodpecker/pull/6480)]
+
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
 
 ### ❤️ Thanks to all contributors! ❤️
