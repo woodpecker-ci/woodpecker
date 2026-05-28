@@ -16,6 +16,7 @@ package linter
 
 import (
 	"fmt"
+	"slices"
 
 	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
@@ -180,12 +181,15 @@ func (l *Linter) lintDependsOn(config *WorkflowConfig, c *types.Container, area 
 	}
 
 	var linterErr error
-check:
 	for _, dep := range c.DependsOn {
-		for _, step := range config.Workflow.Steps.ContainerList {
-			if dep == step.Name {
-				continue check
-			}
+		if slices.ContainsFunc(
+			config.Workflow.Steps.ContainerList,
+			func(step *types.Container) bool { return dep.Name == step.Name },
+		) {
+			continue
+		}
+		if dep.Optional {
+			continue
 		}
 		linterErr = multierr.Append(
 			linterErr,
