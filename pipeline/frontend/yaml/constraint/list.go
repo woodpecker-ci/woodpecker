@@ -19,7 +19,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"go.uber.org/multierr"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 )
@@ -75,6 +75,9 @@ func (c *List) Excludes(v string) bool {
 
 // UnmarshalYAML unmarshal the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
+	}
 	out1 := struct {
 		Include yaml_base_types.StringOrSlice
 		Exclude yaml_base_types.StringOrSlice
