@@ -14,6 +14,10 @@
 
 - Cleanup e2e test setup [[#6480](https://github.com/woodpecker-ci/woodpecker/pull/6480)]
 
+### 📦️ Dependency
+
+- Migrate `gopkg.in/yaml.v3` usages to `go.yaml.in/yaml/v4` [[#6651](https://github.com/woodpecker-ci/woodpecker/pull/6651)]
+
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
 
 ### ❤️ Thanks to all contributors! ❤️
