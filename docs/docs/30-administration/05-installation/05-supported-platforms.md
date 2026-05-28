@@ -30,7 +30,7 @@ The table lists what is officially built and published by the Woodpecker project
 | darwin / amd64 (macOS Intel)         | –              | Binary         | Binary         | Binary         |
 | darwin / arm64 (macOS Apple Silicon) | –              | Binary         | Binary         | Binary         |
 | freebsd / amd64                      | Image + Binary | Image + Binary | Image + Binary | Binary         |
-| freebsd / arm64                      | Image          | Image          | Image          | Binary         |
+| freebsd / arm64                      | –              | Image + Binary | Image + Binary | Binary         |
 | openbsd / amd64                      | –              | Binary         | Binary         | Binary         |
 | openbsd / arm64                      | –              | Binary         | Binary         | Binary         |
 
