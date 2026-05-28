@@ -29,6 +29,9 @@ func (o Option[T]) MarshalJSON() ([]byte, error) {
 }
 
 func (o *Option[T]) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
+	}
 	var v *T
 	if err := value.Decode(&v); err != nil {
 		return err

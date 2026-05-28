@@ -123,6 +123,9 @@ func (when *When) IsLocal() bool {
 }
 
 func (when *When) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
+	}
 	switch value.Kind {
 	case yaml.SequenceNode:
 		if err := value.Decode(&when.Constraints); err != nil {

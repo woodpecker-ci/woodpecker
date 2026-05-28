@@ -35,6 +35,9 @@ type Path struct {
 
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
+	}
 	out1 := struct {
 		Include       yaml_base_types.StringOrSlice `yaml:"include"`
 		Exclude       yaml_base_types.StringOrSlice `yaml:"exclude"`

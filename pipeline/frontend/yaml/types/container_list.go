@@ -27,6 +27,9 @@ type ContainerList struct {
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
+	}
 	switch value.Kind {
 	// We support maps ...
 	case yaml.MappingNode:
