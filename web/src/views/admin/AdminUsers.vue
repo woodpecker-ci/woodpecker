@@ -102,12 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-<<<<<<< HEAD
-import { computed, ref } from 'vue';
-=======
-import { cloneDeep } from 'lodash';
 import { computed, onMounted, ref } from 'vue';
->>>>>>> 498aae972 (feat(ui): show forge origin in admin users panel)
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
