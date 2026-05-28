@@ -18,13 +18,15 @@
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
-        <Badge v-if="getForgeLabel(user.forge_id)" :label="$t('admin.settings.users.forge')" :value="getForgeLabel(user.forge_id)" />
-        <Badge
-          v-if="user.admin"
-          class="md:display-unset hidden"
-          :value="$t('admin.settings.users.admin.admin')"
-        />
-        <div class="flex items-center gap-2" :class="{ 'ml-auto': !user.admin }">
+        <span class="ml-auto flex gap-2">
+          <Badge v-if="forgesMap.has(user.forge_id)" class="md:display-unset hidden" :value="forgesMap.get(user.forge_id)" />
+          <Badge
+            v-if="user.admin"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin')"
+          />
+        </span>
+        <div class="flex items-center gap-2">
           <IconButton
             icon="edit"
             :title="$t('admin.settings.users.edit_user')"
@@ -49,7 +51,11 @@
     <div v-else>
       <form @submit.prevent="saveUser">
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.login')">
-          <TextField :id="id" v-model="selectedUser.login" :disabled="isEditingUser" :placeholder="$t('username')" />
+          <TextField :id="id" v-model="selectedUser.login" :placeholder="$t('admin.settings.users.login')" :disabled="isEditingUser"" />
+        </InputField>
+
+        <InputField v-if="forgesMap.has(selectedUser.forge_id)" v-slot="{ id }" :label="$t('admin.settings.users.forge')">
+          <TextField :id="id" v-model="selectedUserForge" :placeholder="$t('admin.settings.users.forge')" disabled />
         </InputField>
 
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.email')">
@@ -66,10 +72,6 @@
               :placeholder="$t('admin.settings.users.avatar_url')"
             />
           </div>
-        </InputField>
-
-        <InputField v-if="isEditingUser && selectedUser.forge_id" :label="$t('admin.settings.users.forge')">
-          <Badge :value="getForgeLabel(selectedUser.forge_id)" />
         </InputField>
 
         <InputField :label="$t('admin.settings.users.admin.admin')">
@@ -129,35 +131,24 @@ const { t } = useI18n();
 
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
+const selectedUserForge = computed(() => forgesMap.value.get(selectedUser.value!.forge_id))
 
 const forgesMap = ref<Map<number, Forge>>(new Map());
 
 async function loadForges() {
   const forges = await apiClient.getForges({ page: 1 });
   if (forges) {
-    forgesMap.value = new Map(forges.map((f) => [f.id, f]));
-  }
-}
+    forgesMap.value = new Map((forges.map((forge) => {
+      let name = forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
 
-const forgeTypeNames: Record<string, string> = {
-  github: 'GitHub',
-  gitlab: 'GitLab',
-  gitea: 'Gitea',
-  forgejo: 'Forgejo',
-  bitbucket: 'Bitbucket',
-  'bitbucket-dc': 'Bitbucket DC',
-  addon: 'Addon',
-};
+      if (forge.url || forge.oauth_host) {
+        const url = new URL(forge.oauth_host || forge.url);
+        name = url.hostname;
+      }
 
-function getForgeLabel(forgeId: number | undefined): string | undefined {
-  if (!forgeId) {
-    return undefined;
+      return [forge.id, name];
+    })));
   }
-  const forge = forgesMap.value.get(forgeId);
-  if (!forge) {
-    return undefined;
-  }
-  return forgeTypeNames[forge.type] || forge.type;
 }
 
 onMounted(loadForges);
@@ -203,6 +194,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
 function editUser(user: User) {
   selectedUser.value = deepClone(user);
+  console.log(selectedUserForge.value)
 }
 
 function showAddUser() {
