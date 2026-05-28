@@ -27,6 +27,8 @@ code and execute commands.
 In order to use this backend, you need to download (or build) the
 [agent](https://github.com/woodpecker-ci/woodpecker/releases/latest), configure it and run it on the host machine.
 
+The local backend is supported on Windows, macOS, FreeBSD and OpenBSD; see [Supported platforms](../../05-installation/05-supported-platforms.md) for the full component and backend matrix.
+
 ## Step specific configuration
 
 ### Shell
