@@ -28,6 +28,8 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -350,7 +352,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	select {
 	case <-finished:
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return &types.State{ExitCode: 0, Exited: true}, nil
 	}
 
 	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
@@ -502,27 +504,30 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
+	var g errgroup.Group
+
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
-			if err != nil {
-				return err
-			}
+			g.Go(func() error {
+				return e.DestroyStep(ctx, step, taskUUID)
+			})
 		}
+	}
+
+	if err := g.Wait(); err != nil {
+		log.Error().Err(err).Msg("could not destroy all pods")
 	}
 
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
-	err := e.stopHeadlessService(ctx, e, namespace, taskUUID)
-	if err != nil {
-		return err
+	if err := e.stopHeadlessService(ctx, e, namespace, taskUUID); err != nil {
+		log.Error().Err(err).Msg("could not delete headless service")
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow volume")
-	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), e.config.newDefaultDeleteOptions())
-	if err != nil {
-		return err
+	if err := stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), e.config.newDefaultDeleteOptions()); err != nil {
+		log.Error().Err(err).Msg("could not delete workflow volume")
 	}
 
 	return nil
