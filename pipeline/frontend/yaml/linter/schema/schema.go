@@ -19,6 +19,7 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+	"strings"
 
 	"codeberg.org/6543/go-yaml2json"
 	"codeberg.org/6543/xyaml"
@@ -58,7 +59,7 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	}
 
 	if !result.Valid() {
-		return result.Errors(), fmt.Errorf("config not valid")
+		return filterRedundantCompositionErrors(result.Errors()), fmt.Errorf("config not valid")
 	}
 
 	return nil, nil
@@ -66,4 +67,48 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 
 func LintString(s string) ([]gojsonschema.ResultError, error) {
 	return Lint(bytes.NewBufferString(s))
+}
+
+func filterRedundantCompositionErrors(schemaErrors []gojsonschema.ResultError) []gojsonschema.ResultError {
+	filtered := make([]gojsonschema.ResultError, 0, len(schemaErrors))
+	for index, schemaError := range schemaErrors {
+		if isCompositionError(schemaError) && hasSpecificSchemaError(schemaErrors, index, schemaError.Field()) {
+			continue
+		}
+
+		filtered = append(filtered, schemaError)
+	}
+
+	return filtered
+}
+
+func isCompositionError(schemaError gojsonschema.ResultError) bool {
+	switch schemaError.Type() {
+	case "number_one_of", "number_any_of":
+		return true
+	default:
+		return false
+	}
+}
+
+func hasSpecificSchemaError(schemaErrors []gojsonschema.ResultError, currentIndex int, field string) bool {
+	for index, schemaError := range schemaErrors {
+		if index == currentIndex || isCompositionError(schemaError) {
+			continue
+		}
+
+		if isSameFieldOrChild(schemaError.Field(), field) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isSameFieldOrChild(field, parent string) bool {
+	if parent == "(root)" {
+		return true
+	}
+
+	return field == parent || strings.HasPrefix(field, parent+".")
 }
