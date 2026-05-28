@@ -114,6 +114,7 @@
 
 ### Misc
 
+- build: release freebsd/openbsd as binary not container [[#6610](https://github.com/woodpecker-ci/woodpecker/pull/6610)]
 - flake.lock: Update [[#6656](https://github.com/woodpecker-ci/woodpecker/pull/6656)]
 - Use "sign in/out" [[#6579](https://github.com/woodpecker-ci/woodpecker/pull/6579)]
 
