@@ -14,6 +14,8 @@ codeberg.org/6543/go-yaml2json v1.0.0 h1:heGqo9VEi7gY2yNqjj7X4ADs5nzlFIbGsJtgYDL
 codeberg.org/6543/go-yaml2json v1.0.0/go.mod h1:mz61q14LWF4ZABrgMEDMmk3t9dPi6zgR1uBh2VKV2RQ=
 codeberg.org/6543/xyaml v1.1.0 h1:0PWTy8OUqshshjrrnAXFWXSPUEa8R49DIh2ah07SxFc=
 codeberg.org/6543/xyaml v1.1.0/go.mod h1:jI7afXLZUxeL4rNNsG1SlHh78L+gma9lK1bIebyFZwA=
+codeberg.org/6543/xyaml/v2 v2.0.1 h1:GIkCLqf8TeUHjRqTbhCOGAmc8pzCuAFr4lWgLV+HgPc=
+codeberg.org/6543/xyaml/v2 v2.0.1/go.mod h1:OiVkoPEUSJK4xUub8OuQvdnJM9SpM74oGxpGB045JVI=
 codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3 v3.0.0 h1:s2fK+FBwvcYsmKDjNhmoe7B8q9zsgs0UrSlYe9r4XjM=
 codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3 v3.0.0/go.mod h1:Is2jTpS1dizeXm4skQv/ES3QVqnzcNhn2GzZXpiw9f8=
 filippo.io/edwards25519 v1.2.0 h1:crnVqOiS4jqYleHd9vaKZ+HKtHfllngJIiOpNpoJsjo=
