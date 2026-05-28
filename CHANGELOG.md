@@ -4,13 +4,17 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @jolheiser, @julienvincent, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @wucm667
+@6543, @AkashKumar7902, @EdwardSalter, @M31ancholy, @anbraten, @hhamalai, @johanvdw, @jolheiser, @julienvincent, @lephuongbg, @mateuszkamola, @qwerty287, @rfinnie, @simonmeyerrr, @wucm667
 
 ### 🔒 Security
 
 - Use Gitlab username [[#6653](https://github.com/woodpecker-ci/woodpecker/pull/6653)]
 - Update uuid [[#6647](https://github.com/woodpecker-ci/woodpecker/pull/6647)]
 - server: for grpc store extracted agentID in context [[#6569](https://github.com/woodpecker-ci/woodpecker/pull/6569)]
+
+### ✨ Features
+
+- Support optional flag in depends_on for workflows and steps [[#6461](https://github.com/woodpecker-ci/woodpecker/pull/6461)]
 
 ### 📈 Enhancement
 
