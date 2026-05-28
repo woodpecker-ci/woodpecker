@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	"codeberg.org/6543/go-yaml2json"
+	"codeberg.org/6543/go-yaml2json/v2"
 	"go.yaml.in/yaml/v4"
 )
 
