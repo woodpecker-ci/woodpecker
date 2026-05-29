@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @qwerty287
+@6543, @AkashKumar7902, @qwerty287
 
 ### 📈 Enhancement
 
@@ -13,6 +13,10 @@
 ### 🧪 Tests
 
 - Cleanup e2e test setup [[#6480](https://github.com/woodpecker-ci/woodpecker/pull/6480)]
+
+### 📚 Documentation
+
+- docs: add cli exec examples [[#6629](https://github.com/woodpecker-ci/woodpecker/pull/6629)]
 
 ### 📦️ Dependency
 
