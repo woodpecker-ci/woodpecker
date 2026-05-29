@@ -20,6 +20,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6657](https://github.com/woodpecker-ci/woodpecker/pull/6657)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.36.0 [[#6668](https://github.com/woodpecker-ci/woodpecker/pull/6668)]
 - Migrate `gopkg.in/yaml.v3` usages to `go.yaml.in/yaml/v4` [[#6651](https://github.com/woodpecker-ci/woodpecker/pull/6651)]
 
