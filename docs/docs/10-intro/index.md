@@ -24,3 +24,5 @@ Then you might want to jump directly into it and [start creating your first pipe
 ## Want to start from scratch and deploy your own Woodpecker instance?
 
 Woodpecker is lightweight and even runs on a Raspberry Pi. You can follow the [deployment guide](../30-administration/00-general.md) to set up your own Woodpecker instance.
+
+If you want to try a pipeline before installing a server, you can also run workflow files locally with [`woodpecker-cli exec`](../20-usage/73-local-execution.md).
