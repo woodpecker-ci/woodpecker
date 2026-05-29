@@ -31,7 +31,7 @@ woodpecker-cli exec --backend-engine local .woodpecker/my-first-workflow.yaml
 
 ## Pass metadata
 
-Local runs create metadata values automatically, but you can override them to test conditions such as branches, pull requests, tags, and events:
+Metadata values are set automatically, but you can override them to test conditions such as branches, pull requests, tags, and events:
 
 ```shell
 woodpecker-cli exec \
