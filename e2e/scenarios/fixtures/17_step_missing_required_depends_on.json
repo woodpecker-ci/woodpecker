@@ -1,0 +1,5 @@
+{
+  "name": "step with missing required depends_on fails the pipeline at parse time",
+  "event": "push",
+  "expected_status": "error"
+}

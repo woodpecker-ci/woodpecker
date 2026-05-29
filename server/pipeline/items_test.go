@@ -69,7 +69,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	s := store_mocks.NewMockStore(t)
 	s.On("WorkflowsCreate", mock.Anything).Return(nil)
 
-	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems)
+	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems, false)
 	require.NoError(t, err)
 	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
@@ -80,6 +80,49 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	if pipeline.Workflows[0].Children[0].PPID != 1 {
 		t.Fatal("Should set step PPID")
 	}
+}
+
+func TestSaveWorkflowsReplaceExisting(t *testing.T) {
+	t.Parallel()
+
+	pipeline := &model.Pipeline{
+		ID:    1,
+		Event: model.EventPush,
+		// a gated pipeline already carries persisted workflows on approval
+		Workflows: []*model.Workflow{{ID: 99, PID: 1}},
+	}
+
+	pipelineItems := []*builder.Item{{
+		Workflow: &builder.Workflow{ID: 1, PID: 1},
+		Config: &backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{{Name: "clone"}}},
+			},
+		},
+	}}
+
+	s := store_mocks.NewMockStore(t)
+	s.On("WorkflowsReplace", mock.Anything, mock.Anything).Return(nil)
+
+	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems, true)
+	require.NoError(t, err)
+	assert.Len(t, pipeline.Workflows, 1)
+	assert.Equal(t, int64(1), pipeline.Workflows[0].PipelineID)
+}
+
+func TestSaveWorkflowsRejectsExistingWithoutReplace(t *testing.T) {
+	t.Parallel()
+
+	pipeline := &model.Pipeline{
+		ID:        1,
+		Event:     model.EventPush,
+		Workflows: []*model.Workflow{{ID: 99, PID: 1}},
+	}
+
+	s := store_mocks.NewMockStore(t)
+
+	_, err := saveWorkflowsFromPipelineBuilder(s, pipeline, nil, false)
+	require.Error(t, err)
 }
 
 func TestParsePipeline(t *testing.T) {

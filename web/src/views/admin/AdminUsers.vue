@@ -18,12 +18,15 @@
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
-        <Badge
-          v-if="user.admin"
-          class="md:display-unset ml-auto hidden"
-          :value="$t('admin.settings.users.admin.admin')"
-        />
-        <div class="flex items-center gap-2" :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }">
+        <span class="ml-auto flex gap-2">
+          <Badge
+            v-if="forgesMap.has(user.forge_id)"
+            class="md:display-unset hidden"
+            :value="forgesMap.get(user.forge_id)"
+          />
+          <Badge v-if="user.admin" class="md:display-unset hidden" :value="$t('admin.settings.users.admin.admin')" />
+        </span>
+        <div class="flex items-center gap-2">
           <IconButton
             icon="edit"
             :title="$t('admin.settings.users.edit_user')"
@@ -48,7 +51,20 @@
     <div v-else>
       <form @submit.prevent="saveUser">
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.login')">
-          <TextField :id="id" v-model="selectedUser.login" :disabled="isEditingUser" :placeholder="$t('username')" />
+          <TextField
+            :id="id"
+            v-model="selectedUser.login"
+            :placeholder="$t('admin.settings.users.login')"
+            :disabled="isEditingUser"
+          />
+        </InputField>
+
+        <InputField
+          v-if="selectedUser!.forge_id !== undefined && forgesMap.has(selectedUser!.forge_id)"
+          v-slot="{ id }"
+          :label="$t('admin.settings.users.forge')"
+        >
+          <TextField :id="id" v-model="selectedUserForge" :placeholder="$t('admin.settings.users.forge')" disabled />
         </InputField>
 
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.email')">
@@ -97,7 +113,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -122,8 +138,31 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const { t } = useI18n();
 
+const forgesMap = ref<Map<number, string>>(new Map());
+
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
+const selectedUserForge = computed(() => forgesMap.value.get(selectedUser.value?.forge_id || -1));
+
+async function loadForges() {
+  const forges = await apiClient.getForges({ page: 1 });
+  if (forges) {
+    forgesMap.value = new Map(
+      forges.map((forge) => {
+        let name = forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
+
+        if (forge.url || forge.oauth_host) {
+          const url = new URL(forge.oauth_host || forge.url);
+          name = url.hostname;
+        }
+
+        return [forge.id, name];
+      }),
+    );
+  }
+}
+
+onMounted(loadForges);
 
 async function loadUsers(page: number): Promise<User[] | null> {
   return apiClient.getUsers({ page });

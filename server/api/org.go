@@ -127,15 +127,27 @@ func LookupOrg(c *gin.Context) {
 
 	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
 
-	org, err := _store.OrgFindByName(orgFullName, user.ForgeID)
-	if err != nil {
-		handleDBError(c, err)
-		return
+	var org *model.Org
+	if user == nil {
+		org, err = _store.OrgLookup(orgFullName)
+		if err != nil {
+			if err.Error() == "found more than one org with this name" {
+				_ = c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+			handleDBError(c, err)
+			return
+		}
+	} else {
+		org, err = _store.OrgFindByName(orgFullName, user.ForgeID)
+		if err != nil {
+			handleDBError(c, err)
+			return
+		}
 	}
 
 	// don't leak private org infos
 	if org.Private {
-		user := session.User(c)
 		if user == nil {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
@@ -166,12 +178,12 @@ func LookupOrg(c *gin.Context) {
 //
 //	@Summary		Delete an organization
 //	@Description	Deletes the given org. Requires admin rights.
-//	@Router			/orgs/{id} [delete]
+//	@Router			/orgs/{org_id} [delete]
 //	@Produce		plain
 //	@Success		204
 //	@Tags			Orgs
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			id				path	string	true	"the org's id"
+//	@Param			org_id			path	string	true	"the org's id"
 func DeleteOrg(c *gin.Context) {
 	_store := store.FromContext(c)
 	org := session.Org(c)
