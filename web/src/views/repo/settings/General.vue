@@ -142,7 +142,9 @@
           <TextField
             :id="id"
             v-model="repoSettings.config_file"
-            :placeholder="$t('repo.settings.general.pipeline_path.default')"
+            :placeholder="
+              $t('repo.settings.general.pipeline_path.by_default', { paths: defaultConfigPaths.join(' ➔ ') })
+            "
           />
         </template>
 
@@ -196,6 +198,7 @@ import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
+import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
@@ -208,6 +211,7 @@ const notifications = useNotifications();
 const { user } = useAuthentication();
 const repoStore = useRepoStore();
 const i18n = useI18n();
+const { defaultConfigPaths } = useConfig();
 
 const repo = requiredInject('repo');
 const repoSettings = ref<RepoSettings>();
