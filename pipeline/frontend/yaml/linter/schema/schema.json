@@ -42,6 +42,10 @@
       "description": "List of workflow dependencies. Accepts strings or objects with name and optional fields. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
       "$ref": "#/definitions/depends_on_list"
     },
+    "concurrency": {
+      "description": "Limit how many instances of this workflow may run at the same time. Read more: https://woodpecker-ci.org/docs/usage/workflows#concurrency",
+      "$ref": "#/definitions/concurrency"
+    },
     "runs_on": {
       "type": "array",
       "description": "Deprecated: use `when.status` instead. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
@@ -100,6 +104,31 @@
           "minLength": 1,
           "items": {
             "$ref": "#/definitions/depends_on_item"
+          }
+        }
+      ]
+    },
+    "concurrency": {
+      "description": "Limit how many instances of this workflow may run at the same time. Provide an integer for the limit, or an object to also set a custom group.",
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["limit"],
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of workflows sharing the same group that run at once."
+            },
+            "group": {
+              "type": "string",
+              "description": "Identifier shared by workflows that are limited against each other. Defaults to the workflow name. Environment variables are substituted, e.g. `deploy-${CI_COMMIT_BRANCH}`."
+            }
           }
         }
       ]

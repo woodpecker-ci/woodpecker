@@ -57,6 +57,40 @@ func TestParse(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("Should unmarshal concurrency object", func(t *testing.T) {
+		out, err := ParseString(`steps:
+  deploy:
+    image: alpine
+concurrency:
+  limit: 2
+  group: deploy
+`)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, out.Concurrency.Limit)
+		assert.Equal(t, "deploy", out.Concurrency.Group)
+	})
+
+	t.Run("Should unmarshal concurrency shorthand", func(t *testing.T) {
+		out, err := ParseString(`steps:
+  deploy:
+    image: alpine
+concurrency: 1
+`)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, out.Concurrency.Limit)
+		assert.Empty(t, out.Concurrency.Group)
+	})
+
+	t.Run("Should default concurrency to disabled", func(t *testing.T) {
+		out, err := ParseString(`steps:
+  deploy:
+    image: alpine
+`)
+		assert.NoError(t, err)
+		assert.True(t, out.Concurrency.IsZero())
+		assert.Equal(t, 0, out.Concurrency.Limit)
+	})
+
 	t.Run("Should handle simple yaml anchors", func(t *testing.T) {
 		out, err := ParseString(simpleYamlAnchors)
 		assert.NoError(t, err)

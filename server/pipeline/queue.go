@@ -46,6 +46,20 @@ func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
 
+		// Set up the concurrency limit if the workflow opted in. The group is
+		// scoped to the repository and defaults to the workflow name so that
+		// only "similar" workflows (same workflow, across pipelines) are
+		// limited against each other. When no limit is set the behavior is
+		// unchanged.
+		if item.ConcurrencyLimit > 0 {
+			group := item.ConcurrencyGroup
+			if group == "" {
+				group = item.Workflow.Name
+			}
+			task.ConcurrencyLimit = item.ConcurrencyLimit
+			task.ConcurrencyGroup = fmt.Sprintf("%d:%s", repo.ID, group)
+		}
+
 		task.Data, err = json.Marshal(rpc.Workflow{
 			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,
