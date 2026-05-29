@@ -353,7 +353,33 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, ctx.Err()
 	}
 
-	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
+	// After the informer signals completion, kubelet may not have finalized
+	// containerStatuses yet (phase=Succeeded before state.terminated is set).
+	// Retry with backoff to allow kubelet to catch up, using the same retry
+	// configuration as TailStep for log stream recovery (PR #5550).
+	pod, err := backoff.Retry(ctx,
+		func() (*kube_core_v1.Pod, error) {
+			p, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
+			if err != nil {
+				if kube_errors.IsNotFound(err) {
+					return nil, backoff.Permanent(err)
+				}
+				return nil, err
+			}
+			if len(p.Status.ContainerStatuses) == 0 {
+				return nil, fmt.Errorf("no container statuses found for pod %s", podName)
+			}
+			if p.Status.ContainerStatuses[0].State.Terminated == nil {
+				return nil, fmt.Errorf("container %s/%s terminated state not yet finalized", podName, p.Status.ContainerStatuses[0].Name)
+			}
+			return p, nil
+		},
+		backoff.WithBackOff(backoff.NewExponentialBackOff()),
+		backoff.WithMaxElapsedTime(maxRetryDuration),
+		backoff.WithNotify(func(err error, delay time.Duration) {
+			log.Warn().Err(err).Str("pod", podName).Dur("backoff", delay).Msg("waiting for container terminated state, retrying with backoff")
+		}),
+	)
 	if err != nil {
 		if kube_errors.IsNotFound(err) {
 			return &types.State{ExitCode: 0, Exited: true}, nil
@@ -365,17 +391,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, fmt.Errorf("could not pull image for pod %s", podName)
 	}
 
-	if len(pod.Status.ContainerStatuses) == 0 {
-		return nil, fmt.Errorf("no container statuses found for pod %s", podName)
-	}
-
 	cs := pod.Status.ContainerStatuses[0]
-
-	if cs.State.Terminated == nil {
-		err := fmt.Errorf("no terminated state found for container %s/%s", podName, cs.Name)
-		log.Error().Str("taskUUID", taskUUID).Str("pod", podName).Str("container", cs.Name).Interface("state", cs.State).Msg(err.Error())
-		return nil, err
-	}
 
 	bs := &types.State{
 		ExitCode:  int(cs.State.Terminated.ExitCode),
