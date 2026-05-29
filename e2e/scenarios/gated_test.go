@@ -47,10 +47,9 @@ func TestGatedPipeline(t *testing.T) {
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 		Event:  model.EventPush,
 		Branch: "main",
-		Commit: "deadbeef",
+		Commit: &model.Commit{SHA: "deadbeef"},
 		Ref:    "refs/heads/main",
 		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
 	})
 	require.NoError(t, err, "create gated pipeline")
 	require.NotNil(t, created)

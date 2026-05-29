@@ -282,24 +282,13 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	pipeline.Author = hook.UserUsername
 	pipeline.AuthorAvatar = hook.UserAvatar
 
-	pipeline.Author = hook.UserUsername
-
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-<<<<<<< HEAD
 			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
 			pipeline.Commit.ForgeURL = cm.URL
-=======
-			pipeline.Email = cm.Author.Email
-			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
-			if len(pipeline.Email) != 0 {
-				pipeline.Avatar = getUserAvatar(pipeline.Email)
-			}
->>>>>>> main
 		}
 
 		files = append(files, cm.Added...)
@@ -349,7 +338,6 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 	pipeline.TagTitle = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
-<<<<<<< HEAD
 	pipeline.AuthorAvatar = hook.UserAvatar
 	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, strings.TrimPrefix(hook.Ref, "refs/tags/"))
 
@@ -358,17 +346,6 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
 			pipeline.Commit.ForgeURL = cm.URL
-=======
-
-	for _, cm := range hook.Commits {
-		if hook.After == cm.ID {
-			pipeline.Email = cm.Author.Email
-			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
-			if len(pipeline.Email) != 0 {
-				pipeline.Avatar = getUserAvatar(pipeline.Email)
-			}
->>>>>>> main
 			break
 		}
 	}
@@ -422,18 +399,7 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 			ForgeURL: hook.Commit.URL,
 		},
 		ForgeURL: hook.URL,
-<<<<<<< HEAD
 		Release:  &model.Release{Title: hook.Name},
-=======
-		Message:  fmt.Sprintf("created release %s", hook.Name),
-		Sender:   hook.Commit.Author.Name,
-		// Using the commit author here as Gitlab does not send the hook user.
-		// This is not an issue because releases can be created by users with
-		// push permissions only anyways.
-		Author: hook.Commit.Author.Name,
-		Email:  hook.Commit.Author.Email,
-
->>>>>>> main
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)
 		Ref:      "refs/tags/" + hook.Tag,
