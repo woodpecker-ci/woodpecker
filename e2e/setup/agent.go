@@ -23,9 +23,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v3/agent"
@@ -51,9 +48,8 @@ type AgentEnv struct {
 	// name is used for logging and as the hostname label.
 	name string
 
-	// requestedOrgID is applied to the DB record by WaitForAgentRegistered
-	// so the server's GetServerLabels returns the right org-id filter.
-	// model.IDNotSet (-1) means global (default).
+	// requestOrgID is applied to the DB record by WaitForAgentRegistered.
+	// See WithOrgID. model.IDNotSet (-1) means global (default).
 	requestOrgID int64
 }
 
@@ -68,9 +64,7 @@ type agentConfig struct {
 	// They are matched against task Labels set in pipeline YAML (labels: key: value).
 	customLabels map[string]string
 
-	// orgID pins the agent to a specific organization (-1 = global).
-	// Org agents score higher than global agents for tasks in the same org,
-	// so they are always preferred by the queue when available.
+	// orgID pins the agent to a specific organization. See WithOrgID.
 	orgID int64
 }
 
@@ -82,7 +76,7 @@ func WithHostname(name string) AgentOption {
 // WithCustomLabels merges extra labels into the agent's filter set.
 // Use this to test label-based task routing, e.g.:
 //
-//	setup.StartAgent(ctx, t, addr, setup.WithCustomLabels(map[string]string{"gpu": "true"}))
+//	setup.StartAgent(t, addr, setup.WithCustomLabels(map[string]string{"gpu": "true"}))
 //
 // The pipeline YAML must set a matching label:
 //
@@ -108,6 +102,11 @@ func WithOrgID(id int64) AgentOption {
 // server at grpcAddr and returns an *AgentEnv whose AgentID is populated once
 // the agent has registered. Pass AgentOption values to configure labels, hostname,
 // or org-scoping; multiple agents can be started in the same test.
+//
+// The agent owns its own lifetime via an internal context canceled through
+// t.Cleanup. This decouples agent shutdown from the test's own context: the
+// agent keeps running until the test completes, regardless of which ctx the
+// caller's pipeline operations use.
 func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 	t.Helper()
 
@@ -122,40 +121,24 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 
 	env := &AgentEnv{name: cfg.hostname}
 
-	transport := grpc.WithTransportCredentials(insecure.NewCredentials())
-	keepaliveOpts := grpc.WithKeepaliveParams(keepalive.ClientParameters{
-		Time:    defaultTimeout,
-		Timeout: shortTimeout,
-	})
-
 	agentCtx, agentCancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { agentCancel(nil) })
 
-	authConn, err := grpc.NewClient(grpcAddr, transport, keepaliveOpts)
+	agentConn, err := agent_rpc.Dial(agentCtx, agent_rpc.DialConfig{
+		ServerAddr:       grpcAddr,
+		AgentToken:       TestAgentToken,
+		AgentID:          -1,
+		Secure:           false,
+		KeepaliveTime:    defaultTimeout,
+		KeepaliveTimeout: shortTimeout,
+		AuthRefreshEvery: agentAuthRefreshEvery,
+	})
 	if err != nil {
-		t.Fatalf("StartAgent(%s): create auth gRPC connection: %v", cfg.hostname, err)
+		t.Fatalf("StartAgent(%s): dial gRPC: %v", cfg.hostname, err)
 	}
-	t.Cleanup(func() { authConn.Close() })
+	t.Cleanup(agentConn.Close)
 
-	authClient := agent_rpc.NewAuthGrpcClient(authConn, TestAgentToken, -1)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(agentCtx, authClient, agentAuthRefreshEvery)
-	if err != nil {
-		t.Fatalf("StartAgent(%s): authenticate with server: %v", cfg.hostname, err)
-	}
-
-	conn, err := grpc.NewClient(
-		grpcAddr,
-		transport,
-		keepaliveOpts,
-		grpc.WithUnaryInterceptor(authInterceptor.Unary()),
-		grpc.WithStreamInterceptor(authInterceptor.Stream()),
-	)
-	if err != nil {
-		t.Fatalf("StartAgent(%s): create main gRPC connection: %v", cfg.hostname, err)
-	}
-	t.Cleanup(func() { conn.Close() })
-
-	client := agent_rpc.NewGrpcClient(agentCtx, conn)
+	client := agent_rpc.NewGrpcClient(agentCtx, agentConn.MainConn)
 
 	grpcCtx := metadata.NewOutgoingContext(agentCtx, metadata.Pairs("hostname", cfg.hostname))
 

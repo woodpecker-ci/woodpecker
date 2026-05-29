@@ -29,7 +29,7 @@ func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflo
 		return fmt.Errorf("lookup plugin binary: %w", err)
 	}
 
-	cmd := exec.CommandContext(ctx, binary)
+	cmd := newCmd(ctx, binary)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 

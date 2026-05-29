@@ -42,7 +42,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.
 		if err != nil {
 			return err
 		}
-		task.Dependencies = getTaskDependencies(item.DependsOn, pipelineItems)
+		task.Dependencies = getTaskDependencies(item.DependsOn.Names(), pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
 

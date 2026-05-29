@@ -91,7 +91,7 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		// depend on https://github.com/woodpecker-ci/woodpecker/issues/778
 	}
 
-	items = filterItemsWithMissingDependencies(items)
+	items = filterMissingDependencies(items)
 
 	return items, errorsAndWarnings
 }
