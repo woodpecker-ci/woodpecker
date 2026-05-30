@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @qwerty287
+@6543, @AkashKumar7902, @qwerty287, @simonckemper
 
 ### 📈 Enhancement
 
@@ -26,6 +26,10 @@
 - Update web npm deps non-major [[#6657](https://github.com/woodpecker-ci/woodpecker/pull/6657)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.36.0 [[#6668](https://github.com/woodpecker-ci/woodpecker/pull/6668)]
 - Migrate `gopkg.in/yaml.v3` usages to `go.yaml.in/yaml/v4` [[#6651](https://github.com/woodpecker-ci/woodpecker/pull/6651)]
+
+### Misc
+
+- fix(kubernetes): retry WaitStep when container terminated state not yet finalized [[#6672](https://github.com/woodpecker-ci/woodpecker/pull/6672)]
 
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
 
