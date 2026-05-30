@@ -355,8 +355,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	// After the informer signals completion, kubelet may not have finalized
 	// containerStatuses yet (phase=Succeeded before state.terminated is set).
-	// Retry with backoff to allow kubelet to catch up, using the same retry
-	// configuration as TailStep for log stream recovery (PR #5550).
+	// Retry with backoff to allow kubelet to catch up.
 	pod, err := backoff.Retry(ctx,
 		func() (*kube_core_v1.Pod, error) {
 			p, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
