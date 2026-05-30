@@ -16,7 +16,7 @@
     "@tsconfig/docusaurus": "^2.0.7",
     "@types/node": "^24.10.9",
     "axios": "^1.13.4",
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.0",
     "isomorphic-dompurify": "^3.0.0",
     "marked": "^18.0.0",
     "slugify": "^1.6.6",
