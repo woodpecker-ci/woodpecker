@@ -425,7 +425,8 @@
                     "default": "默认: .woodpecker/*.yml -> .woodpecker.yml",
                     "desc": "流水线配置文件的路径（例如 {0}）。文件夹路径应以 {1} 结尾。",
                     "desc_path_example": "my/path/",
-                    "path": "流水线路径"
+                    "path": "流水线路径",
+                    "by_default": "默认:{paths}"
                 },
                 "project": "项目设置",
                 "protected": {
