@@ -16,6 +16,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6675](https://github.com/woodpecker-ci/woodpecker/pull/6675)]
 - docs: add cli exec examples [[#6629](https://github.com/woodpecker-ci/woodpecker/pull/6629)]
 
 ### 📦️ Dependency
