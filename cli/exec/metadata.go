@@ -30,12 +30,8 @@ import (
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w *metadata.Workflow) (*metadata.Metadata, error) {
+func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*metadata.Metadata, error) {
 	m := &metadata.Metadata{}
-
-	if w != nil {
-		m.Workflow = *w
-	}
 
 	if c.IsSet("metadata-file") {
 		metadataFile, err := os.Open(c.String("metadata-file"))
@@ -108,6 +104,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "commit-refspec", func(s string) { m.Curr.Commit.Refspec = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-branch", func(s string) { m.Curr.Commit.Branch = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-message", func(s string) { m.Curr.Commit.Message = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "commit-timestamp", func(i int64) { m.Curr.Commit.Timestamp = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "commit-author-name", func(s string) { m.Curr.Commit.Author.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-author-email", func(s string) { m.Curr.Commit.Author.Email = s }, c.String)
 	// TODO remove in next major
@@ -132,6 +129,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "prev-commit-refspec", func(s string) { m.Prev.Commit.Refspec = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-commit-branch", func(s string) { m.Prev.Commit.Branch = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-commit-message", func(s string) { m.Prev.Commit.Message = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "prev-commit-timestamp", func(i int64) { m.Prev.Commit.Timestamp = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "prev-commit-author-name", func(s string) { m.Prev.Commit.Author.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-commit-author-email", func(s string) { m.Prev.Commit.Author.Email = s }, c.String)
 	// TODO remove in next major

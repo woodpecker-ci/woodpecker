@@ -228,6 +228,10 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
 	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
 
+	// pipeline config paths
+	server.Config.Pipeline.ConfigPaths = c.StringSlice("default-pipeline-configs")
+	server.Config.Pipeline.ConfigExtensions = c.StringSlice("default-pipeline-config-extensions")
+
 	// server configuration
 	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
 	if err != nil {

@@ -30,7 +30,12 @@
             <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
           </div>
           <div class="flex gap-2">
-            <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
+            <TextField
+              :id="id"
+              v-model="newImage"
+              :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
+              @keydown.enter.prevent="addNewImage"
+            />
             <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
           </div>
         </div>

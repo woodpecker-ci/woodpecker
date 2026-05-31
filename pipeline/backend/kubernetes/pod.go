@@ -206,7 +206,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		spec.Tolerations = tolerations(config.PodTolerations)
 	}
 
-	spec.Volumes, err = pvcVolumes(step.Volumes)
+	spec.Volumes, err = pvcVolumes(podVolumes(step, options))
 	if err != nil {
 		return spec, err
 	}
@@ -278,7 +278,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		return container, err
 	}
 
-	container.VolumeMounts, err = volumeMounts(step.Volumes)
+	container.VolumeMounts, err = volumeMounts(podVolumes(step, options))
 	if err != nil {
 		return container, err
 	}
@@ -386,6 +386,27 @@ func pvcVolumes(volumes []string) ([]kube_core_v1.Volume, error) {
 	}
 
 	return vols, nil
+}
+
+func podVolumes(step *types.Step, options BackendOptions) []string {
+	if !isService(step) || useWorkspaceVolume(options) {
+		return step.Volumes
+	}
+
+	volumes := make([]string, 0, len(step.Volumes))
+	for _, volume := range step.Volumes {
+		if volumeMountPath(volume) != step.WorkspaceBase {
+			volumes = append(volumes, volume)
+		}
+	}
+	return volumes
+}
+
+func useWorkspaceVolume(options BackendOptions) bool {
+	if options.WorkspaceVolume != nil {
+		return *options.WorkspaceVolume
+	}
+	return true
 }
 
 func pvcVolume(name string) kube_core_v1.Volume {

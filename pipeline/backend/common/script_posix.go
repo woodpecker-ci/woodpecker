@@ -35,7 +35,8 @@ func generateScriptPosix(commands []string, workDir string) string {
 	}
 
 	for _, command := range commands {
-		fmt.Fprintf(&buf,
+		fmt.Fprintf(
+			&buf,
 			traceScript,
 			shellescape.Quote(command),
 			command,

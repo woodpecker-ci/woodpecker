@@ -16,8 +16,9 @@ package linter
 
 import (
 	"fmt"
+	"slices"
 
-	"codeberg.org/6543/xyaml"
+	"codeberg.org/6543/xyaml/v2"
 	"go.uber.org/multierr"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
@@ -124,10 +125,12 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 	var linterErr error
 	for _, container := range config.Workflow.Clone.ContainerList {
 		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
-			linterErr = multierr.Append(linterErr,
+			linterErr = multierr.Append(
+				linterErr,
 				newLinterError(
 					"Specified clone image does not match allow list, netrc is not injected",
-					config.File, fmt.Sprintf("clone.%s", container.Name), true),
+					config.File, fmt.Sprintf("clone.%s", container.Name), true,
+				),
 			)
 		}
 	}
@@ -178,14 +181,18 @@ func (l *Linter) lintDependsOn(config *WorkflowConfig, c *types.Container, area 
 	}
 
 	var linterErr error
-check:
 	for _, dep := range c.DependsOn {
-		for _, step := range config.Workflow.Steps.ContainerList {
-			if dep == step.Name {
-				continue check
-			}
+		if slices.ContainsFunc(
+			config.Workflow.Steps.ContainerList,
+			func(step *types.Container) bool { return dep.Name == step.Name },
+		) {
+			continue
 		}
-		linterErr = multierr.Append(linterErr,
+		if dep.Optional {
+			continue
+		}
+		linterErr = multierr.Append(
+			linterErr,
 			newLinterError(
 				"One or more of the specified dependencies do not exist",
 				config.File, fmt.Sprintf("%s.%s.depends_on", area, c.Name), false,

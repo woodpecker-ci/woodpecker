@@ -123,7 +123,8 @@
                 "add": "Benutzer hinzufügen",
                 "admin": {
                     "admin": "Admin",
-                    "placeholder": "Benutzer ist ein Admin"
+                    "placeholder": "Benutzer ist ein Admin",
+                    "admin_warning": "Dieser Benutzer ist ein Admin aufgrund deiner Umgebungs-Konfiguration. Wenn du die Berechtigung hier entziehst, wird sie bei der nächsten Anmeldung wiederhergestellt."
                 },
                 "avatar_url": "URL des Profilbilds",
                 "cancel": "Abbrechen",
@@ -139,7 +140,8 @@
                 "save": "Benutzer speichern",
                 "saved": "Benutzer gespeichert",
                 "show": "Benutzer anzeigen",
-                "users": "Benutzer"
+                "users": "Benutzer",
+                "forge": "Code-Plattform"
             },
             "registries": {
                 "desc": "Globale Registry-Zugangsdaten können hinzugefügt werden, um für private Images für alle Pipelines zu verwenden.",
@@ -262,7 +264,9 @@
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",
                 "log_delete": "Löschen",
-                "skipped": "Dieser Schritt wurde übersprungen."
+                "skipped": "Dieser Schritt wurde übersprungen.",
+                "expand_all": "Alle ausklappen",
+                "collapse_all": "Alle einklappen"
             },
             "config": "Konfiguration",
             "errors": "Fehler",
@@ -397,10 +401,14 @@
                 "saved": "Cron gespeichert",
                 "schedule": {
                     "placeholder": "Zeitplan",
-                    "title": "Zeitplan (basierend auf UTC)"
+                    "title": "Zeitplan"
                 },
                 "show": "Crons anzeigen",
-                "enabled": "Aktiv"
+                "enabled": "Aktiv",
+                "next_exec_local": "Nächste Ausführung: {local}",
+                "next_exec_both": "Nächste Ausführung: {local} ({zoned} {timezone})",
+                "timezone": "Zeitzone",
+                "your_timezone": "In der Zeitzone deines Webbrowsers."
             },
             "general": {
                 "allow_pr": {
@@ -414,13 +422,15 @@
                 "general": "Projekt",
                 "netrc_only_trusted": {
                     "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Code-Plattform zu klonen oder zu pushen.",
-                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
+                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen",
+                    "placeholder": "Plugin-Image"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. {0}). Verzeichnisse sollten mit einem {1} enden.",
                     "desc_path_example": "mein/pfad/",
-                    "path": "Pipeline-Pfad"
+                    "path": "Pipeline-Pfad",
+                    "by_default": "Standardmäßig: {paths}"
                 },
                 "project": "Projekt-Einstellungen",
                 "protected": {

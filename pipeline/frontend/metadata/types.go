@@ -32,6 +32,7 @@ type (
 		ID          int64                `json:"id,omitempty"`
 		Name        string               `json:"name,omitempty"`
 		Owner       string               `json:"owner,omitempty"`
+		OrgID       int64                `json:"org_id,omitempty"`
 		RemoteID    string               `json:"remote_id,omitempty"`
 		ForgeURL    string               `json:"forge_url,omitempty"`
 		CloneURL    string               `json:"clone_url,omitempty"`
@@ -55,6 +56,7 @@ type (
 		DeployTask  string   `json:"task,omitempty"`
 		Commit      Commit   `json:"commit"`
 		Parent      int64    `json:"parent,omitempty"`
+		RerunCount  int64    `json:"rerun_count,omitempty"`
 		Cron        string   `json:"cron,omitempty"`
 		Author      string   `json:"author,omitempty"`
 		Avatar      string   `json:"avatar,omitempty"`
@@ -67,6 +69,7 @@ type (
 		Refspec              string   `json:"refspec,omitempty"`
 		Branch               string   `json:"branch,omitempty"`
 		Message              string   `json:"message,omitempty"`
+		Timestamp            int64    `json:"timestamp,omitempty"`
 		Author               Author   `json:"author"`
 		ChangedFiles         []string `json:"changed_files,omitempty"`
 		PullRequestLabels    []string `json:"labels,omitempty"`

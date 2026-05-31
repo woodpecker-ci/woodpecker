@@ -16,9 +16,9 @@ package constant
 
 import "time"
 
-// DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
+// DefaultConfigOrder represent the priority in which woodpecker searches for a pipeline config by default
 // folders are indicated by supplying a trailing slash.
-var DefaultConfigOrder = [...]string{
+var DefaultConfigOrder = []string{
 	".woodpecker/",
 	".woodpecker.yaml",
 	".woodpecker.yml",
@@ -27,7 +27,7 @@ var DefaultConfigOrder = [...]string{
 const (
 	// DefaultClonePlugin can be changed by 'WOODPECKER_DEFAULT_CLONE_PLUGIN' at runtime.
 	// renovate: datasource=docker depName=woodpeckerci/plugin-git
-	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.9.0"
+	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.9.2"
 )
 
 // TrustedClonePlugins can be changed by 'WOODPECKER_PLUGINS_TRUSTED_CLONE' at runtime.
