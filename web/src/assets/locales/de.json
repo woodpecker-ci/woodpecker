@@ -140,7 +140,8 @@
                 "save": "Benutzer speichern",
                 "saved": "Benutzer gespeichert",
                 "show": "Benutzer anzeigen",
-                "users": "Benutzer"
+                "users": "Benutzer",
+                "forge": "Code-Plattform"
             },
             "registries": {
                 "desc": "Globale Registry-Zugangsdaten können hinzugefügt werden, um für private Images für alle Pipelines zu verwenden.",
@@ -428,7 +429,8 @@
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. {0}). Verzeichnisse sollten mit einem {1} enden.",
                     "desc_path_example": "mein/pfad/",
-                    "path": "Pipeline-Pfad"
+                    "path": "Pipeline-Pfad",
+                    "by_default": "Standardmäßig: {paths}"
                 },
                 "project": "Projekt-Einstellungen",
                 "protected": {

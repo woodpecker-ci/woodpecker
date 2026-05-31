@@ -140,11 +140,12 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		DeployTo:    pipeline.DeployTo,
 		DeployTask:  pipeline.DeployTask,
 		Commit: metadata.Commit{
-			Sha:     pipeline.Commit,
-			Ref:     pipeline.Ref,
-			Refspec: pipeline.Refspec,
-			Branch:  pipeline.Branch,
-			Message: pipeline.Message,
+			Sha:       pipeline.Commit,
+			Ref:       pipeline.Ref,
+			Refspec:   pipeline.Refspec,
+			Branch:    pipeline.Branch,
+			Message:   pipeline.Message,
+			Timestamp: pipeline.Timestamp,
 			Author: metadata.Author{
 				Name:  pipeline.Author,
 				Email: pipeline.Email,

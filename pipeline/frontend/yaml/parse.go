@@ -15,7 +15,7 @@
 package yaml
 
 import (
-	"codeberg.org/6543/xyaml"
+	"codeberg.org/6543/xyaml/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 )

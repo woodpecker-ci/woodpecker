@@ -21,7 +21,7 @@ import (
 	"slices"
 
 	"github.com/expr-lang/expr"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
@@ -123,6 +123,9 @@ func (when *When) IsLocal() bool {
 }
 
 func (when *When) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
+	}
 	switch value.Kind {
 	case yaml.SequenceNode:
 		if err := value.Decode(&when.Constraints); err != nil {

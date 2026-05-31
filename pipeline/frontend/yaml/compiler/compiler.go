@@ -15,6 +15,7 @@
 package compiler
 
 import (
+	"errors"
 	"fmt"
 	"maps"
 	"path"
@@ -221,6 +222,11 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// add pipeline steps
+	stepNames := make(map[string]struct{}, len(conf.Steps.ContainerList))
+	for _, container := range conf.Steps.ContainerList {
+		stepNames[container.Name] = struct{}{}
+	}
+
 	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
 	for pos, container := range conf.Steps.ContainerList {
 		// Skip if local and should not run local
@@ -259,6 +265,15 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	// generate stages out of steps
 	stepStages, err := newDAGCompiler(steps).compile()
 	if err != nil {
+		// If the missing dep exists in the config but isn't in the surviving
+		// step list, it was filtered out by its 'when' conditions. Surface a
+		// more actionable error.
+		var missingDepErr *ErrStepMissingDependency
+		if errors.As(err, &missingDepErr) {
+			if _, inConfig := stepNames[missingDepErr.dep]; inConfig {
+				return nil, &ErrStepFilteredDependency{name: missingDepErr.name, dep: missingDepErr.dep}
+			}
+		}
 		return nil, err
 	}
 

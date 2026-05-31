@@ -5970,6 +5970,9 @@ const docTemplate = `{
                 },
                 "sha": {
                     "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
                 }
             }
         },

@@ -16,8 +16,10 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
@@ -39,6 +41,23 @@ func Config(c *gin.Context) {
 		csrf, _ = t.Sign(user.Hash)
 	}
 
+	var configPaths []string
+
+	extensionsClean := make([]string, len(server.Config.Pipeline.ConfigExtensions))
+	for i, e := range server.Config.Pipeline.ConfigExtensions {
+		extensionsClean[i] = strings.TrimPrefix(e, ".")
+	}
+
+	extensions := strings.Join(extensionsClean, ",")
+	for _, p := range server.Config.Pipeline.ConfigPaths {
+		if strings.HasSuffix(p, "/") {
+			// it's a directory -> add extensions
+			configPaths = append(configPaths, fmt.Sprintf("%s*.{%s}", p, extensions))
+		} else {
+			configPaths = append(configPaths, p)
+		}
+	}
+
 	configData := map[string]any{
 		"user":                        user,
 		"csrf":                        csrf,
@@ -48,6 +67,7 @@ func Config(c *gin.Context) {
 		"enable_swagger":              server.Config.WebUI.EnableSwagger,
 		"user_registered_agents":      !server.Config.Agent.DisableUserRegisteredAgentRegistration,
 		"max_pipeline_log_line_count": server.Config.WebUI.MaxPipelineLogLineCount,
+		"default_config_paths":        configPaths,
 	}
 
 	// default func map with json parser.
@@ -83,4 +103,5 @@ window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};
 window.WOODPECKER_SKIP_VERSION_CHECK = {{ .skip_version_check }}
 window.WOODPECKER_USER_REGISTERED_AGENTS = {{ .user_registered_agents }}
 window.WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT = {{ .max_pipeline_log_line_count }}
+window.WOODPECKER_DEFAULT_CONFIG_PATHS = {{ json .default_config_paths }}
 `
