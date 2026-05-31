@@ -42,8 +42,15 @@ const (
 	maxQueuedBatchesPerClient int = 30
 
 	// Is the time till we send a ping to keep the connection alive.
-	idlePingTime = time.Second * 30
+	idlePingTime = time.Second * 15
+
+	ssePingFrame = ": ping\n\nevent: ping\ndata: {}\n\n"
 )
+
+func writeSSEPing(rw io.Writer, flusher http.Flusher) {
+	logWriteStringErr(io.WriteString(rw, ssePingFrame))
+	flusher.Flush()
+}
 
 // EventStreamSSE
 //
@@ -67,9 +74,7 @@ func EventStreamSSE(c *gin.Context) {
 		return
 	}
 
-	// ping the client
-	logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
-	flusher.Flush()
+	writeSSEPing(rw, flusher)
 
 	log.Debug().Msg("user feed: connection opened")
 
@@ -107,15 +112,17 @@ func EventStreamSSE(c *gin.Context) {
 		cancel(err)
 	}()
 
+	pingTicker := time.NewTicker(idlePingTime)
+	defer pingTicker.Stop()
+
 	for {
 		select {
 		case <-requestCtx.Done():
 			return
 		case <-ctx.Done():
 			return
-		case <-time.After(idlePingTime):
-			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
-			flusher.Flush()
+		case <-pingTicker.C:
+			writeSSEPing(rw, flusher)
 		case buf, ok := <-eventChan:
 			if ok {
 				logWriteStringErr(io.WriteString(rw, "data: "))
@@ -151,8 +158,7 @@ func LogStreamSSE(c *gin.Context) {
 		return
 	}
 
-	logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
-	flusher.Flush()
+	writeSSEPing(rw, flusher)
 
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -249,6 +255,9 @@ func LogStreamSSE(c *gin.Context) {
 		log.Debug().Msgf("log stream: reconnect: last-event-id: %d", last)
 	}
 
+	pingTicker := time.NewTicker(idlePingTime)
+	defer pingTicker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done(): // Monitor if the "tail" context is canceled.
@@ -261,9 +270,8 @@ func LogStreamSSE(c *gin.Context) {
 		case <-requestCtx.Done(): // Monitor the request context for cancellation when the client has gone away.
 			log.Debug().Msg("log stream: closed, client has gone away")
 			return
-		case <-time.After(idlePingTime):
-			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
-			flusher.Flush()
+		case <-pingTicker.C:
+			writeSSEPing(rw, flusher)
 		case buf, ok := <-logChan:
 			if ok {
 				if id > last {

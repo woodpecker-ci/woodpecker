@@ -6,7 +6,7 @@ import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 
 import App from '~/App.vue';
-import useEvents from '~/compositions/useEvents';
+import { setupEvents } from '~/compositions/useEvents';
 import { i18n } from '~/compositions/useI18n';
 import { notifications } from '~/compositions/useNotifications';
 import router from '~/router';
@@ -21,4 +21,6 @@ app.use(i18n);
 app.use(createPinia());
 app.mount('#app');
 
-useEvents();
+void router.isReady().then(() => {
+  setupEvents(router);
+});

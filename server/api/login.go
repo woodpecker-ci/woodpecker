@@ -15,6 +15,7 @@
 package api
 
 import (
+	"context"
 	"encoding/base32"
 	"errors"
 	"fmt"
@@ -43,6 +44,25 @@ const (
 	perPage            = 50
 	maxPage            = 10000
 )
+
+// SyncRepoPermissionsFn runs repo permission sync after login.
+// Tests may replace this to run synchronously.
+var SyncRepoPermissionsFn = syncRepoPermissionsAsync
+
+func syncRepoPermissionsAsync(ctx context.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) {
+	go func() {
+		if err := updateRepoPermissions(ctx, user, _store, _forge, forgeID); err != nil {
+			log.Error().Err(err).Msgf("background repo permission sync failed for user %s", user.Login)
+		}
+	}()
+}
+
+// SyncRepoPermissionsSyncForTesting runs permission sync synchronously in tests.
+func SyncRepoPermissionsSyncForTesting(ctx context.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) {
+	if err := updateRepoPermissions(ctx, user, _store, _forge, forgeID); err != nil {
+		log.Error().Err(err).Msgf("background repo permission sync failed for user %s", user.Login)
+	}
+}
 
 func HandleAuth(c *gin.Context) {
 	// TODO: check if this is really needed
@@ -293,21 +313,16 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	err = updateRepoPermissions(c, user, _store, _forge, forgeID)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
-		return
-	}
-
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
+
+	SyncRepoPermissionsFn(context.WithoutCancel(c.Request.Context()), user, _store, _forge, forgeID)
 
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
-func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {
+func updateRepoPermissions(ctx context.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {
 	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
-		return _forge.Repos(c, user, &model.ListOptions{
+		return _forge.Repos(ctx, user, &model.ListOptions{
 			Page:    page,
 			PerPage: perPage,
 		})
