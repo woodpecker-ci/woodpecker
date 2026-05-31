@@ -298,6 +298,25 @@ func TestCompilerCompile(t *testing.T) {
 			backConf:    nil,
 			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
 		},
+		{
+			name: "workflow with step depending on filtered-out step",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{
+				{
+					Name:  "build",
+					Image: "bash",
+					When: constraint.When{Constraints: []constraint.Constraint{{
+						Event: yaml_base_types.StringOrSlice{"tag"},
+					}}},
+				},
+				{
+					Name:      "deploy",
+					Image:     "bash",
+					DependsOn: constraint.DependsOn{{Name: "build"}},
+				},
+			}}},
+			backConf:    nil,
+			expectedErr: "step 'deploy' depends on step 'build' which is filtered out by its conditions",
+		},
 	}
 
 	for _, test := range tests {
