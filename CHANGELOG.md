@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.5.0 [[#6682](https://github.com/woodpecker-ci/woodpecker/pull/6682)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.2 [[#6674](https://github.com/woodpecker-ci/woodpecker/pull/6674)]
 - Update web npm deps non-major [[#6657](https://github.com/woodpecker-ci/woodpecker/pull/6657)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.36.0 [[#6668](https://github.com/woodpecker-ci/woodpecker/pull/6668)]
