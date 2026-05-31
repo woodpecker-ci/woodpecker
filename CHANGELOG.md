@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Add commit timestamp env vars [[#6670](https://github.com/woodpecker-ci/woodpecker/pull/6670)]
 - Show forge in users list [[#6666](https://github.com/woodpecker-ci/woodpecker/pull/6666)]
 
 ### 🧪 Tests
