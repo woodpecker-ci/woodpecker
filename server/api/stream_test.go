@@ -19,12 +19,15 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
@@ -34,6 +37,75 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
+
+func TestSSEPingFrame(t *testing.T) {
+	assert.Contains(t, ssePingFrame, ": ping")
+	assert.Contains(t, ssePingFrame, "event: ping")
+	assert.Contains(t, ssePingFrame, "data: {}")
+}
+
+func TestEventStreamSSEInitialPing(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	broker := memory.New()
+	server.Config.Services.Scheduler = scheduler.NewScheduler(nil, broker)
+	t.Cleanup(func() { server.Config.Services.Scheduler = nil })
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "/stream/events", nil)
+	require.NoError(t, err)
+	c.Request = req
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		EventStreamSSE(c)
+	}()
+
+	time.Sleep(20 * time.Millisecond)
+	cancel(nil)
+	<-done
+
+	body := w.Body.String()
+	assert.Contains(t, body, ": ping")
+	assert.Contains(t, body, "event: ping")
+}
+
+func TestEventStreamSSETickerPing(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping SSE ticker ping test in short mode")
+	}
+
+	gin.SetMode(gin.TestMode)
+	broker := memory.New()
+	server.Config.Services.Scheduler = scheduler.NewScheduler(nil, broker)
+	t.Cleanup(func() { server.Config.Services.Scheduler = nil })
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "/stream/events", nil)
+	require.NoError(t, err)
+	c.Request = req
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		EventStreamSSE(c)
+	}()
+
+	time.Sleep(idlePingTime + time.Second)
+	cancel(nil)
+	<-done
+
+	body := w.Body.String()
+	assert.GreaterOrEqual(t, strings.Count(body, "event: ping"), 2)
+}
 
 func TestEventStreamSSEConcurrentDisconnect(t *testing.T) {
 	gin.SetMode(gin.TestMode)

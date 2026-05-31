@@ -42,6 +42,12 @@ import (
 func TestHandleAuth(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
+	originalSync := api.SyncRepoPermissionsFn
+	api.SyncRepoPermissionsFn = api.SyncRepoPermissionsSyncForTesting
+	t.Cleanup(func() {
+		api.SyncRepoPermissionsFn = originalSync
+	})
+
 	user := &model.User{
 		ID:            1,
 		OrgID:         1,
