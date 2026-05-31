@@ -22,6 +22,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#6686](https://github.com/woodpecker-ci/woodpecker/pull/6686)]
 - Update dependency concurrently to v10 [[#6676](https://github.com/woodpecker-ci/woodpecker/pull/6676)]
 - Update docs npm deps non-major [[#6675](https://github.com/woodpecker-ci/woodpecker/pull/6675)]
 - docs: add cli exec examples [[#6629](https://github.com/woodpecker-ci/woodpecker/pull/6629)]
