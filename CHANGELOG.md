@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-05-31
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @qwerty287, @simonckemper
+@6543, @AkashKumar7902, @MeurillonGuillaume, @qwerty287, @simonckemper
 
 ### 📈 Enhancement
 
+- Improve slow user authorization if many orgs/repos [[#5665](https://github.com/woodpecker-ci/woodpecker/pull/5665)]
 - pipeline: use more explizite error for step dependencies filtered out by its conditions [[#6680](https://github.com/woodpecker-ci/woodpecker/pull/6680)]
 - Add commit timestamp env vars [[#6670](https://github.com/woodpecker-ci/woodpecker/pull/6670)]
 - Show forge in users list [[#6666](https://github.com/woodpecker-ci/woodpecker/pull/6666)]
