@@ -411,7 +411,7 @@ func (q *fifo) canRunConcurrent(task *model.Task) bool {
 }
 
 // taskInstantiationOrder returns a monotonic value reflecting the order in
-// which a task (workflow) was created. Task IDs are the autoincrement workflow
+// which a task (workflow) was created. Task IDs are the auto incremented workflow
 // IDs, so a lower value means an earlier instantiation.
 func taskInstantiationOrder(task *model.Task) int64 {
 	id, err := strconv.ParseInt(task.ID, 10, 64)
