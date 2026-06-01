@@ -866,6 +866,14 @@ func TestFifoConcurrency(t *testing.T) {
 		assert.NoError(t, q.Done(ctx, g2.ID, model.StatusSuccess))
 		waitForProcess()
 	})
+
+	t.Run("non-numeric task id falls back to order zero", func(t *testing.T) {
+		// IDs are normally the auto-incremented workflow IDs, but guard against
+		// a malformed ID by treating it as the earliest possible order.
+		assert.Equal(t, int64(0), taskInstantiationOrder(&model.Task{ID: "not-a-number"}))
+		assert.Equal(t, int64(0), taskInstantiationOrder(&model.Task{ID: ""}))
+		assert.Equal(t, int64(123), taskInstantiationOrder(&model.Task{ID: "123"}))
+	})
 }
 
 func TestFifoLeaseManagement(t *testing.T) {
