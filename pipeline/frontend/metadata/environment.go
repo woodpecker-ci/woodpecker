@@ -97,6 +97,7 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_COMMIT_REFSPEC", commit.Refspec)
 	setNonEmptyEnvVar(params, "CI_COMMIT_MESSAGE", commit.Message)
 	setNonEmptyEnvVar(params, "CI_COMMIT_BRANCH", commit.Branch)
+	setNonEmptyEnvVar(params, "CI_COMMIT_TIMESTAMP", strconv.FormatInt(commit.Timestamp, 10))
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR", commit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_EMAIL", commit.Author.Email)
 	if p, f := strings.CutPrefix(pipeline.Commit.Ref, "refs/tags/"); f {
@@ -150,6 +151,7 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_REFSPEC", prevCommit.Refspec)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_MESSAGE", prevCommit.Message)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_BRANCH", prevCommit.Branch)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_TIMESTAMP", strconv.FormatInt(prevCommit.Timestamp, 10))
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR", prevCommit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_EMAIL", prevCommit.Author.Email)
 	if prevPipeline.Event.IsPull() {

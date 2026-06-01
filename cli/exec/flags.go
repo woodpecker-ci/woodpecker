@@ -284,6 +284,11 @@ var flags = []cli.Flag{
 		Name:    "commit-message",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_MESSAGE\".",
 	},
+	&cli.Int64Flag{
+		Sources: cli.EnvVars("CI_COMMIT_TIMESTAMP"),
+		Name:    "commit-timestamp",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_TIMESTAMP\".",
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_AUTHOR"),
 		Name:    "commit-author-name",
@@ -386,6 +391,11 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_PREV_COMMIT_MESSAGE"),
 		Name:    "prev-commit-message",
 		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_MESSAGE\".",
+	},
+	&cli.Int64Flag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_TIMESTAMP"),
+		Name:    "prev-commit-message",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_TIMESTAMP\".",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR"),
