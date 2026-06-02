@@ -210,35 +210,43 @@ func PatchCron(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
-	if in.Branch != nil && *in.Branch != "" {
-		// check if branch exists on forge
-		_, err := _forge.BranchHead(c, user, repo, *in.Branch)
-		if err != nil {
-			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
-			return
+	if in.Branch != nil {
+		if branch := strings.TrimSpace(*in.Branch); branch != "" {
+			// check if branch exists on forge
+			_, err := _forge.BranchHead(c, user, repo, branch)
+			if err != nil {
+				c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
+				return
+			}
+			cron.Branch = branch
 		}
-		cron.Branch = *in.Branch
 	}
-	if in.Timezone != nil && *in.Timezone != "" {
-		cron.Timezone = *in.Timezone
-		nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, cron.Timezone, time.Now())
-		if err != nil {
-			c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
-			return
+	if in.Timezone != nil {
+		if tz := strings.TrimSpace(*in.Timezone); tz != "" {
+			nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, tz, time.Now())
+			if err != nil {
+				c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
+				return
+			}
+			cron.Timezone = tz
+			cron.NextExec = nextExec.Unix()
 		}
-		cron.NextExec = nextExec.Unix()
 	}
-	if in.Schedule != nil && *in.Schedule != "" {
-		cron.Schedule = *in.Schedule
-		nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, cron.Timezone, time.Now())
-		if err != nil {
-			c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
-			return
+	if in.Schedule != nil {
+		if schedule := strings.TrimSpace(*in.Schedule); schedule != "" {
+			nextExec, err := cron_scheduler.CalcNewNext(schedule, cron.Timezone, time.Now())
+			if err != nil {
+				c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
+				return
+			}
+			cron.Schedule = schedule
+			cron.NextExec = nextExec.Unix()
 		}
-		cron.NextExec = nextExec.Unix()
 	}
-	if in.Name != nil && *in.Name != "" {
-		cron.Name = *in.Name
+	if in.Name != nil {
+		if name := strings.TrimSpace(*in.Name); name != "" {
+			cron.Name = name
+		}
 	}
 	if in.Enabled != nil {
 		cron.Enabled = *in.Enabled
