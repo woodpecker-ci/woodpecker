@@ -18,6 +18,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -126,11 +127,11 @@ func PostCron(c *gin.Context) {
 	}
 	cron := &model.Cron{
 		RepoID:    repo.ID,
-		Name:      in.Name,
+		Name:      strings.TrimSpace(in.Name),
 		CreatorID: user.ID,
-		Schedule:  in.Schedule,
-		Timezone:  in.Timezone,
-		Branch:    in.Branch,
+		Schedule:  strings.TrimSpace(in.Schedule),
+		Timezone:  strings.TrimSpace(in.Timezone),
+		Branch:    strings.TrimSpace(in.Branch),
 		Variables: in.Variables,
 		Enabled:   in.Enabled,
 	}
@@ -142,7 +143,7 @@ func PostCron(c *gin.Context) {
 		return
 	}
 
-	nextExec, err := cron_scheduler.CalcNewNext(in.Schedule, in.Timezone, time.Now())
+	nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, cron.Timezone, time.Now())
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 		return
@@ -151,7 +152,7 @@ func PostCron(c *gin.Context) {
 
 	if in.Branch != "" {
 		// check if branch exists on forge
-		_, err := _forge.BranchHead(c, user, repo, in.Branch)
+		_, err := _forge.BranchHead(c, user, repo, cron.Branch)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
