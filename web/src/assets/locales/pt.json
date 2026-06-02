@@ -122,7 +122,8 @@
                     "path": "Caminho do pipeline",
                     "default": "Por padrão: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Caminho para a configuração do pipeline (por exemplo, {0}). As pastas devem terminar com {1}.",
-                    "desc_path_example": "meu/caminho/"
+                    "desc_path_example": "meu/caminho/",
+                    "by_default": "Por padrão: {paths}"
                 },
                 "allow_deploy": {
                     "allow": "Permitir implantações",
@@ -348,7 +349,8 @@
                 "desc": "Apenas usuários autenticados da instância Woodpecker podem ver este projeto.",
                 "internal": "Interno"
             }
-        }
+        },
+        "refresh": "Atualizar lista de repositórios"
     },
     "repos": "Repos",
     "repositories": {
@@ -418,9 +420,11 @@
                 "saved": "Usuário salvo",
                 "admin": {
                     "admin": "Admin",
-                    "placeholder": "O usuário é um administrador"
+                    "placeholder": "O usuário é um administrador",
+                    "admin_warning": "Este usuário possui permissões de administrador devido à configuração do seu ambiente. Se você revogar as permissões aqui, o usuário as recuperará ao fazer login na próxima vez."
                 },
-                "delete_user": "Excluir usuário"
+                "delete_user": "Excluir usuário",
+                "forge": "Forja"
             },
             "orgs": {
                 "delete_org": "Excluir organização",
