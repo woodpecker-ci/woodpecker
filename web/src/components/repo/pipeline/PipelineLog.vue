@@ -181,6 +181,7 @@ import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { debounce } from '~/lib/utils';
+import { extractCommandMatchers } from '~/lib/utils/pipelineConfig';
 
 interface LogLine {
   index: number;
@@ -245,27 +246,9 @@ const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 const collapsedCommands = ref(new Set<number>());
 
-const commandRegex = /^\s*-\s(.+)$/gm;
-const specialCharsRegex = /[.*+?^${}()|[\]\\]/g;
-const matrixVariableRegex = /\\\$(\\\{\w+\\\})/g;
-
 const knownCommandMatchers = computed(() => {
   if (!pipelineConfigs.value) return [];
-  const patterns: RegExp[] = [];
-  pipelineConfigs.value.forEach((config: PipelineConfig) => {
-    const decoded = decode(config.data);
-    const matches = decoded.matchAll(commandRegex);
-    for (const match of matches) {
-      const rawCommand = match[1].trim();
-      // Replace matrix variable ${VAR} with a wildcard match (non-greedy)
-      const patternString = rawCommand
-        .replace(specialCharsRegex, '\\$&') // escape all
-        .replace(matrixVariableRegex, '.*'); // match ${VAR}
-
-      patterns.push(new RegExp(`^${patternString}$`));
-    }
-  });
-  return patterns;
+  return pipelineConfigs.value.flatMap((config: PipelineConfig) => extractCommandMatchers(decode(config.data)));
 });
 
 const groupedLogs = computed(() => {
