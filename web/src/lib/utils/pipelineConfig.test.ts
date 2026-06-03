@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string -- YAML fixtures intentionally contain literal ${VAR} matrix variables */
 import { describe, expect, it } from 'vitest';
 
-import { extractCommandMatchers } from './pipelineConfig';
+import { extractCommandMatchers, extractCmdFromTrace } from './pipelineConfig';
 
 // Map form: steps as a keyed object
 const mapFormYaml = `
@@ -255,5 +255,33 @@ steps:
       expect(matchers.some((m) => m.test('pnpm installXXfrozen-lockfile'))).toBe(false);
       expect(matchers.some((m) => m.test("bash -c 'echo (hi) | grep h'"))).toBe(true);
     });
+  });
+});
+
+describe('extractCmdFromTrace', () => {
+  it('strips the + prefix from a plain trace line', () => {
+    expect(extractCmdFromTrace('+ corepack enable')).toBe('corepack enable');
+  });
+
+  it('strips single quotes added by the Windows local backend', () => {
+    expect(extractCmdFromTrace("+ 'net use'")).toBe('net use');
+  });
+
+  it('strips double quotes', () => {
+    expect(extractCmdFromTrace('+ "net use"')).toBe('net use');
+  });
+
+  it('does not strip mismatched quotes', () => {
+    expect(extractCmdFromTrace("+ 'net use\"")).toBe("'net use\"");
+  });
+
+  it('does not strip a quote that only wraps part of the command', () => {
+    expect(extractCmdFromTrace("+ echo 'hello world'")).toBe("echo 'hello world'");
+  });
+
+  it('returns null for a non-trace line', () => {
+    expect(extractCmdFromTrace('corepack enable')).toBeNull();
+    expect(extractCmdFromTrace('Lockfile is up to date')).toBeNull();
+    expect(extractCmdFromTrace('+ ')).toBe('');
   });
 });

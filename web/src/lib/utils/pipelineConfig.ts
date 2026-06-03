@@ -116,3 +116,26 @@ export function extractCommandMatchers(decodedYaml: string, stepName: string): R
     .map((command) => commandToMatcher(String(command).trim()))
     .filter((matcher): matcher is RegExp => matcher !== null);
 }
+
+/**
+ * Extract the command string from a shell trace line (`set -x` output).
+ *
+ * Bash and POSIX shells prefix each traced command with `+ `. Some backends
+ * (e.g. the Windows local backend) additionally wrap the command in single or
+ * double quotes: `+ 'net use'`. This function strips both the `+ ` prefix and
+ * any surrounding matching quote pair so the result can be compared against the
+ * plain command strings from the pipeline config.
+ *
+ * Returns null if the line is not a trace line (does not start with `+ `).
+ */
+export function extractCmdFromTrace(line: string): string | null {
+  if (!line.startsWith('+ ')) {
+    return null;
+  }
+
+  const raw = line.slice(2).trim();
+
+  // Strip surrounding matching single or double quotes added by some backends.
+  const quoteMatch = /^(['"])([\s\S]*)\1$/.exec(raw);
+  return quoteMatch !== null ? quoteMatch[2] : raw;
+}

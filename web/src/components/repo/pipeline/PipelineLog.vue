@@ -181,7 +181,7 @@ import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { debounce } from '~/lib/utils';
-import { extractCommandMatchers } from '~/lib/utils/pipelineConfig';
+import { extractCommandMatchers, extractCmdFromTrace } from '~/lib/utils/pipelineConfig';
 
 interface LogLine {
   index: number;
@@ -284,8 +284,8 @@ const groupedLogs = computed(() => {
     const trimmedText = (line.rawText || '').trim();
 
     let isCommand = false;
-    if (trimmedText.startsWith('+ ')) {
-      const cmdPart = trimmedText.slice(2).trim();
+    const cmdPart = extractCmdFromTrace(trimmedText);
+    if (cmdPart !== null) {
       isCommand = knownCommandMatchers.value.some((matcher) => matcher.test(cmdPart));
     }
 
