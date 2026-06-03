@@ -246,9 +246,21 @@ const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 const collapsedCommands = ref(new Set<number>());
 
+const currentWorkflow = computed(() =>
+  pipeline.value.workflows?.find((workflow) => workflow.children.some((s) => s.pid === stepId.value)),
+);
+
 const knownCommandMatchers = computed(() => {
-  if (!pipelineConfigs.value) return [];
-  return pipelineConfigs.value.flatMap((config: PipelineConfig) => extractCommandMatchers(decode(config.data)));
+  const workflowName = currentWorkflow.value?.name;
+  const stepName = step.value?.name;
+  if (!workflowName || !stepName || !pipelineConfigs.value) return [];
+
+  // Each workflow corresponds to one config file (config.name === workflow.name).
+  // Scope matchers to the current step's commands only.
+  const config = pipelineConfigs.value.find((c: PipelineConfig) => c.name === workflowName);
+  if (!config) return [];
+
+  return extractCommandMatchers(decode(config.data), stepName);
 });
 
 const groupedLogs = computed(() => {

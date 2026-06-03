@@ -1,47 +1,118 @@
-// Matches a `commands:` block and captures its indented list items.
-// Group 1: the base indentation of the `commands:` key.
-// Group 2: all subsequent lines that belong to the list (same indent + deeper).
-const commandsBlockRegex = /^(\s+)commands:\s*\n((?:\1\s+-\s.+\n?)*)/gm;
-
-// Matches a single YAML list item: optional whitespace, dash, space, content.
-const commandLineRegex = /^\s*-\s(.+)$/gm;
+import { load } from 'js-yaml';
 
 // Characters that are special in a RegExp and must be escaped.
 const specialCharsRegex = /[.*+?^${}()|[\]\\]/g;
 
-// After escaping, a variable \${VAR} looks like \$\{WORD\} — replace with .* wildcard.
+// After escaping, a matrix variable ${VAR} looks like \$\{WORD\} — replace with .* wildcard.
 const matrixVariableRegex = /\\\$\\\{\w+\\\}/g;
 
+// Shape of the parts of a Woodpecker pipeline config we care about.
+interface StepConfig {
+  name?: string;
+  commands?: string | string[];
+}
+
+interface PipelineConfigYaml {
+  steps?: Record<string, StepConfig> | StepConfig[];
+}
+
 /**
- * Parse one decoded pipeline config YAML and return a list of RegExp matchers,
- * one per shell command found inside `commands:` blocks.
- *
- * Matrix variables (`${VAR}`) are turned into `.*` wildcards so that a command
- * like `echo ${VERSION}` still matches its runtime log line.
- *
- * Patterns that degenerate to pure wildcards (e.g. a bare `${VAR}` entry) are
- * dropped — they would match every log line and produce false positives.
+ * Turn a raw config string into an anchored regex source, replacing matrix
+ * variables (`${VAR}`) with `.*` wildcards. Matrix variables are interpolated
+ * before the pipeline runs, so the stored config keeps `${VAR}` while the
+ * runtime value (log line / step name) is concrete — the wildcard bridges that.
  */
-export function extractCommandMatchers(decodedYaml: string): RegExp[] {
-  const patterns: RegExp[] = [];
+function toPatternSource(raw: string): string {
+  return raw
+    .replace(specialCharsRegex, '\\$&') // escape regex special chars
+    .replace(matrixVariableRegex, '.*'); // replace escaped \${VAR} with .*
+}
 
-  for (const block of decodedYaml.matchAll(commandsBlockRegex)) {
-    const blockContent = block[2];
-    for (const match of blockContent.matchAll(commandLineRegex)) {
-      const rawCommand = match[1].trim();
+/**
+ * Build a RegExp matching a single shell command.
+ *
+ * Returns null for patterns that collapse to pure wildcards (e.g. a bare `${VAR}`
+ * command) — those would match every log line and produce false positives.
+ */
+function commandToMatcher(rawCommand: string): RegExp | null {
+  const patternString = toPatternSource(rawCommand.trim());
 
-      const patternString = rawCommand
-        .replace(specialCharsRegex, '\\$&') // escape regex special chars
-        .replace(matrixVariableRegex, '.*'); // replace escaped \${VAR} with .*
-
-      // Skip patterns that collapsed entirely to wildcards — they match everything.
-      if (/^(\.\*)*$/.test(patternString)) {
-        continue;
-      }
-
-      patterns.push(new RegExp(`^${patternString}$`));
-    }
+  if (/^(?:\.\*)*$/.test(patternString)) {
+    return null;
   }
 
-  return patterns;
+  return new RegExp(`^${patternString}$`);
+}
+
+/**
+ * Build a RegExp matching a step name. Unlike commands, a pure-wildcard name
+ * (a step named entirely by a matrix variable) is kept on purpose: it matches
+ * every runtime step, which is the desired "can't disambiguate, so apply to
+ * all" fallback.
+ */
+function stepNameToMatcher(rawName: string): RegExp {
+  return new RegExp(`^${toPatternSource(rawName.trim())}$`);
+}
+
+/**
+ * Normalize the `steps` node (map form or list form) into a flat list of steps,
+ * using the map key as the name in map form.
+ */
+function normalizeSteps(steps: Record<string, StepConfig> | StepConfig[]): StepConfig[] {
+  if (Array.isArray(steps)) {
+    return steps;
+  }
+  return Object.entries(steps).map(([name, config]) => ({ ...(config ?? {}), name }));
+}
+
+function toCommandList(commands: string | string[] | undefined): string[] {
+  if (commands === undefined || commands === null) {
+    return [];
+  }
+  return Array.isArray(commands) ? commands : [commands];
+}
+
+/**
+ * Collect the `commands` of every config step whose (wildcard-aware) name
+ * matches the given runtime step name. Returns an empty array if the YAML is
+ * invalid or no matching step has commands.
+ */
+function getStepCommands(decodedYaml: string, stepName: string): string[] {
+  let doc: PipelineConfigYaml | undefined;
+  try {
+    doc = load(decodedYaml) as PipelineConfigYaml;
+  } catch {
+    return [];
+  }
+
+  const steps = doc?.steps;
+  if (steps === undefined || steps === null) {
+    return [];
+  }
+
+  const commands: string[] = [];
+  for (const step of normalizeSteps(steps)) {
+    if (step.name === undefined || step.name === null) {
+      continue;
+    }
+    if (stepNameToMatcher(step.name).test(stepName)) {
+      commands.push(...toCommandList(step.commands));
+    }
+  }
+  return commands;
+}
+
+/**
+ * Return RegExp matchers for the commands of the step(s) matching `stepName`
+ * within a pipeline config, used to detect which log lines start a new
+ * (collapsible) command group.
+ *
+ * Both step names and commands support matrix-variable wildcards. Scoping to
+ * the matching step(s) avoids false matches from unrelated steps; YAML
+ * anchors/aliases are resolved by the parser.
+ */
+export function extractCommandMatchers(decodedYaml: string, stepName: string): RegExp[] {
+  return getStepCommands(decodedYaml, stepName)
+    .map((command) => commandToMatcher(String(command).trim()))
+    .filter((matcher): matcher is RegExp => matcher !== null);
 }
