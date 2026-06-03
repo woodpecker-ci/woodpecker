@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string -- YAML fixtures intentionally contain literal ${VAR} matrix variables */
 import { describe, expect, it } from 'vitest';
 
-import { extractCommandMatchers, extractCmdFromTrace } from './pipelineConfig';
+import { extractCmdFromTrace, extractCommandMatchers } from './pipelineConfig';
 
 // Map form: steps as a keyed object
 const mapFormYaml = `
@@ -272,7 +272,7 @@ describe('extractCmdFromTrace', () => {
   });
 
   it('does not strip mismatched quotes', () => {
-    expect(extractCmdFromTrace("+ 'net use\"")).toBe("'net use\"");
+    expect(extractCmdFromTrace('+ \'net use"')).toBe('\'net use"');
   });
 
   it('does not strip a quote that only wraps part of the command', () => {
