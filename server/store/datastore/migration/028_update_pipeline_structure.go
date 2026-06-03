@@ -35,10 +35,11 @@ var updatePipelineStructure = xormigrate.Migration{
 		}
 
 		type commit struct {
-			SHA      string       `json:"sha"`
-			Message  string       `json:"message"`
-			ForgeURL string       `json:"forge_url"`
-			Author   commitAuthor `json:"author"`
+			SHA       string       `json:"sha"`
+			Message   string       `json:"message"`
+			ForgeURL  string       `json:"forge_url"`
+			Author    commitAuthor `json:"author"`
+			Timestamp int64        `json:"timestamp"`
 		}
 
 		type pullRequest struct {
@@ -76,6 +77,7 @@ var updatePipelineStructure = xormigrate.Migration{
 			PullRequestLabels []string `xorm:"json 'pr_labels'"`
 			FromFork          bool     `xorm:"from_fork"`
 			IsPrerelease      bool     `xorm:"is_prerelease"`
+			Timestamp         int64    `xorm:"'timestamp'"`
 
 			// new fields
 			CommitNew   *commit      `xorm:"json 'commit_new'"`
@@ -85,8 +87,7 @@ var updatePipelineStructure = xormigrate.Migration{
 			TagTitle    string       `xorm:"tag_title"`
 
 			// removed without replacement
-			Timestamp int64  `xorm:"'timestamp'"`
-			Email     string `xorm:"varchar(500) email"`
+			Email string `xorm:"varchar(500) email"`
 		}
 
 		if err := sess.Sync(new(pipelines)); err != nil {
@@ -99,7 +100,7 @@ var updatePipelineStructure = xormigrate.Migration{
 		for {
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage024, page*perPage024).Cols("id", "event", "author", "forge_url", "commit", "title", "message", "sender", "deploy", "deploy_task", "pr_labels", "from_fork", "is_prerelease", "email").Find(&oldPipelines)
+			err := sess.Limit(perPage024, page*perPage024).Cols("id", "event", "author", "forge_url", "commit", "title", "message", "sender", "deploy", "deploy_task", "pr_labels", "from_fork", "is_prerelease", "email", "timestamp").Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
@@ -115,6 +116,7 @@ var updatePipelineStructure = xormigrate.Migration{
 						Author: oldPipeline.Author,
 						Email:  oldPipeline.Email,
 					},
+					Timestamp: oldPipeline.Timestamp,
 				}
 
 				switch oldPipeline.Event {

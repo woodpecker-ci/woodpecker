@@ -68,6 +68,7 @@
     "branches": "Branches",
     "pull_requests": "Pull requests",
     "add": "Add repository",
+    "refresh": "Refresh repository list",
     "user_none": "This organization/user has no projects yet",
     "not_allowed": "You are not allowed to access this repository",
     "enable": {

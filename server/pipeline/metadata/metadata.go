@@ -153,6 +153,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		metadata.Commit.Message = pipeline.Commit.Message
 		metadata.Commit.Author.Name = pipeline.Commit.Author.Name
 		metadata.Commit.Author.Email = pipeline.Commit.Author.Email
+		metadata.Commit.Timestamp = pipeline.Commit.Timestamp
 	}
 
 	if pipeline.PullRequest != nil {

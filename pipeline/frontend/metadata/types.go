@@ -70,6 +70,7 @@ type (
 		Refspec              string   `json:"refspec,omitempty"`
 		Branch               string   `json:"branch,omitempty"`
 		Message              string   `json:"message,omitempty"`
+		Timestamp            int64    `json:"timestamp,omitempty"`
 		Author               Author   `json:"author"`
 		ChangedFiles         []string `json:"changed_files,omitempty"`
 		PullRequestLabels    []string `json:"labels,omitempty"`

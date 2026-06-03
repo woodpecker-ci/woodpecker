@@ -66,7 +66,17 @@ You can use any image from registries like the [Docker Hub](https://hub.docker.c
        - aws help
 ```
 
-## 3. Push the file and trigger first pipeline
+## 3. Run the workflow locally
+
+If you have `woodpecker-cli` and a supported backend installed, you can run the workflow before pushing it:
+
+```shell
+woodpecker-cli exec .woodpecker/my-first-workflow.yaml
+```
+
+This is useful for checking workflow syntax, command output, and metadata conditions while you are still editing the file. For more examples, including secrets and downloaded metadata, see [local pipeline execution](./73-local-execution.md).
+
+## 4. Push the file and trigger first pipeline
 
 If you push this file to your repository now, Woodpecker will already execute your first pipeline.
 
@@ -79,7 +89,7 @@ As you probably noticed, there is another step in called `clone` which is execut
 This for example allows the first step to build your application using your source code and as the second step will receive
 the same workspace it can use the previously built binary and test it.
 
-## 4. Use a plugin for reusable tasks
+## 5. Use a plugin for reusable tasks
 
 Sometimes you have some tasks that you need to do in every project. For example, deploying to Kubernetes or sending a Slack message. Therefore you can use one of the [official and community plugins](/plugins) or simply [create your own](./51-plugins/20-creating-plugins.md).
 

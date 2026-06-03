@@ -125,10 +125,12 @@
                 "pipeline_path": {
                     "path": "Pipeline 路徑",
                     "desc_path_example": "my/path/",
-                    "default": "預設: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml"
+                    "default": "預設: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+                    "by_default": "預設: {paths}"
                 },
                 "allow_pr": {
-                    "allow": "允許拉取請求"
+                    "allow": "允許拉取請求",
+                    "desc": "允許拉取請求上的 pipeline 執行。"
                 },
                 "success": "專案設定已更新",
                 "netrc_only_trusted": {
@@ -164,7 +166,14 @@
                 "edit": "編輯 cron",
                 "delete": "刪除 cron",
                 "save": "儲存 cron",
-                "add": "新增 cron"
+                "add": "新增 cron",
+                "show": "顯示 cron",
+                "created": "Cron 已建立",
+                "saved": "Cron 已儲存",
+                "deleted": "Cron 已刪除",
+                "not_executed_yet": "尚未執行",
+                "crons": "Crons",
+                "your_timezone": "使用您的瀏覽器時區。"
             },
             "actions": {
                 "repair": {
@@ -225,7 +234,7 @@
             "stale_wp_repo": "過時的 Woodpecker 儲存庫",
             "conflict": "衝突"
         },
-        "open_in_forge": "",
+        "open_in_forge": "在 forge 中開啟儲存庫",
         "activity": "活動",
         "branches": "分支"
     },
@@ -252,7 +261,8 @@
                 "users": "使用者",
                 "deleted": "使用者已刪除",
                 "created": "使用者已建立",
-                "saved": "使用者已儲存"
+                "saved": "使用者已儲存",
+                "forge": "Forge"
             },
             "agents": {
                 "name": {
@@ -342,7 +352,8 @@
     "require_approval": {
         "none": "無",
         "require_approval_for": "批准要求",
-        "pull_requests": "所有拉取請求"
+        "pull_requests": "所有拉取請求",
+        "all_events": "來自 forge 的所有事件"
     },
     "github": "GitHub",
     "gitlab": "GitLab",
@@ -418,5 +429,13 @@
     "org_level_secret": "組織秘密",
     "extensions_configuration_saved": "擴充功能配置已儲存",
     "oauth_client_id": "OAuth 用戶端 ID",
-    "oauth_client_secret": "OAuth 用戶端秘密"
+    "oauth_client_secret": "OAuth 用戶端秘密",
+    "forges": "Forges",
+    "add_forge": "新增 forge",
+    "forge_type": "Forge 類型",
+    "forge_created": "Forge 已建立",
+    "forge_deleted": "Forge 已刪除",
+    "edit_forge": "編輯 forge",
+    "delete_forge": "刪除 forge",
+    "forge_saved": "Forge 已儲存"
 }

@@ -84,7 +84,7 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		Pipeline:  p,
 		Commit:    p.Commit.SHA,
 		Message:   p.Commit.Message,
-		Timestamp: p.Created,
+		Timestamp: p.Commit.Timestamp,
 		Sender:    p.Author,
 		Email:     p.Commit.Author.Email,
 	}
