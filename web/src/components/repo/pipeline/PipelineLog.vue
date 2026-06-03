@@ -179,6 +179,7 @@ import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
+import useUserConfig from '~/compositions/useUserConfig';
 import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { debounce } from '~/lib/utils';
 
@@ -209,6 +210,7 @@ defineEmits<{
 
 const notifications = useNotifications();
 const i18n = useI18n();
+const { userConfig } = useUserConfig();
 const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = requiredInject('repo');
@@ -572,11 +574,12 @@ const expandLogGroupWithPageHash = (hash: string) => {
   }
 };
 
-// When user click on a step, if the step has already finished running, show user the
-// only the outline by collapse all log groups
+// When a user opens a step that has already finished running, collapse all log
+// groups by default so they see only the command outline. This is opt-out via
+// the "collapse log groups by default" user preference.
 watch(loadedLogs, async (isLoaded, wasLoaded) => {
   // Only trigger when transitioning from unloaded to loaded state
-  if (isLoaded && !wasLoaded) {
+  if (isLoaded && !wasLoaded && userConfig.value.collapseLogGroupsByDefault) {
     const isFinished = step.value && !['running', 'pending', 'started'].includes(step.value.state);
     if (isFinished) {
       // Wait for groupedLogs computed property to update
