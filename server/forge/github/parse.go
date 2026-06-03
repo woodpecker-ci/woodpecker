@@ -126,6 +126,10 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 		return repo, pipeline, "", ""
 	}
 
+	if hook.GetForced() {
+		return repo, pipeline, hook.GetHeadCommit().GetID(), ""
+	}
+
 	return repo, pipeline, hook.GetHeadCommit().GetID(), hook.GetBefore()
 }
 
