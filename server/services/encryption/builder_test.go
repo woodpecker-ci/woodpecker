@@ -40,8 +40,8 @@ func (c *fakeClient) SetEncryptionService(svc types.EncryptionService) error {
 	c.service = svc
 	return c.setErr
 }
-func (c *fakeClient) EnableEncryption() error                              { return nil }
-func (c *fakeClient) MigrateEncryption(_ types.EncryptionService) error    { return nil }
+func (c *fakeClient) EnableEncryption() error                           { return nil }
+func (c *fakeClient) MigrateEncryption(_ types.EncryptionService) error { return nil }
 
 func TestNoEncryptionService(t *testing.T) {
 	t.Parallel()

@@ -22,9 +22,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// these tests mutate the process environment and therefore must not run in
-// parallel.
-
 func TestDatasourceDefaultValue(t *testing.T) {
 	t.Run("outside container", func(t *testing.T) {
 		restore := unsetEnvForTest(t, "WOODPECKER_IN_CONTAINER")
@@ -71,7 +68,7 @@ func unsetEnvForTest(t *testing.T, key string) func() {
 	require.NoError(t, os.Unsetenv(key))
 	return func() {
 		if had {
-			_ = os.Setenv(key, prev)
+			_ = os.Setenv(key, prev) //nolint:usetesting
 		} else {
 			_ = os.Unsetenv(key)
 		}

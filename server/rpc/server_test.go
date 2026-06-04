@@ -33,8 +33,11 @@ import (
 // newTestServer builds a WoodpeckerServer whose peer talks to the given mocked
 // store. A fresh prometheus registry avoids duplicate-collector panics when
 // several servers are constructed in one test binary.
-func newTestServer(store *store_mocks.MockStore) *WoodpeckerServer {
-	return NewWoodpeckerServer(nil, nil, store, prometheus.NewRegistry()).(*WoodpeckerServer)
+func newTestServer(t *testing.T, store *store_mocks.MockStore) *WoodpeckerServer {
+	t.Helper()
+	server, ok := NewWoodpeckerServer(nil, nil, store, prometheus.NewRegistry()).(*WoodpeckerServer)
+	require.True(t, ok)
+	return server
 }
 
 func ctxWithAgentID(id int64) context.Context {
@@ -52,7 +55,7 @@ func TestNewWoodpeckerServer(t *testing.T) {
 func TestServerVersion(t *testing.T) {
 	t.Parallel()
 
-	srv := newTestServer(store_mocks.NewMockStore(t))
+	srv := newTestServer(t, store_mocks.NewMockStore(t))
 	res, err := srv.Version(context.Background(), new(proto.Empty))
 
 	require.NoError(t, err)
@@ -72,7 +75,7 @@ func TestServerReportHealth(t *testing.T) {
 			return a.ID == 7 && a.LastContact > 0
 		})).Return(nil)
 
-		srv := newTestServer(store)
+		srv := newTestServer(t, store)
 		_, err := srv.ReportHealth(ctxWithAgentID(7), &proto.ReportHealthRequest{Status: "I am alive!"})
 		require.NoError(t, err)
 	})
@@ -83,14 +86,14 @@ func TestServerReportHealth(t *testing.T) {
 		agent := &model.Agent{ID: 7, OwnerID: model.IDNotSet, OrgID: model.IDNotSet}
 		store.On("AgentFind", int64(7)).Return(agent, nil)
 
-		srv := newTestServer(store)
+		srv := newTestServer(t, store)
 		_, err := srv.ReportHealth(ctxWithAgentID(7), &proto.ReportHealthRequest{Status: "nope"})
 		assert.Error(t, err)
 	})
 
 	t.Run("missing agent id in context errors", func(t *testing.T) {
 		t.Parallel()
-		srv := newTestServer(store_mocks.NewMockStore(t))
+		srv := newTestServer(t, store_mocks.NewMockStore(t))
 		_, err := srv.ReportHealth(context.Background(), &proto.ReportHealthRequest{Status: "I am alive!"})
 		assert.Error(t, err)
 	})
@@ -106,7 +109,7 @@ func TestServerUnregisterAgent(t *testing.T) {
 		store.On("AgentFind", int64(9)).Return(agent, nil)
 		store.On("AgentDelete", agent).Return(nil)
 
-		srv := newTestServer(store)
+		srv := newTestServer(t, store)
 		_, err := srv.UnregisterAgent(ctxWithAgentID(9), new(proto.Empty))
 		require.NoError(t, err)
 	})
@@ -118,7 +121,7 @@ func TestServerUnregisterAgent(t *testing.T) {
 		agent := &model.Agent{ID: 9, OwnerID: 42, OrgID: model.IDNotSet}
 		store.On("AgentFind", int64(9)).Return(agent, nil)
 
-		srv := newTestServer(store)
+		srv := newTestServer(t, store)
 		_, err := srv.UnregisterAgent(ctxWithAgentID(9), new(proto.Empty))
 		require.NoError(t, err)
 		store.AssertNotCalled(t, "AgentDelete", mock.Anything)
@@ -132,7 +135,7 @@ func TestServerUnregisterAgent(t *testing.T) {
 		store.On("AgentFind", int64(9)).Return(agent, nil)
 		store.On("AgentDelete", agent).Return(delErr)
 
-		srv := newTestServer(store)
+		srv := newTestServer(t, store)
 		_, err := srv.UnregisterAgent(ctxWithAgentID(9), new(proto.Empty))
 		assert.ErrorIs(t, err, delErr)
 	})
