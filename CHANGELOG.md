@@ -24,6 +24,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6679](https://github.com/woodpecker-ci/woodpecker/pull/6679)]
 - Lock file maintenance [[#6686](https://github.com/woodpecker-ci/woodpecker/pull/6686)]
 - Update dependency concurrently to v10 [[#6676](https://github.com/woodpecker-ci/woodpecker/pull/6676)]
 - Update docs npm deps non-major [[#6675](https://github.com/woodpecker-ci/woodpecker/pull/6675)]
@@ -33,7 +34,6 @@
 
 - Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.6.0 [[#6699](https://github.com/woodpecker-ci/woodpecker/pull/6699)]
 - Update web npm deps non-major [[#6673](https://github.com/woodpecker-ci/woodpecker/pull/6673)]
-- Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.5.0 [[#6682](https://github.com/woodpecker-ci/woodpecker/pull/6682)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.2 [[#6674](https://github.com/woodpecker-ci/woodpecker/pull/6674)]
 - Update web npm deps non-major [[#6657](https://github.com/woodpecker-ci/woodpecker/pull/6657)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.36.0 [[#6668](https://github.com/woodpecker-ci/woodpecker/pull/6668)]
