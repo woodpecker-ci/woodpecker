@@ -24,8 +24,7 @@ import (
 
 func TestDatasourceDefaultValue(t *testing.T) {
 	t.Run("outside container", func(t *testing.T) {
-		restore := unsetEnvForTest(t, "WOODPECKER_IN_CONTAINER")
-		defer restore()
+		unsetEnvForTest(t, "WOODPECKER_IN_CONTAINER")
 		assert.Equal(t, "woodpecker.sqlite", datasourceDefaultValue())
 	})
 
@@ -62,15 +61,15 @@ func TestGetFirstNonEmptyEnvVar(t *testing.T) {
 
 // unsetEnvForTest removes an env var and returns a function that restores its
 // previous value. Needed because t.Setenv cannot represent an *absent* var.
-func unsetEnvForTest(t *testing.T, key string) func() {
+func unsetEnvForTest(t *testing.T, key string) {
 	t.Helper()
 	prev, had := os.LookupEnv(key)
 	require.NoError(t, os.Unsetenv(key))
-	return func() {
+	t.Cleanup(func() {
 		if had {
 			_ = os.Setenv(key, prev) //nolint:usetesting
 		} else {
 			_ = os.Unsetenv(key)
 		}
-	}
+	})
 }
