@@ -41,6 +41,10 @@
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.36.0 [[#6668](https://github.com/woodpecker-ci/woodpecker/pull/6668)]
 - Migrate `gopkg.in/yaml.v3` usages to `go.yaml.in/yaml/v4` [[#6651](https://github.com/woodpecker-ci/woodpecker/pull/6651)]
 
+### Misc
+
+- Group commands followup user preference [[#6694](https://github.com/woodpecker-ci/woodpecker/pull/6694)]
+
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
 
 ### ❤️ Thanks to all contributors! ❤️
