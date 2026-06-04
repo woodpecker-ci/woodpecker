@@ -459,6 +459,13 @@
           "light": "Light",
           "dark": "Dark",
           "auto": "Auto"
+        },
+        "pipeline_logs": {
+          "pipeline_logs": "Pipeline logs",
+          "collapse_groups": {
+            "collapse": "Collapse log groups by default",
+            "desc": "When opening a finished step, collapse all command groups to show only the outline."
+          }
         }
       },
       "secrets": {
