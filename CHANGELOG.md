@@ -33,6 +33,7 @@
 
 ### 📦️ Dependency
 
+- bump github.com/quic-go/quic-go to v0.59.1 [[#6700](https://github.com/woodpecker-ci/woodpecker/pull/6700)]
 - Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.6.0 [[#6699](https://github.com/woodpecker-ci/woodpecker/pull/6699)]
 - Update web npm deps non-major [[#6673](https://github.com/woodpecker-ci/woodpecker/pull/6673)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.2 [[#6674](https://github.com/woodpecker-ci/woodpecker/pull/6674)]
