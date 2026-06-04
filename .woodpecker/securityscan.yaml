@@ -5,7 +5,7 @@ when:
       - ${CI_REPO_DEFAULT_BRANCH}
 
 variables:
-  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.5.0
+  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.6.0
 
 steps:
   backend:
@@ -35,7 +35,6 @@ services:
   server:
     image: *trivy_plugin
     settings:
-      service: true
       db-repository: mirror.gcr.io/aquasec/trivy-db:2
     ports:
       - 10000
