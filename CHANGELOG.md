@@ -16,6 +16,7 @@
 
 ### 🐛 Bug Fixes
 
+- github dont fail on force push [[#6697](https://github.com/woodpecker-ci/woodpecker/pull/6697)]
 - fix(kubernetes): retry WaitStep when container terminated state not yet finalized [[#6672](https://github.com/woodpecker-ci/woodpecker/pull/6672)]
 
 ### 🧪 Tests
