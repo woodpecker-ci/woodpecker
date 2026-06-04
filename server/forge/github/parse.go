@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v88/github"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -124,6 +125,11 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
 		}
 		return repo, pipeline, "", ""
+	}
+
+	if hook.GetForced() {
+		log.Debug().Msgf("detected force push on push hook [%d]", hook.GetPushID())
+		return repo, pipeline, hook.GetHeadCommit().GetID(), ""
 	}
 
 	return repo, pipeline, hook.GetHeadCommit().GetID(), hook.GetBefore()

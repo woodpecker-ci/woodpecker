@@ -819,8 +819,7 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 		prev = ""
 		fallthrough
 	case "":
-		// For tag events, prev is empty, but we can still fetch the changed files using the current commit
-		log.Trace().Msg("GitHub tag event, fetching changed files using current commit")
+		log.Trace().Msg("GitHub force push or tag event, fetching changed files using current commit")
 	}
 
 	repo, err := _store.GetRepoNameFallback(c.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
