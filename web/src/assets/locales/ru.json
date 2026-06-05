@@ -594,6 +594,12 @@
                     "dark": "Тёмная",
                     "light": "Светлая",
                     "theme": "Тема"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Журнал конвейера",
+                    "collapse_groups": {
+                        "collapse": "Сворачивать группы журнала по умолчанию"
+                    }
                 }
             },
             "secrets": {
