@@ -21,6 +21,7 @@
 
 ### 🧪 Tests
 
+- Add more tests in areas not well covered [[#6696](https://github.com/woodpecker-ci/woodpecker/pull/6696)]
 - Cleanup e2e test setup [[#6480](https://github.com/woodpecker-ci/woodpecker/pull/6480)]
 
 ### 📚 Documentation
