@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @MeurillonGuillaume, @qwerty287, @simonckemper
+@6543, @AkashKumar7902, @MeurillonGuillaume, @head1328, @qwerty287, @simonckemper
 
 ### 📈 Enhancement
 
@@ -26,6 +26,7 @@
 
 ### 📚 Documentation
 
+- Add Podman plugin [[#6701](https://github.com/woodpecker-ci/woodpecker/pull/6701)]
 - Update docs npm deps non-major [[#6679](https://github.com/woodpecker-ci/woodpecker/pull/6679)]
 - Lock file maintenance [[#6686](https://github.com/woodpecker-ci/woodpecker/pull/6686)]
 - Update dependency concurrently to v10 [[#6676](https://github.com/woodpecker-ci/woodpecker/pull/6676)]
