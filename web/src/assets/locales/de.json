@@ -540,7 +540,8 @@
                 "internal": "Intern",
                 "desc": "Nur authentifizierte Benutzer der Woodpecker-Instanz können dieses Projekt sehen."
             }
-        }
+        },
+        "refresh": "Repository-Liste neu laden"
     },
     "repos": "Repos",
     "repositories": {
@@ -594,6 +595,13 @@
                     "dark": "Dunkel",
                     "light": "Hell",
                     "theme": "Thema"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Pipeline-Logs",
+                    "collapse_groups": {
+                        "collapse": "Log-Gruppen standardmäßig einklappen",
+                        "desc": "Beim Öffnen eines beendeten Schrittes alle Befehlsgruppen einklappen, um nur die Übersicht anzuzeigen."
+                    }
                 }
             },
             "secrets": {
