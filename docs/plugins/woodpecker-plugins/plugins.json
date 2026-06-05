@@ -329,6 +329,11 @@
       "name": "Laravel Forge",
       "docs": "https://raw.githubusercontent.com/njaaazi/laravel-forge-woodpecker/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Podman",
+      "docs": "https://codeberg.org/head1328/woodpecker-ci-plugin-podman/raw/branch/main/docs.md",
+      "verified": false
     }
   ]
 }
