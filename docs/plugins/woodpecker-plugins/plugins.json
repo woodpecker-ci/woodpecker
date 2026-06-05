@@ -332,7 +332,7 @@
     },
     {
       "name": "Podman",
-      "docs": "https://codeberg.org/head1328/woodpecker-ci-plugin-podman/src/branch/main/docs.md",
+      "docs": "https://codeberg.org/head1328/woodpecker-ci-plugin-podman/raw/branch/main/docs.md",
       "verified": false
     }
   ]
