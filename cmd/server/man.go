@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/rs/zerolog/log"
 	docs "github.com/urfave/cli-docs/v3"
 
 	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
