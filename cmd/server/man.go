@@ -29,7 +29,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Error().Err(err)
+		fmt.Fprintf(os.Stderr, "Error could not load .env: %s", err)
 		os.Exit(1)
 	}
 
