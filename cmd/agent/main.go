@@ -16,7 +16,9 @@ package main
 
 import (
 	"context"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cmd/agent/core"
@@ -34,6 +36,11 @@ var backends = []backend_types.Backend{
 }
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Error().Err(err)
+		os.Exit(1)
+	}
+
 	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
 		log.Info().Msg("termination signal is received, shutting down agent")
 	})

@@ -18,14 +18,21 @@ package main
 
 import (
 	"fmt"
+	"os"
 
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 	docs "github.com/urfave/cli-docs/v3"
 
 	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Error().Err(err)
+		os.Exit(1)
+	}
+
 	app := genApp()
 	md, err := docs.ToMan(app)
 	if err != nil {
