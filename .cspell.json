@@ -80,6 +80,7 @@
     "gocritic",
     "GODEBUG",
     "godoc",
+    "godotenv",
     "Gogs",
     "golangci",
     "gomod",
