@@ -206,11 +206,6 @@
       "verified": true
     },
     {
-      "name": "Twine",
-      "docs": "https://gitea.elara.ws/music-kraken/plugin-twine/raw/branch/master/docs.md",
-      "verified": false
-    },
-    {
       "name": "Gitea Package",
       "docs": "https://codeberg.org/woodpecker-community/gitea-package/raw/branch/main/docs.md",
       "verified": false
