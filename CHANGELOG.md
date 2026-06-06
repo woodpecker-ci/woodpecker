@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Group commands followup user preference [[#6694](https://github.com/woodpecker-ci/woodpecker/pull/6694)]
 - Trim white spaces for cron create/update [[#6690](https://github.com/woodpecker-ci/woodpecker/pull/6690)]
 - Improve slow user authorization if many orgs/repos [[#5665](https://github.com/woodpecker-ci/woodpecker/pull/5665)]
 - pipeline: use more explizite error for step dependencies filtered out by its conditions [[#6680](https://github.com/woodpecker-ci/woodpecker/pull/6680)]
@@ -43,10 +44,6 @@
 - Update web npm deps non-major [[#6657](https://github.com/woodpecker-ci/woodpecker/pull/6657)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.36.0 [[#6668](https://github.com/woodpecker-ci/woodpecker/pull/6668)]
 - Migrate `gopkg.in/yaml.v3` usages to `go.yaml.in/yaml/v4` [[#6651](https://github.com/woodpecker-ci/woodpecker/pull/6651)]
-
-### Misc
-
-- Group commands followup user preference [[#6694](https://github.com/woodpecker-ci/woodpecker/pull/6694)]
 
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
 
