@@ -20,6 +20,11 @@ import (
 	"context"
 	"os"
 
+	// Embed the IANA timezone database so that cron schedule
+	// timezones work in minimal containers (Alpine, scratch)
+	// that lack system timezone data.
+	_ "time/tzdata"
+
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
 
