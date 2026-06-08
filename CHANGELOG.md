@@ -27,6 +27,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6705](https://github.com/woodpecker-ci/woodpecker/pull/6705)]
 - Add Podman plugin [[#6701](https://github.com/woodpecker-ci/woodpecker/pull/6701)]
 - Update docs npm deps non-major [[#6679](https://github.com/woodpecker-ci/woodpecker/pull/6679)]
 - Lock file maintenance [[#6686](https://github.com/woodpecker-ci/woodpecker/pull/6686)]
