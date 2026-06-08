@@ -22,7 +22,7 @@
         "manual_pipeline": {
             "select_branch": "選擇分支",
             "show_pipelines": "顯示 pipeline",
-            "title": "手動觸發 pipeline 執行",
+            "title": "觸發手動 pipeline 執行",
             "trigger": "執行 pipeline",
             "variables": {
                 "value": "變數值",
@@ -44,7 +44,9 @@
                 "log_auto_scroll": "啟用自動滾動",
                 "log_auto_scroll_off": "停用自動滾動",
                 "cancel_success": "Pipeline 已取消",
-                "restart_success": "Pipeline 已重啟"
+                "restart_success": "Pipeline 已重啟",
+                "canceled": "此步驟已被取消。",
+                "skipped": "此步驟已被略過。"
             },
             "tasks": "任務",
             "status": {
@@ -70,7 +72,8 @@
                 "release": "發佈",
                 "pr": "拉取請求",
                 "cron": "Cron",
-                "pr_metadata": "拉取請求的詮釋資料已變更"
+                "pr_metadata": "拉取請求的詮釋資料已變更",
+                "pr_closed": "拉取請求已合併/關閉"
             },
             "errors": "錯誤",
             "warnings": "警告",
@@ -97,7 +100,10 @@
                 "canceled_by_step": "因為 {step} 所以被取消",
                 "canceled_by_user": "被 {user} 取消"
             },
-            "we_got_some_errors": "喔不，發生了錯誤！"
+            "we_got_some_errors": "喔不，發生了錯誤！",
+            "no_pipeline_steps": "無 pipeline 步驟可用！",
+            "step_not_started": "此步驟尚未開始。",
+            "log_title": "步驟紀錄"
         },
         "settings": {
             "general": {
@@ -145,7 +151,8 @@
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
                 "events": "事件",
-                "workflow": "工作流程"
+                "workflow": "工作流程",
+                "step": "步驟"
             },
             "crons": {
                 "schedule": {
@@ -236,7 +243,8 @@
         },
         "open_in_forge": "在 forge 中開啟儲存庫",
         "activity": "活動",
-        "branches": "分支"
+        "branches": "分支",
+        "refresh": "重新整理儲存庫清單"
     },
     "cancel": "取消",
     "not_found": {
@@ -285,6 +293,9 @@
                 "version": "版本",
                 "org": {
                     "badge": "組織"
+                },
+                "custom_labels": {
+                    "custom_labels": "自訂標籤"
                 }
             },
             "repos": {
@@ -307,7 +318,8 @@
                 "stats": {
                     "running_count": "執行中",
                     "pending_count": "等待中",
-                    "completed_count": "完成的任務"
+                    "completed_count": "完成的任務",
+                    "worker_count": "空閒"
                 },
                 "task_running": "任務執行中",
                 "task_pending": "任務等待中",
@@ -382,6 +394,12 @@
                     "light": "亮色",
                     "dark": "暗色",
                     "auto": "自動"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Pipeline 紀錄",
+                    "collapse_groups": {
+                        "collapse": "預設摺疊紀錄群組"
+                    }
                 }
             },
             "cli_and_api": {
@@ -437,5 +455,25 @@
     "forge_deleted": "Forge 已刪除",
     "edit_forge": "編輯 forge",
     "delete_forge": "刪除 forge",
-    "forge_saved": "Forge 已儲存"
+    "forge_saved": "Forge 已儲存",
+    "errors": {
+        "not_found": "伺服器無法找到請求的物件"
+    },
+    "executable": "執行檔",
+    "show_forges": "顯示 forges",
+    "internal_error": "發生了內部錯誤",
+    "no_search_results": "找不到結果",
+    "extension_netrc": "包含 netrc 憑證",
+    "login_to_cli": "登入至 CLI",
+    "cli_login_success": "登入至 CLI 成功",
+    "cli_login_failed": "登入至 CLI 失敗",
+    "cli_login_denied": "登入至 CLI 被拒絕",
+    "return_to_cli": "您現在可以關閉此分頁並回到 CLI。",
+    "running_version": "您正在執行 Woodpecker {0}",
+    "update_woodpecker": "請更新您的 Woodpecker 實例至 {0}",
+    "login_to_cli_description": "如果繼續，您將會被登入至 CLI。",
+    "executable_desc": "附加元件執行檔路徑。",
+    "skip_verify_desc": "略過 API 連線的 SSL 驗證。不推薦用於生產環境。",
+    "developer_settings_to_create": "前往 {0} 並設定 OAuth 應用程式。",
+    "help_translating": "您可以在 {0} 上幫助將 Woodpecker 翻譯成您的語言。"
 }
