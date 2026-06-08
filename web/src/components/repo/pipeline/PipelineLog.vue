@@ -68,7 +68,7 @@
               @click="collapseAll"
             />
           </template>
-          <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:step-id', null)" />
+          <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:stepId', null)" />
         </div>
       </div>
 
@@ -205,7 +205,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (event: 'update:step-id', stepId: number | null): true;
+  (event: 'update:stepId', stepId: number | null): true;
 }>();
 
 const notifications = useNotifications();
