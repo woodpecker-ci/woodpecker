@@ -18,7 +18,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/joho/godotenv"
 	docs "github.com/urfave/cli-docs/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cmd/agent/core"
@@ -35,6 +37,11 @@ var backends = []backend_types.Backend{
 }
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error could not load .env: %s", err)
+		os.Exit(1)
+	}
+
 	app := core.GenApp(backends)
 	md, err := docs.ToMan(app)
 	if err != nil {

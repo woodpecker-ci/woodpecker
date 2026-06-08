@@ -19,8 +19,6 @@ import (
 	"os"
 	"slices"
 
-	// Load config from .env file.
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 

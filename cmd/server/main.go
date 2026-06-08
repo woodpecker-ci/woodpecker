@@ -18,9 +18,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 
 	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
@@ -28,6 +29,11 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error could not load .env: %s", err)
+		os.Exit(1)
+	}
+
 	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
 		log.Info().Msg("termination signal is received, shutting down server")
 	})
