@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Surface `.env` load errors [[#6707](https://github.com/woodpecker-ci/woodpecker/pull/6707)]
 - Group commands followup user preference [[#6694](https://github.com/woodpecker-ci/woodpecker/pull/6694)]
 - Trim white spaces for cron create/update [[#6690](https://github.com/woodpecker-ci/woodpecker/pull/6690)]
 - Improve slow user authorization if many orgs/repos [[#5665](https://github.com/woodpecker-ci/woodpecker/pull/5665)]
