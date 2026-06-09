@@ -35,17 +35,19 @@ import (
 // downstream then tried to use, getting "pull access denied ... repository
 // does not exist" because the build had not completed yet.
 //
-// build-auth sleeps for a measurable duration. auth-server-tests depends_on it.
-// Correct behaviour: auth-server-tests must not START until build-auth has
+// "Build Auth" sleeps for a measurable duration. "Auth server tests" depends_on it.
+// Correct behaviour: "Auth server tests" must not START until "Build Auth" has
 // FINISHED. We prove this directly from the recorded step timestamps rather
 // than just final status, because a broken ordering still ends "success" —
 // the steps just overlap in time.
 
+// Workflow and step names match the issue report verbatim so the test
+// reads as a direct reproduction of the failure scenario.
 var buildAuthYAML = []byte(`
 skip_clone: true
 
 steps:
-  - name: build-auth
+  - name: Build Auth
     image: dummy
     environment:
       SLEEP: '2s'
@@ -57,10 +59,10 @@ var authServerTestsYAML = []byte(`
 skip_clone: true
 
 depends_on:
-  - build-auth
+  - Build Auth
 
 steps:
-  - name: auth-server-tests
+  - name: Auth server tests
     image: dummy
     commands:
       - echo running tests against built image
@@ -70,8 +72,11 @@ steps:
 // depends_on does not begin executing until its dependency has completed.
 func TestWorkflowDependsOnOrdering(t *testing.T) {
 	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
-		{Name: ".woodpecker/build-auth.yaml", Data: buildAuthYAML},
-		{Name: ".woodpecker/auth-server-tests.yaml", Data: authServerTestsYAML},
+		// Filenames with spaces: the workflow name is derived from the
+		// filename (minus extension), so "Build Auth.yaml" → workflow "Build Auth",
+		// matching exactly what the issue reporter used.
+		{Name: ".woodpecker/Build Auth.yaml", Data: buildAuthYAML},
+		{Name: ".woodpecker/Auth server tests.yaml", Data: authServerTestsYAML},
 	})
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
@@ -97,23 +102,23 @@ func TestWorkflowDependsOnOrdering(t *testing.T) {
 	for _, w := range workflows {
 		byWorkflow[w.Name] = w
 	}
-	require.Contains(t, byWorkflow, "build-auth", "build-auth workflow present")
-	require.Contains(t, byWorkflow, "auth-server-tests", "auth-server-tests workflow present")
-	assert.Equal(t, model.StatusSuccess, byWorkflow["build-auth"].State)
-	assert.Equal(t, model.StatusSuccess, byWorkflow["auth-server-tests"].State)
+	require.Contains(t, byWorkflow, "Build Auth", "Build Auth workflow present")
+	require.Contains(t, byWorkflow, "Auth server tests", "Auth server tests workflow present")
+	assert.Equal(t, model.StatusSuccess, byWorkflow["Build Auth"].State)
+	assert.Equal(t, model.StatusSuccess, byWorkflow["Auth server tests"].State)
 
 	// The core assertion: the dependent step must start only AFTER the
 	// dependency step finished. Compare recorded timestamps.
-	buildStep := setup.WaitForStep(t, env.Store, finished, "build-auth")
-	testStep := setup.WaitForStep(t, env.Store, finished, "auth-server-tests")
+	buildStep := setup.WaitForStep(t, env.Store, finished, "Build Auth")
+	testStep := setup.WaitForStep(t, env.Store, finished, "Auth server tests")
 
-	require.NotZero(t, buildStep.Finished, "build-auth must record a finish time")
-	require.NotZero(t, testStep.Started, "auth-server-tests must record a start time")
+	require.NotZero(t, buildStep.Finished, "Build Auth must record a finish time")
+	require.NotZero(t, testStep.Started, "Auth server tests must record a start time")
 
 	// This is the line that fails if #3858 regresses: a broken workflow-level
-	// depends_on lets auth-server-tests start while build-auth is still
+	// depends_on lets Auth server tests start while Build Auth is still
 	// sleeping, so testStep.Started < buildStep.Finished.
 	assert.GreaterOrEqualf(t, testStep.Started, buildStep.Finished,
-		"auth-server-tests started at %d but build-auth only finished at %d — dependent workflow ran before its dependency completed (issue #3858)",
+		"Auth server tests started at %d but Build Auth only finished at %d — dependent workflow ran before its dependency completed (issue #3858)",
 		testStep.Started, buildStep.Finished)
 }
