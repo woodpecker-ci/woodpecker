@@ -140,7 +140,8 @@
                 "save": "保存用户",
                 "saved": "已保存用户",
                 "show": "显示用户",
-                "users": "用户"
+                "users": "用户",
+                "forge": "代码托管平台"
             },
             "registries": {
                 "desc": "可以添加全局注册凭据以在所有流水线中使用私有镜像。",
@@ -536,7 +537,8 @@
                 "internal": "内部的",
                 "desc": "只有Woodpecker的登录用户可以看到这个项目。"
             }
-        }
+        },
+        "refresh": "刷新仓库列表"
     },
     "repos": "仓库",
     "repositories": {
@@ -590,6 +592,13 @@
                     "dark": "暗色",
                     "light": "亮色",
                     "theme": "主题"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "流水线日志",
+                    "collapse_groups": {
+                        "collapse": "默认折叠日志分组",
+                        "desc": "打开已完成的步骤时，折叠所有命令组以仅显示概要。"
+                    }
                 }
             },
             "secrets": {

@@ -68,6 +68,7 @@
     "branches": "Branches",
     "pull_requests": "Pull requests",
     "add": "Add repository",
+    "refresh": "Refresh repository list",
     "user_none": "This organization/user has no projects yet",
     "not_allowed": "You are not allowed to access this repository",
     "enable": {
@@ -458,6 +459,13 @@
           "light": "Light",
           "dark": "Dark",
           "auto": "Auto"
+        },
+        "pipeline_logs": {
+          "pipeline_logs": "Pipeline logs",
+          "collapse_groups": {
+            "collapse": "Collapse log groups by default",
+            "desc": "When opening a finished step, collapse all command groups to show only the outline."
+          }
         }
       },
       "secrets": {

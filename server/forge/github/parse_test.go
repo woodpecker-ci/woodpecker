@@ -80,6 +80,22 @@ func Test_parseHook(t *testing.T) {
 		sort.Strings(b.ChangedFiles)
 	})
 
+	t.Run("forced push hook", func(t *testing.T) {
+		// On a force push the "before" commit may be unreachable after the
+		// history rewrite. Comparing against it (CompareCommits) fails with a
+		// 404 on the forge, so the previous commit must be empty to make the
+		// downstream changed-files lookup fall back to the head commit only.
+		req := testHookRequest([]byte(fixtures.HookPushForced), hookPush)
+		p, r, b, cc, pc, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.Equal(t, "f7220f1f753260bf6f1c533357c70213e9fd4abe", cc)
+		assert.Empty(t, pc, "forced push must not expose the unreachable before commit")
+		assert.Nil(t, p)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPush, b.Event)
+	})
+
 	t.Run("PR hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequest), hookPull)
 		p, r, b, cc, pc, err := parseHook(req, false)
