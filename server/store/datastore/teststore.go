@@ -25,37 +25,16 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-// testStoreDriverConfig returns the database driver and connection string used
-// for tests. It defaults to in-memory sqlite but can be overridden via
-// environment variables to run the same tests against mysql/postgres.
-func testStoreDriverConfig() (driver, config string) {
-	driver = "sqlite3"
-	config = ":memory:"
-
-	if os.Getenv("WOODPECKER_DATABASE_DRIVER") != "" {
-		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
-		config = os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
-	}
-	return driver, config
-}
-
 // NewTestStore creates a fully-migrated in-memory sqlite store for use in
-// tests of other packages (e.g. server/api). It is gated behind the "test"
-// build tag so it never ends up in release builds.
-//
-// The driver and connection string can be overridden via the
-// WOODPECKER_DATABASE_DRIVER / WOODPECKER_DATABASE_DATASOURCE environment
-// variables, with fallback to in-memory sqlite.
+// tests of other packages (e.g. server/api).
 //
 // The returned store is automatically closed on test cleanup.
 func NewTestStore(t *testing.T) store.Store {
 	t.Helper()
 
-	driver, config := testStoreDriverConfig()
-
 	s, err := NewEngine(&store.Opts{
-		Driver: driver,
-		Config: config,
+		Driver: "sqlite3",
+		Config: ":memory:",
 		// MaxOpenConns=1 and MaxIdleConns=1 are required for in-memory sqlite:
 		// without them the pool drops idle connections, destroying the in-memory
 		// schema between calls and breaking migrations.
