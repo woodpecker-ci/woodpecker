@@ -50,7 +50,7 @@ steps:
   - name: Build Auth
     image: dummy
     environment:
-      SLEEP: '2s'
+      SLEEP: '1s'
     commands:
       - echo building auth-build image
 `)
@@ -145,7 +145,7 @@ steps:
   - name: Build base
     image: dummy
     environment:
-      SLEEP: '2s'
+      SLEEP: '1s'
     commands:
       - echo building base image
 `)
@@ -160,7 +160,7 @@ steps:
   - name: Build Auth
     image: dummy
     environment:
-      SLEEP: '2s'
+      SLEEP: '1s'
     commands:
       - echo building auth-build image
 `)
@@ -175,7 +175,7 @@ steps:
   - name: Lint
     image: dummy
     environment:
-      SLEEP: '3s'
+      SLEEP: '2s'
     commands:
       - echo linting
 `)
