@@ -28,7 +28,7 @@ func Load() {
 		return
 	}
 
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(dotEnv); err != nil {
 		fmt.Fprintf(os.Stderr, "Error could not load %q: %s", dotEnv, err)
 		os.Exit(1)
 	}
