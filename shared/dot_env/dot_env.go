@@ -21,13 +21,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const dotEnv = ".env"
+
 func Load() {
-	if _, err := os.Stat(".env"); os.IsNotExist(err) {
+	if _, err := os.Stat(dotEnv); os.IsNotExist(err) {
 		return
 	}
 
 	if err := godotenv.Load(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error could not load .env: %s", err)
+		fmt.Fprintf(os.Stderr, "Error could not load %q: %s", dotEnv, err)
 		os.Exit(1)
 	}
 }
