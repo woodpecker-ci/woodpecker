@@ -271,6 +271,49 @@ func TestPostCron(t *testing.T) {
 	})
 }
 
+func TestRunCron(t *testing.T) {
+	s := newTestStore(t)
+	repo, _ := cronFixture(t, s)
+
+	t.Run("invalid id returns bad request", func(t *testing.T) {
+		tc := newTestContext(t, s)
+		withRepo(repo, &model.Perm{})(tc)
+		withParam("cron", "abc")(tc)
+
+		RunCron(tc.Ctx)
+
+		assert.Equal(t, http.StatusBadRequest, tc.Recorder.Code)
+	})
+
+	t.Run("missing cron returns not found", func(t *testing.T) {
+		tc := newTestContext(t, s)
+		withRepo(repo, &model.Perm{})(tc)
+		withParam("cron", "9999")(tc)
+
+		RunCron(tc.Ctx)
+
+		assert.Equal(t, http.StatusNotFound, tc.Recorder.Code)
+	})
+
+	t.Run("pipeline creation failure returns internal error", func(t *testing.T) {
+		cron := seedCron(t, s, repo.ID, "run-fail")
+		// CreatePipeline resolves repo+user from the store, then asks the forge
+		// for the branch head. Make that fail so RunCron hits its 500 branch
+		// without exercising the full pipeline.Create machinery.
+		forge := cronForgeManager(t)
+		forge.On("BranchHead", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			Return(nil, assert.AnError)
+
+		tc := newTestContext(t, s)
+		withRepo(repo, &model.Perm{})(tc)
+		withParam("cron", strItoa(cron.ID))(tc)
+
+		RunCron(tc.Ctx)
+
+		assert.Equal(t, http.StatusInternalServerError, tc.Recorder.Code)
+	})
+}
+
 func TestPatchCron(t *testing.T) {
 	s := newTestStore(t)
 	repo, user := cronFixture(t, s)
