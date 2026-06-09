@@ -18,14 +18,20 @@ package main
 
 import (
 	"fmt"
+	"os"
 
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
 	docs "github.com/urfave/cli-docs/v3"
 
 	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error could not load .env: %s", err)
+		os.Exit(1)
+	}
+
 	app := genApp()
 	md, err := docs.ToMan(app)
 	if err != nil {

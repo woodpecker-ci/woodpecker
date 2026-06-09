@@ -19,6 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -217,6 +218,33 @@ func TestCreateFilterFunc(t *testing.T) {
 			},
 			wantMatched: false,
 			wantScore:   0,
+		},
+		{
+			name: "Required label (shebang) missing on task is filtered out",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"!org-id": "123", "platform": "linux"},
+			},
+			task: &model.Task{
+				// no org-id label, so the required !org-id can't be satisfied
+				Labels: map[string]string{"platform": "linux"},
+			},
+			wantMatched: false,
+			wantScore:   0,
+		},
+		{
+			name: "Internal labels are ignored for scoring",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{
+					"platform":                            "linux",
+					pipeline.InternalLabelPrefix + "repo": "some/repo",
+				},
+			},
+			// only the platform label contributes; the internal label is dropped
+			wantMatched: true,
+			wantScore:   10,
 		},
 	}
 
