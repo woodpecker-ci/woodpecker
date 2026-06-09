@@ -30,13 +30,13 @@ import (
 
 // Models woodpecker-ci/woodpecker#3858: "depends_on seems to be broken on
 // workflow level". A downstream workflow that depends_on an upstream one
-// started running before the upstream had finished — in the reporter's case
+// started running before the upstream had finished. In the reporter's case
 // the upstream built a docker image (auth-build:${CI_COMMIT_SHA}) that the
-// downstream then tried to use, getting "pull access denied ... repository
-// does not exist" because the build had not completed yet.
+// downstream then tried to use, getting a "pull access denied" error because
+// the build had not completed yet.
 //
 // "Build Auth" sleeps for a measurable duration. "Auth server tests" depends_on it.
-// Correct behaviour: "Auth server tests" must not START until "Build Auth" has
+// Correct behavior: "Auth server tests" must not START until "Build Auth" has
 // FINISHED. We prove this directly from the recorded step timestamps rather
 // than just final status, because a broken ordering still ends "success" —
 // the steps just overlap in time.
