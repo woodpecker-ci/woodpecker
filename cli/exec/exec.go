@@ -26,6 +26,7 @@ import (
 
 	"codeberg.org/6543/xyaml/v2"
 	"github.com/oklog/ulid/v2"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/multierr"
 
@@ -105,11 +106,14 @@ func repoRootFromFile(file string) string {
 
 	// first we check if file lives inside multi workflow setup
 	if filepath.Base(root) == ".woodpecker" {
+		log.Info().Msg("auto detected workflow in multi workflow setup, parrent directory is used as workspace")
 		root = filepath.Dir(root)
 	}
 
 	// and make sure have the absolute path
 	root, _ = filepath.Abs(root)
+
+	log.Debug().Msgf("auto selected workspace folder at %q", root)
 	return root
 }
 
