@@ -26,7 +26,7 @@ func newCmd(ctx context.Context, binary string, args ...string) *exec.Cmd {
 	cmd := exec.CommandContext(ctx, binary, args...)
 
 	// Non perfect workaround till std exec supports JOB_OBJECT
-	// https://github.com/woodpecker-ci/woodpecker/issues/6717
+	// https://github.com/woodpecker-ci/woodpecker/issues/6717 & https://github.com/golang/go/issues/79927
 	cmd.Cancel = func() error {
 		return exec.Command("taskkill", "/F", "/T", "/PID",
 			strconv.Itoa(cmd.Process.Pid)).Run()
