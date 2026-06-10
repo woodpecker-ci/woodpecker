@@ -27,6 +27,11 @@ type State struct {
 	// Container is oom killed, true or false
 	// TODO (6024): well known errors as string enum into ./errors.go
 	OOMKilled bool `json:"oom_killed"`
+	// InfraFailure is true when the backend terminated the step for an
+	// infrastructure reason (e.g. node preemption, eviction or graceful
+	// node shutdown) rather than the workload itself failing. Such steps
+	// are candidates for an automatic retry on a fresh agent.
+	InfraFailure bool `json:"infra_failure"`
 	// Container error
 	Error error
 }

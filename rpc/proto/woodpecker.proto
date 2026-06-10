@@ -50,6 +50,7 @@ message StepState {
   string error = 6;
   bool   canceled = 7;
   bool   skipped = 8;
+  bool   infra_failure = 9;
 }
 
 message WorkflowState {

@@ -218,6 +218,29 @@ func TestPipelineIncrement(t *testing.T) {
 	assert.EqualValues(t, 1, pipelineC.Number)
 }
 
+func TestClaimInfraRetry(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo))
+	defer closer()
+
+	require.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1", ForgeRemoteID: "1"}))
+	pipeline := &model.Pipeline{RepoID: 1, Status: model.StatusFailure}
+	require.NoError(t, store.CreatePipeline(pipeline))
+
+	// the first claim wins, any subsequent claim loses
+	claimed, err := store.ClaimInfraRetry(pipeline.ID)
+	require.NoError(t, err)
+	assert.True(t, claimed, "first claim should win")
+
+	claimed, err = store.ClaimInfraRetry(pipeline.ID)
+	require.NoError(t, err)
+	assert.False(t, claimed, "second claim should lose")
+
+	// the flag is persisted
+	got, err := store.GetPipeline(pipeline.ID)
+	require.NoError(t, err)
+	assert.True(t, got.InfraRetried)
+}
+
 func TestDeletePipeline(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo), new(model.Workflow),
 		new(model.Step), new(model.LogEntry), new(model.PipelineConfig), new(model.Config))

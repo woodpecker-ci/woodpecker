@@ -37,13 +37,14 @@ type dummy struct {
 
 const (
 	// Step names to control behavior of dummy backend.
-	WorkflowSetupFailUUID = "WorkflowSetupShouldFail"
-	EnvKeyStepSleep       = "SLEEP"
-	EnvKeyStepType        = "EXPECT_TYPE"
-	EnvKeyStepStartFail   = "STEP_START_FAIL"
-	EnvKeyStepExitCode    = "STEP_EXIT_CODE"
-	EnvKeyStepTailFail    = "STEP_TAIL_FAIL"
-	EnvKeyStepOOMKilled   = "STEP_OOM_KILLED"
+	WorkflowSetupFailUUID  = "WorkflowSetupShouldFail"
+	EnvKeyStepSleep        = "SLEEP"
+	EnvKeyStepType         = "EXPECT_TYPE"
+	EnvKeyStepStartFail    = "STEP_START_FAIL"
+	EnvKeyStepExitCode     = "STEP_EXIT_CODE"
+	EnvKeyStepTailFail     = "STEP_TAIL_FAIL"
+	EnvKeyStepOOMKilled    = "STEP_OOM_KILLED"
+	EnvKeyStepInfraFailure = "STEP_INFRA_FAILURE"
 
 	// Internal const.
 	stepStateStarted   = "started"
@@ -202,6 +203,7 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 	e.kv.Store(key, stepStateDone)
 
 	oomKilled, _ := strconv.ParseBool(step.Environment[EnvKeyStepOOMKilled])
+	infraFailure, _ := strconv.ParseBool(step.Environment[EnvKeyStepInfraFailure])
 	exitCode := 0
 
 	if code, exist := step.Environment[EnvKeyStepExitCode]; exist {
@@ -209,9 +211,10 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 	}
 
 	return &backend_types.State{
-		ExitCode:  exitCode,
-		Exited:    true,
-		OOMKilled: oomKilled,
+		ExitCode:     exitCode,
+		Exited:       true,
+		OOMKilled:    oomKilled,
+		InfraFailure: infraFailure,
 	}, nil
 }
 

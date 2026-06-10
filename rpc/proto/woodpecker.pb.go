@@ -46,6 +46,7 @@ type StepState struct {
 	Error         string                 `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
 	Canceled      bool                   `protobuf:"varint,7,opt,name=canceled,proto3" json:"canceled,omitempty"`
 	Skipped       bool                   `protobuf:"varint,8,opt,name=skipped,proto3" json:"skipped,omitempty"`
+	InfraFailure  bool                   `protobuf:"varint,9,opt,name=infra_failure,json=infraFailure,proto3" json:"infra_failure,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -132,6 +133,13 @@ func (x *StepState) GetCanceled() bool {
 func (x *StepState) GetSkipped() bool {
 	if x != nil {
 		return x.Skipped
+	}
+	return false
+}
+
+func (x *StepState) GetInfraFailure() bool {
+	if x != nil {
+		return x.InfraFailure
 	}
 	return false
 }
@@ -1216,7 +1224,7 @@ var File_woodpecker_proto protoreflect.FileDescriptor
 
 const file_woodpecker_proto_rawDesc = "" +
 	"\n" +
-	"\x10woodpecker.proto\x12\x05proto\"\xdf\x01\n" +
+	"\x10woodpecker.proto\x12\x05proto\"\x84\x02\n" +
 	"\tStepState\x12\x1b\n" +
 	"\tstep_uuid\x18\x01 \x01(\tR\bstepUuid\x12\x18\n" +
 	"\astarted\x18\x02 \x01(\x03R\astarted\x12\x1a\n" +
@@ -1225,7 +1233,8 @@ const file_woodpecker_proto_rawDesc = "" +
 	"\texit_code\x18\x05 \x01(\x05R\bexitCode\x12\x14\n" +
 	"\x05error\x18\x06 \x01(\tR\x05error\x12\x1a\n" +
 	"\bcanceled\x18\a \x01(\bR\bcanceled\x12\x18\n" +
-	"\askipped\x18\b \x01(\bR\askipped\"w\n" +
+	"\askipped\x18\b \x01(\bR\askipped\x12#\n" +
+	"\rinfra_failure\x18\t \x01(\bR\finfraFailure\"w\n" +
 	"\rWorkflowState\x12\x18\n" +
 	"\astarted\x18\x01 \x01(\x03R\astarted\x12\x1a\n" +
 	"\bfinished\x18\x02 \x01(\x03R\bfinished\x12\x14\n" +

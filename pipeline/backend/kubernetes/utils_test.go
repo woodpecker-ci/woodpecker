@@ -18,7 +18,35 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	kube_core_v1 "k8s.io/api/core/v1"
 )
+
+func TestIsPodDisrupted(t *testing.T) {
+	disruptionTarget := func(status kube_core_v1.ConditionStatus) *kube_core_v1.Pod {
+		return &kube_core_v1.Pod{Status: kube_core_v1.PodStatus{
+			Conditions: []kube_core_v1.PodCondition{{
+				Type:   kube_core_v1.PodConditionType("DisruptionTarget"),
+				Status: status,
+			}},
+		}}
+	}
+	withReason := func(reason string) *kube_core_v1.Pod {
+		return &kube_core_v1.Pod{Status: kube_core_v1.PodStatus{Reason: reason}}
+	}
+
+	assert.True(t, isPodDisrupted(disruptionTarget(kube_core_v1.ConditionTrue)), "DisruptionTarget=True")
+	assert.False(t, isPodDisrupted(disruptionTarget(kube_core_v1.ConditionFalse)), "DisruptionTarget=False")
+	assert.True(t, isPodDisrupted(withReason("NodeShutdown")), "Reason=NodeShutdown")
+	assert.True(t, isPodDisrupted(withReason("Shutdown")), "Reason=Shutdown")
+	assert.True(t, isPodDisrupted(withReason("Terminated")), "Reason=Terminated")
+	assert.True(t, isPodDisrupted(withReason("NodeLost")), "Reason=NodeLost")
+	// node-pressure eviction is the workload's own fault and must not be
+	// treated as a retryable infra failure (only the DisruptionTarget
+	// condition flags API/taint evictions).
+	assert.False(t, isPodDisrupted(withReason("Evicted")), "Reason=Evicted is not retryable")
+	assert.False(t, isPodDisrupted(withReason("Completed")), "Reason=Completed")
+	assert.False(t, isPodDisrupted(&kube_core_v1.Pod{}), "no condition, no reason")
+}
 
 func TestDNSName(t *testing.T) {
 	name, err := dnsName("wp_01he8bebctabr3kgk0qj36d2me_0_services_0")

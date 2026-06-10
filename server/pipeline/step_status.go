@@ -60,6 +60,7 @@ func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancel
 			}
 			step.ExitCode = state.ExitCode
 			step.Error = state.Error
+			step.InfraFailure = state.InfraFailure
 
 			if state.ExitCode == 0 && state.Error == "" {
 				step.State = model.StatusSuccess
@@ -81,6 +82,7 @@ func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancel
 			}
 			step.ExitCode = state.ExitCode
 			step.Error = state.Error
+			step.InfraFailure = state.InfraFailure
 
 			if state.ExitCode == 0 && state.Error == "" {
 				step.State = model.StatusSuccess

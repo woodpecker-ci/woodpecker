@@ -77,7 +77,11 @@ var Config = struct {
 		PrivilegedPlugins                   []string
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
-		Proxy                               struct {
+		// InfraRetryMaxAttempts caps automatic restarts when a pipeline fails
+		// solely due to infrastructure events (e.g. spot-node preemption);
+		// 0 disables them.
+		InfraRetryMaxAttempts int64
+		Proxy                 struct {
 			No    string
 			HTTP  string
 			HTTPS string

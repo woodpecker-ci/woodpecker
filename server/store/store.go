@@ -90,6 +90,10 @@ type Store interface {
 	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error
+	// ClaimInfraRetry atomically marks a pipeline as having had its automatic
+	// infrastructure-failure retry triggered. It returns true for the single
+	// caller that wins the claim, so concurrent Done calls cannot each restart it.
+	ClaimInfraRetry(pipelineID int64) (bool, error)
 	// DeletePipeline deletes a pipeline.
 	DeletePipeline(*model.Pipeline) error
 

@@ -316,14 +316,15 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	req := &proto.UpdateRequest{
 		Id: workflowID,
 		State: &proto.StepState{
-			StepUuid: state.StepUUID,
-			Started:  state.Started,
-			Finished: state.Finished,
-			Exited:   state.Exited,
-			ExitCode: int32(state.ExitCode),
-			Error:    state.Error,
-			Canceled: state.Canceled,
-			Skipped:  state.Skipped,
+			StepUuid:     state.StepUUID,
+			Started:      state.Started,
+			Finished:     state.Finished,
+			Exited:       state.Exited,
+			ExitCode:     int32(state.ExitCode),
+			Error:        state.Error,
+			Canceled:     state.Canceled,
+			Skipped:      state.Skipped,
+			InfraFailure: state.InfraFailure,
 		},
 	}
 

@@ -415,6 +415,20 @@ In order to enable this configuration you need to set the appropriate environmen
 
 ## Tips and tricks
 
+### Preemptible / spot nodes
+
+When step pods run on preemptible or spot nodes, a node can be reclaimed
+mid-step. Kubernetes marks such a pod with the `DisruptionTarget` condition
+before taking it down. The backend detects this and reports the step as an
+infrastructure failure rather than a normal failure, so the server can
+automatically retry the pipeline instead of surfacing it as a real failure.
+
+This is opt-in and disabled by default; set
+[`WOODPECKER_INFRA_RETRY_MAX_ATTEMPTS`](../10-server.md#infra_retry_max_attempts)
+on the server to the maximum number of automatic retries. A pipeline is retried
+only when every failing step is an infrastructure failure — a genuine failure
+mixed in disables the retry.
+
 ### CRI-O
 
 CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly. Add the following at the beginning of your configuration:

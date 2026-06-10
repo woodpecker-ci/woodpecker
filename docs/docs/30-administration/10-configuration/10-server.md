@@ -780,6 +780,13 @@ The default time for a repo in minutes before a pipeline gets killed
 
 The maximum time in minutes you can set in the repo settings before a pipeline gets killed
 
+### INFRA_RETRY_MAX_ATTEMPTS
+
+- Name: `WOODPECKER_INFRA_RETRY_MAX_ATTEMPTS`
+- Default: 0
+
+Maximum number of times a pipeline is automatically restarted when it fails solely because of an infrastructure event (for example a spot-node preemption or pod eviction) rather than the workload itself failing. The Kubernetes backend flags such steps using the pod's `DisruptionTarget` condition. A pipeline is only retried when every failing step is an infrastructure failure; a genuine step failure mixed in disables the retry. `0` (the default) disables automatic infra retries.
+
 ---
 
 ### SESSION_EXPIRES

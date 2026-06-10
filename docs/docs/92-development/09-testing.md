@@ -9,6 +9,17 @@ with [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stre
 
 ### Integration Tests
 
+Some backend behaviour can only be verified against a real cluster. The
+Kubernetes backend has a `kind`-tagged test that creates a real pod, evicts it
+through the Eviction API and asserts the resulting infrastructure-failure
+detection. It is excluded from the normal test run (build tag `kind`) and needs
+a local cluster:
+
+```bash
+kind create cluster --name wp-e2e
+make test-kind
+```
+
 ### Dummy backend
 
 There is a special backend called **`dummy`** which does not execute any commands, but emulates how a typical backend should behave.
@@ -81,5 +92,6 @@ There are also environment variables to alter step behavior:
 - `STEP_TAIL_FAIL: true` if set will error when we simulate to read from stdout for logs
 - `STEP_EXIT_CODE: 2` if set will be used as exit code, default is 0
 - `STEP_OOM_KILLED: true` simulates a step being killed by memory constrains
+- `STEP_INFRA_FAILURE: true` simulates a step terminated by an infrastructure event (node preemption / eviction) rather than the workload itself failing
 
 You can let the setup of a whole workflow fail by setting it's UUID to `WorkflowSetupShouldFail`.

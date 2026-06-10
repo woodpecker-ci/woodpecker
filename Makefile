@@ -206,6 +206,9 @@ test-lib: ## Test lib code
 test-e2e: ## Test by running yaml config and compare expected result
 	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...
 
+test-kind: ## Test the Kubernetes backend against a live cluster (needs: kind create cluster --name wp-e2e)
+	go test -timeout 200s -tags kind ./pipeline/backend/kubernetes/...
+
 .PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests
 

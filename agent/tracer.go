@@ -38,12 +38,13 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 			Logger()
 
 		stepState := rpc.StepState{
-			StepUUID: state.CurrStep.UUID,
-			Exited:   state.CurrStepState.Exited,
-			ExitCode: state.CurrStepState.ExitCode,
-			Started:  state.CurrStepState.Started,
-			Canceled: errors.Is(state.CurrStepState.Error, pipeline_errors.ErrCancel),
-			Skipped:  state.CurrStepState.Skipped,
+			StepUUID:     state.CurrStep.UUID,
+			Exited:       state.CurrStepState.Exited,
+			ExitCode:     state.CurrStepState.ExitCode,
+			Started:      state.CurrStepState.Started,
+			Canceled:     errors.Is(state.CurrStepState.Error, pipeline_errors.ErrCancel),
+			Skipped:      state.CurrStepState.Skipped,
+			InfraFailure: state.CurrStepState.InfraFailure,
 		}
 		if state.CurrStepState.Error != nil {
 			stepState.Error = state.CurrStepState.Error.Error()

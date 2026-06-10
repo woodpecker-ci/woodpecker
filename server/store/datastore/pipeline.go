@@ -212,6 +212,21 @@ func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
 	return err
 }
 
+// ClaimInfraRetry flips infra_retried from false to true in a single guarded
+// statement. The row lock serialises concurrent callers, so exactly one sees
+// rows-affected == 1 and may proceed with the restart.
+func (s storage) ClaimInfraRetry(pipelineID int64) (bool, error) {
+	affected, err := s.engine.Table("pipelines").
+		Where("id = ?", pipelineID).
+		And("infra_retried = ?", false).
+		Cols("infra_retried").
+		Update(&model.Pipeline{InfraRetried: true})
+	if err != nil {
+		return false, err
+	}
+	return affected == 1, nil
+}
+
 func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
 	return s.deletePipeline(s.engine.NewSession(), pipeline.ID)
 }

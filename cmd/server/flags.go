@@ -203,6 +203,12 @@ var flags = append([]cli.Flag{
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
 	},
+	&cli.Int64Flag{
+		Sources: cli.EnvVars("WOODPECKER_INFRA_RETRY_MAX_ATTEMPTS"),
+		Name:    "infra-retry-max-attempts",
+		Usage:   "Maximum times a pipeline is automatically restarted when it fails solely due to an infrastructure event (e.g. spot-node preemption or pod eviction). 0 disables automatic infra retries",
+		Value:   0,
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_WORKFLOW_LABELS"),
 		Name:    "default-workflow-labels",

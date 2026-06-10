@@ -30,6 +30,16 @@ import (
 
 // Restart a pipeline by creating a new one out of the old and start it.
 func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
+	return restart(ctx, store, lastPipeline, user, repo, envs, false)
+}
+
+// restart is the shared core of Restart and the automatic infrastructure
+// retry. incrementInfraRetry bumps the new pipeline's InfraRetryCount so the
+// counter is persisted atomically with the new pipeline (rather than in a
+// separate, individually-fallible update); it is set only by
+// RetryOnInfraFailure. A user-initiated restart resets the counter to give a
+// fresh infra-retry budget.
+func restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string, incrementInfraRetry bool) (*model.Pipeline, error) {
 	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
@@ -65,6 +75,9 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	newPipeline := createNewOutOfOld(lastPipeline)
 	newPipeline.Parent = lastPipeline.Number
 	newPipeline.RerunCount++
+	if incrementInfraRetry {
+		newPipeline.InfraRetryCount = lastPipeline.InfraRetryCount + 1
+	}
 	newPipeline.Version = version.String()
 
 	err = store.CreatePipeline(newPipeline)
@@ -140,5 +153,17 @@ func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	newPipeline.Started = 0
 	newPipeline.Finished = 0
 	newPipeline.Errors = nil
+	// Reset the infrastructure-retry budget; the automatic-retry path
+	// (restart with incrementInfraRetry) sets it explicitly from the parent,
+	// so a user-initiated restart starts fresh.
+	newPipeline.InfraRetryCount = 0
+	// A fresh pipeline has not had its infra retry claimed yet.
+	newPipeline.InfraRetried = false
+	// The new pipeline has no workflows yet; they are built fresh during
+	// restart. Clearing here matters when the caller passes a pipeline that
+	// already has its workflow tree loaded (e.g. the infra-failure auto-retry
+	// from the Done RPC), which would otherwise trip the "already has
+	// workflows" guard in saveWorkflowsFromPipelineBuilder.
+	newPipeline.Workflows = nil
 	return &newPipeline
 }

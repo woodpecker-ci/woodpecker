@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
@@ -291,6 +292,19 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	finished := make(chan struct{})
 	var finishedOnce sync.Once
 
+	// infraDisrupted is set as soon as kubernetes marks the pod for an
+	// infrastructure-initiated takedown (node preemption, eviction, graceful
+	// node shutdown). It is captured from informer events rather than only
+	// from the post-completion Get below, because the pod can vanish before
+	// WaitStep observes a terminal container status (e.g. the node is lost),
+	// in which case the Get would miss the signal entirely.
+	var infraDisrupted atomic.Bool
+	markDisrupted := func(pod *kube_core_v1.Pod) {
+		if pod.Name == podName && isPodDisrupted(pod) {
+			infraDisrupted.Store(true)
+		}
+	}
+
 	podUpdated := func(_, newPod any) {
 		pod, ok := newPod.(*kube_core_v1.Pod)
 		if !ok {
@@ -299,6 +313,8 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
+			markDisrupted(pod)
+
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				finishedOnce.Do(func() { close(finished) })
 			}
@@ -323,6 +339,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 			}
 		}
 		if pod.Name == podName {
+			markDisrupted(pod)
 			finishedOnce.Do(func() { close(finished) })
 		}
 	}
@@ -342,7 +359,9 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	defer close(stop)
 
 	// If the pod was deleted before the informer started, no events will
-	// ever arrive. Check explicitly so we don't hang forever.
+	// ever arrive. Check explicitly so we don't hang forever. (A pod already
+	// gone at this point left no disruption signal to observe, so it is
+	// treated as a normal completion.)
 	if _, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{}); kube_errors.IsNotFound(err) {
 		return &types.State{ExitCode: 0, Exited: true}, nil
 	}
@@ -381,6 +400,13 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	)
 	if err != nil {
 		if kube_errors.IsNotFound(err) {
+			// The pod vanished before we could read a terminal status. If we
+			// already saw it marked for disruption, report it as an infra
+			// failure (SIGKILL exit) so the server can retry it; otherwise it
+			// completed and was garbage-collected normally.
+			if infraDisrupted.Load() {
+				return &types.State{ExitCode: 137, Exited: true, InfraFailure: true}, nil
+			}
 			return &types.State{ExitCode: 0, Exited: true}, nil
 		}
 		return nil, err
@@ -393,9 +419,10 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	cs := pod.Status.ContainerStatuses[0]
 
 	bs := &types.State{
-		ExitCode:  int(cs.State.Terminated.ExitCode),
-		Exited:    true,
-		OOMKilled: false,
+		ExitCode:     int(cs.State.Terminated.ExitCode),
+		Exited:       true,
+		OOMKilled:    false,
+		InfraFailure: infraDisrupted.Load() || isPodDisrupted(pod),
 	}
 
 	return bs, nil

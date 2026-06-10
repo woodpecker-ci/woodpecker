@@ -380,6 +380,26 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
 			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
 		}
+
+		// Automatically restart the pipeline if it failed solely because of an
+		// infrastructure event (e.g. spot-node preemption). No-op unless
+		// WOODPECKER_INFRA_RETRY_MAX_ATTEMPTS is set.
+		//
+		// Use a detached, bounded context so the restart (forge fetch +
+		// enqueue) is not cancelled if the agent's Done call returns or the
+		// agent disconnects mid-restart, which could otherwise leave a pending
+		// pipeline that never starts.
+		//
+		// Concurrent Done calls (sibling workflows finishing together) can both
+		// reach here; RetryOnInfraFailure atomically claims the single retry so
+		// only one of them actually restarts the pipeline.
+		retryCtx, cancel := context.WithTimeout(context.WithoutCancel(c), 2*time.Minute)
+		if retried, rErr := pipeline.RetryOnInfraFailure(retryCtx, s.store, repo, currentPipeline); rErr != nil {
+			logger.Error().Err(rErr).Msg("could not evaluate pipeline for infrastructure-failure retry")
+		} else if retried {
+			logger.Info().Int64("pipeline_id", currentPipeline.ID).Msg("pipeline automatically restarted after infrastructure failure")
+		}
+		cancel()
 	}
 
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)

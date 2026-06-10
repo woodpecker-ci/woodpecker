@@ -5050,6 +5050,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "infra_retry_count": {
+                    "description": "InfraRetryCount records how many times this pipeline was automatically\nrestarted because of an infrastructure failure (node preemption,\neviction, shutdown). It bounds the budget set by\nWOODPECKER_INFRA_RETRY_MAX_ATTEMPTS and is carried forward on each\nautomatic retry; see Step.InfraFailure for the per-step signal.",
+                    "type": "integer"
+                },
                 "is_prerelease": {
                     "type": "boolean"
                 },
@@ -5665,6 +5669,10 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "infra_failure": {
+                    "description": "InfraFailure is set when the backend reported that this step was\nterminated by an infrastructure event (node preemption, eviction,\ngraceful node shutdown) rather than the workload failing. It lets\nthe server distinguish retryable infra failures from genuine ones.",
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"

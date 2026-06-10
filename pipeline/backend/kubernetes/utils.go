@@ -100,6 +100,36 @@ func isInvalidImageName(pod *kube_core_v1.Pod) bool {
 	return false
 }
 
+// isPodDisrupted reports whether kubernetes terminated the pod for an
+// infrastructure reason (node preemption, API/taint eviction or graceful
+// node shutdown) rather than the workload itself exiting non-zero.
+//
+// The DisruptionTarget pod condition is the authoritative signal: kubernetes
+// (>= 1.26) sets it before taking a pod down for preemption, eviction or node
+// shutdown. The pod-level Reason switch is a fallback for older clusters and
+// for the graceful-node-shutdown path. Those reason strings live in kubelet /
+// node-controller internals rather than in k8s.io/api, so they are matched as
+// literals.
+//
+// "Evicted" is deliberately excluded: kubelet also uses it for node-pressure
+// eviction, which is frequently the workload's own fault (exceeding its
+// memory or ephemeral-storage request) and would fail again on retry. The
+// DisruptionTarget condition still covers API- and taint-initiated evictions.
+func isPodDisrupted(pod *kube_core_v1.Pod) bool {
+	for _, cond := range pod.Status.Conditions {
+		if cond.Type == kube_core_v1.DisruptionTarget && cond.Status == kube_core_v1.ConditionTrue {
+			return true
+		}
+	}
+
+	switch pod.Status.Reason {
+	case "Shutdown", "NodeShutdown", "Terminated", "NodeLost":
+		return true
+	}
+
+	return false
+}
+
 // getClientOutOfCluster returns a k8s client set to the request from outside of cluster.
 func getClientOutOfCluster() (kubernetes.Interface, error) {
 	kubeConfigPath := os.Getenv("KUBECONFIG") // cspell:words KUBECONFIG

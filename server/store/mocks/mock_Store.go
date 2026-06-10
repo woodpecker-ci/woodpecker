@@ -445,6 +445,66 @@ func (_c *MockStore_AgentUpdate_Call) RunAndReturn(run func(agent *model.Agent) 
 	return _c
 }
 
+// ClaimInfraRetry provides a mock function for the type MockStore
+func (_mock *MockStore) ClaimInfraRetry(pipelineID int64) (bool, error) {
+	ret := _mock.Called(pipelineID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ClaimInfraRetry")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64) (bool, error)); ok {
+		return returnFunc(pipelineID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64) bool); ok {
+		r0 = returnFunc(pipelineID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = returnFunc(pipelineID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_ClaimInfraRetry_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ClaimInfraRetry'
+type MockStore_ClaimInfraRetry_Call struct {
+	*mock.Call
+}
+
+// ClaimInfraRetry is a helper method to define mock.On call
+//   - pipelineID int64
+func (_e *MockStore_Expecter) ClaimInfraRetry(pipelineID interface{}) *MockStore_ClaimInfraRetry_Call {
+	return &MockStore_ClaimInfraRetry_Call{Call: _e.mock.On("ClaimInfraRetry", pipelineID)}
+}
+
+func (_c *MockStore_ClaimInfraRetry_Call) Run(run func(pipelineID int64)) *MockStore_ClaimInfraRetry_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_ClaimInfraRetry_Call) Return(b bool, err error) *MockStore_ClaimInfraRetry_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockStore_ClaimInfraRetry_Call) RunAndReturn(run func(pipelineID int64) (bool, error)) *MockStore_ClaimInfraRetry_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Close provides a mock function for the type MockStore
 func (_mock *MockStore) Close() error {
 	ret := _mock.Called()

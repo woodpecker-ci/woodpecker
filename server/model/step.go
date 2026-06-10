@@ -37,6 +37,11 @@ type Step struct {
 	Started    int64       `json:"started,omitempty"    xorm:"started"`
 	Finished   int64       `json:"finished,omitempty"   xorm:"finished"`
 	Type       StepType    `json:"type,omitempty"       xorm:"type"`
+	// InfraFailure is set when the backend reported that this step was
+	// terminated by an infrastructure event (node preemption, eviction,
+	// graceful node shutdown) rather than the workload failing. It lets
+	// the server distinguish retryable infra failures from genuine ones.
+	InfraFailure bool `json:"infra_failure,omitempty" xorm:"NOT NULL DEFAULT false 'infra_failure'"`
 } //	@name	Step
 
 // TableName return database table name for xorm.
