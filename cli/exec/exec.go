@@ -100,12 +100,25 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	return runExec(ctx, c, yamls, repoPath)
 }
 
+func repoRootFromFile(file string) string {
+	root := filepath.Dir(file)
+
+	// first we check if file lives inside multi workflow setup
+	if filepath.Base(root) == ".woodpecker" {
+		root = filepath.Dir(root)
+	}
+
+	// and make sure have the absolute path
+	root, _ = filepath.Abs(root)
+	return root
+}
+
 func execFile(ctx context.Context, c *cli.Command, file string) error {
 	repoPath := c.String("repo-path")
 	if repoPath != "" {
 		repoPath, _ = filepath.Abs(repoPath)
 	} else {
-		repoPath, _ = filepath.Abs(filepath.Dir(file))
+		repoPath = repoRootFromFile(file)
 	}
 	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
