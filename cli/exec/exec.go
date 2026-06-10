@@ -106,7 +106,7 @@ func repoRootFromFile(file string) string {
 
 	// first we check if file lives inside multi workflow setup
 	if filepath.Base(root) == ".woodpecker" {
-		log.Info().Msg("auto detected workflow in multi workflow setup, parrent directory is used as workspace")
+		log.Info().Msg("auto detected workflow in multi workflow setup, parent directory is used as workspace")
 		root = filepath.Dir(root)
 	}
 
