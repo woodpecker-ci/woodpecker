@@ -71,7 +71,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER_ADDR"),
 		Name:    "server-addr",
-		Usage:   "server address",
+		Usage:   "configures the HTTP listener, supports unix socket via unix:// prefix",
 		Value:   ":8000",
 	},
 	&cli.StringFlag{
