@@ -108,7 +108,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_ADDR"),
 		Name:    "grpc-addr",
-		Usage:   "grpc address",
+		Usage:   "grpc socket server opens, by default on all IPs via port 9000, use unix:// prefix for unix socket",
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
