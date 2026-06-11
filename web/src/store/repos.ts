@@ -15,6 +15,8 @@ export const useRepoStore = defineStore('repos', () => {
 
   const repos: Map<number, Repo> = reactive(new Map());
   const ownedRepoIds = ref<number[]>([]);
+  const isLoadingRepos = ref(false);
+  const isSyncingRepos = ref(false);
 
   const ownedRepos = computed(() =>
     [...repos.entries()].filter(([repoId]) => ownedRepoIds.value.includes(repoId)).map(([, repo]) => repo),
@@ -38,6 +40,15 @@ export const useRepoStore = defineStore('repos', () => {
   }
 
   async function loadRepos() {
+    isLoadingRepos.value = true;
+    try {
+      return await fetchRepos();
+    } finally {
+      isLoadingRepos.value = false;
+    }
+  }
+
+  async function fetchRepos() {
     const _ownedRepos = await apiClient.getRepoList();
 
     _ownedRepos.forEach((repo) => {
@@ -65,15 +76,45 @@ export const useRepoStore = defineStore('repos', () => {
         setRepo(repo);
       });
     }
+
+    return _ownedRepos;
+  }
+
+  async function loadReposWithBackgroundSync(maxAttempts = 40, pollIntervalMs = 3000) {
+    isSyncingRepos.value = false;
+
+    const initialRepos = await loadRepos();
+    if (initialRepos.length > 0) {
+      return;
+    }
+
+    isSyncingRepos.value = true;
+    try {
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, pollIntervalMs);
+        });
+
+        const syncedRepos = await fetchRepos();
+        if (syncedRepos.length > 0) {
+          return;
+        }
+      }
+    } finally {
+      isSyncingRepos.value = false;
+    }
   }
 
   return {
     repos,
     ownedRepos,
     ownedRepoIds,
+    isLoadingRepos,
+    isSyncingRepos,
     getRepo,
     setRepo,
     loadRepo,
     loadRepos,
+    loadReposWithBackgroundSync,
   };
 });

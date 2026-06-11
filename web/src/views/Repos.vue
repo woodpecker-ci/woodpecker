@@ -8,7 +8,17 @@
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
     </template>
 
-    <Transition name="fade" mode="out-in">
+    <div
+      v-if="isLoadingRepos || isSyncingRepos"
+      class="text-wp-text-alt-100 flex flex-col items-center justify-center gap-4 py-16"
+    >
+      <Icon name="spinner" class="h-8 w-8 animate-spin" />
+      <p class="max-w-lg text-center">
+        {{ isSyncingRepos ? $t('repositories.syncing') : $t('repositories.loading') }}
+      </p>
+    </div>
+
+    <Transition v-else name="fade" mode="out-in">
       <div v-if="search === '' && repos.length > 0" class="grid gap-8">
         <div v-if="reposLastAccess.length > 0 && repos.length > 4" class="flex flex-col gap-4">
           <div>
@@ -41,10 +51,12 @@
 </template>
 
 <script lang="ts" setup>
+import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import RepoItem from '~/components/repo/RepoItem.vue';
 import useRepos from '~/compositions/useRepos';
@@ -53,6 +65,7 @@ import { useWPTitle } from '~/compositions/useWPTitle';
 import { useRepoStore } from '~/store/repos';
 
 const repoStore = useRepoStore();
+const { isLoadingRepos, isSyncingRepos } = storeToRefs(repoStore);
 
 const { sortReposByLastAccess, sortReposByLastActivity, repoWithLastPipeline } = useRepos();
 const repos = computed(() => Object.values(repoStore.ownedRepos).map((r) => repoWithLastPipeline(r)));
@@ -64,7 +77,7 @@ const { searchedRepos } = useRepoSearch(repos, search);
 const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
 
 onMounted(async () => {
-  await repoStore.loadRepos();
+  await repoStore.loadReposWithBackgroundSync();
 });
 
 const { t } = useI18n();

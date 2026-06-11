@@ -5,6 +5,8 @@
   "repos": "Repos",
   "repositories": {
     "title": "Repositories",
+    "loading": "Loading repositories…",
+    "syncing": "Syncing repository permissions from your forge. This may take a moment if you have many repositories.",
     "all": {
       "title": "All repositories",
       "desc": "Repositories sorted by last pipeline creation"
