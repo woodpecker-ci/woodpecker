@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-09
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -40,6 +40,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6706](https://github.com/woodpecker-ci/woodpecker/pull/6706)]
 - Update golang-lang to v1.26.4 [[#6704](https://github.com/woodpecker-ci/woodpecker/pull/6704)]
 - bump github.com/quic-go/quic-go to v0.59.1 [[#6700](https://github.com/woodpecker-ci/woodpecker/pull/6700)]
 - Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.6.0 [[#6699](https://github.com/woodpecker-ci/woodpecker/pull/6699)]
