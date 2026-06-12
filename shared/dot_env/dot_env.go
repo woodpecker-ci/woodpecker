@@ -1,4 +1,4 @@
-// Copyright 2025 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build man
-
-package main
+package dot_env
 
 import (
 	"fmt"
+	"os"
 
-	docs "github.com/urfave/cli-docs/v3"
-
-	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/dot_env"
+	"github.com/joho/godotenv"
 )
 
-func main() {
-	dot_env.Load()
+const dotEnv = ".env"
 
-	app := genApp()
-	md, err := docs.ToMan(app)
-	if err != nil {
-		panic(err)
+func Load() {
+	if _, err := os.Stat(dotEnv); os.IsNotExist(err) {
+		return
 	}
-	fmt.Print(md)
+
+	if err := godotenv.Load(dotEnv); err != nil {
+		fmt.Fprintf(os.Stderr, "Error could not load %q: %s", dotEnv, err)
+		os.Exit(1)
+	}
 }
