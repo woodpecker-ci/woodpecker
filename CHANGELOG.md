@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-12
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -40,6 +40,7 @@
 
 ### 📦️ Dependency
 
+- Update pre-commit non-major to v3.8.4 [[#6723](https://github.com/woodpecker-ci/woodpecker/pull/6723)]
 - Update web npm deps non-major [[#6706](https://github.com/woodpecker-ci/woodpecker/pull/6706)]
 - Update golang-lang to v1.26.4 [[#6704](https://github.com/woodpecker-ci/woodpecker/pull/6704)]
 - bump github.com/quic-go/quic-go to v0.59.1 [[#6700](https://github.com/woodpecker-ci/woodpecker/pull/6700)]
