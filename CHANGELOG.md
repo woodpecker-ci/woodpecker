@@ -40,6 +40,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/alpine Docker tag to v3.24 [[#6725](https://github.com/woodpecker-ci/woodpecker/pull/6725)]
 - Update pre-commit non-major to v3.8.4 [[#6723](https://github.com/woodpecker-ci/woodpecker/pull/6723)]
 - Update web npm deps non-major [[#6706](https://github.com/woodpecker-ci/woodpecker/pull/6706)]
 - Update golang-lang to v1.26.4 [[#6704](https://github.com/woodpecker-ci/woodpecker/pull/6704)]
