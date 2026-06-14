@@ -169,14 +169,13 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	privilegedPlugins := c.StringSlice("plugins-privileged")
 
-	// emulate server prefix for volume/network naming
+	// prefix for the local-execution workspace volume name
 	prefix := "wp_" + ulid.Make().String()
 
 	// build compiler options — mirrors server behavior
 	compilerOpts := []compiler.Option{
 		compiler.WithEscalated(privilegedPlugins...),
 		compiler.WithNetworks(c.StringSlice("network")...),
-		compiler.WithPrefix(prefix),
 		compiler.WithProxy(compiler.ProxyOptions{
 			NoProxy:    c.String("backend-no-proxy"),
 			HTTPProxy:  c.String("backend-http-proxy"),
