@@ -18,6 +18,7 @@
 
 ### 🐛 Bug Fixes
 
+- cli exec: have uniq prefix for each workflow [[#6716](https://github.com/woodpecker-ci/woodpecker/pull/6716)]
 - github dont fail on force push [[#6697](https://github.com/woodpecker-ci/woodpecker/pull/6697)]
 - fix(kubernetes): retry WaitStep when container terminated state not yet finalized [[#6672](https://github.com/woodpecker-ci/woodpecker/pull/6672)]
 
