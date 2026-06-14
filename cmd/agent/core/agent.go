@@ -137,6 +137,9 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	client := agent_rpc.NewGrpcClient(
 		ctx, agentConn.MainConn,
 		agent_rpc.SetConnectionRetryTimeout(c.Duration("retry-timeout")),
+		// Allow RPCs to re-authenticate and retry if the server rejects an
+		// expired access token, instead of getting stuck (issue #4144).
+		agent_rpc.SetAuthRefresher(agentConn.AuthInterceptor),
 	)
 	agentConfigPersisted := atomic.Bool{}
 
