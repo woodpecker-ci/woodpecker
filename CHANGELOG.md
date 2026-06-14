@@ -10,6 +10,10 @@
 
 - Update joi [[#6728](https://github.com/woodpecker-ci/woodpecker/pull/6728)]
 
+### ✨ Features
+
+- Support Unix Sockets [[#6721](https://github.com/woodpecker-ci/woodpecker/pull/6721)]
+
 ### 📈 Enhancement
 
 - Surface `.env` load errors [[#6707](https://github.com/woodpecker-ci/woodpecker/pull/6707)]
