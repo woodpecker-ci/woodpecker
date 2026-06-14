@@ -6,6 +6,10 @@
 
 @6543, @AkashKumar7902, @MeurillonGuillaume, @head1328, @qwerty287, @simonckemper
 
+### 🔒 Security
+
+- Update joi [[#6728](https://github.com/woodpecker-ci/woodpecker/pull/6728)]
+
 ### 📈 Enhancement
 
 - Surface `.env` load errors [[#6707](https://github.com/woodpecker-ci/woodpecker/pull/6707)]
