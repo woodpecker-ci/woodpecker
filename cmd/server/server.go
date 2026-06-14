@@ -19,9 +19,12 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -246,8 +249,25 @@ func run(ctx context.Context, c *cli.Command) error {
 	} else {
 		// start the server without tls
 		serviceWaitingGroup.Go(func() error {
+			network := "tcp"
+			addr := c.String("server-addr")
+			if strings.HasPrefix(addr, "unix://") {
+				network = "unix"
+				addr, _ = filepath.Abs(strings.TrimPrefix(addr, "unix://"))
+				if _, err := os.Stat(filepath.Dir(addr)); os.IsNotExist(err) {
+					err = fmt.Errorf("can not listen to unix socket, parent folder %q not exist", filepath.Dir(addr))
+					stopServerFunc(err)
+					return err
+				}
+			}
+			lis, err := net.Listen(network, addr)
+			if err != nil {
+				err = fmt.Errorf("could not start web listener: %w", err)
+				stopServerFunc(err)
+				return err
+			}
+
 			httpServer := &http.Server{
-				Addr:    c.String("server-addr"),
 				Handler: handler,
 			}
 
@@ -262,7 +282,7 @@ func run(ctx context.Context, c *cli.Command) error {
 			}()
 
 			log.Info().Msg("starting http server ...")
-			if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := httpServer.Serve(lis); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Error().Err(err).Msg("http server failed")
 				stopServerFunc(fmt.Errorf("http server failed: %w", err))
 			}
