@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-13
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -41,6 +41,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6724](https://github.com/woodpecker-ci/woodpecker/pull/6724)]
 - Update docker.io/alpine Docker tag to v3.24 [[#6725](https://github.com/woodpecker-ci/woodpecker/pull/6725)]
 - Update pre-commit non-major to v3.8.4 [[#6723](https://github.com/woodpecker-ci/woodpecker/pull/6723)]
 - Update web npm deps non-major [[#6706](https://github.com/woodpecker-ci/woodpecker/pull/6706)]
@@ -52,6 +53,10 @@
 - Update web npm deps non-major [[#6657](https://github.com/woodpecker-ci/woodpecker/pull/6657)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.36.0 [[#6668](https://github.com/woodpecker-ci/woodpecker/pull/6668)]
 - Migrate `gopkg.in/yaml.v3` usages to `go.yaml.in/yaml/v4` [[#6651](https://github.com/woodpecker-ci/woodpecker/pull/6651)]
+
+### Misc
+
+- Make cli exec auto detect single workflow test in multi workflow setup [[#6715](https://github.com/woodpecker-ci/woodpecker/pull/6715)]
 
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
 
