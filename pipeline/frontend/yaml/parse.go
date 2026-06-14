@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	// Set to allow deeply nested k8s backend_options for node affinity
+	// Set to allow deeply nested k8s backend_options for node affinity.
 	maxMergeDepth uint16 = 15
 )
 
