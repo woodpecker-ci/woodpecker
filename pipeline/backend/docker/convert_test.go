@@ -258,6 +258,85 @@ func TestToConfigFull(t *testing.T) {
 	}, conf)
 }
 
+func TestToHostConfig(t *testing.T) {
+	const (
+		oneGiB   = int64(1024 * 1024 * 1024)
+		halfGiB  = int64(512 * 1024 * 1024)
+		halfCPU  = int64(500_000_000)
+	)
+
+	baseStep := &backend_types.Step{
+		Name: "test",
+		UUID: "abc123",
+	}
+
+	baseConf := &config{
+		resourceLimit: resourceLimit{
+			MemLimit: oneGiB,
+		},
+	}
+
+	tests := []struct {
+		name            string
+		conf            *config
+		options         BackendOptions
+		wantMemory      int64
+		wantNanoCPUs    int64
+		wantOomScoreAdj int
+	}{
+		{
+			name:            "per-step memory overrides global",
+			conf:            baseConf,
+			options:         BackendOptions{Resources: Resources{Limits: ResourceList{Memory: "512m"}}},
+			wantMemory:      halfGiB,
+			wantNanoCPUs:    0,
+			wantOomScoreAdj: 0,
+		},
+		{
+			name:            "global memory used when step memory not set",
+			conf:            baseConf,
+			options:         BackendOptions{},
+			wantMemory:      oneGiB,
+			wantNanoCPUs:    0,
+			wantOomScoreAdj: 0,
+		},
+		{
+			name:            "cpus converted to nanocpus",
+			conf:            &config{},
+			options:         BackendOptions{Resources: Resources{Limits: ResourceList{CPUs: 0.5}}},
+			wantMemory:      0,
+			wantNanoCPUs:    halfCPU,
+			wantOomScoreAdj: 0,
+		},
+		{
+			name:            "oom_score_adj 500 propagated",
+			conf:            &config{},
+			options:         BackendOptions{OomScoreAdj: 500},
+			wantMemory:      0,
+			wantNanoCPUs:    0,
+			wantOomScoreAdj: 500,
+		},
+		{
+			name:            "oom_score_adj 0 propagated",
+			conf:            &config{},
+			options:         BackendOptions{OomScoreAdj: 0},
+			wantMemory:      0,
+			wantNanoCPUs:    0,
+			wantOomScoreAdj: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hostConfig, err := toHostConfig(baseStep, tt.conf, tt.options)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantMemory, hostConfig.Resources.Memory)
+			assert.Equal(t, tt.wantNanoCPUs, hostConfig.Resources.NanoCPUs)
+			assert.Equal(t, tt.wantOomScoreAdj, hostConfig.OomScoreAdj)
+		})
+	}
+}
+
 func TestToWindowsConfig(t *testing.T) {
 	engine := docker{
 		info: system.Info{OSType: "windows", Architecture: "x86_64"},
