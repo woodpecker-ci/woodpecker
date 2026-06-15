@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @MeurillonGuillaume, @head1328, @mmeier86, @qwerty287, @simonckemper
+@6543, @AkashKumar7902, @MeurillonGuillaume, @head1328, @mmeier86, @nijave, @qwerty287, @simonckemper
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Add k8s userns support [[#6710](https://github.com/woodpecker-ci/woodpecker/pull/6710)]
 - Surface `.env` load errors [[#6707](https://github.com/woodpecker-ci/woodpecker/pull/6707)]
 - Group commands followup user preference [[#6694](https://github.com/woodpecker-ci/woodpecker/pull/6694)]
 - Trim white spaces for cron create/update [[#6690](https://github.com/woodpecker-ci/woodpecker/pull/6690)]
