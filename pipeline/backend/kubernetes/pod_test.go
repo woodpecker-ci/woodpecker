@@ -493,7 +493,13 @@ func TestFullPod(t *testing.T) {
 }
 
 func TestPodPrivilege(t *testing.T) {
-	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*kube_core_v1.Pod, error) {
+	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext, hostUsers ...*bool) (*kube_core_v1.Pod, error) {
+		opts := BackendOptions{
+			SecurityContext: &secCtx,
+		}
+		if len(hostUsers) > 0 {
+			opts.HostUsers = hostUsers[0]
+		}
 		return mkPod(&types.Step{
 			Name:       "go-test",
 			Image:      "golang:1.16",
@@ -502,9 +508,7 @@ func TestPodPrivilege(t *testing.T) {
 		}, &config{
 			Namespace:       "woodpecker",
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
-		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
-			SecurityContext: &secCtx,
-		}, "11301")
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", opts, "11301")
 	}
 
 	// securty context is requesting user and group 101 (non-root)
@@ -542,6 +546,30 @@ func TestPodPrivilege(t *testing.T) {
 		AppArmorProfile:          (*kube_core_v1.AppArmorProfile)(nil),
 	}, pod.Spec.SecurityContext)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// securty context is requesting root with hostUsers=false (user namespaces): allowed
+	secCtx = SecurityContext{
+		RunAsUser:  newInt64(0),
+		RunAsGroup: newInt64(0),
+		FSGroup:    newInt64(0),
+	}
+	pod, err = createTestPod(false, false, secCtx, newBool(false))
+	assert.NoError(t, err)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.RunAsGroup)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.FSGroup)
+	assert.False(t, *pod.Spec.HostUsers)
+
+	// securty context is requesting root with hostUsers=true: still blocked
+	secCtx = SecurityContext{
+		RunAsUser:  newInt64(0),
+		RunAsGroup: newInt64(0),
+		FSGroup:    newInt64(0),
+	}
+	pod, err = createTestPod(false, false, secCtx, newBool(true))
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.SecurityContext.RunAsUser)
+	assert.Nil(t, pod.Spec.SecurityContext.RunAsGroup)
 
 	// step is not privileged, but security context is requesting privileged
 	secCtx = SecurityContext{
@@ -1304,6 +1332,37 @@ func TestPodAffinityStepOverridesAgent(t *testing.T) {
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expected)
+}
+
+func TestHostUsers(t *testing.T) {
+	createTestPod := func(hostUsers *bool) (*kube_core_v1.Pod, error) {
+		return mkPod(&types.Step{
+			Name:  "go-test",
+			Image: "golang:1.16",
+			UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		}, &config{
+			Namespace: "woodpecker",
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+			HostUsers: hostUsers,
+		}, "11301")
+	}
+
+	// hostUsers not set: nil (k8s defaults to true)
+	pod, err := createTestPod(nil)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.HostUsers)
+
+	// hostUsers set to false: enables user namespace isolation
+	pod, err = createTestPod(newBool(false))
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.False(t, *pod.Spec.HostUsers)
+
+	// hostUsers set to true: explicitly use host user namespace
+	pod, err = createTestPod(newBool(true))
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.True(t, *pod.Spec.HostUsers)
 }
 
 func TestInitContainer(t *testing.T) {
