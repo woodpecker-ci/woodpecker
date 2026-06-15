@@ -34,6 +34,7 @@ type BackendOptions struct {
 	SecurityContext    *SecurityContext       `mapstructure:"securityContext"`
 	Secrets            []SecretRef            `mapstructure:"secrets"`
 	WorkspaceVolume    *bool                  `mapstructure:"workspaceVolume"`
+	HostUsers          *bool                  `mapstructure:"hostUsers"`
 }
 
 // Resources defines two maps for kubernetes resource definitions.
