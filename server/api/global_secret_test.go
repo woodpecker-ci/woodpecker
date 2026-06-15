@@ -142,9 +142,7 @@ func TestPostGlobalSecret(t *testing.T) {
 
 		PostGlobalSecret(c)
 
-		// Note: the global handler returns 400 on validation failure, unlike
-		// the repo/org handlers which return 422.
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
 	})
 
 	t.Run("storage error returns internal error", func(t *testing.T) {
