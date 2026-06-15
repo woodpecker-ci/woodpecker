@@ -17,6 +17,7 @@
 ### 📈 Enhancement
 
 - Add k8s userns support [[#6710](https://github.com/woodpecker-ci/woodpecker/pull/6710)]
+- Make cli exec auto detect single workflow test in multi workflow setup [[#6715](https://github.com/woodpecker-ci/woodpecker/pull/6715)]
 - Surface `.env` load errors [[#6707](https://github.com/woodpecker-ci/woodpecker/pull/6707)]
 - Group commands followup user preference [[#6694](https://github.com/woodpecker-ci/woodpecker/pull/6694)]
 - Trim white spaces for cron create/update [[#6690](https://github.com/woodpecker-ci/woodpecker/pull/6690)]
@@ -72,7 +73,6 @@
 ### Misc
 
 - Rename editorconfig file [[#6734](https://github.com/woodpecker-ci/woodpecker/pull/6734)]
-- Make cli exec auto detect single workflow test in multi workflow setup [[#6715](https://github.com/woodpecker-ci/woodpecker/pull/6715)]
 
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
 
