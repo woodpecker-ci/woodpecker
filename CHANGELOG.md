@@ -33,6 +33,7 @@
 
 ### 🧪 Tests
 
+- More test coverage of `server/api/...` [[#6712](https://github.com/woodpecker-ci/woodpecker/pull/6712)]
 - Add e2e test that assert workflow depends_on enforces ordering [[#6711](https://github.com/woodpecker-ci/woodpecker/pull/6711)]
 - Add more tests in areas not well covered [[#6696](https://github.com/woodpecker-ci/woodpecker/pull/6696)]
 - Cleanup e2e test setup [[#6480](https://github.com/woodpecker-ci/woodpecker/pull/6480)]
