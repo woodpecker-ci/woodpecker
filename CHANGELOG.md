@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @MeurillonGuillaume, @head1328, @qwerty287, @simonckemper
+@6543, @AkashKumar7902, @MeurillonGuillaume, @head1328, @mmeier86, @qwerty287, @simonckemper
 
 ### 🔒 Security
 
@@ -26,6 +26,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix issue with deeply nested k8s backend_options [[#6730](https://github.com/woodpecker-ci/woodpecker/pull/6730)]
 - cli exec: have uniq prefix for each workflow [[#6716](https://github.com/woodpecker-ci/woodpecker/pull/6716)]
 - github dont fail on force push [[#6697](https://github.com/woodpecker-ci/woodpecker/pull/6697)]
 - fix(kubernetes): retry WaitStep when container terminated state not yet finalized [[#6672](https://github.com/woodpecker-ci/woodpecker/pull/6672)]
