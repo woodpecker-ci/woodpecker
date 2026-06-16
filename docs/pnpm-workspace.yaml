@@ -7,8 +7,5 @@ allowBuilds:
   core-js: false
 
 overrides:
-  webpack-dev-server@<=5.2.0: '>=5.2.1'
-  serialize-javascript: '^7.0.5'
-  uuid: '^14.0.0'
   joi: '^18.2.1'
   js-yaml: '^4.2.0'
