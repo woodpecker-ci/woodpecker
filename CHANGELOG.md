@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-15
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- local backend: on windows use process tree-walk as workaround to kill [[#6718](https://github.com/woodpecker-ci/woodpecker/pull/6718)]
 - Fix issue with deeply nested k8s backend_options [[#6730](https://github.com/woodpecker-ci/woodpecker/pull/6730)]
 - cli exec: have uniq prefix for each workflow [[#6716](https://github.com/woodpecker-ci/woodpecker/pull/6716)]
 - github dont fail on force push [[#6697](https://github.com/woodpecker-ci/woodpecker/pull/6697)]
