@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @MeurillonGuillaume, @head1328, @mmeier86, @nijave, @qwerty287, @simonckemper
+@6543, @AkashKumar7902, @MeurillonGuillaume, @gedankenstuecke, @head1328, @mmeier86, @nijave, @qwerty287, @simonckemper
 
 ### 🔒 Security
 
@@ -73,6 +73,7 @@
 
 ### Misc
 
+- adds git-pages plugin [[#6736](https://github.com/woodpecker-ci/woodpecker/pull/6736)]
 - Rename editorconfig file [[#6734](https://github.com/woodpecker-ci/woodpecker/pull/6734)]
 
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
