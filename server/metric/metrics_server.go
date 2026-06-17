@@ -82,8 +82,8 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 		FailurePipelineStepInfoCount = promauto.NewCounterVec(
 			prometheus.CounterOpts{
 				Namespace: "woodpecker",
-				Name:      "failure_pipeline_step_total",
-				Help:      "Total number of the failure steps.",
+				Name:      "step_failures_total",
+				Help:      "Total number of pipeline step failures.",
 			},
 			[]string{"pipeline", "repo", "step"})
 
