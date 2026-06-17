@@ -34,9 +34,11 @@ const (
 )
 
 var (
-	FailurePipelineStepInfoCount *prometheus.CounterVec = nil
-	StepDurationRecord           *prometheus.GaugeVec   = nil
+	FailurePipelineStepInfoCount *prometheus.CounterVec   = nil
+	StepDurationRecord           *prometheus.HistogramVec = nil
 )
+
+var stepDurationBuckets = []float64{1, 5, 10, 30, 60, 120, 300, 600, 1800, 3600}
 
 func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Store) {
 	detailedMetricsEnabled := c.Bool("step-level-metrics")
@@ -77,19 +79,20 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 	})
 
 	if detailedMetricsEnabled {
-		FailurePipelineStepInfoCount = promauto.NewCounterVec(
+		FailurePipelineStepInfoCount = prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Namespace: "woodpecker",
 				Name:      "failure_pipeline_step_total",
-				Help:      "Total number of the failure steps",
+				Help:      "Total number of the failure steps.",
 			},
 			[]string{"pipeline", "repo", "step"})
 
-		StepDurationRecord = promauto.NewGaugeVec(
-			prometheus.GaugeOpts{
+		StepDurationRecord = prometheus.NewHistogramVec(
+			prometheus.HistogramOpts{
 				Namespace: "woodpecker",
-				Name:      "woodpecker_step_duration_seconds",
-				Help:      "woodpecker_step_duration_seconds",
+				Name:      "step_duration_seconds",
+				Help:      "Step duration in seconds.",
+				Buckets:   stepDurationBuckets,
 			},
 			[]string{"pipeline", "repo", "step"},
 		)

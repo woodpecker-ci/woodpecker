@@ -657,6 +657,15 @@ Example: `:9001`
 
 ---
 
+### STEP_LEVEL_METRICS
+
+- Name: `WOODPECKER_STEP_LEVEL_METRICS`
+- Default: `false`
+
+Enable step-level metrics, including failed step counters and step duration histograms.
+
+---
+
 ### ADMIN
 
 - Name: `WOODPECKER_ADMIN`
