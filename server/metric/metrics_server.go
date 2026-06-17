@@ -36,7 +36,7 @@ const (
 var FailurePipelineStepInfo *prometheus.CounterVec = nil
 
 func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Store) {
-	detailedMetricsEnabled := c.Bool("detailed-metrics")
+	detailedMetricsEnabled := c.Bool("step-level-metrics")
 	pendingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pending_steps",
