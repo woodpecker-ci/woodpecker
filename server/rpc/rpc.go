@@ -228,7 +228,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 			strconv.FormatInt(workflow.PipelineID, 10),
 			repo.FullName,
 			step.Name,
-		).Observe(float64(duration))
+		).Set(float64(duration))
 	}
 	if state.Exited {
 		server.Config.Services.LogStore.StepFinished(step)

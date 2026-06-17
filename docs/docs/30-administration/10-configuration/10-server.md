@@ -662,7 +662,7 @@ Example: `:9001`
 - Name: `WOODPECKER_STEP_LEVEL_METRICS`
 - Default: `false`
 
-Enable step-level metrics, including failed step counters and step duration histograms.
+Enable step-level metrics, including failed step counters and step duration gauges.
 
 ---
 
