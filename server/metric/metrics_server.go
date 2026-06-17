@@ -79,7 +79,7 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 	})
 
 	if detailedMetricsEnabled {
-		FailurePipelineStepInfoCount = prometheus.NewCounterVec(
+		FailurePipelineStepInfoCount = promauto.NewCounterVec(
 			prometheus.CounterOpts{
 				Namespace: "woodpecker",
 				Name:      "failure_pipeline_step_total",
@@ -87,7 +87,7 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 			},
 			[]string{"pipeline", "repo", "step"})
 
-		StepDurationRecord = prometheus.NewHistogramVec(
+		StepDurationRecord = promauto.NewHistogramVec(
 			prometheus.HistogramOpts{
 				Namespace: "woodpecker",
 				Name:      "step_duration_seconds",
