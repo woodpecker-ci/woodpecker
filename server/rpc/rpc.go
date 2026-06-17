@@ -214,12 +214,21 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if metric.FailurePipelineStepInfo != nil &&
+	if metric.FailurePipelineStepInfoCount != nil &&
 		state.Exited &&
 		(step.State == model.StatusFailure ||
 			step.State == model.StatusKilled ||
 			step.State == model.StatusError) {
-		metric.FailurePipelineStepInfo.WithLabelValues(strconv.FormatInt(workflow.PipelineID, 10), repo.FullName, step.Name).Inc()
+		metric.FailurePipelineStepInfoCount.WithLabelValues(strconv.FormatInt(workflow.PipelineID, 10), repo.FullName, step.Name).Inc()
+	}
+
+	if metric.StepDurationRecord != nil && state.Exited && step.Started > 0 && step.Finished > step.Started {
+		duration := step.Finished - step.Started
+		metric.StepDurationRecord.WithLabelValues(
+			strconv.FormatInt(workflow.PipelineID, 10),
+			repo.FullName,
+			step.Name,
+		).Set(float64(duration))
 	}
 	if state.Exited {
 		server.Config.Services.LogStore.StepFinished(step)

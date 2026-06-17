@@ -33,7 +33,8 @@ const (
 	storeInfoRefreshInterval = 10 * time.Second
 )
 
-var FailurePipelineStepInfo *prometheus.CounterVec = nil
+var FailurePipelineStepInfoCount *prometheus.CounterVec = nil
+var StepDurationRecord *prometheus.GaugeVec = nil
 
 func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Store) {
 	detailedMetricsEnabled := c.Bool("step-level-metrics")
@@ -74,13 +75,22 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 	})
 
 	if detailedMetricsEnabled {
-		FailurePipelineStepInfo = promauto.NewCounterVec(
+		FailurePipelineStepInfoCount = promauto.NewCounterVec(
 			prometheus.CounterOpts{
 				Namespace: "woodpecker",
 				Name:      "failure_pipeline_step_total",
 				Help:      "Total number of the failure steps",
 			},
 			[]string{"pipeline", "repo", "step"})
+
+		StepDurationRecord = promauto.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: "woodpecker",
+				Name:      "woodpecker_step_duration_secondsl",
+				Help:      "woodpecker_step_duration_seconds",
+			},
+			[]string{"pipeline", "repo", "step"},
+		)
 	}
 	go func() {
 		log.Info().Msg("queue metric collector started")
