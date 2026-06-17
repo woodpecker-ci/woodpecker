@@ -611,6 +611,13 @@
                     "light": "Claro",
                     "dark": "Escuro",
                     "auto": "Auto"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Logs de pipeline",
+                    "collapse_groups": {
+                        "collapse": "Recolher grupos de logs por padrão",
+                        "desc": "Ao abrir uma etapa concluída, recolhe todos os grupos de comandos para mostrar apenas o resumo."
+                    }
                 }
             },
             "registries": {

@@ -18,13 +18,15 @@ import (
 	"context"
 	"os"
 
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/shared/dot_env"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 func main() {
+	dot_env.Load()
+
 	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
 		log.Info().Msg("termination signal is received, terminate cli")
 	})

@@ -3,7 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@11.5.1",
+  "packageManager": "pnpm@11.6.0",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -26,7 +26,7 @@
     "dompurify": "^3.4.0",
     "fuse.js": "^7.3.0",
     "js-base64": "^3.7.8",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.2.0",
     "marked": "^18.0.0",
     "node-emoji": "^2.2.0",
     "pinia": "^3.0.4",
@@ -45,7 +45,7 @@
     "@intlify/eslint-plugin-vue-i18n": "4.5.1",
     "@intlify/unplugin-vue-i18n": "^11.0.7",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "4.3.0",
+    "@tailwindcss/vite": "4.3.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.12.2",
     "@types/prismjs": "^1.26.6",

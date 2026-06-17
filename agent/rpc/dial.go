@@ -18,6 +18,9 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -79,6 +82,17 @@ func Dial(authCtx context.Context, cfg DialConfig) (*AgentConn, error) {
 		Time:    cfg.KeepaliveTime,
 		Timeout: cfg.KeepaliveTimeout,
 	})
+
+	if strings.HasPrefix(cfg.ServerAddr, "unix://") {
+		addr, _ := filepath.Abs(strings.TrimPrefix(cfg.ServerAddr, "unix://"))
+		if _, err := os.Stat(addr); err != nil {
+			if os.IsNotExist(err) {
+				return nil, fmt.Errorf("can not connect to unix socket, %q not exist", addr)
+			}
+			return nil, fmt.Errorf("can not get unix socket stat: %w", err)
+		}
+		cfg.ServerAddr = "unix://" + addr
+	}
 
 	authConn, err := grpc.NewClient(cfg.ServerAddr, transport, keepaliveOpts)
 	if err != nil {

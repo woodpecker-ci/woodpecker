@@ -77,6 +77,11 @@ func TestParse(t *testing.T) {
 		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[1].Image)
 		assert.Equal(t, yaml_base_types.StringOrSlice{"push"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
 	})
+
+	t.Run("Should handle deeply nested yaml", func(t *testing.T) {
+		_, err := ParseString(sampleDeepYaml)
+		assert.NoError(t, err)
+	})
 }
 
 func TestMatch(t *testing.T) {
@@ -243,6 +248,30 @@ steps:
     environment:
       DRIVER: next
       PLATFORM: linux
+`
+
+var sampleDeepYaml = `
+image: hello-world
+when:
+  - branch:
+    - tester
+steps:
+  test:
+    image: golang
+    commands:
+      - go install
+      - go test
+    backend_options:
+      kubernetes:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: accelerator
+                      operator: In
+                      values:
+                        - nvidia-tesla-v100
 `
 
 func TestReSerialize(t *testing.T) {
