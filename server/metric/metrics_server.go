@@ -88,7 +88,7 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 		StepDurationRecord = promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
 				Namespace: "woodpecker",
-				Name:      "woodpecker_step_duration_secondsl",
+				Name:      "woodpecker_step_duration_seconds",
 				Help:      "woodpecker_step_duration_seconds",
 			},
 			[]string{"pipeline", "repo", "step"},
