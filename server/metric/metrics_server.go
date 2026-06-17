@@ -33,8 +33,10 @@ const (
 	storeInfoRefreshInterval = 10 * time.Second
 )
 
-var FailurePipelineStepInfoCount *prometheus.CounterVec = nil
-var StepDurationRecord *prometheus.GaugeVec = nil
+var (
+	FailurePipelineStepInfoCount *prometheus.CounterVec = nil
+	StepDurationRecord           *prometheus.GaugeVec   = nil
+)
 
 func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Store) {
 	detailedMetricsEnabled := c.Bool("step-level-metrics")
