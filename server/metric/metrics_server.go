@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package metric
 
 import (
 	"context"
@@ -22,12 +22,21 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func startMetricsCollector(ctx context.Context, _store store.Store) {
+const (
+	queueInfoRefreshInterval = 500 * time.Millisecond
+	storeInfoRefreshInterval = 10 * time.Second
+)
+
+var FailurePipelineStepInfo *prometheus.CounterVec = nil
+
+func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Store) {
+	detailedMetricsEnabled := c.Bool("detailed-metrics")
 	pendingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pending_steps",
@@ -64,6 +73,15 @@ func startMetricsCollector(ctx context.Context, _store store.Store) {
 		Help:      "Total number of repos.",
 	})
 
+	if detailedMetricsEnabled {
+		FailurePipelineStepInfo = promauto.NewCounterVec(
+			prometheus.CounterOpts{
+				Namespace: "woodpecker",
+				Name:      "failure_pipeline_step_info",
+				Help:      "failure_pipeline_step_info",
+			},
+			[]string{"pipeline", "repo", "step"})
+	}
 	go func() {
 		log.Info().Msg("queue metric collector started")
 

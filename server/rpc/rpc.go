@@ -28,6 +28,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
+	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	grpc_metadata "google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -213,6 +214,12 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
+	if metric.FailurePipelineStepInfo != nil &&
+		(step.State == model.StatusFailure ||
+			step.State == model.StatusKilled ||
+			step.State == model.StatusError) {
+		metric.FailurePipelineStepInfo.WithLabelValues(strconv.FormatInt(workflow.PipelineID, 10), repo.FullName, step.Name).Inc()
+	}
 	if state.Exited {
 		server.Config.Services.LogStore.StepFinished(step)
 	}
