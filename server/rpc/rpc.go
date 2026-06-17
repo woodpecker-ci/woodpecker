@@ -215,6 +215,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 	}
 
 	if metric.FailurePipelineStepInfo != nil &&
+		state.Exited &&
 		(step.State == model.StatusFailure ||
 			step.State == model.StatusKilled ||
 			step.State == model.StatusError) {
