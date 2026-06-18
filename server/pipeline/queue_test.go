@@ -55,7 +55,7 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 				ConcurrencyGroup: "deploy",
 			},
 			expectedLimit: 2,
-			expectedGroup: "7:deploy",
+			expectedGroup: "7//deploy",
 		},
 		{
 			name: "empty group defaults to the workflow name",
@@ -64,7 +64,7 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 				ConcurrencyLimit: 1,
 			},
 			expectedLimit: 1,
-			expectedGroup: "7:test",
+			expectedGroup: "7/test/",
 		},
 	}
 
