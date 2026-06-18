@@ -244,6 +244,7 @@ labels:
 depends_on:
   - lint
   - test
+concurrency: 1
 `
 
 var simpleYamlAnchors = `
@@ -282,6 +283,9 @@ steps:
     environment:
       DRIVER: next
       PLATFORM: linux
+concurrency:
+  limit: 1
+  group: test
 `
 
 var sampleDeepYaml = `
@@ -339,6 +343,9 @@ func TestReSerialize(t *testing.T) {
       environment:
         DRIVER: next
         PLATFORM: linux
+concurrency:
+  limit: 1
+  group: test
 `, string(work1Bin))
 
 	work2, err := ParseString(sampleYaml)
@@ -391,6 +398,7 @@ labels:
 depends_on:
     - lint
     - test
+concurrency: 1
 `, string(workBin2))
 }
 
