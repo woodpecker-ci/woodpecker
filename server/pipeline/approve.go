@@ -21,7 +21,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -33,11 +32,9 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot approve a pipeline with status %s", currentPipeline.Status)}
 	}
 
-	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	forge, err := loadForge(repo)
 	if err != nil {
-		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
-		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, errors.New(msg)
+		return nil, err
 	}
 
 	// fetch the pipeline file from the database
@@ -59,8 +56,8 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, currentPipeline, user, repo, yamls, nil, true)
 	if handleParseErrors(currentPipeline, parseErr) {
-		if err := updatePipelineWithErr(ctx, forge, store, currentPipeline, repo, user, parseErr); err != nil {
-			log.Error().Err(err).Msgf("error setting error status of pipeline for %s#%d after approval", repo.FullName, currentPipeline.Number)
+		if _, uErr := updatePipelineWithErr(ctx, forge, store, currentPipeline, repo, user, parseErr); uErr != nil {
+			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d after approval", repo.FullName, currentPipeline.Number)
 		}
 		msg := fmt.Sprintf("failure to parse pipeline config for %s", repo.FullName)
 		log.Error().Err(parseErr).Msg(msg)
@@ -71,18 +68,9 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, err
 	}
 
-	if currentPipeline, err = UpdateToStatusPending(store, *currentPipeline, user.Login); err != nil {
+	if currentPipeline, err = UpdatePipelineToPending(store, *currentPipeline, user.Login); err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
-	publishPipeline(ctx, forge, currentPipeline, repo, user)
-
-	currentPipeline, err = start(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
-	if err != nil {
-		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
-	}
-
-	return currentPipeline, nil
+	return finishPipeline(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
 }

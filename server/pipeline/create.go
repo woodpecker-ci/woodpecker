@@ -49,11 +49,9 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	}
 
-	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	_forge, err := loadForge(repo)
 	if err != nil {
-		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
-		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, errors.New(msg)
+		return nil, err
 	}
 
 	// If the repoUser has a refresh token, the current access token
@@ -90,14 +88,21 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	case configFetchErr != nil:
 		// error while fetching config - not using the old config
 		log.Error().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s', and did not get any config", repo.Config, pipeline.Ref, repoUser.Login)
-		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
+		if _, err := updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr)); err != nil {
+			return nil, err
+		}
+		return nil, nil
 	}
 
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
-	*pipeline = *currentPipeline
+	pipeline = currentPipeline
 	if handleParseErrors(pipeline, parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
-		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
+		erroredPipeline, uErr := updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
+		if uErr != nil {
+			return pipeline, uErr
+		}
+		return erroredPipeline, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("createPipelineItems failed: %w", err)
@@ -130,48 +135,40 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
-
-	if pipeline.Status == model.StatusBlocked {
-		return pipeline, nil
+	if pipeline.Status != model.StatusBlocked {
+		pipeline, err = updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	if err := updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser); err != nil {
+	return finishPipeline(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
+}
+
+// updatePipelineWithErr moves the pipeline to the error state, persists it and
+// publishes the change. It returns the updated pipeline so the caller can use
+// the new value directly instead of relying on in-place mutation.
+func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) (*model.Pipeline, error) {
+	updated, uErr := UpdatePipelineToError(_store, *pipeline, err)
+	if uErr != nil {
+		return nil, uErr
+	}
+
+	publishPipeline(ctx, _forge, updated, repo, repoUser)
+
+	return updated, nil
+}
+
+// updatePipelinePending moves the pipeline to the pending state, persists it
+// and publishes the change. It returns the updated pipeline so the caller can
+// use the new value directly instead of relying on in-place mutation.
+func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) (*model.Pipeline, error) {
+	updated, err := UpdatePipelineToPending(_store, *pipeline, "")
+	if err != nil {
 		return nil, err
 	}
 
-	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
-	if err != nil {
-		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
-	}
+	publishPipeline(ctx, _forge, updated, repo, repoUser)
 
-	return pipeline, nil
-}
-
-func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
-	_pipeline, err := UpdateToStatusError(_store, *pipeline, err)
-	if err != nil {
-		return err
-	}
-	// update value in ref
-	*pipeline = *_pipeline
-
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
-
-	return nil
-}
-
-func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
-	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
-	if err != nil {
-		return err
-	}
-	// update value in ref
-	*pipeline = *_pipeline
-
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
-
-	return nil
+	return updated, nil
 }

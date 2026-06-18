@@ -339,11 +339,11 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
-		// pipeline.UpdateToStatusRunning -> UpdatePipeline
+		// pipeline.UpdatePipelineToRunning -> UpdatePipeline
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
 		// updateForgeStatus -> GetUser returns error so forge interaction is skipped
 		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
-		// pipeline.UpdateWorkflowStatusToRunning -> WorkflowUpdate
+		// pipeline.UpdateWorkflowToRunning -> WorkflowUpdate
 		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
 		// pubsub deferred -> WorkflowGetTree
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)

@@ -37,7 +37,7 @@ func mockStorePipeline(t *testing.T) store.Store {
 func TestUpdateToStatusRunning(t *testing.T) {
 	t.Parallel()
 
-	pipeline, _ := UpdateToStatusRunning(mockStorePipeline(t), model.Pipeline{}, int64(1))
+	pipeline, _ := UpdatePipelineToRunning(mockStorePipeline(t), model.Pipeline{}, int64(1))
 	assert.Equal(t, model.StatusRunning, pipeline.Status)
 	assert.EqualValues(t, 1, pipeline.Started)
 }
@@ -47,7 +47,7 @@ func TestUpdateToStatusPending(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusPending(mockStorePipeline(t), model.Pipeline{}, "Reviewer")
+	pipeline, _ := UpdatePipelineToPending(mockStorePipeline(t), model.Pipeline{}, "Reviewer")
 
 	assert.Equal(t, model.StatusPending, pipeline.Status)
 	assert.Equal(t, "Reviewer", pipeline.Reviewer)
@@ -59,7 +59,7 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusDeclined(mockStorePipeline(t), model.Pipeline{}, "Reviewer")
+	pipeline, _ := UpdatePipelineToDeclined(mockStorePipeline(t), model.Pipeline{}, "Reviewer")
 
 	assert.Equal(t, model.StatusDeclined, pipeline.Status)
 	assert.Equal(t, "Reviewer", pipeline.Reviewer)
@@ -69,7 +69,7 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 func TestUpdateToStatusToDone(t *testing.T) {
 	t.Parallel()
 
-	pipeline, _ := UpdateStatusToDone(mockStorePipeline(t), model.Pipeline{}, "status", int64(1))
+	pipeline, _ := UpdatePipelineToDone(mockStorePipeline(t), model.Pipeline{}, "status", int64(1))
 
 	assert.Equal(t, model.StatusValue("status"), pipeline.Status)
 	assert.EqualValues(t, 1, pipeline.Finished)
@@ -80,7 +80,7 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusError(mockStorePipeline(t), model.Pipeline{}, errors.New("this is an error"))
+	pipeline, _ := UpdatePipelineToError(mockStorePipeline(t), model.Pipeline{}, errors.New("this is an error"))
 
 	assert.Len(t, pipeline.Errors, 1)
 	assert.Equal(t, "[generic] this is an error", pipeline.Errors[0].Error())
@@ -98,7 +98,7 @@ func TestUpdateToStatusKilled(t *testing.T) {
 		SupersededBy: 2,
 	}
 
-	pipeline, _ := UpdateToStatusKilled(mockStorePipeline(t), model.Pipeline{}, cancelInfo, model.StatusKilled)
+	pipeline, _ := UpdatePipelineToKilled(mockStorePipeline(t), model.Pipeline{}, cancelInfo, model.StatusKilled)
 
 	assert.Equal(t, model.StatusKilled, pipeline.Status)
 	assert.NotNil(t, pipeline.CancelInfo)

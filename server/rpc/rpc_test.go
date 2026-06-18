@@ -141,7 +141,7 @@ func TestCompleteChildrenIfParentCompleted(t *testing.T) {
 		assert.Equal(t, model.StatusSuccess, runningService.State)
 		assert.Equal(t, int64(1234567900), runningService.Finished)
 
-		result, err := pipeline.UpdateWorkflowStatusToDone(mockStore, workflow, rpc.WorkflowState{
+		result, err := pipeline.UpdateWorkflowToDone(mockStore, workflow, rpc.WorkflowState{
 			Started:  1234567800,
 			Finished: 1234567900,
 		})

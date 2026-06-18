@@ -15,6 +15,8 @@
 package pipeline
 
 import (
+	"fmt"
+
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -33,18 +35,18 @@ func WorkflowStatus(steps []*model.Step) model.StatusValue {
 	return status
 }
 
-func UpdateWorkflowStatusToRunning(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
+func UpdateWorkflowToRunning(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
 	workflow.Started = state.Started
 	workflow.State = model.StatusRunning
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
 
-func UpdateWorkflowToStatusSkipped(store store.Store, workflow model.Workflow) (*model.Workflow, error) {
+func UpdateWorkflowToSkipped(store store.Store, workflow model.Workflow) (*model.Workflow, error) {
 	workflow.State = model.StatusSkipped
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
 
-func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
+func UpdateWorkflowToDone(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
 	workflow.Finished = state.Finished
 	workflow.Error = state.Error
 	if state.Started == 0 {
@@ -59,4 +61,24 @@ func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, stat
 		workflow.State = model.StatusKilled
 	}
 	return &workflow, store.WorkflowUpdate(&workflow)
+}
+
+// setWorkflowTreeState forces every workflow and step of the pipeline to the
+// given state and persists each change. It is used when a terminal state
+// applies to the whole tree at once, such as declining a blocked pipeline.
+func setWorkflowTreeState(store store.Store, pipeline *model.Pipeline, state model.StatusValue) error {
+	for _, workflow := range pipeline.Workflows {
+		workflow.State = state
+		if err := store.WorkflowUpdate(workflow); err != nil {
+			return fmt.Errorf("error updating workflow. %w", err)
+		}
+
+		for _, step := range workflow.Children {
+			step.State = state
+			if err := store.StepUpdate(step); err != nil {
+				return fmt.Errorf("error updating step. %w", err)
+			}
+		}
+	}
+	return nil
 }
