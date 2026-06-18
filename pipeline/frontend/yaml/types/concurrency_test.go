@@ -100,3 +100,75 @@ func TestMarshalConcurrencyOmitsZero(t *testing.T) {
 	// IsZero makes an unset concurrency omitted from the output.
 	assert.NotContains(t, string(out), "concurrency")
 }
+
+func TestMarshalConcurrency(t *testing.T) {
+	tests := []struct {
+		name        string
+		concurrency Concurrency
+		expected    string
+	}{
+		{
+			name:        "shorthand integer when no group",
+			concurrency: Concurrency{Limit: 3},
+			expected:    "concurrency: 3\n",
+		},
+		{
+			name:        "full form when group is set",
+			concurrency: Concurrency{Limit: 2, Group: "deploy"},
+			expected:    "concurrency:\n    limit: 2\n    group: deploy\n",
+		},
+		{
+			name:        "group only omits the zero limit",
+			concurrency: Concurrency{Group: "deploy"},
+			expected:    "concurrency:\n    group: deploy\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapped := struct {
+				Concurrency Concurrency `yaml:"concurrency"`
+			}{tc.concurrency}
+			out, err := yaml.Marshal(wrapped)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, string(out))
+		})
+	}
+}
+
+func TestConcurrencyRoundTrip(t *testing.T) {
+	tests := []struct {
+		name        string
+		concurrency Concurrency
+		// wantShorthand asserts whether the marshalled form is the bare
+		// integer (true) or the expanded object (false).
+		wantShorthand bool
+	}{
+		{name: "limit only", concurrency: Concurrency{Limit: 3}, wantShorthand: true},
+		{name: "limit and group", concurrency: Concurrency{Limit: 2, Group: "deploy"}, wantShorthand: false},
+		{name: "group only", concurrency: Concurrency{Group: "deploy"}, wantShorthand: false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			type wrapper struct {
+				Concurrency Concurrency `yaml:"concurrency"`
+			}
+
+			out, err := yaml.Marshal(wrapper{tc.concurrency})
+			assert.NoError(t, err)
+
+			if tc.wantShorthand {
+				assert.NotContains(t, string(out), "limit:", "expected shorthand, got object form")
+				assert.NotContains(t, string(out), "group:")
+			} else {
+				assert.Contains(t, string(out), "group:")
+			}
+
+			var back wrapper
+			err = yaml.Unmarshal(out, &back)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.concurrency, back.Concurrency, "value changed across marshal/unmarshal")
+		})
+	}
+}
