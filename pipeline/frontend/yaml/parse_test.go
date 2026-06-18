@@ -344,8 +344,8 @@ func TestReSerialize(t *testing.T) {
         DRIVER: next
         PLATFORM: linux
 concurrency:
-  limit: 1
-  group: test
+    limit: 1
+    group: test
 `, string(work1Bin))
 
 	work2, err := ParseString(sampleYaml)

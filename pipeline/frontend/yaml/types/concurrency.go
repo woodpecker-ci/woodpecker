@@ -51,6 +51,18 @@ func (c *Concurrency) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
+// MarshalYAML implements the Marshaler interface. It mirrors UnmarshalYAML so
+// the config round-trips: when only a limit is set (no explicit group) it emits
+// the shorthand `concurrency: <int>`, otherwise the full `{limit, group}` form.
+func (c Concurrency) MarshalYAML() (any, error) {
+	if c.Group == "" {
+		return c.Limit, nil
+	}
+	// alias type avoids recursing into this MarshalYAML.
+	type concurrencyAlias Concurrency
+	return concurrencyAlias(c), nil
+}
+
 // IsZero treats a disabled (limit <= 0) concurrency as empty for omitempty.
 func (c Concurrency) IsZero() bool {
 	return c.Limit <= 0 && c.Group == ""
