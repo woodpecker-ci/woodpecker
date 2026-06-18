@@ -27,7 +27,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER"),
 		Name:    "server",
-		Usage:   "server address",
+		Usage:   "server grpc address, supports unix socket via unix:// prefix",
 		Value:   "localhost:9000",
 	},
 	&cli.StringFlag{
@@ -44,7 +44,7 @@ var flags = []cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_SECURE"),
 		Name:    "grpc-secure",
-		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport",
+		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport (tls)",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_VERIFY"),
