@@ -632,5 +632,9 @@
   "exit_fullscreen": "Exit fullscreen",
   "help_translating": "You can help translate Woodpecker into your language on {0}.",
   "weblate": "our Weblate",
-  "disabled": "Disabled"
+  "disabled": "Disabled",
+  "live_updates": {
+    "ws_fallback_title": "Live updates: WebSocket unavailable, falling back to SSE",
+    "ws_fallback_text": "Your reverse proxy may not be forwarding the WebSocket Upgrade headers. See the \"Reverse Proxy\" section of the Woodpecker server documentation."
+  }
 }

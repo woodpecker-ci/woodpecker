@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	"context"
 	"net/http"
 
 	mock "github.com/stretchr/testify/mock"
@@ -1444,6 +1445,86 @@ func (_c *MockClient_LogLevel_Call) Return(logLevel *woodpecker.LogLevel, err er
 }
 
 func (_c *MockClient_LogLevel_Call) RunAndReturn(run func() (*woodpecker.LogLevel, error)) *MockClient_LogLevel_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// LogStream provides a mock function for the type MockClient
+func (_mock *MockClient) LogStream(ctx context.Context, repoID int64, pipelineNumber int64, stepID int64, callback func(woodpecker.LogEntry)) woodpecker.Stream {
+	ret := _mock.Called(ctx, repoID, pipelineNumber, stepID, callback)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LogStream")
+	}
+
+	var r0 woodpecker.Stream
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, int64, func(woodpecker.LogEntry)) woodpecker.Stream); ok {
+		return returnFunc(ctx, repoID, pipelineNumber, stepID, callback)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, int64, func(woodpecker.LogEntry)) woodpecker.Stream); ok {
+		r0 = returnFunc(ctx, repoID, pipelineNumber, stepID, callback)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(woodpecker.Stream)
+		}
+	}
+	return r0
+}
+
+// MockClient_LogStream_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LogStream'
+type MockClient_LogStream_Call struct {
+	*mock.Call
+}
+
+// LogStream is a helper method to define mock.On call
+//   - ctx context.Context
+//   - repoID int64
+//   - pipelineNumber int64
+//   - stepID int64
+//   - callback func(woodpecker.LogEntry)
+func (_e *MockClient_Expecter) LogStream(ctx interface{}, repoID interface{}, pipelineNumber interface{}, stepID interface{}, callback interface{}) *MockClient_LogStream_Call {
+	return &MockClient_LogStream_Call{Call: _e.mock.On("LogStream", ctx, repoID, pipelineNumber, stepID, callback)}
+}
+
+func (_c *MockClient_LogStream_Call) Run(run func(ctx context.Context, repoID int64, pipelineNumber int64, stepID int64, callback func(woodpecker.LogEntry))) *MockClient_LogStream_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 int64
+		if args[3] != nil {
+			arg3 = args[3].(int64)
+		}
+		var arg4 func(woodpecker.LogEntry)
+		if args[4] != nil {
+			arg4 = args[4].(func(woodpecker.LogEntry))
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_LogStream_Call) Return(stream woodpecker.Stream) *MockClient_LogStream_Call {
+	_c.Call.Return(stream)
+	return _c
+}
+
+func (_c *MockClient_LogStream_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipelineNumber int64, stepID int64, callback func(woodpecker.LogEntry)) woodpecker.Stream) *MockClient_LogStream_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -4648,6 +4729,68 @@ func (_c *MockClient_StepLogsPurge_Call) Return(err error) *MockClient_StepLogsP
 }
 
 func (_c *MockClient_StepLogsPurge_Call) RunAndReturn(run func(repoID int64, pipelineNumber int64, stepID int64) error) *MockClient_StepLogsPurge_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Subscribe provides a mock function for the type MockClient
+func (_mock *MockClient) Subscribe(ctx context.Context, callback func(woodpecker.Event)) woodpecker.Stream {
+	ret := _mock.Called(ctx, callback)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Subscribe")
+	}
+
+	var r0 woodpecker.Stream
+	if returnFunc, ok := ret.Get(0).(func(context.Context, func(woodpecker.Event)) woodpecker.Stream); ok {
+		return returnFunc(ctx, callback)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, func(woodpecker.Event)) woodpecker.Stream); ok {
+		r0 = returnFunc(ctx, callback)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(woodpecker.Stream)
+		}
+	}
+	return r0
+}
+
+// MockClient_Subscribe_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Subscribe'
+type MockClient_Subscribe_Call struct {
+	*mock.Call
+}
+
+// Subscribe is a helper method to define mock.On call
+//   - ctx context.Context
+//   - callback func(woodpecker.Event)
+func (_e *MockClient_Expecter) Subscribe(ctx interface{}, callback interface{}) *MockClient_Subscribe_Call {
+	return &MockClient_Subscribe_Call{Call: _e.mock.On("Subscribe", ctx, callback)}
+}
+
+func (_c *MockClient_Subscribe_Call) Run(run func(ctx context.Context, callback func(woodpecker.Event))) *MockClient_Subscribe_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 func(woodpecker.Event)
+		if args[1] != nil {
+			arg1 = args[1].(func(woodpecker.Event))
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_Subscribe_Call) Return(stream woodpecker.Stream) *MockClient_Subscribe_Call {
+	_c.Call.Return(stream)
+	return _c
+}
+
+func (_c *MockClient_Subscribe_Call) RunAndReturn(run func(ctx context.Context, callback func(woodpecker.Event)) woodpecker.Stream) *MockClient_Subscribe_Call {
 	_c.Call.Return(run)
 	return _c
 }

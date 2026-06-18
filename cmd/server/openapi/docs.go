@@ -4149,7 +4149,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/events": {
+        "/stream/sse/events": {
             "get": {
                 "description": "With quic and http2 support",
                 "produces": [
@@ -4166,7 +4166,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stream/logs/{repo_id}/{pipeline}/{step_id}": {
+        "/stream/sse/logs/{repo_id}/{pipeline}/{step_id}": {
             "get": {
                 "produces": [
                     "text/plain"
@@ -4201,6 +4201,62 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            }
+        },
+        "/stream/ws/events": {
+            "get": {
+                "description": "WebSocket variant of /stream/events. Each text frame contains the\nsame JSON payload that the SSE endpoint emits in ` + "`" + `data:` + "`" + ` lines.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Stream events like pipeline updates over WebSocket",
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols"
+                    }
+                }
+            }
+        },
+        "/stream/ws/logs/{repo_id}/{pipeline}/{step_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Stream logs of a pipeline step over WebSocket",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "step_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols"
                     }
                 }
             }

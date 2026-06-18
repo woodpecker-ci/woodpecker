@@ -253,12 +253,33 @@ func apiRoutes(e *gin.RouterGroup) {
 
 		stream := apiBase.Group("/stream")
 		{
+			// Back-compat aliases (no prefix). TODO: remove with 4.0.0
 			stream.GET("/logs/:repo_id/:pipeline/:step_id",
 				session.SetRepo(),
 				session.SetPerm(),
 				session.MustPull,
 				api.LogStreamSSE)
 			stream.GET("/events", api.EventStreamSSE)
+
+			sse := stream.Group("/sse")
+			{
+				sse.GET("/logs/:repo_id/:pipeline/:step_id",
+					session.SetRepo(),
+					session.SetPerm(),
+					session.MustPull,
+					api.LogStreamSSE)
+				sse.GET("/events", api.EventStreamSSE)
+			}
+
+			ws := stream.Group("/ws")
+			{
+				ws.GET("/logs/:repo_id/:pipeline/:step_id",
+					session.SetRepo(),
+					session.SetPerm(),
+					session.MustPull,
+					api.LogStreamWS)
+				ws.GET("/events", api.EventStreamWS)
+			}
 		}
 
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {
