@@ -133,7 +133,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_STEP_LEVEL_METRICS"),
 		Name:    "step-level-metrics",
 		Usage:   "enable step-level metrics",
-		Value:   false,
+		Value:   true,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ADMIN"),

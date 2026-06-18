@@ -408,7 +408,7 @@ woodpecker_step_failures_total{pipeline="1",repo="woodpecker-ci/woodpecker",step
 woodpecker_step_duration_seconds{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 12
 ```
 
-Step-level metrics are only exported when `WOODPECKER_STEP_LEVEL_METRICS` is enabled.
+Step-level metrics are exported as long as `WOODPECKER_STEP_LEVEL_METRICS` is not disabled.
 
 #### Example response structure
 
@@ -668,7 +668,7 @@ Example: `:9001`
 ### STEP_LEVEL_METRICS
 
 - Name: `WOODPECKER_STEP_LEVEL_METRICS`
-- Default: `false`
+- Default: `true`
 
 Enable step-level metrics, including failed step counters and step duration gauges.
 
