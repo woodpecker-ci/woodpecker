@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @MeurillonGuillaume, @gedankenstuecke, @head1328, @mmeier86, @nijave, @qwerty287, @simonckemper
+@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @gedankenstuecke, @head1328, @mmeier86, @nijave, @qwerty287, @simonckemper
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Add Prometheus metrics for pipeline step duration and failures [[#6738](https://github.com/woodpecker-ci/woodpecker/pull/6738)]
 - Add k8s userns support [[#6710](https://github.com/woodpecker-ci/woodpecker/pull/6710)]
 - Make cli exec auto detect single workflow test in multi workflow setup [[#6715](https://github.com/woodpecker-ci/woodpecker/pull/6715)]
 - Surface `.env` load errors [[#6707](https://github.com/woodpecker-ci/woodpecker/pull/6707)]
