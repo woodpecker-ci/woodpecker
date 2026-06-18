@@ -400,7 +400,15 @@ woodpecker_waiting_steps 0
 # HELP woodpecker_worker_count Total number of workers.
 # TYPE woodpecker_worker_count gauge
 woodpecker_worker_count 4
+# HELP woodpecker_step_failures_total Total number of pipeline step failures.
+# TYPE woodpecker_step_failures_total counter
+woodpecker_step_failures_total{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 1
+# HELP woodpecker_step_duration_seconds Step duration in seconds.
+# TYPE woodpecker_step_duration_seconds gauge
+woodpecker_step_duration_seconds{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 12
 ```
+
+Step-level metrics are only exported when `WOODPECKER_STEP_LEVEL_METRICS` is enabled.
 
 #### Example response structure
 
