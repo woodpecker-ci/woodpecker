@@ -400,7 +400,15 @@ woodpecker_waiting_steps 0
 # HELP woodpecker_worker_count Total number of workers.
 # TYPE woodpecker_worker_count gauge
 woodpecker_worker_count 4
+# HELP woodpecker_step_failures_total Total number of pipeline step failures.
+# TYPE woodpecker_step_failures_total counter
+woodpecker_step_failures_total{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 1
+# HELP woodpecker_step_duration_seconds Step duration in seconds.
+# TYPE woodpecker_step_duration_seconds gauge
+woodpecker_step_duration_seconds{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 12
 ```
+
+Step-level metrics are exported as long as `WOODPECKER_STEP_LEVEL_METRICS` is not disabled.
 
 #### Example response structure
 
@@ -655,6 +663,15 @@ Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath.
 Configures an unprotected metrics endpoint. An empty value disables the metrics endpoint completely.
 
 Example: `:9001`
+
+---
+
+### STEP_LEVEL_METRICS
+
+- Name: `WOODPECKER_STEP_LEVEL_METRICS`
+- Default: `true`
+
+Enable step-level metrics, including failed step counters and step duration gauges.
 
 ---
 
