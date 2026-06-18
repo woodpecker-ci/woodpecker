@@ -498,7 +498,8 @@
             "desc": "Dépôts classés par date de création du dernier pipeline"
         },
         "last": {
-            "title": "Dernière visite"
+            "title": "Dernière visite",
+            "desc": "Dépôts visités le plus récemment triés par date d'accès"
         }
     },
     "running_version": "Vous utilisez Woodpecker {0}",
@@ -652,5 +653,12 @@
     "pipeline_since": "Pipeline crée {created} minutes ago",
     "pipeline_has_warnings": "Le pipeline a des alertes",
     "pipeline_has_errors": "Le pipeline a des erreurs",
-    "login_with": "Se connecter avec {forge}"
+    "login_with": "Se connecter avec {forge}",
+    "login_to_woodpecker_with": "Se connecter à Woodpecker avec",
+    "extensions_signatures_public_key": "Clés publiques pour les signatures",
+    "extensions_signatures_public_key_description": "Cette clé publique devrait être utilisée par vos extensions pour vérifier que le webhook provient de Woodpecker.",
+    "disabled": "Désactivé",
+    "fullscreen": "Plein écran",
+    "exit_fullscreen": "Quitter le plein écran",
+    "help_translating": "Vous pouvez aider à traduire Woodpecker dans votre lanage sur {0}."
 }

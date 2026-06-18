@@ -98,7 +98,8 @@
             "view": "檢視 pipeline",
             "cancel_info": {
                 "canceled_by_step": "因為 {step} 所以被取消",
-                "canceled_by_user": "被 {user} 取消"
+                "canceled_by_user": "被 {user} 取消",
+                "superseded_by": "被 #{pipelineId} 取代"
             },
             "we_got_some_errors": "喔不，發生了錯誤！",
             "no_pipeline_steps": "無 pipeline 步驟可用！",
@@ -180,7 +181,8 @@
                 "deleted": "Cron 已刪除",
                 "not_executed_yet": "尚未執行",
                 "crons": "Crons",
-                "your_timezone": "使用您的瀏覽器時區。"
+                "your_timezone": "使用您的瀏覽器時區。",
+                "none": "還沒有任何 cron。"
             },
             "actions": {
                 "repair": {
@@ -206,11 +208,11 @@
             "visibility": "專案可見性",
             "public": {
                 "public": "公開",
-                "desc": "所有人包含非登入的使用者都可以看到你的專案。"
+                "desc": "所有人包含非登入的使用者都可以看到您的專案。"
             },
             "private": {
                 "private": "私有",
-                "desc": "只有你和其他儲存庫的擁有者可以看到這個專案。"
+                "desc": "只有您和其他儲存庫的擁有者可以看到這個專案。"
             },
             "internal": {
                 "internal": "內部",
@@ -232,7 +234,7 @@
         "pull_requests": "拉取請求",
         "add": "新增儲存庫",
         "user_none": "這個組織/使用者還沒有任何專案",
-        "not_allowed": "你不被允許存取這個儲存庫",
+        "not_allowed": "您不被允許存取這個儲存庫",
         "enable": {
             "enable": "啟用",
             "enabled": "已啟用",
@@ -270,11 +272,13 @@
                 "deleted": "使用者已刪除",
                 "created": "使用者已建立",
                 "saved": "使用者已儲存",
-                "forge": "Forge"
+                "forge": "Forge",
+                "none": "還沒有任何使用者。"
             },
             "agents": {
                 "name": {
-                    "name": "名稱"
+                    "name": "名稱",
+                    "placeholder": "代理的名稱"
                 },
                 "id": "ID",
                 "token": "權杖",
@@ -296,7 +300,19 @@
                 },
                 "custom_labels": {
                     "custom_labels": "自訂標籤"
-                }
+                },
+                "agents": "代理",
+                "add": "新增代理",
+                "save": "儲存代理",
+                "show": "顯示代理",
+                "created": "代理已建立",
+                "saved": "代理已儲存",
+                "deleted": "代理已刪除",
+                "no_schedule": {
+                    "name": "停用代理"
+                },
+                "edit_agent": "編輯代理",
+                "delete_agent": "刪除代理"
             },
             "repos": {
                 "disabled": "已停用",
@@ -306,7 +322,8 @@
                 "repair": {
                     "repair": "修復全部",
                     "success": "儲存庫已修復"
-                }
+                },
+                "none": "還沒有任何儲存庫。"
             },
             "queue": {
                 "queue": "佇列",
@@ -323,14 +340,16 @@
                 },
                 "task_running": "任務執行中",
                 "task_pending": "任務等待中",
-                "waiting_for": "正在等待"
+                "waiting_for": "正在等待",
+                "agent": "代理"
             },
             "orgs": {
                 "orgs": "組織",
                 "delete_org": "刪除組織",
                 "org_settings": "組織設定",
                 "deleted": "組織已刪除",
-                "view": "檢視組織"
+                "view": "檢視組織",
+                "none": "還沒有任何組織。"
             },
             "settings": "管理員設定"
         }
@@ -357,7 +376,8 @@
         "saved": "秘密已儲存",
         "edit": "編輯秘密",
         "delete": "刪除秘密",
-        "note": "說明"
+        "note": "說明",
+        "none": "還沒有任何秘密。"
     },
     "settings": "設定",
     "extensions": "擴充功能",
@@ -428,7 +448,8 @@
         "delete": "刪除註冊表",
         "created": "註冊表憑證已建立",
         "saved": "註冊表憑證已儲存",
-        "deleted": "註冊表憑證已刪除"
+        "deleted": "註冊表憑證已刪除",
+        "none": "還沒有註冊表憑證。"
     },
     "developer_settings": "開發者設定",
     "oauth_host": "OAuth 主機",

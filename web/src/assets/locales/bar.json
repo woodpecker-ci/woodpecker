@@ -161,7 +161,8 @@
                     "path": "Pipeline-Pfad",
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Pfad zu deina Pipeline-Config (zum Beispui {0}). Ordner soin mit am {1} aufhörn.",
-                    "desc_path_example": "mei/pfad/"
+                    "desc_path_example": "mei/pfad/",
+                    "by_default": "Normalerweis: {paths}"
                 },
                 "allow_pr": {
                     "allow": "Pull Requests erlaubn",
@@ -264,7 +265,8 @@
                     "success": "Repo glöscht"
                 }
             }
-        }
+        },
+        "refresh": "Repos nei lon"
     },
     "admin": {
         "settings": {
@@ -378,10 +380,12 @@
                 "saved": "Benutzer gspeichert",
                 "admin": {
                     "admin": "Admin",
-                    "placeholder": "Benutzer is a Admin"
+                    "placeholder": "Benutzer is a Admin",
+                    "admin_warning": "Dea Benutzer is Admin, weilla üba umgebungs Variablen so configuriert woan is. Wennsd n zum hiabe macha mechst, muasd de zerst obasn sunsd ändad si nix."
                 },
                 "delete_user": "Benutzer löschn",
-                "edit_user": "Benutzer beabadn"
+                "edit_user": "Benutzer beabadn",
+                "forge": "Forge"
             },
             "orgs": {
                 "desc": "Organisationen de wo Repos auf dem Server ham.",
@@ -496,6 +500,13 @@
                     "light": "Hell",
                     "dark": "Dunkel",
                     "auto": "Automatisch"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Pipeline Zeiln",
+                    "collapse_groups": {
+                        "collapse": "Schiab Zeiln in gruppn standartmäsig zamad",
+                        "desc": "Wensd an fertign Schrid auf machst, dann soin standartmäsig die Zeiln gruppiert sei."
+                    }
                 }
             },
             "secrets": {

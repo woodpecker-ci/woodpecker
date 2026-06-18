@@ -63,7 +63,7 @@ To get an _agent token_ you have to register the agent manually in the server us
 - Name: `WOODPECKER_SERVER`
 - Default: `localhost:9000`
 
-Configures gRPC address of the server.
+Configures gRPC address to the server. If you want to use an unix socket add `unix://` prefix and the path.
 
 ---
 
@@ -215,7 +215,7 @@ After pinging for a keepalive check, the agent waits for a duration of this time
 - Name: `WOODPECKER_GRPC_SECURE`
 - Default: `false`
 
-Configures if the connection to `WOODPECKER_SERVER` should be made using a secure transport.
+Configures if the connection to `WOODPECKER_SERVER` should be made using a secure transport (tls).
 
 ---
 

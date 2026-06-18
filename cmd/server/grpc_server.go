@@ -18,6 +18,9 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/urfave/cli/v3"
@@ -28,7 +31,18 @@ import (
 )
 
 func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) error {
-	lis, err := net.Listen("tcp", c.String("grpc-addr"))
+	network := "tcp"
+	addr := c.String("grpc-addr")
+
+	if strings.HasPrefix(addr, "unix://") {
+		network = "unix"
+		addr, _ = filepath.Abs(strings.TrimPrefix(addr, "unix://"))
+		if _, err := os.Stat(filepath.Dir(addr)); os.IsNotExist(err) {
+			return fmt.Errorf("can not listen to unix socket, parent folder %q not exist", filepath.Dir(addr))
+		}
+	}
+
+	lis, err := net.Listen(network, addr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on grpc-addr: %w", err)
 	}
