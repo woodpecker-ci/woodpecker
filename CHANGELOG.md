@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- bump go.mongodb.org/mongo-driver v1.17.6 => v1.17.7 [[#6741](https://github.com/woodpecker-ci/woodpecker/pull/6741)]
 - Update joi [[#6728](https://github.com/woodpecker-ci/woodpecker/pull/6728)]
 
 ### ✨ Features
