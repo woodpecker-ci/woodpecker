@@ -1,6 +1,6 @@
 {
     "cancel": "취소",
-    "login_to_woodpecker_with": "다음으로 Woodpecker에 로그인:",
+    "login_to_woodpecker_with": "다음 링크로 Woodpecker 로그인",
     "login": "로그인",
     "repos": "저장소",
     "repositories": {
@@ -109,7 +109,7 @@
                     "path": "파이프라인 경로",
                     "by_default": "기본값: {paths}",
                     "desc": "파이프라인 설정 경로 (예: {0}). 폴더는 {1}로 끝나야 합니다.",
-                    "desc_path_example": "my/path/"
+                    "desc_path_example": "내/경로/"
                 },
                 "allow_pr": {
                     "allow": "풀 리퀘스트 허용",
@@ -599,7 +599,7 @@
     "oauth_client_secret": "OAuth 클라이언트 보안 비밀번호",
     "oauth_host": "OAuth 호스트",
     "merge_ref": "머지 참조(ref)",
-    "merge_ref_desc": "머지 베이스로 사용할 참조입니다. 풀 리퀘스트의 차이점(diff)을 결정하는 데 사용됩니다.",
+    "merge_ref_desc": "merge 베이스로 사용할 참조입니다. 풀 리퀘스트의 차이점(diff)을 결정하는 데 사용됩니다.",
     "public_only": "공개 저장소만",
     "public_only_desc": "공개 저장소만 표시합니다.",
     "git_username": "Git 사용자 이름",
@@ -613,7 +613,7 @@
     "skip_verify": "SSL 검증 건너뛰기",
     "skip_verify_desc": "API 연결 시 SSL 검증을 건너뜁니다. 프로덕션 환경에서는 권장되지 않습니다.",
     "url": "URL",
-    "forge_managed_by_env": "기본 포지는 환경 변수로 관리됩니다. 이 포지에 대한 모든 변경 사항은 재시작 시 되돌려집니다.",
+    "forge_managed_by_env": "주 포지(Primary Forge)는 환경 변수로 관리됩니다. 이 포지에 대한 모든 변경 사항은 재시작 시 되돌려집니다.",
     "oauth_redirect_url": "OAuth 리디렉션 URL",
     "forge_created": "포지가 생성되었습니다",
     "advanced_options": "고급 옵션",
@@ -626,11 +626,11 @@
     "use_this_redirect_url_to_create": "OAuth 애플리케이션을 생성하거나 업데이트하려면 이 리디렉션 URL을 사용하세요.",
     "developer_settings_to_create": "{0}으로 이동하여 OAuth 애플리케이션을 설정하세요.",
     "developer_settings": "개발자 설정",
-    "public_url_for_oauth_if": "URL({0})과 다른 경우 OAuth용 공개 URL",
+    "public_url_for_oauth_if": "URL({0})과 다른 경우의 OAuth용 공개 URL",
     "forge_saved": "포지가 저장되었습니다",
     "fullscreen": "전체 화면",
     "exit_fullscreen": "전체 화면 종료",
-    "help_translating": "{0}에서 Woodpecker의 한국어 번역을 도울 수 있습니다.",
-    "weblate": "Weblate",
+    "help_translating": "{0}에서 Woodpecker 번역에 참여하실 수 있습니다.",
+    "weblate": "우리의 Weblate",
     "disabled": "비활성화됨"
 }
