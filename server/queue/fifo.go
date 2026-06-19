@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"slices"
-	"strconv"
 	"sync"
 	"time"
 
@@ -347,20 +346,19 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 // violating its workflow concurrency limit. Tasks without a limit always pass,
 // keeping the default scheduling behavior unchanged.
 //
-// Slots within a concurrency group are granted in instantiation order
-// (lowest task ID first, which corresponds to the order pipelines were
-// created) rather than in the order tasks become ready. This guarantees that a
-// later pipeline whose dependencies happen to finish faster cannot overtake an
-// earlier one that is still waiting.
+// Slots within a concurrency group are granted in creation order (earliest
+// pipeline first, by the task's Created timestamp, with the workflow name as a
+// deterministic tiebreaker) rather than in the order tasks become ready. This
+// guarantees that a later pipeline whose dependencies happen to finish faster
+// cannot overtake an earlier one that is still waiting.
 //
 // The ordering reservation only applies across pipelines. Within a single
 // pipeline, execution order is already defined by depends_on, and reserving a
-// slot for an earlier-ID workflow could deadlock when it depends on a later-ID
-// workflow that shares the same group (e.g. deploy.yaml, which sorts before
-// and so gets a lower ID than test.yaml, depending on test.yaml). Because
-// dependencies never cross pipelines, restricting the reservation to other
-// pipelines keeps the ordering guarantee while making such deadlocks
-// impossible.
+// slot for an earlier workflow could deadlock when it depends on a later
+// workflow that shares the same group (e.g. deploy.yaml depending on
+// test.yaml). Because dependencies never cross pipelines, restricting the
+// reservation to other pipelines keeps the ordering guarantee while making
+// such deadlocks impossible.
 //
 // Expects the queue to be locked by the caller.
 func (q *fifo) canRunConcurrent(task *model.Task) bool {
@@ -369,7 +367,6 @@ func (q *fifo) canRunConcurrent(task *model.Task) bool {
 	}
 
 	group := task.ConcurrencyGroup
-	order := taskInstantiationOrder(task)
 
 	// count tasks of the same group that already occupy a running slot.
 	running := 0
@@ -394,7 +391,7 @@ func (q *fifo) canRunConcurrent(task *model.Task) bool {
 		if other.PipelineID == task.PipelineID {
 			return
 		}
-		if taskInstantiationOrder(other) < order {
+		if taskOrderLess(other, task) {
 			ahead++
 		}
 	}
@@ -410,15 +407,15 @@ func (q *fifo) canRunConcurrent(task *model.Task) bool {
 	return running+ahead < task.ConcurrencyLimit
 }
 
-// taskInstantiationOrder returns a monotonic value reflecting the order in
-// which a task (workflow) was created. Task IDs are the auto incremented workflow
-// IDs, so a lower value means an earlier instantiation.
-func taskInstantiationOrder(task *model.Task) int64 {
-	id, err := strconv.ParseInt(task.ID, 10, 64)
-	if err != nil {
-		return 0
+// taskOrderLess reports whether task a was instantiated before task b. Ordering
+// is by the Created timestamp (the pipeline creation time), with the workflow
+// name as a deterministic tiebreaker for tasks created within the same second.
+// The task ID is intentionally not used for ordering.
+func taskOrderLess(a, b *model.Task) bool {
+	if a.Created != b.Created {
+		return a.Created < b.Created
 	}
-	return id
+	return a.Name < b.Name
 }
 
 func (q *fifo) resubmitExpiredPipelines() {

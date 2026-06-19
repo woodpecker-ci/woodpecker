@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -36,6 +37,12 @@ func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.
 			Labels:     make(map[string]string),
 			PipelineID: activePipeline.ID,
 			RepoID:     repo.ID,
+			Created:    activePipeline.Created,
+		}
+		// fall back to the current time if the pipeline has no creation
+		// timestamp, so the queue always has a defined ordering key.
+		if task.Created == 0 {
+			task.Created = time.Now().Unix()
 		}
 		maps.Copy(task.Labels, item.Labels)
 		err := task.ApplyLabelsFromRepo(repo)

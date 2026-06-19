@@ -5723,6 +5723,10 @@ const docTemplate = `{
                     "description": "ConcurrencyLimit is the maximum number of tasks sharing the same\nConcurrencyGroup that may run at once. A value \u003c= 0 means unlimited.",
                     "type": "integer"
                 },
+                "created": {
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines, so the queue never relies\non the task ID for ordering.",
+                    "type": "integer"
+                },
                 "dep_status": {
                     "type": "object",
                     "additionalProperties": {
@@ -6212,6 +6216,10 @@ const docTemplate = `{
                 },
                 "concurrency_limit": {
                     "description": "ConcurrencyLimit is the maximum number of tasks sharing the same\nConcurrencyGroup that may run at once. A value \u003c= 0 means unlimited.",
+                    "type": "integer"
+                },
+                "created": {
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines, so the queue never relies\non the task ID for ordering.",
                     "type": "integer"
                 },
                 "dep_status": {

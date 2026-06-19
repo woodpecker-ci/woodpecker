@@ -676,18 +676,20 @@ func TestFifoConcurrency(t *testing.T) {
 	defer cancel(nil)
 
 	t.Run("limit serializes group in instantiation order", func(t *testing.T) {
-		// Lower ID == instantiated earlier. taskB is pushed first to prove the
-		// queue serializes by instantiation order, not by push/ready order.
-		// Distinct pipeline IDs model two pipelines of the same workflow.
-		taskA := &model.Task{ID: "100", PipelineID: 1, ConcurrencyGroup: "repo:deploy", ConcurrencyLimit: 1}
-		taskB := &model.Task{ID: "200", PipelineID: 2, ConcurrencyGroup: "repo:deploy", ConcurrencyLimit: 1}
+		// Lower Created == instantiated earlier. taskB is pushed first to
+		// prove the queue serializes by creation order, not by push/ready
+		// order. Distinct pipeline IDs model two pipelines of the same
+		// workflow. Ordering must not depend on the task ID, so taskA (the
+		// earlier one) deliberately has the higher ID.
+		taskA := &model.Task{ID: "200", PipelineID: 1, Created: 100, ConcurrencyGroup: "repo:deploy", ConcurrencyLimit: 1}
+		taskB := &model.Task{ID: "100", PipelineID: 2, Created: 200, ConcurrencyGroup: "repo:deploy", ConcurrencyLimit: 1}
 
 		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{taskB, taskA}))
 		waitForProcess()
 
 		got, err := q.Poll(ctx, 1, filterFnTrue)
 		assert.NoError(t, err)
-		assert.Equal(t, "100", got.ID) // earliest instantiated runs first
+		assert.Equal(t, "200", got.ID) // earliest instantiated (lowest Created) runs first
 
 		waitForProcess()
 		info := q.Info(ctx)
@@ -706,7 +708,7 @@ func TestFifoConcurrency(t *testing.T) {
 
 		got2, err := q.Poll(ctx, 2, filterFnTrue)
 		assert.NoError(t, err)
-		assert.Equal(t, "200", got2.ID)
+		assert.Equal(t, "100", got2.ID)
 		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
 		waitForProcess()
 	})
@@ -714,18 +716,20 @@ func TestFifoConcurrency(t *testing.T) {
 	t.Run("preserves instantiation order over readiness", func(t *testing.T) {
 		// Pipeline 1's deploy (taskA) waits on its own slow check (dep), while
 		// pipeline 2's deploy (taskB) is immediately ready. taskB must still
-		// wait for the earlier taskA.
-		dep := &model.Task{ID: "50", PipelineID: 1}
+		// wait for the earlier taskA. Ordering is by Created, not ID, so taskA
+		// has the higher ID but the lower Created.
+		dep := &model.Task{ID: "50", PipelineID: 1, Created: 100}
 		taskA := &model.Task{
-			ID:               "100",
+			ID:               "200",
 			PipelineID:       1,
+			Created:          100,
 			ConcurrencyGroup: "repo:deploy2",
 			ConcurrencyLimit: 1,
 			Dependencies:     []string{"50"},
 			DepStatus:        make(map[string]model.StatusValue),
 			RunOn:            []string{"success", "failure"},
 		}
-		taskB := &model.Task{ID: "200", PipelineID: 2, ConcurrencyGroup: "repo:deploy2", ConcurrencyLimit: 1}
+		taskB := &model.Task{ID: "100", PipelineID: 2, Created: 200, ConcurrencyGroup: "repo:deploy2", ConcurrencyLimit: 1}
 
 		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dep, taskA, taskB}))
 		waitForProcess()
@@ -748,13 +752,13 @@ func TestFifoConcurrency(t *testing.T) {
 
 		gotA, err := q.Poll(ctx, 1, filterFnTrue)
 		assert.NoError(t, err)
-		assert.Equal(t, "100", gotA.ID)
+		assert.Equal(t, "200", gotA.ID)
 		assert.NoError(t, q.Done(ctx, gotA.ID, model.StatusSuccess))
 		waitForProcess()
 
 		gotB, err := q.Poll(ctx, 2, filterFnTrue)
 		assert.NoError(t, err)
-		assert.Equal(t, "200", gotB.ID)
+		assert.Equal(t, "100", gotB.ID)
 		assert.NoError(t, q.Done(ctx, gotB.ID, model.StatusSuccess))
 		waitForProcess()
 	})
@@ -867,12 +871,25 @@ func TestFifoConcurrency(t *testing.T) {
 		waitForProcess()
 	})
 
-	t.Run("non-numeric task id falls back to order zero", func(t *testing.T) {
-		// IDs are normally the auto-incremented workflow IDs, but guard against
-		// a malformed ID by treating it as the earliest possible order.
-		assert.Equal(t, int64(0), taskInstantiationOrder(&model.Task{ID: "not-a-number"}))
-		assert.Equal(t, int64(0), taskInstantiationOrder(&model.Task{ID: ""}))
-		assert.Equal(t, int64(123), taskInstantiationOrder(&model.Task{ID: "123"}))
+	t.Run("task ordering uses Created with name tiebreak", func(t *testing.T) {
+		// earlier Created sorts first, regardless of ID.
+		assert.True(t, taskOrderLess(
+			&model.Task{ID: "999", Created: 100},
+			&model.Task{ID: "1", Created: 200},
+		))
+		assert.False(t, taskOrderLess(
+			&model.Task{ID: "1", Created: 200},
+			&model.Task{ID: "999", Created: 100},
+		))
+		// equal Created falls back to the workflow name, alphabetically.
+		assert.True(t, taskOrderLess(
+			&model.Task{ID: "2", Created: 100, Name: "alpha"},
+			&model.Task{ID: "1", Created: 100, Name: "beta"},
+		))
+		assert.False(t, taskOrderLess(
+			&model.Task{ID: "1", Created: 100, Name: "beta"},
+			&model.Task{ID: "2", Created: 100, Name: "alpha"},
+		))
 	})
 }
 

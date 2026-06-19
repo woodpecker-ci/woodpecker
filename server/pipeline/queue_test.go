@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -88,4 +89,37 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 			assert.Equal(t, tc.expectedGroup, task.ConcurrencyGroup)
 		})
 	}
+}
+
+func TestQueuePipelineCreated(t *testing.T) {
+	repo := &model.Repo{ID: 7}
+	item := &builder.Item{Workflow: &builder.Workflow{ID: 1, Name: "build"}}
+
+	runOnce := func(t *testing.T, pipeline *model.Pipeline) *model.Task {
+		t.Helper()
+		var captured []*model.Task
+		mockQueue := queue_mocks.NewMockQueue(t)
+		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).
+			Run(func(args mock.Arguments) {
+				captured, _ = args.Get(1).([]*model.Task)
+			}).
+			Return(nil).Once()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
+
+		err := queuePipeline(t.Context(), repo, pipeline, []*builder.Item{item})
+		require.NoError(t, err)
+		require.Len(t, captured, 1)
+		return captured[0]
+	}
+
+	t.Run("inherits the pipeline creation time", func(t *testing.T) {
+		task := runOnce(t, &model.Pipeline{ID: 42, Created: 1700000000})
+		assert.Equal(t, int64(1700000000), task.Created)
+	})
+
+	t.Run("falls back to now when the pipeline has no creation time", func(t *testing.T) {
+		before := time.Now().Unix()
+		task := runOnce(t, &model.Pipeline{ID: 42})
+		assert.GreaterOrEqual(t, task.Created, before)
+	})
 }
