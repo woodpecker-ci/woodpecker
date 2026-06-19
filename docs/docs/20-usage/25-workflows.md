@@ -147,7 +147,7 @@ Read more about `skip_clone` at [pipeline syntax](./20-workflow-syntax.md#skip_c
 
 ## Concurrency
 
-Some workflows must not run more than a given number of times at once. A typical example is a deployment workflow: running two deployments at the same time can cause race conditions or corrupt state. Cancelling the previous pipeline is often not an option either, since it could interrupt an ongoing deployment.
+By default workflows run with no concurrency limit. Some workflows, however, must not run more than a given number of times at once. A typical example is a deployment workflow: running two deployments at the same time can cause race conditions or corrupt state. Cancelling the previous pipeline is often not an option either, since it could interrupt an ongoing deployment.
 
 The `concurrency` setting limits how many instances of a workflow may run at the same time. When the limit is reached, additional instances stay queued and start only once a running one has finished. Nothing is cancelled.
 
@@ -186,7 +186,3 @@ concurrency:
   limit: 1
   group: deploy-${CI_COMMIT_BRANCH}
 ```
-
-:::info
-When `concurrency` is not set, workflows run with no limit, exactly as before.
-:::
