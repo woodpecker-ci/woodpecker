@@ -34,6 +34,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
@@ -213,6 +214,22 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
+	if metric.FailurePipelineStepInfoCount != nil &&
+		state.Exited &&
+		(step.State == model.StatusFailure ||
+			step.State == model.StatusKilled ||
+			step.State == model.StatusError) {
+		metric.FailurePipelineStepInfoCount.WithLabelValues(strconv.FormatInt(workflow.PipelineID, 10), repo.FullName, step.Name).Inc()
+	}
+
+	if metric.StepDurationRecord != nil && state.Exited && step.Started > 0 && step.Finished > step.Started {
+		duration := step.Finished - step.Started
+		metric.StepDurationRecord.WithLabelValues(
+			strconv.FormatInt(workflow.PipelineID, 10),
+			repo.FullName,
+			step.Name,
+		).Set(float64(duration))
+	}
 	if state.Exited {
 		server.Config.Services.LogStore.StepFinished(step)
 	}
