@@ -177,9 +177,9 @@ Queued workflows of the same group start in the order their pipelines were creat
 
 ### Groups
 
-By default, the concurrency group is the workflow name, scoped to the repository. This means different runs of the same workflow are limited against each other, while different workflows (and other repositories) are unaffected.
+By default, the limit applies per workflow within a repository. Different runs of the same workflow are limited against each other, while different workflows (and other repositories) are unaffected.
 
-You can set a custom `group` to share a limit across workflows or to make the limit more specific. The group supports [environment variable substitution](./50-environment.md), so you can, for example, limit concurrency per branch or per deployment target:
+Setting a `group` is optional. You can set a custom `group` to share a limit across workflows or to make the limit more specific. The group supports [environment variable substitution](./50-environment.md), so you can, for example, limit concurrency per branch or per deployment target:
 
 ```yaml
 concurrency:
