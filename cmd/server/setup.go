@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
@@ -45,11 +44,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
-)
-
-const (
-	queueInfoRefreshInterval = 500 * time.Millisecond
-	storeInfoRefreshInterval = 10 * time.Second
 )
 
 func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
