@@ -14,11 +14,15 @@
 
 package types
 
-import "fmt"
+import (
+	"fmt"
+
+	"go.yaml.in/yaml/v4"
+)
 
 // Concurrency limits how many instances of a workflow may run at the same
 // time. It can be unmarshalled from:
-//   - an integer: `concurrency: 1` (limit only, group defaults to the workflow name)
+//   - an integer: `concurrency: 1` (limit only, default per-workflow group)
 //   - an object: `concurrency: {limit: 1, group: deploy}`
 type Concurrency struct {
 	// Limit is the maximum number of workflows sharing the same group that
@@ -26,29 +30,49 @@ type Concurrency struct {
 	Limit int `yaml:"limit,omitempty"`
 	// Group identifies which workflows are mutually limited. Workflows that
 	// resolve to the same group within a repository are serialized according
-	// to the limit. When empty it defaults to the workflow name, so different
+	// to the limit. When empty the limit applies per workflow, so different
 	// runs of the same workflow are limited against each other.
 	Group string `yaml:"group,omitempty"`
 }
 
-// UnmarshalYAML implements the Unmarshaler interface.
-func (c *Concurrency) UnmarshalYAML(unmarshal func(any) error) error {
-	// shorthand: `concurrency: <int>`
-	var limit int
-	if err := unmarshal(&limit); err == nil {
-		c.Limit = limit
-		return nil
+// UnmarshalYAML implements the Unmarshaler interface. It inspects the YAML
+// node kind to decide how to decode, instead of speculatively decoding into an
+// int and falling back on error:
+//   - a scalar (`concurrency: 1`) sets only the limit
+//   - a mapping (`concurrency: {limit: 1, group: deploy}`) sets both fields
+func (c *Concurrency) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
+	}
+	// resolve anchors/aliases so the kind switch sees the referenced node.
+	if value.Kind == yaml.AliasNode {
+		value = value.Alias
 	}
 
+	switch value.Kind {
+	// shorthand: `concurrency: <int>`
+	case yaml.ScalarNode:
+		var limit int
+		if err := value.Decode(&limit); err != nil {
+			return fmt.Errorf("failed to unmarshal concurrency limit: %w", err)
+		}
+		c.Limit = limit
+		return nil
+
 	// full form: `concurrency: {limit: <int>, group: <string>}`
-	// use an alias type to avoid recursing into this UnmarshalYAML.
-	type concurrencyAlias Concurrency
-	var tmp concurrencyAlias
-	if err := unmarshal(&tmp); err != nil {
-		return fmt.Errorf("failed to unmarshal concurrency: %w", err)
+	case yaml.MappingNode:
+		// alias type avoids recursing into this UnmarshalYAML.
+		type concurrencyAlias Concurrency
+		var tmp concurrencyAlias
+		if err := value.Decode(&tmp); err != nil {
+			return fmt.Errorf("failed to unmarshal concurrency: %w", err)
+		}
+		*c = Concurrency(tmp)
+		return nil
+
+	default:
+		return fmt.Errorf("failed to unmarshal concurrency: expected an integer or a mapping, got %v", value.Kind)
 	}
-	*c = Concurrency(tmp)
-	return nil
 }
 
 // MarshalYAML implements the Marshaler interface. It mirrors UnmarshalYAML so
