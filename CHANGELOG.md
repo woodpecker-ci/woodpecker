@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @gedankenstuecke, @head1328, @mmeier86, @nijave, @qwerty287, @simonckemper
+@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @gedankenstuecke, @head1328, @mmeier86, @nijave, @qwerty287, @simonckemper, @simonmeyerrr
 
 ### 🔒 Security
 
@@ -14,6 +14,7 @@
 
 ### ✨ Features
 
+- Add workflow concurrency limit option [[#6671](https://github.com/woodpecker-ci/woodpecker/pull/6671)]
 - Support Unix Sockets [[#6721](https://github.com/woodpecker-ci/woodpecker/pull/6721)]
 
 ### 📈 Enhancement
