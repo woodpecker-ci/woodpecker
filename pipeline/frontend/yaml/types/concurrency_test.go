@@ -140,7 +140,7 @@ func TestConcurrencyRoundTrip(t *testing.T) {
 	tests := []struct {
 		name        string
 		concurrency Concurrency
-		// wantShorthand asserts whether the marshalled form is the bare
+		// wantShorthand asserts whether the marshaled form is the bare
 		// integer (true) or the expanded object (false).
 		wantShorthand bool
 	}{

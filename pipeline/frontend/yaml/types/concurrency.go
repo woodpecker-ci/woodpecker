@@ -21,7 +21,7 @@ import (
 )
 
 // Concurrency limits how many instances of a workflow may run at the same
-// time. It can be unmarshalled from:
+// time. It can be unmarshaled from:
 //   - an integer: `concurrency: 1` (limit only, default per-workflow group)
 //   - an object: `concurrency: {limit: 1, group: deploy}`
 type Concurrency struct {
