@@ -383,9 +383,8 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend_types.Config
 		log.Error().Err(err).Msgf("could not destroy all containers")
 	}
 
-	var err error
-	_, _ = backoff.Retry(ctx, func() (any, error) {
-		_, err = e.client.VolumeRemove(ctx, conf.Volume, client.VolumeRemoveOptions{
+	_, err := backoff.Retry(ctx, func() (any, error) {
+		_, err := e.client.VolumeRemove(ctx, conf.Volume, client.VolumeRemoveOptions{
 			Force: true,
 		})
 		if err == nil || !isErrVolumeInUse(err) {

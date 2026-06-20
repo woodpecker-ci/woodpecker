@@ -381,7 +381,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}),
 	)
 	if err != nil {
-		if kube_errors.IsNotFound(err) {
+		if kube_errors.IsNotFound(backoff.AsRetryError(err).LastErr) {
 			return &types.State{ExitCode: 0, Exited: true}, nil
 		}
 		return nil, err
