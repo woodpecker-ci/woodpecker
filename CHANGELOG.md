@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-19
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -62,6 +62,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/mysql Docker tag to v9.7.1 [[#6746](https://github.com/woodpecker-ci/woodpecker/pull/6746)]
 - Update web npm deps non-major [[#6724](https://github.com/woodpecker-ci/woodpecker/pull/6724)]
 - Update docker.io/alpine Docker tag to v3.24 [[#6725](https://github.com/woodpecker-ci/woodpecker/pull/6725)]
 - Update pre-commit non-major to v3.8.4 [[#6723](https://github.com/woodpecker-ci/woodpecker/pull/6723)]
