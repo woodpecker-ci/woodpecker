@@ -18,7 +18,6 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
@@ -84,26 +83,10 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-	filterFn := createFilterFunc(agentFilter)
-
-	for {
-		// poll blocks until a task is available or the context is canceled / worker is kicked
-		task, err := s.scheduler.Poll(c, agent.ID, filterFn)
-		if err != nil || task == nil {
-			return nil, err
-		}
-
-		if task.ShouldRun() {
-			workflow := new(rpc.Workflow)
-			err = json.Unmarshal(task.Data, workflow)
-			return workflow, err
-		}
-
-		// task should not run, so mark it as done
-		if err := s.Done(c, task.ID, rpc.WorkflowState{}); err != nil {
-			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
-		}
-	}
+	return s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
+		// a skipped workflow is finalized through the regular Done flow
+		return s.Done(c, taskID, rpc.WorkflowState{})
+	})
 }
 
 // Wait blocks until the workflow with the given ID is completed or got canceled.

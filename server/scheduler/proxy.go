@@ -22,6 +22,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
@@ -64,8 +65,27 @@ func (p *proxy) Pause() {
 	p.q.Pause()
 }
 
-func (p *proxy) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
-	return p.q.Poll(c, agentID, f)
+func (p *proxy) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*rpc.Workflow, error) {
+	filter := createFilterFunc(agentFilter)
+
+	for {
+		// poll blocks until a task is available or the context is canceled / worker is kicked
+		task, err := p.q.Poll(c, agentID, filter)
+		if err != nil || task == nil {
+			return nil, err
+		}
+
+		if task.ShouldRun() {
+			workflow := new(rpc.Workflow)
+			err = json.Unmarshal(task.Data, workflow)
+			return workflow, err
+		}
+
+		// task should not run, so let the caller mark it as done
+		if err := markSkipped(task.ID); err != nil {
+			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
+		}
+	}
 }
 
 func (p *proxy) Resume() {

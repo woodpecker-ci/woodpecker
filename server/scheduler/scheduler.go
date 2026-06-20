@@ -17,6 +17,7 @@ package scheduler
 import (
 	"context"
 
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
@@ -33,7 +34,12 @@ type FilterFn func(*model.Task) (bool, int)
 // pair the related queue and pubsub calls of a single logical action.
 type Scheduler interface {
 	// Queue operations.
-	Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error)
+	//
+	// Poll blocks until the next runnable workflow for the given agent is
+	// available. It applies the agent's label filter, transparently skips
+	// tasks whose dependencies preclude running (invoking markSkipped so the
+	// caller can finalize them), and returns the runnable workflow.
+	Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*rpc.Workflow, error)
 	Extend(c context.Context, agentID int64, workflowID string) error
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
 	Error(c context.Context, id string, err error) error
