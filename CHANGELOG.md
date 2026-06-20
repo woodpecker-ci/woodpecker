@@ -62,6 +62,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency http-proxy-middleware to v4 [[#6750](https://github.com/woodpecker-ci/woodpecker/pull/6750)]
 - Update pre-commit non-major to v0.49.0 [[#6749](https://github.com/woodpecker-ci/woodpecker/pull/6749)]
 - Update docker.io/mysql Docker tag to v9.7.1 [[#6746](https://github.com/woodpecker-ci/woodpecker/pull/6746)]
 - Update web npm deps non-major [[#6724](https://github.com/woodpecker-ci/woodpecker/pull/6724)]
