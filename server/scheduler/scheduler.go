@@ -65,8 +65,9 @@ type Scheduler interface {
 	CancelWorkflows(c context.Context, workflowIDs []string) error
 }
 
-func NewScheduler(store store.Store, q queue.Queue, ps pubsub.PubSub) Scheduler {
-	return &proxy{
+func NewScheduler(ctx context.Context, store store.Store, q queue.Queue, ps pubsub.PubSub) Scheduler {
+	return &impl{
+		ctx:   ctx,
 		store: store,
 		q:     q,
 		ps:    ps,
