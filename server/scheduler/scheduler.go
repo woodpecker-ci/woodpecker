@@ -66,7 +66,7 @@ type Scheduler interface {
 }
 
 func NewScheduler(store store.Store, q queue.Queue, ps pubsub.PubSub) Scheduler {
-	return &proxy{
+	return &impl{
 		store: store,
 		q:     q,
 		ps:    ps,

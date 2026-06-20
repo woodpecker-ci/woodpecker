@@ -33,6 +33,9 @@ type impl struct {
 	store store.Store
 	q     queue.Queue
 	ps    pubsub.PubSub
+
+	paused bool
+	lock   sync.RWMutex
 }
 
 //
@@ -57,10 +60,6 @@ func (p *impl) Info(c context.Context) queue.InfoT {
 
 func (p *impl) KickAgentWorkers(agentID int64) {
 	p.q.KickAgentWorkers(agentID)
-}
-
-func (p *impl) Pause() {
-	p.q.Pause()
 }
 
 // TODO: markSkipped is a callback helper that is only needed as we use the rpc.Done to mark skipped workflows as done
@@ -88,8 +87,20 @@ func (p *impl) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, ma
 	}
 }
 
+func (p *impl) Pause() {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	if !p.paused {
+		p.q.Pause()
+	}
+}
+
 func (p *impl) Resume() {
-	p.q.Resume()
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	if !p.paused {
+		p.q.Resume()
+	}
 }
 
 func (p *impl) Wait(c context.Context, id string) error {
