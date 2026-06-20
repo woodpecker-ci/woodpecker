@@ -16,6 +16,11 @@ package scheduler
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/oklog/ulid/v2"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
@@ -85,4 +90,47 @@ func (p *proxy) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver)
 
 func (p *proxy) Publish(c context.Context, t pubsub.Topics, m pubsub.Message) error {
 	return p.ps.Publish(c, t, m)
+}
+
+//
+// Scheduler.
+//
+
+// PublishPipelineEvent builds a pipeline state-change event and publishes it
+// to the repo topic (and the public topic for public repos).
+func (p *proxy) PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error {
+	data, err := json.Marshal(model.Event{
+		Repo:     *repo,
+		Pipeline: *pipeline,
+	})
+	if err != nil {
+		return fmt.Errorf("can't marshal JSON: %w", err)
+	}
+
+	message := pubsub.Message{
+		ID:   ulid.Make().String(),
+		Data: data,
+	}
+
+	subTopics := make(pubsub.Topics)
+	// if repo is public, push to public topic
+	if !repo.IsSCMPrivate {
+		subTopics[pubsub.PublicTopic] = struct{}{}
+	}
+	// publish to repo specific topic
+	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
+
+	return p.ps.Publish(c, subTopics, message)
+}
+
+// StartPipeline announces a new pipeline to UI subscribers and enqueues its
+// workflow tasks. The pubsub notification is best-effort and only logged on
+// failure, matching the previous behavior where a failed announcement did not
+// prevent the pipeline from being queued.
+func (p *proxy) StartPipeline(c context.Context, repo *model.Repo, pipeline *model.Pipeline, tasks []*model.Task) error {
+	if err := p.PublishPipelineEvent(c, repo, pipeline); err != nil {
+		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
+	}
+
+	return p.q.PushAtOnce(c, tasks)
 }

@@ -90,7 +90,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return err
 	}
 
-	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {
+	if err := server.Config.Services.Scheduler.PublishPipelineEvent(ctx, repo, killedPipeline); err != nil {
 		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
 	}
 

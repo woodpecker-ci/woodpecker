@@ -15,14 +15,28 @@
 package scheduler
 
 import (
+	"context"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 )
 
-// Scheduler is currently just the combined interface of Queue & PubSub.
+// Scheduler combines the Queue & PubSub providers and adds higher-level
+// operations that consolidate the queue and pubsub calls belonging to a
+// single logical action behind one method.
 type Scheduler interface {
 	queue.Queue
 	pubsub.PubSub
+
+	// PublishPipelineEvent builds a pipeline state-change event and publishes
+	// it to all UI subscribers of the repo (and the public topic if public).
+	PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error
+
+	// StartPipeline announces a new pipeline to UI subscribers and enqueues
+	// its workflow tasks. Publishing is best-effort; enqueuing is critical and
+	// its error is returned.
+	StartPipeline(c context.Context, repo *model.Repo, pipeline *model.Pipeline, tasks []*model.Task) error
 }
 
 func NewScheduler(q queue.Queue, ps pubsub.PubSub) Scheduler {
