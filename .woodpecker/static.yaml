@@ -26,7 +26,7 @@ steps:
       version: 3.6.2
 
   - name: check-feature-docs
-    image: docker.io/alpine:3.23
+    image: docker.io/alpine:3.24
     depends_on: []
     commands:
       - apk add --no-cache -q jq && ./.woodpecker/check-feature-docs.sh

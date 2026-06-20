@@ -80,6 +80,7 @@
     "gocritic",
     "GODEBUG",
     "godoc",
+    "godotenv",
     "Gogs",
     "golangci",
     "gomod",
@@ -282,6 +283,8 @@
     "go.sum",
     "pnpm-lock.yaml",
     "renovate.json",
+    // js config
+    "**/pnpm-workspace.yaml",
     // TODO: remove the following
     "docs/**/*.js",
     "docs/**/*.ts"

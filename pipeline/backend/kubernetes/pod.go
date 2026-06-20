@@ -196,7 +196,8 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		Affinity:           affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
-		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
+		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged, options.HostUsers),
+		HostUsers:          options.HostUsers,
 	}
 
 	// If there are tolerations and they are allowed
@@ -206,7 +207,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		spec.Tolerations = tolerations(config.PodTolerations)
 	}
 
-	spec.Volumes, err = pvcVolumes(step.Volumes)
+	spec.Volumes, err = pvcVolumes(podVolumes(step, options))
 	if err != nil {
 		return spec, err
 	}
@@ -278,7 +279,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		return container, err
 	}
 
-	container.VolumeMounts, err = volumeMounts(step.Volumes)
+	container.VolumeMounts, err = volumeMounts(podVolumes(step, options))
 	if err != nil {
 		return container, err
 	}
@@ -386,6 +387,27 @@ func pvcVolumes(volumes []string) ([]kube_core_v1.Volume, error) {
 	}
 
 	return vols, nil
+}
+
+func podVolumes(step *types.Step, options BackendOptions) []string {
+	if !isService(step) || useWorkspaceVolume(options) {
+		return step.Volumes
+	}
+
+	volumes := make([]string, 0, len(step.Volumes))
+	for _, volume := range step.Volumes {
+		if volumeMountPath(volume) != step.WorkspaceBase {
+			volumes = append(volumes, volume)
+		}
+	}
+	return volumes
+}
+
+func useWorkspaceVolume(options BackendOptions) bool {
+	if options.WorkspaceVolume != nil {
+		return *options.WorkspaceVolume
+	}
+	return true
 }
 
 func pvcVolume(name string) kube_core_v1.Volume {
@@ -550,7 +572,7 @@ func affinity(stepAffinity, agentAffinity *kube_core_v1.Affinity, allowFromStep 
 	return nil
 }
 
-func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *kube_core_v1.PodSecurityContext {
+func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool, hostUsers *bool) *kube_core_v1.PodSecurityContext {
 	var (
 		nonRoot             *bool
 		user                *int64
@@ -561,6 +583,10 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		apparmor            *kube_core_v1.AppArmorProfile
 	)
 
+	// With user namespaces (hostUsers=false), UID 0 inside the container maps
+	// to a non-root UID on the host, so requesting root is safe.
+	allowRoot := stepPrivileged || (hostUsers != nil && !*hostUsers)
+
 	if secCtxConf.RunAsNonRoot {
 		nonRoot = newBool(true)
 	}
@@ -569,18 +595,18 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	}
 
 	if sc != nil {
-		// only allow to set user if its not root or step is privileged
-		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || stepPrivileged) {
+		// only allow to set user if its not root or step is privileged or using user namespaces
+		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || allowRoot) {
 			user = sc.RunAsUser
 		}
 
-		// only allow to set group if its not root or step is privileged
-		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || stepPrivileged) {
+		// only allow to set group if its not root or step is privileged or using user namespaces
+		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || allowRoot) {
 			group = sc.RunAsGroup
 		}
 
-		// only allow to set fsGroup if its not root or step is privileged
-		if sc.FSGroup != nil && (*sc.FSGroup != 0 || stepPrivileged) {
+		// only allow to set fsGroup if its not root or step is privileged or using user namespaces
+		if sc.FSGroup != nil && (*sc.FSGroup != 0 || allowRoot) {
 			fsGroup = sc.FSGroup
 		}
 

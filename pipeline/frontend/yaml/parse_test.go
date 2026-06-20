@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
@@ -46,8 +46,8 @@ func TestParse(t *testing.T) {
 		assert.Equal(t, "slack", out.Steps.ContainerList[2].Image)
 		assert.Equal(t, "frontend", out.Labels["com.example.team"])
 		assert.Equal(t, "build", out.Labels["com.example.type"])
-		assert.Equal(t, "lint", out.DependsOn[0])
-		assert.Equal(t, "test", out.DependsOn[1])
+		assert.Equal(t, "lint", out.DependsOn[0].Name)
+		assert.Equal(t, "test", out.DependsOn[1].Name)
 		assert.EqualValues(t, []string{"success", "failure"}, out.When.Constraints[0].Status)
 		assert.False(t, out.SkipClone)
 	})
@@ -76,6 +76,11 @@ func TestParse(t *testing.T) {
 		assert.Equal(t, "notify_success", out.Steps.ContainerList[1].Name)
 		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[1].Image)
 		assert.Equal(t, yaml_base_types.StringOrSlice{"push"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
+	})
+
+	t.Run("Should handle deeply nested yaml", func(t *testing.T) {
+		_, err := ParseString(sampleDeepYaml)
+		assert.NoError(t, err)
 	})
 }
 
@@ -245,6 +250,30 @@ steps:
       PLATFORM: linux
 `
 
+var sampleDeepYaml = `
+image: hello-world
+when:
+  - branch:
+    - tester
+steps:
+  test:
+    image: golang
+    commands:
+      - go install
+      - go test
+    backend_options:
+      kubernetes:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: accelerator
+                      operator: In
+                      values:
+                        - nvidia-tesla-v100
+`
+
 func TestReSerialize(t *testing.T) {
 	work1, err := ParseString(sampleVarYaml)
 	require.NoError(t, err)
@@ -284,7 +313,9 @@ func TestReSerialize(t *testing.T) {
 	workBin2, err := yaml.Marshal(work2)
 	require.NoError(t, err)
 
-	// TODO: fix "steps.[1].depends_on: []" to be re-serialized!
+	// `depends_on: []` on the build step round-trips intact; an empty
+	// list keeps the step in DAG mode rather than silently dropping back
+	// to sequential.
 	assert.EqualValues(t, `when:
     - status:
         - success
@@ -308,6 +339,7 @@ steps:
     - name: build
       image: golang
       commands: go build
+      depends_on: []
       when:
         event: push
     - name: notify

@@ -400,7 +400,15 @@ woodpecker_waiting_steps 0
 # HELP woodpecker_worker_count Total number of workers.
 # TYPE woodpecker_worker_count gauge
 woodpecker_worker_count 4
+# HELP woodpecker_step_failures_total Total number of pipeline step failures.
+# TYPE woodpecker_step_failures_total counter
+woodpecker_step_failures_total{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 1
+# HELP woodpecker_step_duration_seconds Step duration in seconds.
+# TYPE woodpecker_step_duration_seconds gauge
+woodpecker_step_duration_seconds{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 12
 ```
+
+Step-level metrics are exported as long as `WOODPECKER_STEP_LEVEL_METRICS` is not disabled.
 
 #### Example response structure
 
@@ -558,7 +566,7 @@ Examples:
 - Name: `WOODPECKER_SERVER_ADDR`
 - Default: `:8000`
 
-Configures the HTTP listener port.
+Configures the HTTP listener, supports unix socket via unix:// prefix".
 
 ---
 
@@ -624,7 +632,8 @@ Example: `WOODPECKER_CUSTOM_JS_FILE=/usr/local/www/woodpecker.js`
 - Name: `WOODPECKER_GRPC_ADDR`
 - Default: `:9000`
 
-Configures the gRPC listener port.
+Configures the gRPC listener. Use `localhost:9000` or any IP address to bind it to a specific interface.
+If you want an unix socket use `unix://` prefix, for example `unix:///run/woodpecker-grcp.sock`.
 
 ---
 
@@ -654,6 +663,15 @@ Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath.
 Configures an unprotected metrics endpoint. An empty value disables the metrics endpoint completely.
 
 Example: `:9001`
+
+---
+
+### STEP_LEVEL_METRICS
+
+- Name: `WOODPECKER_STEP_LEVEL_METRICS`
+- Default: `true`
+
+Enable step-level metrics, including failed step counters and step duration gauges.
 
 ---
 
@@ -705,6 +723,19 @@ Enable to allow user registration.
 - Default: `false`
 
 Always use authentication to clone repositories even if they are public. Needed if the forge requires to always authenticate as used by many companies.
+
+---
+
+### ASYNC_REPOSITORY_UPDATE
+
+- Name: `WOODPECKER_ASYNC_REPOSITORY_UPDATE`
+- Default: `false`
+
+Enable asynchronous fetching user permissions for repositories. Will drastically improve login speed for user login if the organisation has many git repositories.
+
+When disabled (default) users will have to wait for all repository access information before being redirected to the Woodpecker homepage. Choose this for strong consistency.
+
+When enabled users will immediately be redirected to the Woodpecker homepage, but might see outdated information if repository access changed or new repositories were added. Choose this for eventual consistency.
 
 ---
 
@@ -977,6 +1008,24 @@ Supported variables:
 - Default: none
 
 Specify a configuration extension endpoint, see [Configuration Extension](../../20-usage/72-extensions/40-configuration-extension.md)
+
+---
+
+### DEFAULT_PIPELINE_CONFIGS
+
+- Name: `WOODPECKER_DEFAULT_PIPELINE_CONFIGS`
+- Default: `.woodpecker/`, `.woodpecker.yaml`, `.woodpecker.yml`
+
+Specify the default pipeline config paths.
+
+---
+
+### DEFAULT_PIPELINE_CONFIG_EXTENSIONS
+
+- Name: `WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS`
+- Default: `.yaml`, `.yml`
+
+Specify the default pipeline config extensions when scanning a pipeline config directory.
 
 ---
 

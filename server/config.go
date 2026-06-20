@@ -36,21 +36,22 @@ var Config = struct {
 		LogStore   log.Service
 	}
 	Server struct {
-		JWTSecret           string
-		Key                 string
-		Cert                string
-		OAuthHost           string
-		Host                string
-		WebhookHost         string
-		Port                string
-		PortTLS             string
-		AgentToken          string
-		StatusContext       string
-		StatusContextFormat string
-		SessionExpires      time.Duration
-		RootPath            string
-		CustomCSSFile       string
-		CustomJsFile        string
+		JWTSecret             string
+		Key                   string
+		Cert                  string
+		OAuthHost             string
+		Host                  string
+		WebhookHost           string
+		Port                  string
+		PortTLS               string
+		AgentToken            string
+		StatusContext         string
+		StatusContextFormat   string
+		SessionExpires        time.Duration
+		RootPath              string
+		CustomCSSFile         string
+		CustomJsFile          string
+		AsyncRepositoryUpdate bool
 	}
 	Agent struct {
 		DisableUserRegisteredAgentRegistration bool
@@ -81,6 +82,8 @@ var Config = struct {
 			HTTP  string
 			HTTPS string
 		}
+		ConfigPaths      []string
+		ConfigExtensions []string
 		// TODO: remove with version 4.x
 		ForceIgnoreServiceFailure bool
 	}

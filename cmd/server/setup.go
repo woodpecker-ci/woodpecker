@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
@@ -45,11 +44,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
-)
-
-const (
-	queueInfoRefreshInterval = 500 * time.Millisecond
-	storeInfoRefreshInterval = 10 * time.Second
 )
 
 func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
@@ -181,6 +175,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+	server.Config.Server.AsyncRepositoryUpdate = c.Bool("async-repository-update")
 
 	// Pull requests
 	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")
@@ -226,6 +221,10 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
 	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
 	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
+
+	// pipeline config paths
+	server.Config.Pipeline.ConfigPaths = c.StringSlice("default-pipeline-configs")
+	server.Config.Pipeline.ConfigExtensions = c.StringSlice("default-pipeline-config-extensions")
 
 	// server configuration
 	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
