@@ -37,7 +37,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
-	"go.woodpecker-ci.org/woodpecker/v3/server/status"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
@@ -84,9 +83,9 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-	return s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
-		// a skipped workflow is finalized through the regular Done flow
-		return s.Done(c, taskID, rpc.WorkflowState{})
+	return s.scheduler.Poll(c, agent.ID, agentFilter, func(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
+		// the scheduler finalized a skipped workflow; sync its status to the forge.
+		s.updateForgeStatus(c, repo, pipeline, workflow)
 	})
 }
 
@@ -344,41 +343,12 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	logger.Debug().Msgf("workflow state in store: %#v", workflow)
 	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
-	// Complete any still-running children (e.g. service containers) before
-	// computing the workflow status, so their final state is reflected.
-	s.completeChildrenIfParentCompleted(workflow, state.Finished)
-
-	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
-		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
-	}
-
-	var queueErr error
-	if !state.Canceled {
-		if workflow.Failing() {
-			queueErr = s.scheduler.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
-		} else {
-			queueErr = s.scheduler.Done(c, strWorkflowID, workflow.State)
-		}
-	} else {
-		if workflow.Started > 0 {
-			queueErr = s.scheduler.Done(c, strWorkflowID, model.StatusKilled)
-		} else {
-			queueErr = s.scheduler.Done(c, strWorkflowID, model.StatusCanceled)
-		}
-	}
-	if queueErr != nil {
-		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
-	}
-
-	currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline)
+	// The scheduler owns the workflow completion: it finalizes the workflow and
+	// its children, acks the queue, rolls the pipeline up and notifies
+	// subscribers. We are left with the forge sync, log streams and metrics.
+	currentPipeline, workflow, err = s.scheduler.FinishWorkflow(c, repo, currentPipeline, workflow, state)
 	if err != nil {
 		return err
-	}
-
-	if !model.IsThereRunningStage(currentPipeline.Workflows) {
-		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, status.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
-			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
-		}
 	}
 
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
@@ -393,10 +363,6 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 			}
 		}
 	}()
-
-	if err := s.scheduler.PublishPipelineEvent(c, repo, currentPipeline); err != nil {
-		return err
-	}
 
 	if currentPipeline.Status == model.StatusSuccess || currentPipeline.Status == model.StatusFailure {
 		s.pipelineCount.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Inc()
@@ -530,20 +496,6 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	agent.LastContact = time.Now().Unix()
 
 	return s.store.AgentUpdate(agent)
-}
-
-func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
-	for _, c := range completedWorkflow.Children {
-		if c.Running() {
-			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusKilled); err != nil {
-				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
-			} else {
-				// Update in-memory state so WorkflowStatus sees the final state
-				c.State = updated.State
-				c.Finished = updated.Finished
-			}
-		}
-	}
 }
 
 func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
