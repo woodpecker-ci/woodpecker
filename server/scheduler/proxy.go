@@ -45,10 +45,6 @@ func (p *proxy) Error(c context.Context, id string, err error) error {
 	return p.q.Error(c, id, err)
 }
 
-func (p *proxy) ErrorAtOnce(c context.Context, ids []string, err error) error {
-	return p.q.ErrorAtOnce(c, ids, err)
-}
-
 func (p *proxy) Extend(c context.Context, agentID int64, workflowID string) error {
 	return p.q.Extend(c, agentID, workflowID)
 }
@@ -145,4 +141,15 @@ func (p *proxy) StartPipeline(c context.Context, repo *model.Repo, pipeline *mod
 	}
 
 	return p.q.PushAtOnce(c, tasks)
+}
+
+// CancelWorkflows evicts the given workflows from the queue, signaling a
+// cancellation (queue.ErrCancel) to any agents currently waiting on them.
+// An empty list is a no-op.
+func (p *proxy) CancelWorkflows(c context.Context, workflowIDs []string) error {
+	if len(workflowIDs) == 0 {
+		return nil
+	}
+
+	return p.q.ErrorAtOnce(c, workflowIDs, queue.ErrCancel)
 }

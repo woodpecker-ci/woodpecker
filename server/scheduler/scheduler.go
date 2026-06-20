@@ -43,7 +43,6 @@ type Scheduler interface {
 	Extend(c context.Context, agentID int64, workflowID string) error
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
 	Error(c context.Context, id string, err error) error
-	ErrorAtOnce(c context.Context, ids []string, err error) error
 	Wait(c context.Context, id string) error
 	Info(c context.Context) queue.InfoT
 	Pause()
@@ -56,6 +55,11 @@ type Scheduler interface {
 	// Consolidated operations.
 	PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error
 	StartPipeline(c context.Context, repo *model.Repo, pipeline *model.Pipeline, tasks []*model.Task) error
+
+	// CancelWorkflows cancels the given workflows: it evicts them from the
+	// queue and signals the cancellation to any agents waiting on them. This is
+	// the entry point for the scheduler to later own the full cancel cleanup.
+	CancelWorkflows(c context.Context, workflowIDs []string) error
 }
 
 func NewScheduler(q queue.Queue, ps pubsub.PubSub) Scheduler {
