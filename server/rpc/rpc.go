@@ -84,8 +84,10 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
 	return s.scheduler.Poll(c, agent.ID, agentFilter, func(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
-		// the scheduler finalized a skipped workflow; sync its status to the forge.
+		// the scheduler finalized a skipped workflow; sync its status to the
+		// forge and record metrics, the same caller-side follow-up Done does.
 		s.updateForgeStatus(c, repo, pipeline, workflow)
+		s.recordPipelineMetrics(repo, pipeline, workflow)
 	})
 }
 
@@ -364,15 +366,22 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}()
 
-	if currentPipeline.Status == model.StatusSuccess || currentPipeline.Status == model.StatusFailure {
-		s.pipelineCount.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Inc()
-		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
-	}
-	if currentPipeline.IsMultiPipeline() {
-		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
-	}
+	s.recordPipelineMetrics(repo, currentPipeline, workflow)
 
 	return s.updateAgentLastWork(agent)
+}
+
+// recordPipelineMetrics records the prometheus metrics for a finished workflow
+// and its pipeline. It is shared by the regular Done path and the skipped
+// workflow follow-up so both report consistently.
+func (s *RPC) recordPipelineMetrics(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
+	if pipeline.Status == model.StatusSuccess || pipeline.Status == model.StatusFailure {
+		s.pipelineCount.WithLabelValues(repo.FullName, pipeline.Branch, string(pipeline.Status), "total").Inc()
+		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(pipeline.Status), "total").Set(float64(pipeline.Finished - pipeline.Started))
+	}
+	if pipeline.IsMultiPipeline() {
+		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
+	}
 }
 
 // Log writes a log entry to the database and publishes it to the pubsub.
