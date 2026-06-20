@@ -68,10 +68,6 @@ func (p *proxy) Poll(c context.Context, agentID int64, f queue.FilterFn) (*model
 	return p.q.Poll(c, agentID, f)
 }
 
-func (p *proxy) PushAtOnce(c context.Context, tasks []*model.Task) error {
-	return p.q.PushAtOnce(c, tasks)
-}
-
 func (p *proxy) Resume() {
 	p.q.Resume()
 }
@@ -86,10 +82,6 @@ func (p *proxy) Wait(c context.Context, id string) error {
 
 func (p *proxy) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver) error {
 	return p.ps.Subscribe(c, t, r)
-}
-
-func (p *proxy) Publish(c context.Context, t pubsub.Topics, m pubsub.Message) error {
-	return p.ps.Publish(c, t, m)
 }
 
 //

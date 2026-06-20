@@ -22,20 +22,29 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 )
 
-// Scheduler combines the Queue & PubSub providers and adds higher-level
-// operations that consolidate the queue and pubsub calls belonging to a
-// single logical action behind one method.
+// Scheduler coordinates the queue and pubsub providers behind a single
+// surface. The low-level enqueue (queue.PushAtOnce) and publish
+// (pubsub.Publish) calls are intentionally not exposed: callers use the
+// consolidated StartPipeline and PublishPipelineEvent methods instead, which
+// pair the related queue and pubsub calls of a single logical action.
 type Scheduler interface {
-	queue.Queue
-	pubsub.PubSub
+	// Queue operations.
+	Poll(c context.Context, agentID int64, f queue.FilterFn) (*model.Task, error)
+	Extend(c context.Context, agentID int64, workflowID string) error
+	Done(c context.Context, id string, exitStatus model.StatusValue) error
+	Error(c context.Context, id string, err error) error
+	ErrorAtOnce(c context.Context, ids []string, err error) error
+	Wait(c context.Context, id string) error
+	Info(c context.Context) queue.InfoT
+	Pause()
+	Resume()
+	KickAgentWorkers(agentID int64)
 
-	// PublishPipelineEvent builds a pipeline state-change event and publishes
-	// it to all UI subscribers of the repo (and the public topic if public).
+	// PubSub operations.
+	Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver) error
+
+	// Consolidated operations.
 	PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error
-
-	// StartPipeline announces a new pipeline to UI subscribers and enqueues
-	// its workflow tasks. Publishing is best-effort; enqueuing is critical and
-	// its error is returned.
 	StartPipeline(c context.Context, repo *model.Repo, pipeline *model.Pipeline, tasks []*model.Task) error
 }
 
