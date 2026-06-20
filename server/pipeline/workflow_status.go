@@ -17,21 +17,9 @@ package pipeline
 import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/status"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
-
-// WorkflowStatus determine workflow status based on corresponding step list.
-func WorkflowStatus(steps []*model.Step) model.StatusValue {
-	status := model.StatusSuccess
-
-	for _, p := range steps {
-		if p.Failure == model.FailureFail || !p.Failing() {
-			status = MergeStatusValues(status, p.State)
-		}
-	}
-
-	return status
-}
 
 func UpdateWorkflowStatusToRunning(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
 	workflow.Started = state.Started
@@ -50,7 +38,7 @@ func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, stat
 	if state.Started == 0 {
 		workflow.State = model.StatusSkipped
 	} else {
-		workflow.State = WorkflowStatus(workflow.Children)
+		workflow.State = status.WorkflowStatus(workflow.Children)
 	}
 	if workflow.Error != "" {
 		workflow.State = model.StatusFailure
