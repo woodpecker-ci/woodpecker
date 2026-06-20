@@ -19,6 +19,7 @@
 
 ### 📈 Enhancement
 
+- Refactor server scheduler collect in new interface [[#6753](https://github.com/woodpecker-ci/woodpecker/pull/6753)]
 - Add Prometheus metrics for pipeline step duration and failures [[#6738](https://github.com/woodpecker-ci/woodpecker/pull/6738)]
 - Add k8s userns support [[#6710](https://github.com/woodpecker-ci/woodpecker/pull/6710)]
 - Make cli exec auto detect single workflow test in multi workflow setup [[#6715](https://github.com/woodpecker-ci/woodpecker/pull/6715)]
@@ -64,6 +65,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/cenkalti/backoff/v5 to v6 [[#6752](https://github.com/woodpecker-ci/woodpecker/pull/6752)]
 - Update dependency http-proxy-middleware to v4 [[#6750](https://github.com/woodpecker-ci/woodpecker/pull/6750)]
 - Update pre-commit non-major to v0.49.0 [[#6749](https://github.com/woodpecker-ci/woodpecker/pull/6749)]
 - Update docker.io/mysql Docker tag to v9.7.1 [[#6746](https://github.com/woodpecker-ci/woodpecker/pull/6746)]
