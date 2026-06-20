@@ -12,5 +12,5 @@ overrides:
   joi: '^18.2.1'
   dompurify: '^3.4.11'
   http-proxy-middleware: '^4.0.0'
-  undici: '^7.28.0'
+  undici: '^8.0.0'
   gray-matter: 'npm:@11ty/gray-matter@^2.1.0'
