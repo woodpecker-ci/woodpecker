@@ -144,3 +144,45 @@ The same syntax works at the step level within a workflow: if a step uses `depen
 Some workflows don't need the source code, like creating a notification on failure.
 Read more about `skip_clone` at [pipeline syntax](./20-workflow-syntax.md#skip_clone)
 :::
+
+## Concurrency
+
+By default workflows run with no concurrency limit. Some workflows, however, must not run more than a given number of times at once. A typical example is a deployment workflow: running two deployments at the same time can cause race conditions or corrupt state. Cancelling the previous pipeline is often not an option either, since it could interrupt an ongoing deployment.
+
+The `concurrency` setting limits how many instances of a workflow may run at the same time. When the limit is reached, additional instances stay queued and start only once a running one has finished. Nothing is cancelled.
+
+```yaml title=".woodpecker/deploy.yaml"
+steps:
+  - name: deploy
+    image: debian:stable-slim
+    commands:
+      - echo deploying
+
+depends_on:
+  - test
+
+concurrency:
+  limit: 1
+```
+
+You can also use the shorthand form to only set the limit:
+
+```yaml
+concurrency: 1
+```
+
+### Ordering
+
+Queued workflows of the same group start in the order their pipelines were created, **not** in the order they become ready to run. This matters when a workflow depends on other workflows (via `depends_on`) whose duration varies: even if a later pipeline's checks finish first, its limited workflow will not overtake an earlier pipeline that is still waiting. This guarantees that, for example, deployments happen in commit order.
+
+### Groups
+
+By default, the limit applies per workflow within a repository. Different runs of the same workflow are limited against each other, while different workflows (and other repositories) are unaffected.
+
+Setting a `group` is optional. You can set a custom `group` to share a limit across workflows or to make the limit more specific. The group supports [environment variable substitution](./50-environment.md), so you can, for example, limit concurrency per branch or per deployment target:
+
+```yaml
+concurrency:
+  limit: 1
+  group: deploy-${CI_COMMIT_BRANCH}
+```
