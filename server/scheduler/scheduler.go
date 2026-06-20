@@ -59,10 +59,14 @@ type Scheduler interface {
 	PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error
 	StartPipeline(c context.Context, repo *model.Repo, pipeline *model.Pipeline, tasks []*model.Task) error
 
-	// CancelWorkflows cancels the given workflows: it evicts them from the
-	// queue and signals the cancellation to any agents waiting on them. This is
-	// the entry point for the scheduler to later own the full cancel cleanup.
-	CancelWorkflows(c context.Context, workflowIDs []string) error
+	// CancelWorkflows owns the full cancellation of a pipeline's workflows:
+	// it evicts the running/pending workflows from the queue (signaling the
+	// cancellation to any agents waiting on them), marks the still-pending
+	// workflows and steps as skipped, transitions the pipeline to its killed
+	// state, and publishes the resulting state change to subscribers. It
+	// returns the updated (killed) pipeline so the caller can sync the forge
+	// status, which is the only cancellation concern left to the caller.
+	CancelWorkflows(c context.Context, repo *model.Repo, pipeline *model.Pipeline, workflows []*model.Workflow, cancelInfo *model.CancelInfo) (*model.Pipeline, error)
 }
 
 func NewScheduler(ctx context.Context, store store.Store, q queue.Queue, ps pubsub.PubSub) Scheduler {

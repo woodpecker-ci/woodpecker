@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -161,13 +162,70 @@ func (p *impl) StartPipeline(c context.Context, repo *model.Repo, pipeline *mode
 	return p.q.PushAtOnce(c, tasks)
 }
 
-// CancelWorkflows evicts the given workflows from the queue, signaling a
-// cancellation (queue.ErrCancel) to any agents currently waiting on them.
-// An empty list is a no-op.
-func (p *impl) CancelWorkflows(c context.Context, workflowIDs []string) error {
-	if len(workflowIDs) == 0 {
-		return nil
+// CancelWorkflows owns the full cancellation of a pipeline's workflows. It
+// evicts the running/pending workflows from the queue first (so any waiting
+// agents receive the cancellation signal as early as possible), then marks the
+// still-pending workflows and steps as skipped, transitions the pipeline to its
+// killed state, and publishes the resulting state change. The returned pipeline
+// carries its refreshed workflow tree so the caller can sync the forge status.
+func (p *impl) CancelWorkflows(c context.Context, repo *model.Repo, pipeline *model.Pipeline, workflows []*model.Workflow, cancelInfo *model.CancelInfo) (*model.Pipeline, error) {
+	// First evict the running and pending workflows from the queue, signaling
+	// the cancellation (queue.ErrCancel) to any agents currently waiting on
+	// them.
+	var workflowIDs []string
+	for _, w := range workflows {
+		if w.State == model.StatusRunning || w.State == model.StatusPending {
+			workflowIDs = append(workflowIDs, fmt.Sprint(w.ID))
+		}
+	}
+	if len(workflowIDs) > 0 {
+		if err := p.q.ErrorAtOnce(c, workflowIDs, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("cancel workflows: %v", workflowIDs)
+		}
 	}
 
-	return p.q.ErrorAtOnce(c, workflowIDs, queue.ErrCancel)
+	// Mark the still-pending workflows and steps as skipped. Running ones are
+	// finalized by their agents once they observe the cancellation signal.
+	hasPendingOnly := true
+	for _, workflow := range workflows {
+		if workflow.State == model.StatusPending {
+			workflow.State = model.StatusSkipped
+			if err := p.store.WorkflowUpdate(workflow); err != nil {
+				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
+			}
+		} else {
+			hasPendingOnly = false
+		}
+		for _, step := range workflow.Children {
+			if step.State == model.StatusPending {
+				step.State = model.StatusCanceled
+				if err := p.store.StepUpdate(step); err != nil {
+					log.Error().Err(err).Msgf("cannot update step with id %d state", step.ID)
+				}
+			}
+		}
+	}
+
+	plState := model.StatusKilled
+	if hasPendingOnly {
+		plState = model.StatusCanceled
+	}
+	pipeline.Status = plState
+	pipeline.Finished = time.Now().Unix()
+	pipeline.CancelInfo = cancelInfo
+	if err := p.store.UpdatePipeline(pipeline); err != nil {
+		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
+		return nil, err
+	}
+
+	var err error
+	if pipeline.Workflows, err = p.store.WorkflowGetTree(pipeline); err != nil {
+		return nil, err
+	}
+
+	if err := p.PublishPipelineEvent(c, repo, pipeline); err != nil {
+		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
+	}
+
+	return pipeline, nil
 }
