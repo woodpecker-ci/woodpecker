@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v6"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -150,13 +150,15 @@ func retryRPC[T any](ctx context.Context, c *client, opName string, op backoff.O
 
 	// Context canceled while inside Retry: callers historically swallowed this
 	// and returned a zero-value error, so preserve that contract.
-	if ctxErr := context.Cause(ctx); ctxErr != nil && errors.Is(err, ctxErr) {
+	if errors.Is(err, context.Canceled) {
 		log.Debug().Err(err).Msgf("grpc: %s(): context canceled", opName)
 		return zero, nil
 	}
 
+	re := backoff.AsRetryError(err)
+
 	// MaxElapsedTime exhausted while we were still in errNotConnected — give up.
-	if errors.Is(err, errNotConnected) {
+	if errors.Is(re.LastErr, errNotConnected) {
 		log.Error().Msg("grpc: connection lost, giving up")
 		return zero, ErrConnectionLost
 	}
