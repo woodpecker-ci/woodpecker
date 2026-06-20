@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v6"
 	"github.com/containerd/errdefs"
 	"github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/api/pkg/stdcopy"
