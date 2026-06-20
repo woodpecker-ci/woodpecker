@@ -151,7 +151,7 @@ func TestGetQueueInfo(t *testing.T) {
 			{ID: "1", PipelineID: 99999, RepoID: repo.ID},
 		}}
 
-		q := installScheduler(t, s, s)
+		q := installScheduler(t, s)
 		q.On("Info", mock.Anything).Return(info)
 
 		tc := newTestContext(t, s)

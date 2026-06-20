@@ -346,7 +346,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
 	// The scheduler owns the workflow completion: it finalizes the workflow and
-	// its children, acks the queue, rolls the pipeline up and notifies
+	// its children, signals the queue, rolls the pipeline up and notifies
 	// subscribers. We are left with the forge sync, log streams and metrics.
 	currentPipeline, workflow, err = s.scheduler.FinishWorkflow(c, repo, currentPipeline, workflow, state)
 	if err != nil {
