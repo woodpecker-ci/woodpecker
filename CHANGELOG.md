@@ -48,6 +48,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6747](https://github.com/woodpecker-ci/woodpecker/pull/6747)]
 - Lock file maintenance [[#6733](https://github.com/woodpecker-ci/woodpecker/pull/6733)]
 - Update docs npm deps non-major to v1.18.0 [[#6731](https://github.com/woodpecker-ci/woodpecker/pull/6731)]
 - Update docs npm deps non-major to v3.17.0 [[#6726](https://github.com/woodpecker-ci/woodpecker/pull/6726)]
