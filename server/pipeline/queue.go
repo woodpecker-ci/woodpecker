@@ -15,7 +15,6 @@
 package pipeline
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -23,11 +22,12 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) error {
+// pipelineTasks builds the queue tasks for a pipeline's workflow items.
+// Enqueuing happens via the scheduler (see scheduler.StartPipeline).
+func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) ([]*model.Task, error) {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		task := &model.Task{
@@ -47,7 +47,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.
 		maps.Copy(task.Labels, item.Labels)
 		err := task.ApplyLabelsFromRepo(repo)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		task.Dependencies = getTaskDependencies(item.DependsOn.Names(), pipelineItems)
 		task.RunOn = item.RunsOn
@@ -72,12 +72,12 @@ func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.
 			Timeout: repo.Timeout,
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		tasks = append(tasks, task)
 	}
-	return server.Config.Services.Scheduler.PushAtOnce(ctx, tasks)
+	return tasks, nil
 }
 
 func getTaskDependencies(dependsOn []string, items []*builder.Item) (taskIDs []string) {

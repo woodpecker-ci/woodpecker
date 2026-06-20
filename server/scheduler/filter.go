@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpc
+package scheduler
 
 import (
 	"maps"
@@ -21,10 +21,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 )
 
-func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
+// createFilterFunc builds a FilterFn that matches queue tasks against the
+// labels an agent advertises in its poll filter.
+func createFilterFunc(agentFilter rpc.Filter) FilterFn {
 	return func(task *model.Task) (bool, int) {
 		// Create a copy of the labels for filtering to avoid modifying the original task
 		labels := maps.Clone(task.Labels)

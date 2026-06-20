@@ -37,7 +37,7 @@ type entry struct {
 
 type worker struct {
 	agentID int64
-	filter  FilterFn
+	filter  func(*model.Task) (bool, int)
 	channel chan *model.Task
 	stop    context.CancelCauseFunc
 }
@@ -84,7 +84,7 @@ func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 }
 
 // Poll retrieves and removes a task head of this queue.
-func (q *fifo) Poll(c context.Context, agentID int64, filter FilterFn) (*model.Task, error) {
+func (q *fifo) Poll(c context.Context, agentID int64, filter func(*model.Task) (bool, int)) (*model.Task, error) {
 	q.Lock()
 	ctx, stop := context.WithCancelCause(c)
 
