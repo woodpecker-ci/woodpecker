@@ -83,7 +83,8 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 				Name:      "step_failures_total",
 				Help:      "Total number of pipeline step failures.",
 			},
-			[]string{"pipeline", "repo", "step"})
+			[]string{"pipeline", "repo", "step"},
+		)
 
 		StepDurationRecord = promauto.NewGaugeVec(
 			prometheus.GaugeOpts{

@@ -19,15 +19,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
-	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
-	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 )
 
 func TestQueuePipelineConcurrency(t *testing.T) {
@@ -71,20 +66,11 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			var captured []*model.Task
-			mockQueue := queue_mocks.NewMockQueue(t)
-			mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).
-				Run(func(args mock.Arguments) {
-					captured, _ = args.Get(1).([]*model.Task)
-				}).
-				Return(nil).Once()
-			server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
-
-			err := queuePipeline(t.Context(), repo, activePipeline, []*builder.Item{tc.item})
+			tasks, err := pipelineTasks(repo, activePipeline, []*builder.Item{tc.item})
 			require.NoError(t, err)
-			require.Len(t, captured, 1)
+			require.Len(t, tasks, 1)
 
-			task := captured[0]
+			task := tasks[0]
 			assert.Equal(t, tc.expectedLimit, task.ConcurrencyLimit)
 			assert.Equal(t, tc.expectedGroup, task.ConcurrencyGroup)
 		})
@@ -97,19 +83,10 @@ func TestQueuePipelineCreated(t *testing.T) {
 
 	runOnce := func(t *testing.T, pipeline *model.Pipeline) *model.Task {
 		t.Helper()
-		var captured []*model.Task
-		mockQueue := queue_mocks.NewMockQueue(t)
-		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).
-			Run(func(args mock.Arguments) {
-				captured, _ = args.Get(1).([]*model.Task)
-			}).
-			Return(nil).Once()
-		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
-
-		err := queuePipeline(t.Context(), repo, pipeline, []*builder.Item{item})
+		tasks, err := pipelineTasks(repo, pipeline, []*builder.Item{item})
 		require.NoError(t, err)
-		require.Len(t, captured, 1)
-		return captured[0]
+		require.Len(t, tasks, 1)
+		return tasks[0]
 	}
 
 	t.Run("inherits the pipeline creation time", func(t *testing.T) {
