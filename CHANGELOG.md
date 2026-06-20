@@ -62,6 +62,7 @@
 
 ### 📦️ Dependency
 
+- Update pre-commit non-major to v0.49.0 [[#6749](https://github.com/woodpecker-ci/woodpecker/pull/6749)]
 - Update docker.io/mysql Docker tag to v9.7.1 [[#6746](https://github.com/woodpecker-ci/woodpecker/pull/6746)]
 - Update web npm deps non-major [[#6724](https://github.com/woodpecker-ci/woodpecker/pull/6724)]
 - Update docker.io/alpine Docker tag to v3.24 [[#6725](https://github.com/woodpecker-ci/woodpecker/pull/6725)]
