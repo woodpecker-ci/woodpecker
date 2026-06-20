@@ -22,6 +22,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 )
 
+// FilterFn filters tasks when polling the queue. If it returns false the task
+// is skipped; the int is a match score (higher is better).
+type FilterFn func(*model.Task) (bool, int)
+
 // Scheduler coordinates the queue and pubsub providers behind a single
 // surface. The low-level enqueue (queue.PushAtOnce) and publish
 // (pubsub.Publish) calls are intentionally not exposed: callers use the
@@ -29,7 +33,7 @@ import (
 // pair the related queue and pubsub calls of a single logical action.
 type Scheduler interface {
 	// Queue operations.
-	Poll(c context.Context, agentID int64, f queue.FilterFn) (*model.Task, error)
+	Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error)
 	Extend(c context.Context, agentID int64, workflowID string) error
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
 	Error(c context.Context, id string, err error) error

@@ -64,7 +64,7 @@ func (p *proxy) Pause() {
 	p.q.Pause()
 }
 
-func (p *proxy) Poll(c context.Context, agentID int64, f queue.FilterFn) (*model.Task, error) {
+func (p *proxy) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	return p.q.Poll(c, agentID, f)
 }
 

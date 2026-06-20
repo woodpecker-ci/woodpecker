@@ -21,10 +21,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 )
 
-func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
+func createFilterFunc(agentFilter rpc.Filter) scheduler.FilterFn {
 	return func(task *model.Task) (bool, int) {
 		// Create a copy of the labels for filtering to avoid modifying the original task
 		labels := maps.Clone(task.Labels)
