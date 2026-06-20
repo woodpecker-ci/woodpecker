@@ -38,7 +38,7 @@ import (
 func TestEventStreamSSEConcurrentDisconnect(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	broker := memory.New()
-	server.Config.Services.Scheduler = scheduler.NewScheduler(nil, broker)
+	server.Config.Services.Scheduler = scheduler.NewScheduler(nil, nil, broker)
 	t.Cleanup(func() { server.Config.Services.Scheduler = nil })
 
 	for i := range 50 {
