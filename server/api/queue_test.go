@@ -40,7 +40,7 @@ import (
 func installScheduler(t *testing.T, s store.Store) *queue_mocks.MockQueue {
 	t.Helper()
 	q := queue_mocks.NewMockQueue(t)
-	server.Config.Services.Scheduler = scheduler.NewScheduler(s, q, memory.New())
+	server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), s, q, memory.New())
 	return q
 }
 

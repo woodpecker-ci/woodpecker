@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -30,6 +31,8 @@ import (
 )
 
 type impl struct {
+	ctx context.Context
+
 	store store.Store
 	q     queue.Queue
 	ps    pubsub.PubSub

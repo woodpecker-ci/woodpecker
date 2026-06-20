@@ -160,7 +160,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	if err != nil {
 		return fmt.Errorf("could not setup queue: %w", err)
 	}
-	server.Config.Services.Scheduler = scheduler.NewScheduler(s, queue, pubsub)
+	server.Config.Services.Scheduler = scheduler.NewScheduler(ctx, s, queue, pubsub)
 	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
