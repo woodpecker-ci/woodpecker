@@ -61,6 +61,8 @@ func (p *proxy) Pause() {
 	p.q.Pause()
 }
 
+// TODO: markSkipped is a callback helper that is only needed as we use the rpc.Done to mark skiped workflows as done
+// this is a hack for another refactor later.
 func (p *proxy) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*rpc.Workflow, error) {
 	filter := createFilterFunc(agentFilter)
 

@@ -39,6 +39,8 @@ type Scheduler interface {
 	// available. It applies the agent's label filter, transparently skips
 	// tasks whose dependencies preclude running (invoking markSkipped so the
 	// caller can finalize them), and returns the runnable workflow.
+	// TODO: markSkipped is a callback helper that is only needed as we use the rpc.Done to mark skiped workflows as done
+	// this is a hack for another refactor later
 	Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*rpc.Workflow, error)
 	Extend(c context.Context, agentID int64, workflowID string) error
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
