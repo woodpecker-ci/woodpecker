@@ -5724,7 +5724,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created": {
-                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines, so the queue never relies\non the task ID for ordering.",
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines.",
                     "type": "integer"
                 },
                 "dep_status": {
@@ -6219,7 +6219,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created": {
-                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines, so the queue never relies\non the task ID for ordering.",
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines.",
                     "type": "integer"
                 },
                 "dep_status": {
