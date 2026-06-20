@@ -265,7 +265,7 @@ func TestCancelPipeline(t *testing.T) {
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Scheduler = scheduler.NewScheduler(nil, memory.New())
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockStore, nil, memory.New())
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -319,7 +319,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
-		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockStore, mockQueue, memory.New())
 
 		// mimic the valid config data
 		configData := []*forge_types.FileMeta{
@@ -391,7 +391,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
-		server.Config.Services.Scheduler = scheduler.NewScheduler(mockQueue, memory.New())
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockStore, mockQueue, memory.New())
 
 		// mimic the old config data
 		oldConfigData := []*forge_types.FileMeta{
@@ -443,7 +443,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
 		server.Config.Services.Manager = mockManager
-		server.Config.Services.Scheduler = scheduler.NewScheduler(nil, memory.New())
+		server.Config.Services.Scheduler = scheduler.NewScheduler(mockStore, nil, memory.New())
 
 		// return nil config with error
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(nil, http.ErrHandlerTimeout)

@@ -21,6 +21,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // FilterFn filters tasks when polling the queue. If it returns false the task
@@ -64,9 +65,10 @@ type Scheduler interface {
 	CancelWorkflows(c context.Context, workflowIDs []string) error
 }
 
-func NewScheduler(q queue.Queue, ps pubsub.PubSub) Scheduler {
+func NewScheduler(store store.Store, q queue.Queue, ps pubsub.PubSub) Scheduler {
 	return &proxy{
-		q:  q,
-		ps: ps,
+		store: store,
+		q:     q,
+		ps:    ps,
 	}
 }
