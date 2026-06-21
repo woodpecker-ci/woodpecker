@@ -49,6 +49,7 @@
 
 ### 📚 Documentation
 
+- Remove openbao extension [[#6757](https://github.com/woodpecker-ci/woodpecker/pull/6757)]
 - Update docs npm deps non-major [[#6747](https://github.com/woodpecker-ci/woodpecker/pull/6747)]
 - Lock file maintenance [[#6733](https://github.com/woodpecker-ci/woodpecker/pull/6733)]
 - Update docs npm deps non-major to v1.18.0 [[#6731](https://github.com/woodpecker-ci/woodpecker/pull/6731)]
