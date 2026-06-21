@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-20
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -65,6 +65,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6756](https://github.com/woodpecker-ci/woodpecker/pull/6756)]
 - Update golang-packages [[#6698](https://github.com/woodpecker-ci/woodpecker/pull/6698)]
 - Update module github.com/cenkalti/backoff/v5 to v6 [[#6752](https://github.com/woodpecker-ci/woodpecker/pull/6752)]
 - Update dependency http-proxy-middleware to v4 [[#6750](https://github.com/woodpecker-ci/woodpecker/pull/6750)]
