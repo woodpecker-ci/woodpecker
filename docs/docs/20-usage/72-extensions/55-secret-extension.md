@@ -171,4 +171,4 @@ Example response:
 These extensions are neither developed nor verified by Woodpecker CI. Make sure you trust them before using.
 :::
 
-- [OpenBao extension](https://github.com/vcheesbrough/woodpecker-openbao-broker)
+_Add you extension here!_
