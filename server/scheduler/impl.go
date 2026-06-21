@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
