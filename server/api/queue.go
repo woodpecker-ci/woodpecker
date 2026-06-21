@@ -138,7 +138,7 @@ func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[
 		if task.AgentID != 0 {
 			name, ok := getAgentName(store, agentNameMap, task.AgentID)
 			if !ok {
-				return nil, fmt.Errorf("agent not found for task %s", task.ID)
+				log.Error().Msgf("agent not found for task %s", task.ID)
 			}
 
 			taskResponse.AgentName = name
