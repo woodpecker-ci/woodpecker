@@ -83,12 +83,32 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
+<<<<<<< HEAD
 	return s.scheduler.Poll(c, agent.ID, agentFilter, func(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
 		// the scheduler finalized a skipped workflow; sync its status to the
 		// forge and record metrics, the same caller-side follow-up Done does.
 		s.updateForgeStatus(c, repo, pipeline, workflow)
 		s.recordPipelineMetrics(repo, pipeline, workflow)
+=======
+	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
+		// a skipped workflow is finalized through the regular Done flow; it
+		// was never initialized by an agent, so lock it to this agent first
+		// to satisfy the workflow ownership check.
+		if err := s.lockAgentToWorkflow(c, agent, taskID); err != nil {
+			return err
+		}
+		return s.Done(c, taskID, rpc.WorkflowState{})
+>>>>>>> main
 	})
+	if err != nil || rpcWorkflow == nil {
+		return nil, err
+	}
+
+	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
+		return nil, err
+	}
+
+	return rpcWorkflow, nil
 }
 
 // Wait blocks until the workflow with the given ID is completed or got canceled.
@@ -242,8 +262,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
-
-	workflow.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
@@ -403,8 +421,14 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		return err
 	}
 
+	workflow, err := s.store.WorkflowByStep(step)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow for step uuid %s", stepUUID)
+		return err
+	}
+
 	// check before agent can alter some state
-	if err := s.checkAgentPermissionByWorkflow(c, agent, "", currentPipeline, nil); err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strconv.FormatInt(workflow.ID, 10), currentPipeline, nil); err != nil {
 		return err
 	}
 

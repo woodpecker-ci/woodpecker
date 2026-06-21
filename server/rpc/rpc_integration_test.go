@@ -99,6 +99,7 @@ func defaultWorkflow(state model.StatusValue) *model.Workflow {
 	return &model.Workflow{
 		ID:         30,
 		PipelineID: 20,
+		AgentID:    1,
 		State:      state,
 		Name:       "test-workflow",
 	}
@@ -576,6 +577,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -605,6 +608,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusSuccess)         // but step already finished
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -632,6 +637,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusRunning)       // but step is still running
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -659,6 +666,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusSuccess)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -681,6 +690,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusSuccess)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -703,6 +714,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusFailure)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -724,6 +737,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusPending)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -746,6 +761,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusSuccess)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -767,6 +784,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusKilled)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -793,6 +812,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
@@ -818,6 +839,8 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(2)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
