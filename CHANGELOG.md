@@ -88,6 +88,7 @@
 
 ### Misc
 
+- Check docs JS files for spelling [[#6758](https://github.com/woodpecker-ci/woodpecker/pull/6758)]
 - adds git-pages plugin [[#6736](https://github.com/woodpecker-ci/woodpecker/pull/6736)]
 - Rename editorconfig file [[#6734](https://github.com/woodpecker-ci/woodpecker/pull/6734)]
 
