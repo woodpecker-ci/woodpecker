@@ -87,6 +87,9 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		// a skipped workflow is finalized through the regular Done flow
 		return s.Done(c, taskID, rpc.WorkflowState{})
 	})
+	if err != nil || rpcWorkflow == nil {
+		return nil, err
+	}
 
 	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
 		return nil, err
