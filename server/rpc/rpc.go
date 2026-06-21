@@ -84,7 +84,12 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
 	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
-		// a skipped workflow is finalized through the regular Done flow
+		// a skipped workflow is finalized through the regular Done flow; it
+		// was never initialized by an agent, so lock it to this agent first
+		// to satisfy the workflow ownership check.
+		if err := s.lockAgentToWorkflow(c, agent, taskID); err != nil {
+			return err
+		}
 		return s.Done(c, taskID, rpc.WorkflowState{})
 	})
 	if err != nil || rpcWorkflow == nil {
