@@ -30,7 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/badges"
 	"go.woodpecker-ci.org/woodpecker/v3/server/ccmenu"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	pipelineStatus "go.woodpecker-ci.org/woodpecker/v3/server/status"
+	pipeline_status "go.woodpecker-ci.org/woodpecker/v3/server/status"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -122,7 +122,7 @@ func GetBadge(c *gin.Context) {
 					stepName := c.Query("step")
 					if len(stepName) == 0 {
 						if status != nil {
-							merged := pipelineStatus.MergeStatusValues(*status, wf.State)
+							merged := pipeline_status.MergeStatusValues(*status, wf.State)
 							status = &merged
 						} else {
 							status = &wf.State
@@ -134,7 +134,7 @@ func GetBadge(c *gin.Context) {
 					for _, s := range wf.Children {
 						if s.Name == stepName {
 							if status != nil {
-								merged := pipelineStatus.MergeStatusValues(*status, s.State)
+								merged := pipeline_status.MergeStatusValues(*status, s.State)
 								status = &merged
 							} else {
 								status = &s.State
