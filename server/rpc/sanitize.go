@@ -63,8 +63,8 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 	}
 
 	if workflow.AgentID != agent.ID {
-		log.Error().Err(ErrAgentIllegalWorflowAgentID).Int64("agentID", agent.ID).Int64("workflowAgentId", workflow.AgentID).Send()
-		return fmt.Errorf("%w: agentId=%d workflowAgentId=%d", ErrAgentIllegalWorflowAgentID, agent.ID, workflow.AgentID)
+		log.Error().Err(ErrAgentIllegalWorkflowAgentID).Int64("agentID", agent.ID).Int64("workflowAgentId", workflow.AgentID).Send()
+		return fmt.Errorf("%w: agentId=%d workflowAgentId=%d", ErrAgentIllegalWorkflowAgentID, agent.ID, workflow.AgentID)
 	}
 
 	return nil
