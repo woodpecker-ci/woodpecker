@@ -83,10 +83,16 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-	return s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
+	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
 		// a skipped workflow is finalized through the regular Done flow
 		return s.Done(c, taskID, rpc.WorkflowState{})
 	})
+
+	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
+		return nil, err
+	}
+
+	return rpcWorkflow, nil
 }
 
 // Wait blocks until the workflow with the given ID is completed or got canceled.
@@ -240,8 +246,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
-
-	workflow.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
