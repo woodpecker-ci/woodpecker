@@ -15,6 +15,7 @@
     "agentscan",
     "anbraten",
     "antfu",
+    "apacheconf",
     "apimachinery",
     "appleboy",
     "aquasec",
@@ -57,6 +58,7 @@
     "dind",
     "Dockle",
     "doublestar",
+    "easyops",
     "emojify",
     "envsubst",
     "esbuild",
@@ -144,6 +146,8 @@
     "nocolor",
     "nolint",
     "nologin",
+    "noopener",
+    "noreferrer",
     "norunningpipelines",
     "nosniff",
     "ntfy",
@@ -284,10 +288,7 @@
     "pnpm-lock.yaml",
     "renovate.json",
     // js config
-    "**/pnpm-workspace.yaml",
-    // TODO: remove the following
-    "docs/**/*.js",
-    "docs/**/*.ts"
+    "**/pnpm-workspace.yaml"
   ],
   // Exclude imports, because they are also strings.
   "ignoreRegExpList": [
