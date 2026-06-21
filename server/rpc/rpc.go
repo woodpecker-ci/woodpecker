@@ -434,8 +434,14 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		return err
 	}
 
+	workflow, err := s.store.WorkflowByStep(step)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow for step uuid %s", stepUUID)
+		return err
+	}
+
 	// check before agent can alter some state
-	if err := s.checkAgentPermissionByWorkflow(c, agent, "", currentPipeline, nil); err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strconv.FormatInt(workflow.ID, 10), currentPipeline, nil); err != nil {
 		return err
 	}
 
