@@ -26,44 +26,48 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-type proxy struct {
-	q  queue.Queue
-	ps pubsub.PubSub
+type impl struct {
+	ctx context.Context
+
+	store store.Store
+	q     queue.Queue
+	ps    pubsub.PubSub
 }
 
 //
 // Queue.
 //
 
-func (p *proxy) Done(c context.Context, id string, exitStatus model.StatusValue) error {
+func (p *impl) Done(c context.Context, id string, exitStatus model.StatusValue) error {
 	return p.q.Done(c, id, exitStatus)
 }
 
-func (p *proxy) Error(c context.Context, id string, err error) error {
+func (p *impl) Error(c context.Context, id string, err error) error {
 	return p.q.Error(c, id, err)
 }
 
-func (p *proxy) Extend(c context.Context, agentID int64, workflowID string) error {
+func (p *impl) Extend(c context.Context, agentID int64, workflowID string) error {
 	return p.q.Extend(c, agentID, workflowID)
 }
 
-func (p *proxy) Info(c context.Context) queue.InfoT {
+func (p *impl) Info(c context.Context) queue.InfoT {
 	return p.q.Info(c)
 }
 
-func (p *proxy) KickAgentWorkers(agentID int64) {
+func (p *impl) KickAgentWorkers(agentID int64) {
 	p.q.KickAgentWorkers(agentID)
 }
 
-func (p *proxy) Pause() {
+func (p *impl) Pause() {
 	p.q.Pause()
 }
 
 // TODO: markSkipped is a callback helper that is only needed as we use the rpc.Done to mark skipped workflows as done
 // this is a hack for another refactor later.
-func (p *proxy) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*rpc.Workflow, error) {
+func (p *impl) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*rpc.Workflow, error) {
 	filter := createFilterFunc(agentFilter)
 
 	for {
@@ -86,11 +90,11 @@ func (p *proxy) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, m
 	}
 }
 
-func (p *proxy) Resume() {
+func (p *impl) Resume() {
 	p.q.Resume()
 }
 
-func (p *proxy) Wait(c context.Context, id string) error {
+func (p *impl) Wait(c context.Context, id string) error {
 	return p.q.Wait(c, id)
 }
 
@@ -98,7 +102,7 @@ func (p *proxy) Wait(c context.Context, id string) error {
 // PubSub.
 //
 
-func (p *proxy) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver) error {
+func (p *impl) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver) error {
 	return p.ps.Subscribe(c, t, r)
 }
 
@@ -108,7 +112,7 @@ func (p *proxy) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver)
 
 // PublishPipelineEvent builds a pipeline state-change event and publishes it
 // to the repo topic (and the public topic for public repos).
-func (p *proxy) PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error {
+func (p *impl) PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error {
 	data, err := json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *pipeline,
@@ -137,7 +141,7 @@ func (p *proxy) PublishPipelineEvent(c context.Context, repo *model.Repo, pipeli
 // workflow tasks. The pubsub notification is best-effort and only logged on
 // failure, matching the previous behavior where a failed announcement did not
 // prevent the pipeline from being queued.
-func (p *proxy) StartPipeline(c context.Context, repo *model.Repo, pipeline *model.Pipeline, tasks []*model.Task) error {
+func (p *impl) StartPipeline(c context.Context, repo *model.Repo, pipeline *model.Pipeline, tasks []*model.Task) error {
 	if err := p.PublishPipelineEvent(c, repo, pipeline); err != nil {
 		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
 	}
@@ -148,7 +152,7 @@ func (p *proxy) StartPipeline(c context.Context, repo *model.Repo, pipeline *mod
 // CancelWorkflows evicts the given workflows from the queue, signaling a
 // cancellation (queue.ErrCancel) to any agents currently waiting on them.
 // An empty list is a no-op.
-func (p *proxy) CancelWorkflows(c context.Context, workflowIDs []string) error {
+func (p *impl) CancelWorkflows(c context.Context, workflowIDs []string) error {
 	if len(workflowIDs) == 0 {
 		return nil
 	}

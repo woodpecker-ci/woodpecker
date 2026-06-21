@@ -53,7 +53,7 @@ func newTestRPC(t *testing.T, mockStore *store_mocks.MockStore, q queue.Queue) R
 
 	return RPC{
 		store:         mockStore,
-		scheduler:     scheduler.NewScheduler(q, memory.New()),
+		scheduler:     scheduler.NewScheduler(t.Context(), mockStore, q, memory.New()),
 		logger:        logging.New(),
 		pipelineTime:  pipelineTime,
 		pipelineCount: pipelineCount,
