@@ -20,6 +20,7 @@
 
 ### 📈 Enhancement
 
+- Refactor to inject store and context into server scheduler [[#6755](https://github.com/woodpecker-ci/woodpecker/pull/6755)]
 - Refactor server scheduler collect in new interface [[#6753](https://github.com/woodpecker-ci/woodpecker/pull/6753)]
 - Add Prometheus metrics for pipeline step duration and failures [[#6738](https://github.com/woodpecker-ci/woodpecker/pull/6738)]
 - Add k8s userns support [[#6710](https://github.com/woodpecker-ci/woodpecker/pull/6710)]
