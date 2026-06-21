@@ -99,6 +99,7 @@ func defaultWorkflow(state model.StatusValue) *model.Workflow {
 	return &model.Workflow{
 		ID:         30,
 		PipelineID: 20,
+		AgentID:    1,
 		State:      state,
 		Name:       "test-workflow",
 	}
