@@ -83,32 +83,12 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-<<<<<<< HEAD
 	return s.scheduler.Poll(c, agent.ID, agentFilter, func(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
 		// the scheduler finalized a skipped workflow; sync its status to the
 		// forge and record metrics, the same caller-side follow-up Done does.
 		s.updateForgeStatus(c, repo, pipeline, workflow)
 		s.recordPipelineMetrics(repo, pipeline, workflow)
-=======
-	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
-		// a skipped workflow is finalized through the regular Done flow; it
-		// was never initialized by an agent, so lock it to this agent first
-		// to satisfy the workflow ownership check.
-		if err := s.lockAgentToWorkflow(c, agent, taskID); err != nil {
-			return err
-		}
-		return s.Done(c, taskID, rpc.WorkflowState{})
->>>>>>> main
 	})
-	if err != nil || rpcWorkflow == nil {
-		return nil, err
-	}
-
-	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
-		return nil, err
-	}
-
-	return rpcWorkflow, nil
 }
 
 // Wait blocks until the workflow with the given ID is completed or got canceled.
