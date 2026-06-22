@@ -116,9 +116,10 @@ func SetupGlobalLogger(ctx context.Context, c *cli.Command, outputLvl bool) erro
 // had before the call. Callers should defer it to guarantee cleanup on
 // panic or clean exit.
 //
-// pretty=true enables the zerolog ConsoleWriter human formatting.
-// noColor=true disables ANSI color sequences — generally desired when
-// the destination is not a user-facing terminal (file, ring buffer, …).
+// When pretty is true, the zerolog ConsoleWriter human formatting
+// is used. When noColor is true, ANSI color sequences are disabled —
+// generally desired when the destination is not a user-facing
+// terminal (file, ring buffer, …).
 //
 // The configured log level is preserved; only the sink changes.
 func SetOutput(w io.Writer, pretty, noColor bool) (restore func()) {

@@ -107,7 +107,7 @@ func TestModelShowsErrorOnFailure(t *testing.T) {
 
 func TestModelCancelingState(t *testing.T) {
 	m := tui.New([]string{"build"})
-	updated, _ := m.Update(tui.CancellingMsg{})
+	updated, _ := m.Update(tui.CancelingMsg{})
 	m = asModel(t, updated)
 	assert.Contains(t, m.View().Content, "canceling")
 }

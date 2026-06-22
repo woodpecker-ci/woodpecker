@@ -67,8 +67,8 @@ type PipelineDoneMsg struct {
 	Err error
 }
 
-// CancellingMsg is emitted by the signal handler on the first
+// CancelingMsg is emitted by the signal handler on the first
 // ctrl-c, so the model can flip its status to "canceling…" while
 // the actual pipeline context cancellation propagates through the
 // runtimes.
-type CancellingMsg struct{}
+type CancelingMsg struct{}
