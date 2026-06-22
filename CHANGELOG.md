@@ -35,6 +35,7 @@
 
 ### 🐛 Bug Fixes
 
+- server queue api should ignore missing agent [[#6763](https://github.com/woodpecker-ci/woodpecker/pull/6763)]
 - docs: deps migrate gray-matter to maintained fork [[#6744](https://github.com/woodpecker-ci/woodpecker/pull/6744)]
 - local backend: on windows use process tree-walk as workaround to kill [[#6718](https://github.com/woodpecker-ci/woodpecker/pull/6718)]
 - Fix issue with deeply nested k8s backend_options [[#6730](https://github.com/woodpecker-ci/woodpecker/pull/6730)]
