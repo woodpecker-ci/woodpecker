@@ -117,7 +117,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	})
 
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Scheduler = scheduler.NewScheduler(memQueue, memory.New())
+	server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), memStore, memQueue, memory.New()) //nolint:contextcheck
 	server.Config.Services.Membership = cache.NewMembershipService(memStore)
 	server.Config.Services.Manager = mgr
 	server.Config.Services.LogStore = memStore

@@ -5788,6 +5788,18 @@ const docTemplate = `{
                 "agent_id": {
                     "type": "integer"
                 },
+                "concurrency_group": {
+                    "description": "ConcurrencyGroup identifies tasks that are limited against each other.\nIt is empty when no concurrency limit applies.",
+                    "type": "string"
+                },
+                "concurrency_limit": {
+                    "description": "ConcurrencyLimit is the maximum number of tasks sharing the same\nConcurrencyGroup that may run at once. A value \u003c= 0 means unlimited.",
+                    "type": "integer"
+                },
+                "created": {
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines.",
+                    "type": "integer"
+                },
                 "dep_status": {
                     "type": "object",
                     "additionalProperties": {
@@ -6318,6 +6330,18 @@ const docTemplate = `{
                 },
                 "agent_name": {
                     "type": "string"
+                },
+                "concurrency_group": {
+                    "description": "ConcurrencyGroup identifies tasks that are limited against each other.\nIt is empty when no concurrency limit applies.",
+                    "type": "string"
+                },
+                "concurrency_limit": {
+                    "description": "ConcurrencyLimit is the maximum number of tasks sharing the same\nConcurrencyGroup that may run at once. A value \u003c= 0 means unlimited.",
+                    "type": "integer"
+                },
+                "created": {
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines.",
+                    "type": "integer"
                 },
                 "dep_status": {
                     "type": "object",

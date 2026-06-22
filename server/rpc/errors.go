@@ -22,5 +22,6 @@ var (
 
 	ErrAgentIllegalLogStreaming = errors.New("agent can not append logs to a step that is marked not running")
 
-	ErrAgentIllegalRepo = errors.New("agent is not allowed to interact with repo")
+	ErrAgentIllegalRepo            = errors.New("agent is not allowed to interact with repo")
+	ErrAgentIllegalWorkflowAgentID = errors.New("agent is not allowed to interact with workflow where it's id is not already locked")
 )
