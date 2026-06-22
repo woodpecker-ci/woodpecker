@@ -67,6 +67,17 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f func(*model.T
 	if task != nil {
 		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
 		if deleteErr := q.store.TaskDelete(task.ID); deleteErr != nil {
+			if errors.Is(deleteErr, types.ErrRecordNotExist) {
+				// The task is no longer in the backup store, which means it was
+				// already finished/removed (e.g. its workflow was canceled) and
+				// only lingered in the in-memory queue. Handing it to the agent
+				// would loop forever, so drop it from the queue instead.
+				log.Error().Err(deleteErr).Msgf("pull queue item: %s: not found in backup, dropping stale task", task.ID)
+				if dropErr := q.Queue.Error(c, task.ID, deleteErr); dropErr != nil {
+					log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop stale task", task.ID)
+				}
+				return nil, nil
+			}
 			log.Error().Err(deleteErr).Msgf("pull queue item: %s: failed to remove from backup", task.ID)
 		} else {
 			log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
