@@ -15,6 +15,7 @@
 package tui_test
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -28,6 +29,15 @@ import (
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
+
+// TestMain pins the glyph mode to emoji so status-marker assertions
+// are deterministic: emoji survive ansi.Strip (used by plainView),
+// whereas the colored-square fallback collapses to an indistinguishable
+// bare "■" once styling is stripped.
+func TestMain(m *testing.M) {
+	os.Setenv("WOODPECKER_EXEC_TUI_GLYPHS", "emoji")
+	os.Exit(m.Run())
+}
 
 // plainView returns the rendered frame with ANSI escape sequences
 // stripped, so tests can assert on user-visible text without caring
@@ -316,9 +326,9 @@ func TestSeededStepsAppearAsPendingBeforeRunning(t *testing.T) {
 	// None of them has a running, success, failure, or skipped
 	// glyph yet — they're all pending. We check by counting
 	// running glyphs: zero.
-	assert.NotContains(t, out, "●", "no step should be running yet")
-	assert.NotContains(t, out, "✓", "no step should be successful yet")
-	assert.NotContains(t, out, "✗", "no step should be failed yet")
+	assert.NotContains(t, out, "🔵", "no step should be running yet")
+	assert.NotContains(t, out, "✅", "no step should be successful yet")
+	assert.NotContains(t, out, "❌", "no step should be failed yet")
 }
 
 func TestStepTransitionsPendingToRunningToSuccess(t *testing.T) {
@@ -332,8 +342,8 @@ func TestStepTransitionsPendingToRunningToSuccess(t *testing.T) {
 	m = asModel(t, u)
 
 	// Pending: no running, no success.
-	assert.NotContains(t, plainView(m), "●")
-	assert.NotContains(t, plainView(m), "✓")
+	assert.NotContains(t, plainView(m), "🔵")
+	assert.NotContains(t, plainView(m), "✅")
 
 	// Running: tracer reports Started=<now>, Exited=false.
 	step := &backend_types.Step{Name: "compile", UUID: "u-1"}
@@ -349,8 +359,8 @@ func TestStepTransitionsPendingToRunningToSuccess(t *testing.T) {
 		},
 	})
 	m = asModel(t, u)
-	assert.Contains(t, plainView(m), "●", "step should render as running after Started != 0")
-	assert.NotContains(t, plainView(m), "✓")
+	assert.Contains(t, plainView(m), "🔵", "step should render as running after Started != 0")
+	assert.NotContains(t, plainView(m), "✅")
 
 	// Success: Exited=true, ExitCode=0.
 	u, _ = m.Update(tui.StepStateMsg{
@@ -366,7 +376,7 @@ func TestStepTransitionsPendingToRunningToSuccess(t *testing.T) {
 		},
 	})
 	m = asModel(t, u)
-	assert.Contains(t, plainView(m), "✓", "step should render as success after Exited && ExitCode==0")
+	assert.Contains(t, plainView(m), "✅", "step should render as success after Exited && ExitCode==0")
 }
 
 func TestStepSeededByUUIDDoesNotDuplicate(t *testing.T) {

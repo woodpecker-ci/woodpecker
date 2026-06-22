@@ -16,7 +16,10 @@ package tui
 
 import (
 	"fmt"
+	"image/color"
+	"os"
 	"strings"
+	"sync"
 
 	"charm.land/lipgloss/v2"
 
@@ -65,37 +68,125 @@ func paneStyle(focused bool) lipgloss.Style {
 		Padding(0, 1)
 }
 
-// Status glyphs rendered next to each workflow and step. Unicode
-// round-trips fine in every modern terminal; ASCII fallbacks can be
-// added later if real users hit issues.
+// Status markers. Two render modes: emoji (large and unambiguous on
+// modern terminals) and colored squares (a single BMP block tinted
+// per state, which stays distinguishable on an old ANSI terminal or
+// the Linux console where emoji are unavailable or mis-sized). The
+// mode is auto-detected once; see detectGlyphMode.
+//
+// Emoji are deliberately full-color status faces so pending vs running
+// is obvious at a glance — the original "·" vs "●" was too subtle.
 const (
-	glyphSuccess  = "✓"
-	glyphFailure  = "✗"
-	glyphSkipped  = "⊘"
-	glyphBlocked  = "⏸"
-	glyphCanceled = "⊗"
-	glyphRunning  = "●"
-	glyphPending  = "·"
+	emojiSuccess  = "✅"
+	emojiFailure  = "❌"
+	emojiSkipped  = "⏭️"
+	emojiBlocked  = "⏸️"
+	emojiCanceled = "✖️"
+	emojiRunning  = "🔵"
+	emojiPending  = "⚪"
 )
 
-// stateGlyph returns a single-character status marker for a workflow
-// state. Used by the tree renderer; also handy for the placeholder
-// view so operators can eyeball skeleton output even before the full
-// rendering lands.
+// squareGlyph is the fallback marker; color carries the meaning.
+const squareGlyph = "■"
+
+var (
+	colorSuccess  = lipgloss.Color("2") // green
+	colorFailure  = lipgloss.Color("1") // red
+	colorSkipped  = lipgloss.Color("8") // gray
+	colorBlocked  = lipgloss.Color("3") // yellow
+	colorCanceled = lipgloss.Color("5") // magenta
+	colorRunning  = lipgloss.Color("4") // blue
+	colorPending  = lipgloss.Color("7") // white
+)
+
+type glyphMode int
+
+const (
+	glyphModeSquares glyphMode = iota
+	glyphModeEmoji
+)
+
+// activeGlyphMode resolves the render mode once per process.
+var activeGlyphMode = sync.OnceValue(detectGlyphMode)
+
+// detectGlyphMode picks emoji vs colored squares. An explicit
+// WOODPECKER_EXEC_TUI_GLYPHS=emoji|squares override wins; otherwise it
+// auto-detects and falls back to squares whenever emoji are unlikely
+// to render correctly.
+func detectGlyphMode() glyphMode {
+	switch strings.ToLower(os.Getenv("WOODPECKER_EXEC_TUI_GLYPHS")) {
+	case "emoji":
+		return glyphModeEmoji
+	case "squares", "square", "ascii":
+		return glyphModeSquares
+	}
+	if supportsEmoji() {
+		return glyphModeEmoji
+	}
+	return glyphModeSquares
+}
+
+// supportsEmoji is a best-effort heuristic: emoji need a UTF-8 locale
+// plus a terminal modern enough to render them at width 2. There is no
+// reliable query for this, so we infer from the usual environment
+// signals and err toward the safe squares fallback.
+func supportsEmoji() bool {
+	if !localeIsUTF8() {
+		return false
+	}
+	if ct := strings.ToLower(os.Getenv("COLORTERM")); ct == "truecolor" || ct == "24bit" {
+		return true
+	}
+	if os.Getenv("TERM_PROGRAM") != "" {
+		return true
+	}
+	term := strings.ToLower(os.Getenv("TERM"))
+	for _, hint := range []string{"kitty", "alacritty", "wezterm", "ghostty", "contour", "256color"} {
+		if strings.Contains(term, hint) {
+			return true
+		}
+	}
+	return false
+}
+
+// localeIsUTF8 reports whether the active locale is UTF-8, checking the
+// POSIX precedence LC_ALL > LC_CTYPE > LANG.
+func localeIsUTF8() bool {
+	for _, key := range []string{"LC_ALL", "LC_CTYPE", "LANG"} {
+		v := strings.ToLower(os.Getenv(key))
+		if v == "" {
+			continue
+		}
+		return strings.Contains(v, "utf-8") || strings.Contains(v, "utf8")
+	}
+	return false
+}
+
+// glyphFor renders a status marker in the active mode: the emoji as-is,
+// or the square tinted with the state color.
+func glyphFor(emoji string, c color.Color) string {
+	if activeGlyphMode() == glyphModeEmoji {
+		return emoji
+	}
+	return lipgloss.NewStyle().Foreground(c).Render(squareGlyph)
+}
+
+// stateGlyph returns the status marker for a workflow state. Used by
+// the tree renderer and the placeholder view.
 func stateGlyph(s scheduler.State) string {
 	switch s {
 	case scheduler.StateSuccess:
-		return glyphSuccess
+		return glyphFor(emojiSuccess, colorSuccess)
 	case scheduler.StateFailure:
-		return glyphFailure
+		return glyphFor(emojiFailure, colorFailure)
 	case scheduler.StateBlocked:
-		return glyphBlocked
+		return glyphFor(emojiBlocked, colorBlocked)
 	case scheduler.StateCanceled:
-		return glyphCanceled
+		return glyphFor(emojiCanceled, colorCanceled)
 	case scheduler.StateRunning:
-		return glyphRunning
+		return glyphFor(emojiRunning, colorRunning)
 	}
-	return glyphPending
+	return glyphFor(emojiPending, colorPending)
 }
 
 // placeholderHeaderWidth is the width of the horizontal rule in the

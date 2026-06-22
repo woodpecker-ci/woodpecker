@@ -438,19 +438,19 @@ func (m *Model) progressCounts() (done, total int) {
 func stepGlyph(s *stepNode) string {
 	switch {
 	case s.skipped:
-		return glyphSkipped
+		return glyphFor(emojiSkipped, colorSkipped)
 	case s.exited && s.exitCode == 0:
-		return glyphSuccess
+		return glyphFor(emojiSuccess, colorSuccess)
 	case s.exited:
-		return glyphFailure
+		return glyphFor(emojiFailure, colorFailure)
 	case s.errText != "":
-		return glyphFailure
+		return glyphFor(emojiFailure, colorFailure)
 	case s.oomKill:
-		return glyphFailure
+		return glyphFor(emojiFailure, colorFailure)
 	case s.started:
-		return glyphRunning
+		return glyphFor(emojiRunning, colorRunning)
 	}
-	return glyphPending
+	return glyphFor(emojiPending, colorPending)
 }
 
 // renderViewTea wraps renderView in a tea.View so Model.View has a
