@@ -69,6 +69,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6767](https://github.com/woodpecker-ci/woodpecker/pull/6767)]
 - Update web npm deps non-major [[#6748](https://github.com/woodpecker-ci/woodpecker/pull/6748)]
 - Update golang-packages [[#6756](https://github.com/woodpecker-ci/woodpecker/pull/6756)]
 - Update module github.com/cenkalti/backoff/v5 to v6 [[#6752](https://github.com/woodpecker-ci/woodpecker/pull/6752)]
