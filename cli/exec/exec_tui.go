@@ -184,13 +184,20 @@ func runTUIMode(pipelineCtx context.Context, items []*builder.Item, backendEngin
 		Events: events,
 	})
 
+	// Route docker image-pull progress into the messages pane as well,
+	// so the docker client's stdout writes don't tear the alt-screen.
+	// Same ring as the zerolog diagnostics; the backend picks this up
+	// via backend_types.ImagePullOutput. Ring.Append is mutex-guarded,
+	// so sharing the ring with the zerolog writer is safe.
+	schedCtx := context.WithValue(runCtx, backend_types.ImagePullOutput, ringWriter)
+
 	// Scheduler in its own goroutine so p.Run can block on the tea
 	// event loop in the main goroutine. When scheduler.Run returns,
 	// send PipelineDoneMsg so the model can transition to its final
 	// state; the user then chooses when to quit.
 	schedDone := make(chan error, 1)
 	go func() {
-		err := sched.Run(runCtx)
+		err := sched.Run(schedCtx)
 		schedDone <- err
 		prog.Send(tui.PipelineDoneMsg{Err: err})
 	}()
