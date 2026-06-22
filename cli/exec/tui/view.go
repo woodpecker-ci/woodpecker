@@ -429,6 +429,12 @@ func (m *Model) progressCounts() (done, total int) {
 }
 
 // stepGlyph returns the status glyph for a step node.
+//
+// The ordering matters: terminal states (skipped/success/failure)
+// take precedence over the started flag, because a step briefly
+// lingers with started=true after exiting before the next tracer
+// event promotes it to its terminal state. Checking terminal first
+// avoids a flicker at the exit boundary.
 func stepGlyph(s *stepNode) string {
 	switch {
 	case s.skipped:
@@ -441,8 +447,10 @@ func stepGlyph(s *stepNode) string {
 		return glyphFailure
 	case s.oomKill:
 		return glyphFailure
+	case s.started:
+		return glyphRunning
 	}
-	return glyphRunning
+	return glyphPending
 }
 
 // renderViewTea wraps renderView in a tea.View so Model.View has a
