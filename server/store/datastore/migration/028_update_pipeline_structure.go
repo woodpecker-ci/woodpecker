@@ -30,8 +30,8 @@ var updatePipelineStructure = xormigrate.Migration{
 		perPage024 := 100
 
 		type commitAuthor struct {
-			Author string `json:"author"`
-			Email  string `json:"email"`
+			Name  string `json:"name"`
+			Email string `json:"email"`
 		}
 
 		type commit struct {
@@ -58,7 +58,6 @@ var updatePipelineStructure = xormigrate.Migration{
 		type release struct {
 			IsPrerelease bool   `json:"is_prerelease,omitempty"`
 			Title        string `json:"title,omitempty"`
-			TagTitle     string `json:"tag_title,omitempty"`
 		}
 
 		type pipelines struct {
@@ -82,7 +81,7 @@ var updatePipelineStructure = xormigrate.Migration{
 			// new fields
 			CommitNew   *commit      `xorm:"json 'commit_new'"`
 			Deployment  *deployment  `xorm:"json 'deployment'"`
-			PullRequest *pullRequest `xorm:"json 'pr'"`
+			PullRequest *pullRequest `xorm:"json 'pull_request'"`
 			Release     *release     `xorm:"json 'release'"`
 			TagTitle    string       `xorm:"tag_title"`
 
@@ -112,8 +111,8 @@ var updatePipelineStructure = xormigrate.Migration{
 					Message:  p.Message,
 					ForgeURL: p.ForgeURL,
 					Author: commitAuthor{
-						Author: p.Author,
-						Email:  p.Email,
+						Name:  p.Author,
+						Email: p.Email,
 					},
 					Timestamp: p.Timestamp,
 				}
@@ -121,7 +120,7 @@ var updatePipelineStructure = xormigrate.Migration{
 				switch p.Event {
 				case model.EventRelease:
 					p.Release = &release{
-						TagTitle:     strings.TrimPrefix(p.Message, "created release "),
+						Title:        strings.TrimPrefix(p.Message, "created release "),
 						IsPrerelease: p.IsPrerelease,
 					}
 					p.TagTitle = strings.TrimPrefix(p.Ref, "refs/tags/")
@@ -153,7 +152,7 @@ var updatePipelineStructure = xormigrate.Migration{
 					}
 				}
 
-				if _, err := sess.ID(p.ID).Cols("commit_new", "deployment", "pr", "release", "tag_title").Update(p); err != nil {
+				if _, err := sess.ID(p.ID).Cols("commit_new", "deployment", "pull_request", "release", "tag_title").Update(p); err != nil {
 					return err
 				}
 			}
