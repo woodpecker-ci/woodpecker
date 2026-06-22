@@ -89,7 +89,7 @@ func TestRenderViewShowsPaneStructure(t *testing.T) {
 	assert.Contains(t, out, "test")
 	assert.Contains(t, out, "q: quit", "footer must render")
 	assert.Contains(t, out, "logs", "right-pane tabs must render")
-	assert.Contains(t, out, "debug", "right-pane tabs must render")
+	assert.Contains(t, out, "messages", "messages pane must render")
 }
 
 func TestCursorMovementInTree(t *testing.T) {
@@ -146,11 +146,11 @@ func TestFocusCyclesWithTab(t *testing.T) {
 	assert.Contains(t, out, "[tree]")
 }
 
-func TestDebugKeyJumpsToDebugPane(t *testing.T) {
+func TestLKeyJumpsToMessagesPane(t *testing.T) {
 	m := sized(t, []string{"build"}, 100, 24)
 	u, _ := m.Update(fakeKeyMsg("L"))
 	m = asModel(t, u)
-	assert.Contains(t, plainView(m), "[debug]")
+	assert.Contains(t, plainView(m), "[messages]")
 }
 
 func TestLogLineRefreshesSelectedStepView(t *testing.T) {
@@ -172,6 +172,32 @@ func TestLogLineRefreshesSelectedStepView(t *testing.T) {
 	m = asModel(t, u)
 
 	assert.Contains(t, plainView(m), "hello from the step")
+}
+
+func TestPreRunMessagesAppearInMessagesPane(t *testing.T) {
+	// The runTUIMode caller seeds the messages ring with pre-run
+	// output (lint warnings, metadata, anything printed before the
+	// TUI took over stdout). The messages pane must show that text
+	// once the first tick has redrawn the viewport.
+	m := tui.New([]string{"build"})
+
+	// Seed as cli/exec does in runTUIMode.
+	m.MessagesRing().Append("⚠️  pipeline has 3 warnings:\n")
+	m.MessagesRing().Append("   ⚠️  Consider adding a `when` block\n")
+
+	// Drive a WindowSizeMsg + DebugTickMsg, matching the real
+	// bubbletea event sequence (size arrives first, then the tick
+	// refreshes the viewport contents).
+	u, _ := m.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
+	m = asModel(t, u)
+	u, _ = m.Update(tui.DebugTickMsg{})
+	m = asModel(t, u)
+
+	out := plainView(m)
+	assert.Contains(t, out, "pipeline has 3 warnings",
+		"pre-run warning text must render in the messages pane")
+	assert.Contains(t, out, "Consider adding a `when` block",
+		"subsequent pre-run lines must also render")
 }
 
 func TestUnselectedStepDoesNotRefreshButStillStoresLog(t *testing.T) {

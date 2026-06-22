@@ -37,18 +37,14 @@ var (
 // supports ANSI at all, including ones without truecolor.
 var selectedRowStyle = lipgloss.NewStyle().Reverse(true)
 
-// tabActiveStyle renders the currently-focused tab header in the
-// right pane; tabInactiveStyle renders the other tab.
-var (
-	tabActiveStyle = lipgloss.NewStyle().
-			Foreground(colorAccent).
-			Bold(true).
-			Underline(true)
-
-	tabInactiveStyle = lipgloss.NewStyle().
-				Foreground(colorMuted).
-				Faint(true)
-)
+// paneTitleStyle renders the short title bar at the top of each
+// pane ("logs", "messages"). Reusing an accent foreground + bold
+// underline keeps the label distinct from the pane border without
+// adding a second color.
+var paneTitleStyle = lipgloss.NewStyle().
+	Foreground(colorAccent).
+	Bold(true).
+	Underline(true)
 
 // footerStyle is the keybind hint strip at the bottom of the view.
 var footerStyle = lipgloss.NewStyle().
