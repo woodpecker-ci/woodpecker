@@ -100,60 +100,60 @@ var updatePipelineStructure = xormigrate.Migration{
 		for {
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage024, page*perPage024).Cols("id", "event", "author", "forge_url", "commit", "title", "message", "sender", "deploy", "deploy_task", "pr_labels", "from_fork", "is_prerelease", "email", "timestamp").Find(&oldPipelines)
+			err := sess.Limit(perPage024, page*perPage024).Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
 
-			for _, oldPipeline := range oldPipelines {
-				var newPipeline pipelines
-				newPipeline.ID = oldPipeline.ID
-				newPipeline.CommitNew = &commit{
-					SHA:      oldPipeline.Commit,
-					Message:  oldPipeline.Message,
-					ForgeURL: oldPipeline.ForgeURL,
+			// fill new fields with old values
+			for _, p := range oldPipelines {
+				p.CommitNew = &commit{
+					SHA:      p.Commit,
+					Message:  p.Message,
+					ForgeURL: p.ForgeURL,
 					Author: commitAuthor{
-						Author: oldPipeline.Author,
-						Email:  oldPipeline.Email,
+						Author: p.Author,
+						Email:  p.Email,
 					},
-					Timestamp: oldPipeline.Timestamp,
+					Timestamp: p.Timestamp,
 				}
 
-				switch oldPipeline.Event {
+				switch p.Event {
 				case model.EventRelease:
-					newPipeline.Release = &release{
-						TagTitle:     strings.TrimPrefix(oldPipeline.Message, "created release "),
-						IsPrerelease: oldPipeline.IsPrerelease,
+					p.Release = &release{
+						TagTitle:     strings.TrimPrefix(p.Message, "created release "),
+						IsPrerelease: p.IsPrerelease,
 					}
-					newPipeline.TagTitle = strings.TrimPrefix(oldPipeline.Ref, "refs/tags/")
+					p.TagTitle = strings.TrimPrefix(p.Ref, "refs/tags/")
 				case model.EventTag:
-					newPipeline.TagTitle = strings.TrimPrefix(oldPipeline.Ref, "refs/tags/")
+					p.TagTitle = strings.TrimPrefix(p.Ref, "refs/tags/")
 				case model.EventPull, model.EventPullClosed:
-					newPipeline.PullRequest = &pullRequest{
-						Title: oldPipeline.Title,
+					p.PullRequest = &pullRequest{
+						Title: p.Title,
 						Index: model.ForgeRemoteID(
 							strings.TrimSuffix(
 								strings.TrimSuffix(
 									strings.TrimPrefix(
-										strings.TrimPrefix(oldPipeline.Ref, "refs/pull/"),
+										strings.TrimPrefix(p.Ref, "refs/pull/"),
 										"refs/merge-requests/",
 									),
-									"/merge"),
+									"/merge",
+								),
 								"/head",
 							),
 						),
-						FromFork: oldPipeline.FromFork,
-						Labels:   oldPipeline.PullRequestLabels,
+						FromFork: p.FromFork,
+						Labels:   p.PullRequestLabels,
 					}
 				case model.EventDeploy:
-					newPipeline.Deployment = &deployment{
-						Description: oldPipeline.Message,
-						Target:      oldPipeline.DeployTo,
-						Task:        oldPipeline.DeployTask,
+					p.Deployment = &deployment{
+						Description: p.Message,
+						Target:      p.DeployTo,
+						Task:        p.DeployTask,
 					}
 				}
 
-				if _, err := sess.ID(oldPipeline.ID).Cols("commit_new", "deployment", "pr", "release", "tag_title").Update(newPipeline); err != nil {
+				if _, err := sess.ID(p.ID).Cols("commit_new", "deployment", "pr", "release", "tag_title").Update(p); err != nil {
 					return err
 				}
 			}
@@ -165,11 +165,10 @@ var updatePipelineStructure = xormigrate.Migration{
 			page++
 		}
 
-		// if err := dropTableColumns(sess, "pipelines", "email", "timestamp", "sender", "commit", "title", "message", "deploy", "deploy_task", "pr_labels", "from_fork"); err != nil {
-		// 	return err
-		// }
+		if err := dropTableColumns(sess, "pipelines", "email", "timestamp", "sender", "commit", "title", "message", "deploy", "deploy_task", "pr_labels", "from_fork"); err != nil {
+			return err
+		}
 
-		// return renameColumn(sess, "pipelines", "commit_new", "commit")
-		return nil
+		return renameColumn(sess, "pipelines", "commit_new", "commit")
 	},
 }
