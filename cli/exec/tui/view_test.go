@@ -345,21 +345,20 @@ func TestStepTransitionsPendingToRunningToSuccess(t *testing.T) {
 	assert.NotContains(t, plainView(m), "🔵")
 	assert.NotContains(t, plainView(m), "✅")
 
-	// Running: tracer reports Started=<now>, Exited=false.
+	// Running: the runtime marks the step started with a zero-valued
+	// state (Started==0, Exited==false), exactly as runtime.traceStep
+	// emits it. This is the case the old Started!=0 check missed.
 	step := &backend_types.Step{Name: "compile", UUID: "u-1"}
 	u, _ = m.Update(tui.StepStateMsg{
 		Workflow: "build",
 		Step:     step,
 		State: &state.State{
-			CurrStep: step,
-			CurrStepState: backend_types.State{
-				Started: 1700000000,
-				Exited:  false,
-			},
+			CurrStep:      step,
+			CurrStepState: backend_types.State{},
 		},
 	})
 	m = asModel(t, u)
-	assert.Contains(t, plainView(m), "🔵", "step should render as running after Started != 0")
+	assert.Contains(t, plainView(m), "🔵", "step should render as running on the start event")
 	assert.NotContains(t, plainView(m), "✅")
 
 	// Success: Exited=true, ExitCode=0.

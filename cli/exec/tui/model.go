@@ -63,11 +63,11 @@ type workflowNode struct {
 type stepNode struct {
 	name string
 	uuid string
-	// started flips true the first time a tracer event reports a
-	// non-zero Started timestamp for this step. It distinguishes
-	// pending (not yet started) from running (started, not yet
-	// exited). Without this we'd have no way to separate the two
-	// from the tracer fields alone — Exited=false matches both.
+	// started flips true the first time a tracer event reports the
+	// step as non-terminal (not exited, not skipped). It distinguishes
+	// pending (no trace yet) from running (started, not yet exited).
+	// The runtime's start event carries a zero-valued state, so this
+	// keys off Exited/Skipped rather than the Started timestamp.
 	started  bool
 	exited   bool
 	exitCode int
@@ -378,11 +378,14 @@ func (m *Model) handleStepState(msg StepStateMsg) {
 	}
 	sn := findOrCreateStep(wf, msg.Step, m.budget)
 	st := msg.State.CurrStepState
-	// started flips true when the runtime first reports a non-zero
-	// Started timestamp. Once true it stays true — a subsequent
-	// update that happens to carry a zeroed state (shouldn't, but
-	// defensive) won't toggle us back to pending.
-	if st.Started != 0 {
+	// A step is running once the runtime emits any non-terminal trace
+	// for it. The runtime marks "started" with a zero-valued
+	// CurrStepState (Started==0, Exited==false; see runtime.traceStep),
+	// so keying off st.Started!=0 alone misses the start event entirely
+	// and the row jumps pending -> result without ever showing running.
+	// Treat "not exited and not skipped" as started; once set it stays
+	// set, so a later terminal event only flips exited/skipped.
+	if !st.Exited && !st.Skipped {
 		sn.started = true
 	}
 	sn.exited = st.Exited
