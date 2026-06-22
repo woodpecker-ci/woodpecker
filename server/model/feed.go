@@ -38,13 +38,16 @@ type Feed struct {
 }
 
 func (f *Feed) ToAPIModel() *APIFeed {
-	return &APIFeed{
-		Feed:    f,
-		Commit:  f.Commit.SHA,
-		Title:   f.Commit.Message,
-		Message: f.Commit.Message,
-		Email:   f.Commit.Author.Email,
+	af := &APIFeed{
+		Feed: f,
 	}
+	if f.Commit != nil {
+		af.Commit = f.Commit.SHA
+		af.Title = f.Commit.Message
+		af.Message = f.Commit.Message
+		af.Email = f.Commit.Author.Email
+	}
+	return af
 }
 
 // APIFeed TODO remove in next major.

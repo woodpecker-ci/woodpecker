@@ -81,15 +81,17 @@ func (Pipeline) TableName() string {
 
 func (p *Pipeline) ToAPIModel() *APIPipeline {
 	ap := &APIPipeline{
-		Pipeline:  p,
-		Commit:    p.Commit.SHA,
-		Message:   p.Commit.Message,
-		Timestamp: p.Commit.Timestamp,
-		Sender:    p.Author,
-		Email:     p.Commit.Author.Email,
+		Pipeline: p,
+		Sender:   p.Author,
 	}
 
-	ap.Author = p.Commit.Author.Name
+	if p.Commit != nil {
+		ap.Commit = p.Commit.SHA
+		ap.Message = p.Commit.Message
+		ap.Timestamp = p.Commit.Timestamp
+		ap.Email = p.Commit.Author.Email
+		ap.Author = p.Commit.Author.Name
+	}
 	ap.Avatar = p.AuthorAvatar
 
 	switch p.Event {
@@ -120,7 +122,9 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 			ap.FromFork = p.PullRequest.FromFork
 			ap.PullRequestMilestone = p.PullRequest.Milestone
 		}
-		ap.Message = p.Commit.Message
+		if p.Commit != nil {
+			ap.Message = p.Commit.Message
+		}
 	}
 
 	return ap
