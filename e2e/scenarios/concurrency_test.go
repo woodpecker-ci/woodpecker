@@ -93,10 +93,9 @@ func TestWorkflowConcurrencyLimit(t *testing.T) {
 		p, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
 			Event:  model.EventPush,
 			Branch: "main",
-			Commit: fmt.Sprintf("deadbeef%d", i),
+			Commit: &model.Commit{SHA: fmt.Sprintf("deadbeef%d", i)},
 			Ref:    "refs/heads/main",
 			Author: env.Fixtures.Owner.Login,
-			Sender: env.Fixtures.Owner.Login,
 		})
 		require.NoErrorf(t, err, "create pipeline round %d", i)
 		require.NotNil(t, p)
