@@ -43,10 +43,11 @@ var updatePipelineStructure = xormigrate.Migration{
 		}
 
 		type pullRequest struct {
-			Index    model.ForgeRemoteID `json:"index"`
-			Title    string              `json:"title"`
-			Labels   []string            `json:"labels,omitempty"`
-			FromFork bool                `json:"from_fork,omitempty"`
+			Index     model.ForgeRemoteID `json:"index"`
+			Title     string              `json:"title"`
+			Labels    []string            `json:"labels,omitempty"`
+			Milestone string              `json:"milestone,omitempty"`
+			FromFork  bool                `json:"from_fork,omitempty"`
 		}
 
 		type deployment struct {
@@ -67,16 +68,17 @@ var updatePipelineStructure = xormigrate.Migration{
 			ForgeURL string             `xorm:"forge_url"`
 			Ref      string             `xorm:"ref"`
 
-			Commit            string   `xorm:"commit"`
-			Title             string   `xorm:"title"`
-			Message           string   `xorm:"TEXT 'message'"`
-			Sender            string   `xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-			DeployTo          string   `xorm:"deploy"`
-			DeployTask        string   `xorm:"deploy_task"`
-			PullRequestLabels []string `xorm:"json 'pr_labels'"`
-			FromFork          bool     `xorm:"from_fork"`
-			IsPrerelease      bool     `xorm:"is_prerelease"`
-			Timestamp         int64    `xorm:"'timestamp'"`
+			Commit               string   `xorm:"commit"`
+			Title                string   `xorm:"title"`
+			Message              string   `xorm:"TEXT 'message'"`
+			Sender               string   `xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
+			DeployTo             string   `xorm:"deploy"`
+			DeployTask           string   `xorm:"deploy_task"`
+			PullRequestLabels    []string `xorm:"json 'pr_labels'"`
+			PullRequestMilestone string   `xorm:"pr_milestone"`
+			FromFork             bool     `xorm:"from_fork"`
+			IsPrerelease         bool     `xorm:"is_prerelease"`
+			Timestamp            int64    `xorm:"'timestamp'"`
 
 			// new fields
 			CommitNew   *commit      `xorm:"json 'commit_new'"`
@@ -141,8 +143,9 @@ var updatePipelineStructure = xormigrate.Migration{
 								"/head",
 							),
 						),
-						FromFork: p.FromFork,
-						Labels:   p.PullRequestLabels,
+						FromFork:  p.FromFork,
+						Labels:    p.PullRequestLabels,
+						Milestone: p.PullRequestMilestone,
 					}
 				case model.EventDeploy:
 					p.Deployment = &deployment{
@@ -164,7 +167,7 @@ var updatePipelineStructure = xormigrate.Migration{
 			page++
 		}
 
-		if err := dropTableColumns(sess, "pipelines", "email", "timestamp", "sender", "commit", "title", "message", "deploy", "deploy_task", "pr_labels", "from_fork"); err != nil {
+		if err := dropTableColumns(sess, "pipelines", "email", "timestamp", "sender", "commit", "title", "message", "deploy", "deploy_task", "pr_labels", "pr_milestone", "is_prerelease", "from_fork"); err != nil {
 			return err
 		}
 
