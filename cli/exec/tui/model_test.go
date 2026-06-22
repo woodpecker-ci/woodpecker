@@ -176,3 +176,26 @@ func TestModelQuitKey(t *testing.T) {
 	// don't assert the concrete type to avoid coupling tests to
 	// bubbletea internals; the smoke is that a non-nil cmd came back.
 }
+
+func TestModelInitSchedulesDebugTick(t *testing.T) {
+	// Init must return a command so the model's DebugTickMsg loop
+	// kicks off when the tea program starts. Without this, the
+	// budget Enforce and debug pane refresh would never fire.
+	m := tui.New([]string{"build"})
+	cmd := m.Init()
+	require.NotNil(t, cmd, "Init must return a non-nil cmd (debug ticker)")
+	// Running the command yields a DebugTickMsg; any other return
+	// value means the ticker is misconfigured.
+	msg := cmd()
+	require.IsType(t, tui.DebugTickMsg{}, msg)
+}
+
+func TestModelDebugTickReschedules(t *testing.T) {
+	// After handling a DebugTickMsg, the handler must return another
+	// ticker command; otherwise the loop dies on the first fire.
+	m := tui.New([]string{"build"})
+	_, cmd := m.Update(tui.DebugTickMsg{})
+	require.NotNil(t, cmd, "DebugTickMsg handler must reschedule")
+	msg := cmd()
+	require.IsType(t, tui.DebugTickMsg{}, msg)
+}
