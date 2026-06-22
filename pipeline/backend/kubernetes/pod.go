@@ -39,7 +39,6 @@ const (
 	TaskUUIDLabel            = "woodpecker-ci.org/task-uuid"
 	podPrefix                = "wp-"
 	defaultFSGroup     int64 = 1000
-	initContainerImage       = "busybox:stable-musl"
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*kube_core_v1.Pod, error) {
@@ -67,7 +66,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 	}
 	spec.Containers = append(spec.Containers, container)
 
-	initContainer := podInitContainer(&spec, &container)
+	initContainer := podInitContainer(config, &spec, &container)
 	if initContainer != nil {
 		spec.InitContainers = append(spec.InitContainers, *initContainer)
 	}
@@ -294,7 +293,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 // podInitContainer determines whether an init container is required to prepare the
 // main step container's working directory with the correct permissions.
 // If it is required, it returns the init container spec, otherwise it returns an empty container spec.
-func podInitContainer(podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Container) *kube_core_v1.Container {
+func podInitContainer(config *config,podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Container) *kube_core_v1.Container {
 	// if pod is running as root, we don't need an init container to precreate the workingDir
 	// since kubelet already precreates it (as root:root)
 	if podSpec.SecurityContext == nil ||
@@ -320,7 +319,7 @@ func podInitContainer(podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Con
 
 	return &kube_core_v1.Container{
 		Name:            "init-" + container.Name,
-		Image:           initContainerImage,
+		Image:           config.PermissionInitImage,
 		ImagePullPolicy: kube_core_v1.PullAlways,
 		Args:            []string{"mkdir", "-p", container.WorkingDir},
 		SecurityContext: &kube_core_v1.SecurityContext{

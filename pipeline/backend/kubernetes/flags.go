@@ -134,4 +134,10 @@ var Flags = []cli.Flag{
 		Usage:   "seconds Woodpecker waits for pods to stop gracefully before forcefully killing them",
 		Value:   20,
 	},
+	&cli.StringFlag{
+    Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PERMISSION_INIT_IMAGE"),
+    Name:    "backend-k8s-permission-init-image",
+    Usage:   "image used by the workspace permission init container",
+    Value:   "busybox:stable-musl",
+  	},
 }

@@ -78,6 +78,7 @@ type config struct {
 	NativeSecretsAllowFromStep  bool
 	PriorityClassName           string
 	StopTimeout                 int64
+	PermissionInitImage         string
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -125,6 +126,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 				StopTimeout:                c.Int64("backend-k8s-stop-timeout"),
+				PermissionInitImage:        c.String("backend-k8s-permission-init-image"),	
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
