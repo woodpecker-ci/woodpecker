@@ -15,10 +15,14 @@
 package migration
 
 import (
+	"encoding/json"
+	"fmt"
+	"reflect"
 	"strings"
 
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -95,6 +99,30 @@ var updatePipelineStructure = xormigrate.Migration{
 			return err
 		}
 
+		dialect := sess.Engine().Dialect().URI().DBType
+
+		// jsonThen is the THEN placeholder used for JSON columns.
+		// Postgres maps `json` column tag to a native json type,
+		// so untyped bind parameters inside a CASE need an explicit cast.
+		jsonThen := "?"
+		if dialect == schemas.POSTGRES {
+			jsonThen = "CAST(? AS json)"
+		}
+
+		// marshalJSON encodes v as a JSON string, returning a nil interface for
+		// nil pointers so the column is written as SQL NULL rather than the
+		// literal "null".
+		marshalJSON := func(v any) (any, error) {
+			if rv := reflect.ValueOf(v); rv.Kind() == reflect.Pointer && rv.IsNil() {
+				return nil, nil
+			}
+			b, err := json.Marshal(v)
+			if err != nil {
+				return nil, err
+			}
+			return string(b), nil
+		}
+
 		page := 0
 		oldPipelines := make([]*pipelines, 0, perPage024)
 
@@ -105,6 +133,27 @@ var updatePipelineStructure = xormigrate.Migration{
 			if err != nil {
 				return err
 			}
+			if len(oldPipelines) == 0 {
+				break
+			}
+
+			// Build a single bulk UPDATE for the whole page instead of one
+			// statement per row. Every target column becomes a CASE keyed by
+			// id, collapsing perPage024 round-trips into one statement.
+			var (
+				commitCase  strings.Builder
+				deployCase  strings.Builder
+				prCase      strings.Builder
+				releaseCase strings.Builder
+				tagCase     strings.Builder
+
+				commitArgs  []any
+				deployArgs  []any
+				prArgs      []any
+				releaseArgs []any
+				tagArgs     []any
+				ids         []any
+			)
 
 			// fill new fields with old values
 			for _, p := range oldPipelines {
@@ -155,9 +204,63 @@ var updatePipelineStructure = xormigrate.Migration{
 					}
 				}
 
-				if _, err := sess.ID(p.ID).Cols("commit_new", "deployment", "pull_request", "release", "tag_title").Update(p); err != nil {
+				commitJSON, err := marshalJSON(p.CommitNew)
+				if err != nil {
 					return err
 				}
+				deployJSON, err := marshalJSON(p.Deployment)
+				if err != nil {
+					return err
+				}
+				prJSON, err := marshalJSON(p.PullRequest)
+				if err != nil {
+					return err
+				}
+				releaseJSON, err := marshalJSON(p.Release)
+				if err != nil {
+					return err
+				}
+
+				ids = append(ids, p.ID)
+
+				commitCase.WriteString(" WHEN ? THEN " + jsonThen)
+				commitArgs = append(commitArgs, p.ID, commitJSON)
+				deployCase.WriteString(" WHEN ? THEN " + jsonThen)
+				deployArgs = append(deployArgs, p.ID, deployJSON)
+				prCase.WriteString(" WHEN ? THEN " + jsonThen)
+				prArgs = append(prArgs, p.ID, prJSON)
+				releaseCase.WriteString(" WHEN ? THEN " + jsonThen)
+				releaseArgs = append(releaseArgs, p.ID, releaseJSON)
+				tagCase.WriteString(" WHEN ? THEN ?")
+				tagArgs = append(tagArgs, p.ID, p.TagTitle)
+			}
+
+			placeholders := strings.TrimSuffix(strings.Repeat("?,", len(ids)), ",")
+			query := fmt.Sprintf(
+				"UPDATE `pipelines` SET "+
+					"`commit_new` = CASE `id`%s END, "+
+					"`deployment` = CASE `id`%s END, "+
+					"`pull_request` = CASE `id`%s END, "+
+					"`release` = CASE `id`%s END, "+
+					"`tag_title` = CASE `id`%s END "+
+					"WHERE `id` IN (%s)",
+				commitCase.String(), deployCase.String(), prCase.String(),
+				releaseCase.String(), tagCase.String(), placeholders,
+			)
+
+			// Argument order must match the textual order of the placeholders
+			// above: each column's CASE, then the WHERE IN list.
+			execArgs := make([]any, 0, 1+len(commitArgs)+len(deployArgs)+len(prArgs)+len(releaseArgs)+len(tagArgs)+len(ids))
+			execArgs = append(execArgs, query)
+			execArgs = append(execArgs, commitArgs...)
+			execArgs = append(execArgs, deployArgs...)
+			execArgs = append(execArgs, prArgs...)
+			execArgs = append(execArgs, releaseArgs...)
+			execArgs = append(execArgs, tagArgs...)
+			execArgs = append(execArgs, ids...)
+
+			if _, err := sess.Exec(execArgs...); err != nil {
+				return err
 			}
 
 			if len(oldPipelines) < perPage024 {
