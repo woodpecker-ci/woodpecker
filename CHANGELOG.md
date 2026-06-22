@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-21
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -51,6 +51,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#6768](https://github.com/woodpecker-ci/woodpecker/pull/6768)]
 - Remove openbao extension [[#6757](https://github.com/woodpecker-ci/woodpecker/pull/6757)]
 - Update docs npm deps non-major [[#6747](https://github.com/woodpecker-ci/woodpecker/pull/6747)]
 - Lock file maintenance [[#6733](https://github.com/woodpecker-ci/woodpecker/pull/6733)]
@@ -70,7 +71,6 @@
 
 - Update web npm deps non-major [[#6748](https://github.com/woodpecker-ci/woodpecker/pull/6748)]
 - Update golang-packages [[#6756](https://github.com/woodpecker-ci/woodpecker/pull/6756)]
-- Update golang-packages [[#6698](https://github.com/woodpecker-ci/woodpecker/pull/6698)]
 - Update module github.com/cenkalti/backoff/v5 to v6 [[#6752](https://github.com/woodpecker-ci/woodpecker/pull/6752)]
 - Update dependency http-proxy-middleware to v4 [[#6750](https://github.com/woodpecker-ci/woodpecker/pull/6750)]
 - Update pre-commit non-major to v0.49.0 [[#6749](https://github.com/woodpecker-ci/woodpecker/pull/6749)]
