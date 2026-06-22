@@ -44,6 +44,7 @@ import (
 	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
 	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -287,6 +288,26 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	// from this one, so cancellation fans out to all of them at once.
 	pipelineCtx, cancel := context.WithTimeout(ctx, c.Duration("timeout"))
 	defer cancel()
+
+	// Decide output mode. The TUI is the default on an interactive
+	// terminal; callers with --no-tui or a non-interactive stdout
+	// (pipe, CI log) get the plain per-line stderr stream.
+	useTUI := !c.Bool("no-tui") && logger.IsInteractiveTerminal()
+
+	if useTUI {
+		return runTUIMode(pipelineCtx, items, backendEngine)
+	}
+	return runLineMode(pipelineCtx, items, backendEngine)
+}
+
+// runLineMode drives the scheduler with a line-oriented output path:
+// per-step output goes through LineWriter to stderr, and workflow
+// banners / diagnostics are rendered by handleLineModeEvent.
+//
+// This is the path used when --no-tui is set, when stdout is not a
+// terminal (e.g. CI logs), or as a fallback when the TUI is
+// unavailable.
+func runLineMode(pipelineCtx context.Context, items []*builder.Item, backendEngine backend_types.Backend) error {
 	pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
 		fmt.Fprintln(os.Stderr, "ctrl+c received, terminating pipeline")
 	})
@@ -316,7 +337,7 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	// state transitions into user-visible banners and diagnostics.
 	// Buffered generously so a slow terminal never back-pressures the
 	// scheduler's control loop.
-	events := make(chan scheduler.Event, 64)
+	events := make(chan scheduler.Event, schedulerEventBuffer)
 	eventsDone := make(chan struct{})
 	go func() {
 		defer close(eventsDone)
@@ -346,6 +367,11 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	<-eventsDone
 	return execErr
 }
+
+// schedulerEventBuffer is the channel buffer size for scheduler
+// events. Generous so a slow consumer (terminal, tea program) does
+// not back-pressure the scheduler's control loop.
+const schedulerEventBuffer = 64
 
 // handleLineModeEvent renders a workflow-level state transition to
 // the given writer for the plain (non-TUI) output path. It emits:
