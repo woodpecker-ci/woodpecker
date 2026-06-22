@@ -77,12 +77,27 @@ func runTUIMode(pipelineCtx context.Context, items []*builder.Item, backendEngin
 	runCtx, cancel := context.WithCancel(pipelineCtx) //nolint:forbidigo // needed for two-stage sigint
 	defer cancel()
 
-	// Seed the model with workflow names.
-	workflowNames := make([]string, len(items))
+	// Seed the model with each workflow's full step list from the
+	// compiled backend config so every step appears in the tree with
+	// a 'pending' glyph before the scheduler starts. The tracer
+	// events during execution will then visibly flip each step
+	// pending → running → success/failure/skipped.
+	seeds := make([]tui.WorkflowSeed, len(items))
 	for i, it := range items {
-		workflowNames[i] = it.Workflow.Name
+		seed := tui.WorkflowSeed{Name: it.Workflow.Name}
+		if it.Config != nil {
+			for _, stage := range it.Config.Stages {
+				for _, step := range stage.Steps {
+					seed.Steps = append(seed.Steps, tui.StepSeed{
+						Name: step.Name,
+						UUID: step.UUID,
+					})
+				}
+			}
+		}
+		seeds[i] = seed
 	}
-	model := tui.New(workflowNames)
+	model := tui.NewFromSeeds(seeds)
 
 	// Seed the messages pane with pre-run output (lint warnings,
 	// validator output, anything printed before the TUI took over).
