@@ -130,7 +130,7 @@ func TestGetQueueInfo(t *testing.T) {
 		assert.Empty(t, got.WaitingOnDeps)
 	})
 
-	t.Run("unknown agent returns internal error", func(t *testing.T) {
+	t.Run("unknown agent is ignored", func(t *testing.T) {
 		pipe := seedPipeline(t, s, repo.ID)
 		info := queue.InfoT{Running: []*model.Task{
 			{ID: "1", AgentID: 99999, PipelineID: pipe.ID, RepoID: repo.ID},
@@ -142,8 +142,12 @@ func TestGetQueueInfo(t *testing.T) {
 		tc := newTestContext(t, s)
 		GetQueueInfo(tc.Ctx)
 
-		assert.Equal(t, http.StatusInternalServerError, tc.Recorder.Code)
-		assert.Contains(t, tc.Recorder.Body.String(), "agent not found")
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		var got model.QueueInfo
+		tc.decodeJSON(t, &got)
+		require.Len(t, got.Running, 1)
+		assert.Equal(t, "1", got.Running[0].ID)
+		assert.Empty(t, got.Running[0].AgentName)
 	})
 
 	t.Run("unknown pipeline returns internal error", func(t *testing.T) {
