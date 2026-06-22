@@ -28,7 +28,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
@@ -38,6 +38,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	cron_scheduler "go.woodpecker-ci.org/woodpecker/v3/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -125,7 +126,7 @@ func run(ctx context.Context, c *cli.Command) error {
 
 	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
 
-	startMetricsCollector(ctx, _store)
+	metric.StartMetricsCollector(ctx, c, _store)
 
 	serviceWaitingGroup.Go(func() error {
 		log.Info().Msg("starting cron service ...")

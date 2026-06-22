@@ -18,14 +18,12 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
 	"strconv"
 	"time"
 
-	"github.com/oklog/ulid/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
 	grpc_metadata "google.golang.org/grpc/metadata"
@@ -34,9 +32,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -85,26 +83,24 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-	filterFn := createFilterFunc(agentFilter)
-
-	for {
-		// poll blocks until a task is available or the context is canceled / worker is kicked
-		task, err := s.scheduler.Poll(c, agent.ID, filterFn)
-		if err != nil || task == nil {
-			return nil, err
+	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
+		// a skipped workflow is finalized through the regular Done flow; it
+		// was never initialized by an agent, so lock it to this agent first
+		// to satisfy the workflow ownership check.
+		if err := s.lockAgentToWorkflow(c, agent, taskID); err != nil {
+			return err
 		}
-
-		if task.ShouldRun() {
-			workflow := new(rpc.Workflow)
-			err = json.Unmarshal(task.Data, workflow)
-			return workflow, err
-		}
-
-		// task should not run, so mark it as done
-		if err := s.Done(c, task.ID, rpc.WorkflowState{}); err != nil {
-			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
-		}
+		return s.Done(c, taskID, rpc.WorkflowState{})
+	})
+	if err != nil || rpcWorkflow == nil {
+		return nil, err
 	}
+
+	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
+		return nil, err
+	}
+
+	return rpcWorkflow, nil
 }
 
 // Wait blocks until the workflow with the given ID is completed or got canceled.
@@ -213,6 +209,22 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
+	if metric.FailurePipelineStepInfoCount != nil &&
+		state.Exited &&
+		(step.State == model.StatusFailure ||
+			step.State == model.StatusKilled ||
+			step.State == model.StatusError) {
+		metric.FailurePipelineStepInfoCount.WithLabelValues(strconv.FormatInt(workflow.PipelineID, 10), repo.FullName, step.Name).Inc()
+	}
+
+	if metric.StepDurationRecord != nil && state.Exited && step.Started > 0 && step.Finished > step.Started {
+		duration := step.Finished - step.Started
+		metric.StepDurationRecord.WithLabelValues(
+			strconv.FormatInt(workflow.PipelineID, 10),
+			repo.FullName,
+			step.Name,
+		).Set(float64(duration))
+	}
 	if state.Exited {
 		server.Config.Services.LogStore.StepFinished(step)
 	}
@@ -222,7 +234,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	return s.notify(c, repo, currentPipeline)
+	return s.scheduler.PublishPipelineEvent(c, repo, currentPipeline)
 }
 
 // Init signals the workflow is initialized.
@@ -242,8 +254,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
-
-	workflow.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
@@ -278,7 +288,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	defer func() {
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
 
-		if err := s.notify(c, repo, currentPipeline); err != nil {
+		if err := s.scheduler.PublishPipelineEvent(c, repo, currentPipeline); err != nil {
 			log.Error().Err(err).Msg("could not publish pipeline state change to pubsub")
 		}
 	}()
@@ -395,7 +405,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}()
 
-	if err := s.notify(c, repo, currentPipeline); err != nil {
+	if err := s.scheduler.PublishPipelineEvent(c, repo, currentPipeline); err != nil {
 		return err
 	}
 
@@ -429,8 +439,14 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		return err
 	}
 
+	workflow, err := s.store.WorkflowByStep(step)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow for step uuid %s", stepUUID)
+		return err
+	}
+
 	// check before agent can alter some state
-	if err := s.checkAgentPermissionByWorkflow(c, agent, "", currentPipeline, nil); err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strconv.FormatInt(workflow.ID, 10), currentPipeline, nil); err != nil {
 		return err
 	}
 
@@ -569,28 +585,6 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}
 	}
-}
-
-// Notify push to our pubsub infra pipeline state changes.
-func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline) (err error) {
-	message := pubsub.Message{ID: ulid.Make().String()}
-	message.Data, err = json.Marshal(model.Event{
-		Repo:     *repo,
-		Pipeline: *pipeline,
-	})
-	if err != nil {
-		return fmt.Errorf("can't marshal JSON: %w", err)
-	}
-
-	subTopics := make(map[string]struct{})
-	// if repo is public, push to public topic
-	if !repo.IsSCMPrivate {
-		subTopics[pubsub.PublicTopic] = struct{}{}
-	}
-	// publish to repo specific topic
-	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
-
-	return s.scheduler.Publish(c, subTopics, message)
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {

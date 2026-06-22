@@ -37,10 +37,10 @@ import (
 // server config and returns the mock so tests can stub Info/Pause/Resume.
 // GetQueueInfo, PauseQueue and ResumeQueue only call queue methods, so a real
 // scheduler proxying to the mock queue is enough.
-func installScheduler(t *testing.T) *queue_mocks.MockQueue {
+func installScheduler(t *testing.T, s store.Store) *queue_mocks.MockQueue {
 	t.Helper()
 	q := queue_mocks.NewMockQueue(t)
-	server.Config.Services.Scheduler = scheduler.NewScheduler(q, memory.New())
+	server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), s, q, memory.New())
 	return q
 }
 
@@ -89,7 +89,7 @@ func TestGetQueueInfo(t *testing.T) {
 		info.Stats.WaitingOnDeps = 1
 		info.Stats.Running = 1
 
-		q := installScheduler(t)
+		q := installScheduler(t, s)
 		q.On("Info", mock.Anything).Return(info)
 
 		tc := newTestContext(t, s)
@@ -116,7 +116,7 @@ func TestGetQueueInfo(t *testing.T) {
 	})
 
 	t.Run("empty queue returns empty lists", func(t *testing.T) {
-		q := installScheduler(t)
+		q := installScheduler(t, s)
 		q.On("Info", mock.Anything).Return(queue.InfoT{})
 
 		tc := newTestContext(t, s)
@@ -136,7 +136,7 @@ func TestGetQueueInfo(t *testing.T) {
 			{ID: "1", AgentID: 99999, PipelineID: pipe.ID, RepoID: repo.ID},
 		}}
 
-		q := installScheduler(t)
+		q := installScheduler(t, s)
 		q.On("Info", mock.Anything).Return(info)
 
 		tc := newTestContext(t, s)
@@ -151,7 +151,7 @@ func TestGetQueueInfo(t *testing.T) {
 			{ID: "1", PipelineID: 99999, RepoID: repo.ID},
 		}}
 
-		q := installScheduler(t)
+		q := installScheduler(t, s)
 		q.On("Info", mock.Anything).Return(info)
 
 		tc := newTestContext(t, s)
@@ -166,7 +166,7 @@ func TestPauseResumeQueue(t *testing.T) {
 	s := newTestStore(t)
 
 	t.Run("pause returns no content and pauses queue", func(t *testing.T) {
-		q := installScheduler(t)
+		q := installScheduler(t, s)
 		q.On("Pause").Return()
 
 		tc := newTestContext(t, s)
@@ -177,7 +177,7 @@ func TestPauseResumeQueue(t *testing.T) {
 	})
 
 	t.Run("resume returns no content and resumes queue", func(t *testing.T) {
-		q := installScheduler(t)
+		q := installScheduler(t, s)
 		q.On("Resume").Return()
 
 		tc := newTestContext(t, s)

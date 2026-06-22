@@ -15,18 +15,19 @@
 package pipeline
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"maps"
+	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) error {
+// pipelineTasks builds the queue tasks for a pipeline's workflow items.
+// Enqueuing happens via the scheduler (see scheduler.StartPipeline).
+func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) ([]*model.Task, error) {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		task := &model.Task{
@@ -36,15 +37,34 @@ func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.
 			Labels:     make(map[string]string),
 			PipelineID: activePipeline.ID,
 			RepoID:     repo.ID,
+			Created:    activePipeline.Created,
+		}
+		// fall back to the current time if the pipeline has no creation
+		// timestamp, so the queue always has a defined ordering key.
+		if task.Created == 0 {
+			task.Created = time.Now().Unix()
 		}
 		maps.Copy(task.Labels, item.Labels)
 		err := task.ApplyLabelsFromRepo(repo)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		task.Dependencies = getTaskDependencies(item.DependsOn.Names(), pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
+
+		// Set up the concurrency limit if the workflow opted in.
+		if item.ConcurrencyLimit > 0 {
+			task.ConcurrencyLimit = item.ConcurrencyLimit
+
+			// If no group assigned, each workflow is it's own unique group,
+			// else we use defined group unique per repo.
+			if item.ConcurrencyGroup == "" {
+				task.ConcurrencyGroup = fmt.Sprintf("%d/%s/", repo.ID, item.Workflow.Name)
+			} else {
+				task.ConcurrencyGroup = fmt.Sprintf("%d//%s", repo.ID, item.ConcurrencyGroup)
+			}
+		}
 
 		task.Data, err = json.Marshal(rpc.Workflow{
 			ID:      fmt.Sprint(item.Workflow.ID),
@@ -52,12 +72,12 @@ func queuePipeline(ctx context.Context, repo *model.Repo, activePipeline *model.
 			Timeout: repo.Timeout,
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		tasks = append(tasks, task)
 	}
-	return server.Config.Services.Scheduler.PushAtOnce(ctx, tasks)
+	return tasks, nil
 }
 
 func getTaskDependencies(dependsOn []string, items []*builder.Item) (taskIDs []string) {

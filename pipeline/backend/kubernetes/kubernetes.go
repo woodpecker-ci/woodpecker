@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v6"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	kube_core_v1 "k8s.io/api/core/v1"
@@ -381,7 +381,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}),
 	)
 	if err != nil {
-		if kube_errors.IsNotFound(err) {
+		if kube_errors.IsNotFound(backoff.AsRetryError(err).LastErr) {
 			return &types.State{ExitCode: 0, Exited: true}, nil
 		}
 		return nil, err
