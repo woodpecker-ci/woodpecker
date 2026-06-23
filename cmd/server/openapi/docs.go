@@ -4805,7 +4805,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "message": {
-                    "description": "// Depricated",
+                    "description": "// Deprecated",
                     "type": "string"
                 },
                 "number": {

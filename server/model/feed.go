@@ -40,7 +40,7 @@ type Feed struct {
 	// // New
 	Release  *Release `json:"release,omitempty"    xorm:"json 'pipeline_release'"`
 	TagTitle string   `json:"tag_title,omitempty"  xorm:"pipeline_tag_title"`
-	// // Depricated
+	// // Deprecated
 	Message string `json:"message,omitempty"       xorm:"pipeline_message"`
 }
 
