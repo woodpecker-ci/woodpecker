@@ -241,9 +241,9 @@ If set to 0 we retry forever.
 
 ---
 
-## LOGENTRY_STREAM_BUFFER_SIZE
+## LOG_ENTRY_STREAM_BUFFER_SIZE
 
-- Name: `WOODPECKER_LOGENTRY_STREAM_BUFFER_SIZE`
+- Name: `WOODPECKER_LOG_ENTRY_STREAM_BUFFER_SIZE`
 - Default: `100`
 
 Set how many log lines an agent can buffer before it blocks io.Pipe, expect logentries to reach 1M in worst case.
