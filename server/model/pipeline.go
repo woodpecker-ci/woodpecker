@@ -16,6 +16,8 @@
 package model
 
 import (
+	"fmt"
+
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
@@ -24,7 +26,7 @@ type Pipeline struct {
 	ID                   int64                   `json:"id"                      xorm:"pk autoincr 'id'"`
 	RepoID               int64                   `json:"-"                       xorm:"UNIQUE(s) INDEX 'repo_id'"`
 	Number               int64                   `json:"number"                  xorm:"UNIQUE(s) 'number'"`
-	Author               string                  `json:"author"                  xorm:"INDEX 'author'"`
+	Author               string                  `json:"author"                  xorm:"INDEX 'author'"` // TODO: only // The user sending the webhook data or triggering the pipeline event
 	Parent               int64                   `json:"parent"                  xorm:"parent"`
 	Event                WebhookEvent            `json:"event"                   xorm:"event"`
 	EventReason          []string                `json:"event_reason"            xorm:"json 'event_reason'"`
@@ -41,12 +43,7 @@ type Pipeline struct {
 	RerunCount           int64                   `json:"rerun_count"             xorm:"rerun_count"`
 	Ref                  string                  `json:"ref"                     xorm:"ref"`
 	Refspec              string                  `json:"refspec"                 xorm:"refspec"`
-	Title                string                  `json:"title"                   xorm:"title"`
-	Message              string                  `json:"message"                 xorm:"TEXT 'message'"`
-	Timestamp            int64                   `json:"timestamp"               xorm:"'timestamp'"`
-	Sender               string                  `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Avatar               string                  `json:"author_avatar"           xorm:"varchar(500) avatar"`
-	Email                string                  `json:"author_email"            xorm:"varchar(500) email"`
+	Avatar               string                  `json:"author_avatar"           xorm:"varchar(500) avatar"` // TODO: only & raneme to AuthorAvatar // Avatar URL of the author of the commit
 	ForgeURL             string                  `json:"forge_url"               xorm:"forge_url"`
 	Reviewer             string                  `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed             int64                   `json:"reviewed"                xorm:"reviewed"`
@@ -57,14 +54,26 @@ type Pipeline struct {
 	PullRequestLabels    []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 	PullRequestMilestone string                  `json:"pr_milestone,omitempty"  xorm:"pr_milestone"`
 	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
-	IsPrerelease         bool                    `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
 	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
 	Version              string                  `json:"version"                 xorm:"'version'"`
+
+	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774
+	// // New
+	Release  *Release `json:"release,omitempty"       xorm:"json 'release'"`
+	TagTitle string   `json:"tag_title,omitempty"     xorm:"tag_title"`
+	// // Deprecated
+	Title     string `json:"title"                   xorm:"title"`
+	Message   string `json:"message"                 xorm:"TEXT 'message'"`
+	Timestamp int64  `json:"timestamp"               xorm:"'timestamp'"`
+	Sender    string `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
+	Email     string `json:"author_email"            xorm:"varchar(500) email"`
 }
 
 // APIPipeline TODO remove deprecated properties in next major.
 type APIPipeline struct {
 	*Pipeline
+
+	IsPrerelease bool `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
@@ -77,10 +86,18 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		Pipeline: p,
 	}
 
-	switch p.Event { //nolint:gocritic
+	switch p.Event {
 	case EventCron:
 		ap.Message = p.Cron
 		ap.Sender = p.Cron
+	case EventTag:
+		ap.Message = fmt.Sprintf("created tag %s", p.TagTitle)
+	case EventRelease:
+		if p.Release != nil {
+			ap.Title = p.Release.Title
+			ap.IsPrerelease = p.Release.IsPrerelease
+		}
+		ap.Message = "created release " + p.TagTitle
 	}
 
 	return ap
@@ -109,6 +126,11 @@ type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name	PipelineOptions
+
+type Release struct {
+	Title        string `json:"title,omitempty"`
+	IsPrerelease bool   `json:"is_prerelease,omitempty"`
+} //	@name	Release
 
 type CancelInfo struct {
 	CanceledByUser string `json:"canceled_by_user,omitempty"`

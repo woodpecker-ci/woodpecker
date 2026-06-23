@@ -15,6 +15,8 @@
 
 package model
 
+import "fmt"
+
 // Feed represents an item in the user's feed or timeline.
 type Feed struct {
 	RepoID   int64  `json:"repo_id"                 xorm:"repo_id"`
@@ -34,4 +36,32 @@ type Feed struct {
 	Author   string `json:"author,omitempty"        xorm:"pipeline_author"`
 	Avatar   string `json:"author_avatar,omitempty" xorm:"pipeline_avatar"`
 	Email    string `json:"author_email,omitempty"  xorm:"pipeline_email"`
+
+	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774
+	Release *Release `json:"release,omitempty" xorm:"json 'pipeline_release'"`
+}
+
+func (f *Feed) ToAPIModel() *APIFeed {
+	af := &APIFeed{
+		Feed: f,
+	}
+	switch p.Event {
+	case EventTag:
+		ap.Message = fmt.Sprintf("created tag %s", p.TagTitle)
+	case EventRelease:
+		if p.Release != nil {
+			ap.IsPrerelease = p.Release.IsPrerelease
+			ap.Title = p.Release.Title
+		}
+		ap.Message = "created release " + p.TagTitle
+	}
+	return af
+}
+
+// APIFeed TODO remove in next major.
+type APIFeed struct {
+	*Feed
+
+	// TODO: remove in next major
+	IsPrerelease string `xorm:"-" json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
 } //	@name	Feed
