@@ -76,7 +76,7 @@ func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn, opts ...ClientOpt
 		opt(client)
 	}
 
-	client.logs = make(chan *proto.LogEntry, 10) // max memory use: buffer count * 1 MiB
+	client.logs = make(chan *proto.LogEntry, client.logEntryBufferSize) // max memory use: buffer count * 1 MiB
 
 	go client.processLogs(ctx)
 	return client
