@@ -130,10 +130,10 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 
 	return &model.Pipeline{
 		Event:     model.EventTag,
+		TagTitle:  ref,
 		Commit:    hook.Sha,
 		Ref:       fmt.Sprintf("refs/tags/%s", ref),
 		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
-		Message:   fmt.Sprintf("created tag %s", ref),
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
@@ -206,16 +206,19 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 	)
 
 	return &model.Pipeline{
-		Event:        model.EventRelease,
-		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
-		ForgeURL:     hook.Release.HTMLURL,
-		Branch:       hook.Release.Target,
-		Message:      fmt.Sprintf("created release %s", hook.Release.Title),
-		Avatar:       avatar,
-		Author:       hook.Sender.UserName,
-		Sender:       hook.Sender.UserName,
-		Email:        hook.Sender.Email,
-		IsPrerelease: hook.Release.IsPrerelease,
+		Event:    model.EventRelease,
+		Ref:      fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
+		ForgeURL: hook.Release.HTMLURL,
+		Branch:   hook.Release.Target,
+		Avatar:   avatar,
+		Author:   hook.Sender.UserName,
+		Sender:   hook.Sender.UserName,
+		Email:    hook.Sender.Email,
+		Release: &model.Release{
+			Title:        hook.Release.Title,
+			IsPrerelease: hook.Release.IsPrerelease,
+		},
+		TagTitle: hook.Release.TagName,
 	}
 }
 

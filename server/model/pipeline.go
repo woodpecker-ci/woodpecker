@@ -93,11 +93,12 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 	case EventTag:
 		ap.Message = fmt.Sprintf("created tag %s", p.TagTitle)
 	case EventRelease:
+		ap.Message = "created release " + p.TagTitle
 		if p.Release != nil {
 			ap.Title = p.Release.Title
+			ap.Message = "created release " + p.Release.Title
 			ap.IsPrerelease = p.Release.IsPrerelease
 		}
-		ap.Message = "created release " + p.TagTitle
 	}
 
 	return ap

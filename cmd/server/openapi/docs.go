@@ -4796,7 +4796,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "event": {
-                    "type": "string"
+                    "$ref": "#/definitions/WebhookEvent"
                 },
                 "finished": {
                     "type": "integer"
@@ -4835,6 +4835,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "tag_title": {
                     "type": "string"
                 },
                 "title": {

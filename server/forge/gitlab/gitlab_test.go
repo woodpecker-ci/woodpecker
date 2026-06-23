@@ -163,6 +163,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 				assert.Equal(t, "develop", hookRepo.Branch)
 				assert.Equal(t, "refs/tags/v22", pipeline.Ref)
+				assert.Equal(t, "v22", pipeline.TagTitle)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventTag, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
@@ -347,7 +348,7 @@ func Test_GitLab(t *testing.T) {
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
 				assert.Equal(t, "ci", hookRepo.Name)
-				assert.Equal(t, "created release Awesome version 0.0.2", pipeline.Message)
+				assert.Equal(t, "Awesome version 0.0.2", pipeline.Release.Title)
 				assert.Equal(t, model.EventRelease, pipeline.Event)
 			}
 		})

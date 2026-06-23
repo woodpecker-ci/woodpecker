@@ -210,6 +210,8 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	case "tag", "annotated_tag", "bookmark":
 		pipeline.Event = model.EventTag
 		pipeline.Ref = fmt.Sprintf("refs/tags/%s", change.New.Name)
+		// TODO is the forge url correct on tags?
+		pipeline.TagTitle = change.New.Name
 	default:
 		pipeline.Event = model.EventPush
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)

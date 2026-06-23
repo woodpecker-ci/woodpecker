@@ -103,7 +103,7 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 		Commit:   hook.GetHeadCommit().GetID(),
 		Ref:      hook.GetRef(),
 		ForgeURL: hook.GetHeadCommit().GetURL(),
-		Branch:   strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
+		Branch:   strings.TrimPrefix(hook.GetRef(), "refs/heads/"),
 		Message:  hook.GetHeadCommit().GetMessage(),
 		Email:    hook.GetHeadCommit().GetAuthor().GetEmail(),
 		Avatar:   hook.GetSender().GetAvatarURL(),
@@ -119,10 +119,11 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!
 		pipeline.Event = model.EventTag
+		pipeline.TagTitle = strings.TrimPrefix(pipeline.Ref, "refs/tags/")
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
 		// as pipeline's branch so that we can filter events base on it
 		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
+			pipeline.Branch = strings.TrimPrefix(hook.GetBaseRef(), "refs/heads/")
 		}
 		return repo, pipeline, "", ""
 	}
@@ -248,15 +249,18 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 	}
 
 	pipeline := &model.Pipeline{
-		Event:        model.EventRelease,
-		ForgeURL:     hook.GetRelease().GetHTMLURL(),
-		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
-		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
-		Message:      fmt.Sprintf("created release %s", name),
-		Author:       hook.GetRelease().GetAuthor().GetLogin(),
-		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),
-		Sender:       hook.GetSender().GetLogin(),
-		IsPrerelease: hook.GetRelease().GetPrerelease(),
+		Event:    model.EventRelease,
+		ForgeURL: hook.GetRelease().GetHTMLURL(),
+		Ref:      fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
+		Branch:   hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
+		Release: &model.Release{
+			Title:        name,
+			IsPrerelease: hook.GetRelease().GetPrerelease(),
+		},
+		TagTitle: hook.GetRelease().GetTagName(),
+		Author:   hook.GetRelease().GetAuthor().GetLogin(),
+		Avatar:   hook.GetRelease().GetAuthor().GetAvatarURL(),
+		Sender:   hook.GetSender().GetLogin(),
 	}
 
 	return convertRepo(hook.GetRepo()), pipeline
