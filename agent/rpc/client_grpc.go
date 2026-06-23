@@ -95,6 +95,10 @@ func SetConnectionRetryTimeout(d time.Duration) ClientOption {
 
 func SetLogEntryBufferSize(count int) ClientOption {
 	return func(c *client) {
+		if count < 0 {
+			log.Error().Msgf("LogEntry Buffer can not be negative")
+			return
+		}
 		c.logEntryBufferSize = count
 	}
 }
