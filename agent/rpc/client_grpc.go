@@ -99,6 +99,7 @@ func SetLogEntryBufferSize(count int) ClientOption {
 			log.Error().Msgf("LogEntry Buffer can not be negative")
 			return
 		}
+		log.Info().Msgf("logentry stream buffer size set to max %dMb", count)
 		c.logEntryBufferSize = count
 	}
 }
