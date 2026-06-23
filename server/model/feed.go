@@ -32,14 +32,16 @@ type Feed struct {
 	Ref      string       `json:"ref,omitempty"           xorm:"pipeline_ref"`
 	Refspec  string       `json:"refspec,omitempty"       xorm:"pipeline_refspec"`
 	Title    string       `json:"title,omitempty"         xorm:"pipeline_title"`
-	Message  string       `json:"message,omitempty"       xorm:"pipeline_message"`
 	Author   string       `json:"author,omitempty"        xorm:"pipeline_author"`
 	Avatar   string       `json:"author_avatar,omitempty" xorm:"pipeline_avatar"`
 	Email    string       `json:"author_email,omitempty"  xorm:"pipeline_email"`
 
 	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774
+	// // New
 	Release  *Release `json:"release,omitempty"    xorm:"json 'pipeline_release'"`
 	TagTitle string   `json:"tag_title,omitempty"  xorm:"pipeline_tag_title"`
+	// // Depricated
+	Message string `json:"message,omitempty"       xorm:"pipeline_message"`
 }
 
 func (f *Feed) ToAPIModel() *APIFeed {
@@ -62,7 +64,4 @@ func (f *Feed) ToAPIModel() *APIFeed {
 // APIFeed TODO remove in next major.
 type APIFeed struct {
 	*Feed
-
-	// TODO: remove in next major
-	IsPrerelease string `xorm:"-" json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
 } //	@name	Feed
