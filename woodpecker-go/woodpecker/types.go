@@ -175,7 +175,7 @@ type (
 		Password string `json:"password,omitempty"`
 	}
 
-	// Release represents pipeline release metadata
+	// Release represents pipeline release metadata.
 	Release struct {
 		Title        string `json:"title,omitempty"`
 		IsPrerelease bool   `json:"is_prerelease,omitempty"`

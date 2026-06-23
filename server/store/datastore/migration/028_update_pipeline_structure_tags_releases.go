@@ -28,7 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-var updatePipelineStructure_tagsReleases = xormigrate.Migration{
+var updatePipelineStructureTagsReleases = xormigrate.Migration{
 	ID: "update-pipeline-structure_tags-releases",
 	MigrateSession: func(sess *xorm.Session) error {
 		// perPage set the size of the slice to read per page.
