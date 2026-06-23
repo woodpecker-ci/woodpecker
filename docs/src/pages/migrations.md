@@ -22,7 +22,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
     - `tag_title` for tag events
     - dropped for manual events (was a combination of `MANUAL PIPELINE` and branch)
   - `is_prerelease` => `release.is_prerelease`
-  - extraction from `ref` => `release.tag_title`
+  - extraction from `ref` => `tag_title`
 
 ### Admin-facing migrations
 
