@@ -61,7 +61,7 @@ type client struct {
 	// Maps directly onto backoff.WithMaxElapsedTime.
 	connectionRetryTimeout time.Duration
 	// logEntryBufferSize sets the buffer size before the log reader is blocking.
-	// If you have enoth memory and log bursts, set it higher.
+	// If you have enough memory and log bursts, set it higher.
 	logEntryBufferSize int
 }
 
