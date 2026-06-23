@@ -4804,11 +4804,8 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_prerelease": {
-                    "description": "TODO: remove in next major",
-                    "type": "string"
-                },
                 "message": {
+                    "description": "// Depricated",
                     "type": "string"
                 },
                 "number": {
@@ -4821,7 +4818,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release": {
-                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774",
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774\n// New",
                     "allOf": [
                         {
                             "$ref": "#/definitions/Release"
