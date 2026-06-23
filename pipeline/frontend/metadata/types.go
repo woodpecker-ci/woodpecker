@@ -58,6 +58,7 @@ type (
 		Parent      int64    `json:"parent,omitempty"`
 		RerunCount  int64    `json:"rerun_count,omitempty"`
 		Cron        string   `json:"cron,omitempty"`
+		Release     string   `json:"release,omitempty"`
 		Author      string   `json:"author,omitempty"`
 		Avatar      string   `json:"avatar,omitempty"`
 	}

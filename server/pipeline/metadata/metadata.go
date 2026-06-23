@@ -126,7 +126,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		parent = pipeline.Parent
 	}
 
-	return metadata.Pipeline{
+	metadata := metadata.Pipeline{
 		Number:      pipeline.Number,
 		Parent:      parent,
 		Created:     pipeline.Created,
@@ -159,4 +159,11 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		Author: pipeline.Author,
 		Avatar: pipeline.Avatar,
 	}
+
+	if pipeline.Release != nil {
+		metadata.Commit.IsPrerelease = pipeline.Release.IsPrerelease
+		metadata.Release = pipeline.Release.Title
+	}
+
+	return metadata
 }
