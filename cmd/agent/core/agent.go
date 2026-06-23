@@ -137,6 +137,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	client := agent_rpc.NewGrpcClient(
 		ctx, agentConn.MainConn,
 		agent_rpc.SetConnectionRetryTimeout(c.Duration("retry-timeout")),
+		agent_rpc.SetLogEntryBufferSize(c.Int("")),
 	)
 	agentConfigPersisted := atomic.Bool{}
 
