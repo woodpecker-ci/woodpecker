@@ -43,7 +43,7 @@ type Pipeline struct {
 	RerunCount           int64                   `json:"rerun_count"             xorm:"rerun_count"`
 	Ref                  string                  `json:"ref"                     xorm:"ref"`
 	Refspec              string                  `json:"refspec"                 xorm:"refspec"`
-	Avatar               string                  `json:"author_avatar"           xorm:"varchar(500) avatar"` // TODO: only & raneme to AuthorAvatar // Avatar URL of the author of the commit
+	Avatar               string                  `json:"author_avatar"           xorm:"varchar(500) avatar"` // TODO: only & rename to AuthorAvatar // Avatar URL of the author of the commit
 	ForgeURL             string                  `json:"forge_url"               xorm:"forge_url"`
 	Reviewer             string                  `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed             int64                   `json:"reviewed"                xorm:"reviewed"`

@@ -5003,7 +5003,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "author_avatar": {
-                    "description": "TODO: only \u0026 raneme to AuthorAvatar // Avatar URL of the author of the commit",
+                    "description": "TODO: only \u0026 rename to AuthorAvatar // Avatar URL of the author of the commit",
                     "type": "string"
                 },
                 "author_email": {
