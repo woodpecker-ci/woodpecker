@@ -34,11 +34,11 @@ import (
 const (
 	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
 	// This will be removed in the future.
-	StepLabelLegacy          = "step"
-	StepLabel                = "woodpecker-ci.org/step"
-	TaskUUIDLabel            = "woodpecker-ci.org/task-uuid"
-	podPrefix                = "wp-"
-	defaultFSGroup     int64 = 1000
+	StepLabelLegacy       = "step"
+	StepLabel             = "woodpecker-ci.org/step"
+	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
+	podPrefix             = "wp-"
+	defaultFSGroup  int64 = 1000
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*kube_core_v1.Pod, error) {
@@ -293,7 +293,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 // podInitContainer determines whether an init container is required to prepare the
 // main step container's working directory with the correct permissions.
 // If it is required, it returns the init container spec, otherwise it returns an empty container spec.
-func podInitContainer(config *config,podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Container) *kube_core_v1.Container {
+func podInitContainer(config *config, podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Container) *kube_core_v1.Container {
 	// if pod is running as root, we don't need an init container to precreate the workingDir
 	// since kubelet already precreates it (as root:root)
 	if podSpec.SecurityContext == nil ||

@@ -135,9 +135,9 @@ var Flags = []cli.Flag{
 		Value:   20,
 	},
 	&cli.StringFlag{
-    Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PERMISSION_INIT_IMAGE"),
-    Name:    "backend-k8s-permission-init-image",
-    Usage:   "image used by the workspace permission init container",
-    Value:   "busybox:stable-musl",
-  	},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PERMISSION_INIT_IMAGE"),
+		Name:    "backend-k8s-permission-init-image",
+		Usage:   "image used by the workspace permission init container",
+		Value:   "busybox:stable-musl",
+	},
 }
