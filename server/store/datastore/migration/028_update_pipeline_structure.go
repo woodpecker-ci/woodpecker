@@ -178,20 +178,20 @@ var updatePipelineStructure = xormigrate.Migration{
 				case model.EventTag:
 					p.TagTitle = strings.TrimPrefix(p.Ref, "refs/tags/")
 				case model.EventPull, model.EventPullClosed:
+					// derive the pull request index from the ref, covering every forge
+					// ref layout: GitHub/Gitea/Forgejo (refs/pull/N/head), GitLab
+					// (refs/merge-requests/N/head|merge) and Bitbucket cloud + datacenter
+					// (refs/pull-requests/N/from).
+					prIndex := p.Ref
+					for _, prefix := range []string{"refs/pull/", "refs/merge-requests/", "refs/pull-requests/"} {
+						prIndex = strings.TrimPrefix(prIndex, prefix)
+					}
+					for _, suffix := range []string{"/merge", "/head", "/from"} {
+						prIndex = strings.TrimSuffix(prIndex, suffix)
+					}
 					p.PullRequest = &pullRequest{
-						Title: p.Title,
-						Index: model.ForgeRemoteID(
-							strings.TrimSuffix(
-								strings.TrimSuffix(
-									strings.TrimPrefix(
-										strings.TrimPrefix(p.Ref, "refs/pull/"),
-										"refs/merge-requests/",
-									),
-									"/merge",
-								),
-								"/head",
-							),
-						),
+						Title:     p.Title,
+						Index:     model.ForgeRemoteID(prIndex),
 						FromFork:  p.FromFork,
 						Labels:    p.PullRequestLabels,
 						Milestone: p.PullRequestMilestone,
