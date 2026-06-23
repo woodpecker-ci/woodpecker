@@ -12,6 +12,18 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 - deprecated `runs_on` workflow property in favor of `when.status`.
 
+### API changes
+
+- The pipeline model is currently being changed to use nested objects grouped based on the event.
+  Following properties are deprecated and should be replaced by the their new counterparts:
+  - `title` =>
+    - `release.title`: for release events
+  - `message` =>
+    - `tag_title` for tag events
+    - dropped for manual events (was a combination of `MANUAL PIPELINE` and branch)
+  - `is_prerelease` => `release.is_prerelease`
+  - extraction from `ref` => `release.tag_title`
+
 ### Admin-facing migrations
 
 - changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
