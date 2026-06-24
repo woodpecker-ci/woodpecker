@@ -104,6 +104,7 @@ func (m *Metadata) Environ() map[string]string {
 		setNonEmptyEnvVar(params, "CI_COMMIT_TAG", p)
 	}
 	if pipeline.Event == EventRelease {
+		setNonEmptyEnvVar(params, "CI_PIPELINE_RELEASE_TITLE", pipeline.Release)
 		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Commit.IsPrerelease))
 	}
 	if pipeline.Event.IsPull() {
