@@ -90,13 +90,10 @@ func TestWorkflowConcurrencyLimit(t *testing.T) {
 	// Trigger all rounds up front so they compete for the concurrency groups.
 	created := make([]*model.Pipeline, 0, rounds)
 	for i := range rounds {
-		p, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-			Event:  model.EventPush,
-			Branch: "main",
-			Commit: &model.Commit{SHA: fmt.Sprintf("deadbeef%d", i)},
-			Ref:    "refs/heads/main",
-			Author: env.Fixtures.Owner.Login,
-		})
+		pipeDraft := env.DummyPipeline(model.EventPush)
+		pipeDraft.Commit.SHA = fmt.Sprintf("deadbeef%d", i)
+
+		p, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, pipeDraft)
 		require.NoErrorf(t, err, "create pipeline round %d", i)
 		require.NotNil(t, p)
 		created = append(created, p)
