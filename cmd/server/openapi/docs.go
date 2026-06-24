@@ -4818,7 +4818,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release": {
-                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774\n// New",
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
                     "allOf": [
                         {
                             "$ref": "#/definitions/Release"
@@ -5093,7 +5093,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release": {
-                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774\n// New",
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
                     "allOf": [
                         {
                             "$ref": "#/definitions/Release"
@@ -5941,9 +5941,6 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "is_prerelease": {
-                    "type": "boolean"
-                },
                 "labels": {
                     "type": "array",
                     "items": {
@@ -6075,7 +6072,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "release": {
-                    "type": "string"
+                    "$ref": "#/definitions/metadata.Release"
                 },
                 "rerun_count": {
                     "type": "integer"
@@ -6090,6 +6087,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "title": {
                     "type": "string"
                 }
             }
