@@ -683,7 +683,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	}
 
 	if pipeline != nil {
-		switch pipeline.Event { //nilint:gocritic // ignore lint issue as this will get more cases later
+		switch pipeline.Event { //nolint:gocritic // ignore lint issue as this will get more cases later
 		case model.EventRelease:
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
