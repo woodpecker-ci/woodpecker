@@ -5062,6 +5062,9 @@ const docTemplate = `{
                 "parent": {
                     "type": "integer"
                 },
+                "pr_draft": {
+                    "type": "boolean"
+                },
                 "pr_labels": {
                     "type": "array",
                     "items": {
@@ -5902,6 +5905,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "draft": {
+                    "type": "boolean"
                 },
                 "is_prerelease": {
                     "type": "boolean"
