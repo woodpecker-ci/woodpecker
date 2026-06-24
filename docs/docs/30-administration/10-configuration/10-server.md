@@ -402,10 +402,21 @@ woodpecker_waiting_steps 0
 woodpecker_worker_count 4
 # HELP woodpecker_step_failures_total Total number of pipeline step failures.
 # TYPE woodpecker_step_failures_total counter
-woodpecker_step_failures_total{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 1
+woodpecker_step_failures_total{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker"} 1
 # HELP woodpecker_step_duration_seconds Step duration in seconds.
-# TYPE woodpecker_step_duration_seconds gauge
-woodpecker_step_duration_seconds{pipeline="1",repo="woodpecker-ci/woodpecker",step="deploy"} 12
+# TYPE woodpecker_step_duration_seconds histogram
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="1"} 0
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="5"} 0
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="10"} 0
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="30"} 1
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="60"} 1
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="300"} 1
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="600"} 1
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="1800"} 1
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="3600"} 1
+woodpecker_step_duration_seconds_bucket{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker",le="+Inf"} 1
+woodpecker_step_duration_seconds_sum{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker"} 12
+woodpecker_step_duration_seconds_count{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker"} 1
 ```
 
 Step-level metrics are exported as long as `WOODPECKER_STEP_LEVEL_METRICS` is not disabled.
@@ -671,7 +682,7 @@ Example: `:9001`
 - Name: `WOODPECKER_STEP_LEVEL_METRICS`
 - Default: `true`
 
-Enable step-level metrics, including failed step counters and step duration gauges.
+Enable step-level metrics, including failed step counters and step duration histograms.
 
 ---
 
