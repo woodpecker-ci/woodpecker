@@ -39,6 +39,7 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			pipeline.LabelFilterOrg: "0",
+			pipeline.LabelRepoID:    "0",
 		}, filters)
 	})
 
@@ -50,17 +51,46 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			pipeline.LabelFilterOrg: "*",
+			pipeline.LabelRepoID:    "*",
 		}, filters)
 	})
 
 	t.Run("OrgAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID: 123,
+			OrgID:  123,
+			RepoID: IDNotSet,
 		}
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			pipeline.LabelFilterOrg: "123",
+			pipeline.LabelRepoID:    "*",
+		}, filters)
+	})
+
+	t.Run("RepoAgent", func(t *testing.T) {
+		agent := &Agent{
+			OrgID:  IDNotSet,
+			RepoID: 456,
+		}
+		filters, err := agent.GetServerLabels()
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]string{
+			pipeline.LabelRepoID:    "456",
+			pipeline.LabelFilterOrg: "*",
+		}, filters)
+	})
+
+	t.Run("OrgAndRepoAgent", func(t *testing.T) {
+		agent := &Agent{
+			OrgID:  123,
+			RepoID: 456,
+		}
+		filters, err := agent.GetServerLabels()
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]string{
+			pipeline.LabelFilterOrg: "123",
+			pipeline.LabelRepoID:    "456",
 		}, filters)
 	})
 }
@@ -76,7 +106,8 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 
 	t.Run("GlobalAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID: IDNotSet,
+			OrgID:  IDNotSet,
+			RepoID: IDNotSet,
 		}
 
 		assert.True(t, agent.CanAccessRepo(repo))
@@ -84,7 +115,33 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 
 	t.Run("OrgAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID: 12,
+			OrgID:  12,
+			RepoID: IDNotSet,
+		}
+		assert.True(t, agent.CanAccessRepo(repo))
+		assert.False(t, agent.CanAccessRepo(otherRepo))
+	})
+
+	t.Run("RepoAgent", func(t *testing.T) {
+		agent := &Agent{
+			OrgID:  12,
+			RepoID: 123,
+		}
+		assert.True(t, agent.CanAccessRepo(repo))
+		assert.False(t, agent.CanAccessRepo(otherRepo))
+	})
+
+	t.Run("OrgAndRepoAgent", func(t *testing.T) {
+		agent := &Agent{
+			OrgID:  12,
+			RepoID: 456,
+		}
+		assert.False(t, agent.CanAccessRepo(repo))
+		assert.False(t, agent.CanAccessRepo(otherRepo))
+
+		agent = &Agent{
+			OrgID:  12,
+			RepoID: 123,
 		}
 		assert.True(t, agent.CanAccessRepo(repo))
 		assert.False(t, agent.CanAccessRepo(otherRepo))

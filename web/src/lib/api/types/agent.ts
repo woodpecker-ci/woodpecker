@@ -3,6 +3,7 @@ export interface Agent {
   name: string;
   owner_id: number;
   org_id: number;
+  repo_id: number;
   token: string;
   created: number;
   updated: number;
