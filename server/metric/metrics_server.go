@@ -34,8 +34,8 @@ const (
 )
 
 var (
-	FailurePipelineStepInfoCount *prometheus.CounterVec = nil
-	StepDurationRecord           *prometheus.GaugeVec   = nil
+	FailurePipelineStepInfoCount *prometheus.CounterVec   = nil
+	StepDurationRecord           *prometheus.HistogramVec = nil
 )
 
 func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Store) {
@@ -83,16 +83,17 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 				Name:      "step_failures_total",
 				Help:      "Total number of pipeline step failures.",
 			},
-			[]string{"pipeline", "repo", "step"},
+			[]string{"workflow", "repo", "step"},
 		)
 
-		StepDurationRecord = promauto.NewGaugeVec(
-			prometheus.GaugeOpts{
+		StepDurationRecord = promauto.NewHistogramVec(
+			prometheus.HistogramOpts{
 				Namespace: "woodpecker",
 				Name:      "step_duration_seconds",
 				Help:      "Step duration in seconds.",
+				Buckets:   []float64{1, 5, 10, 30, 60, 300, 600, 1800, 3600},
 			},
-			[]string{"pipeline", "repo", "step"},
+			[]string{"workflow", "repo", "step"},
 		)
 	}
 	go func() {
