@@ -36,7 +36,7 @@ type Feed struct {
 	Avatar   string       `json:"author_avatar,omitempty" xorm:"pipeline_avatar"`
 	Email    string       `json:"author_email,omitempty"  xorm:"pipeline_email"`
 
-	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774
+	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626
 	// // New
 	Release  *Release `json:"release,omitempty"    xorm:"json 'pipeline_release'"`
 	TagTitle string   `json:"tag_title,omitempty"  xorm:"pipeline_tag_title"`
