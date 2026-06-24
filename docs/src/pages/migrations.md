@@ -21,7 +21,6 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
     - `release.title`: for release events
   - `message` =>
     - `tag_title` for tag events
-    - dropped for manual events (was a combination of `MANUAL PIPELINE` and branch)
   - `is_prerelease` => `release.is_prerelease`
   - extraction from `ref` => `tag_title`
 
