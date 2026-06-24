@@ -57,8 +57,8 @@ func TestMetadataPipelineFromModelPipelineRelease(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			result := metadataPipelineFromModelPipeline(tc.pipeline, false)
-			assert.Equal(t, tc.wantRelease, result.Release)
-			assert.Equal(t, tc.wantIsPrerelease, result.Commit.IsPrerelease)
+			assert.Equal(t, tc.wantRelease, result.Release.Title)
+			assert.Equal(t, tc.wantIsPrerelease, result.Release.IsPrerelease)
 		})
 	}
 }

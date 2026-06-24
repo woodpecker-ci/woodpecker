@@ -97,7 +97,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	metadataFileAndOverrideOrDefault(c, "pipeline-url", func(s string) { m.Curr.ForgeURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-deploy-to", func(s string) { m.Curr.DeployTo = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-deploy-task", func(s string) { m.Curr.DeployTask = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "pipeline-release", func(s string) { m.Curr.Release = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "pipeline-release", func(s string) { m.Curr.Release.Title = s }, c.String)
 
 	// Current Pipeline Commit
 	metadataFileAndOverrideOrDefault(c, "commit-sha", func(s string) { m.Curr.Commit.Sha = s }, c.String)
@@ -113,7 +113,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 
 	metadataFileAndOverrideOrDefault(c, "commit-pull-labels", func(sl []string) { m.Curr.Commit.PullRequestLabels = sl }, c.StringSlice)
 	metadataFileAndOverrideOrDefault(c, "commit-pull-milestone", func(s string) { m.Curr.Commit.PullRequestMilestone = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "commit-release-is-pre", func(b bool) { m.Curr.Commit.IsPrerelease = b }, c.Bool)
+	metadataFileAndOverrideOrDefault(c, "commit-release-is-pre", func(b bool) { m.Curr.Release.IsPrerelease = b }, c.Bool)
 
 	// Previous Pipeline
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-number", func(i int64) { m.Prev.Number = i }, c.Int64)

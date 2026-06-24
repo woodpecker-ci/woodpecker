@@ -24,12 +24,14 @@ func TestEnviron(t *testing.T) {
 	m := Metadata{
 		Sys: System{Name: "wp"},
 		Curr: Pipeline{
-			Event:   EventRelease,
-			Release: "v1.2.3",
-			Commit: Commit{
-				Ref:          "refs/tags/v1.2.3",
-				Timestamp:    1722617519,
+			Event: EventRelease,
+			Release: Release{
+				Title:        "v1.2.3",
 				IsPrerelease: true,
+			},
+			Commit: Commit{
+				Ref:       "refs/tags/v1.2.3",
+				Timestamp: 1722617519,
 			},
 		},
 		Prev: Pipeline{

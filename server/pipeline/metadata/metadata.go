@@ -160,8 +160,8 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 	}
 
 	if pipeline.Release != nil {
-		metadata.Commit.IsPrerelease = pipeline.Release.IsPrerelease
-		metadata.Release = pipeline.Release.Title
+		metadata.Release.Title = pipeline.Release.Title
+		metadata.Release.IsPrerelease = pipeline.Release.IsPrerelease
 	}
 
 	return metadata
