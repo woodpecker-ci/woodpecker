@@ -214,16 +214,16 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		(step.State == model.StatusFailure ||
 			step.State == model.StatusKilled ||
 			step.State == model.StatusError) {
-		metric.FailurePipelineStepInfoCount.WithLabelValues(strconv.FormatInt(workflow.PipelineID, 10), repo.FullName, step.Name).Inc()
+		metric.FailurePipelineStepInfoCount.WithLabelValues(workflow.Name, repo.FullName, step.Name).Inc()
 	}
 
-	if metric.StepDurationRecord != nil && state.Exited && step.Started > 0 && step.Finished > step.Started {
+	if metric.StepDurationRecord != nil && state.Exited && step.Started > 0 && step.Finished >= step.Started {
 		duration := step.Finished - step.Started
 		metric.StepDurationRecord.WithLabelValues(
-			strconv.FormatInt(workflow.PipelineID, 10),
+			workflow.Name,
 			repo.FullName,
 			step.Name,
-		).Set(float64(duration))
+		).Observe(float64(duration))
 	}
 	if state.Exited {
 		server.Config.Services.LogStore.StepFinished(step)
