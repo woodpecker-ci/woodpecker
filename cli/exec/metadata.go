@@ -97,6 +97,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	metadataFileAndOverrideOrDefault(c, "pipeline-url", func(s string) { m.Curr.ForgeURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-deploy-to", func(s string) { m.Curr.DeployTo = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-deploy-task", func(s string) { m.Curr.DeployTask = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "pipeline-release", func(s string) { m.Curr.Release = s }, c.String)
 
 	// Current Pipeline Commit
 	metadataFileAndOverrideOrDefault(c, "commit-sha", func(s string) { m.Curr.Commit.Sha = s }, c.String)

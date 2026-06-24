@@ -254,6 +254,11 @@ var flags = []cli.Flag{
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_DEPLOY_TASK\".",
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_RELEASE_TITLE"),
+		Name:    "pipeline-release",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_RELEASE_TITLE\".",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_PIPELINE_FILES"),
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_FILES\", either json formatted list of strings, or comma separated string list.",
 		Name:    "pipeline-changed-files",
