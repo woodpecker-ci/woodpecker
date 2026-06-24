@@ -16,6 +16,7 @@ package rpc
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -25,8 +26,17 @@ import (
 
 // AuthInterceptor is a client interceptor for authentication.
 type AuthInterceptor struct {
-	authClient  *AuthClient
+	authClient *AuthClient
+
+	// mu guards accessToken, which is read by every outgoing RPC (attachToken)
+	// and written by both the background refresh goroutine and on-demand
+	// RefreshToken calls.
+	mu          sync.RWMutex
 	accessToken string
+
+	// refreshMu serializes re-authentication so that a burst of RPCs failing
+	// with an expired token does not trigger a stampede of Auth calls.
+	refreshMu sync.Mutex
 }
 
 // NewAuthInterceptor returns a new auth interceptor.
@@ -72,7 +82,43 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamClientInterceptor {
 }
 
 func (interceptor *AuthInterceptor) attachToken(ctx context.Context) context.Context {
-	return metadata.AppendToOutgoingContext(ctx, "token", interceptor.accessToken)
+	return metadata.AppendToOutgoingContext(ctx, "token", interceptor.Token())
+}
+
+// Token returns the access token currently in use. It is safe for concurrent
+// use.
+func (interceptor *AuthInterceptor) Token() string {
+	interceptor.mu.RLock()
+	defer interceptor.mu.RUnlock()
+	return interceptor.accessToken
+}
+
+func (interceptor *AuthInterceptor) setToken(token string) {
+	interceptor.mu.Lock()
+	defer interceptor.mu.Unlock()
+	interceptor.accessToken = token
+}
+
+// RefreshToken forces a re-authentication with the server and atomically
+// replaces the stored access token. It is used by the RPC client to recover
+// from an expired access token without waiting for the background refresh
+// timer.
+//
+// It is safe to call concurrently. Callers pass the token they last used as
+// staleToken; if another goroutine already refreshed the token in the
+// meantime, the redundant re-authentication is skipped. No token material is
+// logged.
+func (interceptor *AuthInterceptor) RefreshToken(ctx context.Context, staleToken string) error {
+	interceptor.refreshMu.Lock()
+	defer interceptor.refreshMu.Unlock()
+
+	// Another goroutine already obtained a fresh token while we were waiting
+	// for the lock; nothing to do.
+	if staleToken != "" && interceptor.Token() != staleToken {
+		return nil
+	}
+
+	return interceptor.refreshToken(ctx)
 }
 
 func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, refreshInterval time.Duration) error {
@@ -89,7 +135,11 @@ func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, re
 			case <-ctx.Done():
 				return
 			case <-time.After(wait):
+				// Serialize with on-demand RefreshToken calls so the two
+				// never race to authenticate at the same time.
+				interceptor.refreshMu.Lock()
 				err := interceptor.refreshToken(ctx)
+				interceptor.refreshMu.Unlock()
 				if err != nil {
 					wait = time.Second
 				} else {
@@ -102,13 +152,16 @@ func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, re
 	return nil
 }
 
+// refreshToken authenticates with the server and stores the new access token.
+// Callers must hold refreshMu (or be the constructor, before the refresh
+// goroutine is started).
 func (interceptor *AuthInterceptor) refreshToken(ctx context.Context) error {
 	accessToken, _, err := interceptor.authClient.Auth(ctx)
 	if err != nil {
 		return err
 	}
 
-	interceptor.accessToken = accessToken
+	interceptor.setToken(accessToken)
 	log.Trace().Msg("token refreshed")
 
 	return nil

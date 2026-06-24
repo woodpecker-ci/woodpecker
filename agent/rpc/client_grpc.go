@@ -50,12 +50,35 @@ const (
 	// Maximum amount of time between sending consecutive batched log messages.
 	// Controls the delay between the CI job generating a log record, and web users receiving it.
 	maxLogFlushPeriod time.Duration = time.Second
+
+	// Maximum number of times a single RPC will re-authenticate and retry after
+	// the server rejects its access token with codes.Unauthenticated. It
+	// prevents an infinite refresh/retry loop when re-authentication does not
+	// resolve the rejection (e.g. a revoked agent secret) — even when
+	// connectionRetryTimeout is infinite.
+	maxAuthRefreshes int = 2
 )
+
+// tokenRefresher lets the RPC client force a re-authentication after the
+// server rejects the current access token (most commonly because it expired).
+// It is implemented by *AuthInterceptor.
+type tokenRefresher interface {
+	// Token returns the access token currently in use.
+	Token() string
+	// RefreshToken re-authenticates and replaces the stored access token.
+	// staleToken is the token the caller last used; if the stored token has
+	// already changed, the refresh is skipped.
+	RefreshToken(ctx context.Context, staleToken string) error
+}
 
 type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
 	logs   chan *proto.LogEntry
+	// auth re-authenticates the agent when an RPC fails with
+	// codes.Unauthenticated. It may be nil (e.g. in tests), in which case
+	// Unauthenticated errors are treated as permanent.
+	auth tokenRefresher
 	// connectionRetryTimeout is the maximum time to wait for a connection to be
 	// restored before the agent gives up and exits. Zero means infinite.
 	// Maps directly onto backoff.WithMaxElapsedTime.
@@ -85,6 +108,14 @@ func SetConnectionRetryTimeout(d time.Duration) ClientOption {
 	}
 	return func(c *client) {
 		c.connectionRetryTimeout = d
+	}
+}
+
+// SetAuthRefresher wires the auth interceptor into the client so that RPCs
+// rejected with codes.Unauthenticated trigger a re-authentication and retry.
+func SetAuthRefresher(a tokenRefresher) ClientOption {
+	return func(c *client) {
+		c.auth = a
 	}
 }
 
@@ -141,7 +172,7 @@ func (c *client) retryOpts(op string) []backoff.RetryOption {
 //   - returning backoff.Permanent(err) for unrecoverable gRPC codes
 //   - returning the raw error for retryable codes (Aborted/DataLoss/...)
 func retryRPC[T any](ctx context.Context, c *client, opName string, op backoff.Operation[T]) (T, error) {
-	res, err := backoff.Retry(ctx, op, c.retryOpts(opName)...)
+	res, err := backoff.Retry(ctx, withAuthRefresh(ctx, c, opName, op), c.retryOpts(opName)...)
 	if err == nil {
 		return res, nil
 	}
@@ -167,6 +198,58 @@ func retryRPC[T any](ctx context.Context, c *client, opName string, op backoff.O
 	return zero, err
 }
 
+// withAuthRefresh wraps an RPC operation so that, when it fails with
+// codes.Unauthenticated (typically an expired access token), the client
+// re-authenticates and lets backoff retry the call. Without this, an expired
+// token would never be replaced on demand and the agent would stay stuck
+// retrying with a dead token (see issue #4144).
+//
+// Re-authentication is attempted at most maxAuthRefreshes times per RPC; once
+// exhausted the error is made permanent so the call returns and the failure
+// surfaces to the caller (and ultimately the agent's supervisor). If no
+// refresher is configured, the wrapper is a no-op and Unauthenticated stays
+// permanent.
+func withAuthRefresh[T any](ctx context.Context, c *client, opName string, op backoff.Operation[T]) backoff.Operation[T] {
+	if c.auth == nil {
+		// Without a refresher there is no way to recover from an auth
+		// rejection, so keep codes.Unauthenticated permanent (the behavior
+		// before on-demand refresh existed).
+		return func() (T, error) {
+			res, err := op()
+			if err != nil && status.Code(err) == codes.Unauthenticated {
+				return res, backoff.Permanent(err)
+			}
+			return res, err
+		}
+	}
+
+	refreshes := 0
+	return func() (T, error) {
+		res, err := op()
+		if err == nil || status.Code(err) != codes.Unauthenticated {
+			return res, err
+		}
+
+		if refreshes >= maxAuthRefreshes {
+			log.Error().Msgf("grpc: %s(): access token still rejected after %d re-authentication attempts, giving up", opName, refreshes)
+			return res, backoff.Permanent(err)
+		}
+		refreshes++
+
+		staleToken := c.auth.Token()
+		log.Warn().Msgf("grpc: %s(): access token rejected by server, re-authenticating (attempt %d/%d)", opName, refreshes, maxAuthRefreshes)
+		if rerr := c.auth.RefreshToken(ctx, staleToken); rerr != nil {
+			// Re-auth itself failed (e.g. server briefly unreachable); keep the
+			// error retryable so backoff waits and we try again on the next
+			// iteration, up to maxAuthRefreshes.
+			log.Error().Err(rerr).Msgf("grpc: %s(): re-authentication failed", opName)
+		}
+		// Return the original (retryable) error so backoff retries the RPC,
+		// this time with the refreshed token attached by the interceptor.
+		return res, err
+	}
+}
+
 // classifyRPCErr inspects a gRPC error and returns either the same error (for
 // retryable codes) or a backoff.Permanent wrapping it (for fatal codes). It is
 // the single source of truth for which gRPC codes are worth retrying.
@@ -183,6 +266,11 @@ func classifyRPCErr(ctx context.Context, err error) error {
 			return backoff.Permanent(ctx.Err())
 		}
 		return backoff.Permanent(err)
+	case codes.Unauthenticated:
+		// The access token was rejected, most commonly because it expired.
+		// Keep it retryable so withAuthRefresh can re-authenticate and retry;
+		// the retry count there bounds how long we keep trying.
+		return err
 	case codes.Aborted,
 		codes.DataLoss,
 		codes.DeadlineExceeded,
