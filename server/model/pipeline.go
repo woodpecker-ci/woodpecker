@@ -57,7 +57,7 @@ type Pipeline struct {
 	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
 	Version              string                  `json:"version"                 xorm:"'version'"`
 
-	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/6774
+	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626
 	// // New
 	Release  *Release `json:"release,omitempty"       xorm:"json 'release'"`
 	TagTitle string   `json:"tag_title,omitempty"     xorm:"tag_title"`
