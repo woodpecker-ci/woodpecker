@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-24
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -53,42 +53,45 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#6768](https://github.com/woodpecker-ci/woodpecker/pull/6768)]
+- Check docs JS files for spelling [[#6758](https://github.com/woodpecker-ci/woodpecker/pull/6758)]
 - Remove openbao extension [[#6757](https://github.com/woodpecker-ci/woodpecker/pull/6757)]
 - Update docs npm deps non-major [[#6747](https://github.com/woodpecker-ci/woodpecker/pull/6747)]
-- Lock file maintenance [[#6733](https://github.com/woodpecker-ci/woodpecker/pull/6733)]
+- adds git-pages plugin [[#6736](https://github.com/woodpecker-ci/woodpecker/pull/6736)]
 - Update docs npm deps non-major to v1.18.0 [[#6731](https://github.com/woodpecker-ci/woodpecker/pull/6731)]
 - Update docs npm deps non-major to v3.17.0 [[#6726](https://github.com/woodpecker-ci/woodpecker/pull/6726)]
 - Update docs npm deps non-major [[#6722](https://github.com/woodpecker-ci/woodpecker/pull/6722)]
-- Lock file maintenance [[#6709](https://github.com/woodpecker-ci/woodpecker/pull/6709)]
 - Update docs npm deps non-major [[#6705](https://github.com/woodpecker-ci/woodpecker/pull/6705)]
 - Add Podman plugin [[#6701](https://github.com/woodpecker-ci/woodpecker/pull/6701)]
 - Update docs npm deps non-major [[#6679](https://github.com/woodpecker-ci/woodpecker/pull/6679)]
-- Lock file maintenance [[#6686](https://github.com/woodpecker-ci/woodpecker/pull/6686)]
 - Update dependency concurrently to v10 [[#6676](https://github.com/woodpecker-ci/woodpecker/pull/6676)]
 - Update docs npm deps non-major [[#6675](https://github.com/woodpecker-ci/woodpecker/pull/6675)]
 - docs: add cli exec examples [[#6629](https://github.com/woodpecker-ci/woodpecker/pull/6629)]
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6782](https://github.com/woodpecker-ci/woodpecker/pull/6782)]
 - Update golang-packages [[#6776](https://github.com/woodpecker-ci/woodpecker/pull/6776)]
 - Update golang-packages [[#6770](https://github.com/woodpecker-ci/woodpecker/pull/6770)]
 - Update web npm deps non-major [[#6761](https://github.com/woodpecker-ci/woodpecker/pull/6761)]
 - Update golang-packages [[#6767](https://github.com/woodpecker-ci/woodpecker/pull/6767)]
+- Lock file maintenance [[#6768](https://github.com/woodpecker-ci/woodpecker/pull/6768)]
 - Update web npm deps non-major [[#6748](https://github.com/woodpecker-ci/woodpecker/pull/6748)]
 - Update golang-packages [[#6756](https://github.com/woodpecker-ci/woodpecker/pull/6756)]
 - Update module github.com/cenkalti/backoff/v5 to v6 [[#6752](https://github.com/woodpecker-ci/woodpecker/pull/6752)]
 - Update dependency http-proxy-middleware to v4 [[#6750](https://github.com/woodpecker-ci/woodpecker/pull/6750)]
 - Update pre-commit non-major to v0.49.0 [[#6749](https://github.com/woodpecker-ci/woodpecker/pull/6749)]
 - Update docker.io/mysql Docker tag to v9.7.1 [[#6746](https://github.com/woodpecker-ci/woodpecker/pull/6746)]
+- Lock file maintenance [[#6733](https://github.com/woodpecker-ci/woodpecker/pull/6733)]
 - Update web npm deps non-major [[#6724](https://github.com/woodpecker-ci/woodpecker/pull/6724)]
 - Update docker.io/alpine Docker tag to v3.24 [[#6725](https://github.com/woodpecker-ci/woodpecker/pull/6725)]
 - Update pre-commit non-major to v3.8.4 [[#6723](https://github.com/woodpecker-ci/woodpecker/pull/6723)]
 - Update web npm deps non-major [[#6706](https://github.com/woodpecker-ci/woodpecker/pull/6706)]
+- Lock file maintenance [[#6709](https://github.com/woodpecker-ci/woodpecker/pull/6709)]
 - Update golang-lang to v1.26.4 [[#6704](https://github.com/woodpecker-ci/woodpecker/pull/6704)]
 - bump github.com/quic-go/quic-go to v0.59.1 [[#6700](https://github.com/woodpecker-ci/woodpecker/pull/6700)]
 - Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.6.0 [[#6699](https://github.com/woodpecker-ci/woodpecker/pull/6699)]
 - Update web npm deps non-major [[#6673](https://github.com/woodpecker-ci/woodpecker/pull/6673)]
+- Lock file maintenance [[#6686](https://github.com/woodpecker-ci/woodpecker/pull/6686)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.2 [[#6674](https://github.com/woodpecker-ci/woodpecker/pull/6674)]
 - Update web npm deps non-major [[#6657](https://github.com/woodpecker-ci/woodpecker/pull/6657)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.36.0 [[#6668](https://github.com/woodpecker-ci/woodpecker/pull/6668)]
@@ -96,9 +99,6 @@
 
 ### Misc
 
-- fix(metrics): reduce step metric cardinality [[#6777](https://github.com/woodpecker-ci/woodpecker/pull/6777)]
-- Check docs JS files for spelling [[#6758](https://github.com/woodpecker-ci/woodpecker/pull/6758)]
-- adds git-pages plugin [[#6736](https://github.com/woodpecker-ci/woodpecker/pull/6736)]
 - Rename editorconfig file [[#6734](https://github.com/woodpecker-ci/woodpecker/pull/6734)]
 
 ## [3.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.15.0) - 2026-05-28
