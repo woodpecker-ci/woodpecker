@@ -237,14 +237,14 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
 
 For pull request events, `CI_COMMIT_PULL_REQUEST_DRAFT` is set to `true` or `false` depending on whether the pull request is a draft.
 
-| Forge                  | Supported          | Notes                                                                 |
-| ---------------------- | ------------------ | --------------------------------------------------------------------- |
-| GitHub                 | :white_check_mark: |                                                                       |
-| Gitea                  | :white_check_mark: |                                                                       |
-| GitLab                 | :white_check_mark: | Uses `draft`; falls back to legacy `work_in_progress` when needed     |
-| Forgejo                | :x:                | Webhook payloads include draft status, but it is not exposed yet      |
-| Bitbucket              | :x:                | Webhook payloads include draft status, but it is not exposed yet      |
-| Bitbucket Datacenter   | :x:                | Webhook payloads include draft status, but it is not exposed yet      |
+| Forge                | Supported          | Notes                                                             |
+| -------------------- | ------------------ | ----------------------------------------------------------------- |
+| GitHub               | :white_check_mark: |                                                                   |
+| Gitea                | :white_check_mark: |                                                                   |
+| GitLab               | :white_check_mark: | Uses `draft`; falls back to legacy `work_in_progress` when needed |
+| Forgejo              | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
+| Bitbucket            | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
+| Bitbucket Datacenter | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
 
 On unsupported forges the variable is still set to `false`.
 
