@@ -176,6 +176,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 	server.Config.Server.AsyncRepositoryUpdate = c.Bool("async-repository-update")
+	server.Config.Server.WebhookSyncTimeout = c.Duration("webhook-sync-timeout")
 
 	// Pull requests
 	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")
