@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @gedankenstuecke, @head1328, @mmeier86, @nijave, @qwerty287, @simonckemper, @simonmeyerrr
+@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @gedankenstuecke, @head1328, @mahlzahn, @mmeier86, @nijave, @qwerty287, @simonckemper, @simonmeyerrr
 
 ### 🔒 Security
 
@@ -36,6 +36,7 @@
 
 ### 🐛 Bug Fixes
 
+- Allow images for secrets to contain SHA256 for image pinning [[#6784](https://github.com/woodpecker-ci/woodpecker/pull/6784)]
 - server should drop stale queue tasks already missing in database [[#6765](https://github.com/woodpecker-ci/woodpecker/pull/6765)]
 - server queue api should ignore missing agent [[#6763](https://github.com/woodpecker-ci/woodpecker/pull/6763)]
 - docs: deps migrate gray-matter to maintained fork [[#6744](https://github.com/woodpecker-ci/woodpecker/pull/6744)]
