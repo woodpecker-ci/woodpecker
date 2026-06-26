@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-25
+## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -20,6 +20,7 @@
 
 ### 📈 Enhancement
 
+- Make LogEntry Buffer configurable for agent [[#6773](https://github.com/woodpecker-ci/woodpecker/pull/6773)]
 - Agent treat gRPC Internal error as fatal [[#6780](https://github.com/woodpecker-ci/woodpecker/pull/6780)]
 - Refactor to inject store and context into server scheduler [[#6755](https://github.com/woodpecker-ci/woodpecker/pull/6755)]
 - Refactor server scheduler collect in new interface [[#6753](https://github.com/woodpecker-ci/woodpecker/pull/6753)]
