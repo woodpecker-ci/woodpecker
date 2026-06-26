@@ -50,14 +50,7 @@ func runScenario(t *testing.T, sc Scenario) {
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  sc.Event,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(sc.Event))
 	require.NoError(t, err, "create pipeline")
 	require.NotNil(t, created)
 

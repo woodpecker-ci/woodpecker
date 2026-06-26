@@ -318,6 +318,11 @@ var flags = []cli.Flag{
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_MILESTONE\".",
 	},
 	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_DRAFT"),
+		Name:    "commit-pull-draft",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_DRAFT\".",
+	},
+	&cli.BoolFlag{
 		Sources: cli.EnvVars("CI_COMMIT_PRERELEASE"),
 		Name:    "commit-release-is-pre",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PRERELEASE\".",

@@ -211,6 +211,27 @@ func Test_GitLab(t *testing.T) {
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
+				assert.False(t, pipeline.PullRequestDraft)
+			}
+		})
+
+		t.Run("merge request work in progress", func(t *testing.T) {
+			payload := bytes.ReplaceAll(
+				fixtures.HookPullRequestOpened,
+				[]byte(`"work_in_progress": false`),
+				[]byte(`"work_in_progress": true`),
+			)
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(payload),
+			)
+			req.Header = fixtures.MergeRequestHookHeaders
+
+			_, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, pipeline) {
+				assert.True(t, pipeline.PullRequestDraft)
 			}
 		})
 
