@@ -235,7 +235,7 @@ func PostHook(c *gin.Context) {
 	if syncTimeout > 0 {
 		select {
 		case <-done:
-			// handle syncronus
+			// handle synchronous
 		case <-time.After(syncTimeout):
 			log.Debug().Str("repo", repo.FullName).Dur("timeout", syncTimeout).Msg("pipeline creation exceeded webhook sync timeout, continuing in background")
 			c.JSON(http.StatusAccepted, nil)
@@ -243,7 +243,7 @@ func PostHook(c *gin.Context) {
 			return
 		}
 	} else {
-		// we do syncronus
+		// we do synchronous
 		<-done
 	}
 
