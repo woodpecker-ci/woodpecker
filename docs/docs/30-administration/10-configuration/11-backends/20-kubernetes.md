@@ -625,3 +625,12 @@ Secret names to pull images from private repositories. See, how to [Pull an Imag
 - Default: none, which will use the default priority class configured in Kubernetes
 
 Which [Kubernetes PriorityClass](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/priority-class-v1/) to assign to created job pods.
+
+---
+
+### BACKEND_K8S_PERMISSION_INIT_IMAGE
+
+- Name: `WOODPECKER_BACKEND_K8S_PERMISSION_INIT_IMAGE`
+- Default: 'busybox:stable-musl'
+
+Container image used for the workspace permission init container, which is used to create the workspace directory and ensure correct permissions when running steps as non-root users.
