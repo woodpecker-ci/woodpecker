@@ -246,7 +246,7 @@ If set to 0 we retry forever.
 - Name: `WOODPECKER_LOG_ENTRY_STREAM_BUFFER_SIZE`
 - Default: `100`
 
-Set how many log lines an agent can buffer before it blocks io.Pipe, expect logentries to reach 1M in worst case.
+Set how many log lines an agent can buffer before it blocks io.Pipe, expect logentries to reach 1 MB in worst case.
 If used with local backend, tis can increase your performance in special cases significantly.
 
 :::warning

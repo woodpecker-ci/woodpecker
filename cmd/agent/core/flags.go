@@ -61,7 +61,7 @@ var flags = []cli.Flag{
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_ENTRY_STREAM_BUFFER_SIZE"),
 		Name:    "log-entry-stream-buffer-size",
-		Usage:   "how many log lines an agent can buffer before it blocks io.Pipe, expect one log-entry to be 1M in worst case.",
+		Usage:   "how many log lines an agent can buffer before it blocks io.Pipe, expect one log-entry to be 1 MB in worst case.",
 		Value:   100,
 	},
 	&cli.StringFlag{
