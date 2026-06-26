@@ -254,7 +254,6 @@ func PostHook(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, pl)
 	}
-	return
 }
 
 func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
