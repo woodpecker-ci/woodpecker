@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @WeslleyNasRocha, @gedankenstuecke, @head1328, @mahlzahn, @mmeier86, @nijave, @qwerty287, @simonckemper, @simonmeyerrr
+@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @WeslleyNasRocha, @gedankenstuecke, @head1328, @mahlzahn, @mmeier86, @nati737, @nijave, @qwerty287, @simonckemper, @simonmeyerrr
 
 ### 🔒 Security
 
@@ -20,6 +20,7 @@
 
 ### 📈 Enhancement
 
+- Kubernetes: allow custom image when precreating workingDir as nonroot [[#6771](https://github.com/woodpecker-ci/woodpecker/pull/6771)]
 - Server can move pipeline parsing into background on long creation times [[#6781](https://github.com/woodpecker-ci/woodpecker/pull/6781)]
 - Add CI_COMMIT_PULL_REQUEST_DRAFT environment variable [[#6778](https://github.com/woodpecker-ci/woodpecker/pull/6778)]
 - Make LogEntry Buffer configurable for agent [[#6773](https://github.com/woodpecker-ci/woodpecker/pull/6773)]
