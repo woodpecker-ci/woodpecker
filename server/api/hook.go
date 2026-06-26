@@ -220,9 +220,7 @@ func PostHook(c *gin.Context) {
 	bgCtx, cancel := context.WithTimeout(context.WithoutCancel(context.Background()), backgroundPipelineCreationTimeout)
 
 	done := make(chan struct{})
-
 	var pl *model.Pipeline
-	var err error
 
 	go func() {
 		defer cancel()
@@ -249,7 +247,7 @@ func PostHook(c *gin.Context) {
 		<-done
 	}
 
-	if res.err != nil {
+	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.JSON(http.StatusOK, pl)
