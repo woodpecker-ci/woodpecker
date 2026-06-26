@@ -20,6 +20,7 @@
 
 ### 📈 Enhancement
 
+- Server can move pipeline parsing into background on long creation times [[#6781](https://github.com/woodpecker-ci/woodpecker/pull/6781)]
 - Add CI_COMMIT_PULL_REQUEST_DRAFT environment variable [[#6778](https://github.com/woodpecker-ci/woodpecker/pull/6778)]
 - Make LogEntry Buffer configurable for agent [[#6773](https://github.com/woodpecker-ci/woodpecker/pull/6773)]
 - Agent treat gRPC Internal error as fatal [[#6780](https://github.com/woodpecker-ci/woodpecker/pull/6780)]
