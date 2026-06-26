@@ -57,6 +57,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6786](https://github.com/woodpecker-ci/woodpecker/pull/6786)]
 - Check docs JS files for spelling [[#6758](https://github.com/woodpecker-ci/woodpecker/pull/6758)]
 - Remove openbao extension [[#6757](https://github.com/woodpecker-ci/woodpecker/pull/6757)]
 - Update docs npm deps non-major [[#6747](https://github.com/woodpecker-ci/woodpecker/pull/6747)]
