@@ -221,7 +221,7 @@ func PostHook(c *gin.Context) {
 	// The background goroutine must not use the gin request context: gin cancels
 	// it once the handler returns. We detach from cancellation (keeping request
 	// values) and apply our own hard cap instead.
-	bgCtx, cancel := context.WithTimeout(context.WithoutCancel(c.Request.Context()), backgroundPipelineCreationTimeout)
+	bgCtx, cancel := context.WithTimeout(context.WithoutCancel(context.Background()), backgroundPipelineCreationTimeout)
 
 	type createResult struct {
 		pipeline *model.Pipeline
