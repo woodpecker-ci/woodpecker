@@ -60,6 +60,9 @@ type client struct {
 	// restored before the agent gives up and exits. Zero means infinite.
 	// Maps directly onto backoff.WithMaxElapsedTime.
 	connectionRetryTimeout time.Duration
+	// logEntryBufferSize sets the buffer size before the log reader is blocking.
+	// If you have enough memory and log bursts, set it higher.
+	logEntryBufferSize int
 }
 
 // NewGrpcClient returns a new grpc Client.
@@ -67,11 +70,13 @@ func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn, opts ...ClientOpt
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
-	client.logs = make(chan *proto.LogEntry, 10) // max memory use: 10 lines * 1 MiB
+	client.logEntryBufferSize = 100
 
 	for _, opt := range opts {
 		opt(client)
 	}
+
+	client.logs = make(chan *proto.LogEntry, client.logEntryBufferSize) // max memory use: buffer count * 1 MiB
 
 	go client.processLogs(ctx)
 	return client
@@ -85,6 +90,17 @@ func SetConnectionRetryTimeout(d time.Duration) ClientOption {
 	}
 	return func(c *client) {
 		c.connectionRetryTimeout = d
+	}
+}
+
+func SetLogEntryBufferSize(count int) ClientOption {
+	return func(c *client) {
+		if count < 0 {
+			log.Error().Msgf("LogEntry Buffer can not be negative")
+			return
+		}
+		log.Info().Msgf("log-entry stream buffer size set to max %dMb", count)
+		c.logEntryBufferSize = count
 	}
 }
 
