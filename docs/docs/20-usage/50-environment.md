@@ -75,6 +75,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_PULL_REQUEST`           | commit pull request number (set only for pull request events)                                                                                    | `1`                                                                                                        |
 | `CI_COMMIT_PULL_REQUEST_LABELS`    | labels assigned to pull request (set only for pull request events)                                                                               | `server`                                                                                                   |
 | `CI_COMMIT_PULL_REQUEST_MILESTONE` | milestone assigned to pull request (set only for `pull_request` and `pull_request_closed` events)                                                | `summer-sprint`                                                                                            |
+| `CI_COMMIT_PULL_REQUEST_DRAFT`     | whether the pull request is a draft (set only for pull request events; see [forge support](#ci_commit_pull_request_draft-forge-support))         | `true`, `false`                                                                                            |
 | `CI_COMMIT_MESSAGE`                | commit message                                                                                                                                   | `Initial commit`                                                                                           |
 | `CI_COMMIT_TIMESTAMP`              | commit UNIX timestamp                                                                                                                            | `1722617519`                                                                                               |
 | `CI_COMMIT_AUTHOR`                 | commit author username                                                                                                                           | `john-doe`                                                                                                 |
@@ -231,6 +232,21 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
      settings:
 +      target: /target/${CI_COMMIT_TAG##v}
 ```
+
+## `CI_COMMIT_PULL_REQUEST_DRAFT` forge support
+
+For pull request events, `CI_COMMIT_PULL_REQUEST_DRAFT` is set to `true` or `false` depending on whether the pull request is a draft.
+
+| Forge                | Supported          | Notes                                                             |
+| -------------------- | ------------------ | ----------------------------------------------------------------- |
+| GitHub               | :white_check_mark: |                                                                   |
+| Gitea                | :white_check_mark: |                                                                   |
+| GitLab               | :white_check_mark: | Uses `draft`; falls back to legacy `work_in_progress` when needed |
+| Forgejo              | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
+| Bitbucket            | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
+| Bitbucket Datacenter | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
+
+On unsupported forges the variable is still set to `false`.
 
 ## `pull_request_metadata` specific event reason values
 

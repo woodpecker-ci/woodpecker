@@ -182,6 +182,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		),
 		PullRequestLabels:    convertLabels(hook.PullRequest.Labels),
 		PullRequestMilestone: convertMilestone(hook.PullRequest.Milestone),
+		PullRequestDraft:     hook.PullRequest.Draft,
 		FromFork:             hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
 	}
 
