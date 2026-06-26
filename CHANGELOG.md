@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @gedankenstuecke, @head1328, @mahlzahn, @mmeier86, @nijave, @qwerty287, @simonckemper, @simonmeyerrr
+@6543, @AkashKumar7902, @M31ancholy, @MeurillonGuillaume, @WeslleyNasRocha, @gedankenstuecke, @head1328, @mahlzahn, @mmeier86, @nijave, @qwerty287, @simonckemper, @simonmeyerrr
 
 ### 🔒 Security
 
@@ -20,6 +20,7 @@
 
 ### 📈 Enhancement
 
+- Add CI_COMMIT_PULL_REQUEST_DRAFT environment variable [[#6778](https://github.com/woodpecker-ci/woodpecker/pull/6778)]
 - Make LogEntry Buffer configurable for agent [[#6773](https://github.com/woodpecker-ci/woodpecker/pull/6773)]
 - Agent treat gRPC Internal error as fatal [[#6780](https://github.com/woodpecker-ci/woodpecker/pull/6780)]
 - Refactor to inject store and context into server scheduler [[#6755](https://github.com/woodpecker-ci/woodpecker/pull/6755)]
