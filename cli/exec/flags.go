@@ -328,11 +328,9 @@ var flags = []cli.Flag{
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_DRAFT\".",
 	},
 	&cli.BoolFlag{
-		// CI_COMMIT_PRERELEASE is kept as a deprecated alias.
-		// TODO remove CI_COMMIT_PRERELEASE in next major
-		Sources: cli.EnvVars("CI_PIPELINE_RELEASE_PRE", "CI_COMMIT_PRERELEASE"),
+		Sources: cli.EnvVars("CI_COMMIT_PRERELEASE"),
 		Name:    "commit-release-is-pre",
-		Usage:   "Set the metadata environment variable \"CI_PIPELINE_RELEASE_PRE\".",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_PRERELEASE\".",
 	},
 	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_NUMBER"),

@@ -216,16 +216,15 @@ func TestDeprecations(t *testing.T) {
 		from string
 		want string // empty = expect no deprecation warning
 	}{
-		{from: `steps: { build: { image: golang, commands: ["echo $CI_COMMIT_PRERELEASE"] } }`, want: "Usage of `CI_COMMIT_PRERELEASE` is deprecated, use `CI_PIPELINE_RELEASE_PRE`"},
-		{from: `steps: { build: { image: golang, commands: ["echo $$CI_COMMIT_PRERELEASE"] } }`, want: "Usage of `CI_COMMIT_PRERELEASE` is deprecated, use `CI_PIPELINE_RELEASE_PRE`"},
-		{from: `steps: { build: { image: golang, commands: ["echo ${CI_COMMIT_PRERELEASE}"] } }`, want: "Usage of `CI_COMMIT_PRERELEASE` is deprecated, use `CI_PIPELINE_RELEASE_PRE`"},
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PIPELINE_AVATAR`"},
+		{from: `steps: { build: { image: golang, commands: ["echo $$CI_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PIPELINE_AVATAR`"},
 		{from: `steps: { build: { image: golang, commands: ["echo ${CI_COMMIT_AUTHOR_AVATAR}"] } }`, want: "Usage of `CI_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PIPELINE_AVATAR`"},
 		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_PREV_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PREV_PIPELINE_AVATAR`"},
 		// new names must not warn
-		{from: `steps: { build: { image: golang, commands: ["echo $CI_PIPELINE_RELEASE_PRE"] } }`, want: ""},
 		{from: `steps: { build: { image: golang, commands: ["echo $CI_PIPELINE_AVATAR"] } }`, want: ""},
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_PIPELINE_AVATAR"] } }`, want: ""},
 		// must not match a longer var name
-		{from: `steps: { build: { image: golang, commands: ["echo $CI_COMMIT_PRERELEASE_FOO"] } }`, want: ""},
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_COMMIT_AUTHOR_AVATAR_FOO"] } }`, want: ""},
 		// CI_COMMIT_AUTHOR_AVATAR regexp must not fire on CI_PREV_COMMIT_AUTHOR_AVATAR only
 		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_PREV_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PREV_PIPELINE_AVATAR`"},
 	}
