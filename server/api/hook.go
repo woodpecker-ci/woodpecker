@@ -221,12 +221,12 @@ func PostHook(c *gin.Context) {
 
 	done := make(chan struct{})
 
-	var pipeline *model.Pipeline
+	var pl *model.Pipeline
 	var err error
 
 	go func() {
 		defer cancel()
-		pipeline, err = pipeline.Create(bgCtx, _store, repo, pipelineFromForge)
+		pl, err = pipeline.Create(bgCtx, _store, repo, pipelineFromForge)
 		if err != nil {
 			log.Error().Err(err).Str("repo", repo.FullName).Msg("could not create pipeline from webhook")
 		}
@@ -252,7 +252,7 @@ func PostHook(c *gin.Context) {
 	if res.err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, pipeline)
+		c.JSON(http.StatusOK, pl)
 	}
 	return
 }
