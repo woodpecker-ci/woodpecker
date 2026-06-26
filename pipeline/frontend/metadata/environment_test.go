@@ -62,8 +62,9 @@ func TestEnviron(t *testing.T) {
 		Curr: Pipeline{
 			Event: EventPull,
 			Commit: Commit{
-				ChangedFiles: []string{"readme", "license"},
-				Refspec:      "branch-a:branch-b",
+				ChangedFiles:     []string{"readme", "license"},
+				Refspec:          "branch-a:branch-b",
+				PullRequestDraft: true,
 			},
 		},
 		Prev: Pipeline{
@@ -80,4 +81,18 @@ func TestEnviron(t *testing.T) {
 	assert.False(t, ok)
 
 	assert.Equal(t, `["readme","license"]`, envs["CI_PIPELINE_FILES"])
+	assert.Equal(t, "true", envs["CI_COMMIT_PULL_REQUEST_DRAFT"])
+
+	m = Metadata{
+		Sys: System{Name: "wp"},
+		Curr: Pipeline{
+			Event: EventPull,
+			Commit: Commit{
+				Refspec: "branch-a:branch-b",
+			},
+		},
+	}
+
+	envs = m.Environ()
+	assert.Equal(t, "false", envs["CI_COMMIT_PULL_REQUEST_DRAFT"])
 }

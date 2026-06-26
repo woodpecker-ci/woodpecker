@@ -153,6 +153,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 			ChangedFiles:         pipeline.ChangedFiles,
 			PullRequestLabels:    pipeline.PullRequestLabels,
 			PullRequestMilestone: pipeline.PullRequestMilestone,
+			PullRequestDraft:     pipeline.PullRequestDraft,
 		},
 		Cron:   pipeline.Cron,
 		Author: pipeline.Author,

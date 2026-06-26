@@ -75,6 +75,7 @@ type (
 		ChangedFiles         []string `json:"changed_files,omitempty"`
 		PullRequestLabels    []string `json:"labels,omitempty"`
 		PullRequestMilestone string   `json:"milestone,omitempty"`
+		PullRequestDraft     bool     `json:"draft,omitempty"`
 	}
 
 	// Release defines runtime metadata for a release.
