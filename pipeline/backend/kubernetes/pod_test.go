@@ -1405,7 +1405,8 @@ func TestInitContainer(t *testing.T) {
 		WorkingDir: "/woodpecker/src/github.com/woodpecker-ci/woodpecker",
 		Volumes:    []string{"workspace:/woodpecker/src", "other:/other"},
 	}, &config{
-		Namespace: "woodpecker",
+		Namespace:           "woodpecker",
+		PermissionInitImage: "busybox:stable-musl",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		SecurityContext: &SecurityContext{
 			RunAsNonRoot: newBool(true),
