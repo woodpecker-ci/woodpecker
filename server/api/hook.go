@@ -217,50 +217,44 @@ func PostHook(c *gin.Context) {
 	// respond synchronously with the created pipeline (preserving the old
 	// behavior and API response). If it takes longer we respond 202 Accepted and
 	// let creation finish in the background.
-	//
-	// The background goroutine must not use the gin request context: gin cancels
-	// it once the handler returns. We detach from cancellation (keeping request
-	// values) and apply our own hard cap instead.
 	bgCtx, cancel := context.WithTimeout(context.WithoutCancel(context.Background()), backgroundPipelineCreationTimeout)
 
-	type createResult struct {
-		pipeline *model.Pipeline
-		err      error
-	}
-	done := make(chan createResult, 1)
+	done := make(chan struct{})
+
+	var pipeline *model.Pipeline
+	var err error
+
 	go func() {
 		defer cancel()
-		pl, err := pipeline.Create(bgCtx, _store, repo, pipelineFromForge)
+		pipeline, err = pipeline.Create(bgCtx, _store, repo, pipelineFromForge)
 		if err != nil {
 			log.Error().Err(err).Str("repo", repo.FullName).Msg("could not create pipeline from webhook")
 		}
-		done <- createResult{pipeline: pl, err: err}
+		done <- struct{}{}
 	}()
 
 	syncTimeout := server.Config.Server.WebhookSyncTimeout
-	if syncTimeout <= 0 {
-		// Fallback disabled: always wait for the result.
-		res := <-done
-		if res.err != nil {
-			handlePipelineErr(c, res.err)
-		} else {
-			c.JSON(http.StatusOK, res.pipeline)
+	if syncTimeout > 0 {
+		select {
+		case <-done:
+			// handle syncronus
+		case <-time.After(syncTimeout):
+			log.Debug().Str("repo", repo.FullName).Dur("timeout", syncTimeout).Msg("pipeline creation exceeded webhook sync timeout, continuing in background")
+			c.JSON(http.StatusAccepted, nil)
+			// do async
+			return
 		}
-		return
+	} else {
+		// we do syncronus
+		<-done
 	}
 
-	select {
-	case res := <-done:
-		if res.err != nil {
-			handlePipelineErr(c, res.err)
-		} else {
-			c.JSON(http.StatusOK, res.pipeline)
-		}
-	case <-time.After(syncTimeout):
-		log.Debug().Str("repo", repo.FullName).Dur("timeout", syncTimeout).
-			Msg("pipeline creation exceeded webhook sync timeout, continuing in background")
-		c.JSON(http.StatusAccepted, nil)
+	if res.err != nil {
+		handlePipelineErr(c, err)
+	} else {
+		c.JSON(http.StatusOK, pipeline)
 	}
+	return
 }
 
 func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
