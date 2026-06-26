@@ -58,6 +58,12 @@ var flags = []cli.Flag{
 		Usage:   "how long the agent keeps retrying to reconnect to the server after the gRPC connection is lost before giving up, set to 0 to retry forever",
 		Value:   2 * time.Minute,
 	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_ENTRY_STREAM_BUFFER_SIZE"),
+		Name:    "log-entry-stream-buffer-size",
+		Usage:   "how many log lines an agent can buffer before it blocks io.Pipe, expect one log-entry to be 1 MB in worst case.",
+		Value:   100,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_HOSTNAME"),
 		Name:    "hostname",
