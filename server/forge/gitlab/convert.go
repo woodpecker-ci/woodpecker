@@ -235,6 +235,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 		FromFork: target.PathWithNamespace != source.PathWithNamespace,
 		Title:    obj.Title,
 		Index:    model.ForgeRemoteID(strconv.Itoa(int(obj.IID))),
+		Draft:    obj.Draft || obj.WorkInProgress,
 	}
 
 	return obj.IID, hook.ObjectAttributes.MilestoneID, repo, pipeline, nil

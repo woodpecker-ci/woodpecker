@@ -159,6 +159,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 	if pipeline.PullRequest != nil {
 		metadata.Commit.PullRequestLabels = pipeline.PullRequest.Labels
 		metadata.Commit.PullRequestMilestone = pipeline.PullRequest.Milestone
+		metadata.Commit.PullRequestDraft = pipeline.PullRequest.Draft
 	}
 	if pipeline.Deployment != nil {
 		metadata.DeployTo = pipeline.Deployment.Target

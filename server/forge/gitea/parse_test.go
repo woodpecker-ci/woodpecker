@@ -18,6 +18,7 @@ package gitea
 import (
 	"bytes"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -691,5 +692,23 @@ func TestGiteaParser(t *testing.T) {
 				assert.EqualValues(t, tc.pipe, p)
 			}
 		})
+	}
+}
+
+func Test_parsePullRequestDraft(t *testing.T) {
+	payload := strings.Replace(
+		fixtures.HookPullRequest,
+		`"state": "open",`,
+		`"state": "open",`+"\n    "+`"draft": true,`,
+		1,
+	)
+	req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(payload))
+	req.Header = http.Header{}
+	req.Header.Set(hookEvent, "pull_request")
+
+	_, p, err := parseHook(req)
+	assert.NoError(t, err)
+	if assert.NotNil(t, p) {
+		assert.True(t, p.PullRequestDraft)
 	}
 }

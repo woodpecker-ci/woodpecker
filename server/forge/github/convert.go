@@ -167,6 +167,7 @@ func convertPullRequest(pr *github.PullRequest) *model.PullRequest {
 		Labels:    convertLabels(pr.Labels),
 		Milestone: pr.GetMilestone().GetTitle(),
 		FromFork:  pr.GetHead().GetRepo().GetID() != pr.GetBase().GetRepo().GetID(),
+		Draft:     pr.GetDraft(),
 	}
 }
 

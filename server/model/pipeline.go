@@ -72,6 +72,7 @@ type APIPipeline struct {
 	IsPrerelease         bool     `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
 	Avatar               string   `json:"avatar"`                  // deprecated, use author_avatar instead
 	PullRequestMilestone string   `json:"pr_milestone,omitempty"`  // deprecated, use pull_request.milestone instead
+	PullRequestDraft     bool     `json:"pr_draft,omitempty"`      // deprecated, use pull_request.draft instead
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
@@ -121,6 +122,7 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 			ap.PullRequestLabels = p.PullRequest.Labels
 			ap.FromFork = p.PullRequest.FromFork
 			ap.PullRequestMilestone = p.PullRequest.Milestone
+			ap.PullRequestDraft = p.PullRequest.Draft
 		}
 		if p.Commit != nil {
 			ap.Message = p.Commit.Message

@@ -458,15 +458,16 @@ func TestFullPod(t *testing.T) {
 			Password: "bar",
 		},
 	}, &config{
-		Namespace:                   "woodpecker",
-		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
-		PodLabels:                   map[string]string{"app": "test"},
-		PodLabelsAllowFromStep:      true,
-		PodAnnotations:              map[string]string{"apps.kubernetes.io/pod-index": "0"},
-		PodAnnotationsAllowFromStep: true,
-		PodTolerationsAllowFromStep: true,
-		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
-		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
+		Namespace:                       "woodpecker",
+		ImagePullSecretNames:            []string{"regcred", "another-pull-secret"},
+		PodLabels:                       map[string]string{"app": "test"},
+		PodLabelsAllowFromStep:          true,
+		PodAnnotations:                  map[string]string{"apps.kubernetes.io/pod-index": "0"},
+		PodAnnotationsAllowFromStep:     true,
+		PodTolerationsAllowFromStep:     true,
+		PodNodeSelector:                 map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
+		SecurityContext:                 SecurityContextConfig{RunAsNonRoot: false},
+		ServiceAccountNameAllowFromStep: true,
 	},
 		"wp-01he8bebctabr3kgk0qj36d2me-0",
 		"linux/amd64",
@@ -999,6 +1000,33 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 	ja.Assertf(string(podJSON), expectedAllow)
 }
 
+func TestServiceAccountNameAllowFromStep(t *testing.T) {
+	step := &types.Step{
+		Name:  "sa-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}
+
+	// When disabled (default), a step-provided service account name must be ignored.
+	pod, err := mkPod(step, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		ServiceAccountName: "privileged-sa",
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.Empty(t, pod.Spec.ServiceAccountName)
+
+	// When explicitly enabled by the admin, the step value is honored.
+	pod, err = mkPod(step, &config{
+		Namespace:                       "woodpecker",
+		ServiceAccountNameAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		ServiceAccountName: "privileged-sa",
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "privileged-sa", pod.Spec.ServiceAccountName)
+}
+
 func TestStepSecret(t *testing.T) {
 	const expected = `{
 		"metadata": {
@@ -1405,7 +1433,8 @@ func TestInitContainer(t *testing.T) {
 		WorkingDir: "/woodpecker/src/github.com/woodpecker-ci/woodpecker",
 		Volumes:    []string{"workspace:/woodpecker/src", "other:/other"},
 	}, &config{
-		Namespace: "woodpecker",
+		Namespace:           "woodpecker",
+		PermissionInitImage: "busybox:stable-musl",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		SecurityContext: &SecurityContext{
 			RunAsNonRoot: newBool(true),

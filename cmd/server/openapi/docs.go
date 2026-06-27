@@ -5109,6 +5109,10 @@ const docTemplate = `{
                 "parent": {
                     "type": "integer"
                 },
+                "pr_draft": {
+                    "description": "deprecated, use pull_request.draft instead",
+                    "type": "boolean"
+                },
                 "pr_labels": {
                     "description": "deprecated, use pull_request.labels instead",
                     "type": "array",
@@ -5200,6 +5204,9 @@ const docTemplate = `{
         "PullRequest": {
             "type": "object",
             "properties": {
+                "draft": {
+                    "type": "boolean"
+                },
                 "from_fork": {
                     "type": "boolean"
                 },
@@ -5975,6 +5982,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "draft": {
+                    "type": "boolean"
                 },
                 "is_prerelease": {
                     "type": "boolean"

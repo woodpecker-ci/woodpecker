@@ -289,6 +289,7 @@ func convertPullRequest(from *gitea.PullRequest) *model.PullRequest {
 		Labels:    convertLabels(from.Labels),
 		Milestone: convertMilestone(from.Milestone),
 		FromFork:  from.Head.RepoID != from.Base.RepoID,
+		Draft:     from.Draft,
 	}
 }
 

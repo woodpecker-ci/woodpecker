@@ -52,6 +52,7 @@ var updatePipelineStructure = xormigrate.Migration{
 			Labels    []string            `json:"labels,omitempty"`
 			Milestone string              `json:"milestone,omitempty"`
 			FromFork  bool                `json:"from_fork,omitempty"`
+			Draft     bool                `json:"draft,omitempty"`
 		}
 
 		type deployment struct {
@@ -80,6 +81,7 @@ var updatePipelineStructure = xormigrate.Migration{
 			DeployTask           string   `xorm:"deploy_task"`
 			PullRequestLabels    []string `xorm:"json 'pr_labels'"`
 			PullRequestMilestone string   `xorm:"pr_milestone"`
+			PullRequestDraft     bool     `xorm:"pr_draft"`
 			FromFork             bool     `xorm:"from_fork"`
 			IsPrerelease         bool     `xorm:"is_prerelease"`
 			Timestamp            int64    `xorm:"'timestamp'"`
@@ -195,6 +197,7 @@ var updatePipelineStructure = xormigrate.Migration{
 						FromFork:  p.FromFork,
 						Labels:    p.PullRequestLabels,
 						Milestone: p.PullRequestMilestone,
+						Draft:     p.PullRequest.Draft,
 					}
 				case model.EventDeploy:
 					p.Deployment = &deployment{
@@ -270,7 +273,7 @@ var updatePipelineStructure = xormigrate.Migration{
 			page++
 		}
 
-		if err := dropTableColumns(sess, "pipelines", "email", "timestamp", "sender", "commit", "title", "message", "deploy", "deploy_task", "pr_labels", "pr_milestone", "is_prerelease", "from_fork"); err != nil {
+		if err := dropTableColumns(sess, "pipelines", "email", "timestamp", "sender", "commit", "title", "message", "deploy", "deploy_task", "pr_labels", "pr_milestone", "pr_draft", "is_prerelease", "from_fork"); err != nil {
 			return err
 		}
 
