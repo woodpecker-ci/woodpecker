@@ -35,7 +35,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_METADATA_FILE"),
 		Name:    "metadata-file",
-		Usage:   "path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags",
+		Usage:   "path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags. The metadata format is only expected to work with the same Woodpecker version it was downloaded from and is not intended to be portable between versions",
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_TIMEOUT"),
@@ -252,6 +252,11 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_DEPLOY_TASK"),
 		Name:    "pipeline-deploy-task",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_DEPLOY_TASK\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_RELEASE_TITLE"),
+		Name:    "pipeline-release",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_RELEASE_TITLE\".",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_PIPELINE_FILES"),

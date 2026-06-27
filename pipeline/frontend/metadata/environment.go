@@ -104,7 +104,8 @@ func (m *Metadata) Environ() map[string]string {
 		setNonEmptyEnvVar(params, "CI_COMMIT_TAG", p)
 	}
 	if pipeline.Event == EventRelease {
-		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Commit.IsPrerelease))
+		setNonEmptyEnvVar(params, "CI_PIPELINE_RELEASE_TITLE", pipeline.Release.Title)
+		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Release.IsPrerelease))
 	}
 	if pipeline.Event.IsPull() {
 		sourceBranch, targetBranch := getSourceTargetBranches(commit.Refspec)

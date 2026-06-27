@@ -15,6 +15,7 @@
 package linter_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -207,6 +208,45 @@ func TestLintErrors(t *testing.T) {
 			}
 		}
 		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
+	}
+}
+
+func TestDeprecations(t *testing.T) {
+	testdata := []struct {
+		from string
+		want string // empty = expect no deprecation warning
+	}{
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PIPELINE_AVATAR`"},
+		{from: `steps: { build: { image: golang, commands: ["echo $$CI_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PIPELINE_AVATAR`"},
+		{from: `steps: { build: { image: golang, commands: ["echo ${CI_COMMIT_AUTHOR_AVATAR}"] } }`, want: "Usage of `CI_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PIPELINE_AVATAR`"},
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_PREV_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PREV_PIPELINE_AVATAR`"},
+		// new names must not warn
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PIPELINE_AVATAR"] } }`, want: ""},
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_PIPELINE_AVATAR"] } }`, want: ""},
+		// must not match a longer var name
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_COMMIT_AUTHOR_AVATAR_FOO"] } }`, want: ""},
+		// CI_COMMIT_AUTHOR_AVATAR regexp must not fire on CI_PREV_COMMIT_AUTHOR_AVATAR only
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_PREV_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PREV_PIPELINE_AVATAR`"},
+	}
+
+	for _, test := range testdata {
+		conf, err := yaml.ParseString(test.from)
+		assert.NoError(t, err)
+
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      test.from,
+			RawConfig: test.from,
+			Workflow:  conf,
+		}})
+
+		found := ""
+		for _, e := range errors.GetPipelineErrors(lerr) {
+			if e.Type == errors.PipelineErrorTypeDeprecation && !strings.Contains(e.Message, "runs_on") {
+				found = e.Message
+				break
+			}
+		}
+		assert.Equal(t, test.want, found, "config %q", test.from)
 	}
 }
 

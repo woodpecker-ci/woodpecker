@@ -4796,7 +4796,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "event": {
-                    "type": "string"
+                    "$ref": "#/definitions/WebhookEvent"
                 },
                 "finished": {
                     "type": "integer"
@@ -4805,6 +4805,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "message": {
+                    "description": "// Deprecated",
                     "type": "string"
                 },
                 "number": {
@@ -4816,6 +4817,14 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
+                "release": {
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Release"
+                        }
+                    ]
+                },
                 "repo_id": {
                     "type": "integer"
                 },
@@ -4823,6 +4832,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "tag_title": {
                     "type": "string"
                 },
                 "title": {
@@ -4987,9 +4999,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
+                    "description": "TODO: only // The user sending the webhook data or triggering the pipeline event",
                     "type": "string"
                 },
                 "author_avatar": {
+                    "description": "TODO: only \u0026 rename to AuthorAvatar // Avatar URL of the author of the commit",
                     "type": "string"
                 },
                 "author_email": {
@@ -5051,6 +5065,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "is_prerelease": {
+                    "description": "deprecated, use release.is_prerelease instead",
                     "type": "boolean"
                 },
                 "message": {
@@ -5080,6 +5095,14 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
+                "release": {
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Release"
+                        }
+                    ]
+                },
                 "rerun_count": {
                     "type": "integer"
                 },
@@ -5099,10 +5122,14 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/StatusValue"
                 },
+                "tag_title": {
+                    "type": "string"
+                },
                 "timestamp": {
                     "type": "integer"
                 },
                 "title": {
+                    "description": "// Deprecated",
                     "type": "string"
                 },
                 "updated": {
@@ -5215,6 +5242,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -5909,9 +5947,6 @@ const docTemplate = `{
                 "draft": {
                     "type": "boolean"
                 },
-                "is_prerelease": {
-                    "type": "boolean"
-                },
                 "labels": {
                     "type": "array",
                     "items": {
@@ -6042,6 +6077,9 @@ const docTemplate = `{
                 "parent": {
                     "type": "integer"
                 },
+                "release": {
+                    "$ref": "#/definitions/metadata.Release"
+                },
                 "rerun_count": {
                     "type": "integer"
                 },
@@ -6055,6 +6093,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "title": {
                     "type": "string"
                 }
             }
