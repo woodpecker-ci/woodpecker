@@ -184,19 +184,23 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	}
 
 	spec := kube_core_v1.PodSpec{
-		RestartPolicy:      kube_core_v1.RestartPolicyNever,
-		RuntimeClassName:   options.RuntimeClassName,
-		ServiceAccountName: options.ServiceAccountName,
-		PriorityClassName:  config.PriorityClassName,
-		HostAliases:        hostAliases(step.ExtraHosts),
-		Hostname:           getHostnameOrEmpty(step.Name),
-		Subdomain:          subdomain,
-		DNSConfig:          dnsConfig(config.GetNamespace(step.OrgID), subdomain),
-		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
-		Tolerations:        tolerations(options.Tolerations),
-		Affinity:           affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
-		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged, options.HostUsers),
-		HostUsers:          options.HostUsers,
+		RestartPolicy:     kube_core_v1.RestartPolicyNever,
+		RuntimeClassName:  options.RuntimeClassName,
+		PriorityClassName: config.PriorityClassName,
+		HostAliases:       hostAliases(step.ExtraHosts),
+		Hostname:          getHostnameOrEmpty(step.Name),
+		Subdomain:         subdomain,
+		DNSConfig:         dnsConfig(config.GetNamespace(step.OrgID), subdomain),
+		NodeSelector:      nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		Tolerations:       tolerations(options.Tolerations),
+		Affinity:          affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
+		SecurityContext:   podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged, options.HostUsers),
+		HostUsers:         options.HostUsers,
+	}
+
+	// Only allow the step to set the service account name if explicitly enabled by the admin.
+	if config.ServiceAccountNameAllowFromStep {
+		spec.ServiceAccountName = options.ServiceAccountName
 	}
 
 	// If there are tolerations and they are allowed
