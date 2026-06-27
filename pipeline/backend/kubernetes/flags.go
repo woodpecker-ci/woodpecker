@@ -122,6 +122,12 @@ var Flags = []cli.Flag{
 		Usage:   "whether to allow existing Kubernetes secrets to be referenced from steps",
 		Value:   false,
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT_NAME_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-service-account-name-allow-from-step",
+		Usage:   "whether to allow using service account name from step's backend options",
+		Value:   false,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PRIORITY_CLASS"),
 		Name:    "backend-k8s-priority-class",
