@@ -291,6 +291,8 @@ execute a local pipeline
 
 **--backend-k8s-secctx-nonroot**: `run as non root` Kubernetes security context option (default: false)
 
+**--backend-k8s-service-account-name-allow-from-step**: whether to allow using service account name from step's backend options (default: false)
+
 **--backend-k8s-stop-timeout**="": seconds Woodpecker waits for pods to stop gracefully before forcefully killing them (default: 20)
 
 **--backend-k8s-storage-class**="": backend k8s storage class
