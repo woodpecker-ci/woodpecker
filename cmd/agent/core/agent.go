@@ -158,6 +158,14 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		return err
 	}
 
+	// check if server application version is compatible with agent
+	agentVersion := version.String()
+	serverVersion := grpcServerVersion.ServerVersion
+	if serverVersion != "dev" && agentVersion != "dev" && serverVersion != agentVersion {
+		log.Warn().Msgf("server version %q does not match agent version %q — version mismatch may cause unexpected behavior",
+			serverVersion, agentVersion)
+	}
+
 	// new engine
 	backendCtx := context.WithValue(agentCtx, types.CliCommand, c)
 	backendName := c.String("backend-engine")
