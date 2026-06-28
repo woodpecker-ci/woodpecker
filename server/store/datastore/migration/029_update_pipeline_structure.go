@@ -193,7 +193,7 @@ var updatePipelineStructure = xormigrate.Migration{
 						FromFork:  p.FromFork,
 						Labels:    p.PullRequestLabels,
 						Milestone: p.PullRequestMilestone,
-						Draft:     p.PullRequest.Draft,
+						Draft:     p.PullRequestDraft,
 					}
 				case model.EventDeploy:
 					p.Deployment = &deployment{
