@@ -16,6 +16,8 @@
 package model
 
 import (
+	"fmt"
+
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
@@ -39,7 +41,7 @@ type Pipeline struct {
 	RerunCount          int64                   `json:"rerun_count"             xorm:"rerun_count"`
 	Ref                 string                  `json:"ref"                     xorm:"ref"`
 	Refspec             string                  `json:"refspec"                 xorm:"refspec"`
-	AuthorAvatar        string                  `json:"author_avatar"           xorm:"varchar(500) 'avatar'"` // Avatar URL of the author of the commit
+	AuthorAvatar        string                  `json:"author_avatar"           xorm:"varchar(500) 'author_avatar'"` // Avatar URL of the author of the commit
 	ForgeURL            string                  `json:"forge_url"               xorm:"forge_url"`
 	Reviewer            string                  `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed            int64                   `json:"reviewed"                xorm:"reviewed"` // timestamp of the review
@@ -91,7 +93,6 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		ap.Message = p.Commit.Message
 		ap.Timestamp = p.Commit.Timestamp
 		ap.Email = p.Commit.Author.Email
-		ap.Author = p.Commit.Author.Name
 	}
 	ap.Avatar = p.AuthorAvatar
 
@@ -100,13 +101,14 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		ap.Message = p.Cron
 		ap.Sender = p.Cron
 	case EventTag:
-		ap.Message = p.TagTitle
+		ap.Message = fmt.Sprintf("created tag %s", p.TagTitle)
 	case EventRelease:
-		if p.Release != nil {
-			ap.IsPrerelease = p.Release.IsPrerelease
-			ap.Title = p.Release.Title
-		}
 		ap.Message = "created release " + p.TagTitle
+		if p.Release != nil {
+			ap.Title = p.Release.Title
+			ap.Message = "created release " + p.Release.Title
+			ap.IsPrerelease = p.Release.IsPrerelease
+		}
 	case EventManual:
 		ap.Message = "MANUAL PIPELINE @ " + p.Branch
 	case EventDeploy:
@@ -160,12 +162,12 @@ type Deployment struct {
 	Target      string `json:"target"`
 	Task        string `json:"task"`
 	Description string `json:"description"`
-}
+} //	@name	Deployment
 
 type Release struct {
-	IsPrerelease bool   `json:"is_prerelease,omitempty"`
 	Title        string `json:"title,omitempty"`
-}
+	IsPrerelease bool   `json:"is_prerelease,omitempty"`
+} //	@name	Release
 
 type CancelInfo struct {
 	CanceledByUser string `json:"canceled_by_user,omitempty"`

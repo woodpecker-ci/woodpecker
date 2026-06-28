@@ -14,7 +14,8 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 ### API changes
 
-- The pipeline model has been changed to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pr.title`). Following properties are deprecated and should be replaced by the their new counterparts:
+- The pipeline model has been changed to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pull_request.title`).
+  Following properties are deprecated and should be replaced by the their new counterparts:
   - `deploy_to` => `deployment.target`
   - `deploy_task` => `deployment.task`
   - `commit` (SHA) => `commit_pipeline.sha`
@@ -35,7 +36,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
   - `pr_labels` => `pull_request.labels`
   - `is_prerelease` => `release.is_prerelease`
   - `from_fork` => `pull_request.from_fork`
-  - extraction from `ref` => `release.tag_title`
+  - extraction from `ref` => `tag_title`
   - `refspec` => `pull_request.source_branch` and `pull_request.target_branch`
 
 ### Admin-facing migrations

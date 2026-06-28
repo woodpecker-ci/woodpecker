@@ -514,39 +514,35 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 
 	if pipeline != nil {
 		switch pipeline.Event {
-		case model.EventRelease:
-			tagName := strings.Split(pipeline.Ref, "/")[2]
-			commit, tagMsg, err := c.getTagCommitAndMessage(ctx, repo, tagName)
-			if err != nil {
-				return nil, nil, err
+		case model.EventRelease, model.EventTag:
+			if pipeline.TagTitle == "" {
+				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			pipeline.Commit = commit
-			pipeline.TagTitle = tagMsg
-		case model.EventPull, model.EventPullClosed:
+			if pipeline.Commit == "" {
+				commit, _, err := c.getTagCommitAndMessage(ctx, repo, pipeline.TagTitle)
+				if err != nil {
+					return nil, nil, err
+				}
+				pipeline.Commit = commit
+			}
+
+		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
 			sha, err := c.getCommitFromSHAStore(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {
 				return nil, nil, err
 			}
 			pipeline.Commit = sha
-		case model.EventTag:
-			tagName := strings.Split(pipeline.Ref, "/")[2]
-			commit, tagMsg, err := c.getTagCommitAndMessage(ctx, repo, tagName)
-			if err != nil {
-				return nil, nil, err
-			}
-			pipeline.Commit = commit
-			pipeline.TagTitle = tagMsg
-		}
-	}
 
-	if pipeline != nil && pipeline.IsPullRequest() && len(pipeline.ChangedFiles) == 0 {
-		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
-		if err != nil {
-			return nil, nil, err
-		}
-		pipeline.ChangedFiles, err = c.getChangedFilesForPR(ctx, repo, index)
-		if err != nil {
-			log.Error().Err(err).Msgf("could not get changed files for PR %s#%d", repo.FullName, index)
+			if len(pipeline.ChangedFiles) == 0 {
+				index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
+				if err != nil {
+					return nil, nil, err
+				}
+				pipeline.ChangedFiles, err = c.getChangedFilesForPR(ctx, repo, index)
+				if err != nil {
+					log.Error().Err(err).Msgf("could not get changed files for PR %s#%d", repo.FullName, index)
+				}
+			}
 		}
 	}
 

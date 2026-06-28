@@ -336,11 +336,11 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 	pipeline.Commit = &model.Commit{
 		SHA: hook.After,
 	}
-	pipeline.TagTitle = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	pipeline.TagTitle = strings.TrimPrefix(strings.TrimPrefix(hook.Ref, "refs/heads/"), "refs/tags/")
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
 	pipeline.AuthorAvatar = hook.UserAvatar
-	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, strings.TrimPrefix(hook.Ref, "refs/tags/"))
+	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, pipeline.TagTitle)
 
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {

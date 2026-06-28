@@ -292,6 +292,7 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "refs/tags/the-tag-v1", pipeline.Ref)
 		assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit.SHA)
 		assert.Equal(t, "Update .woodpecker.yml", pipeline.Commit.Message)
+		assert.Equal(t, "the-tag-v1", pipeline.TagTitle)
 		assert.Equal(t, "https://github.com/6543/test_ci_tmp/commit/67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.ForgeURL)
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.AuthorAvatar)

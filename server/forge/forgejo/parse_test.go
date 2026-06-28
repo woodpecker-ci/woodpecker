@@ -181,12 +181,18 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event:        model.EventTag,
-				Commit:       &model.Commit{SHA: "ef98532add3b2feb7a137426bba1248724367df5"},
+				Event: model.EventTag,
+				Commit: &model.Commit{
+					SHA: "ef98532add3b2feb7a137426bba1248724367df5",
+					Author: model.CommitAuthor{
+						Email: "gordon@golang.org",
+						Name:  "gordon",
+					},
+				},
 				Ref:          "refs/tags/v1.0.0",
 				Author:       "gordon",
 				AuthorAvatar: "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-				ForgeURL:     "http://forgejo.golang.org/gordon/hello-world/releases/tag/v1.0.0",
+				ForgeURL:     "http://forgejo.golang.org/gordon/hello-world/src/tag/v1.0.0",
 				TagTitle:     "v1.0.0",
 			},
 		},
@@ -450,8 +456,10 @@ func TestForgejoParser(t *testing.T) {
 				Author:       "anbraten",
 				AuthorAvatar: "https://git.xxx/user/avatar/anbraten/-1",
 				ForgeURL:     "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
-				Release:      &model.Release{Title: "Version 0.0.5"},
-				TagTitle:     "0.0.5",
+				Release: &model.Release{
+					Title: "Version 0.0.5",
+				},
+				TagTitle: "0.0.5",
 			},
 		},
 		{

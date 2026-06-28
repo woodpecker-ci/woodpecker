@@ -273,6 +273,10 @@ var updatePipelineStructure = xormigrate.Migration{
 			return err
 		}
 
+		if err := renameColumn(sess, "pipelines", "avatar", "author_avatar"); err != nil {
+			return err
+		}
+
 		return renameColumn(sess, "pipelines", "commit_new", "commit")
 	},
 }

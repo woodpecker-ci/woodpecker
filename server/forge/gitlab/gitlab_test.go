@@ -164,6 +164,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Equal(t, "develop", hookRepo.Branch)
 				assert.Equal(t, "refs/tags/v22", pipeline.Ref)
 				assert.Equal(t, "http://10.40.8.5:3200/test/woodpecker/-/tags/v22", pipeline.ForgeURL)
+				assert.Equal(t, "v22", pipeline.TagTitle)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventTag, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)

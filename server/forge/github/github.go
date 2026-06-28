@@ -679,12 +679,15 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	if pipeline != nil {
 		switch pipeline.Event {
 		case model.EventRelease:
-			tagName := strings.Split(pipeline.Ref, "/")[2]
-			commit, err := c.getCommitAndMessageFromTag(ctx, repo, tagName)
+			if pipeline.TagTitle == "" {
+				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
+			}
+			commit, err := c.getCommitAndMessageFromTag(ctx, repo, pipeline.TagTitle)
 			if err != nil {
 				return nil, nil, err
 			}
 			pipeline.Commit = commit
+
 		case model.EventDeploy, model.EventPull, model.EventPullClosed:
 			commit, err := c.getCommitFromSHA(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {

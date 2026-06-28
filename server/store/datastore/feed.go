@@ -36,10 +36,12 @@ pipelines.branch as pipeline_branch,
 pipelines.ref as pipeline_ref,
 pipelines.refspec as pipeline_refspec,
 pipelines.deployment as pipeline_deployment,
-pipelines.pull_request as pipeline_pr,
+pipelines.pull_request as pipeline_pull_request,
 pipelines.release as pipeline_release,
-pipelines.author as pipeline_author,
-pipelines.avatar as pipeline_avatar`
+pipelines.author_avatar as pipeline_author_avatar,
+pipelines.avatar as pipeline_avatar,
+pipelines.release as pipeline_release,
+pipelines.tag_title as pipeline_tag_title`
 
 	return fmt.Sprintf(feedTemplate, s.engine.Dialect().Quoter().Quote("commit"))
 }

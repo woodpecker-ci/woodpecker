@@ -864,7 +864,7 @@ func (g *GitLab) loadReleaseAuthor(ctx context.Context, tmpRepo *model.Repo, pip
 		return nil, err
 	}
 
-	release, _, err := client.Releases.GetRelease(_repo.ID, strings.TrimPrefix(pipeline.Ref, "refs/tags/"), gitlab.WithContext(ctx))
+	release, _, err := client.Releases.GetRelease(_repo.ID, pipeline.TagTitle, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

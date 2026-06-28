@@ -102,7 +102,8 @@ func Test_parsePush(t *testing.T) {
 		assert.Equal(t, hook.Sha, pipeline.Commit.SHA)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
 		assert.Empty(t, pipeline.Branch)
-		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world/releases/tag/v1.0.0", pipeline.ForgeURL)
+		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world/src/tag/v1.0.0", pipeline.ForgeURL)
+		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
 	})
 }
 
