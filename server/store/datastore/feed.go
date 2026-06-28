@@ -39,8 +39,6 @@ pipelines.deployment as pipeline_deployment,
 pipelines.pull_request as pipeline_pull_request,
 pipelines.release as pipeline_release,
 pipelines.author_avatar as pipeline_author_avatar,
-pipelines.avatar as pipeline_avatar,
-pipelines.release as pipeline_release,
 pipelines.tag_title as pipeline_tag_title`
 
 	return fmt.Sprintf(feedTemplate, s.engine.Dialect().Quoter().Quote("commit"))
