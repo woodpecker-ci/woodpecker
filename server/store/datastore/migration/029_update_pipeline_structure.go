@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"src.techknowlogick.com/xormigrate"
+	"xorm.io/builder"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 
@@ -131,7 +132,10 @@ var updatePipelineStructure = xormigrate.Migration{
 		for {
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage024, page*perPage024).Find(&oldPipelines)
+			err := sess.Limit(perPage024, page*perPage024).
+				OrderBy("id ASC").
+				Where(builder.In("event", model.EventPull, model.EventPullClosed, model.EventPullMetadata, model.EventDeploy)).
+				Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
@@ -171,15 +175,7 @@ var updatePipelineStructure = xormigrate.Migration{
 				}
 
 				switch p.Event {
-				case model.EventRelease:
-					p.Release = &release{
-						Title:        strings.TrimPrefix(p.Message, "created release "),
-						IsPrerelease: p.IsPrerelease,
-					}
-					p.TagTitle = strings.TrimPrefix(p.Ref, "refs/tags/")
-				case model.EventTag:
-					p.TagTitle = strings.TrimPrefix(p.Ref, "refs/tags/")
-				case model.EventPull, model.EventPullClosed:
+				case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
 					// derive the pull request index from the ref, covering every forge
 					// ref layout: GitHub/Gitea/Forgejo (refs/pull/N/head), GitLab
 					// (refs/merge-requests/N/head|merge) and Bitbucket cloud + datacenter
