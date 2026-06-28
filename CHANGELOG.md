@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-06-27
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-06-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -9,6 +9,10 @@
 ### 📈 Enhancement
 
 - Rework pipeline data structure: Release & Tag [[#6774](https://github.com/woodpecker-ci/woodpecker/pull/6774)]
+
+### 📦️ Dependency
+
+- Update pre-commit hook rbubley/mirrors-prettier to v3.9.1 [[#6797](https://github.com/woodpecker-ci/woodpecker/pull/6797)]
 
 ## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-27
 
