@@ -514,13 +514,11 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			if pipeline.Commit == "" {
-				commit, _, err := c.getTagCommitAndMessage(ctx, repo, pipeline.TagTitle)
-				if err != nil {
-					return nil, nil, err
-				}
-				pipeline.Commit = commit
+			commit, _, err := c.getTagCommitAndMessage(ctx, repo, pipeline.TagTitle)
+			if err != nil {
+				return nil, nil, err
 			}
+			pipeline.Commit = commit
 
 		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
 			sha, err := c.getCommitFromSHAWithUserFromStore(ctx, repo, pipeline.Commit.SHA)

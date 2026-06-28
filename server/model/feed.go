@@ -51,7 +51,7 @@ func (f *Feed) ToAPIModel() *APIFeed {
 		af.Author = f.Commit.Author.Name
 	}
 
-	switch af.Event {
+	switch WebhookEvent(af.Event) {
 	case EventTag:
 		af.Message = fmt.Sprintf("created tag %s", af.TagTitle)
 	case EventRelease:

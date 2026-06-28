@@ -3123,8 +3123,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "override the target deploy value",
+                        "description": "deprecated use deploy_target instead",
                         "name": "deploy_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "override the deployment target value",
+                        "name": "deploy_target",
                         "in": "query"
                     }
                 ],
@@ -4774,6 +4780,20 @@ const docTemplate = `{
                 }
             }
         },
+        "Deployment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
         "Feed": {
             "type": "object",
             "properties": {
@@ -4792,11 +4812,22 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
+                },
                 "created": {
                     "type": "integer"
                 },
+                "deployment": {
+                    "$ref": "#/definitions/Deployment"
+                },
                 "event": {
-                    "$ref": "#/definitions/WebhookEvent"
+                    "type": "string"
                 },
                 "finished": {
                     "type": "integer"
@@ -4805,11 +4836,13 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "message": {
-                    "description": "// Deprecated",
                     "type": "string"
                 },
                 "number": {
                     "type": "integer"
+                },
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
                 },
                 "ref": {
                     "type": "string"
@@ -4818,12 +4851,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release": {
-                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/Release"
-                        }
-                    ]
+                    "$ref": "#/definitions/Release"
                 },
                 "repo_id": {
                     "type": "integer"
@@ -4999,14 +5027,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
-                    "description": "TODO: only // The user sending the webhook data or triggering the pipeline event",
+                    "description": "The user sending the webhook data or triggering the pipeline event",
                     "type": "string"
                 },
                 "author_avatar": {
-                    "description": "TODO: only \u0026 rename to AuthorAvatar // Avatar URL of the author of the commit",
+                    "description": "Avatar URL of the author of the commit",
                     "type": "string"
                 },
                 "author_email": {
+                    "description": "deprecated, use commit.author.email instead",
+                    "type": "string"
+                },
+                "avatar": {
+                    "description": "deprecated, use author_avatar instead",
                     "type": "string"
                 },
                 "branch": {
@@ -5022,7 +5055,16 @@ const docTemplate = `{
                     }
                 },
                 "commit": {
+                    "description": "deprecated, use commit_pipeline.sha instead",
                     "type": "string"
+                },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
                 },
                 "created": {
                     "type": "integer"
@@ -5032,10 +5074,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "deploy_task": {
+                    "description": "deprecated, use deployment.task instead",
                     "type": "string"
                 },
                 "deploy_to": {
+                    "description": "deprecated, use deployment.target instead",
                     "type": "string"
+                },
+                "deployment": {
+                    "$ref": "#/definitions/Deployment"
                 },
                 "errors": {
                     "type": "array",
@@ -5059,6 +5106,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "from_fork": {
+                    "description": "deprecated, use pull_request.from_fork instead",
                     "type": "boolean"
                 },
                 "id": {
@@ -5069,6 +5117,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "message": {
+                    "description": "deprecated, use commit.message (pull_request, pull_request_closed \u0026 push), deployment.description, cron (cron) or tag_title (tag) instead",
                     "type": "string"
                 },
                 "number": {
@@ -5078,16 +5127,22 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "pr_draft": {
+                    "description": "deprecated, use pull_request.draft instead",
                     "type": "boolean"
                 },
                 "pr_labels": {
+                    "description": "deprecated, use pull_request.labels instead",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "pr_milestone": {
+                    "description": "deprecated, use pull_request.milestone instead",
                     "type": "string"
+                },
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
                 },
                 "ref": {
                     "type": "string"
@@ -5096,24 +5151,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "release": {
-                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/Release"
-                        }
-                    ]
+                    "$ref": "#/definitions/Release"
                 },
                 "rerun_count": {
                     "type": "integer"
                 },
                 "reviewed": {
+                    "description": "timestamp of the review",
                     "type": "integer"
                 },
                 "reviewed_by": {
                     "type": "string"
                 },
                 "sender": {
-                    "description": "uses reported user for webhooks and name of cron for cron pipelines",
+                    "description": "deprecated, use author instead",
                     "type": "string"
                 },
                 "started": {
@@ -5126,10 +5177,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "timestamp": {
+                    "description": "deprecated, use created instead",
                     "type": "integer"
                 },
                 "title": {
-                    "description": "// Deprecated",
+                    "description": "deprecated, use pull_request.title (pull_request \u0026 pull_request_closed) or deployment.description",
                     "type": "string"
                 },
                 "updated": {
@@ -5169,7 +5221,22 @@ const docTemplate = `{
         "PullRequest": {
             "type": "object",
             "properties": {
+                "draft": {
+                    "type": "boolean"
+                },
+                "from_fork": {
+                    "type": "boolean"
+                },
                 "index": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "milestone": {
                     "type": "string"
                 },
                 "title": {
@@ -6234,6 +6301,37 @@ const docTemplate = `{
                 "RequireApprovalPullRequests",
                 "RequireApprovalAllEvents"
             ]
+        },
+        "model.Commit": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/model.CommitAuthor"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.CommitAuthor": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "model.ForgeType": {
             "type": "string",
