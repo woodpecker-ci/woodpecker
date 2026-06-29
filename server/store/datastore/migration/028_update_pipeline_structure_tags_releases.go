@@ -85,7 +85,10 @@ var updatePipelineStructureTagsReleases = xormigrate.Migration{
 		for {
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage, page*perPage).Where(builder.In("event", model.EventRelease, model.EventTag)).Find(&oldPipelines)
+			err := sess.Limit(perPage, page*perPage).
+				OrderBy("id ASC").
+				Where(builder.In("event", model.EventRelease, model.EventTag)).
+				Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
