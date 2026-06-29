@@ -335,11 +335,11 @@ func podInitContainer(config *config, podSpec *kube_core_v1.PodSpec, container *
 		Resources: kube_core_v1.ResourceRequirements{
 			Requests: kube_core_v1.ResourceList{
 				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
-				kube_core_v1.ResourceMemory: resource.MustParse("5Mi"),
+				kube_core_v1.ResourceMemory: resource.MustParse("12Mi"),
 			},
 			Limits: kube_core_v1.ResourceList{
 				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
-				kube_core_v1.ResourceMemory: resource.MustParse("5Mi"),
+				kube_core_v1.ResourceMemory: resource.MustParse("12Mi"),
 			},
 		},
 		VolumeMounts: volumeMounts,

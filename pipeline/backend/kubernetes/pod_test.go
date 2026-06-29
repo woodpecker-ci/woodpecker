@@ -1407,11 +1407,11 @@ func TestInitContainer(t *testing.T) {
 		"resources": {
 			"requests": {
 				"cpu": "5m",
-				"memory": "5Mi"
+				"memory": "12Mi"
 			},
 			"limits": {
 				"cpu": "5m",
-				"memory": "5Mi"
+				"memory": "12Mi"
 			}
 		},
 		"securityContext": {
