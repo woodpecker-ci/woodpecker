@@ -2,7 +2,7 @@
   "name": "woodpecker",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@11.3.0",
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
     "start": "cd ../ && make generate-docs && cd docs && docusaurus start",
     "build": "pnpm build:woodpecker-plugins && docusaurus build",
@@ -17,10 +17,10 @@
     "format:check": "prettier -c ."
   },
   "dependencies": {
-    "@docusaurus/core": "^3.9.2",
-    "@docusaurus/faster": "^3.9.2",
-    "@docusaurus/plugin-content-blog": "^3.9.2",
-    "@docusaurus/preset-classic": "^3.9.2",
+    "@docusaurus/core": "^3.10.1",
+    "@docusaurus/faster": "^3.10.1",
+    "@docusaurus/plugin-content-blog": "^3.10.1",
+    "@docusaurus/preset-classic": "^3.10.1",
     "@easyops-cn/docusaurus-search-local": "^0.55.1",
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.1",
@@ -41,9 +41,9 @@
     ]
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.9.2",
+    "@docusaurus/module-type-aliases": "^3.10.1",
     "@docusaurus/tsconfig": "3.10.1",
-    "@docusaurus/types": "^3.9.2",
+    "@docusaurus/types": "^3.10.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",

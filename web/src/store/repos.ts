@@ -67,6 +67,10 @@ export const useRepoStore = defineStore('repos', () => {
     }
   }
 
+  async function refreshRepos() {
+    await apiClient.refreshRepoList();
+  }
+
   return {
     repos,
     ownedRepos,
@@ -75,5 +79,6 @@ export const useRepoStore = defineStore('repos', () => {
     setRepo,
     loadRepo,
     loadRepos,
+    refreshRepos,
   };
 });

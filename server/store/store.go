@@ -189,12 +189,14 @@ type Store interface {
 	WorkflowsCreate([]*model.Workflow) error
 	WorkflowsReplace(*model.Pipeline, []*model.Workflow) error
 	WorkflowLoad(int64) (*model.Workflow, error)
+	WorkflowByStep(*model.Step) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error
 
 	// Org
 	OrgCreate(*model.Org) error
 	OrgGet(int64) (*model.Org, error)
 	OrgFindByName(string, int64) (*model.Org, error)
+	OrgLookup(string) (*model.Org, error)
 	OrgUpdate(*model.Org) error
 	OrgDelete(int64) error
 	OrgList(*model.ListOptions) ([]*model.Org, error)

@@ -210,6 +210,7 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	case "tag", "annotated_tag", "bookmark":
 		pipeline.Event = model.EventTag
 		pipeline.Ref = fmt.Sprintf("refs/tags/%s", change.New.Name)
+		pipeline.TagTitle = change.New.Name
 	default:
 		pipeline.Event = model.EventPush
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)

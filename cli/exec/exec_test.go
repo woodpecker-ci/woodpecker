@@ -72,12 +72,14 @@ steps:
 	r.Close()
 	stdout := buf.String()
 
-	assert.Contains(t, stdout,
+	assert.Contains(
+		t, stdout,
 		`[build:L0:0s] StepName: build
 [build:L1:0s] StepType: commands
 [build:L2:0s] StepUUID: `,
 	)
-	assert.Contains(t, stdout,
+	assert.Contains(
+		t, stdout,
 		`[build:L3:0s] StepCommands:
 [build:L4:0s] ------------------
 [build:L5:0s] echo hello
@@ -97,4 +99,27 @@ func clearEnv(t *testing.T) {
 		}
 	})
 	os.Clearenv()
+}
+
+func TestRepoRootFromFile(t *testing.T) {
+	tmp := t.TempDir()
+
+	// pipeline file inside a `.woodpecker` config folder => repo root is the parent
+	wpDir := filepath.Join(tmp, "myrepo", ".woodpecker")
+	require.NoError(t, os.MkdirAll(wpDir, 0o755))
+	wpFile := filepath.Join(wpDir, "securityscan.yaml")
+	require.NoError(t, os.WriteFile(wpFile, []byte("steps: {}\n"), 0o644))
+	assert.Equal(t, filepath.Join(tmp, "myrepo"), repoRootFromFile(wpFile))
+
+	// legacy single config file at repo root => repo root is the file's directory
+	rootDir := filepath.Join(tmp, "legacy")
+	require.NoError(t, os.MkdirAll(rootDir, 0o755))
+	rootFile := filepath.Join(rootDir, ".woodpecker.yml")
+	require.NoError(t, os.WriteFile(rootFile, []byte("steps: {}\n"), 0o644))
+	assert.Equal(t, rootDir, repoRootFromFile(rootFile))
+
+	// arbitrary file not in a `.woodpecker` folder => its own directory
+	otherFile := filepath.Join(rootDir, "ci.yaml")
+	require.NoError(t, os.WriteFile(otherFile, []byte("steps: {}\n"), 0o644))
+	assert.Equal(t, rootDir, repoRootFromFile(otherFile))
 }

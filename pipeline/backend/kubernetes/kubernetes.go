@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v6"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	kube_core_v1 "k8s.io/api/core/v1"
@@ -59,25 +59,27 @@ type kube struct {
 }
 
 type config struct {
-	Namespace                   string
-	EnableNamespacePerOrg       bool
-	StorageClass                string
-	VolumeSize                  string
-	StorageRwx                  bool
-	PodLabels                   map[string]string
-	PodLabelsAllowFromStep      bool
-	PodAnnotations              map[string]string
-	PodAnnotationsAllowFromStep bool
-	PodNodeSelector             map[string]string
-	PodTolerationsAllowFromStep bool
-	PodTolerations              []Toleration
-	PodAffinity                 *kube_core_v1.Affinity
-	PodAffinityAllowFromStep    bool
-	ImagePullSecretNames        []string
-	SecurityContext             SecurityContextConfig
-	NativeSecretsAllowFromStep  bool
-	PriorityClassName           string
-	StopTimeout                 int64
+	Namespace                       string
+	EnableNamespacePerOrg           bool
+	StorageClass                    string
+	VolumeSize                      string
+	StorageRwx                      bool
+	PodLabels                       map[string]string
+	PodLabelsAllowFromStep          bool
+	PodAnnotations                  map[string]string
+	PodAnnotationsAllowFromStep     bool
+	PodNodeSelector                 map[string]string
+	PodTolerationsAllowFromStep     bool
+	PodTolerations                  []Toleration
+	PodAffinity                     *kube_core_v1.Affinity
+	PodAffinityAllowFromStep        bool
+	ImagePullSecretNames            []string
+	SecurityContext                 SecurityContextConfig
+	NativeSecretsAllowFromStep      bool
+	ServiceAccountNameAllowFromStep bool
+	PriorityClassName               string
+	StopTimeout                     int64
+	PermissionInitImage             string
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -123,8 +125,10 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 					FSGroup:      newInt64(defaultFSGroup),
 				},
-				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
-				StopTimeout:                c.Int64("backend-k8s-stop-timeout"),
+				NativeSecretsAllowFromStep:      c.Bool("backend-k8s-allow-native-secrets"),
+				ServiceAccountNameAllowFromStep: c.Bool("backend-k8s-service-account-name-allow-from-step"),
+				StopTimeout:                     c.Int64("backend-k8s-stop-timeout"),
+				PermissionInitImage:             c.String("backend-k8s-permission-init-image"),
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -353,9 +357,35 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, ctx.Err()
 	}
 
-	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
+	// After the informer signals completion, kubelet may not have finalized
+	// containerStatuses yet (phase=Succeeded before state.terminated is set).
+	// Retry with backoff to allow kubelet to catch up.
+	pod, err := backoff.Retry(
+		ctx,
+		func() (*kube_core_v1.Pod, error) {
+			p, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
+			if err != nil {
+				if kube_errors.IsNotFound(err) {
+					return nil, backoff.Permanent(err)
+				}
+				return nil, err
+			}
+			if len(p.Status.ContainerStatuses) == 0 {
+				return nil, fmt.Errorf("no container statuses found for pod %s", podName)
+			}
+			if p.Status.ContainerStatuses[0].State.Terminated == nil {
+				return nil, fmt.Errorf("container %s/%s terminated state not yet finalized", podName, p.Status.ContainerStatuses[0].Name)
+			}
+			return p, nil
+		},
+		backoff.WithBackOff(backoff.NewExponentialBackOff()),
+		backoff.WithMaxElapsedTime(maxRetryDuration),
+		backoff.WithNotify(func(err error, delay time.Duration) {
+			log.Warn().Err(err).Str("pod", podName).Dur("backoff", delay).Msg("waiting for container terminated state, retrying with backoff")
+		}),
+	)
 	if err != nil {
-		if kube_errors.IsNotFound(err) {
+		if kube_errors.IsNotFound(backoff.AsRetryError(err).LastErr) {
 			return &types.State{ExitCode: 0, Exited: true}, nil
 		}
 		return nil, err
@@ -365,17 +395,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, fmt.Errorf("could not pull image for pod %s", podName)
 	}
 
-	if len(pod.Status.ContainerStatuses) == 0 {
-		return nil, fmt.Errorf("no container statuses found for pod %s", podName)
-	}
-
 	cs := pod.Status.ContainerStatuses[0]
-
-	if cs.State.Terminated == nil {
-		err := fmt.Errorf("no terminated state found for container %s/%s", podName, cs.Name)
-		log.Error().Str("taskUUID", taskUUID).Str("pod", podName).Str("container", cs.Name).Interface("state", cs.State).Msg(err.Error())
-		return nil, err
-	}
 
 	bs := &types.State{
 		ExitCode:  int(cs.State.Terminated.ExitCode),

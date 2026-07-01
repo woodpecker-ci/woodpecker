@@ -127,15 +127,27 @@ func LookupOrg(c *gin.Context) {
 
 	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
 
-	org, err := _store.OrgFindByName(orgFullName, user.ForgeID)
-	if err != nil {
-		handleDBError(c, err)
-		return
+	var org *model.Org
+	if user == nil {
+		org, err = _store.OrgLookup(orgFullName)
+		if err != nil {
+			if err.Error() == "found more than one org with this name" {
+				_ = c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+			handleDBError(c, err)
+			return
+		}
+	} else {
+		org, err = _store.OrgFindByName(orgFullName, user.ForgeID)
+		if err != nil {
+			handleDBError(c, err)
+			return
+		}
 	}
 
 	// don't leak private org infos
 	if org.Private {
-		user := session.User(c)
 		if user == nil {
 			c.AbortWithStatus(http.StatusNotFound)
 			return

@@ -18,14 +18,17 @@ import (
 	"sort"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
 type Item struct {
-	Workflow  *Workflow
-	Labels    map[string]string
-	DependsOn []string
-	RunsOn    []string
-	Config    *backend_types.Config
+	Workflow         *Workflow
+	Labels           map[string]string
+	DependsOn        constraint.DependsOn
+	RunsOn           []string
+	ConcurrencyLimit int
+	ConcurrencyGroup string
+	Config           *backend_types.Config
 }
 
 type Workflow struct {
