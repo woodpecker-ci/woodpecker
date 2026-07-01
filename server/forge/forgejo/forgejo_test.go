@@ -161,7 +161,7 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		Commit: "9ecad50",
+		Commit: &model.Commit{SHA: "9ecad50"},
 	}
 
 	fakeWorkflow = &model.Workflow{

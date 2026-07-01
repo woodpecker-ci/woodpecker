@@ -48,8 +48,11 @@ func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 
 	// repository requires approval for pull requests from forks
 	case model.RequireApprovalForks:
-		if pipeline.IsPullRequest() && pipeline.FromFork {
-			return true
+		if pipeline.IsPullRequest() {
+			// missing PR metadata: cannot determine fork origin, require approval to be safe
+			if pipeline.PullRequest == nil || pipeline.PullRequest.FromFork {
+				return true
+			}
 		}
 
 	// repository requires approval for pull requests

@@ -91,7 +91,7 @@ func TestWorkflowConcurrencyLimit(t *testing.T) {
 	created := make([]*model.Pipeline, 0, rounds)
 	for i := range rounds {
 		pipeDraft := env.DummyPipeline(model.EventPush)
-		pipeDraft.Commit = fmt.Sprintf("deadbeef%d", i)
+		pipeDraft.Commit.SHA = fmt.Sprintf("deadbeef%d", i)
 
 		p, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, pipeDraft)
 		require.NoErrorf(t, err, "create pipeline round %d", i)
