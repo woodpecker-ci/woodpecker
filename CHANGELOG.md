@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Rename CI_COMMIT_PRERELEASE to CI_PIPELINE_RELEASE_PRE [[#6794](https://github.com/woodpecker-ci/woodpecker/pull/6794)]
 - Rework pipeline data structure: Release & Tag [[#6774](https://github.com/woodpecker-ci/woodpecker/pull/6774)]
 
 ### 📚 Documentation
