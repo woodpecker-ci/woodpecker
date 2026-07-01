@@ -202,6 +202,8 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	item.Labels[pipeline.LabelRepoFullName] = workflowMetadata.Repo.Owner + "/" + workflowMetadata.Repo.Name
 	item.Labels[pipeline.LabelBranch] = workflowMetadata.Repo.Branch
 	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(workflowMetadata.Repo.OrgID, 10)
+	item.Labels[pipeline.LabelCommitBranch] = workflowMetadata.Curr.Commit.Branch
+	item.Labels[pipeline.LabelEvent] = string(workflowMetadata.Curr.Event)
 
 	return item, errorsAndWarnings
 }
