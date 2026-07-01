@@ -2,7 +2,7 @@
   <header class="text-wp-text-100" :class="{ 'md:px-4': fullWidth }">
     <Container :full-width="fullWidth" class="relative py-0!">
       <div class="border-wp-background-400 dark:border-wp-background-100 border-b">
-        <div class="flex w-full flex-col gap-2 py-3 md:flex-row md:items-center md:justify-between md:gap-10">
+        <div class="flex w-full flex-col gap-2 py-3 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-10 md:gap-y-2">
           <div
             class="flex min-h-10 content-start items-center"
             :class="{
