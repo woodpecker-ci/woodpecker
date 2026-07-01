@@ -359,6 +359,7 @@ var deprecatedEnvVars = []struct {
 	replacement string
 	re          *regexp.Regexp
 }{
+	{"CI_COMMIT_PRERELEASE", "CI_PIPELINE_RELEASE_PRE", deprecatedEnvVarRefRegexp("CI_COMMIT_PRERELEASE")},
 	{"CI_COMMIT_AUTHOR_AVATAR", "CI_PIPELINE_AVATAR", deprecatedEnvVarRefRegexp("CI_COMMIT_AUTHOR_AVATAR")},
 	{"CI_PREV_COMMIT_AUTHOR_AVATAR", "CI_PREV_PIPELINE_AVATAR", deprecatedEnvVarRefRegexp("CI_PREV_COMMIT_AUTHOR_AVATAR")},
 }
