@@ -168,7 +168,7 @@ func TestGetWorkflowMetadata(t *testing.T) {
 		},
 		{
 			name:     "Test with pull request draft",
-			pipeline: &model.Pipeline{Number: 3, Event: model.EventPull, Ref: "refs/pull/1/head", PullRequestDraft: true},
+			pipeline: &model.Pipeline{Number: 3, Event: model.EventPull, Ref: "refs/pull/1/head", PullRequest: &model.PullRequest{Draft: true}},
 		},
 	}
 

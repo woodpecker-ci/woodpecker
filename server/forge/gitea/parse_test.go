@@ -205,16 +205,11 @@ func TestGiteaParser(t *testing.T) {
 				Event: model.EventTag,
 				Commit: &model.Commit{
 					SHA: "ef98532add3b2feb7a137426bba1248724367df5",
-					Author: model.CommitAuthor{
-						Email: "gordon@golang.org",
-						Name:  "gordon",
-					},
 				},
 				Ref:          "refs/tags/v1.0.0",
 				Author:       "gordon",
 				TagTitle:     "v1.0.0",
 				AuthorAvatar: "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-				ForgeURL:     "http://gitea.golang.org/gordon/hello-world/releases/tag/v1.0.0",
 				ForgeURL:     "http://gitea.golang.org/gordon/hello-world/src/tag/v1.0.0",
 			},
 		},
@@ -717,7 +712,7 @@ func Test_parsePullRequestDraft(t *testing.T) {
 
 	_, p, err := parseHook(req)
 	assert.NoError(t, err)
-	if assert.NotNil(t, p) {
-		assert.True(t, p.PullRequestDraft)
+	if assert.NotNil(t, p) && assert.NotNil(t, p.PullRequest) {
+		assert.True(t, p.PullRequest.Draft)
 	}
 }

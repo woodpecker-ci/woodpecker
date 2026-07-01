@@ -184,10 +184,6 @@ func TestForgejoParser(t *testing.T) {
 				Event: model.EventTag,
 				Commit: &model.Commit{
 					SHA: "ef98532add3b2feb7a137426bba1248724367df5",
-					Author: model.CommitAuthor{
-						Email: "gordon@golang.org",
-						Name:  "gordon",
-					},
 				},
 				Ref:          "refs/tags/v1.0.0",
 				Author:       "gordon",

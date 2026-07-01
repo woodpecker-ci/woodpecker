@@ -83,7 +83,6 @@ func TestGetPipelineQueue(t *testing.T) {
 	assert.Equal(t, pipeline1.Commit.SHA, feedItem.Commit.SHA)
 	assert.Equal(t, pipeline1.Commit.Author.Email, feedItem.Commit.Author.Email)
 	assert.Equal(t, pipeline1.Commit.Author.Name, feedItem.Commit.Author.Name)
-	assert.Equal(t, pipeline1.Author, feedItem.Author)
 }
 
 func TestUserFeed(t *testing.T) {

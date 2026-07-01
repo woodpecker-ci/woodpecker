@@ -213,7 +213,7 @@ func Test_GitLab(t *testing.T) {
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
-				assert.False(t, pipeline.PullRequestDraft)
+				assert.False(t, pipeline.PullRequest.Draft)
 			}
 		})
 
@@ -232,8 +232,8 @@ func Test_GitLab(t *testing.T) {
 
 			_, pipeline, err := client.Hook(ctx, req)
 			assert.NoError(t, err)
-			if assert.NotNil(t, pipeline) {
-				assert.True(t, pipeline.PullRequestDraft)
+			if assert.NotNil(t, pipeline) && assert.NotNil(t, pipeline.PullRequest) {
+				assert.True(t, pipeline.PullRequest.Draft)
 			}
 		})
 
