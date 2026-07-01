@@ -39,6 +39,8 @@ const (
 	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
 	podPrefix             = "wp-"
 	defaultFSGroup  int64 = 1000
+	// Because of https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/nodes/working-with-clusters
+	initContainerMemLimit = "12Mi"
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*kube_core_v1.Pod, error) {
@@ -335,11 +337,11 @@ func podInitContainer(config *config, podSpec *kube_core_v1.PodSpec, container *
 		Resources: kube_core_v1.ResourceRequirements{
 			Requests: kube_core_v1.ResourceList{
 				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
-				kube_core_v1.ResourceMemory: resource.MustParse("12Mi"),
+				kube_core_v1.ResourceMemory: resource.MustParse(initContainerMemLimit),
 			},
 			Limits: kube_core_v1.ResourceList{
 				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
-				kube_core_v1.ResourceMemory: resource.MustParse("12Mi"),
+				kube_core_v1.ResourceMemory: resource.MustParse(initContainerMemLimit),
 			},
 		},
 		VolumeMounts: volumeMounts,
