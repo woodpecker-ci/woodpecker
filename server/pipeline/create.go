@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -74,8 +75,10 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	// fetch the pipeline file from the forge
+	phaseStart := time.Now()
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
+	configFetchDuration := time.Since(phaseStart)
 	switch {
 	case errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}):
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
@@ -93,7 +96,9 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
 	}
 
+	phaseStart = time.Now()
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
+	compileDuration := time.Since(phaseStart)
 	*pipeline = *currentPipeline
 	if handleParseErrors(pipeline, parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
@@ -130,22 +135,38 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
+	phaseStart = time.Now()
 	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+	publishDuration := time.Since(phaseStart)
 
 	if pipeline.Status == model.StatusBlocked {
 		return pipeline, nil
 	}
 
+	phaseStart = time.Now()
 	if err := updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser); err != nil {
 		return nil, err
 	}
+	pendingDuration := time.Since(phaseStart)
 
+	phaseStart = time.Now()
 	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, errors.New(msg)
 	}
+
+	log.Info().
+		Str("repo", repo.FullName).
+		Int64("pipeline", pipeline.Number).
+		Int("workflows", len(pipeline.Workflows)).
+		Dur("config_fetch", configFetchDuration).
+		Dur("compile", compileDuration).
+		Dur("publish_created", publishDuration).
+		Dur("publish_pending", pendingDuration).
+		Dur("start", time.Since(phaseStart)).
+		Msg("pipeline creation timing")
 
 	return pipeline, nil
 }
