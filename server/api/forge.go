@@ -180,9 +180,6 @@ func restoreSecretOptions(forge *model.Forge, oldOptions map[string]any) {
 	if oldKey == "" || newKey != "" || !hasNonEmptyAppID(forge.AdditionalOptions) {
 		return
 	}
-	if forge.AdditionalOptions == nil {
-		forge.AdditionalOptions = make(map[string]any)
-	}
 	forge.AdditionalOptions["app-private-key"] = oldKey
 }
 

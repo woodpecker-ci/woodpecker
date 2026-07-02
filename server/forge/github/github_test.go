@@ -17,6 +17,9 @@ package github
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -114,6 +117,7 @@ func TestGithubApp(t *testing.T) {
 	ctx := t.Context()
 
 	notInstalledRepo := &model.Repo{
+		UserID:   1,
 		Owner:    "not-installed",
 		Name:     "some-repo",
 		FullName: "not-installed/some-repo",
@@ -186,6 +190,104 @@ func TestGithubApp(t *testing.T) {
 			State: model.StatusSuccess,
 		})
 		assert.NoError(t, err)
+	})
+
+	t.Run("file and dir are fetched with installation token", func(t *testing.T) {
+		// the fixture handler rejects any other token
+		data, err := c.File(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, ".woodpecker.yml")
+		assert.NoError(t, err)
+		assert.Equal(t, "pipeline:", string(data))
+
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "somedir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "somedir/a.yaml", files[0].Name)
+	})
+
+	t.Run("branches are listed with installation token", func(t *testing.T) {
+		branches, err := c.Branches(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		assert.Equal(t, []string{"main", "dev"}, branches)
+
+		commit, err := c.BranchHead(ctx, fakeUser, fakeRepo, "main")
+		assert.NoError(t, err)
+		assert.Equal(t, "abc123", commit.SHA)
+	})
+
+	t.Run("pull requests are listed with installation token", func(t *testing.T) {
+		prs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		require.Len(t, prs, 1)
+		assert.Equal(t, model.ForgeRemoteID("7"), prs[0].Index)
+	})
+
+	t.Run("netrc falls back to user token on installation lookup errors", func(t *testing.T) {
+		netrc, err := c.Netrc(fakeUser, &model.Repo{
+			Owner:    "lookup-error",
+			Name:     "some-repo",
+			FullName: "lookup-error/some-repo",
+			Clone:    "https://github.com/lookup-error/some-repo.git",
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, fakeUser.AccessToken, netrc.Login)
+		assert.Equal(t, "x-oauth-basic", netrc.Password)
+	})
+
+	t.Run("netrc errors on invalid clone url", func(t *testing.T) {
+		_, err := c.Netrc(fakeUser, &model.Repo{Clone: "://not-a-url"})
+		assert.Error(t, err)
+	})
+
+	t.Run("repo token without app uses user token", func(t *testing.T) {
+		forge, _ := New(1, Opts{})
+		cl, _ := forge.(*client)
+		assert.Equal(t, fakeUser.AccessToken, cl.repoToken(ctx, fakeUser, fakeRepo))
+	})
+
+	t.Run("hook client falls back to the repo owner", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
+		mockStore.On("UpdateUser", mock.Anything).Return(nil).Maybe()
+		storeCtx := store.InjectToContext(ctx, mockStore)
+
+		cl, _ := c.(*client)
+		gh, err := cl.newRepoHookClient(storeCtx, mockStore, notInstalledRepo)
+		assert.NoError(t, err)
+		assert.NotNil(t, gh)
+	})
+
+	t.Run("hook client errors when the repo owner is gone", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("GetUser", int64(1)).Return(nil, errors.New("user not found"))
+		storeCtx := store.InjectToContext(ctx, mockStore)
+
+		cl, _ := c.(*client)
+		_, err := cl.newRepoHookClient(storeCtx, mockStore, notInstalledRepo)
+		assert.Error(t, err)
+	})
+
+	t.Run("app health surfaces api errors", func(t *testing.T) {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/v3/app", func(w http.ResponseWriter, _ *http.Request) {
+			fmt.Fprint(w, `{"id": 12345, "name": "Woodpecker Test App"}`)
+		})
+		mux.HandleFunc("/api/v3/app/installations", func(w http.ResponseWriter, _ *http.Request) {
+			http.Error(w, "boom", http.StatusInternalServerError)
+		})
+		errServer := httptest.NewServer(mux)
+		defer errServer.Close()
+
+		forge, err := New(1, Opts{URL: errServer.URL, AppID: "12345", AppPrivateKey: appKey})
+		require.NoError(t, err)
+		cl, _ := forge.(*client)
+		_, _, err = cl.AppHealth(ctx)
+		assert.ErrorContains(t, err, "installations")
+
+		deadForge, err := New(1, Opts{URL: "http://127.0.0.1:1", AppID: "12345", AppPrivateKey: appKey})
+		require.NoError(t, err)
+		cl, _ = deadForge.(*client)
+		_, _, err = cl.AppHealth(ctx)
+		assert.Error(t, err)
 	})
 }
 

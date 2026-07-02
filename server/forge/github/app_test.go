@@ -98,6 +98,16 @@ func TestParseAppPrivateKey(t *testing.T) {
 		_, err := parseAppPrivateKey("not-a-key")
 		assert.Error(t, err)
 	})
+
+	t.Run("squashed PEM with mismatched block types", func(t *testing.T) {
+		_, ok := repairSquashedPEM("-----BEGIN RSA PRIVATE KEY-----abc-----END EC PRIVATE KEY-----")
+		assert.False(t, ok)
+	})
+
+	t.Run("squashed PEM with invalid body", func(t *testing.T) {
+		_, err := parseAppPrivateKey("-----BEGIN RSA PRIVATE KEY-----bm90LWEta2V5-----END RSA PRIVATE KEY-----")
+		assert.Error(t, err)
+	})
 }
 
 func TestAppJWT(t *testing.T) {
@@ -144,9 +154,13 @@ func TestAppInstallationToken(t *testing.T) {
 		switch r.PathValue("owner") {
 		case "not-installed":
 			http.Error(w, "", http.StatusNotFound)
+		case "lookup-error":
+			http.Error(w, "", http.StatusInternalServerError)
 		case "uninstalled":
 			// installation still resolves, but minting tokens for it fails
 			fmt.Fprint(w, `{"id": 8}`)
+		case "mint-error":
+			fmt.Fprint(w, `{"id": 9}`)
 		default:
 			fmt.Fprint(w, `{"id": 7}`)
 		}
@@ -157,8 +171,12 @@ func TestAppInstallationToken(t *testing.T) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		if r.PathValue("id") == "8" {
+		switch r.PathValue("id") {
+		case "8":
 			http.Error(w, "", http.StatusNotFound)
+			return
+		case "9":
+			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
@@ -236,4 +254,24 @@ func TestAppInstallationToken(t *testing.T) {
 	_, err = app.token(ctx, "uninstalled", "some-repo", apiTokenMinValidity)
 	assert.ErrorIs(t, err, errAppNotInstalled)
 	assert.Equal(t, mints+1, tokenMints)
+
+	// transient installation lookup errors are surfaced, not cached
+	lookups = installationLookups
+	_, err = app.token(ctx, "lookup-error", "some-repo", apiTokenMinValidity)
+	assert.Error(t, err)
+	assert.NotErrorIs(t, err, errAppNotInstalled)
+
+	_, err = app.token(ctx, "lookup-error", "some-repo", apiTokenMinValidity)
+	assert.Error(t, err)
+	assert.Equal(t, lookups+2, installationLookups)
+
+	// transient mint errors are surfaced and retried on the next call
+	mints = tokenMints
+	_, err = app.token(ctx, "mint-error", "some-repo", apiTokenMinValidity)
+	assert.Error(t, err)
+	assert.NotErrorIs(t, err, errAppNotInstalled)
+
+	_, err = app.token(ctx, "mint-error", "some-repo", apiTokenMinValidity)
+	assert.Error(t, err)
+	assert.Equal(t, mints+2, tokenMints)
 }

@@ -42,8 +42,55 @@ func Handler() http.Handler {
 	e.POST("/api/v3/repos/:owner/:name/statuses/:commit", createStatus)
 	e.GET("/api/v3/app", getApp)
 	e.GET("/api/v3/app/installations", listInstallations)
+	e.GET("/api/v3/repos/:owner/:name/branches", listBranches)
+	e.GET("/api/v3/repos/:owner/:name/branches/:branch", getBranch)
+	e.GET("/api/v3/repos/:owner/:name/pulls", listPulls)
+	e.GET("/api/v3/repos/:owner/:name/contents/*path", getContents)
 
 	return e
+}
+
+// requireInstallationToken guards fixture endpoints used to assert that
+// repo-scoped API calls are made with the app installation token.
+func requireInstallationToken(c *gin.Context) bool {
+	if c.GetHeader("Authorization") != "Bearer "+InstallationToken {
+		c.String(http.StatusUnauthorized, "")
+		return false
+	}
+	return true
+}
+
+func listBranches(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `[{"name": "main"}, {"name": "dev"}]`)
+}
+
+func getBranch(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `{"name": "main", "commit": {"sha": "abc123", "html_url": "https://github.com/octocat/Hello-World/commit/abc123"}}`)
+}
+
+func listPulls(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `[{"number": 7, "title": "test pr"}]`)
+}
+
+func getContents(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	if strings.HasSuffix(c.Param("path"), "somedir") {
+		c.String(http.StatusOK, `[{"type": "file", "name": "a.yaml", "path": "somedir/a.yaml"}]`)
+		return
+	}
+	// base64 of "pipeline:"
+	c.String(http.StatusOK, `{"type": "file", "encoding": "base64", "name": "config", "content": "cGlwZWxpbmU6"}`)
 }
 
 func getApp(c *gin.Context) {
@@ -70,6 +117,8 @@ func getRepoInstallation(c *gin.Context) {
 	switch c.Param("owner") {
 	case "not-installed":
 		c.String(http.StatusNotFound, "")
+	case "lookup-error":
+		c.String(http.StatusInternalServerError, "")
 	default:
 		c.String(http.StatusOK, `{"id": 42}`)
 	}
