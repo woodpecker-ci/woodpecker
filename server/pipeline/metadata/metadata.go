@@ -126,6 +126,15 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		parent = pipeline.Parent
 	}
 
+	var commitSHA, commitMessage, commitEmail string
+	var commitTimestamp int64
+	if pipeline.Commit != nil {
+		commitSHA = pipeline.Commit.SHA
+		commitMessage = pipeline.Commit.Message
+		commitTimestamp = pipeline.Commit.Timestamp
+		commitEmail = pipeline.Commit.Author.Email
+	}
+
 	metadata := metadata.Pipeline{
 		Number:      pipeline.Number,
 		Parent:      parent,
@@ -140,15 +149,15 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		DeployTo:    pipeline.DeployTo,
 		DeployTask:  pipeline.DeployTask,
 		Commit: metadata.Commit{
-			Sha:       pipeline.Commit,
+			Sha:       commitSHA,
 			Ref:       pipeline.Ref,
 			Refspec:   pipeline.Refspec,
 			Branch:    pipeline.Branch,
-			Message:   pipeline.Message,
-			Timestamp: pipeline.Timestamp,
+			Message:   commitMessage,
+			Timestamp: commitTimestamp,
 			Author: metadata.Author{
 				Name:  pipeline.Author,
-				Email: pipeline.Email,
+				Email: commitEmail,
 			},
 			ChangedFiles:         pipeline.ChangedFiles,
 			PullRequestLabels:    pipeline.PullRequestLabels,

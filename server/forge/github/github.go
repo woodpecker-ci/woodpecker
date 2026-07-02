@@ -271,7 +271,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	}
 
 	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = b.Commit
+	opts.Ref = b.Commit.SHA
 	content, _, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -293,7 +293,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	}
 
 	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = b.Commit
+	opts.Ref = b.Commit.SHA
 	_, data, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -596,7 +596,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_, _, err = client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, github.RepoStatus{
+	_, _, err = client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit.SHA, github.RepoStatus{
 		Context:     github.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 		State:       github.Ptr(convertStatus(workflow.State)),
 		Description: github.Ptr(common.GetPipelineStatusDescription(workflow.State)),
@@ -688,12 +688,15 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			if pipeline.Commit == "" {
+			if pipeline.Commit == nil || pipeline.Commit.SHA == "" {
 				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
 				if err != nil {
 					return nil, nil, err
 				}
-				pipeline.Commit = sha
+				if pipeline.Commit == nil {
+					pipeline.Commit = &model.Commit{}
+				}
+				pipeline.Commit.SHA = sha
 			}
 		}
 	}
