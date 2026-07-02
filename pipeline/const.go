@@ -29,6 +29,8 @@ const (
 	LabelRepoFullName   string = InternalLabelPrefix + "/repo-full-name"
 	LabelBranch         string = InternalLabelPrefix + "/branch"
 	LabelOrgID          string = InternalLabelPrefix + "/org-id"
+	LabelCommitBranch   string = InternalLabelPrefix + "/commit-branch"
+	LabelEvent          string = InternalLabelPrefix + "/event"
 	LabelFilterOrg      string = "org-id"
 	LabelFilterRepo     string = "repo"
 	LabelFilterPlatform string = "platform"
