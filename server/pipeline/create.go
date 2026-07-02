@@ -136,26 +136,34 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	phaseStart = time.Now()
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
-	publishDuration := time.Since(phaseStart)
+	publishPipelineEvent(ctx, pipeline, repo)
 
 	if pipeline.Status == model.StatusBlocked {
+		// blocked pipelines never reach start(), so their statuses are posted here
+		updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser)
 		return pipeline, nil
 	}
+	publishDuration := time.Since(phaseStart)
 
 	phaseStart = time.Now()
-	if err := updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser); err != nil {
+	if err := updatePipelinePending(ctx, _store, pipeline, repo); err != nil {
 		return nil, err
 	}
 	pendingDuration := time.Since(phaseStart)
 
 	phaseStart = time.Now()
-	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
+	startedPipeline, err := start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
+		// transition the pipeline to error and post the statuses, so neither the
+		// pipeline nor the commit is stuck in a pending state forever
+		if uErr := updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, err); uErr != nil {
+			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, pipeline.Number)
+		}
 		return nil, errors.New(msg)
 	}
+	pipeline = startedPipeline
 
 	log.Info().
 		Str("repo", repo.FullName).
@@ -179,12 +187,26 @@ func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store
 	// update value in ref
 	*pipeline = *_pipeline
 
+	// transition the persisted workflows as well: forges post the workflow
+	// states as commit statuses, so leaving them pending would publish
+	// statuses that never resolve
+	for _, workflow := range pipeline.Workflows {
+		if workflow.State != model.StatusPending {
+			continue
+		}
+		workflow.State = model.StatusError
+		workflow.Finished = pipeline.Finished
+		if uErr := _store.WorkflowUpdate(workflow); uErr != nil {
+			log.Error().Err(uErr).Msgf("cannot update workflow with id %d state", workflow.ID)
+		}
+	}
+
 	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 
 	return nil
 }
 
-func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo) error {
 	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
 	if err != nil {
 		return err
@@ -192,7 +214,8 @@ func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store
 	// update value in ref
 	*pipeline = *_pipeline
 
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+	// the forge statuses are posted by start() right after
+	publishPipelineEvent(ctx, pipeline, repo)
 
 	return nil
 }
