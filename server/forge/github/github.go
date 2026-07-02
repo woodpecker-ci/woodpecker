@@ -682,13 +682,20 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
-		tagName := strings.Split(pipeline.Ref, "/")[2]
-		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
-		if err != nil {
-			return nil, nil, err
+	if pipeline != nil {
+		switch pipeline.Event { //nolint:gocritic // ignore lint issue as this will get more cases later
+		case model.EventRelease:
+			if pipeline.TagTitle == "" {
+				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
+			}
+			if pipeline.Commit == "" {
+				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+				if err != nil {
+					return nil, nil, err
+				}
+				pipeline.Commit = sha
+			}
 		}
-		pipeline.Commit = sha
 	}
 
 	if pull != nil {

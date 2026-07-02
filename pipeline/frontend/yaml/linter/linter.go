@@ -16,6 +16,7 @@ package linter
 
 import (
 	"fmt"
+	"regexp"
 	"slices"
 
 	"codeberg.org/6543/xyaml/v2"
@@ -328,7 +329,47 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 		})
 	}
 
+	for _, dep := range deprecatedEnvVars {
+		// TODO in next major: make this a failing lint error (IsWarning: false)
+		// instead of a warning; only remove the scan once the env vars themselves
+		// are removed (the major after).
+		if dep.re.MatchString(config.RawConfig) {
+			err = multierr.Append(err, &pipeline_errors.PipelineError{
+				Type:      pipeline_errors.PipelineErrorTypeDeprecation,
+				IsWarning: true,
+				Message:   fmt.Sprintf("Usage of `%s` is deprecated, use `%s`", dep.old, dep.replacement),
+				Data: pipeline_errors.DeprecationErrorData{
+					File:  config.File,
+					Field: config.File,
+					Docs:  "https://woodpecker-ci.org/docs/usage/environment",
+				},
+			})
+		}
+	}
+
 	return err
+}
+
+// deprecatedEnvVars lists env vars that are deprecated but still emitted as
+// aliases. The linter warns when a config references one of them.
+// TODO in next major: escalate the warning above to a failing lint error
+// before the env vars are actually removed.
+var deprecatedEnvVars = []struct {
+	old         string
+	replacement string
+	re          *regexp.Regexp
+}{
+	{"CI_COMMIT_PRERELEASE", "CI_PIPELINE_RELEASE_PRE", deprecatedEnvVarRefRegexp("CI_COMMIT_PRERELEASE")},
+	{"CI_COMMIT_AUTHOR_AVATAR", "CI_PIPELINE_AVATAR", deprecatedEnvVarRefRegexp("CI_COMMIT_AUTHOR_AVATAR")},
+	{"CI_PREV_COMMIT_AUTHOR_AVATAR", "CI_PREV_PIPELINE_AVATAR", deprecatedEnvVarRefRegexp("CI_PREV_COMMIT_AUTHOR_AVATAR")},
+}
+
+// deprecatedEnvVarRefRegexp builds a regexp matching the substitution forms of
+// an env var reference: $NAME, $$NAME and ${NAME}. A trailing word boundary on
+// the bare forms avoids matching longer names (e.g. NAME vs NAME_SUFFIX).
+func deprecatedEnvVarRefRegexp(name string) *regexp.Regexp {
+	q := regexp.QuoteMeta(name)
+	return regexp.MustCompile(`\$\{` + q + `\}|\$\$?` + q + `\b`)
 }
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {

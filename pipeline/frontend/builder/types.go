@@ -22,11 +22,13 @@ import (
 )
 
 type Item struct {
-	Workflow  *Workflow
-	Labels    map[string]string
-	DependsOn constraint.DependsOn
-	RunsOn    []string
-	Config    *backend_types.Config
+	Workflow         *Workflow
+	Labels           map[string]string
+	DependsOn        constraint.DependsOn
+	RunsOn           []string
+	ConcurrencyLimit int
+	ConcurrencyGroup string
+	Config           *backend_types.Config
 }
 
 type Workflow struct {

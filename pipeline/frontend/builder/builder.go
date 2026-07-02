@@ -162,10 +162,12 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	}
 
 	item = &Item{
-		Workflow:  workflow,
-		Config:    ir,
-		Labels:    parsed.Labels,
-		DependsOn: parsed.DependsOn,
+		Workflow:         workflow,
+		Config:           ir,
+		Labels:           parsed.Labels,
+		DependsOn:        parsed.DependsOn,
+		ConcurrencyLimit: parsed.Concurrency.Limit,
+		ConcurrencyGroup: parsed.Concurrency.Group,
 		// TODO: remove in next major.
 		RunsOn: parsed.RunsOn, //nolint:staticcheck
 	}
@@ -200,6 +202,8 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	item.Labels[pipeline.LabelRepoFullName] = workflowMetadata.Repo.Owner + "/" + workflowMetadata.Repo.Name
 	item.Labels[pipeline.LabelBranch] = workflowMetadata.Repo.Branch
 	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(workflowMetadata.Repo.OrgID, 10)
+	item.Labels[pipeline.LabelCommitBranch] = workflowMetadata.Curr.Commit.Branch
+	item.Labels[pipeline.LabelEvent] = string(workflowMetadata.Curr.Event)
 
 	return item, errorsAndWarnings
 }

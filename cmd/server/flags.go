@@ -105,6 +105,12 @@ var flags = append([]cli.Flag{
 		Name:    "async-repository-update",
 		Usage:   "if true fetch repository permissions asynchronous, impacts performance if there are many repositories with possible tradeoff in consistency",
 	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_WEBHOOK_SYNC_TIMEOUT"),
+		Name:    "webhook-sync-timeout",
+		Usage:   "max time to wait for pipeline creation triggered by an incoming webhook before responding 202 Accepted and finishing it in the background; 0 disables the fallback and always responds synchronously",
+		Value:   5 * time.Second,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_ADDR"),
 		Name:    "grpc-addr",
@@ -128,6 +134,12 @@ var flags = append([]cli.Flag{
 		Name:    "metrics-server-addr",
 		Usage:   "metrics server address",
 		Value:   "",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_STEP_LEVEL_METRICS"),
+		Name:    "step-level-metrics",
+		Usage:   "enable step-level metrics",
+		Value:   true,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ADMIN"),
