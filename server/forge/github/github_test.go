@@ -95,6 +95,100 @@ func Test_github(t *testing.T) {
 	})
 }
 
+func TestGithubApp(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	s := httptest.NewServer(fixtures.Handler())
+	defer s.Close()
+
+	_, appKey := generateAppKey(t)
+
+	c, err := New(1, Opts{
+		URL:           s.URL,
+		SkipVerify:    true,
+		AppID:         "12345",
+		AppPrivateKey: appKey,
+	})
+	require.NoError(t, err)
+
+	ctx := t.Context()
+
+	notInstalledRepo := &model.Repo{
+		Owner:    "not-installed",
+		Name:     "some-repo",
+		FullName: "not-installed/some-repo",
+		Clone:    "https://github.com/not-installed/some-repo.git",
+	}
+
+	t.Run("app id and private key must be set together", func(t *testing.T) {
+		_, err := New(1, Opts{AppID: "12345"})
+		assert.Error(t, err)
+		_, err = New(1, Opts{AppPrivateKey: appKey})
+		assert.Error(t, err)
+	})
+
+	t.Run("invalid private key", func(t *testing.T) {
+		_, err := New(1, Opts{AppID: "12345", AppPrivateKey: "not-a-key"})
+		assert.Error(t, err)
+	})
+
+	t.Run("netrc uses installation token", func(t *testing.T) {
+		netrc, err := c.Netrc(fakeUser, fakeRepo)
+		assert.NoError(t, err)
+		assert.Equal(t, "github.com", netrc.Machine)
+		assert.Equal(t, "x-access-token", netrc.Login)
+		assert.Equal(t, fixtures.InstallationToken, netrc.Password)
+		assert.Equal(t, model.ForgeTypeGithub, netrc.Type)
+	})
+
+	t.Run("netrc works without user", func(t *testing.T) {
+		netrc, err := c.Netrc(nil, fakeRepo)
+		assert.NoError(t, err)
+		assert.Equal(t, "x-access-token", netrc.Login)
+		assert.Equal(t, fixtures.InstallationToken, netrc.Password)
+	})
+
+	t.Run("netrc falls back to user token when app is not installed", func(t *testing.T) {
+		netrc, err := c.Netrc(fakeUser, notInstalledRepo)
+		assert.NoError(t, err)
+		assert.Equal(t, fakeUser.AccessToken, netrc.Login)
+		assert.Equal(t, "x-oauth-basic", netrc.Password)
+	})
+
+	t.Run("repo token prefers installation token", func(t *testing.T) {
+		cl, _ := c.(*client)
+		assert.Equal(t, fixtures.InstallationToken, cl.repoToken(ctx, fakeUser, fakeRepo))
+		assert.Equal(t, fakeUser.AccessToken, cl.repoToken(ctx, fakeUser, notInstalledRepo))
+	})
+
+	t.Run("app health reports app name and installations", func(t *testing.T) {
+		cl, _ := c.(*client)
+		name, installations, err := cl.AppHealth(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, "Woodpecker Test App", name)
+		assert.Equal(t, 1, installations)
+	})
+
+	t.Run("app health errors without app", func(t *testing.T) {
+		forge, _ := New(1, Opts{})
+		cl, _ := forge.(*client)
+		_, _, err := cl.AppHealth(ctx)
+		assert.Error(t, err)
+	})
+
+	t.Run("status is sent with installation token", func(t *testing.T) {
+		// the fixture handler rejects any other token
+		err := c.Status(ctx, fakeUser, fakeRepo, &model.Pipeline{
+			Commit: "366701fde727cb7a9e7f21eb88264f59f6f9b89c",
+			Event:  model.EventPush,
+		}, &model.Workflow{
+			Name:  "test",
+			State: model.StatusSuccess,
+		})
+		assert.NoError(t, err)
+	})
+}
+
 var (
 	fakeUser = &model.User{
 		Login:       "6543",

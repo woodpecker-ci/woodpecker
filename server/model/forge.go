@@ -53,6 +53,23 @@ func (f *Forge) PublicCopy() *Forge {
 	return forge
 }
 
+// RedactSecrets removes secret values from the forge's additional options so
+// the forge can be returned to API clients. Like OAuthClientSecret, secret
+// options are write-only: clients keep the stored value by omitting the
+// option on update. A redacted secret is replaced by an "<option>-set"
+// marker so clients can tell whether a value is stored.
+func (f *Forge) RedactSecrets() {
+	if f == nil || f.AdditionalOptions == nil {
+		return
+	}
+	if f.Type == ForgeTypeGithub {
+		if key, _ := f.AdditionalOptions["app-private-key"].(string); key != "" {
+			f.AdditionalOptions["app-private-key-set"] = true
+		}
+		delete(f.AdditionalOptions, "app-private-key")
+	}
+}
+
 // ForgeWithOAuthClientSecret allows to update the client secret.
 type ForgeWithOAuthClientSecret struct {
 	Forge

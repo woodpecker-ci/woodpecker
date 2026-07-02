@@ -788,6 +788,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/forges/{forge_id}/app-health": {
+            "get": {
+                "description": "Authenticates as the configured GitHub App and reports whether the credentials work.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Check the GitHub App configuration of a forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the forge's id",
+                        "name": "forge_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ForgeAppHealth"
+                        }
+                    }
+                }
+            }
+        },
         "/healthz": {
             "get": {
                 "description": "If everything is fine, just a 204 will be returned, a 500 signals server state is unhealthy.",
@@ -4867,6 +4904,23 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "ForgeAppHealth": {
+            "type": "object",
+            "properties": {
+                "app_name": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "healthy": {
+                    "type": "boolean"
+                },
+                "installations": {
+                    "type": "integer"
                 }
             }
         },

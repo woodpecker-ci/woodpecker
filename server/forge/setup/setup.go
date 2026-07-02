@@ -17,6 +17,7 @@ package setup
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -144,6 +145,15 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 	// get additional config and be false by default
 	mergeRef, _ := forge.AdditionalOptions["merge-ref"].(bool)
 	publicOnly, _ := forge.AdditionalOptions["public-only"].(bool)
+	// GitHub App credentials are optional, without them user OAuth tokens are used for all API calls
+	var appID string
+	switch v := forge.AdditionalOptions["app-id"].(type) {
+	case string:
+		appID = v
+	case float64: // GitHub app ids are numeric, accept them when set as JSON number via the API
+		appID = strconv.FormatInt(int64(v), 10)
+	}
+	appPrivateKey, _ := forge.AdditionalOptions["app-private-key"].(string)
 
 	opts := github.Opts{
 		URL:               forge.URL,
@@ -153,6 +163,8 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		MergeRef:          mergeRef,
 		OnlyPublic:        publicOnly,
 		OAuthHost:         forge.OAuthHost,
+		AppID:             appID,
+		AppPrivateKey:     appPrivateKey,
 	}
 	log.Debug().
 		Str("url", opts.URL).
@@ -162,6 +174,8 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("oauth-client-id-set", opts.OAuthClientID != "").
 		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
+		Bool("app-id-set", opts.AppID != "").
+		Bool("app-private-key-set", opts.AppPrivateKey != "").
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
 	return github.New(forge.ID, opts)

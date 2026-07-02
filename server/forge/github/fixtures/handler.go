@@ -15,10 +15,17 @@
 package fixtures
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+// InstallationToken is the installation access token returned by the mock
+// installation token endpoint.
+const InstallationToken = "ghs_mock_installation_token"
 
 // Handler returns an http.Handler that is capable of handling a variety of mock
 // Bitbucket requests and returning mock responses.
@@ -30,8 +37,65 @@ func Handler() http.Handler {
 	e.GET("/api/v3/repositories/:id", getRepoByID)
 	e.GET("/api/v3/orgs/:org/memberships/:user", getMembership)
 	e.GET("/api/v3/user/memberships/orgs/:org", getMembership)
+	e.GET("/api/v3/repos/:owner/:name/installation", getRepoInstallation)
+	e.POST("/api/v3/app/installations/:id/access_tokens", createInstallationToken)
+	e.POST("/api/v3/repos/:owner/:name/statuses/:commit", createStatus)
+	e.GET("/api/v3/app", getApp)
+	e.GET("/api/v3/app/installations", listInstallations)
 
 	return e
+}
+
+func getApp(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusOK, `{"id": 12345, "name": "Woodpecker Test App", "slug": "woodpecker-test-app"}`)
+}
+
+func listInstallations(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusOK, `[{"id": 42}]`)
+}
+
+func getRepoInstallation(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	switch c.Param("owner") {
+	case "not-installed":
+		c.String(http.StatusNotFound, "")
+	default:
+		c.String(http.StatusOK, `{"id": 42}`)
+	}
+}
+
+func createInstallationToken(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	if c.Param("id") != "42" {
+		c.String(http.StatusNotFound, "")
+		return
+	}
+	expiresAt := time.Now().Add(time.Hour).UTC().Format(time.RFC3339)
+	c.String(http.StatusCreated, fmt.Sprintf(`{"token": %q, "expires_at": %q}`, InstallationToken, expiresAt))
+}
+
+// createStatus only accepts the mock installation token, so tests can assert
+// that a status was sent with GitHub App credentials.
+func createStatus(c *gin.Context) {
+	if c.GetHeader("Authorization") != "Bearer "+InstallationToken {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusCreated, `{"id": 1}`)
 }
 
 func getRepo(c *gin.Context) {

@@ -15,15 +15,32 @@
 package api
 
 import (
+	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
+
+// validateForge ensures the forge configuration can actually be constructed,
+// so invalid configurations (e.g. an unparsable GitHub App private key or a
+// private key without an app id) are rejected at save time instead of
+// breaking every operation of the forge afterwards. Only GitHub forges are
+// validated for now: their constructor is side-effect free and rejects
+// invalid GitHub App credentials.
+func validateForge(forge *model.Forge) error {
+	if forge.Type != model.ForgeTypeGithub {
+		return nil
+	}
+	_, err := setup.Forge(forge)
+	return err
+}
 
 // GetForges
 //
@@ -44,6 +61,9 @@ func GetForges(c *gin.Context) {
 
 	user := session.User(c)
 	if user != nil && user.Admin {
+		for _, forge := range forges {
+			forge.RedactSecrets()
+		}
 		c.JSON(http.StatusOK, forges)
 		return
 	}
@@ -80,6 +100,7 @@ func GetForge(c *gin.Context) {
 
 	user := session.User(c)
 	if user != nil && user.Admin {
+		forge.RedactSecrets()
 		c.JSON(http.StatusOK, forge)
 	} else {
 		c.JSON(http.StatusOK, forge.PublicCopy())
@@ -117,6 +138,7 @@ func PatchForge(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
+	oldAdditionalOptions := forge.AdditionalOptions
 	forge.URL = in.URL
 	forge.Type = in.Type
 	forge.OAuthClientID = in.OAuthClientID
@@ -126,6 +148,12 @@ func PatchForge(c *gin.Context) {
 	if in.OAuthClientSecret != "" {
 		forge.OAuthClientSecret = in.OAuthClientSecret
 	}
+	restoreSecretOptions(forge, oldAdditionalOptions)
+
+	if err := validateForge(forge); err != nil {
+		c.String(http.StatusBadRequest, "invalid forge configuration: %s", err)
+		return
+	}
 
 	err = _store.ForgeUpdate(forge)
 	if err != nil {
@@ -133,7 +161,40 @@ func PatchForge(c *gin.Context) {
 		return
 	}
 
+	forge.RedactSecrets()
 	c.JSON(http.StatusOK, forge)
+}
+
+// restoreSecretOptions copies write-only secret options from the stored
+// forge configuration when an update request omits them or sends them empty,
+// mirroring the OAuthClientSecret semantics. Clearing the GitHub App id
+// drops the stored private key, so app authentication can be disabled again.
+func restoreSecretOptions(forge *model.Forge, oldOptions map[string]any) {
+	if forge.Type != model.ForgeTypeGithub {
+		return
+	}
+	// never persist the redaction marker clients echo back
+	delete(forge.AdditionalOptions, "app-private-key-set")
+	oldKey, _ := oldOptions["app-private-key"].(string)
+	newKey, _ := forge.AdditionalOptions["app-private-key"].(string)
+	if oldKey == "" || newKey != "" || !hasNonEmptyAppID(forge.AdditionalOptions) {
+		return
+	}
+	if forge.AdditionalOptions == nil {
+		forge.AdditionalOptions = make(map[string]any)
+	}
+	forge.AdditionalOptions["app-private-key"] = oldKey
+}
+
+func hasNonEmptyAppID(options map[string]any) bool {
+	switch v := options["app-id"].(type) {
+	case string:
+		return v != ""
+	case float64: // GitHub app ids are numeric, they may be set as JSON number via the API
+		return true
+	default:
+		return false
+	}
 }
 
 // PostForge
@@ -163,11 +224,94 @@ func PostForge(c *gin.Context) {
 		SkipVerify:        in.SkipVerify,
 		AdditionalOptions: in.AdditionalOptions,
 	}
+	// never persist the redaction marker clients echo back
+	delete(forge.AdditionalOptions, "app-private-key-set")
+
+	if err := validateForge(forge); err != nil {
+		c.String(http.StatusBadRequest, "invalid forge configuration: %s", err)
+		return
+	}
+
 	if err = store.FromContext(c).ForgeCreate(forge); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
+	forge.RedactSecrets()
 	c.JSON(http.StatusOK, forge)
+}
+
+// ForgeAppHealth is the result of checking a forge's GitHub App configuration.
+type ForgeAppHealth struct {
+	Healthy       bool   `json:"healthy"`
+	AppName       string `json:"app_name,omitempty"`
+	Installations int    `json:"installations"`
+	Error         string `json:"error,omitempty"`
+} //	@name	ForgeAppHealth
+
+// githubAppChecker is implemented by forges that can verify their GitHub App
+// configuration.
+type githubAppChecker interface {
+	AppHealth(ctx context.Context) (name string, installations int, err error)
+}
+
+// appCheckTimeout bounds the outbound forge API calls of the app check.
+const appCheckTimeout = 10 * time.Second
+
+// GetForgeAppHealth
+//
+//	@Summary		Check the GitHub App configuration of a forge
+//	@Description	Authenticates as the configured GitHub App and reports whether the credentials work.
+//	@Router			/forges/{forge_id}/app-health [get]
+//	@Produce		json
+//	@Success		200	{object}	ForgeAppHealth
+//	@Tags			Forges
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			forge_id		path	int		true	"the forge's id"
+func GetForgeAppHealth(c *gin.Context) {
+	forgeID, err := strconv.ParseInt(c.Param("forge_id"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	forge, err := store.FromContext(c).ForgeGet(forgeID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	// only github forges support app checks, and constructing other forge
+	// types may have side effects (addon forges start an external process)
+	if forge.Type != model.ForgeTypeGithub {
+		c.String(http.StatusBadRequest, "forge does not support app checks")
+		return
+	}
+
+	// construct a fresh instance from the stored configuration, bypassing
+	// the service manager cache so recently saved credentials are the ones
+	// being tested
+	forgeInstance, err := setup.Forge(forge)
+	if err != nil {
+		c.JSON(http.StatusOK, ForgeAppHealth{Healthy: false, Error: err.Error()})
+		return
+	}
+
+	checker, ok := forgeInstance.(githubAppChecker)
+	if !ok {
+		c.String(http.StatusBadRequest, "forge does not support app checks")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c, appCheckTimeout)
+	defer cancel()
+
+	name, installations, err := checker.AppHealth(ctx)
+	if err != nil {
+		c.JSON(http.StatusOK, ForgeAppHealth{Healthy: false, Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, ForgeAppHealth{Healthy: true, AppName: name, Installations: installations})
 }
 
 // DeleteForge

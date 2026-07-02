@@ -243,6 +243,7 @@ func apiRoutes(e *gin.RouterGroup) {
 		{
 			forgeBase.Use(session.MustAdmin())
 			forgeBase.POST("", api.PostForge)
+			forgeBase.GET("/:forge_id/app-health", api.GetForgeAppHealth)
 			forgeBase.PATCH("/:forge_id", api.PatchForge)
 			forgeBase.DELETE("/:forge_id", api.DeleteForge)
 		}

@@ -116,7 +116,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 	return privateKey, privateKey.Public(), nil
 }
 
-func setupForgeService(c *cli.Command, _store store.Store) error {
+func setupForgeService(c *cli.Command, _store store.Store, setupForge SetupForge) error {
 	_forge, err := _store.ForgeGet(1)
 	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return err
@@ -145,6 +145,8 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.Type = model.ForgeTypeGithub
 		_forge.AdditionalOptions["merge-ref"] = c.Bool("github-merge-ref")
 		_forge.AdditionalOptions["public-only"] = c.Bool("github-public-only")
+		_forge.AdditionalOptions["app-id"] = c.String("github-app-id")
+		_forge.AdditionalOptions["app-private-key"] = c.String("github-app-private-key")
 		if _forge.URL == "" {
 			_forge.URL = "https://github.com"
 		}
@@ -173,6 +175,14 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.AdditionalOptions["oauth-enable-project-admin-scope"] = c.Bool("bitbucket-dc-oauth-enable-oauth2-scope-project-admin")
 	default:
 		return errors.New("forge not configured")
+	}
+
+	// fail fast on invalid GitHub App credentials instead of breaking every
+	// forge API call at runtime
+	if _forge.Type == model.ForgeTypeGithub && setupForge != nil {
+		if _, err := setupForge(_forge); err != nil {
+			return fmt.Errorf("invalid forge configuration: %w", err)
+		}
 	}
 
 	if forgeExists {

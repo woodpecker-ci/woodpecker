@@ -570,6 +570,25 @@ var flags = append([]cli.Flag{
 		Usage:   "github tokens should only get access to public repos",
 		Value:   false,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_GITHUB_APP_ID"),
+		Name:    "github-app-id",
+		Usage:   "github app (client) id, used together with the private key to authenticate as a GitHub App",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
+	&cli.StringFlag{
+		Sources: cli.NewValueSourceChain(
+			cli.File(os.Getenv("WOODPECKER_GITHUB_APP_PRIVATE_KEY_FILE")),
+			cli.EnvVar("WOODPECKER_GITHUB_APP_PRIVATE_KEY"),
+		),
+		Name:  "github-app-private-key",
+		Usage: "github app private key (PEM or base64-encoded PEM)",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
 	//
 	// Gitea
 	//

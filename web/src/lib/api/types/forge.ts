@@ -10,3 +10,10 @@ export interface Forge {
   oauth_host?: string;
   additional_options?: Record<string, unknown>;
 }
+
+export interface ForgeAppHealth {
+  healthy: boolean;
+  app_name?: string;
+  installations?: number;
+  error?: string;
+}
