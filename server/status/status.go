@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+// Package status holds the pure status-aggregation logic shared between the
+// pipeline layer, the scheduler and the API. It only depends on the model and
+// must not import any package that orchestrates state, so the scheduler can use
+// it without creating an import cycle.
+package status
 
 import "go.woodpecker-ci.org/woodpecker/v3/server/model"
 
@@ -43,7 +47,7 @@ var statusPriorityOrder = []model.StatusValue{
 	model.StatusSkipped,
 }
 
-var priorityMap map[model.StatusValue]int = buildPriorityMap()
+var priorityMap = buildPriorityMap()
 
 func buildPriorityMap() map[model.StatusValue]int {
 	m := map[model.StatusValue]int{}
@@ -53,6 +57,8 @@ func buildPriorityMap() map[model.StatusValue]int {
 	return m
 }
 
+// MergeStatusValues merges two status values, returning the more significant of
+// the two according to statusPriorityOrder.
 func MergeStatusValues(s, t model.StatusValue) model.StatusValue {
 	// both are skipped due to cancellation -> canceled
 	if s == model.StatusCanceled && t == model.StatusCanceled {
@@ -66,4 +72,28 @@ func MergeStatusValues(s, t model.StatusValue) model.StatusValue {
 		t = model.StatusKilled
 	}
 	return statusPriorityOrder[min(priorityMap[s], priorityMap[t])]
+}
+
+// WorkflowStatus determines a workflow status based on its corresponding step list.
+func WorkflowStatus(steps []*model.Step) model.StatusValue {
+	status := model.StatusSuccess
+
+	for _, p := range steps {
+		if p.Failure == model.FailureFail || !p.Failing() {
+			status = MergeStatusValues(status, p.State)
+		}
+	}
+
+	return status
+}
+
+// PipelineStatus determines a pipeline status based on its corresponding workflow list.
+func PipelineStatus(workflows []*model.Workflow) model.StatusValue {
+	status := model.StatusSuccess
+
+	for _, p := range workflows {
+		status = MergeStatusValues(status, p.State)
+	}
+
+	return status
 }

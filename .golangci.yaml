@@ -197,6 +197,8 @@ linters:
           alias: service_log
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/rpc
           alias: server_rpc
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/status
+          alias: pipeline_status
         - pkg: go.woodpecker-ci.org/woodpecker/v3/agent/rpc
           alias: agent_rpc
         - pkg: go.woodpecker-ci.org/woodpecker/v3/shared/utils

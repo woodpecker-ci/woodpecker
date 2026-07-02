@@ -89,19 +89,3 @@ func TestUpdateToStatusError(t *testing.T) {
 	assert.LessOrEqual(t, now, pipeline.Started)
 	assert.Equal(t, pipeline.Started, pipeline.Finished)
 }
-
-func TestUpdateToStatusKilled(t *testing.T) {
-	t.Parallel()
-
-	now := time.Now().Unix()
-	cancelInfo := &model.CancelInfo{
-		SupersededBy: 2,
-	}
-
-	pipeline, _ := UpdateToStatusKilled(mockStorePipeline(t), model.Pipeline{}, cancelInfo, model.StatusKilled)
-
-	assert.Equal(t, model.StatusKilled, pipeline.Status)
-	assert.NotNil(t, pipeline.CancelInfo)
-	assert.EqualValues(t, 2, pipeline.CancelInfo.SupersededBy)
-	assert.LessOrEqual(t, now, pipeline.Finished)
-}
