@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-02
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @Kernald
+
+### 📈 Enhancement
+
+- Stamp trusted commit-branch and event pod labels [[#6802](https://github.com/woodpecker-ci/woodpecker/pull/6802)]
+- Rename CI_COMMIT_PRERELEASE to CI_PIPELINE_RELEASE_PRE [[#6794](https://github.com/woodpecker-ci/woodpecker/pull/6794)]
+- Rework pipeline data structure: Release & Tag [[#6774](https://github.com/woodpecker-ci/woodpecker/pull/6774)]
+
+### 📚 Documentation
+
+- Update docs npm deps non-major [[#6788](https://github.com/woodpecker-ci/woodpecker/pull/6788)]
+
+### 📦️ Dependency
+
+- Update pre-commit hook rbubley/mirrors-prettier to v3.9.1 [[#6797](https://github.com/woodpecker-ci/woodpecker/pull/6797)]
+
 ## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-27
 
 ### ❤️ Thanks to all contributors! ❤️
