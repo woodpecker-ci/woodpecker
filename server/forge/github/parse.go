@@ -99,13 +99,19 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 	}
 
 	pipeline := &model.Pipeline{
-		Event:    model.EventPush,
-		Commit:   hook.GetHeadCommit().GetID(),
+		Event: model.EventPush,
+		Commit: &model.Commit{
+			SHA:      hook.GetHeadCommit().GetID(),
+			Message:  hook.GetHeadCommit().GetMessage(),
+			ForgeURL: hook.GetHeadCommit().GetURL(),
+			Author: model.CommitAuthor{
+				Name:  hook.GetSender().GetLogin(),
+				Email: hook.GetHeadCommit().GetAuthor().GetEmail(),
+			},
+		},
 		Ref:      hook.GetRef(),
 		ForgeURL: hook.GetHeadCommit().GetURL(),
 		Branch:   strings.TrimPrefix(hook.GetRef(), "refs/heads/"),
-		Message:  hook.GetHeadCommit().GetMessage(),
-		Email:    hook.GetHeadCommit().GetAuthor().GetEmail(),
 		Avatar:   hook.GetSender().GetAvatarURL(),
 		Author:   hook.GetSender().GetLogin(),
 		Sender:   hook.GetSender().GetLogin(),
@@ -114,6 +120,7 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 
 	if len(pipeline.Author) == 0 {
 		pipeline.Author = hook.GetHeadCommit().GetAuthor().GetLogin()
+		pipeline.Commit.Author.Name = pipeline.Author
 	}
 	if strings.HasPrefix(pipeline.Ref, "refs/tags/") {
 		// just kidding, this is actually a tag event. Why did this come as a push
@@ -140,10 +147,16 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 // If the commit type is unsupported nil values are returned.
 func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline) {
 	pipeline := &model.Pipeline{
-		Event:      model.EventDeploy,
-		Commit:     hook.GetDeployment().GetSHA(),
+		Event: model.EventDeploy,
+		Commit: &model.Commit{
+			SHA:      hook.GetDeployment().GetSHA(),
+			Message:  hook.GetDeployment().GetDescription(),
+			ForgeURL: hook.GetDeployment().GetURL(),
+			Author: model.CommitAuthor{
+				Name: hook.GetSender().GetLogin(),
+			},
+		},
 		ForgeURL:   hook.GetDeployment().GetURL(),
-		Message:    hook.GetDeployment().GetDescription(),
 		Ref:        hook.GetDeployment().GetRef(),
 		Branch:     hook.GetDeployment().GetRef(),
 		Avatar:     hook.GetSender().GetAvatarURL(),
@@ -153,7 +166,7 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 		DeployTask: hook.GetDeployment().GetTask(),
 	}
 	// if the ref is a sha or short sha we need to manually construct the ref.
-	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
+	if strings.HasPrefix(pipeline.Commit.SHA, pipeline.Ref) || pipeline.Commit.SHA == pipeline.Ref {
 		pipeline.Branch = hook.GetRepo().GetDefaultBranch()
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
 	}
@@ -202,15 +215,21 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	pipeline := &model.Pipeline{
 		Event:       event,
 		EventReason: []string{eventAction},
-		Commit:      hook.GetPullRequest().GetHead().GetSHA(),
-		ForgeURL:    hook.GetPullRequest().GetHTMLURL(),
-		Ref:         fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
-		Branch:      hook.GetPullRequest().GetBase().GetRef(),
-		Message:     hook.GetPullRequest().GetTitle(),
-		Author:      hook.GetPullRequest().GetUser().GetLogin(),
-		Avatar:      hook.GetPullRequest().GetUser().GetAvatarURL(),
-		Title:       hook.GetPullRequest().GetTitle(),
-		Sender:      hook.GetSender().GetLogin(),
+		Commit: &model.Commit{
+			SHA:      hook.GetPullRequest().GetHead().GetSHA(),
+			Message:  hook.GetPullRequest().GetTitle(),
+			ForgeURL: hook.GetPullRequest().GetHTMLURL(),
+			Author: model.CommitAuthor{
+				Name: hook.GetPullRequest().GetUser().GetLogin(),
+			},
+		},
+		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
+		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
+		Branch:   hook.GetPullRequest().GetBase().GetRef(),
+		Author:   hook.GetPullRequest().GetUser().GetLogin(),
+		Avatar:   hook.GetPullRequest().GetUser().GetAvatarURL(),
+		Title:    hook.GetPullRequest().GetTitle(),
+		Sender:   hook.GetSender().GetLogin(),
 		Refspec: fmt.Sprintf(
 			refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),

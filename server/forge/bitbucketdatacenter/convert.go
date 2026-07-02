@@ -88,16 +88,23 @@ func convertRepositoryPushEvent(ev *bitbucket.RepositoryPushEvent, baseURL strin
 		return nil
 	}
 
+	forgeURL := fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash)
 	pipeline := &model.Pipeline{
-		Commit:    change.ToHash,
-		Branch:    change.Ref.DisplayID,
-		Message:   "",
-		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author:    authorLabel(ev.Actor.Name),
-		Email:     ev.Actor.Email,
-		Timestamp: time.Time(ev.Date).UTC().Unix(),
-		Ref:       ev.Changes[0].RefId,
-		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
+		Commit: &model.Commit{
+			SHA:      change.ToHash,
+			Message:  "",
+			ForgeURL: forgeURL,
+			Author: model.CommitAuthor{
+				Name:  authorLabel(ev.Actor.Name),
+				Email: ev.Actor.Email,
+			},
+			Timestamp: time.Time(ev.Date).UTC().Unix(),
+		},
+		Branch:   change.Ref.DisplayID,
+		Avatar:   bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author:   authorLabel(ev.Actor.Name),
+		Ref:      ev.Changes[0].RefId,
+		ForgeURL: forgeURL,
 	}
 
 	if strings.HasPrefix(ev.Changes[0].RefId, "refs/tags/") {
@@ -125,19 +132,26 @@ func convertGetCommitRange(ev *bitbucket.RepositoryPushEvent) (currCommit, prevC
 }
 
 func convertPullRequestEvent(ev *bitbucket.PullRequestEvent, baseURL string) *model.Pipeline {
+	forgeURL := fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest)
 	pipeline := &model.Pipeline{
-		Commit:    ev.PullRequest.Source.Latest,
-		Branch:    ev.PullRequest.Source.DisplayID,
-		Title:     ev.PullRequest.Title,
-		Message:   ev.PullRequest.Title,
-		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author:    authorLabel(ev.Actor.Name),
-		Email:     ev.Actor.Email,
-		Timestamp: time.Time(ev.Date).UTC().Unix(),
-		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
-		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
-		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
-		FromFork:  ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
+		Commit: &model.Commit{
+			SHA:      ev.PullRequest.Source.Latest,
+			Message:  ev.PullRequest.Title,
+			ForgeURL: forgeURL,
+			Author: model.CommitAuthor{
+				Name:  authorLabel(ev.Actor.Name),
+				Email: ev.Actor.Email,
+			},
+			Timestamp: time.Time(ev.Date).UTC().Unix(),
+		},
+		Branch:   ev.PullRequest.Source.DisplayID,
+		Title:    ev.PullRequest.Title,
+		Avatar:   bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author:   authorLabel(ev.Actor.Name),
+		Ref:      fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		ForgeURL: forgeURL,
+		Refspec:  fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
+		FromFork: ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
 	}
 
 	if ev.EventKey == bitbucket.EventKeyPullRequestMerged || ev.EventKey == bitbucket.EventKeyPullRequestDeclined || ev.EventKey == bitbucket.EventKeyPullRequestDeleted {
