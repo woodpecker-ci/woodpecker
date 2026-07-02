@@ -20,7 +20,9 @@ import (
 	"golang.org/x/term"
 )
 
-// isInteractiveTerminal checks if the output is piped, but NOT if the session is run interactively.
-func isInteractiveTerminal() bool {
+// IsInteractiveTerminal reports whether stdout is attached to a terminal.
+// It is the single source of truth for this check across the codebase;
+// do not re-implement it.
+func IsInteractiveTerminal() bool {
 	return term.IsTerminal(int(os.Stdout.Fd()))
 }
