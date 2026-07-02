@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 	kube_core_v1 "k8s.io/api/core/v1"
+	kube_errors "k8s.io/apimachinery/pkg/api/errors"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
@@ -334,4 +335,41 @@ func TestWaitStepNoGoroutineLeak(t *testing.T) {
 	assert.Less(t, leaked, numSteps,
 		"goroutines leaked after canceling %d WaitStep calls: got %d leaked",
 		numSteps, leaked)
+}
+
+func TestDestroyWorkflowCleansOrphanedSecrets(t *testing.T) {
+	const namespace = "test-ns"
+	ctx := context.Background()
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+
+	step := &types.Step{
+		UUID:          "01he8bebctabr3kgk0qj36d2me-0",
+		Name:          "go-test",
+		Image:         "alpine",
+		SecretMapping: map[string]string{"FOO": "bar"},
+		AuthConfig:    types.Auth{Username: "foo", Password: "bar"},
+	}
+
+	// Secrets created but the pod was never started (e.g. canceled workflow),
+	// so no owner reference points at a pod and Kubernetes will not GC them.
+	require.NoError(t, startRegistrySecret(ctx, engine, step))
+	require.NoError(t, startStepSecret(ctx, engine, step))
+
+	conf := &types.Config{
+		Volume: "test-volume",
+		Stages: []*types.Stage{{Steps: []*types.Step{step}}},
+	}
+
+	require.NoError(t, engine.DestroyWorkflow(ctx, conf, "task-uuid"))
+
+	regName, err := registrySecretName(step)
+	require.NoError(t, err)
+	stepName, err := stepSecretName(step)
+	require.NoError(t, err)
+
+	for _, name := range []string{regName, stepName} {
+		_, err := client.CoreV1().Secrets(namespace).Get(ctx, name, kube_meta_v1.GetOptions{})
+		assert.True(t, kube_errors.IsNotFound(err), "secret %s should be deleted by DestroyWorkflow", name)
+	}
 }
