@@ -182,6 +182,7 @@ import useNotifications from '~/compositions/useNotifications';
 import useUserConfig from '~/compositions/useUserConfig';
 import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { debounce } from '~/lib/utils';
+import { extractCommandMatchers, extractCmdFromTrace } from '~/lib/utils/pipelineConfig';
 
 interface LogLine {
   index: number;
@@ -247,27 +248,21 @@ const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 const collapsedCommands = ref(new Set<number>());
 
-const commandRegex = /^\s*-\s(.+)$/gm;
-const specialCharsRegex = /[.*+?^${}()|[\]\\]/g;
-const matrixVariableRegex = /\\\$(\\\{\w+\\\})/g;
+const currentWorkflow = computed(() =>
+  pipeline.value.workflows?.find((workflow) => workflow.children.some((s) => s.pid === stepId.value)),
+);
 
 const knownCommandMatchers = computed(() => {
-  if (!pipelineConfigs.value) return [];
-  const patterns: RegExp[] = [];
-  pipelineConfigs.value.forEach((config: PipelineConfig) => {
-    const decoded = decode(config.data);
-    const matches = decoded.matchAll(commandRegex);
-    for (const match of matches) {
-      const rawCommand = match[1].trim();
-      // Replace matrix variable ${VAR} with a wildcard match (non-greedy)
-      const patternString = rawCommand
-        .replace(specialCharsRegex, '\\$&') // escape all
-        .replace(matrixVariableRegex, '.*'); // match ${VAR}
+  const workflowName = currentWorkflow.value?.name;
+  const stepName = step.value?.name;
+  if (!workflowName || !stepName || !pipelineConfigs.value) return [];
 
-      patterns.push(new RegExp(`^${patternString}$`));
-    }
-  });
-  return patterns;
+  // Each workflow corresponds to one config file (config.name === workflow.name).
+  // Scope matchers to the current step's commands only.
+  const config = pipelineConfigs.value.find((c: PipelineConfig) => c.name === workflowName);
+  if (!config) return [];
+
+  return extractCommandMatchers(decode(config.data), stepName);
 });
 
 const groupedLogs = computed(() => {
@@ -291,8 +286,8 @@ const groupedLogs = computed(() => {
     const trimmedText = (line.rawText || '').trim();
 
     let isCommand = false;
-    if (trimmedText.startsWith('+ ')) {
-      const cmdPart = trimmedText.slice(2).trim();
+    const cmdPart = extractCmdFromTrace(trimmedText);
+    if (cmdPart !== null) {
       isCommand = knownCommandMatchers.value.some((matcher) => matcher.test(cmdPart));
     }
 
