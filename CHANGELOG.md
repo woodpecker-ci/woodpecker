@@ -20,6 +20,7 @@
 
 ### 📦️ Dependency
 
+- Update pnpm to v11.10.0 [[#6814](https://github.com/woodpecker-ci/woodpecker/pull/6814)]
 - Update module github.com/cenkalti/backoff/v6 to v7 [[#6812](https://github.com/woodpecker-ci/woodpecker/pull/6812)]
 - Update web npm deps non-major [[#6787](https://github.com/woodpecker-ci/woodpecker/pull/6787)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.4 [[#6811](https://github.com/woodpecker-ci/woodpecker/pull/6811)]
