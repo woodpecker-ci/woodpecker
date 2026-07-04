@@ -14,6 +14,7 @@
 
 ### 📚 Documentation
 
+- Update pnpm to v11.10.0 [[#6813](https://github.com/woodpecker-ci/woodpecker/pull/6813)]
 - Lock file maintenance [[#6799](https://github.com/woodpecker-ci/woodpecker/pull/6799)]
 - Update docs npm deps non-major [[#6788](https://github.com/woodpecker-ci/woodpecker/pull/6788)]
 
