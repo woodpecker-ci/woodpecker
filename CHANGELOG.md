@@ -19,6 +19,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6787](https://github.com/woodpecker-ci/woodpecker/pull/6787)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.4 [[#6811](https://github.com/woodpecker-ci/woodpecker/pull/6811)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.1 [[#6797](https://github.com/woodpecker-ci/woodpecker/pull/6797)]
 
