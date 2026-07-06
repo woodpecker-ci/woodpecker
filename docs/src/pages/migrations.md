@@ -10,7 +10,19 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
+- deprecated `CI_COMMIT_PRERELEASE` env var in favor of `CI_PIPELINE_RELEASE_PRE`
 - deprecated `runs_on` workflow property in favor of `when.status`.
+
+### API changes
+
+- The pipeline model is currently being changed to use nested objects grouped based on the event.
+  Following properties are deprecated and should be replaced by the their new counterparts:
+  - `title` =>
+    - `release.title`: for release events
+  - `message` =>
+    - `tag_title` for tag events
+  - `is_prerelease` => `release.is_prerelease`
+  - extraction from `ref` => `tag_title`
 
 ### Admin-facing migrations
 

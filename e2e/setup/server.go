@@ -67,6 +67,17 @@ type ServerEnv struct {
 	Manager  services.Manager
 }
 
+func (env *ServerEnv) DummyPipeline(event model.WebhookEvent) *model.Pipeline {
+	return &model.Pipeline{
+		Event:  event,
+		Branch: "main",
+		Commit: "deadbeef",
+		Ref:    "refs/heads/main",
+		Author: env.Fixtures.Owner.Login,
+		Sender: env.Fixtures.Owner.Login,
+	}
+}
+
 // StartServer wires up the full in-process server stack:
 //   - in-memory sqlite store (fully migrated) with seeded fixtures
 //   - in-memory queue, pubsub, and logging
@@ -105,7 +116,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	})
 
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Scheduler = scheduler.NewScheduler(memQueue, memory.New())
+	server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), memStore, memQueue, memory.New()) //nolint:contextcheck
 	server.Config.Services.Membership = cache.NewMembershipService(memStore)
 	server.Config.Services.Manager = mgr
 	server.Config.Services.LogStore = memStore

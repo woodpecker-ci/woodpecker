@@ -21,6 +21,7 @@ import (
 
 	"github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -362,4 +363,65 @@ func Test_convertProjectsToTeams(t *testing.T) {
 
 		assert.Equal(t, tt.expected, actual)
 	}
+}
+
+func Test_convertListOptions(t *testing.T) {
+	t.Parallel()
+
+	t.Run("all returns empty options", func(t *testing.T) {
+		t.Parallel()
+		got := convertListOptions(&model.ListOptions{All: true, Page: 3, PerPage: 50})
+		assert.Equal(t, bitbucket.ListOptions{}, got)
+	})
+
+	t.Run("paged computes limit and start", func(t *testing.T) {
+		t.Parallel()
+		got := convertListOptions(&model.ListOptions{Page: 3, PerPage: 50})
+		assert.Equal(t, uint(50), got.Limit)
+		assert.Equal(t, uint(100), got.Start)
+	})
+
+	t.Run("first page has zero start", func(t *testing.T) {
+		t.Parallel()
+		got := convertListOptions(&model.ListOptions{Page: 1, PerPage: 25})
+		assert.Equal(t, uint(0), got.Start)
+	})
+}
+
+func Test_updateUserCredentials(t *testing.T) {
+	t.Parallel()
+
+	u := &model.User{}
+	expiry := time.Unix(1700000000, 0)
+	updateUserCredentials(u, &oauth2.Token{
+		AccessToken:  "access",
+		RefreshToken: "refresh",
+		Expiry:       expiry,
+	})
+
+	assert.Equal(t, "access", u.AccessToken)
+	assert.Equal(t, "refresh", u.RefreshToken)
+	assert.Equal(t, expiry.UTC().Unix(), u.Expiry)
+}
+
+func Test_anonymizeLink(t *testing.T) {
+	t.Parallel()
+
+	t.Run("strips user info", func(t *testing.T) {
+		t.Parallel()
+		assert.Equal(t, "https://example.com/repo.git",
+			anonymizeLink("https://user:pass@example.com/repo.git"))
+	})
+
+	t.Run("passes link through unchanged when no user info", func(t *testing.T) {
+		t.Parallel()
+		assert.Equal(t, "https://example.com/repo.git",
+			anonymizeLink("https://example.com/repo.git"))
+	})
+
+	t.Run("returns original on parse error", func(t *testing.T) {
+		t.Parallel()
+		bad := "://not a url"
+		assert.Equal(t, bad, anonymizeLink(bad))
+	})
 }

@@ -20,6 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
@@ -901,4 +902,34 @@ func (t *testMetadata) GetWorkflowMetadata(w *Workflow) metadata.Metadata {
 			},
 		},
 	}
+}
+
+func TestInternalCommitBranchAndEventLabels(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+		branch:        "main",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Data: []byte(`
+when:
+  event: push
+steps:
+  - name: build
+    image: scratch
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1)
+
+	assert.Equal(t, "main", items[0].Labels[pipeline.LabelCommitBranch])
+	assert.Equal(t, "push", items[0].Labels[pipeline.LabelEvent])
 }

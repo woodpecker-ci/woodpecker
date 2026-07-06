@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
@@ -45,11 +44,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
-)
-
-const (
-	queueInfoRefreshInterval = 500 * time.Millisecond
-	storeInfoRefreshInterval = 10 * time.Second
 )
 
 func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
@@ -166,7 +160,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	if err != nil {
 		return fmt.Errorf("could not setup queue: %w", err)
 	}
-	server.Config.Services.Scheduler = scheduler.NewScheduler(queue, pubsub)
+	server.Config.Services.Scheduler = scheduler.NewScheduler(ctx, s, queue, pubsub)
 	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
@@ -182,6 +176,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 	server.Config.Server.AsyncRepositoryUpdate = c.Bool("async-repository-update")
+	server.Config.Server.WebhookSyncTimeout = c.Duration("webhook-sync-timeout")
 
 	// Pull requests
 	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")

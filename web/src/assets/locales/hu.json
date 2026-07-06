@@ -373,7 +373,12 @@
     "internal_error": "Valamilyen belső hiba történt",
     "info": "Információ",
     "registration_closed": "A regisztráció zárva",
-    "repositories": "Repository-k",
+    "repositories": {
+        "title": "Kódtárak",
+        "all": {
+            "title": "Összes kódtár"
+        }
+    },
     "documentation_for": "{topic} dokumentációja",
     "docs": "Dokumentáció",
     "repos": "Repók",
@@ -516,5 +521,6 @@
     "cli_login_denied": "Belépés a CLIbe megtagadva",
     "return_to_cli": "Mostmár bezárhatod ezt az ablakot és visszaléphetsz a CLIbe.",
     "settings": "Beállítások",
-    "access_denied": "Nincs hozzáférésed ehhez a munkamenethez"
+    "access_denied": "Nincs hozzáférésed ehhez a munkamenethez",
+    "login_to_woodpecker_with": "Bejelentkezés a Woodpeckerbe"
 }

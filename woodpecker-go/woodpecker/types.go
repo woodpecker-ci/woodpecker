@@ -133,6 +133,7 @@ type (
 		Reviewer    string           `json:"reviewed_by"`
 		Reviewed    int64            `json:"reviewed"`
 		Workflows   []*Workflow      `json:"workflows,omitempty"`
+		Release     *Release         `json:"release,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
@@ -172,6 +173,12 @@ type (
 		Address  string `json:"address"`
 		Username string `json:"username"`
 		Password string `json:"password,omitempty"`
+	}
+
+	// Release represents pipeline release metadata.
+	Release struct {
+		Title        string `json:"title,omitempty"`
+		IsPrerelease bool   `json:"is_prerelease,omitempty"`
 	}
 
 	// Secret represents a secret variable, such as a password or token.

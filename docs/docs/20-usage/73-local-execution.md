@@ -51,6 +51,10 @@ woodpecker-cli exec \
   .woodpecker/my-first-workflow.yaml
 ```
 
+:::warning
+The metadata file is not a stable, portable API: its format is only guaranteed for the same server and CLI version it came from. Use it to replay against a matching version, and re-download after upgrades instead of reusing old files.
+:::
+
 ## Pass environment variables and secrets
 
 Use `--env` for regular environment variables:

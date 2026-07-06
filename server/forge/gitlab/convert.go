@@ -234,6 +234,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 	pipeline.Title = obj.Title
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequestLabels = convertLabels(hook.Labels)
+	pipeline.PullRequestDraft = obj.Draft || obj.WorkInProgress
 	pipeline.FromFork = target.PathWithNamespace != source.PathWithNamespace
 
 	return obj.IID, hook.ObjectAttributes.MilestoneID, repo, pipeline, nil
@@ -333,12 +334,12 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 		repo.IsSCMPrivate = false
 	}
 
-	refTag := strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Event = model.EventTag
+	pipeline.TagTitle = strings.TrimPrefix(strings.TrimPrefix(hook.Ref, "refs/heads/"), "refs/tags/")
 	pipeline.Commit = hook.After
-	pipeline.Branch = refTag
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
+	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, pipeline.TagTitle)
 
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
@@ -393,7 +394,6 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		Event:    model.EventRelease,
 		Commit:   hook.Commit.ID,
 		ForgeURL: hook.URL,
-		Message:  fmt.Sprintf("created release %s", hook.Name),
 		Sender:   hook.Commit.Author.Name,
 		// Using the commit author here as Gitlab does not send the hook user.
 		// This is not an issue because releases can be created by users with
@@ -401,9 +401,12 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		Author: hook.Commit.Author.Name,
 		Email:  hook.Commit.Author.Email,
 
+		Release: &model.Release{Title: hook.Name},
+
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)
-		Ref: "refs/tags/" + hook.Tag,
+		Ref:      "refs/tags/" + hook.Tag,
+		TagTitle: hook.Tag,
 	}
 	if len(pipeline.Email) != 0 {
 		pipeline.Avatar = getUserAvatar(pipeline.Email)

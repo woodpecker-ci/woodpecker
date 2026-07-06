@@ -38,6 +38,8 @@ func Test_convertDesc(t *testing.T) {
 	assert.Equal(t, descPending, convertDesc(model.StatusPending))
 	assert.Equal(t, descPending, convertDesc(model.StatusRunning))
 	assert.Equal(t, descFailure, convertDesc(model.StatusFailure))
+	assert.Equal(t, descBlocked, convertDesc(model.StatusBlocked))
+	assert.Equal(t, descDeclined, convertDesc(model.StatusDeclined))
 	assert.Equal(t, descError, convertDesc(model.StatusKilled))
 	assert.Equal(t, descError, convertDesc(model.StatusError))
 }
@@ -156,5 +158,15 @@ func Test_convertRepoHook(t *testing.T) {
 		assert.Equal(t, *from.HTMLURL, repo.ForgeURL)
 		assert.Equal(t, *from.CloneURL, repo.Clone)
 		assert.Equal(t, *from.DefaultBranch, repo.Branch)
+	})
+
+	t.Run("should derive full name from owner and name when missing", func(t *testing.T) {
+		from := &github.PushEventRepository{Owner: &github.User{}}
+		from.Owner.Login = github.Ptr("octocat")
+		from.Name = github.Ptr("hello-world")
+		// FullName intentionally left empty to hit the fallback branch
+
+		repo := convertRepoHook(from)
+		assert.Equal(t, "octocat/hello-world", repo.FullName)
 	})
 }
