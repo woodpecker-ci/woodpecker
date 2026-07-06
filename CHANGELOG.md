@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-04
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Kernald
+@6543, @Kernald, @kanywst
+
+### 🔒 Security
+
+- Gate Kubernetes nodeSelector backend step config behind agent config [[#6809](https://github.com/woodpecker-ci/woodpecker/pull/6809)]
 
 ### 📈 Enhancement
 
