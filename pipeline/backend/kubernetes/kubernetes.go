@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	kube_core_v1 "k8s.io/api/core/v1"
@@ -69,6 +69,7 @@ type config struct {
 	PodAnnotations                  map[string]string
 	PodAnnotationsAllowFromStep     bool
 	PodNodeSelector                 map[string]string
+	PodNodeSelectorAllowFromStep    bool
 	PodTolerationsAllowFromStep     bool
 	PodTolerations                  []Toleration
 	PodAffinity                     *kube_core_v1.Affinity
@@ -107,20 +108,21 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
 			config := config{
-				Namespace:                   c.String("backend-k8s-namespace"),
-				EnableNamespacePerOrg:       c.Bool("backend-k8s-namespace-per-org"),
-				StorageClass:                c.String("backend-k8s-storage-class"),
-				VolumeSize:                  c.String("backend-k8s-volume-size"),
-				StorageRwx:                  c.Bool("backend-k8s-storage-rwx"),
-				PriorityClassName:           c.String("backend-k8s-priority-class"),
-				PodLabels:                   make(map[string]string), // just init empty map to prevent nil panic
-				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
-				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
-				PodTolerationsAllowFromStep: c.Bool("backend-k8s-pod-tolerations-allow-from-step"),
-				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
-				PodAffinityAllowFromStep:    c.Bool("backend-k8s-pod-affinity-allow-from-step"),
-				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
+				Namespace:                    c.String("backend-k8s-namespace"),
+				EnableNamespacePerOrg:        c.Bool("backend-k8s-namespace-per-org"),
+				StorageClass:                 c.String("backend-k8s-storage-class"),
+				VolumeSize:                   c.String("backend-k8s-volume-size"),
+				StorageRwx:                   c.Bool("backend-k8s-storage-rwx"),
+				PriorityClassName:            c.String("backend-k8s-priority-class"),
+				PodLabels:                    make(map[string]string), // just init empty map to prevent nil panic
+				PodLabelsAllowFromStep:       c.Bool("backend-k8s-pod-labels-allow-from-step"),
+				PodAnnotations:               make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotationsAllowFromStep:  c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+				PodTolerationsAllowFromStep:  c.Bool("backend-k8s-pod-tolerations-allow-from-step"),
+				PodNodeSelectorAllowFromStep: c.Bool("backend-k8s-pod-node-selector-allow-from-step"),
+				PodNodeSelector:              make(map[string]string), // just init empty map to prevent nil panic
+				PodAffinityAllowFromStep:     c.Bool("backend-k8s-pod-affinity-allow-from-step"),
+				ImagePullSecretNames:         c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 					FSGroup:      newInt64(defaultFSGroup),
