@@ -589,6 +589,15 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_GITHUB_APP_CLONE_TOKEN_SCOPE"),
+		Name:    "github-app-clone-token-scope",
+		Usage:   "scope of github app clone tokens: 'repo' restricts them to the repository being built with read-only contents access, 'installation' covers all repositories of the app installation (e.g. for private git submodules)",
+		Value:   "repo",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
 	//
 	// Gitea
 	//

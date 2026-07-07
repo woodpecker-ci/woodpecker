@@ -299,17 +299,52 @@ func TestPatchForge(t *testing.T) {
 		assert.Equal(t, true, response.AdditionalOptions["app-private-key-set"])
 	})
 
-	t.Run("should keep the stored github app private key for a numeric app id", func(t *testing.T) {
+	t.Run("should reject a numeric app id", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("ForgeGet", int64(1)).Return(storedForge(), nil)
+
+		// additional options are typed, GitHub app ids must be sent as strings
+		w := patchForgeRequest(t, mockStore, `{"type": "github", "url": "https://github.com", "additional_options": {"app-id": 12345}}`)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "must be a string")
+		mockStore.AssertNotCalled(t, "ForgeUpdate", mock.Anything)
+	})
+
+	t.Run("should clear the app configuration when additional options are omitted", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("ForgeGet", int64(1)).Return(storedForge(), nil)
 		mockStore.On("ForgeUpdate", mock.MatchedBy(func(forge *model.Forge) bool {
-			return forge.AdditionalOptions["app-private-key"] == appPrivateKey
+			_, hasKey := forge.AdditionalOptions[model.ForgeGithubOptionAppPrivateKey]
+			return !hasKey
 		})).Return(nil)
 
-		// GitHub app ids are numeric, they may be sent as JSON number via the API
-		w := patchForgeRequest(t, mockStore, `{"type": "github", "url": "https://github.com", "additional_options": {"app-id": 12345}}`)
+		// omitting additional_options replaces them wholesale and must not panic
+		w := patchForgeRequest(t, mockStore, `{"type": "github", "url": "https://github.com"}`)
 
 		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("should reject a new private key without an app id", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("ForgeGet", int64(1)).Return(storedForge(), nil)
+
+		// an explicitly submitted key must not be dropped silently
+		w := patchForgeRequest(t, mockStore, `{"type": "github", "url": "https://github.com", "additional_options": {"app-id": "", "app-private-key": "some-new-key"}}`)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockStore.AssertNotCalled(t, "ForgeUpdate", mock.Anything)
+	})
+
+	t.Run("should validate non-github forges as well", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("ForgeGet", int64(1)).Return(storedForge(), nil)
+
+		// bitbucket-dc requires a git machine account
+		w := patchForgeRequest(t, mockStore, `{"type": "bitbucket-dc", "url": "https://bb.example.com", "additional_options": {}}`)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockStore.AssertNotCalled(t, "ForgeUpdate", mock.Anything)
 	})
 
 	t.Run("should not restore github options when the forge type changes", func(t *testing.T) {

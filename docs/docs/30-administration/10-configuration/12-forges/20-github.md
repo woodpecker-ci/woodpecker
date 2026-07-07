@@ -55,12 +55,18 @@ WOODPECKER_GITHUB_APP_PRIVATE_KEY_FILE=/etc/woodpecker/github-app-private-key.pe
 
 For repositories the app is not installed on, Woodpecker falls back to the OAuth token of the user who enabled the repository.
 
+Clone credentials handed to agents are restricted by default to the repository being built with read-only contents access.
+If your pipelines need to clone other private repositories of the same installation (e.g. git submodules or private go modules), set `WOODPECKER_GITHUB_APP_CLONE_TOKEN_SCOPE=installation` to hand out clone tokens covering all repositories of the app installation instead.
+Server-side API calls always use installation-wide tokens; those never leave the server.
+
 The private key is write-only: the API and the admin UI never return it, and leaving the field empty when updating a forge keeps the stored key.
 After saving, the "Test GitHub App" button in the admin UI (or `GET /api/forges/{id}/app-health`) verifies that the credentials work.
 
 :::note
-Installation access tokens expire after one hour and are scoped to the repositories of the app installation.
-Clone credentials of pipelines that stay queued for a very long time may therefore expire before the clone step runs, and clone access to private repositories outside the installation (e.g. git submodules in another organization) requires falling back to user OAuth tokens by not installing the app on the affected repositories.
+Installation access tokens expire after one hour.
+Clone credentials of pipelines that stay queued for a very long time may therefore expire before the clone step runs.
+This limitation will be resolved by injecting credentials when an agent picks up the workflow instead of at creation time, see [woodpecker-ci/woodpecker#2851](https://github.com/woodpecker-ci/woodpecker/issues/2851).
+Clone access to private repositories outside the installation (e.g. git submodules in another organization) requires falling back to user OAuth tokens by not installing the app on the affected repositories.
 :::
 
 ## Configuration
@@ -172,3 +178,12 @@ Configures the private key of the GitHub App, either as plain PEM or base64-enco
 - Default: none
 
 Read the value for `WOODPECKER_GITHUB_APP_PRIVATE_KEY` from the specified filepath, e.g. the `.pem` file downloaded from GitHub.
+
+---
+
+### GITHUB_APP_CLONE_TOKEN_SCOPE
+
+- Name: `WOODPECKER_GITHUB_APP_CLONE_TOKEN_SCOPE`
+- Default: `repo`
+
+Scope of the installation access tokens handed out as clone credentials. `repo` restricts them to the repository being built with read-only contents access. `installation` covers all repositories of the app installation with the app's permissions, which is needed to clone other private repositories during a pipeline (e.g. git submodules or private go modules of the same organization).

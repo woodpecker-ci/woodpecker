@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -179,9 +180,13 @@ func TestAppInstallationToken(t *testing.T) {
 			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
+		prefix := "ghs_token"
+		if body, _ := io.ReadAll(r.Body); strings.Contains(string(body), "repositories") {
+			prefix = "ghs_scoped"
+		}
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, `{"token": "ghs_token_%d", "expires_at": %q}`,
-			tokenMints, time.Now().Add(time.Hour).UTC().Format(time.RFC3339))
+		fmt.Fprintf(w, `{"token": "%s_%d", "expires_at": %q}`,
+			prefix, tokenMints, time.Now().Add(time.Hour).UTC().Format(time.RFC3339))
 	})
 	server := httptest.NewServer(mux)
 	defer server.Close()
@@ -225,6 +230,23 @@ func TestAppInstallationToken(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "ghs_token_2", token)
 	assert.Equal(t, 2, tokenMints)
+
+	// clone tokens are restricted to the repository and cached separately
+	// from the installation-wide tokens
+	scoped, err := app.cloneToken(ctx, "octocat", "hello-world", apiTokenMinValidity, false)
+	require.NoError(t, err)
+	assert.Equal(t, "ghs_scoped_3", scoped)
+
+	cached, err := app.cloneToken(ctx, "octocat", "hello-world", apiTokenMinValidity, false)
+	require.NoError(t, err)
+	assert.Equal(t, scoped, cached)
+	assert.Equal(t, 3, tokenMints)
+
+	// the installation-wide clone scope reuses the plain installation token
+	wide, err := app.cloneToken(ctx, "octocat", "hello-world", apiTokenMinValidity, true)
+	require.NoError(t, err)
+	assert.Equal(t, "ghs_token_2", wide)
+	assert.Equal(t, 3, tokenMints)
 
 	// repositories the app is not installed on return errAppNotInstalled and
 	// the negative result is cached

@@ -52,22 +52,40 @@ const (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL               string // GitHub server url.
-	OAuthClientID     string // GitHub oauth client id.
-	OAuthClientSecret string // GitHub oauth client secret.
-	SkipVerify        bool   // Skip ssl verification.
-	MergeRef          bool   // Clone pull requests using the merge ref.
-	OnlyPublic        bool   // Only obtain OAuth tokens with access to public repos.
-	OAuthHost         string // Public url for oauth if different from url.
-	AppID             string // GitHub App (client) id used to mint installation tokens.
-	AppPrivateKey     string // GitHub App private key (PEM or base64-encoded PEM).
+	URL                string // GitHub server url.
+	OAuthClientID      string // GitHub oauth client id.
+	OAuthClientSecret  string // GitHub oauth client secret.
+	SkipVerify         bool   // Skip ssl verification.
+	MergeRef           bool   // Clone pull requests using the merge ref.
+	OnlyPublic         bool   // Only obtain OAuth tokens with access to public repos.
+	OAuthHost          string // Public url for oauth if different from url.
+	AppID              string // GitHub App (client) id used to mint installation tokens.
+	AppPrivateKey      string // GitHub App private key (PEM or base64-encoded PEM).
+	AppCloneTokenScope string // Scope of clone tokens: "repo" (default) or "installation".
 }
+
+// Values of the AppCloneTokenScope option.
+const (
+	// AppCloneTokenScopeRepo scopes clone tokens to the repository being
+	// built with read-only contents access.
+	AppCloneTokenScopeRepo = "repo"
+	// AppCloneTokenScopeInstallation hands out clone tokens covering all
+	// repositories of the app installation with the app's permissions, e.g.
+	// for private git submodules in the same organization.
+	AppCloneTokenScopeInstallation = "installation"
+)
 
 // New returns a Forge implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
 func New(id int64, opts Opts) (forge.Forge, error) {
 	if (opts.AppID != "") != (opts.AppPrivateKey != "") {
 		return nil, errors.New("github app requires both app id and private key to be set")
+	}
+
+	switch opts.AppCloneTokenScope {
+	case "", AppCloneTokenScopeRepo, AppCloneTokenScopeInstallation:
+	default:
+		return nil, fmt.Errorf("invalid github app clone token scope %q, must be %q or %q", opts.AppCloneTokenScope, AppCloneTokenScopeRepo, AppCloneTokenScopeInstallation)
 	}
 
 	r := &client{
@@ -92,6 +110,7 @@ func New(id int64, opts Opts) (forge.Forge, error) {
 			return nil, err
 		}
 		r.app = app
+		r.wideCloneTokens = opts.AppCloneTokenScope == AppCloneTokenScopeInstallation
 	}
 
 	return r, nil
@@ -108,6 +127,9 @@ type client struct {
 	OnlyPublic bool
 	oAuthHost  string
 	app        *appClient // set when a GitHub App is configured
+	// clone tokens cover the whole installation instead of only the
+	// repository being built
+	wideCloneTokens bool
 }
 
 // Name returns the string name of this driver.
@@ -395,7 +417,7 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		// the forge interface does not provide a context here, so bound the token mint call
 		ctx, cancel := context.WithTimeout(context.Background(), netrcTokenTimeout)
 		defer cancel()
-		if token, ok := c.appToken(ctx, r, netrcTokenMinValidity); ok {
+		if token, ok := c.appCloneToken(ctx, r, netrcTokenMinValidity); ok {
 			return &model.Netrc{
 				Login:    "x-access-token",
 				Password: token,
@@ -611,6 +633,26 @@ func (c *client) AppHealth(ctx context.Context) (string, int, error) {
 	}
 
 	return app.GetName(), len(installations), nil
+}
+
+// appCloneToken returns an installation access token suitable as clone
+// credential for the repository when a GitHub App is configured and
+// installed on it. By default the token is restricted to the repository and
+// read-only contents access, see AppCloneTokenScope.
+func (c *client) appCloneToken(ctx context.Context, r *model.Repo, minValidity time.Duration) (string, bool) {
+	if c.app == nil || r == nil {
+		return "", false
+	}
+	token, err := c.app.cloneToken(ctx, r.Owner, r.Name, minValidity, c.wideCloneTokens)
+	if err != nil {
+		if errors.Is(err, errAppNotInstalled) {
+			log.Debug().Msgf("github app is not installed on repo %s, using user token", r.FullName)
+		} else {
+			log.Warn().Err(err).Msgf("failed to get github app clone token for repo %s, falling back to user token", r.FullName)
+		}
+		return "", false
+	}
+	return token, true
 }
 
 // repoToken returns the token to use for repo-scoped API calls: an

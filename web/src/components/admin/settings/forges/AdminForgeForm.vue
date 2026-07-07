@@ -107,6 +107,15 @@
             @update:model-value="setAdditionalOptions('github', 'app-private-key', $event)"
           />
         </InputField>
+        <InputField v-if="getAdditionalOptions('github', 'app-id')" :label="$t('github_app_clone_token_scope')">
+          <Checkbox
+            :label="$t('github_app_clone_token_scope_desc')"
+            :model-value="getAdditionalOptions('github', 'app-clone-token-scope') === 'installation'"
+            @update:model-value="
+              setAdditionalOptions('github', 'app-clone-token-scope', $event ? 'installation' : 'repo')
+            "
+          />
+        </InputField>
         <InputField
           v-if="!isNew && forge.id && getAdditionalOptions('github', 'app-id')"
           :label="$t('github_app_check')"
@@ -240,6 +249,7 @@ interface GitHubAdditionOptions {
   'public-only'?: boolean;
   'app-id'?: string;
   'app-private-key'?: string;
+  'app-clone-token-scope'?: string;
 }
 
 interface BitbucketAdditionOptions {

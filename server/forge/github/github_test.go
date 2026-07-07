@@ -136,12 +136,14 @@ func TestGithubApp(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("netrc uses installation token", func(t *testing.T) {
+	t.Run("netrc uses a repo-scoped installation token", func(t *testing.T) {
 		netrc, err := c.Netrc(fakeUser, fakeRepo)
 		assert.NoError(t, err)
 		assert.Equal(t, "github.com", netrc.Machine)
 		assert.Equal(t, "x-access-token", netrc.Login)
-		assert.Equal(t, fixtures.InstallationToken, netrc.Password)
+		// the fixture only hands this token out for requests restricted to
+		// specific repositories with read-only contents access
+		assert.Equal(t, fixtures.ScopedInstallationToken, netrc.Password)
 		assert.Equal(t, model.ForgeTypeGithub, netrc.Type)
 	})
 
@@ -149,7 +151,26 @@ func TestGithubApp(t *testing.T) {
 		netrc, err := c.Netrc(nil, fakeRepo)
 		assert.NoError(t, err)
 		assert.Equal(t, "x-access-token", netrc.Login)
+		assert.Equal(t, fixtures.ScopedInstallationToken, netrc.Password)
+	})
+
+	t.Run("netrc uses an installation-wide token when configured", func(t *testing.T) {
+		wide, err := New(1, Opts{
+			URL:                s.URL,
+			SkipVerify:         true,
+			AppID:              "12345",
+			AppPrivateKey:      appKey,
+			AppCloneTokenScope: AppCloneTokenScopeInstallation,
+		})
+		require.NoError(t, err)
+		netrc, err := wide.Netrc(fakeUser, fakeRepo)
+		assert.NoError(t, err)
 		assert.Equal(t, fixtures.InstallationToken, netrc.Password)
+	})
+
+	t.Run("invalid clone token scope", func(t *testing.T) {
+		_, err := New(1, Opts{AppID: "12345", AppPrivateKey: appKey, AppCloneTokenScope: "bogus"})
+		assert.ErrorContains(t, err, "clone token scope")
 	})
 
 	t.Run("netrc falls back to user token when app is not installed", func(t *testing.T) {

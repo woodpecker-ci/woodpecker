@@ -24,8 +24,12 @@ import (
 )
 
 // InstallationToken is the installation access token returned by the mock
-// installation token endpoint.
+// installation token endpoint for unrestricted (installation-wide) tokens.
 const InstallationToken = "ghs_mock_installation_token"
+
+// ScopedInstallationToken is returned instead when the token request is
+// restricted to specific repositories, as clone tokens are.
+const ScopedInstallationToken = "ghs_mock_scoped_installation_token"
 
 // Handler returns an http.Handler that is capable of handling a variety of mock
 // Bitbucket requests and returning mock responses.
@@ -133,8 +137,22 @@ func createInstallationToken(c *gin.Context) {
 		c.String(http.StatusNotFound, "")
 		return
 	}
+	var req struct {
+		Repositories []string          `json:"repositories"`
+		Permissions  map[string]string `json:"permissions"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	token := InstallationToken
+	if len(req.Repositories) > 0 {
+		// repository-restricted clone tokens must also drop write access
+		if req.Permissions["contents"] != "read" {
+			c.String(http.StatusUnprocessableEntity, "")
+			return
+		}
+		token = ScopedInstallationToken
+	}
 	expiresAt := time.Now().Add(time.Hour).UTC().Format(time.RFC3339)
-	c.String(http.StatusCreated, fmt.Sprintf(`{"token": %q, "expires_at": %q}`, InstallationToken, expiresAt))
+	c.String(http.StatusCreated, fmt.Sprintf(`{"token": %q, "expires_at": %q}`, token, expiresAt))
 }
 
 // createStatus only accepts the mock installation token, so tests can assert

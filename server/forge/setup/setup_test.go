@@ -89,9 +89,10 @@ func TestForgeGitHubApp(t *testing.T) {
 
 	t.Run("app-id as JSON number", func(t *testing.T) {
 		t.Parallel()
-		// additional options set via the API are JSON-decoded, turning numeric app ids into float64;
-		// if the coercion failed, the private key would be set without an app id and setup would error
-		f, err := Forge(&model.Forge{
+		// the API rejects non-string app ids at save time, so setup treats a
+		// numeric value as unset - together with the private key this fails
+		// the pairing check instead of being silently coerced
+		_, err := Forge(&model.Forge{
 			ID:   1,
 			Type: model.ForgeTypeGithub,
 			URL:  "https://github.com",
@@ -100,9 +101,7 @@ func TestForgeGitHubApp(t *testing.T) {
 				"app-private-key": pemKey,
 			},
 		})
-		require.NoError(t, err)
-		require.NotNil(t, f)
-		assert.Equal(t, "github", f.Name())
+		require.Error(t, err)
 	})
 
 	t.Run("app-id without private key", func(t *testing.T) {

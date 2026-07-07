@@ -16,6 +16,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -31,13 +32,25 @@ import (
 // validateForge ensures the forge configuration can actually be constructed,
 // so invalid configurations (e.g. an unparsable GitHub App private key or a
 // private key without an app id) are rejected at save time instead of
-// breaking every operation of the forge afterwards. Only GitHub forges are
-// validated for now: their constructor is side-effect free and rejects
-// invalid GitHub App credentials.
+// breaking every operation of the forge afterwards. Addon forges are not
+// validated as constructing them starts an external process.
 func validateForge(forge *model.Forge) error {
-	if forge.Type != model.ForgeTypeGithub {
+	if forge.Type == model.ForgeTypeAddon {
 		return nil
 	}
+
+	// additional options are a schemaless JSON map, ensure the string options
+	// have the right type before the setup helpers silently coerce them
+	if forge.Type == model.ForgeTypeGithub {
+		for _, key := range []string{model.ForgeGithubOptionAppID, model.ForgeGithubOptionAppCloneTokenScope} {
+			if value, ok := forge.AdditionalOptions[key]; ok {
+				if _, isString := value.(string); !isString {
+					return fmt.Errorf("additional option %q must be a string", key)
+				}
+			}
+		}
+	}
+
 	_, err := setup.Forge(forge)
 	return err
 }
@@ -167,30 +180,39 @@ func PatchForge(c *gin.Context) {
 
 // restoreSecretOptions copies write-only secret options from the stored
 // forge configuration when an update request omits them or sends them empty,
-// mirroring the OAuthClientSecret semantics. Clearing the GitHub App id
-// drops the stored private key, so app authentication can be disabled again.
+// mirroring the OAuthClientSecret semantics.
 func restoreSecretOptions(forge *model.Forge, oldOptions map[string]any) {
-	if forge.Type != model.ForgeTypeGithub {
-		return
+	submittedAppKey, _ := forge.AdditionalOptions[model.ForgeGithubOptionAppPrivateKey].(string)
+
+	for _, key := range model.SecretForgeOptions(forge.Type) {
+		// never persist the redaction marker clients echo back
+		delete(forge.AdditionalOptions, model.SecretForgeOptionSetMarker(key))
+		oldValue, _ := oldOptions[key].(string)
+		newValue, _ := forge.AdditionalOptions[key].(string)
+		if oldValue != "" && newValue == "" {
+			if forge.AdditionalOptions == nil {
+				forge.AdditionalOptions = make(map[string]any)
+			}
+			forge.AdditionalOptions[key] = oldValue
+		}
 	}
-	// never persist the redaction marker clients echo back
-	delete(forge.AdditionalOptions, "app-private-key-set")
-	oldKey, _ := oldOptions["app-private-key"].(string)
-	newKey, _ := forge.AdditionalOptions["app-private-key"].(string)
-	if oldKey == "" || newKey != "" || !hasNonEmptyAppID(forge.AdditionalOptions) {
-		return
+
+	// a restored github app private key is only kept while an app id is
+	// configured, so clearing the app id disables app authentication again -
+	// a key explicitly submitted with this request is left alone, the
+	// validation rejects such inconsistent configurations instead
+	if forge.Type == model.ForgeTypeGithub && submittedAppKey == "" {
+		if appID, _ := forge.AdditionalOptions[model.ForgeGithubOptionAppID].(string); appID == "" {
+			delete(forge.AdditionalOptions, model.ForgeGithubOptionAppPrivateKey)
+		}
 	}
-	forge.AdditionalOptions["app-private-key"] = oldKey
 }
 
-func hasNonEmptyAppID(options map[string]any) bool {
-	switch v := options["app-id"].(type) {
-	case string:
-		return v != ""
-	case float64: // GitHub app ids are numeric, they may be set as JSON number via the API
-		return true
-	default:
-		return false
+// dropSecretOptionMarkers removes the redaction markers clients echo back,
+// so they are never persisted.
+func dropSecretOptionMarkers(forge *model.Forge) {
+	for _, key := range model.SecretForgeOptions(forge.Type) {
+		delete(forge.AdditionalOptions, model.SecretForgeOptionSetMarker(key))
 	}
 }
 
@@ -221,8 +243,7 @@ func PostForge(c *gin.Context) {
 		SkipVerify:        in.SkipVerify,
 		AdditionalOptions: in.AdditionalOptions,
 	}
-	// never persist the redaction marker clients echo back
-	delete(forge.AdditionalOptions, "app-private-key-set")
+	dropSecretOptionMarkers(forge)
 
 	if err := validateForge(forge); err != nil {
 		c.String(http.StatusBadRequest, "invalid forge configuration: %s", err)

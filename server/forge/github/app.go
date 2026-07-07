@@ -76,6 +76,7 @@ type appClient struct {
 	mu            sync.Mutex
 	installations map[string]installationEntry // repo full name -> installation
 	tokens        map[int64]tokenEntry         // installation id -> access token
+	cloneTokens   map[string]tokenEntry        // repo full name -> repo-scoped clone token
 	now           func() time.Time             // overridable for tests
 }
 
@@ -101,6 +102,7 @@ func newAppClient(appID, privateKey, api string, skipVerify bool) (*appClient, e
 		skipVerify:    skipVerify,
 		installations: make(map[string]installationEntry),
 		tokens:        make(map[int64]tokenEntry),
+		cloneTokens:   make(map[string]tokenEntry),
 		now:           time.Now,
 	}, nil
 }
@@ -222,10 +224,9 @@ func (a *appClient) installationID(ctx context.Context, owner, name string) (int
 }
 
 // token returns an installation access token for the repository that is
-// valid for at least minValidity. Tokens are scoped to the whole
-// installation so that access to other repositories of the same installation
-// (e.g. git submodules or private go modules) keeps working, mirroring the
-// scope users are used to from OAuth tokens.
+// valid for at least minValidity. The token covers the whole installation
+// with the permissions granted to the app, and is used for server-side API
+// calls only.
 func (a *appClient) token(ctx context.Context, owner, name string, minValidity time.Duration) (string, error) {
 	installationID, err := a.installationID(ctx, owner, name)
 	if err != nil {
@@ -239,24 +240,76 @@ func (a *appClient) token(ctx context.Context, owner, name string, minValidity t
 		return entry.token, nil
 	}
 
-	client, err := a.newAppJWTClient(ctx)
+	token, err := a.mintToken(ctx, installationID, owner, name, nil)
 	if err != nil {
 		return "", err
 	}
 
-	token, resp, err := client.Apps.CreateInstallationToken(ctx, installationID, nil)
+	a.mu.Lock()
+	a.tokens[installationID] = *token
+	a.mu.Unlock()
+	return token.token, nil
+}
+
+// cloneToken returns an installation access token for the repository that is
+// restricted to the repository itself and read-only contents access. It is
+// handed out as clone credential, so it carries as little access as
+// possible. When wideScope is true the token covers the whole installation
+// with the app's permissions instead, so that clones of other repositories
+// of the same installation (e.g. git submodules or private go modules) keep
+// working.
+func (a *appClient) cloneToken(ctx context.Context, owner, name string, minValidity time.Duration, wideScope bool) (string, error) {
+	if wideScope {
+		return a.token(ctx, owner, name, minValidity)
+	}
+
+	installationID, err := a.installationID(ctx, owner, name)
+	if err != nil {
+		return "", err
+	}
+
+	key := installationKey(owner, name)
+	a.mu.Lock()
+	entry, ok := a.cloneTokens[key]
+	a.mu.Unlock()
+	if ok && a.now().Add(minValidity).Before(entry.expiresAt) {
+		return entry.token, nil
+	}
+
+	token, err := a.mintToken(ctx, installationID, owner, name, &github.InstallationTokenOptions{
+		Repositories: []string{name},
+		Permissions: &github.InstallationPermissions{
+			Contents: github.Ptr("read"),
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	a.mu.Lock()
+	a.cloneTokens[key] = *token
+	a.mu.Unlock()
+	return token.token, nil
+}
+
+// mintToken creates a new installation access token, optionally restricted
+// to specific repositories and permissions.
+func (a *appClient) mintToken(ctx context.Context, installationID int64, owner, name string, opts *github.InstallationTokenOptions) (*tokenEntry, error) {
+	client, err := a.newAppJWTClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	token, resp, err := client.Apps.CreateInstallationToken(ctx, installationID, opts)
 	if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusForbidden) {
 		// the installation was removed or suspended after it was cached,
 		// fall back to user tokens until the app becomes available again
 		a.cacheNotInstalled(owner, name)
-		return "", errAppNotInstalled
+		return nil, errAppNotInstalled
 	}
 	if err != nil {
-		return "", fmt.Errorf("failed to create github app installation token for %s/%s: %w", owner, name, err)
+		return nil, fmt.Errorf("failed to create github app installation token for %s/%s: %w", owner, name, err)
 	}
 
-	a.mu.Lock()
-	a.tokens[installationID] = tokenEntry{token: token.GetToken(), expiresAt: token.GetExpiresAt().Time}
-	a.mu.Unlock()
-	return token.GetToken(), nil
+	return &tokenEntry{token: token.GetToken(), expiresAt: token.GetExpiresAt().Time}, nil
 }

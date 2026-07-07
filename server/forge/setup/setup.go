@@ -17,7 +17,6 @@ package setup
 import (
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -143,28 +142,24 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 
 func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 	// get additional config and be false by default
-	mergeRef, _ := forge.AdditionalOptions["merge-ref"].(bool)
-	publicOnly, _ := forge.AdditionalOptions["public-only"].(bool)
+	mergeRef, _ := forge.AdditionalOptions[model.ForgeGithubOptionMergeRef].(bool)
+	publicOnly, _ := forge.AdditionalOptions[model.ForgeGithubOptionPublicOnly].(bool)
 	// GitHub App credentials are optional, without them user OAuth tokens are used for all API calls
-	var appID string
-	switch v := forge.AdditionalOptions["app-id"].(type) {
-	case string:
-		appID = v
-	case float64: // GitHub app ids are numeric, accept them when set as JSON number via the API
-		appID = strconv.FormatInt(int64(v), 10)
-	}
-	appPrivateKey, _ := forge.AdditionalOptions["app-private-key"].(string)
+	appID, _ := forge.AdditionalOptions[model.ForgeGithubOptionAppID].(string)
+	appPrivateKey, _ := forge.AdditionalOptions[model.ForgeGithubOptionAppPrivateKey].(string)
+	appCloneTokenScope, _ := forge.AdditionalOptions[model.ForgeGithubOptionAppCloneTokenScope].(string)
 
 	opts := github.Opts{
-		URL:               forge.URL,
-		OAuthClientID:     forge.OAuthClientID,
-		OAuthClientSecret: forge.OAuthClientSecret,
-		SkipVerify:        forge.SkipVerify,
-		MergeRef:          mergeRef,
-		OnlyPublic:        publicOnly,
-		OAuthHost:         forge.OAuthHost,
-		AppID:             appID,
-		AppPrivateKey:     appPrivateKey,
+		URL:                forge.URL,
+		OAuthClientID:      forge.OAuthClientID,
+		OAuthClientSecret:  forge.OAuthClientSecret,
+		SkipVerify:         forge.SkipVerify,
+		MergeRef:           mergeRef,
+		OnlyPublic:         publicOnly,
+		OAuthHost:          forge.OAuthHost,
+		AppID:              appID,
+		AppPrivateKey:      appPrivateKey,
+		AppCloneTokenScope: appCloneTokenScope,
 	}
 	log.Debug().
 		Str("url", opts.URL).
@@ -182,19 +177,19 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 }
 
 func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
-	gitUsername, ok := forge.AdditionalOptions["git-username"].(string)
+	gitUsername, ok := forge.AdditionalOptions[model.ForgeBitbucketDCOptionGitUsername].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing git-username")
 	}
-	gitPassword, ok := forge.AdditionalOptions["git-password"].(string)
+	gitPassword, ok := forge.AdditionalOptions[model.ForgeBitbucketDCOptionGitPassword].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing git-password")
 	}
 
-	enableProjectAdminScope, ok := forge.AdditionalOptions["oauth-enable-project-admin-scope"].(bool)
-	if !ok {
-		return nil, fmt.Errorf("incorrect type for oauth-enable-project-admin-scope value")
-	}
+	// this option is not exposed by the admin UI, so it may be missing when
+	// the forge was configured through the UI/API - default to false like the
+	// other optional booleans
+	enableProjectAdminScope, _ := forge.AdditionalOptions[model.ForgeBitbucketDCOptionAdminScope].(bool)
 
 	opts := bitbucketdatacenter.Opts{
 		URL:                          forge.URL,
@@ -217,7 +212,7 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 }
 
 func setupAddon(forge *model.Forge) (forge.Forge, error) {
-	executable, ok := forge.AdditionalOptions["executable"].(string)
+	executable, ok := forge.AdditionalOptions[model.ForgeAddonOptionExecutable].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing addon executable")
 	}
