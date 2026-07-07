@@ -607,6 +607,15 @@ Additional node selector to apply to worker pods. Must be a YAML object, e.g. `{
 
 ---
 
+### BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP`
+- Default: `false`
+
+Determines if the Pod `nodeSelector` can be defined from a step's backend options. Disabled by default, as it would otherwise let any user with push access pin pipeline pods onto chosen nodes.
+
+---
+
 ### BACKEND_K8S_SECCTX_NONROOT <!-- cspell:ignore SECCTX NONROOT -->
 
 - Name: `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`

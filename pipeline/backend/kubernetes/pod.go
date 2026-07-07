@@ -193,7 +193,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		Hostname:          getHostnameOrEmpty(step.Name),
 		Subdomain:         subdomain,
 		DNSConfig:         dnsConfig(config.GetNamespace(step.OrgID), subdomain),
-		NodeSelector:      nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		NodeSelector:      nodeSelector(options.NodeSelector, config.PodNodeSelector, config.PodNodeSelectorAllowFromStep, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:       tolerations(options.Tolerations),
 		Affinity:          affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
 		SecurityContext:   podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged, options.HostUsers),
@@ -512,7 +512,7 @@ func resourceList(resources map[string]string) (kube_core_v1.ResourceList, error
 	return requestResources, nil
 }
 
-func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, platform string) map[string]string {
+func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, allowFromStep bool, platform string) map[string]string {
 	nodeSelector := make(map[string]string)
 
 	if platform != "" {
@@ -527,8 +527,12 @@ func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, pla
 	}
 
 	if len(backendNodeSelector) > 0 {
-		log.Trace().Msgf("appending labels to the node selector from the backend options: %v", backendNodeSelector)
-		maps.Copy(nodeSelector, backendNodeSelector)
+		if allowFromStep {
+			log.Trace().Msgf("appending labels to the node selector from the backend options: %v", backendNodeSelector)
+			maps.Copy(nodeSelector, backendNodeSelector)
+		} else {
+			log.Debug().Msg("Step node selector is disallowed by instance configuration, ignoring it")
+		}
 	}
 
 	return nodeSelector

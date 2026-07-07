@@ -466,6 +466,7 @@ func TestFullPod(t *testing.T) {
 		PodAnnotationsAllowFromStep:     true,
 		PodTolerationsAllowFromStep:     true,
 		PodNodeSelector:                 map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
+		PodNodeSelectorAllowFromStep:    true,
 		SecurityContext:                 SecurityContextConfig{RunAsNonRoot: false},
 		ServiceAccountNameAllowFromStep: true,
 	},
