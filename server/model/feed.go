@@ -19,34 +19,36 @@ import "fmt"
 
 // Feed represents an item in the user's feed or timeline.
 type Feed struct {
-	RepoID   int64        `json:"repo_id"                 xorm:"repo_id"`
-	ID       int64        `json:"id,omitempty"            xorm:"pipeline_id"`
-	Number   int64        `json:"number,omitempty"        xorm:"pipeline_number"`
-	Event    WebhookEvent `json:"event,omitempty"         xorm:"pipeline_event"`
-	Status   string       `json:"status,omitempty"        xorm:"pipeline_status"`
-	Created  int64        `json:"created,omitempty"       xorm:"pipeline_created"`
-	Started  int64        `json:"started,omitempty"       xorm:"pipeline_started"`
-	Finished int64        `json:"finished,omitempty"      xorm:"pipeline_finished"`
-	Commit   string       `json:"commit,omitempty"        xorm:"pipeline_commit"`
-	Branch   string       `json:"branch,omitempty"        xorm:"pipeline_branch"`
-	Ref      string       `json:"ref,omitempty"           xorm:"pipeline_ref"`
-	Refspec  string       `json:"refspec,omitempty"       xorm:"pipeline_refspec"`
-	Title    string       `json:"title,omitempty"         xorm:"pipeline_title"`
-	Author   string       `json:"author,omitempty"        xorm:"pipeline_author"`
-	Avatar   string       `json:"author_avatar,omitempty" xorm:"pipeline_avatar"`
-	Email    string       `json:"author_email,omitempty"  xorm:"pipeline_email"`
+	RepoID   int64        `json:"repo_id"                   xorm:"repo_id"`
+	ID       int64        `json:"id,omitempty"              xorm:"pipeline_id"`
+	Number   int64        `json:"number,omitempty"          xorm:"pipeline_number"`
+	Event    WebhookEvent `json:"event,omitempty"           xorm:"pipeline_event"`
+	Status   string       `json:"status,omitempty"          xorm:"pipeline_status"`
+	Created  int64        `json:"created,omitempty"         xorm:"pipeline_created"`
+	Started  int64        `json:"started,omitempty"         xorm:"pipeline_started"`
+	Finished int64        `json:"finished,omitempty"        xorm:"pipeline_finished"`
+	Commit   *Commit      `json:"commit_pipeline,omitempty" xorm:"json 'pipeline_commit'"` // TODO change json to 'commit' in next major
+	Branch   string       `json:"branch,omitempty"          xorm:"pipeline_branch"`
+	Ref      string       `json:"ref,omitempty"             xorm:"pipeline_ref"`
+	Refspec  string       `json:"refspec,omitempty"         xorm:"pipeline_refspec"`
+	Title    string       `json:"title,omitempty"           xorm:"pipeline_title"`
+	Author   string       `json:"author,omitempty"          xorm:"pipeline_author"`
+	Avatar   string       `json:"author_avatar,omitempty"   xorm:"pipeline_avatar"`
 
 	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626
 	// // New
 	Release  *Release `json:"release,omitempty"    xorm:"json 'pipeline_release'"`
 	TagTitle string   `json:"tag_title,omitempty"  xorm:"pipeline_tag_title"`
-	// // Deprecated
-	Message string `json:"message,omitempty"       xorm:"pipeline_message"`
 }
 
 func (f *Feed) ToAPIModel() *APIFeed {
 	af := &APIFeed{
 		Feed: f,
+	}
+	if f.Commit != nil {
+		af.Commit = f.Commit.SHA
+		af.Message = f.Commit.Message
+		af.Email = f.Commit.Author.Email
 	}
 	switch af.Event {
 	case EventTag:
@@ -64,4 +66,8 @@ func (f *Feed) ToAPIModel() *APIFeed {
 // APIFeed TODO remove in next major.
 type APIFeed struct {
 	*Feed
+
+	Commit  string `json:"commit,omitempty"`       // deprecated, use commit_pipeline.sha instead
+	Message string `json:"message,omitempty"`      // deprecated, use commit_pipeline.message instead
+	Email   string `json:"author_email,omitempty"` // deprecated, use commit_pipeline.author.email instead
 } //	@name	Feed

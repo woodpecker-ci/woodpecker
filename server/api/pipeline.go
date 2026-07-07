@@ -90,19 +90,25 @@ func CreatePipeline(c *gin.Context) {
 
 func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
 	return &model.Pipeline{
-		Event:     event,
-		Commit:    commit.SHA,
-		Branch:    opts.Branch,
-		Timestamp: time.Now().UTC().Unix(),
+		Event: event,
+		Commit: &model.Commit{
+			SHA:      commit.SHA,
+			Message:  "MANUAL PIPELINE @ " + opts.Branch,
+			ForgeURL: commit.ForgeURL,
+			Author: model.CommitAuthor{
+				Name:  user.Login,
+				Email: user.Email,
+			},
+			Timestamp: time.Now().UTC().Unix(),
+		},
+		Branch: opts.Branch,
 
-		Avatar:  user.Avatar,
-		Message: "MANUAL PIPELINE @ " + opts.Branch,
+		Avatar: user.Avatar,
 
 		Ref:                 opts.Branch,
 		AdditionalVariables: opts.Variables,
 
 		Author: user.Login,
-		Email:  user.Email,
 
 		ForgeURL: commit.ForgeURL,
 	}

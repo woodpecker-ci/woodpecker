@@ -28,6 +28,9 @@ func TestPipelineToAPIModel(t *testing.T) {
 		wantMessage      string
 		wantSender       string
 		wantIsPrerelease bool
+		wantCommit       string
+		wantTimestamp    int64
+		wantEmail        string
 	}{
 		{
 			name:        "cron uses cron name as message and sender",
@@ -58,9 +61,25 @@ func TestPipelineToAPIModel(t *testing.T) {
 		},
 		{
 			name:     "push leaves derived fields untouched",
-			pipeline: Pipeline{Event: EventPush, Message: "fix bug"},
+			pipeline: Pipeline{Event: EventPush, Commit: &Commit{Message: "fix bug"}},
 			// message is the stored commit message, not overwritten
 			wantMessage: "fix bug",
+		},
+		{
+			name: "commit substruct is exposed via the deprecated fields",
+			pipeline: Pipeline{
+				Event: EventPush,
+				Commit: &Commit{
+					SHA:       "cafe1234",
+					Message:   "fix bug",
+					Timestamp: 1700000000,
+					Author:    CommitAuthor{Name: "alice", Email: "alice@example.com"},
+				},
+			},
+			wantCommit:    "cafe1234",
+			wantMessage:   "fix bug",
+			wantTimestamp: 1700000000,
+			wantEmail:     "alice@example.com",
 		},
 	}
 
@@ -72,6 +91,9 @@ func TestPipelineToAPIModel(t *testing.T) {
 			assert.Equal(t, tc.wantMessage, ap.Message)
 			assert.Equal(t, tc.wantSender, ap.Sender)
 			assert.Equal(t, tc.wantIsPrerelease, ap.IsPrerelease)
+			assert.Equal(t, tc.wantCommit, ap.Commit)
+			assert.Equal(t, tc.wantTimestamp, ap.Timestamp)
+			assert.Equal(t, tc.wantEmail, ap.Email)
 		})
 	}
 }

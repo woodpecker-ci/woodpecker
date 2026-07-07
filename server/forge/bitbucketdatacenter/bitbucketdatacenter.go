@@ -272,7 +272,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit)
+	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit.SHA)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			// requested directory might not exist
@@ -291,7 +291,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	opts := &bitbucket.FilesListOptions{At: p.Commit}
+	opts := &bitbucket.FilesListOptions{At: p.Commit.SHA}
 	all := make([]*forge_types.FileMeta, 0)
 	for {
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
@@ -335,7 +335,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		DateAdded:   bitbucket.DateTime(time.Unix(pipeline.Started, 0)),
 		Ref:         fmt.Sprintf("refs/heads/%s", pipeline.Branch),
 	}
-	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
+	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit.SHA, status)
 	return err
 }
 
@@ -566,19 +566,23 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, p.Commit)
+	if p.Commit == nil {
+		p.Commit = &model.Commit{}
+	}
+
+	commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, p.Commit.SHA)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read commit: %w", err)
 	}
 
 	// In Bitbucket Data Center, when using annotated tags, the webhook's ToHash is the tag object SHA, not the actual commit SHA.
 	// Update p.Commit so that build statuses are posted to the correct commit SHA.
-	if p.Event == model.EventTag && commit.ID != "" && commit.ID != p.Commit {
-		p.Commit = commit.ID
+	if p.Event == model.EventTag && commit.ID != "" && commit.ID != p.Commit.SHA {
+		p.Commit.SHA = commit.ID
 		p.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, commit.ID)
 	}
 
-	p.Message = commit.Message
+	p.Commit.Message = commit.Message
 
 	opts := &bitbucket.CompareChangesOptions{}
 	if currCommit != "" {

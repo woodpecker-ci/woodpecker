@@ -215,20 +215,24 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 
 	lastCommit := obj.LastCommit
 
-	pipeline.Message = lastCommit.Message
-	pipeline.Commit = lastCommit.ID
+	pipeline.Commit = &model.Commit{
+		SHA:      lastCommit.ID,
+		Message:  lastCommit.Message,
+		ForgeURL: obj.URL,
+		Author: model.CommitAuthor{
+			Name:  hook.User.Username,
+			Email: lastCommit.Author.Email,
+		},
+	}
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
 	pipeline.Refspec = fmt.Sprintf("%s:%s", obj.SourceBranch, obj.TargetBranch)
 
-	author := lastCommit.Author
-
 	pipeline.Author = hook.User.Username
-	pipeline.Email = author.Email
 
-	if len(pipeline.Email) != 0 {
-		pipeline.Avatar = getUserAvatar(pipeline.Email)
+	if len(pipeline.Commit.Author.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Commit.Author.Email)
 	}
 
 	pipeline.Title = obj.Title
@@ -276,7 +280,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	}
 
 	pipeline.Event = model.EventPush
-	pipeline.Commit = hook.After
+	pipeline.Commit = &model.Commit{SHA: hook.After}
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
 
@@ -286,11 +290,14 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Email = cm.Author.Email
-			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
-			if len(pipeline.Email) != 0 {
-				pipeline.Avatar = getUserAvatar(pipeline.Email)
+			pipeline.Commit.Message = cm.Message
+			pipeline.Commit.Timestamp = cm.Timestamp.Unix()
+			pipeline.Commit.Author = model.CommitAuthor{
+				Name:  hook.UserUsername,
+				Email: cm.Author.Email,
+			}
+			if len(pipeline.Commit.Author.Email) != 0 {
+				pipeline.Avatar = getUserAvatar(pipeline.Commit.Author.Email)
 			}
 		}
 
@@ -336,18 +343,22 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 
 	pipeline.Event = model.EventTag
 	pipeline.TagTitle = strings.TrimPrefix(strings.TrimPrefix(hook.Ref, "refs/heads/"), "refs/tags/")
-	pipeline.Commit = hook.After
+	pipeline.Commit = &model.Commit{SHA: hook.After}
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
 	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, pipeline.TagTitle)
+	pipeline.Commit.ForgeURL = pipeline.ForgeURL
 
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Email = cm.Author.Email
-			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
-			if len(pipeline.Email) != 0 {
-				pipeline.Avatar = getUserAvatar(pipeline.Email)
+			pipeline.Commit.Message = cm.Message
+			pipeline.Commit.Timestamp = cm.Timestamp.Unix()
+			pipeline.Commit.Author = model.CommitAuthor{
+				Name:  hook.UserUsername,
+				Email: cm.Author.Email,
+			}
+			if len(pipeline.Commit.Author.Email) != 0 {
+				pipeline.Avatar = getUserAvatar(pipeline.Commit.Author.Email)
 			}
 			break
 		}
@@ -391,15 +402,21 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 	}
 
 	pipeline := &model.Pipeline{
-		Event:    model.EventRelease,
-		Commit:   hook.Commit.ID,
+		Event: model.EventRelease,
+		Commit: &model.Commit{
+			SHA:      hook.Commit.ID,
+			ForgeURL: hook.URL,
+			Author: model.CommitAuthor{
+				Name:  hook.Commit.Author.Name,
+				Email: hook.Commit.Author.Email,
+			},
+		},
 		ForgeURL: hook.URL,
 		Sender:   hook.Commit.Author.Name,
 		// Using the commit author here as Gitlab does not send the hook user.
 		// This is not an issue because releases can be created by users with
 		// push permissions only anyways.
 		Author: hook.Commit.Author.Name,
-		Email:  hook.Commit.Author.Email,
 
 		Release: &model.Release{Title: hook.Name},
 
@@ -408,8 +425,8 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		Ref:      "refs/tags/" + hook.Tag,
 		TagTitle: hook.Tag,
 	}
-	if len(pipeline.Email) != 0 {
-		pipeline.Avatar = getUserAvatar(pipeline.Email)
+	if len(pipeline.Commit.Author.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Commit.Author.Email)
 	}
 
 	return repo, pipeline, nil

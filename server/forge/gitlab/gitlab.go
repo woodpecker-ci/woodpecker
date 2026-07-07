@@ -366,7 +366,11 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	if err != nil {
 		return nil, err
 	}
-	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
+	commitRef := ""
+	if pipeline.Commit != nil {
+		commitRef = pipeline.Commit.SHA
+	}
+	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &commitRef}, gitlab.WithContext(ctx))
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{fileName}})
 	}
@@ -386,10 +390,14 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		return nil, err
 	}
 
+	commitRef := ""
+	if pipeline.Commit != nil {
+		commitRef = pipeline.Commit.SHA
+	}
 	opts := &gitlab.ListTreeOptions{
 		ListOptions: gitlab.ListOptions{PerPage: defaultPerPage},
 		Path:        &path,
-		Ref:         &pipeline.Commit,
+		Ref:         &commitRef,
 		Recursive:   gitlab.Ptr(false),
 	}
 
@@ -437,7 +445,7 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
+	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit.SHA, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(workflow.State),
 		Description: gitlab.Ptr(common.GetPipelineStatusDescription(workflow.State)),
 		TargetURL:   gitlab.Ptr(common.GetPipelineStatusURL(repo, pipeline, workflow)),
@@ -653,7 +661,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
 		repo, pipeline, cmID, err := convertTagHook(event)
-		if err != nil || pipeline.Message != "" {
+		if err != nil || (pipeline.Commit != nil && pipeline.Commit.Message != "") {
 			return repo, pipeline, err
 		}
 
@@ -906,11 +914,15 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 	}
 
 	pipeline.Author = cm.AuthorName
-	pipeline.Email = cm.AuthorEmail
-	pipeline.Message = cm.Message
-	pipeline.Timestamp = cm.CommittedDate.Unix()
-	if len(pipeline.Email) != 0 {
-		pipeline.Avatar = getUserAvatar(pipeline.Email)
+	if pipeline.Commit == nil {
+		pipeline.Commit = &model.Commit{}
+	}
+	pipeline.Commit.Message = cm.Message
+	pipeline.Commit.Timestamp = cm.CommittedDate.Unix()
+	pipeline.Commit.Author.Name = cm.AuthorName
+	pipeline.Commit.Author.Email = cm.AuthorEmail
+	if len(pipeline.Commit.Author.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Commit.Author.Email)
 	}
 
 	return pipeline, nil

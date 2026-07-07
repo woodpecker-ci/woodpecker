@@ -277,7 +277,7 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
 	}
@@ -293,7 +293,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 	}
 
 	// List files in repository
-	contents, resp, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
+	contents, resp, err := client.ListContents(r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -328,7 +328,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 	_, _, err = client.CreateStatus(
 		repo.Owner,
 		repo.Name,
-		pipeline.Commit,
+		pipeline.Commit.SHA,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State),
 			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
@@ -516,12 +516,15 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			if pipeline.Commit == "" {
+			if pipeline.Commit == nil || pipeline.Commit.SHA == "" {
 				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
 				if err != nil {
 					return nil, nil, err
 				}
-				pipeline.Commit = sha
+				if pipeline.Commit == nil {
+					pipeline.Commit = &model.Commit{}
+				}
+				pipeline.Commit.SHA = sha
 			}
 
 		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:

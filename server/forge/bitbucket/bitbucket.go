@@ -242,7 +242,7 @@ func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 
 // File fetches the file from the Bitbucket repository and returns its contents.
 func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
-	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, f)
+	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit.SHA, f)
 	if err != nil {
 		var rspErr internal.Error
 		if ok := errors.As(err, &rspErr); ok && rspErr.Status == http.StatusNotFound {
@@ -261,7 +261,7 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	repoPathFiles := []*forge_types.FileMeta{}
 	client := c.newClient(ctx, u)
 	for {
-		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
+		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit.SHA, f, page)
 		if err != nil {
 			var rspErr internal.Error
 			if ok := errors.As(err, &rspErr); ok && rspErr.Status == http.StatusNotFound {
@@ -277,7 +277,7 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 				Name: filename,
 			}
 			if file.Type == "commit_file" {
-				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit.SHA, file.Path)
 				if err != nil {
 					return nil, err
 				}
@@ -322,7 +322,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		status.Refname = pipeline.Branch
 	}
 
-	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
+	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit.SHA, &status)
 }
 
 // Activate activates the repository by registering repository push hooks with
@@ -454,7 +454,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	switch pl.Event {
 	case model.EventPush:
 		// List only the latest push changes
-		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
+		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit.SHA)
 		if err != nil {
 			return nil, nil, err
 		}

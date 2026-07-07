@@ -38,7 +38,7 @@ type Pipeline struct {
 	Finished             int64                   `json:"finished"                xorm:"finished"`
 	DeployTo             string                  `json:"deploy_to"               xorm:"deploy"`
 	DeployTask           string                  `json:"deploy_task"             xorm:"deploy_task"`
-	Commit               string                  `json:"commit"                  xorm:"commit"`
+	Commit               *Commit                 `json:"commit_pipeline"         xorm:"json 'commit'"` // TODO change json to 'commit' in next major
 	Branch               string                  `json:"branch"                  xorm:"branch"`
 	RerunCount           int64                   `json:"rerun_count"             xorm:"rerun_count"`
 	Ref                  string                  `json:"ref"                     xorm:"ref"`
@@ -63,11 +63,8 @@ type Pipeline struct {
 	Release  *Release `json:"release,omitempty"       xorm:"json 'release'"`
 	TagTitle string   `json:"tag_title,omitempty"     xorm:"tag_title"`
 	// // Deprecated
-	Title     string `json:"title"                   xorm:"title"`
-	Message   string `json:"message"                 xorm:"TEXT 'message'"`
-	Timestamp int64  `json:"timestamp"               xorm:"'timestamp'"`
-	Sender    string `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Email     string `json:"author_email"            xorm:"varchar(500) email"`
+	Title  string `json:"title"  xorm:"title"`
+	Sender string `json:"sender" xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
 }
 
 // APIPipeline TODO remove deprecated properties in next major.
@@ -75,6 +72,11 @@ type APIPipeline struct {
 	*Pipeline
 
 	IsPrerelease bool `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
+
+	Commit    string `json:"commit"`       // deprecated, use commit_pipeline.sha instead
+	Message   string `json:"message"`      // deprecated, use commit_pipeline.message instead
+	Timestamp int64  `json:"timestamp"`    // deprecated, use commit_pipeline.timestamp instead
+	Email     string `json:"author_email"` // deprecated, use commit_pipeline.author.email instead
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
@@ -85,6 +87,13 @@ func (Pipeline) TableName() string {
 func (p *Pipeline) ToAPIModel() *APIPipeline {
 	ap := &APIPipeline{
 		Pipeline: p,
+	}
+
+	if p.Commit != nil {
+		ap.Commit = p.Commit.SHA
+		ap.Message = p.Commit.Message
+		ap.Timestamp = p.Commit.Timestamp
+		ap.Email = p.Commit.Author.Email
 	}
 
 	switch p.Event {
