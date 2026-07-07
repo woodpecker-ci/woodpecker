@@ -74,15 +74,15 @@ func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
 	org := session.Org(c)
 
+	if user == nil {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
+		return
+	}
+
 	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from user")
 		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	if user == nil {
-		c.JSON(http.StatusOK, &model.OrgPerm{})
 		return
 	}
 
