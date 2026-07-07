@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
