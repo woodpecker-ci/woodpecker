@@ -25,10 +25,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 )
 
-const (
-	gravatarBase = "https://www.gravatar.com/avatar"
-)
-
 // newClient is a helper function that returns a new GitHub
 // client using the provided OAuth token.
 func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error) {

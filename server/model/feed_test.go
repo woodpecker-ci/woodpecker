@@ -29,18 +29,18 @@ func TestFeedToAPIModel(t *testing.T) {
 	}{
 		{
 			name:        "tag uses tag title in message",
-			feed:        Feed{Event: EventTag, TagTitle: "v1.0"},
+			feed:        Feed{Event: string(EventTag), TagTitle: "v1.0"},
 			wantMessage: "created tag v1.0",
 		},
 		{
 			name:        "release without release object falls back to tag title",
-			feed:        Feed{Event: EventRelease, TagTitle: "v3.0"},
+			feed:        Feed{Event: string(EventRelease), TagTitle: "v3.0"},
 			wantMessage: "created release v3.0",
 		},
 		{
 			name: "release with release object uses release title",
 			feed: Feed{
-				Event:    EventRelease,
+				Event:    string(EventRelease),
 				TagTitle: "v3.0",
 				Release:  &Release{Title: "My Release"},
 			},
@@ -49,9 +49,9 @@ func TestFeedToAPIModel(t *testing.T) {
 		},
 		{
 			name:        "push leaves derived fields untouched",
-			feed:        Feed{Event: EventPush, Title: "some commit"},
+			feed:        Feed{Event: string(EventPush), Commit: &Commit{Message: "some commit"}},
 			wantTitle:   "some commit",
-			wantMessage: "",
+			wantMessage: "some commit",
 		},
 	}
 

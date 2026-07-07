@@ -46,6 +46,7 @@ var fakePipeline = &model.Pipeline{
 	ID:     2,
 	Number: 2,
 	Status: model.StatusSuccess,
+	Commit: &model.Commit{},
 }
 
 func TestGetPipelines(t *testing.T) {
@@ -178,6 +179,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		ID:     1,
 		Number: 1,
 		Status: model.StatusFailure,
+		Commit: &model.Commit{},
 	}
 
 	fakeRepo := &model.Repo{ID: 1}
