@@ -26,94 +26,89 @@ import (
 )
 
 type ServerMetadata struct {
-	forge            metadata.ServerForge
-	repo             *model.Repo
-	pipeline         *model.Pipeline
-	previousPipeline *model.Pipeline
-	sysURL           string
+	// base holds every metadata field that is identical for all workflows of
+	// a pipeline. It is computed once at construction time; GetWorkflowMetadata
+	// only stamps the per-workflow fields onto a copy of it.
+	base metadata.Metadata
 }
 
 func NewServerMetadata(forge metadata.ServerForge, repo *model.Repo, pipeline, previousPipeline *model.Pipeline, sysURL string) *ServerMetadata {
+	host := sysURL
+	uri, err := url.Parse(sysURL)
+	if err == nil {
+		host = uri.Host
+	}
+
+	fForge := metadata.Forge{}
+	if forge != nil {
+		fForge = metadata.Forge{
+			Type: forge.Name(),
+			URL:  forge.URL(),
+		}
+	}
+
+	fRepo := metadata.Repo{}
+	if repo != nil {
+		fRepo = metadata.Repo{
+			ID:          repo.ID,
+			Name:        repo.Name,
+			Owner:       repo.Owner,
+			OrgID:       repo.OrgID,
+			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),
+			ForgeURL:    repo.ForgeURL,
+			CloneURL:    repo.Clone,
+			CloneSSHURL: repo.CloneSSH,
+			Private:     repo.IsSCMPrivate,
+			Branch:      repo.Branch,
+			Trusted: metadata.TrustedConfiguration{
+				Network:  repo.Trusted.Network,
+				Volumes:  repo.Trusted.Volumes,
+				Security: repo.Trusted.Security,
+			},
+		}
+
+		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {
+			if fRepo.Name == "" && repo.FullName != "" {
+				fRepo.Name = repo.FullName[idx+1:]
+			}
+			if fRepo.Owner == "" && repo.FullName != "" {
+				fRepo.Owner = repo.FullName[:idx]
+			}
+		}
+	}
+
 	return &ServerMetadata{
-		forge:            forge,
-		repo:             repo,
-		pipeline:         pipeline,
-		previousPipeline: previousPipeline,
-		sysURL:           sysURL,
+		base: metadata.Metadata{
+			Repo: fRepo,
+			Curr: metadataPipelineFromModelPipeline(pipeline, true),
+			Prev: metadataPipelineFromModelPipeline(previousPipeline, false),
+			Step: metadata.Step{},
+			Sys: metadata.System{
+				Name:     "woodpecker",
+				URL:      sysURL,
+				Host:     host,
+				Platform: "", // will be set by pipeline platform option or by agent
+				Version:  version.Version,
+			},
+			Forge: fForge,
+		},
 	}
 }
 
 // GetWorkflowMetadata return the metadata from a pipeline will run with.
 // TODO: builder should depend on metadata not the other way around
 func (s *ServerMetadata) GetWorkflowMetadata(workflow *builder.Workflow) metadata.Metadata {
-	host := s.sysURL
-	uri, err := url.Parse(s.sysURL)
-	if err == nil {
-		host = uri.Host
-	}
+	m := s.base
 
-	fForge := metadata.Forge{}
-	if s.forge != nil {
-		fForge = metadata.Forge{
-			Type: s.forge.Name(),
-			URL:  s.forge.URL(),
-		}
-	}
-
-	fRepo := metadata.Repo{}
-	if s.repo != nil {
-		fRepo = metadata.Repo{
-			ID:          s.repo.ID,
-			Name:        s.repo.Name,
-			Owner:       s.repo.Owner,
-			OrgID:       s.repo.OrgID,
-			RemoteID:    fmt.Sprint(s.repo.ForgeRemoteID),
-			ForgeURL:    s.repo.ForgeURL,
-			CloneURL:    s.repo.Clone,
-			CloneSSHURL: s.repo.CloneSSH,
-			Private:     s.repo.IsSCMPrivate,
-			Branch:      s.repo.Branch,
-			Trusted: metadata.TrustedConfiguration{
-				Network:  s.repo.Trusted.Network,
-				Volumes:  s.repo.Trusted.Volumes,
-				Security: s.repo.Trusted.Security,
-			},
-		}
-
-		if idx := strings.LastIndex(s.repo.FullName, "/"); idx != -1 {
-			if fRepo.Name == "" && s.repo.FullName != "" {
-				fRepo.Name = s.repo.FullName[idx+1:]
-			}
-			if fRepo.Owner == "" && s.repo.FullName != "" {
-				fRepo.Owner = s.repo.FullName[:idx]
-			}
-		}
-	}
-
-	fWorkflow := metadata.Workflow{}
 	if workflow != nil {
-		fWorkflow = metadata.Workflow{
+		m.Workflow = metadata.Workflow{
 			Name:   workflow.Name,
 			Number: workflow.PID,
 			Matrix: workflow.Environ,
 		}
 	}
 
-	return metadata.Metadata{
-		Repo:     fRepo,
-		Curr:     metadataPipelineFromModelPipeline(s.pipeline, true),
-		Prev:     metadataPipelineFromModelPipeline(s.previousPipeline, false),
-		Workflow: fWorkflow,
-		Step:     metadata.Step{},
-		Sys: metadata.System{
-			Name:     "woodpecker",
-			URL:      s.sysURL,
-			Host:     host,
-			Platform: "", // will be set by pipeline platform option or by agent
-			Version:  version.Version,
-		},
-		Forge: fForge,
-	}
+	return m
 }
 
 func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent bool) metadata.Pipeline {

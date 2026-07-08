@@ -186,3 +186,33 @@ func TestGetWorkflowMetadata(t *testing.T) {
 		})
 	}
 }
+
+func TestGetWorkflowMetadataBuildsBaseOnce(t *testing.T) {
+	forge := mocks.NewMockForge(t)
+	// base metadata must be derived exactly once at construction time,
+	// no matter how many workflows request their metadata afterwards.
+	forge.On("Name").Return("gitea").Once()
+	forge.On("URL").Return("https://gitea.com").Once()
+
+	repo := &model.Repo{FullName: "testUser/testRepo", Branch: "main"}
+	pipe := &model.Pipeline{Number: 7}
+
+	sm := NewServerMetadata(forge, repo, pipe, nil, "https://example.com")
+
+	first := sm.GetWorkflowMetadata(&builder.Workflow{Name: "one", PID: 1, Environ: map[string]string{"K": "a"}})
+	second := sm.GetWorkflowMetadata(&builder.Workflow{Name: "two", PID: 2, Environ: map[string]string{"K": "b"}})
+	third := sm.GetWorkflowMetadata(nil)
+
+	// per-workflow fields differ and must not leak between calls
+	assert.Equal(t, metadata.Workflow{Name: "one", Number: 1, Matrix: map[string]string{"K": "a"}}, first.Workflow)
+	assert.Equal(t, metadata.Workflow{Name: "two", Number: 2, Matrix: map[string]string{"K": "b"}}, second.Workflow)
+	assert.Equal(t, metadata.Workflow{}, third.Workflow)
+
+	// shared base fields identical across calls
+	for _, m := range []metadata.Metadata{first, second, third} {
+		assert.Equal(t, "gitea", m.Forge.Type)
+		assert.Equal(t, "testUser/testRepo", m.Repo.Owner+"/"+m.Repo.Name)
+		assert.EqualValues(t, 7, m.Curr.Number)
+		assert.Equal(t, "example.com", m.Sys.Host)
+	}
+}
