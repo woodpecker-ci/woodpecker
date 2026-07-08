@@ -35,17 +35,22 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+// pipelineCredentials bundles everything the compiler embeds into the backend
+// config that is secret or short-lived: forge netrc credentials, pipeline
+// secrets and registry credentials.
+type pipelineCredentials struct {
+	netrc      *model.Netrc
+	secrets    []compiler.Secret
+	registries []compiler.Registry
+}
+
+// collectCredentials gathers the netrc, secrets and registry credentials a
+// pipeline compiles with.
+func collectCredentials(ctx context.Context, forge forge.Forge, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*pipelineCredentials, error) {
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
 		netrc = &model.Netrc{}
-	}
-
-	// get the previous pipeline so that we can send status change notifications
-	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
@@ -82,6 +87,25 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			Username: reg.Username,
 			Password: reg.Password,
 		})
+	}
+
+	return &pipelineCredentials{
+		netrc:      netrc,
+		secrets:    secrets,
+		registries: registries,
+	}, nil
+}
+
+func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+	credentials, err := collectCredentials(ctx, forge, currentPipeline, user, repo)
+	if err != nil {
+		return nil, err
+	}
+
+	// get the previous pipeline so that we can send status change notifications
+	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
 	if envs == nil {
@@ -125,8 +149,8 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
 		CompilerOptions: []compiler.Option{
 			compiler.WithLocal(false),
-			compiler.WithRegistry(registries...),
-			compiler.WithSecret(secrets...),
+			compiler.WithRegistry(credentials.registries...),
+			compiler.WithSecret(credentials.secrets...),
 			compiler.WithProxy(compiler.ProxyOptions{
 				NoProxy:    server.Config.Pipeline.Proxy.No,
 				HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
@@ -136,9 +160,9 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			compiler.WithNetworks(server.Config.Pipeline.Networks...),
 			compiler.WithOption(
 				compiler.WithNetrc(
-					netrc.Login,
-					netrc.Password,
-					netrc.Machine,
+					credentials.netrc.Login,
+					credentials.netrc.Password,
+					credentials.netrc.Machine,
 				),
 				repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 			),
