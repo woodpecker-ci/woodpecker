@@ -67,7 +67,7 @@ func (p *impl) Pause() {
 
 // TODO: markSkipped is a callback helper that is only needed as we use the rpc.Done to mark skipped workflows as done
 // this is a hack for another refactor later.
-func (p *impl) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*rpc.Workflow, error) {
+func (p *impl) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*model.Task, error) {
 	filter := createFilterFunc(agentFilter)
 
 	for {
@@ -78,9 +78,7 @@ func (p *impl) Poll(c context.Context, agentID int64, agentFilter rpc.Filter, ma
 		}
 
 		if task.ShouldRun() {
-			workflow := new(rpc.Workflow)
-			err = json.Unmarshal(task.Data, workflow)
-			return workflow, err
+			return task, nil
 		}
 
 		// task should not run, so let the caller mark it as done

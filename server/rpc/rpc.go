@@ -18,6 +18,7 @@ package rpc
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
@@ -83,7 +84,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
+	task, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
 		// a skipped workflow is finalized through the regular Done flow; it
 		// was never initialized by an agent, so lock it to this agent first
 		// to satisfy the workflow ownership check.
@@ -92,11 +93,16 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		}
 		return s.Done(c, taskID, rpc.WorkflowState{})
 	})
-	if err != nil || rpcWorkflow == nil {
+	if err != nil || task == nil {
 		return nil, err
 	}
 
-	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
+	if err := s.lockAgentToWorkflow(c, agent, task.ID); err != nil {
+		return nil, err
+	}
+
+	rpcWorkflow := new(rpc.Workflow)
+	if err := json.Unmarshal(task.Data, rpcWorkflow); err != nil {
 		return nil, err
 	}
 
