@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types" //nolint:depguard // constructing builder.Item.Config in tests
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -99,4 +100,23 @@ func TestQueuePipelineCreated(t *testing.T) {
 		task := runOnce(t, &model.Pipeline{ID: 42})
 		assert.GreaterOrEqual(t, task.Created, before)
 	})
+}
+
+func TestPipelineTasksQueueNoPayload(t *testing.T) {
+	repo := &model.Repo{ID: 1}
+	pipe := &model.Pipeline{ID: 2, Created: 1234}
+	items := []*builder.Item{{
+		Workflow: &builder.Workflow{ID: 3, PID: 1, Name: "wf"},
+		Config:   &backend_types.Config{},
+	}}
+
+	tasks, err := pipelineTasks(repo, pipe, items)
+	assert.NoError(t, err)
+	assert.Len(t, tasks, 1)
+
+	// the queue must not transport the compiled config: it would freeze
+	// secrets and oauth tokens at creation time. The payload is compiled at
+	// agent fetch time from the task ID alone.
+	assert.Empty(t, tasks[0].Data)
+	assert.Equal(t, "3", tasks[0].ID)
 }
