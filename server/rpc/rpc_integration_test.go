@@ -37,6 +37,7 @@ import (
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
@@ -1100,5 +1101,159 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		c, err := metric.FailurePipelineStepInfoCount.GetMetricWithLabelValues(workflow.Name, defaultRepo().FullName, step.Name, "step")
 		require.NoError(t, err)
 		assert.Zero(t, testutil.ToFloat64(c))
+	})
+}
+
+func TestRPCNextDeferredCompilation(t *testing.T) {
+	deferredTask := func() *model.Task {
+		return &model.Task{
+			ID:         "30",
+			PipelineID: 20,
+			RepoID:     10,
+			// no Data: payload is compiled at fetch time
+		}
+	}
+
+	t.Run("compiles payload at fetch time", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
+
+		agent := defaultAgent()
+		workflow := defaultWorkflow(model.StatusPending)
+
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockQueue.On("Poll", mock.Anything, int64(1), mock.Anything).Return(deferredTask(), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, mockQueue)
+		compiled := &rpc.Workflow{ID: "30"}
+		calls := 0
+		rpcInst.compileWorkflow = func(_ context.Context, _ store.Store, workflowID int64) (*rpc.Workflow, error) {
+			calls++
+			assert.EqualValues(t, 30, workflowID)
+			return compiled, nil
+		}
+
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+		got, err := rpcInst.Next(ctx, rpc.Filter{Labels: map[string]string{}})
+		require.NoError(t, err)
+		assert.Same(t, compiled, got)
+		assert.Equal(t, 1, calls)
+	})
+
+	t.Run("retries a failed compilation once", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
+
+		agent := defaultAgent()
+		workflow := defaultWorkflow(model.StatusPending)
+
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockQueue.On("Poll", mock.Anything, int64(1), mock.Anything).Return(deferredTask(), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, mockQueue)
+		compiled := &rpc.Workflow{ID: "30"}
+		calls := 0
+		rpcInst.compileWorkflow = func(_ context.Context, _ store.Store, _ int64) (*rpc.Workflow, error) {
+			calls++
+			if calls == 1 {
+				return nil, errors.New("transient failure")
+			}
+			return compiled, nil
+		}
+
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+		got, err := rpcInst.Next(ctx, rpc.Filter{Labels: map[string]string{}})
+		require.NoError(t, err)
+		assert.Same(t, compiled, got)
+		assert.Equal(t, 2, calls)
+	})
+
+	t.Run("persistent compile failure finalizes the workflow as failed", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
+		mockLogStore := log_mocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		agent := defaultAgent()
+		repo := defaultRepo()
+		pipeline := defaultPipeline(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusPending)
+		workflow.Children = []*model.Step{}
+
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockQueue.On("Poll", mock.Anything, int64(1), mock.Anything).Return(deferredTask(), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		// the regular Done flow finalizes the workflow
+		mockStore.On("StepListFromWorkflowFind", mock.Anything).Return([]*model.Step{}, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{}, nil)
+		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
+		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+		mockQueue.On("Error", mock.Anything, "30", mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, mockQueue)
+		calls := 0
+		rpcInst.compileWorkflow = func(_ context.Context, _ store.Store, _ int64) (*rpc.Workflow, error) {
+			calls++
+			return nil, errors.New("secret service down")
+		}
+
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+		got, err := rpcInst.Next(ctx, rpc.Filter{Labels: map[string]string{}})
+		require.NoError(t, err)
+		assert.Nil(t, got)
+		assert.Equal(t, 2, calls)
+
+		// the workflow was marked as failed with the compile error attached
+		require.NotEmpty(t, mockStore.Calls)
+		foundError := false
+		for _, call := range mockStore.Calls {
+			if call.Method == "WorkflowUpdate" {
+				if wf, ok := call.Arguments.Get(0).(*model.Workflow); ok && wf.Error != "" {
+					foundError = true
+					assert.Contains(t, wf.Error, "secret service down")
+					assert.Equal(t, model.StatusFailure, wf.State)
+				}
+			}
+		}
+		assert.True(t, foundError, "expected a WorkflowUpdate call carrying the compile error")
+	})
+
+	t.Run("legacy task data is used as-is", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
+
+		agent := defaultAgent()
+		workflow := defaultWorkflow(model.StatusPending)
+
+		legacy := deferredTask()
+		legacy.Data = []byte(`{"id":"30","timeout":13}`)
+
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockQueue.On("Poll", mock.Anything, int64(1), mock.Anything).Return(legacy, nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, mockQueue)
+		rpcInst.compileWorkflow = func(_ context.Context, _ store.Store, _ int64) (*rpc.Workflow, error) {
+			t.Fatal("legacy tasks must not be compiled")
+			return nil, nil
+		}
+
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+		got, err := rpcInst.Next(ctx, rpc.Filter{Labels: map[string]string{}})
+		require.NoError(t, err)
+		require.NotNil(t, got)
+		assert.Equal(t, "30", got.ID)
+		assert.EqualValues(t, 13, got.Timeout)
 	})
 }
