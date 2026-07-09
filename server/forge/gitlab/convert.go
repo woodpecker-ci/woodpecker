@@ -179,6 +179,8 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 		return 0, 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
 	case source == nil:
 		return 0, 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
+	case hook.User == nil:
+		return 0, 0, nil, nil, fmt.Errorf("user key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {
