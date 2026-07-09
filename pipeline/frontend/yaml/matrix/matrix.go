@@ -73,6 +73,11 @@ func calc(matrix Matrix) []Axis {
 	var perm int
 	var tags []string
 	for k, v := range matrix {
+		// an axis without values contributes no permutations and would
+		// cause a division by zero below
+		if len(v) == 0 {
+			continue
+		}
 		perm *= len(v)
 		if perm == 0 {
 			perm = len(v)
