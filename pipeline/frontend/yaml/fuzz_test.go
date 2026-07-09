@@ -19,9 +19,8 @@ import (
 )
 
 // FuzzParseBytes exercises the whole workflow yaml parsing including all
-// custom UnmarshalYAML implementations (constraints, container lists,
-// string-or-slice types, ...) with untrusted input. The property checked is
-// that parsing never panics.
+// custom UnmarshalYAML implementations (constraints, container lists, string-or-slice types and so on)
+// with untrusted input. The property checked is that parsing never panics.
 func FuzzParseBytes(f *testing.F) {
 	f.Add([]byte(sampleYaml))
 	f.Add([]byte(simpleYamlAnchors))

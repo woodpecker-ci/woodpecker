@@ -21,8 +21,7 @@ import (
 )
 
 // FuzzParamsToEnv drives the reflection and recursion heavy plugin settings
-// conversion (incl. from_secret injection) with untrusted structures decoded
-// from yaml and checks that it never panics.
+// conversion with untrusted structures with secrets decoded from yaml and checks that it never panics.
 func FuzzParamsToEnv(f *testing.F) {
 	f.Add("string: stringz\nint: 1\nfloat: 1.2\nbool: true")
 	f.Add("slice: [1, 2, 3]\nmap: { hello: world }")
