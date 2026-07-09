@@ -16,9 +16,11 @@ package pipeline
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -42,16 +44,21 @@ func TestUpdateStepStatus(t *testing.T) {
 		t.Run("TransitionToRunning", func(t *testing.T) {
 			t.Parallel()
 
-			t.Run("WithStartTime", func(t *testing.T) {
+			t.Run("IgnoresAgentStartTime", func(t *testing.T) {
 				t.Parallel()
+				before := time.Now().Unix()
 				step := &model.Step{State: model.StatusPending}
+				// The agent reports a start time, but the server must ignore it
+				// and stamp its own clock so Started/Finished share one time
+				// source (#6808).
 				state := rpc.StepState{Started: 42, Finished: 0}
 
 				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusRunning, step.State)
-				assert.Equal(t, int64(42), step.Started)
+				assert.NotEqual(t, int64(42), step.Started)
+				assert.GreaterOrEqual(t, step.Started, before)
 				assert.Equal(t, int64(0), step.Finished)
 			})
 
@@ -71,8 +78,9 @@ func TestUpdateStepStatus(t *testing.T) {
 		t.Run("DirectToSuccess", func(t *testing.T) {
 			t.Parallel()
 
-			t.Run("WithFinishTime", func(t *testing.T) {
+			t.Run("IgnoresAgentTimes", func(t *testing.T) {
 				t.Parallel()
+				before := time.Now().Unix()
 				step := &model.Step{State: model.StatusPending}
 				state := rpc.StepState{Started: 42, Exited: true, Finished: 100, ExitCode: 0, Error: ""}
 
@@ -80,8 +88,10 @@ func TestUpdateStepStatus(t *testing.T) {
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusSuccess, step.State)
-				assert.Equal(t, int64(42), step.Started)
-				assert.Equal(t, int64(100), step.Finished)
+				assert.NotEqual(t, int64(42), step.Started)
+				assert.NotEqual(t, int64(100), step.Finished)
+				assert.GreaterOrEqual(t, step.Started, before)
+				assert.GreaterOrEqual(t, step.Finished, step.Started)
 			})
 
 			t.Run("WithoutFinishTime", func(t *testing.T) {
@@ -121,16 +131,20 @@ func TestUpdateStepStatus(t *testing.T) {
 		t.Run("ToSuccess", func(t *testing.T) {
 			t.Parallel()
 
-			t.Run("WithFinishTime", func(t *testing.T) {
+			t.Run("UsesServerFinishTime", func(t *testing.T) {
 				t.Parallel()
+				before := time.Now().Unix()
 				step := &model.Step{State: model.StatusRunning, Started: 42}
+				// Agent-reported finish time is ignored; the server stamps its
+				// own clock instead (#6808).
 				state := rpc.StepState{Exited: true, Finished: 100, ExitCode: 0, Error: ""}
 
 				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusSuccess, step.State)
-				assert.Equal(t, int64(100), step.Finished)
+				assert.NotEqual(t, int64(100), step.Finished)
+				assert.GreaterOrEqual(t, step.Finished, before)
 			})
 
 			t.Run("WithoutFinishTime", func(t *testing.T) {
@@ -152,13 +166,15 @@ func TestUpdateStepStatus(t *testing.T) {
 			t.Run("WithExitCode137", func(t *testing.T) {
 				t.Parallel()
 				step := &model.Step{State: model.StatusRunning, Started: 42}
+				before := time.Now().Unix()
 				state := rpc.StepState{Exited: true, Finished: 34, ExitCode: pipeline.ExitCodeKilled, Error: "an error"}
 
 				err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
 				assert.NoError(t, err)
 				assert.Equal(t, model.StatusFailure, step.State)
-				assert.Equal(t, int64(34), step.Finished)
+				assert.NotEqual(t, int64(34), step.Finished)
+				assert.GreaterOrEqual(t, step.Finished, before)
 				assert.Equal(t, pipeline.ExitCodeKilled, step.ExitCode)
 			})
 
@@ -205,6 +221,7 @@ func TestUpdateStepStatus(t *testing.T) {
 
 		t.Run("WithExitedAndFinishTime", func(t *testing.T) {
 			t.Parallel()
+			before := time.Now().Unix()
 			step := &model.Step{State: model.StatusRunning, Started: 42}
 			state := rpc.StepState{Canceled: true, Exited: true, Finished: 100, ExitCode: 1, Error: "canceled"}
 
@@ -212,7 +229,8 @@ func TestUpdateStepStatus(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, model.StatusKilled, step.State)
-			assert.Equal(t, int64(100), step.Finished)
+			assert.NotEqual(t, int64(100), step.Finished)
+			assert.GreaterOrEqual(t, step.Finished, before)
 			assert.Equal(t, 1, step.ExitCode)
 			assert.Equal(t, "canceled", step.Error)
 		})
@@ -282,6 +300,35 @@ func TestUpdateStepStatus(t *testing.T) {
 		assert.Contains(t, err.Error(), "does not expect rpc state updates")
 		assert.Equal(t, model.StatusKilled, step.State)
 	})
+}
+
+// TestStepStatusSkewedAgentClock reproduces #6808: a step is started (server
+// records its own clock) and then finished by an agent whose clock is skewed
+// far into the past. Before the fix the finish time was copied from the agent
+// clock, so step.Finished < step.Started and the reported duration was
+// negative. With the server-authoritative fix both timestamps come from the
+// server clock, so the duration is always non-negative.
+func TestStepStatusSkewedAgentClock(t *testing.T) {
+	t.Parallel()
+
+	store := mockStoreStep(t)
+	step := &model.Step{State: model.StatusPending}
+
+	// Phase 1 — "started" trace: the agent sends Started=0, so the server
+	// stamps its own clock.
+	require.NoError(t, UpdateStepStatus(t.Context(), store, step, rpc.StepState{Started: 0, Finished: 0}))
+	require.Equal(t, model.StatusRunning, step.State)
+	require.Greater(t, step.Started, int64(0))
+
+	// Phase 2 — "finished" trace with a badly skewed agent clock (far in the
+	// past relative to the server). The old behaviour would set
+	// step.Finished = 1000 < step.Started -> negative duration.
+	const skewedAgentFinish = int64(1000)
+	require.NoError(t, UpdateStepStatus(t.Context(), store, step, rpc.StepState{Exited: true, Finished: skewedAgentFinish, ExitCode: 0}))
+
+	assert.Equal(t, model.StatusSuccess, step.State)
+	assert.NotEqual(t, skewedAgentFinish, step.Finished)
+	assert.GreaterOrEqual(t, step.Finished, step.Started, "duration must never be negative")
 }
 
 func TestUpdateStepToStatusSkipped(t *testing.T) {

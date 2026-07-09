@@ -278,7 +278,10 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 
 	if currentPipeline.Status == model.StatusPending {
-		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
+		// Use the server clock for the pipeline start time instead of the
+		// agent-supplied state.Started, matching the step/workflow state
+		// machine, so pipeline duration is not skewed by agent clock drift (#6808).
+		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, time.Now().Unix()); err != nil {
 			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
 		}
 	}
@@ -356,8 +359,10 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
 	// Complete any still-running children (e.g. service containers) before
-	// computing the workflow status, so their final state is reflected.
-	s.completeChildrenIfParentCompleted(workflow, state.Finished)
+	// computing the workflow status, so their final state is reflected. Stamp
+	// their finish time from the server clock rather than the agent-supplied
+	// state.Finished, consistent with the step/workflow state machine (#6808).
+	s.completeChildrenIfParentCompleted(workflow, time.Now().Unix())
 
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)

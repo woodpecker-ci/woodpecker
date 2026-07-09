@@ -31,10 +31,23 @@ import (
 func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancelPipelineFromStep bool, _ error) {
 	log.Debug().Str("StepUUID", step.UUID).Msgf("Update step %#v state %#v", step, state)
 
+	// now is the server clock. We use it as the single authoritative source
+	// for the persisted Started and Finished timestamps instead of trusting
+	// the agent-supplied state.Started/state.Finished. Previously the start
+	// time was recorded from the server clock (state.Started is 0 on the
+	// "started" trace) while the finish time was copied from the agent clock,
+	// so clock skew between agent and server produced wrong or even negative
+	// step durations (#6808). The agent-reported timestamps are still used as
+	// presence flags (0 vs non-0) to decide the state transition, but never as
+	// stored values. Relative in-step/log timing stays agent-sourced.
+	now := time.Now().Unix()
+
 	switch step.State {
 	case model.StatusPending:
 		// Handle skip before anything else — skipped steps never started,
-		// so we must not set Started or transition through Running.
+		// so we must not set Started or transition through Running. A skipped
+		// step never ran (Started stays 0), so there is no start/finish pair
+		// that could be skewed; keep the agent value here as-is.
 		if state.Skipped {
 			step.State = model.StatusSkipped
 			if state.Finished != 0 {
@@ -47,17 +60,11 @@ func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancel
 		if state.Finished == 0 {
 			step.State = model.StatusRunning
 		}
-		step.Started = state.Started
-		if step.Started == 0 {
-			step.Started = time.Now().Unix()
-		}
+		step.Started = now
 
 		// Handle direct transition to finished if step setup error happened
 		if state.Exited || state.Error != "" {
-			step.Finished = state.Finished
-			if step.Finished == 0 {
-				step.Finished = time.Now().Unix()
-			}
+			step.Finished = now
 			step.ExitCode = state.ExitCode
 			step.Error = state.Error
 
@@ -75,10 +82,7 @@ func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancel
 	case model.StatusRunning:
 		// Already running, check if it finished
 		if state.Exited || state.Error != "" {
-			step.Finished = state.Finished
-			if step.Finished == 0 {
-				step.Finished = time.Now().Unix()
-			}
+			step.Finished = now
 			step.ExitCode = state.ExitCode
 			step.Error = state.Error
 
@@ -101,7 +105,7 @@ func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancel
 	if state.Canceled && step.State != model.StatusKilled {
 		step.State = model.StatusKilled
 		if step.Finished == 0 {
-			step.Finished = time.Now().Unix()
+			step.Finished = now
 		}
 	}
 

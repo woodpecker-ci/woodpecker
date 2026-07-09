@@ -15,6 +15,8 @@
 package pipeline
 
 import (
+	"time"
+
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -33,8 +35,13 @@ func WorkflowStatus(steps []*model.Step) model.StatusValue {
 	return status
 }
 
-func UpdateWorkflowStatusToRunning(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
-	workflow.Started = state.Started
+func UpdateWorkflowStatusToRunning(store store.Store, workflow model.Workflow, _ rpc.WorkflowState) (*model.Workflow, error) {
+	// Record the workflow start time from the server clock rather than the
+	// agent-supplied state.Started, so that Started and Finished share a single
+	// clock and durations stay correct even when the agent clock is skewed
+	// (#6808). This also keeps pipeline/workflow times consistent across a
+	// multi-agent pipeline where different workflows run on different agents.
+	workflow.Started = time.Now().Unix()
 	workflow.State = model.StatusRunning
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
@@ -45,7 +52,10 @@ func UpdateWorkflowToStatusSkipped(store store.Store, workflow model.Workflow) (
 }
 
 func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
-	workflow.Finished = state.Finished
+	// Record the finish time from the server clock (see UpdateWorkflowStatusToRunning
+	// and #6808). state.Started is still consulted below purely as a presence
+	// flag to detect a workflow that was never started (skipped).
+	workflow.Finished = time.Now().Unix()
 	workflow.Error = state.Error
 	if state.Started == 0 {
 		workflow.State = model.StatusSkipped

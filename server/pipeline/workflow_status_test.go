@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -180,25 +181,29 @@ func TestWorkflowStatus(t *testing.T) {
 }
 
 func TestUpdateWorkflowStatusToRunning(t *testing.T) {
-	t.Run("should update workflow to running status", func(t *testing.T) {
+	t.Run("should update workflow to running status using the server clock", func(t *testing.T) {
+		before := time.Now().Unix()
 		workflow := model.Workflow{
 			ID:    1,
 			State: model.StatusPending,
 		}
+		// Agent reports a start time; the server must ignore it and record its
+		// own clock instead (#6808).
 		state := rpc.WorkflowState{
 			Started: 1234567890,
 		}
 
 		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("WorkflowUpdate", mock.MatchedBy(func(w *model.Workflow) bool {
-			return w.ID == 1 && w.State == model.StatusRunning && w.Started == 1234567890
+			return w.ID == 1 && w.State == model.StatusRunning && w.Started >= before
 		})).Return(nil)
 
 		result, err := UpdateWorkflowStatusToRunning(mockStore, workflow, state)
 
 		assert.NoError(t, err)
 		assert.Equal(t, model.StatusRunning, result.State)
-		assert.Equal(t, int64(1234567890), result.Started)
+		assert.NotEqual(t, int64(1234567890), result.Started)
+		assert.GreaterOrEqual(t, result.Started, before)
 		mockStore.AssertCalled(t, "WorkflowUpdate", mock.Anything)
 	})
 }
@@ -225,6 +230,7 @@ func TestUpdateWorkflowToStatusSkipped(t *testing.T) {
 
 func TestUpdateWorkflowStatusToDone(t *testing.T) {
 	t.Run("should mark as skipped when not started", func(t *testing.T) {
+		before := time.Now().Unix()
 		workflow := model.Workflow{
 			ID:       3,
 			State:    model.StatusRunning,
@@ -238,14 +244,17 @@ func TestUpdateWorkflowStatusToDone(t *testing.T) {
 
 		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("WorkflowUpdate", mock.MatchedBy(func(w *model.Workflow) bool {
-			return w.State == model.StatusSkipped && w.Finished == 1234567900
+			return w.State == model.StatusSkipped && w.Finished >= before
 		})).Return(nil)
 
 		result, err := UpdateWorkflowStatusToDone(mockStore, workflow, state)
 
 		assert.NoError(t, err)
+		// Started==0 still marks the workflow skipped (used as a presence flag)...
 		assert.Equal(t, model.StatusSkipped, result.State)
-		assert.Equal(t, int64(1234567900), result.Finished)
+		// ...but Finished is stamped from the server clock, not the agent value (#6808).
+		assert.NotEqual(t, int64(1234567900), result.Finished)
+		assert.GreaterOrEqual(t, result.Finished, before)
 	})
 
 	t.Run("should mark as failure when error exists", func(t *testing.T) {
@@ -273,6 +282,7 @@ func TestUpdateWorkflowStatusToDone(t *testing.T) {
 	})
 
 	t.Run("should mark as success when all children are successful", func(t *testing.T) {
+		before := time.Now().Unix()
 		successStep := &model.Step{
 			ID:    1,
 			State: model.StatusSuccess,
@@ -295,6 +305,8 @@ func TestUpdateWorkflowStatusToDone(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, model.StatusSuccess, result.State)
-		assert.Equal(t, int64(1234567900), result.Finished)
+		// Finished comes from the server clock, not the agent-supplied value (#6808).
+		assert.NotEqual(t, int64(1234567900), result.Finished)
+		assert.GreaterOrEqual(t, result.Finished, before)
 	})
 }
