@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-08
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @DerRockWolf, @Kernald, @kanywst
+@6543, @DerRockWolf, @Kernald, @TowyTowy, @kanywst
 
 ### 🔒 Security
 
@@ -19,6 +19,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(server): heal users left on forge_id=0 with closed registration [[#6823](https://github.com/woodpecker-ci/woodpecker/pull/6823)]
 - Correct forge_id and org handling on user/repo [[#6820](https://github.com/woodpecker-ci/woodpecker/pull/6820)]
 
 ### 📚 Documentation
