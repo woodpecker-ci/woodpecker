@@ -28,11 +28,11 @@ import (
 )
 
 //go:embed schema.json
-var schemaDefinition []byte
+var SchemaDefinition []byte
 
 // Lint lints an io.Reader against the Woodpecker `schema.json`.
 func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
-	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
+	schemaLoader := gojsonschema.NewBytesLoader(SchemaDefinition)
 
 	// read yaml config
 	rBytes, err := io.ReadAll(r)
