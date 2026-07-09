@@ -3,7 +3,13 @@ import { useI18n } from 'vue-i18n';
 let currentLocale = 'en';
 
 function splitDuration(durationMs: number) {
-  const totalSeconds = durationMs / 1000;
+  // Clamp negative durations to zero. Start and end timestamps can come from
+  // different clocks (browser, server, agent), so skew between them can produce
+  // a negative value which would otherwise render as garbled output like
+  // `00:-5` or `-5 seconds`.
+  const clampedMs = Math.max(0, durationMs);
+
+  const totalSeconds = clampedMs / 1000;
   const totalMinutes = totalSeconds / 60;
   const totalHours = totalMinutes / 60;
 
