@@ -1,2 +1,0 @@
-go test fuzz v1
-[]byte("matrix:\n  0: [01*]\n  x0: ")
