@@ -54,6 +54,9 @@ func toRepo(from *gitea.Repository) *model.Repo {
 
 // toPerm converts a Gitea permission to a Woodpecker permission.
 func toPerm(from *gitea.Permission) *model.Perm {
+	if from == nil {
+		return &model.Perm{}
+	}
 	return &model.Perm{
 		Pull:  from.Pull,
 		Push:  from.Push,
