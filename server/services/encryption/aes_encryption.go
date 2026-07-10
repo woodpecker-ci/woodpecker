@@ -17,11 +17,11 @@ package encryption
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/sha3"
 	"errors"
 	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/crypto/sha3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -69,7 +69,7 @@ func (svc *aesEncryptionService) validateKey() error {
 
 func (svc *aesEncryptionService) hash(data []byte) ([]byte, error) {
 	result := make([]byte, 32)
-	sha := sha3.NewShake256()
+	sha := sha3.NewSHAKE256()
 
 	_, err := sha.Write(data)
 	if err != nil {
