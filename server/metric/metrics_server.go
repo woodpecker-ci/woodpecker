@@ -83,7 +83,7 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 				Name:      "step_failures_total",
 				Help:      "Total number of pipeline step failures.",
 			},
-			[]string{"workflow", "repo", "step"},
+			[]string{"workflow", "repo", "step", "type"},
 		)
 
 		StepDurationRecord = promauto.NewHistogramVec(
@@ -93,7 +93,7 @@ func StartMetricsCollector(ctx context.Context, c *cli.Command, _store store.Sto
 				Help:      "Step duration in seconds.",
 				Buckets:   []float64{1, 5, 10, 30, 60, 300, 600, 1800, 3600},
 			},
-			[]string{"workflow", "repo", "step"},
+			[]string{"workflow", "repo", "step", "type"},
 		)
 	}
 	go func() {
