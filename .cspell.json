@@ -263,6 +263,7 @@
     ".git/**/*",
     ".gitignore",
     ".golangci.yaml",
+    ".trivy/*",
     ".vscode/extensions.json",
     "*_test.go",
     "*.excalidraw",
