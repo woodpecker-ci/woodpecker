@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-09
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @DerRockWolf, @Kernald, @TowyTowy, @kanywst
+@6543, @DerRockWolf, @Kernald, @TowyTowy, @healdropper, @kanywst
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Add step type label to step-level Prometheus metrics [[#6824](https://github.com/woodpecker-ci/woodpecker/pull/6824)]
 - docs: add note about `pull_request` events with `path` filter and correct comment about `on_empty` [[#6819](https://github.com/woodpecker-ci/woodpecker/pull/6819)]
 - Stamp trusted commit-branch and event pod labels [[#6802](https://github.com/woodpecker-ci/woodpecker/pull/6802)]
 - Rename CI_COMMIT_PRERELEASE to CI_PIPELINE_RELEASE_PRE [[#6794](https://github.com/woodpecker-ci/woodpecker/pull/6794)]
