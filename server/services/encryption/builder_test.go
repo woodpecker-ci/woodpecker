@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 	"github.com/urfave/cli/v3"
@@ -32,16 +33,26 @@ import (
 // fakeClient is a minimal EncryptionClient that records whether the service was
 // set and can be made to fail on demand.
 type fakeClient struct {
-	setErr  error
-	service types.EncryptionService
+	setErr       error
+	service      types.EncryptionService
+	enableCalled bool
+	migratedTo   types.EncryptionService
 }
 
 func (c *fakeClient) SetEncryptionService(svc types.EncryptionService) error {
 	c.service = svc
 	return c.setErr
 }
-func (c *fakeClient) EnableEncryption() error                           { return nil }
-func (c *fakeClient) MigrateEncryption(_ types.EncryptionService) error { return nil }
+
+func (c *fakeClient) EnableEncryption() error {
+	c.enableCalled = true
+	return nil
+}
+
+func (c *fakeClient) MigrateEncryption(newSvc types.EncryptionService) error {
+	c.migratedTo = newSvc
+	return nil
+}
 
 func TestNoEncryptionService(t *testing.T) {
 	t.Parallel()
@@ -245,5 +256,123 @@ func TestValidateKey(t *testing.T) {
 		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(sample, nil)
 
 		assert.NoError(t, svc.validateKey())
+	})
+}
+
+// runBuild runs builder.Build() with the given cli args, store and clients.
+func runBuild(t *testing.T, args []string, s *store_mocks.MockStore, clients ...types.EncryptionClient) error {
+	t.Helper()
+	var buildErr error
+	cmd := &cli.Command{
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: rawKeyConfigFlag},
+			&cli.StringFlag{Name: tinkKeysetFilepathConfigFlag},
+			&cli.BoolFlag{Name: disableEncryptionConfigFlag},
+		},
+		Action: func(_ context.Context, c *cli.Command) error {
+			b := Encryption(c, s)
+			for _, client := range clients {
+				b = b.WithClient(client)
+			}
+			buildErr = b.Build()
+			return nil
+		},
+	}
+	require.NoError(t, cmd.Run(t.Context(), args))
+	return buildErr
+}
+
+// aesSampleFor derives the ciphertext sample the aes service would store for
+// the given password, so tests can present a matching "enabled" state.
+func aesSampleFor(t *testing.T, password string) string {
+	t.Helper()
+	svc := &aesEncryptionService{}
+	require.NoError(t, svc.loadCipher(password))
+	sample, err := svc.Encrypt(svc.keyID, keyIDAssociatedData)
+	require.NoError(t, err)
+	return sample
+}
+
+func TestBuild(t *testing.T) {
+	t.Parallel()
+
+	t.Run("unencrypted mode without keys succeeds", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return("", store_types.ErrRecordNotExist)
+
+		client := &fakeClient{}
+		require.NoError(t, runBuild(t, []string{"woodpecker"}, s, client))
+		assert.IsType(t, &noEncryption{}, client.service)
+		assert.False(t, client.enableCalled)
+	})
+
+	t.Run("disable flag while not enabled succeeds without touching data", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return("", store_types.ErrRecordNotExist)
+
+		client := &fakeClient{}
+		args := []string{"woodpecker", "--" + disableEncryptionConfigFlag, "--" + rawKeyConfigFlag, "password"}
+		require.NoError(t, runBuild(t, args, s, client))
+		assert.IsType(t, &noEncryption{}, client.service)
+		assert.False(t, client.enableCalled)
+		assert.Nil(t, client.migratedTo)
+	})
+
+	t.Run("enabled state without keys is an error", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return("some-sample", nil)
+
+		err := runBuild(t, []string{"woodpecker"}, s, &fakeClient{})
+		assert.ErrorContains(t, err, errMessageNoKeysProvided)
+	})
+
+	t.Run("raw key first boot enables encryption", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return("", store_types.ErrRecordNotExist)
+		s.On("ServerConfigSet", ciphertextSampleConfigKey, mock.AnythingOfType("string")).Return(nil)
+
+		client := &fakeClient{}
+		args := []string{"woodpecker", "--" + rawKeyConfigFlag, "password"}
+		require.NoError(t, runBuild(t, args, s, client))
+		assert.IsType(t, &aesEncryptionService{}, client.service)
+		assert.True(t, client.enableCalled)
+	})
+
+	t.Run("raw key with valid sample boots without re-enabling", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(aesSampleFor(t, "password"), nil)
+
+		client := &fakeClient{}
+		args := []string{"woodpecker", "--" + rawKeyConfigFlag, "password"}
+		require.NoError(t, runBuild(t, args, s, client))
+		assert.IsType(t, &aesEncryptionService{}, client.service)
+		assert.False(t, client.enableCalled)
+	})
+
+	t.Run("raw key with wrong sample refuses to start", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(aesSampleFor(t, "other-password"), nil)
+
+		args := []string{"woodpecker", "--" + rawKeyConfigFlag, "password"}
+		err := runBuild(t, args, s, &fakeClient{})
+		assert.ErrorIs(t, err, errEncryptionKeyInvalid)
+	})
+
+	t.Run("disable flag while enabled decrypts and removes sample", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(aesSampleFor(t, "password"), nil)
+		s.On("ServerConfigDelete", ciphertextSampleConfigKey).Return(nil)
+
+		client := &fakeClient{}
+		args := []string{"woodpecker", "--" + disableEncryptionConfigFlag, "--" + rawKeyConfigFlag, "password"}
+		require.NoError(t, runBuild(t, args, s, client))
+		assert.IsType(t, &noEncryption{}, client.migratedTo)
 	})
 }
