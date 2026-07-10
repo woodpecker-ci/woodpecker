@@ -1,3 +1,0 @@
-go test fuzz v1
-string("0 0 30 2 *")
-string("")
