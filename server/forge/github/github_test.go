@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/github/fixtures"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
@@ -94,6 +95,35 @@ func Test_github(t *testing.T) {
 	t.Run("repo not found error", func(t *testing.T) {
 		_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 		assert.Error(t, err)
+	})
+
+	t.Run("dir is fetched with a single graphql request", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "somedir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "somedir/a.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
+
+	t.Run("dir returns config-not-found for missing directories", func(t *testing.T) {
+		_, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "no-such-dir")
+		assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+	})
+
+	t.Run("dir with symlinks falls back to per-file fetching", func(t *testing.T) {
+		// the fallback resolves the symlink instead of returning its target path
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
+
+	t.Run("dir falls back to per-file fetching when graphql fails", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "rest-fallback-dir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "rest-fallback-dir/b.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
 	})
 }
 
