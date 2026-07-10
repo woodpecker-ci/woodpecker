@@ -1,3 +1,0 @@
-go test fuzz v1
-string("Merge Request Hook")
-[]byte("{\"object_attributes\":{\"action\":\"open\",\"target\":{},\"source\":{}}}")
