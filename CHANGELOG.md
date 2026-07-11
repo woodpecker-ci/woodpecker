@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v6.1.1 [[#6834](https://github.com/woodpecker-ci/woodpecker/pull/6834)]
 - Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.2 [[#6833](https://github.com/woodpecker-ci/woodpecker/pull/6833)]
 - Update dependency golang to v1.26.5 [[#6832](https://github.com/woodpecker-ci/woodpecker/pull/6832)]
 - Update golang-packages [[#6785](https://github.com/woodpecker-ci/woodpecker/pull/6785)]
