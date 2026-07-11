@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -53,6 +54,10 @@ func (wrapper *EncryptedSecretStore) EnableEncryption() error {
 		return fmt.Errorf(errMessageTemplateFailedToEnable, err)
 	}
 	for _, secret := range secrets {
+		if strings.HasPrefix(secret.Value, types.EncryptedValuePrefix) {
+			// already encrypted by an earlier, interrupted run
+			continue
+		}
 		if err := wrapper.encrypt(secret); err != nil {
 			return err
 		}
