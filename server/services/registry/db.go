@@ -18,15 +18,14 @@ import (
 	"context"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 type db struct {
-	store store.Store
+	store model.RegistryStore
 }
 
 // New returns a new local registry service.
-func NewDB(store store.Store) Service {
+func NewDB(store model.RegistryStore) Service {
 	return &db{store}
 }
 

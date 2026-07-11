@@ -26,6 +26,20 @@ var (
 	errRegistryPasswordInvalid = errors.New("invalid registry password")
 )
 
+// RegistryStore persists registry information to storage.
+type RegistryStore interface {
+	RegistryFind(*Repo, string) (*Registry, error)
+	RegistryList(*Repo, bool, *ListOptions) ([]*Registry, error)
+	RegistryListAll() ([]*Registry, error)
+	RegistryCreate(*Registry) error
+	RegistryUpdate(*Registry) error
+	RegistryDelete(*Registry) error
+	OrgRegistryFind(int64, string) (*Registry, error)
+	OrgRegistryList(int64, *ListOptions) ([]*Registry, error)
+	GlobalRegistryFind(string) (*Registry, error)
+	GlobalRegistryList(*ListOptions) ([]*Registry, error)
+}
+
 // Registry represents a docker registry with credentials.
 type Registry struct {
 	ID       int64  `json:"id"       xorm:"pk autoincr 'id'"`
