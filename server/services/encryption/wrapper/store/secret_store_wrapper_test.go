@@ -16,6 +16,7 @@ package store
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -135,4 +136,16 @@ func TestSecretWritesRestorePlaintextValue(t *testing.T) {
 		assert.Equal(t, "plain", secret.Value,
 			"failed create must not leak ciphertext into the caller object")
 	})
+}
+
+func TestDecryptListErrorWrappedOnce(t *testing.T) {
+	t.Parallel()
+
+	wrapper := NewSecretStore(store_mocks.NewMockStore(t))
+	require.NoError(t, wrapper.SetEncryptionService(&fakeCipher{prefix: "enc:"}))
+
+	err := wrapper.decryptList([]*model.Secret{{ID: 42, Value: "not encrypted"}})
+	require.Error(t, err)
+	assert.Equal(t, 1, strings.Count(err.Error(), "failed to decrypt secret id=42"),
+		"decrypt failure must be wrapped exactly once")
 }

@@ -110,9 +110,8 @@ func (wrapper *EncryptedSecretStore) decrypt(secret *model.Secret) error {
 
 func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) error {
 	for _, secret := range secrets {
-		err := wrapper.decrypt(secret)
-		if err != nil {
-			return fmt.Errorf(errMessageTemplateFailedToDecryptSecret, secret.ID, err)
+		if err := wrapper.decrypt(secret); err != nil {
+			return err
 		}
 	}
 	return nil
