@@ -18,7 +18,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -55,7 +54,7 @@ func (wrapper *EncryptedRegistryStore) EnableEncryption() error {
 		return fmt.Errorf(errMessageTemplateFailedToEnableRegistries, err)
 	}
 	for _, registry := range registries {
-		if strings.HasPrefix(registry.Password, types.EncryptedValuePrefix) {
+		if isMarkedValue(registry.Password) {
 			// already encrypted by an earlier, interrupted run
 			continue
 		}

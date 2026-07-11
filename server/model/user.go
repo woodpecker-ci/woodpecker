@@ -27,6 +27,16 @@ var errUserLoginInvalid = errors.New("invalid user login")
 
 const maxLoginLen = 250
 
+// UserStore persists user information to storage.
+type UserStore interface {
+	GetUser(int64) (*User, error)
+	GetUserByRemoteID(int64, ForgeRemoteID) (*User, error)
+	GetUserByLogin(int64, string) (*User, error)
+	GetUserList(p *ListOptions) ([]*User, error)
+	CreateUser(*User) error
+	UpdateUser(*User) error
+}
+
 // User represents a registered user.
 type User struct {
 	// the id for this user.

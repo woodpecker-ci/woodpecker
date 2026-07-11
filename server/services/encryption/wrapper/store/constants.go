@@ -45,3 +45,17 @@ const (
 	logMessageMigratingRegistriesEncryption        = "Migrating registry password encryption keys"
 	logMessageMigratingRegistriesEncryptionSuccess = "Registry password encryption migrated successfully"
 )
+
+// User wrapper.
+const (
+	errMessageTemplateFailedToEnableUsers  = "failed enabling user token encryption: %w"
+	errMessageTemplateFailedToMigrateUsers = "failed migrating user token encryption: %w"
+	errMessageTemplateFailedToEncryptUser  = "failed to encrypt tokens of user id=%d: %w"
+	errMessageTemplateFailedToDecryptUser  = "failed to decrypt tokens of user id=%d: %w"
+	errMessageTemplateUserStorageError     = "Storage error: could not update user in DB"
+
+	logMessageEnablingUsersEncryption         = "Encrypting all user tokens in database"
+	logMessageEnablingUsersEncryptionSuccess  = "All user tokens are encrypted"
+	logMessageMigratingUsersEncryption        = "Migrating user token encryption keys"
+	logMessageMigratingUsersEncryptionSuccess = "User token encryption migrated successfully"
+)
