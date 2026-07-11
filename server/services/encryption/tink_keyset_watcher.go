@@ -68,6 +68,7 @@ func (svc *tinkEncryptionService) handleFileEvents() {
 			if !ok {
 				log.Fatal().Err(err).Msg(errMessageTinkKeysetFileWatchFailed) //nolint:forbidigo
 			}
+			log.Error().Err(err).Msg(errMessageTinkKeysetFileWatchFailed)
 		}
 	}
 }
