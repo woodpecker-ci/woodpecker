@@ -18,6 +18,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/fsnotify/fsnotify"
@@ -213,4 +214,34 @@ func TestIsKeysetChangeEvent(t *testing.T) {
 			assert.Equal(t, tt.want, isKeysetChangeEvent(fsnotify.Event{Op: tt.op}))
 		})
 	}
+}
+
+func TestTinkEncryptedValueMarker(t *testing.T) {
+	t.Parallel()
+
+	svc := loadTinkService(t, writeKeysetFile(t, newKeysetHandle(t)), store_mocks.NewMockStore(t))
+
+	t.Run("encrypt marks and round-trips", func(t *testing.T) {
+		t.Parallel()
+		ciphertext, err := svc.Encrypt("plain", "aad")
+		require.NoError(t, err)
+		assert.True(t, strings.HasPrefix(ciphertext, types.EncryptedValuePrefix))
+
+		plaintext, err := svc.Decrypt(ciphertext, "aad")
+		require.NoError(t, err)
+		assert.Equal(t, "plain", plaintext)
+	})
+
+	t.Run("unmarked value is passed through as plaintext", func(t *testing.T) {
+		t.Parallel()
+		plaintext, err := svc.Decrypt("legacy plaintext row", "aad")
+		require.NoError(t, err)
+		assert.Equal(t, "legacy plaintext row", plaintext)
+	})
+
+	t.Run("marked but corrupt value is an error", func(t *testing.T) {
+		t.Parallel()
+		_, err := svc.Decrypt(types.EncryptedValuePrefix+"@@ not base64 @@", "aad")
+		assert.Error(t, err)
+	})
 }

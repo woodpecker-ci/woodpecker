@@ -41,11 +41,16 @@ func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) (str
 	if err != nil {
 		return "", fmt.Errorf(errTemplateEncryptionFailed, err)
 	}
-	return base64.StdEncoding.EncodeToString(ciphertext), nil
+	return markEncrypted(base64.StdEncoding.EncodeToString(ciphertext)), nil
 }
 
 func (svc *tinkEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
-	ct, err := base64.StdEncoding.DecodeString(ciphertext)
+	if !isMarkedEncrypted(ciphertext) {
+		// value was stored before encryption was enabled
+		return ciphertext, nil
+	}
+
+	ct, err := base64.StdEncoding.DecodeString(unmark(ciphertext))
 	if err != nil {
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
 	}

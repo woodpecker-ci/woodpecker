@@ -17,12 +17,14 @@ package encryption
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
@@ -106,14 +108,14 @@ func TestDecryptTamperedCiphertext(t *testing.T) {
 	require.NoError(t, err)
 
 	// Decode, tamper, re-encode
-	decoded, err := base64.StdEncoding.DecodeString(ciphertext)
+	decoded, err := base64.StdEncoding.DecodeString(unmark(ciphertext))
 	require.NoError(t, err)
 
 	// Tamper with the ciphertext (flip a bit in the middle)
 	if len(decoded) > AES_GCM_SIV_NonceSize+1 {
 		decoded[AES_GCM_SIV_NonceSize+1] ^= 0xFF
 	}
-	tampered := base64.StdEncoding.EncodeToString(decoded)
+	tampered := markEncrypted(base64.StdEncoding.EncodeToString(decoded))
 
 	_, err = aes.Decrypt(tampered, "")
 	assert.Error(t, err, "decryption of tampered ciphertext should fail")
@@ -124,7 +126,7 @@ func TestDecryptInvalidBase64(t *testing.T) {
 	err := aes.loadCipher(string(random.GetRandomBytes(32)))
 	require.NoError(t, err)
 
-	_, err = aes.Decrypt("not-valid-base64!!!", "")
+	_, err = aes.Decrypt(markEncrypted("not-valid-base64!!!"), "")
 	assert.Error(t, err, "decryption of invalid base64 should fail")
 }
 
@@ -138,10 +140,10 @@ func TestDecryptTruncatedCiphertext(t *testing.T) {
 	require.NoError(t, err)
 
 	// Truncate the ciphertext
-	decoded, err := base64.StdEncoding.DecodeString(ciphertext)
+	decoded, err := base64.StdEncoding.DecodeString(unmark(ciphertext))
 	require.NoError(t, err)
 
-	truncated := base64.StdEncoding.EncodeToString(decoded[:len(decoded)/2])
+	truncated := markEncrypted(base64.StdEncoding.EncodeToString(decoded[:len(decoded)/2]))
 	_, err = aes.Decrypt(truncated, "")
 	assert.Error(t, err, "decryption of truncated ciphertext should fail")
 }
@@ -256,10 +258,10 @@ func TestAesDecryptMalformedCiphertext(t *testing.T) {
 		name       string
 		ciphertext string
 	}{
-		{name: "empty input", ciphertext: ""},
-		{name: "shorter than nonce", ciphertext: base64.StdEncoding.EncodeToString([]byte("short"))},
-		{name: "exactly nonce size but no ciphertext", ciphertext: base64.StdEncoding.EncodeToString(make([]byte, AES_GCM_SIV_NonceSize))},
-		{name: "not base64 at all", ciphertext: "%%% not base64 %%%"},
+		{name: "marked empty input", ciphertext: markEncrypted("")},
+		{name: "marked shorter than nonce", ciphertext: markEncrypted(base64.StdEncoding.EncodeToString([]byte("short")))},
+		{name: "marked exactly nonce size but no ciphertext", ciphertext: markEncrypted(base64.StdEncoding.EncodeToString(make([]byte, AES_GCM_SIV_NonceSize)))},
+		{name: "marked not base64 at all", ciphertext: markEncrypted("%%% not base64 %%%")},
 	}
 
 	for _, tt := range tests {
@@ -271,4 +273,40 @@ func TestAesDecryptMalformedCiphertext(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestAesEncryptedValueMarker(t *testing.T) {
+	t.Parallel()
+
+	svc := &aesEncryptionService{}
+	require.NoError(t, svc.loadCipher("password"))
+
+	t.Run("encrypt marks the value as encrypted", func(t *testing.T) {
+		t.Parallel()
+		ciphertext, err := svc.Encrypt("plain", "aad")
+		require.NoError(t, err)
+		assert.True(t, strings.HasPrefix(ciphertext, types.EncryptedValuePrefix))
+	})
+
+	t.Run("marked value round-trips", func(t *testing.T) {
+		t.Parallel()
+		ciphertext, err := svc.Encrypt("plain", "aad")
+		require.NoError(t, err)
+		plaintext, err := svc.Decrypt(ciphertext, "aad")
+		require.NoError(t, err)
+		assert.Equal(t, "plain", plaintext)
+	})
+
+	t.Run("unmarked value is passed through as plaintext", func(t *testing.T) {
+		t.Parallel()
+		plaintext, err := svc.Decrypt("legacy plaintext row", "aad")
+		require.NoError(t, err)
+		assert.Equal(t, "legacy plaintext row", plaintext)
+	})
+
+	t.Run("marked but corrupt value is an error", func(t *testing.T) {
+		t.Parallel()
+		_, err := svc.Decrypt(types.EncryptedValuePrefix+"@@ not base64 @@", "aad")
+		assert.Error(t, err)
+	})
 }

@@ -43,11 +43,16 @@ func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (stri
 	result = append(result, nonce...)
 	result = append(result, ciphertext...)
 
-	return base64.StdEncoding.EncodeToString(result), nil
+	return markEncrypted(base64.StdEncoding.EncodeToString(result)), nil
 }
 
 func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
-	bytes, err := base64.StdEncoding.DecodeString(ciphertext)
+	if !isMarkedEncrypted(ciphertext) {
+		// value was stored before encryption was enabled
+		return ciphertext, nil
+	}
+
+	bytes, err := base64.StdEncoding.DecodeString(unmark(ciphertext))
 	if err != nil {
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
 	}
