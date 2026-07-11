@@ -15,16 +15,19 @@
 package encryption
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tink-crypto/tink-go/v2/aead"
 	insecure_clear_text_keyset "github.com/tink-crypto/tink-go/v2/insecurecleartextkeyset"
 	"github.com/tink-crypto/tink-go/v2/keyset"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	store_types "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -127,5 +130,61 @@ func TestTinkValidateKeyset(t *testing.T) {
 		assert.NotErrorIs(t, err, errEncryptionKeyRotated,
 			"decryption failure must not be mistaken for a key rotation")
 		assert.ErrorIs(t, err, errEncryptionKeyInvalid)
+	})
+}
+
+// recClient records the order of encryption client callbacks into a shared log.
+type recClient struct {
+	log        *[]string
+	migrateErr error
+}
+
+func (c *recClient) SetEncryptionService(_ types.EncryptionService) error { return nil }
+func (c *recClient) EnableEncryption() error                              { return nil }
+
+func (c *recClient) MigrateEncryption(_ types.EncryptionService) error {
+	*c.log = append(*c.log, "migrate")
+	return c.migrateErr
+}
+
+func TestTinkRotate(t *testing.T) {
+	t.Parallel()
+
+	// prepare: sample encrypted under the old primary, service running on
+	// the rotated keyset so rotate() sees errEncryptionKeyRotated
+	setup := func(t *testing.T, s *store_mocks.MockStore, migrateErr error) (*tinkEncryptionService, *[]string) {
+		t.Helper()
+		oldHandle := newKeysetHandle(t)
+		oldSvc := loadTinkService(t, writeKeysetFile(t, oldHandle), s)
+		sample, err := oldSvc.Encrypt(oldSvc.primaryKeyID, keyIDAssociatedData)
+		require.NoError(t, err)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(sample, nil)
+
+		order := &[]string{}
+		svc := loadTinkService(t, writeKeysetFile(t, rotatedKeysetHandle(t, oldHandle)), s)
+		svc.clients = []types.EncryptionClient{&recClient{log: order, migrateErr: migrateErr}}
+		return svc, order
+	}
+
+	t.Run("clients are migrated before the sample is replaced", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		svc, order := setup(t, s, nil)
+		s.On("ServerConfigSet", ciphertextSampleConfigKey, mock.AnythingOfType("string")).
+			Run(func(_ mock.Arguments) { *order = append(*order, "sample") }).
+			Return(nil)
+
+		require.NoError(t, svc.rotate())
+		assert.Equal(t, []string{"migrate", "sample"}, *order,
+			"sample must only be replaced after data migration succeeded")
+	})
+
+	t.Run("failed migration leaves the sample untouched", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		svc, _ := setup(t, s, errors.New("migration blew up"))
+		// no ServerConfigSet expectation: any call fails the test
+
+		assert.Error(t, svc.rotate())
 	})
 }
