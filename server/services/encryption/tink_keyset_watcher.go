@@ -37,6 +37,13 @@ func (svc *tinkEncryptionService) initFileWatcher() error {
 	return nil
 }
 
+// isKeysetChangeEvent reports whether the file event indicates new keyset
+// content. Op is a bitmask and may combine several operations in one event,
+// so it must be tested with Has instead of equality.
+func isKeysetChangeEvent(event fsnotify.Event) bool {
+	return event.Has(fsnotify.Write) || event.Has(fsnotify.Create)
+}
+
 func (svc *tinkEncryptionService) handleFileEvents() {
 	for {
 		select {
@@ -44,7 +51,7 @@ func (svc *tinkEncryptionService) handleFileEvents() {
 			if !ok {
 				log.Fatal().Msg(errMessageTinkKeysetFileWatchFailed) //nolint:forbidigo
 			}
-			if (event.Op == fsnotify.Write) || (event.Op == fsnotify.Create) {
+			if isKeysetChangeEvent(event) {
 				log.Warn().Msgf(logTemplateTinkKeysetFileChanged, event.Name)
 				err := svc.rotate()
 				if err != nil {

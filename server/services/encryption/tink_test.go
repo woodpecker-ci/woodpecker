@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -187,4 +188,29 @@ func TestTinkRotate(t *testing.T) {
 
 		assert.Error(t, svc.rotate())
 	})
+}
+
+func TestIsKeysetChangeEvent(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		op   fsnotify.Op
+		want bool
+	}{
+		{name: "write", op: fsnotify.Write, want: true},
+		{name: "create", op: fsnotify.Create, want: true},
+		{name: "write combined with chmod", op: fsnotify.Write | fsnotify.Chmod, want: true},
+		{name: "create combined with write", op: fsnotify.Create | fsnotify.Write, want: true},
+		{name: "chmod only", op: fsnotify.Chmod, want: false},
+		{name: "remove", op: fsnotify.Remove, want: false},
+		{name: "rename", op: fsnotify.Rename, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tt.want, isKeysetChangeEvent(fsnotify.Event{Op: tt.op}))
+		})
+	}
 }
