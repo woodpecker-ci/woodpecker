@@ -96,12 +96,27 @@ func collectCredentials(ctx context.Context, forge forge.Forge, currentPipeline 
 	}, nil
 }
 
+// parsePipeline fully parses and compiles a pipeline, embedding freshly
+// gathered credentials (netrc, secrets, registries) into the result.
 func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
 	credentials, err := collectCredentials(ctx, forge, currentPipeline, user, repo)
 	if err != nil {
 		return nil, err
 	}
 
+	return parsePipelineWithCredentials(ctx, forge, store, currentPipeline, user, repo, forgeYamls, envs, credentials, false)
+}
+
+// parsePipelineHollow parses and compiles a pipeline without gathering any
+// credentials: secret references stay unresolved and the netrc is empty. The
+// result only serves to derive the workflow/step structure, labels and
+// dependencies at pipeline creation time; the config an agent executes is
+// produced by a full compilation at fetch time.
+func parsePipelineHollow(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+	return parsePipelineWithCredentials(ctx, forge, store, currentPipeline, user, repo, forgeYamls, envs, &pipelineCredentials{netrc: &model.Netrc{}}, true)
+}
+
+func parsePipelineWithCredentials(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string, credentials *pipelineCredentials, hollow bool) ([]*builder.Item, error) {
 	// get the previous pipeline so that we can send status change notifications
 	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -171,6 +186,10 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 		},
 	}
 
+	if hollow {
+		b.CompilerOptions = append(b.CompilerOptions, compiler.WithDeferredSecrets())
+	}
+
 	// TODO: remove with version 4.x
 	if server.Config.Pipeline.ForceIgnoreServiceFailure {
 		b.CompilerOptions = append(b.CompilerOptions, compiler.WithForceIgnoreServiceFailure())
@@ -206,7 +225,10 @@ func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Sto
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string, replaceExisting bool,
 ) (pipeline *model.Pipeline, items []*builder.Item, parseErr, err error) {
-	pipelineItems, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
+	// only a hollow parse: the workflow/step structure, labels and
+	// dependencies are derived and persisted here, while the config an agent
+	// executes is compiled with fresh credentials at fetch time.
+	pipelineItems, parseErr := parsePipelineHollow(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(parseErr) {
 		return currentPipeline, nil, parseErr, nil
 	}

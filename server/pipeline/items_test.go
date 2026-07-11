@@ -214,3 +214,48 @@ steps:
 	assert.Equal(t, "bar", step.Environment["FOO"])
 	assert.Equal(t, "secret world", step.Environment["HELLO"])
 }
+
+func TestParsePipelineHollow(t *testing.T) {
+	pipe := &model.Pipeline{ID: 1, Event: model.EventPush}
+	user := &model.User{ID: 1}
+	repo := &model.Repo{ID: 1}
+
+	yamls := []*forge_types.FileMeta{{
+		Name: "woodpecker.yml",
+		Data: []byte(`
+when:
+  - event: push
+
+steps:
+  - name: test
+    image: alpine
+    environment:
+      HELLO:
+        from_secret: hello
+    commands:
+      - echo "hello world"
+`),
+	}}
+
+	// a hollow parse only derives the workflow/step structure: the strict
+	// mocks assert that no netrc is generated and no secret or registry
+	// service is contacted, and the unresolved secret is not an error.
+	forge := forge_mocks.NewMockForge(t)
+	forge.On("Name").Return("github")
+	forge.On("URL").Return("https://github.com")
+
+	store := store_mocks.NewMockStore(t)
+	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipe.ID).Return(&model.Pipeline{}, nil)
+
+	mockManager := manager_mocks.NewMockManager(t)
+	server.Config.Services.Manager = mockManager
+	mockManager.On("EnvironmentService").Return(nil, nil)
+
+	pipelineItems, err := parsePipelineHollow(t.Context(), forge, store, pipe, user, repo, yamls, nil)
+	assert.NoError(t, err)
+
+	require.Len(t, pipelineItems, 1)
+	step := pipelineItems[0].Config.Stages[0].Steps[0]
+	assert.Equal(t, "test", step.Name)
+	assert.Empty(t, step.Environment["HELLO"])
+}

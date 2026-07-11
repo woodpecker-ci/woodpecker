@@ -538,3 +538,32 @@ func TestCompilerCompilePrivileged(t *testing.T) {
 	assert.False(t, backConf.Stages[0].Steps[1].Privileged)
 	assert.False(t, backConf.Stages[0].Steps[2].Privileged)
 }
+
+func TestCompilerCompileDeferredSecrets(t *testing.T) {
+	// with deferred secret resolution a config referencing a secret the
+	// compiler does not know compiles fine: the secret is resolved by a
+	// later full compilation (at agent fetch time)
+	compiler := New(
+		WithMetadata(metadata.Metadata{
+			Repo: metadata.Repo{
+				Owner:    "octacat",
+				Name:     "hello-world",
+				ForgeURL: "https://github.com/octocat/hello-world",
+			},
+		}),
+		WithDeferredSecrets(),
+	)
+
+	fronConf := &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+		Name:     "step",
+		Image:    "bash",
+		Commands: []string{"env"},
+		Environment: map[string]any{
+			"MISSING": map[string]any{"from_secret": "missing"},
+		},
+	}}}}
+
+	backConf, err := compiler.Compile(fronConf)
+	assert.NoError(t, err)
+	assert.NotNil(t, backConf)
+}

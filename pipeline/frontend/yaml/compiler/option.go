@@ -67,6 +67,17 @@ func WithSecret(secrets ...Secret) Option {
 	}
 }
 
+// WithDeferredSecrets configures the compiler to skip resolving secret
+// references: every from_secret reference yields an empty value instead of an
+// error. Used for the "hollow" compilation at pipeline creation time, whose
+// result only serves to derive the workflow/step structure; the secrets are
+// resolved by the full compilation at agent fetch time.
+func WithDeferredSecrets() Option {
+	return func(compiler *Compiler) {
+		compiler.deferredSecrets = true
+	}
+}
+
 // WithMetadata configures the compiler with the repository, pipeline
 // and system metadata. The metadata is used to remove steps from
 // the compiled pipeline configuration that should be skipped. The
