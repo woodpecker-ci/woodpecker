@@ -57,6 +57,11 @@ func (svc *tinkEncryptionService) handleFileEvents() {
 				if err != nil {
 					log.Fatal().Err(err).Msg(errMessageFailedRotatingEncryption) //nolint:forbidigo
 				}
+				// the rotated service runs its own watcher; close this
+				// one instead of leaking it
+				if err := svc.keysetFileWatcher.Close(); err != nil {
+					log.Error().Err(err).Msgf(logTemplateTinkFailedClosingKeysetFile, svc.keysetFilePath)
+				}
 				return
 			}
 		case err, ok := <-svc.keysetFileWatcher.Errors:
