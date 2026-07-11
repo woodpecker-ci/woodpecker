@@ -245,3 +245,30 @@ func TestValidateKeyWrongPassword(t *testing.T) {
 	require.NoError(t, second.loadCipher("wrong-password"))
 	assert.Error(t, second.validateKey())
 }
+
+func TestAesDecryptMalformedCiphertext(t *testing.T) {
+	t.Parallel()
+
+	svc := &aesEncryptionService{}
+	require.NoError(t, svc.loadCipher("password"))
+
+	tests := []struct {
+		name       string
+		ciphertext string
+	}{
+		{name: "empty input", ciphertext: ""},
+		{name: "shorter than nonce", ciphertext: base64.StdEncoding.EncodeToString([]byte("short"))},
+		{name: "exactly nonce size but no ciphertext", ciphertext: base64.StdEncoding.EncodeToString(make([]byte, AES_GCM_SIV_NonceSize))},
+		{name: "not base64 at all", ciphertext: "%%% not base64 %%%"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			assert.NotPanics(t, func() {
+				_, err := svc.Decrypt(tt.ciphertext, "aad")
+				assert.Error(t, err)
+			})
+		})
+	}
+}

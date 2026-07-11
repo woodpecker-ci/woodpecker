@@ -36,6 +36,7 @@ var (
 	errEncryptionNotEnabled = errors.New("encryption is not enabled")
 	errEncryptionKeyInvalid = errors.New("encryption key is invalid")
 	errEncryptionKeyRotated = errors.New("encryption key is being rotated")
+	errCiphertextTooShort   = errors.New("ciphertext too short")
 )
 
 const (

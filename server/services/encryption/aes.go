@@ -51,6 +51,9 @@ func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (str
 	if err != nil {
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
 	}
+	if len(bytes) <= AES_GCM_SIV_NonceSize {
+		return "", fmt.Errorf(errTemplateDecryptionFailed, errCiphertextTooShort)
+	}
 
 	nonce := bytes[:AES_GCM_SIV_NonceSize]
 	message := bytes[AES_GCM_SIV_NonceSize:]
