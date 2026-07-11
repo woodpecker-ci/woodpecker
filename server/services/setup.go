@@ -28,8 +28,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
-	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption"
-	encryptedStore "go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/wrapper/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
@@ -56,17 +54,12 @@ func setupRegistryService(store store.Store, dockerConfig, endpoint string, incl
 	return service
 }
 
-func setupSecretService(c *cli.Command, store store.Store, endpoint string, client *utils.Client, includeNetrc bool) (secret.Service, error) {
-	encryptedSecretStore := encryptedStore.NewSecretStore(store)
-	if err := encryption.Encryption(c, store).WithClient(encryptedSecretStore).Build(); err != nil {
-		return nil, fmt.Errorf("could not create encryption service: %w", err)
-	}
-
+func setupSecretService(store store.Store, endpoint string, client *utils.Client, includeNetrc bool) secret.Service {
 	if endpoint != "" {
-		return secret.NewCombined(secret.NewDB(encryptedSecretStore), secret.NewHTTP(endpoint, client, includeNetrc)), nil
+		return secret.NewCombined(secret.NewDB(store), secret.NewHTTP(endpoint, client, includeNetrc))
 	}
 
-	return secret.NewDB(encryptedSecretStore), nil
+	return secret.NewDB(store)
 }
 
 func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, error) {

@@ -83,16 +83,11 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
-	secretService, err := setupSecretService(c, store, c.String("secret-extension-endpoint"), client, c.Bool("secret-extension-netrc"))
-	if err != nil {
-		return nil, err
-	}
-
 	return &manager{
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
-		secret:              secretService,
+		secret:              setupSecretService(store, c.String("secret-extension-endpoint"), client, c.Bool("secret-extension-netrc")),
 		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), c.Bool("registry-extension-netrc"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),

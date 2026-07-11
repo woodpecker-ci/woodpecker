@@ -154,3 +154,40 @@ func TestUserTokenEncryption(t *testing.T) {
 		assert.Same(t, cipher, wrapper.encryption)
 	})
 }
+
+func TestEncryptedStoreRouting(t *testing.T) {
+	t.Parallel()
+
+	cipher := &fakeCipher{prefix: "k1:"}
+
+	s := store_mocks.NewMockStore(t)
+	s.On("GlobalSecretFind", "token").
+		Return(&model.Secret{ID: 1, Value: cipher.fullPrefix() + "sv"}, nil)
+	s.On("GlobalRegistryFind", "docker.io").
+		Return(&model.Registry{ID: 2, Password: cipher.fullPrefix() + "rp"}, nil)
+	s.On("GetUser", int64(3)).
+		Return(&model.User{ID: 3, AccessToken: cipher.fullPrefix() + "at"}, nil)
+	s.On("GetUserCount").Return(int64(7), nil)
+
+	wrapped := NewEncryptedStore(s)
+	for _, client := range wrapped.Clients() {
+		require.NoError(t, client.SetEncryptionService(cipher))
+	}
+
+	secret, err := wrapped.GlobalSecretFind("token")
+	require.NoError(t, err)
+	assert.Equal(t, "sv", secret.Value)
+
+	registry, err := wrapped.GlobalRegistryFind("docker.io")
+	require.NoError(t, err)
+	assert.Equal(t, "rp", registry.Password)
+
+	user, err := wrapped.GetUser(3)
+	require.NoError(t, err)
+	assert.Equal(t, "at", user.AccessToken)
+
+	// non-encrypted methods pass through via embedding
+	count, err := wrapped.GetUserCount()
+	require.NoError(t, err)
+	assert.Equal(t, int64(7), count)
+}
