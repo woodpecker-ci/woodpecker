@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-10
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency golang to v1.26.5 [[#6832](https://github.com/woodpecker-ci/woodpecker/pull/6832)]
 - Update golang-packages [[#6785](https://github.com/woodpecker-ci/woodpecker/pull/6785)]
 - Update pnpm to v11.10.0 [[#6814](https://github.com/woodpecker-ci/woodpecker/pull/6814)]
 - Update module github.com/cenkalti/backoff/v6 to v7 [[#6812](https://github.com/woodpecker-ci/woodpecker/pull/6812)]
