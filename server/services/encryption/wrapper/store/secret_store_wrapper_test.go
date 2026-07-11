@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -80,5 +81,58 @@ func TestMigrateEncryption(t *testing.T) {
 		assert.Error(t, wrapper.MigrateEncryption(newCipher))
 		assert.Same(t, oldCipher, wrapper.encryption,
 			"wrapper must not switch to the new service when migration failed")
+	})
+}
+
+func TestSecretWritesRestorePlaintextValue(t *testing.T) {
+	t.Parallel()
+
+	cipher := &fakeCipher{prefix: "enc:"}
+
+	t.Run("update success leaves plaintext in caller object", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		var stored string
+		s.On("SecretUpdate", mock.AnythingOfType("*model.Secret")).
+			Run(func(args mock.Arguments) { stored = args.Get(0).(*model.Secret).Value }).
+			Return(nil)
+
+		wrapper := NewSecretStore(s)
+		require.NoError(t, wrapper.SetEncryptionService(cipher))
+
+		secret := &model.Secret{ID: 7, Value: "plain"}
+		require.NoError(t, wrapper.SecretUpdate(secret))
+		assert.Equal(t, "enc:plain", stored, "value must be stored encrypted")
+		assert.Equal(t, "plain", secret.Value, "caller must see plaintext")
+	})
+
+	t.Run("update failure leaves plaintext in caller object", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("SecretUpdate", mock.AnythingOfType("*model.Secret")).Return(errors.New("db gone"))
+
+		wrapper := NewSecretStore(s)
+		require.NoError(t, wrapper.SetEncryptionService(cipher))
+
+		secret := &model.Secret{ID: 7, Value: "plain"}
+		assert.Error(t, wrapper.SecretUpdate(secret))
+		assert.Equal(t, "plain", secret.Value,
+			"failed update must not leak ciphertext into the caller object")
+	})
+
+	t.Run("create failure on update step leaves plaintext in caller object", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		s.On("SecretCreate", mock.AnythingOfType("*model.Secret")).Return(nil)
+		s.On("SecretUpdate", mock.AnythingOfType("*model.Secret")).Return(errors.New("db gone"))
+		s.On("SecretDelete", mock.AnythingOfType("*model.Secret")).Return(nil)
+
+		wrapper := NewSecretStore(s)
+		require.NoError(t, wrapper.SetEncryptionService(cipher))
+
+		secret := &model.Secret{Value: "plain"}
+		assert.Error(t, wrapper.SecretCreate(secret))
+		assert.Equal(t, "plain", secret.Value,
+			"failed create must not leak ciphertext into the caller object")
 	})
 }
