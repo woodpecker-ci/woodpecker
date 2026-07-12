@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -267,6 +268,18 @@ func run(ctx context.Context, c *cli.Command) error {
 				stopServerFunc(err)
 				return err
 			}
+			if network == "unix" && c.String("unix-socket-permission") != "" {
+				mode, err := parseUnixSocketPermission(c.String("unix-socket-permission"))
+				if err != nil {
+					stopServerFunc(err)
+					return err
+				}
+				if err := os.Chmod(addr, mode); err != nil {
+					err = fmt.Errorf("could not set unix socket permission: %w", err)
+					stopServerFunc(err)
+					return err
+				}
+			}
 
 			httpServer := &http.Server{
 				Handler: handler,
@@ -321,4 +334,12 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	return serviceWaitingGroup.Wait()
+}
+
+func parseUnixSocketPermission(permission string) (os.FileMode, error) {
+	mode, err := strconv.ParseUint(permission, 8, 32)
+	if err != nil {
+		return 0, fmt.Errorf("invalid unix socket permission %q: %w", permission, err)
+	}
+	return os.FileMode(mode), nil
 }
