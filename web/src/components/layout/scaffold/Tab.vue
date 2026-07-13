@@ -1,7 +1,7 @@
 <template><span /></template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 
 import type { IconNames } from '~/components/atomic/Icon.vue';
@@ -39,4 +39,21 @@ onMounted(() => {
     matchChildren: props.matchChildren,
   });
 });
+
+// tabs register once on mount, so sync later prop changes (e.g. a count that
+// updates after async data finished loading) into the registered entry
+watch(
+  () => [props.title, props.count, props.icon, props.iconClass] as const,
+  () => {
+    const tab = tabs.value.find(({ to }) => isSameRoute(to, props.to));
+    if (!tab) {
+      return;
+    }
+
+    tab.title = props.title;
+    tab.count = props.count;
+    tab.icon = props.icon;
+    tab.iconClass = props.iconClass;
+  },
+);
 </script>
