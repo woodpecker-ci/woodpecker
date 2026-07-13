@@ -7,71 +7,50 @@
         :pipeline="pipeline!"
       />
 
-      <div class="flex grow basis-full flex-col items-stretch md:basis-auto">
-        <div v-if="workflowsWithErrors.length > 0" class="mb-4 w-full">
+      <div class="relative flex grow basis-full items-start justify-center md:basis-auto">
+        <div v-if="showErrorPanel" class="mb-4 w-full md:mb-auto">
           <Panel>
-            <div class="flex flex-col gap-y-3">
-              <div class="flex items-center gap-x-2">
-                <Icon name="alert" class="text-wp-error-100 shrink-0" />
-                <span class="text-lg font-bold">{{ $t('repo.pipeline.workflow_errors') }}</span>
-              </div>
-              <div
-                v-for="workflow in workflowsWithErrors"
-                :key="workflow.id"
-                class="border-wp-background-400 flex flex-col gap-y-1 border-l-2 pl-3"
-              >
-                <span class="font-bold">{{ workflow.name }}</span>
-                <pre class="code-box break-words whitespace-pre-wrap">{{ workflow.error }}</pre>
+            <div class="flex flex-col items-center gap-4 text-center">
+              <Icon name="status-error" class="text-wp-error-100 h-16 w-16" size="1.5rem" />
+              <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
+              <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
+            </div>
+          </Panel>
+        </div>
+
+        <div v-else-if="pipeline!.status === 'blocked'" class="mb-4 w-full md:mb-auto">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-blocked" size="1.5rem" class="h-16 w-16" />
+              <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
+              <div v-if="repoPermissions!.push" class="flex flex-wrap items-center justify-center gap-2">
+                <Button
+                  color="green"
+                  :text="$t('repo.pipeline.protected.approve')"
+                  :is-loading="isApprovingPipeline"
+                  @click="approvePipeline"
+                />
+                <Button
+                  color="red"
+                  :text="$t('repo.pipeline.protected.decline')"
+                  :is-loading="isDecliningPipeline"
+                  @click="declinePipeline"
+                />
               </div>
             </div>
           </Panel>
         </div>
 
-        <div class="relative flex grow items-start justify-center">
-          <div v-if="pipeline!.errors?.some((e) => !e.is_warning)" class="mb-4 w-full md:mb-auto">
-            <Panel>
-              <div class="flex flex-col items-center gap-4 text-center">
-                <Icon name="status-error" class="text-wp-error-100 h-16 w-16" size="1.5rem" />
-                <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
-                <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
-              </div>
-            </Panel>
-          </div>
-
-          <div v-else-if="pipeline!.status === 'blocked'" class="mb-4 w-full md:mb-auto">
-            <Panel>
-              <div class="flex flex-col items-center gap-4">
-                <Icon name="status-blocked" size="1.5rem" class="h-16 w-16" />
-                <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
-                <div v-if="repoPermissions!.push" class="flex flex-wrap items-center justify-center gap-2">
-                  <Button
-                    color="green"
-                    :text="$t('repo.pipeline.protected.approve')"
-                    :is-loading="isApprovingPipeline"
-                    @click="approvePipeline"
-                  />
-                  <Button
-                    color="red"
-                    :text="$t('repo.pipeline.protected.decline')"
-                    :is-loading="isDecliningPipeline"
-                    @click="declinePipeline"
-                  />
-                </div>
-              </div>
-            </Panel>
-          </div>
-
-          <div v-else-if="pipeline!.status === 'declined'" class="mb-4 w-full md:mb-auto">
-            <Panel>
-              <div class="flex flex-col items-center gap-4">
-                <Icon name="status-declined" size="1.5rem" class="text-wp-error-100 h-16 w-16" />
-                <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
-              </div>
-            </Panel>
-          </div>
-
-          <PipelineLog v-else-if="selectedStepId !== null" v-model:step-id="selectedStepId" :pipeline="pipeline!" />
+        <div v-else-if="pipeline!.status === 'declined'" class="mb-4 w-full md:mb-auto">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-declined" size="1.5rem" class="text-wp-error-100 h-16 w-16" />
+              <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
+            </div>
+          </Panel>
         </div>
+
+        <PipelineLog v-else-if="selectedStepId !== null" v-model:step-id="selectedStepId" :pipeline="pipeline!" />
       </div>
     </div>
   </Container>
@@ -94,6 +73,7 @@ import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { PipelineStep } from '~/lib/api/types';
+import { anyStepStarted, workflowsWithErrors } from '~/lib/pipeline';
 
 const props = defineProps<{
   stepId?: string | null;
@@ -113,7 +93,15 @@ const stepId = toRef(props, 'stepId');
 
 const defaultStepId = computed(() => pipeline.value?.workflows?.[0].children?.[0].pid ?? null);
 
-const workflowsWithErrors = computed(() => pipeline.value?.workflows?.filter((w) => !!w.error) ?? []);
+// Replace the log view with the error panel for parse errors, or for workflow
+// runtime errors when no step produced logs yet. If steps already ran (e.g.
+// the error happened during cleanup), keep the logs accessible; the errors
+// tab still points to the details.
+const showErrorPanel = computed(
+  () =>
+    pipeline.value?.errors?.some((e) => !e.is_warning) ||
+    (workflowsWithErrors(pipeline.value).length > 0 && !anyStepStarted(pipeline.value)),
+);
 
 const selectedStepId = computed({
   get() {
