@@ -33,6 +33,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/google/go-github/v88 to v89 [[#6838](https://github.com/woodpecker-ci/woodpecker/pull/6838)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.5 [[#6836](https://github.com/woodpecker-ci/woodpecker/pull/6836)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v6.1.1 [[#6834](https://github.com/woodpecker-ci/woodpecker/pull/6834)]
 - Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.2 [[#6833](https://github.com/woodpecker-ci/woodpecker/pull/6833)]
