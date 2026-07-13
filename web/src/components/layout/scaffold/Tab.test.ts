@@ -88,4 +88,34 @@ describe('tab', () => {
     expect(tabs.value).toHaveLength(1);
     expect(tabs.value[0].title).toBe('Errors');
   });
+
+  it('keeps template order when a tab mounts later than its siblings', async () => {
+    const middleVisible = ref(false);
+    const tabs = ref<TabType[]>([]);
+
+    const host = defineComponent({
+      setup() {
+        return () =>
+          h('div', [
+            h(Tab, { to: { name: 'repo-pipeline' }, title: 'Tasks' }),
+            middleVisible.value ? h(Tab, { to: { name: 'repo-pipeline-errors' }, title: 'Errors' }) : null,
+            h(Tab, { to: { name: 'repo-pipeline-config' }, title: 'Config' }),
+          ]);
+      },
+    });
+
+    mount(host, {
+      global: {
+        provide: { tabs },
+      },
+    });
+    await nextTick();
+
+    expect(tabs.value.map(({ title }) => title)).toStrictEqual(['Tasks', 'Config']);
+
+    middleVisible.value = true;
+    await nextTick();
+
+    expect(tabs.value.map(({ title }) => title)).toStrictEqual(['Tasks', 'Errors', 'Config']);
+  });
 });

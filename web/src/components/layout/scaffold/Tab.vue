@@ -1,7 +1,7 @@
-<template><span /></template>
+<template><span ref="anchor" /></template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue';
+import { markRaw, onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 
 import type { IconNames } from '~/components/atomic/Icon.vue';
@@ -15,6 +15,8 @@ const props = defineProps<{
   iconClass?: string;
   matchChildren?: boolean;
 }>();
+
+const anchor = useTemplateRef('anchor');
 
 const { tabs } = useTabsClient();
 
@@ -30,14 +32,27 @@ onMounted(() => {
     return;
   }
 
-  tabs.value.push({
+  const tab = {
     to: props.to,
     title: props.title,
     count: props.count,
     icon: props.icon,
     iconClass: props.iconClass,
     matchChildren: props.matchChildren,
-  });
+    anchor: markRaw(anchor.value!),
+  };
+
+  // insert before the first tab whose anchor element comes after ours, so a
+  // tab mounting later than its siblings still ends up in template order
+  const index = tabs.value.findIndex(
+    ({ anchor: other }) =>
+      other !== undefined && (anchor.value!.compareDocumentPosition(other) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+  );
+  if (index === -1) {
+    tabs.value.push(tab);
+  } else {
+    tabs.value.splice(index, 0, tab);
+  }
 });
 
 onBeforeUnmount(() => {
