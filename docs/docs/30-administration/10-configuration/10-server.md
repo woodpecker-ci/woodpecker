@@ -663,6 +663,8 @@ openssl rand -hex 32
 
 Store the generated value securely and provide it through `WOODPECKER_GRPC_SECRET` or `WOODPECKER_GRPC_SECRET_FILE`.
 
+After this secret is rotated, connected agents reauthenticate when the server rejects their old token. Agents do not need to be restarted as long as `WOODPECKER_AGENT_SECRET` remains unchanged.
+
 ---
 
 ### GRPC_SECRET_FILE
