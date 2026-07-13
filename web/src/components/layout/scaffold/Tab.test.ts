@@ -44,6 +44,7 @@ describe('tab', () => {
   });
 
   it('does not register the same route twice', async () => {
+    const duplicateVisible = ref(true);
     const tabs = ref<TabType[]>([]);
 
     const host = defineComponent({
@@ -51,7 +52,7 @@ describe('tab', () => {
         return () =>
           h('div', [
             h(Tab, { to: { name: 'repo-pipeline-errors' }, title: 'Errors' }),
-            h(Tab, { to: { name: 'repo-pipeline-errors' }, title: 'Errors' }),
+            duplicateVisible.value ? h(Tab, { to: { name: 'repo-pipeline-errors' }, title: 'Errors' }) : null,
           ]);
       },
     });
@@ -61,6 +62,13 @@ describe('tab', () => {
         provide: { tabs },
       },
     });
+    await nextTick();
+
+    expect(tabs.value).toHaveLength(1);
+
+    // the second instance was skipped by the dedup, so its unmount must not
+    // remove the entry registered by the first, still-mounted instance
+    duplicateVisible.value = false;
     await nextTick();
 
     expect(tabs.value).toHaveLength(1);

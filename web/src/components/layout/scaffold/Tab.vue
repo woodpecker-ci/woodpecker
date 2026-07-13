@@ -1,10 +1,11 @@
 <template><span ref="anchor" /></template>
 
 <script setup lang="ts">
-import { markRaw, onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
+import { markRaw, onBeforeUnmount, onMounted, toRaw, useTemplateRef } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 
 import type { IconNames } from '~/components/atomic/Icon.vue';
+import type { Tab } from '~/compositions/useTabs';
 import { useTabsClient } from '~/compositions/useTabs';
 
 const props = defineProps<{
@@ -19,6 +20,10 @@ const props = defineProps<{
 const anchor = useTemplateRef('anchor');
 
 const { tabs } = useTabsClient();
+
+// the entry this instance registered; stays undefined when the mount-time
+// dedup skips registration, so unmount won't touch another instance's entry
+let registeredTab: Tab | undefined;
 
 // TODO: find a better way to compare routes like
 // https://github.com/vuejs/router/blob/0eaaeb9697acd40ad524d913d0348748e9797acb/packages/router/src/utils/index.ts#L17
@@ -41,6 +46,7 @@ onMounted(() => {
     matchChildren: props.matchChildren,
     anchor: markRaw(anchor.value!),
   };
+  registeredTab = tab;
 
   // insert before the first tab whose anchor element comes after ours, so a
   // tab mounting later than its siblings still ends up in template order
@@ -56,8 +62,11 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  // the mount-time dedup guarantees at most one entry per route, so removing
-  // by route can't drop an entry owned by another still-mounted tab
-  tabs.value = tabs.value.filter(({ to }) => !isSameRoute(to, props.to));
+  if (registeredTab === undefined) {
+    return;
+  }
+
+  // compare raw objects because the tabs ref wraps its entries in reactive proxies
+  tabs.value = tabs.value.filter((tab) => toRaw(tab) !== registeredTab);
 });
 </script>
