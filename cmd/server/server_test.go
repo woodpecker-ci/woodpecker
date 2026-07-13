@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseUnixSocketPermission(t *testing.T) {
+func TestSetUnixSocketPermission(t *testing.T) {
 	tests := []struct {
 		name       string
 		permission string
@@ -48,14 +48,19 @@ func TestParseUnixSocketPermission(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseUnixSocketPermission(tt.permission)
+			path := t.TempDir() + "/socket"
+			require.NoError(t, os.WriteFile(path, []byte(""), 0o600))
+
+			err := setUnixSocketPermission(path, tt.permission)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
 			}
 
 			require.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			info, err := os.Stat(path)
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, info.Mode().Perm())
 		})
 	}
 }

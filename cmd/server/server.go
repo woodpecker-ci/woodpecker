@@ -269,13 +269,7 @@ func run(ctx context.Context, c *cli.Command) error {
 				return err
 			}
 			if network == "unix" && c.String("unix-socket-permission") != "" {
-				mode, err := parseUnixSocketPermission(c.String("unix-socket-permission"))
-				if err != nil {
-					stopServerFunc(err)
-					return err
-				}
-				if err := os.Chmod(addr, mode); err != nil {
-					err = fmt.Errorf("could not set unix socket permission: %w", err)
+				if err := setUnixSocketPermission(addr, c.String("unix-socket-permission")); err != nil {
 					stopServerFunc(err)
 					return err
 				}
@@ -336,10 +330,13 @@ func run(ctx context.Context, c *cli.Command) error {
 	return serviceWaitingGroup.Wait()
 }
 
-func parseUnixSocketPermission(permission string) (os.FileMode, error) {
+func setUnixSocketPermission(path, permission string) error {
 	mode, err := strconv.ParseUint(permission, 8, 32)
 	if err != nil {
-		return 0, fmt.Errorf("invalid unix socket permission %q: %w", permission, err)
+		return fmt.Errorf("invalid unix socket permission %q: %w", permission, err)
 	}
-	return os.FileMode(mode), nil
+	if err := os.Chmod(path, os.FileMode(mode)); err != nil {
+		return fmt.Errorf("could not set unix socket permission: %w", err)
+	}
+	return nil
 }
