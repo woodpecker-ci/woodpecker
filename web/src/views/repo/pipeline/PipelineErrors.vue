@@ -1,9 +1,9 @@
 <template>
   <Panel>
     <div class="flex flex-col gap-y-4">
-      <!-- Runtime errors first: hard parse errors prevent any workflow from
-           running, so the two never compete, and next to parse warnings the
-           runtime error is the actual failure cause. -->
+      <!--  Runtime errors first: hard parse errors prevent any workflow from
+            running, so the two never compete, and next to parse warnings the
+            runtime error is the actual failure cause.  -->
       <div v-if="runtimeErrorWorkflows.length > 0" class="flex flex-col gap-y-4">
         <span class="text-lg font-bold">{{ $t('repo.pipeline.runtime_errors') }}</span>
         <div
