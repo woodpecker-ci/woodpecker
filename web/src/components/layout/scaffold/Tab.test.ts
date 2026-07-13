@@ -74,6 +74,45 @@ describe('tab', () => {
     expect(tabs.value).toHaveLength(1);
   });
 
+  it('keeps the tab when the registering duplicate unmounts before the skipped one', async () => {
+    const firstVisible = ref(true);
+    const secondVisible = ref(true);
+    const tabs = ref<TabType[]>([]);
+
+    const host = defineComponent({
+      setup() {
+        return () =>
+          h('div', [
+            firstVisible.value ? h(Tab, { to: { name: 'repo-pipeline-errors' }, title: 'Errors' }) : null,
+            secondVisible.value ? h(Tab, { to: { name: 'repo-pipeline-errors' }, title: 'Errors' }) : null,
+          ]);
+      },
+    });
+
+    mount(host, {
+      global: {
+        provide: { tabs },
+      },
+    });
+    await nextTick();
+
+    expect(tabs.value).toHaveLength(1);
+
+    // the registering instance goes away, but a matching instance is still
+    // mounted, so the shared tab must survive
+    firstVisible.value = false;
+    await nextTick();
+
+    expect(tabs.value).toHaveLength(1);
+    expect(tabs.value[0].title).toBe('Errors');
+
+    // once the last matching instance unmounts, the tab must disappear
+    secondVisible.value = false;
+    await nextTick();
+
+    expect(tabs.value).toHaveLength(0);
+  });
+
   it('unregisters itself on unmount', async () => {
     const { visible, tabs } = await mountConditionalTab();
 
