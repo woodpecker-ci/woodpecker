@@ -24,6 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/dot_env"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -34,6 +35,8 @@ var backends = []backend_types.Backend{
 }
 
 func main() {
+	dot_env.Load()
+
 	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
 		log.Info().Msg("termination signal is received, shutting down agent")
 	})

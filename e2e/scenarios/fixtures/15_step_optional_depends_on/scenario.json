@@ -1,0 +1,10 @@
+{
+  "name": "step-level optional depends_on drops missing step without error",
+  "event": "push",
+  "expected_status": "success",
+  "expected_workflows": [{ "name": "build", "status": "success" }],
+  "expected_steps": [
+    { "name": "build", "status": "success", "exit_code": 0 },
+    { "name": "deploy", "status": "success", "exit_code": 0 }
+  ]
+}

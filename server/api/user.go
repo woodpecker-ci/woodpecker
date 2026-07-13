@@ -74,7 +74,11 @@ func GetFeed(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error fetching user feed. %s", err)
 		return
 	}
-	c.JSON(http.StatusOK, feed)
+	var fs []*model.APIFeed
+	for _, f := range feed {
+		fs = append(fs, f.ToAPIModel())
+	}
+	c.JSON(http.StatusOK, fs)
 }
 
 // GetRepos
@@ -211,6 +215,25 @@ func GetRepos(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, repos)
+}
+
+func RefreshRepos(c *gin.Context) {
+	_store := store.FromContext(c)
+	user := session.User(c)
+
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	if err := updateRepoPermissions(c, user, _store, _forge, user.ForgeID); err != nil {
+		log.Error().Err(err).Msgf("Can't update repo permissions for user %s in forge %s", user.Login, _forge.Name())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, "Ok")
 }
 
 // PostToken

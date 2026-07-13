@@ -179,6 +179,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -212,6 +213,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgGet", org.ID).Return(org, nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -248,6 +250,9 @@ func TestHandleAuth(t *testing.T) {
 
 		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
 		assert.Equal(t, "/login?error=registration_closed", c.Writer.Header().Get("Location"))
+		// a rejected login must not persist any (broken) user/org row, see #6769
+		_store.AssertNotCalled(t, "CreateUser", mock.Anything)
+		_store.AssertNotCalled(t, "OrgCreate", mock.Anything)
 	})
 
 	t.Run("should deny a user with missing org access", func(t *testing.T) {
@@ -308,6 +313,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -343,6 +349,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgUpdate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -378,6 +385,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgUpdate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)

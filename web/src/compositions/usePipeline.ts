@@ -103,8 +103,10 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return `#${pipeline.value.ref
         .replaceAll('refs/pull/', '')
         .replaceAll('refs/merge-requests/', '')
+        .replaceAll('refs/pull-requests/', '')
         .replaceAll('/merge', '')
-        .replaceAll('/head', '')}`;
+        .replaceAll('/head', '')
+        .replaceAll('/from', '')}`;
     }
 
     return pipeline.value?.ref;

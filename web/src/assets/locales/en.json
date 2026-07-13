@@ -68,6 +68,7 @@
     "branches": "Branches",
     "pull_requests": "Pull requests",
     "add": "Add repository",
+    "refresh": "Refresh repository list",
     "user_none": "This organization/user has no projects yet",
     "not_allowed": "You are not allowed to access this repository",
     "enable": {
@@ -106,7 +107,7 @@
         "success": "Project settings updated",
         "pipeline_path": {
           "path": "Pipeline path",
-          "default": "By default: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+          "by_default": "By default: {paths}",
           "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
           "desc_path_example": "my/path/"
         },
@@ -421,7 +422,8 @@
           "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, the user will regain them when they sign in next time."
         },
         "delete_user": "Delete user",
-        "edit_user": "Edit user"
+        "edit_user": "Edit user",
+        "forge": "Forge"
       },
       "orgs": {
         "orgs": "Organizations",
@@ -458,6 +460,13 @@
           "light": "Light",
           "dark": "Dark",
           "auto": "Auto"
+        },
+        "pipeline_logs": {
+          "pipeline_logs": "Pipeline logs",
+          "collapse_groups": {
+            "collapse": "Collapse log groups by default",
+            "desc": "When opening a finished step, collapse all command groups to show only the outline."
+          }
         }
       },
       "secrets": {

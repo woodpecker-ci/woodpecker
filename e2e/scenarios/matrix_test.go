@@ -76,14 +76,7 @@ func TestMatrixPipeline(t *testing.T) {
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create matrix pipeline")
 	require.NotNil(t, created)
 
@@ -142,14 +135,7 @@ func TestMatrixIncludePipeline(t *testing.T) {
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create matrix include pipeline")
 	require.NotNil(t, created)
 
@@ -214,14 +200,7 @@ steps:
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create single-axis matrix pipeline")
 	require.NotNil(t, created)
 
@@ -262,14 +241,7 @@ steps:
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create non-matrix pipeline")
 	require.NotNil(t, created)
 

@@ -425,7 +425,16 @@
         }
     },
     "repos": "Repo",
-    "repositories": "Repository",
+    "repositories": {
+        "all": {
+            "title": "Tutti i repository",
+            "desc": "Repository ordinati in base alla data di creazione dell'ultima pipeline"
+        },
+        "last": {
+            "title": "Ultima visita",
+            "desc": "Archivi visitati più di recente, ordinati in base alla data di accesso"
+        }
+    },
     "search": "Cerca…",
     "time": {
         "not_started": "non ancora iniziato",
@@ -573,5 +582,6 @@
             "desc": "Pipeline create dagli utenti elencati non richiedono mai approvazione."
         }
     },
-    "org_access_denied": "Non sei autorizzato ad accedere a questa organizzazione"
+    "org_access_denied": "Non sei autorizzato ad accedere a questa organizzazione",
+    "login_to_woodpecker_with": "Accedi a Woodpecker con"
 }

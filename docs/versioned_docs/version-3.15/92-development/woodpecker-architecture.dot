@@ -1,0 +1,157 @@
+digraph WoodpeckerArchitecture {
+  graph [
+    rankdir=TB,
+    splines=ortho,
+    nodesep=0.5,
+    ranksep=0.8,
+    fontname="Helvetica"
+  ]
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#2b2b2b",
+    fontcolor="white",
+    fontname="Helvetica"
+  ]
+
+  edge [
+    color="#bdbdbd",
+    arrowsize=0.7
+  ]
+
+  /* ===================== UI ===================== */
+  subgraph cluster_ui {
+    label="UI"
+    fillcolor="#c7efe9"
+    fontcolor="black"
+    style="rounded,filled"
+
+    ui_web [label="web/"]
+  }
+
+  /* ===================== SDK ===================== */
+  subgraph cluster_sdk {
+    label="SDK (woodpecker-go)"
+    fillcolor="#e8f5e9"
+    fontcolor="black"
+    style="rounded,filled"
+
+    sdk [label="woodpecker-go"]
+  }
+
+  /* ===================== CLI ===================== */
+  subgraph cluster_cli {
+    label="woodpecker-cli"
+    fillcolor="#bfe9e0"
+    fontcolor="black"
+    style="rounded,filled"
+
+    cli_cmd  [label="cmd/cli/"]
+    cli_core [label="cli/"]
+  }
+
+  /* ===================== Agent ===================== */
+  subgraph cluster_agent {
+    label="woodpecker-agent"
+    fillcolor="#ffe0c7"
+    fontcolor="black"
+    style="rounded,filled"
+
+    agent_cmd  [label="cmd/agent/"]
+    agent_core [label="agent/"]
+  }
+
+  /* ===================== Pipelines ===================== */
+  subgraph cluster_pipelines {
+    label="Pipelines"
+    fillcolor="#ffe8d6"
+    fontcolor="black"
+    style="rounded,filled"
+
+    pipe_core      [label="pipeline/"]
+    pipe_frontend  [label="pipeline/frontend/\n(yaml)"]
+    pipe_backend   [label="pipeline/backend/\n(exec engines)"]
+  }
+
+  /* ===================== Server ===================== */
+  subgraph cluster_server {
+    label="woodpecker-server"
+    fillcolor="#dbe9ff"
+    fontcolor="black"
+    style="rounded,filled"
+
+    srv_cmd     [label="cmd/server/"]
+    srv_router  [label="server/router/"]
+    srv_api     [label="server/api/"]
+    srv_grpc    [label="server/rpc/"]
+    srv_queue   [label="server/queue/"]
+    srv_pubsub  [label="server/pubsub/"]
+    srv_store   [label="server/store/"]
+    srv_model   [label="server/model/"]
+    srv_forge   [label="server/forge/"]
+  }
+
+  /* ===================== Shared Libs ===================== */
+  subgraph cluster_shared {
+    label="Shared Libs"
+    fillcolor="#eeeeee"
+    fontcolor="black"
+    style="rounded,filled"
+
+    shared_util   [label="shared/util/"]
+    shared_token  [label="shared/token/"]
+    shared_http   [label="shared/httputil/"]
+    shared_log    [label="shared/logger/"]
+  }
+
+  /* ===================== External ===================== */
+  subgraph cluster_external {
+    label="External Systems"
+    style="rounded,dashed"
+    fontcolor="white"
+
+    ext_scm [label="SCM Providers", shape=cloud]
+    ext_db  [label="Database", shape=cylinder]
+  }
+
+  /* ===================== Runtime Interactions ===================== */
+
+  /* UI */
+  ui_web -> srv_router [xlabel="HTTP"]
+  ui_web -> srv_api    [xlabel="REST API"]
+
+  /* CLI */
+  cli_cmd  -> cli_core
+  cli_core -> sdk
+  sdk      -> srv_api [xlabel="REST API"]
+
+  /* Agent */
+  agent_cmd  -> agent_core
+  agent_core -> srv_grpc  [xlabel="gRPC connect"]
+  agent_core -> srv_queue [xlabel="poll work"]
+  agent_core -> pipe_backend [xlabel="execute steps"]
+
+  /* Pipelines */
+  pipe_frontend -> pipe_core
+  pipe_core     -> pipe_backend
+
+  /* Server internal flow */
+  srv_cmd    -> srv_router
+  srv_router -> srv_api
+  srv_api    -> srv_store
+  srv_api    -> srv_pubsub
+  srv_api    -> srv_queue
+  srv_grpc   -> srv_queue
+  srv_store  -> srv_model
+
+  /* External integrations */
+  srv_forge -> ext_scm [xlabel="SCM API"]
+  srv_store -> ext_db  [xlabel="SQL"]
+
+  /* Shared libs usage (consumer -> library) */
+  srv_router -> shared_token
+  srv_api    -> shared_http
+  srv_grpc   -> shared_log
+  pipe_core  -> shared_util
+}

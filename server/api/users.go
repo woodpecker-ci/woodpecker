@@ -162,6 +162,11 @@ func PostUser(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
+
+	if in.ForgeID < defaultForgeID {
+		in.ForgeID = defaultForgeID
+	}
+
 	user := &model.User{
 		Login:  in.Login,
 		Email:  in.Email,
