@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v88/github"
+	"github.com/google/go-github/v89/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -588,8 +588,8 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		}
 		id, _ := strconv.Atoi(matches[1])
 
-		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), &github.DeploymentStatusRequest{
-			State:       github.Ptr(convertStatus(pipeline.Status)),
+		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), github.DeploymentStatusRequest{
+			State:       convertStatus(pipeline.Status),
 			Description: github.Ptr(common.GetPipelineStatusDescription(pipeline.Status)),
 			LogURL:      github.Ptr(common.GetPipelineStatusURL(repo, pipeline, nil)),
 		})
