@@ -75,6 +75,11 @@ var flags = append([]cli.Flag{
 		Value:   ":8000",
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_UNIX_SOCKET_PERMISSION"),
+		Name:    "unix-socket-permission",
+		Usage:   "file mode for the HTTP unix socket, for example 660 or 666",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER_ADDR_TLS"),
 		Name:    "server-addr-tls",
 		Usage:   "port https with tls (:443)",
