@@ -1,7 +1,7 @@
 <template><span /></template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onBeforeUnmount, onMounted } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 
 import type { IconNames } from '~/components/atomic/Icon.vue';
@@ -38,5 +38,11 @@ onMounted(() => {
     iconClass: props.iconClass,
     matchChildren: props.matchChildren,
   });
+});
+
+onBeforeUnmount(() => {
+  // the mount-time dedup guarantees at most one entry per route, so removing
+  // by route can't drop an entry owned by another still-mounted tab
+  tabs.value = tabs.value.filter(({ to }) => !isSameRoute(to, props.to));
 });
 </script>
