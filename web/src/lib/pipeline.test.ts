@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Pipeline } from '~/lib/api/types';
 
-import { anyStepStarted, pipelineHasErrorsToShow, workflowsWithErrors } from './pipeline';
+import { anyStepStarted, hasHardParseErrors, pipelineHasErrorsToShow, workflowsWithErrors } from './pipeline';
 
 function fakePipeline(overrides: Partial<Pipeline> = {}): Pipeline {
   return {
@@ -125,5 +125,28 @@ describe('anyStepStarted', () => {
       ],
     });
     expect(anyStepStarted(pipeline)).toBe(true);
+  });
+});
+
+describe('hasHardParseErrors', () => {
+  it('is false without pipeline errors', () => {
+    expect(hasHardParseErrors(fakePipeline())).toBe(false);
+  });
+
+  it('is false when all pipeline errors are warnings', () => {
+    const pipeline = fakePipeline({
+      errors: [{ type: 'linter', message: 'meh', is_warning: true }],
+    });
+    expect(hasHardParseErrors(pipeline)).toBe(false);
+  });
+
+  it('is true when a non-warning pipeline error exists', () => {
+    const pipeline = fakePipeline({
+      errors: [
+        { type: 'linter', message: 'meh', is_warning: true },
+        { type: 'compiler', message: 'bad yaml', is_warning: false },
+      ],
+    });
+    expect(hasHardParseErrors(pipeline)).toBe(true);
   });
 });
