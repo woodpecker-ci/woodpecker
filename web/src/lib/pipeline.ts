@@ -12,10 +12,6 @@ export function anyStepStarted(pipeline?: Pipeline): boolean {
   );
 }
 
-export function hasHardParseErrors(pipeline?: Pipeline): boolean {
-  return pipeline?.errors?.some((e) => !e.is_warning) ?? false;
-}
-
 export function pipelineHasErrorsToShow(pipeline?: Pipeline): boolean {
-  return hasHardParseErrors(pipeline) || workflowsWithErrors(pipeline).length > 0;
+  return (pipeline?.errors?.some((e) => !e.is_warning) ?? false) || workflowsWithErrors(pipeline).length > 0;
 }

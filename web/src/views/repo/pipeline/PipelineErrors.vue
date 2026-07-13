@@ -1,14 +1,28 @@
 <template>
   <Panel>
     <div class="flex flex-col gap-y-4">
-      <!-- Hard parse errors block the pipeline and come first; if parsing only
-           produced warnings, the runtime errors are the real failure cause and
-           are shown on top instead. -->
-      <div
-        v-if="pipeline!.errors && pipeline!.errors.length > 0"
-        class="flex flex-col gap-y-4"
-        :class="hasHardParseErrors(pipeline) ? 'order-1' : 'order-2'"
-      >
+      <!-- Runtime errors first: hard parse errors prevent any workflow from
+           running, so the two never compete, and next to parse warnings the
+           runtime error is the actual failure cause. -->
+      <div v-if="runtimeErrorWorkflows.length > 0" class="flex flex-col gap-y-4">
+        <span class="text-lg font-bold">{{ $t('repo.pipeline.runtime_errors') }}</span>
+        <div
+          v-for="workflow in runtimeErrorWorkflows"
+          :key="workflow.id"
+          class="grid grid-cols-[minmax(10rem,auto)_3fr]"
+        >
+          <span class="flex items-start gap-x-2">
+            <Icon name="alert" class="text-wp-error-100 my-1 shrink-0" />
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+            <span class="my-1">
+              <code>{{ workflow.name }}</code>
+            </span>
+          </span>
+          <pre class="code-box break-words whitespace-pre-wrap">{{ workflow.error }}</pre>
+        </div>
+      </div>
+
+      <div v-if="pipeline!.errors && pipeline!.errors.length > 0" class="flex flex-col gap-y-4">
         <span class="text-lg font-bold">{{ $t('repo.pipeline.parse_errors') }}</span>
         <template v-for="(error, _index) in pipeline!.errors" :key="_index">
           <div>
@@ -53,28 +67,6 @@
           </div>
         </template>
       </div>
-
-      <div
-        v-if="runtimeErrorWorkflows.length > 0"
-        class="flex flex-col gap-y-4"
-        :class="hasHardParseErrors(pipeline) ? 'order-2' : 'order-1'"
-      >
-        <span class="text-lg font-bold">{{ $t('repo.pipeline.runtime_errors') }}</span>
-        <div
-          v-for="workflow in runtimeErrorWorkflows"
-          :key="workflow.id"
-          class="grid grid-cols-[minmax(10rem,auto)_3fr]"
-        >
-          <span class="flex items-start gap-x-2">
-            <Icon name="alert" class="text-wp-error-100 my-1 shrink-0" />
-            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-            <span class="my-1">
-              <code>{{ workflow.name }}</code>
-            </span>
-          </span>
-          <pre class="code-box break-words whitespace-pre-wrap">{{ workflow.error }}</pre>
-        </div>
-      </div>
     </div>
   </Panel>
 </template>
@@ -90,7 +82,7 @@ import Panel from '~/components/layout/Panel.vue';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { PipelineError } from '~/lib/api/types';
-import { hasHardParseErrors, pipelineHasErrorsToShow, workflowsWithErrors } from '~/lib/pipeline';
+import { pipelineHasErrorsToShow, workflowsWithErrors } from '~/lib/pipeline';
 
 const repo = requiredInject('repo');
 const pipeline = requiredInject('pipeline');
