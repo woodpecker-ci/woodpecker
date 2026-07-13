@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-12
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @DerRockWolf, @Kernald, @TowyTowy, @healdropper, @kanywst
+@6543, @DerRockWolf, @Kernald, @TowyTowy, @cyphercodes, @healdropper, @kanywst
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- feat(server): add unix socket permission option [[#6839](https://github.com/woodpecker-ci/woodpecker/pull/6839)]
 - Add step type label to step-level Prometheus metrics [[#6824](https://github.com/woodpecker-ci/woodpecker/pull/6824)]
 - docs: add note about `pull_request` events with `path` filter and correct comment about `on_empty` [[#6819](https://github.com/woodpecker-ci/woodpecker/pull/6819)]
 - Stamp trusted commit-branch and event pod labels [[#6802](https://github.com/woodpecker-ci/woodpecker/pull/6802)]
