@@ -4515,6 +4515,47 @@ func (_c *MockClient_SetLogLevel_Call) RunAndReturn(run func(logLevel *woodpecke
 	return _c
 }
 
+// StreamLogEntries provides a mock function for the type MockClient
+func (_mock *MockClient) StreamLogEntries(repoID int64, pipeline int64, stepID int64) (<-chan *LogEntry, <-chan error, error) {
+	ret := _mock.Called(repoID, pipeline, stepID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for StreamLogEntries")
+	}
+
+	var r0 <-chan *LogEntry
+	var r1 <-chan error
+	var r2 error
+
+	if returnFunc, ok := ret.Get(0).(func(int64, int64, int64) (<-chan *LogEntry, <-chan error, error)); ok {
+		return returnFunc(repoID, pipeline, stepID)
+	}
+
+	if returnFunc, ok := ret.Get(0).(func(int64, int64, int64) <-chan *LogEntry); ok {
+		r0 = returnFunc(repoID, pipeline, stepID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan *LogEntry)
+		}
+	}
+
+	if returnFunc, ok := ret.Get(1).(func(int64, int64, int64) <-chan error); ok {
+		r1 = returnFunc(repoID, pipeline, stepID)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(<-chan error)
+		}
+	}
+
+	if returnFunc, ok := ret.Get(2).(func(int64, int64, int64) error); ok {
+		r2 = returnFunc(repoID, pipeline, stepID)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // StepLogEntries provides a mock function for the type MockClient
 func (_mock *MockClient) StepLogEntries(repoID int64, pipeline int64, stepID int64) ([]*woodpecker.LogEntry, error) {
 	ret := _mock.Called(repoID, pipeline, stepID)

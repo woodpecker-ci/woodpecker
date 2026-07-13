@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -123,6 +124,71 @@ func (c *client) do(rawURL, method string, in, out any) error {
 		return json.NewDecoder(body).Decode(out)
 	}
 	return nil
+}
+
+// Helper function to make an http stream request.
+func (c *client) stream(rawURL, method string, in any) (<-chan map[string]string, <-chan error, error) {
+	body, err := c.open(rawURL, method, in)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	msgCh := make(chan map[string]string)
+	errCh := make(chan error, 1)
+
+	go func() {
+		defer body.Close()
+
+		defer close(msgCh)
+		defer close(errCh)
+
+		reader := bufio.NewReader(body)
+
+		msgBuffer := make(map[string]string)
+
+		for {
+			select {
+
+			default:
+				line, err := reader.ReadString('\n')
+				if err != nil {
+					errCh <- err
+					return
+				}
+
+				line = strings.TrimSpace(line)
+
+				if line == "" {
+					msgCh <- msgBuffer
+					msgBuffer = make(map[string]string)
+
+					continue
+				}
+
+				parts := strings.Split(line, ":")
+				if len(parts) == 0 {
+					continue
+				}
+
+				key := parts[0]
+				value := ""
+				if len(parts) > 1 {
+					value = strings.Join(parts[1:], ":")
+				}
+
+				if key == "" {
+					continue
+				}
+
+				if _, ok := msgBuffer[key]; ok {
+					continue
+				}
+				msgBuffer[key] = strings.TrimSpace(value)
+			}
+		}
+	}()
+
+	return msgCh, errCh, nil
 }
 
 // Helper function to open an http request.
