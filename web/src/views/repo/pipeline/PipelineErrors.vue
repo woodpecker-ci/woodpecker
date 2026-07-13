@@ -33,6 +33,9 @@
                 :url="error.data?.docs || ''"
               />
             </span>
+            <span v-else-if="isConfigExtensionError(error)" class="flex items-center gap-x-2 whitespace-nowrap">
+              <DocsLink :topic="error.type" url="docs/usage/extensions/configuration-extension" />
+            </span>
             <span v-else />
           </div>
           <div class="col-start-2 grid grid-cols-[minmax(10rem,auto)_4fr]">
@@ -74,6 +77,10 @@ function isDeprecationError(
 
 function isBadHabitError(error: PipelineError): error is PipelineError<{ file?: string; field: string; docs: string }> {
   return error.type === 'bad_habit';
+}
+
+function isConfigExtensionError(error: PipelineError): boolean {
+  return error.type === 'config_extension';
 }
 
 const { t } = useI18n();
