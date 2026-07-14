@@ -39,3 +39,9 @@ type EncryptionClient interface {
 	// MigrateEncryption should decrypt all existing data and encrypt it with new encryption service
 	MigrateEncryption(newEncryption EncryptionService) error
 }
+
+// EncryptedValuePrefix marks stored values that hold ciphertext. Values
+// without this prefix are treated as plaintext, which keeps reads working in
+// mixed states and lets interrupted enable/migrate runs resume by skipping
+// rows that are already encrypted.
+const EncryptedValuePrefix = "woodpecker-enc:v1:"

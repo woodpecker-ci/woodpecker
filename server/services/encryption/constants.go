@@ -36,6 +36,7 @@ var (
 	errEncryptionNotEnabled = errors.New("encryption is not enabled")
 	errEncryptionKeyInvalid = errors.New("encryption key is invalid")
 	errEncryptionKeyRotated = errors.New("encryption key is being rotated")
+	errCiphertextTooShort   = errors.New("ciphertext too short")
 )
 
 const (
@@ -91,6 +92,8 @@ const (
 
 // AES.
 const (
+	keyIDDomainSeparation = "woodpecker-encryption-key-id/v1"
+
 	// Error wrapping templates.
 	errTemplateAesFailedLoadingCipher   = "failed loading encryption cipher: %w"
 	errTemplateAesFailedCalculatingHash = "failed calculating hash: %w"

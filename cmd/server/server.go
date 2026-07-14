@@ -42,6 +42,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption"
+	wrapperStore "go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/wrapper/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/web"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
@@ -116,6 +118,19 @@ func run(ctx context.Context, c *cli.Command) error {
 			log.Error().Err(err).Msg("could not close store")
 		}
 	}()
+
+	// route secrets, registries and user tokens through the encrypting
+	// store. All encryption clients have to be registered on this single
+	// builder run.
+	encryptedStore := wrapperStore.NewEncryptedStore(_store)
+	encryptionBuilder := encryption.Encryption(c, _store)
+	for _, client := range encryptedStore.Clients() {
+		encryptionBuilder = encryptionBuilder.WithClient(client)
+	}
+	if err := encryptionBuilder.Build(); err != nil {
+		return fmt.Errorf("could not create encryption service: %w", err)
+	}
+	_store = encryptedStore
 
 	err = setupEvilGlobals(ctx, c, _store)
 	if err != nil {

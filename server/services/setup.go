@@ -55,14 +55,6 @@ func setupRegistryService(store store.Store, dockerConfig, endpoint string, incl
 }
 
 func setupSecretService(store store.Store, endpoint string, client *utils.Client, includeNetrc bool) secret.Service {
-	// TODO(1544): fix encrypted store
-	// // encryption
-	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
-	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("could not create encryption service")
-	// }
-
 	if endpoint != "" {
 		return secret.NewCombined(secret.NewDB(store), secret.NewHTTP(endpoint, client, includeNetrc))
 	}

@@ -65,10 +65,11 @@ func (svc *tinkEncryptionService) validateKeyset() error {
 	}
 
 	plaintext, err := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
+	if err != nil {
+		return fmt.Errorf("%w: %s", errEncryptionKeyInvalid, err)
+	}
 	if plaintext != svc.primaryKeyID {
 		return errEncryptionKeyRotated
-	} else if err != nil {
-		return fmt.Errorf(errTemplateFailedValidatingKey, err)
 	}
 	return nil
 }

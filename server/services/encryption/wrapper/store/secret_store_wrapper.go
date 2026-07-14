@@ -53,6 +53,10 @@ func (wrapper *EncryptedSecretStore) EnableEncryption() error {
 		return fmt.Errorf(errMessageTemplateFailedToEnable, err)
 	}
 	for _, secret := range secrets {
+		if isMarkedValue(secret.Value) {
+			// already encrypted by an earlier, interrupted run
+			continue
+		}
 		if err := wrapper.encrypt(secret); err != nil {
 			return err
 		}
@@ -73,21 +77,25 @@ func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService type
 	if err := wrapper.decryptList(secrets); err != nil {
 		return err
 	}
-	wrapper.encryption = newEncryptionService
 	for _, secret := range secrets {
-		if err := wrapper.encrypt(secret); err != nil {
+		if err := wrapper.encryptWith(newEncryptionService, secret); err != nil {
 			return err
 		}
 		if err := wrapper._save(secret); err != nil {
 			return err
 		}
 	}
+	wrapper.encryption = newEncryptionService
 	log.Warn().Msg(logMessageMigratingSecretsEncryptionSuccess)
 	return nil
 }
 
 func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) error {
-	encryptedValue, err := wrapper.encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
+	return wrapper.encryptWith(wrapper.encryption, secret)
+}
+
+func (wrapper *EncryptedSecretStore) encryptWith(encryption types.EncryptionService, secret *model.Secret) error {
+	encryptedValue, err := encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
 		return fmt.Errorf(errMessageTemplateFailedToEncryptSecret, secret.ID, err)
 	}
@@ -106,9 +114,8 @@ func (wrapper *EncryptedSecretStore) decrypt(secret *model.Secret) error {
 
 func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) error {
 	for _, secret := range secrets {
-		err := wrapper.decrypt(secret)
-		if err != nil {
-			return fmt.Errorf(errMessageTemplateFailedToDecryptSecret, secret.ID, err)
+		if err := wrapper.decrypt(secret); err != nil {
+			return err
 		}
 	}
 	return nil

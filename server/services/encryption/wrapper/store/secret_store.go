@@ -52,6 +52,9 @@ func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
 	}
 	secret.ID = newSecret.ID
 
+	plainValue := secret.Value
+	defer func() { secret.Value = plainValue }()
+
 	err = wrapper.encrypt(secret)
 	if err != nil {
 		deleteErr := wrapper.store.SecretDelete(newSecret)
@@ -70,29 +73,19 @@ func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
 		return err
 	}
 
-	err = wrapper.decrypt(secret)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (wrapper *EncryptedSecretStore) SecretUpdate(secret *model.Secret) error {
+	plainValue := secret.Value
+	defer func() { secret.Value = plainValue }()
+
 	err := wrapper.encrypt(secret)
 	if err != nil {
 		return err
 	}
 
-	err = wrapper.store.SecretUpdate(secret)
-	if err != nil {
-		return err
-	}
-
-	err = wrapper.decrypt(secret)
-	if err != nil {
-		return err
-	}
-	return nil
+	return wrapper.store.SecretUpdate(secret)
 }
 
 func (wrapper *EncryptedSecretStore) SecretDelete(secret *model.Secret) error {

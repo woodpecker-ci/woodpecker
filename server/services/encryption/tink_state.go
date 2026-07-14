@@ -62,15 +62,18 @@ func (svc *tinkEncryptionService) rotate() error {
 	}
 
 	err := newSvc.validateKeyset()
-	if errors.Is(err, errEncryptionKeyRotated) {
-		err = newSvc.updateCiphertextSample()
-	}
-	if err != nil {
+	if err != nil && !errors.Is(err, errEncryptionKeyRotated) {
 		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 
 	if err := newSvc.callbackOnRotation(); err != nil {
 		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
+	}
+
+	if errors.Is(err, errEncryptionKeyRotated) {
+		if err := newSvc.updateCiphertextSample(); err != nil {
+			return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
+		}
 	}
 
 	if err := newSvc.initFileWatcher(); err != nil {
