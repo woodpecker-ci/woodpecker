@@ -137,7 +137,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	exponentialBackoff := backoff.NewExponentialBackOff()
 
 	// Execute with backoff retry
-	return backoff.Retry(
+	status, err := backoff.Retry(
 		ctx, func() (int, error) {
 			// Check if context is already canceled
 			if ctx.Err() != nil {
@@ -220,6 +220,14 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 			log.Debug().Err(err).Msgf("HTTP request failed, retrying in %v: %s %s", delay, method, path)
 		}),
 	)
+
+	// backoff wraps the final error in a *RetryError; unwrap it so callers see
+	// the actual underlying error (e.g. *HTTPStatusError) without the backoff prefix.
+	if retryErr := backoff.AsRetryError(err); retryErr != nil {
+		err = retryErr.LastErr
+	}
+
+	return status, err
 }
 
 // isRetryableError checks if an error is transient and suitable for retry.
