@@ -655,7 +655,7 @@ If you want an unix socket use `unix://` prefix, for example `unix:///run/woodpe
 
 Configures the secret used to sign JWTs for gRPC connections.
 
-If this setting is empty, the server generates a secure temporary secret and logs a warning. The generated secret is not persisted and changes each time the server starts. Configure and persist a secret to keep it stable across restarts. Generate a secure secret with:
+If this setting is empty, the server generates a secure temporary secret and logs a warning. The generated secret is not persisted and changes each time the server starts. Configure and persist a secret to keep it stable across restarts. Setting this explicitly is important for high availability (HA) setups with multiple server replicas: each replica would otherwise generate its own secret and reject the gRPC tokens issued by the other replicas. Generate a secure secret with:
 
 ```shell
 openssl rand -hex 32
