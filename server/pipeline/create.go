@@ -79,7 +79,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
 	switch {
-	case errors.Is(configFetchErr, &configExtensionErr):
+	case errors.Is(configFetchErr, &config.ErrConfigExtension{}):
 		// the config extension explicitly rejected the pipeline
 		var extErr *config.ErrConfigExtension
 		_ = errors.As(configFetchErr, &extErr)
