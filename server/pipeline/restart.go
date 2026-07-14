@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 
 	"github.com/rs/zerolog/log"
 
@@ -62,7 +63,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		}
 	}
 
-	newPipeline := createNewOutOfOld(lastPipeline)
+	newPipeline := createNewOutOfOld(lastPipeline, envs)
 	newPipeline.Parent = lastPipeline.Number
 	newPipeline.RerunCount++
 	newPipeline.Version = version.String()
@@ -89,7 +90,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	newPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs, false)
+	newPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, nil, false)
 	if handleParseErrors(newPipeline, parseErr) {
 		if newPipeline, uErr := UpdateToStatusError(store, *newPipeline, parseErr); uErr != nil {
 			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, newPipeline.Number)
@@ -132,7 +133,11 @@ func linkPipelineConfigs(store store.Store, configs []*model.Config, pipelineID 
 	return nil
 }
 
-func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
+// createNewOutOfOld derives the restarted pipeline from the old one.
+// Restart-supplied variables (envs) are merged into AdditionalVariables so
+// they are persisted with the new pipeline and available to any later
+// (re-)compilation; explicit restart input wins over inherited variables.
+func createNewOutOfOld(old *model.Pipeline, envs map[string]string) *model.Pipeline {
 	newPipeline := *old
 	newPipeline.ID = 0
 	newPipeline.Number = 0
@@ -140,5 +145,11 @@ func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	newPipeline.Started = 0
 	newPipeline.Finished = 0
 	newPipeline.Errors = nil
+
+	variables := make(map[string]string, len(old.AdditionalVariables)+len(envs))
+	maps.Copy(variables, old.AdditionalVariables)
+	maps.Copy(variables, envs)
+	newPipeline.AdditionalVariables = variables
+
 	return &newPipeline
 }

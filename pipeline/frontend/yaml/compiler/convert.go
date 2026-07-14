@@ -99,6 +99,10 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	workingDir = c.stepWorkingDir(container)
 
 	getSecretValue := func(name string) (string, error) {
+		if c.deferredSecrets {
+			return "", nil
+		}
+
 		name = strings.ToLower(name)
 		secret, ok := c.secrets[name]
 		if !ok {

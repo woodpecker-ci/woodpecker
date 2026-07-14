@@ -15,13 +15,11 @@
 package pipeline
 
 import (
-	"encoding/json"
 	"fmt"
 	"maps"
 	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
-	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -66,14 +64,10 @@ func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineIte
 			}
 		}
 
-		task.Data, err = json.Marshal(rpc.Workflow{
-			ID:      fmt.Sprint(item.Workflow.ID),
-			Config:  item.Config,
-			Timeout: repo.Timeout,
-		})
-		if err != nil {
-			return nil, err
-		}
+		// The task deliberately carries no payload: the workflow is compiled
+		// at agent fetch time (see rpc.Next / pipeline.CompileWorkflow), so
+		// no secrets are stored in the queue and oauth tokens cannot expire
+		// while a task is waiting.
 
 		tasks = append(tasks, task)
 	}

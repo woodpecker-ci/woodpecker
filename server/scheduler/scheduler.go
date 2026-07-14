@@ -36,13 +36,14 @@ type FilterFn func(*model.Task) (bool, int)
 type Scheduler interface {
 	// Queue operations.
 	//
-	// Poll blocks until the next runnable workflow for the given agent is
-	// available. It applies the agent's label filter, transparently skips
+	// Poll blocks until the next runnable workflow task for the given agent
+	// is available. It applies the agent's label filter, transparently skips
 	// tasks whose dependencies preclude running (invoking markSkipped so the
-	// caller can finalize them), and returns the runnable workflow.
+	// caller can finalize them), and returns the runnable task. Turning the
+	// task into the workflow payload an agent executes is the caller's job.
 	// TODO: markSkipped is a callback helper that is only needed as we use the rpc.Done to mark skipped workflows as done
 	// this is a hack for another refactor later.
-	Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*rpc.Workflow, error)
+	Poll(c context.Context, agentID int64, agentFilter rpc.Filter, markSkipped func(taskID string) error) (*model.Task, error)
 	Extend(c context.Context, agentID int64, workflowID string) error
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
 	Error(c context.Context, id string, err error) error

@@ -35,17 +35,22 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+// pipelineCredentials bundles everything the compiler embeds into the backend
+// config that is secret or short-lived: forge netrc credentials, pipeline
+// secrets and registry credentials.
+type pipelineCredentials struct {
+	netrc      *model.Netrc
+	secrets    []compiler.Secret
+	registries []compiler.Registry
+}
+
+// collectCredentials gathers the netrc, secrets and registry credentials a
+// pipeline compiles with.
+func collectCredentials(ctx context.Context, forge forge.Forge, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*pipelineCredentials, error) {
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
 		netrc = &model.Netrc{}
-	}
-
-	// get the previous pipeline so that we can send status change notifications
-	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
@@ -82,6 +87,40 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			Username: reg.Username,
 			Password: reg.Password,
 		})
+	}
+
+	return &pipelineCredentials{
+		netrc:      netrc,
+		secrets:    secrets,
+		registries: registries,
+	}, nil
+}
+
+// parsePipeline fully parses and compiles a pipeline, embedding freshly
+// gathered credentials (netrc, secrets, registries) into the result.
+func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+	credentials, err := collectCredentials(ctx, forge, currentPipeline, user, repo)
+	if err != nil {
+		return nil, err
+	}
+
+	return parsePipelineWithCredentials(ctx, forge, store, currentPipeline, user, repo, forgeYamls, envs, credentials, false)
+}
+
+// parsePipelineHollow parses and compiles a pipeline without gathering any
+// credentials: secret references stay unresolved and the netrc is empty. The
+// result only serves to derive the workflow/step structure, labels and
+// dependencies at pipeline creation time; the config an agent executes is
+// produced by a full compilation at fetch time.
+func parsePipelineHollow(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+	return parsePipelineWithCredentials(ctx, forge, store, currentPipeline, user, repo, forgeYamls, envs, &pipelineCredentials{netrc: &model.Netrc{}}, true)
+}
+
+func parsePipelineWithCredentials(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string, credentials *pipelineCredentials, hollow bool) ([]*builder.Item, error) {
+	// get the previous pipeline so that we can send status change notifications
+	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
 	if envs == nil {
@@ -125,8 +164,8 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
 		CompilerOptions: []compiler.Option{
 			compiler.WithLocal(false),
-			compiler.WithRegistry(registries...),
-			compiler.WithSecret(secrets...),
+			compiler.WithRegistry(credentials.registries...),
+			compiler.WithSecret(credentials.secrets...),
 			compiler.WithProxy(compiler.ProxyOptions{
 				NoProxy:    server.Config.Pipeline.Proxy.No,
 				HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
@@ -136,15 +175,19 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			compiler.WithNetworks(server.Config.Pipeline.Networks...),
 			compiler.WithOption(
 				compiler.WithNetrc(
-					netrc.Login,
-					netrc.Password,
-					netrc.Machine,
+					credentials.netrc.Login,
+					credentials.netrc.Password,
+					credentials.netrc.Machine,
 				),
 				repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 			),
 			compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
 			compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
 		},
+	}
+
+	if hollow {
+		b.CompilerOptions = append(b.CompilerOptions, compiler.WithDeferredSecrets())
 	}
 
 	// TODO: remove with version 4.x
@@ -182,7 +225,10 @@ func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Sto
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string, replaceExisting bool,
 ) (pipeline *model.Pipeline, items []*builder.Item, parseErr, err error) {
-	pipelineItems, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
+	// only a hollow parse: the workflow/step structure, labels and
+	// dependencies are derived and persisted here, while the config an agent
+	// executes is compiled with fresh credentials at fetch time.
+	pipelineItems, parseErr := parsePipelineHollow(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(parseErr) {
 		return currentPipeline, nil, parseErr, nil
 	}

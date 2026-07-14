@@ -18,6 +18,7 @@ package rpc
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
@@ -54,6 +55,10 @@ type RPC struct {
 	store         store.Store
 	pipelineTime  *prometheus.GaugeVec
 	pipelineCount *prometheus.CounterVec
+	// compileWorkflow compiles the payload of a task queued without data
+	// (deferred compilation). Defaults to pipeline.CompileWorkflow; only
+	// tests replace it.
+	compileWorkflow func(c context.Context, store store.Store, workflowID int64) (*rpc.Workflow, error)
 }
 
 // Next blocks until it provides the next workflow to execute.
@@ -83,7 +88,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
+	task, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
 		// a skipped workflow is finalized through the regular Done flow; it
 		// was never initialized by an agent, so lock it to this agent first
 		// to satisfy the workflow ownership check.
@@ -92,15 +97,61 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		}
 		return s.Done(c, taskID, rpc.WorkflowState{})
 	})
-	if err != nil || rpcWorkflow == nil {
+	if err != nil || task == nil {
 		return nil, err
 	}
 
-	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
+	if err := s.lockAgentToWorkflow(c, agent, task.ID); err != nil {
 		return nil, err
+	}
+
+	rpcWorkflow, err := s.taskWorkflowPayload(c, task)
+	if err != nil {
+		log.Error().Err(err).Str("workflow_id", task.ID).Msg("failed to compile workflow at fetch time, marking it as failed")
+		// finalize through the regular Done flow so the failure status and
+		// the compile error land on the workflow and its pipeline.
+		now := time.Now().Unix()
+		if doneErr := s.Done(c, task.ID, rpc.WorkflowState{Started: now, Finished: now, Error: err.Error()}); doneErr != nil {
+			log.Error().Err(doneErr).Str("workflow_id", task.ID).Msg("failed to finalize workflow after fetch-time compile failure")
+		}
+		// nothing to hand out; the agent will poll again
+		return nil, nil
 	}
 
 	return rpcWorkflow, nil
+}
+
+// taskWorkflowPayload turns a queued task into the workflow payload an agent
+// executes. Tasks queued without data are compiled at fetch time (with one
+// retry to ride out transient failures such as a short forge or secret
+// service hiccup); tasks queued before deferred compilation still carry the
+// payload compiled at creation time and are used as-is.
+func (s *RPC) taskWorkflowPayload(c context.Context, task *model.Task) (*rpc.Workflow, error) {
+	if len(task.Data) > 0 {
+		rpcWorkflow := new(rpc.Workflow)
+		if err := json.Unmarshal(task.Data, rpcWorkflow); err != nil {
+			return nil, err
+		}
+		return rpcWorkflow, nil
+	}
+
+	workflowID, err := strconv.ParseInt(task.ID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid workflow task id %q: %w", task.ID, err)
+	}
+
+	compile := s.compileWorkflow
+	if compile == nil {
+		compile = pipeline.CompileWorkflow
+	}
+
+	rpcWorkflow, err := compile(c, s.store, workflowID)
+	if err == nil {
+		return rpcWorkflow, nil
+	}
+	log.Warn().Err(err).Int64("workflow_id", workflowID).Msg("fetch-time workflow compilation failed, retrying once")
+
+	return compile(c, s.store, workflowID)
 }
 
 // Wait blocks until the workflow with the given ID is completed or got canceled.

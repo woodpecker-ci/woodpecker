@@ -95,6 +95,7 @@ type Compiler struct {
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
 	securityTrustedPipeline bool
+	deferredSecrets         bool
 	// TODO: remove with version 4.x
 	forceIgnoreServiceFailure bool
 }
