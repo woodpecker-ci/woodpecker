@@ -42,6 +42,22 @@ type Client struct {
 	*httpsign.Client
 }
 
+// HTTPStatusError is returned by Send for non-retryable client error (4xx)
+// responses and carries the raw response body so callers can inspect it.
+type HTTPStatusError struct {
+	Status int
+	Body   string
+}
+
+func (e *HTTPStatusError) Error() string {
+	return fmt.Sprintf("response: %s", e.Body)
+}
+
+func (*HTTPStatusError) Is(target error) bool {
+	_, ok := target.(*HTTPStatusError)
+	return ok
+}
+
 func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*httpsign.Client, error) {
 	timeout := 10 * time.Second //nolint:mnd
 
@@ -175,7 +191,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 			// If status code is client error (4xx), don't retry
 			if statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError {
 				log.Debug().Int("status", statusCode).Msgf("HTTP request returned client error (not retryable): %s %s", method, path)
-				return statusCode, backoff.Permanent(fmt.Errorf("response: %s", string(respBody)))
+				return statusCode, backoff.Permanent(&HTTPStatusError{Status: statusCode, Body: string(respBody)})
 			}
 
 			// If status code is OK (2xx), parse and return response

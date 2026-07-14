@@ -21,12 +21,14 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
@@ -77,6 +79,15 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
 	switch {
+	case errors.Is(configFetchErr, &configExtensionErr):
+		// the config extension explicitly rejected the pipeline
+		var extErr *config.ErrConfigExtension
+		_ = errors.As(configFetchErr, &extErr)
+		log.Debug().Str("repo", repo.FullName).Err(extErr).Msgf("config extension rejected pipeline '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, &pipeline_errors.PipelineError{
+			Type:    pipeline_errors.PipelineErrorTypeConfigExtension,
+			Message: extErr.Message,
+		})
 	case errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}):
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		if err := _store.DeletePipeline(pipeline); err != nil {
