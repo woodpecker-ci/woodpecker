@@ -16,11 +16,14 @@ package kubernetes
 
 import (
 	"errors"
+	"fmt"
+	"hash/fnv"
 	"os"
 	"regexp"
 	"strings"
 
 	kube_core_v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	kube_client_cmd "k8s.io/client-go/tools/clientcmd"
@@ -29,13 +32,8 @@ import (
 const maxDNSLabelLen = 63
 
 var (
-	dnsPattern = regexp.MustCompile(
-		`^[a-z0-9]` + // must start with
-			`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
-			`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
-	)
-	dnsLabelPattern         = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)
-	dnsDisallowedCharacters = regexp.MustCompile(`[^-^.a-z0-9]+`)
+	dnsDisallowedCharacters = regexp.MustCompile(`[^-.a-z0-9]+`)
+	dotsAndDashes           = regexp.MustCompile(`[.-]{2,}`)
 	ErrDNSPatternInvalid    = errors.New("name is not a valid kubernetes DNS name")
 )
 
@@ -52,28 +50,46 @@ func getHostnameOrEmpty(name string) string {
 
 	clean = strings.Trim(clean, "-")
 
-	if dnsLabelPattern.MatchString(clean) {
+	if len(validation.IsDNS1123Label(clean)) == 0 {
 		return clean
 	}
 	return ""
 }
 
-func dnsName(i string) (string, error) {
-	res := strings.ToLower(strings.ReplaceAll(i, "_", "-"))
+func toDNSName(in string) (string, error) {
+	res := strings.ToLower(in)
+	res = dnsDisallowedCharacters.ReplaceAllString(res, "-")
+	res = dotsAndDashes.ReplaceAllStringFunc(res, func(s string) string {
+		if strings.ContainsRune(s, '.') {
+			return "."
+		}
+		return "-"
+	})
+	res = strings.Trim(res, "-.")
 
-	if found := dnsPattern.FindStringIndex(res); found == nil {
+	if len(res) > validation.DNS1123SubdomainMaxLength {
+		res = truncateWithHash(res, in, validation.DNS1123SubdomainMaxLength)
+	}
+
+	if res == "" || len(validation.IsDNS1123Subdomain(res)) > 0 {
 		return "", ErrDNSPatternInvalid
 	}
 
 	return res, nil
 }
 
-func toDNSName(in string) (string, error) {
-	lower := strings.ToLower(in)
-	withoutUnderscores := strings.ReplaceAll(lower, "_", "-")
-	withoutSpaces := strings.ReplaceAll(withoutUnderscores, " ", "-")
-	almostDNS := dnsDisallowedCharacters.ReplaceAllString(withoutSpaces, "")
-	return dnsName(almostDNS)
+func truncateWithHash(s, original string, maxLen int) string {
+	h := fnv.New32a()
+	h.Write([]byte(original))
+	hashStr := fmt.Sprintf("%08x", h.Sum32())
+
+	reservedLength := 1 + len(hashStr)
+	maxBaseLength := maxLen - reservedLength
+
+	truncated := s[:maxBaseLength]
+	truncated = strings.TrimRight(truncated, "-")
+
+	return fmt.Sprintf("%s-%s", truncated, hashStr)
 }
 
 func isImagePullBackOffState(pod *kube_core_v1.Pod) bool {

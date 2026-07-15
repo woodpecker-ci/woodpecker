@@ -89,7 +89,7 @@ func stepToPodName(step *types.Step) (name string, err error) {
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(podPrefix + step.UUID)
+	return toDNSName(podPrefix + step.UUID)
 }
 
 func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (kube_meta_v1.ObjectMeta, error) {
