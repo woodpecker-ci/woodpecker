@@ -30,19 +30,18 @@ import (
 const logStreamDelayAllowed = 5 * time.Minute
 
 func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, p *model.Pipeline, repo *model.Repo) error {
-	var err error
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	workflow, err := s.store.WorkflowLoad(workflowID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
+		return err
+	}
+
 	if repo == nil && p == nil {
-		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		workflow, err := s.store.WorkflowLoad(workflowID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
-			return err
-		}
-
 		p, err = s.store.GetPipeline(workflow.PipelineID)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
@@ -58,12 +57,33 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 		}
 	}
 
-	if agent.CanAccessRepo(repo) {
-		return nil
+	if !agent.CanAccessRepo(repo) {
+		log.Error().Err(ErrAgentIllegalRepo).Int64("agentID", agent.ID).Int64("repoId", repo.ID).Send()
+		return fmt.Errorf("%w: agentId=%d repoID=%d", ErrAgentIllegalRepo, agent.ID, repo.ID)
 	}
 
-	log.Error().Err(ErrAgentIllegalRepo).Int64("agentID", agent.ID).Int64("repoId", repo.ID).Send()
-	return fmt.Errorf("%w: agentId=%d repoID=%d", ErrAgentIllegalRepo, agent.ID, repo.ID)
+	if workflow.AgentID != agent.ID {
+		log.Error().Err(ErrAgentIllegalWorkflowAgentID).Int64("agentID", agent.ID).Int64("workflowAgentId", workflow.AgentID).Send()
+		return fmt.Errorf("%w: agentId=%d workflowAgentId=%d", ErrAgentIllegalWorkflowAgentID, agent.ID, workflow.AgentID)
+	}
+
+	return nil
+}
+
+func (s *RPC) lockAgentToWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	workflow, err := s.store.WorkflowLoad(workflowID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
+		return err
+	}
+
+	workflow.AgentID = agent.ID
+	return s.store.WorkflowUpdate(workflow)
 }
 
 // isActiveState returns true for states where work is in progress or not yet started.

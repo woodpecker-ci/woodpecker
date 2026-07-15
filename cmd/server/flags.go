@@ -71,8 +71,13 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER_ADDR"),
 		Name:    "server-addr",
-		Usage:   "server address",
+		Usage:   "configures the HTTP listener, supports unix socket via unix:// prefix",
 		Value:   ":8000",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_UNIX_SOCKET_PERMISSION"),
+		Name:    "unix-socket-permission",
+		Usage:   "file mode for the HTTP unix socket, for example 660 or 666",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER_ADDR_TLS"),
@@ -100,10 +105,21 @@ var flags = append([]cli.Flag{
 		Name:    "custom-js-file",
 		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_ASYNC_REPOSITORY_UPDATE"),
+		Name:    "async-repository-update",
+		Usage:   "if true fetch repository permissions asynchronous, impacts performance if there are many repositories with possible tradeoff in consistency",
+	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_WEBHOOK_SYNC_TIMEOUT"),
+		Name:    "webhook-sync-timeout",
+		Usage:   "max time to wait for pipeline creation triggered by an incoming webhook before responding 202 Accepted and finishing it in the background; 0 disables the fallback and always responds synchronously",
+		Value:   5 * time.Second,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_ADDR"),
 		Name:    "grpc-addr",
-		Usage:   "grpc address",
+		Usage:   "grpc socket server opens, by default on all IPs via port 9000, use unix:// prefix for unix socket",
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
@@ -123,6 +139,12 @@ var flags = append([]cli.Flag{
 		Name:    "metrics-server-addr",
 		Usage:   "metrics server address",
 		Value:   "",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_STEP_LEVEL_METRICS"),
+		Name:    "step-level-metrics",
+		Usage:   "enable step-level metrics",
+		Value:   true,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ADMIN"),
@@ -290,6 +312,24 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_NETRC"),
 		Name:    "config-extension-netrc",
 		Usage:   "whether global configuration extension should receive netrc data",
+	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_CONFIGS"),
+		Name:    "default-pipeline-configs",
+		Usage:   "default pipeline config paths to check",
+		Value:   constant.DefaultConfigOrder,
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS"),
+		Name:    "default-pipeline-config-extensions",
+		Usage:   "default pipeline config extensions when scanning a pipeline config directory",
+		Value:   []string{".yaml", ".yml"},
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_REGISTRY_EXTENSION_ENDPOINT"),

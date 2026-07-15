@@ -122,6 +122,21 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-kubernetes-backend-tolerations.yaml",
 			fail:     false,
 		},
+		{
+			name:     "Concurrency",
+			testFile: ".woodpecker/test-concurrency.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Concurrency shorthand",
+			testFile: ".woodpecker/test-concurrency-shorthand.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Concurrency invalid",
+			testFile: ".woodpecker/test-concurrency-invalid.yaml",
+			fail:     true,
+		},
 	}
 
 	for _, tt := range testTable {
@@ -146,4 +161,28 @@ func TestSchema(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSchemaFiltersRedundantCompositionErrors(t *testing.T) {
+	t.Parallel()
+
+	configErrors, err := schema.LintString(`steps:
+  publish:
+    image: plugins/docker
+    settings:
+      repo: foo/bar
+      tags: latest
+    environment:
+      CGO: 0
+`)
+	require.Error(t, err)
+
+	descriptions := make([]string, 0, len(configErrors))
+	for _, configError := range configErrors {
+		descriptions = append(descriptions, configError.Description())
+	}
+
+	assert.NotContains(t, descriptions, "Must validate one and only one schema (oneOf)")
+	assert.NotContains(t, descriptions, "Must validate at least one schema (anyOf)")
+	assert.Contains(t, descriptions, "Additional property settings is not allowed")
 }

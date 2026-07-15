@@ -115,13 +115,15 @@
                 },
                 "netrc_only_trusted": {
                     "desc": "Plugins que obtêm acesso para credenciais netrc que podem ser usadas para clonar repositórios da forja ou fazer push para a forja.",
-                    "netrc_only_trusted": "Contêineres confiáveis personalizados"
+                    "netrc_only_trusted": "Contêineres confiáveis personalizados",
+                    "placeholder": "Image do plugin"
                 },
                 "pipeline_path": {
                     "path": "Caminho do pipeline",
                     "default": "Por padrão: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Caminho para a configuração do pipeline (por exemplo, {0}). As pastas devem terminar com {1}.",
-                    "desc_path_example": "meu/caminho/"
+                    "desc_path_example": "meu/caminho/",
+                    "by_default": "Por padrão: {paths}"
                 },
                 "allow_deploy": {
                     "allow": "Permitir implantações",
@@ -178,11 +180,15 @@
                     "placeholder": "Nome do trabalho cron"
                 },
                 "schedule": {
-                    "title": "Programação (com base no UTC)",
+                    "title": "Programação",
                     "placeholder": "Programação"
                 },
                 "edit": "Editar cron",
-                "enabled": "Habilitado"
+                "enabled": "Habilitado",
+                "next_exec_local": "Próxima execução: {local}",
+                "next_exec_both": "Próxima execução: {local} ({zoned} {timezone})",
+                "timezone": "Fuso horário",
+                "your_timezone": "No fuso horário do seu navegador."
             },
             "actions": {
                 "repair": {
@@ -273,7 +279,9 @@
                 "log_download": "Baixar",
                 "log_auto_scroll": "Habilitar rolagem automática",
                 "log_delete": "Excluir",
-                "skipped": "Essa etapa foi ignorada."
+                "skipped": "Essa etapa foi ignorada.",
+                "expand_all": "Expandir tudo",
+                "collapse_all": "Recolher tudo"
             },
             "tasks": "Tarefas",
             "config": "Configuração",
@@ -341,7 +349,8 @@
                 "desc": "Apenas usuários autenticados da instância Woodpecker podem ver este projeto.",
                 "internal": "Interno"
             }
-        }
+        },
+        "refresh": "Atualizar lista de repositórios"
     },
     "repos": "Repos",
     "repositories": {
@@ -400,7 +409,7 @@
                 "edit_user": "Editar usuário",
                 "users": "Usuários",
                 "desc": "Usuários registrados para este servidor.",
-                "login": "Login",
+                "login": "Nome de usuário",
                 "email": "Email",
                 "avatar_url": "URL do avatar",
                 "save": "Salvar usuário",
@@ -411,9 +420,11 @@
                 "saved": "Usuário salvo",
                 "admin": {
                     "admin": "Admin",
-                    "placeholder": "O usuário é um administrador"
+                    "placeholder": "O usuário é um administrador",
+                    "admin_warning": "Este usuário possui permissões de administrador devido à configuração do seu ambiente. Se você revogar as permissões aqui, o usuário as recuperará ao fazer login na próxima vez."
                 },
-                "delete_user": "Excluir usuário"
+                "delete_user": "Excluir usuário",
+                "forge": "Forja"
             },
             "orgs": {
                 "delete_org": "Excluir organização",
@@ -600,6 +611,13 @@
                     "light": "Claro",
                     "dark": "Escuro",
                     "auto": "Auto"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Logs de pipeline",
+                    "collapse_groups": {
+                        "collapse": "Recolher grupos de logs por padrão",
+                        "desc": "Ao abrir uma etapa concluída, recolhe todos os grupos de comandos para mostrar apenas o resumo."
+                    }
                 }
             },
             "registries": {
@@ -650,7 +668,7 @@
         "show": "Mostrar registries"
     },
     "login_to_cli_description": "Se continuar, você será conectado à CLI.",
-    "cli_login_failed": "Login na CLI falhou",
+    "cli_login_failed": "Acesso à CLI falhou",
     "secrets": {
         "add": "Adicionar segredo",
         "plugins": {
@@ -695,14 +713,14 @@
     "org_access_denied": "Você não tem permissão para acessar esta organização",
     "login_to_cli": "Acessar com CLI",
     "abort": "Abortar",
-    "cli_login_success": "Login na CLI bem-sucedido",
+    "cli_login_success": "Acesso à CLI bem-sucedido",
     "settings": "Configurações",
     "oauth_error": "Erro ao autenticar no provedor de OAuth",
     "return_to_cli": "Agora você pode fechar esta aba e retornar à CLI.",
     "internal_error": "Ocorreu um erro interno",
     "registration_closed": "O registro está fechado",
     "login_with": "Acessar com {forge}",
-    "cli_login_denied": "Login na CLI negado",
+    "cli_login_denied": "Acesso à CLI negado",
     "forges": "Forjas",
     "add_forge": "Adicionar forja",
     "show_forges": "Mostrar forjas",

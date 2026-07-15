@@ -21,6 +21,7 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
@@ -222,7 +223,7 @@ func TestCompilerCompile(t *testing.T) {
 				Name:      "echo 1",
 				Image:     "bash",
 				Commands:  []string{"echo 1"},
-				DependsOn: []string{"echo env", "echo 2"},
+				DependsOn: constraint.DependsOn{{Name: "echo env"}, {Name: "echo 2"}},
 			}, {
 				Name:     "echo 2",
 				Image:    "bash",
@@ -292,10 +293,29 @@ func TestCompilerCompile(t *testing.T) {
 			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
 				Name:      "dummy",
 				Image:     "dummy_img",
-				DependsOn: []string{"not exist"},
+				DependsOn: constraint.DependsOn{{Name: "not exist"}},
 			}}}},
 			backConf:    nil,
 			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
+		},
+		{
+			name: "workflow with step depending on filtered-out step",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{
+				{
+					Name:  "build",
+					Image: "bash",
+					When: constraint.When{Constraints: []constraint.Constraint{{
+						Event: yaml_base_types.StringOrSlice{"tag"},
+					}}},
+				},
+				{
+					Name:      "deploy",
+					Image:     "bash",
+					DependsOn: constraint.DependsOn{{Name: "build"}},
+				},
+			}}},
+			backConf:    nil,
+			expectedErr: "step 'deploy' depends on step 'build' which is filtered out by its conditions",
 		},
 	}
 
@@ -494,7 +514,7 @@ func TestCompilerCompilePrivileged(t *testing.T) {
 				{
 					Name:      "privileged-plugin",
 					Image:     "test/image",
-					DependsOn: []string{}, // no dependencies =>  enable dag mode & all steps are executed in parallel
+					DependsOn: constraint.DependsOn{}, // no dependencies =>  enable dag mode & all steps are executed in parallel
 				},
 				{
 					Name:     "no-plugin",

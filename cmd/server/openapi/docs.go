@@ -990,40 +990,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/orgs/{id}": {
-            "delete": {
-                "description": "Deletes the given org. Requires admin rights.",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Orgs"
-                ],
-                "summary": "Delete an organization",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the org's id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
         "/orgs/{org_id}": {
             "get": {
                 "produces": [
@@ -1059,6 +1025,38 @@ const docTemplate = `{
                                 "$ref": "#/definitions/Org"
                             }
                         }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes the given org. Requires admin rights.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Orgs"
+                ],
+                "summary": "Delete an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -4798,7 +4796,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "event": {
-                    "type": "string"
+                    "$ref": "#/definitions/WebhookEvent"
                 },
                 "finished": {
                     "type": "integer"
@@ -4807,6 +4805,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "message": {
+                    "description": "// Deprecated",
                     "type": "string"
                 },
                 "number": {
@@ -4818,6 +4817,14 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
+                "release": {
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Release"
+                        }
+                    ]
+                },
                 "repo_id": {
                     "type": "integer"
                 },
@@ -4825,6 +4832,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "tag_title": {
                     "type": "string"
                 },
                 "title": {
@@ -4989,9 +4999,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
+                    "description": "TODO: only // The user sending the webhook data or triggering the pipeline event",
                     "type": "string"
                 },
                 "author_avatar": {
+                    "description": "TODO: only \u0026 rename to AuthorAvatar // Avatar URL of the author of the commit",
                     "type": "string"
                 },
                 "author_email": {
@@ -5053,6 +5065,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "is_prerelease": {
+                    "description": "deprecated, use release.is_prerelease instead",
                     "type": "boolean"
                 },
                 "message": {
@@ -5063,6 +5076,9 @@ const docTemplate = `{
                 },
                 "parent": {
                     "type": "integer"
+                },
+                "pr_draft": {
+                    "type": "boolean"
                 },
                 "pr_labels": {
                     "type": "array",
@@ -5078,6 +5094,14 @@ const docTemplate = `{
                 },
                 "refspec": {
                     "type": "string"
+                },
+                "release": {
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Release"
+                        }
+                    ]
                 },
                 "rerun_count": {
                     "type": "integer"
@@ -5098,10 +5122,14 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/StatusValue"
                 },
+                "tag_title": {
+                    "type": "string"
+                },
                 "timestamp": {
                     "type": "integer"
                 },
                 "title": {
+                    "description": "// Deprecated",
                     "type": "string"
                 },
                 "updated": {
@@ -5214,6 +5242,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -5717,6 +5756,18 @@ const docTemplate = `{
                 "agent_id": {
                     "type": "integer"
                 },
+                "concurrency_group": {
+                    "description": "ConcurrencyGroup identifies tasks that are limited against each other.\nIt is empty when no concurrency limit applies.",
+                    "type": "string"
+                },
+                "concurrency_limit": {
+                    "description": "ConcurrencyLimit is the maximum number of tasks sharing the same\nConcurrencyGroup that may run at once. A value \u003c= 0 means unlimited.",
+                    "type": "integer"
+                },
+                "created": {
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines.",
+                    "type": "integer"
+                },
                 "dep_status": {
                     "type": "object",
                     "additionalProperties": {
@@ -5763,6 +5814,9 @@ const docTemplate = `{
             "properties": {
                 "admin": {
                     "description": "Admin indicates the user is a system administrator.\n\nNOTE: If the username is part of the WOODPECKER_ADMIN\nenvironment variable, this value will be set to true on login.",
+                    "type": "boolean"
+                },
+                "admin_env": {
                     "type": "boolean"
                 },
                 "avatar_url": {
@@ -5890,7 +5944,7 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "is_prerelease": {
+                "draft": {
                     "type": "boolean"
                 },
                 "labels": {
@@ -5913,6 +5967,9 @@ const docTemplate = `{
                 },
                 "sha": {
                     "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
                 }
             }
         },
@@ -6020,6 +6077,9 @@ const docTemplate = `{
                 "parent": {
                     "type": "integer"
                 },
+                "release": {
+                    "$ref": "#/definitions/metadata.Release"
+                },
                 "rerun_count": {
                     "type": "integer"
                 },
@@ -6033,6 +6093,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -6193,6 +6264,18 @@ const docTemplate = `{
                 },
                 "agent_name": {
                     "type": "string"
+                },
+                "concurrency_group": {
+                    "description": "ConcurrencyGroup identifies tasks that are limited against each other.\nIt is empty when no concurrency limit applies.",
+                    "type": "string"
+                },
+                "concurrency_limit": {
+                    "description": "ConcurrencyLimit is the maximum number of tasks sharing the same\nConcurrencyGroup that may run at once. A value \u003c= 0 means unlimited.",
+                    "type": "integer"
+                },
+                "created": {
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines.",
+                    "type": "integer"
                 },
                 "dep_status": {
                     "type": "object",
