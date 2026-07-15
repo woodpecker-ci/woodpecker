@@ -15,6 +15,7 @@
 package main
 
 import (
+	"encoding/base32"
 	"errors"
 	"os"
 	"path/filepath"
@@ -104,5 +105,34 @@ func TestSetupJWTSecret(t *testing.T) {
 		secret, err := setupJWTSecret(s)
 		assert.ErrorIs(t, err, readErr)
 		assert.Empty(t, secret)
+	})
+}
+
+func TestSetupGrpcSecret(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns configured secret", func(t *testing.T) {
+		t.Parallel()
+
+		secret, generated := setupGrpcSecret("configured-secret")
+
+		assert.Equal(t, "configured-secret", secret)
+		assert.False(t, generated)
+	})
+
+	t.Run("generates random secret when not configured", func(t *testing.T) {
+		t.Parallel()
+
+		secretA, generatedA := setupGrpcSecret("")
+		secretB, generatedB := setupGrpcSecret("")
+
+		assert.True(t, generatedA)
+		assert.True(t, generatedB)
+		assert.NotEmpty(t, secretA)
+		assert.NotEqual(t, secretA, secretB)
+
+		decoded, err := base32.StdEncoding.DecodeString(secretA)
+		require.NoError(t, err)
+		assert.Len(t, decoded, 32)
 	})
 }

@@ -15,6 +15,7 @@
 package matrix
 
 import (
+	"sort"
 	"strings"
 
 	"codeberg.org/6543/xyaml/v2"
@@ -84,6 +85,10 @@ func calc(matrix Matrix) []Axis {
 		}
 		tags = append(tags, k)
 	}
+	// map iteration order is random: sort the tags so the permutation order
+	// is deterministic and derived workflow numbering is stable across
+	// repeated compilations of the same pipeline.
+	sort.Strings(tags)
 
 	// structure to hold the transformed result set
 	var axisList []Axis

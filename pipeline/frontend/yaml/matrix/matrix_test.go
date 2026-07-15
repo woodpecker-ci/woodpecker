@@ -80,3 +80,17 @@ matrix:
     - go_version: 1.6
       python_version: 3.4
 `
+
+func TestMatrixDeterministicOrder(t *testing.T) {
+	// the axis permutation order must be stable across parses: workflow
+	// PIDs derived from it have to match when a pipeline is compiled more
+	// than once (e.g. again at agent fetch time).
+	first, err := ParseString(fakeMatrix)
+	assert.NoError(t, err)
+
+	for i := 0; i < 20; i++ {
+		again, err := ParseString(fakeMatrix)
+		assert.NoError(t, err)
+		assert.EqualValues(t, first, again)
+	}
+}

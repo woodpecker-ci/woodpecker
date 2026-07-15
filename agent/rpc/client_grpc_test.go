@@ -15,10 +15,16 @@
 package rpc
 
 import (
+	"context"
+	"errors"
 	"testing"
 	"time"
 
+	"github.com/cenkalti/backoff/v7"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestSetConnectionRetryTimeout(t *testing.T) {
@@ -51,4 +57,51 @@ func TestIsConnected(t *testing.T) {
 		assert.NoError(t, cl.conn.Close())
 		assert.False(t, cl.IsConnected())
 	})
+}
+
+func TestClassifyRPCErrUnauthenticatedIsRetryable(t *testing.T) {
+	t.Parallel()
+
+	err := status.Error(codes.Unauthenticated, "expired token")
+	classified := classifyRPCErr(context.Background(), err)
+
+	assert.Equal(t, codes.Unauthenticated, status.Code(classified))
+	assert.False(t, errors.Is(classified, backoff.ErrPermanent))
+}
+
+func TestRetryRPCUnauthenticatedHonorsFiniteTimeout(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	c := &client{connectionRetryTimeout: time.Nanosecond}
+	var attempts int
+
+	_, err := retryRPC(ctx, c, "test", func() (struct{}, error) {
+		attempts++
+		return struct{}{}, classifyRPCErr(ctx, status.Error(codes.Unauthenticated, "expired token"))
+	})
+
+	require.Error(t, err)
+	assert.ErrorIs(t, err, backoff.ErrMaxElapsedTime)
+	assert.Equal(t, 1, attempts)
+}
+
+func TestRetryRPCUnauthenticatedRetriesUntilContextCancellation(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
+	c := &client{connectionRetryTimeout: 0}
+	var attempts int
+
+	_, err := retryRPC(ctx, c, "test", func() (struct{}, error) {
+		attempts++
+		if attempts == 3 {
+			cancel(nil)
+		}
+		return struct{}{}, classifyRPCErr(ctx, status.Error(codes.Unauthenticated, "expired token"))
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, 3, attempts)
 }
