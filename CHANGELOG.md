@@ -25,6 +25,10 @@
 - fix(server): heal users left on forge_id=0 with closed registration [[#6823](https://github.com/woodpecker-ci/woodpecker/pull/6823)]
 - Correct forge_id and org handling on user/repo [[#6820](https://github.com/woodpecker-ci/woodpecker/pull/6820)]
 
+### 🧪 Tests
+
+- Add mock for server scheduler [[#6848](https://github.com/woodpecker-ci/woodpecker/pull/6848)]
+
 ### 📚 Documentation
 
 - Minor adjustments for API usage example [[#6605](https://github.com/woodpecker-ci/woodpecker/pull/6605)]
