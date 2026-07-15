@@ -190,6 +190,154 @@ func TestToDnsNameTruncationUniqueness(t *testing.T) {
 	assert.NotEqual(t, got1, got2, "different long inputs should produce different truncated names")
 }
 
+func TestToLabelValue(t *testing.T) {
+	tests := []struct {
+		name    string
+		in      string
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "underscores preserved",
+			in:   "wp_01he8bebctabr3kgk0qj36d2me_0_services_0",
+			want: "wp_01he8bebctabr3kgk0qj36d2me_0_services_0",
+		},
+		{
+			name: "dots preserved",
+			in:   "a.0-AA",
+			want: "a.0-aa",
+		},
+		{
+			name: "uppercase with underscores",
+			in:   "BUILD_AND_DEPLOY_0",
+			want: "build_and_deploy_0",
+		},
+		{
+			name: "spaces to dashes",
+			in:   "build and deploy",
+			want: "build-and-deploy",
+		},
+		{
+			name: "special char ampersand",
+			in:   "build & deploy",
+			want: "build-deploy",
+		},
+		{
+			name: "backslash to dash",
+			in:   "abc\\def",
+			want: "abc-def",
+		},
+		{
+			name: "leading dash trimmed",
+			in:   "-build-and-deploy",
+			want: "build-and-deploy",
+		},
+		{
+			name: "trailing dash trimmed",
+			in:   "test-",
+			want: "test",
+		},
+		{
+			name: "leading dot trimmed",
+			in:   ".0-a",
+			want: "0-a",
+		},
+		{
+			name: "trailing dot trimmed",
+			in:   "0-a.",
+			want: "0-a",
+		},
+		{
+			name: "consecutive underscores collapsed",
+			in:   "a__b",
+			want: "a-b",
+		},
+		{
+			name: "consecutive dots collapsed",
+			in:   "ABC..DEF",
+			want: "abc-def",
+		},
+		{
+			name: "mixed separators collapsed",
+			in:   "a._-b",
+			want: "a-b",
+		},
+		{
+			name: "unicode emoji replaced",
+			in:   "hello🚀world",
+			want: "hello-world",
+		},
+		{
+			name: "single valid char",
+			in:   "a",
+			want: "a",
+		},
+		{
+			name: "numbers only",
+			in:   "123",
+			want: "123",
+		},
+		{
+			name: "mixed leading trailing",
+			in:   "-.-test-.-",
+			want: "test",
+		},
+		{
+			name: "all special chars become empty",
+			in:   "!!!",
+			want: "",
+		},
+		{
+			name: "empty string is valid",
+			in:   "",
+			want: "",
+		},
+		{
+			name: "truncation needed",
+			in:   strings.Repeat("a", 100),
+		},
+		{
+			name: "truncation boundary exact 63",
+			in:   strings.Repeat("a", 63),
+			want: strings.Repeat("a", 63),
+		},
+		{
+			name: "truncation with trailing dash at cut",
+			in:   strings.Repeat("a", 50) + "----" + strings.Repeat("b", 30),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := toLabelValue(tt.in)
+			if tt.wantErr {
+				assert.ErrorIs(t, err, ErrLabelInvalid)
+				return
+			}
+			assert.NoError(t, err)
+			if tt.name == "truncation needed" || tt.name == "truncation with trailing dash at cut" {
+				assert.LessOrEqual(t, len(got), validation.LabelValueMaxLength)
+				assert.Len(t, validation.IsValidLabelValue(got), 0)
+				return
+			}
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestToLabelValueTruncationUniqueness(t *testing.T) {
+	long1 := strings.Repeat("a", 100)
+	long2 := strings.Repeat("a", 99) + "b"
+
+	got1, err := toLabelValue(long1)
+	assert.NoError(t, err)
+
+	got2, err := toLabelValue(long2)
+	assert.NoError(t, err)
+
+	assert.NotEqual(t, got1, got2, "different long inputs should produce different truncated labels")
+}
+
 func TestGetHostnameOrEmpty(t *testing.T) {
 	tests := []struct {
 		name string

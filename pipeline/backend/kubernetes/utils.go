@@ -34,7 +34,10 @@ const maxDNSLabelLen = 63
 var (
 	dnsDisallowedCharacters = regexp.MustCompile(`[^-.a-z0-9]+`)
 	dotsAndDashes           = regexp.MustCompile(`[.-]{2,}`)
+	labelDisallowedChars    = regexp.MustCompile(`[^-_.a-z0-9]+`)
+	labelSeparators         = regexp.MustCompile(`[-_.]{2,}`)
 	ErrDNSPatternInvalid    = errors.New("name is not a valid kubernetes DNS name")
+	ErrLabelInvalid         = errors.New("value is not a valid kubernetes label value")
 )
 
 func getHostnameOrEmpty(name string) string {
@@ -90,6 +93,23 @@ func truncateWithHash(s, original string, maxLen int) string {
 	truncated = strings.TrimRight(truncated, "-")
 
 	return fmt.Sprintf("%s-%s", truncated, hashStr)
+}
+
+func toLabelValue(in string) (string, error) {
+	res := strings.ToLower(in)
+	res = labelDisallowedChars.ReplaceAllString(res, "-")
+	res = labelSeparators.ReplaceAllString(res, "-")
+	res = strings.Trim(res, "-_.")
+
+	if len(res) > validation.LabelValueMaxLength {
+		res = truncateWithHash(res, in, validation.LabelValueMaxLength)
+	}
+
+	if len(validation.IsValidLabelValue(res)) > 0 {
+		return "", ErrLabelInvalid
+	}
+
+	return res, nil
 }
 
 func isImagePullBackOffState(pod *kube_core_v1.Pod) bool {
