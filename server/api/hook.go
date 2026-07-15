@@ -219,7 +219,7 @@ func PostHook(c *gin.Context) {
 	// respond synchronously with the created pipeline (preserving the old
 	// behavior and API response). If it takes longer we respond 202 Accepted and
 	// let creation finish in the background.
-	log.Info().Str("repo", repo.FullName).Dur("hook_parse", hookParseDuration).Msg("webhook parse timing")
+	log.Debug().Str("repo", repo.FullName).Dur("hook_parse", hookParseDuration).Msg("webhook parse timing")
 
 	bgCtx, cancel := context.WithTimeout(context.WithoutCancel(context.Background()), backgroundPipelineCreationTimeout)
 

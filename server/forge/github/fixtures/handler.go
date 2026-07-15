@@ -86,6 +86,7 @@ func getContents(c *gin.Context) {
 	// base64 of "pipeline:"
 	c.String(http.StatusOK, `{"type": "file", "encoding": "base64", "name": "config", "content": "cGlwZWxpbmU6"}`)
 }
+
 func getRepo(c *gin.Context) {
 	switch c.Param("name") {
 	case "repo_not_found":

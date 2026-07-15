@@ -165,7 +165,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 	pipeline = startedPipeline
 
-	log.Info().
+	log.Debug().
 		Str("repo", repo.FullName).
 		Int64("pipeline", pipeline.Number).
 		Int("workflows", len(pipeline.Workflows)).
