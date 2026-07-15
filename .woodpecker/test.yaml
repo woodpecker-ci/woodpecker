@@ -99,6 +99,17 @@ steps:
     when:
       - path: *when_path
 
+  test-fuzz:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - make fuzz
+    environment:
+      FUZZ_TIME: 2s
+    when:
+      - path: *when_path
+
   sqlite:
     depends_on:
       - vendor
