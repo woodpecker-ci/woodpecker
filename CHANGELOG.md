@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- WebUI: Fixes three bugs around component unmount and reset in compositions [[#6843](https://github.com/woodpecker-ci/woodpecker/pull/6843)]
 - fix(server): heal users left on forge_id=0 with closed registration [[#6823](https://github.com/woodpecker-ci/woodpecker/pull/6823)]
 - Correct forge_id and org handling on user/repo [[#6820](https://github.com/woodpecker-ci/woodpecker/pull/6820)]
 
