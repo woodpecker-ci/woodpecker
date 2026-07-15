@@ -46,10 +46,6 @@ func getHostnameOrEmpty(name string) string {
 	}
 	clean = strings.ReplaceAll(clean, ".", "-")
 
-	if len(clean) > maxDNSLabelLen {
-		clean = clean[:maxDNSLabelLen]
-	}
-
 	clean = strings.Trim(clean, "-")
 
 	if dnsLabelPattern.MatchString(clean) {
@@ -73,7 +69,15 @@ func toDNSName(in string) (string, error) {
 	withoutUnderscores := strings.ReplaceAll(lower, "_", "-")
 	withoutSpaces := strings.ReplaceAll(withoutUnderscores, " ", "-")
 	almostDNS := dnsDisallowedCharacters.ReplaceAllString(withoutSpaces, "")
-	return dnsName(almostDNS)
+	name, err := dnsName(almostDNS)
+	if err != nil {
+		return "", nil
+	}
+
+	if len(name) > maxDNSLabelLen {
+		name = name[:maxDNSLabelLen]
+	}
+	return name, nil
 }
 
 func isImagePullBackOffState(pod *kube_core_v1.Pod) bool {
