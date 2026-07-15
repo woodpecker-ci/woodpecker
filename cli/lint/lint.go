@@ -67,6 +67,21 @@ func lint(ctx context.Context, c *cli.Command) error {
 }
 
 func lintDir(ctx context.Context, c *cli.Command, dir string) error {
+	isDir, config, found, err := common.FindPipelineConfig(dir)
+	if err != nil {
+		return err
+	}
+	if found {
+		if !isDir {
+			return lintFile(ctx, c, config)
+		}
+		dir = config
+	}
+
+	return lintFilesInDir(ctx, c, dir)
+}
+
+func lintFilesInDir(ctx context.Context, c *cli.Command, dir string) error {
 	var errorStrings []string
 	if err := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
