@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-13
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -33,6 +33,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6821](https://github.com/woodpecker-ci/woodpecker/pull/6821)]
 - Update module github.com/google/go-github/v88 to v89 [[#6838](https://github.com/woodpecker-ci/woodpecker/pull/6838)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.5 [[#6836](https://github.com/woodpecker-ci/woodpecker/pull/6836)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v6.1.1 [[#6834](https://github.com/woodpecker-ci/woodpecker/pull/6834)]
