@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @DerRockWolf, @Kernald, @TowyTowy, @cyphercodes, @healdropper, @kanywst
+@6543, @DerRockWolf, @Kernald, @TowyTowy, @cyphercodes, @healdropper, @kanywst, @rfinnie
 
 ### 🔒 Security
 
@@ -27,6 +27,7 @@
 
 ### 📚 Documentation
 
+- Minor adjustments for API usage example [[#6605](https://github.com/woodpecker-ci/woodpecker/pull/6605)]
 - Lock file maintenance [[#6816](https://github.com/woodpecker-ci/woodpecker/pull/6816)]
 - Update pnpm to v11.10.0 [[#6813](https://github.com/woodpecker-ci/woodpecker/pull/6813)]
 - Lock file maintenance [[#6799](https://github.com/woodpecker-ci/woodpecker/pull/6799)]
