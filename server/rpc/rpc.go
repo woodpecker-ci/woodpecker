@@ -214,7 +214,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		(step.State == model.StatusFailure ||
 			step.State == model.StatusKilled ||
 			step.State == model.StatusError) {
-		metric.FailurePipelineStepInfoCount.WithLabelValues(workflow.Name, repo.FullName, step.Name).Inc()
+		metric.FailurePipelineStepInfoCount.WithLabelValues(workflow.Name, repo.FullName, step.Name, string(step.Type)).Inc()
 	}
 
 	if metric.StepDurationRecord != nil && state.Exited && step.Started > 0 && step.Finished >= step.Started {
@@ -223,6 +223,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 			workflow.Name,
 			repo.FullName,
 			step.Name,
+			string(step.Type),
 		).Observe(float64(duration))
 	}
 	if state.Exited {

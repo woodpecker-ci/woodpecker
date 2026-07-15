@@ -74,6 +74,11 @@ func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
 	org := session.Org(c)
 
+	if user == nil {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
+		return
+	}
+
 	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from user")
@@ -81,18 +86,20 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	if user == nil {
-		c.JSON(http.StatusOK, &model.OrgPerm{})
-		return
-	}
-
-	if (org.IsUser && org.Name == user.Login) || (user.Admin && !org.IsUser) {
+	if (org.IsUser && org.Name == user.Login && org.ForgeID == user.ForgeID) || (user.Admin && !org.IsUser) {
 		c.JSON(http.StatusOK, &model.OrgPerm{
 			Member: true,
 			Admin:  true,
 		})
 		return
 	} else if org.IsUser {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
+		return
+	}
+
+	// orgs of other forges can share a name with orgs of the user's forge,
+	// so a membership looked up on the user's forge proves nothing about them
+	if org.ForgeID != user.ForgeID {
 		c.JSON(http.StatusOK, &model.OrgPerm{})
 		return
 	}
