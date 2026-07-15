@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Make matrix axis permutation order deterministic [[#6847](https://github.com/woodpecker-ci/woodpecker/pull/6847)]
 - feat(server): add unix socket permission option [[#6839](https://github.com/woodpecker-ci/woodpecker/pull/6839)]
 - Add step type label to step-level Prometheus metrics [[#6824](https://github.com/woodpecker-ci/woodpecker/pull/6824)]
 - docs: add note about `pull_request` events with `path` filter and correct comment about `on_empty` [[#6819](https://github.com/woodpecker-ci/woodpecker/pull/6819)]
