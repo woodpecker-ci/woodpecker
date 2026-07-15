@@ -128,7 +128,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
+import { computed, onMounted, ref, toRef, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -225,9 +225,6 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
 
 onMounted(loadPipeline);
 watch([repositoryId, pipelineId], loadPipeline);
-onBeforeUnmount(() => {
-  favicon.updateStatus('default');
-});
 
 const goBack = useRouteBack({ name: 'repo' });
 </script>
