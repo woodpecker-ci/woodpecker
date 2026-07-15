@@ -15,9 +15,9 @@
 package kubernetes
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
-	"fmt"
-	"hash/fnv"
 	"os"
 	"regexp"
 	"strings"
@@ -71,7 +71,7 @@ func toDNSName(in string) (string, error) {
 	res = strings.Trim(res, "-.")
 
 	if len(res) > validation.DNS1123SubdomainMaxLength {
-		res = truncateWithHash(res, in, validation.DNS1123SubdomainMaxLength)
+		res = truncateWithHash(res, in, validation.DNS1123SubdomainMaxLength, "-.")
 	}
 
 	if res == "" || len(validation.IsDNS1123Subdomain(res)) > 0 {
@@ -81,18 +81,12 @@ func toDNSName(in string) (string, error) {
 	return res, nil
 }
 
-func truncateWithHash(s, original string, maxLen int) string {
-	h := fnv.New32a()
-	h.Write([]byte(original))
-	hashStr := fmt.Sprintf("%08x", h.Sum32())
-
-	reservedLength := 1 + len(hashStr)
-	maxBaseLength := maxLen - reservedLength
-
-	truncated := s[:maxBaseLength]
-	truncated = strings.TrimRight(truncated, "-")
-
-	return fmt.Sprintf("%s-%s", truncated, hashStr)
+func truncateWithHash(s, original string, maxLen int, trimChars string) string {
+	hash := sha256.Sum256([]byte(original))
+	hashStr := hex.EncodeToString(hash[:])[:16]
+	maxBaseLength := maxLen - 1 - len(hashStr)
+	truncated := strings.TrimRight(s[:maxBaseLength], trimChars)
+	return truncated + "-" + hashStr
 }
 
 func toLabelValue(in string) (string, error) {
@@ -102,7 +96,7 @@ func toLabelValue(in string) (string, error) {
 	res = strings.Trim(res, "-_.")
 
 	if len(res) > validation.LabelValueMaxLength {
-		res = truncateWithHash(res, in, validation.LabelValueMaxLength)
+		res = truncateWithHash(res, in, validation.LabelValueMaxLength, "-_.")
 	}
 
 	if len(validation.IsValidLabelValue(res)) > 0 {

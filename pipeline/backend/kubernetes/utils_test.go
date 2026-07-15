@@ -157,6 +157,14 @@ func TestToDnsName(t *testing.T) {
 			name: "truncation with trailing dash at cut",
 			in:   strings.Repeat("a", 240) + "----" + strings.Repeat("b", 60),
 		},
+		{
+			name: "truncation at dot boundary",
+			in:   strings.Repeat("a.", 130),
+		},
+		{
+			name: "truncation with long label segment",
+			in:   strings.Repeat("a", 70) + "." + strings.Repeat("b", 70) + "." + strings.Repeat("c", 70),
+		},
 	}
 
 	for _, tt := range tests {
@@ -167,7 +175,7 @@ func TestToDnsName(t *testing.T) {
 				return
 			}
 			assert.NoError(t, err)
-			if tt.name == "truncation needed" || tt.name == "truncation with trailing dash at cut" {
+			if tt.name == "truncation needed" || tt.name == "truncation with trailing dash at cut" || tt.name == "truncation at dot boundary" || tt.name == "truncation with long label segment" {
 				assert.LessOrEqual(t, len(got), validation.DNS1123SubdomainMaxLength)
 				assert.Len(t, validation.IsDNS1123Subdomain(got), 0)
 				return
