@@ -33,11 +33,13 @@ func TestPodName(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0", name)
 
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	name, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0a", name)
 
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"})
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	name, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local", name)
 }
 
 func TestStepToPodName(t *testing.T) {
@@ -118,8 +120,9 @@ func TestStepLabel(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, "build-image", name)
 
-	_, err = stepLabel(&types.Step{Name: ".build.image"})
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	name, err = stepLabel(&types.Step{Name: ".build.image"})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "build.image", name)
 }
 
 func TestPodHostnameSanitized(t *testing.T) {
