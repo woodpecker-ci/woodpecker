@@ -73,7 +73,7 @@ import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { PipelineStep } from '~/lib/api/types';
-import { anyStepStarted, workflowsWithErrors } from '~/lib/pipeline';
+import { anyStepStarted, pipelineHasErrorsToShow, pipelineHasNonWarningErrors } from '~/lib/pipeline';
 
 const props = defineProps<{
   stepId?: string | null;
@@ -97,10 +97,10 @@ const defaultStepId = computed(() => pipeline.value?.workflows?.[0].children?.[0
 // runtime errors when no step produced logs yet. If steps already ran (e.g.
 // the error happened during cleanup), keep the logs accessible; the errors
 // tab still points to the details.
-const showErrorPanel = computed(
-  () =>
-    pipeline.value?.errors?.some((e) => !e.is_warning) ||
-    (workflowsWithErrors(pipeline.value).length > 0 && !anyStepStarted(pipeline.value)),
+const showErrorPanel = computed(() =>
+  anyStepStarted(pipeline.value)
+    ? pipelineHasNonWarningErrors(pipeline.value)
+    : pipelineHasErrorsToShow(pipeline.value),
 );
 
 const selectedStepId = computed({
