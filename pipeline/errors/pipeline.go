@@ -23,11 +23,12 @@ import (
 type PipelineErrorType string
 
 const (
-	PipelineErrorTypeLinter      PipelineErrorType = "linter"      // some error with the config syntax
-	PipelineErrorTypeDeprecation PipelineErrorType = "deprecation" // using some deprecated feature
-	PipelineErrorTypeCompiler    PipelineErrorType = "compiler"    // some error with the config semantics
-	PipelineErrorTypeGeneric     PipelineErrorType = "generic"     // some generic error
-	PipelineErrorTypeBadHabit    PipelineErrorType = "bad_habit"   // some bad-habit error
+	PipelineErrorTypeLinter          PipelineErrorType = "linter"           // some error with the config syntax
+	PipelineErrorTypeDeprecation     PipelineErrorType = "deprecation"      // using some deprecated feature
+	PipelineErrorTypeCompiler        PipelineErrorType = "compiler"         // some error with the config semantics
+	PipelineErrorTypeGeneric         PipelineErrorType = "generic"          // some generic error
+	PipelineErrorTypeConfigExtension PipelineErrorType = "config_extension" // error reported by a configuration extension
+	PipelineErrorTypeBadHabit        PipelineErrorType = "bad_habit"        // some bad-habit error
 )
 
 type PipelineError struct {
