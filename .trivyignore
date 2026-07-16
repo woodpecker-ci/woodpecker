@@ -1,0 +1,5 @@
+# golang.org/x/crypto/openpgp is flagged as unmaintained, but the package is
+# not imported by this module at all (`go mod why golang.org/x/crypto/openpgp`
+# reports "main module does not need package"): the module dependency itself
+# is only used for ssh/acme/bcrypt, and the advisory has no fixed version.
+GO-2026-5932
