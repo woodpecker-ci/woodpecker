@@ -93,6 +93,24 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
 	}
 
+	// persist the pipeline config for historical correctness, restarts, etc
+	var configs []*model.Config
+	for _, forgeYamlConfig := range forgeYamlConfigs {
+		config, err := findOrPersistPipelineConfig(_store, pipeline, forgeYamlConfig)
+		if err != nil {
+			msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
+			log.Error().Err(err).Msg(msg)
+			return nil, errors.New(msg)
+		}
+		configs = append(configs, config)
+	}
+	// link pipeline to persisted configs
+	if err := linkPipelineConfigs(_store, configs, pipeline.ID); err != nil {
+		msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		return nil, errors.New(msg)
+	}
+
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
 	*pipeline = *currentPipeline
 	if handleParseErrors(pipeline, parseErr) {
@@ -110,24 +128,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		}
 
 		return nil, ErrFiltered
-	}
-
-	// persist the pipeline config for historical correctness, restarts, etc
-	var configs []*model.Config
-	for _, forgeYamlConfig := range forgeYamlConfigs {
-		config, err := findOrPersistPipelineConfig(_store, pipeline, forgeYamlConfig)
-		if err != nil {
-			msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
-			log.Error().Err(err).Msg(msg)
-			return nil, errors.New(msg)
-		}
-		configs = append(configs, config)
-	}
-	// link pipeline to persisted configs
-	if err := linkPipelineConfigs(_store, configs, pipeline.ID); err != nil {
-		msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
 	}
 
 	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
