@@ -122,11 +122,13 @@ func SetPerm() gin.HandlerFunc {
 				log.Error().Err(err).Msgf("error fetching permission for %s %s",
 					user.Login, repo.FullName)
 			}
-			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
+			// a user of another forge has no permissions on this repo and
+			// their token must not be sent to the repo's forge
+			if user.ForgeID == repo.ForgeID && time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
 				_repo, err := _forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 				if err == nil {
 					log.Debug().Msgf("synced user permission for %s %s", user.Login, repo.FullName)
-					_repo.ForgeID = user.ForgeID
+					_repo.ForgeID = repo.ForgeID
 					perm = _repo.Perm
 					perm.RepoID = repo.ID
 					perm.UserID = user.ID
@@ -181,7 +183,8 @@ func MustPull(c *gin.Context) {
 			user.Login, c.Request.URL.Path)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debug().Msgf("guest denied read access to %s %s",
+		log.Debug().Msgf(
+			"guest denied read access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)
@@ -206,7 +209,8 @@ func MustPush(c *gin.Context) {
 			user.Login, c.Request.URL.Path)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debug().Msgf("guest denied write access to %s %s",
+		log.Debug().Msgf(
+			"guest denied write access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)

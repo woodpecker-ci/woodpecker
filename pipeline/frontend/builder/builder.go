@@ -91,7 +91,7 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		// depend on https://github.com/woodpecker-ci/woodpecker/issues/778
 	}
 
-	items = filterItemsWithMissingDependencies(items)
+	items = filterMissingDependencies(items)
 
 	return items, errorsAndWarnings
 }
@@ -162,10 +162,12 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	}
 
 	item = &Item{
-		Workflow:  workflow,
-		Config:    ir,
-		Labels:    parsed.Labels,
-		DependsOn: parsed.DependsOn,
+		Workflow:         workflow,
+		Config:           ir,
+		Labels:           parsed.Labels,
+		DependsOn:        parsed.DependsOn,
+		ConcurrencyLimit: parsed.Concurrency.Limit,
+		ConcurrencyGroup: parsed.Concurrency.Group,
 		// TODO: remove in next major.
 		RunsOn: parsed.RunsOn, //nolint:staticcheck
 	}
@@ -200,6 +202,8 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	item.Labels[pipeline.LabelRepoFullName] = workflowMetadata.Repo.Owner + "/" + workflowMetadata.Repo.Name
 	item.Labels[pipeline.LabelBranch] = workflowMetadata.Repo.Branch
 	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(workflowMetadata.Repo.OrgID, 10)
+	item.Labels[pipeline.LabelCommitBranch] = workflowMetadata.Curr.Commit.Branch
+	item.Labels[pipeline.LabelEvent] = string(workflowMetadata.Curr.Event)
 
 	return item, errorsAndWarnings
 }
@@ -212,7 +216,8 @@ func (b *PipelineBuilder) environmentVariables(metadata metadata.Metadata, axis 
 
 func (b *PipelineBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	options := []compiler.Option{}
-	options = append(options,
+	options = append(
+		options,
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
 		compiler.WithEscalated(b.PrivilegedPlugins...),

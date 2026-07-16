@@ -201,10 +201,11 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 
 	teams := make([]*model.Team, 0, len(groups))
 	for i := range groups {
-		teams = append(teams, &model.Team{
-			Login:  groups[i].Name,
-			Avatar: groups[i].AvatarURL,
-		},
+		teams = append(
+			teams, &model.Team{
+				Login:  groups[i].Name,
+				Avatar: groups[i].AvatarURL,
+			},
 		)
 	}
 
@@ -660,7 +661,16 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		pipeline, err = g.loadCommitFromSHA(ctx, repo, pipeline, cmID)
 		return repo, pipeline, err
 	case *gitlab.ReleaseEvent:
-		return convertReleaseHook(event)
+		repo, pipeline, err := convertReleaseHook(event)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if pipeline, err = g.loadReleaseAuthor(ctx, repo, pipeline); err != nil {
+			return nil, nil, err
+		}
+
+		return repo, pipeline, nil
 	default:
 		return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType)}
 	}
@@ -819,6 +829,44 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		}
 		pipeline.PullRequestMilestone = milestone.Title
 	}
+
+	return pipeline, nil
+}
+
+func (g *GitLab) loadReleaseAuthor(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return pipeline, nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(g.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	release, _, err := client.Releases.GetRelease(_repo.ID, pipeline.TagTitle, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	pipeline.Author = release.Author.Username
+	pipeline.Avatar = release.Author.AvatarURL
 
 	return pipeline, nil
 }

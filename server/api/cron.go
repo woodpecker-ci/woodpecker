@@ -18,6 +18,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -126,19 +127,23 @@ func PostCron(c *gin.Context) {
 	}
 	cron := &model.Cron{
 		RepoID:    repo.ID,
-		Name:      in.Name,
+		Name:      strings.TrimSpace(in.Name),
 		CreatorID: user.ID,
-		Schedule:  in.Schedule,
-		Branch:    in.Branch,
+		Schedule:  strings.TrimSpace(in.Schedule),
+		Timezone:  strings.TrimSpace(in.Timezone),
+		Branch:    strings.TrimSpace(in.Branch),
 		Variables: in.Variables,
 		Enabled:   in.Enabled,
+	}
+	if cron.Timezone == "" {
+		cron.Timezone = "UTC"
 	}
 	if err := cron.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
 
-	nextExec, err := cron_scheduler.CalcNewNext(in.Schedule, time.Now())
+	nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, cron.Timezone, time.Now())
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 		return
@@ -147,7 +152,7 @@ func PostCron(c *gin.Context) {
 
 	if in.Branch != "" {
 		// check if branch exists on forge
-		_, err := _forge.BranchHead(c, user, repo, in.Branch)
+		_, err := _forge.BranchHead(c, user, repo, cron.Branch)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
@@ -205,32 +210,49 @@ func PatchCron(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
-	if in.Branch != nil && *in.Branch != "" {
-		// check if branch exists on forge
-		_, err := _forge.BranchHead(c, user, repo, *in.Branch)
-		if err != nil {
-			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
-			return
+	if in.Branch != nil {
+		if branch := strings.TrimSpace(*in.Branch); branch != "" {
+			// check if branch exists on forge
+			_, err := _forge.BranchHead(c, user, repo, branch)
+			if err != nil {
+				c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
+				return
+			}
+			cron.Branch = branch
 		}
-		cron.Branch = *in.Branch
 	}
-	if in.Schedule != nil && *in.Schedule != "" {
-		cron.Schedule = *in.Schedule
-		nextExec, err := cron_scheduler.CalcNewNext(*in.Schedule, time.Now())
-		if err != nil {
-			c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
-			return
+	if in.Timezone != nil {
+		if tz := strings.TrimSpace(*in.Timezone); tz != "" {
+			nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, tz, time.Now())
+			if err != nil {
+				c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
+				return
+			}
+			cron.Timezone = tz
+			cron.NextExec = nextExec.Unix()
 		}
-		cron.NextExec = nextExec.Unix()
 	}
-	if in.Name != nil && *in.Name != "" {
-		cron.Name = *in.Name
+	if in.Schedule != nil {
+		if schedule := strings.TrimSpace(*in.Schedule); schedule != "" {
+			nextExec, err := cron_scheduler.CalcNewNext(schedule, cron.Timezone, time.Now())
+			if err != nil {
+				c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
+				return
+			}
+			cron.Schedule = schedule
+			cron.NextExec = nextExec.Unix()
+		}
+	}
+	if in.Name != nil {
+		if name := strings.TrimSpace(*in.Name); name != "" {
+			cron.Name = name
+		}
 	}
 	if in.Enabled != nil {
 		cron.Enabled = *in.Enabled
 		// if we re-enable a cron we have to calc NextExec because it was not while disabled
 		if cron.Enabled {
-			nextExec, err := cron_scheduler.CalcNewNext(*in.Schedule, time.Now())
+			nextExec, err := cron_scheduler.CalcNewNext(cron.Schedule, cron.Timezone, time.Now())
 			if err != nil {
 				c.String(http.StatusInternalServerError, "Cron schedule could not parsed: %s", err)
 				return

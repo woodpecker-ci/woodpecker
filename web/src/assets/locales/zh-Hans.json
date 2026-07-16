@@ -123,7 +123,8 @@
                 "add": "添加用户",
                 "admin": {
                     "admin": "管理员",
-                    "placeholder": "此用户是管理员"
+                    "placeholder": "此用户是管理员",
+                    "admin_warning": "由于您的环境配置，该用户拥有管理员权限。如果你在这里撤销权限，该用户下次登录时仍会重新获得管理员权限。"
                 },
                 "avatar_url": "头像链接",
                 "cancel": "取消",
@@ -134,12 +135,13 @@
                 "desc": "在此服务器上注册的用户。",
                 "edit_user": "编辑用户",
                 "email": "邮箱",
-                "login": "登录",
+                "login": "用户名",
                 "none": "还没有任何用户。",
                 "save": "保存用户",
                 "saved": "已保存用户",
                 "show": "显示用户",
-                "users": "用户"
+                "users": "用户",
+                "forge": "代码托管平台"
             },
             "registries": {
                 "desc": "可以添加全局注册凭据以在所有流水线中使用私有镜像。",
@@ -259,7 +261,9 @@
                 "restart": "重启",
                 "restart_success": "流水线已重启",
                 "log_delete": "删除",
-                "skipped": "此步骤已被跳过。"
+                "skipped": "此步骤已被跳过。",
+                "expand_all": "展开全部",
+                "collapse_all": "收起全部"
             },
             "config": "配置",
             "errors": "错误",
@@ -394,10 +398,14 @@
                 "saved": "计划已保存",
                 "schedule": {
                     "placeholder": "计划任务",
-                    "title": "计划任务（基于 UTC）"
+                    "title": "计划任务"
                 },
                 "show": "显示所有计划",
-                "enabled": "启用"
+                "enabled": "启用",
+                "next_exec_local": "下一次执行时间: {local}",
+                "next_exec_both": "下一次执行时间: {local} ({zoned} {timezone})",
+                "timezone": "时区",
+                "your_timezone": "使用你的当前浏览器时区。"
             },
             "general": {
                 "allow_pr": {
@@ -411,13 +419,15 @@
                 "general": "项目",
                 "netrc_only_trusted": {
                     "desc": "可获取用于克隆或推送仓库至代码托管平台的 netrc 凭证的插件。",
-                    "netrc_only_trusted": "自定义信任的插件"
+                    "netrc_only_trusted": "自定义信任的插件",
+                    "placeholder": "插件镜像"
                 },
                 "pipeline_path": {
                     "default": "默认: .woodpecker/*.yml -> .woodpecker.yml",
                     "desc": "流水线配置文件的路径（例如 {0}）。文件夹路径应以 {1} 结尾。",
                     "desc_path_example": "my/path/",
-                    "path": "流水线路径"
+                    "path": "流水线路径",
+                    "by_default": "默认:{paths}"
                 },
                 "project": "项目设置",
                 "protected": {
@@ -527,7 +537,8 @@
                 "internal": "内部的",
                 "desc": "只有Woodpecker的登录用户可以看到这个项目。"
             }
-        }
+        },
+        "refresh": "刷新仓库列表"
     },
     "repos": "仓库",
     "repositories": {
@@ -581,6 +592,13 @@
                     "dark": "暗色",
                     "light": "亮色",
                     "theme": "主题"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "流水线日志",
+                    "collapse_groups": {
+                        "collapse": "默认折叠日志分组",
+                        "desc": "打开已完成的步骤时，折叠所有命令组以仅显示概要。"
+                    }
                 }
             },
             "secrets": {
@@ -633,7 +651,7 @@
     "abort": "中止",
     "cli_login_success": "登录到 CLI 成功",
     "cli_login_failed": "登录到 CLI 失败",
-    "cli_login_denied": "登录 CLI 被拒绝",
+    "cli_login_denied": "登录到 CLI 时被拒绝",
     "login_to_cli_description": "点击继续以登录到 CLI。",
     "return_to_cli": "您现在可以关闭此选项卡并返回 CLI。",
     "login_with": "使用 {forge} 登录",

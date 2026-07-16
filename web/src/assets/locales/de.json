@@ -123,7 +123,8 @@
                 "add": "Benutzer hinzufügen",
                 "admin": {
                     "admin": "Admin",
-                    "placeholder": "Benutzer ist ein Admin"
+                    "placeholder": "Benutzer ist ein Admin",
+                    "admin_warning": "Dieser Benutzer ist ein Admin aufgrund deiner Umgebungs-Konfiguration. Wenn du die Berechtigung hier entziehst, wird sie bei der nächsten Anmeldung wiederhergestellt."
                 },
                 "avatar_url": "URL des Profilbilds",
                 "cancel": "Abbrechen",
@@ -139,7 +140,8 @@
                 "save": "Benutzer speichern",
                 "saved": "Benutzer gespeichert",
                 "show": "Benutzer anzeigen",
-                "users": "Benutzer"
+                "users": "Benutzer",
+                "forge": "Code-Plattform"
             },
             "registries": {
                 "desc": "Globale Registry-Zugangsdaten können hinzugefügt werden, um für private Images für alle Pipelines zu verwenden.",
@@ -399,10 +401,14 @@
                 "saved": "Cron gespeichert",
                 "schedule": {
                     "placeholder": "Zeitplan",
-                    "title": "Zeitplan (basierend auf UTC)"
+                    "title": "Zeitplan"
                 },
                 "show": "Crons anzeigen",
-                "enabled": "Aktiv"
+                "enabled": "Aktiv",
+                "next_exec_local": "Nächste Ausführung: {local}",
+                "next_exec_both": "Nächste Ausführung: {local} ({zoned} {timezone})",
+                "timezone": "Zeitzone",
+                "your_timezone": "In der Zeitzone deines Webbrowsers."
             },
             "general": {
                 "allow_pr": {
@@ -416,13 +422,15 @@
                 "general": "Projekt",
                 "netrc_only_trusted": {
                     "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Code-Plattform zu klonen oder zu pushen.",
-                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
+                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen",
+                    "placeholder": "Plugin-Image"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. {0}). Verzeichnisse sollten mit einem {1} enden.",
                     "desc_path_example": "mein/pfad/",
-                    "path": "Pipeline-Pfad"
+                    "path": "Pipeline-Pfad",
+                    "by_default": "Standardmäßig: {paths}"
                 },
                 "project": "Projekt-Einstellungen",
                 "protected": {
@@ -532,7 +540,8 @@
                 "internal": "Intern",
                 "desc": "Nur authentifizierte Benutzer der Woodpecker-Instanz können dieses Projekt sehen."
             }
-        }
+        },
+        "refresh": "Repository-Liste neu laden"
     },
     "repos": "Repos",
     "repositories": {
@@ -586,6 +595,13 @@
                     "dark": "Dunkel",
                     "light": "Hell",
                     "theme": "Thema"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Pipeline-Logs",
+                    "collapse_groups": {
+                        "collapse": "Log-Gruppen standardmäßig einklappen",
+                        "desc": "Beim Öffnen eines beendeten Schrittes alle Befehlsgruppen einklappen, um nur die Übersicht anzuzeigen."
+                    }
                 }
             },
             "secrets": {
@@ -685,7 +701,7 @@
         "registries": "Register",
         "desc": "Register-Zugangsdaten können hinzugefügt werden, um private Images für Pipelines zu nutzen.",
         "deleted": "Register-Zugangsdaten gelöscht",
-        "save": "Speicher Registry",
+        "save": "Registry speichern",
         "add": "Register hinzufügen",
         "view": "Register ansehen",
         "edit": "Register bearbeiten",

@@ -28,7 +28,12 @@
               <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
             </div>
             <div class="flex gap-2">
-              <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
+              <TextField
+                :id="id"
+                v-model="newImage"
+                :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
+                @keydown.enter.prevent="addNewImage"
+              />
               <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
             </div>
           </div>
@@ -99,7 +104,7 @@
               <Button type="button" color="gray" start-icon="trash" @click="removeUser(allowedUser)" />
             </div>
             <div class="flex gap-2">
-              <TextField :id="id" v-model="newUser" @keydown.enter.prevent="addNewUser" />
+              <TextField :id="id" v-model="newUser" :placeholder="$t('username')" @keydown.enter.prevent="addNewUser" />
               <Button type="button" color="gray" start-icon="plus" @click="addNewUser" />
             </div>
           </div>
@@ -119,7 +124,12 @@
         :label="$t('repo.settings.general.timeout.timeout')"
       >
         <div class="flex items-center">
-          <NumberField :id="id" v-model="repoSettings.timeout" class="w-24" />
+          <NumberField
+            :id="id"
+            v-model="repoSettings.timeout"
+            :placeholder="$t('repo.settings.general.timeout.timeout')"
+            class="w-24"
+          />
           <span class="text-wp-text-alt-100 ml-4">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
@@ -132,7 +142,9 @@
           <TextField
             :id="id"
             v-model="repoSettings.config_file"
-            :placeholder="$t('repo.settings.general.pipeline_path.default')"
+            :placeholder="
+              $t('repo.settings.general.pipeline_path.by_default', { paths: defaultConfigPaths.join(' ➔ ') })
+            "
           />
         </template>
 
@@ -186,6 +198,7 @@ import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
+import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
@@ -198,6 +211,7 @@ const notifications = useNotifications();
 const { user } = useAuthentication();
 const repoStore = useRepoStore();
 const i18n = useI18n();
+const { defaultConfigPaths } = useConfig();
 
 const repo = requiredInject('repo');
 const repoSettings = ref<RepoSettings>();

@@ -1,7 +1,7 @@
 {
   "cancel": "Cancel",
-  "login_to_woodpecker_with": "Login to Woodpecker with",
-  "login": "Login",
+  "login_to_woodpecker_with": "Sign in to Woodpecker with",
+  "login": "Sign in",
   "repos": "Repos",
   "repositories": {
     "title": "Repositories",
@@ -16,7 +16,7 @@
   },
   "docs": "Docs",
   "api": "API",
-  "logout": "Logout",
+  "logout": "Sign out",
   "search": "Search…",
   "username": "Username",
   "password": "Password",
@@ -68,6 +68,7 @@
     "branches": "Branches",
     "pull_requests": "Pull requests",
     "add": "Add repository",
+    "refresh": "Refresh repository list",
     "user_none": "This organization/user has no projects yet",
     "not_allowed": "You are not allowed to access this repository",
     "enable": {
@@ -106,7 +107,7 @@
         "success": "Project settings updated",
         "pipeline_path": {
           "path": "Pipeline path",
-          "default": "By default: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+          "by_default": "By default: {paths}",
           "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
           "desc_path_example": "my/path/"
         },
@@ -120,7 +121,8 @@
         },
         "netrc_only_trusted": {
           "netrc_only_trusted": "Custom trusted clone plugins",
-          "desc": "Plugins that get access to netrc credentials that can be used to clone repositories from the forge or push them into the forge."
+          "desc": "Plugins that get access to netrc credentials that can be used to clone repositories from the forge or push them into the forge.",
+          "placeholder": "Plugin image"
         },
         "trusted": {
           "trusted": "Trusted",
@@ -156,7 +158,8 @@
         "created": "Cron created",
         "saved": "Cron saved",
         "deleted": "Cron deleted",
-        "next_exec": "Next execution",
+        "next_exec_local": "Next execution: {local}",
+        "next_exec_both": "Next execution: {local} ({zoned} {timezone})",
         "not_executed_yet": "Not executed yet",
         "run": "Run now",
         "branch": {
@@ -168,9 +171,11 @@
           "placeholder": "Name of the cron job"
         },
         "schedule": {
-          "title": "Schedule (based on UTC)",
+          "title": "Schedule",
           "placeholder": "Schedule"
         },
+        "timezone": "Timezone",
+        "your_timezone": "In your browser's timezone.",
         "edit": "Edit cron",
         "delete": "Delete cron",
         "enabled": "Enabled"
@@ -398,7 +403,7 @@
       "users": {
         "users": "Users",
         "desc": "Users registered for this server.",
-        "login": "Login",
+        "login": "Username",
         "email": "Email",
         "avatar_url": "Avatar URL",
         "save": "Save user",
@@ -412,10 +417,12 @@
         "saved": "User saved",
         "admin": {
           "admin": "Admin",
-          "placeholder": "User is an admin"
+          "placeholder": "User is an admin",
+          "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, the user will regain them when they sign in next time."
         },
         "delete_user": "Delete user",
-        "edit_user": "Edit user"
+        "edit_user": "Edit user",
+        "forge": "Forge"
       },
       "orgs": {
         "orgs": "Organizations",
@@ -452,6 +459,13 @@
           "light": "Light",
           "dark": "Dark",
           "auto": "Auto"
+        },
+        "pipeline_logs": {
+          "pipeline_logs": "Pipeline logs",
+          "collapse_groups": {
+            "collapse": "Collapse log groups by default",
+            "desc": "When opening a finished step, collapse all command groups to show only the outline."
+          }
         }
       },
       "secrets": {
@@ -528,12 +542,12 @@
   "org_level_secret": "organization secret",
   "global_level_registry": "global registry",
   "org_level_registry": "organization registry",
-  "login_to_cli": "Login to CLI",
-  "login_to_cli_description": "If you continue, you will be logged in to the CLI.",
+  "login_to_cli": "Sign in to CLI",
+  "login_to_cli_description": "If you continue, you will be signed in to the CLI.",
   "abort": "Abort",
-  "cli_login_success": "Login to CLI successful",
-  "cli_login_failed": "Login to CLI failed",
-  "cli_login_denied": "Login to CLI denied",
+  "cli_login_success": "Sign-in to CLI successful",
+  "cli_login_failed": "Sign-in to CLI failed",
+  "cli_login_denied": "Sign-in to CLI denied",
   "return_to_cli": "You can now close this tab and return to the CLI.",
   "settings": "Settings",
   "oauth_error": "Error while authenticating against OAuth provider",

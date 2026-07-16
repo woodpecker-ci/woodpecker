@@ -137,7 +137,7 @@ steps:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.3.1
+    image: docker.io/woodpeckerci/plugin-codecov:2.3.2
     settings:
       files:
         - agent-coverage.out
@@ -162,7 +162,7 @@ services:
     when: *when
 
   mysql:
-    image: docker.io/mysql:9.7.0
+    image: docker.io/mysql:9.7.1
     ports: ['3306']
     environment:
       MYSQL_DATABASE: test

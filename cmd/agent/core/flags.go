@@ -27,7 +27,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER"),
 		Name:    "server",
-		Usage:   "server address",
+		Usage:   "server grpc address, supports unix socket via unix:// prefix",
 		Value:   "localhost:9000",
 	},
 	&cli.StringFlag{
@@ -35,7 +35,8 @@ var flags = []cli.Flag{
 		Usage: "server-agent shared token",
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")),
-			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
+			cli.EnvVar("WOODPECKER_AGENT_SECRET"),
+		),
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},
@@ -43,7 +44,7 @@ var flags = []cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_SECURE"),
 		Name:    "grpc-secure",
-		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport",
+		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport (tls)",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_VERIFY"),
@@ -56,6 +57,12 @@ var flags = []cli.Flag{
 		Name:    "retry-timeout",
 		Usage:   "how long the agent keeps retrying to reconnect to the server after the gRPC connection is lost before giving up, set to 0 to retry forever",
 		Value:   2 * time.Minute,
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_ENTRY_STREAM_BUFFER_SIZE"),
+		Name:    "log-entry-stream-buffer-size",
+		Usage:   "how many log lines an agent can buffer before it blocks io.Pipe, expect one log-entry to be 1 MB in worst case.",
+		Value:   100,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_HOSTNAME"),

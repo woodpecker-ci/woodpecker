@@ -50,12 +50,14 @@ func TestAgentLabelRouting(t *testing.T) {
 	})
 
 	// Plain agent: wildcard repo label only — cannot satisfy gpu=true.
-	plainAgent := setup.StartAgent(t, env.GRPCAddr,
+	plainAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("plain-agent"),
 	)
 
 	// GPU agent: carries gpu=true — the only agent that can accept the task.
-	gpuAgent := setup.StartAgent(t, env.GRPCAddr,
+	gpuAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("gpu-agent"),
 		setup.WithCustomLabels(map[string]string{"gpu": "true"}),
 	)
@@ -69,14 +71,7 @@ func TestAgentLabelRouting(t *testing.T) {
 	// wrong assignment here, but waiting avoids any startup-ordering flakiness.
 	setup.WaitForWorkersReady(t, env.Queue, 2*setup.AgentMaxWorkflows)
 
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create pipeline")
 
 	finished := setup.WaitForPipeline(t, env.Store, created.ID)
@@ -127,14 +122,7 @@ Func TestOrgAgentPreferredOverGlobal(t *testing.T) {
 	// race). agentMaxWorkflows slots per agent = 8 workers total.
 	setup.WaitForWorkersReady(t, env.Queue, 2*setup.AgentMaxWorkflows)
 
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create pipeline")
 
 	finished := setup.WaitForPipeline(t, env.Store, created.ID)

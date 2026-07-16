@@ -3816,6 +3816,68 @@ func (_c *MockStore_OrgList_Call) RunAndReturn(run func(listOptions *model.ListO
 	return _c
 }
 
+// OrgLookup provides a mock function for the type MockStore
+func (_mock *MockStore) OrgLookup(s string) (*model.Org, error) {
+	ret := _mock.Called(s)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgLookup")
+	}
+
+	var r0 *model.Org
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) (*model.Org, error)); ok {
+		return returnFunc(s)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) *model.Org); ok {
+		r0 = returnFunc(s)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Org)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(s)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_OrgLookup_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrgLookup'
+type MockStore_OrgLookup_Call struct {
+	*mock.Call
+}
+
+// OrgLookup is a helper method to define mock.On call
+//   - s string
+func (_e *MockStore_Expecter) OrgLookup(s interface{}) *MockStore_OrgLookup_Call {
+	return &MockStore_OrgLookup_Call{Call: _e.mock.On("OrgLookup", s)}
+}
+
+func (_c *MockStore_OrgLookup_Call) Run(run func(s string)) *MockStore_OrgLookup_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_OrgLookup_Call) Return(org *model.Org, err error) *MockStore_OrgLookup_Call {
+	_c.Call.Return(org, err)
+	return _c
+}
+
+func (_c *MockStore_OrgLookup_Call) RunAndReturn(run func(s string) (*model.Org, error)) *MockStore_OrgLookup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // OrgRegistryFind provides a mock function for the type MockStore
 func (_mock *MockStore) OrgRegistryFind(n int64, s string) (*model.Registry, error) {
 	ret := _mock.Called(n, s)
@@ -6269,6 +6331,68 @@ func (_c *MockStore_UserFeed_Call) Return(feeds []*model.Feed, err error) *MockS
 }
 
 func (_c *MockStore_UserFeed_Call) RunAndReturn(run func(user *model.User) ([]*model.Feed, error)) *MockStore_UserFeed_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WorkflowByStep provides a mock function for the type MockStore
+func (_mock *MockStore) WorkflowByStep(step *model.Step) (*model.Workflow, error) {
+	ret := _mock.Called(step)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WorkflowByStep")
+	}
+
+	var r0 *model.Workflow
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Step) (*model.Workflow, error)); ok {
+		return returnFunc(step)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Step) *model.Workflow); ok {
+		r0 = returnFunc(step)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Workflow)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Step) error); ok {
+		r1 = returnFunc(step)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_WorkflowByStep_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WorkflowByStep'
+type MockStore_WorkflowByStep_Call struct {
+	*mock.Call
+}
+
+// WorkflowByStep is a helper method to define mock.On call
+//   - step *model.Step
+func (_e *MockStore_Expecter) WorkflowByStep(step interface{}) *MockStore_WorkflowByStep_Call {
+	return &MockStore_WorkflowByStep_Call{Call: _e.mock.On("WorkflowByStep", step)}
+}
+
+func (_c *MockStore_WorkflowByStep_Call) Run(run func(step *model.Step)) *MockStore_WorkflowByStep_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Step
+		if args[0] != nil {
+			arg0 = args[0].(*model.Step)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_WorkflowByStep_Call) Return(workflow *model.Workflow, err error) *MockStore_WorkflowByStep_Call {
+	_c.Call.Return(workflow, err)
+	return _c
+}
+
+func (_c *MockStore_WorkflowByStep_Call) RunAndReturn(run func(step *model.Step) (*model.Workflow, error)) *MockStore_WorkflowByStep_Call {
 	_c.Call.Return(run)
 	return _c
 }

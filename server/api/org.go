@@ -74,6 +74,11 @@ func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
 	org := session.Org(c)
 
+	if user == nil {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
+		return
+	}
+
 	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from user")
@@ -81,18 +86,20 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	if user == nil {
-		c.JSON(http.StatusOK, &model.OrgPerm{})
-		return
-	}
-
-	if (org.IsUser && org.Name == user.Login) || (user.Admin && !org.IsUser) {
+	if (org.IsUser && org.Name == user.Login && org.ForgeID == user.ForgeID) || (user.Admin && !org.IsUser) {
 		c.JSON(http.StatusOK, &model.OrgPerm{
 			Member: true,
 			Admin:  true,
 		})
 		return
 	} else if org.IsUser {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
+		return
+	}
+
+	// orgs of other forges can share a name with orgs of the user's forge,
+	// so a membership looked up on the user's forge proves nothing about them
+	if org.ForgeID != user.ForgeID {
 		c.JSON(http.StatusOK, &model.OrgPerm{})
 		return
 	}
@@ -127,15 +134,27 @@ func LookupOrg(c *gin.Context) {
 
 	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
 
-	org, err := _store.OrgFindByName(orgFullName, user.ForgeID)
-	if err != nil {
-		handleDBError(c, err)
-		return
+	var org *model.Org
+	if user == nil {
+		org, err = _store.OrgLookup(orgFullName)
+		if err != nil {
+			if err.Error() == "found more than one org with this name" {
+				_ = c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+			handleDBError(c, err)
+			return
+		}
+	} else {
+		org, err = _store.OrgFindByName(orgFullName, user.ForgeID)
+		if err != nil {
+			handleDBError(c, err)
+			return
+		}
 	}
 
 	// don't leak private org infos
 	if org.Private {
-		user := session.User(c)
 		if user == nil {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
@@ -166,12 +185,12 @@ func LookupOrg(c *gin.Context) {
 //
 //	@Summary		Delete an organization
 //	@Description	Deletes the given org. Requires admin rights.
-//	@Router			/orgs/{id} [delete]
+//	@Router			/orgs/{org_id} [delete]
 //	@Produce		plain
 //	@Success		204
 //	@Tags			Orgs
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			id				path	string	true	"the org's id"
+//	@Param			org_id			path	string	true	"the org's id"
 func DeleteOrg(c *gin.Context) {
 	_store := store.FromContext(c)
 	org := session.Org(c)

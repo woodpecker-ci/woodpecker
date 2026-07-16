@@ -39,14 +39,7 @@ func TestRestartPipeline(t *testing.T) {
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	// First run.
-	original, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	original, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create original pipeline")
 	originalFinished := setup.WaitForPipeline(t, env.Store, original.ID)
 	require.Equal(t, model.StatusSuccess, originalFinished.Status, "original should succeed")
@@ -64,10 +57,12 @@ func TestRestartPipeline(t *testing.T) {
 	assert.NotEqual(t, originalFinished.ID, restarted.ID, "restart should have a new ID")
 	assert.NotEqual(t, originalFinished.Number, restarted.Number, "restart should have a new number")
 	assert.Equal(t, originalFinished.Number, restarted.Parent, "restart.Parent should point at original.Number")
+	assert.Equal(t, int64(1), restarted.RerunCount, "restart should increment rerun count")
 
 	// The restart runs through the same start path — wait for it to finish.
 	restartedFinished := setup.WaitForPipeline(t, env.Store, restarted.ID)
 	assert.Equal(t, model.StatusSuccess, restartedFinished.Status, "restarted pipeline should succeed")
+	assert.Equal(t, int64(1), restartedFinished.RerunCount, "restarted pipeline should preserve rerun count")
 
 	// Restart should have its OWN workflows, not reuse the originals.
 	restartedWorkflows, err := env.Store.WorkflowGetTree(restartedFinished)

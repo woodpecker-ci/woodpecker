@@ -15,6 +15,7 @@
     "agentscan",
     "anbraten",
     "antfu",
+    "apacheconf",
     "apimachinery",
     "appleboy",
     "aquasec",
@@ -57,8 +58,10 @@
     "dind",
     "Dockle",
     "doublestar",
+    "easyops",
     "emojify",
     "envsubst",
+    "esbuild",
     "errgroup",
     "estree",
     "evenodd",
@@ -79,6 +82,7 @@
     "gocritic",
     "GODEBUG",
     "godoc",
+    "godotenv",
     "Gogs",
     "golangci",
     "gomod",
@@ -142,6 +146,8 @@
     "nocolor",
     "nolint",
     "nologin",
+    "noopener",
+    "noreferrer",
     "norunningpipelines",
     "nosniff",
     "ntfy",
@@ -281,9 +287,8 @@
     "go.sum",
     "pnpm-lock.yaml",
     "renovate.json",
-    // TODO: remove the following
-    "docs/**/*.js",
-    "docs/**/*.ts"
+    // js config
+    "**/pnpm-workspace.yaml"
   ],
   // Exclude imports, because they are also strings.
   "ignoreRegExpList": [

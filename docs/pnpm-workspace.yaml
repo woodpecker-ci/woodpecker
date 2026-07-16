@@ -2,5 +2,15 @@ packages:
   - '.'
   - 'plugins/**'
 
+allowBuilds:
+  '@swc/core': false
+  core-js: false
+
 overrides:
-  webpack-dev-server@<=5.2.0: '>=5.2.1'
+  serialize-javascript: '^7.0.5'
+  uuid: '^14.0.0'
+  joi: '^18.2.1'
+  dompurify: '^3.4.11'
+  http-proxy-middleware: '^4.0.0'
+  undici: '^7.28.0'
+  gray-matter: 'npm:@11ty/gray-matter@^2.1.0'

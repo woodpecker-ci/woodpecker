@@ -92,7 +92,7 @@ func PostGlobalSecret(c *gin.Context) {
 		Note:   in.Note,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error inserting global secret. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting global secret. %s", err)
 		return
 	}
 

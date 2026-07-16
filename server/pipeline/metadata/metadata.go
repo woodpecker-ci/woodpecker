@@ -126,7 +126,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		parent = pipeline.Parent
 	}
 
-	return metadata.Pipeline{
+	metadata := metadata.Pipeline{
 		Number:      pipeline.Number,
 		Parent:      parent,
 		Created:     pipeline.Created,
@@ -136,14 +136,16 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		Event:       metadata.Event(pipeline.Event),
 		EventReason: pipeline.EventReason,
 		ForgeURL:    pipeline.ForgeURL,
+		RerunCount:  pipeline.RerunCount,
 		DeployTo:    pipeline.DeployTo,
 		DeployTask:  pipeline.DeployTask,
 		Commit: metadata.Commit{
-			Sha:     pipeline.Commit,
-			Ref:     pipeline.Ref,
-			Refspec: pipeline.Refspec,
-			Branch:  pipeline.Branch,
-			Message: pipeline.Message,
+			Sha:       pipeline.Commit,
+			Ref:       pipeline.Ref,
+			Refspec:   pipeline.Refspec,
+			Branch:    pipeline.Branch,
+			Message:   pipeline.Message,
+			Timestamp: pipeline.Timestamp,
 			Author: metadata.Author{
 				Name:  pipeline.Author,
 				Email: pipeline.Email,
@@ -151,10 +153,17 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 			ChangedFiles:         pipeline.ChangedFiles,
 			PullRequestLabels:    pipeline.PullRequestLabels,
 			PullRequestMilestone: pipeline.PullRequestMilestone,
-			IsPrerelease:         pipeline.IsPrerelease,
+			PullRequestDraft:     pipeline.PullRequestDraft,
 		},
 		Cron:   pipeline.Cron,
 		Author: pipeline.Author,
 		Avatar: pipeline.Avatar,
 	}
+
+	if pipeline.Release != nil {
+		metadata.Release.Title = pipeline.Release.Title
+		metadata.Release.IsPrerelease = pipeline.Release.IsPrerelease
+	}
+
+	return metadata
 }

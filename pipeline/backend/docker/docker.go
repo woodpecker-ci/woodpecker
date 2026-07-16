@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/containerd/errdefs"
 	"github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/api/pkg/stdcopy"
@@ -102,7 +102,8 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 	return &http.Client{
 		Transport: httputil.NewUserAgentRoundTripper(
 			&http.Transport{TLSClientConfig: tlsConf},
-			"backend-docker"),
+			"backend-docker",
+		),
 		CheckRedirect: client.CheckRedirect,
 	}
 }
@@ -382,9 +383,8 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend_types.Config
 		log.Error().Err(err).Msgf("could not destroy all containers")
 	}
 
-	var err error
-	_, _ = backoff.Retry(ctx, func() (any, error) {
-		_, err = e.client.VolumeRemove(ctx, conf.Volume, client.VolumeRemoveOptions{
+	_, err := backoff.Retry(ctx, func() (any, error) {
+		_, err := e.client.VolumeRemove(ctx, conf.Volume, client.VolumeRemoveOptions{
 			Force: true,
 		})
 		if err == nil || !isErrVolumeInUse(err) {

@@ -15,14 +15,14 @@
         }
     },
     "search": "搜尋…",
-    "unknown_error": "出現未知錯誤",
+    "unknown_error": "發生了未知錯誤",
     "url": "URL",
     "welcome": "歡迎使用 Woodpecker",
     "repo": {
         "manual_pipeline": {
             "select_branch": "選擇分支",
             "show_pipelines": "顯示 pipeline",
-            "title": "手動觸發 pipeline 執行",
+            "title": "觸發手動 pipeline 執行",
             "trigger": "執行 pipeline",
             "variables": {
                 "value": "變數值",
@@ -38,7 +38,15 @@
                 "restart": "重新啟動",
                 "deploy": "部署",
                 "log_download": "下載",
-                "log_delete": "刪除"
+                "log_delete": "刪除",
+                "expand_all": "展開全部",
+                "collapse_all": "摺疊全部",
+                "log_auto_scroll": "啟用自動滾動",
+                "log_auto_scroll_off": "停用自動滾動",
+                "cancel_success": "Pipeline 已取消",
+                "restart_success": "Pipeline 已重啟",
+                "canceled": "此步驟已被取消。",
+                "skipped": "此步驟已被略過。"
             },
             "tasks": "任務",
             "status": {
@@ -48,7 +56,11 @@
                 "error": "錯誤",
                 "running": "執行中",
                 "pending": "等待中",
-                "declined": "已拒絕"
+                "declined": "已拒絕",
+                "canceled": "已取消",
+                "started": "已啟動",
+                "killed": "已終止",
+                "status": "狀態: {status}"
             },
             "load_more": "載入更多",
             "config": "配置",
@@ -57,7 +69,11 @@
                 "push": "推送",
                 "tag": "標記",
                 "manual": "手動",
-                "release": "發佈"
+                "release": "發佈",
+                "pr": "拉取請求",
+                "cron": "Cron",
+                "pr_metadata": "拉取請求的詮釋資料已變更",
+                "pr_closed": "拉取請求已合併/關閉"
             },
             "errors": "錯誤",
             "warnings": "警告",
@@ -73,15 +89,22 @@
             "pipeline": "Pipeline #{pipelineId}",
             "protected": {
                 "approve": "核准",
-                "decline": "拒絕"
+                "decline": "拒絕",
+                "approve_success": "Pipeline 已核准",
+                "decline_success": "Pipeline 已拒絕"
             },
             "version_header": "Woodpecker 版本",
             "created": "",
             "view": "檢視 pipeline",
             "cancel_info": {
                 "canceled_by_step": "因為 {step} 所以被取消",
-                "canceled_by_user": "被 {user} 取消"
-            }
+                "canceled_by_user": "被 {user} 取消",
+                "superseded_by": "被 #{pipelineId} 取代"
+            },
+            "we_got_some_errors": "喔不，發生了錯誤！",
+            "no_pipeline_steps": "無 pipeline 步驟可用！",
+            "step_not_started": "此步驟尚未開始。",
+            "log_title": "步驟紀錄"
         },
         "settings": {
             "general": {
@@ -108,10 +131,17 @@
                 },
                 "pipeline_path": {
                     "path": "Pipeline 路徑",
-                    "desc_path_example": "my/path/"
+                    "desc_path_example": "my/path/",
+                    "default": "預設: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+                    "by_default": "預設: {paths}"
                 },
                 "allow_pr": {
-                    "allow": "允許拉取請求"
+                    "allow": "允許拉取請求",
+                    "desc": "允許拉取請求上的 pipeline 執行。"
+                },
+                "success": "專案設定已更新",
+                "netrc_only_trusted": {
+                    "placeholder": "外掛映像檔"
                 }
             },
             "badge": {
@@ -122,20 +152,37 @@
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
                 "events": "事件",
-                "workflow": "工作流程"
+                "workflow": "工作流程",
+                "step": "步驟"
             },
             "crons": {
                 "schedule": {
-                    "placeholder": "排程"
+                    "placeholder": "排程",
+                    "title": "排程"
                 },
                 "run": "現在執行",
                 "branch": {
-                    "title": "分支"
+                    "title": "分支",
+                    "placeholder": "分支 (如果為空則使用預設分支)"
                 },
                 "name": {
-                    "name": "名稱"
+                    "name": "名稱",
+                    "placeholder": "Cron 工作的名稱"
                 },
-                "enabled": "已啟用"
+                "enabled": "已啟用",
+                "timezone": "時區",
+                "edit": "編輯 cron",
+                "delete": "刪除 cron",
+                "save": "儲存 cron",
+                "add": "新增 cron",
+                "show": "顯示 cron",
+                "created": "Cron 已建立",
+                "saved": "Cron 已儲存",
+                "deleted": "Cron 已刪除",
+                "not_executed_yet": "尚未執行",
+                "crons": "Crons",
+                "your_timezone": "使用您的瀏覽器時區。",
+                "none": "還沒有任何 cron。"
             },
             "actions": {
                 "repair": {
@@ -153,21 +200,22 @@
                 "delete": {
                     "delete": "刪除儲存庫",
                     "success": "儲存庫已刪除"
-                }
+                },
+                "actions": "Actions"
             }
         },
         "visibility": {
             "visibility": "專案可見性",
             "public": {
                 "public": "公開",
-                "desc": "所有人包含非登入的使用者都可以看到你的專案。"
+                "desc": "所有人包含非登入的使用者都可以看到您的專案。"
             },
             "private": {
                 "private": "私有",
-                "desc": "只有你和其他儲存庫的擁有者可以看到這個專案。"
+                "desc": "只有您和其他儲存庫的擁有者可以看到這個專案。"
             },
             "internal": {
-                "internal": "內部的",
+                "internal": "內部",
                 "desc": "只有已認證的使用者可以看到這個專案。"
             }
         },
@@ -186,7 +234,7 @@
         "pull_requests": "拉取請求",
         "add": "新增儲存庫",
         "user_none": "這個組織/使用者還沒有任何專案",
-        "not_allowed": "你不被允許存取這個儲存庫",
+        "not_allowed": "您不被允許存取這個儲存庫",
         "enable": {
             "enable": "啟用",
             "enabled": "已啟用",
@@ -195,9 +243,10 @@
             "stale_wp_repo": "過時的 Woodpecker 儲存庫",
             "conflict": "衝突"
         },
-        "open_in_forge": "",
+        "open_in_forge": "在 forge 中開啟儲存庫",
         "activity": "活動",
-        "branches": "分支"
+        "branches": "分支",
+        "refresh": "重新整理儲存庫清單"
     },
     "cancel": "取消",
     "not_found": {
@@ -207,25 +256,29 @@
         "settings": {
             "users": {
                 "cancel": "取消",
-                "login": "登入",
+                "login": "使用者名稱",
                 "email": "電子郵件",
                 "avatar_url": "Avatar URL",
                 "save": "儲存使用者",
                 "show": "顯示使用者",
                 "add": "新增使用者",
                 "admin": {
-                    "admin": "管理員"
+                    "admin": "管理員",
+                    "placeholder": "使用者是個管理員"
                 },
                 "delete_user": "刪除使用者",
                 "edit_user": "編輯使用者",
                 "users": "使用者",
                 "deleted": "使用者已刪除",
                 "created": "使用者已建立",
-                "saved": "使用者已儲存"
+                "saved": "使用者已儲存",
+                "forge": "Forge",
+                "none": "還沒有任何使用者。"
             },
             "agents": {
                 "name": {
-                    "name": "名稱"
+                    "name": "名稱",
+                    "placeholder": "代理的名稱"
                 },
                 "id": "ID",
                 "token": "權杖",
@@ -244,13 +297,33 @@
                 "version": "版本",
                 "org": {
                     "badge": "組織"
-                }
+                },
+                "custom_labels": {
+                    "custom_labels": "自訂標籤"
+                },
+                "agents": "代理",
+                "add": "新增代理",
+                "save": "儲存代理",
+                "show": "顯示代理",
+                "created": "代理已建立",
+                "saved": "代理已儲存",
+                "deleted": "代理已刪除",
+                "no_schedule": {
+                    "name": "停用代理"
+                },
+                "edit_agent": "編輯代理",
+                "delete_agent": "刪除代理"
             },
             "repos": {
                 "disabled": "已停用",
                 "settings": "儲存庫設定",
                 "repos": "儲存庫",
-                "view": "檢視儲存庫"
+                "view": "檢視儲存庫",
+                "repair": {
+                    "repair": "修復全部",
+                    "success": "儲存庫已修復"
+                },
+                "none": "還沒有任何儲存庫。"
             },
             "queue": {
                 "queue": "佇列",
@@ -261,23 +334,27 @@
                 "tasks": "任務",
                 "stats": {
                     "running_count": "執行中",
-                    "pending_count": "等待中"
+                    "pending_count": "等待中",
+                    "completed_count": "完成的任務",
+                    "worker_count": "空閒"
                 },
                 "task_running": "任務執行中",
                 "task_pending": "任務等待中",
-                "waiting_for": "正在等待"
+                "waiting_for": "正在等待",
+                "agent": "代理"
             },
             "orgs": {
                 "orgs": "組織",
                 "delete_org": "刪除組織",
                 "org_settings": "組織設定",
                 "deleted": "組織已刪除",
-                "view": "檢視組織"
+                "view": "檢視組織",
+                "none": "還沒有任何組織。"
             },
             "settings": "管理員設定"
         }
     },
-    "username": "帳號",
+    "username": "使用者名稱",
     "time": {
         "just_now": "剛剛",
         "not_started": "尚未開始"
@@ -299,14 +376,16 @@
         "saved": "秘密已儲存",
         "edit": "編輯秘密",
         "delete": "刪除秘密",
-        "note": "說明"
+        "note": "說明",
+        "none": "還沒有任何秘密。"
     },
     "settings": "設定",
     "extensions": "擴充功能",
     "require_approval": {
         "none": "無",
         "require_approval_for": "批准要求",
-        "pull_requests": "所有拉取請求"
+        "pull_requests": "所有拉取請求",
+        "all_events": "來自 forge 的所有事件"
     },
     "github": "GitHub",
     "gitlab": "GitLab",
@@ -335,6 +414,12 @@
                     "light": "亮色",
                     "dark": "暗色",
                     "auto": "自動"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Pipeline 紀錄",
+                    "collapse_groups": {
+                        "collapse": "預設摺疊紀錄群組"
+                    }
                 }
             },
             "cli_and_api": {
@@ -360,7 +445,11 @@
         "add": "新增註冊表",
         "view": "檢視註冊表",
         "edit": "編輯註冊表",
-        "delete": "刪除註冊表"
+        "delete": "刪除註冊表",
+        "created": "註冊表憑證已建立",
+        "saved": "註冊表憑證已儲存",
+        "deleted": "註冊表憑證已刪除",
+        "none": "還沒有註冊表憑證。"
     },
     "developer_settings": "開發者設定",
     "oauth_host": "OAuth 主機",
@@ -372,5 +461,40 @@
     "public_only_desc": "僅顯示公開儲存庫。",
     "addon": "附加元件",
     "config_extension_exclusive": "獨佔",
-    "abort": "中止"
+    "abort": "中止",
+    "leave_empty_to_keep_current_value": "留白以保留當前值",
+    "documentation_for": "適用於 \"{topic}\" 的說明文件",
+    "global_level_secret": "全域秘密",
+    "org_level_secret": "組織秘密",
+    "extensions_configuration_saved": "擴充功能配置已儲存",
+    "oauth_client_id": "OAuth 用戶端 ID",
+    "oauth_client_secret": "OAuth 用戶端秘密",
+    "forges": "Forges",
+    "add_forge": "新增 forge",
+    "forge_type": "Forge 類型",
+    "forge_created": "Forge 已建立",
+    "forge_deleted": "Forge 已刪除",
+    "edit_forge": "編輯 forge",
+    "delete_forge": "刪除 forge",
+    "forge_saved": "Forge 已儲存",
+    "errors": {
+        "not_found": "伺服器無法找到請求的物件"
+    },
+    "executable": "執行檔",
+    "show_forges": "顯示 forges",
+    "internal_error": "發生了內部錯誤",
+    "no_search_results": "找不到結果",
+    "extension_netrc": "包含 netrc 憑證",
+    "login_to_cli": "登入至 CLI",
+    "cli_login_success": "登入至 CLI 成功",
+    "cli_login_failed": "登入至 CLI 失敗",
+    "cli_login_denied": "登入至 CLI 被拒絕",
+    "return_to_cli": "您現在可以關閉此分頁並回到 CLI。",
+    "running_version": "您正在執行 Woodpecker {0}",
+    "update_woodpecker": "請更新您的 Woodpecker 實例至 {0}",
+    "login_to_cli_description": "如果繼續，您將會被登入至 CLI。",
+    "executable_desc": "附加元件執行檔路徑。",
+    "skip_verify_desc": "略過 API 連線的 SSL 驗證。不推薦用於生產環境。",
+    "developer_settings_to_create": "前往 {0} 並設定 OAuth 應用程式。",
+    "help_translating": "您可以在 {0} 上幫助將 Woodpecker 翻譯成您的語言。"
 }

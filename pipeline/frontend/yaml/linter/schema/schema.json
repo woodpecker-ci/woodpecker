@@ -39,11 +39,12 @@
       "$ref": "#/definitions/labels"
     },
     "depends_on": {
-      "type": "array",
-      "minLength": 1,
-      "items": {
-        "type": "string"
-      }
+      "description": "List of workflow dependencies. Accepts strings or objects with name and optional fields. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
+      "$ref": "#/definitions/depends_on_list"
+    },
+    "concurrency": {
+      "description": "Limit how many instances of this workflow may run at the same time. Read more: https://woodpecker-ci.org/docs/usage/workflows#concurrency",
+      "$ref": "#/definitions/concurrency"
     },
     "runs_on": {
       "type": "array",
@@ -66,6 +67,69 @@
         },
         {
           "type": "string"
+        }
+      ]
+    },
+    "depends_on_item": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the dependency (step or workflow)."
+            },
+            "optional": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, the dependency is silently dropped when not present in the pipeline."
+            }
+          }
+        }
+      ]
+    },
+    "depends_on_list": {
+      "description": "A dependency or list of dependencies. Each item can be a string or an object with name and optional fields.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "$ref": "#/definitions/depends_on_item"
+          }
+        }
+      ]
+    },
+    "concurrency": {
+      "description": "Limit how many instances of this workflow may run at the same time. Provide an integer for the limit, or an object to also set a custom group.",
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["limit"],
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of workflows sharing the same group that run at once."
+            },
+            "group": {
+              "type": "string",
+              "description": "Identifier shared by workflows that are limited against each other. Defaults to the workflow name. Environment variables are substituted, e.g. `deploy-${CI_COMMIT_BRANCH}`."
+            }
+          }
         }
       ]
     },
@@ -325,8 +389,8 @@
           "$ref": "#/definitions/step_volumes"
         },
         "depends_on": {
-          "description": "Execute a step after another step has finished.",
-          "$ref": "#/definitions/string_or_string_slice"
+          "description": "Execute a step after another step has finished. Accepts strings or objects with name and optional fields.",
+          "$ref": "#/definitions/depends_on_list"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -386,8 +450,8 @@
           "$ref": "#/definitions/step_volumes"
         },
         "depends_on": {
-          "description": "Execute a step after another step has finished.",
-          "$ref": "#/definitions/string_or_string_slice"
+          "description": "Execute a step after another step has finished. Accepts strings or objects with name and optional fields.",
+          "$ref": "#/definitions/depends_on_list"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",

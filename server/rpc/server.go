@@ -36,33 +36,16 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, store store.Store) proto.WoodpeckerServer {
-	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "pipeline_time",
-		Help:      "Pipeline time.",
-	}, []string{"repo", "branch", "status", "pipeline"})
-	pipelineCount := promauto.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "woodpecker",
-		Name:      "pipeline_count",
-		Help:      "Pipeline count.",
-	}, []string{"repo", "branch", "status", "pipeline"})
-	peer := RPC{
-		store:         store,
-		scheduler:     scheduler,
-		logger:        logger,
-		pipelineTime:  pipelineTime,
-		pipelineCount: pipelineCount,
+// NewWoodpeckerServer creates a WoodpeckerServer with its metrics registered
+// into registerer. Pass prometheus.DefaultRegisterer in production; pass a
+// fresh prometheus.NewRegistry() in tests to avoid "duplicate metrics
+// collector registration" panics when the server is created multiple times.
+// A nil registerer defaults to prometheus.DefaultRegisterer.
+func NewWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, store store.Store, registerer prometheus.Registerer) proto.WoodpeckerServer {
+	if registerer == nil {
+		registerer = prometheus.DefaultRegisterer
 	}
-	return &WoodpeckerServer{peer: peer}
-}
-
-// NewTestWoodpeckerServer creates a WoodpeckerServer for e2e tests.
-// It is using a caller-supplied prometheus registry.
-// Use this in tests to avoid "duplicate metrics collector registration" panics when the server is created multiple times.
-// (promauto in NewWoodpeckerServer registers into the global default registry, which panics on duplicate names).
-func NewTestWoodpeckerServer(scheduler scheduler.Scheduler, logger logging.Log, store store.Store, registry *prometheus.Registry) proto.WoodpeckerServer {
-	factory := promauto.With(registry)
+	factory := promauto.With(registerer)
 	pipelineTime := factory.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",

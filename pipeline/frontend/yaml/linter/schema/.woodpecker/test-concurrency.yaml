@@ -1,0 +1,9 @@
+steps:
+  deploy:
+    image: alpine
+    commands:
+      - echo deploying
+
+concurrency:
+  limit: 1
+  group: deploy-production
