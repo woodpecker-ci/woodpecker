@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @DerRockWolf, @Kernald, @TowyTowy, @cyphercodes, @healdropper, @kanywst, @rfinnie, @xoxys
+@6543, @DerRockWolf, @Kernald, @TowyTowy, @cyphercodes, @healdropper, @kanywst, @nicolasbatistoni, @rfinnie, @xoxys
 
 ### 🔒 Security
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix CreatePipeline retry [[#6859](https://github.com/woodpecker-ci/woodpecker/pull/6859)]
 - WebUI: unregister scaffold Tab on unmount and stable Tab order [[#6842](https://github.com/woodpecker-ci/woodpecker/pull/6842)]
 - WebUI: Fixes three bugs around component unmount and reset in compositions [[#6843](https://github.com/woodpecker-ci/woodpecker/pull/6843)]
 - fix(server): heal users left on forge_id=0 with closed registration [[#6823](https://github.com/woodpecker-ci/woodpecker/pull/6823)]
