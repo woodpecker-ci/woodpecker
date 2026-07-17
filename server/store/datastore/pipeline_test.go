@@ -218,6 +218,31 @@ func TestPipelineIncrement(t *testing.T) {
 	assert.EqualValues(t, 1, pipelineC.Number)
 }
 
+// Duplicates must surface as ErrInsertDuplicateDetected so the retry sees them as retryable (#6067).
+func TestCreatePipelineDuplicateIsRetryable(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	require.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1", ForgeRemoteID: "1"}))
+
+	// Duplicate step: UNIQUE(pipeline_id, pid).
+	err := store.CreatePipeline(&model.Pipeline{RepoID: 1},
+		&model.Step{PID: 1, Name: "clone"},
+		&model.Step{PID: 1, Name: "dup"},
+	)
+	assert.ErrorIs(t, err, types.ErrInsertDuplicateDetected)
+
+	// Every attempt rolled back.
+	count, err := store.GetPipelineCount()
+	assert.NoError(t, err)
+	assert.Zero(t, count)
+
+	// Same for the pipeline insert. Forced through the PK: the number is MAX+1, it can't collide on demand.
+	existing := &model.Pipeline{RepoID: 1}
+	require.NoError(t, store.CreatePipeline(existing))
+	assert.ErrorIs(t, store.CreatePipeline(&model.Pipeline{ID: existing.ID, RepoID: 1}), types.ErrInsertDuplicateDetected)
+}
+
 func TestDeletePipeline(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo), new(model.Workflow),
 		new(model.Step), new(model.LogEntry), new(model.PipelineConfig), new(model.Config))
