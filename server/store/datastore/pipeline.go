@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -24,6 +25,7 @@ import (
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
@@ -196,6 +198,16 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 func isUniqueConstraintError(err error) bool {
 	if err == nil {
 		return false
+	}
+
+	// The inserts in CreatePipeline go through wrapInsert, which normalizes driver-specific unique
+	// constraint violations into types.ErrInsertDuplicateDetected. Its message ("on insert duplicate
+	// based on constraints was detected") matches none of the raw driver patterns below, so without
+	// this check the retry added in #6067 never triggers and CreatePipeline fails permanently on the
+	// first collision. Keep the raw string checks too: this function is also reachable with errors
+	// that did not go through wrapInsert.
+	if errors.Is(err, types.ErrInsertDuplicateDetected) {
+		return true
 	}
 
 	errStr := err.Error()
