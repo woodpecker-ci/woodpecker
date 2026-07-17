@@ -101,12 +101,12 @@
 
     <Tab icon="tray-full" :to="{ name: 'repo-pipeline' }" :title="$t('repo.pipeline.tasks')" />
     <Tab
-      v-if="pipeline.errors && pipeline.errors.length > 0"
+      v-if="errorsTabCount > 0"
       :to="{ name: 'repo-pipeline-errors' }"
       icon="alert"
-      :title="pipeline.errors.some((e) => !e.is_warning) ? $t('repo.pipeline.errors') : $t('repo.pipeline.warnings')"
-      :count="pipeline.errors?.length"
-      :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-error-100' : 'text-wp-state-warn-100'"
+      :title="pipelineHasErrorsToShow(pipeline) ? $t('repo.pipeline.errors') : $t('repo.pipeline.warnings')"
+      :count="errorsTabCount"
+      :icon-class="pipelineHasErrorsToShow(pipeline) ? 'text-wp-error-100' : 'text-wp-state-warn-100'"
     />
     <Tab icon="file-cog-outline" :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
     <Tab
@@ -149,6 +149,7 @@ import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Pipeline, PipelineConfig } from '~/lib/api/types';
+import { pipelineHasErrorsToShow, workflowsWithErrors } from '~/lib/pipeline';
 import { usePipelineStore } from '~/store/pipelines';
 
 const props = defineProps<{
@@ -173,6 +174,10 @@ const repoPermissions = requiredInject('repo-permissions');
 
 const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, durationElapsed, created, message, shortMessage } = usePipeline(pipeline);
+
+const errorsTabCount = computed(
+  () => (pipeline.value?.errors?.length ?? 0) + workflowsWithErrors(pipeline.value).length,
+);
 provide('pipeline', pipeline as Ref<Pipeline>); // can't be undefined because of v-if in template
 
 const pipelineConfigs = ref<PipelineConfig[]>();
