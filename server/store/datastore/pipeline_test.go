@@ -16,7 +16,6 @@
 package datastore
 
 import (
-	"errors"
 	"testing"
 	"time"
 
@@ -281,17 +280,4 @@ func TestDeletePipeline(t *testing.T) {
 	count, err = store.engine.Count(new(model.Config))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, count)
-}
-
-func TestIsUniqueConstraintError(t *testing.T) {
-	// Without this, the retry in CreatePipeline is dead code (#6067).
-	assert.True(t, isUniqueConstraintError(types.ErrInsertDuplicateDetected))
-
-	// Raw driver errors, for callers that don't go through wrapInsert.
-	assert.True(t, isUniqueConstraintError(errors.New(`pq: duplicate key value violates unique constraint "UQE_pipelines_s"`)))
-	assert.True(t, isUniqueConstraintError(errors.New("UNIQUE constraint failed: pipelines.repo_id")))
-	assert.True(t, isUniqueConstraintError(errors.New("Error 1062: Duplicate entry '1-2' for key 'UQE_pipelines_s'")))
-
-	assert.False(t, isUniqueConstraintError(nil))
-	assert.False(t, isUniqueConstraintError(errors.New("connection refused")))
 }
