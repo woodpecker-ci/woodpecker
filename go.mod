@@ -15,7 +15,7 @@ require (
 	github.com/cenkalti/backoff/v7 v7.0.0
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.6.1+incompatible
+	github.com/docker/cli v29.6.2+incompatible
 	github.com/docker/go-connections v0.7.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
@@ -55,7 +55,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.5.2
 	github.com/zalando/go-keyring v0.2.8
-	gitlab.com/gitlab-org/api/client-go/v2 v2.48.1
+	gitlab.com/gitlab-org/api/client-go/v2 v2.50.0
 	go.uber.org/multierr v1.11.0
 	go.yaml.in/yaml/v4 v4.0.0-rc.6
 	golang.org/x/crypto v0.54.0
@@ -65,7 +65,7 @@ require (
 	golang.org/x/sync v0.22.0
 	golang.org/x/term v0.45.0
 	golang.org/x/text v0.40.0
-	google.golang.org/grpc v1.82.0
+	google.golang.org/grpc v1.82.1
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.36.2

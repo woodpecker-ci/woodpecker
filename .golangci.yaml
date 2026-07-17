@@ -46,6 +46,13 @@ linters:
   settings:
     depguard:
       rules:
+        deprecated:
+          list-mode: lax
+          files:
+            - $all
+          deny:
+            - pkg: golang.org/x/crypto/openpgp
+              desc: deprecated and frozen, use github.com/ProtonMail/go-crypto/openpgp instead
         agent:
           list-mode: lax
           files:
