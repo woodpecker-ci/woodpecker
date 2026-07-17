@@ -284,15 +284,10 @@ func TestDeletePipeline(t *testing.T) {
 }
 
 func TestIsUniqueConstraintError(t *testing.T) {
-	// The inserts in CreatePipeline go through wrapInsert, which normalizes driver errors into
-	// types.ErrInsertDuplicateDetected. If isUniqueConstraintError does not recognize that sentinel,
-	// the retry added in #6067 is dead code: CreatePipeline hits backoff.Permanent on the first
-	// collision and the webhook gets a 500, so the pipeline is never created.
-	assert.True(t, isUniqueConstraintError(types.ErrInsertDuplicateDetected),
-		"the sentinel returned by wrapInsert must be retryable, otherwise the retry never runs")
+	// Without this, the retry in CreatePipeline is dead code (#6067).
+	assert.True(t, isUniqueConstraintError(types.ErrInsertDuplicateDetected))
 
-	// Raw driver errors must keep working: this function is also reachable with errors that did not
-	// go through wrapInsert.
+	// Raw driver errors, for callers that don't go through wrapInsert.
 	assert.True(t, isUniqueConstraintError(errors.New(`pq: duplicate key value violates unique constraint "UQE_pipelines_s"`)))
 	assert.True(t, isUniqueConstraintError(errors.New("UNIQUE constraint failed: pipelines.repo_id")))
 	assert.True(t, isUniqueConstraintError(errors.New("Error 1062: Duplicate entry '1-2' for key 'UQE_pipelines_s'")))
