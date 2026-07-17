@@ -52,7 +52,9 @@ func NewMembershipService(_store store.Store) MembershipService {
 
 // Get returns if the user is a member of the organization.
 func (c *membershipCache) Get(ctx context.Context, _forge forge.Forge, u *model.User, org string) (*model.OrgPerm, error) {
-	key := fmt.Sprintf("%s-%s", u.ForgeRemoteID, org)
+	// ForgeRemoteID is only unique per forge, so the key must be scoped by
+	// the (globally unique) user ID to not leak permissions across forges
+	key := fmt.Sprintf("%d-%s", u.ID, org)
 	item := c.cache.Get(key)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil

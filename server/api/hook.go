@@ -17,10 +17,12 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -57,6 +59,12 @@ func getAgentName(store store.Store, agentNameMap map[int64]string, agentID int6
 
 	return "", false
 }
+
+// backgroundPipelineCreationTimeout caps how long a webhook-triggered pipeline
+// creation may keep running after the HTTP handler has already responded 202
+// Accepted (see PostHook). It bounds the detached background goroutine so a
+// stuck creation cannot leak indefinitely.
+const backgroundPipelineCreationTimeout = 2 * time.Minute
 
 // PostHook
 //
@@ -203,8 +211,42 @@ func PostHook(c *gin.Context) {
 	//
 	// 6. Finally create a pipeline
 	//
+	// Pipeline creation can be slow (forge round-trips, config fetching). To
+	// avoid the forge timing out and retrying the webhook delivery, we wait only
+	// up to WebhookSyncTimeout for creation to finish. If it completes in time we
+	// respond synchronously with the created pipeline (preserving the old
+	// behavior and API response). If it takes longer we respond 202 Accepted and
+	// let creation finish in the background.
+	bgCtx, cancel := context.WithTimeout(context.WithoutCancel(context.Background()), backgroundPipelineCreationTimeout)
 
-	pl, err := pipeline.Create(c, _store, repo, pipelineFromForge)
+	done := make(chan struct{})
+	var pl *model.Pipeline
+
+	go func() {
+		defer cancel()
+		pl, err = pipeline.Create(bgCtx, _store, repo, pipelineFromForge)
+		if err != nil {
+			log.Error().Err(err).Str("repo", repo.FullName).Msg("could not create pipeline from webhook")
+		}
+		done <- struct{}{}
+	}()
+
+	syncTimeout := server.Config.Server.WebhookSyncTimeout
+	if syncTimeout > 0 {
+		select {
+		case <-done:
+			// handle synchronous
+		case <-time.After(syncTimeout):
+			log.Debug().Str("repo", repo.FullName).Dur("timeout", syncTimeout).Msg("pipeline creation exceeded webhook sync timeout, continuing in background")
+			c.JSON(http.StatusAccepted, nil)
+			// do async
+			return
+		}
+	} else {
+		// we do synchronous
+		<-done
+	}
+
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

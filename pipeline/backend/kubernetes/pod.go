@@ -34,12 +34,13 @@ import (
 const (
 	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
 	// This will be removed in the future.
-	StepLabelLegacy          = "step"
-	StepLabel                = "woodpecker-ci.org/step"
-	TaskUUIDLabel            = "woodpecker-ci.org/task-uuid"
-	podPrefix                = "wp-"
-	defaultFSGroup     int64 = 1000
-	initContainerImage       = "busybox:stable-musl"
+	StepLabelLegacy       = "step"
+	StepLabel             = "woodpecker-ci.org/step"
+	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
+	podPrefix             = "wp-"
+	defaultFSGroup  int64 = 1000
+	// Because of https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/nodes/working-with-clusters
+	initContainerMemLimit = "12Mi"
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, taskUUID string) (*kube_core_v1.Pod, error) {
@@ -67,7 +68,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 	}
 	spec.Containers = append(spec.Containers, container)
 
-	initContainer := podInitContainer(&spec, &container)
+	initContainer := podInitContainer(config, &spec, &container)
 	if initContainer != nil {
 		spec.InitContainers = append(spec.InitContainers, *initContainer)
 	}
@@ -88,7 +89,7 @@ func stepToPodName(step *types.Step) (name string, err error) {
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(podPrefix + step.UUID)
+	return toDNSName(podPrefix + step.UUID)
 }
 
 func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (kube_meta_v1.ObjectMeta, error) {
@@ -115,7 +116,7 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 		// Only copy user labels if allowed by agent config.
 		// Internal labels are filtered on the server-side.
 		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
-			labels[k], err = toDNSName(v)
+			labels[k], err = toLabelValue(v)
 			if err != nil {
 				return labels, err
 			}
@@ -185,19 +186,23 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	}
 
 	spec := kube_core_v1.PodSpec{
-		RestartPolicy:      kube_core_v1.RestartPolicyNever,
-		RuntimeClassName:   options.RuntimeClassName,
-		ServiceAccountName: options.ServiceAccountName,
-		PriorityClassName:  config.PriorityClassName,
-		HostAliases:        hostAliases(step.ExtraHosts),
-		Hostname:           getHostnameOrEmpty(step.Name),
-		Subdomain:          subdomain,
-		DNSConfig:          dnsConfig(config.GetNamespace(step.OrgID), subdomain),
-		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
-		Tolerations:        tolerations(options.Tolerations),
-		Affinity:           affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
-		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged, options.HostUsers),
-		HostUsers:          options.HostUsers,
+		RestartPolicy:     kube_core_v1.RestartPolicyNever,
+		RuntimeClassName:  options.RuntimeClassName,
+		PriorityClassName: config.PriorityClassName,
+		HostAliases:       hostAliases(step.ExtraHosts),
+		Hostname:          getHostnameOrEmpty(step.Name),
+		Subdomain:         subdomain,
+		DNSConfig:         dnsConfig(config.GetNamespace(step.OrgID), subdomain),
+		NodeSelector:      nodeSelector(options.NodeSelector, config.PodNodeSelector, config.PodNodeSelectorAllowFromStep, step.Environment["CI_SYSTEM_PLATFORM"]),
+		Tolerations:       tolerations(options.Tolerations),
+		Affinity:          affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
+		SecurityContext:   podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged, options.HostUsers),
+		HostUsers:         options.HostUsers,
+	}
+
+	// Only allow the step to set the service account name if explicitly enabled by the admin.
+	if config.ServiceAccountNameAllowFromStep {
+		spec.ServiceAccountName = options.ServiceAccountName
 	}
 
 	// If there are tolerations and they are allowed
@@ -294,7 +299,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 // podInitContainer determines whether an init container is required to prepare the
 // main step container's working directory with the correct permissions.
 // If it is required, it returns the init container spec, otherwise it returns an empty container spec.
-func podInitContainer(podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Container) *kube_core_v1.Container {
+func podInitContainer(config *config, podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Container) *kube_core_v1.Container {
 	// if pod is running as root, we don't need an init container to precreate the workingDir
 	// since kubelet already precreates it (as root:root)
 	if podSpec.SecurityContext == nil ||
@@ -320,7 +325,7 @@ func podInitContainer(podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Con
 
 	return &kube_core_v1.Container{
 		Name:            "init-" + container.Name,
-		Image:           initContainerImage,
+		Image:           config.PermissionInitImage,
 		ImagePullPolicy: kube_core_v1.PullAlways,
 		Args:            []string{"mkdir", "-p", container.WorkingDir},
 		SecurityContext: &kube_core_v1.SecurityContext{
@@ -332,11 +337,11 @@ func podInitContainer(podSpec *kube_core_v1.PodSpec, container *kube_core_v1.Con
 		Resources: kube_core_v1.ResourceRequirements{
 			Requests: kube_core_v1.ResourceList{
 				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
-				kube_core_v1.ResourceMemory: resource.MustParse("5Mi"),
+				kube_core_v1.ResourceMemory: resource.MustParse(initContainerMemLimit),
 			},
 			Limits: kube_core_v1.ResourceList{
 				kube_core_v1.ResourceCPU:    resource.MustParse("5m"),
-				kube_core_v1.ResourceMemory: resource.MustParse("5Mi"),
+				kube_core_v1.ResourceMemory: resource.MustParse(initContainerMemLimit),
 			},
 		},
 		VolumeMounts: volumeMounts,
@@ -507,7 +512,7 @@ func resourceList(resources map[string]string) (kube_core_v1.ResourceList, error
 	return requestResources, nil
 }
 
-func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, platform string) map[string]string {
+func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, allowFromStep bool, platform string) map[string]string {
 	nodeSelector := make(map[string]string)
 
 	if platform != "" {
@@ -522,8 +527,12 @@ func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, pla
 	}
 
 	if len(backendNodeSelector) > 0 {
-		log.Trace().Msgf("appending labels to the node selector from the backend options: %v", backendNodeSelector)
-		maps.Copy(nodeSelector, backendNodeSelector)
+		if allowFromStep {
+			log.Trace().Msgf("appending labels to the node selector from the backend options: %v", backendNodeSelector)
+			maps.Copy(nodeSelector, backendNodeSelector)
+		} else {
+			log.Debug().Msg("Step node selector is disallowed by instance configuration, ignoring it")
+		}
 	}
 
 	return nodeSelector

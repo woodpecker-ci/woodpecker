@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -202,6 +202,7 @@ func classifyRPCErr(ctx context.Context, err error) error {
 	case codes.Aborted,
 		codes.DataLoss,
 		codes.DeadlineExceeded,
+		codes.Unauthenticated,
 		codes.Unavailable:
 		return err
 	default:

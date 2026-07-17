@@ -17,12 +17,14 @@ package github
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v88/github"
+	"github.com/google/go-github/v89/github"
 	github_mock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -93,6 +95,55 @@ func Test_github(t *testing.T) {
 		_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 		assert.Error(t, err)
 	})
+}
+
+func TestStatusDeployment(t *testing.T) {
+	var (
+		method    string
+		path      string
+		decodeErr error
+		body      struct {
+			State       string `json:"state"`
+			Description string `json:"description"`
+			LogURL      string `json:"log_url"`
+		}
+	)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		method = r.Method
+		path = r.URL.Path
+		decodeErr = json.NewDecoder(r.Body).Decode(&body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	t.Cleanup(server.Close)
+
+	gh, err := github.NewClient(
+		github.WithURLs(github.Ptr(server.URL+"/"), nil),
+		github.WithHTTPClient(server.Client()),
+	)
+	require.NoError(t, err)
+
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
+	c := &client{}
+	err = c.Status(ctx, fakeUser, &model.Repo{
+		ID:    7,
+		Owner: "octocat",
+		Name:  "Hello-World",
+	}, &model.Pipeline{
+		Number:   9,
+		Event:    model.EventDeploy,
+		Status:   model.StatusSuccess,
+		ForgeURL: "https://api.github.com/repos/octocat/Hello-World/deployments/42",
+	}, nil)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.MethodPost, method)
+	assert.Equal(t, "/repos/octocat/Hello-World/deployments/42/statuses", path)
+	require.NoError(t, decodeErr)
+	assert.Equal(t, "success", body.State)
+	assert.Equal(t, "Pipeline was successful", body.Description)
+	assert.Contains(t, body.LogURL, "/repos/7/pipeline/9")
 }
 
 var (
@@ -266,7 +317,7 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/tags/the-tag-v1", pipeline.Ref)
 		assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit)
-		assert.Equal(t, "Update .woodpecker.yml", pipeline.Message)
+		assert.Equal(t, "the-tag-v1", pipeline.TagTitle)
 		assert.Equal(t, "https://github.com/6543/test_ci_tmp/commit/67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.ForgeURL)
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)

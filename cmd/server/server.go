@@ -25,10 +25,11 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
@@ -267,6 +268,12 @@ func run(ctx context.Context, c *cli.Command) error {
 				stopServerFunc(err)
 				return err
 			}
+			if network == "unix" && c.String("unix-socket-permission") != "" {
+				if err := setUnixSocketPermission(addr, c.String("unix-socket-permission")); err != nil {
+					stopServerFunc(err)
+					return err
+				}
+			}
 
 			httpServer := &http.Server{
 				Handler: handler,
@@ -321,4 +328,15 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	return serviceWaitingGroup.Wait()
+}
+
+func setUnixSocketPermission(path, permission string) error {
+	mode, err := strconv.ParseUint(permission, 8, 32)
+	if err != nil {
+		return fmt.Errorf("invalid unix socket permission %q: %w", permission, err)
+	}
+	if err := os.Chmod(path, os.FileMode(mode)); err != nil {
+		return fmt.Errorf("could not set unix socket permission: %w", err)
+	}
+	return nil
 }
