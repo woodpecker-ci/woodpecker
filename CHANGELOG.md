@@ -36,6 +36,7 @@
 
 ### 🧪 Tests
 
+- Add `fuzz` target to make [[#6828](https://github.com/woodpecker-ci/woodpecker/pull/6828)]
 - Add mock for server scheduler [[#6848](https://github.com/woodpecker-ci/woodpecker/pull/6848)]
 
 ### 📚 Documentation
