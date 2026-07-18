@@ -287,6 +287,18 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 }
 
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	// fetch the whole directory with a single GraphQL request: fetching one
+	// file per request multiplies both the latency and the exposure to
+	// transient forge errors for directories with many files
+	dirFiles, err := c.dirFromGraphQL(ctx, u.AccessToken, r.Owner, r.Name, b.Commit, f)
+	if err == nil {
+		return dirFiles, nil
+	}
+	if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+		return nil, err
+	}
+	log.Debug().Err(err).Msgf("github: graphql fetch of directory %s failed, falling back to fetching per file", f)
+
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
@@ -302,10 +314,18 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
+	// directories are not descended into, like in the single-request fetch
+	entries := make([]*github.RepositoryContent, 0, len(data))
+	for _, file := range data {
+		if file.GetType() != "dir" {
+			entries = append(entries, file)
+		}
+	}
+
 	fc := make(chan *forge_types.FileMeta)
 	errChan := make(chan error)
 
-	for _, file := range data {
+	for _, file := range entries {
 		go func(path string) {
 			content, err := c.File(ctx, u, r, b, path)
 			if err != nil {
@@ -324,7 +344,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 	var files []*forge_types.FileMeta
 
-	for range data {
+	for range entries {
 		select {
 		case err := <-errChan:
 			return nil, err

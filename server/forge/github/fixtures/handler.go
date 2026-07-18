@@ -16,6 +16,7 @@ package fixtures
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,8 +31,60 @@ func Handler() http.Handler {
 	e.GET("/api/v3/repositories/:id", getRepoByID)
 	e.GET("/api/v3/orgs/:org/memberships/:user", getMembership)
 	e.GET("/api/v3/user/memberships/orgs/:org", getMembership)
+	e.POST("/api/graphql", graphqlDir)
+	e.GET("/api/v3/repos/:owner/:name/contents/*path", getContents)
 
 	return e
+}
+
+// graphqlDir mocks the single-request directory fetch used by Dir.
+func graphqlDir(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	var req struct {
+		Variables struct {
+			Expression string `json:"expression"`
+		} `json:"variables"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	switch {
+	case strings.HasSuffix(req.Variables.Expression, ":somedir"):
+		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "pipeline:", "isTruncated": false, "isBinary": false}},
+			{"name": "sub", "type": "tree", "mode": 16384, "object": {}}
+		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":symlink-dir"):
+		// symlink blobs carry the link target as text, the forge must fall
+		// back to the REST path which resolves them
+		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "link.yaml", "type": "blob", "mode": 40960, "object": {"text": "../target.yaml", "isTruncated": false, "isBinary": false}}
+		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":rest-fallback-dir"):
+		// force the caller onto the per-file REST fallback
+		c.String(http.StatusBadGateway, "")
+	default:
+		c.String(http.StatusOK, `{"data": {"repository": {"object": null}}}`)
+	}
+}
+
+// getContents serves the per-file REST fallback.
+func getContents(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	if strings.HasSuffix(c.Param("path"), "rest-fallback-dir") {
+		c.String(http.StatusOK, `[{"type": "file", "name": "b.yaml", "path": "rest-fallback-dir/b.yaml"}, {"type": "dir", "name": "nested", "path": "rest-fallback-dir/nested"}]`)
+		return
+	}
+	if strings.HasSuffix(c.Param("path"), "symlink-dir") {
+		c.String(http.StatusOK, `[{"type": "symlink", "name": "link.yaml", "path": "symlink-dir/link.yaml"}]`)
+		return
+	}
+	// base64 of "pipeline:"
+	c.String(http.StatusOK, `{"type": "file", "encoding": "base64", "name": "config", "content": "cGlwZWxpbmU6"}`)
 }
 
 func getRepo(c *gin.Context) {

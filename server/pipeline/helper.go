@@ -18,17 +18,29 @@ import (
 	"context"
 
 	"github.com/rs/zerolog/log"
+	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
+// maxConcurrentStatusUpdates bounds the parallel commit-status calls per
+// pipeline, so pipelines with many workflows do not trip forge rate limits.
+const maxConcurrentStatusUpdates = 10
+
 func updatePipelineStatus(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, user *model.User) {
+	// setting one status per workflow sequentially delays pipelines with many
+	// workflows by tens of seconds, so post them concurrently
+	var group errgroup.Group
+	group.SetLimit(maxConcurrentStatusUpdates)
 	for _, workflow := range pipeline.Workflows {
-		err := forge.Status(ctx, user, repo, pipeline, workflow)
-		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
-			return
-		}
+		group.Go(func() error {
+			err := forge.Status(ctx, user, repo, pipeline, workflow)
+			if err != nil {
+				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
+			}
+			return nil
+		})
 	}
+	_ = group.Wait()
 }

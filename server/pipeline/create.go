@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -74,8 +75,10 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	// fetch the pipeline file from the forge
+	phaseStart := time.Now()
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
+	configFetchDuration := time.Since(phaseStart)
 	switch {
 	case errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}):
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
@@ -93,7 +96,9 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
 	}
 
+	phaseStart = time.Now()
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
+	compileDuration := time.Since(phaseStart)
 	*pipeline = *currentPipeline
 	if handleParseErrors(pipeline, parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
@@ -130,22 +135,46 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+	phaseStart = time.Now()
+	publishPipelineEvent(ctx, pipeline, repo)
 
 	if pipeline.Status == model.StatusBlocked {
+		// blocked pipelines never reach start(), so their statuses are posted here
+		updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser)
 		return pipeline, nil
 	}
+	publishDuration := time.Since(phaseStart)
 
-	if err := updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser); err != nil {
+	phaseStart = time.Now()
+	if err := updatePipelinePending(ctx, _store, pipeline, repo); err != nil {
 		return nil, err
 	}
+	pendingDuration := time.Since(phaseStart)
 
-	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
+	phaseStart = time.Now()
+	startedPipeline, err := start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
+		// transition the pipeline to error and post the statuses, so neither the
+		// pipeline nor the commit is stuck in a pending state forever
+		if uErr := updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, err); uErr != nil {
+			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, pipeline.Number)
+		}
 		return nil, errors.New(msg)
 	}
+	pipeline = startedPipeline
+
+	log.Debug().
+		Str("repo", repo.FullName).
+		Int64("pipeline", pipeline.Number).
+		Int("workflows", len(pipeline.Workflows)).
+		Dur("config_fetch", configFetchDuration).
+		Dur("compile", compileDuration).
+		Dur("publish_created", publishDuration).
+		Dur("publish_pending", pendingDuration).
+		Dur("start", time.Since(phaseStart)).
+		Msg("pipeline creation timing")
 
 	return pipeline, nil
 }
@@ -158,12 +187,26 @@ func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store
 	// update value in ref
 	*pipeline = *_pipeline
 
+	// transition the persisted workflows as well: forges post the workflow
+	// states as commit statuses, so leaving them pending would publish
+	// statuses that never resolve
+	for _, workflow := range pipeline.Workflows {
+		if workflow.State != model.StatusPending {
+			continue
+		}
+		workflow.State = model.StatusError
+		workflow.Finished = pipeline.Finished
+		if uErr := _store.WorkflowUpdate(workflow); uErr != nil {
+			log.Error().Err(uErr).Msgf("cannot update workflow with id %d state", workflow.ID)
+		}
+	}
+
 	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 
 	return nil
 }
 
-func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo) error {
 	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
 	if err != nil {
 		return err
@@ -171,7 +214,8 @@ func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store
 	// update value in ref
 	*pipeline = *_pipeline
 
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+	// the forge statuses are posted by start() right after
+	publishPipelineEvent(ctx, pipeline, repo)
 
 	return nil
 }
