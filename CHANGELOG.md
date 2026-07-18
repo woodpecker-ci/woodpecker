@@ -48,6 +48,7 @@
 
 ### 📦️ Dependency
 
+- Update pnpm to v11.15.0 [[#6865](https://github.com/woodpecker-ci/woodpecker/pull/6865)]
 - Update pre-commit hook igorshubovych/markdownlint-cli to v0.49.1 [[#6861](https://github.com/woodpecker-ci/woodpecker/pull/6861)]
 - Update dependency pinia to v4 [[#6864](https://github.com/woodpecker-ci/woodpecker/pull/6864)]
 - Update gitea/gitea Docker tag to v1.27 [[#6863](https://github.com/woodpecker-ci/woodpecker/pull/6863)]
