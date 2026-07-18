@@ -48,6 +48,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency pinia to v4 [[#6864](https://github.com/woodpecker-ci/woodpecker/pull/6864)]
 - Update gitea/gitea Docker tag to v1.27 [[#6863](https://github.com/woodpecker-ci/woodpecker/pull/6863)]
 - Update web npm deps non-major [[#6862](https://github.com/woodpecker-ci/woodpecker/pull/6862)]
 - Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.2 [[#6860](https://github.com/woodpecker-ci/woodpecker/pull/6860)]
