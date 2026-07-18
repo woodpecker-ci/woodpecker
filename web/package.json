@@ -28,7 +28,7 @@
     "js-base64": "^3.7.8",
     "marked": "^18.0.0",
     "node-emoji": "^2.2.0",
-    "pinia": "^3.0.4",
+    "pinia": "^4.0.0",
     "prismjs": "^1.30.0",
     "semver": "^7.7.4",
     "simple-icons": "^16.16.0",
