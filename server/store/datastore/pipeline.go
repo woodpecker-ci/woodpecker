@@ -16,7 +16,7 @@ package datastore
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"time"
 
 	"github.com/cenkalti/backoff/v7"
@@ -24,6 +24,7 @@ import (
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
@@ -169,7 +170,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		pipeline.Created = time.Now().UTC().Unix()
 		// only Insert set auto created ID back to object
 		if err := wrapInsert(sess.Insert(pipeline)); err != nil {
-			if isUniqueConstraintError(err) {
+			if errors.Is(err, types.ErrInsertDuplicateDetected) {
 				return struct{}{}, err
 			}
 			return struct{}{}, backoff.Permanent(err)
@@ -179,7 +180,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 			stepList[i].PipelineID = pipeline.ID
 			// only Insert set auto created ID back to object
 			if err := wrapInsert(sess.Insert(stepList[i])); err != nil {
-				if isUniqueConstraintError(err) {
+				if errors.Is(err, types.ErrInsertDuplicateDetected) {
 					return struct{}{}, err
 				}
 				return struct{}{}, backoff.Permanent(err)
@@ -190,21 +191,6 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 	}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries))
 
 	return err
-}
-
-// isUniqueConstraintError checks if an error is a unique constraint violation error.
-func isUniqueConstraintError(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	errStr := err.Error()
-	// Check for common unique constraint error patterns across different databases
-	return strings.Contains(errStr, "duplicate key") ||
-		strings.Contains(errStr, "Duplicate entry") ||
-		strings.Contains(errStr, "UNIQUE constraint failed") ||
-		strings.Contains(errStr, "unique constraint") ||
-		strings.Contains(errStr, "UNIQUE violation")
 }
 
 func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
