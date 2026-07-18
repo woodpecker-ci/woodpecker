@@ -342,7 +342,8 @@
             "load_more": "Загрузить ещё",
             "version_header": "Версия Woodpecker",
             "version": "Версия Woodpecker, на которой был выполнен этот конвейер.",
-            "parse_errors": "Ошибки разбора"
+            "parse_errors": "Ошибки разбора",
+            "runtime_errors": "Ошибки выполнения"
         },
         "pull_requests": "Запросы на слияние",
         "settings": {
