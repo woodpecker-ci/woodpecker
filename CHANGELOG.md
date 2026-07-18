@@ -48,6 +48,8 @@
 
 ### 📦️ Dependency
 
+- Update gitea/gitea Docker tag to v1.27 [[#6863](https://github.com/woodpecker-ci/woodpecker/pull/6863)]
+- Update web npm deps non-major [[#6862](https://github.com/woodpecker-ci/woodpecker/pull/6862)]
 - Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.2 [[#6860](https://github.com/woodpecker-ci/woodpecker/pull/6860)]
 - Update golang-packages [[#6858](https://github.com/woodpecker-ci/woodpecker/pull/6858)]
 - Update web npm deps non-major [[#6815](https://github.com/woodpecker-ci/woodpecker/pull/6815)]
