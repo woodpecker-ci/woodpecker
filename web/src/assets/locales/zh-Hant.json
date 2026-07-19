@@ -104,7 +104,9 @@
             "we_got_some_errors": "喔不，發生了錯誤！",
             "no_pipeline_steps": "無 pipeline 步驟可用！",
             "step_not_started": "此步驟尚未開始。",
-            "log_title": "步驟紀錄"
+            "log_title": "步驟紀錄",
+            "parse_errors": "解析錯誤",
+            "runtime_errors": "執行環境錯誤"
         },
         "settings": {
             "general": {
@@ -202,7 +204,8 @@
                     "success": "儲存庫已刪除"
                 },
                 "actions": "Actions"
-            }
+            },
+            "not_allowed": "您不被允許存取此儲存庫的設定"
         },
         "visibility": {
             "visibility": "專案可見性",
