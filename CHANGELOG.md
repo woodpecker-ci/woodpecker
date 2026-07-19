@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-18
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -49,6 +49,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6867](https://github.com/woodpecker-ci/woodpecker/pull/6867)]
 - Update pnpm to v11.15.0 [[#6865](https://github.com/woodpecker-ci/woodpecker/pull/6865)]
 - Update pre-commit hook igorshubovych/markdownlint-cli to v0.49.1 [[#6861](https://github.com/woodpecker-ci/woodpecker/pull/6861)]
 - Update dependency pinia to v4 [[#6864](https://github.com/woodpecker-ci/woodpecker/pull/6864)]
