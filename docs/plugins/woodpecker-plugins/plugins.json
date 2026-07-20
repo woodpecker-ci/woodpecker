@@ -334,6 +334,11 @@
       "name": "Git-pages",
       "docs": "https://codeberg.org/gedankenstuecke/git-pages-woodpecker-plugin/raw/branch/main/README.md",
       "verified": false
-    }
+    },
+    {
+      "name": "NestGuard",
+      "docs": "https://codeberg.org/woodpecker-community/nestguard/raw/branch/main/README.md",
+      "verified": false
+    },
   ]
 }
