@@ -145,6 +145,13 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.DELETE("/registries/:registry", session.MustPush, api.DeleteRegistry)
 
 					// requires push permissions
+					repo.GET("/parameters", session.MustPush, api.GetParameterList)
+					repo.POST("/parameters", session.MustPush, api.PostParameter)
+					repo.GET("/parameters/:parameter", session.MustPush, api.GetParameter)
+					repo.PATCH("/parameters/:parameter", session.MustPush, api.PatchParameter)
+					repo.DELETE("/parameters/:parameter", session.MustPush, api.DeleteParameter)
+
+					// requires push permissions
 					repo.GET("/cron", session.MustPush, api.GetCronList)
 					repo.POST("/cron", session.MustPush, api.PostCron)
 					repo.GET("/cron/:cron", session.MustPush, api.GetCron)

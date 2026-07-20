@@ -159,6 +159,13 @@ type Store interface {
 	ServerConfigSet(string, string) error
 	ServerConfigDelete(string) error
 
+	// Parameters
+	ParameterCreate(*model.Parameter) error
+	ParameterFind(*model.Repo, int64) (*model.Parameter, error)
+	ParameterList(*model.Repo, *model.ListOptions) ([]*model.Parameter, error)
+	ParameterUpdate(*model.Parameter) error
+	ParameterDelete(*model.Repo, int64) error
+
 	// Cron
 	CronCreate(*model.Cron) error
 	CronFind(*model.Repo, int64) (*model.Cron, error)
