@@ -35,7 +35,7 @@ import (
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
-	log_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
+	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
@@ -141,7 +141,7 @@ func TestDownloadStepLogs(t *testing.T) {
 	mockStore.On("GetPipelineNumber", repo, int64(42)).Return(pipeline, nil)
 	mockStore.On("StepLoad", pipeline.ID, int64(3)).Return(step, nil)
 
-	mockLogStore := log_service_mocks.NewMockService(t)
+	mockLogStore := log_mocks.NewMockService(t)
 	mockLogStore.On("LogFind", step).Return(logs, nil)
 
 	originalLogStore := server.Config.Services.LogStore
