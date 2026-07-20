@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @DerRockWolf, @Kernald, @TowyTowy, @cyphercodes, @healdropper, @kanywst, @nicolasbatistoni, @rfinnie, @xoxys
+@6543, @AnayGarodia, @DerRockWolf, @Kernald, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @kanywst, @nicolasbatistoni, @rfinnie, @xoxys
 
 ### 🔒 Security
 
@@ -28,6 +28,8 @@
 
 ### 🐛 Bug Fixes
 
+- fix(forgejo): treat 404 on empty repos as empty pull request list [[#6872](https://github.com/woodpecker-ci/woodpecker/pull/6872)]
+- fix(github): resolve tag pagination loop in release hook [[#6870](https://github.com/woodpecker-ci/woodpecker/pull/6870)]
 - Fix CreatePipeline retry [[#6859](https://github.com/woodpecker-ci/woodpecker/pull/6859)]
 - WebUI: unregister scaffold Tab on unmount and stable Tab order [[#6842](https://github.com/woodpecker-ci/woodpecker/pull/6842)]
 - WebUI: Fixes three bugs around component unmount and reset in compositions [[#6843](https://github.com/woodpecker-ci/woodpecker/pull/6843)]
