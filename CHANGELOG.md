@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AnayGarodia, @DerRockWolf, @Kernald, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @kanywst, @nicolasbatistoni, @rfinnie, @xoxys
+@6543, @AnayGarodia, @DerRockWolf, @Kernald, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @kanywst, @nicolasbatistoni, @rfinnie, @xoxys
 
 ### 🔒 Security
 
@@ -73,6 +73,10 @@
 - Update web npm deps non-major [[#6787](https://github.com/woodpecker-ci/woodpecker/pull/6787)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.4 [[#6811](https://github.com/woodpecker-ci/woodpecker/pull/6811)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.1 [[#6797](https://github.com/woodpecker-ci/woodpecker/pull/6797)]
+
+### Misc
+
+- Add NestGuard plugin to plugins.json [[#6873](https://github.com/woodpecker-ci/woodpecker/pull/6873)]
 
 ## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-27
 
