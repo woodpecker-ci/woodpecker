@@ -1,4 +1,4 @@
-// Copyright 2024 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,37 +14,12 @@
 
 package shared
 
-import (
-	"io"
-	"strings"
-)
-
-// secretsWriter is an io.Writer decorator that masks secret values before
-// forwarding data to the wrapped writer. It is meant to wrap a line-oriented
-// writer so that multi-line secrets are masked correctly per line.
-type secretsWriter struct {
-	dst      io.Writer
-	replacer *strings.Replacer
-}
+import "io"
 
 // NewSecretsWriter wraps dst so that any of the given secret values are
-// replaced with asterisks before being written. The returned writer reports
-// the number of input bytes consumed, so it composes transparently with
-// callers that check n against the input length.
+// replaced with asterisks before being written. It is a convenience for
+// NewSanitizeWriter with the secrets replacer as the sanitize function;
+// other sanitize algorithms can be plugged in via NewSanitizeWriter.
 func NewSecretsWriter(dst io.Writer, secrets []string) io.Writer {
-	return &secretsWriter{
-		dst:      dst,
-		replacer: NewSecretsReplacer(secrets),
-	}
-}
-
-func (w *secretsWriter) Write(p []byte) (n int, err error) {
-	data := p
-	if w.replacer != nil {
-		data = []byte(w.replacer.Replace(string(p)))
-	}
-	if _, err := w.dst.Write(data); err != nil {
-		return 0, err
-	}
-	return len(p), nil
+	return NewSanitizeWriter(dst, NewSecretsReplacer(secrets).Replace)
 }
