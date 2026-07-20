@@ -439,21 +439,17 @@ async function download() {
   if (!repo?.value || !pipeline.value || !step.value) {
     throw new Error('The repository, pipeline or step was undefined');
   }
-  let logs;
+  let logs: Blob;
   try {
     downloadInProgress.value = true;
-    logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
+    logs = await apiClient.downloadLogs(repo.value.id, pipeline.value.number, step.value.id);
   } catch (e) {
     notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_download_error'));
     return;
   } finally {
     downloadInProgress.value = false;
   }
-  const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => decode(line.data ?? '')).join('\n')], {
-      type: 'text/plain',
-    }),
-  );
+  const fileURL = window.URL.createObjectURL(logs);
   const fileLink = document.createElement('a');
 
   fileLink.href = fileURL;
