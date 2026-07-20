@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AnayGarodia, @DerRockWolf, @Kernald, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @kanywst, @nicolasbatistoni, @rfinnie, @xoxys
+@6543, @AnayGarodia, @DerRockWolf, @Kernald, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @kanywst, @nicolasbatistoni, @rfinnie, @xoxys
 
 ### 🔒 Security
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- ReFetch secrets on pipeline restart [[#6857](https://github.com/woodpecker-ci/woodpecker/pull/6857)]
 - fix(forgejo): treat 404 on empty repos as empty pull request list [[#6872](https://github.com/woodpecker-ci/woodpecker/pull/6872)]
 - fix(github): resolve tag pagination loop in release hook [[#6870](https://github.com/woodpecker-ci/woodpecker/pull/6870)]
 - Fix CreatePipeline retry [[#6859](https://github.com/woodpecker-ci/woodpecker/pull/6859)]
