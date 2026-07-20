@@ -335,7 +335,7 @@ func DownloadStepLogs(c *gin.Context) {
 	}
 
 	repo := session.Repo(c)
-	filename := safeDownloadFilename(fmt.Sprintf("%s-%s-%d-%s.log", repo.Owner, repo.Name, pl.Number, step.Name))
+	filename := sanitizeDownloadFilename(fmt.Sprintf("%s-%s-%d-%s.log", repo.Owner, repo.Name, pl.Number, step.Name))
 	c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": filename}))
 	c.Header("Content-Type", "text/plain; charset=utf-8")
 	c.Header("X-Content-Type-Options", "nosniff")
@@ -386,13 +386,15 @@ func pipelineStepFromParams(c *gin.Context) (*model.Pipeline, *model.Step, bool)
 	return pl, step, true
 }
 
-func safeDownloadFilename(filename string) string {
-	return strings.Map(func(r rune) rune {
-		if r < ' ' || r == '\x7f' || r == '/' || r == '\\' {
+func sanitizeDownloadFilename(filename string) string {
+	filename = strings.Map(func(r rune) rune {
+		if r < ' ' || r == '\x7f' || strings.ContainsRune(`<>:"/\|?*`, r) {
 			return '-'
 		}
 		return r
 	}, filename)
+	filename = strings.TrimRight(filename, ".")
+	return strings.TrimSpace(filename)
 }
 
 // DeleteStepLogs
