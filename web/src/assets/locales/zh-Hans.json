@@ -339,7 +339,9 @@
             },
             "load_more": "加载更多",
             "version": "此流水线在该 Woodpecker 版本上执行。",
-            "version_header": "Woodpecker 版本"
+            "version_header": "Woodpecker 版本",
+            "parse_errors": "解析错误",
+            "runtime_errors": "运行时错误"
         },
         "pull_requests": "合并请求",
         "settings": {
