@@ -25,6 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/tenki"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/dot_env"
 )
@@ -33,6 +34,7 @@ var backends = []backend_types.Backend{
 	kubernetes.New(),
 	docker.New(),
 	local.New(),
+	tenki.New(),
 }
 
 func main() {

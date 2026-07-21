@@ -45,6 +45,7 @@ The agent can run on any platform listed above, but the available execution back
 | [Docker](../10-configuration/11-backends/10-docker.md)         | Supported | Supported[^win-docker] | –         | [WIP][^freebsd-docker] | –         |
 | [Kubernetes](../10-configuration/11-backends/20-kubernetes.md) | Supported | –                      | –         | –                      | –         |
 | [Local](../10-configuration/11-backends/30-local.md)           | Supported | Supported              | Supported | Supported              | Supported |
+| [Tenki](../10-configuration/11-backends/40-tenki.md)           | Supported | Supported              | Supported | Supported              | Supported |
 
 [^win-docker]: Works through WSL2 with Docker Desktop, and with native Windows containers.
 
@@ -54,4 +55,5 @@ Notes:
 
 - The **Docker** and **Kubernetes** backends require a Linux host on the agent because they rely on Linux container runtimes. On Windows, Docker is available via WSL2 or Windows containers (see footnote above). Running the agent on macOS or OpenBSD restricts you to the Local backend.
 - The **Local** backend runs pipeline commands directly on the agent host with no isolation. It is the only backend available on macOS and OpenBSD, and is intended for trusted, private setups only. See the [Local backend documentation](../10-configuration/11-backends/30-local.md) for the full security notes.
+- The **Tenki** backend executes steps in remote cloud microVMs, so it works from an agent on any host operating system — it only needs outbound network access and an API key. See the [Tenki backend documentation](../10-configuration/11-backends/40-tenki.md).
 - `plugin-git` is invoked as a container by default. On hosts where the Docker and Kubernetes backends are unavailable, configure the Local backend to use the [`plugin-git` binary](https://github.com/woodpecker-ci/plugin-git/releases/latest) instead, or disable the clone step and clone manually in the pipeline.
