@@ -17,7 +17,8 @@ package model
 
 import (
 	"errors"
-	"net/url"
+
+	"github.com/distribution/reference"
 )
 
 var (
@@ -67,8 +68,18 @@ func (r *Registry) Validate() error {
 		return errRegistryPasswordInvalid
 	}
 
-	_, err := url.Parse(r.Address)
-	return err
+	address := r.Address
+	if address == "index.docker.io" {
+		address = "docker.io"
+	}
+	named, err := reference.ParseNamed(address + "/woodpecker/validation")
+	if err != nil {
+		return errRegistryAddressInvalid
+	}
+	if reference.Domain(named) != address {
+		return errRegistryAddressInvalid
+	}
+	return nil
 }
 
 // Copy makes a copy of the registry without the password.
