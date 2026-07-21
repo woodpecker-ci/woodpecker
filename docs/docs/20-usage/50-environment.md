@@ -50,7 +50,7 @@ This is the reference list of all environment variables available to your pipeli
 
 The **Scope** column documents when each variable can be used:
 
-- `config`: the variable is available at config-evaluation time, when the pipeline configuration is parsed. It can be referenced in [`when`](./20-workflow-syntax.md#when) filters and expanded via [string substitution](#string-substitution) (e.g. `${CI_COMMIT_SHA}`).
+- `config`: the variable is available at config-evaluation time, when the pipeline configuration is parsed. It can be referenced in [`when`](./20-workflow-syntax.md#when---conditional-execution) filters and expanded via [string substitution](#string-substitution) (e.g. `${CI_COMMIT_SHA}`).
 - `runtime`: the variable is available as an environment variable inside the running step.
 
 Most variables are available in both scopes. Variables scoped only to `runtime` (e.g. the step-specific variables and `CI_PIPELINE_STATUS`) are not populated while the configuration is evaluated, so they cannot be used in `when` filters or substitutions.
