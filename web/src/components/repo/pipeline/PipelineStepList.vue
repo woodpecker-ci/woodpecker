@@ -63,7 +63,7 @@
     <div class="relative min-h-0 w-full grow">
       <div class="absolute top-0 right-0 left-0 flex h-full flex-col gap-y-2 md:overflow-y-auto">
         <div
-          v-for="workflow in pipeline.workflows"
+          v-for="workflow in sortedWorkflows"
           :key="workflow.id"
           class="border-wp-background-400 dark:border-wp-background-100 bg-wp-background-200 rounded-md border p-2"
         >
@@ -99,7 +99,7 @@
             :class="{ 'max-h-0': workflowsCollapsed[workflow.id], 'ml-[1.6rem]': !singleConfig }"
           >
             <button
-              v-for="step in workflow.children"
+              v-for="step in sortedChildren(workflow)"
               ref="steps"
               :key="step.pid"
               :data-step-id="step.pid"
@@ -108,7 +108,7 @@
               class="hover:bg-wp-control-neutral-200 flex w-full cursor-pointer items-center gap-2 rounded-md border-2 border-transparent p-2"
               :class="{
                 'bg-wp-control-neutral-200': selectedStepId && selectedStepId === step.pid,
-                'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
+                'mt-1': !singleConfig || step.pid !== sortedChildren(workflow)[0]?.pid,
               }"
               @click="$emit('update:selectedStepId', step.pid)"
             >
@@ -134,7 +134,7 @@ import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuratio
 import { requiredInject } from '~/compositions/useInjectProvide';
 import usePipeline from '~/compositions/usePipeline';
 import { StepType } from '~/lib/api/types';
-import type { Pipeline, PipelineStep } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -167,6 +167,21 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
 const singleConfig = computed(
   () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length === 1,
 );
+
+const sortedWorkflows = computed(() =>
+  [...(pipeline.value.workflows ?? [])].toSorted((a, b) => {
+    const aStarted = a.started ?? 0;
+    const bStarted = b.started ?? 0;
+    if (aStarted && bStarted) return aStarted - bStarted;
+    if (aStarted) return -1;
+    if (bStarted) return 1;
+    return a.pid - b.pid;
+  }),
+);
+
+function sortedChildren(workflow: PipelineWorkflow): PipelineStep[] {
+  return [...(workflow.children ?? [])].toSorted((a, b) => a.pid - b.pid);
+}
 
 const steps = useTemplateRef('steps');
 watch(selectedStepId, async (newSelectedStepId, oldSelectedStepId) => {
