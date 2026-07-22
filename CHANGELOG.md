@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-21
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -53,6 +53,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6883](https://github.com/woodpecker-ci/woodpecker/pull/6883)]
 - Update web npm deps non-major [[#6866](https://github.com/woodpecker-ci/woodpecker/pull/6866)]
 - Update golang-packages [[#6867](https://github.com/woodpecker-ci/woodpecker/pull/6867)]
 - Update pnpm to v11.15.0 [[#6865](https://github.com/woodpecker-ci/woodpecker/pull/6865)]
