@@ -83,19 +83,19 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
-		// a skipped workflow is finalized through the regular Done flow; it
-		// was never initialized by an agent, so lock it to this agent first
-		// to satisfy the workflow ownership check.
-		if err := s.lockAgentToWorkflow(c, agent, taskID); err != nil {
-			return err
-		}
-		return s.Done(c, taskID, rpc.WorkflowState{})
+	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
+		// the scheduler finalized a skipped workflow; sync its status to the
+		// forge and record metrics, the same caller-side follow-up Done does.
+		s.updateForgeStatus(c, repo, pipeline, workflow)
+		s.recordPipelineMetrics(repo, pipeline, workflow)
 	})
 	if err != nil || rpcWorkflow == nil {
 		return nil, err
 	}
 
+	// Lock the polled workflow to this agent so subsequent agent RPCs (Init,
+	// Update, Wait, ...) pass the ownership check in sanitize.go. The scheduler
+	// hands out the workflow but does not record the owning agent itself.
 	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
 		return nil, err
 	}
@@ -356,41 +356,12 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	logger.Debug().Msgf("workflow state in store: %#v", workflow)
 	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
-	// Complete any still-running children (e.g. service containers) before
-	// computing the workflow status, so their final state is reflected.
-	s.completeChildrenIfParentCompleted(workflow, state.Finished)
-
-	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
-		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
-	}
-
-	var queueErr error
-	if !state.Canceled {
-		if workflow.Failing() {
-			queueErr = s.scheduler.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
-		} else {
-			queueErr = s.scheduler.Done(c, strWorkflowID, workflow.State)
-		}
-	} else {
-		if workflow.Started > 0 {
-			queueErr = s.scheduler.Done(c, strWorkflowID, model.StatusKilled)
-		} else {
-			queueErr = s.scheduler.Done(c, strWorkflowID, model.StatusCanceled)
-		}
-	}
-	if queueErr != nil {
-		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
-	}
-
-	currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline)
+	// The scheduler owns the workflow completion: it finalizes the workflow and
+	// its children, signals the queue, rolls the pipeline up and notifies
+	// subscribers. We are left with the forge sync, log streams and metrics.
+	currentPipeline, workflow, err = s.scheduler.FinishWorkflow(c, repo, currentPipeline, workflow, state)
 	if err != nil {
 		return err
-	}
-
-	if !model.IsThereRunningStage(currentPipeline.Workflows) {
-		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
-			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
-		}
 	}
 
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
@@ -406,19 +377,22 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}()
 
-	if err := s.scheduler.PublishPipelineEvent(c, repo, currentPipeline); err != nil {
-		return err
-	}
-
-	if currentPipeline.Status == model.StatusSuccess || currentPipeline.Status == model.StatusFailure {
-		s.pipelineCount.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Inc()
-		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
-	}
-	if currentPipeline.IsMultiPipeline() {
-		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
-	}
+	s.recordPipelineMetrics(repo, currentPipeline, workflow)
 
 	return s.updateAgentLastWork(agent)
+}
+
+// recordPipelineMetrics records the prometheus metrics for a finished workflow
+// and its pipeline. It is shared by the regular Done path and the skipped
+// workflow follow-up so both report consistently.
+func (s *RPC) recordPipelineMetrics(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
+	if pipeline.Status == model.StatusSuccess || pipeline.Status == model.StatusFailure {
+		s.pipelineCount.WithLabelValues(repo.FullName, pipeline.Branch, string(pipeline.Status), "total").Inc()
+		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(pipeline.Status), "total").Set(float64(pipeline.Finished - pipeline.Started))
+	}
+	if pipeline.IsMultiPipeline() {
+		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
+	}
 }
 
 // Log writes a log entry to the database and publishes it to the pubsub.
@@ -548,20 +522,6 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	agent.LastContact = time.Now().Unix()
 
 	return s.store.AgentUpdate(agent)
-}
-
-func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
-	for _, c := range completedWorkflow.Children {
-		if c.Running() {
-			if updated, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, finished, model.StatusKilled); err != nil {
-				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
-			} else {
-				// Update in-memory state so WorkflowStatus sees the final state
-				c.State = updated.State
-				c.Finished = updated.Finished
-			}
-		}
-	}
 }
 
 func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
