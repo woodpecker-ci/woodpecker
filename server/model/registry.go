@@ -17,6 +17,8 @@ package model
 
 import (
 	"errors"
+	"regexp"
+	"strings"
 
 	"github.com/distribution/reference"
 )
@@ -25,6 +27,7 @@ var (
 	errRegistryAddressInvalid  = errors.New("invalid registry address")
 	errRegistryUsernameInvalid = errors.New("invalid registry username")
 	errRegistryPasswordInvalid = errors.New("invalid registry password")
+	registryAddressRegexp      = regexp.MustCompile("^(?:" + reference.DomainRegexp.String() + ")$")
 )
 
 // Registry represents a docker registry with credentials.
@@ -68,18 +71,20 @@ func (r *Registry) Validate() error {
 		return errRegistryPasswordInvalid
 	}
 
-	address := r.Address
-	if address == "index.docker.io" {
-		address = "docker.io"
-	}
-	named, err := reference.ParseNamed(address + "/woodpecker/validation")
-	if err != nil {
-		return errRegistryAddressInvalid
-	}
-	if reference.Domain(named) != address {
+	if !isRegistryAddress(r.Address) {
 		return errRegistryAddressInvalid
 	}
 	return nil
+}
+
+// isRegistryAddress accepts the domain[:port] part of an OCI image reference.
+// A bare single-label name is a Docker Hub repository path, not a registry
+// domain, unless it is localhost; it therefore cannot match image credentials.
+func isRegistryAddress(address string) bool {
+	if !registryAddressRegexp.MatchString(address) {
+		return false
+	}
+	return address == "localhost" || strings.ContainsAny(address, ".:")
 }
 
 // Copy makes a copy of the registry without the password.
