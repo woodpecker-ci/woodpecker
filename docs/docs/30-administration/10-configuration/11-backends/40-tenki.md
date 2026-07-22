@@ -22,6 +22,30 @@ This backend runs untrusted pipeline code inside a Tenki cloud microVM. Be aware
 - Step environment variables (including secrets) and workflow labels are sent to the Tenki API to run the sandbox — that is, to a third-party control plane.
 :::
 
+## Pipeline example
+
+The workflow compiler inserts the default image-based clone step unless `skip_clone: true` is set, and this backend rejects image-based steps. So set `skip_clone: true` and clone the repository yourself with `git`. The `image` field is required by the schema but ignored by this backend, so any value works as a placeholder.
+
+```yaml title=".woodpecker.yaml"
+when:
+  - event: [push, pull_request]
+
+skip_clone: true
+
+steps:
+  clone:
+    image: alpine # placeholder: ignored by the tenki backend
+    commands:
+      - git clone "$CI_REPO_CLONE_URL" .
+      - git checkout "$CI_COMMIT_SHA"
+  build:
+    image: alpine # placeholder
+    commands:
+      - go build ./...
+```
+
+For **private repositories**, provide credentials to `git`. The generated step script writes a `~/.netrc` from the standard `CI_NETRC_MACHINE` / `CI_NETRC_USERNAME` / `CI_NETRC_PASSWORD` variables when they are set, so an HTTPS clone authenticates automatically; alternatively embed a token in the clone URL.
+
 ## API key
 
 Create an API key (`tk_...`) in the Tenki dashboard under **API Keys** and pass it via `WOODPECKER_BACKEND_TENKI_API_KEY`. The project and workspace are resolved automatically from the key's identity; set them explicitly only if the key can access more than one.

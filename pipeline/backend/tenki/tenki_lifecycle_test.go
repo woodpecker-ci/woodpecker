@@ -141,7 +141,7 @@ func TestReapOrphanSandbox(t *testing.T) {
 	e := &tenki{client: &fakeClient{listSessions: []sandboxSession{other, match}}}
 	e.config.projectID = "proj"
 
-	e.reapOrphanSandbox(context.Background(), "task-1")
+	require.NoError(t, e.reapOrphanSandbox(context.Background(), "task-1"))
 
 	assert.Equal(t, int32(1), match.closes.Load(), "matching orphan should be closed")
 	assert.Equal(t, int32(0), other.closes.Load(), "unrelated sandbox must not be touched")
@@ -229,19 +229,38 @@ func TestDestroyStepKillsAndIsIdempotent(t *testing.T) {
 
 func TestDestroyWorkflowTeardownFailure(t *testing.T) {
 	handle := &fakeRunHandle{}
-	sess := &fakeSession{closeErr: errors.New("terminate failed")}
-	e := &tenki{}
+	sess := &fakeSession{name: sandboxName("t"), closeErr: errors.New("terminate failed")}
+	orphan := &fakeSession{id: "sb", name: sandboxName("t")}
+	e := &tenki{client: &fakeClient{listSessions: []sandboxSession{orphan}}}
 	ws := &workflowState{session: sess}
 	ws.stepState.Store("s", &stepState{handle: handle, output: io.NopCloser(strings.NewReader(""))})
 	e.workflows.Store("t", ws)
 
-	// a failing teardown must not surface as an error, but the sandbox close
-	// must have been attempted and the state cleared.
+	// A failing teardown must not surface as an error, and the sandbox must be
+	// retried out-of-band (reaped by name) rather than left running.
 	require.NoError(t, e.DestroyWorkflow(context.Background(), &backend_types.Config{}, "t"))
-	assert.Equal(t, int32(1), sess.closes.Load())
+	assert.Equal(t, int32(1), sess.closes.Load(), "direct close attempted")
+	assert.Equal(t, int32(1), orphan.closes.Load(), "failed close retried via reaper")
 	assert.GreaterOrEqual(t, handle.kills.Load(), int32(1))
 	_, err := e.getWorkflowState("t")
 	assert.ErrorIs(t, err, ErrWorkflowStateNotFound)
+}
+
+func TestDestroyWorkflowKeepsStateWhenTerminationUnconfirmed(t *testing.T) {
+	handle := &fakeRunHandle{}
+	sess := &fakeSession{name: sandboxName("t"), closeErr: errors.New("close failed")}
+	// the reaper retry also fails (cannot even list), so termination is unconfirmed
+	e := &tenki{client: &fakeClient{listErr: errors.New("list failed")}}
+	ws := &workflowState{session: sess}
+	ws.stepState.Store("s", &stepState{handle: handle, output: io.NopCloser(strings.NewReader(""))})
+	e.workflows.Store("t", ws)
+
+	err := e.DestroyWorkflow(context.Background(), &backend_types.Config{}, "t")
+	require.Error(t, err, "unconfirmed teardown must not be reported as success")
+
+	// state is kept so the sandbox can still be terminated on a later attempt
+	_, stateErr := e.getWorkflowState("t")
+	require.NoError(t, stateErr, "workflow state must be retained until termination is confirmed")
 }
 
 func TestStartStepRejectsEmptyCommands(t *testing.T) {

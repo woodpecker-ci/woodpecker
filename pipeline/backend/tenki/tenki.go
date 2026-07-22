@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io"
 	"maps"
+	"strings"
 	"sync"
 	"time"
 
@@ -32,6 +33,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -196,7 +198,9 @@ func (e *tenki) SetupWorkflow(ctx context.Context, conf *backend_types.Config, t
 		// CreateAndWait may have provisioned the sandbox before readiness failed
 		// (or the context was canceled), dropping the handle. Reap it best-effort
 		// so it does not linger until maxDuration.
-		e.reapOrphanSandbox(ctx, taskUUID)
+		if reapErr := e.reapOrphanSandbox(ctx, taskUUID); reapErr != nil {
+			log.Warn().Err(reapErr).Str("taskUUID", taskUUID).Msg("could not reap sandbox possibly orphaned by the failed create")
+		}
 		return fmt.Errorf("could not create tenki sandbox: %w", err)
 	}
 
@@ -209,7 +213,7 @@ func (e *tenki) SetupWorkflow(ctx context.Context, conf *backend_types.Config, t
 // the deterministic sandbox name so it never touches unrelated sandboxes, and
 // uses its own short-lived context so it still runs when the workflow context
 // was canceled.
-func (e *tenki) reapOrphanSandbox(ctx context.Context, taskUUID string) {
+func (e *tenki) reapOrphanSandbox(ctx context.Context, taskUUID string) error {
 	name := sandboxName(taskUUID)
 
 	// Detach from the (possibly already-canceled) parent so the reap still runs,
@@ -219,19 +223,21 @@ func (e *tenki) reapOrphanSandbox(ctx context.Context, taskUUID string) {
 
 	sessions, err := e.client.ListProjectSandboxes(ctx, e.config.projectID)
 	if err != nil {
-		log.Warn().Err(err).Str("taskUUID", taskUUID).Msg("could not list sandboxes to reap possible orphan")
-		return
+		return fmt.Errorf("could not list sandboxes to reap %q: %w", name, err)
 	}
+
+	var errs []error
 	for _, s := range sessions {
 		if s.Name() != name {
 			continue
 		}
 		if err := s.CloseIfOpen(ctx); err != nil {
-			log.Warn().Err(err).Str("sandbox", s.ID()).Msg("could not reap orphan tenki sandbox")
+			errs = append(errs, err)
 			continue
 		}
 		log.Info().Str("taskUUID", taskUUID).Str("sandbox", s.ID()).Msg("reaped orphan tenki sandbox")
 	}
+	return errors.Join(errs...)
 }
 
 // StartStep runs the step's commands as a single shell invocation inside the
@@ -413,7 +419,14 @@ func (e *tenki) DestroyWorkflow(ctx context.Context, _ *backend_types.Config, ta
 
 	if ws.session != nil {
 		if err := ws.session.CloseIfOpen(ctx); err != nil {
-			log.Error().Err(err).Str("taskUUID", taskUUID).Msg("could not close tenki sandbox")
+			// A failed close would leak the sandbox until max duration. Retry
+			// out-of-band by name; only if that also fails do we keep the
+			// workflow state and surface the error, so teardown is never
+			// reported as a false success.
+			log.Error().Err(err).Str("taskUUID", taskUUID).Msg("could not close tenki sandbox; retrying teardown by name")
+			if reapErr := e.reapOrphanSandbox(ctx, taskUUID); reapErr != nil {
+				return fmt.Errorf("could not terminate tenki sandbox for workflow %s: %w", taskUUID, errors.Join(err, reapErr))
+			}
 		}
 	}
 
@@ -463,18 +476,25 @@ func workflowMetadata(conf *backend_types.Config, taskUUID string) map[string]st
 	md := map[string]string{}
 
 	// Workflow labels are the same across every step; copy them from the first
-	// step that has any.
+	// step that has any. Only Woodpecker's own labels (repo, branch, event, ...)
+	// are copied — arbitrary user-defined labels are skipped so unexpected keys
+	// or values are never sent to the Tenki control plane or reject the create
+	// on a metadata format limit.
 	for _, stage := range conf.Stages {
+		found := false
 		for _, step := range stage.Steps {
 			if len(step.WorkflowLabels) == 0 {
 				continue
 			}
+			found = true
 			for k, v := range step.WorkflowLabels {
-				md[k] = v
+				if strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
+					md[k] = v
+				}
 			}
 			break
 		}
-		if len(md) > 0 {
+		if found {
 			break
 		}
 	}

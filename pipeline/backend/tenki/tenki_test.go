@@ -192,13 +192,18 @@ func TestWorkflowMetadata(t *testing.T) {
 		assert.False(t, hasRepo)
 	})
 
-	t.Run("labels taken from first step that has any", func(t *testing.T) {
+	t.Run("only woodpecker labels are copied, user labels dropped", func(t *testing.T) {
 		conf := &backend_types.Config{Stages: []*backend_types.Stage{
 			{Steps: []*backend_types.Step{{Name: "a"}}},
-			{Steps: []*backend_types.Step{{Name: "b", WorkflowLabels: map[string]string{"repo": "x/y"}}}},
+			{Steps: []*backend_types.Step{{Name: "b", WorkflowLabels: map[string]string{
+				"woodpecker-ci.org/repo-name": "x/y",
+				"user-label":                  "should-be-dropped",
+			}}}},
 		}}
 		md := workflowMetadata(conf, "task-2")
-		assert.Equal(t, "x/y", md["repo"])
+		assert.Equal(t, "x/y", md["woodpecker-ci.org/repo-name"])
+		_, hasUser := md["user-label"]
+		assert.False(t, hasUser, "arbitrary user labels must not be forwarded to Tenki")
 		assert.Equal(t, "woodpecker", md["managed-by"])
 		assert.Equal(t, "task-2", md["task-uuid"])
 	})
