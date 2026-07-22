@@ -70,7 +70,7 @@ var Flags = []cli.Flag{
 	&cli.DurationFlag{
 		Name:        "backend-tenki-idle-timeout",
 		Sources:     cli.EnvVars("WOODPECKER_BACKEND_TENKI_IDLE_TIMEOUT"),
-		Usage:       "inactivity window before a sandbox is auto-paused; 0 matches the max duration so long steps are not paused mid-run",
+		Usage:       "inactivity window before a sandbox is auto-paused (rounded to whole minutes); 0 matches the max duration so long steps are not paused mid-run",
 		DefaultText: "match max duration",
 	},
 }

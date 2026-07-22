@@ -93,13 +93,15 @@ type fakeSession struct {
 	closeErr error
 	closes   atomic.Int32
 	argvs    [][]string
+	lastOpts []sandbox.RunOptions
 }
 
 func (s *fakeSession) ID() string   { return s.id }
 func (s *fakeSession) Name() string { return s.name }
 
-func (s *fakeSession) Command(argv []string, _ ...sandbox.RunOptions) sandboxCommand {
+func (s *fakeSession) Command(argv []string, opts ...sandbox.RunOptions) sandboxCommand {
 	s.argvs = append(s.argvs, argv)
+	s.lastOpts = opts
 	if s.cmd == nil {
 		s.cmd = &fakeCommand{handle: &fakeRunHandle{result: &sandbox.Result{Status: sandbox.CommandStatusSucceeded}}}
 	}
@@ -116,6 +118,8 @@ type fakeClient struct {
 	createErr     error
 	listSessions  []sandboxSession
 	listErr       error
+	identity      *sandbox.Identity
+	whoamiErr     error
 }
 
 func (c *fakeClient) CreateAndWait(_ context.Context, _ time.Duration, _ ...sandbox.CreateOption) (sandboxSession, error) {
@@ -130,7 +134,7 @@ func (c *fakeClient) ListProjectSandboxes(_ context.Context, _ string, _ ...sand
 }
 
 func (c *fakeClient) WhoAmI(_ context.Context) (*sandbox.Identity, error) {
-	return nil, errors.New("not implemented")
+	return c.identity, c.whoamiErr
 }
 
 // Lifecycle tests.
@@ -288,6 +292,10 @@ func TestStartStepUsesGeneratedScript(t *testing.T) {
 		Type:       backend_types.StepTypeCommands,
 		Commands:   []string{"echo hi"},
 		WorkingDir: "/woodpecker/src",
+		Environment: map[string]string{
+			"FOO":       "bar",
+			"CI_SCRIPT": "hijack", // a user-set value must not win over the generated one
+		},
 	}, "t")
 	require.NoError(t, err)
 
@@ -297,6 +305,84 @@ func TestStartStepUsesGeneratedScript(t *testing.T) {
 	last := sess.argvs[len(sess.argvs)-1]
 	assert.Equal(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, last)
 
+	// the step env must be forwarded, and the generated CI_SCRIPT/SHELL must
+	// take precedence over any user-provided values.
+	require.NotEmpty(t, sess.lastOpts)
+	env := sess.lastOpts[0].Env
+	assert.Equal(t, "bar", env["FOO"], "step env must be forwarded to the exec")
+	assert.Equal(t, "/bin/sh", env["SHELL"])
+	assert.NotEmpty(t, env["CI_SCRIPT"], "generated CI_SCRIPT must be present")
+	assert.NotEqual(t, "hijack", env["CI_SCRIPT"], "generated CI_SCRIPT must win over a user-set one")
+
 	// stdin must be closed so the SDK's stdin pump goroutine does not leak.
 	assert.True(t, stdin.closed.Load(), "step stdin should be closed")
+}
+
+func TestStartStepRejectsUnsupportedType(t *testing.T) {
+	e := &tenki{}
+	e.workflows.Store("t", &workflowState{session: &fakeSession{}})
+
+	err := e.StartStep(context.Background(), &backend_types.Step{
+		UUID: "s", Name: "svc", Type: backend_types.StepTypeService, Commands: []string{"run"},
+	}, "t")
+	assert.ErrorIs(t, err, ErrUnsupportedStepType)
+}
+
+func TestTailStep(t *testing.T) {
+	e := &tenki{}
+	ws := &workflowState{session: &fakeSession{}}
+	ws.stepState.Store("s", &stepState{output: io.NopCloser(strings.NewReader("logs"))})
+	e.workflows.Store("t", ws)
+
+	got, err := e.TailStep(context.Background(), &backend_types.Step{UUID: "s"}, "t")
+	require.NoError(t, err)
+	data, err := io.ReadAll(got)
+	require.NoError(t, err)
+	assert.Equal(t, "logs", string(data))
+
+	_, err = e.TailStep(context.Background(), &backend_types.Step{UUID: "missing"}, "t")
+	assert.ErrorIs(t, err, ErrStepStateNotFound)
+}
+
+func TestResolveProject(t *testing.T) {
+	t.Run("resolves first workspace and project", func(t *testing.T) {
+		e := &tenki{client: &fakeClient{identity: &sandbox.Identity{Workspaces: []sandbox.IdentityWorkspace{
+			{ID: "ws", Projects: []sandbox.IdentityProject{{ID: "proj"}}},
+		}}}}
+		require.NoError(t, e.resolveProject(context.Background()))
+		assert.Equal(t, "ws", e.config.workspaceID)
+		assert.Equal(t, "proj", e.config.projectID)
+	})
+
+	t.Run("no resolvable project", func(t *testing.T) {
+		e := &tenki{client: &fakeClient{identity: &sandbox.Identity{}}}
+		assert.ErrorIs(t, e.resolveProject(context.Background()), ErrNoProjectResolved)
+	})
+
+	t.Run("WhoAmI error is wrapped", func(t *testing.T) {
+		e := &tenki{client: &fakeClient{whoamiErr: errors.New("boom")}}
+		err := e.resolveProject(context.Background())
+		require.Error(t, err)
+		assert.NotErrorIs(t, err, ErrNoProjectResolved)
+	})
+}
+
+func TestEnsureWorkspaceDir(t *testing.T) {
+	t.Run("passes the directory as a positional argument", func(t *testing.T) {
+		sess := &fakeSession{}
+		require.NoError(t, ensureWorkspaceDir(context.Background(), sess, "/woodpecker/src"))
+
+		require.NotEmpty(t, sess.argvs)
+		argv := sess.argvs[0]
+		// the path is $1, never interpolated into the script body
+		assert.Equal(t, "/bin/sh", argv[0])
+		assert.Equal(t, "sh", argv[len(argv)-2])
+		assert.Equal(t, "/woodpecker/src", argv[len(argv)-1])
+	})
+
+	t.Run("non-zero exit surfaces as an error", func(t *testing.T) {
+		sess := &fakeSession{cmd: &fakeCommand{execRes: &sandbox.Result{Status: sandbox.CommandStatusFailed, ExitCode: 2}}}
+		err := ensureWorkspaceDir(context.Background(), sess, "/woodpecker/src")
+		assert.Error(t, err)
+	})
 }

@@ -177,7 +177,7 @@ func (e *tenki) SetupWorkflow(ctx context.Context, conf *backend_types.Config, t
 	}
 
 	createOpts := []sandbox.CreateOption{
-		sandbox.WithWaitReady(true),
+		// CreateAndWait already enables wait-ready internally.
 		sandbox.WithMaxDuration(e.config.maxDuration),
 		sandbox.WithIdleTimeout(idleTimeout),
 		sandbox.WithAllowOutbound(e.config.allowOutbound),
@@ -488,7 +488,7 @@ func workflowMetadata(conf *backend_types.Config, taskUUID string) map[string]st
 			}
 			found = true
 			for k, v := range step.WorkflowLabels {
-				if strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
+				if strings.HasPrefix(k, pipeline.InternalLabelPrefix+"/") {
 					md[k] = v
 				}
 			}
