@@ -218,9 +218,9 @@ func TestWorkflowMetadata(t *testing.T) {
 
 func TestMergeOutput(t *testing.T) {
 	t.Run("merges stdout and stderr", func(t *testing.T) {
-		h := &sandbox.RunHandle{
-			Stdout: strings.NewReader("out-line\n"),
-			Stderr: strings.NewReader("err-line\n"),
+		h := &fakeRunHandle{
+			stdout: strings.NewReader("out-line\n"),
+			stderr: strings.NewReader("err-line\n"),
 		}
 		rc := mergeOutput(h)
 		data, err := io.ReadAll(rc)
@@ -233,7 +233,7 @@ func TestMergeOutput(t *testing.T) {
 	})
 
 	t.Run("tolerates a nil stream", func(t *testing.T) {
-		h := &sandbox.RunHandle{Stdout: strings.NewReader("only-out")}
+		h := &fakeRunHandle{stdout: strings.NewReader("only-out")}
 		rc := mergeOutput(h)
 		data, err := io.ReadAll(rc)
 		require.NoError(t, err)

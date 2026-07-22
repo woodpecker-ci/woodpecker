@@ -94,3 +94,12 @@ Maximum time to wait for a sandbox to become ready.
 - Default: `1h`
 
 Maximum lifetime of a workflow sandbox before it is reclaimed.
+
+---
+
+### BACKEND_TENKI_IDLE_TIMEOUT
+
+- Name: `WOODPECKER_BACKEND_TENKI_IDLE_TIMEOUT`
+- Default: match the max duration
+
+Inactivity window after which a sandbox is auto-paused. Because running a step does not refresh the session's activity clock, this defaults to the max duration so a long-running step is never paused mid-run. Set a smaller value only if you want idle sandboxes reclaimed sooner.

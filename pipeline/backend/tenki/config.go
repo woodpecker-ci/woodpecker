@@ -28,6 +28,7 @@ type config struct {
 	allowOutbound bool
 	createTimeout time.Duration
 	maxDuration   time.Duration
+	idleTimeout   time.Duration
 }
 
 func configFromCli(c *cli.Command) (config, error) {
@@ -39,6 +40,7 @@ func configFromCli(c *cli.Command) (config, error) {
 		allowOutbound: c.Bool("backend-tenki-allow-outbound"),
 		createTimeout: c.Duration("backend-tenki-create-timeout"),
 		maxDuration:   c.Duration("backend-tenki-max-duration"),
+		idleTimeout:   c.Duration("backend-tenki-idle-timeout"),
 	}
 
 	if conf.apiKey == "" {

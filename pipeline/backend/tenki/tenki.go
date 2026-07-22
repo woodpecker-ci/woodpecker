@@ -24,7 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strings"
+	"maps"
 	"sync"
 	"time"
 
@@ -32,6 +32,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
@@ -44,7 +45,7 @@ const orphanReapTimeout = 30 * time.Second
 // tenki is the Tenki sandbox backend. A single instance handles multiple
 // concurrent workflows, keyed by taskUUID.
 type tenki struct {
-	client    *sandbox.Client
+	client    sandboxClient
 	config    config
 	workflows sync.Map // taskUUID -> *workflowState
 }
@@ -52,13 +53,13 @@ type tenki struct {
 // workflowState holds the sandbox backing a single workflow and the state of
 // its currently running steps.
 type workflowState struct {
-	session   *sandbox.Session
+	session   sandboxSession
 	stepState sync.Map // step.UUID -> *stepState
 }
 
 // stepState holds the running command of a single step.
 type stepState struct {
-	handle *sandbox.RunHandle
+	handle sandboxRunHandle
 	output io.ReadCloser
 }
 
@@ -104,7 +105,7 @@ func (e *tenki) Load(ctx context.Context) (*backend_types.BackendInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create tenki client: %w", err)
 	}
-	e.client = client
+	e.client = realClient{c: client}
 
 	// The Go SDK's Create requires an explicit project scope (unlike the CLI,
 	// which tracks a "current project"). Resolve it from the API key identity
@@ -164,9 +165,19 @@ func selectProject(workspaces []sandbox.IdentityWorkspace, workspaceID string) (
 func (e *tenki) SetupWorkflow(ctx context.Context, conf *backend_types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
+	// The data-plane exec used to run steps does not refresh the session's
+	// activity clock, so a long-running step could be auto-paused mid-run. Set a
+	// generous idle timeout (defaulting to the max duration) so idle-pause never
+	// preempts an active workflow.
+	idleTimeout := e.config.idleTimeout
+	if idleTimeout <= 0 {
+		idleTimeout = e.config.maxDuration
+	}
+
 	createOpts := []sandbox.CreateOption{
 		sandbox.WithWaitReady(true),
 		sandbox.WithMaxDuration(e.config.maxDuration),
+		sandbox.WithIdleTimeout(idleTimeout),
 		sandbox.WithAllowOutbound(e.config.allowOutbound),
 		sandbox.WithProjectID(e.config.projectID),
 		// Name and tag the sandbox so it is identifiable in the Tenki
@@ -212,14 +223,14 @@ func (e *tenki) reapOrphanSandbox(ctx context.Context, taskUUID string) {
 		return
 	}
 	for _, s := range sessions {
-		if s.Name != name {
+		if s.Name() != name {
 			continue
 		}
 		if err := s.CloseIfOpen(ctx); err != nil {
-			log.Warn().Err(err).Str("sandbox", s.ID).Msg("could not reap orphan tenki sandbox")
+			log.Warn().Err(err).Str("sandbox", s.ID()).Msg("could not reap orphan tenki sandbox")
 			continue
 		}
-		log.Info().Str("taskUUID", taskUUID).Str("sandbox", s.ID).Msg("reaped orphan tenki sandbox")
+		log.Info().Str("taskUUID", taskUUID).Str("sandbox", s.ID()).Msg("reaped orphan tenki sandbox")
 	}
 }
 
@@ -259,11 +270,17 @@ func (e *tenki) StartStep(ctx context.Context, step *backend_types.Step, taskUUI
 		}
 	}
 
-	script := strings.Join(step.Commands, "\n")
-	cmd := ws.session.Command([]string{"/bin/sh", "-c", script}, sandbox.RunOptions{
-		Env: step.Environment,
-		Dir: step.WorkingDir,
-	})
+	// Build the step script with Woodpecker's shared generator (same as the
+	// docker/local backends): it runs under `/bin/sh -e` so any command failure
+	// aborts the step, traces each command (`echo + <cmd>`), sets up netrc, and
+	// cd's into the workspace. A raw join under `sh -c` would mask intermediate
+	// failures.
+	scriptEnv, entrypoint := common.GenerateContainerConf(step.Commands, "linux", step.WorkingDir)
+	runEnv := make(map[string]string, len(step.Environment)+len(scriptEnv))
+	maps.Copy(runEnv, step.Environment)
+	maps.Copy(runEnv, scriptEnv) // CI_SCRIPT/SHELL take precedence
+
+	cmd := ws.session.Command(entrypoint, sandbox.RunOptions{Env: runEnv})
 
 	handle, err := cmd.Stream(ctx)
 	if err != nil {
@@ -273,8 +290,8 @@ func (e *tenki) StartStep(ctx context.Context, step *backend_types.Step, taskUUI
 	// Steps never write to stdin. Close the write side so the SDK's stdin pump
 	// goroutine exits instead of blocking for the lifetime of the (long-lived)
 	// agent process.
-	if handle.Stdin != nil {
-		_ = handle.Stdin.Close()
+	if stdin := handle.Stdin(); stdin != nil {
+		_ = stdin.Close()
 	}
 
 	ws.stepState.Store(step.UUID, &stepState{
@@ -326,10 +343,20 @@ func (e *tenki) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 		if r.err != nil {
 			return nil, r.err
 		}
-		return &backend_types.State{
+		state := &backend_types.State{
 			Exited:   true,
 			ExitCode: int(r.res.ExitCode),
-		}, nil
+		}
+		// Don't trust the exit code alone: a killed or timed-out command can
+		// report exit code 0. Surface it as a failure so the step is not
+		// misreported as success.
+		if !r.res.Status.IsSuccess() && state.ExitCode == 0 {
+			state.ExitCode = 1
+		}
+		if r.res.Status.IsTimedOut() {
+			state.Error = fmt.Errorf("step %q timed out", step.Name)
+		}
+		return state, nil
 	}
 }
 
@@ -466,7 +493,7 @@ func workflowMetadata(conf *backend_types.Config, taskUUID string) map[string]st
 // passwordless sudo and hand ownership back to the guest user. Keeping the path
 // unchanged preserves Woodpecker's workspace semantics (CI_WORKSPACE, volumes,
 // and any user command referencing the path all stay valid).
-func ensureWorkspaceDir(ctx context.Context, sess *sandbox.Session, dir string) error {
+func ensureWorkspaceDir(ctx context.Context, sess sandboxSession, dir string) error {
 	// Pass the directory as a positional argument ($1) instead of interpolating
 	// it into the script, so the guest shell never re-parses the path (avoids
 	// command injection through the workspace directory).
@@ -489,11 +516,11 @@ fi`
 // mergeOutput combines the command's stdout and stderr into a single stream,
 // as Woodpecker expects one log reader per step. Parallel writes to an
 // io.Pipe are gated sequentially, so concurrent copies are safe.
-func mergeOutput(h *sandbox.RunHandle) io.ReadCloser {
+func mergeOutput(h sandboxRunHandle) io.ReadCloser {
 	pr, pw := io.Pipe()
 
 	var streams []io.Reader
-	for _, s := range []io.Reader{h.Stdout, h.Stderr} {
+	for _, s := range []io.Reader{h.Stdout(), h.Stderr()} {
 		if s != nil {
 			streams = append(streams, s)
 		}
