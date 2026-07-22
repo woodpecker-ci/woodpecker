@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 type ctxKey struct{}
@@ -495,6 +496,12 @@ func (s *RPC) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, err
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
 		return -1, err
+	}
+
+	// check if agent version matches server version
+	if info.Version != "" && info.Version != "dev" && info.Version != version.String() {
+		log.Warn().Str("agent-version", info.Version).Str("server-version", version.String()).
+			Msgf("agent version mismatch — agent is running %s but server is running %s", info.Version, version.String())
 	}
 
 	if agent.Name == "" {
