@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"mime"
 	"net/http"
 	"strconv"
 	"strings"
@@ -295,32 +297,8 @@ func GetPipelineLastByBranch(c *gin.Context) {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 //	@Param		step_id			path	int		true	"the step id"
 func GetStepLogs(c *gin.Context) {
-	_store := store.FromContext(c)
-	repo := session.Repo(c)
-
-	// parse the pipeline number and step sequence number from
-	// the request parameter.
-	num, err := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
-
-	stepID, err := strconv.ParseInt(c.Params.ByName("step_id"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	step, err := _store.StepLoad(pl.ID, stepID)
-	if err != nil {
-		handleDBError(c, err)
+	_, step, ok := pipelineStepFromParams(c)
+	if !ok {
 		return
 	}
 
@@ -331,6 +309,92 @@ func GetStepLogs(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, logs)
+}
+
+// DownloadStepLogs
+//
+//	@Summary	Download logs for a pipeline step
+//	@Router		/repos/{repo_id}/logs/{pipeline_number}/{step_id}/download [get]
+//	@Produce	plain
+//	@Success	200	{string}	string
+//	@Tags		Pipeline logs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		pipeline_number	path	int		true	"the number of the pipeline"
+//	@Param		step_id			path	int		true	"the step id"
+func DownloadStepLogs(c *gin.Context) {
+	pl, step, ok := pipelineStepFromParams(c)
+	if !ok {
+		return
+	}
+
+	logs, err := server.Config.Services.LogStore.LogFind(step)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	repo := session.Repo(c)
+	filename := sanitizeDownloadFilename(fmt.Sprintf("%s-%s-%d-%s.log", repo.Owner, repo.Name, pl.Number, step.Name))
+	c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": filename}))
+	c.Header("Content-Type", "text/plain; charset=utf-8")
+	c.Header("X-Content-Type-Options", "nosniff")
+	c.Status(http.StatusOK)
+
+	for i, entry := range logs {
+		if i > 0 {
+			if _, err = io.WriteString(c.Writer, "\n"); err != nil {
+				_ = c.Error(err)
+				return
+			}
+		}
+		if _, err = c.Writer.Write(entry.Data); err != nil {
+			_ = c.Error(err)
+			return
+		}
+	}
+}
+
+func pipelineStepFromParams(c *gin.Context) (*model.Pipeline, *model.Step, bool) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+
+	num, err := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return nil, nil, false
+	}
+
+	pl, err := _store.GetPipelineNumber(repo, num)
+	if err != nil {
+		handleDBError(c, err)
+		return nil, nil, false
+	}
+
+	stepID, err := strconv.ParseInt(c.Params.ByName("step_id"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return nil, nil, false
+	}
+
+	step, err := _store.StepLoad(pl.ID, stepID)
+	if err != nil {
+		handleDBError(c, err)
+		return nil, nil, false
+	}
+
+	return pl, step, true
+}
+
+func sanitizeDownloadFilename(filename string) string {
+	filename = strings.Map(func(r rune) rune {
+		if r < ' ' || r == '\x7f' || strings.ContainsRune(`<>:"/\|?*`, r) {
+			return '-'
+		}
+		return r
+	}, filename)
+	filename = strings.TrimRight(filename, ".")
+	return strings.TrimSpace(filename)
 }
 
 // DeleteStepLogs

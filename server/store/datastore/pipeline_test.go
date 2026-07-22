@@ -226,7 +226,8 @@ func TestCreatePipelineDuplicateIsRetryable(t *testing.T) {
 	require.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1", ForgeRemoteID: "1"}))
 
 	// Duplicate step: UNIQUE(pipeline_id, pid).
-	err := store.CreatePipeline(&model.Pipeline{RepoID: 1},
+	err := store.CreatePipeline(
+		&model.Pipeline{RepoID: 1},
 		&model.Step{PID: 1, Name: "clone"},
 		&model.Step{PID: 1, Name: "dup"},
 	)

@@ -35,6 +35,7 @@ import (
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
+	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
@@ -123,6 +124,47 @@ func TestGetPipelines(t *testing.T) {
 		})
 		assert.Equal(t, http.StatusOK, c.Writer.Status())
 	})
+}
+
+func TestDownloadStepLogs(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	repo := &model.Repo{ID: 1, Owner: "woodpecker-ci", Name: "woodpecker"}
+	pipeline := &model.Pipeline{ID: 2, Number: 42}
+	step := &model.Step{ID: 3, PipelineID: pipeline.ID, Name: "build"}
+	logs := []*model.LogEntry{
+		{StepID: step.ID, Line: 0, Data: []byte("first line")},
+		{StepID: step.ID, Line: 1, Data: []byte("\x1b[31msecond line\x1b[0m")},
+	}
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetPipelineNumber", repo, int64(42)).Return(pipeline, nil)
+	mockStore.On("StepLoad", pipeline.ID, int64(3)).Return(step, nil)
+
+	mockLogStore := log_mocks.NewMockService(t)
+	mockLogStore.On("LogFind", step).Return(logs, nil)
+
+	originalLogStore := server.Config.Services.LogStore
+	server.Config.Services.LogStore = mockLogStore
+	t.Cleanup(func() {
+		server.Config.Services.LogStore = originalLogStore
+	})
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("store", mockStore)
+	c.Set("repo", repo)
+	c.Params = gin.Params{
+		{Key: "pipeline_number", Value: "42"},
+		{Key: "step_id", Value: "3"},
+	}
+
+	DownloadStepLogs(c)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "text/plain; charset=utf-8", w.Header().Get("Content-Type"))
+	assert.Equal(t, "attachment; filename=woodpecker-ci-woodpecker-42-build.log", w.Header().Get("Content-Disposition"))
+	assert.Equal(t, "first line\n\x1b[31msecond line\x1b[0m", w.Body.String())
 }
 
 func TestDeletePipeline(t *testing.T) {
