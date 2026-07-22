@@ -518,10 +518,7 @@ func ensureWorkspaceDir(ctx context.Context, sess sandboxSession, dir string) er
 	// it into the script, so the guest shell never re-parses the path (avoids
 	// command injection through the workspace directory).
 	const script = `set -e
-if ! mkdir -p "$1" 2>/dev/null; then
-  sudo mkdir -p "$1"
-  sudo chown -R "$(id -u):$(id -g)" "$1"
-fi`
+mkdir -p "$1" 2>/dev/null || { sudo mkdir -p "$1" && sudo chown -R "$(id -u):$(id -g)" "$1"; }`
 
 	res, err := sess.Command([]string{"/bin/sh", "-c", script, "sh", dir}).Exec(ctx)
 	if err != nil {
