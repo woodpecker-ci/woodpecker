@@ -1,5 +1,9 @@
 <template>
-  <Settings :title="$t('repo.settings.parameters.parameters')" :description="$t('repo.settings.parameters.desc')">
+  <Settings
+    :title="$t('repo.settings.parameters.parameters')"
+    :description="$t('repo.settings.parameters.desc')"
+    docs-url="docs/usage/parameters"
+  >
     <template #headerActions>
       <Button
         v-if="selectedParameter"
