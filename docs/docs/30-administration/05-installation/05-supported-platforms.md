@@ -4,12 +4,12 @@ Woodpecker is shipped as container images and as pre-built binaries on the [GitH
 
 ## Components
 
-| Component           | Purpose                                                                                                                                                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `woodpecker-server` | Web UI, API, webhook receiver, pipeline scheduler.                                                                                                                                                                        |
+| Component           | Purpose                                                                                                                                                                                                                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `woodpecker-server` | Web UI, API, webhook receiver, pipeline scheduler.                                                                                                                                                                                                                              |
 | `woodpecker-agent`  | Executes pipeline workflows via a backend ([Docker](../10-configuration/11-backends/10-docker.md), [Kubernetes](../10-configuration/11-backends/20-kubernetes.md), [Local](../10-configuration/11-backends/30-local.md), [Tenki](../10-configuration/11-backends/40-tenki.md)). |
-| `woodpecker-cli`    | Command-line utility for interacting with the server.                                                                                                                                                                     |
-| `plugin-git`        | Default clone plugin, invoked automatically by the agent at the start of every workflow. Distributed as a container image; binaries are also published for use with the Local backend.                                    |
+| `woodpecker-cli`    | Command-line utility for interacting with the server.                                                                                                                                                                                                                           |
+| `plugin-git`        | Default clone plugin, invoked automatically by the agent at the start of every workflow. Distributed as a container image; binaries are also published for use with the Local backend.                                                                                          |
 
 ## Component / platform matrix
 

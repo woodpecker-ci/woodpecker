@@ -20,6 +20,7 @@ This backend runs untrusted pipeline code inside a Tenki cloud microVM. Be aware
 - The sandbox base image grants **passwordless `sudo`** (root inside the microVM); isolation relies on the microVM boundary, not on an unprivileged user.
 - **Outbound network access is enabled by default** (`WOODPECKER_BACKEND_TENKI_ALLOW_OUTBOUND`) so repositories and dependencies can be fetched. Disable it or restrict egress at the Tenki network layer for untrusted pipelines.
 - Step environment variables (including secrets) and workflow labels are sent to the Tenki API to run the sandbox — that is, to a third-party control plane.
+
 :::
 
 ## Pipeline example
