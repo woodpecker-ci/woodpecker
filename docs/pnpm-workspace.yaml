@@ -14,3 +14,6 @@ overrides:
   http-proxy-middleware: '^4.0.0'
   undici: '^7.28.0'
   gray-matter: 'npm:@11ty/gray-matter@^2.1.0'
+  brace-expansion: '^2.1.2'
+  fast-uri: '^3.1.4'
+  fast-xml-parser: '^5.10.1'
