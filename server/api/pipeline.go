@@ -65,6 +65,24 @@ func CreatePipeline(c *gin.Context) {
 		return
 	}
 
+	// Validate submitted variables against the repo's defined parameters and fill in
+	// defaults. Repos without defined parameters behave exactly as before (free-text
+	// variables only, no validation).
+	params, err := _store.ParameterList(repo, &model.ListOptions{All: true})
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error getting parameter list. %s", err)
+		return
+	}
+	if len(params) > 0 {
+		if opts.Variables == nil {
+			opts.Variables = make(map[string]string)
+		}
+		if err := model.ValidateParameterValues(params, opts.Variables); err != nil {
+			c.String(http.StatusUnprocessableEntity, "Error validating pipeline parameters. %s", err)
+			return
+		}
+	}
+
 	user := session.User(c)
 
 	lastCommit, err := _forge.BranchHead(c, user, repo, opts.Branch)

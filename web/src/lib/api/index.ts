@@ -6,6 +6,7 @@ import type {
   Forge,
   Org,
   OrgPermissions,
+  Parameter,
   Pipeline,
   PipelineConfig,
   PipelineFeed,
@@ -252,6 +253,25 @@ export default class WoodpeckerClient extends ApiClient {
 
   async runCron(repoId: number, cronId: number): Promise<Pipeline> {
     return this._post(`/api/repos/${repoId}/cron/${cronId}`) as Promise<Pipeline>;
+  }
+
+  // ref is accepted so a future workflow-defined parameter source can return
+  // ref-specific definitions; the server currently ignores it.
+  async getParameterList(repoId: number, opts?: PaginationOptions & { ref?: string }): Promise<Parameter[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/parameters?${query}`) as Promise<Parameter[] | null>;
+  }
+
+  async createParameter(repoId: number, parameter: Partial<Parameter>): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/parameters`, parameter);
+  }
+
+  async updateParameter(repoId: number, parameter: Partial<Parameter>): Promise<unknown> {
+    return this._patch(`/api/repos/${repoId}/parameters/${parameter.id}`, parameter);
+  }
+
+  async deleteParameter(repoId: number, parameterId: number): Promise<unknown> {
+    return this._delete(`/api/repos/${repoId}/parameters/${parameterId}`);
   }
 
   async getOrg(orgId: number): Promise<Org> {

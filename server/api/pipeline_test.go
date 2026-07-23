@@ -327,6 +327,7 @@ func TestCreatePipeline(t *testing.T) {
 		}
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(configData, nil)
 
+		mockStore.On("ParameterList", fakeRepo, mock.Anything).Return(nil, nil)
 		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
 		mockStore.On("CreatePipeline", mock.Anything).Return(nil)
 		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(nil, types.ErrRecordNotExist).Maybe()
@@ -399,6 +400,7 @@ func TestCreatePipeline(t *testing.T) {
 		}
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(oldConfigData, http.ErrHandlerTimeout)
 
+		mockStore.On("ParameterList", fakeRepo, mock.Anything).Return(nil, nil)
 		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
 		mockStore.On("CreatePipeline", mock.Anything).Return(nil)
 		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(&model.Pipeline{}, nil).Maybe()
@@ -448,6 +450,7 @@ func TestCreatePipeline(t *testing.T) {
 		// return nil config with error
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(nil, http.ErrHandlerTimeout)
 
+		mockStore.On("ParameterList", fakeRepo, mock.Anything).Return(nil, nil)
 		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
 		mockStore.On("CreatePipeline", mock.Anything).Return(nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)

@@ -94,9 +94,7 @@ func withRepo(r *model.Repo, perm *model.Perm) ctxOption {
 
 // withParam sets a gin URL path parameter (e.g. "cron", "repo_id", "secret").
 // The key is intentionally a parameter so the same helper serves every
-// endpoint group; it currently varies across the api test suite.
-//
-//nolint:unparam // key varies across endpoint test files sharing this helper
+// endpoint group; it varies across the api test suite.
 func withParam(key, value string) ctxOption {
 	return func(tc *testContext) {
 		tc.Ctx.Params = append(tc.Ctx.Params, gin.Param{Key: key, Value: value})
