@@ -157,7 +157,7 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 }
 
 func stepLabel(step *types.Step) (string, error) {
-	return toDNSName(step.Name)
+	return toLabelValue(step.Name)
 }
 
 func podAnnotations(config *config, options BackendOptions) map[string]string {
