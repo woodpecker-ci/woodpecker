@@ -15,10 +15,21 @@
 package fixtures
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+// InstallationToken is the installation access token returned by the mock
+// installation token endpoint for unrestricted (installation-wide) tokens.
+const InstallationToken = "ghs_mock_installation_token"
+
+// ScopedInstallationToken is returned instead when the token request is
+// restricted to specific repositories, as clone tokens are.
+const ScopedInstallationToken = "ghs_mock_scoped_installation_token"
 
 // Handler returns an http.Handler that is capable of handling a variety of mock
 // Bitbucket requests and returning mock responses.
@@ -30,8 +41,128 @@ func Handler() http.Handler {
 	e.GET("/api/v3/repositories/:id", getRepoByID)
 	e.GET("/api/v3/orgs/:org/memberships/:user", getMembership)
 	e.GET("/api/v3/user/memberships/orgs/:org", getMembership)
+	e.GET("/api/v3/repos/:owner/:name/installation", getRepoInstallation)
+	e.POST("/api/v3/app/installations/:id/access_tokens", createInstallationToken)
+	e.POST("/api/v3/repos/:owner/:name/statuses/:commit", createStatus)
+	e.GET("/api/v3/app", getApp)
+	e.GET("/api/v3/app/installations", listInstallations)
+	e.GET("/api/v3/repos/:owner/:name/branches", listBranches)
+	e.GET("/api/v3/repos/:owner/:name/branches/:branch", getBranch)
+	e.GET("/api/v3/repos/:owner/:name/pulls", listPulls)
+	e.GET("/api/v3/repos/:owner/:name/contents/*path", getContents)
 
 	return e
+}
+
+// requireInstallationToken guards fixture endpoints used to assert that
+// repo-scoped API calls are made with the app installation token.
+func requireInstallationToken(c *gin.Context) bool {
+	if c.GetHeader("Authorization") != "Bearer "+InstallationToken {
+		c.String(http.StatusUnauthorized, "")
+		return false
+	}
+	return true
+}
+
+func listBranches(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `[{"name": "main"}, {"name": "dev"}]`)
+}
+
+func getBranch(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `{"name": "main", "commit": {"sha": "abc123", "html_url": "https://github.com/octocat/Hello-World/commit/abc123"}}`)
+}
+
+func listPulls(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `[{"number": 7, "title": "test pr"}]`)
+}
+
+func getContents(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	if strings.HasSuffix(c.Param("path"), "somedir") {
+		c.String(http.StatusOK, `[{"type": "file", "name": "a.yaml", "path": "somedir/a.yaml"}]`)
+		return
+	}
+	// base64 of "pipeline:"
+	c.String(http.StatusOK, `{"type": "file", "encoding": "base64", "name": "config", "content": "cGlwZWxpbmU6"}`)
+}
+
+func getApp(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusOK, `{"id": 12345, "name": "Woodpecker Test App", "slug": "woodpecker-test-app"}`)
+}
+
+func listInstallations(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusOK, `[{"id": 42}]`)
+}
+
+func getRepoInstallation(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	switch c.Param("owner") {
+	case "not-installed":
+		c.String(http.StatusNotFound, "")
+	case "lookup-error":
+		c.String(http.StatusInternalServerError, "")
+	default:
+		c.String(http.StatusOK, `{"id": 42}`)
+	}
+}
+
+func createInstallationToken(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	if c.Param("id") != "42" {
+		c.String(http.StatusNotFound, "")
+		return
+	}
+	var req struct {
+		Repositories []string          `json:"repositories"`
+		Permissions  map[string]string `json:"permissions"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	token := InstallationToken
+	if len(req.Repositories) > 0 {
+		// repository-restricted clone tokens must also drop write access
+		if req.Permissions["contents"] != "read" {
+			c.String(http.StatusUnprocessableEntity, "")
+			return
+		}
+		token = ScopedInstallationToken
+	}
+	expiresAt := time.Now().Add(time.Hour).UTC().Format(time.RFC3339)
+	c.String(http.StatusCreated, fmt.Sprintf(`{"token": %q, "expires_at": %q}`, token, expiresAt))
+}
+
+// createStatus only accepts the mock installation token, so tests can assert
+// that a status was sent with GitHub App credentials.
+func createStatus(c *gin.Context) {
+	if c.GetHeader("Authorization") != "Bearer "+InstallationToken {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusCreated, `{"id": 1}`)
 }
 
 func getRepo(c *gin.Context) {

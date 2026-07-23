@@ -52,18 +52,42 @@ const (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL               string // GitHub server url.
-	OAuthClientID     string // GitHub oauth client id.
-	OAuthClientSecret string // GitHub oauth client secret.
-	SkipVerify        bool   // Skip ssl verification.
-	MergeRef          bool   // Clone pull requests using the merge ref.
-	OnlyPublic        bool   // Only obtain OAuth tokens with access to public repos.
-	OAuthHost         string // Public url for oauth if different from url.
+	URL                string // GitHub server url.
+	OAuthClientID      string // GitHub oauth client id.
+	OAuthClientSecret  string // GitHub oauth client secret.
+	SkipVerify         bool   // Skip ssl verification.
+	MergeRef           bool   // Clone pull requests using the merge ref.
+	OnlyPublic         bool   // Only obtain OAuth tokens with access to public repos.
+	OAuthHost          string // Public url for oauth if different from url.
+	AppID              string // GitHub App (client) id used to mint installation tokens.
+	AppPrivateKey      string // GitHub App private key (PEM or base64-encoded PEM).
+	AppCloneTokenScope string // Scope of clone tokens: "repo" (default) or "installation".
 }
+
+// Values of the AppCloneTokenScope option.
+const (
+	// AppCloneTokenScopeRepo scopes clone tokens to the repository being
+	// built with read-only contents access.
+	AppCloneTokenScopeRepo = "repo"
+	// AppCloneTokenScopeInstallation hands out clone tokens covering all
+	// repositories of the app installation with the app's permissions, e.g.
+	// for private git submodules in the same organization.
+	AppCloneTokenScopeInstallation = "installation"
+)
 
 // New returns a Forge implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
 func New(id int64, opts Opts) (forge.Forge, error) {
+	if (opts.AppID != "") != (opts.AppPrivateKey != "") {
+		return nil, errors.New("github app requires both app id and private key to be set")
+	}
+
+	switch opts.AppCloneTokenScope {
+	case "", AppCloneTokenScopeRepo, AppCloneTokenScopeInstallation:
+	default:
+		return nil, fmt.Errorf("invalid github app clone token scope %q, must be %q or %q", opts.AppCloneTokenScope, AppCloneTokenScopeRepo, AppCloneTokenScopeInstallation)
+	}
+
 	r := &client{
 		id:         id,
 		API:        defaultAPI,
@@ -80,6 +104,15 @@ func New(id int64, opts Opts) (forge.Forge, error) {
 		r.API = r.url + "/api/v3/"
 	}
 
+	if opts.AppID != "" {
+		app, err := newAppClient(opts.AppID, opts.AppPrivateKey, r.API, r.SkipVerify)
+		if err != nil {
+			return nil, err
+		}
+		r.app = app
+		r.wideCloneTokens = opts.AppCloneTokenScope == AppCloneTokenScopeInstallation
+	}
+
 	return r, nil
 }
 
@@ -93,6 +126,10 @@ type client struct {
 	MergeRef   bool
 	OnlyPublic bool
 	oAuthHost  string
+	app        *appClient // set when a GitHub App is configured
+	// clone tokens cover the whole installation instead of only the
+	// repository being built
+	wideCloneTokens bool
 }
 
 // Name returns the string name of this driver.
@@ -265,7 +302,7 @@ func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 
 // File fetches the file from the GitHub repository and returns its contents.
 func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
-	client, err := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, c.repoToken(ctx, u, r))
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +324,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 }
 
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
-	client, err := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, c.repoToken(ctx, u, r))
 	if err != nil {
 		return nil, err
 	}
@@ -340,8 +377,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	token := common.UserToken(ctx, r, u)
-	client, err := c.newClientToken(ctx, token)
+	client, err := c.newClientToken(ctx, c.repoToken(ctx, u, r))
 	if err != nil {
 		return nil, err
 	}
@@ -368,20 +404,35 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 }
 
 // Netrc returns a netrc file capable of authenticating GitHub requests and
-// cloning GitHub repositories. The netrc will use the global machine account
-// when configured.
+// cloning GitHub repositories. When a GitHub App is configured and installed
+// on the repository an installation access token is used, otherwise the
+// user's OAuth token.
 func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.app != nil {
+		// the forge interface does not provide a context here, so bound the token mint call
+		ctx, cancel := context.WithTimeout(context.Background(), netrcTokenTimeout)
+		defer cancel()
+		if token, ok := c.appCloneToken(ctx, r, netrcTokenMinValidity); ok {
+			return &model.Netrc{
+				Login:    "x-access-token",
+				Password: token,
+				Machine:  host,
+				Type:     model.ForgeTypeGithub,
+			}, nil
+		}
+	}
+
 	login := ""
 	token := ""
 
 	if u != nil {
 		login = u.AccessToken
 		token = "x-oauth-basic"
-	}
-
-	host, err := common.ExtractHostFromCloneURL(r.Clone)
-	if err != nil {
-		return nil, err
 	}
 
 	return &model.Netrc{
@@ -510,6 +561,12 @@ func (c *client) newClientToken(ctx context.Context, token string) (*github.Clie
 		return ctxClient, nil
 	}
 
+	return newGithubClient(ctx, c.API, token, c.SkipVerify)
+}
+
+// newGithubClient returns a GitHub client authenticating with the given
+// bearer token (OAuth token, installation access token or app JWT).
+func newGithubClient(ctx context.Context, api, token string, skipVerify bool) (*github.Client, error) {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -521,7 +578,7 @@ func (c *client) newClientToken(ctx context.Context, token string) (*github.Clie
 	baseTransport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 	}
-	if c.SkipVerify {
+	if skipVerify {
 		baseTransport.TLSClientConfig = &tls.Config{
 			InsecureSkipVerify: true,
 		}
@@ -530,7 +587,103 @@ func (c *client) newClientToken(ctx context.Context, token string) (*github.Clie
 	// Wrap the base transport with User-Agent support
 	tp.Base = httputil.NewUserAgentRoundTripper(baseTransport, "forge-github")
 
-	return github.NewClient(github.WithURLs(github.Ptr(c.API), nil), github.WithHTTPClient(tc))
+	return github.NewClient(github.WithURLs(github.Ptr(api), nil), github.WithHTTPClient(tc))
+}
+
+// appToken returns an installation access token for the repository when a
+// GitHub App is configured and installed on it.
+func (c *client) appToken(ctx context.Context, r *model.Repo, minValidity time.Duration) (string, bool) {
+	if c.app == nil || r == nil {
+		return "", false
+	}
+	token, err := c.app.token(ctx, r.Owner, r.Name, minValidity)
+	if err != nil {
+		if errors.Is(err, errAppNotInstalled) {
+			log.Debug().Msgf("github app is not installed on repo %s, using user token", r.FullName)
+		} else {
+			log.Warn().Err(err).Msgf("failed to get github app installation token for repo %s, falling back to user token", r.FullName)
+		}
+		return "", false
+	}
+	return token, true
+}
+
+// AppHealth verifies the configured GitHub App credentials by authenticating
+// as the app. It returns the app name and the number of installations (of
+// the first result page) and is used by the admin API to check a forge's
+// GitHub App configuration.
+func (c *client) AppHealth(ctx context.Context) (string, int, error) {
+	if c.app == nil {
+		return "", 0, errors.New("no github app configured")
+	}
+
+	client, err := c.app.newAppJWTClient(ctx)
+	if err != nil {
+		return "", 0, err
+	}
+
+	app, _, err := client.Apps.Get(ctx, "")
+	if err != nil {
+		return "", 0, fmt.Errorf("failed to authenticate as github app: %w", err)
+	}
+
+	installations, _, err := client.Apps.ListInstallations(ctx, &github.ListOptions{PerPage: defaultPageSize})
+	if err != nil {
+		return "", 0, fmt.Errorf("failed to list github app installations: %w", err)
+	}
+
+	return app.GetName(), len(installations), nil
+}
+
+// appCloneToken returns an installation access token suitable as clone
+// credential for the repository when a GitHub App is configured and
+// installed on it. By default the token is restricted to the repository and
+// read-only contents access, see AppCloneTokenScope.
+func (c *client) appCloneToken(ctx context.Context, r *model.Repo, minValidity time.Duration) (string, bool) {
+	if c.app == nil || r == nil {
+		return "", false
+	}
+	token, err := c.app.cloneToken(ctx, r.Owner, r.Name, minValidity, c.wideCloneTokens)
+	if err != nil {
+		if errors.Is(err, errAppNotInstalled) {
+			log.Debug().Msgf("github app is not installed on repo %s, using user token", r.FullName)
+		} else {
+			log.Warn().Err(err).Msgf("failed to get github app clone token for repo %s, falling back to user token", r.FullName)
+		}
+		return "", false
+	}
+	return token, true
+}
+
+// repoToken returns the token to use for repo-scoped API calls: an
+// installation access token when a GitHub App is configured and installed on
+// the repository, the user's OAuth token otherwise.
+func (c *client) repoToken(ctx context.Context, u *model.User, r *model.Repo) string {
+	if token, ok := c.appToken(ctx, r, apiTokenMinValidity); ok {
+		return token
+	}
+	return common.UserToken(ctx, r, u)
+}
+
+// newRepoHookClient returns a client for API calls during webhook
+// processing. It prefers a GitHub App installation token and falls back to
+// the (refreshed) OAuth token of the repo owner.
+func (c *client) newRepoHookClient(ctx context.Context, _store store.Store, repo *model.Repo) (*github.Client, error) {
+	if token, ok := c.appToken(ctx, repo, apiTokenMinValidity); ok {
+		return c.newClientToken(ctx, token)
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Refresh the OAuth token before making API calls.
+	// The token may be expired, and without this refresh the API calls below
+	// would fail with an authentication error.
+	forge.Refresh(ctx, c, _store, user)
+
+	return c.newClientToken(ctx, user.AccessToken)
 }
 
 // matchingEmail returns matching user email.
@@ -574,7 +727,7 @@ var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 // Status sends the commit status to the forge.
 // An example would be the GitHub pull request status.
 func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
-	client, err := c.newClientToken(ctx, user.AccessToken)
+	client, err := c.newClientToken(ctx, c.repoToken(ctx, user, repo))
 	if err != nil {
 		return err
 	}
@@ -634,8 +787,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
-	token := common.UserToken(ctx, r, u)
-	client, err := c.newClientToken(ctx, token)
+	client, err := c.newClientToken(ctx, c.repoToken(ctx, u, r))
 	if err != nil {
 		return nil, err
 	}
@@ -659,8 +811,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch.
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
-	token := common.UserToken(ctx, r, u)
-	client, err := c.newClientToken(ctx, token)
+	client, err := c.newClientToken(ctx, c.repoToken(ctx, u, r))
 	if err != nil {
 		return nil, err
 	}
@@ -726,17 +877,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return nil, err
 	}
 
-	user, err := _store.GetUser(repo.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Refresh the OAuth token before making API calls.
-	// The token may be expired, and without this refresh the API calls below
-	// would fail with an authentication error.
-	forge.Refresh(ctx, c, _store, user)
-
-	gh, err := c.newClientToken(ctx, user.AccessToken)
+	gh, err := c.newRepoHookClient(ctx, _store, repo)
 	if err != nil {
 		return nil, err
 	}
@@ -772,17 +913,7 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		return "", err
 	}
 
-	user, err := _store.GetUser(repo.UserID)
-	if err != nil {
-		return "", err
-	}
-
-	// Refresh the OAuth token before making API calls.
-	// The token may be expired, and without this refresh the API calls below
-	// would fail with an authentication error.
-	forge.Refresh(ctx, c, _store, user)
-
-	gh, err := c.newClientToken(ctx, user.AccessToken)
+	gh, err := c.newRepoHookClient(ctx, _store, repo)
 	if err != nil {
 		return "", err
 	}
@@ -836,17 +967,7 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 		return nil, err
 	}
 
-	user, err := _store.GetUser(repo.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Refresh the OAuth token before making API calls.
-	// The token may be expired, and without this refresh the API calls below
-	// would fail with an authentication error.
-	forge.Refresh(ctx, c, _store, user)
-
-	gh, err := c.newClientToken(ctx, user.AccessToken)
+	gh, err := c.newRepoHookClient(ctx, _store, repo)
 	if err != nil {
 		return nil, err
 	}
