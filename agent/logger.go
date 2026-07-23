@@ -23,6 +23,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/shared"
 	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
@@ -42,7 +43,7 @@ func (r *Runner) createLogger(_logger zerolog.Logger, workflow *rpc.Workflow) lo
 
 		logger.Debug().Msg("log stream opened")
 
-		logStream := log.NewLineWriter(r.client, step.UUID, secrets...)
+		logStream := shared.NewSecretsWriter(log.NewLineWriter(r.client, step.UUID), secrets)
 		if err := pipeline_utils.CopyLineByLine(logStream, rc, pipeline.MaxLogLineLength); err != nil {
 			logger.Error().Err(err).Msg("copy limited logStream part")
 		}
