@@ -331,7 +331,9 @@
             },
             "load_more": "Carregar mais",
             "version": "A versão do Woodpecker na qual este pipeline foi executado.",
-            "version_header": "Versão do Woodpecker"
+            "version_header": "Versão do Woodpecker",
+            "parse_errors": "Erros de análise",
+            "runtime_errors": "Erros em tempo de execução"
         },
         "branches": "Branches",
         "pull_requests": "Pull requests",

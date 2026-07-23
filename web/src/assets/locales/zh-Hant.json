@@ -81,7 +81,8 @@
             "debug": {
                 "title": "除錯",
                 "download_metadata": "下載詮釋資料",
-                "metadata_download_successful": "詮釋資料下載成功"
+                "metadata_download_successful": "詮釋資料下載成功",
+                "no_permission": "您不被允許存取除錯資訊"
             },
             "no_logs": "無紀錄",
             "loading": "載入中…",
@@ -104,7 +105,9 @@
             "we_got_some_errors": "喔不，發生了錯誤！",
             "no_pipeline_steps": "無 pipeline 步驟可用！",
             "step_not_started": "此步驟尚未開始。",
-            "log_title": "步驟紀錄"
+            "log_title": "步驟紀錄",
+            "parse_errors": "解析錯誤",
+            "runtime_errors": "執行環境錯誤"
         },
         "settings": {
             "general": {
@@ -202,7 +205,8 @@
                     "success": "儲存庫已刪除"
                 },
                 "actions": "Actions"
-            }
+            },
+            "not_allowed": "您不被允許存取此儲存庫的設定"
         },
         "visibility": {
             "visibility": "專案可見性",
@@ -234,7 +238,7 @@
         "pull_requests": "拉取請求",
         "add": "新增儲存庫",
         "user_none": "這個組織/使用者還沒有任何專案",
-        "not_allowed": "您不被允許存取這個儲存庫",
+        "not_allowed": "您不被允許存取此儲存庫",
         "enable": {
             "enable": "啟用",
             "enabled": "已啟用",
@@ -351,7 +355,8 @@
                 "view": "檢視組織",
                 "none": "還沒有任何組織。"
             },
-            "settings": "管理員設定"
+            "settings": "管理員設定",
+            "not_allowed": "您不被允許存取伺服器設定"
         }
     },
     "username": "使用者名稱",
@@ -496,5 +501,14 @@
     "executable_desc": "附加元件執行檔路徑。",
     "skip_verify_desc": "略過 API 連線的 SSL 驗證。不推薦用於生產環境。",
     "developer_settings_to_create": "前往 {0} 並設定 OAuth 應用程式。",
-    "help_translating": "您可以在 {0} 上幫助將 Woodpecker 翻譯成您的語言。"
+    "help_translating": "您可以在 {0} 上幫助將 Woodpecker 翻譯成您的語言。",
+    "org": {
+        "settings": {
+            "not_allowed": "您不被允許存取此組織的設定"
+        }
+    },
+    "access_denied": "您不被允許存取此實例",
+    "org_access_denied": "您不被允許存取此組織",
+    "use_this_redirect_url_to_create": "使用此重新導向 URL 來建立或更新 OAuth 應用程式。",
+    "git_username_desc": "Git 使用者名稱。"
 }

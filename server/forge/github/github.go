@@ -918,10 +918,10 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		return "", err
 	}
 
-	page := 1
+	opts := &github.ListOptions{Page: 1}
 	var tag *github.RepositoryTag
-	for {
-		tags, _, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, &github.ListOptions{Page: page})
+	for opts.Page > 0 {
+		tags, resp, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, opts)
 		if err != nil {
 			return "", err
 		}
@@ -935,6 +935,8 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		if tag != nil {
 			break
 		}
+
+		opts.Page = resp.NextPage
 	}
 	if tag == nil {
 		return "", fmt.Errorf("could not find tag %s", tagName)

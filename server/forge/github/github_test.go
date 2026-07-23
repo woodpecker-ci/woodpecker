@@ -541,3 +541,57 @@ func TestHook(t *testing.T) {
 		assert.Empty(t, pipeline.ChangedFiles)
 	})
 }
+
+func TestGetTagCommitSHA(t *testing.T) {
+	// Tags API paginates 30 per page; put the target tag on the second page
+	// to exercise pagination instead of a first-page match.
+	mockedHTTPClient := github_mock.NewMockedHTTPClient(
+		github_mock.WithRequestMatchPages(
+			github_mock.GetReposTagsByOwnerByRepo,
+			[]github.RepositoryTag{
+				{Name: github.Ptr("v1.0.0")},
+				{Name: github.Ptr("v1.0.1")},
+			},
+			[]github.RepositoryTag{
+				{Name: github.Ptr("v1.0.2")},
+				{
+					Name:   github.Ptr("v1.0.3"),
+					Commit: &github.Commit{SHA: github.Ptr("deadbeefcafe")},
+				},
+			},
+		),
+	)
+
+	gh, err := github.NewClient(github.WithHTTPClient(mockedHTTPClient))
+	require.NoError(t, err)
+
+	ctx := context.WithValue(context.Background(), githubClientKey, gh)
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetUser", mock.Anything).Return(&model.User{
+		ID:          1,
+		Login:       "6543",
+		AccessToken: "token",
+	}, nil)
+	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(&model.Repo{
+		ID:            1,
+		ForgeRemoteID: "1",
+		Owner:         "6543",
+		Name:          "hello-world",
+		UserID:        1,
+	}, nil)
+	ctx = store.InjectToContext(ctx, mockStore)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+
+	t.Run("finds a tag beyond the first page", func(t *testing.T) {
+		sha, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "v1.0.3")
+		require.NoError(t, err)
+		assert.Equal(t, "deadbeefcafe", sha)
+	})
+
+	t.Run("returns an error instead of looping forever when the tag does not exist", func(t *testing.T) {
+		_, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
+		require.Error(t, err)
+	})
+}
