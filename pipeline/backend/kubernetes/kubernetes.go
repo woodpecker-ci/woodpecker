@@ -280,8 +280,13 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err = startPod(ctx, e, step, options, taskUUID)
-	return err
+	pod, err := startPod(ctx, e, step, options, taskUUID)
+	if err != nil {
+		return err
+	}
+
+	// Make the step pod the owner of the ephemeral secrets so GC can remove them when the pod is removed
+	return setSecretsOwner(ctx, e, step, pod)
 }
 
 // WaitStep waits for the pipeline step to complete and returns
@@ -523,12 +528,23 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 // DestroyWorkflow destroys the pipeline environment.
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
+	var errs []error
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
-			if err != nil {
-				return err
+			// Clean up the step secrets in any case so we get no opaque ones.
+			if needsRegistrySecret(step) {
+				if err := stopRegistrySecret(ctx, e, step, e.config.newDefaultDeleteOptions()); err != nil {
+					errs = append(errs, err)
+				}
+			}
+			if needsStepSecret(step) {
+				if err := stopStepSecret(ctx, e, step, e.config.newDefaultDeleteOptions()); err != nil {
+					errs = append(errs, err)
+				}
+			}
+			if err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions()); err != nil {
+				errs = append(errs, err)
 			}
 		}
 	}
@@ -536,16 +552,14 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
-	err := e.stopHeadlessService(ctx, e, namespace, taskUUID)
-	if err != nil {
-		return err
+	if err := e.stopHeadlessService(ctx, e, namespace, taskUUID); err != nil {
+		errs = append(errs, err)
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow volume")
-	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), e.config.newDefaultDeleteOptions())
-	if err != nil {
-		return err
+	if err := stopVolume(ctx, e, conf.Volume, namespace, e.config.newDefaultDeleteOptions()); err != nil {
+		errs = append(errs, err)
 	}
 
-	return nil
+	return errors.Join(errs...)
 }

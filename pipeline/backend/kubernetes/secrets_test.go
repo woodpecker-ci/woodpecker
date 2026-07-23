@@ -15,12 +15,16 @@
 package kubernetes
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	kube_core_v1 "k8s.io/api/core/v1"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/fake"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -239,4 +243,47 @@ func TestRegistrySecret(t *testing.T) {
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(secretJSON), expected)
+}
+
+func TestSetSecretsOwner(t *testing.T) {
+	const namespace = "test-ns"
+	ctx := context.Background()
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+
+	step := &types.Step{
+		UUID:          "01he8bebctabr3kgk0qj36d2me-0",
+		Name:          "go-test",
+		Image:         "alpine",
+		SecretMapping: map[string]string{"FOO": "bar"},
+		AuthConfig:    types.Auth{Username: "foo", Password: "bar"},
+	}
+
+	require.NoError(t, startRegistrySecret(ctx, engine, step))
+	require.NoError(t, startStepSecret(ctx, engine, step))
+
+	pod := &kube_core_v1.Pod{
+		ObjectMeta: kube_meta_v1.ObjectMeta{
+			Name:      "wp-01he8bebctabr3kgk0qj36d2me-0",
+			Namespace: namespace,
+			UID:       "pod-uid-123",
+		},
+	}
+
+	require.NoError(t, setSecretsOwner(ctx, engine, step, pod))
+
+	regName, err := registrySecretName(step)
+	require.NoError(t, err)
+	stepName, err := stepSecretName(step)
+	require.NoError(t, err)
+
+	for _, name := range []string{regName, stepName} {
+		secret, err := client.CoreV1().Secrets(namespace).Get(ctx, name, kube_meta_v1.GetOptions{})
+		require.NoError(t, err)
+		require.Len(t, secret.OwnerReferences, 1, "secret %s should have one owner", name)
+		owner := secret.OwnerReferences[0]
+		assert.Equal(t, "Pod", owner.Kind)
+		assert.Equal(t, pod.Name, owner.Name)
+		assert.Equal(t, pod.UID, owner.UID)
+	}
 }
