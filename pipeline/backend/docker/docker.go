@@ -175,6 +175,21 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend_types.Config, 
 	return err
 }
 
+// imagePullOutput returns the writer that image-pull progress should
+// be streamed to. It defaults to os.Stdout, preserving the previous
+// behavior; an embedder can override it via the
+// backend_types.ImagePullOutput context value so the docker client's
+// progress output does not tear an alt-screen UI. When the writer is
+// not a terminal, DisplayJSONMessagesStream falls back to plain
+// newline-terminated status lines, which is exactly what a captured
+// log pane wants.
+func imagePullOutput(ctx context.Context) io.Writer {
+	if w, ok := ctx.Value(backend_types.ImagePullOutput).(io.Writer); ok && w != nil {
+		return w
+	}
+	return os.Stdout
+}
+
 func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUUID string) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
@@ -202,8 +217,9 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
 		if pErr == nil {
 			// TODO(1936): show image pull progress in web-ui
-			fd, isTerminal := term.GetFdInfo(os.Stdout)
-			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+			out := imagePullOutput(ctx)
+			fd, isTerminal := term.GetFdInfo(out)
+			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, out, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
 			responseBody.Close()
@@ -231,8 +247,9 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 			return pErr
 		}
 		// TODO(1936): show image pull progress in web-ui
-		fd, isTerminal := term.GetFdInfo(os.Stdout)
-		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+		out := imagePullOutput(ctx)
+		fd, isTerminal := term.GetFdInfo(out)
+		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, out, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
 		responseBody.Close()
