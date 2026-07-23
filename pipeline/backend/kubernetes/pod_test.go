@@ -16,7 +16,6 @@ package kubernetes
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/kinbiko/jsonassert"
@@ -114,20 +113,6 @@ func TestPodMeta(t *testing.T) {
 	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "", meta.Labels[ServiceLabel])
-}
-
-func TestStepLabel(t *testing.T) {
-	name, err := stepLabel(&types.Step{Name: "Build image"})
-	assert.NoError(t, err)
-	assert.EqualValues(t, "build-image", name)
-
-	name, err = stepLabel(&types.Step{Name: ".build.image"})
-	assert.NoError(t, err)
-	assert.EqualValues(t, "build.image", name)
-
-	name, err = stepLabel(&types.Step{Name: strings.Repeat("a", 100)})
-	assert.NoError(t, err)
-	assert.LessOrEqual(t, len(name), 63)
 }
 
 func TestPodHostnameSanitized(t *testing.T) {
