@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-22
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -45,6 +45,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6835](https://github.com/woodpecker-ci/woodpecker/pull/6835)]
 - Minor adjustments for API usage example [[#6605](https://github.com/woodpecker-ci/woodpecker/pull/6605)]
 - Lock file maintenance [[#6816](https://github.com/woodpecker-ci/woodpecker/pull/6816)]
 - Update pnpm to v11.10.0 [[#6813](https://github.com/woodpecker-ci/woodpecker/pull/6813)]
