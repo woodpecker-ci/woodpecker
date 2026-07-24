@@ -148,3 +148,28 @@ The relative weight vs. other containers.
 Comma-separated list to limit the specific CPUs or cores a pipeline container can use.
 
 Example: `WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_SET=1,2`
+
+## Per-step backend options
+
+You can override resource limits on a per-step basis using `backend_options`:
+
+```yaml
+steps:
+  heavy-build:
+    image: golang:1.22
+    commands:
+      - go build ./...
+    backend_options:
+      docker:
+        resources:
+          limits:
+            memory: 1g
+            cpus: 1.5
+        oom_score_adj: 500
+```
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `resources.limits.memory` | string | Maximum memory for the step (e.g. `512m`, `1g`). Overrides the agent-level `WOODPECKER_BACKEND_DOCKER_LIMIT_MEM` when set. |
+| `resources.limits.cpus` | float | Maximum CPU cores (e.g. `0.5`, `1.5`). Converted to Docker NanoCPUs. |
+| `oom_score_adj` | integer (0–1000) | Adjusts the OOM killer score. `0` = no change (default), `1000` = kill this container first. Negative values are rejected by design — steps cannot protect themselves from the OOM killer. |
