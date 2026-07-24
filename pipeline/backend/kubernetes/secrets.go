@@ -270,11 +270,11 @@ func registrySecretLabels(step *types.Step, config *config) (map[string]string, 
 	if step.Type == types.StepTypeService {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
-	labels[StepLabelLegacy], err = toDNSName(step.Name)
+	labels[StepLabelLegacy], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
-	labels[StepLabel], err = toDNSName(step.Name)
+	labels[StepLabel], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}

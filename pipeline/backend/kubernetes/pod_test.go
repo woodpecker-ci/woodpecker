@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/kinbiko/jsonassert"
@@ -113,6 +114,80 @@ func TestPodMeta(t *testing.T) {
 	}, BackendOptions{}, "wp-01he8bebctabr3kg-0", taskUUID)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "", meta.Labels[ServiceLabel])
+}
+
+// TestStepNameAsLabel verifies that step names are correctly converted to valid
+// Kubernetes label values via toLabelValue (replaces the old stepLabel wrapper).
+func TestStepNameAsLabel(t *testing.T) {
+	tests := []struct {
+		name     string
+		stepName string
+		want     string
+	}{
+		{
+			name:     "spaces converted to dashes and lowercased",
+			stepName: "Build image",
+			want:     "build-image",
+		},
+		{
+			name:     "leading dot stripped",
+			stepName: ".build.image",
+			want:     "build.image",
+		},
+		{
+			name:     "simple lowercase name unchanged",
+			stepName: "test",
+			want:     "test",
+		},
+		{
+			name:     "underscores preserved",
+			stepName: "run_tests",
+			want:     "run_tests",
+		},
+		{
+			name:     "mixed special characters",
+			stepName: "Deploy (production)",
+			want:     "deploy-production",
+		},
+		{
+			name:     "consecutive spaces single dash",
+			stepName: "step   name",
+			want:     "step-name",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := toLabelValue(tt.stepName)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+// TestStepNameAsLabelInPod verifies that step labels in a pod use toLabelValue
+// and produce valid values that Kubernetes accepts.
+func TestStepNameAsLabelInPod(t *testing.T) {
+	step := &types.Step{
+		Name:        "Build & Deploy (staging)",
+		Image:       "alpine:latest",
+		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
+		WorkingDir:  "/woodpecker/src",
+		Environment: map[string]string{},
+	}
+	meta, err := podMeta(step, &config{Namespace: "woodpecker"}, BackendOptions{}, "wp-01he8bebctabr3kgk0qj36d2me-1", taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "build-deploy-staging", meta.Labels[StepLabel])
+	assert.Equal(t, "build-deploy-staging", meta.Labels[StepLabelLegacy])
+}
+
+// TestStepNameAsLabelLongName verifies that long step names are truncated
+// to 63 characters (Kubernetes label value limit).
+func TestStepNameAsLabelLongName(t *testing.T) {
+	longName := strings.Repeat("a", 100)
+	got, err := toLabelValue(longName)
+	assert.NoError(t, err)
+	assert.LessOrEqual(t, len(got), 63)
 }
 
 func TestPodHostnameSanitized(t *testing.T) {

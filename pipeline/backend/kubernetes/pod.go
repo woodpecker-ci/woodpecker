@@ -140,11 +140,11 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 	if isService(step) {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
-	labels[StepLabelLegacy], err = toDNSName(step.Name)
+	labels[StepLabelLegacy], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
-	labels[StepLabel], err = toDNSName(step.Name)
+	labels[StepLabel], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
