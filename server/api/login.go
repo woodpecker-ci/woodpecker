@@ -31,6 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
@@ -137,7 +138,15 @@ func HandleAuth(c *gin.Context) {
 
 	// if organization filter is enabled, we need to check if the user is a member of one
 	// of the configured organizations
-	if server.Config.Permissions.Orgs.IsConfigured {
+	forgeModel, err := _store.ForgeGet(forgeID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot get forge by id %d", forgeID)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		return
+	}
+
+	allowedOrgs := allowedOrgsForForge(forgeModel)
+	if allowedOrgs.IsConfigured {
 		isMember := false
 		for page := 1; page <= maxPage; page++ {
 			teams, terr := _forge.Teams(c, userFromForge, &model.ListOptions{
@@ -151,7 +160,7 @@ func HandleAuth(c *gin.Context) {
 				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 				return
 			}
-			if server.Config.Permissions.Orgs.IsMember(teams) {
+			if allowedOrgs.IsMember(teams) {
 				isMember = true
 				break
 			}
@@ -320,6 +329,17 @@ func HandleAuth(c *gin.Context) {
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
+}
+
+// allowedOrgsForForge returns the organizations a user has to be a member of to
+// be allowed to log in using the given forge. Orgs configured on the forge itself
+// take precedence over the global WOODPECKER_ORGS setting, as org names are only
+// unique within a single forge.
+func allowedOrgsForForge(forgeModel *model.Forge) *permissions.Orgs {
+	if len(forgeModel.Orgs) > 0 {
+		return permissions.NewOrgs(forgeModel.Orgs)
+	}
+	return server.Config.Permissions.Orgs
 }
 
 func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {

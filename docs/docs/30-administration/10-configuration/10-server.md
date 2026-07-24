@@ -716,6 +716,8 @@ Comma-separated list of approved organizations.
 
 Example: `org1,org2`
 
+This setting applies to all [forges](./12-forges/11-overview.md). As organization names are only unique within a single forge, someone could create an organization with an approved name on another connected forge to gain access. If you connected more than one forge, you should therefore set the allowed organizations per forge in the admin UI (`Settings` -> `Forges` -> `Advanced options`). The list configured on a forge replaces this global setting for logins using that forge.
+
 ---
 
 ### REPO_OWNERS
