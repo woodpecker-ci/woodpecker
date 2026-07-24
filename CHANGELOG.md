@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-23
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -29,6 +29,7 @@
 
 ### 🐛 Bug Fixes
 
+- Use toLabelValue instead of toDNSName in Kubernetes step label [[#6890](https://github.com/woodpecker-ci/woodpecker/pull/6890)]
 - ReFetch secrets on pipeline restart [[#6857](https://github.com/woodpecker-ci/woodpecker/pull/6857)]
 - fix(forgejo): treat 404 on empty repos as empty pull request list [[#6872](https://github.com/woodpecker-ci/woodpecker/pull/6872)]
 - fix(github): resolve tag pagination loop in release hook [[#6870](https://github.com/woodpecker-ci/woodpecker/pull/6870)]
