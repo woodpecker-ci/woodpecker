@@ -55,6 +55,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#6889](https://github.com/woodpecker-ci/woodpecker/pull/6889)]
 - Update dependency brace-expansion to v5 [[#6895](https://github.com/woodpecker-ci/woodpecker/pull/6895)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.6 [[#6893](https://github.com/woodpecker-ci/woodpecker/pull/6893)]
 - Update golang-packages [[#6883](https://github.com/woodpecker-ci/woodpecker/pull/6883)]
