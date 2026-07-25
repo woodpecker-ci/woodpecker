@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-24
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -55,6 +55,7 @@
 
 ### 📦️ Dependency
 
+- Update pre-commit hook rbubley/mirrors-prettier to v3.9.6 [[#6893](https://github.com/woodpecker-ci/woodpecker/pull/6893)]
 - Update golang-packages [[#6883](https://github.com/woodpecker-ci/woodpecker/pull/6883)]
 - Update web npm deps non-major [[#6866](https://github.com/woodpecker-ci/woodpecker/pull/6866)]
 - Update golang-packages [[#6867](https://github.com/woodpecker-ci/woodpecker/pull/6867)]
