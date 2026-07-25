@@ -55,6 +55,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency fast-uri to v4 [[#6897](https://github.com/woodpecker-ci/woodpecker/pull/6897)]
 - Update golang-packages [[#6889](https://github.com/woodpecker-ci/woodpecker/pull/6889)]
 - Update dependency brace-expansion to v5 [[#6895](https://github.com/woodpecker-ci/woodpecker/pull/6895)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.6 [[#6893](https://github.com/woodpecker-ci/woodpecker/pull/6893)]
