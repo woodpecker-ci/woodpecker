@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AnayGarodia, @DerRockWolf, @Kernald, @Komzpa, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @kanywst, @nicolasbatistoni, @rfinnie, @xoxys, @youdie006
+@6543, @AnayGarodia, @DerRockWolf, @Kernald, @Komzpa, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @kanywst, @nicolasbatistoni, @qwerty287, @rfinnie, @xoxys, @youdie006
 
 ### 🔒 Security
 
@@ -30,6 +30,7 @@
 
 ### 🐛 Bug Fixes
 
+- Do not allow 0 minute timeout [[#6903](https://github.com/woodpecker-ci/woodpecker/pull/6903)]
 - Fix pipeline queue default template data [[#6906](https://github.com/woodpecker-ci/woodpecker/pull/6906)]
 - Use toLabelValue instead of toDNSName in Kubernetes step label [[#6890](https://github.com/woodpecker-ci/woodpecker/pull/6890)]
 - ReFetch secrets on pipeline restart [[#6857](https://github.com/woodpecker-ci/woodpecker/pull/6857)]
