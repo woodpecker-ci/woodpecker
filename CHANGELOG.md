@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-26
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -55,6 +55,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/docker/go-connections to v0.8.0 [[#6900](https://github.com/woodpecker-ci/woodpecker/pull/6900)]
 - Update dependency fast-uri to v4 [[#6897](https://github.com/woodpecker-ci/woodpecker/pull/6897)]
 - Update golang-packages [[#6889](https://github.com/woodpecker-ci/woodpecker/pull/6889)]
 - Update dependency brace-expansion to v5 [[#6895](https://github.com/woodpecker-ci/woodpecker/pull/6895)]
