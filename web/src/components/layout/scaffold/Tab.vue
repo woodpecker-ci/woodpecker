@@ -1,7 +1,7 @@
 <template><span ref="anchor" /></template>
 
 <script lang="ts">
-import { markRaw, onBeforeUnmount, onMounted, toRaw, useTemplateRef } from 'vue';
+import { markRaw, onBeforeUnmount, onMounted, toRaw, useTemplateRef, watch } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 
 import type { IconNames } from '~/components/atomic/Icon.vue';
@@ -73,6 +73,24 @@ onMounted(() => {
     tabs.value.splice(index, 0, tab);
   }
 });
+
+// tabs register once on mount, so sync later prop changes (e.g. a count that
+// updates after async data finished loading) into the registered entry
+watch(
+  () => [props.title, props.count, props.icon, props.iconClass] as const,
+  () => {
+    // go through the reactive proxy in tabs so consumers get notified
+    const tab = tabs.value.find(({ to }) => isSameRoute(to, props.to));
+    if (!tab) {
+      return;
+    }
+
+    tab.title = props.title;
+    tab.count = props.count;
+    tab.icon = props.icon;
+    tab.iconClass = props.iconClass;
+  },
+);
 
 onBeforeUnmount(() => {
   if (registeredTab === undefined) {

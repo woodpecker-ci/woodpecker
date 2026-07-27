@@ -333,7 +333,9 @@
                 "metadata_exec_title": "Перезапустити конвеєр локально",
                 "metadata_exec_desc": "Щоб запустити конвеєр локально, завантажте його метадані. Це дає змогу виправити проблеми й перевірити зміни, не вивантажуючи їх у репозиторій. Локально слід встановити консольний інтерфейс Woodpecker тої ж версії, що й на сервері.",
                 "no_permission": "Вам не можна переглядати даних налагодження"
-            }
+            },
+            "parse_errors": "Помилки розмітки",
+            "runtime_errors": "Помилки запуску"
         },
         "settings": {
             "actions": {
@@ -688,11 +690,11 @@
     "invalid_state": "Стан OAuth хибний",
     "extensions_description": "HTTP-служби, які Woodpecker може викликати замість вбудованих.",
     "extension_endpoint_placeholder": "як-от https://example.com/api",
-    "config_extension_endpoint": "Ендпойнт розширення конфігурації",
-    "registry_extension_endpoint": "Ендпойнт розширення реєстру",
+    "config_extension_endpoint": "Ендпоїнт розширення конфігурації",
+    "registry_extension_endpoint": "Ендпоїнт розширення реєстру",
     "config_extension_exclusive": "Винятково",
     "config_extension_exclusive_desc": "Пропустити всі інші способи отримання конфігурації, включно з платформою.",
-    "secret_extension_endpoint": "Ендпойнт розширення секретів",
+    "secret_extension_endpoint": "Ендпоїнт розширення секретів",
     "extension_netrc": "Додати netrc-доступи",
     "extension_netrc_desc": "Надіслати розширенню netrc-доступи платформи.",
     "extensions_signatures_public_key": "Відкритий ключ для підписів",
