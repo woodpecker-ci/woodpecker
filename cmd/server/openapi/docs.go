@@ -4801,6 +4801,9 @@ const docTemplate = `{
                 "finished": {
                     "type": "integer"
                 },
+                "full_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
