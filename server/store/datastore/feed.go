@@ -24,6 +24,7 @@ import (
 
 func (s storage) getFeedSelect() string {
 	const feedTemplate = `repos.id as repo_id,
+repos.full_name as repo_full_name,
 pipelines.id as pipeline_id,
 pipelines.number as pipeline_number,
 pipelines.event as pipeline_event,
