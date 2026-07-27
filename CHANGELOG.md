@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- Add Docker backend AppArmor profile option [[#6909](https://github.com/woodpecker-ci/woodpecker/pull/6909)]
 - docs: document the scope of built-in environment variables [[#6879](https://github.com/woodpecker-ci/woodpecker/pull/6879)]
 - refactor: rework k8s utils to handle resource names and labels [[#6855](https://github.com/woodpecker-ci/woodpecker/pull/6855)]
 - Make matrix axis permutation order deterministic [[#6847](https://github.com/woodpecker-ci/woodpecker/pull/6847)]
