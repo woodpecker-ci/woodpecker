@@ -57,6 +57,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6894](https://github.com/woodpecker-ci/woodpecker/pull/6894)]
 - Update module github.com/docker/go-connections to v0.8.0 [[#6900](https://github.com/woodpecker-ci/woodpecker/pull/6900)]
 - Update dependency fast-uri to v4 [[#6897](https://github.com/woodpecker-ci/woodpecker/pull/6897)]
 - Update golang-packages [[#6889](https://github.com/woodpecker-ci/woodpecker/pull/6889)]
