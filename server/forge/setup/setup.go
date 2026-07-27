@@ -23,6 +23,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/addon"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/atomgit"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo"
@@ -44,6 +45,8 @@ func Forge(forge *model.Forge) (forge.Forge, error) {
 		return setupBitbucket(forge)
 	case model.ForgeTypeGitea:
 		return setupGitea(forge)
+	case model.ForgeTypeAtomGit:
+		return setupAtomGit(forge)
 	case model.ForgeTypeForgejo:
 		return setupForgejo(forge)
 	case model.ForgeTypeBitbucketDatacenter:
@@ -92,6 +95,32 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 		Str("type", string(forge.Type)).
 		Msg("setting up forge")
 	return gitea.New(forge.ID, opts)
+}
+
+func setupAtomGit(forge *model.Forge) (forge.Forge, error) {
+	serverURL, err := url.Parse(forge.URL)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := atomgit.Opts{
+		URL:               strings.TrimRight(serverURL.String(), "/"),
+		OAuthClientID:     forge.OAuthClientID,
+		OAuthClientSecret: forge.OAuthClientSecret,
+		SkipVerify:        forge.SkipVerify,
+		OAuthHost:         forge.OAuthHost,
+	}
+	if len(opts.URL) == 0 {
+		return nil, fmt.Errorf("WOODPECKER_ATOMGIT_URL must be set")
+	}
+	log.Debug().
+		Str("url", opts.URL).
+		Bool("skip-verify", opts.SkipVerify).
+		Bool("oauth-client-id-set", opts.OAuthClientID != "").
+		Bool("oauth-secret-id-set", opts.OAuthClientSecret != "").
+		Str("type", string(forge.Type)).
+		Msg("setting up forge")
+	return atomgit.New(forge.ID, opts)
 }
 
 func setupForgejo(forge *model.Forge) (forge.Forge, error) {

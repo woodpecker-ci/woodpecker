@@ -23,6 +23,7 @@ const (
 	ForgeTypeForgejo             ForgeType = "forgejo"
 	ForgeTypeBitbucket           ForgeType = "bitbucket"
 	ForgeTypeBitbucketDatacenter ForgeType = "bitbucket-dc"
+	ForgeTypeAtomGit             ForgeType = "atomgit"
 	ForgeTypeAddon               ForgeType = "addon"
 )
 
@@ -45,9 +46,10 @@ func (Forge) TableName() string {
 // PublicCopy returns a copy of the forge without sensitive information and technical details.
 func (f *Forge) PublicCopy() *Forge {
 	forge := &Forge{
-		ID:   f.ID,
-		Type: f.Type,
-		URL:  f.URL,
+		ID:        f.ID,
+		Type:      f.Type,
+		URL:       f.URL,
+		OAuthHost: f.OAuthHost,
 	}
 
 	return forge

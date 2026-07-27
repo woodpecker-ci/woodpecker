@@ -379,7 +379,51 @@ func LookupRepo(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 func GetRepo(c *gin.Context) {
-	c.JSON(http.StatusOK, session.Repo(c))
+	repo := session.Repo(c)
+
+	// Lazily backfill forge-derived fields (forge_url, pr_enabled, ...) that
+	// may be missing on repos enabled before the forge driver populated them.
+	// This self-heals stale rows (e.g. AtomGit repos stored without a
+	// forge_url) without requiring a manual repair. Only triggered while the
+	// stored forge_url is empty, so the forge is contacted at most once.
+	if repo.ForgeURL == "" {
+		if err := backfillRepoFromForge(c, repo); err != nil {
+			// Non-fatal: serve the stored repo as-is if the forge is unreachable.
+			log.Trace().Err(err).Msgf("could not backfill repo '%s/%s' from forge", repo.Owner, repo.Name)
+		}
+	}
+
+	c.JSON(http.StatusOK, repo)
+}
+
+// backfillRepoFromForge refreshes forge-derived repository fields from the
+// forge and persists them to the store.
+func backfillRepoFromForge(c *gin.Context, repo *model.Repo) error {
+	_store := store.FromContext(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		return err
+	}
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return err
+	}
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	from, err := _forge.Repo(c, repoUser, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	if err != nil {
+		return err
+	}
+	if from.ForgeURL == "" {
+		return nil
+	}
+	repo.ForgeURL = from.ForgeURL
+	repo.PREnabled = from.PREnabled
+	repo.Clone = from.Clone
+	repo.CloneSSH = from.CloneSSH
+	repo.Branch = from.Branch
+	repo.IsSCMPrivate = from.IsSCMPrivate
+	return _store.UpdateRepo(repo)
 }
 
 // GetRepoPermissions

@@ -12,6 +12,7 @@
   <SvgIcon v-else-if="name === 'commit'" :bg-circle="bgCircle" :path="mdiSourceCommit" size="1.3rem" />
   <SvgIcon v-else-if="name === 'back'" :bg-circle="bgCircle" :path="mdiArrowLeft" size="1.3rem" />
   <SvgIcon v-else-if="name === 'github'" :bg-circle="bgCircle" :path="mdiGithub" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'atomgit'" :bg-circle="bgCircle" :path="mdiGit" size="1.3rem" />
   <SvgIcon v-else-if="name === 'repo'" :bg-circle="bgCircle" :path="mdiGit" size="1.3rem" />
   <SvgIcon v-else-if="name === 'settings'" :bg-circle="bgCircle" :path="mdiCog" size="1.3rem" />
   <SvgIcon v-else-if="name === 'settings-outline'" :bg-circle="bgCircle" :path="mdiCogOutline" size="1.3rem" />
@@ -233,6 +234,7 @@ export type IconNames =
   | 'bitbucket'
   | 'bitbucket-dc'
   | 'forgejo'
+  | 'atomgit'
   | 'question'
   | 'list'
   | 'plus'

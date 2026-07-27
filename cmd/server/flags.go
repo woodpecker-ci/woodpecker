@@ -478,7 +478,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Name:    "forge-url",
 		Usage:   "url of the forge",
-		Sources: cli.EnvVars("WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_FORGEJO_URL", "WOODPECKER_BITBUCKET_URL", "WOODPECKER_BITBUCKET_DC_URL"),
+		Sources: cli.EnvVars("WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_FORGEJO_URL", "WOODPECKER_BITBUCKET_URL", "WOODPECKER_BITBUCKET_DC_URL", "WOODPECKER_ATOMGIT_URL"),
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -490,6 +490,7 @@ var flags = append([]cli.Flag{
 				"WOODPECKER_FORGEJO_CLIENT_FILE",
 				"WOODPECKER_BITBUCKET_CLIENT_FILE",
 				"WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE",
+				"WOODPECKER_ATOMGIT_CLIENT_FILE",
 			)),
 			cli.EnvVar("WOODPECKER_FORGE_CLIENT"),
 			cli.EnvVar("WOODPECKER_GITHUB_CLIENT"),
@@ -498,6 +499,7 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_FORGEJO_CLIENT"),
 			cli.EnvVar("WOODPECKER_BITBUCKET_CLIENT"),
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_ID"),
+			cli.EnvVar("WOODPECKER_ATOMGIT_CLIENT"),
 		),
 		Name:  "forge-oauth-client",
 		Usage: "oauth2 client id",
@@ -515,6 +517,7 @@ var flags = append([]cli.Flag{
 				"WOODPECKER_FORGEJO_SECRET_FILE",
 				"WOODPECKER_BITBUCKET_SECRET_FILE",
 				"WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE",
+				"WOODPECKER_ATOMGIT_SECRET_FILE",
 			)),
 			cli.EnvVar("WOODPECKER_FORGE_SECRET"),
 			cli.EnvVar("WOODPECKER_GITHUB_SECRET"),
@@ -523,6 +526,7 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_FORGEJO_SECRET"),
 			cli.EnvVar("WOODPECKER_BITBUCKET_SECRET"),
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"),
+			cli.EnvVar("WOODPECKER_ATOMGIT_SECRET"),
 		),
 		Name:  "forge-oauth-secret",
 		Usage: "oauth2 client secret",
@@ -582,6 +586,14 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_GITEA"),
 		Name:    "gitea",
 		Usage:   "gitea driver is enabled",
+	},
+	//
+	// AtomGit
+	//
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_ATOMGIT"),
+		Name:    "atomgit",
+		Usage:   "atomgit driver is enabled",
 	},
 	//
 	// Forgejo
