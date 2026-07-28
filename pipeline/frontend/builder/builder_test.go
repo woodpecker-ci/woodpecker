@@ -338,6 +338,43 @@ steps:
 		assert.ErrorContains(t, err, "depends on its own workflow")
 	})
 
+	// The two scenarios from woodpecker-ci/woodpecker#2685: workflows
+	// depending on each other (or on themselves) used to enqueue tasks that
+	// could never run; now the pipeline is rejected at creation.
+	t.Run("workflow-level cycle rejected", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "a", Data: []byte(`
+when:
+  event: push
+depends_on:
+  - b
+steps:
+  - name: s
+    image: scratch
+`)}, &YamlFile{Name: "b", Data: []byte(`
+when:
+  event: push
+depends_on:
+  - a
+steps:
+  - name: s
+    image: scratch
+`)})
+		assert.ErrorContains(t, err, "cyclic workflow dependency")
+	})
+
+	t.Run("workflow self dependency rejected", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "a", Data: []byte(`
+when:
+  event: push
+depends_on:
+  - a
+steps:
+  - name: s
+    image: scratch
+`)})
+		assert.ErrorContains(t, err, "cyclic workflow dependency")
+	})
+
 	t.Run("cycle across step and workflow deps rejected", func(t *testing.T) {
 		_, err := build(&YamlFile{Name: "a", Data: []byte(`
 when:
