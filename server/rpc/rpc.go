@@ -131,6 +131,131 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 	return false, nil
 }
 
+const (
+	// waitWorkflowPollInterval is how often the target workflow state is
+	// re-read from the store while an agent waits on it.
+	waitWorkflowPollInterval = time.Second
+	// waitWorkflowMaxCallTime caps a single WaitWorkflow call so the unary
+	// RPC stays short-lived; a non-terminal response tells the agent to call
+	// again.
+	waitWorkflowMaxCallTime = time.Minute
+)
+
+// WaitWorkflow blocks until another workflow of the caller's pipeline (or a
+// single step of it) reaches a terminal state. The target is resolved
+// server-side from the calling workflow's pipeline, so agents can only wait
+// on workflows of pipelines they already work on. A single call is capped at
+// waitWorkflowMaxCallTime; if the target is still running by then, a
+// Found=true/Status="" response instructs the agent to poll again.
+func (s *RPC) WaitWorkflow(c context.Context, callerWorkflowID, workflowName, stepName string) (*rpc.WorkflowDepResult, error) {
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.checkAgentPermissionByWorkflow(c, agent, callerWorkflowID, nil, nil); err != nil {
+		return nil, err
+	}
+
+	callerID, err := strconv.ParseInt(callerWorkflowID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	caller, err := s.store.WorkflowLoad(callerID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow with id %d", callerID)
+		return nil, err
+	}
+	currentPipeline, err := s.store.GetPipeline(caller.PipelineID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", caller.PipelineID)
+		return nil, err
+	}
+
+	deadline := time.NewTimer(waitWorkflowMaxCallTime)
+	defer deadline.Stop()
+	ticker := time.NewTicker(waitWorkflowPollInterval)
+	defer ticker.Stop()
+
+	for {
+		result, terminal, err := s.workflowDepStatus(currentPipeline, callerID, workflowName, stepName)
+		if err != nil {
+			return nil, err
+		}
+		if !result.Found || terminal {
+			return result, nil
+		}
+
+		select {
+		case <-c.Done():
+			return nil, c.Err()
+		case <-deadline.C:
+			// still running — the agent re-polls with a fresh call
+			return &rpc.WorkflowDepResult{Found: true}, nil
+		case <-ticker.C:
+		}
+	}
+}
+
+// workflowDepStatus resolves the dependency target within the pipeline and
+// aggregates its state. Matrix workflows share one name, so all instances
+// with the requested name are covered: the wait is terminal only when every
+// instance (or its requested step) is terminal, and statuses merge worst-wins.
+func (s *RPC) workflowDepStatus(currentPipeline *model.Pipeline, callerID int64, workflowName, stepName string) (*rpc.WorkflowDepResult, bool, error) {
+	workflows, err := s.store.WorkflowGetTree(currentPipeline)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot load workflow tree for pipeline %d", currentPipeline.ID)
+		return nil, false, err
+	}
+
+	var statuses []model.StatusValue
+	for _, workflow := range workflows {
+		if workflow.Name != workflowName || workflow.ID == callerID {
+			continue
+		}
+		if stepName == "" {
+			statuses = append(statuses, workflow.State)
+			continue
+		}
+		found := false
+		for _, step := range workflow.Children {
+			if step.Name == stepName {
+				statuses = append(statuses, step.State)
+				found = true
+				break
+			}
+		}
+		if !found {
+			return &rpc.WorkflowDepResult{}, false, nil
+		}
+	}
+	if len(statuses) == 0 {
+		return &rpc.WorkflowDepResult{}, false, nil
+	}
+
+	// For dependency purposes any non-success outcome must surface, so merge
+	// only the non-success statuses: plain MergeStatusValues would mask a
+	// skipped matrix sibling behind a successful one (success outranks
+	// skipped in the workflow status priority).
+	var nonSuccess []model.StatusValue
+	for _, status := range statuses {
+		if !isDoneState(status) {
+			return &rpc.WorkflowDepResult{Found: true}, false, nil
+		}
+		if status != model.StatusSuccess {
+			nonSuccess = append(nonSuccess, status)
+		}
+	}
+	merged := model.StatusSuccess
+	if len(nonSuccess) > 0 {
+		merged = nonSuccess[0]
+		for _, status := range nonSuccess[1:] {
+			merged = pipeline.MergeStatusValues(merged, status)
+		}
+	}
+	return &rpc.WorkflowDepResult{Found: true, Status: string(merged)}, true, nil
+}
+
 // Extend extends the lease for the workflow with the given ID.
 func (s *RPC) Extend(c context.Context, workflowID string) error {
 	agent, err := s.getAgentFromContext(c)

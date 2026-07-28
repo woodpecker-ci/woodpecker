@@ -64,7 +64,7 @@ type MockPeer_Done_Call struct {
 //   - c context.Context
 //   - workflowID string
 //   - state rpc.WorkflowState
-func (_e *MockPeer_Expecter) Done(c interface{}, workflowID interface{}, state interface{}) *MockPeer_Done_Call {
+func (_e *MockPeer_Expecter) Done(c any, workflowID any, state any) *MockPeer_Done_Call {
 	return &MockPeer_Done_Call{Call: _e.mock.On("Done", c, workflowID, state)}
 }
 
@@ -114,7 +114,7 @@ type MockPeer_EnqueueLog_Call struct {
 
 // EnqueueLog is a helper method to define mock.On call
 //   - logEntry *rpc.LogEntry
-func (_e *MockPeer_Expecter) EnqueueLog(logEntry interface{}) *MockPeer_EnqueueLog_Call {
+func (_e *MockPeer_Expecter) EnqueueLog(logEntry any) *MockPeer_EnqueueLog_Call {
 	return &MockPeer_EnqueueLog_Call{Call: _e.mock.On("EnqueueLog", logEntry)}
 }
 
@@ -166,7 +166,7 @@ type MockPeer_Extend_Call struct {
 // Extend is a helper method to define mock.On call
 //   - c context.Context
 //   - workflowID string
-func (_e *MockPeer_Expecter) Extend(c interface{}, workflowID interface{}) *MockPeer_Extend_Call {
+func (_e *MockPeer_Expecter) Extend(c any, workflowID any) *MockPeer_Extend_Call {
 	return &MockPeer_Extend_Call{Call: _e.mock.On("Extend", c, workflowID)}
 }
 
@@ -224,7 +224,7 @@ type MockPeer_Init_Call struct {
 //   - c context.Context
 //   - workflowID string
 //   - state rpc.WorkflowState
-func (_e *MockPeer_Expecter) Init(c interface{}, workflowID interface{}, state interface{}) *MockPeer_Init_Call {
+func (_e *MockPeer_Expecter) Init(c any, workflowID any, state any) *MockPeer_Init_Call {
 	return &MockPeer_Init_Call{Call: _e.mock.On("Init", c, workflowID, state)}
 }
 
@@ -341,7 +341,7 @@ type MockPeer_Next_Call struct {
 // Next is a helper method to define mock.On call
 //   - c context.Context
 //   - f rpc.Filter
-func (_e *MockPeer_Expecter) Next(c interface{}, f interface{}) *MockPeer_Next_Call {
+func (_e *MockPeer_Expecter) Next(c any, f any) *MockPeer_Next_Call {
 	return &MockPeer_Next_Call{Call: _e.mock.On("Next", c, f)}
 }
 
@@ -407,7 +407,7 @@ type MockPeer_RegisterAgent_Call struct {
 // RegisterAgent is a helper method to define mock.On call
 //   - ctx context.Context
 //   - info rpc.AgentInfo
-func (_e *MockPeer_Expecter) RegisterAgent(ctx interface{}, info interface{}) *MockPeer_RegisterAgent_Call {
+func (_e *MockPeer_Expecter) RegisterAgent(ctx any, info any) *MockPeer_RegisterAgent_Call {
 	return &MockPeer_RegisterAgent_Call{Call: _e.mock.On("RegisterAgent", ctx, info)}
 }
 
@@ -463,7 +463,7 @@ type MockPeer_ReportHealth_Call struct {
 
 // ReportHealth is a helper method to define mock.On call
 //   - c context.Context
-func (_e *MockPeer_Expecter) ReportHealth(c interface{}) *MockPeer_ReportHealth_Call {
+func (_e *MockPeer_Expecter) ReportHealth(c any) *MockPeer_ReportHealth_Call {
 	return &MockPeer_ReportHealth_Call{Call: _e.mock.On("ReportHealth", c)}
 }
 
@@ -514,7 +514,7 @@ type MockPeer_UnregisterAgent_Call struct {
 
 // UnregisterAgent is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockPeer_Expecter) UnregisterAgent(ctx interface{}) *MockPeer_UnregisterAgent_Call {
+func (_e *MockPeer_Expecter) UnregisterAgent(ctx any) *MockPeer_UnregisterAgent_Call {
 	return &MockPeer_UnregisterAgent_Call{Call: _e.mock.On("UnregisterAgent", ctx)}
 }
 
@@ -567,7 +567,7 @@ type MockPeer_Update_Call struct {
 //   - c context.Context
 //   - workflowID string
 //   - state rpc.StepState
-func (_e *MockPeer_Expecter) Update(c interface{}, workflowID interface{}, state interface{}) *MockPeer_Update_Call {
+func (_e *MockPeer_Expecter) Update(c any, workflowID any, state any) *MockPeer_Update_Call {
 	return &MockPeer_Update_Call{Call: _e.mock.On("Update", c, workflowID, state)}
 }
 
@@ -639,7 +639,7 @@ type MockPeer_Version_Call struct {
 
 // Version is a helper method to define mock.On call
 //   - c context.Context
-func (_e *MockPeer_Expecter) Version(c interface{}) *MockPeer_Version_Call {
+func (_e *MockPeer_Expecter) Version(c any) *MockPeer_Version_Call {
 	return &MockPeer_Version_Call{Call: _e.mock.On("Version", c)}
 }
 
@@ -700,7 +700,7 @@ type MockPeer_Wait_Call struct {
 // Wait is a helper method to define mock.On call
 //   - c context.Context
 //   - workflowID string
-func (_e *MockPeer_Expecter) Wait(c interface{}, workflowID interface{}) *MockPeer_Wait_Call {
+func (_e *MockPeer_Expecter) Wait(c any, workflowID any) *MockPeer_Wait_Call {
 	return &MockPeer_Wait_Call{Call: _e.mock.On("Wait", c, workflowID)}
 }
 
@@ -728,6 +728,86 @@ func (_c *MockPeer_Wait_Call) Return(canceled bool, err error) *MockPeer_Wait_Ca
 }
 
 func (_c *MockPeer_Wait_Call) RunAndReturn(run func(c context.Context, workflowID string) (bool, error)) *MockPeer_Wait_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WaitWorkflow provides a mock function for the type MockPeer
+func (_mock *MockPeer) WaitWorkflow(c context.Context, workflowID string, workflowName string, stepName string) (*rpc.WorkflowDepResult, error) {
+	ret := _mock.Called(c, workflowID, workflowName, stepName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WaitWorkflow")
+	}
+
+	var r0 *rpc.WorkflowDepResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) (*rpc.WorkflowDepResult, error)); ok {
+		return returnFunc(c, workflowID, workflowName, stepName)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) *rpc.WorkflowDepResult); ok {
+		r0 = returnFunc(c, workflowID, workflowName, stepName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*rpc.WorkflowDepResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = returnFunc(c, workflowID, workflowName, stepName)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockPeer_WaitWorkflow_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WaitWorkflow'
+type MockPeer_WaitWorkflow_Call struct {
+	*mock.Call
+}
+
+// WaitWorkflow is a helper method to define mock.On call
+//   - c context.Context
+//   - workflowID string
+//   - workflowName string
+//   - stepName string
+func (_e *MockPeer_Expecter) WaitWorkflow(c any, workflowID any, workflowName any, stepName any) *MockPeer_WaitWorkflow_Call {
+	return &MockPeer_WaitWorkflow_Call{Call: _e.mock.On("WaitWorkflow", c, workflowID, workflowName, stepName)}
+}
+
+func (_c *MockPeer_WaitWorkflow_Call) Run(run func(c context.Context, workflowID string, workflowName string, stepName string)) *MockPeer_WaitWorkflow_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPeer_WaitWorkflow_Call) Return(workflowDepResult *rpc.WorkflowDepResult, err error) *MockPeer_WaitWorkflow_Call {
+	_c.Call.Return(workflowDepResult, err)
+	return _c
+}
+
+func (_c *MockPeer_WaitWorkflow_Call) RunAndReturn(run func(c context.Context, workflowID string, workflowName string, stepName string) (*rpc.WorkflowDepResult, error)) *MockPeer_WaitWorkflow_Call {
 	_c.Call.Return(run)
 	return _c
 }

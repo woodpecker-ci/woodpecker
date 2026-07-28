@@ -56,6 +56,17 @@ type (
 		ServerVersion string `json:"server_version,omitempty"`
 	}
 
+	// WorkflowDepResult is the outcome of waiting on another workflow (or one
+	// of its steps) via WaitWorkflow.
+	WorkflowDepResult struct {
+		// Found is false when no workflow (or step) with the requested name
+		// exists in the calling workflow's pipeline.
+		Found bool `json:"found"`
+		// Status is the target's terminal status (model.StatusValue string)
+		// when Found is true.
+		Status string `json:"status"`
+	}
+
 	// AgentInfo represents all the metadata that should be known about an agent.
 	AgentInfo struct {
 		Version      string            `json:"version"`
