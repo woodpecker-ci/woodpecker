@@ -93,6 +93,10 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	items = filterMissingDependencies(items)
 
+	if err := validateWorkflowDependencies(items); err != nil {
+		return nil, multierr.Append(errorsAndWarnings, err)
+	}
+
 	return items, errorsAndWarnings
 }
 

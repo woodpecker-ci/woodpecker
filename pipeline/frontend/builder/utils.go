@@ -15,9 +15,11 @@
 package builder
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
@@ -80,4 +82,142 @@ func ContainsItemWithName(name string, items []*Item) bool {
 		}
 	}
 	return false
+}
+
+// validateWorkflowDependencies checks the cross-workflow step dependencies
+// (Step.WaitFor, produced by the compiler from 'workflow:' entries in a
+// step's depends_on) against the full set of built workflows — the only
+// place all workflows of a pipeline are visible at once. It rejects
+// self-references, missing required targets (a target absent from items is
+// either an unknown name or a workflow filtered out by its when conditions),
+// missing target steps, and cycles; missing optional targets are dropped.
+func validateWorkflowDependencies(items []*Item) error {
+	for _, item := range items {
+		for _, stage := range item.Config.Stages {
+			for _, step := range stage.Steps {
+				if len(step.WaitFor) == 0 {
+					continue
+				}
+				kept := step.WaitFor[:0]
+				for _, dep := range step.WaitFor {
+					if dep.Workflow == item.Workflow.Name {
+						return &pipeline_errors.PipelineError{
+							Message: fmt.Sprintf(
+								"step '%s' in workflow '%s' depends on its own workflow; use a plain step dependency instead",
+								step.Name, item.Workflow.Name),
+							Type: pipeline_errors.PipelineErrorTypeCompiler,
+						}
+					}
+					if !ContainsItemWithName(dep.Workflow, items) {
+						if dep.Optional {
+							continue
+						}
+						return &pipeline_errors.PipelineError{
+							Message: fmt.Sprintf(
+								"step '%s' in workflow '%s' depends on unknown workflow '%s' (it does not exist or was filtered out by its conditions)",
+								step.Name, item.Workflow.Name, dep.Workflow),
+							Type: pipeline_errors.PipelineErrorTypeCompiler,
+						}
+					}
+					// the wait fans out to every matrix item with that
+					// workflow name, so the step must exist in all of them
+					if dep.Step != "" && !allItemsContainStep(dep.Step, dep.Workflow, items) {
+						if dep.Optional {
+							continue
+						}
+						return &pipeline_errors.PipelineError{
+							Message: fmt.Sprintf(
+								"step '%s' in workflow '%s' depends on unknown step '%s' of workflow '%s'",
+								step.Name, item.Workflow.Name, dep.Step, dep.Workflow),
+							Type: pipeline_errors.PipelineErrorTypeCompiler,
+						}
+					}
+					kept = append(kept, dep)
+				}
+				step.WaitFor = kept
+			}
+		}
+	}
+
+	return detectWorkflowDependencyCycles(items)
+}
+
+func containsStepWithName(name string, item *Item) bool {
+	for _, stage := range item.Config.Stages {
+		for _, step := range stage.Steps {
+			if step.Name == name {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func allItemsContainStep(stepName, workflowName string, items []*Item) bool {
+	for _, item := range items {
+		if item.Workflow.Name == workflowName && !containsStepWithName(stepName, item) {
+			return false
+		}
+	}
+	return true
+}
+
+// detectWorkflowDependencyCycles rejects cycles on the workflow-collapsed
+// dependency graph: nodes are workflow names, edges are workflow-level
+// depends_on entries plus step-level cross-workflow dependencies collapsed
+// to workflow→workflow. Collapsing is deliberately conservative — a
+// step-granular topology that is theoretically schedulable but whose
+// workflow-level projection is cyclic is still rejected, because a waiting
+// step only unblocks at target (step) completion and such topologies can
+// deadlock agents.
+func detectWorkflowDependencyCycles(items []*Item) error {
+	edges := make(map[string][]string)
+	for _, item := range items {
+		name := item.Workflow.Name
+		for _, dep := range item.DependsOn {
+			edges[name] = append(edges[name], dep.Name)
+		}
+		for _, stage := range item.Config.Stages {
+			for _, step := range stage.Steps {
+				for _, dep := range step.WaitFor {
+					edges[name] = append(edges[name], dep.Workflow)
+				}
+			}
+		}
+	}
+
+	const (
+		unvisited = iota
+		visiting
+		done
+	)
+	state := make(map[string]int)
+	var visit func(name string, path []string) error
+	visit = func(name string, path []string) error {
+		switch state[name] {
+		case visiting:
+			return &pipeline_errors.PipelineError{
+				Message: fmt.Sprintf(
+					"cyclic workflow dependency detected: %s -> %s",
+					strings.Join(path, " -> "), name),
+				Type: pipeline_errors.PipelineErrorTypeCompiler,
+			}
+		case done:
+			return nil
+		}
+		state[name] = visiting
+		for _, dep := range edges[name] {
+			if err := visit(dep, append(path, name)); err != nil {
+				return err
+			}
+		}
+		state[name] = done
+		return nil
+	}
+	for _, item := range items {
+		if err := visit(item.Workflow.Name, nil); err != nil {
+			return err
+		}
+	}
+	return nil
 }
