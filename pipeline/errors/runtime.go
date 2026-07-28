@@ -51,11 +51,27 @@ func (e *OomError) Error() string {
 	return fmt.Sprintf("uuid=%s: received oom kill", e.UUID)
 }
 
+// A WorkflowDependencyError reports that a step's cross-workflow dependency
+// (depends_on with a 'workflow' key) resolved unsuccessfully: the target
+// workflow or step failed, was skipped/canceled, or a required target is
+// missing.
+type WorkflowDependencyError struct {
+	Step string
+	Msg  string
+}
+
+// Error returns the error message in string format.
+func (e *WorkflowDependencyError) Error() string {
+	return fmt.Sprintf("step=%s: cross-workflow dependency failed: %s", e.Step, e.Msg)
+}
+
 // IsStepFailure reports whether err was caused by a step itself terminating
-// unsuccessfully (non-zero exit code or oom kill), as opposed to the runtime
-// or backend failing to execute the workflow.
+// unsuccessfully (non-zero exit code, oom kill or a failed cross-workflow
+// dependency), as opposed to the runtime or backend failing to execute the
+// workflow.
 func IsStepFailure(err error) bool {
 	var exitErr *ExitError
 	var oomErr *OomError
-	return errors.As(err, &exitErr) || errors.As(err, &oomErr)
+	var depErr *WorkflowDependencyError
+	return errors.As(err, &exitErr) || errors.As(err, &oomErr) || errors.As(err, &depErr)
 }

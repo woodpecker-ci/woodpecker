@@ -511,6 +511,119 @@ func TestExecuteStep(t *testing.T) {
 	})
 }
 
+// stubWaiter is a WorkflowWaiter test double with canned per-workflow results.
+type stubWaiter struct {
+	ok  bool
+	msg string
+	err error
+}
+
+func (w *stubWaiter) WaitWorkflowDependency(_ context.Context, _ backend_types.WorkflowDependency) (bool, string, error) {
+	return w.ok, w.msg, w.err
+}
+
+func TestExecuteStepWithWorkflowDependencies(t *testing.T) {
+	t.Parallel()
+
+	stepWithDep := func() *backend_types.Step {
+		step := dummyStep("gated")
+		step.WaitFor = []backend_types.WorkflowDependency{{Workflow: "auxiliaries"}}
+		return step
+	}
+
+	t.Run("SatisfiedDependencyRunsStep", func(t *testing.T) {
+		t.Parallel()
+		tracer := newTestTracer(t)
+		r := newDummyRuntime(t, tracer)
+		WithWorkflowWaiter(&stubWaiter{ok: true})(r)
+
+		err := r.executeStep(t.Context(), stepWithDep())
+
+		assert.NoError(t, err)
+		assert.NoError(t, r.err.Get())
+		calls := getTracerStates(tracer)
+		require.Len(t, calls, 2, "step should have started and completed")
+	})
+
+	t.Run("FailedDependencySkipsStepAndCascades", func(t *testing.T) {
+		t.Parallel()
+		tracer := newTestTracer(t)
+		r := newDummyRuntime(t, tracer)
+		WithWorkflowWaiter(&stubWaiter{ok: false, msg: "workflow 'auxiliaries' finished with status failure"})(r)
+
+		err := r.executeStep(t.Context(), stepWithDep())
+
+		assert.NoError(t, err)
+		var depErr *pipeline_errors.WorkflowDependencyError
+		assert.ErrorAs(t, r.err.Get(), &depErr, "dependency failure must set the workflow error for the skip cascade")
+		assert.True(t, pipeline_errors.IsStepFailure(r.err.Get()), "must count as step failure, not runtime error")
+		calls := getTracerStates(tracer)
+		require.Len(t, calls, 1)
+		assert.True(t, calls[0].CurrStepState.Skipped, "the gated step itself must be traced as skipped")
+	})
+
+	t.Run("FailedDependencyKeepsEarlierError", func(t *testing.T) {
+		t.Parallel()
+		tracer := newTestTracer(t)
+		r := newDummyRuntime(t, tracer)
+		earlier := errors.New("earlier failure")
+		r.err.Set(earlier)
+		WithWorkflowWaiter(&stubWaiter{ok: false, msg: "gone"})(r)
+
+		err := r.executeStep(t.Context(), stepWithDep())
+
+		assert.NoError(t, err)
+		assert.Equal(t, earlier, r.err.Get(), "an earlier error must not be clobbered")
+	})
+
+	t.Run("OnFailureStepStillRunsAfterDependencyFailure", func(t *testing.T) {
+		t.Parallel()
+		tracer := newTestTracer(t)
+		r := newDummyRuntime(t, tracer)
+		WithWorkflowWaiter(&stubWaiter{ok: false, msg: "gone"})(r)
+
+		gated := stepWithDep()
+		assert.NoError(t, r.executeStep(t.Context(), gated))
+
+		cleanup := dummyStep("cleanup")
+		cleanup.OnSuccess = false
+		cleanup.OnFailure = true
+		assert.NoError(t, r.executeStep(t.Context(), cleanup))
+
+		calls := getTracerStates(tracer)
+		require.Len(t, calls, 3, "gated skip + cleanup start + cleanup complete")
+		assert.True(t, calls[0].CurrStepState.Skipped)
+		assert.False(t, calls[1].CurrStepState.Exited)
+		assert.True(t, calls[2].CurrStepState.Exited)
+	})
+
+	t.Run("TransportErrorIsRuntimeError", func(t *testing.T) {
+		t.Parallel()
+		tracer := newTestTracer(t)
+		r := newDummyRuntime(t, tracer)
+		transport := errors.New("connection lost")
+		WithWorkflowWaiter(&stubWaiter{err: transport})(r)
+
+		err := r.executeStep(t.Context(), stepWithDep())
+
+		assert.ErrorIs(t, err, transport)
+		assert.False(t, pipeline_errors.IsStepFailure(err))
+	})
+
+	t.Run("NilWaiterIgnoresDependencies", func(t *testing.T) {
+		t.Parallel()
+		tracer := newTestTracer(t)
+		r := newDummyRuntime(t, tracer)
+
+		err := r.executeStep(t.Context(), stepWithDep())
+
+		assert.NoError(t, err)
+		assert.NoError(t, r.err.Get())
+		calls := getTracerStates(tracer)
+		require.Len(t, calls, 2, "step should run normally when no waiter is configured")
+	})
+}
+
 func TestRunBlockingStep(t *testing.T) {
 	t.Parallel()
 

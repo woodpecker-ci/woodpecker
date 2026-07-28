@@ -176,6 +176,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
 		pipeline_runtime.WithLogger(r.createLogger(logger, workflow)),
 		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
+		pipeline_runtime.WithWorkflowWaiter(r.createWorkflowWaiter(workflow)),
 		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,
