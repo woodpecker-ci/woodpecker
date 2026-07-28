@@ -23,6 +23,7 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
@@ -254,11 +255,17 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			maps.Copy(step.Environment, c.cloneEnv)
 		}
 
+		// External (cross-workflow) dependencies are enforced at runtime by
+		// the agent, not by the stage DAG: only local deps determine stage
+		// placement. Local() keeps non-nil-ness, preserving the DAG-mode
+		// signal for steps with exclusively external deps.
+		step.WaitFor = toWaitFor(container.DependsOn.External())
+
 		steps = append(steps, &dagCompilerStep{
 			step:      step,
 			position:  pos,
 			name:      container.Name,
-			dependsOn: container.DependsOn,
+			dependsOn: container.DependsOn.Local(),
 		})
 	}
 
@@ -280,4 +287,20 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	config.Stages = append(config.Stages, stepStages...)
 
 	return config, nil
+}
+
+// toWaitFor converts external yaml dependencies into their backend form.
+func toWaitFor(external constraint.DependsOn) []backend_types.WorkflowDependency {
+	if len(external) == 0 {
+		return nil
+	}
+	waitFor := make([]backend_types.WorkflowDependency, len(external))
+	for i, dep := range external {
+		waitFor[i] = backend_types.WorkflowDependency{
+			Workflow: dep.Workflow,
+			Step:     dep.Step,
+			Optional: dep.Optional,
+		}
+	}
+	return waitFor
 }
