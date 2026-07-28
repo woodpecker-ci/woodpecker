@@ -52,6 +52,7 @@
 
 ### 📚 Documentation
 
+- Remove dependency overrides [[#6912](https://github.com/woodpecker-ci/woodpecker/pull/6912)]
 - Update pnpm to v11.17.0 [[#6892](https://github.com/woodpecker-ci/woodpecker/pull/6892)]
 - Lock file maintenance [[#6901](https://github.com/woodpecker-ci/woodpecker/pull/6901)]
 - Update docs npm deps non-major [[#6835](https://github.com/woodpecker-ci/woodpecker/pull/6835)]
