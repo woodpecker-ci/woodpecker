@@ -137,6 +137,16 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-concurrency-invalid.yaml",
 			fail:     true,
 		},
+		{
+			name:     "Cross-workflow step depends_on",
+			testFile: ".woodpecker/test-cross-workflow-deps.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Cross-workflow depends_on invalid at workflow level",
+			testFile: ".woodpecker/test-cross-workflow-deps-invalid.yaml",
+			fail:     true,
+		},
 	}
 
 	for _, tt := range testTable {

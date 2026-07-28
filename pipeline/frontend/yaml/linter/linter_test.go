@@ -92,6 +92,21 @@ steps:
 	}, {
 		Title: "explicitly privileged container",
 		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+	}, {
+		Title: "cross-workflow step dependency", Data: `
+when:
+  event: push
+
+steps:
+  build:
+    image: golang
+  pin-deps:
+    image: golang
+    depends_on:
+      - build
+      - workflow: auxiliaries
+        step: resolve-pins
+`,
 	}}
 
 	for _, testd := range testdatas {

@@ -84,6 +84,35 @@ depends_on:
 		err := yaml.Unmarshal([]byte(`{depends_on: [{optional: true}]}`), &s)
 		assert.Error(t, err)
 	})
+
+	t.Run("unmarshal external workflow dependency", func(t *testing.T) {
+		s := StructDependsOn{}
+		assert.NoError(t, yaml.Unmarshal([]byte(`
+depends_on:
+  - clone
+  - workflow: auxiliaries
+    step: resolve-pins
+    optional: true
+  - workflow: other
+`), &s))
+		assert.Equal(t, DependsOn{
+			{Name: "clone"},
+			{Workflow: "auxiliaries", Step: "resolve-pins", Optional: true},
+			{Workflow: "other"},
+		}, s.DependsOn)
+	})
+
+	t.Run("unmarshal object with both name and workflow", func(t *testing.T) {
+		s := StructDependsOn{}
+		err := yaml.Unmarshal([]byte(`{depends_on: [{name: lint, workflow: other}]}`), &s)
+		assert.Error(t, err)
+	})
+
+	t.Run("unmarshal object with step but no workflow", func(t *testing.T) {
+		s := StructDependsOn{}
+		err := yaml.Unmarshal([]byte(`{depends_on: [{name: lint, step: build}]}`), &s)
+		assert.Error(t, err)
+	})
 }
 
 func TestDependsOnMarshal(t *testing.T) {
@@ -141,6 +170,11 @@ func TestDependsOnRoundTrip(t *testing.T) {
 		{"single required", DependsOn{{Name: "lint"}}},
 		{"multiple required", DependsOn{{Name: "lint"}, {Name: "test"}}},
 		{"mixed required and optional", DependsOn{{Name: "lint"}, {Name: "test", Optional: true}}},
+		{"external workflow dependency", DependsOn{
+			{Name: "lint"},
+			{Workflow: "auxiliaries", Step: "resolve-pins"},
+			{Workflow: "other", Optional: true},
+		}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -166,13 +200,31 @@ func TestDependsOnHelpers(t *testing.T) {
 		{Name: "b", Optional: true},
 		{Name: "c"},
 		{Name: "d", Optional: true},
+		{Workflow: "w1", Step: "s1"},
+		{Workflow: "w2", Optional: true},
 	}
-	assert.Equal(t, []string{"a", "b", "c", "d"}, d.Names())
+	assert.Equal(t, []string{"a", "b", "c", "d"}, d.Names(), "external deps must not leak into name resolution")
 	assert.Equal(t, []string{"a", "c"}, d.RequiredNames())
 	assert.Equal(t, []string{"b", "d"}, d.OptionalNames())
+	assert.Equal(t, DependsOn{
+		{Name: "a"},
+		{Name: "b", Optional: true},
+		{Name: "c"},
+		{Name: "d", Optional: true},
+	}, d.Local())
+	assert.Equal(t, DependsOn{
+		{Workflow: "w1", Step: "s1"},
+		{Workflow: "w2", Optional: true},
+	}, d.External())
 
 	var nilDeps DependsOn
 	assert.Nil(t, nilDeps.Names())
 	assert.Nil(t, nilDeps.RequiredNames())
 	assert.Nil(t, nilDeps.OptionalNames())
+	assert.Nil(t, nilDeps.Local())
+	assert.Nil(t, nilDeps.External())
+
+	externalOnly := DependsOn{{Workflow: "w"}}
+	assert.NotNil(t, externalOnly.Local(), "Local() must stay non-nil for non-nil input to preserve the DAG-mode signal")
+	assert.Empty(t, externalOnly.Local())
 }
