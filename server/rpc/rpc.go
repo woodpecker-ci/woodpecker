@@ -132,12 +132,11 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 }
 
 const (
-	// waitWorkflowPollInterval is how often the target workflow state is
-	// re-read from the store while an agent waits on it.
+	// How often the target workflow state is re-read from the store while an
+	// agent waits on it.
 	waitWorkflowPollInterval = time.Second
-	// waitWorkflowMaxCallTime caps a single WaitWorkflow call so the unary
-	// RPC stays short-lived; a non-terminal response tells the agent to call
-	// again.
+	// Caps a single WaitWorkflow call so the unary RPC stays short-lived; a
+	// non-terminal response tells the agent to call again.
 	waitWorkflowMaxCallTime = time.Minute
 )
 
