@@ -164,7 +164,7 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 			&cli.BoolFlag{Name: string(TestForgeType), Value: true},
 			&cli.StringFlag{Name: "forge-url", Value: "https://forge.example.test"},
 			&cli.StringSliceFlag{Name: "default-pipeline-configs", Value: constant.DefaultConfigOrder},
-			&cli.StringSliceFlag{Name: "default-pipeline-config-extensions", Value: []string{".yaml", ".yml"}},
+			&cli.StringSliceFlag{Name: "default-pipeline-config-extensions", Value: constant.DefaultConfigExtensions},
 		},
 	}
 

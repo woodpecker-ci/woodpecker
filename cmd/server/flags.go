@@ -326,7 +326,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS"),
 		Name:    "default-pipeline-config-extensions",
 		Usage:   "default pipeline config extensions when scanning a pipeline config directory",
-		Value:   []string{".yaml", ".yml"},
+		Value:   constant.DefaultConfigExtensions,
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},

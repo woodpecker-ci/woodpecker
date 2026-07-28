@@ -9,7 +9,7 @@ Using such an extension can be useful if you want to:
 - Preprocess the original configuration file with something like Go templating
 - Convert custom attributes to Woodpecker attributes
 - Add defaults to the configuration like default steps
-- Convert configuration files from a totally different format like Gitlab CI config, Starlark, Jsonnet, ...
+- Convert configuration files from a totally different format like Gitlab CI config, Starlark, ... (Jsonnet is [supported natively](../26-jsonnet.md))
 - Centralize configuration for multiple repositories in one place
 
 ## Security

@@ -25,6 +25,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/jsonnet"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
@@ -74,7 +75,7 @@ func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 		}
 
 		// check if it is a regular file (not dir)
-		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
+		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml") || strings.HasSuffix(info.Name(), ".jsonnet")) {
 			fmt.Println("#", info.Name())
 			if err := lintFile(ctx, c, path); err != nil {
 				errorStrings = append(errorStrings, err.Error())
@@ -106,17 +107,27 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 		return err
 	}
 
-	rawConfig := string(buf)
-
-	parsedConfig, err := yaml.ParseString(rawConfig)
-	if err != nil {
-		return err
+	var workflowFiles []*jsonnet.File
+	if jsonnet.IsJsonnetFile(file) {
+		workflowFiles, err = jsonnet.Compile(file, buf)
+		if err != nil {
+			return err
+		}
+	} else {
+		workflowFiles = []*jsonnet.File{{Name: path.Base(file), Data: buf}}
 	}
 
-	config := &linter.WorkflowConfig{
-		File:      path.Base(file),
-		RawConfig: rawConfig,
-		Workflow:  parsedConfig,
+	configs := make([]*linter.WorkflowConfig, 0, len(workflowFiles))
+	for _, workflowFile := range workflowFiles {
+		parsedConfig, err := yaml.ParseString(string(workflowFile.Data))
+		if err != nil {
+			return err
+		}
+		configs = append(configs, &linter.WorkflowConfig{
+			File:      workflowFile.Name,
+			RawConfig: string(workflowFile.Data),
+			Workflow:  parsedConfig,
+		})
 	}
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
@@ -128,9 +139,9 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 		}),
 		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
 		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
-	).Lint([]*linter.WorkflowConfig{config})
+	).Lint(configs)
 	if err != nil {
-		str, err := FormatLintError(config.File, err, c.Bool("strict"))
+		str, err := FormatLintError(path.Base(file), err, c.Bool("strict"))
 
 		if str != "" {
 			fmt.Print(str)

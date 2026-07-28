@@ -22,6 +22,15 @@ var DefaultConfigOrder = []string{
 	".woodpecker/",
 	".woodpecker.yaml",
 	".woodpecker.yml",
+	".woodpecker.jsonnet",
+}
+
+// DefaultConfigExtensions represent the file extensions woodpecker considers
+// as pipeline configs when scanning a config folder by default.
+var DefaultConfigExtensions = []string{
+	".yaml",
+	".yml",
+	".jsonnet",
 }
 
 const (

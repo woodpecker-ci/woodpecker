@@ -460,6 +460,14 @@ func TestSanitizePath(t *testing.T) {
 			path:          "folder/sub-folder/test.yaml",
 			sanitizedPath: "test",
 		},
+		{
+			path:          ".woodpecker.jsonnet",
+			sanitizedPath: "woodpecker",
+		},
+		{
+			path:          ".woodpecker/test.jsonnet",
+			sanitizedPath: "test",
+		},
 	}
 
 	for _, test := range testTable {
@@ -932,4 +940,83 @@ steps:
 
 	assert.Equal(t, "main", items[0].Labels[pipeline.LabelCommitBranch])
 	assert.Equal(t, "push", items[0].Labels[pipeline.LabelEvent])
+}
+
+func TestJsonnetMultiWorkflow(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Name: ".woodpecker.jsonnet", Data: []byte(`
+local pipeline(name) = {
+  name: name,
+  when: { event: 'push' },
+  steps: [{ name: 'build', image: 'scratch' }],
+};
+std.map(pipeline, ['alpha', 'beta']) + [pipeline('deploy') { depends_on: ['alpha', 'beta'] }]
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 3)
+	assert.Equal(t, "alpha", items[0].Workflow.Name)
+	assert.Equal(t, "beta", items[1].Workflow.Name)
+	assert.Equal(t, "deploy", items[2].Workflow.Name)
+	assert.Len(t, items[2].DependsOn, 2)
+}
+
+func TestJsonnetMatrix(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Name: ".woodpecker.jsonnet", Data: []byte(`
+{
+  when: { event: 'push' },
+  matrix: { TAG: ['a', 'b'] },
+  steps: [{ name: 'build', image: 'scratch', commands: ['echo ${TAG}'] }],
+}
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 2)
+	assert.Equal(t, "a", items[0].Workflow.Environ["TAG"])
+	assert.Equal(t, "b", items[1].Workflow.Environ["TAG"])
+}
+
+func TestJsonnetCompileError(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Name: ".woodpecker.jsonnet", Data: []byte(`{ steps: [ }`)},
+		},
+	}
+
+	_, err := b.Build()
+	assert.Error(t, err)
+	assert.True(t, errors.HasBlockingErrors(err))
 }

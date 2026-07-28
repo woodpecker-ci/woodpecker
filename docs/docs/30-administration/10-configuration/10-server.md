@@ -1035,7 +1035,7 @@ Specify a configuration extension endpoint, see [Configuration Extension](../../
 ### DEFAULT_PIPELINE_CONFIGS
 
 - Name: `WOODPECKER_DEFAULT_PIPELINE_CONFIGS`
-- Default: `.woodpecker/`, `.woodpecker.yaml`, `.woodpecker.yml`
+- Default: `.woodpecker/`, `.woodpecker.yaml`, `.woodpecker.yml`, `.woodpecker.jsonnet`
 
 Specify the default pipeline config paths.
 
@@ -1044,7 +1044,7 @@ Specify the default pipeline config paths.
 ### DEFAULT_PIPELINE_CONFIG_EXTENSIONS
 
 - Name: `WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS`
-- Default: `.yaml`, `.yml`
+- Default: `.yaml`, `.yml`, `.jsonnet`
 
 Specify the default pipeline config extensions when scanning a pipeline config directory.
 

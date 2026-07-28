@@ -85,7 +85,7 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 		if e != nil {
 			return e
 		}
-		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
+		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml") || strings.HasSuffix(info.Name(), ".jsonnet")) {
 			dat, err := os.ReadFile(path)
 			if err != nil {
 				return err

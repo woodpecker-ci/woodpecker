@@ -278,6 +278,52 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{},
 			expectedError:     true,
 		},
+		{
+			name:       "Default config - .woodpecker.jsonnet",
+			repoConfig: "",
+			files: []file{{
+				name: ".woodpecker.jsonnet",
+				data: dummyData,
+			}},
+			expectedFileNames: []string{
+				".woodpecker.jsonnet",
+			},
+			expectedError: false,
+		},
+		{
+			name:       "Default config - .woodpecker.yml before .woodpecker.jsonnet",
+			repoConfig: "",
+			files: []file{{
+				name: ".woodpecker.yml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker.jsonnet",
+				data: dummyData,
+			}},
+			expectedFileNames: []string{
+				".woodpecker.yml",
+			},
+			expectedError: false,
+		},
+		{
+			name:       "Default config with .jsonnet - .woodpecker/",
+			repoConfig: "",
+			files: []file{{
+				name: ".woodpecker/release.yml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/pipelines.jsonnet",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/notes.txt",
+				data: dummyData,
+			}},
+			expectedFileNames: []string{
+				".woodpecker/release.yml",
+				".woodpecker/pipelines.jsonnet",
+			},
+			expectedError: false,
+		},
 	}
 
 	for _, tt := range testTable {
@@ -309,7 +355,7 @@ func TestFetch(t *testing.T) {
 				time.Second*3,
 				3,
 				constant.DefaultConfigOrder,
-				[]string{".yaml", ".yml"},
+				constant.DefaultConfigExtensions,
 			)
 			files, err := configFetcher.Fetch(
 				t.Context(),

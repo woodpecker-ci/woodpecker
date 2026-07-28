@@ -29,6 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/jsonnet"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
@@ -50,6 +51,9 @@ type PipelineBuilder struct {
 }
 
 func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
+	if err := b.expandJsonnetFiles(); err != nil {
+		return nil, err
+	}
 	b.Yamls = SortYamlFilesByName(b.Yamls)
 
 	pidSequence := 1
@@ -94,6 +98,27 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	items = filterMissingDependencies(items)
 
 	return items, errorsAndWarnings
+}
+
+// expandJsonnetFiles replaces every jsonnet config with the workflow
+// configs it compiles into.
+func (b *PipelineBuilder) expandJsonnetFiles() error {
+	expanded := make([]*YamlFile, 0, len(b.Yamls))
+	for _, y := range b.Yamls {
+		if !jsonnet.IsJsonnetFile(y.Name) {
+			expanded = append(expanded, y)
+			continue
+		}
+		files, err := jsonnet.Compile(y.Name, y.Data)
+		if err != nil {
+			return &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+		}
+		for _, f := range files {
+			expanded = append(expanded, &YamlFile{Name: f.Name, Data: f.Data})
+		}
+	}
+	b.Yamls = expanded
+	return nil
 }
 
 func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
