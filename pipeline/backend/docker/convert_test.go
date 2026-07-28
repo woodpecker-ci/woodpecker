@@ -129,6 +129,20 @@ func TestToContainerName(t *testing.T) {
 	assert.EqualValues(t, "wp_d841ee40-e66e-4275-bb3f-55bf89744b21", toContainerName(testPluginStep))
 }
 
+func TestToHostConfigApparmorProfile(t *testing.T) {
+	hostConfig, err := toHostConfig(testCmdStep, &config{apparmor: "osgeo-woodie"})
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, []string{"apparmor=osgeo-woodie"}, hostConfig.SecurityOpt)
+}
+
+func TestToHostConfigApparmorProfileDefault(t *testing.T) {
+	hostConfig, err := toHostConfig(testCmdStep, &config{})
+
+	assert.NoError(t, err)
+	assert.Nil(t, hostConfig.SecurityOpt)
+}
+
 func TestStepToConfig(t *testing.T) {
 	// StepTypeCommands
 	conf := testEngine.toConfig(testCmdStep, BackendOptions{})
