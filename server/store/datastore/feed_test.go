@@ -68,6 +68,7 @@ func TestGetPipelineQueue(t *testing.T) {
 
 	feedItem := feed[0]
 	assert.Equal(t, repo1.ID, feedItem.RepoID)
+	assert.Equal(t, repo1.FullName, feedItem.FullName)
 	assert.Equal(t, pipeline1.ID, feedItem.ID)
 	assert.Equal(t, pipeline1.Number, feedItem.Number)
 	assert.EqualValues(t, pipeline1.Event, feedItem.Event)
