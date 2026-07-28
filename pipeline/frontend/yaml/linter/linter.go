@@ -19,10 +19,10 @@ import (
 	"regexp"
 	"slices"
 
-	"codeberg.org/6543/xyaml/v2"
 	"go.uber.org/multierr"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	woodpeckerYaml "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
@@ -311,7 +311,7 @@ func (l *Linter) lintSchema(config *WorkflowConfig) error {
 
 func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 	parsed := new(types.Workflow)
-	err := xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	err := woodpeckerYaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
 	}
@@ -374,7 +374,7 @@ func deprecatedEnvVarRefRegexp(name string) *regexp.Regexp {
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 	parsed := new(types.Workflow)
-	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	err = woodpeckerYaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
 	}
