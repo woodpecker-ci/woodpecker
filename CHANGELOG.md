@@ -32,6 +32,7 @@
 
 ### 🐛 Bug Fixes
 
+- Don't count step error as workflow runtime error [[#6904](https://github.com/woodpecker-ci/woodpecker/pull/6904)]
 - Do not allow 0 minute timeout [[#6903](https://github.com/woodpecker-ci/woodpecker/pull/6903)]
 - Fix pipeline queue default template data [[#6906](https://github.com/woodpecker-ci/woodpecker/pull/6906)]
 - Use toLabelValue instead of toDNSName in Kubernetes step label [[#6890](https://github.com/woodpecker-ci/woodpecker/pull/6890)]
