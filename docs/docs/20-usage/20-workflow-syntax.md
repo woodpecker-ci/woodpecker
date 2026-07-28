@@ -522,6 +522,37 @@ steps:
 
 :::
 
+#### Depending on other workflows
+
+A step can also depend on **another workflow** of the same pipeline — or on a single step of it — by using the object form with a `workflow` key:
+
+```yaml
+steps:
+  - name: build
+    image: golang
+    commands:
+      - go build
+
+  - name: pin-deps
+    image: golang
+    depends_on:
+      - build # regular step dependency within this workflow
+      - workflow: auxiliaries # wait for the whole 'auxiliaries' workflow
+      - workflow: auxiliaries # or wait only for one of its steps
+        step: resolve-pins
+        optional: true # missing targets are ignored when optional
+    commands:
+      - ./use-artifacts-from-auxiliaries.sh
+```
+
+Unlike a workflow-level `depends_on` — which delays the *entire* workflow — a cross-workflow step dependency gates only the declaring step: all other steps run in parallel with the referenced workflow, and the gated step waits until the referenced workflow (or step) has finished. This allows expensive steps to overlap with another workflow and synchronize only where necessary.
+
+The referenced name is the workflow name (the filename without path and extension, see [workflow flow control](./25-workflows.md#flow-control)). If the referenced workflow or step finishes with any status other than success — including being skipped because its own dependencies failed — the depending step is skipped and the workflow is marked failed, exactly like a failed local dependency; steps with `when: status: failure` still run. With [matrix workflows](./30-matrix-workflows.md) the dependency covers every matrix instance of the referenced name.
+
+:::note
+Cycles are rejected at pipeline creation, including cycles formed together with workflow-level `depends_on` edges (checked on the workflow-to-workflow projection of the graph). A required reference to an unknown — or filtered-out — workflow or step fails the pipeline before it starts; mark the dependency `optional: true` if the target may legitimately be absent. While a step waits, it occupies its agent slot, so make sure enough agent capacity is available for the referenced workflow to be scheduled. `woodpecker-cli exec` ignores cross-workflow dependencies with a warning.
+:::
+
 ### `volumes`
 
 Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.
