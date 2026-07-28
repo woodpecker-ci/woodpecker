@@ -283,6 +283,10 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout
+		if repo.Timeout < 1 {
+			c.String(http.StatusBadRequest, "Timeout must be at least 1 minute")
+			return
+		}
 	}
 	if in.Config != nil {
 		repo.Config = *in.Config
