@@ -37,6 +37,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/nsjail"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
@@ -54,13 +55,14 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     slices.Concat(flags, docker.Flags, kubernetes.Flags, local.Flags),
+	Flags:     slices.Concat(flags, docker.Flags, kubernetes.Flags, local.Flags, nsjail.Flags),
 }
 
 var backends = []backend_types.Backend{
 	kubernetes.New(),
 	docker.New(),
 	local.New(),
+	nsjail.New(),
 }
 
 func run(ctx context.Context, c *cli.Command) error {
@@ -136,9 +138,12 @@ func execFile(ctx context.Context, c *cli.Command, file string) error {
 }
 
 func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, repoPath string) error {
-	// if we use the local backend we should signal to run at $repoPath
+	// if we use the local or nsjail backend we should signal to run at $repoPath
 	if c.String("backend-engine") == "local" {
 		local.CLIWorkaroundExecAtDir = repoPath
+	}
+	if c.String("backend-engine") == "nsjail" {
+		nsjail.CLIWorkaroundExecAtDir = repoPath
 	}
 
 	// collect secrets from flags
