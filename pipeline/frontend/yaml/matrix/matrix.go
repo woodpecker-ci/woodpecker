@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
-	yaml "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 )
 
 const (

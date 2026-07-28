@@ -22,7 +22,7 @@ import (
 	"go.uber.org/multierr"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
-	yaml "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
