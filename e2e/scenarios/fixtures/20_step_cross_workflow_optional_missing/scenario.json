@@ -1,0 +1,12 @@
+{
+  "name": "missing optional cross-workflow dependency is ignored",
+  "event": "push",
+  "expected_status": "success",
+  "expected_workflows": [
+    { "name": "base", "status": "success" }
+  ],
+  "expected_steps": [
+    { "name": "build", "status": "success", "exit_code": 0 },
+    { "name": "pin-deps", "status": "success", "exit_code": 0 }
+  ]
+}

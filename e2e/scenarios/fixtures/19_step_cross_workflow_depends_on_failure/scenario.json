@@ -1,0 +1,20 @@
+{
+  "name": "failed cross-workflow dependency skips the gated step and cascades",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_workflows": [
+    { "name": "auxiliaries", "status": "failure" },
+    {
+      "name": "base",
+      "status": "failure",
+      "error": "step=pin-deps: cross-workflow dependency failed: workflow 'auxiliaries' finished with status failure"
+    }
+  ],
+  "expected_steps": [
+    { "name": "resolve-pins", "status": "failure", "exit_code": 1 },
+    { "name": "build", "status": "success", "exit_code": 0 },
+    { "name": "pin-deps", "status": "skipped", "exit_code": 0 },
+    { "name": "package", "status": "skipped", "exit_code": 0 },
+    { "name": "report-failure", "status": "success", "exit_code": 0 }
+  ]
+}

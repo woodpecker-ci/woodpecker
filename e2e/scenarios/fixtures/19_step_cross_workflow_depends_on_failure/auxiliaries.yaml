@@ -1,0 +1,9 @@
+skip_clone: true
+
+steps:
+  - name: resolve-pins
+    image: dummy
+    environment:
+      STEP_EXIT_CODE: '1'
+    commands:
+      - echo resolving pins failed

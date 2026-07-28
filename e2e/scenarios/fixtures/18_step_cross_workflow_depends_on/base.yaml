@@ -1,0 +1,24 @@
+skip_clone: true
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+
+  - name: pin-deps
+    image: dummy
+    depends_on:
+      - build
+      - workflow: auxiliaries
+        step: resolve-pins
+    commands:
+      - echo pinning deps
+
+  - name: wait-deps
+    image: dummy
+    depends_on:
+      - pin-deps
+      - workflow: auxiliaries
+    commands:
+      - echo deps published

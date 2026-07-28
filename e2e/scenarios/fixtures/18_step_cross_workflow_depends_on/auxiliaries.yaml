@@ -1,0 +1,14 @@
+skip_clone: true
+
+steps:
+  - name: resolve-pins
+    image: dummy
+    commands:
+      - echo resolving pins
+
+  - name: publish
+    image: dummy
+    depends_on:
+      - resolve-pins
+    commands:
+      - echo publishing deps

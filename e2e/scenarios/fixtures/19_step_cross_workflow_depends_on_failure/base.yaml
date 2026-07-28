@@ -1,0 +1,32 @@
+skip_clone: true
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+
+  - name: pin-deps
+    image: dummy
+    depends_on:
+      - build
+      - workflow: auxiliaries
+    commands:
+      - echo this must not run
+
+  - name: package
+    image: dummy
+    depends_on:
+      - pin-deps
+    commands:
+      - echo this must not run either
+
+  - name: report-failure
+    image: dummy
+    depends_on:
+      - pin-deps
+    when:
+      status:
+        - failure
+    commands:
+      - echo reporting the failure
