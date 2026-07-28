@@ -29,3 +29,20 @@ var CliCommand contextKey
 // an immutable public variable with a unique type. It's immutable
 // because nobody else can create a ContextKey, being unexported.
 type contextKey struct{}
+
+// ImagePullOutput is an optional context key whose value is an
+// io.Writer. When set, backends stream image-pull progress to it
+// instead of os.Stdout. This lets an embedder (currently the CLI exec
+// TUI; the agent could adopt it later) capture pull output so the
+// docker client's progress writes cannot tear an alt-screen UI.
+// Programmatic only: there is intentionally no flag for it.
+//
+// TODO: parse the jsonmessage stream and emit structured pull-progress
+// log entries instead of raw text, so the web UI / TUI log panel can
+// render it natively rather than as opaque lines.
+var ImagePullOutput imagePullOutputKey
+
+// imagePullOutputKey is a distinct unexported type so this context key
+// cannot collide with contextKey (two empty-struct keys of the same
+// type would compare equal and alias each other).
+type imagePullOutputKey struct{}

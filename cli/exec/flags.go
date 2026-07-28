@@ -22,6 +22,12 @@ import (
 
 var flags = []cli.Flag{
 	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_EXEC_NO_TUI"),
+		Name:    "no-tui",
+		Usage:   "disable the interactive TUI and print plain per-line output to stderr, even on a terminal",
+		Value:   false,
+	},
+	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOCAL"),
 		Name:    "local",
 		Usage:   "run from local directory",
