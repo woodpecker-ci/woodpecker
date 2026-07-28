@@ -164,7 +164,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 func convertLabels(from []*github.Label) []string {
 	labels := make([]string, len(from))
 	for i, label := range from {
-		labels[i] = *label.Name
+		labels[i] = label.GetName()
 	}
 	return labels
 }
