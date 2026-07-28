@@ -342,7 +342,9 @@
             },
             "load_more": "Mehr laden",
             "version": "Die Woodpecker-Version, mit der diese Pipeline ausgeführt wurde.",
-            "version_header": "Woodpecker-Version"
+            "version_header": "Woodpecker-Version",
+            "parse_errors": "Parse-Fehler",
+            "runtime_errors": "Laufzeitfehler"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
