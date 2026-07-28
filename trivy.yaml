@@ -1,3 +1,0 @@
-# Trivy picks this file up automatically when scanning the repository root
-# (see .woodpecker/securityscan.yaml).
-ignore-policy: .trivy/ignore-policy.rego
