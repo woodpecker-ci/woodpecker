@@ -651,9 +651,19 @@ If you want an unix socket use `unix://` prefix, for example `unix:///run/woodpe
 ### GRPC_SECRET
 
 - Name: `WOODPECKER_GRPC_SECRET`
-- Default: `secret`
+- Default: none
 
-Configures the gRPC JWT secret.
+Configures the secret used to sign JWTs for gRPC connections.
+
+If this setting is empty, the server generates a secure temporary secret and logs a warning. The generated secret is not persisted and changes each time the server starts. Configure and persist a secret to keep it stable across restarts. Setting this explicitly is important for high availability (HA) setups with multiple server replicas: each replica would otherwise generate its own secret and reject the gRPC tokens issued by the other replicas. Generate a secure secret with:
+
+```shell
+openssl rand -hex 32
+```
+
+Store the generated value securely and provide it through `WOODPECKER_GRPC_SECRET` or `WOODPECKER_GRPC_SECRET_FILE`.
+
+After this secret is rotated, connected agents reauthenticate when the server rejects their old token. Agents do not need to be restarted as long as `WOODPECKER_AGENT_SECRET` remains unchanged.
 
 ---
 
@@ -662,7 +672,7 @@ Configures the gRPC JWT secret.
 - Name: `WOODPECKER_GRPC_SECRET_FILE`
 - Default: none
 
-Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath.
+Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath. The file should be stored persistently and only be readable by the Woodpecker server.
 
 ---
 

@@ -89,7 +89,7 @@ func stepToPodName(step *types.Step) (name string, err error) {
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(podPrefix + step.UUID)
+	return toDNSName(podPrefix + step.UUID)
 }
 
 func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (kube_meta_v1.ObjectMeta, error) {
@@ -116,7 +116,7 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 		// Only copy user labels if allowed by agent config.
 		// Internal labels are filtered on the server-side.
 		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
-			labels[k], err = toDNSName(v)
+			labels[k], err = toLabelValue(v)
 			if err != nil {
 				return labels, err
 			}
@@ -140,11 +140,11 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 	if isService(step) {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
-	labels[StepLabelLegacy], err = stepLabel(step)
+	labels[StepLabelLegacy], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
-	labels[StepLabel], err = stepLabel(step)
+	labels[StepLabel], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
@@ -154,10 +154,6 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 	}
 
 	return labels, nil
-}
-
-func stepLabel(step *types.Step) (string, error) {
-	return toDNSName(step.Name)
 }
 
 func podAnnotations(config *config, options BackendOptions) map[string]string {

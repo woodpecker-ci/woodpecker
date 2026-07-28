@@ -53,6 +53,9 @@ func toRepo(from *forgejo.Repository) *model.Repo {
 
 // toPerm converts a Forgejo permission to a Woodpecker permission.
 func toPerm(from *forgejo.Permission) *model.Perm {
+	if from == nil {
+		return &model.Perm{}
+	}
 	return &model.Perm{
 		Pull:  from.Pull,
 		Push:  from.Push,

@@ -129,7 +129,7 @@ var flags = append([]cli.Flag{
 		),
 		Name:  "grpc-secret",
 		Usage: "grpc jwt secret",
-		Value: "secret",
+		Value: "",
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},

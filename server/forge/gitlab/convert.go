@@ -179,6 +179,8 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 		return 0, 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
 	case source == nil:
 		return 0, 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
+	case hook.User == nil:
+		return 0, 0, nil, nil, fmt.Errorf("user key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {
@@ -285,10 +287,15 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
+		if cm == nil {
+			continue
+		}
 		if hook.After == cm.ID {
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
+			if cm.Timestamp != nil {
+				pipeline.Timestamp = cm.Timestamp.Unix()
+			}
 			if len(pipeline.Email) != 0 {
 				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}
@@ -342,10 +349,15 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, pipeline.TagTitle)
 
 	for _, cm := range hook.Commits {
+		if cm == nil {
+			continue
+		}
 		if hook.After == cm.ID {
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
+			if cm.Timestamp != nil {
+				pipeline.Timestamp = cm.Timestamp.Unix()
+			}
 			if len(pipeline.Email) != 0 {
 				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}

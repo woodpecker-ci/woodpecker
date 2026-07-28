@@ -56,7 +56,7 @@ const (
 
 // parseHook parses a GitHub hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Repo, _ *model.Pipeline, currCommit, prevCommit string, _ error) {
+func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, string, string, error) {
 	var reader io.Reader = r.Body
 
 	if payload := r.FormValue(hookField); payload != "" {
@@ -68,7 +68,14 @@ func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Rep
 		return nil, nil, nil, "", "", err
 	}
 
-	payload, err := github.ParseWebHook(github.WebHookType(r), raw)
+	return parseHookPayload(github.WebHookType(r), raw, merge)
+}
+
+// parseHookPayload parses a raw GitHub hook payload of the given webhook type
+// and returns Repo and Pipeline detail. If a hook type is unsupported nil
+// values are returned.
+func parseHookPayload(webhookType string, raw []byte, merge bool) (_ *github.PullRequest, _ *model.Repo, _ *model.Pipeline, currCommit, prevCommit string, _ error) {
+	payload, err := github.ParseWebHook(webhookType, raw)
 	if err != nil {
 		return nil, nil, nil, "", "", err
 	}
@@ -216,7 +223,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
-		PullRequestLabels:    convertLabels(hook.GetPullRequest().Labels),
+		PullRequestLabels:    convertLabels(hook.GetPullRequest().GetLabels()),
 		PullRequestMilestone: hook.GetPullRequest().GetMilestone().GetTitle(),
 		PullRequestDraft:     hook.GetPullRequest().GetDraft(),
 		FromFork:             fromFork,

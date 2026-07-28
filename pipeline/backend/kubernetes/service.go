@@ -56,7 +56,7 @@ func mkHeadlessService(namespace, taskUUID string) (*kube_core_v1.Service, error
 }
 
 func serviceName(step *types.Step) (string, error) {
-	return dnsName(ServicePrefix + step.UUID + "-" + step.Name)
+	return toDNSName(ServicePrefix + step.UUID + "-" + step.Name)
 }
 
 func isService(step *types.Step) bool {
@@ -64,7 +64,7 @@ func isService(step *types.Step) bool {
 }
 
 func subdomain(taskUUID string) (string, error) {
-	return dnsName(HeadlessServicePrefix + taskUUID)
+	return toDNSName(HeadlessServicePrefix + taskUUID)
 }
 
 func startHeadlessService(ctx context.Context, engine *kube, namespace, taskUUID string) (*kube_core_v1.Service, error) {

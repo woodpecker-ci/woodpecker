@@ -26,6 +26,7 @@ type config struct {
 	enableIPv6    bool
 	network       string
 	volumes       []string
+	apparmor      string
 	resourceLimit resourceLimit
 	stopTimeout   int64
 }
@@ -43,6 +44,7 @@ func configFromCli(c *cli.Command) (config, error) {
 	conf := config{
 		enableIPv6: c.Bool("backend-docker-ipv6"),
 		network:    c.String("backend-docker-network"),
+		apparmor:   c.String("backend-docker-apparmor-profile"),
 		resourceLimit: resourceLimit{
 			MemSwapLimit: c.Int64("backend-docker-limit-mem-swap"),
 			MemLimit:     c.Int64("backend-docker-limit-mem"),
