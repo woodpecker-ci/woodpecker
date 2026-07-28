@@ -101,19 +101,17 @@ func (t *InfoT) String() string {
 	return sb.String()
 }
 
-// FilterFn filters tasks in the queue. If the Filter returns false,
-// the Task is skipped and not returned to the subscriber.
-// The int return value represents the matching score (higher is better).
-type FilterFn func(*model.Task) (bool, int)
-
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
 type Queue interface {
 	// PushAtOnce pushes multiple tasks to the tail of this queue.
 	PushAtOnce(c context.Context, tasks []*model.Task) error
 
-	// Poll retrieves and removes a task head of this queue.
-	Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error)
+	// Poll retrieves and removes a task head of this queue. The filter is
+	// applied to each candidate: returning false skips the task, the int is a
+	// match score (higher is better). The named scheduler.FilterFn wraps this
+	// signature for callers.
+	Poll(c context.Context, agentID int64, f func(*model.Task) (bool, int)) (*model.Task, error)
 
 	// Extend extends the deadline for a task.
 	Extend(c context.Context, agentID int64, workflowID string) error

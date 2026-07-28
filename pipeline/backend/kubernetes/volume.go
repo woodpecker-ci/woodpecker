@@ -64,7 +64,7 @@ func mkPersistentVolumeClaim(config *config, name, namespace string) (*kube_core
 }
 
 func volumeName(name string) (string, error) {
-	return dnsName(strings.Split(name, ":")[0])
+	return toDNSName(strings.Split(name, ":")[0])
 }
 
 func volumeMountPath(name string) string {

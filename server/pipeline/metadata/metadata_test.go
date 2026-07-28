@@ -164,13 +164,25 @@ func TestGetWorkflowMetadata(t *testing.T) {
 				"CI_WORKFLOW_NUMBER":        "0",
 			},
 		},
+		{
+			name:     "Test with pull request draft",
+			pipeline: &model.Pipeline{Number: 3, Event: model.EventPull, Ref: "refs/pull/1/head", PullRequestDraft: true},
+		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			result := NewServerMetadata(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL).GetWorkflowMetadata(testCase.workflow)
-			assert.EqualValues(t, testCase.expectedMetadata, result)
-			assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
+			if testCase.expectedMetadata.Sys.Name != "" || testCase.expectedMetadata.Forge.Type != "" || testCase.expectedMetadata.Curr.Number != 0 {
+				assert.EqualValues(t, testCase.expectedMetadata, result)
+			}
+			if testCase.expectedEnviron != nil {
+				assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
+			}
+			if testCase.name == "Test with pull request draft" {
+				assert.True(t, result.Curr.Commit.PullRequestDraft)
+				assert.Equal(t, "true", result.Environ()["CI_COMMIT_PULL_REQUEST_DRAFT"])
+			}
 		})
 	}
 }

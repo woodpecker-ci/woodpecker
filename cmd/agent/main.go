@@ -16,10 +16,7 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cmd/agent/core"
@@ -27,6 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/dot_env"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -37,10 +35,7 @@ var backends = []backend_types.Backend{
 }
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error could not load .env: %s", err)
-		os.Exit(1)
-	}
+	dot_env.Load()
 
 	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
 		log.Info().Msg("termination signal is received, shutting down agent")

@@ -19,6 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -138,7 +139,7 @@ func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[
 		if task.AgentID != 0 {
 			name, ok := getAgentName(store, agentNameMap, task.AgentID)
 			if !ok {
-				return nil, fmt.Errorf("agent not found for task %s", task.ID)
+				log.Error().Msgf("agent not found for task %s", task.ID)
 			}
 
 			taskResponse.AgentName = name

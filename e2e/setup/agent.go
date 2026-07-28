@@ -66,6 +66,10 @@ type agentConfig struct {
 
 	// orgID pins the agent to a specific organization. See WithOrgID.
 	orgID int64
+
+	// capacity is the number of workflows the agent runs in parallel
+	// (advertised to the server and number of runner goroutines).
+	capacity int
 }
 
 // WithHostname sets the agent's hostname label (default: "test-agent").
@@ -98,6 +102,13 @@ func WithOrgID(id int64) AgentOption {
 	return func(c *agentConfig) { c.orgID = id }
 }
 
+// WithCapacity sets how many workflows the agent runs in parallel. This is the
+// value advertised to the server (RegisterAgent capacity) and the number of
+// runner goroutines started. Defaults to AgentMaxWorkflows when unset or <= 0.
+func WithCapacity(n int) AgentOption {
+	return func(c *agentConfig) { c.capacity = n }
+}
+
 // StartAgent connects an in-process agent using the dummy backend to the gRPC
 // server at grpcAddr and returns an *AgentEnv whose AgentID is populated once
 // the agent has registered. Pass AgentOption values to configure labels, hostname,
@@ -114,9 +125,13 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 		hostname:     "test-agent",
 		customLabels: make(map[string]string),
 		orgID:        model.IDNotSet, // global by default
+		capacity:     AgentMaxWorkflows,
 	}
 	for _, o := range opts {
 		o(cfg)
+	}
+	if cfg.capacity <= 0 {
+		cfg.capacity = AgentMaxWorkflows
 	}
 
 	env := &AgentEnv{name: cfg.hostname}
@@ -155,7 +170,7 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 		Version:      version.String(),
 		Backend:      backend.Name(),
 		Platform:     engInfo.Platform,
-		Capacity:     AgentMaxWorkflows,
+		Capacity:     cfg.capacity,
 		CustomLabels: cfg.customLabels,
 	})
 	require.NoErrorf(t, err, "StartAgent(%s): register with server: %v", cfg.hostname, err)
@@ -192,11 +207,11 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 	}
 
 	counter := &agent.State{
-		Polling:  AgentMaxWorkflows,
+		Polling:  cfg.capacity,
 		Metadata: make(map[string]agent.Info),
 	}
 
-	for i := range AgentMaxWorkflows {
+	for i := range cfg.capacity {
 		go func(slot int) {
 			runner := agent.NewRunner(client, filter, cfg.hostname, counter, backend)
 			log.Debug().Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner started")

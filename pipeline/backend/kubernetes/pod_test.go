@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/kinbiko/jsonassert"
@@ -33,11 +34,13 @@ func TestPodName(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0", name)
 
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	name, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0a", name)
 
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"})
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	name, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local", name)
 }
 
 func TestStepToPodName(t *testing.T) {
@@ -113,13 +116,78 @@ func TestPodMeta(t *testing.T) {
 	assert.EqualValues(t, "", meta.Labels[ServiceLabel])
 }
 
-func TestStepLabel(t *testing.T) {
-	name, err := stepLabel(&types.Step{Name: "Build image"})
-	assert.NoError(t, err)
-	assert.EqualValues(t, "build-image", name)
+// TestStepNameAsLabel verifies that step names are correctly converted to valid
+// Kubernetes label values via toLabelValue (replaces the old stepLabel wrapper).
+func TestStepNameAsLabel(t *testing.T) {
+	tests := []struct {
+		name     string
+		stepName string
+		want     string
+	}{
+		{
+			name:     "spaces converted to dashes and lowercased",
+			stepName: "Build image",
+			want:     "build-image",
+		},
+		{
+			name:     "leading dot stripped",
+			stepName: ".build.image",
+			want:     "build.image",
+		},
+		{
+			name:     "simple lowercase name unchanged",
+			stepName: "test",
+			want:     "test",
+		},
+		{
+			name:     "underscores preserved",
+			stepName: "run_tests",
+			want:     "run_tests",
+		},
+		{
+			name:     "mixed special characters",
+			stepName: "Deploy (production)",
+			want:     "deploy-production",
+		},
+		{
+			name:     "consecutive spaces single dash",
+			stepName: "step   name",
+			want:     "step-name",
+		},
+	}
 
-	_, err = stepLabel(&types.Step{Name: ".build.image"})
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := toLabelValue(tt.stepName)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+// TestStepNameAsLabelInPod verifies that step labels in a pod use toLabelValue
+// and produce valid values that Kubernetes accepts.
+func TestStepNameAsLabelInPod(t *testing.T) {
+	step := &types.Step{
+		Name:        "Build & Deploy (staging)",
+		Image:       "alpine:latest",
+		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
+		WorkingDir:  "/woodpecker/src",
+		Environment: map[string]string{},
+	}
+	meta, err := podMeta(step, &config{Namespace: "woodpecker"}, BackendOptions{}, "wp-01he8bebctabr3kgk0qj36d2me-1", taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "build-deploy-staging", meta.Labels[StepLabel])
+	assert.Equal(t, "build-deploy-staging", meta.Labels[StepLabelLegacy])
+}
+
+// TestStepNameAsLabelLongName verifies that long step names are truncated
+// to 63 characters (Kubernetes label value limit).
+func TestStepNameAsLabelLongName(t *testing.T) {
+	longName := strings.Repeat("a", 100)
+	got, err := toLabelValue(longName)
+	assert.NoError(t, err)
+	assert.LessOrEqual(t, len(got), 63)
 }
 
 func TestPodHostnameSanitized(t *testing.T) {
@@ -458,15 +526,17 @@ func TestFullPod(t *testing.T) {
 			Password: "bar",
 		},
 	}, &config{
-		Namespace:                   "woodpecker",
-		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
-		PodLabels:                   map[string]string{"app": "test"},
-		PodLabelsAllowFromStep:      true,
-		PodAnnotations:              map[string]string{"apps.kubernetes.io/pod-index": "0"},
-		PodAnnotationsAllowFromStep: true,
-		PodTolerationsAllowFromStep: true,
-		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
-		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
+		Namespace:                       "woodpecker",
+		ImagePullSecretNames:            []string{"regcred", "another-pull-secret"},
+		PodLabels:                       map[string]string{"app": "test"},
+		PodLabelsAllowFromStep:          true,
+		PodAnnotations:                  map[string]string{"apps.kubernetes.io/pod-index": "0"},
+		PodAnnotationsAllowFromStep:     true,
+		PodTolerationsAllowFromStep:     true,
+		PodNodeSelector:                 map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
+		PodNodeSelectorAllowFromStep:    true,
+		SecurityContext:                 SecurityContextConfig{RunAsNonRoot: false},
+		ServiceAccountNameAllowFromStep: true,
 	},
 		"wp-01he8bebctabr3kgk0qj36d2me-0",
 		"linux/amd64",
@@ -493,7 +563,13 @@ func TestFullPod(t *testing.T) {
 }
 
 func TestPodPrivilege(t *testing.T) {
-	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*kube_core_v1.Pod, error) {
+	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext, hostUsers ...*bool) (*kube_core_v1.Pod, error) {
+		opts := BackendOptions{
+			SecurityContext: &secCtx,
+		}
+		if len(hostUsers) > 0 {
+			opts.HostUsers = hostUsers[0]
+		}
 		return mkPod(&types.Step{
 			Name:       "go-test",
 			Image:      "golang:1.16",
@@ -502,9 +578,7 @@ func TestPodPrivilege(t *testing.T) {
 		}, &config{
 			Namespace:       "woodpecker",
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
-		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
-			SecurityContext: &secCtx,
-		}, "11301")
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", opts, "11301")
 	}
 
 	// securty context is requesting user and group 101 (non-root)
@@ -542,6 +616,30 @@ func TestPodPrivilege(t *testing.T) {
 		AppArmorProfile:          (*kube_core_v1.AppArmorProfile)(nil),
 	}, pod.Spec.SecurityContext)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// securty context is requesting root with hostUsers=false (user namespaces): allowed
+	secCtx = SecurityContext{
+		RunAsUser:  newInt64(0),
+		RunAsGroup: newInt64(0),
+		FSGroup:    newInt64(0),
+	}
+	pod, err = createTestPod(false, false, secCtx, newBool(false))
+	assert.NoError(t, err)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.RunAsGroup)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.FSGroup)
+	assert.False(t, *pod.Spec.HostUsers)
+
+	// securty context is requesting root with hostUsers=true: still blocked
+	secCtx = SecurityContext{
+		RunAsUser:  newInt64(0),
+		RunAsGroup: newInt64(0),
+		FSGroup:    newInt64(0),
+	}
+	pod, err = createTestPod(false, false, secCtx, newBool(true))
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.SecurityContext.RunAsUser)
+	assert.Nil(t, pod.Spec.SecurityContext.RunAsGroup)
 
 	// step is not privileged, but security context is requesting privileged
 	secCtx = SecurityContext{
@@ -971,6 +1069,33 @@ func TestPodTolerationsAllowFromStep(t *testing.T) {
 	ja.Assertf(string(podJSON), expectedAllow)
 }
 
+func TestServiceAccountNameAllowFromStep(t *testing.T) {
+	step := &types.Step{
+		Name:  "sa-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}
+
+	// When disabled (default), a step-provided service account name must be ignored.
+	pod, err := mkPod(step, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		ServiceAccountName: "privileged-sa",
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.Empty(t, pod.Spec.ServiceAccountName)
+
+	// When explicitly enabled by the admin, the step value is honored.
+	pod, err = mkPod(step, &config{
+		Namespace:                       "woodpecker",
+		ServiceAccountNameAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		ServiceAccountName: "privileged-sa",
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "privileged-sa", pod.Spec.ServiceAccountName)
+}
+
 func TestStepSecret(t *testing.T) {
 	const expected = `{
 		"metadata": {
@@ -1306,6 +1431,37 @@ func TestPodAffinityStepOverridesAgent(t *testing.T) {
 	ja.Assertf(string(podJSON), expected)
 }
 
+func TestHostUsers(t *testing.T) {
+	createTestPod := func(hostUsers *bool) (*kube_core_v1.Pod, error) {
+		return mkPod(&types.Step{
+			Name:  "go-test",
+			Image: "golang:1.16",
+			UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		}, &config{
+			Namespace: "woodpecker",
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+			HostUsers: hostUsers,
+		}, "11301")
+	}
+
+	// hostUsers not set: nil (k8s defaults to true)
+	pod, err := createTestPod(nil)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.HostUsers)
+
+	// hostUsers set to false: enables user namespace isolation
+	pod, err = createTestPod(newBool(false))
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.False(t, *pod.Spec.HostUsers)
+
+	// hostUsers set to true: explicitly use host user namespace
+	pod, err = createTestPod(newBool(true))
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.True(t, *pod.Spec.HostUsers)
+}
+
 func TestInitContainer(t *testing.T) {
 	const expected = `
 	{
@@ -1320,11 +1476,11 @@ func TestInitContainer(t *testing.T) {
 		"resources": {
 			"requests": {
 				"cpu": "5m",
-				"memory": "5Mi"
+				"memory": "12Mi"
 			},
 			"limits": {
 				"cpu": "5m",
-				"memory": "5Mi"
+				"memory": "12Mi"
 			}
 		},
 		"securityContext": {
@@ -1346,7 +1502,8 @@ func TestInitContainer(t *testing.T) {
 		WorkingDir: "/woodpecker/src/github.com/woodpecker-ci/woodpecker",
 		Volumes:    []string{"workspace:/woodpecker/src", "other:/other"},
 	}, &config{
-		Namespace: "woodpecker",
+		Namespace:           "woodpecker",
+		PermissionInitImage: "busybox:stable-musl",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		SecurityContext: &SecurityContext{
 			RunAsNonRoot: newBool(true),

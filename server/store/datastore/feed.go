@@ -24,6 +24,7 @@ import (
 
 func (s storage) getFeedSelect() string {
 	const feedTemplate = `repos.id as repo_id,
+repos.full_name as repo_full_name,
 pipelines.id as pipeline_id,
 pipelines.number as pipeline_number,
 pipelines.event as pipeline_event,
@@ -39,7 +40,9 @@ pipelines.title as pipeline_title,
 pipelines.message as pipeline_message,
 pipelines.author as pipeline_author,
 pipelines.email as pipeline_email,
-pipelines.avatar as pipeline_avatar`
+pipelines.avatar as pipeline_avatar,
+pipelines.release as pipeline_release,
+pipelines.tag_title as pipeline_tag_title`
 
 	return fmt.Sprintf(feedTemplate, s.engine.Dialect().Quoter().Quote("commit"))
 }

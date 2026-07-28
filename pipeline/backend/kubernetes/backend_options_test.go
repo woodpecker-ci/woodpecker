@@ -86,6 +86,7 @@ func Test_parseBackendOptions(t *testing.T) {
 								"localhostProfile": "k8s-apparmor-example-deny-write",
 							},
 						},
+						"hostUsers": false,
 						"secrets": []map[string]any{
 							{
 								"name": "aws",
@@ -109,6 +110,7 @@ func Test_parseBackendOptions(t *testing.T) {
 				NodeSelector:       map[string]string{"storage": "ssd"},
 				ServiceAccountName: "wp-svc-acc",
 				WorkspaceVolume:    newBool(false),
+				HostUsers:          newBool(false),
 				Labels:             map[string]string{"app": "test"},
 				Annotations:        map[string]string{"apps.kubernetes.io/pod-index": "0"},
 				Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},

@@ -122,6 +122,21 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-kubernetes-backend-tolerations.yaml",
 			fail:     false,
 		},
+		{
+			name:     "Concurrency",
+			testFile: ".woodpecker/test-concurrency.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Concurrency shorthand",
+			testFile: ".woodpecker/test-concurrency-shorthand.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Concurrency invalid",
+			testFile: ".woodpecker/test-concurrency-invalid.yaml",
+			fail:     true,
+		},
 	}
 
 	for _, tt := range testTable {

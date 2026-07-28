@@ -133,6 +133,7 @@ type (
 		Reviewer    string           `json:"reviewed_by"`
 		Reviewed    int64            `json:"reviewed"`
 		Workflows   []*Workflow      `json:"workflows,omitempty"`
+		Release     *Release         `json:"release,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
@@ -174,6 +175,12 @@ type (
 		Password string `json:"password,omitempty"`
 	}
 
+	// Release represents pipeline release metadata.
+	Release struct {
+		Title        string `json:"title,omitempty"`
+		IsPrerelease bool   `json:"is_prerelease,omitempty"`
+	}
+
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
 		ID     int64    `json:"id"`
@@ -189,6 +196,7 @@ type (
 	// Feed represents an item in the user's feed or timeline.
 	Feed struct {
 		RepoID   int64  `json:"repo_id"`
+		FullName string `json:"full_name,omitempty"`
 		ID       int64  `json:"id,omitempty"`
 		Number   int64  `json:"number,omitempty"`
 		Event    string `json:"event,omitempty"`

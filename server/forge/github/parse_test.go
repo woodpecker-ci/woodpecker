@@ -106,6 +106,22 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, b)
 		assert.NotNil(t, p)
 		assert.Equal(t, model.EventPull, b.Event)
+		assert.False(t, b.PullRequestDraft)
+	})
+
+	t.Run("PR draft hook", func(t *testing.T) {
+		payload := strings.Replace(
+			fixtures.HookPullRequest,
+			`"state": "open",`,
+			`"state": "open",`+"\n    "+`"draft": true,`,
+			1,
+		)
+		req := testHookRequest([]byte(payload), hookPull)
+		_, _, b, _, _, err := parseHook(req, false)
+		assert.NoError(t, err)
+		if assert.NotNil(t, b) {
+			assert.True(t, b.PullRequestDraft)
+		}
 	})
 	t.Run("PR closed hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestClosed), hookPull)

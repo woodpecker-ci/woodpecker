@@ -26,6 +26,7 @@ import (
 
 	"codeberg.org/6543/xyaml/v2"
 	"github.com/oklog/ulid/v2"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/multierr"
 
@@ -100,12 +101,28 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	return runExec(ctx, c, yamls, repoPath)
 }
 
+func repoRootFromFile(file string) string {
+	root := filepath.Dir(file)
+
+	// first we check if file lives inside multi workflow setup
+	if filepath.Base(root) == ".woodpecker" {
+		log.Info().Msg("auto detected workflow in multi workflow setup, parent directory is used as workspace")
+		root = filepath.Dir(root)
+	}
+
+	// and make sure have the absolute path
+	root, _ = filepath.Abs(root)
+
+	log.Debug().Msgf("auto selected workspace folder at %q", root)
+	return root
+}
+
 func execFile(ctx context.Context, c *cli.Command, file string) error {
 	repoPath := c.String("repo-path")
 	if repoPath != "" {
 		repoPath, _ = filepath.Abs(repoPath)
 	} else {
-		repoPath, _ = filepath.Abs(filepath.Dir(file))
+		repoPath = repoRootFromFile(file)
 	}
 	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
@@ -152,14 +169,13 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	privilegedPlugins := c.StringSlice("plugins-privileged")
 
-	// emulate server prefix for volume/network naming
+	// prefix for the local-execution workspace volume name
 	prefix := "wp_" + ulid.Make().String()
 
 	// build compiler options — mirrors server behavior
 	compilerOpts := []compiler.Option{
 		compiler.WithEscalated(privilegedPlugins...),
 		compiler.WithNetworks(c.StringSlice("network")...),
-		compiler.WithPrefix(prefix),
 		compiler.WithProxy(compiler.ProxyOptions{
 			NoProxy:    c.String("backend-no-proxy"),
 			HTTPProxy:  c.String("backend-http-proxy"),

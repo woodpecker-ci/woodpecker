@@ -416,7 +416,7 @@ func (_c *MockQueue_Pause_Call) RunAndReturn(run func()) *MockQueue_Pause_Call {
 }
 
 // Poll provides a mock function for the type MockQueue
-func (_mock *MockQueue) Poll(c context.Context, agentID int64, f queue.FilterFn) (*model.Task, error) {
+func (_mock *MockQueue) Poll(c context.Context, agentID int64, f func(*model.Task) (bool, int)) (*model.Task, error) {
 	ret := _mock.Called(c, agentID, f)
 
 	if len(ret) == 0 {
@@ -425,17 +425,17 @@ func (_mock *MockQueue) Poll(c context.Context, agentID int64, f queue.FilterFn)
 
 	var r0 *model.Task
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, queue.FilterFn) (*model.Task, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, func(*model.Task) (bool, int)) (*model.Task, error)); ok {
 		return returnFunc(c, agentID, f)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, queue.FilterFn) *model.Task); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, func(*model.Task) (bool, int)) *model.Task); ok {
 		r0 = returnFunc(c, agentID, f)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Task)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, queue.FilterFn) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, func(*model.Task) (bool, int)) error); ok {
 		r1 = returnFunc(c, agentID, f)
 	} else {
 		r1 = ret.Error(1)
@@ -451,12 +451,12 @@ type MockQueue_Poll_Call struct {
 // Poll is a helper method to define mock.On call
 //   - c context.Context
 //   - agentID int64
-//   - f queue.FilterFn
+//   - f func(*model.Task) (bool, int)
 func (_e *MockQueue_Expecter) Poll(c interface{}, agentID interface{}, f interface{}) *MockQueue_Poll_Call {
 	return &MockQueue_Poll_Call{Call: _e.mock.On("Poll", c, agentID, f)}
 }
 
-func (_c *MockQueue_Poll_Call) Run(run func(c context.Context, agentID int64, f queue.FilterFn)) *MockQueue_Poll_Call {
+func (_c *MockQueue_Poll_Call) Run(run func(c context.Context, agentID int64, f func(*model.Task) (bool, int))) *MockQueue_Poll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -466,9 +466,9 @@ func (_c *MockQueue_Poll_Call) Run(run func(c context.Context, agentID int64, f 
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
-		var arg2 queue.FilterFn
+		var arg2 func(*model.Task) (bool, int)
 		if args[2] != nil {
-			arg2 = args[2].(queue.FilterFn)
+			arg2 = args[2].(func(*model.Task) (bool, int))
 		}
 		run(
 			arg0,
@@ -484,7 +484,7 @@ func (_c *MockQueue_Poll_Call) Return(task *model.Task, err error) *MockQueue_Po
 	return _c
 }
 
-func (_c *MockQueue_Poll_Call) RunAndReturn(run func(c context.Context, agentID int64, f queue.FilterFn) (*model.Task, error)) *MockQueue_Poll_Call {
+func (_c *MockQueue_Poll_Call) RunAndReturn(run func(c context.Context, agentID int64, f func(*model.Task) (bool, int)) (*model.Task, error)) *MockQueue_Poll_Call {
 	_c.Call.Return(run)
 	return _c
 }

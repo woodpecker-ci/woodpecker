@@ -71,8 +71,13 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER_ADDR"),
 		Name:    "server-addr",
-		Usage:   "server address",
+		Usage:   "configures the HTTP listener, supports unix socket via unix:// prefix",
 		Value:   ":8000",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_UNIX_SOCKET_PERMISSION"),
+		Name:    "unix-socket-permission",
+		Usage:   "file mode for the HTTP unix socket, for example 660 or 666",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER_ADDR_TLS"),
@@ -105,10 +110,16 @@ var flags = append([]cli.Flag{
 		Name:    "async-repository-update",
 		Usage:   "if true fetch repository permissions asynchronous, impacts performance if there are many repositories with possible tradeoff in consistency",
 	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_WEBHOOK_SYNC_TIMEOUT"),
+		Name:    "webhook-sync-timeout",
+		Usage:   "max time to wait for pipeline creation triggered by an incoming webhook before responding 202 Accepted and finishing it in the background; 0 disables the fallback and always responds synchronously",
+		Value:   5 * time.Second,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_ADDR"),
 		Name:    "grpc-addr",
-		Usage:   "grpc address",
+		Usage:   "grpc socket server opens, by default on all IPs via port 9000, use unix:// prefix for unix socket",
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
@@ -118,7 +129,7 @@ var flags = append([]cli.Flag{
 		),
 		Name:  "grpc-secret",
 		Usage: "grpc jwt secret",
-		Value: "secret",
+		Value: "",
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},
@@ -128,6 +139,12 @@ var flags = append([]cli.Flag{
 		Name:    "metrics-server-addr",
 		Usage:   "metrics server address",
 		Value:   "",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_STEP_LEVEL_METRICS"),
+		Name:    "step-level-metrics",
+		Usage:   "enable step-level metrics",
+		Value:   true,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ADMIN"),

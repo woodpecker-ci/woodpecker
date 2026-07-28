@@ -74,15 +74,7 @@ func TestInfraSmoke(t *testing.T) {
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	draftPipeline := &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	}
-	createdPipeline, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, draftPipeline)
+	createdPipeline, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create pipeline")
 	require.NotNil(t, createdPipeline)
 	t.Logf("pipeline %d created with status=%s", createdPipeline.ID, createdPipeline.Status)

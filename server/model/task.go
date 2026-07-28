@@ -34,6 +34,15 @@ type Task struct {
 	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
 	PipelineID   int64                  `json:"pipeline_id"  xorm:"'pipeline_id'"`
 	RepoID       int64                  `json:"repo_id"      xorm:"'repo_id'"`
+	// ConcurrencyLimit is the maximum number of tasks sharing the same
+	// ConcurrencyGroup that may run at once. A value <= 0 means unlimited.
+	ConcurrencyLimit int `json:"concurrency_limit" xorm:"NOT NULL DEFAULT 0 'concurrency_limit'"`
+	// ConcurrencyGroup identifies tasks that are limited against each other.
+	// It is empty when no concurrency limit applies.
+	ConcurrencyGroup string `json:"concurrency_group" xorm:"'concurrency_group'"`
+	// Created is the unix timestamp the task's pipeline was created at. It
+	// defines the queue ordering across pipelines.
+	Created int64 `json:"created" xorm:"NOT NULL DEFAULT 0 'created'"`
 } //	@name	Task
 
 // TableName return database table name for xorm.

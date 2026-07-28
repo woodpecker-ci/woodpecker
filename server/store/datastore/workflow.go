@@ -127,6 +127,16 @@ func (s storage) WorkflowLoad(id int64) (*model.Workflow, error) {
 	return workflow, wrapGet(s.engine.ID(id).Get(workflow))
 }
 
+// WorkflowByStep returns the workflow a step belongs to. A step's parent
+// positional id (PPID) equals the workflow's PID within the same pipeline.
+func (s storage) WorkflowByStep(step *model.Step) (*model.Workflow, error) {
+	workflow := new(model.Workflow)
+	return workflow, wrapGet(s.engine.
+		Where("pipeline_id = ?", step.PipelineID).
+		Where("pid = ?", step.PPID).
+		Get(workflow))
+}
+
 func (s storage) WorkflowUpdate(workflow *model.Workflow) error {
 	_, err := s.engine.ID(workflow.ID).AllCols().Update(workflow)
 	return err

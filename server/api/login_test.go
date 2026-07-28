@@ -250,6 +250,9 @@ func TestHandleAuth(t *testing.T) {
 
 		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
 		assert.Equal(t, "/login?error=registration_closed", c.Writer.Header().Get("Location"))
+		// a rejected login must not persist any (broken) user/org row, see #6769
+		_store.AssertNotCalled(t, "CreateUser", mock.Anything)
+		_store.AssertNotCalled(t, "OrgCreate", mock.Anything)
 	})
 
 	t.Run("should deny a user with missing org access", func(t *testing.T) {

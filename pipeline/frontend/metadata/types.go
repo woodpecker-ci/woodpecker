@@ -58,6 +58,7 @@ type (
 		Parent      int64    `json:"parent,omitempty"`
 		RerunCount  int64    `json:"rerun_count,omitempty"`
 		Cron        string   `json:"cron,omitempty"`
+		Release     Release  `json:"release,omitempty"`
 		Author      string   `json:"author,omitempty"`
 		Avatar      string   `json:"avatar,omitempty"`
 	}
@@ -74,7 +75,13 @@ type (
 		ChangedFiles         []string `json:"changed_files,omitempty"`
 		PullRequestLabels    []string `json:"labels,omitempty"`
 		PullRequestMilestone string   `json:"milestone,omitempty"`
-		IsPrerelease         bool     `json:"is_prerelease,omitempty"`
+		PullRequestDraft     bool     `json:"draft,omitempty"`
+	}
+
+	// Release defines runtime metadata for a release.
+	Release struct {
+		Title        string `json:"title,omitempty"`
+		IsPrerelease bool   `json:"is_prerelease,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.

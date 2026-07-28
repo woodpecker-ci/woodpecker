@@ -44,14 +44,7 @@ func TestGatedPipeline(t *testing.T) {
 	require.NoError(t, env.Store.UpdateRepo(env.Fixtures.Repo), "enable repo approval")
 
 	// Pipeline must come back blocked, not running.
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create gated pipeline")
 	require.NotNil(t, created)
 	require.Equal(t, model.StatusBlocked, created.Status, "untrusted author pipeline must be blocked")

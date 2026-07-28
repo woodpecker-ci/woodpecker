@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v88/github"
+	"github.com/google/go-github/v89/github"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -56,7 +56,7 @@ const (
 
 // parseHook parses a GitHub hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Repo, _ *model.Pipeline, currCommit, prevCommit string, _ error) {
+func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, string, string, error) {
 	var reader io.Reader = r.Body
 
 	if payload := r.FormValue(hookField); payload != "" {
@@ -68,7 +68,14 @@ func parseHook(r *http.Request, merge bool) (_ *github.PullRequest, _ *model.Rep
 		return nil, nil, nil, "", "", err
 	}
 
-	payload, err := github.ParseWebHook(github.WebHookType(r), raw)
+	return parseHookPayload(github.WebHookType(r), raw, merge)
+}
+
+// parseHookPayload parses a raw GitHub hook payload of the given webhook type
+// and returns Repo and Pipeline detail. If a hook type is unsupported nil
+// values are returned.
+func parseHookPayload(webhookType string, raw []byte, merge bool) (_ *github.PullRequest, _ *model.Repo, _ *model.Pipeline, currCommit, prevCommit string, _ error) {
+	payload, err := github.ParseWebHook(webhookType, raw)
 	if err != nil {
 		return nil, nil, nil, "", "", err
 	}
@@ -103,7 +110,7 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 		Commit:   hook.GetHeadCommit().GetID(),
 		Ref:      hook.GetRef(),
 		ForgeURL: hook.GetHeadCommit().GetURL(),
-		Branch:   strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
+		Branch:   strings.TrimPrefix(hook.GetRef(), "refs/heads/"),
 		Message:  hook.GetHeadCommit().GetMessage(),
 		Email:    hook.GetHeadCommit().GetAuthor().GetEmail(),
 		Avatar:   hook.GetSender().GetAvatarURL(),
@@ -119,10 +126,11 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!
 		pipeline.Event = model.EventTag
+		pipeline.TagTitle = strings.TrimPrefix(pipeline.Ref, "refs/tags/")
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
 		// as pipeline's branch so that we can filter events base on it
 		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
+			pipeline.Branch = strings.TrimPrefix(hook.GetBaseRef(), "refs/heads/")
 		}
 		return repo, pipeline, "", ""
 	}
@@ -215,8 +223,9 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
-		PullRequestLabels:    convertLabels(hook.GetPullRequest().Labels),
+		PullRequestLabels:    convertLabels(hook.GetPullRequest().GetLabels()),
 		PullRequestMilestone: hook.GetPullRequest().GetMilestone().GetTitle(),
+		PullRequestDraft:     hook.GetPullRequest().GetDraft(),
 		FromFork:             fromFork,
 	}
 	if merge {
@@ -248,15 +257,18 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 	}
 
 	pipeline := &model.Pipeline{
-		Event:        model.EventRelease,
-		ForgeURL:     hook.GetRelease().GetHTMLURL(),
-		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
-		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
-		Message:      fmt.Sprintf("created release %s", name),
-		Author:       hook.GetRelease().GetAuthor().GetLogin(),
-		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),
-		Sender:       hook.GetSender().GetLogin(),
-		IsPrerelease: hook.GetRelease().GetPrerelease(),
+		Event:    model.EventRelease,
+		ForgeURL: hook.GetRelease().GetHTMLURL(),
+		Ref:      fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
+		Branch:   hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
+		Release: &model.Release{
+			Title:        name,
+			IsPrerelease: hook.GetRelease().GetPrerelease(),
+		},
+		TagTitle: hook.GetRelease().GetTagName(),
+		Author:   hook.GetRelease().GetAuthor().GetLogin(),
+		Avatar:   hook.GetRelease().GetAuthor().GetAvatarURL(),
+		Sender:   hook.GetSender().GetLogin(),
 	}
 
 	return convertRepo(hook.GetRepo()), pipeline

@@ -104,7 +104,11 @@ func (m *Metadata) Environ() map[string]string {
 		setNonEmptyEnvVar(params, "CI_COMMIT_TAG", p)
 	}
 	if pipeline.Event == EventRelease {
-		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Commit.IsPrerelease))
+		setNonEmptyEnvVar(params, "CI_PIPELINE_RELEASE_TITLE", pipeline.Release.Title)
+		setNonEmptyEnvVar(params, "CI_PIPELINE_RELEASE_PRE", strconv.FormatBool(pipeline.Release.IsPrerelease))
+		// Deprecated: use CI_PIPELINE_RELEASE_PRE instead.
+		// TODO remove in next major
+		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Release.IsPrerelease))
 	}
 	if pipeline.Event.IsPull() {
 		sourceBranch, targetBranch := getSourceTargetBranches(commit.Refspec)
@@ -113,6 +117,7 @@ func (m *Metadata) Environ() map[string]string {
 		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST", pullRegexp.FindString(pipeline.Commit.Ref))
 		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST_LABELS", strings.Join(pipeline.Commit.PullRequestLabels, ","))
 		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST_MILESTONE", pipeline.Commit.PullRequestMilestone)
+		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST_DRAFT", strconv.FormatBool(pipeline.Commit.PullRequestDraft))
 	}
 
 	// Only export changed files if maxChangedFiles is not exceeded

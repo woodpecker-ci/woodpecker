@@ -18,8 +18,12 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -28,7 +32,25 @@ import (
 )
 
 func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) error {
-	lis, err := net.Listen("tcp", c.String("grpc-addr"))
+	network := "tcp"
+	addr := c.String("grpc-addr")
+	jwtSecret, generated := setupGrpcSecret(c.String("grpc-secret"))
+	if generated {
+		log.Warn().Msg(
+			"WOODPECKER_GRPC_SECRET is not set; generated a temporary random secret. " +
+				"Set and persist WOODPECKER_GRPC_SECRET to keep the same secret across restarts",
+		)
+	}
+
+	if strings.HasPrefix(addr, "unix://") {
+		network = "unix"
+		addr, _ = filepath.Abs(strings.TrimPrefix(addr, "unix://"))
+		if _, err := os.Stat(filepath.Dir(addr)); os.IsNotExist(err) {
+			return fmt.Errorf("can not listen to unix socket, parent folder %q not exist", filepath.Dir(addr))
+		}
+	}
+
+	lis, err := net.Listen(network, addr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on grpc-addr: %w", err)
 	}
@@ -38,7 +60,7 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 		Store:            _store,
 		Scheduler:        server.Config.Services.Scheduler,
 		Logger:           server.Config.Services.Logs,
-		JWTSecret:        c.String("grpc-secret"),
+		JWTSecret:        jwtSecret,
 		AgentToken:       server.Config.Server.AgentToken,
 		KeepaliveMinTime: c.Duration("keepalive-min-time"),
 		Registerer:       prometheus.DefaultRegisterer,

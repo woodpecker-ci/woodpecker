@@ -57,6 +57,40 @@ func TestParse(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("Should unmarshal concurrency object", func(t *testing.T) {
+		out, err := ParseString(`steps:
+  deploy:
+    image: alpine
+concurrency:
+  limit: 2
+  group: deploy
+`)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, out.Concurrency.Limit)
+		assert.Equal(t, "deploy", out.Concurrency.Group)
+	})
+
+	t.Run("Should unmarshal concurrency shorthand", func(t *testing.T) {
+		out, err := ParseString(`steps:
+  deploy:
+    image: alpine
+concurrency: 1
+`)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, out.Concurrency.Limit)
+		assert.Empty(t, out.Concurrency.Group)
+	})
+
+	t.Run("Should default concurrency to disabled", func(t *testing.T) {
+		out, err := ParseString(`steps:
+  deploy:
+    image: alpine
+`)
+		assert.NoError(t, err)
+		assert.True(t, out.Concurrency.IsZero())
+		assert.Equal(t, 0, out.Concurrency.Limit)
+	})
+
 	t.Run("Should handle simple yaml anchors", func(t *testing.T) {
 		out, err := ParseString(simpleYamlAnchors)
 		assert.NoError(t, err)
@@ -76,6 +110,11 @@ func TestParse(t *testing.T) {
 		assert.Equal(t, "notify_success", out.Steps.ContainerList[1].Name)
 		assert.Equal(t, "plugins/slack", out.Steps.ContainerList[1].Image)
 		assert.Equal(t, yaml_base_types.StringOrSlice{"push"}, out.Steps.ContainerList[1].When.Constraints[0].Event)
+	})
+
+	t.Run("Should handle deeply nested yaml", func(t *testing.T) {
+		_, err := ParseString(sampleDeepYaml)
+		assert.NoError(t, err)
 	})
 }
 
@@ -205,6 +244,7 @@ labels:
 depends_on:
   - lint
   - test
+concurrency: 1
 `
 
 var simpleYamlAnchors = `
@@ -243,6 +283,33 @@ steps:
     environment:
       DRIVER: next
       PLATFORM: linux
+concurrency:
+  limit: 1
+  group: test
+`
+
+var sampleDeepYaml = `
+image: hello-world
+when:
+  - branch:
+    - tester
+steps:
+  test:
+    image: golang
+    commands:
+      - go install
+      - go test
+    backend_options:
+      kubernetes:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: accelerator
+                      operator: In
+                      values:
+                        - nvidia-tesla-v100
 `
 
 func TestReSerialize(t *testing.T) {
@@ -276,6 +343,9 @@ func TestReSerialize(t *testing.T) {
       environment:
         DRIVER: next
         PLATFORM: linux
+concurrency:
+    limit: 1
+    group: test
 `, string(work1Bin))
 
 	work2, err := ParseString(sampleYaml)
@@ -328,6 +398,7 @@ labels:
 depends_on:
     - lint
     - test
+concurrency: 1
 `, string(workBin2))
 }
 

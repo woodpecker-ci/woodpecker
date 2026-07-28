@@ -14,7 +14,7 @@ steps:
       - echo -e "\nLast checked:$(date)" >> links.md
 
   - name: Update issue
-    image: docker.io/alpine:3.23
+    image: docker.io/alpine:3.24
     depends_on: links
     environment:
       GITHUB_TOKEN:
