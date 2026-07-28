@@ -25,7 +25,7 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 	"go.yaml.in/yaml/v4"
 
-	woodpeckerYaml "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	yaml "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 )
 
 //go:embed schema.json
@@ -43,7 +43,7 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 
 	// resolve sequence merges
 	yamlDoc := new(yaml.Node)
-	if err := woodpeckerYaml.Unmarshal(rBytes, yamlDoc); err != nil {
+	if err := yaml.Unmarshal(rBytes, yamlDoc); err != nil {
 		return nil, fmt.Errorf("failed to parse yml file %w", err)
 	}
 

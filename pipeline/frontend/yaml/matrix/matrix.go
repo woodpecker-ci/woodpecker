@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
-	woodpeckerYaml "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	yaml "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 )
 
 const (
@@ -124,7 +124,7 @@ func parse(raw []byte) (Matrix, error) {
 	data := struct {
 		Matrix map[string][]string
 	}{}
-	if err := woodpeckerYaml.Unmarshal(raw, &data); err != nil {
+	if err := yaml.Unmarshal(raw, &data); err != nil {
 		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
 	return data.Matrix, nil
@@ -137,7 +137,7 @@ func parseList(raw []byte) ([]Axis, error) {
 		}
 	}{}
 
-	if err := woodpeckerYaml.Unmarshal(raw, &data); err != nil {
+	if err := yaml.Unmarshal(raw, &data); err != nil {
 		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
 	return data.Matrix.Include, nil
