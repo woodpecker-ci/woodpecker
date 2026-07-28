@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AnayGarodia, @DerRockWolf, @Kernald, @Komzpa, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @kanywst, @nicolasbatistoni, @qwerty287, @rfinnie, @xoxys, @youdie006
+@6543, @AnayGarodia, @DerRockWolf, @Kernald, @Komzpa, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @kanywst, @nicolasbatistoni, @qwerty287, @rfinnie, @roian6, @xoxys, @youdie006
 
 ### 🔒 Security
 
@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- Document CLI configuration [[#6899](https://github.com/woodpecker-ci/woodpecker/pull/6899)]
 - Add Docker backend AppArmor profile option [[#6909](https://github.com/woodpecker-ci/woodpecker/pull/6909)]
 - docs: document the scope of built-in environment variables [[#6879](https://github.com/woodpecker-ci/woodpecker/pull/6879)]
 - refactor: rework k8s utils to handle resource names and labels [[#6855](https://github.com/woodpecker-ci/woodpecker/pull/6855)]
