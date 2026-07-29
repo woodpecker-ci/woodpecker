@@ -284,10 +284,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 //	@Param		step_id			path	int		true	"the step id"
 func GetStepLogs(c *gin.Context) {
-	step, ok := stepFromParams(c)
-	if !ok {
-		return
-	}
+	step := session.Step(c)
 
 	logs, err := server.Config.Services.LogStore.LogFind(step)
 	if err != nil {
@@ -310,10 +307,7 @@ func GetStepLogs(c *gin.Context) {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 //	@Param		step_id			path	int		true	"the step id"
 func DownloadStepLogs(c *gin.Context) {
-	step, ok := stepFromParams(c)
-	if !ok {
-		return
-	}
+	step := session.Step(c)
 
 	logs, err := server.Config.Services.LogStore.LogFind(step)
 	if err != nil {
@@ -343,25 +337,6 @@ func DownloadStepLogs(c *gin.Context) {
 	}
 }
 
-func stepFromParams(c *gin.Context) (*model.Step, bool) {
-	_store := store.FromContext(c)
-	pl := session.Pipeline(c)
-
-	stepID, err := strconv.ParseInt(c.Params.ByName("step_id"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return nil, false
-	}
-
-	step, err := _store.StepLoad(pl.ID, stepID)
-	if err != nil {
-		handleDBError(c, err)
-		return nil, false
-	}
-
-	return step, true
-}
-
 func sanitizeDownloadFilename(filename string) string {
 	filename = strings.Map(func(r rune) rune {
 		if r < ' ' || r == '\x7f' || strings.ContainsRune(`<>:"/\|?*`, r) {
@@ -386,19 +361,7 @@ func sanitizeDownloadFilename(filename string) string {
 //	@Param		step_id			path	int		true	"the step id"
 func DeleteStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
-	_pipeline := session.Pipeline(c)
-
-	stepID, err := strconv.ParseInt(c.Params.ByName("step_id"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	_step, err := _store.StepLoad(_pipeline.ID, stepID)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	_step := session.Step(c)
 
 	switch _step.State {
 	case model.StatusRunning, model.StatusPending:
@@ -406,7 +369,7 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	err = _store.LogDelete(_step)
+	err := _store.LogDelete(_step)
 	if err != nil {
 		handleDBError(c, err)
 		return

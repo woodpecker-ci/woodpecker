@@ -124,9 +124,9 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.POST("/pipelines/:pipeline_number/approve", session.MustPush, session.SetPipeline(), api.PostApproval)
 					repo.POST("/pipelines/:pipeline_number/decline", session.MustPush, session.SetPipeline(), api.PostDecline)
 
-					repo.GET("/logs/:pipeline_number/:step_id", session.SetPipeline(), api.GetStepLogs)
-					repo.GET("/logs/:pipeline_number/:step_id/download", session.SetPipeline(), api.DownloadStepLogs)
-					repo.DELETE("/logs/:pipeline_number/:step_id", session.MustPush, session.SetPipeline(), api.DeleteStepLogs)
+					repo.GET("/logs/:pipeline_number/:step_id", session.SetPipeline(), session.SetStep(), api.GetStepLogs)
+					repo.GET("/logs/:pipeline_number/:step_id/download", session.SetPipeline(), session.SetStep(), api.DownloadStepLogs)
+					repo.DELETE("/logs/:pipeline_number/:step_id", session.MustPush, session.SetPipeline(), session.SetStep(), api.DeleteStepLogs)
 
 					// requires push permissions
 					repo.DELETE("/logs/:pipeline_number", session.MustPush, session.SetPipeline(), api.DeletePipelineLogs)

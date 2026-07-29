@@ -137,9 +137,6 @@ func TestDownloadStepLogs(t *testing.T) {
 		{StepID: step.ID, Line: 1, Data: []byte("\x1b[31msecond line\x1b[0m")},
 	}
 
-	mockStore := store_mocks.NewMockStore(t)
-	mockStore.On("StepLoad", pipeline.ID, int64(3)).Return(step, nil)
-
 	mockLogStore := log_mocks.NewMockService(t)
 	mockLogStore.On("LogFind", step).Return(logs, nil)
 
@@ -151,10 +148,9 @@ func TestDownloadStepLogs(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Set("store", mockStore)
 	c.Set("repo", repo)
 	c.Set("pipeline", pipeline)
-	c.Params = gin.Params{{Key: "step_id", Value: "3"}}
+	c.Set("step", step)
 
 	DownloadStepLogs(c)
 
