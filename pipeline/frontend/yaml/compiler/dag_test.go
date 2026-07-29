@@ -162,6 +162,42 @@ func TestOptionalStepDependency(t *testing.T) {
 		assert.Len(t, stages, 2, "should produce 2 stages (build then deploy)")
 	})
 
+	t.Run("missing optional step dep on a step that has dependents", func(t *testing.T) {
+		// convertDAGToStages resolves one step at a time and runs the cycle check in the
+		// same loop, so if it reaches `notify` before `deploy`, the walk follows deploy's
+		// still-unresolved edge to the absent `lint`. Map iteration order decides, so run
+		// this enough times to cover both orders.
+		for range 100 {
+			steps := map[string]*dagCompilerStep{
+				"build": {
+					position: 0,
+					name:     "build",
+					step:     &backend_types.Step{Name: "build"},
+				},
+				"deploy": {
+					position: 1,
+					name:     "deploy",
+					step:     &backend_types.Step{Name: "deploy"},
+					dependsOn: constraint.DependsOn{
+						{Name: "build"},
+						{Name: "lint", Optional: true},
+					},
+				},
+				"notify": {
+					position: 2,
+					name:     "notify",
+					step:     &backend_types.Step{Name: "notify"},
+					dependsOn: constraint.DependsOn{
+						{Name: "deploy"},
+					},
+				},
+			}
+			stages, err := convertDAGToStages(steps)
+			assert.NoError(t, err)
+			assert.Len(t, stages, 3, "build, then deploy, then notify")
+		}
+	})
+
 	t.Run("missing required step dep still errors", func(t *testing.T) {
 		steps := map[string]*dagCompilerStep{
 			"deploy": {
