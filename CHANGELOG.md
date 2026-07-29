@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-28
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AnayGarodia, @DerRockWolf, @Kernald, @Komzpa, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @kanywst, @nicolasbatistoni, @qwerty287, @rfinnie, @roian6, @xoxys, @youdie006
+@6543, @AnayGarodia, @DerRockWolf, @Kernald, @Komzpa, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @kanywst, @nicolasbatistoni, @qwerty287, @rfinnie, @roian6, @xoxys, @youdie006, @zmully
 
 ### 🔒 Security
 
@@ -32,6 +32,7 @@
 
 ### 🐛 Bug Fixes
 
+- all yaml unmarshalling should use maxDepth [[#6911](https://github.com/woodpecker-ci/woodpecker/pull/6911)]
 - Don't count step error as workflow runtime error [[#6904](https://github.com/woodpecker-ci/woodpecker/pull/6904)]
 - Do not allow 0 minute timeout [[#6903](https://github.com/woodpecker-ci/woodpecker/pull/6903)]
 - Fix pipeline queue default template data [[#6906](https://github.com/woodpecker-ci/woodpecker/pull/6906)]
