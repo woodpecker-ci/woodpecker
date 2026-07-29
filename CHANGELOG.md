@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AnayGarodia, @DerRockWolf, @Kernald, @Komzpa, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @kanywst, @nicolasbatistoni, @qwerty287, @rfinnie, @roian6, @xoxys, @youdie006, @zmully
+@6543, @AnayGarodia, @DerRockWolf, @Kernald, @Komzpa, @OCram85, @TowyTowy, @cyphercodes, @glitch-ux, @healdropper, @ivanvc, @jleider, @kanywst, @nicolasbatistoni, @qwerty287, @rfinnie, @roian6, @xoxys, @youdie006, @zmully
 
 ### 🔒 Security
 
@@ -32,6 +32,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(server): guard DAG cycle check against filtered-out optional dependencies [[#6915](https://github.com/woodpecker-ci/woodpecker/pull/6915)]
 - all yaml unmarshalling should use maxDepth [[#6911](https://github.com/woodpecker-ci/woodpecker/pull/6911)]
 - Don't count step error as workflow runtime error [[#6904](https://github.com/woodpecker-ci/woodpecker/pull/6904)]
 - Do not allow 0 minute timeout [[#6903](https://github.com/woodpecker-ci/woodpecker/pull/6903)]
