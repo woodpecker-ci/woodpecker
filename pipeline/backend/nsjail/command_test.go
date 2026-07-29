@@ -290,5 +290,3 @@ func TestDefaultSeccompProfileArchAware(t *testing.T) {
 		assert.Contains(t, profile, "arch_prctl")
 	}
 }
-
-
