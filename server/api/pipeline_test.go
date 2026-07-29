@@ -138,7 +138,6 @@ func TestDownloadStepLogs(t *testing.T) {
 	}
 
 	mockStore := store_mocks.NewMockStore(t)
-	mockStore.On("GetPipelineNumber", repo, int64(42)).Return(pipeline, nil)
 	mockStore.On("StepLoad", pipeline.ID, int64(3)).Return(step, nil)
 
 	mockLogStore := log_mocks.NewMockService(t)
@@ -154,10 +153,8 @@ func TestDownloadStepLogs(t *testing.T) {
 	c, _ := gin.CreateTestContext(w)
 	c.Set("store", mockStore)
 	c.Set("repo", repo)
-	c.Params = gin.Params{
-		{Key: "pipeline_number", Value: "42"},
-		{Key: "step_id", Value: "3"},
-	}
+	c.Set("pipeline", pipeline)
+	c.Params = gin.Params{{Key: "step_id", Value: "3"}}
 
 	DownloadStepLogs(c)
 
@@ -172,26 +169,16 @@ func TestDeletePipeline(t *testing.T) {
 
 	t.Run("should delete pipeline", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
-		mockStore.On("GetPipelineNumber", mock.Anything, mock.Anything).Return(fakePipeline, nil)
 		mockStore.On("DeletePipeline", mock.Anything).Return(nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
-		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
+		c.Set("pipeline", fakePipeline)
 
 		DeletePipeline(c)
 
-		mockStore.AssertCalled(t, "GetPipelineNumber", mock.Anything, mock.Anything)
 		mockStore.AssertCalled(t, "DeletePipeline", mock.Anything)
 		assert.Equal(t, http.StatusNoContent, c.Writer.Status())
-	})
-
-	t.Run("should not delete without pipeline number", func(t *testing.T) {
-		c, _ := gin.CreateTestContext(httptest.NewRecorder())
-
-		DeletePipeline(c)
-
-		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
 	})
 
 	t.Run("should not delete pending", func(t *testing.T) {
@@ -199,15 +186,13 @@ func TestDeletePipeline(t *testing.T) {
 		fakePipeline.Status = model.StatusPending
 
 		mockStore := store_mocks.NewMockStore(t)
-		mockStore.On("GetPipelineNumber", mock.Anything, mock.Anything).Return(&fakePipeline, nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
-		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
+		c.Set("pipeline", &fakePipeline)
 
 		DeletePipeline(c)
 
-		mockStore.AssertCalled(t, "GetPipelineNumber", mock.Anything, mock.Anything)
 		mockStore.AssertNotCalled(t, "DeletePipeline", mock.Anything)
 		assert.Equal(t, http.StatusUnprocessableEntity, c.Writer.Status())
 	})
@@ -233,17 +218,16 @@ func TestGetPipelineMetadata(t *testing.T) {
 	server.Config.Services.Manager = mockManager
 
 	mockStore := store_mocks.NewMockStore(t)
-	mockStore.On("GetPipelineNumber", mock.Anything, int64(2)).Return(fakePipeline, nil)
 	mockStore.On("GetPipelineLastBefore", mock.Anything, mock.Anything, int64(2)).Return(prevPipeline, nil)
 
 	t.Run("PipelineMetadata", func(t *testing.T) {
 		t.Run("should get pipeline metadata", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
 			c.Set("store", mockStore)
 			c.Set("forge", mockForge)
 			c.Set("repo", fakeRepo)
+			c.Set("pipeline", fakePipeline)
 
 			GetPipelineMetadata(c)
 
@@ -256,31 +240,6 @@ func TestGetPipelineMetadata(t *testing.T) {
 			assert.Equal(t, int64(1), response.Repo.ID)
 			assert.Equal(t, int64(2), response.Curr.Number)
 			assert.Equal(t, int64(1), response.Prev.Number)
-		})
-
-		t.Run("should return bad request for invalid pipeline number", func(t *testing.T) {
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "pipeline_number", Value: "invalid"}}
-
-			GetPipelineMetadata(c)
-
-			assert.Equal(t, http.StatusBadRequest, w.Code)
-		})
-
-		t.Run("should return not found for non-existent pipeline", func(t *testing.T) {
-			mockStore := store_mocks.NewMockStore(t)
-			mockStore.On("GetPipelineNumber", mock.Anything, int64(3)).Return((*model.Pipeline)(nil), types.ErrRecordNotExist)
-
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "pipeline_number", Value: "3"}}
-			c.Set("store", mockStore)
-			c.Set("repo", fakeRepo)
-
-			GetPipelineMetadata(c)
-
-			assert.Equal(t, http.StatusNotFound, w.Code)
 		})
 	})
 }
@@ -300,7 +259,6 @@ func TestCancelPipeline(t *testing.T) {
 
 		mockForge := forge_mocks.NewMockForge(t)
 		mockStore := store_mocks.NewMockStore(t)
-		mockStore.On("GetPipelineNumber", fakeRepo, int64(2)).Return(runningPipeline, nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{}, nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
 
@@ -314,7 +272,7 @@ func TestCancelPipeline(t *testing.T) {
 		c.Set("store", mockStore)
 		c.Set("repo", fakeRepo)
 		c.Set("user", fakeUser)
-		c.Params = gin.Params{{Key: "pipeline_number", Value: "2"}}
+		c.Set("pipeline", runningPipeline)
 
 		CancelPipeline(c)
 
