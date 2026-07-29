@@ -66,6 +66,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.53.0 [[#6917](https://github.com/woodpecker-ci/woodpecker/pull/6917)]
 - Update golang-packages [[#6910](https://github.com/woodpecker-ci/woodpecker/pull/6910)]
 - Update web npm deps non-major [[#6894](https://github.com/woodpecker-ci/woodpecker/pull/6894)]
 - Update module github.com/docker/go-connections to v0.8.0 [[#6900](https://github.com/woodpecker-ci/woodpecker/pull/6900)]
