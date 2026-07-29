@@ -22,9 +22,10 @@ import (
 	"strings"
 
 	"codeberg.org/6543/go-yaml2json/v2"
-	"codeberg.org/6543/xyaml/v2"
 	"github.com/xeipuuv/gojsonschema"
-	"go.yaml.in/yaml/v4"
+	go_yaml "go.yaml.in/yaml/v4"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 )
 
 //go:embed schema.json
@@ -41,8 +42,8 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	}
 
 	// resolve sequence merges
-	yamlDoc := new(yaml.Node)
-	if err := xyaml.Unmarshal(rBytes, yamlDoc); err != nil {
+	yamlDoc := new(go_yaml.Node)
+	if err := yaml.Unmarshal(rBytes, yamlDoc); err != nil {
 		return nil, fmt.Errorf("failed to parse yml file %w", err)
 	}
 
