@@ -74,16 +74,34 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error) {
+func toHostConfig(step *types.Step, conf *config, options BackendOptions) (*container.HostConfig, error) {
+	// Memory: per-step overrides global
+	memLimit := conf.resourceLimit.MemLimit
+	if options.Resources.Limits.Memory != "" {
+		parsed, err := parseMemory(options.Resources.Limits.Memory)
+		if err != nil {
+			return nil, err
+		}
+		memLimit = parsed
+	}
+
+	// CPUs → NanoCPUs
+	nanoCPUs := int64(0)
+	if options.Resources.Limits.CPUs > 0 {
+		nanoCPUs = int64(options.Resources.Limits.CPUs * 1e9)
+	}
+
 	config := &container.HostConfig{
 		Resources: container.Resources{
+			Memory:     memLimit,
+			NanoCPUs:   nanoCPUs,
 			CPUQuota:   conf.resourceLimit.CPUQuota,
 			CPUShares:  conf.resourceLimit.CPUShares,
 			CpusetCpus: conf.resourceLimit.CPUSet,
-			Memory:     conf.resourceLimit.MemLimit,
 			MemorySwap: conf.resourceLimit.MemSwapLimit,
 		},
-		ShmSize: conf.resourceLimit.ShmSize,
+		OomScoreAdj: options.OomScoreAdj,
+		ShmSize:     conf.resourceLimit.ShmSize,
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},

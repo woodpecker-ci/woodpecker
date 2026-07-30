@@ -720,10 +720,49 @@
       "description": "Advanced options for the different agent backends",
       "type": "object",
       "properties": {
+        "docker": {
+          "$ref": "#/definitions/step_backend_docker"
+        },
         "kubernetes": {
           "$ref": "#/definitions/step_backend_kubernetes"
         }
       }
+    },
+    "step_backend_docker": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string",
+          "description": "User and group used to run the pipeline step."
+        },
+        "oom_score_adj": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "OOM killer score adjustment. 0 = no change, 1000 = kill this container first. Cannot be negative by design."
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "limits": {
+              "type": "object",
+              "properties": {
+                "memory": {
+                  "type": "string",
+                  "description": "Maximum memory for this step, e.g. '512m', '1g'. Overrides the agent-level WOODPECKER_BACKEND_DOCKER_LIMIT_MEM."
+                },
+                "cpus": {
+                  "type": "number",
+                  "description": "Maximum CPU cores for this step, e.g. 0.5, 1.5. Converted to Docker NanoCPUs."
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     },
     "step_backend_kubernetes": {
       "description": "Advanced options for the kubernetes agent backends",
