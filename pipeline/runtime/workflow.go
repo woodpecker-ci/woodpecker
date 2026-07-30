@@ -82,7 +82,14 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	r.uploadWait.Wait()
 	logger.Debug().Msg("logs and traces uploaded")
 
-	return r.err.Get()
+	// A failing step is a successfully executed task from the runtime's point of
+	// view. It is reported through the step states, which make the workflow fail,
+	// so it must not surface as a runtime error. Use Err() to get it anyway.
+	if err := r.err.Get(); !pipeline_errors.IsStepFailure(err) {
+		return err
+	}
+
+	return nil
 }
 
 // The validateConfig checks if a dev made a mistake,
