@@ -119,9 +119,12 @@ func TestRunStepError(t *testing.T) {
 
 	err := r.Run(t.Context())
 
-	assert.Error(t, err)
+	// a failing step is a successful runtime task, the failure is reported
+	// via the step state and Err() only.
+	assert.NoError(t, err)
+
 	var exitErr *pipeline_errors.ExitError
-	assert.True(t, errors.As(err, &exitErr))
+	assert.True(t, errors.As(r.Err(), &exitErr))
 	assert.Equal(t, 1, exitErr.Code)
 }
 
