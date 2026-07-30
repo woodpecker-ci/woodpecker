@@ -264,6 +264,8 @@ linters:
           alias: github_mock
         - pkg: gitlab.com/gitlab-org/api/client-go/v2
           alias: gitlab
+        - pkg: go.yaml.in/yaml/v4
+          alias: go_yaml
     misspell:
       locale: US
     mnd:
