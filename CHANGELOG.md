@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-29
+## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -66,6 +66,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/mattn/go-sqlite3 to v1.14.49 [[#6919](https://github.com/woodpecker-ci/woodpecker/pull/6919)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.53.0 [[#6917](https://github.com/woodpecker-ci/woodpecker/pull/6917)]
 - Update golang-packages [[#6910](https://github.com/woodpecker-ci/woodpecker/pull/6910)]
 - Update web npm deps non-major [[#6894](https://github.com/woodpecker-ci/woodpecker/pull/6894)]
