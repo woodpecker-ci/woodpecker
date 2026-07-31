@@ -1,5 +1,48 @@
 # CLI
 
+# CONFIGURATION
+
+woodpecker-cli stores named contexts in a `contexts.json` file under the user's configuration directory. `XDG_CONFIG_HOME` overrides the base directory. The default paths are:
+
+| Platform | Path |
+| --- | --- |
+| Linux and other Unix systems | `~/.config/woodpecker/contexts.json` |
+| macOS | `~/Library/Application Support/woodpecker/contexts.json` |
+| Windows | `C:\Users\<user>\AppData\Local\woodpecker\contexts.json` |
+
+The file records the selected context and its non-secret connection settings:
+
+```json
+{
+  "current_context": "production",
+  "contexts": {
+    "production": {
+      "name": "production",
+      "server_url": "https://ci.example.test",
+      "log_level": "info"
+    }
+  }
+}
+```
+
+`current_context` must name an entry in `contexts`. The `woodpecker-cli context use` command changes that selection. Authentication tokens are never written to this JSON file; they are stored in the operating system's keyring and looked up by server URL.
+
+## Legacy configuration
+
+If no usable current context can be loaded, woodpecker-cli falls back to the legacy `config.json` file in the same configuration directory. `--config` or `WOODPECKER_CONFIG` selects a different legacy file. The legacy JSON accepts `server_url` and `log_level`; its token is also read from the operating system's keyring, not from JSON.
+
+## Precedence
+
+Command-line flags take precedence over their matching environment variables, and either source takes precedence over stored context or legacy values:
+
+| Flag | Environment variable |
+| --- | --- |
+| `--server` | `WOODPECKER_SERVER` |
+| `--token` | `WOODPECKER_TOKEN` |
+| `--log-level` | `WOODPECKER_LOG_LEVEL` |
+
+The `--config` flag and `WOODPECKER_CONFIG` only choose the legacy configuration file; they do not replace or select a context.
+
 # NAME
 
 woodpecker-cli - command line utility
@@ -227,6 +270,8 @@ execute a local pipeline
 
 **--backend-docker-api-version**="": the version of the API to reach, leave empty for latest.
 
+**--backend-docker-apparmor-profile**="": AppArmor profile applied to backend Docker containers
+
 **--backend-docker-cert**="": path to load the TLS certificates for connecting to docker server
 
 **--backend-docker-host**="": path to docker socket or url to the docker server
@@ -265,6 +310,8 @@ execute a local pipeline
 
 **--backend-k8s-namespace-per-org**: Whether to enable namespace segregation per organization feature. When enabled, Woodpecker will create the Kubernetes resources to separated Kubernetes namespaces per Woodpecker organization. (default: false)
 
+**--backend-k8s-permission-init-image**="": image used by the workspace permission init container (default: busybox:stable-musl)
+
 **--backend-k8s-pod-affinity**="": backend k8s Agent-wide worker pod affinity, in YAML format
 
 **--backend-k8s-pod-affinity-allow-from-step**: whether to allow using affinity from step's backend options (default: false)
@@ -281,6 +328,8 @@ execute a local pipeline
 
 **--backend-k8s-pod-node-selector**="": backend k8s Agent-wide worker pod node selector
 
+**--backend-k8s-pod-node-selector-allow-from-step**: whether to allow using node selector from step's backend options (default: false)
+
 **--backend-k8s-pod-tolerations**="": backend k8s Agent-wide worker pod tolerations
 
 **--backend-k8s-pod-tolerations-allow-from-step**: whether to allow using tolerations from step's backend options (default: true)
@@ -288,6 +337,8 @@ execute a local pipeline
 **--backend-k8s-priority-class**="": which kubernetes priority class to assign to created job pods
 
 **--backend-k8s-secctx-nonroot**: `run as non root` Kubernetes security context option (default: false)
+
+**--backend-k8s-service-account-name-allow-from-step**: whether to allow using service account name from step's backend options (default: false)
 
 **--backend-k8s-stop-timeout**="": seconds Woodpecker waits for pods to stop gracefully before forcefully killing them (default: 20)
 
@@ -313,6 +364,8 @@ execute a local pipeline
 
 **--commit-message**="": Set the metadata environment variable "CI_COMMIT_MESSAGE".
 
+**--commit-pull-draft**: Set the metadata environment variable "CI_COMMIT_PULL_REQUEST_DRAFT". (default: false)
+
 **--commit-pull-labels**="": Set the metadata environment variable "CI_COMMIT_PULL_REQUEST_LABELS".
 
 **--commit-pull-milestone**="": Set the metadata environment variable "CI_COMMIT_PULL_REQUEST_MILESTONE".
@@ -321,9 +374,11 @@ execute a local pipeline
 
 **--commit-refspec**="": Set the metadata environment variable "CI_COMMIT_REFSPEC".
 
-**--commit-release-is-pre**: Set the metadata environment variable "CI_COMMIT_PRERELEASE". (default: false)
+**--commit-release-is-pre**: Set the metadata environment variable "CI_PIPELINE_RELEASE_PRE". (default: false)
 
 **--commit-sha**="": Set the metadata environment variable "CI_COMMIT_SHA".
+
+**--commit-timestamp**="": Set the metadata environment variable "CI_COMMIT_TIMESTAMP". (default: 0)
 
 **--env**="": Set the metadata environment variable "CI_ENV".
 
@@ -333,7 +388,7 @@ execute a local pipeline
 
 **--local**: run from local directory (default: true)
 
-**--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags
+**--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags. The metadata format is only expected to work with the same Woodpecker version it was downloaded from and is not intended to be portable between versions
 
 **--netrc-machine**="": 
 
@@ -357,6 +412,8 @@ execute a local pipeline
 
 **--pipeline-parent**="": Set the metadata environment variable "CI_PIPELINE_PARENT". (default: 0)
 
+**--pipeline-release**="": Set the metadata environment variable "CI_PIPELINE_RELEASE_TITLE".
+
 **--pipeline-started**="": Set the metadata environment variable "CI_PIPELINE_STARTED". (default: 0)
 
 **--pipeline-url**="": Set the metadata environment variable "CI_PIPELINE_FORGE_URL".
@@ -372,6 +429,8 @@ execute a local pipeline
 **--prev-commit-branch**="": Set the metadata environment variable "CI_PREV_COMMIT_BRANCH".
 
 **--prev-commit-message**="": Set the metadata environment variable "CI_PREV_COMMIT_MESSAGE".
+
+**--prev-commit-message**="": Set the metadata environment variable "CI_PREV_COMMIT_TIMESTAMP". (default: 0)
 
 **--prev-commit-ref**="": Set the metadata environment variable "CI_PREV_COMMIT_REF".
 
@@ -455,7 +514,7 @@ lint a pipeline configuration file
 
 **--plugins-privileged**="": allow plugins to run in privileged mode, if set empty, there is no
 
-**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: "docker.io/woodpeckerci/plugin-git:2.9.0", "docker.io/woodpeckerci/plugin-git", "quay.io/woodpeckerci/plugin-git")
+**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: "docker.io/woodpeckerci/plugin-git:2.9.2", "docker.io/woodpeckerci/plugin-git", "quay.io/woodpeckerci/plugin-git")
 
 **--strict**: treat warnings as errors (default: false)
 
