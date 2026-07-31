@@ -56,6 +56,7 @@
 - Update pnpm to v11.17.0 [[#6892](https://github.com/woodpecker-ci/woodpecker/pull/6892)]
 - Update docs npm deps non-major [[#6835](https://github.com/woodpecker-ci/woodpecker/pull/6835)]
 - docs: document the scope of built-in environment variables [[#6879](https://github.com/woodpecker-ci/woodpecker/pull/6879)]
+- Add NestGuard plugin to plugins.json [[#6873](https://github.com/woodpecker-ci/woodpecker/pull/6873)]
 - Minor adjustments for API usage example [[#6605](https://github.com/woodpecker-ci/woodpecker/pull/6605)]
 - docs: add note about `pull_request` events with `path` filter and correct comment about `on_empty` [[#6819](https://github.com/woodpecker-ci/woodpecker/pull/6819)]
 - Update docs npm deps non-major [[#6788](https://github.com/woodpecker-ci/woodpecker/pull/6788)]
@@ -99,10 +100,6 @@
 - Update module github.com/cenkalti/backoff/v6 to v7 [[#6812](https://github.com/woodpecker-ci/woodpecker/pull/6812)]
 - Update web npm deps non-major [[#6787](https://github.com/woodpecker-ci/woodpecker/pull/6787)]
 - Lock file maintenance [[#6799](https://github.com/woodpecker-ci/woodpecker/pull/6799)]
-
-### Misc
-
-- Add NestGuard plugin to plugins.json [[#6873](https://github.com/woodpecker-ci/woodpecker/pull/6873)]
 
 ## [3.16.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.16.0) - 2026-06-27
 
