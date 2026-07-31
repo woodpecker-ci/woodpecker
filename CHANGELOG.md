@@ -62,6 +62,11 @@
 
 ### 📦️ Dependency
 
+- Update dependency mvdan/gofumpt to v0.11.0 [[#6926](https://github.com/woodpecker-ci/woodpecker/pull/6926)]
+- Lock file maintenance [[#6931](https://github.com/woodpecker-ci/woodpecker/pull/6931)]
+- Update docker.io/mysql Docker tag to v26 [[#6930](https://github.com/woodpecker-ci/woodpecker/pull/6930)]
+- Update dependency jsdom to v30 [[#6929](https://github.com/woodpecker-ci/woodpecker/pull/6929)]
+- Update pre-commit hook hadolint/hadolint to v2.15.1 [[#6927](https://github.com/woodpecker-ci/woodpecker/pull/6927)]
 - Update golang-packages [[#6920](https://github.com/woodpecker-ci/woodpecker/pull/6920)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.49 [[#6919](https://github.com/woodpecker-ci/woodpecker/pull/6919)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.53.0 [[#6917](https://github.com/woodpecker-ci/woodpecker/pull/6917)]
