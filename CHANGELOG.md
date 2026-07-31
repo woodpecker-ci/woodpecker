@@ -18,14 +18,11 @@
 
 ### 📈 Enhancement
 
-- Document CLI configuration [[#6899](https://github.com/woodpecker-ci/woodpecker/pull/6899)]
 - Add Docker backend AppArmor profile option [[#6909](https://github.com/woodpecker-ci/woodpecker/pull/6909)]
-- docs: document the scope of built-in environment variables [[#6879](https://github.com/woodpecker-ci/woodpecker/pull/6879)]
 - refactor: rework k8s utils to handle resource names and labels [[#6855](https://github.com/woodpecker-ci/woodpecker/pull/6855)]
 - Make matrix axis permutation order deterministic [[#6847](https://github.com/woodpecker-ci/woodpecker/pull/6847)]
 - feat(server): add unix socket permission option [[#6839](https://github.com/woodpecker-ci/woodpecker/pull/6839)]
 - Add step type label to step-level Prometheus metrics [[#6824](https://github.com/woodpecker-ci/woodpecker/pull/6824)]
-- docs: add note about `pull_request` events with `path` filter and correct comment about `on_empty` [[#6819](https://github.com/woodpecker-ci/woodpecker/pull/6819)]
 - Stamp trusted commit-branch and event pod labels [[#6802](https://github.com/woodpecker-ci/woodpecker/pull/6802)]
 - Rename CI_COMMIT_PRERELEASE to CI_PIPELINE_RELEASE_PRE [[#6794](https://github.com/woodpecker-ci/woodpecker/pull/6794)]
 - Rework pipeline data structure: Release & Tag [[#6774](https://github.com/woodpecker-ci/woodpecker/pull/6774)]
@@ -55,13 +52,12 @@
 ### 📚 Documentation
 
 - Remove dependency overrides [[#6912](https://github.com/woodpecker-ci/woodpecker/pull/6912)]
+- Document CLI configuration [[#6899](https://github.com/woodpecker-ci/woodpecker/pull/6899)]
 - Update pnpm to v11.17.0 [[#6892](https://github.com/woodpecker-ci/woodpecker/pull/6892)]
-- Lock file maintenance [[#6901](https://github.com/woodpecker-ci/woodpecker/pull/6901)]
 - Update docs npm deps non-major [[#6835](https://github.com/woodpecker-ci/woodpecker/pull/6835)]
+- docs: document the scope of built-in environment variables [[#6879](https://github.com/woodpecker-ci/woodpecker/pull/6879)]
 - Minor adjustments for API usage example [[#6605](https://github.com/woodpecker-ci/woodpecker/pull/6605)]
-- Lock file maintenance [[#6816](https://github.com/woodpecker-ci/woodpecker/pull/6816)]
-- Update pnpm to v11.10.0 [[#6813](https://github.com/woodpecker-ci/woodpecker/pull/6813)]
-- Lock file maintenance [[#6799](https://github.com/woodpecker-ci/woodpecker/pull/6799)]
+- docs: add note about `pull_request` events with `path` filter and correct comment about `on_empty` [[#6819](https://github.com/woodpecker-ci/woodpecker/pull/6819)]
 - Update docs npm deps non-major [[#6788](https://github.com/woodpecker-ci/woodpecker/pull/6788)]
 
 ### 📦️ Dependency
@@ -71,6 +67,7 @@
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.53.0 [[#6917](https://github.com/woodpecker-ci/woodpecker/pull/6917)]
 - Update golang-packages [[#6910](https://github.com/woodpecker-ci/woodpecker/pull/6910)]
 - Update web npm deps non-major [[#6894](https://github.com/woodpecker-ci/woodpecker/pull/6894)]
+- Lock file maintenance [[#6901](https://github.com/woodpecker-ci/woodpecker/pull/6901)]
 - Update module github.com/docker/go-connections to v0.8.0 [[#6900](https://github.com/woodpecker-ci/woodpecker/pull/6900)]
 - Update dependency fast-uri to v4 [[#6897](https://github.com/woodpecker-ci/woodpecker/pull/6897)]
 - Update golang-packages [[#6889](https://github.com/woodpecker-ci/woodpecker/pull/6889)]
@@ -88,17 +85,15 @@
 - Update golang-packages [[#6858](https://github.com/woodpecker-ci/woodpecker/pull/6858)]
 - Update web npm deps non-major [[#6815](https://github.com/woodpecker-ci/woodpecker/pull/6815)]
 - Update golang-packages [[#6821](https://github.com/woodpecker-ci/woodpecker/pull/6821)]
-- Update module github.com/google/go-github/v88 to v89 [[#6838](https://github.com/woodpecker-ci/woodpecker/pull/6838)]
-- Update pre-commit hook rbubley/mirrors-prettier to v3.9.5 [[#6836](https://github.com/woodpecker-ci/woodpecker/pull/6836)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v6.1.1 [[#6834](https://github.com/woodpecker-ci/woodpecker/pull/6834)]
 - Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.2 [[#6833](https://github.com/woodpecker-ci/woodpecker/pull/6833)]
 - Update dependency golang to v1.26.5 [[#6832](https://github.com/woodpecker-ci/woodpecker/pull/6832)]
 - Update golang-packages [[#6785](https://github.com/woodpecker-ci/woodpecker/pull/6785)]
+- Lock file maintenance [[#6816](https://github.com/woodpecker-ci/woodpecker/pull/6816)]
 - Update pnpm to v11.10.0 [[#6814](https://github.com/woodpecker-ci/woodpecker/pull/6814)]
 - Update module github.com/cenkalti/backoff/v6 to v7 [[#6812](https://github.com/woodpecker-ci/woodpecker/pull/6812)]
 - Update web npm deps non-major [[#6787](https://github.com/woodpecker-ci/woodpecker/pull/6787)]
-- Update pre-commit hook rbubley/mirrors-prettier to v3.9.4 [[#6811](https://github.com/woodpecker-ci/woodpecker/pull/6811)]
-- Update pre-commit hook rbubley/mirrors-prettier to v3.9.1 [[#6797](https://github.com/woodpecker-ci/woodpecker/pull/6797)]
+- Lock file maintenance [[#6799](https://github.com/woodpecker-ci/woodpecker/pull/6799)]
 
 ### Misc
 
