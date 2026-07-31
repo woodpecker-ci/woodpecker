@@ -265,6 +265,8 @@ execute a local pipeline
 
 **--backend-k8s-namespace-per-org**: Whether to enable namespace segregation per organization feature. When enabled, Woodpecker will create the Kubernetes resources to separated Kubernetes namespaces per Woodpecker organization. (default: false)
 
+**--backend-k8s-permission-init-image**="": image used by the workspace permission init container (default: busybox:stable-musl)
+
 **--backend-k8s-pod-affinity**="": backend k8s Agent-wide worker pod affinity, in YAML format
 
 **--backend-k8s-pod-affinity-allow-from-step**: whether to allow using affinity from step's backend options (default: false)
@@ -313,6 +315,8 @@ execute a local pipeline
 
 **--commit-message**="": Set the metadata environment variable "CI_COMMIT_MESSAGE".
 
+**--commit-pull-draft**: Set the metadata environment variable "CI_COMMIT_PULL_REQUEST_DRAFT". (default: false)
+
 **--commit-pull-labels**="": Set the metadata environment variable "CI_COMMIT_PULL_REQUEST_LABELS".
 
 **--commit-pull-milestone**="": Set the metadata environment variable "CI_COMMIT_PULL_REQUEST_MILESTONE".
@@ -324,6 +328,8 @@ execute a local pipeline
 **--commit-release-is-pre**: Set the metadata environment variable "CI_COMMIT_PRERELEASE". (default: false)
 
 **--commit-sha**="": Set the metadata environment variable "CI_COMMIT_SHA".
+
+**--commit-timestamp**="": Set the metadata environment variable "CI_COMMIT_TIMESTAMP". (default: 0)
 
 **--env**="": Set the metadata environment variable "CI_ENV".
 
@@ -372,6 +378,8 @@ execute a local pipeline
 **--prev-commit-branch**="": Set the metadata environment variable "CI_PREV_COMMIT_BRANCH".
 
 **--prev-commit-message**="": Set the metadata environment variable "CI_PREV_COMMIT_MESSAGE".
+
+**--prev-commit-message**="": Set the metadata environment variable "CI_PREV_COMMIT_TIMESTAMP". (default: 0)
 
 **--prev-commit-ref**="": Set the metadata environment variable "CI_PREV_COMMIT_REF".
 
@@ -455,7 +463,7 @@ lint a pipeline configuration file
 
 **--plugins-privileged**="": allow plugins to run in privileged mode, if set empty, there is no
 
-**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: "docker.io/woodpeckerci/plugin-git:2.9.0", "docker.io/woodpeckerci/plugin-git", "quay.io/woodpeckerci/plugin-git")
+**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: "docker.io/woodpeckerci/plugin-git:2.9.2", "docker.io/woodpeckerci/plugin-git", "quay.io/woodpeckerci/plugin-git")
 
 **--strict**: treat warnings as errors (default: false)
 
