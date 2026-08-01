@@ -4,11 +4,15 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@zmully
+@qwerty287, @zmully
 
 ### 📈 Enhancement
 
 - Update frontend schema.json for documented backend options [[#6933](https://github.com/woodpecker-ci/woodpecker/pull/6933)]
+
+### 📚 Documentation
+
+- Fix old link to Gitea docs [[#6932](https://github.com/woodpecker-ci/woodpecker/pull/6932)]
 
 ### 📦️ Dependency
 
