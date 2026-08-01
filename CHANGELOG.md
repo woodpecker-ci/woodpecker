@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#6925](https://github.com/woodpecker-ci/woodpecker/pull/6925)]
 - Fix old link to Gitea docs [[#6932](https://github.com/woodpecker-ci/woodpecker/pull/6932)]
 
 ### 📦️ Dependency
