@@ -22,6 +22,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -38,6 +39,7 @@ func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineIte
 			PipelineID: activePipeline.ID,
 			RepoID:     repo.ID,
 			Created:    activePipeline.Created,
+			Priority:   model.QueuePriority(repo, activePipeline, server.Config.Pipeline.QueuePriorityRules),
 		}
 		// fall back to the current time if the pipeline has no creation
 		// timestamp, so the queue always has a defined ordering key.

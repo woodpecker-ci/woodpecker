@@ -71,6 +71,7 @@ var Config = struct {
 		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
 		DefaultApprovalMode                 model.ApprovalMode
 		DefaultWorkflowLabels               map[string]string
+		QueuePriorityRules                  []model.QueuePriorityRule
 		DefaultClonePlugin                  string
 		TrustedClonePlugins                 []string
 		Volumes                             []string
