@@ -15,148 +15,107 @@
 package model
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"go.yaml.in/yaml/v4"
 )
 
 // QueuePriorityRule adds or subtracts priority from a pipeline's queued tasks
 // when all configured match fields match. Higher resulting task priority runs
 // earlier in the queue.
 type QueuePriorityRule struct {
-	Priority      int
-	Repo          string
-	Event         WebhookEvent
-	Branch        string
-	Ref           string
-	Author        string
-	Sender        string
-	PullLabel     string
-	EventReason   string
-	MinRerunCount int64
+	Priority      int          `yaml:"priority"`
+	Repo          string       `yaml:"repo"`
+	Event         WebhookEvent `yaml:"event"`
+	Branch        string       `yaml:"branch"`
+	Ref           string       `yaml:"ref"`
+	Author        string       `yaml:"author"`
+	Sender        string       `yaml:"sender"`
+	PullLabel     string       `yaml:"pr_label"`
+	EventReason   string       `yaml:"event_reason"`
+	MinRerunCount int64        `yaml:"min_rerun_count"`
 }
 
-// ParseQueuePriorityRules parses a list of whitespace-separated key=value rule
-// strings. Every rule must include priority=<int>.
-func ParseQueuePriorityRules(values []string) ([]QueuePriorityRule, error) {
-	rules := make([]QueuePriorityRule, 0, len(values))
-	for _, value := range values {
-		value = strings.TrimSpace(value)
-		if value == "" {
-			continue
-		}
+type queuePriorityRuleFile struct {
+	Rules []queuePriorityRuleConfig `yaml:"rules"`
+}
 
-		rule, err := parseQueuePriorityRule(value)
+type queuePriorityRuleConfig struct {
+	Priority      *int         `yaml:"priority"`
+	Repo          string       `yaml:"repo"`
+	Event         WebhookEvent `yaml:"event"`
+	Branch        string       `yaml:"branch"`
+	Ref           string       `yaml:"ref"`
+	Author        string       `yaml:"author"`
+	Sender        string       `yaml:"sender"`
+	PullLabel     string       `yaml:"pr_label"`
+	EventReason   string       `yaml:"event_reason"`
+	MinRerunCount int64        `yaml:"min_rerun_count"`
+}
+
+// ParseQueuePriorityRuleFile parses a YAML queue priority config.
+func ParseQueuePriorityRuleFile(data []byte) ([]QueuePriorityRule, error) {
+	var file queuePriorityRuleFile
+	if err := yaml.Unmarshal(data, &file); err != nil {
+		return nil, err
+	}
+	rules := make([]QueuePriorityRule, 0, len(file.Rules))
+	for i := range file.Rules {
+		rule, err := file.Rules[i].asRule()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid rule %d: %w", i+1, err)
 		}
 		rules = append(rules, rule)
 	}
 	return rules, nil
 }
 
-// ParseQueuePriorityRuleFile parses one queue priority rule per non-empty,
-// non-comment line.
-func ParseQueuePriorityRuleFile(data []byte) ([]QueuePriorityRule, error) {
-	var values []string
-	scanner := bufio.NewScanner(bytes.NewReader(data))
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		values = append(values, line)
+func (r queuePriorityRuleConfig) asRule() (QueuePriorityRule, error) {
+	if r.Priority == nil {
+		return QueuePriorityRule{}, fmt.Errorf("missing priority")
 	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
+	rule := QueuePriorityRule{
+		Priority:      *r.Priority,
+		Repo:          r.Repo,
+		Event:         r.Event,
+		Branch:        r.Branch,
+		Ref:           r.Ref,
+		Author:        r.Author,
+		Sender:        r.Sender,
+		PullLabel:     r.PullLabel,
+		EventReason:   r.EventReason,
+		MinRerunCount: r.MinRerunCount,
 	}
-	return ParseQueuePriorityRules(values)
+	return rule, rule.Validate()
 }
 
-func parseQueuePriorityRule(value string) (QueuePriorityRule, error) {
-	var rule QueuePriorityRule
-	hasPriority := false
-
-	for _, field := range strings.Fields(value) {
-		key, raw, ok := strings.Cut(field, "=")
-		if !ok || strings.TrimSpace(key) == "" {
-			return rule, fmt.Errorf("invalid queue priority rule field %q in %q", field, value)
-		}
-		if raw == "" {
-			return rule, fmt.Errorf("empty queue priority rule value for %q in %q", key, value)
-		}
-
-		switch strings.ReplaceAll(strings.ToLower(key), "-", "_") {
-		case "priority":
-			priority, err := strconv.Atoi(raw)
-			if err != nil {
-				return rule, fmt.Errorf("invalid queue priority %q in %q: %w", raw, value, err)
-			}
-			rule.Priority = priority
-			hasPriority = true
-		case "repo":
-			if err := validateQueuePriorityGlob(key, raw); err != nil {
-				return rule, err
-			}
-			rule.Repo = raw
-		case "event":
-			event := WebhookEvent(raw)
-			if err := event.Validate(); err != nil {
-				return rule, err
-			}
-			rule.Event = event
-		case "branch":
-			if err := validateQueuePriorityGlob(key, raw); err != nil {
-				return rule, err
-			}
-			rule.Branch = raw
-		case "ref":
-			if err := validateQueuePriorityGlob(key, raw); err != nil {
-				return rule, err
-			}
-			rule.Ref = raw
-		case "author":
-			if err := validateQueuePriorityGlob(key, raw); err != nil {
-				return rule, err
-			}
-			rule.Author = raw
-		case "sender":
-			if err := validateQueuePriorityGlob(key, raw); err != nil {
-				return rule, err
-			}
-			rule.Sender = raw
-		case "pr_label", "pull_label", "pull_request_label":
-			if err := validateQueuePriorityGlob(key, raw); err != nil {
-				return rule, err
-			}
-			rule.PullLabel = raw
-		case "event_reason":
-			if err := validateQueuePriorityGlob(key, raw); err != nil {
-				return rule, err
-			}
-			rule.EventReason = raw
-		case "min_rerun_count":
-			min, err := strconv.ParseInt(raw, 10, 64)
-			if err != nil {
-				return rule, fmt.Errorf("invalid queue priority min_rerun_count %q in %q: %w", raw, value, err)
-			}
-			if min < 0 {
-				return rule, fmt.Errorf("invalid queue priority min_rerun_count %q in %q: must be greater than or equal to zero", raw, value)
-			}
-			rule.MinRerunCount = min
-		default:
-			return rule, fmt.Errorf("unknown queue priority rule field %q in %q", key, value)
+// Validate checks a queue priority rule loaded from config.
+func (r QueuePriorityRule) Validate() error {
+	if r.Event != "" {
+		if err := r.Event.Validate(); err != nil {
+			return err
 		}
 	}
-
-	if !hasPriority {
-		return rule, fmt.Errorf("queue priority rule %q is missing priority", value)
+	for key, pattern := range map[string]string{
+		"repo":         r.Repo,
+		"branch":       r.Branch,
+		"ref":          r.Ref,
+		"author":       r.Author,
+		"sender":       r.Sender,
+		"pr_label":     r.PullLabel,
+		"event_reason": r.EventReason,
+	} {
+		if pattern != "" {
+			if err := validateQueuePriorityGlob(key, pattern); err != nil {
+				return err
+			}
+		}
 	}
-	return rule, nil
+	if r.MinRerunCount < 0 {
+		return fmt.Errorf("min_rerun_count must be greater than or equal to zero")
+	}
+	return nil
 }
 
 func validateQueuePriorityGlob(key, pattern string) error {

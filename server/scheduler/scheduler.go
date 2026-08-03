@@ -58,6 +58,7 @@ type Scheduler interface {
 	// Consolidated operations.
 	PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error
 	StartPipeline(c context.Context, repo *model.Repo, pipeline *model.Pipeline, tasks []*model.Task) error
+	ReprioritizeRepo(c context.Context, repo *model.Repo, rules []model.QueuePriorityRule) error
 
 	// CancelWorkflows cancels the given workflows: it evicts them from the
 	// queue and signals the cancellation to any agents waiting on them. This is

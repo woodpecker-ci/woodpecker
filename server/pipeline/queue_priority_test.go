@@ -40,7 +40,7 @@ func TestLoadQueuePriorityRulesUsesDefaultBranchHead(t *testing.T) {
 	forge.On("File", mock.Anything, user, repo, mock.MatchedBy(func(p *model.Pipeline) bool {
 		return p.Commit == "master-head"
 	}), queuePriorityConfigPath).
-		Return([]byte("priority=-20 event=pull_request event_reason=synchroniz*\n"), nil)
+		Return([]byte("rules:\n  - priority: -20\n    event: pull_request\n    event_reason: synchroniz*\n"), nil)
 
 	rules, err := loadQueuePriorityRules(t.Context(), forge, user, repo, pipeline)
 	require.NoError(t, err)
