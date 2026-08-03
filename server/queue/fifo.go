@@ -312,8 +312,9 @@ func (q *fifo) filterWaiting() {
 }
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
+	var bestElement *list.Element
+	var bestTask *model.Task
 	var bestWorker *worker
-	var bestScore int
 
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
@@ -326,20 +327,30 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 			continue
 		}
 
+		var taskBestWorker *worker
+		var taskBestScore int
 		for worker := range q.workers {
 			matched, score := worker.filter(task)
-			if matched && score > bestScore {
-				bestWorker = worker
-				bestScore = score
+			if matched && (taskBestWorker == nil || score > taskBestScore) {
+				taskBestWorker = worker
+				taskBestScore = score
 			}
 		}
-		if bestWorker != nil {
-			log.Debug().Msgf("queue: assigned task: %v with deps %v to worker with score %d", task.ID, task.Dependencies, bestScore)
-			return element, bestWorker
+		if taskBestWorker == nil {
+			continue
+		}
+
+		if bestTask == nil || queueOrderLess(task, bestTask) {
+			bestElement = element
+			bestTask = task
+			bestWorker = taskBestWorker
 		}
 	}
 
-	return nil, nil
+	if bestTask != nil {
+		log.Debug().Msgf("queue: assigned task: %v with deps %v to worker", bestTask.ID, bestTask.Dependencies)
+	}
+	return bestElement, bestWorker
 }
 
 // canRunConcurrent reports whether the given task may currently start without
@@ -407,15 +418,23 @@ func (q *fifo) canRunConcurrent(task *model.Task) bool {
 	return running+ahead < task.ConcurrencyLimit
 }
 
-// taskOrderLess reports whether task a was instantiated before task b. Ordering
-// is by the Created timestamp (the pipeline creation time), with the workflow
-// name as a deterministic tiebreaker for tasks created within the same second.
-// The task ID is intentionally not used for ordering.
+// taskOrderLess reports whether task a was instantiated before task b. It is
+// used for concurrency reservations, where queue priority must not violate
+// same-workflow commit ordering.
 func taskOrderLess(a, b *model.Task) bool {
 	if a.Created != b.Created {
 		return a.Created < b.Created
 	}
 	return a.Name < b.Name
+}
+
+// queueOrderLess reports whether task a should be assigned before task b.
+// Higher priority runs first; equal priorities retain FIFO task ordering.
+func queueOrderLess(a, b *model.Task) bool {
+	if a.Priority != b.Priority {
+		return a.Priority > b.Priority
+	}
+	return taskOrderLess(a, b)
 }
 
 func (q *fifo) resubmitExpiredPipelines() {

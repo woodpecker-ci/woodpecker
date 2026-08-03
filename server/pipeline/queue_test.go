@@ -22,6 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -75,6 +76,39 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 			assert.Equal(t, tc.expectedGroup, task.ConcurrencyGroup)
 		})
 	}
+}
+
+func TestQueuePipelinePriority(t *testing.T) {
+	repo := &model.Repo{ID: 7, FullName: "postgis/postgis"}
+	item := &builder.Item{Workflow: &builder.Workflow{ID: 1, Name: "build"}}
+
+	server.Config.Pipeline.QueuePriorityRules = []model.QueuePriorityRule{
+		{Priority: 100, Event: model.EventPush, Branch: "master"},
+		{Priority: 80, Event: model.EventPush, Branch: "stable-*"},
+		{Priority: -20, Event: model.EventPull, EventReason: "synchronized"},
+	}
+	t.Cleanup(func() {
+		server.Config.Pipeline.QueuePriorityRules = nil
+	})
+
+	tasks, err := pipelineTasks(repo, &model.Pipeline{
+		ID:          42,
+		Event:       model.EventPush,
+		Branch:      "stable-3.6",
+		EventReason: []string{"push"},
+	}, []*builder.Item{item})
+	require.NoError(t, err)
+	require.Len(t, tasks, 1)
+	assert.Equal(t, 80, tasks[0].Priority)
+
+	tasks, err = pipelineTasks(repo, &model.Pipeline{
+		ID:          43,
+		Event:       model.EventPull,
+		EventReason: []string{"synchronized"},
+	}, []*builder.Item{item})
+	require.NoError(t, err)
+	require.Len(t, tasks, 1)
+	assert.Equal(t, -20, tasks[0].Priority)
 }
 
 func TestQueuePipelineCreated(t *testing.T) {

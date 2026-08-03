@@ -891,6 +891,79 @@ func TestFifoConcurrency(t *testing.T) {
 			&model.Task{ID: "2", Created: 100, Name: "alpha"},
 		))
 	})
+
+	t.Run("queue ordering uses priority before Created", func(t *testing.T) {
+		assert.True(t, queueOrderLess(
+			&model.Task{ID: "2", Created: 200, Priority: 10},
+			&model.Task{ID: "1", Created: 100, Priority: 1},
+		))
+		assert.False(t, taskOrderLess(
+			&model.Task{ID: "2", Created: 200, Priority: 10},
+			&model.Task{ID: "1", Created: 100, Priority: 1},
+		), "concurrency reservation ordering must ignore queue priority")
+	})
+}
+
+func TestFifoPriority(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	t.Run("higher priority later task runs first", func(t *testing.T) {
+		low := &model.Task{ID: "low", Created: 100, Priority: 0}
+		high := &model.Task{ID: "high", Created: 200, Priority: 10}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{low, high}))
+		waitForProcess()
+
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "high", got.ID)
+
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		got, err = q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "low", got.ID)
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("waiting high priority task does not block runnable task", func(t *testing.T) {
+		parent := &model.Task{ID: "priority-parent", Created: 100}
+		child := &model.Task{
+			ID:           "priority-child",
+			Created:      200,
+			Priority:     50,
+			Dependencies: []string{"priority-parent"},
+			DepStatus:    make(map[string]model.StatusValue),
+			RunOn:        []string{"success"},
+		}
+		other := &model.Task{ID: "priority-other", Created: 300, Priority: 0}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{parent, child, other}))
+		waitForProcess()
+
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "priority-parent", got.ID)
+		waitForProcess()
+
+		got, err = q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "priority-other", got.ID)
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		assert.NoError(t, q.Done(ctx, "priority-parent", model.StatusSuccess))
+		waitForProcess()
+
+		got, err = q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "priority-child", got.ID)
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+	})
 }
 
 func TestFifoLeaseManagement(t *testing.T) {
