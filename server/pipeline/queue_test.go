@@ -23,7 +23,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -68,7 +67,7 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tasks, err := pipelineTasks(repo, nil, activePipeline, []*builder.Item{tt.item})
+			tasks, err := pipelineTasks(repo, nil, activePipeline, []*builder.Item{tt.item}, nil)
 			require.NoError(t, err)
 			require.Len(t, tasks, 1)
 
@@ -83,30 +82,27 @@ func TestQueuePipelinePriority(t *testing.T) {
 	repo := &model.Repo{ID: 7, FullName: "postgis/postgis"}
 	item := &builder.Item{Workflow: &builder.Workflow{ID: 1, Name: "build"}}
 
-	server.Config.Pipeline.QueuePriorityRules = []model.QueuePriorityRule{
+	priorityRules := []model.QueuePriorityRule{
 		{Priority: 100, Event: model.EventPush, Branch: "master"},
 		{Priority: 80, Event: model.EventPush, Branch: "stable-*"},
 		{Priority: -20, Event: model.EventPull, EventReason: "synchronized"},
 	}
-	t.Cleanup(func() {
-		server.Config.Pipeline.QueuePriorityRules = nil
-	})
 
-	tasks, err := pipelineTasks(repo, &model.Pipeline{
+	tasks, err := pipelineTasks(repo, nil, &model.Pipeline{
 		ID:          42,
 		Event:       model.EventPush,
 		Branch:      "stable-3.6",
 		EventReason: []string{"push"},
-	}, []*builder.Item{item})
+	}, []*builder.Item{item}, priorityRules)
 	require.NoError(t, err)
 	require.Len(t, tasks, 1)
 	assert.Equal(t, 80, tasks[0].Priority)
 
-	tasks, err = pipelineTasks(repo, &model.Pipeline{
+	tasks, err = pipelineTasks(repo, nil, &model.Pipeline{
 		ID:          43,
 		Event:       model.EventPull,
 		EventReason: []string{"synchronized"},
-	}, []*builder.Item{item})
+	}, []*builder.Item{item}, priorityRules)
 	require.NoError(t, err)
 	require.Len(t, tasks, 1)
 	assert.Equal(t, -20, tasks[0].Priority)
@@ -118,7 +114,7 @@ func TestQueuePipelineCreated(t *testing.T) {
 
 	runOnce := func(t *testing.T, pipeline *model.Pipeline) *model.Task {
 		t.Helper()
-		tasks, err := pipelineTasks(repo, nil, pipeline, []*builder.Item{item})
+		tasks, err := pipelineTasks(repo, nil, pipeline, []*builder.Item{item}, nil)
 		require.NoError(t, err)
 		require.Len(t, tasks, 1)
 		return tasks[0]
@@ -159,7 +155,7 @@ func TestQueuePipelineOrgAgentsOnly(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tasks, err := pipelineTasks(repo, tt.org, activePipeline, []*builder.Item{newItem()})
+			tasks, err := pipelineTasks(repo, tt.org, activePipeline, []*builder.Item{newItem()}, nil)
 			require.NoError(t, err)
 			require.Len(t, tasks, 1)
 
