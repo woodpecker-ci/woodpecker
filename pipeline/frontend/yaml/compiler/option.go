@@ -146,6 +146,14 @@ func WithEnviron(env map[string]string) Option {
 	}
 }
 
+// WithAxisEnviron configures the compiler with axis environment variables
+// added to non-plugin containers only, but can also be used for filters.
+func WithAxisEnviron(env map[string]string) Option {
+	return func(compiler *Compiler) {
+		maps.Copy(compiler.axisEnv, env)
+	}
+}
+
 // WithNetworks configures the compiler with additional networks
 // to be connected to pipeline containers.
 func WithNetworks(networks ...string) Option {
