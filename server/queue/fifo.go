@@ -369,8 +369,9 @@ func (q *fifo) assignToWorker(concurrency *concurrencyIndex) (*list.Element, *wo
 	if len(q.workers) == 0 {
 		return nil, nil
 	}
+	var bestElement *list.Element
+	var bestTask *model.Task
 	var bestWorker *worker
-	var bestScore int
 
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
@@ -381,24 +382,30 @@ func (q *fifo) assignToWorker(concurrency *concurrencyIndex) (*list.Element, *wo
 			continue
 		}
 
+		var taskBestWorker *worker
+		var taskBestScore int
 		for worker := range q.workers {
 			matched, score := worker.filter(task)
-			if matched && score > bestScore {
-				bestWorker = worker
-				bestScore = score
+			if matched && (taskBestWorker == nil || score > taskBestScore) {
+				taskBestWorker = worker
+				taskBestScore = score
 			}
 		}
-		if bestWorker != nil {
-			log.Debug().
-				Str("task_id", task.ID).
-				Strs("dependencies", task.Dependencies).
-				Int("score", bestScore).
-				Msg("queue: assigned task to worker")
-			return element, bestWorker
+		if taskBestWorker == nil {
+			continue
+		}
+
+		if bestTask == nil || queueOrderLess(task, bestTask) {
+			bestElement = element
+			bestTask = task
+			bestWorker = taskBestWorker
 		}
 	}
 
-	return nil, nil
+	if bestTask != nil {
+		log.Debug().Msgf("queue: assigned task: %v with deps %v to worker", bestTask.ID, bestTask.Dependencies)
+	}
+	return bestElement, bestWorker
 }
 
 // taskOrderLess reports whether task a was instantiated before task b. Ordering
@@ -411,6 +418,15 @@ func taskOrderLess(a, b *model.Task) bool {
 
 func taskOrderCompare(a, b *model.Task) int {
 	return cmp.Or(cmp.Compare(a.Created, b.Created), cmp.Compare(a.Name, b.Name))
+}
+
+// queueOrderLess reports whether task a should be assigned before task b.
+// Higher priority runs first; equal priorities retain FIFO task ordering.
+func queueOrderLess(a, b *model.Task) bool {
+	if a.Priority != b.Priority {
+		return a.Priority > b.Priority
+	}
+	return taskOrderLess(a, b)
 }
 
 func (q *fifo) resubmitExpiredPipelines() {
