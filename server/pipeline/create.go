@@ -111,6 +111,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
+	priorityRules, err := loadQueuePriorityRules(ctx, _forge, repoUser, repo, pipeline)
+	if err != nil {
+		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, err)
+	}
+
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
 	*pipeline = *currentPipeline
 	if handleParseErrors(pipeline, parseErr) {
@@ -140,7 +145,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, err
 	}
 
-	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
+	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems, priorityRules)
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
