@@ -228,14 +228,6 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
-	&cli.StringSliceFlag{
-		Sources: cli.EnvVars("WOODPECKER_QUEUE_PRIORITY_RULES"),
-		Name:    "queue-priority-rules",
-		Usage:   "Rules that add or subtract queue priority for matching pipelines. Example: priority=100 event=push branch=main",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
-	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_SESSION_EXPIRES"),
 		Name:    "session-expires",

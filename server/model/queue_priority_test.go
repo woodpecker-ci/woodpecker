@@ -40,6 +40,21 @@ func TestParseQueuePriorityRules(t *testing.T) {
 	assert.Equal(t, "renovate*", rules[1].Sender)
 }
 
+func TestParseQueuePriorityRuleFile(t *testing.T) {
+	rules, err := ParseQueuePriorityRuleFile([]byte(`
+# default branches first
+priority=100 event=push branch=master
+priority=-20 event=pull_request event_reason=synchroniz*
+`))
+	require.NoError(t, err)
+	require.Len(t, rules, 2)
+
+	assert.Equal(t, 100, rules[0].Priority)
+	assert.Equal(t, "master", rules[0].Branch)
+	assert.Equal(t, -20, rules[1].Priority)
+	assert.Equal(t, "synchroniz*", rules[1].EventReason)
+}
+
 func TestParseQueuePriorityRulesRejectsInvalidRule(t *testing.T) {
 	tests := []string{
 		"event=push",

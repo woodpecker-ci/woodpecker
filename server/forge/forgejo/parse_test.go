@@ -275,8 +275,11 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Author:   "test",
-				Event:    "pull_request",
+				Author: "test",
+				Event:  "pull_request",
+				EventReason: []string{
+					"synchronized",
+				},
 				Commit:   "788ed8d02d3b7fcfcf6386dbcbca696aa1d4dc25",
 				Branch:   "main",
 				Ref:      "refs/pull/2/head",

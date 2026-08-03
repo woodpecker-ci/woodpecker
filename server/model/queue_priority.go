@@ -15,6 +15,8 @@
 package model
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -55,6 +57,24 @@ func ParseQueuePriorityRules(values []string) ([]QueuePriorityRule, error) {
 		rules = append(rules, rule)
 	}
 	return rules, nil
+}
+
+// ParseQueuePriorityRuleFile parses one queue priority rule per non-empty,
+// non-comment line.
+func ParseQueuePriorityRuleFile(data []byte) ([]QueuePriorityRule, error) {
+	var values []string
+	scanner := bufio.NewScanner(bytes.NewReader(data))
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		values = append(values, line)
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return ParseQueuePriorityRules(values)
 }
 
 func parseQueuePriorityRule(value string) (QueuePriorityRule, error) {
