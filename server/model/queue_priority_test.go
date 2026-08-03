@@ -21,30 +21,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseQueuePriorityRules(t *testing.T) {
-	rules, err := ParseQueuePriorityRules([]string{
-		"priority=100 repo=postgis/postgis event=push branch=stable-*",
-		"priority=-20 event=pull_request event_reason=synchronized sender=renovate*",
-	})
-	require.NoError(t, err)
-	require.Len(t, rules, 2)
-
-	assert.Equal(t, 100, rules[0].Priority)
-	assert.Equal(t, "postgis/postgis", rules[0].Repo)
-	assert.Equal(t, EventPush, rules[0].Event)
-	assert.Equal(t, "stable-*", rules[0].Branch)
-
-	assert.Equal(t, -20, rules[1].Priority)
-	assert.Equal(t, EventPull, rules[1].Event)
-	assert.Equal(t, "synchronized", rules[1].EventReason)
-	assert.Equal(t, "renovate*", rules[1].Sender)
-}
-
 func TestParseQueuePriorityRuleFile(t *testing.T) {
 	rules, err := ParseQueuePriorityRuleFile([]byte(`
 # default branches first
-priority=100 event=push branch=master
-priority=-20 event=pull_request event_reason=synchroniz*
+rules:
+  - priority: 100
+    event: push
+    branch: master
+  - priority: -20
+    event: pull_request
+    event_reason: synchroniz*
 `))
 	require.NoError(t, err)
 	require.Len(t, rules, 2)
@@ -55,20 +41,17 @@ priority=-20 event=pull_request event_reason=synchroniz*
 	assert.Equal(t, "synchroniz*", rules[1].EventReason)
 }
 
-func TestParseQueuePriorityRulesRejectsInvalidRule(t *testing.T) {
+func TestParseQueuePriorityRuleFileRejectsInvalidRule(t *testing.T) {
 	tests := []string{
-		"event=push",
-		"priority=bad event=push",
-		"priority=10 nope=value",
-		"priority=10 event=bogus",
-		"priority=10 min_rerun_count=nope",
-		"priority=10 min_rerun_count=-1",
-		"priority=10 branch=[",
+		"rules:\n  - event: push\n",
+		"rules:\n  - event: bogus\n    priority: 10\n",
+		"rules:\n  - priority: 10\n    min_rerun_count: -1\n",
+		"rules:\n  - priority: 10\n    branch: '['\n",
 	}
 
 	for _, value := range tests {
 		t.Run(value, func(t *testing.T) {
-			_, err := ParseQueuePriorityRules([]string{value})
+			_, err := ParseQueuePriorityRuleFile([]byte(value))
 			assert.Error(t, err)
 		})
 	}
@@ -86,15 +69,14 @@ func TestQueuePriority(t *testing.T) {
 		EventReason:       []string{"synchronized"},
 		RerunCount:        2,
 	}
-	rules, err := ParseQueuePriorityRules([]string{
-		"priority=80 repo=postgis/postgis branch=stable-*",
-		"priority=30 event=pull_request pr_label=needs-*",
-		"priority=-25 sender=renovate*",
-		"priority=-10 event_reason=synchronized",
-		"priority=5 min_rerun_count=2",
-		"priority=900 repo=other/project",
-	})
-	require.NoError(t, err)
+	rules := []QueuePriorityRule{
+		{Priority: 80, Repo: "postgis/postgis", Branch: "stable-*"},
+		{Priority: 30, Event: EventPull, PullLabel: "needs-*"},
+		{Priority: -25, Sender: "renovate*"},
+		{Priority: -10, EventReason: "synchronized"},
+		{Priority: 5, MinRerunCount: 2},
+		{Priority: 900, Repo: "other/project"},
+	}
 
 	assert.Equal(t, 80, QueuePriority(repo, pipeline, rules))
 }

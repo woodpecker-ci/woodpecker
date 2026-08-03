@@ -807,18 +807,25 @@ Example: `platform=linux/amd64,backend=docker`
 
 ### Queue Priority
 
-Woodpecker reads optional queue priority rules from `.woodpecker/queue-priority` on the repository's default branch.
+Woodpecker reads optional queue priority rules from `.woodpecker/queue-priority.yml` on the repository's default branch.
 
 Rules add or subtract queue priority for matching pipelines. Higher priority tasks run first; equal priorities keep the normal FIFO order.
 
-Each non-empty, non-comment line is one whitespace-separated list of `key=value` fields and must include `priority=<number>`. Supported match fields are `repo`, `event`, `branch`, `ref`, `author`, `sender`, `pr_label`, `event_reason`, and `min_rerun_count`. String fields support glob patterns.
+Each rule must include `priority`. Supported match fields are `repo`, `event`, `branch`, `ref`, `author`, `sender`, `pr_label`, `event_reason`, and `min_rerun_count`. String fields support glob patterns.
 
 Example:
 
-```ini title=".woodpecker/queue-priority"
-priority=100 event=push branch=main
-priority=80 event=push branch=stable-*
-priority=-20 event=pull_request event_reason=synchroniz*
+```yaml title=".woodpecker/queue-priority.yml"
+rules:
+  - priority: 100
+    event: push
+    branch: main
+  - priority: 80
+    event: push
+    branch: stable-*
+  - priority: -20
+    event: pull_request
+    event_reason: synchroniz*
 ```
 
 ### DEFAULT_PIPELINE_TIMEOUT

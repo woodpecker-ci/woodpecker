@@ -133,6 +133,9 @@ type Queue interface {
 	// Info returns internal queue information.
 	Info(c context.Context) InfoT
 
+	// Reprioritize updates priorities for pending and dependency-waiting tasks.
+	Reprioritize(c context.Context, priorities map[string]int) error
+
 	// Pause stops the queue from handing out new work items in Poll
 	Pause()
 

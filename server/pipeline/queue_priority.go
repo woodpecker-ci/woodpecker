@@ -24,7 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-const queuePriorityConfigPath = ".woodpecker/queue-priority"
+const queuePriorityConfigPath = ".woodpecker/queue-priority.yml"
 
 func loadQueuePriorityRules(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ([]model.QueuePriorityRule, error) {
 	if repo.Branch == "" {
