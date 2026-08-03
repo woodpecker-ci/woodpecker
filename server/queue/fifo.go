@@ -225,6 +225,25 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	return stats
 }
 
+// Reprioritize updates priorities for pending and dependency-waiting tasks.
+func (q *fifo) Reprioritize(_ context.Context, priorities map[string]int) error {
+	q.Lock()
+	defer q.Unlock()
+
+	updateListTaskPriorities(q.pending, priorities)
+	updateListTaskPriorities(q.waitingOnDeps, priorities)
+	return nil
+}
+
+func updateListTaskPriorities(tasks *list.List, priorities map[string]int) {
+	for element := tasks.Front(); element != nil; element = element.Next() {
+		task, _ := element.Value.(*model.Task)
+		if priority, ok := priorities[task.ID]; ok {
+			task.Priority = priority
+		}
+	}
+}
+
 // Pause stops the queue from handing out new work items in Poll.
 func (q *fifo) Pause() {
 	q.Lock()

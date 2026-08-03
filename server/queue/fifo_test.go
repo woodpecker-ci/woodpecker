@@ -964,6 +964,27 @@ func TestFifoPriority(t *testing.T) {
 		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
 		waitForProcess()
 	})
+
+	t.Run("reprioritize changes next poll order", func(t *testing.T) {
+		oldFirst := &model.Task{ID: "priority-old-first", Created: 100, Priority: 0}
+		newFirst := &model.Task{ID: "priority-new-first", Created: 200, Priority: 0}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{oldFirst, newFirst}))
+		assert.NoError(t, q.Reprioritize(ctx, map[string]int{"priority-new-first": 50}))
+		waitForProcess()
+
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "priority-new-first", got.ID)
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		got, err = q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "priority-old-first", got.ID)
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+	})
 }
 
 func TestFifoLeaseManagement(t *testing.T) {

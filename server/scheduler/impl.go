@@ -149,6 +149,34 @@ func (p *impl) StartPipeline(c context.Context, repo *model.Repo, pipeline *mode
 	return p.q.PushAtOnce(c, tasks)
 }
 
+func (p *impl) ReprioritizeRepo(c context.Context, repo *model.Repo, rules []model.QueuePriorityRule) error {
+	priorities := map[string]int{}
+	info := p.q.Info(c)
+	collect := func(tasks []*model.Task) error {
+		for _, task := range tasks {
+			if task.RepoID != repo.ID {
+				continue
+			}
+			pipeline, err := p.store.GetPipeline(task.PipelineID)
+			if err != nil {
+				return err
+			}
+			priorities[task.ID] = model.QueuePriority(repo, pipeline, rules)
+		}
+		return nil
+	}
+	if err := collect(info.Pending); err != nil {
+		return err
+	}
+	if err := collect(info.WaitingOnDeps); err != nil {
+		return err
+	}
+	if len(priorities) == 0 {
+		return nil
+	}
+	return p.q.Reprioritize(c, priorities)
+}
+
 // CancelWorkflows evicts the given workflows from the queue, signaling a
 // cancellation (queue.ErrCancel) to any agents currently waiting on them.
 // An empty list is a no-op.

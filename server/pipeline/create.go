@@ -115,6 +115,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if err != nil {
 		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, err)
 	}
+	if len(priorityRules) > 0 && server.Config.Services.Scheduler != nil {
+		if err := server.Config.Services.Scheduler.ReprioritizeRepo(ctx, repo, priorityRules); err != nil {
+			log.Error().Err(err).Str("repo", repo.FullName).Msg("failed to reprioritize queued tasks")
+		}
+	}
 
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil, false)
 	*pipeline = *currentPipeline
