@@ -181,6 +181,13 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		return kube_core_v1.PodSpec{}, err
 	}
 
+	hostUsers := options.HostUsers
+	// if the step hasn't explicitly requested to use or not use the host user
+	// namespace, default to the config
+	if hostUsers == nil && config.DisableHostUserns {
+		hostUsers = newBool(false)
+	}
+
 	spec := kube_core_v1.PodSpec{
 		RestartPolicy:     kube_core_v1.RestartPolicyNever,
 		RuntimeClassName:  options.RuntimeClassName,
@@ -192,8 +199,8 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		NodeSelector:      nodeSelector(options.NodeSelector, config.PodNodeSelector, config.PodNodeSelectorAllowFromStep, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:       tolerations(options.Tolerations),
 		Affinity:          affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
-		SecurityContext:   podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged, options.HostUsers),
-		HostUsers:         options.HostUsers,
+		SecurityContext:   podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged, hostUsers),
+		HostUsers:         hostUsers,
 	}
 
 	// Only allow the step to set the service account name if explicitly enabled by the admin.
@@ -590,7 +597,8 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 	// With user namespaces (hostUsers=false), UID 0 inside the container maps
 	// to a non-root UID on the host, so requesting root is safe.
-	allowRoot := stepPrivileged || (hostUsers != nil && !*hostUsers)
+	usingUserns := (hostUsers != nil && !*hostUsers)
+	allowRoot := stepPrivileged || usingUserns
 
 	if secCtxConf.RunAsNonRoot {
 		nonRoot = newBool(true)
@@ -620,8 +628,8 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 			fsGroup = sc.FSGroup
 		}
 
-		// only allow to set nonRoot if it's not set globally already
-		if nonRoot == nil && sc.RunAsNonRoot != nil {
+		// only allow to set nonRoot if it's not set globally already or using user namespaces
+		if (nonRoot == nil || usingUserns) && sc.RunAsNonRoot != nil {
 			nonRoot = sc.RunAsNonRoot
 		}
 

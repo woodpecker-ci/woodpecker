@@ -81,6 +81,7 @@ type config struct {
 	PriorityClassName               string
 	StopTimeout                     int64
 	PermissionInitImage             string
+	DisableHostUserns               bool
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -127,6 +128,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 					FSGroup:      newInt64(defaultFSGroup),
 				},
+				DisableHostUserns:               c.Bool("backend-k8s-disable-host-userns"),
 				NativeSecretsAllowFromStep:      c.Bool("backend-k8s-allow-native-secrets"),
 				ServiceAccountNameAllowFromStep: c.Bool("backend-k8s-service-account-name-allow-from-step"),
 				StopTimeout:                     c.Int64("backend-k8s-stop-timeout"),

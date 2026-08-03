@@ -672,6 +672,24 @@ func TestPodPrivilege(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
 
+	// global runAsNonRoot is true and override is requested value by security context
+	// and hostUsers=false: applied
+	secCtx = SecurityContext{
+		RunAsNonRoot: newBool(false),
+	}
+	pod, err = createTestPod(false, true, secCtx, newBool(false))
+	assert.NoError(t, err)
+	assert.False(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+
+	// global runAsNonRoot is true and override is requested value by security context
+	// and hostUsers=true: ignored
+	secCtx = SecurityContext{
+		RunAsNonRoot: newBool(false),
+	}
+	pod, err = createTestPod(false, true, secCtx, newBool(true))
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+
 	// non-privileged step with allowPrivilegeEscalation=false: applied
 	secCtx = SecurityContext{
 		AllowPrivilegeEscalation: newBool(false),
@@ -1457,6 +1475,44 @@ func TestHostUsers(t *testing.T) {
 
 	// hostUsers set to true: explicitly use host user namespace
 	pod, err = createTestPod(newBool(true))
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.True(t, *pod.Spec.HostUsers)
+}
+
+func TestDisableHostUserns(t *testing.T) {
+	createTestPod := func(disableHostUserns bool, hostUsers *bool) (*kube_core_v1.Pod, error) {
+		return mkPod(&types.Step{
+			Name:  "go-test",
+			Image: "golang:1.16",
+			UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		}, &config{
+			Namespace:         "woodpecker",
+			DisableHostUserns: disableHostUserns,
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+			HostUsers: hostUsers,
+		}, "11301")
+	}
+
+	// default: option not enabled, hostUsers option not explicitly set: nil
+	pod, err := createTestPod(false, nil)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.HostUsers)
+
+	// option enabled, hostUsers option not explicitly set: false
+	pod, err = createTestPod(true, nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.False(t, *pod.Spec.HostUsers)
+
+	// option enabled, hostUsers option explicitly set to false: false
+	pod, err = createTestPod(true, newBool(false))
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.False(t, *pod.Spec.HostUsers)
+
+	// option enabled, hostUsers option explicitly set to true: true
+	pod, err = createTestPod(true, newBool(true))
 	assert.NoError(t, err)
 	assert.NotNil(t, pod.Spec.HostUsers)
 	assert.True(t, *pod.Spec.HostUsers)
