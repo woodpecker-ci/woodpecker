@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-03
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -18,6 +18,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/getkin/kin-openapi to v0.146.0 [[#6944](https://github.com/woodpecker-ci/woodpecker/pull/6944)]
 - Update web npm deps non-major [[#6928](https://github.com/woodpecker-ci/woodpecker/pull/6928)]
 - Update golang-packages [[#6937](https://github.com/woodpecker-ci/woodpecker/pull/6937)]
 
