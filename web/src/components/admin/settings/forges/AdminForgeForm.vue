@@ -100,6 +100,11 @@
         </InputField>
       </template>
 
+      <InputField v-slot="{ id }" :label="$t('allowed_orgs')">
+        <p>{{ $t('allowed_orgs_desc') }}</p>
+        <TextField :id="id" v-model="allowedOrgs" :placeholder="$t('allowed_orgs_placeholder')" />
+      </InputField>
+
       <InputField :label="$t('skip_verify')">
         <Checkbox
           :label="$t('skip_verify_desc')"
@@ -249,6 +254,19 @@ function setAdditionalOptions<T extends keyof Record<string, unknown>>(
     },
   };
 }
+
+const allowedOrgs = computed({
+  get: () => forge.value?.orgs?.join(', ') ?? '',
+  set: (value) => {
+    forge.value = {
+      ...forge.value,
+      orgs: value
+        .split(',')
+        .map((org) => org.trim())
+        .filter((org) => org !== ''),
+    };
+  },
+});
 
 const replaceRegex = /\/$/;
 
