@@ -25,12 +25,12 @@ steps:
     image: debian
     commands:
       - echo "This is the build step"
-      - echo "binary-data-123" > executable
+      - echo "some-data" > some-file.txt
   - name: a-test-step
-    image: golang:1.16
+    image: alpine
     commands:
       - echo "Testing ..."
-      - ./executable
+      - cat some-file.txt
 ```
 
 **So what did we do here?**
@@ -51,9 +51,9 @@ steps:
 
 The steps are executed in the order they are defined, so `build` will be executed first and then `a-test-step`.
 
-In the `build` step we use the `debian` image and build a "binary file" called `executable`.
+In the `build` step we use the `debian` image and create a file called `some-file.txt`.
 
-In the `a-test-step` we use the `golang:1.16` image and run the `executable` file to test it.
+In the `a-test-step` we use the `alpine` image and output the `some-file.txt` file contents.
 
 You can use any image from registries like the [Docker Hub](https://hub.docker.com/search?type=image) you have access to:
 
