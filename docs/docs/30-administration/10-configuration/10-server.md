@@ -18,7 +18,7 @@ You can also restrict the registration:
   WOODPECKER_ADMIN=john.smith,jane_doe
   ```
 
-- open registration and filtering by organizational affiliation with the setting `WOODPECKER_ORGS`
+- open registration and filtering by organizational affiliation with the setting `WOODPECKER_ORGS`. For GitLab forges group names have to exact match, so members of group `group` are not permitted access if you set `WOODPECKER_ORGS=group/subgroup`.
 
   ```ini
   WOODPECKER_OPEN=true
