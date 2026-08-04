@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @zmully
+@gerbsen, @qwerty287, @zmully
+
+### 🔒 Security
+
+- Change group identifier to full_path for GitLab [[#6950](https://github.com/woodpecker-ci/woodpecker/pull/6950)]
 
 ### 📈 Enhancement
 
