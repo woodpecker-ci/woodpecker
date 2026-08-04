@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@gerbsen, @qwerty287, @zmully
+@gerbsen, @kastl-ars, @qwerty287, @zmully
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 📚 Documentation
 
+- [documentation] make intro example actually usable [[#6953](https://github.com/woodpecker-ci/woodpecker/pull/6953)]
 - Lock file maintenance [[#6940](https://github.com/woodpecker-ci/woodpecker/pull/6940)]
 - Update docs npm deps non-major [[#6925](https://github.com/woodpecker-ci/woodpecker/pull/6925)]
 - Fix old link to Gitea docs [[#6932](https://github.com/woodpecker-ci/woodpecker/pull/6932)]
