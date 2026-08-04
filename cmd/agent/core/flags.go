@@ -47,10 +47,10 @@ var flags = []cli.Flag{
 		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport (tls)",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_GRPC_VERIFY"),
+		Sources: cli.EnvVars("WOODPECKER_GRPC_SKIP_VERIFY", "WOODPECKER_GRPC_VERIFY"), // TODO remove GRPC_VERIFY in next major
 		Name:    "grpc-skip-insecure",
 		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
-		Value:   true,
+		Value:   false,
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_RETRY_TIMEOUT"),
