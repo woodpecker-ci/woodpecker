@@ -712,7 +712,7 @@ Example: `WOODPECKER_ADMIN=user1,user2`
 - Name: `WOODPECKER_ORGS`
 - Default: none
 
-Comma-separated list of approved organizations.
+Comma-separated list of approved organizations. For GitLab forges this is the `full_path` [attribute](https://docs.gitlab.com/api/groups/).
 
 Example: `org1,org2`
 
