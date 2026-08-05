@@ -92,6 +92,25 @@ func toHostConfig(step *types.Step, conf *config, options BackendOptions) (*cont
 
 	if step.Privileged {
 		config.Runtime = options.Runtime
+
+		for _, r := range options.DeviceRequests {
+			/*
+
+			 backend_options:
+			     driver: nvidia
+			     count: -1
+			     capabilities: [[gpu]]
+
+			*/
+			config.Resources.DeviceRequests = append(config.Resources.DeviceRequests, container.DeviceRequest{
+				Driver:       r.Driver,
+				Count:        r.Count,
+				Capabilities: r.Capabilities,
+				DeviceIDs:    r.DeviceIDs,
+				Options:      r.Options,
+			})
+		}
+
 	}
 	if conf.apparmor != "" {
 		config.SecurityOpt = []string{"apparmor=" + conf.apparmor}
