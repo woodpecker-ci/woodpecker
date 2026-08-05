@@ -32,6 +32,12 @@ var Flags = []cli.Flag{
 		Value:   false,
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_CLUSTER_DOMAIN"),
+		Name:    "backend-k8s-cluster-domain",
+		Usage:   "backend k8s cluster domain, used to build the DNS search entry that makes services reachable by hostname",
+		Value:   "cluster.local",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_VOLUME_SIZE"),
 		Name:    "backend-k8s-volume-size",
 		Usage:   "backend k8s volume size (default 10G)",
