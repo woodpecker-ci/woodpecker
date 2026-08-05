@@ -23,6 +23,7 @@ import (
 // BackendOptions defines all the advanced options for the docker backend.
 type BackendOptions struct {
 	User string `mapstructure:"user"`
+	Runtime string `mapstructure:"runtime"`
 }
 
 func parseBackendOptions(step *backend_types.Step) (BackendOptions, error) {
