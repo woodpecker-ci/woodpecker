@@ -47,3 +47,15 @@ func TestOrgsRejectsSameNamedGroup(t *testing.T) {
 	// subgroups are not matched either, only exact membership counts
 	assert.False(t, org.IsMember([]*model.Team{{Login: "woodpecker/infra"}}))
 }
+
+func TestOrgsIgnoresCase(t *testing.T) {
+	org := NewOrgs([]string{"Woodpecker-CI"})
+
+	// the configured name and the one reported by the forge may differ in case
+	assert.True(t, org.IsMember([]*model.Team{{Login: "woodpecker-ci"}}))
+	assert.True(t, org.IsMember([]*model.Team{{Login: "WOODPECKER-CI"}}))
+
+	// this also holds for a GitLab full path
+	group := NewOrgs([]string{"my-group/My-Subgroup"})
+	assert.True(t, group.IsMember([]*model.Team{{Login: "My-Group/my-subgroup"}}))
+}

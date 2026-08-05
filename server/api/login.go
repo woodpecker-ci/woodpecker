@@ -164,6 +164,10 @@ func HandleAuth(c *gin.Context) {
 				isMember = true
 				break
 			}
+			// we don't want to walk through 10k page requests if there are no more teams
+			if len(teams) < perPage {
+				break
+			}
 		}
 		if !isMember {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")

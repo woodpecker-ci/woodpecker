@@ -395,6 +395,78 @@ func TestHandleAuth(t *testing.T) {
 		_forge.AssertNotCalled(t, "Teams", mock.Anything, mock.Anything, mock.Anything)
 	})
 
+	t.Run("should stop requesting teams once a page is not full", func(t *testing.T) {
+		_manager := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		_store := store_mocks.NewMockStore(t)
+		server.Config.Services.Manager = _manager
+		server.Config.Permissions.Open = true
+		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", _store)
+		c.Request = &http.Request{
+			Header: make(http.Header),
+			URL: &url.URL{
+				Scheme: "https",
+			},
+		}
+
+		teamsCalls := 0
+		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+		// a single team is less than a full page, so there is nothing more to fetch
+		_forge.On("Teams", mock.Anything, user, mock.Anything).Run(func(mock.Arguments) {
+			teamsCalls++
+		}).Return([]*model.Team{
+			{
+				Login: "org2",
+			},
+		}, nil)
+
+		api.HandleAuth(c)
+
+		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+		assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+		// without stopping early this would walk through all maxPage pages
+		assert.Equal(t, 1, teamsCalls)
+	})
+
+	t.Run("should stop requesting teams if the forge does not implement it", func(t *testing.T) {
+		_manager := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		_store := store_mocks.NewMockStore(t)
+		server.Config.Services.Manager = _manager
+		server.Config.Permissions.Open = true
+		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", _store)
+		c.Request = &http.Request{
+			Header: make(http.Header),
+			URL: &url.URL{
+				Scheme: "https",
+			},
+		}
+
+		teamsCalls := 0
+		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+		_forge.On("Teams", mock.Anything, user, mock.Anything).Run(func(mock.Arguments) {
+			teamsCalls++
+		}).Return(nil, forge_types.ErrNotImplemented)
+
+		api.HandleAuth(c)
+
+		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+		assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+		assert.Equal(t, 1, teamsCalls)
+	})
+
 	t.Run("should create an user org if it does not exists", func(t *testing.T) {
 		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
