@@ -1,9 +1,15 @@
 # Distribution packages
 
+:::tip
+For a full list of operating systems and architectures that Woodpecker is built for, including which components are available on each, see [Supported platforms](./05-supported-platforms.md).
+:::
+
 ## Official packages
 
 - DEB
 - RPM
+
+DEB and RPM packages are built for `linux/amd64` and `linux/arm64`. For other architectures, use the binary tarballs or container images linked from the [Supported platforms](./05-supported-platforms.md) page.
 
 The pre-built packages are available on the [GitHub releases](https://github.com/woodpecker-ci/woodpecker/releases/latest) page. The packages can be installed using the package manager of your distribution.
 

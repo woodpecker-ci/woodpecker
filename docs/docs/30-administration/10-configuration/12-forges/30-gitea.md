@@ -63,7 +63,7 @@ If you run the Woodpecker CI server on the same host as the Gitea instance, you 
 ALLOWED_HOST_LIST=external,loopback
 ```
 
-For reference see [Configuration Cheat Sheet](https://docs.gitea.io/en-us/config-cheat-sheet/#webhook-webhook).
+For reference see [Configuration Cheat Sheet](https://docs.gitea.com/administration/config-cheat-sheet#webhook-webhook).
 
 ![gitea oauth setup](gitea_oauth.gif)
 

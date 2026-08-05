@@ -36,14 +36,14 @@ The file records the selected context and its non-secret connection settings:
 
 ` + "```json" + `
 {
-	"current_context": "production",
-	"contexts": {
-		"production": {
-			"name": "production",
-			"server_url": "https://ci.example.test",
-			"log_level": "info"
-		}
-	}
+  "current_context": "production",
+  "contexts": {
+    "production": {
+      "name": "production",
+      "server_url": "https://ci.example.test",
+      "log_level": "info"
+    }
+  }
 }
 ` + "```" + `
 
