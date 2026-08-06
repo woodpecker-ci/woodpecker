@@ -48,6 +48,26 @@ func TestOrgsRejectsSameNamedGroup(t *testing.T) {
 	assert.False(t, org.IsMember([]*model.Team{{Login: "woodpecker/infra"}}))
 }
 
+func TestOrgsWith(t *testing.T) {
+	global := NewOrgs([]string{"woodpecker-ci"})
+	merged := global.With([]string{"my-group"})
+
+	// both the global and the added orgs are allowed
+	assert.True(t, merged.IsConfigured)
+	assert.True(t, merged.IsMember([]*model.Team{{Login: "woodpecker-ci"}}))
+	assert.True(t, merged.IsMember([]*model.Team{{Login: "my-group"}}))
+	assert.False(t, merged.IsMember([]*model.Team{{Login: "other-group"}}))
+
+	// the original list is not modified
+	assert.False(t, global.IsMember([]*model.Team{{Login: "my-group"}}))
+
+	// adding to an unconfigured list only checks the added orgs
+	fromEmpty := NewOrgs(nil).With([]string{"my-group"})
+	assert.True(t, fromEmpty.IsConfigured)
+	assert.True(t, fromEmpty.IsMember([]*model.Team{{Login: "my-group"}}))
+	assert.False(t, fromEmpty.IsMember([]*model.Team{{Login: "woodpecker-ci"}}))
+}
+
 func TestOrgsIgnoresCase(t *testing.T) {
 	org := NewOrgs([]string{"Woodpecker-CI"})
 

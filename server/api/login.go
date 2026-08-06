@@ -336,14 +336,14 @@ func HandleAuth(c *gin.Context) {
 }
 
 // allowedOrgsForForge returns the organizations a user has to be a member of to
-// be allowed to log in using the given forge. Orgs configured on the forge itself
-// take precedence over the global WOODPECKER_ORGS setting, as org names are only
-// unique within a single forge.
+// be allowed to log in using the given forge. The global WOODPECKER_ORGS setting
+// applies to every forge, orgs configured on a forge itself are allowed in
+// addition to it.
 func allowedOrgsForForge(forgeModel *model.Forge) *permissions.Orgs {
-	if len(forgeModel.Orgs) > 0 {
-		return permissions.NewOrgs(forgeModel.Orgs)
+	if len(forgeModel.Orgs) == 0 {
+		return server.Config.Permissions.Orgs
 	}
-	return server.Config.Permissions.Orgs
+	return server.Config.Permissions.Orgs.With(forgeModel.Orgs)
 }
 
 func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {

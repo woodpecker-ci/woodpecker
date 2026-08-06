@@ -27,8 +27,11 @@ Only **one** forge can be configured using environment variables, for example [G
 
 ### Restricting who can log in
 
-[`WOODPECKER_ORGS`](../10-server.md#orgs) applies to all connected forges. As organization names are only unique within a single forge, someone could create an organization with an approved name on another connected forge to gain access.
-Each forge can therefore carry its own list under `Settings` -> `Forges` -> `Advanced options` -> `Allowed organizations`, which replaces the global setting for logins using that forge. Forges without an own list keep using `WOODPECKER_ORGS`; if neither is set, organizations are not checked at all.
+[`WOODPECKER_ORGS`](../10-server.md#orgs) applies to all connected forges. In addition, each forge can carry its own list under `Settings` -> `Forges` -> `Advanced options` -> `Allowed organizations`. Members of an organization on that list may log in using that forge, on top of everyone allowed by `WOODPECKER_ORGS`. A forge without an own list only uses `WOODPECKER_ORGS`; if neither is set, organizations are not checked at all.
+
+As organization names are only unique within a single forge, someone could create an organization with a name from `WOODPECKER_ORGS` on another connected forge to gain access. If you connected more than one forge, keep `WOODPECKER_ORGS` empty and configure the allowed organizations of each forge instead, including the one from the environment.
+
+The forge configured through environment variables has no own environment setting for this, its list is edited in the admin UI like the one of any other forge. Only the options listed in its docs are written back on server start, the allowed organizations are kept.
 
 Use the organization name, for GitLab the group's [`full_path`](https://docs.gitlab.com/api/groups/) like `my-group/my-subgroup`. Matching is case-insensitive and only happens while logging in. Note that a forge can hide organizations from Woodpecker although the user is a member of them, see GitHub and [GitLab](40-gitlab.md#allowed-organizations).
 

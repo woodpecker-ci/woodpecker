@@ -291,13 +291,46 @@ func TestHandleAuth(t *testing.T) {
 		assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
 	})
 
-	t.Run("should deny a user not being a member of the forge orgs", func(t *testing.T) {
+	t.Run("should deny a user being a member of neither the global nor the forge orgs", func(t *testing.T) {
 		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
-		// the user is a member of the globally allowed org, but the forge only allows another one
+		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", _store)
+		c.Request = &http.Request{
+			Header: make(http.Header),
+			URL: &url.URL{
+				Scheme: "https",
+			},
+		}
+
+		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1, Orgs: []string{"org2"}}, nil)
+		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+		_forge.On("Teams", mock.Anything, user, mock.Anything).Return([]*model.Team{
+			{
+				Login: "org3",
+			},
+		}, nil)
+
+		api.HandleAuth(c)
+
+		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+		assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+	})
+
+	t.Run("should allow a user being a member of the global orgs on a forge with own orgs", func(t *testing.T) {
+		_manager := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		_store := store_mocks.NewMockStore(t)
+		server.Config.Services.Manager = _manager
+		server.Config.Permissions.Open = true
+		// the global orgs apply to every forge, the forge orgs are allowed in addition
 		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
 		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
 		w := httptest.NewRecorder()
@@ -318,11 +351,17 @@ func TestHandleAuth(t *testing.T) {
 				Login: "org1",
 			},
 		}, nil)
+		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
+		_store.On("OrgGet", org.ID).Return(org, nil)
+		_store.On("UpdateUser", mock.Anything).Return(nil)
+		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
 
 		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
-		assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+		assert.Equal(t, "/", c.Writer.Header().Get("Location"))
 	})
 
 	t.Run("should allow a user being a member of the forge orgs", func(t *testing.T) {
@@ -331,7 +370,7 @@ func TestHandleAuth(t *testing.T) {
 		_store := store_mocks.NewMockStore(t)
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
-		// the global org filter does not apply as the forge defines its own one
+		// the forge orgs are allowed in addition to the global ones
 		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
 		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
 		w := httptest.NewRecorder()
