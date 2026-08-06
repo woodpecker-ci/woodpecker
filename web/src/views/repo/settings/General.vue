@@ -18,28 +18,18 @@
       </InputField>
 
       <InputField
-        :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
+        :label="$t('repo.settings.general.netrc_trusted.netrc_trusted')"
         docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
       >
         <template #default="{ id }">
-          <div class="flex flex-col gap-2">
-            <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
-              <TextField :id="id" :model-value="image" disabled />
-              <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
-            </div>
-            <div class="flex gap-2">
-              <TextField
-                :id="id"
-                v-model="newImage"
-                :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
-                @keydown.enter.prevent="addNewImage"
-              />
-              <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
-            </div>
-          </div>
+          <ListEditor
+            :id="id"
+            v-model="repoSettings.netrc_trusted"
+            :placeholder="$t('repo.settings.general.netrc_trusted.placeholder')"
+          />
         </template>
         <template #description>
-          {{ $t('repo.settings.general.netrc_only_trusted.desc') }}
+          {{ $t('repo.settings.general.netrc_trusted.desc') }}
         </template>
       </InputField>
 
@@ -98,16 +88,7 @@
         :label="$t('require_approval.allowed_users.allowed_users')"
       >
         <template #default="{ id }">
-          <div class="flex flex-col gap-2">
-            <div v-for="allowedUser in repoSettings.approval_allowed_users" :key="allowedUser" class="flex gap-2">
-              <TextField :id="id" :model-value="allowedUser" disabled />
-              <Button type="button" color="gray" start-icon="trash" @click="removeUser(allowedUser)" />
-            </div>
-            <div class="flex gap-2">
-              <TextField :id="id" v-model="newUser" :placeholder="$t('username')" @keydown.enter.prevent="addNewUser" />
-              <Button type="button" color="gray" start-icon="plus" @click="addNewUser" />
-            </div>
-          </div>
+          <ListEditor :id="id" v-model="repoSettings.approval_allowed_users" :placeholder="$t('username')" />
         </template>
         <template #description>
           {{ $t('require_approval.allowed_users.desc') }}
@@ -191,6 +172,7 @@ import Checkbox from '~/components/form/Checkbox.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import type { CheckboxOption, RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
+import ListEditor from '~/components/form/ListEditor.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
 import TextField from '~/components/form/TextField.vue';
@@ -277,38 +259,6 @@ const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
   },
   { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
 ];
-
-const newImage = ref('');
-function addNewImage() {
-  if (!newImage.value) {
-    return;
-  }
-  repoSettings.value?.netrc_trusted.push(newImage.value);
-  newImage.value = '';
-}
-function removeImage(image: string) {
-  if (!repoSettings.value) {
-    throw new Error('Unexpected: repoSettings should be set');
-  }
-
-  repoSettings.value.netrc_trusted = repoSettings.value.netrc_trusted.filter((i) => i !== image);
-}
-
-const newUser = ref('');
-function addNewUser() {
-  if (!newUser.value) {
-    return;
-  }
-  repoSettings.value?.approval_allowed_users.push(newUser.value);
-  newUser.value = '';
-}
-function removeUser(user: string) {
-  if (!repoSettings.value) {
-    throw new Error('Unexpected: repoSettings should be set');
-  }
-
-  repoSettings.value.approval_allowed_users = repoSettings.value.approval_allowed_users.filter((i) => i !== user);
-}
 
 useWPTitle(computed(() => [i18n.t('repo.settings.general.project'), repo.value.full_name]));
 </script>
