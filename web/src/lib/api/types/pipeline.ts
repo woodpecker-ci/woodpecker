@@ -62,6 +62,9 @@ export interface Pipeline {
   // The alias for the commit.
   ref: string;
 
+  // Tag name when the pipeline was triggered for a tag (tag push, release, or manual tag run).
+  tag_title?: string;
+
   // The mapping from the local repository to a branch in the forge.
   refspec: string;
 
