@@ -18,18 +18,19 @@
       </InputField>
 
       <InputField
-        :label="$t('repo.settings.general.netrc_trusted.netrc_trusted')"
+        :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
         docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
       >
         <template #default="{ id }">
           <ListEditor
             :id="id"
+            ref="netrcTrustedEditor"
             v-model="repoSettings.netrc_trusted"
-            :placeholder="$t('repo.settings.general.netrc_trusted.placeholder')"
+            :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
           />
         </template>
         <template #description>
-          {{ $t('repo.settings.general.netrc_trusted.desc') }}
+          {{ $t('repo.settings.general.netrc_only_trusted.desc') }}
         </template>
       </InputField>
 
@@ -88,7 +89,12 @@
         :label="$t('require_approval.allowed_users.allowed_users')"
       >
         <template #default="{ id }">
-          <ListEditor :id="id" v-model="repoSettings.approval_allowed_users" :placeholder="$t('username')" />
+          <ListEditor
+            :id="id"
+            ref="approvalAllowedUsersEditor"
+            v-model="repoSettings.approval_allowed_users"
+            :placeholder="$t('username')"
+          />
         </template>
         <template #description>
           {{ $t('require_approval.allowed_users.desc') }}
@@ -164,7 +170,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -198,6 +204,9 @@ const { defaultConfigPaths } = useConfig();
 const repo = requiredInject('repo');
 const repoSettings = ref<RepoSettings>();
 
+const netrcTrustedEditor = useTemplateRef<InstanceType<typeof ListEditor>>('netrcTrustedEditor');
+const approvalAllowedUsersEditor = useTemplateRef<InstanceType<typeof ListEditor>>('approvalAllowedUsersEditor');
+
 function loadRepoSettings() {
   repoSettings.value = {
     config_file: repo.value.config_file,
@@ -222,6 +231,10 @@ const { doSubmit: saveRepoSettings, isLoading: isSaving } = useAsyncAction(async
   if (!repoSettings.value) {
     throw new Error('Unexpected: Repo-Settings should be set');
   }
+
+  // an entry the user typed without confirming it should still be saved
+  netrcTrustedEditor.value?.commitPendingItem();
+  approvalAllowedUsersEditor.value?.commitPendingItem();
 
   await apiClient.updateRepo(repo.value.id, repoSettings.value);
   await loadRepo();

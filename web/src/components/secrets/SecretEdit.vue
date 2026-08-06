@@ -28,7 +28,7 @@
           :id="id"
           ref="imagesEditor"
           v-model="innerValue.images"
-          :placeholder="$t('secrets.plugins.placeholder')"
+          :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
         />
       </InputField>
 

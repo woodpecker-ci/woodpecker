@@ -119,8 +119,8 @@
           "allow": "Allow Deployments",
           "desc": "Allow deployments for successful pipelines. All users with push permissions can trigger these, so use with caution."
         },
-        "netrc_trusted": {
-          "netrc_trusted": "Custom trusted clone plugins",
+        "netrc_only_trusted": {
+          "netrc_only_trusted": "Custom trusted clone plugins",
           "desc": "Plugins that get access to netrc credentials that can be used to clone repositories from the forge or push them into the forge.",
           "placeholder": "Plugin image"
         },
@@ -507,8 +507,7 @@
     "saved": "Secret saved",
     "plugins": {
       "images": "Available only for the following plugins",
-      "desc": "List of plugin images where this secret is available. Leave empty to allow all plugins and normal steps.",
-      "placeholder": "Plugin image"
+      "desc": "List of plugin images where this secret is available. Leave empty to allow all plugins and normal steps."
     },
     "events": {
       "events": "Available at the following events",
