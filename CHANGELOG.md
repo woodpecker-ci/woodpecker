@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-05
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,7 +12,7 @@
 
 ### 📈 Enhancement
 
-- Rename `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY` and fix docu [[#6947](https://github.com/woodpecker-ci/woodpecker/pull/6947)]
+- Enable grpc ssl verifycation by default. Rename `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY` and fix docu [[#6947](https://github.com/woodpecker-ci/woodpecker/pull/6947)]
 - Update frontend schema.json for documented backend options [[#6933](https://github.com/woodpecker-ci/woodpecker/pull/6933)]
 
 ### 📚 Documentation
@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.56.0 [[#6960](https://github.com/woodpecker-ci/woodpecker/pull/6960)]
 - Update module github.com/getkin/kin-openapi to v0.146.0 [[#6944](https://github.com/woodpecker-ci/woodpecker/pull/6944)]
 - Lock file maintenance [[#6940](https://github.com/woodpecker-ci/woodpecker/pull/6940)]
 - Update web npm deps non-major [[#6928](https://github.com/woodpecker-ci/woodpecker/pull/6928)]
