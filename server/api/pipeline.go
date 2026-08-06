@@ -65,15 +65,34 @@ func CreatePipeline(c *gin.Context) {
 		return
 	}
 
-	user := session.User(c)
-
-	lastCommit, err := _forge.BranchHead(c, user, repo, opts.Branch)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch branch head: %w", err))
+	if err := opts.Validate(); err != nil {
+		c.String(http.StatusBadRequest, "%s", err.Error())
 		return
 	}
 
-	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
+	user := session.User(c)
+
+	var (
+		lastCommit *model.Commit
+		label      string
+	)
+	switch {
+	case opts.Branch != "":
+		lastCommit, err = _forge.BranchHead(c, user, repo, opts.Branch)
+		label = opts.Branch
+	case opts.Tag != "":
+		lastCommit, err = _forge.TagHead(c, user, repo, opts.Tag)
+		label = opts.Tag
+	default:
+		lastCommit, err = _forge.Commit(c, user, repo, opts.SHA)
+		label = opts.SHA
+	}
+	if err != nil {
+		c.String(http.StatusBadRequest, "could not resolve ref: %s", err)
+		return
+	}
+
+	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts, label)
 
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
@@ -88,17 +107,15 @@ func CreatePipeline(c *gin.Context) {
 	}
 }
 
-func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
-	return &model.Pipeline{
+func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions, label string) *model.Pipeline {
+	pipeline := &model.Pipeline{
 		Event:     event,
 		Commit:    commit.SHA,
-		Branch:    opts.Branch,
 		Timestamp: time.Now().UTC().Unix(),
 
 		Avatar:  user.Avatar,
-		Message: "MANUAL PIPELINE @ " + opts.Branch,
+		Message: "MANUAL PIPELINE @ " + label,
 
-		Ref:                 opts.Branch,
 		AdditionalVariables: opts.Variables,
 
 		Author: user.Login,
@@ -106,6 +123,17 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 		ForgeURL: commit.ForgeURL,
 	}
+	switch {
+	case opts.Tag != "":
+		pipeline.Ref = "refs/tags/" + opts.Tag
+		pipeline.TagTitle = opts.Tag
+	case opts.SHA != "":
+		pipeline.Ref = commit.SHA
+	default:
+		pipeline.Branch = opts.Branch
+		pipeline.Ref = opts.Branch
+	}
+	return pipeline
 }
 
 // GetPipelines

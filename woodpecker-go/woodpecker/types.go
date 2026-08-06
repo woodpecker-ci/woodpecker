@@ -270,8 +270,17 @@ type (
 
 	// PipelineOptions is the JSON data for creating a new pipeline.
 	PipelineOptions struct {
-		Branch    string            `json:"branch"`
+		Branch    string            `json:"branch,omitempty"`
+		Tag       string            `json:"tag,omitempty"`
+		SHA       string            `json:"sha,omitempty"`
 		Variables map[string]string `json:"variables"`
+	}
+
+	// RepoTag represents a repository tag.
+	RepoTag struct {
+		Name      string `json:"name"`
+		SHA       string `json:"sha,omitempty"`
+		CreatedAt int64  `json:"created_at,omitempty"`
 	}
 
 	// Agent is the JSON data for an agent.

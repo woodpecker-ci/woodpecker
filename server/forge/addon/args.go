@@ -62,6 +62,18 @@ type argumentsBranchHead struct {
 	Branch string     `json:"branch"`
 }
 
+type argumentsTagHead struct {
+	U   *modelUser `json:"u"`
+	R   *modelRepo `json:"r"`
+	Tag string     `json:"tag"`
+}
+
+type argumentsCommit struct {
+	U   *modelUser `json:"u"`
+	R   *modelRepo `json:"r"`
+	SHA string     `json:"sha"`
+}
+
 type argumentsOrgMembershipOrg struct {
 	U   *modelUser `json:"u"`
 	Org string     `json:"org"`
