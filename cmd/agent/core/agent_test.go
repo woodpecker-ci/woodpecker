@@ -15,10 +15,58 @@
 package core
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
+
+func TestIsRetryableConnectError(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{
+			name: "unavailable is retried",
+			err:  status.Error(codes.Unavailable, "connection refused"),
+			want: true,
+		},
+		{
+			// A slow/failing DNS lookup during the initial Login makes
+			// AuthClient.Auth's hardcoded 5s timeout fire, surfacing as
+			// DeadlineExceeded rather than Unavailable. Before this fix the
+			// agent fatal-exited after one attempt instead of honoring
+			// WOODPECKER_CONNECT_RETRY_COUNT/_DELAY.
+			name: "deadline exceeded (slow DNS during Login) is retried",
+			err:  status.Error(codes.DeadlineExceeded, "context deadline exceeded"),
+			want: true,
+		},
+		{
+			name: "permission denied is not retried",
+			err:  status.Error(codes.PermissionDenied, "invalid agent token"),
+			want: false,
+		},
+		{
+			name: "nil error is not retried",
+			err:  nil,
+			want: false,
+		},
+		{
+			name: "non-status error is not retried",
+			err:  errors.New("some other failure"),
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, isRetryableConnectError(tt.err))
+		})
+	}
+}
 
 func TestStringSliceAddToMap(t *testing.T) {
 	tests := []struct {
