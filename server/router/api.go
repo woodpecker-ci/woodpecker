@@ -243,8 +243,13 @@ func apiRoutes(e *gin.RouterGroup) {
 		{
 			forgeBase.Use(session.MustAdmin())
 			forgeBase.POST("", api.PostForge)
-			forgeBase.PATCH("/:forge_id", api.PatchForge)
-			forgeBase.DELETE("/:forge_id", api.DeleteForge)
+
+			forgeIDBase := forgeBase.Group("/:forge_id")
+			{
+				forgeIDBase.GET("/app-health", api.GetForgeAppHealth)
+				forgeIDBase.PATCH("", api.PatchForge)
+				forgeIDBase.DELETE("", api.DeleteForge)
+			}
 		}
 
 		apiBase.GET("/signature/public-key", api.GetSignaturePublicKey)
