@@ -66,6 +66,24 @@ const routes: RouteRecordRaw[] = [
           },
 
           {
+            path: 'tags',
+            meta: { repoHeader: true },
+            children: [
+              {
+                path: '',
+                name: 'repo-tags',
+                component: (): Component => import('~/views/repo/RepoTags.vue'),
+              },
+              {
+                path: ':tag',
+                name: 'repo-tag',
+                component: (): Component => import('~/views/repo/RepoTag.vue'),
+                props: (route) => ({ tag: route.params.tag }),
+              },
+            ],
+          },
+
+          {
             path: 'pull-requests',
             meta: { repoHeader: true },
             children: [

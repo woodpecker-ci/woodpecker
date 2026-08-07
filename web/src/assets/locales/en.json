@@ -40,7 +40,15 @@
     "manual_pipeline": {
       "title": "Trigger a manual pipeline run",
       "trigger": "Run pipeline",
+      "select_source": "Source",
+      "source_branch": "Branch",
+      "source_tag": "Tag",
+      "source_commit": "Commit",
       "select_branch": "Select branch",
+      "select_tag": "Select tag",
+      "enter_commit": "Commit SHA",
+      "enter_commit_placeholder": "Full or short commit SHA",
+      "event_note": "Runs as a manual event. Tag workflows (when.event: tag) are not selected by choosing a tag here.",
       "variables": {
         "delete": "Delete variable",
         "title": "Additional pipeline variables",
@@ -49,7 +57,8 @@
         "value": "Variable value"
       },
       "show_pipelines": "Show pipelines",
-      "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
+      "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event.",
+      "trigger_error": "Could not trigger the manual pipeline."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
@@ -66,6 +75,7 @@
     },
     "activity": "Activity",
     "branches": "Branches",
+    "tags": "Tags",
     "pull_requests": "Pull requests",
     "add": "Add repository",
     "refresh": "Refresh repository list",
@@ -222,6 +232,7 @@
       "step_not_started": "This step hasn't started yet.",
       "pipelines_for": "Pipelines for branch \"{branch}\"",
       "pipelines_for_pr": "Pipelines for pull request #{index}",
+      "pipelines_for_tag": "Pipelines for tag \"{tag}\"",
       "exit_code": "Exit Code {exitCode}",
       "loading": "Loading…",
       "no_logs": "No logs",

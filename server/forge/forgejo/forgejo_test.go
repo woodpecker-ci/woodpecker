@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -125,6 +126,25 @@ func Test_forgejo(t *testing.T) {
 		raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
 		assert.NoError(t, err)
 		assert.Equal(t, "{ platform: linux/amd64 }", string(raw))
+	})
+
+	t.Run("repository tags head and commit", func(t *testing.T) {
+		tags, err := c.Tags(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		require.Len(t, tags, 1)
+		assert.Equal(t, "v1.0.0", tags[0].Name)
+		assert.Equal(t, "tag-sha", tags[0].SHA)
+		assert.NotZero(t, tags[0].CreatedAt)
+
+		tagCommit, err := c.TagHead(ctx, fakeUser, fakeRepo, "v1.0.0")
+		assert.NoError(t, err)
+		assert.Equal(t, "tag-sha", tagCommit.SHA)
+		assert.Equal(t, "http://localhost/test_name/repo_name/commit/tag-sha", tagCommit.ForgeURL)
+
+		commit, err := c.Commit(ctx, fakeUser, fakeRepo, "commit-sha")
+		assert.NoError(t, err)
+		assert.Equal(t, "commit-sha", commit.SHA)
+		assert.Equal(t, "http://localhost/test_name/repo_name/commit/commit-sha", commit.ForgeURL)
 	})
 
 	t.Run("pipeline status", func(t *testing.T) {
