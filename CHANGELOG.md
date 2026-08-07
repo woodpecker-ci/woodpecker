@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-06
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/docker/cli to v29.7.2+incompatible [[#6966](https://github.com/woodpecker-ci/woodpecker/pull/6966)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.56.0 [[#6960](https://github.com/woodpecker-ci/woodpecker/pull/6960)]
 - Update module github.com/getkin/kin-openapi to v0.146.0 [[#6944](https://github.com/woodpecker-ci/woodpecker/pull/6944)]
 - Lock file maintenance [[#6940](https://github.com/woodpecker-ci/woodpecker/pull/6940)]
