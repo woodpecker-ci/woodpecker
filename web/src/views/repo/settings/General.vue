@@ -22,21 +22,12 @@
         docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
       >
         <template #default="{ id }">
-          <div class="flex flex-col gap-2">
-            <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
-              <TextField :id="id" :model-value="image" disabled />
-              <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
-            </div>
-            <div class="flex gap-2">
-              <TextField
-                :id="id"
-                v-model="newImage"
-                :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
-                @keydown.enter.prevent="addNewImage"
-              />
-              <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
-            </div>
-          </div>
+          <ListEditor
+            :id="id"
+            ref="netrcTrustedEditor"
+            v-model="repoSettings.netrc_trusted"
+            :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
+          />
         </template>
         <template #description>
           {{ $t('repo.settings.general.netrc_only_trusted.desc') }}
@@ -98,16 +89,12 @@
         :label="$t('require_approval.allowed_users.allowed_users')"
       >
         <template #default="{ id }">
-          <div class="flex flex-col gap-2">
-            <div v-for="allowedUser in repoSettings.approval_allowed_users" :key="allowedUser" class="flex gap-2">
-              <TextField :id="id" :model-value="allowedUser" disabled />
-              <Button type="button" color="gray" start-icon="trash" @click="removeUser(allowedUser)" />
-            </div>
-            <div class="flex gap-2">
-              <TextField :id="id" v-model="newUser" :placeholder="$t('username')" @keydown.enter.prevent="addNewUser" />
-              <Button type="button" color="gray" start-icon="plus" @click="addNewUser" />
-            </div>
-          </div>
+          <ListEditor
+            :id="id"
+            ref="approvalAllowedUsersEditor"
+            v-model="repoSettings.approval_allowed_users"
+            :placeholder="$t('username')"
+          />
         </template>
         <template #description>
           {{ $t('require_approval.allowed_users.desc') }}
@@ -183,7 +170,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -191,6 +178,7 @@ import Checkbox from '~/components/form/Checkbox.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import type { CheckboxOption, RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
+import ListEditor from '~/components/form/ListEditor.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
 import TextField from '~/components/form/TextField.vue';
@@ -216,6 +204,9 @@ const { defaultConfigPaths } = useConfig();
 const repo = requiredInject('repo');
 const repoSettings = ref<RepoSettings>();
 
+const netrcTrustedEditor = useTemplateRef<InstanceType<typeof ListEditor>>('netrcTrustedEditor');
+const approvalAllowedUsersEditor = useTemplateRef<InstanceType<typeof ListEditor>>('approvalAllowedUsersEditor');
+
 function loadRepoSettings() {
   repoSettings.value = {
     config_file: repo.value.config_file,
@@ -240,6 +231,10 @@ const { doSubmit: saveRepoSettings, isLoading: isSaving } = useAsyncAction(async
   if (!repoSettings.value) {
     throw new Error('Unexpected: Repo-Settings should be set');
   }
+
+  // an entry the user typed without confirming it should still be saved
+  netrcTrustedEditor.value?.commitPendingItem();
+  approvalAllowedUsersEditor.value?.commitPendingItem();
 
   await apiClient.updateRepo(repo.value.id, repoSettings.value);
   await loadRepo();
@@ -277,38 +272,6 @@ const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
   },
   { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
 ];
-
-const newImage = ref('');
-function addNewImage() {
-  if (!newImage.value) {
-    return;
-  }
-  repoSettings.value?.netrc_trusted.push(newImage.value);
-  newImage.value = '';
-}
-function removeImage(image: string) {
-  if (!repoSettings.value) {
-    throw new Error('Unexpected: repoSettings should be set');
-  }
-
-  repoSettings.value.netrc_trusted = repoSettings.value.netrc_trusted.filter((i) => i !== image);
-}
-
-const newUser = ref('');
-function addNewUser() {
-  if (!newUser.value) {
-    return;
-  }
-  repoSettings.value?.approval_allowed_users.push(newUser.value);
-  newUser.value = '';
-}
-function removeUser(user: string) {
-  if (!repoSettings.value) {
-    throw new Error('Unexpected: repoSettings should be set');
-  }
-
-  repoSettings.value.approval_allowed_users = repoSettings.value.approval_allowed_users.filter((i) => i !== user);
-}
 
 useWPTitle(computed(() => [i18n.t('repo.settings.general.project'), repo.value.full_name]));
 </script>
