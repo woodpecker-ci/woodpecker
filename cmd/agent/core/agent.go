@@ -339,7 +339,8 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for range retryCount {
-			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
+			err = run(ctx, c, backendEngines)
+			if code := status.Code(err); code == codes.Unavailable || code == codes.DeadlineExceeded {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to %s, retrying in %v", c.String("server"), retryDelay))
 				time.Sleep(retryDelay)
 			} else {
