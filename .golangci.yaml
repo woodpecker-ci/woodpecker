@@ -246,6 +246,8 @@ linters:
           alias: kube_errors
         - pkg: k8s.io/client-go/tools/clientcmd
           alias: kube_client_cmd
+        - pkg: k8s.io/apimachinery/pkg/types
+          alias: kube_types
 
         # docker
         - pkg: github.com/docker/cli/cli/config/types
