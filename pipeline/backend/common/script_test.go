@@ -26,11 +26,11 @@ const (
 )
 
 func TestGenerateContainerConf(t *testing.T) {
-	gotEnv, gotEntry := GenerateContainerConf([]string{"echo hello world"}, "windows", "/woodpecker/some")
+	gotEnv, gotEntry, _ := GenerateContainerConf([]string{"echo hello world"}, "windows", "/woodpecker/some")
 	assert.Equal(t, windowsScriptBase64, gotEnv["CI_SCRIPT"])
 	assert.Equal(t, "powershell.exe", gotEnv["SHELL"])
 	assert.Equal(t, []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}, gotEntry)
-	gotEnv, gotEntry = GenerateContainerConf([]string{"echo hello world"}, "linux", "/woodpecker/some")
+	gotEnv, gotEntry, _ = GenerateContainerConf([]string{"echo hello world"}, "linux", "/woodpecker/some")
 	assert.Equal(t, posixScriptBase64, gotEnv["CI_SCRIPT"])
 	assert.Equal(t, "/bin/sh", gotEnv["SHELL"])
 	assert.Equal(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, gotEntry)
