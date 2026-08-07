@@ -74,7 +74,7 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error) {
+func toHostConfig(step *types.Step, conf *config, options BackendOptions) (*container.HostConfig, error) {
 	config := &container.HostConfig{
 		Resources: container.Resources{
 			CPUQuota:   conf.resourceLimit.CPUQuota,
@@ -90,6 +90,28 @@ func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error)
 		Privileged: step.Privileged,
 	}
 
+	if step.Privileged {
+		config.Runtime = options.Runtime
+
+		for _, r := range options.DeviceRequests {
+			/*
+
+			 backend_options:
+			     driver: nvidia
+			     count: -1
+			     capabilities: [[gpu]]
+
+			*/
+			config.Resources.DeviceRequests = append(config.Resources.DeviceRequests, container.DeviceRequest{
+				Driver:       r.Driver,
+				Count:        r.Count,
+				Capabilities: r.Capabilities,
+				DeviceIDs:    r.DeviceIDs,
+				Options:      r.Options,
+			})
+		}
+
+	}
 	if conf.apparmor != "" {
 		config.SecurityOpt = []string{"apparmor=" + conf.apparmor}
 	}
