@@ -22,9 +22,21 @@ import (
 // Dependency represents a single dependency with an optional flag.
 // When optional is true, the dependency is silently dropped if the
 // referenced step or workflow is not present in the pipeline.
+//
+// A dependency is either local (Name references a step or workflow in the
+// same scope) or external (Workflow references another workflow of the same
+// pipeline, optionally narrowed to one of its steps via Step). Exactly one
+// of Name / Workflow is set.
 type Dependency struct {
-	Name     string `yaml:"name"`
+	Name     string `yaml:"name,omitempty"`
+	Workflow string `yaml:"workflow,omitempty"`
+	Step     string `yaml:"step,omitempty"`
 	Optional bool   `yaml:"optional,omitempty"`
+}
+
+// IsExternal reports whether the dependency targets another workflow.
+func (d Dependency) IsExternal() bool {
+	return d.Workflow != ""
 }
 
 // DependsOn represents a list of dependencies that can be unmarshalled from:
@@ -66,17 +78,36 @@ func (d *DependsOn) UnmarshalYAML(unmarshal func(any) error) error {
 	return errors.New("failed to unmarshal DependsOn")
 }
 
+func stringField(m map[string]any, key string) (string, error) {
+	v, ok := m[key]
+	if !ok {
+		return "", nil
+	}
+	s, ok := v.(string)
+	if !ok {
+		return "", fmt.Errorf("dependency '%s' must be a string, got %T", key, v)
+	}
+	return s, nil
+}
+
 func dependencyFromMap(m map[string]any) (Dependency, error) {
 	dep := Dependency{}
-	name, ok := m["name"]
-	if !ok {
-		return dep, fmt.Errorf("dependency object requires a 'name' field")
+	var err error
+	if dep.Name, err = stringField(m, "name"); err != nil {
+		return dep, err
 	}
-	nameStr, ok := name.(string)
-	if !ok {
-		return dep, fmt.Errorf("dependency 'name' must be a string, got %T", name)
+	if dep.Workflow, err = stringField(m, "workflow"); err != nil {
+		return dep, err
 	}
-	dep.Name = nameStr
+	if dep.Step, err = stringField(m, "step"); err != nil {
+		return dep, err
+	}
+	if (dep.Name == "") == (dep.Workflow == "") {
+		return dep, fmt.Errorf("dependency object requires exactly one of 'name' or 'workflow'")
+	}
+	if dep.Step != "" && dep.Workflow == "" {
+		return dep, fmt.Errorf("dependency 'step' is only valid together with 'workflow'")
+	}
 	if opt, ok := m["optional"]; ok {
 		optBool, ok := opt.(bool)
 		if !ok {
@@ -88,22 +119,22 @@ func dependencyFromMap(m map[string]any) (Dependency, error) {
 }
 
 // MarshalYAML emits a single string for one required dep, a string array
-// for many, an object array if any dep is optional, and an empty array for
-// a non-nil empty slice (the step DAG-mode signal — see IsZero).
+// for many, an object array if any dep is optional or external, and an empty
+// array for a non-nil empty slice (the step DAG-mode signal — see IsZero).
 func (d DependsOn) MarshalYAML() (any, error) {
 	if len(d) == 0 {
 		return []string{}, nil
 	}
 
-	hasOptional := false
+	needsObjectForm := false
 	for _, dep := range d {
-		if dep.Optional {
-			hasOptional = true
+		if dep.Optional || dep.IsExternal() {
+			needsObjectForm = true
 			break
 		}
 	}
 
-	if hasOptional {
+	if needsObjectForm {
 		type depAlias Dependency
 		out := make([]depAlias, len(d))
 		for i, dep := range d {
@@ -129,42 +160,73 @@ func (d DependsOn) IsZero() bool {
 	return d == nil
 }
 
-// Names returns all dependency names.
+// Names returns the names of all local dependencies. External dependencies
+// are resolved against other workflows, not local step/workflow names, so
+// they are excluded from all name-based accessors.
 func (d DependsOn) Names() []string {
 	if d == nil {
 		return nil
 	}
-	names := make([]string, len(d))
-	for i, dep := range d {
-		names[i] = dep.Name
+	names := make([]string, 0, len(d))
+	for _, dep := range d {
+		if !dep.IsExternal() {
+			names = append(names, dep.Name)
+		}
 	}
 	return names
 }
 
-// RequiredNames returns names of non-optional dependencies.
+// RequiredNames returns names of non-optional local dependencies.
 func (d DependsOn) RequiredNames() []string {
 	if d == nil {
 		return nil
 	}
 	var names []string
 	for _, dep := range d {
-		if !dep.Optional {
+		if !dep.Optional && !dep.IsExternal() {
 			names = append(names, dep.Name)
 		}
 	}
 	return names
 }
 
-// OptionalNames returns names of optional dependencies.
+// OptionalNames returns names of optional local dependencies.
 func (d DependsOn) OptionalNames() []string {
 	if d == nil {
 		return nil
 	}
 	var names []string
 	for _, dep := range d {
-		if dep.Optional {
+		if dep.Optional && !dep.IsExternal() {
 			names = append(names, dep.Name)
 		}
 	}
 	return names
+}
+
+// Local returns only the dependencies on steps/workflows of the same scope.
+// The result is non-nil whenever d is non-nil, preserving the DAG-mode
+// signal (see IsZero).
+func (d DependsOn) Local() DependsOn {
+	if d == nil {
+		return nil
+	}
+	local := make(DependsOn, 0, len(d))
+	for _, dep := range d {
+		if !dep.IsExternal() {
+			local = append(local, dep)
+		}
+	}
+	return local
+}
+
+// External returns only the dependencies targeting other workflows.
+func (d DependsOn) External() DependsOn {
+	var external DependsOn
+	for _, dep := range d {
+		if dep.IsExternal() {
+			external = append(external, dep)
+		}
+	}
+	return external
 }

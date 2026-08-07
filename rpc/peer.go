@@ -127,6 +127,35 @@ type Peer interface {
 	//   - canceled=false, err!=nil: Communication error, agent should retry or handle error
 	Wait(c context.Context, workflowID string) (canceled bool, err error)
 
+	// WaitWorkflow blocks until another workflow of the same pipeline — or a
+	// single step of it — reaches a terminal state, and returns that state.
+	//
+	// This backs cross-workflow step dependencies (a step's depends_on entry
+	// with a 'workflow' key): the agent calls it before starting such a step
+	// and maps the result onto the local skip/failure semantics.
+	//
+	// Parameters:
+	//   - workflowID: the CALLING workflow's ID (must be owned by this agent);
+	//     the server derives the pipeline scope from it, so an agent can never
+	//     wait on workflows outside the pipelines it works on
+	//   - workflowName: name of the target workflow within the same pipeline;
+	//     with matrix workflows several instances share one name and the wait
+	//     covers all of them (statuses are merged, worst wins)
+	//   - stepName: optional — a specific step of the target workflow to wait
+	//     for instead of the whole workflow
+	//
+	// Context Handling:
+	//   - Long-blocking; implementations must return promptly on context
+	//     cancellation with (nil, ctx.Err())
+	//   - The agent-side implementation is expected to re-poll internally if
+	//     the server caps individual calls, so callers see one blocking call
+	//
+	// Returns:
+	//   - result.Found=false: no such workflow (or step) in the pipeline
+	//   - result.Found=true: Status holds the target's terminal status
+	//   - error on communication failure or context cancellation
+	WaitWorkflow(c context.Context, workflowID, workflowName, stepName string) (*WorkflowDepResult, error)
+
 	// Init signals to the server that the workflow has been initialized and execution has started.
 	//
 	// This is called once per workflow immediately after the agent accepts it from Next()

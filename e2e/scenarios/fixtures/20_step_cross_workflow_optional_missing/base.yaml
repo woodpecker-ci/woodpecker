@@ -1,0 +1,17 @@
+skip_clone: true
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+
+  - name: pin-deps
+    image: dummy
+    depends_on:
+      - name: build
+      - workflow: auxiliaries
+        step: resolve-pins
+        optional: true
+    commands:
+      - echo runs because the missing dependency is optional

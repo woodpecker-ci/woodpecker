@@ -169,19 +169,21 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	}
 
 	// Run pipeline
-	err = pipeline_runtime.New(
+	runtime := pipeline_runtime.New(
 		workflow.Config,
 		r.backend,
 		pipeline_runtime.WithContext(workflowCtx),
 		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
 		pipeline_runtime.WithLogger(r.createLogger(logger, workflow)),
 		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
+		pipeline_runtime.WithWorkflowWaiter(r.createWorkflowWaiter(workflow)),
 		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,
 			"pipeline_number": pipelineNumber,
 		}),
-	).Run(runnerCtx)
+	)
+	err = runtime.Run(runnerCtx)
 
 	state.Finished = time.Now().Unix()
 
@@ -191,6 +193,16 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 			state.Canceled = true
 			// cleanup joined error messages
 			state.Error = pipeline_errors.ErrCancel.Error()
+		}
+	} else {
+		// A failed cross-workflow dependency leaves no failed step in THIS
+		// workflow (the gated step is skipped), so the workflow would end
+		// "success" when computed from step states alone. Report it as the
+		// workflow error to mark the workflow failed, mirroring what a
+		// locally failed step would produce.
+		var depErr *pipeline_errors.WorkflowDependencyError
+		if errors.As(runtime.Err(), &depErr) {
+			state.Error = depErr.Error()
 		}
 	}
 

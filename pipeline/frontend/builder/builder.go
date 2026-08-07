@@ -93,6 +93,10 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	items = filterMissingDependencies(items)
 
+	if err := validateWorkflowDependencies(items); err != nil {
+		return nil, multierr.Append(errorsAndWarnings, err)
+	}
+
 	return items, errorsAndWarnings
 }
 
@@ -119,6 +123,19 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
 		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+	}
+
+	// Workflow-level depends_on orders whole workflows by name; the
+	// 'workflow'/'step' object form is only meaningful on step-level
+	// depends_on.
+	for _, dep := range parsed.DependsOn {
+		if dep.IsExternal() {
+			return nil, &pipeline_errors.PipelineError{
+				Message: fmt.Sprintf(
+					"workflow-level depends_on does not accept 'workflow'/'step' keys (workflow %s)", workflow.Name),
+				Type: pipeline_errors.PipelineErrorTypeCompiler,
+			}
+		}
 	}
 
 	// lint pipeline

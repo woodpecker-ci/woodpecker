@@ -140,6 +140,28 @@ In this example, `deploy` always waits for `check-a`. It also waits for `check-b
 
 The same syntax works at the step level within a workflow: if a step uses `depends_on` with `optional: true` on another step that was filtered out by a `when` condition, the dependency is silently dropped.
 
+### Step-level dependencies on other workflows
+
+Workflow-level `depends_on` delays the whole workflow. When only some steps need the other workflow's results, a single **step** can instead depend on another workflow — or on one of its steps — so the rest of the workflow overlaps with the dependency:
+
+```yaml
+steps:
+  - name: build # runs in parallel with the 'auxiliaries' workflow
+    image: golang
+    commands:
+      - go build
+
+  - name: use-deps # starts once 'auxiliaries' finished successfully
+    image: golang
+    depends_on:
+      - build
+      - workflow: auxiliaries
+    commands:
+      - ./use-artifacts.sh
+```
+
+See [step `depends_on`](./20-workflow-syntax.md#depending-on-other-workflows) for the full syntax (per-step targets, `optional`, failure semantics and caveats). Note that a step waiting on another workflow keeps occupying its agent slot — provide enough agent capacity for the referenced workflow to be scheduled, and remember that workflows still share nothing: artifacts do not transfer between them.
+
 :::info
 Some workflows don't need the source code, like creating a notification on failure.
 Read more about `skip_clone` at [pipeline syntax](./20-workflow-syntax.md#skip_clone)

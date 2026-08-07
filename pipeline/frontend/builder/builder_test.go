@@ -208,6 +208,232 @@ depends_on:
 	assert.Equal(t, "test", items[0].DependsOn[1].Name, "Should depend on test")
 }
 
+func TestCrossWorkflowStepDeps(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	build := func(yamls ...*YamlFile) ([]*Item, error) {
+		b := PipelineBuilder{
+			GetWorkflowMetadata: m.GetWorkflowMetadata,
+			RepoTrusted:         &metadata.TrustedConfiguration{},
+			Yamls:               yamls,
+		}
+		return b.Build()
+	}
+
+	auxiliaries := &YamlFile{Name: "auxiliaries", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: resolve-pins
+    image: scratch
+  - name: publish
+    image: scratch
+`)}
+
+	t.Run("valid workflow and step targets", func(t *testing.T) {
+		items, err := build(auxiliaries, &YamlFile{Name: "base", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: build
+    image: scratch
+  - name: pin-deps
+    image: scratch
+    depends_on:
+      - build
+      - workflow: auxiliaries
+        step: resolve-pins
+  - name: wait-deps
+    image: scratch
+    depends_on:
+      - workflow: auxiliaries
+`)})
+		assert.NoError(t, err)
+		assert.Len(t, items, 2)
+	})
+
+	t.Run("unknown required target workflow", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "base", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: wait-deps
+    image: scratch
+    depends_on:
+      - workflow: missing
+`)})
+		assert.ErrorContains(t, err, "depends on unknown workflow 'missing'")
+	})
+
+	t.Run("unknown optional target workflow is dropped", func(t *testing.T) {
+		items, err := build(&YamlFile{Name: "base", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: wait-deps
+    image: scratch
+    depends_on:
+      - workflow: missing
+        optional: true
+`)})
+		assert.NoError(t, err)
+		assert.Len(t, items, 1)
+		for _, stage := range items[0].Config.Stages {
+			for _, step := range stage.Steps {
+				assert.Empty(t, step.WaitFor)
+			}
+		}
+	})
+
+	t.Run("target filtered out by when counts as unknown", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "auxiliaries", Data: []byte(`
+when:
+  event: tag
+steps:
+  - name: resolve-pins
+    image: scratch
+`)}, &YamlFile{Name: "base", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: wait-deps
+    image: scratch
+    depends_on:
+      - workflow: auxiliaries
+`)})
+		assert.ErrorContains(t, err, "depends on unknown workflow 'auxiliaries'")
+	})
+
+	t.Run("unknown required target step", func(t *testing.T) {
+		_, err := build(auxiliaries, &YamlFile{Name: "base", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: wait-deps
+    image: scratch
+    depends_on:
+      - workflow: auxiliaries
+        step: missing
+`)})
+		assert.ErrorContains(t, err, "depends on unknown step 'missing' of workflow 'auxiliaries'")
+	})
+
+	t.Run("self reference rejected", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "base", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: first
+    image: scratch
+  - name: second
+    image: scratch
+    depends_on:
+      - workflow: base
+        step: first
+`)})
+		assert.ErrorContains(t, err, "depends on its own workflow")
+	})
+
+	// The two scenarios from woodpecker-ci/woodpecker#2685: workflows
+	// depending on each other (or on themselves) used to enqueue tasks that
+	// could never run; now the pipeline is rejected at creation.
+	t.Run("workflow-level cycle rejected", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "a", Data: []byte(`
+when:
+  event: push
+depends_on:
+  - b
+steps:
+  - name: s
+    image: scratch
+`)}, &YamlFile{Name: "b", Data: []byte(`
+when:
+  event: push
+depends_on:
+  - a
+steps:
+  - name: s
+    image: scratch
+`)})
+		assert.ErrorContains(t, err, "cyclic workflow dependency")
+	})
+
+	t.Run("workflow self dependency rejected", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "a", Data: []byte(`
+when:
+  event: push
+depends_on:
+  - a
+steps:
+  - name: s
+    image: scratch
+`)})
+		assert.ErrorContains(t, err, "cyclic workflow dependency")
+	})
+
+	t.Run("cycle across step and workflow deps rejected", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "a", Data: []byte(`
+when:
+  event: push
+depends_on:
+  - b
+steps:
+  - name: build
+    image: scratch
+`)}, &YamlFile{Name: "b", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: build
+    image: scratch
+    depends_on:
+      - workflow: a
+`)})
+		assert.ErrorContains(t, err, "cyclic workflow dependency")
+	})
+
+	t.Run("workflow-level external dep rejected", func(t *testing.T) {
+		_, err := build(auxiliaries, &YamlFile{Name: "base", Data: []byte(`
+when:
+  event: push
+depends_on:
+  - workflow: auxiliaries
+steps:
+  - name: build
+    image: scratch
+`)})
+		assert.ErrorContains(t, err, "workflow-level depends_on does not accept")
+	})
+
+	t.Run("matrix target requires step in every axis", func(t *testing.T) {
+		_, err := build(&YamlFile{Name: "matrix-wf", Data: []byte(`
+when:
+  event: push
+matrix:
+  TAG:
+    - a
+    - b
+steps:
+  - name: build-${TAG}
+    image: scratch
+`)}, &YamlFile{Name: "base", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: wait-deps
+    image: scratch
+    depends_on:
+      - workflow: matrix-wf
+        step: build-a
+`)})
+		assert.ErrorContains(t, err, "depends on unknown step 'build-a' of workflow 'matrix-wf'")
+	})
+}
+
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
 

@@ -145,6 +145,14 @@ func (s *WoodpeckerServer) Wait(c context.Context, req *proto.WaitRequest) (*pro
 	return res, err
 }
 
+func (s *WoodpeckerServer) WaitWorkflow(c context.Context, req *proto.WaitWorkflowRequest) (*proto.WaitWorkflowResponse, error) {
+	result, err := s.peer.WaitWorkflow(c, req.GetId(), req.GetWorkflowName(), req.GetStepName())
+	if err != nil {
+		return nil, err
+	}
+	return &proto.WaitWorkflowResponse{Found: result.Found, Status: result.Status}, nil
+}
+
 // Extend extends the workflow deadline.
 func (s *WoodpeckerServer) Extend(c context.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)

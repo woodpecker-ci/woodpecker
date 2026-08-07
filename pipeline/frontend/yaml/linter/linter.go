@@ -183,6 +183,12 @@ func (l *Linter) lintDependsOn(config *WorkflowConfig, c *types.Container, area 
 
 	var linterErr error
 	for _, dep := range c.DependsOn {
+		// External (cross-workflow) dependencies are resolved against the
+		// other workflows of the pipeline, which the linter cannot see here;
+		// they are validated in the pipeline builder instead.
+		if dep.IsExternal() {
+			continue
+		}
 		if slices.ContainsFunc(
 			config.Workflow.Steps.ContainerList,
 			func(step *types.Container) bool { return dep.Name == step.Name },

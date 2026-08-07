@@ -1,0 +1,6 @@
+depends_on:
+  - workflow: auxiliaries
+
+steps:
+  build:
+    image: test

@@ -45,6 +45,11 @@ type Step struct {
 	Ports          []Port            `json:"ports,omitempty"`
 	BackendOptions map[string]any    `json:"backend_options,omitempty"`
 	WorkflowLabels map[string]string `json:"workflow_labels,omitempty"`
+
+	// WaitFor lists workflows (or single steps of them) of the same pipeline
+	// this step blocks on before starting. Enforced at runtime, not part of
+	// the intra-workflow stage DAG.
+	WaitFor []WorkflowDependency `json:"wait_for,omitempty"`
 }
 
 // StepType identifies the type of step.

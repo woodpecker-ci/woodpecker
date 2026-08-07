@@ -343,6 +343,51 @@ func TestCompilerCompile(t *testing.T) {
 	}
 }
 
+func TestCompilerCompileCrossWorkflowDeps(t *testing.T) {
+	compiler := New(
+		WithMetadata(metadata.Metadata{
+			Repo: metadata.Repo{
+				Owner:    "octacat",
+				Name:     "hello-world",
+				ForgeURL: "https://github.com/octocat/hello-world",
+				CloneURL: "https://github.com/octocat/hello-world.git",
+			},
+		}),
+		WithPrefix("test"),
+	)
+
+	conf := &yaml_types.Workflow{
+		SkipClone: true,
+		Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+			Name:  "build",
+			Image: "bash",
+			// external-only deps: DAG mode, but no local edges -> first stage
+			DependsOn: constraint.DependsOn{{Workflow: "auxiliaries", Step: "resolve-pins", Optional: true}},
+		}, {
+			Name:  "publish",
+			Image: "bash",
+			// stage placement comes from the local dep only
+			DependsOn: constraint.DependsOn{{Name: "build"}, {Workflow: "auxiliaries"}},
+		}}},
+	}
+
+	backConf, err := compiler.Compile(conf)
+	assert.NoError(t, err)
+	assert.Len(t, backConf.Stages, 2)
+
+	build := backConf.Stages[0].Steps[0]
+	assert.Equal(t, "build", build.Name)
+	assert.Equal(t, []backend_types.WorkflowDependency{
+		{Workflow: "auxiliaries", Step: "resolve-pins", Optional: true},
+	}, build.WaitFor)
+
+	publish := backConf.Stages[1].Steps[0]
+	assert.Equal(t, "publish", publish.Name)
+	assert.Equal(t, []backend_types.WorkflowDependency{
+		{Workflow: "auxiliaries"},
+	}, publish.WaitFor)
+}
+
 func TestCompilerCompileWithFromSecret(t *testing.T) {
 	repoURL := "https://github.com/octocat/hello-world"
 	compiler := New(

@@ -271,6 +271,39 @@ func (c *client) Wait(ctx context.Context, workflowID string) (canceled bool, er
 	return resp.GetCanceled(), nil
 }
 
+// WaitWorkflow blocks until another workflow of the same pipeline (or a step
+// of it) reaches a terminal state. The server caps individual calls and
+// returns a Found=true/Status="" response while the target is still running;
+// the re-poll loop lives here so callers see a single blocking call.
+func (c *client) WaitWorkflow(ctx context.Context, workflowID, workflowName, stepName string) (*rpc.WorkflowDepResult, error) {
+	req := &proto.WaitWorkflowRequest{
+		Id:           workflowID,
+		WorkflowName: workflowName,
+		StepName:     stepName,
+	}
+
+	for {
+		resp, err := retryRPC(ctx, c, "wait_workflow", func() (*proto.WaitWorkflowResponse, error) {
+			if !c.IsConnected() {
+				return nil, errNotConnected
+			}
+			r, err := c.client.WaitWorkflow(ctx, req)
+			return r, classifyRPCErr(ctx, err)
+		})
+		if err != nil {
+			return nil, err
+		}
+		if resp == nil {
+			// retryRPC returns nil, nil on context cancellation
+			return nil, ctx.Err()
+		}
+		if !resp.GetFound() || resp.GetStatus() != "" {
+			return &rpc.WorkflowDepResult{Found: resp.GetFound(), Status: resp.GetStatus()}, nil
+		}
+		// found but not terminal yet — poll again
+	}
+}
+
 // Init signals the workflow is initialized.
 func (c *client) Init(ctx context.Context, workflowID string, state rpc.WorkflowState) error {
 	req := &proto.InitRequest{

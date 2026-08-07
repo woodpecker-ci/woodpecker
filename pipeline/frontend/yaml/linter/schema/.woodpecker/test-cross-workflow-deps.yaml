@@ -1,0 +1,16 @@
+steps:
+  build:
+    image: test
+
+  pin-deps:
+    image: test
+    depends_on:
+      - build
+      - workflow: auxiliaries
+        step: resolve-pins
+        optional: true
+
+  wait-deps:
+    image: test
+    depends_on:
+      - workflow: auxiliaries

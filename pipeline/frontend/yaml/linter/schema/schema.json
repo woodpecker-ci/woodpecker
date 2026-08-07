@@ -108,6 +108,64 @@
         }
       ]
     },
+    "step_depends_on_item": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the step this step depends on."
+            },
+            "optional": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, the dependency is silently dropped when not present in the pipeline."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["workflow"],
+          "additionalProperties": false,
+          "properties": {
+            "workflow": {
+              "type": "string",
+              "description": "Name of another workflow of the same pipeline this step depends on."
+            },
+            "step": {
+              "type": "string",
+              "description": "Optional: a specific step of the referenced workflow to wait for instead of the whole workflow."
+            },
+            "optional": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, the dependency is silently dropped when the referenced workflow or step is not present in the pipeline."
+            }
+          }
+        }
+      ]
+    },
+    "step_depends_on_list": {
+      "description": "A dependency or list of dependencies. Each item can be a string, an object with name and optional fields, or an object with workflow, step and optional fields for cross-workflow dependencies.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "$ref": "#/definitions/step_depends_on_item"
+          }
+        }
+      ]
+    },
     "concurrency": {
       "description": "Limit how many instances of this workflow may run at the same time. Provide an integer for the limit, or an object to also set a custom group.",
       "oneOf": [
@@ -389,8 +447,8 @@
           "$ref": "#/definitions/step_volumes"
         },
         "depends_on": {
-          "description": "Execute a step after another step has finished. Accepts strings or objects with name and optional fields.",
-          "$ref": "#/definitions/depends_on_list"
+          "description": "Execute a step after another step (or another workflow) has finished. Accepts strings or objects with name/optional or workflow/step/optional fields.",
+          "$ref": "#/definitions/step_depends_on_list"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -450,8 +508,8 @@
           "$ref": "#/definitions/step_volumes"
         },
         "depends_on": {
-          "description": "Execute a step after another step has finished. Accepts strings or objects with name and optional fields.",
-          "$ref": "#/definitions/depends_on_list"
+          "description": "Execute a step after another step (or another workflow) has finished. Accepts strings or objects with name/optional or workflow/step/optional fields.",
+          "$ref": "#/definitions/step_depends_on_list"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",

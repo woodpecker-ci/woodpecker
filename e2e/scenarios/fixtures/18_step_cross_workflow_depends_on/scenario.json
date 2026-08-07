@@ -1,0 +1,16 @@
+{
+  "name": "steps gated on another workflow (whole and per-step) succeed",
+  "event": "push",
+  "expected_status": "success",
+  "expected_workflows": [
+    { "name": "auxiliaries", "status": "success" },
+    { "name": "base", "status": "success" }
+  ],
+  "expected_steps": [
+    { "name": "resolve-pins", "status": "success", "exit_code": 0 },
+    { "name": "publish", "status": "success", "exit_code": 0 },
+    { "name": "build", "status": "success", "exit_code": 0 },
+    { "name": "pin-deps", "status": "success", "exit_code": 0 },
+    { "name": "wait-deps", "status": "success", "exit_code": 0 }
+  ]
+}

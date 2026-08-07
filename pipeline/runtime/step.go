@@ -35,6 +35,14 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend_types.Ste
 	logger := r.makeLogger()
 	logger.Debug().Str("step", step.Name).Msg("prepare")
 
+	// Block on cross-workflow dependencies BEFORE the skip check and the
+	// "started" trace: the step stays pending in the UI while it waits, and
+	// a failed dependency feeds the same r.err skip-cascade a locally failed
+	// step would (so 'when: status: failure' steps still run).
+	if err := r.waitForWorkflowDependencies(step); err != nil {
+		return r.traceStep(nil, err, step)
+	}
+
 	if r.shouldSkipStep(step) {
 		// Trace the skip so the server marks the step as skipped immediately,
 		// rather than leaving it in "pending" until workflow Done.
@@ -57,6 +65,47 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend_types.Ste
 		return r.runDetachedStep(runnerCtx, step)
 	}
 	return r.runBlockingStep(runnerCtx, step)
+}
+
+// waitForWorkflowDependencies blocks until every cross-workflow dependency
+// of the step is resolved. An unsatisfied dependency (target failed, was
+// skipped, or is missing) records a WorkflowDependencyError as the workflow
+// error — unless an earlier error is already set — and returns nil so the
+// regular shouldSkipStep cascade takes over. A non-nil return means a
+// transport failure or cancellation, i.e. a runtime error.
+func (r *Runtime) waitForWorkflowDependencies(step *backend_types.Step) error {
+	if len(step.WaitFor) == 0 {
+		return nil
+	}
+	logger := r.makeLogger()
+	if r.waiter == nil {
+		logger.Warn().Str("step", step.Name).Msg(
+			"cross-workflow depends_on is not supported in this environment and will be ignored")
+		return nil
+	}
+
+	for _, dep := range step.WaitFor {
+		logger.Debug().Str("step", step.Name).Str("workflow", dep.Workflow).Str("workflowStep", dep.Step).
+			Msg("waiting for cross-workflow dependency")
+		ok, msg, err := r.waiter.WaitWorkflowDependency(r.ctx, dep)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			logger.Debug().Str("step", step.Name).Str("workflow", dep.Workflow).Str("reason", msg).
+				Msg("cross-workflow dependency failed")
+			depErr := &pipeline_errors.WorkflowDependencyError{Step: step.Name, Msg: msg}
+			// don't clobber an earlier real error
+			r.err.Update(func(current error) error {
+				if current != nil {
+					return current
+				}
+				return depErr
+			})
+			return nil
+		}
+	}
+	return nil
 }
 
 // shouldSkipStep returns true when the step should not run based on the current

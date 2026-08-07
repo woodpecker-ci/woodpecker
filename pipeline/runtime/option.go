@@ -52,6 +52,15 @@ func WithDescription(desc map[string]string) Option {
 	}
 }
 
+// WithWorkflowWaiter sets the waiter used to block steps on their
+// cross-workflow dependencies. Without it such dependencies are ignored
+// with a warning.
+func WithWorkflowWaiter(waiter WorkflowWaiter) Option {
+	return func(r *Runtime) {
+		r.waiter = waiter
+	}
+}
+
 // WithTaskUUID sets a specific task UUID instead of the auto-generated one.
 func WithTaskUUID(uuid string) Option {
 	return func(r *Runtime) {

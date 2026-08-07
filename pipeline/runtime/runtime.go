@@ -45,6 +45,7 @@ type Runtime struct {
 
 	tracer tracing.Tracer
 	logger logging.Logger
+	waiter WorkflowWaiter
 
 	uploadWait sync.WaitGroup
 

@@ -197,3 +197,118 @@ func TestUpdateAgentLastWork(t *testing.T) {
 		assert.Equal(t, lastWork, agent.LastWork)
 	})
 }
+
+func TestWaitWorkflow(t *testing.T) {
+	agent := &model.Agent{ID: 5, OwnerID: model.IDNotSet, OrgID: model.IDNotSet}
+	callerWorkflow := &model.Workflow{ID: 10, PipelineID: 100, AgentID: 5, Name: "base"}
+	currentPipeline := &model.Pipeline{ID: 100, RepoID: 200}
+	repo := &model.Repo{ID: 200}
+
+	newRPC := func(t *testing.T) (*RPC, *store_mocks.MockStore, context.Context) {
+		store := store_mocks.NewMockStore(t)
+		store.On("AgentFind", int64(5)).Return(agent, nil)
+		store.On("WorkflowLoad", int64(10)).Return(callerWorkflow, nil)
+		store.On("GetPipeline", int64(100)).Return(currentPipeline, nil)
+		store.On("GetRepo", int64(200)).Return(repo, nil)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(5))
+		return &RPC{store: store}, store, ctx
+	}
+
+	t.Run("terminal target returns its status", func(t *testing.T) {
+		grpc, store, ctx := newRPC(t)
+		store.On("WorkflowGetTree", currentPipeline).Return([]*model.Workflow{
+			callerWorkflow,
+			{ID: 11, Name: "auxiliaries", State: model.StatusSuccess},
+		}, nil)
+
+		result, err := grpc.WaitWorkflow(ctx, "10", "auxiliaries", "")
+		require.NoError(t, err)
+		assert.True(t, result.Found)
+		assert.Equal(t, string(model.StatusSuccess), result.Status)
+	})
+
+	t.Run("unknown target reports not found", func(t *testing.T) {
+		grpc, store, ctx := newRPC(t)
+		store.On("WorkflowGetTree", currentPipeline).Return([]*model.Workflow{callerWorkflow}, nil)
+
+		result, err := grpc.WaitWorkflow(ctx, "10", "auxiliaries", "")
+		require.NoError(t, err)
+		assert.False(t, result.Found)
+	})
+
+	t.Run("step target returns the step status while the workflow still runs", func(t *testing.T) {
+		grpc, store, ctx := newRPC(t)
+		store.On("WorkflowGetTree", currentPipeline).Return([]*model.Workflow{
+			callerWorkflow,
+			{ID: 11, Name: "auxiliaries", State: model.StatusRunning, Children: []*model.Step{
+				{Name: "resolve-pins", State: model.StatusSuccess},
+				{Name: "publish", State: model.StatusRunning},
+			}},
+		}, nil)
+
+		result, err := grpc.WaitWorkflow(ctx, "10", "auxiliaries", "resolve-pins")
+		require.NoError(t, err)
+		assert.True(t, result.Found)
+		assert.Equal(t, string(model.StatusSuccess), result.Status)
+	})
+
+	t.Run("unknown step target reports not found", func(t *testing.T) {
+		grpc, store, ctx := newRPC(t)
+		store.On("WorkflowGetTree", currentPipeline).Return([]*model.Workflow{
+			callerWorkflow,
+			{ID: 11, Name: "auxiliaries", State: model.StatusRunning, Children: []*model.Step{
+				{Name: "publish", State: model.StatusRunning},
+			}},
+		}, nil)
+
+		result, err := grpc.WaitWorkflow(ctx, "10", "auxiliaries", "missing")
+		require.NoError(t, err)
+		assert.False(t, result.Found)
+	})
+
+	t.Run("waits until the target is terminal", func(t *testing.T) {
+		grpc, store, ctx := newRPC(t)
+		store.On("WorkflowGetTree", currentPipeline).Once().Return([]*model.Workflow{
+			callerWorkflow,
+			{ID: 11, Name: "auxiliaries", State: model.StatusRunning},
+		}, nil)
+		store.On("WorkflowGetTree", currentPipeline).Return([]*model.Workflow{
+			callerWorkflow,
+			{ID: 11, Name: "auxiliaries", State: model.StatusFailure},
+		}, nil)
+
+		result, err := grpc.WaitWorkflow(ctx, "10", "auxiliaries", "")
+		require.NoError(t, err)
+		assert.True(t, result.Found)
+		assert.Equal(t, string(model.StatusFailure), result.Status)
+	})
+
+	t.Run("matrix instances merge worst-wins and skipped stays visible", func(t *testing.T) {
+		grpc, store, ctx := newRPC(t)
+		store.On("WorkflowGetTree", currentPipeline).Return([]*model.Workflow{
+			callerWorkflow,
+			{ID: 11, Name: "auxiliaries", State: model.StatusSuccess},
+			{ID: 12, Name: "auxiliaries", State: model.StatusSkipped},
+		}, nil)
+
+		result, err := grpc.WaitWorkflow(ctx, "10", "auxiliaries", "")
+		require.NoError(t, err)
+		assert.True(t, result.Found)
+		// a skipped matrix sibling must not disappear behind a successful
+		// one: any non-success outcome surfaces to the dependent step
+		assert.Equal(t, string(model.StatusSkipped), result.Status)
+	})
+
+	t.Run("agent not owning the calling workflow is rejected", func(t *testing.T) {
+		store := store_mocks.NewMockStore(t)
+		store.On("AgentFind", int64(5)).Return(agent, nil)
+		store.On("WorkflowLoad", int64(10)).Return(&model.Workflow{ID: 10, PipelineID: 100, AgentID: 6}, nil)
+		store.On("GetPipeline", int64(100)).Return(currentPipeline, nil)
+		store.On("GetRepo", int64(200)).Return(repo, nil)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(5))
+		grpc := &RPC{store: store}
+
+		_, err := grpc.WaitWorkflow(ctx, "10", "auxiliaries", "")
+		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowAgentID)
+	})
+}
