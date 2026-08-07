@@ -2,11 +2,11 @@
   <div class="flex flex-col gap-2">
     <div v-for="(item, index) in modelValue" :key="item" class="flex gap-2">
       <TextField :id="`${id}-${index}`" :model-value="item" disabled />
-      <Button type="button" color="gray" start-icon="trash" :title="deleteTitle" @click="deleteItem(item)" />
+      <Button type="button" color="gray" start-icon="trash" :title="$t('delete')" @click="deleteItem(item)" />
     </div>
     <div class="flex gap-2">
       <TextField :id="id" v-model="newItem" :placeholder="placeholder" @keydown.enter.prevent="addNewItem" />
-      <Button type="button" color="gray" start-icon="plus" :title="addTitle" @click="addNewItem" />
+      <Button type="button" color="gray" start-icon="plus" :title="$t('add')" @click="addNewItem" />
     </div>
   </div>
 </template>
@@ -22,15 +22,11 @@ const props = withDefaults(
     modelValue?: string[];
     id?: string;
     placeholder?: string;
-    addTitle?: string;
-    deleteTitle?: string;
   }>(),
   {
     modelValue: () => [],
     id: undefined,
     placeholder: undefined,
-    addTitle: undefined,
-    deleteTitle: undefined,
   },
 );
 

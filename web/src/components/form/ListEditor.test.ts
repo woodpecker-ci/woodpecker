@@ -1,8 +1,21 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { defineComponent, h, nextTick, ref } from 'vue';
+import { createI18n } from 'vue-i18n';
+
+import en from '~/assets/locales/en.json';
 
 import ListEditor from './ListEditor.vue';
+
+// resolve the titles through the real locale file, so renaming a key there
+// fails this test instead of silently rendering the raw key in the app
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en',
+  messages: { en },
+});
+
+const global = { plugins: [i18n] };
 
 async function mountListEditor(initialItems: string[] = [], props: Record<string, unknown> = {}) {
   const items = ref(initialItems);
@@ -21,7 +34,7 @@ async function mountListEditor(initialItems: string[] = [], props: Record<string
     },
   });
 
-  const wrapper = mount(host);
+  const wrapper = mount(host, { global });
   await nextTick();
 
   // the last input is the one used to enter new items, the others are the
@@ -170,16 +183,13 @@ describe('listEditor', () => {
     expect(inputs().at(-1)!.attributes('placeholder')).toBe('Plugin image');
   });
 
-  it('applies the add and delete titles to their buttons', async () => {
-    const { wrapper } = await mountListEditor(['plugins/git'], {
-      addTitle: 'Add image',
-      deleteTitle: 'Remove image',
-    });
+  it('titles the delete and add buttons', async () => {
+    const { wrapper } = await mountListEditor(['plugins/git']);
 
     const buttons = wrapper.findAll('button');
 
-    expect(buttons[0].attributes('title')).toBe('Remove image');
-    expect(buttons[1].attributes('title')).toBe('Add image');
+    expect(buttons[0].attributes('title')).toBe('Delete');
+    expect(buttons[1].attributes('title')).toBe('Add');
   });
 
   it('treats a missing modelValue as an empty list', async () => {
@@ -197,7 +207,7 @@ describe('listEditor', () => {
       },
     });
 
-    const wrapper = mount(host);
+    const wrapper = mount(host, { global });
     await nextTick();
 
     expect(wrapper.findAll('input')).toHaveLength(1);
@@ -226,7 +236,7 @@ describe('listEditor', () => {
       },
     });
 
-    const wrapper = mount(host);
+    const wrapper = mount(host, { global });
     await nextTick();
 
     // the user types but never presses enter or the add button
@@ -256,7 +266,7 @@ describe('listEditor', () => {
       },
     });
 
-    mount(host);
+    mount(host, { global });
     await nextTick();
 
     editor.value!.commitPendingItem();
