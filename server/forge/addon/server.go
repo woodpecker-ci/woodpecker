@@ -195,6 +195,48 @@ func (s *RPCServer) BranchHead(args []byte, resp *[]byte) error {
 	return err
 }
 
+func (s *RPCServer) Tags(args []byte, resp *[]byte) error {
+	var a argumentsBranchesPullRequests
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	tags, err := s.Impl.Tags(mkCtx(), a.U.asModel(), a.R.asModel(), a.P)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(tags)
+	return err
+}
+
+func (s *RPCServer) TagHead(args []byte, resp *[]byte) error {
+	var a argumentsTagHead
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	commit, err := s.Impl.TagHead(mkCtx(), a.U.asModel(), a.R.asModel(), a.Tag)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(commit)
+	return err
+}
+
+func (s *RPCServer) Commit(args []byte, resp *[]byte) error {
+	var a argumentsCommit
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	commit, err := s.Impl.Commit(mkCtx(), a.U.asModel(), a.R.asModel(), a.SHA)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(commit)
+	return err
+}
+
 func (s *RPCServer) PullRequests(args []byte, resp *[]byte) error {
 	var a argumentsBranchesPullRequests
 	err := json.Unmarshal(args, &a)

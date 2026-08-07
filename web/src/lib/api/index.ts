@@ -16,6 +16,7 @@ import type {
   Repo,
   RepoPermissions,
   RepoSettings,
+  RepoTag,
   Secret,
   User,
 } from './types';
@@ -28,7 +29,9 @@ interface RepoListOptions {
 
 // PipelineOptions is the data for creating a new pipeline
 interface PipelineOptions {
-  branch: string;
+  branch?: string;
+  tag?: string;
+  sha?: string;
   variables: Record<string, string>;
 }
 
@@ -69,6 +72,11 @@ export default class WoodpeckerClient extends ApiClient {
   async getRepoBranches(repoId: number, opts?: PaginationOptions): Promise<string[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/branches?${query}`) as Promise<string[]>;
+  }
+
+  async getRepoTags(repoId: number, opts?: PaginationOptions): Promise<RepoTag[]> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/tags?${query}`) as Promise<RepoTag[]>;
   }
 
   async getRepoPullRequests(repoId: number, opts?: PaginationOptions): Promise<PullRequest[]> {

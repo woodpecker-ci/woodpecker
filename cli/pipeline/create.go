@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/urfave/cli/v3"
@@ -32,9 +33,16 @@ var pipelineCreateCmd = &cli.Command{
 	Action:    pipelineCreate,
 	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.StringFlag{
-			Name:     "branch",
-			Usage:    "branch to create pipeline from",
-			Required: true,
+			Name:  "branch",
+			Usage: "branch to create pipeline from",
+		},
+		&cli.StringFlag{
+			Name:  "tag",
+			Usage: "tag to create pipeline from",
+		},
+		&cli.StringFlag{
+			Name:  "sha",
+			Usage: "commit SHA to create pipeline from",
 		},
 		&cli.StringSliceFlag{
 			Name:  "var",
@@ -48,6 +56,11 @@ var pipelineCreateCmd = &cli.Command{
 
 func pipelineCreate(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
+	options, err := pipelineCreateOptions(c)
+	if err != nil {
+		return err
+	}
+
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
@@ -57,7 +70,6 @@ func pipelineCreate(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	branch := c.String("branch")
 	variables := make(map[string]string)
 
 	for _, vaz := range c.StringSlice("var") {
@@ -67,10 +79,7 @@ func pipelineCreate(ctx context.Context, c *cli.Command) error {
 		}
 	}
 
-	options := &woodpecker.PipelineOptions{
-		Branch:    branch,
-		Variables: variables,
-	}
+	options.Variables = variables
 
 	pipeline, err := client.PipelineCreate(repoID, options)
 	if err != nil {
@@ -78,4 +87,24 @@ func pipelineCreate(ctx context.Context, c *cli.Command) error {
 	}
 
 	return pipelineOutput(c, []*woodpecker.Pipeline{pipeline})
+}
+
+func pipelineCreateOptions(c *cli.Command) (*woodpecker.PipelineOptions, error) {
+	options := &woodpecker.PipelineOptions{
+		Branch: c.String("branch"),
+		Tag:    c.String("tag"),
+		SHA:    c.String("sha"),
+	}
+
+	set := 0
+	for _, ref := range []string{options.Branch, options.Tag, options.SHA} {
+		if ref != "" {
+			set++
+		}
+	}
+	if set != 1 {
+		return nil, errors.New("exactly one of --branch, --tag, or --sha must be set")
+	}
+
+	return options, nil
 }

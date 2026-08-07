@@ -101,6 +101,59 @@ func TestPipelineList(t *testing.T) {
 	}
 }
 
+func TestRepoTags(t *testing.T) {
+	tests := []struct {
+		name     string
+		handler  http.HandlerFunc
+		opts     ListOptions
+		wantErr  bool
+		expected []*RepoTag
+	}{
+		{
+			name: "success",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodGet, r.Method)
+				assert.Equal(t, "/api/repos/123/tags?page=2&perPage=10", r.URL.RequestURI())
+
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `[{"name":"v1.0.0","sha":"abc123","created_at":1234567890}]`)
+				assert.NoError(t, err)
+			},
+			opts: ListOptions{
+				Page:    2,
+				PerPage: 10,
+			},
+			expected: []*RepoTag{{Name: "v1.0.0", SHA: "abc123", CreatedAt: 1234567890}},
+		},
+		{
+			name: "server error",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(tt.handler)
+			defer ts.Close()
+
+			client := NewClient(ts.URL, http.DefaultClient)
+			tags, err := client.RepoTags(123, tt.opts)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, tags)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, tags)
+		})
+	}
+}
+
 func TestClientDeploy(t *testing.T) {
 	tests := []struct {
 		name             string

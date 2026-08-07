@@ -442,6 +442,50 @@ func GetRepoBranches(c *gin.Context) {
 	c.JSON(http.StatusOK, branches)
 }
 
+// GetRepoTags
+//
+//	@Summary	Get tags of a repository
+//	@Router		/repos/{repo_id}/tags [get]
+//	@Produce	json
+//	@Success	200	{array}	RepoTag
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+func GetRepoTags(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	tags, err := _forge.Tags(c, repoUser, repo, session.Pagination(c))
+	if errors.Is(err, forge_types.ErrNotImplemented) {
+		log.Debug().Msg("Could not fetch repo tag list as forge adapter did not implement it")
+	} else if err != nil {
+		log.Error().Err(err).Msg("failed to load tags")
+		c.String(http.StatusInternalServerError, "failed to load tags: %s", err)
+		return
+	}
+	if tags == nil {
+		tags = []*model.RepoTag{}
+	}
+
+	c.JSON(http.StatusOK, tags)
+}
+
 // GetRepoPullRequests
 //
 //	@Summary	List active pull requests of a repository

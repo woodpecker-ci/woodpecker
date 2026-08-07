@@ -40,9 +40,34 @@ func Handler() http.Handler {
 	e.GET("/2.0/user/emails", getEmails)
 	e.GET("/2.0/user/workspaces/:workspace/permissions/repositories", getPermissions)
 	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
+	e.GET("/2.0/repositories/:owner/:name/commit/:commit", getCommit)
+	e.GET("/2.0/repositories/:owner/:name/refs/tags", listTags)
+	e.GET("/2.0/repositories/:owner/:name/refs/tags/:tag", getTag)
 	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
 	e.GET("/2.0/repositories/:owner/:name/diffstat/:commit", getCommitDiffstat)
 	return e
+}
+
+func listTags(c *gin.Context) {
+	c.String(http.StatusOK, tagsPayload)
+}
+
+func getTag(c *gin.Context) {
+	switch c.Param("tag") {
+	case "v1.0.0":
+		c.String(http.StatusOK, tagPayload)
+	default:
+		c.String(http.StatusNotFound, "")
+	}
+}
+
+func getCommit(c *gin.Context) {
+	switch c.Param("commit") {
+	case "tag-sha", "commit-sha":
+		c.String(http.StatusOK, fmt.Sprintf(commitPayload, c.Param("commit"), c.Param("commit")))
+	default:
+		c.String(http.StatusNotFound, "")
+	}
 }
 
 func getCommitDiffstat(c *gin.Context) {
@@ -619,5 +644,48 @@ const permissionHookPayLoad = `
 			"permission": "admin"
 		}
 	]
+}
+`
+
+const tagsPayload = `
+{
+	"values": [
+		{
+			"name": "v1.0.0",
+			"target": {
+				"hash": "tag-sha",
+				"links": {
+					"html": {
+						"href": "https://bitbucket.org/test_name/repo_name/commits/tag-sha"
+					}
+				}
+			}
+		}
+	]
+}
+`
+
+const tagPayload = `
+{
+	"name": "v1.0.0",
+	"target": {
+		"hash": "tag-sha",
+		"links": {
+			"html": {
+				"href": "https://bitbucket.org/test_name/repo_name/commits/tag-sha"
+			}
+		}
+	}
+}
+`
+
+const commitPayload = `
+{
+	"hash": "%s",
+	"links": {
+		"html": {
+			"href": "https://bitbucket.org/test_name/repo_name/commits/%s"
+		}
+	}
 }
 `

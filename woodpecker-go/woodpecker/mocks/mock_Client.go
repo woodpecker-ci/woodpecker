@@ -3989,6 +3989,74 @@ func (_c *MockClient_RepoRepair_Call) RunAndReturn(run func(repoID int64) error)
 	return _c
 }
 
+// RepoTags provides a mock function for the type MockClient
+func (_mock *MockClient) RepoTags(repoID int64, opt woodpecker.ListOptions) ([]*woodpecker.RepoTag, error) {
+	ret := _mock.Called(repoID, opt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RepoTags")
+	}
+
+	var r0 []*woodpecker.RepoTag
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.ListOptions) ([]*woodpecker.RepoTag, error)); ok {
+		return returnFunc(repoID, opt)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.ListOptions) []*woodpecker.RepoTag); ok {
+		r0 = returnFunc(repoID, opt)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*woodpecker.RepoTag)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.ListOptions) error); ok {
+		r1 = returnFunc(repoID, opt)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_RepoTags_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RepoTags'
+type MockClient_RepoTags_Call struct {
+	*mock.Call
+}
+
+// RepoTags is a helper method to define mock.On call
+//   - repoID int64
+//   - opt woodpecker.ListOptions
+func (_e *MockClient_Expecter) RepoTags(repoID interface{}, opt interface{}) *MockClient_RepoTags_Call {
+	return &MockClient_RepoTags_Call{Call: _e.mock.On("RepoTags", repoID, opt)}
+}
+
+func (_c *MockClient_RepoTags_Call) Run(run func(repoID int64, opt woodpecker.ListOptions)) *MockClient_RepoTags_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 woodpecker.ListOptions
+		if args[1] != nil {
+			arg1 = args[1].(woodpecker.ListOptions)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_RepoTags_Call) Return(repoTags []*woodpecker.RepoTag, err error) *MockClient_RepoTags_Call {
+	_c.Call.Return(repoTags, err)
+	return _c
+}
+
+func (_c *MockClient_RepoTags_Call) RunAndReturn(run func(repoID int64, opt woodpecker.ListOptions) ([]*woodpecker.RepoTag, error)) *MockClient_RepoTags_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Secret provides a mock function for the type MockClient
 func (_mock *MockClient) Secret(repoID int64, secret string) (*woodpecker.Secret, error) {
 	ret := _mock.Called(repoID, secret)

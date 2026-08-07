@@ -140,6 +140,19 @@ type Forge interface {
 	// Is essential for cron feature to work.
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error)
 
+	// Tags returns all tags in the repository.
+	// Should support pagination via ListOptions.
+	//
+	// Errors:
+	//  - Expect types.ErrNotImplemented to be returned if not supported by the forge
+	Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error)
+
+	// TagHead returns the commit for a tag.
+	TagHead(ctx context.Context, u *model.User, r *model.Repo, tag string) (*model.Commit, error)
+
+	// Commit returns a commit by SHA.
+	Commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error)
+
 	// PullRequests returns all open pull requests.
 	// Should support pagination via ListOptions.
 	//
