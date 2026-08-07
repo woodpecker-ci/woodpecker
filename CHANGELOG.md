@@ -13,18 +13,19 @@
 ### 📈 Enhancement
 
 - feat(web): extract ListEditor form component [[#6962](https://github.com/woodpecker-ci/woodpecker/pull/6962)]
-- Enable grpc ssl verifycation by default. Rename `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY` and fix docu [[#6947](https://github.com/woodpecker-ci/woodpecker/pull/6947)]
+- Rename `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY` [[#6947](https://github.com/woodpecker-ci/woodpecker/pull/6947)]
 - Update frontend schema.json for documented backend options [[#6933](https://github.com/woodpecker-ci/woodpecker/pull/6933)]
 
 ### 📚 Documentation
 
 - Update documentation link for NestGuard plugin [[#6954](https://github.com/woodpecker-ci/woodpecker/pull/6954)]
-- [documentation] make intro example actually usable [[#6953](https://github.com/woodpecker-ci/woodpecker/pull/6953)]
+- Make intro example actually usable [[#6953](https://github.com/woodpecker-ci/woodpecker/pull/6953)]
 - Update docs npm deps non-major [[#6925](https://github.com/woodpecker-ci/woodpecker/pull/6925)]
 - Fix old link to Gitea docs [[#6932](https://github.com/woodpecker-ci/woodpecker/pull/6932)]
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#6939](https://github.com/woodpecker-ci/woodpecker/pull/6939)]
 - Update module github.com/docker/cli to v29.7.2+incompatible [[#6966](https://github.com/woodpecker-ci/woodpecker/pull/6966)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.56.0 [[#6960](https://github.com/woodpecker-ci/woodpecker/pull/6960)]
 - Update module github.com/getkin/kin-openapi to v0.146.0 [[#6944](https://github.com/woodpecker-ci/woodpecker/pull/6944)]
