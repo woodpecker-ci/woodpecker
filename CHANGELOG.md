@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- Update google.golang.org/protobuf digest to 644d026 [[#6976](https://github.com/woodpecker-ci/woodpecker/pull/6976)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.3 [[#6978](https://github.com/woodpecker-ci/woodpecker/pull/6978)]
 - Update web npm deps non-major [[#6939](https://github.com/woodpecker-ci/woodpecker/pull/6939)]
 - Update module github.com/docker/cli to v29.7.2+incompatible [[#6966](https://github.com/woodpecker-ci/woodpecker/pull/6966)]
