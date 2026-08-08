@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/google/go-github/v89 to v90 [[#6980](https://github.com/woodpecker-ci/woodpecker/pull/6980)]
 - Update google.golang.org/protobuf digest to 644d026 [[#6976](https://github.com/woodpecker-ci/woodpecker/pull/6976)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.3 [[#6978](https://github.com/woodpecker-ci/woodpecker/pull/6978)]
 - Update web npm deps non-major [[#6939](https://github.com/woodpecker-ci/woodpecker/pull/6939)]
