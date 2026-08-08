@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/agent/log"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/shared"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/mocks"
 )
@@ -29,8 +30,7 @@ func TestLineWriter(t *testing.T) {
 	peer := mocks.NewMockPeer(t)
 	peer.On("EnqueueLog", mock.Anything)
 
-	secrets := []string{"world"}
-	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d", secrets...)
+	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d")
 
 	_, err := lw.Write([]byte("hello world\n"))
 	assert.NoError(t, err)
@@ -42,7 +42,7 @@ func TestLineWriter(t *testing.T) {
 		Time:     0,
 		Type:     rpc.LogEntryStdout,
 		Line:     0,
-		Data:     []byte("hello ********"),
+		Data:     []byte("hello world"),
 	})
 
 	peer.AssertCalled(t, "EnqueueLog", &rpc.LogEntry{
@@ -51,6 +51,32 @@ func TestLineWriter(t *testing.T) {
 		Type:     rpc.LogEntryStdout,
 		Line:     1,
 		Data:     []byte("the previous line had no newline at the end"),
+	})
+
+	peer.AssertExpectations(t)
+}
+
+// TestLineWriterWithSecretsWriter guards the agent contract: wrapping the
+// line writer in shared.NewSecretsWriter masks secret values before they
+// are enqueued, matching the previous built-in masking behavior.
+func TestLineWriterWithSecretsWriter(t *testing.T) {
+	peer := mocks.NewMockPeer(t)
+	peer.On("EnqueueLog", mock.Anything)
+
+	lw := shared.NewSecretsWriter(
+		log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d"),
+		[]string{"world"},
+	)
+
+	_, err := lw.Write([]byte("hello world\n"))
+	assert.NoError(t, err)
+
+	peer.AssertCalled(t, "EnqueueLog", &rpc.LogEntry{
+		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
+		Time:     0,
+		Type:     rpc.LogEntryStdout,
+		Line:     0,
+		Data:     []byte("hello ********"),
 	})
 
 	peer.AssertExpectations(t)
