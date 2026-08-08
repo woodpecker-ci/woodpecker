@@ -325,7 +325,7 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(9024465376), p.Labels[0].ID)
 				assert.Equal(t, "documentation", p.Labels[0].Name)
 				assert.Equal(t, "0075ca", p.Labels[0].Color)
-				assert.Equal(t, "Improvements or additions to documentation", p.Labels[0].Description)
+				assert.Equal(t, "Improvements or additions to documentation", p.Labels[0].GetDescription())
 				assert.Equal(t, int64(9024465382), p.Labels[1].ID)
 				assert.Equal(t, "enhancement", p.Labels[1].Name)
 				assert.Equal(t, "a2eeef", p.Labels[1].Color)
