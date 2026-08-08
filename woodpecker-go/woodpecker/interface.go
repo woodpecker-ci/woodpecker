@@ -110,6 +110,9 @@ type Client interface {
 	// StepLogEntries returns the LogEntries for the given pipeline step
 	StepLogEntries(repoID, pipeline, stepID int64) ([]*LogEntry, error)
 
+	// StreamLogEntries returns a channel receiving the pipeline logs for the specified step.
+	StreamLogEntries(repoID, pipeline, stepID int64) (<-chan *LogEntry, <-chan error, error)
+
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
 	Deploy(repoID, pipeline int64, opt DeployOptions) (*Pipeline, error)
