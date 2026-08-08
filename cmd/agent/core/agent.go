@@ -110,12 +110,18 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		log.Trace().Msg("use ssl for grpc")
 	}
 
+	skipInsecure := c.Bool("grpc-skip-insecure")
+	if c.IsSet("grpc-skip-insecure-deprecated") && !c.IsSet("grpc-skip-insecure") {
+		skipInsecure = c.Bool("grpc-skip-insecure-deprecated")
+		log.Warn().Msg("WOODPECKER_GRPC_VERIFY is deprecated, use WOODPECKER_GRPC_SKIP_VERIFY")
+	}
+
 	agentConn, err := agent_rpc.Dial(grpcClientCtx, agent_rpc.DialConfig{ //nolint:contextcheck
 		ServerAddr:       c.String("server"),
 		AgentToken:       c.String("grpc-token"),
 		AgentID:          agentConfig.AgentID,
 		Secure:           c.Bool("grpc-secure"),
-		SkipTLSVerify:    c.Bool("grpc-skip-insecure"),
+		SkipTLSVerify:    skipInsecure,
 		KeepaliveTime:    c.Duration("grpc-keepalive-time"),
 		KeepaliveTimeout: c.Duration("grpc-keepalive-timeout"),
 		AuthRefreshEvery: authInterceptorRefreshInterval,
