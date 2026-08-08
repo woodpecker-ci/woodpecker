@@ -546,6 +546,60 @@ func (_c *MockQueue_PushAtOnce_Call) RunAndReturn(run func(c context.Context, ta
 	return _c
 }
 
+// Reprioritize provides a mock function for the type MockQueue
+func (_mock *MockQueue) Reprioritize(c context.Context, priorities map[string]int) error {
+	ret := _mock.Called(c, priorities)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Reprioritize")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, map[string]int) error); ok {
+		r0 = returnFunc(c, priorities)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockQueue_Reprioritize_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Reprioritize'
+type MockQueue_Reprioritize_Call struct {
+	*mock.Call
+}
+
+// Reprioritize is a helper method to define mock.On call
+//   - c context.Context
+//   - priorities map[string]int
+func (_e *MockQueue_Expecter) Reprioritize(c interface{}, priorities interface{}) *MockQueue_Reprioritize_Call {
+	return &MockQueue_Reprioritize_Call{Call: _e.mock.On("Reprioritize", c, priorities)}
+}
+
+func (_c *MockQueue_Reprioritize_Call) Run(run func(c context.Context, priorities map[string]int)) *MockQueue_Reprioritize_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 map[string]int
+		if args[1] != nil {
+			arg1 = args[1].(map[string]int)
+		}
+		run(arg0, arg1)
+	})
+	return _c
+}
+
+func (_c *MockQueue_Reprioritize_Call) Return(err error) *MockQueue_Reprioritize_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockQueue_Reprioritize_Call) RunAndReturn(run func(c context.Context, priorities map[string]int) error) *MockQueue_Reprioritize_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Resume provides a mock function for the type MockQueue
 func (_mock *MockQueue) Resume() {
 	_mock.Called()

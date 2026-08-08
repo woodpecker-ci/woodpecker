@@ -31,6 +31,7 @@ func TestTaskList(t *testing.T) {
 		Data:      []byte("foo"),
 		Labels:    map[string]string{"foo": "bar"},
 		DepStatus: map[string]model.StatusValue{"test": "dep"},
+		Priority:  42,
 	}))
 
 	list, err := store.TaskList()
@@ -39,6 +40,13 @@ func TestTaskList(t *testing.T) {
 	assert.Equal(t, "some_random_id", list[0].ID)
 	assert.Equal(t, "foo", string(list[0].Data))
 	assert.EqualValues(t, map[string]model.StatusValue{"test": "dep"}, list[0].DepStatus)
+	assert.Equal(t, 42, list[0].Priority)
+
+	assert.NoError(t, store.TaskUpdatePriority("some_random_id", -10))
+	list, err = store.TaskList()
+	assert.NoError(t, err)
+	assert.Len(t, list, 1, "Expected one task in list")
+	assert.Equal(t, -10, list[0].Priority)
 
 	assert.NoError(t, store.TaskDelete("some_random_id"))
 

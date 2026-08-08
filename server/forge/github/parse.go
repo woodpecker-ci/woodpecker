@@ -179,8 +179,10 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	eventAction := ""
 
 	switch hook.GetAction() {
-	case actionOpen, actionReopen, actionSync:
+	case actionOpen, actionReopen:
 		// default case nothing to do
+	case actionSync:
+		eventAction = common.NormalizeEventReason(hook.GetAction())
 	case actionClose:
 		event = model.EventPullClosed
 	case actionAssigned,
