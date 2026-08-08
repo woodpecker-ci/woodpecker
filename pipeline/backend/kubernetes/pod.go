@@ -254,7 +254,10 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if len(step.Commands) > 0 {
-		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
+		scriptEnv, command, err := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
+		if err != nil {
+			return container, err
+		}
 		container.Command = command
 		maps.Copy(step.Environment, scriptEnv)
 
