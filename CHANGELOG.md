@@ -1,5 +1,43 @@
 # Changelog
 
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-08
+
+### ❤️ Thanks to all contributors! ❤️
+
+@OCram85, @gerbsen, @kastl-ars, @qwerty287, @zmully
+
+### 🔒 Security
+
+- Change group identifier to full_path for GitLab [[#6950](https://github.com/woodpecker-ci/woodpecker/pull/6950)]
+
+### 📈 Enhancement
+
+- Fix vite deprecation [[#6974](https://github.com/woodpecker-ci/woodpecker/pull/6974)]
+- feat(web): extract ListEditor form component [[#6962](https://github.com/woodpecker-ci/woodpecker/pull/6962)]
+- Rename `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY` [[#6947](https://github.com/woodpecker-ci/woodpecker/pull/6947)]
+- Update frontend schema.json for documented backend options [[#6933](https://github.com/woodpecker-ci/woodpecker/pull/6933)]
+
+### 📚 Documentation
+
+- Update docs npm deps non-major [[#6979](https://github.com/woodpecker-ci/woodpecker/pull/6979)]
+- Update documentation link for NestGuard plugin [[#6954](https://github.com/woodpecker-ci/woodpecker/pull/6954)]
+- Make intro example actually usable [[#6953](https://github.com/woodpecker-ci/woodpecker/pull/6953)]
+- Update docs npm deps non-major [[#6925](https://github.com/woodpecker-ci/woodpecker/pull/6925)]
+- Fix old link to Gitea docs [[#6932](https://github.com/woodpecker-ci/woodpecker/pull/6932)]
+
+### 📦️ Dependency
+
+- Update module github.com/google/go-github/v89 to v90 [[#6980](https://github.com/woodpecker-ci/woodpecker/pull/6980)]
+- Update google.golang.org/protobuf digest to 644d026 [[#6976](https://github.com/woodpecker-ci/woodpecker/pull/6976)]
+- Update woodpeckerci/plugin-git Docker tag to v2.9.3 [[#6978](https://github.com/woodpecker-ci/woodpecker/pull/6978)]
+- Update web npm deps non-major [[#6939](https://github.com/woodpecker-ci/woodpecker/pull/6939)]
+- Update module github.com/docker/cli to v29.7.2+incompatible [[#6966](https://github.com/woodpecker-ci/woodpecker/pull/6966)]
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.56.0 [[#6960](https://github.com/woodpecker-ci/woodpecker/pull/6960)]
+- Update module github.com/getkin/kin-openapi to v0.146.0 [[#6944](https://github.com/woodpecker-ci/woodpecker/pull/6944)]
+- Lock file maintenance [[#6940](https://github.com/woodpecker-ci/woodpecker/pull/6940)]
+- Update web npm deps non-major [[#6928](https://github.com/woodpecker-ci/woodpecker/pull/6928)]
+- Update golang-packages [[#6937](https://github.com/woodpecker-ci/woodpecker/pull/6937)]
+
 ## [3.17.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.17.0) - 2026-07-31
 
 ### ❤️ Thanks to all contributors! ❤️
