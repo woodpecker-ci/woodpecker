@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Fix vite deprecation [[#6974](https://github.com/woodpecker-ci/woodpecker/pull/6974)]
 - feat(web): extract ListEditor form component [[#6962](https://github.com/woodpecker-ci/woodpecker/pull/6962)]
 - Rename `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY` [[#6947](https://github.com/woodpecker-ci/woodpecker/pull/6947)]
 - Update frontend schema.json for documented backend options [[#6933](https://github.com/woodpecker-ci/woodpecker/pull/6933)]
