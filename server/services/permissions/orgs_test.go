@@ -32,3 +32,18 @@ func TestOrgs(t *testing.T) {
 	assert.False(t, empty.IsMember([]*model.Team{{Login: "woodpecker-ci"}}))
 	assert.False(t, empty.IsMember([]*model.Team{{Login: "not-woodpecker-ci"}}))
 }
+
+func TestOrgsRejectsSameNamedGroup(t *testing.T) {
+	org := NewOrgs([]string{"woodpecker"})
+
+	// the real top-level group
+	assert.True(t, org.IsMember([]*model.Team{{Login: "woodpecker"}}))
+
+	// anyone can create a group named "woodpecker" below their own namespace,
+	// membership there must never satisfy an allowed org of "woodpecker"
+	assert.False(t, org.IsMember([]*model.Team{{Login: "eve/woodpecker"}}))
+	assert.False(t, org.IsMember([]*model.Team{{Login: "eve/sub/woodpecker"}}))
+
+	// subgroups are not matched either, only exact membership counts
+	assert.False(t, org.IsMember([]*model.Team{{Login: "woodpecker/infra"}}))
+}

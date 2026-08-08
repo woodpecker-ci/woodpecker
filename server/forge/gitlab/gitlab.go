@@ -203,7 +203,7 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 	for i := range groups {
 		teams = append(
 			teams, &model.Team{
-				Login:  groups[i].Name,
+				Login:  groups[i].FullPath,
 				Avatar: groups[i].AvatarURL,
 			},
 		)

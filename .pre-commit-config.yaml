@@ -27,7 +27,7 @@ repos:
       - id: checkmake
         exclude: '^docker/Dockerfile.make$' # actually a Dockerfile and not a makefile
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.14.0
+    rev: v2.15.1
     hooks:
       - id: hadolint
   - repo: https://github.com/rbubley/mirrors-prettier

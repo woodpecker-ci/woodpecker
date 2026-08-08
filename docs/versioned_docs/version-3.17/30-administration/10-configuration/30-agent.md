@@ -63,7 +63,7 @@ To get an _agent token_ you have to register the agent manually in the server us
 - Name: `WOODPECKER_SERVER`
 - Default: `localhost:9000`
 
-Configures gRPC address of the server.
+Configures gRPC address to the server. If you want to use an unix socket add `unix://` prefix and the path.
 
 ---
 
@@ -215,7 +215,7 @@ After pinging for a keepalive check, the agent waits for a duration of this time
 - Name: `WOODPECKER_GRPC_SECURE`
 - Default: `false`
 
-Configures if the connection to `WOODPECKER_SERVER` should be made using a secure transport.
+Configures if the connection to `WOODPECKER_SERVER` should be made using a secure transport (tls).
 
 ---
 
@@ -237,6 +237,20 @@ Set how long the agent keeps retrying to reconnect to the server after the gRPC 
 
 :::warning
 If set to 0 we retry forever.
+:::
+
+---
+
+## LOG_ENTRY_STREAM_BUFFER_SIZE
+
+- Name: `WOODPECKER_LOG_ENTRY_STREAM_BUFFER_SIZE`
+- Default: `100`
+
+Set how many log lines an agent can buffer before it blocks io.Pipe, expect logentries to reach 1 MB in worst case.
+If used with local backend, tis can increase your performance in special cases significantly.
+
+:::warning
+If set to 0 we are always blocking.
 :::
 
 ---

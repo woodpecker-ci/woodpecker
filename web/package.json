@@ -3,7 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@11.17.0",
+  "packageManager": "pnpm@11.20.0",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -56,7 +56,7 @@
     "eslint": "^10.2.0",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-vue-scoped-css": "^3.0.0",
-    "jsdom": "^29.0.2",
+    "jsdom": "^30.0.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tinycolor2": "^1.6.0",
