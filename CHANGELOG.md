@@ -19,7 +19,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#6981](https://github.com/woodpecker-ci/woodpecker/pull/6981)]
 - Update docs npm deps non-major [[#6979](https://github.com/woodpecker-ci/woodpecker/pull/6979)]
 - Update documentation link for NestGuard plugin [[#6954](https://github.com/woodpecker-ci/woodpecker/pull/6954)]
 - Make intro example actually usable [[#6953](https://github.com/woodpecker-ci/woodpecker/pull/6953)]
@@ -28,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- Lock file maintenance [[#6981](https://github.com/woodpecker-ci/woodpecker/pull/6981)]
 - Update dependency eslint to v10.8.1 [[#6977](https://github.com/woodpecker-ci/woodpecker/pull/6977)]
 - Update module github.com/google/go-github/v89 to v90 [[#6980](https://github.com/woodpecker-ci/woodpecker/pull/6980)]
 - Update google.golang.org/protobuf digest to 644d026 [[#6976](https://github.com/woodpecker-ci/woodpecker/pull/6976)]
