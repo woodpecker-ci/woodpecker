@@ -327,18 +327,6 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	return serviceWaitingGroup.Wait()
 }
 
-// isRetryableConnectError reports whether err is a connection failure that
-// WOODPECKER_CONNECT_RETRY_COUNT/_DELAY should retry. codes.Unavailable
-// covers a refused/reset connection, but a slow or transiently failing DNS
-// lookup during the initial Login surfaces as codes.DeadlineExceeded instead
-// (see AuthClient.Auth's hardcoded authClientTimeout) -- without also
-// retrying that code, a DNS hiccup at agent startup crashes the agent after
-// a single attempt regardless of the configured retry count/delay.
-func isRetryableConnectError(err error) bool {
-	code := status.Code(err)
-	return code == codes.Unavailable || code == codes.DeadlineExceeded
-}
-
 func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *cli.Command) error {
 	return func(ctx context.Context, c *cli.Command) error {
 		if err := logger.SetupGlobalLogger(ctx, c, true); err != nil {
@@ -351,7 +339,14 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for range retryCount {
-			if err = run(ctx, c, backendEngines); isRetryableConnectError(err) {
+			err = run(ctx, c, backendEngines)
+			// codes.Unavailable covers a refused/reset connection, but a slow or
+			// transiently failing DNS lookup during the initial Login surfaces as
+			// codes.DeadlineExceeded instead (AuthClient.Auth's hardcoded
+			// authClientTimeout) -- without also retrying that code, a DNS hiccup
+			// at agent startup crashes the agent after a single attempt regardless
+			// of the configured retry count/delay.
+			if code := status.Code(err); code == codes.Unavailable || code == codes.DeadlineExceeded {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to %s, retrying in %v", c.String("server"), retryDelay))
 				time.Sleep(retryDelay)
 			} else {
