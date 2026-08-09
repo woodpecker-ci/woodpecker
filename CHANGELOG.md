@@ -28,6 +28,7 @@
 
 ### 📦️ Dependency
 
+- Update pnpm to v11.21.0 [[#6983](https://github.com/woodpecker-ci/woodpecker/pull/6983)]
 - Lock file maintenance [[#6981](https://github.com/woodpecker-ci/woodpecker/pull/6981)]
 - Update dependency eslint to v10.8.1 [[#6977](https://github.com/woodpecker-ci/woodpecker/pull/6977)]
 - Update module github.com/google/go-github/v89 to v90 [[#6980](https://github.com/woodpecker-ci/woodpecker/pull/6980)]
