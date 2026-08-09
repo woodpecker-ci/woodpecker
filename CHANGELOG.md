@@ -19,6 +19,7 @@
 
 ### 📚 Documentation
 
+- Update pnpm to v11.21.0 [[#6982](https://github.com/woodpecker-ci/woodpecker/pull/6982)]
 - Update docs npm deps non-major [[#6979](https://github.com/woodpecker-ci/woodpecker/pull/6979)]
 - Update documentation link for NestGuard plugin [[#6954](https://github.com/woodpecker-ci/woodpecker/pull/6954)]
 - Make intro example actually usable [[#6953](https://github.com/woodpecker-ci/woodpecker/pull/6953)]
