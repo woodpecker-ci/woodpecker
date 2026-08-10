@@ -26,6 +26,7 @@ type Item struct {
 	Labels           map[string]string
 	DependsOn        constraint.DependsOn
 	RunsOn           []string
+	Priority         int
 	ConcurrencyLimit int
 	ConcurrencyGroup string
 	Config           *backend_types.Config

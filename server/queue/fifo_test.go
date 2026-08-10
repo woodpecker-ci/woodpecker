@@ -890,6 +890,34 @@ func TestFifoConcurrency(t *testing.T) {
 			&model.Task{ID: "1", Created: 100, Name: "beta"},
 			&model.Task{ID: "2", Created: 100, Name: "alpha"},
 		))
+		assert.True(t, queueOrderLess(
+			&model.Task{ID: "2", Created: 200, Priority: 10},
+			&model.Task{ID: "1", Created: 100, Priority: 1},
+		))
+		assert.False(t, taskOrderLess(
+			&model.Task{ID: "2", Created: 200, Priority: 10},
+			&model.Task{ID: "1", Created: 100, Priority: 1},
+		), "concurrency reservation ordering must ignore queue priority")
+	})
+
+	t.Run("higher priority later task runs first", func(t *testing.T) {
+		low := &model.Task{ID: "priority-low", Created: 100, Priority: 0}
+		high := &model.Task{ID: "priority-high", Created: 200, Priority: 10}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{low, high}))
+		waitForProcess()
+
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "priority-high", got.ID)
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		got, err = q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "priority-low", got.ID)
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
 	})
 }
 

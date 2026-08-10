@@ -184,6 +184,12 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		item.RunsOn = append(item.RunsOn, "success")
 	}
 
+	priority, err := parsed.When.Priority(workflowMetadata, true, environ)
+	if err != nil {
+		return nil, multierr.Append(errorsAndWarnings, err)
+	}
+	item.Priority = priority
+
 	// "woodpecker-ci.org" namespace is reserved for internal use — drop any
 	// user-defined labels that try to use it.
 	for key := range item.Labels {

@@ -238,6 +238,38 @@ steps:
 	assert.ElementsMatchf(t, []string{"success", "failure"}, items[0].RunsOn, "Should run on failure")
 }
 
+func TestWorkflowPriority(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+		branch:        "main",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Name: "build", Data: []byte(`
+when:
+  - event: push
+    priority: 10
+  - event: push
+    branch: main
+    priority: 100
+steps:
+  - name: build
+    image: scratch
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1)
+	assert.Equal(t, 100, items[0].Priority)
+}
+
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
