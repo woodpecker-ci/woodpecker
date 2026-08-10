@@ -39,7 +39,7 @@ const (
 	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
 	podPrefix             = "wp-"
 	defaultFSGroup  int64 = 1000
-	defaultClusterDomain = "cluster.local"
+	defaultClusterDomain  = "cluster.local"
 	// Because of https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/nodes/working-with-clusters
 	initContainerMemLimit = "12Mi"
 )
