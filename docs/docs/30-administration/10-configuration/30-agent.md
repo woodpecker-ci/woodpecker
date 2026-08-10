@@ -219,9 +219,9 @@ Configures if the connection to `WOODPECKER_SERVER` should be made using a secur
 
 ---
 
-### GRPC_VERIFY
+### GRPC_SKIP_VERIFY
 
-- Name: `WOODPECKER_GRPC_VERIFY`
+- Name: `WOODPECKER_GRPC_SKIP_VERIFY`
 - Default: `true`
 
 Configures if the gRPC server certificate should be verified, only valid when `WOODPECKER_GRPC_SECURE` is `true`.

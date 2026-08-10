@@ -15,7 +15,7 @@ require (
 	github.com/cenkalti/backoff/v7 v7.0.0
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.7.1+incompatible
+	github.com/docker/cli v29.7.2+incompatible
 	github.com/docker/go-connections v0.8.1
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
@@ -28,7 +28,7 @@ require (
 	github.com/go-sql-driver/mysql v1.10.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
-	github.com/google/go-github/v89 v89.0.0
+	github.com/google/go-github/v90 v90.0.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.8.0
 	github.com/jellydator/ttlcache/v3 v3.4.1
@@ -55,7 +55,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.5.2
 	github.com/zalando/go-keyring v0.2.8
-	gitlab.com/gitlab-org/api/client-go/v2 v2.55.1
+	gitlab.com/gitlab-org/api/client-go/v2 v2.56.0
 	go.uber.org/multierr v1.11.0
 	go.yaml.in/yaml/v4 v4.0.0-rc.6
 	golang.org/x/crypto v0.54.0
@@ -66,7 +66,7 @@ require (
 	golang.org/x/term v0.45.0
 	golang.org/x/text v0.40.0
 	google.golang.org/grpc v1.83.0
-	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
+	google.golang.org/protobuf v1.36.12-0.20260806062936-644d0267c26e
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.36.3
 	k8s.io/apimachinery v0.36.3
@@ -225,7 +225,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/arch v0.22.0 // indirect
 	golang.org/x/mod v0.37.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
