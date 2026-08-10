@@ -517,6 +517,19 @@ Enables namespace isolation per Woodpecker organization. When enabled, each orga
 
 With this feature enabled, Woodpecker creates separate Kubernetes namespaces for each organization using the format `{WOODPECKER_BACKEND_K8S_NAMESPACE}-{organization-id}`. Namespaces are created automatically when needed, but they are not automatically deleted when organizations are removed from Woodpecker.
 
+---
+
+### BACKEND_K8S_CLUSTER_DOMAIN
+
+- Name: `WOODPECKER_BACKEND_K8S_CLUSTER_DOMAIN`
+- Default: `cluster.local`
+
+The DNS domain of the Kubernetes cluster. It is used to build the DNS search entry that lets a step reach a service by its hostname.
+
+Set this value if your cluster was installed with a custom cluster domain.
+
+---
+
 ### BACKEND_K8S_VOLUME_SIZE
 
 - Name: `WOODPECKER_BACKEND_K8S_VOLUME_SIZE`
