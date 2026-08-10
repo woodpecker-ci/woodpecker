@@ -621,6 +621,7 @@
   "executable_desc": "Path to the addon executable.",
   "save": "Save",
   "add": "Add",
+  "delete": "Delete",
   "skip_verify": "Skip SSL verification",
   "skip_verify_desc": "Skip SSL verification for the API connection. This is not recommended for production use.",
   "url": "URL",
