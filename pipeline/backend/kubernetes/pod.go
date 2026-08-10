@@ -39,8 +39,6 @@ const (
 	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
 	podPrefix             = "wp-"
 	defaultFSGroup  int64 = 1000
-	// defaultClusterDomain is used when no cluster domain is configured, which is the
-	// case when the config is built programmatically rather than from the CLI flags.
 	defaultClusterDomain = "cluster.local"
 	// Because of https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/nodes/working-with-clusters
 	initContainerMemLimit = "12Mi"
