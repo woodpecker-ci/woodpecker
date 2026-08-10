@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @gerbsen, @kastl-ars, @qwerty287, @zmully
+@OCram85, @gerbsen, @kastl-ars, @qwerty287, @retif, @zmully
 
 ### 🔒 Security
 
@@ -16,6 +16,10 @@
 - feat(web): extract ListEditor form component [[#6962](https://github.com/woodpecker-ci/woodpecker/pull/6962)]
 - Rename `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY` [[#6947](https://github.com/woodpecker-ci/woodpecker/pull/6947)]
 - Update frontend schema.json for documented backend options [[#6933](https://github.com/woodpecker-ci/woodpecker/pull/6933)]
+
+### 🐛 Bug Fixes
+
+- agent: retry connect on DeadlineExceeded, not just Unavailable [[#6975](https://github.com/woodpecker-ci/woodpecker/pull/6975)]
 
 ### 📚 Documentation
 
