@@ -60,6 +60,55 @@ func TestConstraintStatusSuccessFailure(t *testing.T) {
 	}
 }
 
+func TestConstraintPriority(t *testing.T) {
+	testdata := []struct {
+		desc string
+		conf string
+		with metadata.Metadata
+		want int
+	}{
+		{
+			desc: "no priority defaults to zero",
+			conf: "{ event: push }",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}},
+			want: 0,
+		},
+		{
+			desc: "matching priority is returned",
+			conf: "{ event: push, priority: 10 }",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}},
+			want: 10,
+		},
+		{
+			desc: "highest matching priority wins",
+			conf: "[{ event: push, priority: 10 }, { branch: main, priority: 100 }]",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "main"}}},
+			want: 100,
+		},
+		{
+			desc: "unconfigured matching branch does not override negative priority",
+			conf: "[{ event: pull_request }, { event: pull_request, priority: -20 }]",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}},
+			want: -20,
+		},
+		{
+			desc: "non matching priority is ignored",
+			conf: "[{ event: push, priority: 100 }, { event: pull_request, priority: -20 }]",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}},
+			want: -20,
+		},
+	}
+
+	for _, test := range testdata {
+		t.Run(test.desc, func(t *testing.T) {
+			c := parseConstraints(t, test.conf)
+			got, err := c.Priority(test.with, true, map[string]string{})
+			assert.NoError(t, err)
+			assert.Equal(t, test.want, got)
+		})
+	}
+}
+
 func TestConstraints(t *testing.T) {
 	testdata := []struct {
 		desc string

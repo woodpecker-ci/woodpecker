@@ -38,6 +38,7 @@ func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineIte
 			PipelineID: activePipeline.ID,
 			RepoID:     repo.ID,
 			Created:    activePipeline.Created,
+			Priority:   item.Priority,
 		}
 		// fall back to the current time if the pipeline has no creation
 		// timestamp, so the queue always has a defined ordering key.

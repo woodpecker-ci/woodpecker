@@ -53,6 +53,7 @@ type (
 		Path     Path                          `yaml:"path,omitempty"`
 		Evaluate string                        `yaml:"evaluate,omitempty"`
 		Event    yaml_base_types.StringOrSlice `yaml:"event,omitempty"`
+		Priority optional.Option[int]          `yaml:"priority,omitempty"`
 	}
 )
 
@@ -110,6 +111,30 @@ func (when *When) IncludesStatusSuccess(metadata metadata.Metadata, global bool,
 		}
 	}
 	return false
+}
+
+// Priority returns the highest priority configured by any matching constraint.
+// Conditions without a priority do not affect the result.
+func (when *When) Priority(metadata metadata.Metadata, global bool, env map[string]string) (int, error) {
+	priority := 0
+	hasPriority := false
+	for _, c := range when.Constraints {
+		matches, err := c.Match(metadata, global, env)
+		if err != nil {
+			return 0, err
+		}
+		if !matches || !c.Priority.Has() {
+			continue
+		}
+
+		value := c.Priority.Value()
+		if !hasPriority || value > priority {
+			priority = value
+			hasPriority = true
+		}
+	}
+
+	return priority, nil
 }
 
 // False if (any) non local.
