@@ -33,7 +33,7 @@ As organization names are only unique within a single forge, someone could creat
 
 The forge configured through environment variables has no own environment setting for this, its list is edited in the admin UI like the one of any other forge. Only the options listed in its docs are written back on server start, the allowed organizations are kept.
 
-Use the organization name, for GitLab the group's [`full_path`](https://docs.gitlab.com/api/groups/) like `my-group/my-subgroup`. Matching is case-insensitive and only happens while logging in. Note that a forge can hide organizations from Woodpecker although the user is a member of them, see GitHub and [GitLab](40-gitlab.md#allowed-organizations).
+Use the organization name, for GitLab the group's [`full_path`](https://docs.gitlab.com/api/groups/) like `my-group/my-subgroup`. Matching is case-insensitive and only happens while logging in.
 
 ### Known limitations
 

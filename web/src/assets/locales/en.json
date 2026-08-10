@@ -615,7 +615,7 @@
     "delete": "Delete",
     "allowed_orgs": "Allowed organizations",
     "allowed_orgs_desc": "Organizations whose members may log in using this forge, in addition to the global WOODPECKER_ORGS setting.",
-    "allowed_orgs_placeholder": "org-1",
+    "allowed_orgs_placeholder": "Organization name",
     "skip_verify": "Skip SSL verification",
     "skip_verify_desc": "Skip SSL verification for the API connection. This is not recommended for production use.",
     "url": "URL",

@@ -31,7 +31,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
@@ -145,7 +144,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	allowedOrgs := allowedOrgsForForge(forgeModel)
+	allowedOrgs := server.Config.Permissions.Orgs.With(forgeModel.Orgs)
 	if allowedOrgs.IsConfigured {
 		isMember := false
 		for page := 1; page <= maxPage; page++ {
@@ -333,17 +332,6 @@ func HandleAuth(c *gin.Context) {
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
-}
-
-// allowedOrgsForForge returns the organizations a user has to be a member of to
-// be allowed to log in using the given forge. The global WOODPECKER_ORGS setting
-// applies to every forge, orgs configured on a forge itself are allowed in
-// addition to it.
-func allowedOrgsForForge(forgeModel *model.Forge) *permissions.Orgs {
-	if len(forgeModel.Orgs) == 0 {
-		return server.Config.Permissions.Orgs
-	}
-	return server.Config.Permissions.Orgs.With(forgeModel.Orgs)
 }
 
 func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {
