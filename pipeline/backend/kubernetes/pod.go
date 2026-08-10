@@ -34,12 +34,12 @@ import (
 const (
 	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
 	// This will be removed in the future.
-	StepLabelLegacy       = "step"
-	StepLabel             = "woodpecker-ci.org/step"
-	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
-	podPrefix             = "wp-"
-	defaultFSGroup  int64 = 1000
-	defaultClusterDomain  = "cluster.local"
+	StepLabelLegacy            = "step"
+	StepLabel                  = "woodpecker-ci.org/step"
+	TaskUUIDLabel              = "woodpecker-ci.org/task-uuid"
+	podPrefix                  = "wp-"
+	defaultFSGroup       int64 = 1000
+	defaultClusterDomain       = "cluster.local"
 	// Because of https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/nodes/working-with-clusters
 	initContainerMemLimit = "12Mi"
 )
