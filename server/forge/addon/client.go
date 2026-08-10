@@ -236,10 +236,10 @@ func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 }
 
 func (g *RPC) Activate(_ context.Context, u *model.User, r *model.Repo, link string) error {
-	args, err := json.Marshal(&argumentsActivateDeactivate{
-		U:    modelUserFromModel(u),
-		R:    modelRepoFromModel(r),
-		Link: link,
+	args, err := json.Marshal(&argumentsString{
+		U: modelUserFromModel(u),
+		R: modelRepoFromModel(r),
+		S: link,
 	})
 	if err != nil {
 		return err
@@ -249,10 +249,10 @@ func (g *RPC) Activate(_ context.Context, u *model.User, r *model.Repo, link str
 }
 
 func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link string) error {
-	args, err := json.Marshal(&argumentsActivateDeactivate{
-		U:    modelUserFromModel(u),
-		R:    modelRepoFromModel(r),
-		Link: link,
+	args, err := json.Marshal(&argumentsString{
+		U: modelUserFromModel(u),
+		R: modelRepoFromModel(r),
+		S: link,
 	})
 	if err != nil {
 		return err
@@ -262,7 +262,7 @@ func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link s
 }
 
 func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
-	args, err := json.Marshal(&argumentsBranchesPullRequests{
+	args, err := json.Marshal(&argumentsListOptions{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
 		P: p,
@@ -280,10 +280,10 @@ func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model
 }
 
 func (g *RPC) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
-	args, err := json.Marshal(&argumentsBranchHead{
-		U:      modelUserFromModel(u),
-		R:      modelRepoFromModel(r),
-		Branch: branch,
+	args, err := json.Marshal(&argumentsString{
+		U: modelUserFromModel(u),
+		R: modelRepoFromModel(r),
+		S: branch,
 	})
 	if err != nil {
 		return nil, err
@@ -298,7 +298,7 @@ func (g *RPC) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch
 }
 
 func (g *RPC) Tags(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
-	args, err := json.Marshal(&argumentsBranchesPullRequests{
+	args, err := json.Marshal(&argumentsListOptions{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
 		P: p,
@@ -316,10 +316,10 @@ func (g *RPC) Tags(_ context.Context, u *model.User, r *model.Repo, p *model.Lis
 }
 
 func (g *RPC) TagHead(_ context.Context, u *model.User, r *model.Repo, tag string) (*model.Commit, error) {
-	args, err := json.Marshal(&argumentsTagHead{
-		U:   modelUserFromModel(u),
-		R:   modelRepoFromModel(r),
-		Tag: tag,
+	args, err := json.Marshal(&argumentsString{
+		U: modelUserFromModel(u),
+		R: modelRepoFromModel(r),
+		S: tag,
 	})
 	if err != nil {
 		return nil, err
@@ -334,10 +334,10 @@ func (g *RPC) TagHead(_ context.Context, u *model.User, r *model.Repo, tag strin
 }
 
 func (g *RPC) Commit(_ context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
-	args, err := json.Marshal(&argumentsCommit{
-		U:   modelUserFromModel(u),
-		R:   modelRepoFromModel(r),
-		SHA: sha,
+	args, err := json.Marshal(&argumentsString{
+		U: modelUserFromModel(u),
+		R: modelRepoFromModel(r),
+		S: sha,
 	})
 	if err != nil {
 		return nil, err
@@ -352,7 +352,7 @@ func (g *RPC) Commit(_ context.Context, u *model.User, r *model.Repo, sha string
 }
 
 func (g *RPC) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	args, err := json.Marshal(&argumentsBranchesPullRequests{
+	args, err := json.Marshal(&argumentsListOptions{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
 		P: p,

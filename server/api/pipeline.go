@@ -66,7 +66,7 @@ func CreatePipeline(c *gin.Context) {
 	}
 
 	if err := opts.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "%s", err.Error())
+		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 

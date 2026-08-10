@@ -148,27 +148,27 @@ func (s *RPCServer) Netrc(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) Activate(args []byte, resp *[]byte) error {
-	var a argumentsActivateDeactivate
+	var a argumentsString
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.Activate(mkCtx(), a.U.asModel(), a.R.asModel(), a.Link)
+	return s.Impl.Activate(mkCtx(), a.U.asModel(), a.R.asModel(), a.S)
 }
 
 func (s *RPCServer) Deactivate(args []byte, resp *[]byte) error {
-	var a argumentsActivateDeactivate
+	var a argumentsString
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R.asModel(), a.Link)
+	return s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R.asModel(), a.S)
 }
 
 func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
-	var a argumentsBranchesPullRequests
+	var a argumentsListOptions
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
@@ -182,12 +182,12 @@ func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) BranchHead(args []byte, resp *[]byte) error {
-	var a argumentsBranchHead
+	var a argumentsString
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
-	commit, err := s.Impl.BranchHead(mkCtx(), a.U.asModel(), a.R.asModel(), a.Branch)
+	commit, err := s.Impl.BranchHead(mkCtx(), a.U.asModel(), a.R.asModel(), a.S)
 	if err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func (s *RPCServer) BranchHead(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) Tags(args []byte, resp *[]byte) error {
-	var a argumentsBranchesPullRequests
+	var a argumentsListOptions
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
@@ -210,12 +210,12 @@ func (s *RPCServer) Tags(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) TagHead(args []byte, resp *[]byte) error {
-	var a argumentsTagHead
+	var a argumentsString
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
-	commit, err := s.Impl.TagHead(mkCtx(), a.U.asModel(), a.R.asModel(), a.Tag)
+	commit, err := s.Impl.TagHead(mkCtx(), a.U.asModel(), a.R.asModel(), a.S)
 	if err != nil {
 		return err
 	}
@@ -224,12 +224,12 @@ func (s *RPCServer) TagHead(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) Commit(args []byte, resp *[]byte) error {
-	var a argumentsCommit
+	var a argumentsString
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
-	commit, err := s.Impl.Commit(mkCtx(), a.U.asModel(), a.R.asModel(), a.SHA)
+	commit, err := s.Impl.Commit(mkCtx(), a.U.asModel(), a.R.asModel(), a.S)
 	if err != nil {
 		return err
 	}
@@ -238,7 +238,7 @@ func (s *RPCServer) Commit(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) PullRequests(args []byte, resp *[]byte) error {
-	var a argumentsBranchesPullRequests
+	var a argumentsListOptions
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
