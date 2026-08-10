@@ -1,642 +1,642 @@
 {
-  "cancel": "Cancel",
-  "login_to_woodpecker_with": "Sign in to Woodpecker with",
-  "login": "Sign in",
-  "repos": "Repos",
-  "repositories": {
-    "title": "Repositories",
-    "all": {
-      "title": "All repositories",
-      "desc": "Repositories sorted by last pipeline creation"
-    },
-    "last": {
-      "title": "Last visited",
-      "desc": "Most recently visited repositories sorted by access time"
-    }
-  },
-  "docs": "Docs",
-  "api": "API",
-  "logout": "Sign out",
-  "search": "Search…",
-  "username": "Username",
-  "password": "Password",
-  "back": "Back",
-  "unknown_error": "An unknown error occurred",
-  "documentation_for": "Documentation for \"{topic}\"",
-  "pipeline_feed": "Pipeline feed",
-  "empty_list": "No {entity} found!",
-  "not_found": {
-    "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
-    "back_home": "Back to home"
-  },
-  "errors": {
-    "not_found": "Server could not find requested object"
-  },
-  "time": {
-    "not_started": "not started yet",
-    "just_now": "just now"
-  },
-  "repo": {
-    "manual_pipeline": {
-      "title": "Trigger a manual pipeline run",
-      "trigger": "Run pipeline",
-      "select_branch": "Select branch",
-      "variables": {
-        "delete": "Delete variable",
-        "title": "Additional pipeline variables",
-        "desc": "Specify additional variables to be used in your pipeline. Variables with the same name are overwritten.",
-        "name": "Variable name",
-        "value": "Variable value"
-      },
-      "show_pipelines": "Show pipelines",
-      "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
-    },
-    "deploy_pipeline": {
-      "title": "Trigger a deployment for current pipeline #{pipelineId}",
-      "enter_target": "Target environment for deployment",
-      "enter_task": "Deployment task",
-      "trigger": "Deploy",
-      "variables": {
-        "delete": "Delete variable",
-        "title": "Additional pipeline variables",
-        "desc": "Specify additional variables to be used in your pipeline. Variables with the same name are overwritten.",
-        "name": "Variable name",
-        "value": "Variable value"
-      }
-    },
-    "activity": "Activity",
-    "branches": "Branches",
-    "pull_requests": "Pull requests",
-    "add": "Add repository",
-    "refresh": "Refresh repository list",
-    "user_none": "This organization/user has no projects yet",
-    "not_allowed": "You are not allowed to access this repository",
-    "enable": {
-      "enable": "Enable",
-      "enabled": "Already enabled",
-      "disabled": "Disabled",
-      "success": "Repository enabled",
-      "new_forge_repo": "new repo on forge",
-      "stale_wp_repo": "outdated Woodpecker repo",
-      "conflict": "Conflict",
-      "conflict_desc": "This repository was recreated on the forge with a new ID, but an outdated entry with the same name still exists in Woodpecker. Delete the outdated to enable the new one or Repair the old.",
-      "forge_repo_missing": "Forge repo is missing!"
-    },
-    "open_in_forge": "Open repository in forge",
-    "visibility": {
-      "visibility": "Project visibility",
-      "public": {
-        "public": "Public",
-        "desc": "Anyone can see your project without being logged in."
-      },
-      "private": {
-        "private": "Private",
-        "desc": "Only you and other owners of the repository can see this project."
-      },
-      "internal": {
-        "internal": "Internal",
-        "desc": "Only authenticated users of the Woodpecker instance can see this project."
-      }
-    },
-    "settings": {
-      "not_allowed": "You are not allowed to access the settings of this repository",
-      "general": {
-        "general": "Project",
-        "project": "Project settings",
-        "save": "Save settings",
-        "success": "Project settings updated",
-        "pipeline_path": {
-          "path": "Pipeline path",
-          "by_default": "By default: {paths}",
-          "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
-          "desc_path_example": "my/path/"
+    "cancel": "Cancel",
+    "login_to_woodpecker_with": "Sign in to Woodpecker with",
+    "login": "Sign in",
+    "repos": "Repos",
+    "repositories": {
+        "title": "Repositories",
+        "all": {
+            "title": "All repositories",
+            "desc": "Repositories sorted by last pipeline creation"
         },
-        "allow_pr": {
-          "allow": "Allow Pull Requests",
-          "desc": "Allow the execution of pipelines on pull requests."
-        },
-        "allow_deploy": {
-          "allow": "Allow Deployments",
-          "desc": "Allow deployments for successful pipelines. All users with push permissions can trigger these, so use with caution."
-        },
-        "netrc_only_trusted": {
-          "netrc_only_trusted": "Custom trusted clone plugins",
-          "desc": "Plugins that get access to netrc credentials that can be used to clone repositories from the forge or push them into the forge.",
-          "placeholder": "Plugin image"
-        },
-        "trusted": {
-          "trusted": "Trusted",
-          "network": {
-            "network": "Network",
-            "desc": "Pipeline containers get access to network privileges like changing DNS."
-          },
-          "volumes": {
-            "volumes": "Volumes",
-            "desc": "Pipeline containers are allowed to mount volumes."
-          },
-          "security": {
-            "security": "Security",
-            "desc": "Pipeline containers get access to security privileges."
-          }
-        },
-        "timeout": {
-          "timeout": "Timeout",
-          "minutes": "minutes"
-        },
-        "cancel_prev": {
-          "cancel": "Cancel previous pipelines",
-          "desc": "Selected event triggers cancel pending and running pipelines of the same event before starting the next one."
+        "last": {
+            "title": "Last visited",
+            "desc": "Most recently visited repositories sorted by access time"
         }
-      },
-      "crons": {
-        "crons": "Crons",
-        "desc": "Cron jobs can be used to trigger pipelines on a regular basis.",
-        "show": "Show crons",
-        "add": "Add cron",
-        "none": "There are no crons yet.",
-        "save": "Save cron",
-        "created": "Cron created",
-        "saved": "Cron saved",
-        "deleted": "Cron deleted",
-        "next_exec_local": "Next execution: {local}",
-        "next_exec_both": "Next execution: {local} ({zoned} {timezone})",
-        "not_executed_yet": "Not executed yet",
-        "run": "Run now",
-        "branch": {
-          "title": "Branch",
-          "placeholder": "Branch (uses default branch if empty)"
+    },
+    "docs": "Docs",
+    "api": "API",
+    "logout": "Sign out",
+    "search": "Search…",
+    "username": "Username",
+    "password": "Password",
+    "back": "Back",
+    "unknown_error": "An unknown error occurred",
+    "documentation_for": "Documentation for \"{topic}\"",
+    "pipeline_feed": "Pipeline feed",
+    "empty_list": "No {entity} found!",
+    "not_found": {
+        "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
+        "back_home": "Back to home"
+    },
+    "errors": {
+        "not_found": "Server could not find requested object"
+    },
+    "time": {
+        "not_started": "not started yet",
+        "just_now": "just now"
+    },
+    "repo": {
+        "manual_pipeline": {
+            "title": "Trigger a manual pipeline run",
+            "trigger": "Run pipeline",
+            "select_branch": "Select branch",
+            "variables": {
+                "delete": "Delete variable",
+                "title": "Additional pipeline variables",
+                "desc": "Specify additional variables to be used in your pipeline. Variables with the same name are overwritten.",
+                "name": "Variable name",
+                "value": "Variable value"
+            },
+            "show_pipelines": "Show pipelines",
+            "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
         },
-        "name": {
-          "name": "Name",
-          "placeholder": "Name of the cron job"
+        "deploy_pipeline": {
+            "title": "Trigger a deployment for current pipeline #{pipelineId}",
+            "enter_target": "Target environment for deployment",
+            "enter_task": "Deployment task",
+            "trigger": "Deploy",
+            "variables": {
+                "delete": "Delete variable",
+                "title": "Additional pipeline variables",
+                "desc": "Specify additional variables to be used in your pipeline. Variables with the same name are overwritten.",
+                "name": "Variable name",
+                "value": "Variable value"
+            }
         },
-        "schedule": {
-          "title": "Schedule",
-          "placeholder": "Schedule"
-        },
-        "timezone": "Timezone",
-        "your_timezone": "In your browser's timezone.",
-        "edit": "Edit cron",
-        "delete": "Delete cron",
-        "enabled": "Enabled"
-      },
-      "badge": {
-        "badge": "Badge",
-        "type": "Syntax",
-        "type_url": "URL",
-        "type_markdown": "Markdown",
-        "type_html": "HTML",
-        "branch": "Branch",
-        "events": "Events",
-        "workflow": "Workflow",
-        "step": "Step"
-      },
-      "actions": {
-        "actions": "Actions",
-        "repair": {
-          "repair": "Repair repository",
-          "success": "Repository repaired"
-        },
-        "disable": {
-          "disable": "Disable repository",
-          "success": "Repository disabled"
-        },
+        "activity": "Activity",
+        "branches": "Branches",
+        "pull_requests": "Pull requests",
+        "add": "Add repository",
+        "refresh": "Refresh repository list",
+        "user_none": "This organization/user has no projects yet",
+        "not_allowed": "You are not allowed to access this repository",
         "enable": {
-          "enable": "Enable repository",
-          "success": "Repository enabled"
+            "enable": "Enable",
+            "enabled": "Already enabled",
+            "disabled": "Disabled",
+            "success": "Repository enabled",
+            "new_forge_repo": "new repo on forge",
+            "stale_wp_repo": "outdated Woodpecker repo",
+            "conflict": "Conflict",
+            "conflict_desc": "This repository was recreated on the forge with a new ID, but an outdated entry with the same name still exists in Woodpecker. Delete the outdated to enable the new one or Repair the old.",
+            "forge_repo_missing": "Forge repo is missing!"
         },
-        "delete": {
-          "delete": "Delete repository",
-          "confirm": "All data will be lost after this action!\n\nDo you really want to proceed?",
-          "success": "Repository deleted"
+        "open_in_forge": "Open repository in forge",
+        "visibility": {
+            "visibility": "Project visibility",
+            "public": {
+                "public": "Public",
+                "desc": "Anyone can see your project without being logged in."
+            },
+            "private": {
+                "private": "Private",
+                "desc": "Only you and other owners of the repository can see this project."
+            },
+            "internal": {
+                "internal": "Internal",
+                "desc": "Only authenticated users of the Woodpecker instance can see this project."
+            }
+        },
+        "settings": {
+            "not_allowed": "You are not allowed to access the settings of this repository",
+            "general": {
+                "general": "Project",
+                "project": "Project settings",
+                "save": "Save settings",
+                "success": "Project settings updated",
+                "pipeline_path": {
+                    "path": "Pipeline path",
+                    "by_default": "By default: {paths}",
+                    "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
+                    "desc_path_example": "my/path/"
+                },
+                "allow_pr": {
+                    "allow": "Allow Pull Requests",
+                    "desc": "Allow the execution of pipelines on pull requests."
+                },
+                "allow_deploy": {
+                    "allow": "Allow Deployments",
+                    "desc": "Allow deployments for successful pipelines. All users with push permissions can trigger these, so use with caution."
+                },
+                "netrc_only_trusted": {
+                    "netrc_only_trusted": "Custom trusted clone plugins",
+                    "desc": "Plugins that get access to netrc credentials that can be used to clone repositories from the forge or push them into the forge.",
+                    "placeholder": "Plugin image"
+                },
+                "trusted": {
+                    "trusted": "Trusted",
+                    "network": {
+                        "network": "Network",
+                        "desc": "Pipeline containers get access to network privileges like changing DNS."
+                    },
+                    "volumes": {
+                        "volumes": "Volumes",
+                        "desc": "Pipeline containers are allowed to mount volumes."
+                    },
+                    "security": {
+                        "security": "Security",
+                        "desc": "Pipeline containers get access to security privileges."
+                    }
+                },
+                "timeout": {
+                    "timeout": "Timeout",
+                    "minutes": "minutes"
+                },
+                "cancel_prev": {
+                    "cancel": "Cancel previous pipelines",
+                    "desc": "Selected event triggers cancel pending and running pipelines of the same event before starting the next one."
+                }
+            },
+            "crons": {
+                "crons": "Crons",
+                "desc": "Cron jobs can be used to trigger pipelines on a regular basis.",
+                "show": "Show crons",
+                "add": "Add cron",
+                "none": "There are no crons yet.",
+                "save": "Save cron",
+                "created": "Cron created",
+                "saved": "Cron saved",
+                "deleted": "Cron deleted",
+                "next_exec_local": "Next execution: {local}",
+                "next_exec_both": "Next execution: {local} ({zoned} {timezone})",
+                "not_executed_yet": "Not executed yet",
+                "run": "Run now",
+                "branch": {
+                    "title": "Branch",
+                    "placeholder": "Branch (uses default branch if empty)"
+                },
+                "name": {
+                    "name": "Name",
+                    "placeholder": "Name of the cron job"
+                },
+                "schedule": {
+                    "title": "Schedule",
+                    "placeholder": "Schedule"
+                },
+                "timezone": "Timezone",
+                "your_timezone": "In your browser's timezone.",
+                "edit": "Edit cron",
+                "delete": "Delete cron",
+                "enabled": "Enabled"
+            },
+            "badge": {
+                "badge": "Badge",
+                "type": "Syntax",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branch",
+                "events": "Events",
+                "workflow": "Workflow",
+                "step": "Step"
+            },
+            "actions": {
+                "actions": "Actions",
+                "repair": {
+                    "repair": "Repair repository",
+                    "success": "Repository repaired"
+                },
+                "disable": {
+                    "disable": "Disable repository",
+                    "success": "Repository disabled"
+                },
+                "enable": {
+                    "enable": "Enable repository",
+                    "success": "Repository enabled"
+                },
+                "delete": {
+                    "delete": "Delete repository",
+                    "confirm": "All data will be lost after this action!\n\nDo you really want to proceed?",
+                    "success": "Repository deleted"
+                }
+            }
+        },
+        "pipeline": {
+            "tasks": "Tasks",
+            "config": "Config",
+            "files": "Changed files",
+            "no_pipelines": "No pipelines have been started yet.",
+            "load_more": "Load more",
+            "no_pipeline_steps": "No pipeline steps available!",
+            "step_not_started": "This step hasn't started yet.",
+            "pipelines_for": "Pipelines for branch \"{branch}\"",
+            "pipelines_for_pr": "Pipelines for pull request #{index}",
+            "exit_code": "Exit Code {exitCode}",
+            "loading": "Loading…",
+            "no_logs": "No logs",
+            "pipeline": "Pipeline #{pipelineId}",
+            "log_title": "Step Logs",
+            "log_download_error": "An error occurred while downloading the log file",
+            "log_delete_confirm": "Do you really want to delete the step logs?",
+            "log_delete_error": "An error occurred when deleting the step logs",
+            "actions": {
+                "cancel": "Cancel",
+                "restart": "Restart",
+                "canceled": "This step has been canceled.",
+                "skipped": "This step has been skipped.",
+                "cancel_success": "Pipeline canceled",
+                "deploy": "Deploy",
+                "restart_success": "Pipeline restarted",
+                "log_download": "Download",
+                "log_delete": "Delete",
+                "log_auto_scroll": "Enable automatic scrolling",
+                "log_auto_scroll_off": "Disable automatic scrolling",
+                "expand_all": "Expand all",
+                "collapse_all": "Collapse all"
+            },
+            "protected": {
+                "awaits": "This pipeline is awaiting approval from a maintainer!",
+                "approve": "Approve",
+                "decline": "Decline",
+                "declined": "This pipeline has been declined!",
+                "approve_success": "Pipeline approved",
+                "decline_success": "Pipeline declined"
+            },
+            "event": {
+                "push": "Push",
+                "tag": "Tag",
+                "pr": "Pull Request",
+                "pr_closed": "Pull Request merged/closed",
+                "pr_metadata": "Pull Request metadata changed",
+                "deploy": "Deploy",
+                "cron": "Cron",
+                "manual": "Manual",
+                "release": "Release"
+            },
+            "status": {
+                "status": "Status: {status}",
+                "blocked": "blocked",
+                "pending": "pending",
+                "running": "running",
+                "started": "started",
+                "skipped": "skipped",
+                "canceled": "canceled",
+                "success": "success",
+                "declined": "declined",
+                "error": "error",
+                "failure": "failure",
+                "killed": "killed"
+            },
+            "errors": "Errors",
+            "warnings": "Warnings",
+            "show_errors": "Show errors",
+            "we_got_some_errors": "Oh no, an error occurred!",
+            "parse_errors": "Parse errors",
+            "runtime_errors": "Runtime errors",
+            "duration": "Pipeline duration: {duration}",
+            "created": "Created: {created}",
+            "version": "The Woodpecker version this pipeline was executed on.",
+            "version_header": "Woodpecker version",
+            "cancel_info": {
+                "superseded_by": "Superseded by #{pipelineId}",
+                "canceled_by_user": "Canceled by {user}",
+                "canceled_by_step": "Canceled due to {step}"
+            },
+            "debug": {
+                "title": "Debug",
+                "download_metadata": "Download metadata",
+                "metadata_download_error": "Error downloading metadata",
+                "metadata_download_successful": "Metadata downloaded successfully",
+                "no_permission": "You are not allowed to access the debug information",
+                "metadata_exec_title": "Re-run pipeline locally",
+                "metadata_exec_desc": "Download the metadata of this pipeline to run it locally. This allows you to fix problems and test changes before committing them. The Woodpecker CLI must be installed locally in the same version as the server."
+            },
+            "view": "View pipeline"
         }
-      }
     },
-    "pipeline": {
-      "tasks": "Tasks",
-      "config": "Config",
-      "files": "Changed files",
-      "no_pipelines": "No pipelines have been started yet.",
-      "load_more": "Load more",
-      "no_pipeline_steps": "No pipeline steps available!",
-      "step_not_started": "This step hasn't started yet.",
-      "pipelines_for": "Pipelines for branch \"{branch}\"",
-      "pipelines_for_pr": "Pipelines for pull request #{index}",
-      "exit_code": "Exit Code {exitCode}",
-      "loading": "Loading…",
-      "no_logs": "No logs",
-      "pipeline": "Pipeline #{pipelineId}",
-      "log_title": "Step Logs",
-      "log_download_error": "An error occurred while downloading the log file",
-      "log_delete_confirm": "Do you really want to delete the step logs?",
-      "log_delete_error": "An error occurred when deleting the step logs",
-      "actions": {
-        "cancel": "Cancel",
-        "restart": "Restart",
-        "canceled": "This step has been canceled.",
-        "skipped": "This step has been skipped.",
-        "cancel_success": "Pipeline canceled",
-        "deploy": "Deploy",
-        "restart_success": "Pipeline restarted",
-        "log_download": "Download",
-        "log_delete": "Delete",
-        "log_auto_scroll": "Enable automatic scrolling",
-        "log_auto_scroll_off": "Disable automatic scrolling",
-        "expand_all": "Expand all",
-        "collapse_all": "Collapse all"
-      },
-      "protected": {
-        "awaits": "This pipeline is awaiting approval from a maintainer!",
-        "approve": "Approve",
-        "decline": "Decline",
-        "declined": "This pipeline has been declined!",
-        "approve_success": "Pipeline approved",
-        "decline_success": "Pipeline declined"
-      },
-      "event": {
-        "push": "Push",
-        "tag": "Tag",
-        "pr": "Pull Request",
-        "pr_closed": "Pull Request merged/closed",
-        "pr_metadata": "Pull Request metadata changed",
-        "deploy": "Deploy",
-        "cron": "Cron",
-        "manual": "Manual",
-        "release": "Release"
-      },
-      "status": {
-        "status": "Status: {status}",
-        "blocked": "blocked",
-        "pending": "pending",
-        "running": "running",
-        "started": "started",
-        "skipped": "skipped",
-        "canceled": "canceled",
-        "success": "success",
-        "declined": "declined",
-        "error": "error",
-        "failure": "failure",
-        "killed": "killed"
-      },
-      "errors": "Errors",
-      "warnings": "Warnings",
-      "show_errors": "Show errors",
-      "we_got_some_errors": "Oh no, an error occurred!",
-      "parse_errors": "Parse errors",
-      "runtime_errors": "Runtime errors",
-      "duration": "Pipeline duration: {duration}",
-      "created": "Created: {created}",
-      "version": "The Woodpecker version this pipeline was executed on.",
-      "version_header": "Woodpecker version",
-      "cancel_info": {
-        "superseded_by": "Superseded by #{pipelineId}",
-        "canceled_by_user": "Canceled by {user}",
-        "canceled_by_step": "Canceled due to {step}"
-      },
-      "debug": {
-        "title": "Debug",
-        "download_metadata": "Download metadata",
-        "metadata_download_error": "Error downloading metadata",
-        "metadata_download_successful": "Metadata downloaded successfully",
-        "no_permission": "You are not allowed to access the debug information",
-        "metadata_exec_title": "Re-run pipeline locally",
-        "metadata_exec_desc": "Download the metadata of this pipeline to run it locally. This allows you to fix problems and test changes before committing them. The Woodpecker CLI must be installed locally in the same version as the server."
-      },
-      "view": "View pipeline"
-    }
-  },
-  "org": {
-    "settings": {
-      "not_allowed": "You are not allowed to access the settings of this organization",
-      "secrets": {
-        "desc": "Organization secrets can be used in the pipelines of all repositories owned by the organization."
-      },
-      "registries": {
-        "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
-      },
-      "agents": {
-        "desc": "Agents registered for this organization."
-      }
-    }
-  },
-  "admin": {
-    "settings": {
-      "settings": "Admin Settings",
-      "not_allowed": "You are not allowed to access server settings",
-      "secrets": {
-        "desc": "Global secrets can be used in the pipelines of all repositories.",
-        "warning": "These secrets are available to all users."
-      },
-      "registries": {
-        "desc": "Global registry credentials can be added to use private images for all pipelines.",
-        "warning": "These registry credentials are available to all users."
-      },
-      "agents": {
-        "agents": "Agents",
-        "desc": "Agents registered on this server.",
-        "none": "There are no agents yet.",
-        "id": "ID",
-        "add": "Add agent",
-        "save": "Save agent",
-        "show": "Show agents",
-        "created": "Agent created",
-        "saved": "Agent saved",
-        "deleted": "Agent deleted",
-        "name": {
-          "name": "Name",
-          "placeholder": "Name of the agent"
-        },
-        "no_schedule": {
-          "name": "Disable agent",
-          "placeholder": "Stop agent from taking new tasks"
-        },
-        "token": "Token",
-        "platform": {
-          "platform": "Platform",
-          "badge": "platform"
-        },
-        "backend": {
-          "backend": "Backend",
-          "badge": "backend"
-        },
-        "capacity": {
-          "capacity": "Capacity",
-          "desc": "The maximum amount of parallel pipelines executed by this agent.",
-          "badge": "capacity"
-        },
-        "custom_labels": {
-          "custom_labels": "Custom Labels",
-          "desc": "The custom labels set by the agent admin on agent startup."
-        },
-        "org": {
-          "badge": "org"
-        },
-        "version": "Version",
-        "last_contact": {
-          "last_contact": "Last contact",
-          "badge": "last contact"
-        },
-        "never": "Never",
-        "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
-        "edit_agent": "Edit agent",
-        "delete_agent": "Delete agent"
-      },
-      "queue": {
-        "queue": "Queue",
-        "desc": "Tasks waiting to be executed by agents.",
-        "pause": "Pause",
-        "resume": "Resume",
-        "paused": "Queue is paused",
-        "resumed": "Queue is resumed",
-        "tasks": "Tasks",
-        "task_running": "Task is running",
-        "task_pending": "Task is pending",
-        "task_waiting_on_deps": "Task is waiting on dependencies",
-        "agent": "agent",
-        "waiting_for": "waiting for",
-        "stats": {
-          "completed_count": "Completed Tasks",
-          "worker_count": "Free",
-          "running_count": "Running",
-          "pending_count": "Pending",
-          "waiting_on_deps_count": "Waiting on dependencies"
+    "org": {
+        "settings": {
+            "not_allowed": "You are not allowed to access the settings of this organization",
+            "secrets": {
+                "desc": "Organization secrets can be used in the pipelines of all repositories owned by the organization."
+            },
+            "registries": {
+                "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
+            },
+            "agents": {
+                "desc": "Agents registered for this organization."
+            }
         }
-      },
-      "users": {
-        "users": "Users",
-        "desc": "Users registered for this server.",
-        "login": "Username",
-        "email": "Email",
-        "avatar_url": "Avatar URL",
-        "save": "Save user",
-        "cancel": "Cancel",
-        "show": "Show users",
-        "add": "Add user",
-        "none": "There are no users yet.",
-        "delete_confirm": "Do you really want to delete this user? This will also delete all repositories owned by this user.",
-        "deleted": "User deleted",
-        "created": "User created",
-        "saved": "User saved",
-        "admin": {
-          "admin": "Admin",
-          "placeholder": "User is an admin",
-          "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, the user will regain them when they sign in next time."
-        },
-        "delete_user": "Delete user",
-        "edit_user": "Edit user",
-        "forge": "Forge"
-      },
-      "orgs": {
-        "orgs": "Organizations",
-        "desc": "Organizations owning repositories on this server.",
-        "none": "There are no organizations yet.",
-        "org_settings": "Organization settings",
-        "delete_org": "Delete organization",
-        "deleted": "Organization deleted",
-        "delete_confirm": "Do you really want to delete this organization? This will also delete all repositories owned by this organization.",
-        "view": "View organization"
-      },
-      "repos": {
-        "repos": "Repositories",
-        "desc": "Repositories that are or were activated on this server.",
-        "none": "There are no repositories yet.",
-        "view": "View repository",
-        "settings": "Repository settings",
-        "disabled": "Disabled",
-        "repair": {
-          "repair": "Repair all",
-          "success": "Repositories repaired"
+    },
+    "admin": {
+        "settings": {
+            "settings": "Admin Settings",
+            "not_allowed": "You are not allowed to access server settings",
+            "secrets": {
+                "desc": "Global secrets can be used in the pipelines of all repositories.",
+                "warning": "These secrets are available to all users."
+            },
+            "registries": {
+                "desc": "Global registry credentials can be added to use private images for all pipelines.",
+                "warning": "These registry credentials are available to all users."
+            },
+            "agents": {
+                "agents": "Agents",
+                "desc": "Agents registered on this server.",
+                "none": "There are no agents yet.",
+                "id": "ID",
+                "add": "Add agent",
+                "save": "Save agent",
+                "show": "Show agents",
+                "created": "Agent created",
+                "saved": "Agent saved",
+                "deleted": "Agent deleted",
+                "name": {
+                    "name": "Name",
+                    "placeholder": "Name of the agent"
+                },
+                "no_schedule": {
+                    "name": "Disable agent",
+                    "placeholder": "Stop agent from taking new tasks"
+                },
+                "token": "Token",
+                "platform": {
+                    "platform": "Platform",
+                    "badge": "platform"
+                },
+                "backend": {
+                    "backend": "Backend",
+                    "badge": "backend"
+                },
+                "capacity": {
+                    "capacity": "Capacity",
+                    "desc": "The maximum amount of parallel pipelines executed by this agent.",
+                    "badge": "capacity"
+                },
+                "custom_labels": {
+                    "custom_labels": "Custom Labels",
+                    "desc": "The custom labels set by the agent admin on agent startup."
+                },
+                "org": {
+                    "badge": "org"
+                },
+                "version": "Version",
+                "last_contact": {
+                    "last_contact": "Last contact",
+                    "badge": "last contact"
+                },
+                "never": "Never",
+                "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
+                "edit_agent": "Edit agent",
+                "delete_agent": "Delete agent"
+            },
+            "queue": {
+                "queue": "Queue",
+                "desc": "Tasks waiting to be executed by agents.",
+                "pause": "Pause",
+                "resume": "Resume",
+                "paused": "Queue is paused",
+                "resumed": "Queue is resumed",
+                "tasks": "Tasks",
+                "task_running": "Task is running",
+                "task_pending": "Task is pending",
+                "task_waiting_on_deps": "Task is waiting on dependencies",
+                "agent": "agent",
+                "waiting_for": "waiting for",
+                "stats": {
+                    "completed_count": "Completed Tasks",
+                    "worker_count": "Free",
+                    "running_count": "Running",
+                    "pending_count": "Pending",
+                    "waiting_on_deps_count": "Waiting on dependencies"
+                }
+            },
+            "users": {
+                "users": "Users",
+                "desc": "Users registered for this server.",
+                "login": "Username",
+                "email": "Email",
+                "avatar_url": "Avatar URL",
+                "save": "Save user",
+                "cancel": "Cancel",
+                "show": "Show users",
+                "add": "Add user",
+                "none": "There are no users yet.",
+                "delete_confirm": "Do you really want to delete this user? This will also delete all repositories owned by this user.",
+                "deleted": "User deleted",
+                "created": "User created",
+                "saved": "User saved",
+                "admin": {
+                    "admin": "Admin",
+                    "placeholder": "User is an admin",
+                    "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, the user will regain them when they sign in next time."
+                },
+                "delete_user": "Delete user",
+                "edit_user": "Edit user",
+                "forge": "Forge"
+            },
+            "orgs": {
+                "orgs": "Organizations",
+                "desc": "Organizations owning repositories on this server.",
+                "none": "There are no organizations yet.",
+                "org_settings": "Organization settings",
+                "delete_org": "Delete organization",
+                "deleted": "Organization deleted",
+                "delete_confirm": "Do you really want to delete this organization? This will also delete all repositories owned by this organization.",
+                "view": "View organization"
+            },
+            "repos": {
+                "repos": "Repositories",
+                "desc": "Repositories that are or were activated on this server.",
+                "none": "There are no repositories yet.",
+                "view": "View repository",
+                "settings": "Repository settings",
+                "disabled": "Disabled",
+                "repair": {
+                    "repair": "Repair all",
+                    "success": "Repositories repaired"
+                }
+            }
         }
-      }
-    }
-  },
-  "user": {
-    "settings": {
-      "settings": "User Settings",
-      "general": {
-        "general": "Account",
-        "language": "Language",
-        "theme": {
-          "theme": "Theme",
-          "light": "Light",
-          "dark": "Dark",
-          "auto": "Auto"
-        },
-        "pipeline_logs": {
-          "pipeline_logs": "Pipeline logs",
-          "collapse_groups": {
-            "collapse": "Collapse log groups by default",
-            "desc": "When opening a finished step, collapse all command groups to show only the outline."
-          }
+    },
+    "user": {
+        "settings": {
+            "settings": "User Settings",
+            "general": {
+                "general": "Account",
+                "language": "Language",
+                "theme": {
+                    "theme": "Theme",
+                    "light": "Light",
+                    "dark": "Dark",
+                    "auto": "Auto"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Pipeline logs",
+                    "collapse_groups": {
+                        "collapse": "Collapse log groups by default",
+                        "desc": "When opening a finished step, collapse all command groups to show only the outline."
+                    }
+                }
+            },
+            "secrets": {
+                "desc": "User secrets can be used in the pipelines of all repositories owned by the user."
+            },
+            "registries": {
+                "desc": "User registry credentials can be added to use private images for all personal pipelines."
+            },
+            "cli_and_api": {
+                "cli_and_api": "CLI & API",
+                "desc": "Personal Access Token, CLI and API usage",
+                "token": "Personal Access Token",
+                "api_usage": "Example API Usage",
+                "cli_usage": "Example CLI Usage",
+                "download_cli": "Download CLI",
+                "reset_token": "Reset token",
+                "swagger_ui": "Swagger UI"
+            },
+            "agents": {
+                "desc": "Agents registered to your account repos."
+            }
         }
-      },
-      "secrets": {
-        "desc": "User secrets can be used in the pipelines of all repositories owned by the user."
-      },
-      "registries": {
-        "desc": "User registry credentials can be added to use private images for all personal pipelines."
-      },
-      "cli_and_api": {
-        "cli_and_api": "CLI & API",
-        "desc": "Personal Access Token, CLI and API usage",
-        "token": "Personal Access Token",
-        "api_usage": "Example API Usage",
-        "cli_usage": "Example CLI Usage",
-        "download_cli": "Download CLI",
-        "reset_token": "Reset token",
-        "swagger_ui": "Swagger UI"
-      },
-      "agents": {
-        "desc": "Agents registered to your account repos."
-      }
-    }
-  },
-  "secrets": {
-    "secrets": "Secrets",
-    "desc": "Secrets can be used in all pipelines of this repository.",
-    "none": "There are no secrets yet.",
-    "add": "Add secret",
-    "save": "Save secret",
-    "show": "Show secrets",
-    "name": "Name",
-    "value": "Value",
-    "note": "Note",
-    "delete_confirm": "Do you really want to delete this secret?",
-    "deleted": "Secret deleted",
-    "created": "Secret created",
-    "saved": "Secret saved",
-    "plugins": {
-      "images": "Available only for the following plugins",
-      "desc": "List of plugin images where this secret is available. Leave empty to allow all plugins and normal steps."
     },
-    "events": {
-      "events": "Available at the following events",
-      "warning": "Exposing secrets to pull requests could allow bad actors to steal your secrets with a malicious pull request."
+    "secrets": {
+        "secrets": "Secrets",
+        "desc": "Secrets can be used in all pipelines of this repository.",
+        "none": "There are no secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "note": "Note",
+        "delete_confirm": "Do you really want to delete this secret?",
+        "deleted": "Secret deleted",
+        "created": "Secret created",
+        "saved": "Secret saved",
+        "plugins": {
+            "images": "Available only for the following plugins",
+            "desc": "List of plugin images where this secret is available. Leave empty to allow all plugins and normal steps."
+        },
+        "events": {
+            "events": "Available at the following events",
+            "warning": "Exposing secrets to pull requests could allow bad actors to steal your secrets with a malicious pull request."
+        },
+        "edit": "Edit secret",
+        "delete": "Delete secret"
     },
-    "edit": "Edit secret",
-    "delete": "Delete secret"
-  },
-  "registries": {
-    "registries": "Registries",
-    "credentials": "Registry credentials",
-    "desc": "Registry credentials can be added to use private images for pipelines.",
-    "none": "There are no registry credentials yet.",
-    "address": {
-      "address": "Address",
-      "desc": "Registry Address (e.g. docker.io)"
+    "registries": {
+        "registries": "Registries",
+        "credentials": "Registry credentials",
+        "desc": "Registry credentials can be added to use private images for pipelines.",
+        "none": "There are no registry credentials yet.",
+        "address": {
+            "address": "Address",
+            "desc": "Registry Address (e.g. docker.io)"
+        },
+        "show": "Show registries",
+        "save": "Save registry",
+        "add": "Add registry",
+        "view": "View registry",
+        "edit": "Edit registry",
+        "delete": "Delete registry",
+        "delete_confirm": "Do you really want to delete this registry?",
+        "created": "Registry credentials created",
+        "saved": "Registry credentials saved",
+        "deleted": "Registry credentials deleted"
     },
-    "show": "Show registries",
-    "save": "Save registry",
-    "add": "Add registry",
-    "view": "View registry",
-    "edit": "Edit registry",
-    "delete": "Delete registry",
-    "delete_confirm": "Do you really want to delete this registry?",
-    "created": "Registry credentials created",
-    "saved": "Registry credentials saved",
-    "deleted": "Registry credentials deleted"
-  },
-  "default": "default",
-  "info": "Info",
-  "running_version": "You are running Woodpecker {0}",
-  "update_woodpecker": "Please update your Woodpecker instance to {0}",
-  "global_level_secret": "global secret",
-  "org_level_secret": "organization secret",
-  "global_level_registry": "global registry",
-  "org_level_registry": "organization registry",
-  "login_to_cli": "Sign in to CLI",
-  "login_to_cli_description": "If you continue, you will be signed in to the CLI.",
-  "abort": "Abort",
-  "cli_login_success": "Sign-in to CLI successful",
-  "cli_login_failed": "Sign-in to CLI failed",
-  "cli_login_denied": "Sign-in to CLI denied",
-  "return_to_cli": "You can now close this tab and return to the CLI.",
-  "settings": "Settings",
-  "oauth_error": "Error while authenticating against OAuth provider",
-  "internal_error": "Internal error occurred",
-  "registration_closed": "The registration is closed",
-  "access_denied": "You are not allowed to access this instance",
-  "org_access_denied": "You are not allowed to access this organization",
-  "invalid_state": "The OAuth state is invalid",
-  "extensions": "Extensions",
-  "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
-  "extension_endpoint_placeholder": "e.g. https://example.com/api",
-  "config_extension_endpoint": "Config extension endpoint",
-  "registry_extension_endpoint": "Registry extension endpoint",
-  "config_extension_exclusive": "Exclusive",
-  "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
-  "secret_extension_endpoint": "Secret extension endpoint",
-  "extension_netrc": "Include netrc credentials",
-  "extension_netrc_desc": "Send forge netrc credentials to the extension.",
-  "extensions_signatures_public_key": "Public key for signatures",
-  "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
-  "extensions_configuration_saved": "Extensions configuration saved",
-  "require_approval": {
-    "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution.",
-    "require_approval_for": "Approval requirements",
-    "none": "None",
-    "none_desc": "Every event triggers pipelines, including pull requests. This setting can be dangerous and is only recommended for private instances.",
-    "forks": "Pull request from forked repository",
-    "pull_requests": "All pull requests",
-    "all_events": "All events from forge",
-    "allowed_users": {
-      "allowed_users": "Allowed users",
-      "desc": "Pipelines created by the listed users never require approval."
-    }
-  },
-  "no_search_results": "No results found",
-  "forges": "Forges",
-  "forges_desc": "Configure forges hosting repositories Woodpecker should run for.",
-  "add_forge": "Add forge",
-  "show_forges": "Show forges",
-  "github": "GitHub",
-  "gitlab": "GitLab",
-  "bitbucket": "Bitbucket",
-  "bitbucket_dc": "Bitbucket Data Center",
-  "gitea": "Gitea",
-  "forgejo": "Forgejo",
-  "addon": "Addon",
-  "forge_type": "Forge type",
-  "oauth_client_id": "OAuth Client ID",
-  "oauth_client_secret": "OAuth Client Secret",
-  "oauth_host": "OAuth host",
-  "merge_ref": "Merge ref",
-  "merge_ref_desc": "Ref to use for merge base. This is used to determine the diff for pull requests.",
-  "public_only": "Public only",
-  "public_only_desc": "Only show public repositories.",
-  "git_username": "Git username",
-  "git_username_desc": "Username for the Git user.",
-  "git_password": "Git password",
-  "git_password_desc": "Password or personal access token for the Git user.",
-  "executable": "Executable",
-  "executable_desc": "Path to the addon executable.",
-  "save": "Save",
-  "add": "Add",
-  "delete": "Delete",
-  "allowed_orgs": "Allowed organizations",
-  "allowed_orgs_desc": "Organizations whose members may log in using this forge, in addition to the global WOODPECKER_ORGS setting.",
-  "allowed_orgs_placeholder": "org-1",
-  "skip_verify": "Skip SSL verification",
-  "skip_verify_desc": "Skip SSL verification for the API connection. This is not recommended for production use.",
-  "url": "URL",
-  "forge_managed_by_env": "The primary forge is managed by environment variables. Any changes to this forge will be reverted on a restart.",
-  "oauth_redirect_url": "OAuth redirect URL",
-  "forge_created": "Forge created",
-  "advanced_options": "Advanced options",
-  "leave_empty_to_keep_current_value": "Leave empty to keep current value",
-  "forge_deleted": "Forge deleted",
-  "forge_delete_confirm": "Do you really want to delete this forge? This will also delete all repositories, users and pipelines related to this forge.",
-  "edit_forge": "Edit forge",
-  "delete_forge": "Delete forge",
-  "no_forges": "There are no forges yet.",
-  "use_this_redirect_url_to_create": "Use this redirect URL to create or update the OAuth application.",
-  "developer_settings_to_create": "Go to the {0} and set up the OAuth application.",
-  "developer_settings": "developer settings",
-  "public_url_for_oauth_if": "Public URL for OAuth if different from URL ({0})",
-  "forge_saved": "Forge saved",
-  "fullscreen": "Fullscreen",
-  "exit_fullscreen": "Exit fullscreen",
-  "help_translating": "You can help translate Woodpecker into your language on {0}.",
-  "weblate": "our Weblate",
-  "disabled": "Disabled"
+    "default": "default",
+    "info": "Info",
+    "running_version": "You are running Woodpecker {0}",
+    "update_woodpecker": "Please update your Woodpecker instance to {0}",
+    "global_level_secret": "global secret",
+    "org_level_secret": "organization secret",
+    "global_level_registry": "global registry",
+    "org_level_registry": "organization registry",
+    "login_to_cli": "Sign in to CLI",
+    "login_to_cli_description": "If you continue, you will be signed in to the CLI.",
+    "abort": "Abort",
+    "cli_login_success": "Sign-in to CLI successful",
+    "cli_login_failed": "Sign-in to CLI failed",
+    "cli_login_denied": "Sign-in to CLI denied",
+    "return_to_cli": "You can now close this tab and return to the CLI.",
+    "settings": "Settings",
+    "oauth_error": "Error while authenticating against OAuth provider",
+    "internal_error": "Internal error occurred",
+    "registration_closed": "The registration is closed",
+    "access_denied": "You are not allowed to access this instance",
+    "org_access_denied": "You are not allowed to access this organization",
+    "invalid_state": "The OAuth state is invalid",
+    "extensions": "Extensions",
+    "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
+    "extension_endpoint_placeholder": "e.g. https://example.com/api",
+    "config_extension_endpoint": "Config extension endpoint",
+    "registry_extension_endpoint": "Registry extension endpoint",
+    "config_extension_exclusive": "Exclusive",
+    "config_extension_exclusive_desc": "If enabled, will skip all other ways of configuration fetching, including the forge.",
+    "secret_extension_endpoint": "Secret extension endpoint",
+    "extension_netrc": "Include netrc credentials",
+    "extension_netrc_desc": "Send forge netrc credentials to the extension.",
+    "extensions_signatures_public_key": "Public key for signatures",
+    "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
+    "extensions_configuration_saved": "Extensions configuration saved",
+    "require_approval": {
+        "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution.",
+        "require_approval_for": "Approval requirements",
+        "none": "None",
+        "none_desc": "Every event triggers pipelines, including pull requests. This setting can be dangerous and is only recommended for private instances.",
+        "forks": "Pull request from forked repository",
+        "pull_requests": "All pull requests",
+        "all_events": "All events from forge",
+        "allowed_users": {
+            "allowed_users": "Allowed users",
+            "desc": "Pipelines created by the listed users never require approval."
+        }
+    },
+    "no_search_results": "No results found",
+    "forges": "Forges",
+    "forges_desc": "Configure forges hosting repositories Woodpecker should run for.",
+    "add_forge": "Add forge",
+    "show_forges": "Show forges",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "addon": "Addon",
+    "forge_type": "Forge type",
+    "oauth_client_id": "OAuth Client ID",
+    "oauth_client_secret": "OAuth Client Secret",
+    "oauth_host": "OAuth host",
+    "merge_ref": "Merge ref",
+    "merge_ref_desc": "Ref to use for merge base. This is used to determine the diff for pull requests.",
+    "public_only": "Public only",
+    "public_only_desc": "Only show public repositories.",
+    "git_username": "Git username",
+    "git_username_desc": "Username for the Git user.",
+    "git_password": "Git password",
+    "git_password_desc": "Password or personal access token for the Git user.",
+    "executable": "Executable",
+    "executable_desc": "Path to the addon executable.",
+    "save": "Save",
+    "add": "Add",
+    "delete": "Delete",
+    "allowed_orgs": "Allowed organizations",
+    "allowed_orgs_desc": "Organizations whose members may log in using this forge, in addition to the global WOODPECKER_ORGS setting.",
+    "allowed_orgs_placeholder": "org-1",
+    "skip_verify": "Skip SSL verification",
+    "skip_verify_desc": "Skip SSL verification for the API connection. This is not recommended for production use.",
+    "url": "URL",
+    "forge_managed_by_env": "The primary forge is managed by environment variables. Any changes to this forge will be reverted on a restart.",
+    "oauth_redirect_url": "OAuth redirect URL",
+    "forge_created": "Forge created",
+    "advanced_options": "Advanced options",
+    "leave_empty_to_keep_current_value": "Leave empty to keep current value",
+    "forge_deleted": "Forge deleted",
+    "forge_delete_confirm": "Do you really want to delete this forge? This will also delete all repositories, users and pipelines related to this forge.",
+    "edit_forge": "Edit forge",
+    "delete_forge": "Delete forge",
+    "no_forges": "There are no forges yet.",
+    "use_this_redirect_url_to_create": "Use this redirect URL to create or update the OAuth application.",
+    "developer_settings_to_create": "Go to the {0} and set up the OAuth application.",
+    "developer_settings": "developer settings",
+    "public_url_for_oauth_if": "Public URL for OAuth if different from URL ({0})",
+    "forge_saved": "Forge saved",
+    "fullscreen": "Fullscreen",
+    "exit_fullscreen": "Exit fullscreen",
+    "help_translating": "You can help translate Woodpecker into your language on {0}.",
+    "weblate": "our Weblate",
+    "disabled": "Disabled"
 }
