@@ -779,6 +779,17 @@ Example conditional execution by branch:
 
 The workflow now triggers on `main`, but also if the target branch of a pull request is `main`.
 
+You can add `priority` to workflow-level `when` conditions to change queue ordering for matching workflows. Higher priority workflows run before lower priority workflows. If multiple matching conditions define a priority, Woodpecker uses the highest matching priority. Conditions without `priority` do not affect queue ordering.
+
+```yaml
+when:
+  - event: push
+    branch: main
+    priority: 100
+  - event: pull_request
+    priority: -10
+```
+
 <!-- markdownlint-disable no-duplicate-heading -->
 
 ## `depends_on`
