@@ -340,12 +340,6 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		var err error
 		for range retryCount {
 			err = run(ctx, c, backendEngines)
-			// codes.Unavailable covers a refused/reset connection, but a slow or
-			// transiently failing DNS lookup during the initial Login surfaces as
-			// codes.DeadlineExceeded instead (AuthClient.Auth's hardcoded
-			// authClientTimeout) -- without also retrying that code, a DNS hiccup
-			// at agent startup crashes the agent after a single attempt regardless
-			// of the configured retry count/delay.
 			if code := status.Code(err); code == codes.Unavailable || code == codes.DeadlineExceeded {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to %s, retrying in %v", c.String("server"), retryDelay))
 				time.Sleep(retryDelay)
