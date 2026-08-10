@@ -4863,7 +4863,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "orgs": {
-                    "description": "if set, only members of those orgs may log in using this forge",
+                    "description": "members of those orgs may log in using this forge, in addition to the globally allowed ones",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4901,7 +4901,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "orgs": {
-                    "description": "if set, only members of those orgs may log in using this forge",
+                    "description": "members of those orgs may log in using this forge, in addition to the globally allowed ones",
                     "type": "array",
                     "items": {
                         "type": "string"
