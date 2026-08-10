@@ -526,7 +526,7 @@ With this feature enabled, Woodpecker creates separate Kubernetes namespaces for
 
 The DNS domain of the Kubernetes cluster. It is used to build the DNS search entry that lets a step reach a service by its hostname.
 
-Set it if your cluster was installed with a custom cluster domain (`--cluster-domain` with kubeadm, `dns_domain` with kubespray). Leaving the default on such a cluster makes services unreachable by hostname.
+Set this value if your cluster was installed with a custom cluster domain.
 
 ---
 
