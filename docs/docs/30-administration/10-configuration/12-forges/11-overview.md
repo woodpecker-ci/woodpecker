@@ -23,7 +23,7 @@ In addition to this, Woodpecker supports [addon forges](../100-addons.md) if the
 Support for connecting multiple forges is not finished yet and has to be considered experimental. Please do not use it in public or otherwise untrusted environments. See [known limitations](#known-limitations) below.
 :::
 
-Only **one** forge can be configured using environment variables, for example [GitHub](20-github.md) or [GitLab](40-gitlab.md). Enabling several forge drivers at once does not create several forges. All other forges have to be added by an admin under `Settings` -> `Forges` and exist in the database only. The forge from the environment is written back on every server start, so changing its driver replaces it instead of adding a new one.
+Only **one** forge can be configured using environment variables. Enabling several forge drivers at once does not create several forges. All other forges have to be added by an admin under `Settings` -> `Forges` and exist in the database only. The forge from the environment is written back on every server start, so changing its driver replaces it instead of adding a new one.
 
 ### Restricting who can log in
 
