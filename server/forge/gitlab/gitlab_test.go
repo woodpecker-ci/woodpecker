@@ -104,6 +104,19 @@ func Test_GitLab(t *testing.T) {
 		assert.True(t, _repo.Perm.Push)
 	})
 
+	// Test teams membership method
+	t.Run("Should identify groups by full path, not display name", func(t *testing.T) {
+		teams, err := client.Teams(ctx, &user, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+
+		logins := make([]string, 0, len(teams))
+		for _, team := range teams {
+			logins = append(logins, team.Login)
+		}
+		// both groups are named "woodpecker", only the full path tells them apart
+		assert.Equal(t, []string{"woodpecker", "eve/woodpecker"}, logins)
+	})
+
 	// Test activate method
 	t.Run("Activate, success", func(t *testing.T) {
 		err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook?access_token=token")
