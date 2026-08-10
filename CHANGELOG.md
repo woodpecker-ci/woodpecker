@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @gerbsen, @kastl-ars, @qwerty287, @retif, @zmully
+@OCram85, @gerbsen, @kastl-ars, @qwerty287, @retif, @romain-rossi, @zmully
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Make the Kubernetes cluster domain configurable [[#6957](https://github.com/woodpecker-ci/woodpecker/pull/6957)]
 - Fix vite deprecation [[#6974](https://github.com/woodpecker-ci/woodpecker/pull/6974)]
 - feat(web): extract ListEditor form component [[#6962](https://github.com/woodpecker-ci/woodpecker/pull/6962)]
 - Rename `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY` [[#6947](https://github.com/woodpecker-ci/woodpecker/pull/6947)]
