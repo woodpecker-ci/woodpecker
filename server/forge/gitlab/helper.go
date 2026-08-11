@@ -63,11 +63,7 @@ func isAdmin(proj *gitlab.Project, projectMember *gitlab.ProjectMember) bool {
 	return userAccessLevel(proj, projectMember) >= gitlab.MaintainerPermissions
 }
 
-// userAccessLevel returns the effective access level of the current user for
-// the given project. The explicit (inherited) membership lookup is
-// authoritative when available; otherwise the `permissions` attribute embedded
-// in the project response is used. If neither provides a level,
-// gitlab.NoPermissions is returned.
+// userAccessLevel returns the effective access level of the current user for the project.
 func userAccessLevel(proj *gitlab.Project, projectMember *gitlab.ProjectMember) gitlab.AccessLevelValue {
 	if projectMember != nil {
 		return projectMember.AccessLevel
@@ -75,11 +71,7 @@ func userAccessLevel(proj *gitlab.Project, projectMember *gitlab.ProjectMember) 
 	return embeddedAccessLevel(proj)
 }
 
-// embeddedAccessLevel returns the access level of the current user as reported
-// by the `permissions` attribute of a project response (the maximum of the
-// project and group access level). The projects list API includes this
-// attribute, which allows listing repositories without issuing an extra
-// request per project.
+// embeddedAccessLevel returns the access level of the current user
 // See https://docs.gitlab.com/api/projects/.
 func embeddedAccessLevel(proj *gitlab.Project) gitlab.AccessLevelValue {
 	if proj == nil || proj.Permissions == nil {

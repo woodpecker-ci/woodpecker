@@ -311,12 +311,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 	for i := range projects {
 		project := projects[i]
 
-		// The projects list API already reports the current user's access
-		// level via the `permissions` attribute, so in the common case we can
-		// skip the per-project membership lookup. GitLab may however omit it
-		// (e.g. when access is inherited from a nested parent group), in
-		// which case we fall back to a single explicit lookup per affected
-		// project.
+		// The projects list API already reports the current user's access level
 		var projectMember *gitlab.ProjectMember
 		if embeddedAccessLevel(project) == gitlab.NoPermissions {
 			var err error
