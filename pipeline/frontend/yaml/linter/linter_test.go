@@ -145,8 +145,9 @@ steps:
 
 func TestLintErrors(t *testing.T) {
 	testdata := []struct {
-		from string
-		want string
+		from    string
+		options []linter.Option
+		want    string
 	}{
 		{
 			from: "",
@@ -159,6 +160,13 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "steps: { build: { image: golang, privileged: true }  }",
 			want: "Insufficient trust level to use `privileged` mode",
+		},
+		{
+			from: "{ when: { event: push, priority: 100 }, steps: { build: { image: golang } } }",
+			options: []linter.Option{
+				linter.WithWorkflowPriorityDisabled(true),
+			},
+			want: "Workflow `priority` is disabled on this instance",
 		},
 		{
 			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
@@ -223,7 +231,7 @@ func TestLintErrors(t *testing.T) {
 		conf, err := yaml.ParseString(test.from)
 		require.NoError(t, err)
 
-		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+		lerr := linter.New(test.options...).Lint([]*linter.WorkflowConfig{{
 			File:      test.from,
 			RawConfig: test.from,
 			Workflow:  conf,

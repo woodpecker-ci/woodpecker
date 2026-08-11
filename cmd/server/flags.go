@@ -228,6 +228,11 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_DISABLE_WORKFLOW_PRIORITY"),
+		Name:    "disable-workflow-priority",
+		Usage:   "Disable workflow-level when.priority queue ordering.",
+	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_SESSION_EXPIRES"),
 		Name:    "session-expires",

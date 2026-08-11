@@ -821,6 +821,15 @@ The maximum time in minutes you can set in the repo settings before a pipeline g
 
 ---
 
+### DISABLE_WORKFLOW_PRIORITY
+
+- Name: `WOODPECKER_DISABLE_WORKFLOW_PRIORITY`
+- Default: false
+
+Disable workflow-level `when.priority` queue ordering.
+
+---
+
 ### SESSION_EXPIRES
 
 - Name: `WOODPECKER_SESSION_EXPIRES`

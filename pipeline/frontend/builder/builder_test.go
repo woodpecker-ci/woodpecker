@@ -270,6 +270,35 @@ steps:
 	assert.Equal(t, 100, items[0].Priority)
 }
 
+func TestWorkflowPriorityCanBeDisabled(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+		branch:        "main",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata:     m.GetWorkflowMetadata,
+		RepoTrusted:             &metadata.TrustedConfiguration{},
+		DisableWorkflowPriority: true,
+		Yamls: []*YamlFile{
+			{Name: "build", Data: []byte(`
+when:
+  - event: push
+    priority: 100
+steps:
+  - name: build
+    image: scratch
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.Error(t, err)
+	assert.Empty(t, items)
+}
+
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
