@@ -145,7 +145,7 @@ type Forge interface {
 	//
 	// Errors:
 	//  - Expect types.ErrNotImplemented to be returned if not supported by the forge
-	Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error)
+	Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error)
 
 	// TagHead returns the commit for a tag.
 	TagHead(ctx context.Context, u *model.User, r *model.Repo, tag string) (*model.Commit, error)

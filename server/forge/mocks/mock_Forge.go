@@ -1396,23 +1396,23 @@ func (_c *MockForge_TagHead_Call) RunAndReturn(run func(ctx context.Context, u *
 }
 
 // Tags provides a mock function for the type MockForge
-func (_mock *MockForge) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+func (_mock *MockForge) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	ret := _mock.Called(ctx, u, r, p)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Tags")
 	}
 
-	var r0 []*model.RepoTag
+	var r0 []string
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) ([]*model.RepoTag, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) ([]string, error)); ok {
 		return returnFunc(ctx, u, r, p)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) []*model.RepoTag); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) []string); ok {
 		r0 = returnFunc(ctx, u, r, p)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.RepoTag)
+			r0 = ret.Get(0).([]string)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) error); ok {
@@ -1465,12 +1465,12 @@ func (_c *MockForge_Tags_Call) Run(run func(ctx context.Context, u *model.User, 
 	return _c
 }
 
-func (_c *MockForge_Tags_Call) Return(repoTags []*model.RepoTag, err error) *MockForge_Tags_Call {
+func (_c *MockForge_Tags_Call) Return(repoTags []string, err error) *MockForge_Tags_Call {
 	_c.Call.Return(repoTags, err)
 	return _c
 }
 
-func (_c *MockForge_Tags_Call) RunAndReturn(run func(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error)) *MockForge_Tags_Call {
+func (_c *MockForge_Tags_Call) RunAndReturn(run func(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error)) *MockForge_Tags_Call {
 	_c.Call.Return(run)
 	return _c
 }

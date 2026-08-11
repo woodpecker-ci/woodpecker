@@ -411,8 +411,8 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	}, nil
 }
 
-// Tags returns the tags for the named repository.
-func (c *config) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+// Tags returns the names of all tags for the named repository.
+func (c *config) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	setListOptions(p)
 
 	bitbucketTags, err := c.newClient(ctx, u).ListTags(r.Owner, r.Name, &internal.ListOpts{
@@ -423,12 +423,9 @@ func (c *config) Tags(ctx context.Context, u *model.User, r *model.Repo, p *mode
 		return nil, err
 	}
 
-	tags := make([]*model.RepoTag, 0, len(bitbucketTags))
+	tags := make([]string, 0, len(bitbucketTags))
 	for _, tag := range bitbucketTags {
-		tags = append(tags, &model.RepoTag{
-			Name: tag.Name,
-			SHA:  tag.Target.Hash,
-		})
+		tags = append(tags, tag.Name)
 	}
 	return tags, nil
 }

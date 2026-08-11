@@ -619,8 +619,8 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	}, nil
 }
 
-// Tags returns the tags for the named repository.
-func (g *GitLab) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+// Tags returns the names of all tags for the named repository.
+func (g *GitLab) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := newClient(g.url, token, g.skipVerify)
 	if err != nil {
@@ -644,16 +644,9 @@ func (g *GitLab) Tags(ctx context.Context, u *model.User, r *model.Repo, p *mode
 		return nil, err
 	}
 
-	tags := make([]*model.RepoTag, 0, len(gitlabTags))
+	tags := make([]string, 0, len(gitlabTags))
 	for _, tag := range gitlabTags {
-		repoTag := &model.RepoTag{Name: tag.Name}
-		if tag.Commit != nil {
-			repoTag.SHA = tag.Commit.ID
-		}
-		if tag.CreatedAt != nil {
-			repoTag.CreatedAt = tag.CreatedAt.Unix()
-		}
-		tags = append(tags, repoTag)
+		tags = append(tags, tag.Name)
 	}
 	return tags, nil
 }

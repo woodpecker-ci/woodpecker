@@ -22,7 +22,6 @@ import (
 	"net/url"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -581,7 +580,6 @@ func Test_GitLab(t *testing.T) {
 }
 
 func TestRepositoryRefs(t *testing.T) {
-	createdAt := time.Date(2026, time.August, 6, 12, 0, 0, 0, time.UTC)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -610,7 +608,7 @@ func TestRepositoryRefs(t *testing.T) {
 
 	tags, err := client.Tags(t.Context(), user, repo, &model.ListOptions{Page: 2, PerPage: 25})
 	assert.NoError(t, err)
-	assert.Equal(t, []*model.RepoTag{{Name: "v1.0.0", SHA: "tag-sha", CreatedAt: createdAt.Unix()}}, tags)
+	assert.Equal(t, []string{"v1.0.0"}, tags)
 
 	tagCommit, err := client.TagHead(t.Context(), user, repo, "v1.0.0")
 	assert.NoError(t, err)

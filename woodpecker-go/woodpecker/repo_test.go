@@ -107,7 +107,7 @@ func TestRepoTags(t *testing.T) {
 		handler  http.HandlerFunc
 		opts     ListOptions
 		wantErr  bool
-		expected []*RepoTag
+		expected []string
 	}{
 		{
 			name: "success",
@@ -116,14 +116,14 @@ func TestRepoTags(t *testing.T) {
 				assert.Equal(t, "/api/repos/123/tags?page=2&perPage=10", r.URL.RequestURI())
 
 				w.WriteHeader(http.StatusOK)
-				_, err := fmt.Fprint(w, `[{"name":"v1.0.0","sha":"abc123","created_at":1234567890}]`)
+				_, err := fmt.Fprint(w, `["v1.0.0"]`)
 				assert.NoError(t, err)
 			},
 			opts: ListOptions{
 				Page:    2,
 				PerPage: 10,
 			},
-			expected: []*RepoTag{{Name: "v1.0.0", SHA: "abc123", CreatedAt: 1234567890}},
+			expected: []string{"v1.0.0"},
 		},
 		{
 			name: "server error",

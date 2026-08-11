@@ -3977,7 +3977,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/RepoTag"
+                                "type": "string"
                             }
                         }
                     }
@@ -5621,21 +5621,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/model.TrustedConfigurationPatch"
                 },
                 "visibility": {
-                    "type": "string"
-                }
-            }
-        },
-        "RepoTag": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "unix seconds when known",
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "sha": {
                     "type": "string"
                 }
             }

@@ -276,13 +276,6 @@ type (
 		Variables map[string]string `json:"variables"`
 	}
 
-	// RepoTag represents a repository tag.
-	RepoTag struct {
-		Name      string `json:"name"`
-		SHA       string `json:"sha,omitempty"`
-		CreatedAt int64  `json:"created_at,omitempty"`
-	}
-
 	// Agent is the JSON data for an agent.
 	Agent struct {
 		ID           int64             `json:"id"`

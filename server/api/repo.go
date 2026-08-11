@@ -447,7 +447,7 @@ func GetRepoBranches(c *gin.Context) {
 //	@Summary	Get tags of a repository
 //	@Router		/repos/{repo_id}/tags [get]
 //	@Produce	json
-//	@Success	200	{array}	RepoTag
+//	@Success	200	{array}	string
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -478,9 +478,6 @@ func GetRepoTags(c *gin.Context) {
 		log.Error().Err(err).Msg("failed to load tags")
 		c.String(http.StatusInternalServerError, "failed to load tags: %s", err)
 		return
-	}
-	if tags == nil {
-		tags = []*model.RepoTag{}
 	}
 
 	c.JSON(http.StatusOK, tags)

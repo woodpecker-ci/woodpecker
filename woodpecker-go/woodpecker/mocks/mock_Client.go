@@ -3990,23 +3990,23 @@ func (_c *MockClient_RepoRepair_Call) RunAndReturn(run func(repoID int64) error)
 }
 
 // RepoTags provides a mock function for the type MockClient
-func (_mock *MockClient) RepoTags(repoID int64, opt woodpecker.ListOptions) ([]*woodpecker.RepoTag, error) {
+func (_mock *MockClient) RepoTags(repoID int64, opt woodpecker.ListOptions) ([]string, error) {
 	ret := _mock.Called(repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoTags")
 	}
 
-	var r0 []*woodpecker.RepoTag
+	var r0 []string
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.ListOptions) ([]*woodpecker.RepoTag, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.ListOptions) ([]string, error)); ok {
 		return returnFunc(repoID, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.ListOptions) []*woodpecker.RepoTag); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.ListOptions) []string); ok {
 		r0 = returnFunc(repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*woodpecker.RepoTag)
+			r0 = ret.Get(0).([]string)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.ListOptions) error); ok {
@@ -4047,12 +4047,12 @@ func (_c *MockClient_RepoTags_Call) Run(run func(repoID int64, opt woodpecker.Li
 	return _c
 }
 
-func (_c *MockClient_RepoTags_Call) Return(repoTags []*woodpecker.RepoTag, err error) *MockClient_RepoTags_Call {
+func (_c *MockClient_RepoTags_Call) Return(repoTags []string, err error) *MockClient_RepoTags_Call {
 	_c.Call.Return(repoTags, err)
 	return _c
 }
 
-func (_c *MockClient_RepoTags_Call) RunAndReturn(run func(repoID int64, opt woodpecker.ListOptions) ([]*woodpecker.RepoTag, error)) *MockClient_RepoTags_Call {
+func (_c *MockClient_RepoTags_Call) RunAndReturn(run func(repoID int64, opt woodpecker.ListOptions) ([]string, error)) *MockClient_RepoTags_Call {
 	_c.Call.Return(run)
 	return _c
 }

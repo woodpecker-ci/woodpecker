@@ -402,15 +402,15 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	return nil, fmt.Errorf("no matching branches found")
 }
 
-// Tags returns the tags for the named repository.
-func (c *client) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+// Tags returns the names of all tags for the named repository.
+func (c *client) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
 	opts := convertListOptions(p)
-	all := make([]*model.RepoTag, 0, p.PerPage)
+	all := make([]string, 0, p.PerPage)
 	for {
 		var tags bitbucketTagList
 		resp, err := bc.GetPaged(ctx, "api", fmt.Sprintf("projects/%s/repos/%s/tags", r.Owner, r.Name), &tags, &opts)
@@ -418,10 +418,7 @@ func (c *client) Tags(ctx context.Context, u *model.User, r *model.Repo, p *mode
 			return nil, fmt.Errorf("unable to list tags: %w", err)
 		}
 		for _, tag := range tags.Values {
-			all = append(all, &model.RepoTag{
-				Name: tag.DisplayID,
-				SHA:  tag.LatestCommit,
-			})
+			all = append(all, tag.DisplayID)
 		}
 		if !p.All || resp.LastPage {
 			break

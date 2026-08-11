@@ -131,7 +131,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 		pipeline.Ref = commit.SHA
 	default:
 		pipeline.Branch = opts.Branch
-		pipeline.Ref = opts.Branch
+		pipeline.Ref = "refs/heads/" + opts.Branch
 	}
 	return pipeline
 }

@@ -75,7 +75,7 @@ type Client interface {
 	RepoDel(repoID int64) error
 
 	// RepoTags returns a list of repository tags.
-	RepoTags(repoID int64, opt ListOptions) ([]*RepoTag, error)
+	RepoTags(repoID int64, opt ListOptions) ([]string, error)
 
 	// Pipeline returns a repository pipeline by number.
 	Pipeline(repoID, pipeline int64) (*Pipeline, error)

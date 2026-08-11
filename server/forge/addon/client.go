@@ -297,7 +297,7 @@ func (g *RPC) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) Tags(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+func (g *RPC) Tags(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	args, err := json.Marshal(&argumentsListOptions{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
@@ -311,7 +311,7 @@ func (g *RPC) Tags(_ context.Context, u *model.User, r *model.Repo, p *model.Lis
 	if err != nil {
 		return nil, err
 	}
-	var resp []*model.RepoTag
+	var resp []string
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 

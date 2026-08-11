@@ -206,8 +206,8 @@ func (c *client) RepoDel(repoID int64) error {
 }
 
 // RepoTags returns a list of repository tags.
-func (c *client) RepoTags(repoID int64, opt ListOptions) ([]*RepoTag, error) {
-	var out []*RepoTag
+func (c *client) RepoTags(repoID int64, opt ListOptions) ([]string, error) {
+	var out []string
 	uri, _ := url.Parse(fmt.Sprintf(pathRepoTags, c.addr, repoID))
 	uri.RawQuery = opt.getURLQuery().Encode()
 	err := c.get(uri.String(), &out)

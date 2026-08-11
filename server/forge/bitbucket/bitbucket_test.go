@@ -141,8 +141,7 @@ func TestBitbucket(t *testing.T) {
 	tags, err := c.Tags(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.NoError(t, err)
 	require.Len(t, tags, 1)
-	assert.Equal(t, "v1.0.0", tags[0].Name)
-	assert.Equal(t, "tag-sha", tags[0].SHA)
+	assert.Equal(t, []string{"v1.0.0"}, tags)
 
 	tagCommit, err := c.TagHead(ctx, fakeUser, fakeRepo, "v1.0.0")
 	assert.NoError(t, err)

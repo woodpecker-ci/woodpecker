@@ -184,7 +184,7 @@ func TestRepositoryRefs(t *testing.T) {
 
 	tags, err := c.Tags(ctx, user, repo, &model.ListOptions{Page: 2, PerPage: 25})
 	require.NoError(t, err)
-	assert.Equal(t, []*model.RepoTag{{Name: "v1.0.0", SHA: "tag-sha"}}, tags)
+	assert.Equal(t, []string{"v1.0.0"}, tags)
 
 	tagCommit, err := c.TagHead(ctx, user, repo, "v1.0.0")
 	require.NoError(t, err)

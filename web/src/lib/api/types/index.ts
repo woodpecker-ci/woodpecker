@@ -8,7 +8,6 @@ export * from './pull_request';
 export * from './queue';
 export * from './registry';
 export * from './repo';
-export * from './repoTag';
 export * from './secret';
 export * from './user';
 export * from './webhook';

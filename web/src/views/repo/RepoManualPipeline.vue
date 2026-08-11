@@ -152,7 +152,7 @@ onMounted(async () => {
       value,
       badge: value === defaultBranch ? i18n.t('default') : undefined,
     }));
-  tags.value = tagData.map((tag) => ({ text: tag.name, value: tag.name }));
+  tags.value = tagData.map((value) => ({ text: value, value }));
   loading.value = false;
 });
 

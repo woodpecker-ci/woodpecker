@@ -472,8 +472,8 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 	}, nil
 }
 
-// Tags returns the tags for the named repository.
-func (c *Gitea) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+// Tags returns the names of all tags for the named repository.
+func (c *Gitea) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := c.newClientToken(ctx, token)
 	if err != nil {
@@ -486,16 +486,9 @@ func (c *Gitea) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model
 		return nil, err
 	}
 
-	tags := make([]*model.RepoTag, 0, len(giteaTags))
-	for _, tag := range giteaTags {
-		repoTag := &model.RepoTag{Name: tag.Name}
-		if tag.Commit != nil {
-			repoTag.SHA = tag.Commit.SHA
-			if !tag.Commit.Created.IsZero() {
-				repoTag.CreatedAt = tag.Commit.Created.Unix()
-			}
-		}
-		tags = append(tags, repoTag)
+	tags := make([]string, len(giteaTags))
+	for i := range giteaTags {
+		tags[i] = giteaTags[i].Name
 	}
 	return tags, nil
 }

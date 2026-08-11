@@ -13,10 +13,9 @@ import type {
   PullRequest,
   QueueInfo,
   Registry,
-  Repo,
+	Repo,
   RepoPermissions,
   RepoSettings,
-  RepoTag,
   Secret,
   User,
 } from './types';
@@ -74,9 +73,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/branches?${query}`) as Promise<string[]>;
   }
 
-  async getRepoTags(repoId: number, opts?: PaginationOptions): Promise<RepoTag[]> {
+  async getRepoTags(repoId: number, opts?: PaginationOptions): Promise<string[]> {
     const query = encodeQueryString(opts);
-    return this._get(`/api/repos/${repoId}/tags?${query}`) as Promise<RepoTag[]>;
+    return this._get(`/api/repos/${repoId}/tags?${query}`) as Promise<string[]>;
   }
 
   async getRepoPullRequests(repoId: number, opts?: PaginationOptions): Promise<PullRequest[]> {
