@@ -309,12 +309,24 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 	repos := make([]*model.Repo, 0, len(projects))
 
 	for i := range projects {
-		projectMember, _, err := client.ProjectMembers.GetInheritedProjectMember(projects[i].ID, int64(intUserID), gitlab.WithContext(ctx))
-		if err != nil {
-			return nil, err
+		project := projects[i]
+
+		// The projects list API already reports the current user's access
+		// level via the `permissions` attribute, so in the common case we can
+		// skip the per-project membership lookup. GitLab may however omit it
+		// (e.g. when access is inherited from a nested parent group), in
+		// which case we fall back to a single explicit lookup per affected
+		// project.
+		var projectMember *gitlab.ProjectMember
+		if embeddedAccessLevel(project) == gitlab.NoPermissions {
+			var err error
+			projectMember, _, err = client.ProjectMembers.GetInheritedProjectMember(project.ID, int64(intUserID), gitlab.WithContext(ctx))
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		repo, err := g.convertGitLabRepo(projects[i], projectMember)
+		repo, err := g.convertGitLabRepo(project, projectMember)
 		if err != nil {
 			return nil, err
 		}
