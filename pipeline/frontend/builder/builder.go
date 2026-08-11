@@ -51,6 +51,8 @@ type PipelineBuilder struct {
 	SelectedWorkflow string
 	// ListOnly reports the workflows that could run instead of building them.
 	ListOnly bool
+	// DisableWorkflowPriority ignores `when.priority` of workflows.
+	DisableWorkflowPriority bool
 }
 
 func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -157,6 +159,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 			}),
 			linter.PrivilegedPlugins(b.PrivilegedPlugins),
 			linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
+			linter.WithWorkflowPriorityDisabled(b.DisableWorkflowPriority),
 		).Lint([]*linter.WorkflowConfig{{
 			Workflow:  parsed,
 			File:      workflow.Name,
@@ -225,7 +228,9 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	if err != nil {
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
-	item.Priority = priority
+	if !b.DisableWorkflowPriority {
+		item.Priority = priority
+	}
 
 	// "woodpecker-ci.org" namespace is reserved for internal use — drop any
 	// user-defined labels that try to use it.

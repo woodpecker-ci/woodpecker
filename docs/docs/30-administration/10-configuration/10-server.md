@@ -877,6 +877,15 @@ Maximum time to wait for the pipeline creation triggered by an incoming webhook.
 
 ---
 
+### DISABLE_WORKFLOW_PRIORITY
+
+- Name: `WOODPECKER_DISABLE_WORKFLOW_PRIORITY`
+- Default: false
+
+Disable workflow-level `when.priority` queue ordering.
+
+---
+
 ### SESSION_EXPIRES
 
 - Name: `WOODPECKER_SESSION_EXPIRES`

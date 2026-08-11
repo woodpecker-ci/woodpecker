@@ -35,9 +35,10 @@ const networkModeNone = "none"
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted             TrustedConfiguration
-	privilegedPlugins   *[]string
-	trustedClonePlugins *[]string
+	trusted                 TrustedConfiguration
+	privilegedPlugins       *[]string
+	trustedClonePlugins     *[]string
+	disableWorkflowPriority bool
 }
 
 type TrustedConfiguration struct {
@@ -104,6 +105,9 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 	}
 
 	if err := l.lintSchema(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintWorkflowPriority(config); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
 	if err := l.lintDeprecations(config); err != nil {
@@ -315,6 +319,26 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 		}
 
 		return err
+	}
+
+	return nil
+}
+
+func (l *Linter) lintWorkflowPriority(config *WorkflowConfig) error {
+	if !l.disableWorkflowPriority {
+		return nil
+	}
+
+	for i, c := range config.Workflow.When.Constraints {
+		if !c.Priority.Has() {
+			continue
+		}
+
+		field := "when.priority"
+		if len(config.Workflow.When.Constraints) > 1 {
+			field = fmt.Sprintf("when.%d.priority", i)
+		}
+		return newLinterError("Workflow `priority` is disabled on this instance", config.File, field, false)
 	}
 
 	return nil
