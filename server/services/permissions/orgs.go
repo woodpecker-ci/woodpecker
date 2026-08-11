@@ -37,6 +37,15 @@ type Orgs struct {
 	orgs         map[string]bool
 }
 
+// With returns a new list containing the orgs of o plus the given ones.
+func (o *Orgs) With(orgs []string) *Orgs {
+	merged := make([]string, 0, len(o.orgs)+len(orgs))
+	for org := range o.orgs {
+		merged = append(merged, org)
+	}
+	return NewOrgs(append(merged, orgs...))
+}
+
 func (o *Orgs) IsMember(teams []*model.Team) bool {
 	for _, team := range teams {
 		if o.orgs[strings.ToLower(team.Login)] {
