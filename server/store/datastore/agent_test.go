@@ -77,11 +77,11 @@ func TestAgentList(t *testing.T) {
 	err = store.AgentCreate(agent2)
 	assert.NoError(t, err)
 
-	agents, err := store.AgentList(&model.ListOptions{All: true})
+	agents, err := store.AgentList(&model.ListOptionsWithAll{All: true})
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(agents))
 
-	agents, err = store.AgentList(&model.ListOptions{Page: 1, PerPage: 1})
+	agents, err = store.AgentList(&model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 1}})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(agents))
 }
@@ -128,18 +128,18 @@ func TestAgentListForOrg(t *testing.T) {
 	assert.NoError(t, store.AgentCreate(agent2))
 	assert.NoError(t, store.AgentCreate(agent3))
 
-	agents, err := store.AgentListForOrg(100, &model.ListOptions{All: true})
+	agents, err := store.AgentListForOrg(100, &model.ListOptionsWithAll{All: true})
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(agents))
 	assert.Equal(t, "test-1", agents[0].Name)
 	assert.Equal(t, "test-2", agents[1].Name)
 
-	agents, err = store.AgentListForOrg(200, &model.ListOptions{All: true})
+	agents, err = store.AgentListForOrg(200, &model.ListOptionsWithAll{All: true})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(agents))
 	assert.Equal(t, "test-3", agents[0].Name)
 
-	agents, err = store.AgentListForOrg(100, &model.ListOptions{Page: 1, PerPage: 1})
+	agents, err = store.AgentListForOrg(100, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 1}})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(agents))
 	assert.Equal(t, "test-1", agents[0].Name)
