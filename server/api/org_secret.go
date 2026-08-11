@@ -62,7 +62,7 @@ func GetOrgSecretList(c *gin.Context) {
 	org := session.Org(c)
 
 	secretService := server.Config.Services.Manager.SecretService()
-	list, err := secretService.OrgSecretList(org.ID, session.Pagination(c))
+	list, err := secretService.OrgSecretList(org.ID, session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", org.ID, err)
 		return

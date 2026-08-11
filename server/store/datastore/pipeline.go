@@ -66,7 +66,7 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.PipelineFilter) ([]*model.Pipeline, error) {
+func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptionsWithAll, f *model.PipelineFilter) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, 16)
 
 	cond := builder.NewCond().And(builder.Eq{"repo_id": repo.ID})

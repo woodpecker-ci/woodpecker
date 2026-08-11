@@ -20,12 +20,24 @@ import (
 )
 
 type ListOptions struct {
-	All     bool
+	//All     bool
 	Page    int
 	PerPage int
 }
 
-func ApplyPagination[T any](d *ListOptions, slice []T) []T {
+func (d *ListOptions) All() *ListOptionsWithAll {
+	return &ListOptionsWithAll{
+		ListOptions: d,
+		All:         false,
+	}
+}
+
+type ListOptionsWithAll struct {
+	*ListOptions
+	All bool
+}
+
+func ApplyPagination[T any](d *ListOptionsWithAll, slice []T) []T {
 	if d.All {
 		return slice
 	}
@@ -49,9 +61,9 @@ func (d *ListOptions) Encode() string {
 		query = append(query, fmt.Sprintf("per_page=%d", d.PerPage))
 	}
 
-	if d.All {
-		query = append(query, "all=true")
-	}
+	// if d.All {
+	// 	query = append(query, "all=true")
+	// }
 
 	return strings.Join(query, "&")
 }

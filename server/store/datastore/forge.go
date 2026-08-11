@@ -23,7 +23,7 @@ func (s storage) ForgeGet(id int64) (*model.Forge, error) {
 	return forge, wrapGet(s.engine.ID(id).Get(forge))
 }
 
-func (s storage) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
+func (s storage) ForgeList(p *model.ListOptionsWithAll) ([]*model.Forge, error) {
 	forges := make([]*model.Forge, 0, 10)
 	return forges, s.paginate(p).Find(&forges)
 }

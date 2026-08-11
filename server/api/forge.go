@@ -36,7 +36,7 @@ import (
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetForges(c *gin.Context) {
-	forges, err := store.FromContext(c).ForgeList(session.Pagination(c))
+	forges, err := store.FromContext(c).ForgeList(session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting forge list. %s", err)
 		return

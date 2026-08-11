@@ -175,7 +175,7 @@ func GetPipelines(c *gin.Context) {
 		filter.After = afterDt.Unix()
 	}
 
-	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c), filter)
+	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c).All(), filter)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
