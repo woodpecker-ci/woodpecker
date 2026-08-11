@@ -809,5 +809,8 @@
     "secret_extension_netrc_desc": "Die Netrc-Zugangsdaten für die Code-Plattform an die Geheimnis-Erweiterung senden.",
     "extension_netrc": "Netrc-Zugangsdaten bereitstellen",
     "extension_netrc_desc": "Die Netrc-Zugangsdaten der Code-Plattform an die Erweiterung weitergeben.",
-    "delete": "Entfernen"
+    "delete": "Entfernen",
+    "allowed_orgs": "Erlaubte Organisationen",
+    "allowed_orgs_desc": "Die Mitglieder dieser Organisationen dürfen sich mit dieser Plattform anmelden, zusätzlich zu den in WOODPECKER_ORGS global konfigurierten.",
+    "allowed_orgs_placeholder": "Organisationsname"
 }
