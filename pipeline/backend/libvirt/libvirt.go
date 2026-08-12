@@ -177,7 +177,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 
 		// create the disk
 		{
-			cmd := exec.Command("qemu-img", "create", "-f", "qcow2", disk)
+			cmd := exec.Command("qemu-img", "create", "-f", "qcow2", disk, diskSize)
 			err := cmd.Run()
 			if err != nil {
 				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
