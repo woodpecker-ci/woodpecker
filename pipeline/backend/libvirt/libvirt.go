@@ -181,7 +181,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 		cmd := exec.Command("guestfish", "--format=qcow2", "-N", disk_opts, "--", "mkfs", fstype, "/dev/sda")
 		err := cmd.Run()
 		if err != nil {
-			return "", "", err
+			return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
 		}
 		// sparsify
 		if hasCommand("virt-sparsify") {
@@ -189,7 +189,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			cmd := exec.Command("virt-sparsify", "--in-place", disk)
 			err := cmd.Run()
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
 			}
 		}
 
@@ -198,7 +198,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			cmd := exec.Command("virt-filesystems", "--long", "--csv", "-a", disk, "--uuid")
 			bytes, err := cmd.Output()
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
 			}
 
 			r := csv.NewReader(strings.NewReader(string(bytes)))
@@ -240,7 +240,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			cmd := exec.Command("truncate", "-s", diskSize, disk)
 			err := cmd.Run()
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
 			}
 		}
 
@@ -251,7 +251,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			var err error
 			loop_dev, err = cmd.Output()
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
 			}
 		}
 
@@ -260,7 +260,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			cmd := CmdViaSudo(fmt.Sprintf("mkfs.%s", fstype), "-E", "lazy_itable_init=1,lazy_journal_init=1", string(loop_dev))
 			err := cmd.Run()
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
 			}
 		}
 
@@ -269,7 +269,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			cmd := CmdViaSudo("blkid", "-o", "value", "--match-tag", "UUID", string(loop_dev))
 			bytes, err := cmd.Output()
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
 			}
 
 			diskUuid = string(bytes)
@@ -280,7 +280,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			cmd := CmdViaSudo("losetup", "--detach", string(loop_dev))
 			err := cmd.Run()
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
 			}
 		}
 
