@@ -671,7 +671,7 @@ func GetDomainType(ctx context.Context, domain *virt.Domain) (string, error) {
 }
 
 func hasCommand(cmd string) bool {
-	_, err := exec.LookPath("guestfish")
+	_, err := exec.LookPath(cmd)
 	return err == nil
 }
 
@@ -850,6 +850,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
 	sshCmd.Stdout = pw
 	sshCmd.Stderr = pw
+	sshCmd.Context = ctx
 	w.(*workflow).pipes.Store(step.UUID, &pipes{pr, pw})
 
 	err = sshCmd.Start()
