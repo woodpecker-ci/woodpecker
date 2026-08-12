@@ -171,22 +171,24 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 
 	// create a disk from scratch based on the domain type
 	// kvm and qemu support qcow2, for everything else we use raw image
-	if (domainType == "kvm" || domainType == "qemu") && hasCommand("guestfish") { // qemu with libguest stuff
+	if (domainType == "kvm" || domainType == "qemu") && hasCommand("guestfish") && hasCommand("qemu-img") { // qemu with libguest stuff
 		disk := fmt.Sprintf("%s/shared_%s.qcow2", libvirtImgDir, taskUUID)
 		// create qcow2 image
 
-		disk_opts := fmt.Sprintf("%s=disk:%s", disk, diskSize)
+		// create the disk
+		{
+			cmd := exec.Command("qemu-img", "create", "-f", "qcow2", disk)
+			err := cmd.Run()
+			if err != nil {
+				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
+			}
+		}
+
+		// format the disk
 		// on redhat systems, this will fail on 'ntfs', because they do not support ntfs inside libguest
 		// on other systems, this may work if the host has the appropriate tools
-		cmd := exec.Command("guestfish", "--format=qcow2", "-N", disk_opts, "--", "mkfs", fstype, "/dev/sda")
-		err := cmd.Run()
-		if err != nil {
-			return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
-		}
-		// sparsify
-		if hasCommand("virt-sparsify") {
-			// virt-sparsify --in-place disk.qcow2
-			cmd := exec.Command("virt-sparsify", "--in-place", disk)
+		{
+			cmd := exec.Command("guestfish", "-a", disk, "--", "run", ":", "mkfs", fstype, "/dev/sda")
 			err := cmd.Run()
 			if err != nil {
 				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
@@ -367,31 +369,25 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 		// insert
 		devices.AddChild(sharedXmlDoc.Root())
 	} else { // in absence of a config, create a disk from scratch (ntfs for windows, ext4 otherwise)
-		log.Debug().Msgf("lala 1")
 		guestOS, err := getGuestOS(domain)
 		if err != nil {
 			return nil, "", err
 		}
 
-		log.Debug().Msgf("lala 2")
 		domainType, err := GetDomainType(ctx, domain)
 		if err != nil {
 			return nil, "", err
 		}
 
-		log.Debug().Msgf("lala 3")
 		diskSize, ok := env["LIBVIRT_DISK_SIZE"]
 		if !ok {
 			diskSize = "10G"
 		}
 
-		log.Debug().Msgf("lala 4")
 		disk, diskUuid, err := e.CreateSharedDisk(ctx, guestOS, domainType, diskSize, taskUUID)
 		if err != nil {
 			return nil, "", err
 		}
-
-		log.Debug().Msgf("lala 5")
 
 		// now cook up an XML config
 		var newXml string
