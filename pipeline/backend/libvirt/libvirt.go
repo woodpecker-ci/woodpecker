@@ -178,7 +178,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 		disk_opts := fmt.Sprintf("%s=disk:%s", disk, diskSize)
 		// on redhat systems, this will fail on 'ntfs', because they do not support ntfs inside libguest
 		// on other systems, this may work if the host has the appropriate tools
-		cmd := exec.Command("guestfish", "-N", disk_opts, "--", "mkfs", fstype, "/dev/sda")
+		cmd := exec.Command("guestfish", "--format=qcow2", "-N", disk_opts, "--", "mkfs", fstype, "/dev/sda")
 		err := cmd.Run()
 		if err != nil {
 			return "", "", err
