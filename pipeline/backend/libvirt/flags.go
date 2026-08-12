@@ -31,4 +31,10 @@ var Flags = []cli.Flag{
 		Usage:   "Directory in which libvirt disk images will be created in",
 		Value:   "/var/lib/libvirt/images/",
 	},
+	&cli.BoolFlag{
+		Name:    "backend-libvirt-keep-tmp",
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_LIBVIRT_KEEP_TMP"),
+		Usage:   "Whether to keep temporary VM images",
+		Value:   false,
+	},
 }

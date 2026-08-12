@@ -3,6 +3,7 @@ package libvirt
 import (
 	"context"
 	"encoding/base64"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
@@ -34,6 +35,7 @@ import (
 
 var (
 	ErrUnsupportedStepType = errors.New("unsupported step type")
+	ErrUnsupportedCloning  = errors.New("Automatic cloning is not supported in libvirt. Set 'skip_clone: true'")
 )
 
 type libvirt struct {
@@ -156,11 +158,141 @@ func (e *libvirt) Load(ctx context.Context) (*backend_types.BackendInfo, error) 
 	}, nil
 }
 
-func (e *libvirt) LoadDomain(ctx context.Context, image string, ephemeral bool, sharedDisk SharedDisk, taskUUID string, stepUUID string) (*virt.Domain, error) {
+func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainType string, diskSize string, taskUUID string) (string, string, error) {
+	libvirtImgDir := e.c.String("backend-libvirt-image-dir")
+
+	var diskUuid string
+	var fstype string
+	if guestOS == "windows" {
+		fstype = "ntfs"
+	} else { // TODO: UFS for BSD?
+		fstype = "ext4"
+	}
+
+	// create a disk from scratch based on the domain type
+	// kvm and qemu support qcow2, for everything else we use raw image
+	if (domainType == "kvm" || domainType == "qemu") && hasCommand("guestfish") { // qemu with libguest stuff
+		disk := fmt.Sprintf("%s/shared_%s.qcow2", libvirtImgDir, taskUUID)
+		// create qcow2 image
+
+		disk_opts := fmt.Sprintf("%s=disk:%s", disk, diskSize)
+		// on redhat systems, this will fail on 'ntfs', because they do not support ntfs inside libguest
+		// on other systems, this may work if the host has the appropriate tools
+		cmd := exec.Command("guestfish", "-N", disk_opts, "--", "mkfs", fstype, "/dev/sda")
+		err := cmd.Run()
+		if err != nil {
+			return "", "", err
+		}
+		// sparsify
+		if hasCommand("virt-sparsify") {
+			// virt-sparsify --in-place disk.qcow2
+			cmd := exec.Command("virt-sparsify", "--in-place", disk)
+			err := cmd.Run()
+			if err != nil {
+				return "", "", err
+			}
+		}
+
+		// get uuid
+		{
+			cmd := exec.Command("virt-filesystems", "--long", "--csv", "-a", disk, "--uuid")
+			bytes, err := cmd.Output()
+			if err != nil {
+				return "", "", err
+			}
+
+			r := csv.NewReader(strings.NewReader(string(bytes)))
+			header, err := r.Read()
+			if err != nil {
+				return "", "", err
+			}
+			i := -1
+			for ix, e := range header {
+				if e == "UUID" {
+					i = ix
+				}
+			}
+
+			if i == -1 {
+				return "", "", fmt.Errorf("Could not find UUID in: %s", header)
+			}
+
+			data, err := r.Read()
+			if err != nil {
+				return "", "", err
+			}
+			diskUuid = data[i]
+
+		}
+
+		return disk, diskUuid, nil
+
+	} else { // raw images (basic qemu without libguest, bhyve, etc.)
+		// this only works on a linux host!
+		if e.os != "linux" {
+			return "", "", fmt.Errorf("Cannot automatically create raw disk images on %s. Either use a linux host or define 'disk_config' yourself.", e.os)
+		}
+
+		disk := fmt.Sprintf("%s/shared_%s.raw", libvirtImgDir, taskUUID)
+
+		// create disk
+		{
+			cmd := exec.Command("truncate", "-s", diskSize, disk)
+			err := cmd.Run()
+			if err != nil {
+				return "", "", err
+			}
+		}
+
+		// mount loop device
+		var loop_dev []byte
+		{
+			cmd := CmdViaSudo("losetup", "--find", "--show", disk)
+			var err error
+			loop_dev, err = cmd.Output()
+			if err != nil {
+				return "", "", err
+			}
+		}
+
+		// format
+		{
+			cmd := CmdViaSudo(fmt.Sprintf("mkfs.%s", fstype), "-E", "lazy_itable_init=1,lazy_journal_init=1", string(loop_dev))
+			err := cmd.Run()
+			if err != nil {
+				return "", "", err
+			}
+		}
+
+		// detach loop device
+		{
+			cmd := CmdViaSudo("blkid", "-o", "value", "--match-tag", "UUID", string(loop_dev))
+			bytes, err := cmd.Output()
+			if err != nil {
+				return "", "", err
+			}
+
+			diskUuid = string(bytes)
+		}
+
+		// detach loop device
+		{
+			cmd := CmdViaSudo("losetup", "--detach", string(loop_dev))
+			err := cmd.Run()
+			if err != nil {
+				return "", "", err
+			}
+		}
+
+		return disk, diskUuid, nil
+	}
+}
+
+func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]string, ephemeral bool, sharedDisk SharedDisk, taskUUID string, stepUUID string) (outDomain *virt.Domain, uuid string, err error) {
 	domain, err := e.conn.LookupDomainByName(image)
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	defer domain.Free()
@@ -168,12 +300,12 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, ephemeral bool, 
 	// get the XML from the loaded domain
 	xml, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	// parse the XML into etree
 	doc := etree.NewDocument()
 	if err := doc.ReadFromString(xml); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	if ephemeral {
@@ -204,43 +336,102 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, ephemeral bool, 
 			baseImgName := fmt.Sprintf(baseImagePattern, devAttr.Value, taskUUID, stepUUID, filepath.Ext(fileAttr.Value))
 			newImg, err := e.FromBaseImage(ctx, fileAttr.Value, baseImgName, false)
 			if err != nil {
-				return nil, err
+				return nil, "", err
 			}
 			sourceEl.CreateAttr("file", newImg)
 		}
+	}
+
+	// get devices element
+	devices := doc.FindElement("/domain/devices")
+	if devices == nil {
+		return nil, "", fmt.Errorf("Could not find devices in domain XML")
 	}
 
 	// insert the shared disk if any
 	if sharedDisk.DiskConfig != "" {
 		log.Debug().Msgf("Inserting shared disk: %s", sharedDisk.DiskConfig)
 
-		// get devices element
-		devices := doc.FindElement("/domain/devices")
-		if devices == nil {
-			return nil, fmt.Errorf("Could not find devices in domain XML")
-		}
-
 		// generate the XML with the base image
-		sharedXml, err := e.CreateSharedDiskImage(ctx, &sharedDisk, taskUUID)
+		sharedXml, err := e.EphemeralizeSharedDisk(ctx, &sharedDisk, taskUUID)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 		sharedXmlDoc := etree.NewDocument()
 		if err := sharedXmlDoc.ReadFromString(sharedXml); err != nil {
-			return nil, err
+			return nil, "", err
+		}
+
+		uuid = sharedDisk.UUID
+
+		// insert
+		devices.AddChild(sharedXmlDoc.Root())
+	} else { // in absence of a config, create a disk from scratch (ntfs for windows, ext4 otherwise)
+		guestOS, err := getGuestOS(domain)
+		if err != nil {
+			return nil, "", err
+		}
+
+		domainType, err := GetDomainType(ctx, domain)
+		if err != nil {
+			return nil, "", err
+		}
+
+		diskSize, ok := env["LIBVIRT_DISK_SIZE"]
+		if !ok {
+			diskSize = "10G"
+		}
+
+		disk, diskUuid, err := e.CreateSharedDisk(ctx, guestOS, domainType, diskSize, taskUUID)
+		if err != nil {
+			return nil, "", err
+		}
+
+		// now cook up an XML config
+		var newXml string
+		if domainType == "kvm" || domainType == "qemu" {
+			newXml = fmt.Sprintf(`
+			  <disk type='file' device='disk'>
+          <driver name='qemu' type='qcow2'/>
+          <source file='%s'/>
+          <target dev='sdz' bus='sata'/>
+          <serial>%s</serial>
+        </disk>`, disk, stepUUID)
+		} else {
+			newXml = fmt.Sprintf(`
+        <disk type='file'>
+          <driver name='file' type='raw'/>
+          <source file='%s'/>
+          <target dev='sdz' bus='sata'/>
+          <serial>%s</serial>
+        </disk>`, disk, stepUUID)
+		}
+
+		// on windows we mount via the serial, which is stepUUID
+		if guestOS == "windows" {
+			uuid = stepUUID
+		} else {
+			// on unix we mount via the disk uuid, which we must discover
+			uuid = diskUuid
 		}
 
 		// insert
+		sharedXmlDoc := etree.NewDocument()
+		if err := sharedXmlDoc.ReadFromString(newXml); err != nil {
+			return nil, "", err
+		}
 		devices.AddChild(sharedXmlDoc.Root())
 	}
 
 	newXml, err := doc.WriteToString()
 	log.Debug().Msgf("New domain XML: %s", newXml)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return e.conn.DomainCreateXML(newXml, virt.DOMAIN_NONE)
+	domain, err = e.conn.DomainCreateXML(newXml, virt.DOMAIN_NONE)
+
+	return domain, uuid, err
 }
 
 func (e *libvirt) FromBaseImage(ctx context.Context, baseImage string, targetImg string, overwrite bool) (string, error) {
@@ -304,8 +495,7 @@ func CopyFile(from string, to string, overwrite bool) error {
 	return nil
 }
 
-// create or get the shared disk image
-func (e *libvirt) CreateSharedDiskImage(ctx context.Context, shared_disk *SharedDisk, taskUUID string) (string, error) {
+func (e *libvirt) EphemeralizeSharedDisk(ctx context.Context, shared_disk *SharedDisk, taskUUID string) (string, error) {
 	if shared_disk.DiskConfig == "" {
 		return "", fmt.Errorf("No image specified")
 	}
@@ -446,11 +636,47 @@ func getGuestOS(domain *virt.Domain) (string, error) {
 
 }
 
+func CmdViaSudo(cmd string, arg ...string) *exec.Cmd {
+	if hasCommand("sudo") {
+		return exec.Command("sudo", append([]string{cmd}, arg...)...)
+	} else {
+		return exec.Command(cmd, arg...)
+	}
+}
+
+func GetDomainType(ctx context.Context, domain *virt.Domain) (string, error) {
+	dErr := fmt.Errorf("Could not determine domain type!")
+
+	xml, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
+	if err != nil {
+		return "", err
+	}
+
+	doc := etree.NewDocument()
+	if err := doc.ReadFromString(xml); err != nil {
+		return "", err
+	}
+	el := doc.FindElement("/domain[@type]")
+	if el == nil {
+		return "", dErr
+	}
+	domainType := el.SelectAttr("type")
+	if domainType == nil {
+		return "", dErr
+	}
+
+	return domainType.Value, nil
+}
+
+func hasCommand(cmd string) bool {
+	_, err := exec.LookPath("guestfish")
+	return err == nil
+}
+
 func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskUUID string) error {
 	switch step.Type {
 	case types.StepTypeClone:
-		// ignore cloning for now
-		return nil
+		return ErrUnsupportedCloning
 	case types.StepTypeCommands:
 	case types.StepTypePlugin:
 		return ErrUnsupportedStepType
@@ -463,7 +689,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		log.Error().Err(err).Msg("could not parse backend options")
 	}
 
-	domain, err := e.LoadDomain(ctx, step.Image, options.Ephemeral, options.SharedDisk, taskUUID, step.UUID)
+	domain, uuid, err := e.LoadDomain(ctx, step.Image, step.Environment, options.Ephemeral, options.SharedDisk, taskUUID, step.UUID)
 	if err != nil {
 		return err
 	}
@@ -531,11 +757,16 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		sshAddr = ip.Addr
 	}
 
+	sshPw, ok := step.Environment["LIBVIRT_SSH_PW"]
+	if !ok {
+		return fmt.Errorf("No SSH password set for libvirt guest. Set LIBVIRT_SSH_PW via a secret.")
+	}
+
 	log.Debug().Msgf("Connecting to %s as user %s", sshAddr, options.SSHConfig.User)
 	client, err := backoff.Retry(ctx, func() (*goph.Client, error) {
 		return goph.NewConn(&goph.Config{
 			User:     options.SSHConfig.User,
-			Auth:     goph.Password(options.SSHConfig.Password),
+			Auth:     goph.Password(sshPw),
 			Addr:     sshAddr,
 			Port:     22,
 			Timeout:  goph.DefaultTimeout,
@@ -548,72 +779,64 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	}
 
 	// mount the volume
-	if options.SharedDisk.DiskConfig != "" {
-		if guestOS == "windows" {
-			if options.SharedDisk.UUID == "" {
-				return fmt.Errorf("uuid needs to be defined [%s]", taskUUID)
-			}
-			encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
-			cmd := "powershell"
-			exec := fmt.Sprintf("$mount = '%s' ; $ErrorActionPreference = 'Stop' ; New-Item -ItemType Directory -Path $mount ; $disk = Get-Disk | Where-Object { $_.SerialNumber -eq '%s' } ; $partition = Get-Partition -DiskNumber $disk.DiskNumber | Where-Object { $_.Type -eq 'Basic' } ; Add-PartitionAccessPath -DiskNumber $disk.DiskNumber -PartitionNumber $partition.PartitionNumber -AccessPath $mount", step.WorkspaceBase, options.SharedDisk.UUID)
-			utf16leBytes, err := encoder.Bytes([]byte(exec))
+	if guestOS == "windows" {
+		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+		cmd := "powershell"
+		exec := fmt.Sprintf("$mount = '%s' ; $ErrorActionPreference = 'Stop' ; New-Item -ItemType Directory -Path $mount ; $disk = Get-Disk | Where-Object { $_.SerialNumber -eq '%s' } ; $partition = Get-Partition -DiskNumber $disk.DiskNumber | Where-Object { $_.Type -eq 'Basic' } ; Add-PartitionAccessPath -DiskNumber $disk.DiskNumber -PartitionNumber $partition.PartitionNumber -AccessPath $mount", step.WorkspaceBase, uuid)
+		utf16leBytes, err := encoder.Bytes([]byte(exec))
+		if err != nil {
+			return err
+		}
+
+		args := []string{"-noprofile", "-noninteractive", "-encodedcommand", base64.StdEncoding.EncodeToString(utf16leBytes)}
+		err = AdhocSSH(ctx, client, cmd, args, taskUUID, step.UUID)
+
+		if err != nil {
+			return err
+		}
+	} else { // unix guest
+		var out string
+		// first figure out if we have 'sudo' or 'doas', so we can have the right privilege escalation mechanism
+		{
+			cmd := "/bin/sh"
+			args := []string{"-c", "'if command -v sudo >/dev/null 2>&1 ; then echo -n sudo ; elif command -v doas >/dev/null 2>&1 ; then echo -n doas ; else exit 0 ; fi'"}
+			sshCmd, err := client.CommandContext(ctx, cmd, args...)
 			if err != nil {
 				return err
 			}
-
-			args := []string{"-noprofile", "-noninteractive", "-encodedcommand", base64.StdEncoding.EncodeToString(utf16leBytes)}
-			err = AdhocSSH(ctx, client, cmd, args, taskUUID, step.UUID)
-
+			b, err := sshCmd.Output()
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to check for sudo: %s", err)
 			}
-		} else { // unix guest
-			var out string
-			// first figure out if we have 'sudo' or 'doas', so we can have the right privilege escalation mechanism
-			{
-				cmd := "/bin/sh"
-				args := []string{"-c", "'if command -v sudo >/dev/null 2>&1 ; then echo -n sudo ; elif command -v doas >/dev/null 2>&1 ; then echo -n doas ; else exit 0 ; fi'"}
-				sshCmd, err := client.CommandContext(ctx, cmd, args...)
-				if err != nil {
-					return err
-				}
-				b, err := sshCmd.Output()
-				if err != nil {
-					return fmt.Errorf("Failed to check for sudo: %s", err)
-				}
-				out = string(b)
-			}
+			out = string(b)
+		}
 
-			// check if we're mounting by uuid or label
-			var mountSource string
-			if options.SharedDisk.UUID != "" {
-				mountSource = fmt.Sprintf("UUID=%s", options.SharedDisk.UUID)
-			} else if options.SharedDisk.Label != "" {
-				mountSource = fmt.Sprintf("LABEL=%s", options.SharedDisk.Label)
-			} else {
-				return fmt.Errorf("Neither UUID nor Label defined")
-			}
+		var mountSource string
+		if options.SharedDisk.UUID != "" {
+			mountSource = fmt.Sprintf("UUID=%s", uuid)
+		} else {
+			return fmt.Errorf("Neither UUID nor Label defined")
+		}
 
-			var command []string
-			mntCmds := []string{"mount", "-o", "X-mount.mkdir", mountSource, step.WorkspaceBase}
-			switch out {
-			case "sudo":
-				command = append([]string{"sudo"}, mntCmds...)
-			case "doas":
-				command = append([]string{"doas"}, mntCmds...)
-			case "":
-				log.Debug().Msgf("Running as root")
-				command = mntCmds
-			default:
-				return fmt.Errorf("Unexpected privilege escalation command: %s", out)
-			}
+		var command []string
+		mntCmds := []string{"mount", "-o", "X-mount.mkdir", mountSource, step.WorkspaceBase}
+		switch out {
+		case "sudo":
+			command = append([]string{"sudo"}, mntCmds...)
+		case "doas":
+			command = append([]string{"doas"}, mntCmds...)
+		case "":
+			log.Debug().Msgf("Running as root")
+			command = mntCmds
+		default:
+			return fmt.Errorf("Unexpected privilege escalation command: %s", out)
+		}
 
-			// execute command
-			err = AdhocSSH(ctx, client, command[0], command[1:], taskUUID, step.UUID)
+		// execute command
+		err = AdhocSSH(ctx, client, command[0], command[1:], taskUUID, step.UUID)
 
-			if err != nil {
-				return fmt.Errorf("Failed to run '%s' with args '%s': %s", cmd, args, err)
-			}
+		if err != nil {
+			return fmt.Errorf("Failed to run '%s' with args '%s': %s", cmd, args, err)
 		}
 	}
 
@@ -660,10 +883,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
 	switch step.Type {
 	case types.StepTypeClone:
-		// ignore cloning for now
-		return &backend_types.State{
-			Skipped: true,
-		}, nil
+		return nil, ErrUnsupportedCloning
 	case types.StepTypeCommands:
 	case types.StepTypePlugin:
 		return nil, ErrUnsupportedStepType
@@ -715,9 +935,7 @@ func (f closerFunc) Close() error { return f() }
 func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUUID string) (io.ReadCloser, error) {
 	switch step.Type {
 	case types.StepTypeClone:
-		// ignore cloning for now
-		emptyRC := io.NopCloser(strings.NewReader(""))
-		return emptyRC, nil
+		return nil, ErrUnsupportedCloning
 	case types.StepTypeCommands:
 	case types.StepTypePlugin:
 		return nil, ErrUnsupportedStepType
@@ -798,7 +1016,7 @@ func (e *libvirt) DestroyStep(ctx context.Context, step *backend_types.Step, tas
 	switch step.Type {
 	case types.StepTypeClone:
 		// ignore cloning for now
-		return nil
+		return ErrUnsupportedCloning
 	case types.StepTypeCommands:
 	case types.StepTypePlugin:
 		return ErrUnsupportedStepType
@@ -832,8 +1050,10 @@ func (e *libvirt) DestroyStep(ctx context.Context, step *backend_types.Step, tas
 	}
 	w.(*workflow).domains.Delete(step.UUID)
 
+	keep_tmp := e.c.Bool("backend-libvirt-keep-tmp")
+
 	// clean up ephemeral image
-	{
+	if !keep_tmp {
 		libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 		ephemeralImgs := filepath.Join(libvirtImgDir, fmt.Sprintf(baseImagePattern, "*", taskUUID, step.UUID, ".*"))
 		matches, err := filepath.Glob(ephemeralImgs)
@@ -871,8 +1091,10 @@ func (e *libvirt) DestroyWorkflow(ctx context.Context, conf *backend_types.Confi
 
 	e.workflows.Delete(taskUUID)
 
+	keep_tmp := e.c.Bool("backend-libvirt-keep-tmp")
+
 	// clean up shared disk
-	{
+	if !keep_tmp {
 		libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 		ephemeralImgs := filepath.Join(libvirtImgDir, fmt.Sprintf(sharedDiskPattern, taskUUID, ".*"))
 		matches, err := filepath.Glob(ephemeralImgs)
@@ -889,7 +1111,7 @@ func (e *libvirt) DestroyWorkflow(ctx context.Context, conf *backend_types.Confi
 	}
 
 	// clean up ephemeral images
-	{
+	if !keep_tmp {
 		libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 		ephemeralImgs := filepath.Join(libvirtImgDir, fmt.Sprintf(baseImagePattern, "*", taskUUID, "*", ".*"))
 		matches, err := filepath.Glob(ephemeralImgs)

@@ -15,7 +15,6 @@ type BackendOptions struct {
 
 type SSHConfig struct {
 	User           string `mapstructure:"username"`
-	Password       string `mapstructure:"password"`
 	Hostname       string `mapstructure:"hostname"` // preferred
 	GuestInterface string `mapstructure:"guest_interface"`
 	// takes a duration string, such as "2m"
@@ -25,7 +24,6 @@ type SSHConfig struct {
 type SharedDisk struct {
 	DiskConfig string `mapstructure:"disk_config"`
 	UUID       string `mapstructure:"uuid"` // preferred, required on windows
-	Label      string `mapstructure:"label"`
 }
 
 func parseBackendOptions(step *backend_types.Step) (BackendOptions, error) {
