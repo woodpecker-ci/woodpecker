@@ -135,6 +135,30 @@ func TestTagHeadResolvesTagBeforeFetchingCommit(t *testing.T) {
 	assert.Equal(t, 1, commitCalls)
 }
 
+func TestTagsFetchesSinglePage(t *testing.T) {
+	var calls int
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		w.Header().Set("Content-Type", "application/json")
+		if calls == 1 {
+			_, _ = w.Write([]byte(`{"isLastPage":false,"nextPageStart":25,"values":[{"displayId":"v1.0.0"}]}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"isLastPage":true,"values":[{"displayId":"v2.0.0"}]}`))
+	}))
+	t.Cleanup(s.Close)
+
+	c := &client{urlAPI: s.URL}
+	tags, err := c.Tags(t.Context(), &model.User{AccessToken: "token"}, &model.Repo{
+		Owner: "PRJ",
+		Name:  "repo",
+	}, &model.ListOptions{All: true, Page: 1, PerPage: 25})
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{"v1.0.0"}, tags)
+	assert.Equal(t, 1, calls)
+}
+
 var (
 	fakeUser = &model.User{
 		AccessToken: "fake",

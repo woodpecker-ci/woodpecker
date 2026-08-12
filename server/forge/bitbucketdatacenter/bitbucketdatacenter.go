@@ -410,23 +410,17 @@ func (c *client) Tags(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	}
 
 	opts := convertListOptions(p)
-	all := make([]string, 0, p.PerPage)
-	for {
-		var tags bitbucketTagList
-		resp, err := bc.GetPaged(ctx, "api", fmt.Sprintf("projects/%s/repos/%s/tags", r.Owner, r.Name), &tags, &opts)
-		if err != nil {
-			return nil, fmt.Errorf("unable to list tags: %w", err)
-		}
-		for _, tag := range tags.Values {
-			all = append(all, tag.DisplayID)
-		}
-		if !p.All || resp.LastPage {
-			break
-		}
-		opts.Start = resp.NextPageStart
+	var tags bitbucketTagList
+	_, err = bc.GetPaged(ctx, "api", fmt.Sprintf("projects/%s/repos/%s/tags", r.Owner, r.Name), &tags, &opts)
+	if err != nil {
+		return nil, fmt.Errorf("unable to list tags: %w", err)
 	}
 
-	return all, nil
+	result := make([]string, 0, len(tags.Values))
+	for _, tag := range tags.Values {
+		result = append(result, tag.DisplayID)
+	}
+	return result, nil
 }
 
 // TagHead returns the commit for the specified tag.
