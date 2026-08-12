@@ -837,7 +837,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		}
 	}
 
-	sshCmd, err := client.CommandContext(ctx, cmd, args...)
+	sshCmd, err := client.Command(cmd, args...)
 	if err != nil {
 		return err
 	}
@@ -868,8 +868,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		if e != nil {
 			w.(*workflow).sshErrors.Store(step.UUID, e)
 		}
-		time.Sleep(time.Second * 5)
-		e = pw.Close()
 		if e != nil {
 			log.Debug().Msgf("Error in gofunc of StartStup: %s", e)
 		}
@@ -879,9 +877,16 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	go func() {
 		select {
 		case <-ctx.Done():
-			sshCmd.Signal(ssh.SIGINT)
+			log.Debug().Msg("Context canceled, sending SIGINT to remote process")
+			err := sshCmd.Signal(ssh.SIGINT)
+			if err != nil {
+				log.Debug().Msgf("Failed to send SIGINT to remote process: %s", err)
+			}
 		case <-done:
 		}
+		time.Sleep(time.Second * 5)
+		log.Debug().Msg("Closing write pipe end")
+		_ = pw.Close()
 	}()
 
 	return nil
