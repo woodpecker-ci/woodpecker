@@ -35,6 +35,7 @@
 
 ### 📦️ Dependency
 
+- Update module golang.org/x/crypto to v0.55.0 [[#6994](https://github.com/woodpecker-ci/woodpecker/pull/6994)]
 - Update golang-packages [[#6993](https://github.com/woodpecker-ci/woodpecker/pull/6993)]
 - Update module google.golang.org/protobuf to v1.36.12 [[#6989](https://github.com/woodpecker-ci/woodpecker/pull/6989)]
 - Update pnpm to v11.21.0 [[#6983](https://github.com/woodpecker-ci/woodpecker/pull/6983)]
