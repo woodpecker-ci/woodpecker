@@ -77,7 +77,7 @@ It combines both plugins by the Woodpecker core team and community-maintained on
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=woodpecker-ci/woodpecker&type=Date)](https://star-history.com/#woodpecker-ci/woodpecker&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=woodpecker-ci/woodpecker&type=Date)](https://star-history.dera.page/#woodpecker-ci/woodpecker&Date)
 
 ## License
 
