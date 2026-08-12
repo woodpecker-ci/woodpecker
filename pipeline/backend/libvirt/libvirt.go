@@ -813,12 +813,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 			out = string(b)
 		}
 
-		var mountSource string
-		if options.SharedDisk.UUID != "" {
-			mountSource = fmt.Sprintf("UUID=%s", uuid)
-		} else {
-			return fmt.Errorf("Neither UUID nor Label defined")
-		}
+		mountSource := fmt.Sprintf("UUID=%s", uuid)
 
 		var command []string
 		mntCmds := []string{"mount", "-o", "X-mount.mkdir", mountSource, step.WorkspaceBase}
