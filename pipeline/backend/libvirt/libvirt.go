@@ -367,25 +367,31 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 		// insert
 		devices.AddChild(sharedXmlDoc.Root())
 	} else { // in absence of a config, create a disk from scratch (ntfs for windows, ext4 otherwise)
+		log.Debug().Msgf("lala 1")
 		guestOS, err := getGuestOS(domain)
 		if err != nil {
 			return nil, "", err
 		}
 
+		log.Debug().Msgf("lala 2")
 		domainType, err := GetDomainType(ctx, domain)
 		if err != nil {
 			return nil, "", err
 		}
 
+		log.Debug().Msgf("lala 3")
 		diskSize, ok := env["LIBVIRT_DISK_SIZE"]
 		if !ok {
 			diskSize = "10G"
 		}
 
+		log.Debug().Msgf("lala 4")
 		disk, diskUuid, err := e.CreateSharedDisk(ctx, guestOS, domainType, diskSize, taskUUID)
 		if err != nil {
 			return nil, "", err
 		}
+
+		log.Debug().Msgf("lala 5")
 
 		// now cook up an XML config
 		var newXml string
