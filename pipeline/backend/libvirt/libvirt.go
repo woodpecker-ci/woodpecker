@@ -850,7 +850,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
 	sshCmd.Stdout = pw
 	sshCmd.Stderr = pw
-	sshCmd.Context = ctx
 	w.(*workflow).pipes.Store(step.UUID, &pipes{pr, pw})
 
 	err = sshCmd.Start()
@@ -858,6 +857,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		return err
 	}
 
+	done := make(chan struct{})
 	// Now we spawn a go routine that waits for the ssh command to exit
 	// and then closes the write end of the pipe.
 	// We need to do that here since we won't reach 'WaitStep' otherwise. After
@@ -872,6 +872,15 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		e = pw.Close()
 		if e != nil {
 			log.Debug().Msgf("Error in gofunc of StartStup: %s", e)
+		}
+		close(done)
+	}()
+	// and a go routine that watches the ctx and then triggers a signal
+	go func() {
+		select {
+		case <-ctx.Done():
+			sshCmd.Signal(ssh.SIGINT)
+		case <-done:
 		}
 	}()
 
