@@ -147,7 +147,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 2, "Should have generated 2 items")
 }
@@ -201,7 +202,8 @@ depends_on:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 3, "Should have generated 3 items")
 	assert.Len(t, items[0].DependsOn, 2, "Should have 2 dependencies")
@@ -231,7 +233,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 1, "Should have generated 1 pipeline")
 	assert.Len(t, items[0].RunsOn, 2, "Should run on success and failure")
@@ -266,7 +269,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 2, "Should have generated 2 pipelines")
 	pipelineNames := []string{items[0].Workflow.Name, items[1].Workflow.Name}
@@ -304,7 +308,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 1, "Should have generated 1 pipeline")
 }
@@ -344,7 +349,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.False(t, errors.HasBlockingErrors(err))
 	assert.Len(t, items, 2, "Should have generated 2 items")
 }
@@ -371,7 +377,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Empty(t, items, "Should not generate a pipeline item if there are no steps")
 }
@@ -423,7 +430,8 @@ depends_on: [ shouldbefiltered ]
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 1, "Zerostep and the step that depends on it, and the one depending on it should not generate a pipeline item")
 	assert.Equal(t, "justastep", items[0].Workflow.Name, "justastep should have been generated")
@@ -496,7 +504,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 2)
 
@@ -532,7 +541,8 @@ depends_on:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Empty(t, items, "Workflows with missing dependencies should be filtered out")
 }
@@ -572,7 +582,8 @@ depends_on:
 			},
 		}
 
-		items, err := b.Build()
+		plan, err := b.Build()
+		items := plan.Run
 		assert.NoError(t, err)
 		assert.Len(t, items, 2, "deploy should not be filtered out")
 		deploy := items[0]
@@ -615,7 +626,8 @@ depends_on:
 			},
 		}
 
-		items, err := b.Build()
+		plan, err := b.Build()
+		items := plan.Run
 		assert.NoError(t, err)
 		assert.Len(t, items, 3)
 		deploy := items[0]
@@ -653,7 +665,8 @@ depends_on:
 			},
 		}
 
-		items, err := b.Build()
+		plan, err := b.Build()
+		items := plan.Run
 		assert.NoError(t, err)
 		assert.Len(t, items, 1, "deploy should be filtered out due to missing required dep")
 		assert.Equal(t, "check-a", items[0].Workflow.Name)
@@ -692,7 +705,8 @@ depends_on:
 			},
 		}
 
-		items, err := b.Build()
+		plan, err := b.Build()
+		items := plan.Run
 		assert.NoError(t, err)
 		assert.Len(t, items, 2, "check-b filtered by when, deploy should still run")
 		deploy := items[0]
@@ -731,7 +745,8 @@ depends_on:
 			},
 		}
 
-		items, err := b.Build()
+		plan, err := b.Build()
+		items := plan.Run
 		assert.NoError(t, err)
 		assert.Len(t, items, 1, "deploy should survive: its only dep is optional and the target was removed")
 		assert.Equal(t, "deploy", items[0].Workflow.Name)
@@ -794,7 +809,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 1)
 
@@ -840,7 +856,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 2)
 
@@ -876,7 +893,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 1)
 	assert.Len(t, items[0].Config.Stages, 1, "Should have 1 stage")
@@ -926,7 +944,8 @@ steps:
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
+	items := plan.Run
 	assert.NoError(t, err)
 	assert.Len(t, items, 1)
 

@@ -249,7 +249,7 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
 	if err != nil {
 		str, fmtErr := lint.FormatLintError("pipeline", err, false)
 		fmt.Print(str)
@@ -258,6 +258,7 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		}
 	}
 
+	items := plan.Run
 	if len(items) == 0 {
 		return fmt.Errorf("no workflows to execute (all filtered out)")
 	}
