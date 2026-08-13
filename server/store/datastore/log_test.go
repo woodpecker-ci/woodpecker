@@ -134,3 +134,38 @@ func TestLogFindOrdersByLine(t *testing.T) {
 	assert.Equal(t, []int{0, 1, 2, 3}, lines)
 	assert.Equal(t, []string{"first", "second", "third", "fourth"}, data)
 }
+
+// TestLogFindDropsResentEntries covers an agent reconnecting mid-step and
+// resending a batch the server already stored. Each line number is reported
+// once, which is what a UNIQUE(step_id, line) index would guarantee.
+func TestLogFindDropsResentEntries(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
+	defer closer()
+
+	step := model.Step{
+		ID: 1,
+	}
+
+	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+		{ID: 10, StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
+		{ID: 11, StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
+	}))
+	// the same batch arrives a second time
+	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+		{ID: 12, StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
+		{ID: 13, StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
+	}))
+
+	logEntries, err := store.LogFind(&step)
+	assert.NoError(t, err)
+
+	lines := make([]int, 0, len(logEntries))
+	data := make([]string, 0, len(logEntries))
+	for _, logEntry := range logEntries {
+		lines = append(lines, logEntry.Line)
+		data = append(data, string(logEntry.Data))
+	}
+
+	assert.Equal(t, []int{0, 1}, lines)
+	assert.Equal(t, []string{"hello", "world"}, data)
+}

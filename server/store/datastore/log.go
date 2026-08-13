@@ -29,9 +29,33 @@ const pgBatchSize = 1000
 
 // LogFind returns the log entries of a step in the order the agent produced
 // them, which is the order their line numbers carry.
+//
+// An agent that reconnects mid-step can resend a batch the server already
+// stored, so a line number can occur more than once. Keeping one row per line
+// number matches what a UNIQUE(step_id, line) index would enforce.
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
-	return logEntries, s.engine.Asc("line").Where("step_id = ?", step.ID).Find(&logEntries)
+	if err := s.engine.Asc("line").Where("step_id = ?", step.ID).Find(&logEntries); err != nil {
+		return nil, err
+	}
+
+	return dedupLogEntries(logEntries), nil
+}
+
+// dedupLogEntries keeps the first entry of every line number. The input must
+// be ordered by line, which puts the repeats next to each other.
+func dedupLogEntries(logEntries []*model.LogEntry) []*model.LogEntry {
+	deduped := make([]*model.LogEntry, 0, len(logEntries))
+
+	for _, logEntry := range logEntries {
+		if len(deduped) > 0 && logEntry.Line == deduped[len(deduped)-1].Line {
+			continue
+		}
+
+		deduped = append(deduped, logEntry)
+	}
+
+	return deduped
 }
 
 func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
