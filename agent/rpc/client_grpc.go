@@ -56,6 +56,10 @@ type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
 	logs   chan *proto.LogEntry
+	// flush carries a completion channel to processLogs. The batcher closes it
+	// once the queued entries have been handed to the server, which lets
+	// FlushLogs block until the drain is done.
+	flush chan chan struct{}
 	// connectionRetryTimeout is the maximum time to wait for a connection to be
 	// restored before the agent gives up and exits. Zero means infinite.
 	// Maps directly onto backoff.WithMaxElapsedTime.
@@ -77,6 +81,7 @@ func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn, opts ...ClientOpt
 	}
 
 	client.logs = make(chan *proto.LogEntry, client.logEntryBufferSize) // max memory use: buffer count * 1 MiB
+	client.flush = make(chan chan struct{})
 
 	go client.processLogs(ctx)
 	return client
@@ -366,6 +371,25 @@ func (c *client) EnqueueLog(logEntry *rpc.LogEntry) {
 	}
 }
 
+// FlushLogs drains the batcher and blocks until the queued entries have been
+// handed to the server.
+func (c *client) FlushLogs(ctx context.Context) error {
+	done := make(chan struct{})
+
+	select {
+	case c.flush <- done:
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+
+	select {
+	case <-done:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
 func (c *client) processLogs(ctx context.Context) {
 	var entries []*proto.LogEntry
 	var bytes int
@@ -406,6 +430,22 @@ func (c *client) processLogs(ctx context.Context) {
 			if bytes >= maxLogBatchSize {
 				send()
 			}
+
+		case done := <-c.flush:
+			// Entries already queued must be part of this flush, but select
+			// picks between ready cases at random, so pull them in explicitly
+			// before sending.
+			for drained := false; !drained; {
+				select {
+				case entry := <-c.logs:
+					entries = append(entries, entry)
+					bytes += grpc_proto.Size(entry)
+				default:
+					drained = true
+				}
+			}
+			send()
+			close(done)
 
 		case <-time.After(maxLogFlushPeriod):
 			send()

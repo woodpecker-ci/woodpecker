@@ -207,6 +207,12 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		doneCtx = shutdownCtx
 	}
 
+	// Done closes the workflow's log stream on the server, so the batcher has to
+	// be drained first or the tail of the output is dropped.
+	if err := r.client.FlushLogs(doneCtx); err != nil {
+		logger.Error().Err(err).Msg("failed to flush pending logs")
+	}
+
 	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("failed to update workflow status")
 	} else {
