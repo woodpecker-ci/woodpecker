@@ -1,0 +1,11 @@
+compile:
+  generate:
+    image: alpine
+    commands:
+      - ./scripts/generate-pipeline.sh
+
+steps:
+  test:
+    image: golang
+    commands:
+      - go test ./...

@@ -4,7 +4,7 @@
   "$id": "https://raw.githubusercontent.com/woodpecker-ci/woodpecker/main/pipeline/frontend/yaml/linter/schema/schema.json",
   "description": "Schema of a Woodpecker pipeline file. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax",
   "type": "object",
-  "required": ["steps"],
+  "anyOf": [{ "required": ["steps"] }, { "required": ["compile"] }],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -22,6 +22,10 @@
     },
     "when": {
       "$ref": "#/definitions/workflow_when"
+    },
+    "compile": {
+      "description": "Steps that generate pipeline configuration. They run on an agent before any ordinary workflow starts. Read more: https://woodpecker-ci.org/docs/usage/compile",
+      "$ref": "#/definitions/step_list"
     },
     "steps": {
       "$ref": "#/definitions/step_list"

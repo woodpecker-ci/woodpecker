@@ -21,9 +21,13 @@ import (
 type (
 	// Workflow defines a workflow configuration.
 	Workflow struct {
-		When        constraint.When      `yaml:"when,omitempty"`
-		Workspace   Workspace            `yaml:"workspace,omitempty"`
-		Clone       ContainerList        `yaml:"clone,omitempty"`
+		When      constraint.When `yaml:"when,omitempty"`
+		Workspace Workspace       `yaml:"workspace,omitempty"`
+		Clone     ContainerList   `yaml:"clone,omitempty"`
+		// Compile holds steps that generate pipeline configuration. They run on
+		// an agent before any ordinary workflow starts, and what they emit is
+		// merged into the pipeline's config set.
+		Compile     ContainerList        `yaml:"compile,omitempty"`
 		Steps       ContainerList        `yaml:"steps,omitempty"`
 		Services    ContainerList        `yaml:"services,omitempty"`
 		Labels      map[string]string    `yaml:"labels,omitempty"`

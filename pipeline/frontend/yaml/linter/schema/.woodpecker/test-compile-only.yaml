@@ -1,0 +1,5 @@
+compile:
+  generate:
+    image: alpine
+    commands:
+      - ./scripts/generate-pipeline.sh

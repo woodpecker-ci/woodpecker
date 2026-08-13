@@ -82,15 +82,21 @@ func (l *Linter) Lint(configs []*WorkflowConfig) error {
 func (l *Linter) lintFile(config *WorkflowConfig) error {
 	var linterErr error
 
-	if len(config.Workflow.Steps.ContainerList) == 0 {
+	if len(config.Workflow.Steps.ContainerList) == 0 && len(config.Workflow.Compile.ContainerList) == 0 {
 		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing `steps` section", config.File, "steps", false))
 	}
 
 	if err := l.lintCloneSteps(config); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
+	if err := l.lintCompileSteps(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
 
 	if err := l.lintContainers(config, "clone"); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintContainers(config, "compile"); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
 	if err := l.lintContainers(config, "steps"); err != nil {
@@ -138,19 +144,32 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 	return linterErr
 }
 
+// lintCompileSteps rejects compile steps whose output cannot be captured
+// reliably. A detached step keeps writing after the workflow has moved on, so
+// whatever config response it prints may arrive after the result was collected.
+func (l *Linter) lintCompileSteps(config *WorkflowConfig) error {
+	var linterErr error
+
+	for _, container := range config.Workflow.Compile.ContainerList {
+		if !container.Detached {
+			continue
+		}
+		linterErr = multierr.Append(
+			linterErr,
+			newLinterError(
+				"Detached compile steps are not supported, their output cannot be captured reliably",
+				config.File, fmt.Sprintf("compile.%s.detach", container.Name), false,
+			),
+		)
+	}
+
+	return linterErr
+}
+
 func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 	var linterErr error
 
-	var containers []*types.Container
-
-	switch area {
-	case "clone":
-		containers = config.Workflow.Clone.ContainerList
-	case "steps":
-		containers = config.Workflow.Steps.ContainerList
-	case "services":
-		containers = config.Workflow.Services.ContainerList
-	}
+	containers := containersOfArea(config, area)
 
 	for _, container := range containers {
 		if err := l.lintImage(config, container, area); err != nil {
@@ -176,15 +195,34 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 	return linterErr
 }
 
+// containersOfArea returns the containers of a workflow section.
+func containersOfArea(config *WorkflowConfig, area string) []*types.Container {
+	switch area {
+	case "clone":
+		return config.Workflow.Clone.ContainerList
+	case "compile":
+		return config.Workflow.Compile.ContainerList
+	case "steps":
+		return config.Workflow.Steps.ContainerList
+	case "services":
+		return config.Workflow.Services.ContainerList
+	}
+
+	return nil
+}
+
 func (l *Linter) lintDependsOn(config *WorkflowConfig, c *types.Container, area string) error {
-	if area != "steps" {
+	// Compile steps and ordinary steps are separate graphs: they end up in
+	// different workflows, so a dependency may only name a peer of the same
+	// section.
+	if area != "steps" && area != "compile" {
 		return nil
 	}
 
 	var linterErr error
 	for _, dep := range c.DependsOn {
 		if slices.ContainsFunc(
-			config.Workflow.Steps.ContainerList,
+			containersOfArea(config, area),
 			func(step *types.Container) bool { return dep.Name == step.Name },
 		) {
 			continue
