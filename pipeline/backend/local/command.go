@@ -103,13 +103,18 @@ func (e *local) genCmdByShell(shell string, cmdList []string, baseDir string) (a
 	case "":
 		return nil, ErrNoShellSet
 	case "cmd":
+		agentPath, err := os.Executable()
+		if err != nil {
+			return nil, err
+		}
 		script := "@echo off\n"
 		for _, cmd := range cmdList {
-			// Escaping in cmd.exe is a pain, because of that, the command is encoded in Base64, then the output is done by Powershell
-			encodedCmd := base64.StdEncoding.EncodeToString([]byte("+ " + cmd))
+			// Escaping in cmd.exe is a pain, because of that, the command is encoded in Base64, then the output is done
+			// by a special agent command, the decoder intentionally does not add a new line, so we have to add it here
+			encodedCmd := base64.StdEncoding.EncodeToString([]byte("+ " + cmd + "\n"))
 
 			script += "\n"
-			script += "powershell.exe -NoProfile -NonInteractive -Command \"[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('" + encodedCmd + "'))\"\n"
+			script += agentPath + " decode-base64 " + encodedCmd + "\n"
 			script += cmd + "\n"
 			script += "if not %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
