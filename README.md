@@ -75,10 +75,6 @@ Woodpecker can be extended via plugins.
 The [plugin overview website](https://woodpecker-ci.org/plugins) helps browsing available plugins.
 It combines both plugins by the Woodpecker core team and community-maintained ones.
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=woodpecker-ci/woodpecker&type=Date)](https://star-history.com/#woodpecker-ci/woodpecker&Date)
-
 ## License
 
 Woodpecker is Apache 2.0 licensed.

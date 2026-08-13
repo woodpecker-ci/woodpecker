@@ -196,7 +196,7 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 +    failure: ignore
 ```
 
-If you would like to cancel the full pipeline once the step fails, you can set `failure: cancel`.
+If you would like to cancel the full pipeline once the step fails, you can set `failure: cancel`. For the default behaviour, use `failure: fail`.
 
 ### `when` - Conditional Execution
 
@@ -426,7 +426,9 @@ when:
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-For pipelines without file changes (empty commits or on events without file changes like `tag`), you can use `on_empty` to set whether this condition should be **true** _(default)_ or **false** in these cases.
+`pull_request` events always contain all changed files of the pull request **not** just the files from the last pushed commit.
+
+For pipelines without file changes (empty commits), you can use `on_empty` to set whether this condition should be **true** _(default)_ or **false** in these cases.
 
 ```yaml
 when:
@@ -757,7 +759,10 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block.
+If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is not included in the pipeline.
+Other workflows that have a `depends_on` referencing a skipped workflow will also be excluded.
+Use [`optional: true` on a dependency](./25-workflows.md#optional-dependencies) if you want it to be ignored when the referenced workflow is not part of the pipeline.
 
 For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 
@@ -781,6 +786,19 @@ The workflow now triggers on `main`, but also if the target branch of a pull req
 <!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
+
+### Optional dependencies in `depends_on`
+
+Each entry in `depends_on` can be a string (required dependency) or an object with `name` and `optional: true`.
+Optional dependencies are silently ignored when the referenced workflow or step is not part of the pipeline (e.g. filtered out by `when` conditions).
+If present, the workflow waits for them as usual. See [optional dependencies](./25-workflows.md#optional-dependencies) for details.
+
+```yaml
+depends_on:
+  - check-a
+  - name: check-b
+    optional: true
+```
 
 ## Advanced network options for steps
 
