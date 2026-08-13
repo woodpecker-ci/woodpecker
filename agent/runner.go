@@ -168,13 +168,15 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		}
 	}
 
+	compileResults := newCompileResults()
+
 	// Run pipeline
 	err = pipeline_runtime.New(
 		workflow.Config,
 		r.backend,
 		pipeline_runtime.WithContext(workflowCtx),
 		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
-		pipeline_runtime.WithLogger(r.createLogger(logger, workflow)),
+		pipeline_runtime.WithLogger(r.createLogger(logger, workflow, compileResults)),
 		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
 		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
@@ -199,6 +201,11 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		Bool("canceled", state.Canceled).
 		Msg("workflow finished")
 
+	compileResult := compileResults.report()
+	if compileResult != nil && compileResult.Error != "" {
+		logger.Error().Str("error", compileResult.Error).Msg("compile workflow emitted no usable config response")
+	}
+
 	// Update workflow state
 	doneCtx := runnerCtx //nolint:contextcheck
 	if doneCtx.Err() != nil {
@@ -213,7 +220,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		logger.Error().Err(err).Msg("failed to flush pending logs")
 	}
 
-	if err := r.client.Done(doneCtx, workflow.ID, state, nil); err != nil {
+	if err := r.client.Done(doneCtx, workflow.ID, state, compileResult); err != nil {
 		logger.Error().Err(err).Msg("failed to update workflow status")
 	} else {
 		logger.Debug().Msg("signaling workflow stopped done")

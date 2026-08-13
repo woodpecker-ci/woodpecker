@@ -39,7 +39,7 @@ type LineWriter struct {
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.Writer {
+func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) *LineWriter {
 	lw := &LineWriter{
 		peer:      peer,
 		stepUUID:  stepUUID,
@@ -49,7 +49,30 @@ func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.Writer {
 	return lw
 }
 
+// WithType returns a writer that tags its lines with the given log entry type
+// while sharing the line counter of w, so numbering stays continuous no matter
+// which writer a line went through.
+func (w *LineWriter) WithType(entryType int) io.Writer {
+	return &typedLineWriter{parent: w, entryType: entryType}
+}
+
+type typedLineWriter struct {
+	parent    *LineWriter
+	entryType int
+}
+
+func (w *typedLineWriter) Write(p []byte) (int, error) {
+	return w.parent.write(p, w.entryType)
+}
+
 func (w *LineWriter) Write(p []byte) (n int, err error) {
+	return w.write(p, rpc.LogEntryStdout)
+}
+
+func (w *LineWriter) write(p []byte, entryType int) (n int, err error) {
+	w.Lock()
+	defer w.Unlock()
+
 	data := string(p)
 	if w.replacer != nil {
 		data = w.replacer.Replace(data)
@@ -60,7 +83,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		Data:     []byte(strings.TrimSuffix(data, "\n")), // remove trailing newline
 		StepUUID: w.stepUUID,
 		Time:     int64(time.Since(w.startTime).Seconds()),
-		Type:     rpc.LogEntryStdout,
+		Type:     entryType,
 		Line:     w.num,
 	}
 
