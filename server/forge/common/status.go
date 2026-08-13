@@ -25,6 +25,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
+// DefaultStatusContextFormat is the default template for a forge commit status
+// context.
+//
+// The compile branch renders nothing for an ordinary workflow, so the context
+// of every pipeline without a compile phase is byte-identical to what it was
+// before compile workflows existed.
+const DefaultStatusContextFormat = "{{ .context }}/{{ .event }}/{{if .compile}}compile/{{end}}{{ .workflow }}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}"
+
 func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
 	event := string(pipeline.Event)
 	if pipeline.Event == model.EventPull {
@@ -44,6 +52,10 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 		"owner":    repo.Owner,
 		"repo":     repo.Name,
 		"axis_id":  workflow.AxisID,
+		// A compile workflow and an ordinary workflow may share a name, so
+		// without this they would render the same context and the second would
+		// overwrite the first's commit status.
+		"compile": workflow.Phase == model.WorkflowPhaseCompile,
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("could not create status context")

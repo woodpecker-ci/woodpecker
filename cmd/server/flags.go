@@ -21,6 +21,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils/hostmatcher"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
@@ -398,7 +399,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_STATUS_CONTEXT_FORMAT"),
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}",
+		Value:   common.DefaultStatusContextFormat,
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_MIGRATIONS_ALLOW_LONG"),

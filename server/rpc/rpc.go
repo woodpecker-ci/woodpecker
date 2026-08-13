@@ -356,6 +356,17 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	logger.Debug().Msgf("workflow state in store: %#v", workflow)
 	logger.Debug().Msgf("gRPC Done with state: %#v", state)
 
+	// The result has to be stored before the workflow is marked done: whichever
+	// compile workflow finishes last drives the merge and reads every result
+	// back, including its own.
+	if workflow.Phase == model.WorkflowPhaseCompile {
+		workflow.CompileResult = compileResultFromRPC(compileResult)
+		if err := s.store.WorkflowUpdate(workflow); err != nil {
+			logger.Error().Err(err).Msg("cannot store compile result")
+			return err
+		}
+	}
+
 	// Complete any still-running children (e.g. service containers) before
 	// computing the workflow status, so their final state is reflected.
 	s.completeChildrenIfParentCompleted(workflow, state.Finished)
@@ -387,7 +398,27 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	if !model.IsThereRunningStage(currentPipeline.Workflows) {
+	// A pipeline whose compile phase has just finished is not done: its run
+	// workflows do not exist yet, and building and queueing them is what makes
+	// it running again.
+	advanced := false
+	if workflow.Phase == model.WorkflowPhaseCompile && currentPipeline.CompileState == model.CompileStateCompiling {
+		advanced, err = s.advanceCompilePhase(c, currentPipeline, repo)
+		if err != nil {
+			logger.Error().Err(err).Msg("cannot advance compile phase")
+		}
+		if currentPipeline, err = s.store.GetPipeline(currentPipeline.ID); err != nil {
+			return err
+		}
+		if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
+			return err
+		}
+	}
+
+	// A pipeline still waiting on its compile phase is never finished, even
+	// when nothing is running: another Done call may be merging right now, and
+	// the run workflows it will append do not exist yet.
+	if !advanced && !currentPipeline.CompilePhasePending() && !model.IsThereRunningStage(currentPipeline.Workflows) {
 		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
 			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
 		}
@@ -624,4 +655,40 @@ func (s *RPC) updateAgentLastWork(agent *model.Agent) error {
 	}
 
 	return nil
+}
+
+// compileResultFromRPC converts what the agent reported into its stored form.
+func compileResultFromRPC(result *rpc.CompileResult) *model.CompileResult {
+	if result == nil {
+		return nil
+	}
+
+	configs := make([]model.CompileConfig, 0, len(result.Configs))
+	for _, config := range result.Configs {
+		configs = append(configs, model.CompileConfig{Name: config.Name, Data: config.Data})
+	}
+
+	return &model.CompileResult{Configs: configs, Error: result.Error}
+}
+
+// advanceCompilePhase merges what the compile workflows emitted and queues the
+// run workflows. It reports whether this call was the one that did so; for
+// every other compile workflow it is a no-op.
+func (s *RPC) advanceCompilePhase(c context.Context, currentPipeline *model.Pipeline, repo *model.Repo) (bool, error) {
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		return false, fmt.Errorf("cannot get forge for repo %s: %w", repo.FullName, err)
+	}
+
+	user, err := s.store.GetUser(repo.UserID)
+	if err != nil {
+		return false, fmt.Errorf("cannot get user %d of repo %s: %w", repo.UserID, repo.FullName, err)
+	}
+
+	err = pipeline.CompilePhaseDone(c, _forge, s.store, currentPipeline, repo, user)
+	if errors.Is(err, pipeline.ErrCompilePhaseNotDone) {
+		return false, nil
+	}
+
+	return true, err
 }

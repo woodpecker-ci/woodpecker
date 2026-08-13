@@ -92,6 +92,13 @@ const (
 	CompileStateCompiled CompileState = "compiled"
 )
 
+// CompilePhasePending reports whether the pipeline is waiting on its compile
+// phase. Such a pipeline is never finished, however idle it looks: its run
+// workflows do not exist yet.
+func (p *Pipeline) CompilePhasePending() bool {
+	return p.CompileState == CompileStateCompiling || p.CompileState == CompileStateMerging
+}
+
 // APIPipeline TODO remove deprecated properties in next major.
 type APIPipeline struct {
 	*Pipeline

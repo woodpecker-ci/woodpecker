@@ -187,7 +187,19 @@ func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Sto
 		return currentPipeline, nil, parseErr, nil
 	}
 
+	// The compile phase runs first and on its own. Its output decides what the
+	// run phase looks like, so the run workflows built here are discarded and
+	// rebuilt from the merged config once every compile workflow has finished.
+	// Persisting them now would give each one a forge commit status that could
+	// never be resolved if the merge changed the workflow set.
 	pipelineItems := plan.Run
+	if len(plan.Compile) > 0 {
+		pipelineItems = plan.Compile
+		currentPipeline.CompileState = model.CompileStateCompiling
+		if err := store.UpdatePipeline(currentPipeline); err != nil {
+			return currentPipeline, nil, parseErr, err
+		}
+	}
 
 	// An empty pipeline (e.g. everything filtered out) has no workflows to
 	// persist. Return early so the caller can filter it without us touching
@@ -269,6 +281,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 			State:      model.StatusPending,
 			Environ:    item.Workflow.Environ,
 			AxisID:     item.Workflow.AxisID,
+			Phase:      model.WorkflowPhase(item.Workflow.Phase),
 		}
 
 		if pipeline.Status == model.StatusBlocked {
