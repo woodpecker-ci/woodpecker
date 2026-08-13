@@ -44,11 +44,32 @@ type (
 		Canceled bool   `json:"canceled"`
 	}
 
+	// CompileResult is what a compile workflow emitted. A nil CompileResult on
+	// Done means the workflow was not a compile workflow; a non-nil one with
+	// Error set means the response could not be read.
+	CompileResult struct {
+		Configs []CompileConfig `json:"configs"`
+		Error   string          `json:"error,omitempty"`
+	}
+
+	// CompileConfig is one emitted pipeline configuration. Empty Data removes
+	// the config of that name from the pipeline.
+	CompileConfig struct {
+		Name string `json:"name"`
+		Data []byte `json:"data,omitempty"`
+	}
+
+	// WorkflowPhase tells the agent how to treat a workflow. A compile
+	// workflow's output is scanned for a config response; an ordinary one's is
+	// not.
+	WorkflowPhase string
+
 	// Workflow defines the workflow execution details.
 	Workflow struct {
 		ID      string                `json:"id"`
 		Config  *backend_types.Config `json:"config"`
 		Timeout int64                 `json:"timeout"`
+		Phase   WorkflowPhase         `json:"phase,omitempty"`
 	}
 
 	Version struct {
@@ -64,4 +85,9 @@ type (
 		Capacity     int               `json:"capacity"`
 		CustomLabels map[string]string `json:"custom_labels"`
 	}
+)
+
+const (
+	WorkflowPhaseRun     WorkflowPhase = "run"
+	WorkflowPhaseCompile WorkflowPhase = "compile"
 )

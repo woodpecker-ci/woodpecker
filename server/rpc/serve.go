@@ -25,6 +25,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
@@ -57,6 +58,11 @@ func Serve(ctx context.Context, cfg ServeConfig) error {
 	authorizer := NewAuthorizer(jwtManager)
 
 	grpcServer := grpc.NewServer(
+		// A compile workflow's Done carries the configs it emitted, capped at
+		// compile.DefaultMaxPayloadSize. Leave headroom above that cap, or the
+		// cap is unreachable and users hit an opaque gRPC error instead of a
+		// readable one.
+		grpc.MaxRecvMsgSize(rpc.MaxMessageSize),
 		grpc.StreamInterceptor(authorizer.StreamInterceptor),
 		grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
 		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{

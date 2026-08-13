@@ -17,6 +17,15 @@ package rpc
 
 import "context"
 
+// MaxMessageSize is the largest gRPC message the server accepts and the agent
+// sends.
+//
+// The gRPC default of 4 MiB is exactly the cap on the configs a compile
+// workflow may emit, leaving no room for the framing around them: the cap would
+// be unreachable and users would get an opaque gRPC error instead of a readable
+// one.
+const MaxMessageSize = 8 * 1024 * 1024
+
 // Peer defines the bidirectional communication interface between Woodpecker agents and servers.
 //
 // # Architecture and Implementations
@@ -171,7 +180,11 @@ type Peer interface {
 	// Returns:
 	//   - nil on success
 	//   - error if communication fails or server rejects the state
-	Done(c context.Context, workflowID string, state WorkflowState) error
+	//
+	// compileResult carries what a compile workflow emitted, and is nil for an
+	// ordinary workflow. A non-nil result with no configs and no error means
+	// the workflow ran and asked for no change.
+	Done(c context.Context, workflowID string, state WorkflowState, compileResult *CompileResult) error
 
 	// Extend extends the timeout for the workflow with the given ID in the task queue.
 	//

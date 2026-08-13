@@ -90,7 +90,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		if err := s.lockAgentToWorkflow(c, agent, taskID); err != nil {
 			return err
 		}
-		return s.Done(c, taskID, rpc.WorkflowState{})
+		return s.Done(c, taskID, rpc.WorkflowState{}, nil)
 	})
 	if err != nil || rpcWorkflow == nil {
 		return nil, err
@@ -304,7 +304,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 }
 
 // Done marks the workflow with the given ID as stopped.
-func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
+func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState, compileResult *rpc.CompileResult) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
 		return err

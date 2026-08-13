@@ -248,6 +248,7 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 	w := &rpc.Workflow{
 		ID:      res.GetWorkflow().GetId(),
 		Timeout: res.GetWorkflow().GetTimeout(),
+		Phase:   rpc.WorkflowPhase(res.GetWorkflow().GetPhase()),
 		Config:  new(backend_types.Config),
 	}
 	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
@@ -299,7 +300,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 }
 
 // Done let agent signal to server the workflow has stopped.
-func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) error {
+func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState, compileResult *rpc.CompileResult) error {
 	req := &proto.DoneRequest{
 		Id: workflowID,
 		State: &proto.WorkflowState{
@@ -308,6 +309,14 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 			Error:    state.Error,
 			Canceled: state.Canceled,
 		},
+	}
+
+	if compileResult != nil {
+		configs := make([]*proto.CompileConfig, 0, len(compileResult.Configs))
+		for _, config := range compileResult.Configs {
+			configs = append(configs, &proto.CompileConfig{Name: config.Name, Data: config.Data})
+		}
+		req.CompileResult = &proto.CompileResult{Configs: configs, Error: compileResult.Error}
 	}
 
 	_, err := retryRPC(ctx, c, "done", func() (*proto.Empty, error) {

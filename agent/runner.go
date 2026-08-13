@@ -213,7 +213,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		logger.Error().Err(err).Msg("failed to flush pending logs")
 	}
 
-	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
+	if err := r.client.Done(doneCtx, workflow.ID, state, nil); err != nil {
 		logger.Error().Err(err).Msg("failed to update workflow status")
 	} else {
 		logger.Debug().Msg("signaling workflow stopped done")

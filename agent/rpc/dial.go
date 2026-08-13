@@ -27,6 +27,8 @@ import (
 	grpc_credentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
+
+	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
 // DialConfig bundles everything Dial needs. Callers build this from a
@@ -109,6 +111,9 @@ func Dial(authCtx context.Context, cfg DialConfig) (*AgentConn, error) {
 
 	mainConn, err := grpc.NewClient(
 		cfg.ServerAddr, transport, keepaliveOpts,
+		// Must match the server: a compile workflow's Done carries the configs
+		// it emitted.
+		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(rpc.MaxMessageSize)),
 		grpc.WithUnaryInterceptor(authInterceptor.Unary()),
 		grpc.WithStreamInterceptor(authInterceptor.Stream()),
 	)

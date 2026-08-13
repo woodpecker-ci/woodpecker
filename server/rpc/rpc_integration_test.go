@@ -479,7 +479,7 @@ func TestRPCDone(t *testing.T) {
 		rpcInst := newTestRPC(t, mockStore, mockQueue)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
-		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Started: 100, Finished: 200})
+		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Started: 100, Finished: 200}, nil)
 		assert.NoError(t, err)
 	})
 
@@ -498,7 +498,7 @@ func TestRPCDone(t *testing.T) {
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
-		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
+		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200}, nil)
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
 	})
 
@@ -517,7 +517,7 @@ func TestRPCDone(t *testing.T) {
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
-		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
+		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200}, nil)
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowRun)
 	})
 
@@ -536,7 +536,7 @@ func TestRPCDone(t *testing.T) {
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
-		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
+		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200}, nil)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "not allowed to interact")
 	})
@@ -546,7 +546,7 @@ func TestRPCDone(t *testing.T) {
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
-		err := rpcInst.Done(ctx, "invalid", rpc.WorkflowState{})
+		err := rpcInst.Done(ctx, "invalid", rpc.WorkflowState{}, nil)
 		assert.Error(t, err)
 	})
 }

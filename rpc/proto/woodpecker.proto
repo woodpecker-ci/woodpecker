@@ -63,7 +63,7 @@ message LogEntry {
   string step_uuid = 1;
   int64  time = 2;
   int32  line = 3;
-  int32  type = 4; // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress
+  int32  type = 4; // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress, 5 = compile-config
   bytes  data = 5;
 }
 
@@ -75,6 +75,21 @@ message Workflow {
   string id = 1;
   int64 timeout = 2;
   bytes payload = 3;
+  // Empty or "run" for an ordinary workflow, "compile" for one whose output is
+  // scanned for a config response.
+  string phase = 4;
+}
+
+message CompileConfig {
+  string name = 1;
+  // Empty data removes the config of that name from the pipeline.
+  bytes data = 2;
+}
+
+message CompileResult {
+  repeated CompileConfig configs = 1;
+  // Set when the response could not be read, e.g. a malformed block.
+  string error = 2;
 }
 
 //
@@ -97,6 +112,9 @@ message WaitRequest {
 message DoneRequest {
   string id = 1;
   WorkflowState state = 2;
+  // Set by a compile workflow only. Absent means the workflow emitted no config
+  // response, which is not the same as an empty configs list.
+  optional CompileResult compile_result = 3;
 }
 
 message ExtendRequest {
