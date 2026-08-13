@@ -16,6 +16,8 @@ package core
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"os"
 	"slices"
 
@@ -26,6 +28,20 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
+
+func base64Decoder(ctx context.Context, c *cli.Command) error {
+	if c.Args().Len() != 1 {
+		return fmt.Errorf("expected exactly one base64 argument")
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(c.Args().First())
+	if err != nil {
+		return fmt.Errorf("decode base64: %w", err)
+	}
+
+	_, err = os.Stdout.Write(decoded)
+	return err
+}
 
 func GenApp(backends []backend_types.Backend) *cli.Command {
 	app := &cli.Command{}
@@ -38,6 +54,12 @@ func GenApp(backends []backend_types.Backend) *cli.Command {
 			Name:   "ping",
 			Usage:  "ping the agent",
 			Action: pinger,
+		},
+		{
+			Name:   "decode-base64",
+			Usage:  "decodes a base64 string",
+			Hidden: true,
+			Action: base64Decoder,
 		},
 	}
 	agentFlags := slices.Concat(flags, logger.GlobalLoggerFlags)
