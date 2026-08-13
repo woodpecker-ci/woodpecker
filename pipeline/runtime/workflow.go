@@ -85,7 +85,8 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	// A failing step is a successfully executed task from the runtime's point of
 	// view. It is reported through the step states, which make the workflow fail,
 	// so it must not surface as a runtime error. Use Err() to get it anyway.
-	if err := r.err.Get(); !pipeline_errors.IsStepFailure(err) {
+	// Cancelled workflows are also not runtime errors — they are expected terminations.
+	if err := r.err.Get(); !pipeline_errors.IsStepFailure(err) && !errors.Is(err, pipeline_errors.ErrCancel) {
 		return err
 	}
 
