@@ -57,6 +57,7 @@ type Pipeline struct {
 	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
 	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
 	Version              string                  `json:"version"                 xorm:"'version'"`
+	CompileState         CompileState            `json:"compile_state,omitempty" xorm:"compile_state"`
 
 	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626
 	// // New
@@ -69,6 +70,27 @@ type Pipeline struct {
 	Sender    string `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
 	Email     string `json:"author_email"            xorm:"varchar(500) email"`
 }
+
+// CompileState tracks how far a pipeline got through its compile phase.
+//
+// It exists to make the merge exactly-once. Compile workflows finish on
+// different agents at unpredictable times, so several Done calls can observe
+// "no compile workflow is still running" at the same moment. Whoever swaps
+// compiling for merging owns the merge; everyone else returns.
+type CompileState string
+
+const (
+	// CompileStateNone marks a pipeline that has no compile phase at all.
+	CompileStateNone CompileState = ""
+	// CompileStateCompiling marks a pipeline whose compile workflows are
+	// persisted and may still be running.
+	CompileStateCompiling CompileState = "compiling"
+	// CompileStateMerging marks the pipeline whose merge one Done call claimed.
+	CompileStateMerging CompileState = "merging"
+	// CompileStateCompiled marks a pipeline whose merge has finished, whether
+	// or not it produced anything to run.
+	CompileStateCompiled CompileState = "compiled"
+)
 
 // APIPipeline TODO remove deprecated properties in next major.
 type APIPipeline struct {

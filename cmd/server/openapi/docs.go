@@ -5041,6 +5041,9 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
+                "compile_state": {
+                    "$ref": "#/definitions/model.CompileState"
+                },
                 "created": {
                     "type": "integer"
                 },
@@ -6252,6 +6255,21 @@ const docTemplate = `{
                 "RequireApprovalAllEvents"
             ]
         },
+        "model.CompileState": {
+            "type": "string",
+            "enum": [
+                "",
+                "compiling",
+                "merging",
+                "compiled"
+            ],
+            "x-enum-varnames": [
+                "CompileStateNone",
+                "CompileStateCompiling",
+                "CompileStateMerging",
+                "CompileStateCompiled"
+            ]
+        },
         "model.ForgeType": {
             "type": "string",
             "enum": [
@@ -6396,6 +6414,14 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "phase": {
+                    "description": "Phase is \"compile\" for a workflow that generates pipeline configuration\nand \"run\" for an ordinary one. Compile workflows run first; run workflows\nare created only once every compile workflow has finished.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.WorkflowPhase"
+                        }
+                    ]
+                },
                 "pid": {
                     "type": "integer"
                 },
@@ -6412,6 +6438,17 @@ const docTemplate = `{
                     "$ref": "#/definitions/StatusValue"
                 }
             }
+        },
+        "model.WorkflowPhase": {
+            "type": "string",
+            "enum": [
+                "run",
+                "compile"
+            ],
+            "x-enum-varnames": [
+                "WorkflowPhaseRun",
+                "WorkflowPhaseCompile"
+            ]
         }
     }
 }`

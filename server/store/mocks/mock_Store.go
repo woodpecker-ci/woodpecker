@@ -4489,6 +4489,78 @@ func (_c *MockStore_Ping_Call) RunAndReturn(run func() error) *MockStore_Ping_Ca
 	return _c
 }
 
+// PipelineCompileStateCompareAndSwap provides a mock function for the type MockStore
+func (_mock *MockStore) PipelineCompileStateCompareAndSwap(pipelineID int64, from model.CompileState, to model.CompileState) (bool, error) {
+	ret := _mock.Called(pipelineID, from, to)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PipelineCompileStateCompareAndSwap")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, model.CompileState, model.CompileState) (bool, error)); ok {
+		return returnFunc(pipelineID, from, to)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, model.CompileState, model.CompileState) bool); ok {
+		r0 = returnFunc(pipelineID, from, to)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, model.CompileState, model.CompileState) error); ok {
+		r1 = returnFunc(pipelineID, from, to)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_PipelineCompileStateCompareAndSwap_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PipelineCompileStateCompareAndSwap'
+type MockStore_PipelineCompileStateCompareAndSwap_Call struct {
+	*mock.Call
+}
+
+// PipelineCompileStateCompareAndSwap is a helper method to define mock.On call
+//   - pipelineID int64
+//   - from model.CompileState
+//   - to model.CompileState
+func (_e *MockStore_Expecter) PipelineCompileStateCompareAndSwap(pipelineID interface{}, from interface{}, to interface{}) *MockStore_PipelineCompileStateCompareAndSwap_Call {
+	return &MockStore_PipelineCompileStateCompareAndSwap_Call{Call: _e.mock.On("PipelineCompileStateCompareAndSwap", pipelineID, from, to)}
+}
+
+func (_c *MockStore_PipelineCompileStateCompareAndSwap_Call) Run(run func(pipelineID int64, from model.CompileState, to model.CompileState)) *MockStore_PipelineCompileStateCompareAndSwap_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 model.CompileState
+		if args[1] != nil {
+			arg1 = args[1].(model.CompileState)
+		}
+		var arg2 model.CompileState
+		if args[2] != nil {
+			arg2 = args[2].(model.CompileState)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_PipelineCompileStateCompareAndSwap_Call) Return(b bool, err error) *MockStore_PipelineCompileStateCompareAndSwap_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockStore_PipelineCompileStateCompareAndSwap_Call) RunAndReturn(run func(pipelineID int64, from model.CompileState, to model.CompileState) (bool, error)) *MockStore_PipelineCompileStateCompareAndSwap_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PipelineConfigCreate provides a mock function for the type MockStore
 func (_mock *MockStore) PipelineConfigCreate(pipelineConfig *model.PipelineConfig) error {
 	ret := _mock.Called(pipelineConfig)
@@ -4536,6 +4608,63 @@ func (_c *MockStore_PipelineConfigCreate_Call) Return(err error) *MockStore_Pipe
 }
 
 func (_c *MockStore_PipelineConfigCreate_Call) RunAndReturn(run func(pipelineConfig *model.PipelineConfig) error) *MockStore_PipelineConfigCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PipelineConfigsSetEffective provides a mock function for the type MockStore
+func (_mock *MockStore) PipelineConfigsSetEffective(pipelineID int64, configs []*model.Config) error {
+	ret := _mock.Called(pipelineID, configs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PipelineConfigsSetEffective")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(int64, []*model.Config) error); ok {
+		r0 = returnFunc(pipelineID, configs)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_PipelineConfigsSetEffective_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PipelineConfigsSetEffective'
+type MockStore_PipelineConfigsSetEffective_Call struct {
+	*mock.Call
+}
+
+// PipelineConfigsSetEffective is a helper method to define mock.On call
+//   - pipelineID int64
+//   - configs []*model.Config
+func (_e *MockStore_Expecter) PipelineConfigsSetEffective(pipelineID interface{}, configs interface{}) *MockStore_PipelineConfigsSetEffective_Call {
+	return &MockStore_PipelineConfigsSetEffective_Call{Call: _e.mock.On("PipelineConfigsSetEffective", pipelineID, configs)}
+}
+
+func (_c *MockStore_PipelineConfigsSetEffective_Call) Run(run func(pipelineID int64, configs []*model.Config)) *MockStore_PipelineConfigsSetEffective_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 []*model.Config
+		if args[1] != nil {
+			arg1 = args[1].([]*model.Config)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_PipelineConfigsSetEffective_Call) Return(err error) *MockStore_PipelineConfigsSetEffective_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_PipelineConfigsSetEffective_Call) RunAndReturn(run func(pipelineID int64, configs []*model.Config) error) *MockStore_PipelineConfigsSetEffective_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5614,6 +5743,68 @@ func (_c *MockStore_ServerConfigSet_Call) Return(err error) *MockStore_ServerCon
 }
 
 func (_c *MockStore_ServerConfigSet_Call) RunAndReturn(run func(s string, s1 string) error) *MockStore_ServerConfigSet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SourceConfigsForPipeline provides a mock function for the type MockStore
+func (_mock *MockStore) SourceConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
+	ret := _mock.Called(pipelineID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SourceConfigsForPipeline")
+	}
+
+	var r0 []*model.Config
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64) ([]*model.Config, error)); ok {
+		return returnFunc(pipelineID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64) []*model.Config); ok {
+		r0 = returnFunc(pipelineID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Config)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = returnFunc(pipelineID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_SourceConfigsForPipeline_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SourceConfigsForPipeline'
+type MockStore_SourceConfigsForPipeline_Call struct {
+	*mock.Call
+}
+
+// SourceConfigsForPipeline is a helper method to define mock.On call
+//   - pipelineID int64
+func (_e *MockStore_Expecter) SourceConfigsForPipeline(pipelineID interface{}) *MockStore_SourceConfigsForPipeline_Call {
+	return &MockStore_SourceConfigsForPipeline_Call{Call: _e.mock.On("SourceConfigsForPipeline", pipelineID)}
+}
+
+func (_c *MockStore_SourceConfigsForPipeline_Call) Run(run func(pipelineID int64)) *MockStore_SourceConfigsForPipeline_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_SourceConfigsForPipeline_Call) Return(configs []*model.Config, err error) *MockStore_SourceConfigsForPipeline_Call {
+	_c.Call.Return(configs, err)
+	return _c
+}
+
+func (_c *MockStore_SourceConfigsForPipeline_Call) RunAndReturn(run func(pipelineID int64) ([]*model.Config, error)) *MockStore_SourceConfigsForPipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }

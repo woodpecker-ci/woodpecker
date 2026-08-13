@@ -307,3 +307,35 @@ func TestDeletePipeline(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, count)
 }
+
+// The merge that follows the compile phase must run exactly once, no matter how
+// many agents report Done at the same moment (#4626).
+func TestPipelineCompileStateCompareAndSwap(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo))
+	defer closer()
+
+	require.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1", ForgeRemoteID: "1"}))
+
+	pipeline := &model.Pipeline{RepoID: 1, CompileState: model.CompileStateCompiling}
+	require.NoError(t, store.CreatePipeline(pipeline))
+
+	claimed, err := store.PipelineCompileStateCompareAndSwap(pipeline.ID, model.CompileStateCompiling, model.CompileStateMerging)
+	require.NoError(t, err)
+	assert.True(t, claimed, "the first caller owns the merge")
+
+	claimed, err = store.PipelineCompileStateCompareAndSwap(pipeline.ID, model.CompileStateCompiling, model.CompileStateMerging)
+	require.NoError(t, err)
+	assert.False(t, claimed, "everyone else has to see the state has moved on")
+
+	loaded, err := store.GetPipeline(pipeline.ID)
+	require.NoError(t, err)
+	assert.Equal(t, model.CompileStateMerging, loaded.CompileState)
+
+	// a pipeline without a compile phase is never claimable
+	plain := &model.Pipeline{RepoID: 1}
+	require.NoError(t, store.CreatePipeline(plain))
+
+	claimed, err = store.PipelineCompileStateCompareAndSwap(plain.ID, model.CompileStateCompiling, model.CompileStateMerging)
+	require.NoError(t, err)
+	assert.False(t, claimed)
+}

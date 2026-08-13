@@ -29,9 +29,18 @@ func (Config) TableName() string {
 }
 
 // PipelineConfig is the n:n relation between Pipeline and Config.
+//
+// A config may be linked to a pipeline as its source, as what the pipeline
+// actually ran, or both. They differ only once a compile workflow has rewritten
+// the set: what it emits becomes effective, while the source stays what the
+// pipeline was built from. Source is the only durable input, so approving or
+// restarting a pipeline compiles again rather than replaying the previous run's
+// output.
 type PipelineConfig struct {
 	ConfigID   int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'config_id'"`
 	PipelineID int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'pipeline_id'"`
+	Source     bool  `json:"-"   xorm:"NOT NULL DEFAULT false 'source'"`
+	Effective  bool  `json:"-"   xorm:"NOT NULL DEFAULT false 'effective'"`
 }
 
 func (PipelineConfig) TableName() string {

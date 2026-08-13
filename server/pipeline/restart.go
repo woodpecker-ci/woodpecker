@@ -42,7 +42,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	}
 
 	// fetch the old pipeline config from the database
-	configs, err := store.ConfigsForPipeline(lastPipeline.ID)
+	configs, err := store.SourceConfigsForPipeline(lastPipeline.ID)
 	if err != nil {
 		log.Error().Err(err).Msgf("failure to get pipeline config for %s", repo.FullName)
 		return nil, &ErrNotFound{Msg: fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)}
@@ -123,6 +123,10 @@ func linkPipelineConfigs(store store.Store, configs []*model.Config, pipelineID 
 		pipelineConfig := &model.PipelineConfig{
 			ConfigID:   conf.ID,
 			PipelineID: pipelineID,
+			Source:     true,
+			// Until a compile workflow says otherwise, what the pipeline was
+			// built from is also what it runs.
+			Effective: true,
 		}
 		err := store.PipelineConfigCreate(pipelineConfig)
 		if err != nil {
@@ -140,5 +144,7 @@ func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	newPipeline.Started = 0
 	newPipeline.Finished = 0
 	newPipeline.Errors = nil
+	// A restart rebuilds from the source configs and compiles again.
+	newPipeline.CompileState = model.CompileStateNone
 	return &newPipeline
 }

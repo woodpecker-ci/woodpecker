@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -61,6 +62,8 @@ func TestConfig(t *testing.T) {
 		&model.PipelineConfig{
 			ConfigID:   config.ID,
 			PipelineID: pipeline.ID,
+			Source:     true,
+			Effective:  true,
 		},
 	))
 
@@ -71,6 +74,75 @@ func TestConfig(t *testing.T) {
 	loaded, err := store.ConfigsForPipeline(pipeline.ID)
 	assert.NoError(t, err)
 	assert.Equal(t, config.ID, loaded[0].ID)
+}
+
+func TestConfigsForPipelineSourceAndEffective(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Config), new(model.PipelineConfig), new(model.Pipeline), new(model.Repo))
+	defer closer()
+
+	repo := &model.Repo{UserID: 1, FullName: "octocat/hello-world", Owner: "octocat", Name: "hello-world"}
+	require.NoError(t, store.CreateRepo(repo))
+
+	pipeline := &model.Pipeline{RepoID: repo.ID, Status: model.StatusRunning, Commit: "85f8c029b902"}
+	require.NoError(t, store.CreatePipeline(pipeline))
+
+	source, err := store.ConfigPersist(&model.Config{RepoID: repo.ID, Name: "build", Data: []byte("compile: {}\n")})
+	require.NoError(t, err)
+	require.NoError(t, store.PipelineConfigCreate(&model.PipelineConfig{
+		ConfigID: source.ID, PipelineID: pipeline.ID, Source: true, Effective: true,
+	}))
+
+	// before the compile phase runs, what the pipeline was built from is also
+	// what it runs
+	effective, err := store.ConfigsForPipeline(pipeline.ID)
+	require.NoError(t, err)
+	require.Len(t, effective, 1)
+	assert.Equal(t, source.ID, effective[0].ID)
+
+	compiled, err := store.ConfigPersist(&model.Config{RepoID: repo.ID, Name: "build", Data: []byte("steps: {}\n")})
+	require.NoError(t, err)
+	require.NoError(t, store.PipelineConfigsSetEffective(pipeline.ID, []*model.Config{compiled}))
+
+	effective, err = store.ConfigsForPipeline(pipeline.ID)
+	require.NoError(t, err)
+	require.Len(t, effective, 1)
+	assert.Equal(t, compiled.ID, effective[0].ID, "the compile phase decides what runs")
+
+	sources, err := store.SourceConfigsForPipeline(pipeline.ID)
+	require.NoError(t, err)
+	require.Len(t, sources, 1)
+	assert.Equal(t, source.ID, sources[0].ID,
+		"what a compile workflow emits is never fed back in, so a restart compiles again")
+}
+
+func TestPipelineConfigsSetEffectiveIsIdempotent(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Config), new(model.PipelineConfig), new(model.Pipeline), new(model.Repo))
+	defer closer()
+
+	repo := &model.Repo{UserID: 1, FullName: "octocat/hello-world", Owner: "octocat", Name: "hello-world"}
+	require.NoError(t, store.CreateRepo(repo))
+	pipeline := &model.Pipeline{RepoID: repo.ID, Status: model.StatusRunning, Commit: "85f8c029b902"}
+	require.NoError(t, store.CreatePipeline(pipeline))
+
+	config, err := store.ConfigPersist(&model.Config{RepoID: repo.ID, Name: "build", Data: []byte("steps: {}\n")})
+	require.NoError(t, err)
+
+	// A config may already be linked as the source and then be made effective
+	// again, which must update the existing link rather than insert a second
+	// one and trip the uniqueness constraint.
+	require.NoError(t, store.PipelineConfigCreate(&model.PipelineConfig{
+		ConfigID: config.ID, PipelineID: pipeline.ID, Source: true, Effective: true,
+	}))
+	require.NoError(t, store.PipelineConfigsSetEffective(pipeline.ID, []*model.Config{config}))
+	require.NoError(t, store.PipelineConfigsSetEffective(pipeline.ID, []*model.Config{config}))
+
+	effective, err := store.ConfigsForPipeline(pipeline.ID)
+	require.NoError(t, err)
+	assert.Len(t, effective, 1)
+
+	sources, err := store.SourceConfigsForPipeline(pipeline.ID)
+	require.NoError(t, err)
+	assert.Len(t, sources, 1, "making a config effective must not clear its source flag")
 }
 
 func TestConfigPersist(t *testing.T) {

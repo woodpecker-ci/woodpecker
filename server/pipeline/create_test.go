@@ -47,6 +47,8 @@ func TestConfigPersistedBeforeParsing(t *testing.T) {
 	mockStore.On("PipelineConfigCreate", &model.PipelineConfig{
 		ConfigID:   int64(1),
 		PipelineID: int64(1),
+		Source:     true,
+		Effective:  true,
 	}).Return(nil)
 
 	// Call the persist and link functions directly to verify they work

@@ -29,7 +29,42 @@ type Workflow struct {
 	Platform   string            `json:"platform,omitempty"   xorm:"platform"`
 	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'environ'"`
 	AxisID     int               `json:"-"                    xorm:"axis_id"`
-	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
+	// Phase is "compile" for a workflow that generates pipeline configuration
+	// and "run" for an ordinary one. Compile workflows run first; run workflows
+	// are created only once every compile workflow has finished.
+	Phase WorkflowPhase `json:"phase,omitempty"    xorm:"phase"`
+	// CompileResult is what a compile workflow emitted. Compile workflows
+	// finish at different times, so each result has to survive until the last
+	// one arrives and the merge can run.
+	CompileResult *CompileResult `json:"-"                  xorm:"json 'compile_result'"`
+	Children      []*Step        `json:"children,omitempty" xorm:"-"`
+}
+
+// WorkflowPhase orders the two passes of a pipeline.
+type WorkflowPhase string
+
+const (
+	WorkflowPhaseRun     WorkflowPhase = "run"
+	WorkflowPhaseCompile WorkflowPhase = "compile"
+)
+
+// CompileResult is the configuration a compile workflow produced.
+//
+// A nil CompileResult on a finished compile workflow means the agent reported
+// nothing, which is a failure. A non-nil one with no configs and no error means
+// the workflow ran and asked for no change.
+type CompileResult struct {
+	Configs []CompileConfig `json:"configs,omitempty"`
+	// Error is set when the response could not be read at all, because the
+	// block was malformed or absent.
+	Error string `json:"error,omitempty"`
+}
+
+// CompileConfig is one emitted pipeline configuration. Empty Data removes the
+// config of that name from the pipeline.
+type CompileConfig struct {
+	Name string `json:"name"`
+	Data []byte `json:"data,omitempty"`
 }
 
 // TableName return database table name for xorm.
