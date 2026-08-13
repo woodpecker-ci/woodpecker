@@ -123,6 +123,8 @@ export interface PipelineWorkflow {
   finished?: number;
   agent_id?: number;
   error?: string;
+  /** Compile workflows generate the configuration the run workflows are built from. */
+  phase?: WorkflowPhase;
   children: PipelineStep[];
 }
 
@@ -155,6 +157,20 @@ export type PipelineFeed = Pipeline & {
 };
 
 /* eslint-disable no-unused-vars */
+export enum WorkflowPhase {
+  Run = 'run',
+  Compile = 'compile',
+}
+
+export enum LogEntryType {
+  Stdout = 0,
+  Stderr = 1,
+  ExitCode = 2,
+  Metadata = 3,
+  Progress = 4,
+  CompileConfig = 5,
+}
+
 export enum StepType {
   Clone = 'clone',
   Service = 'service',

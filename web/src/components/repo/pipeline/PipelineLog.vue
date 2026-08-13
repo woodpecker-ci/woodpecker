@@ -180,6 +180,7 @@ import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import useUserConfig from '~/compositions/useUserConfig';
+import { LogEntryType } from '~/lib/api/types';
 import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { debounce } from '~/lib/utils';
 
@@ -374,6 +375,13 @@ function processText(text: string): string {
   return txt;
 }
 
+// A config response is a page of base64 that says nothing to a reader. It is
+// kept in the log for auditing rather than dropped when it is written, so it is
+// hidden here instead.
+function isHiddenLogType(type: number): boolean {
+  return type === LogEntryType.CompileConfig;
+}
+
 function writeLog(line: Partial<LogLine>) {
   const rawText = decode(line.text ?? '');
   logBuffer.value.push({
@@ -487,11 +495,19 @@ async function loadLogs() {
   if (step.value.state !== 'running' && step.value.state !== 'pending') {
     loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
-    logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
+    logs?.forEach((line) => {
+      if (isHiddenLogType(line.type)) {
+        return;
+      }
+      writeLog({ index: line.line, text: line.data, time: line.time });
+    });
     flushLogs(false);
   } else {
     loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
+      if (isHiddenLogType(line.type)) {
+        return;
+      }
       writeLog({ index: line.line, text: line.data, time: line.time });
       flushLogs(true);
     });

@@ -87,6 +87,11 @@
               />
               <PipelineStatusIcon :status="workflow.state" class="h-4! w-4!" />
               <span class="truncate">{{ workflow.name }}</span>
+              <Badge
+                v-if="workflow.phase === WorkflowPhase.Compile"
+                :label="$t('repo.pipeline.compile_workflow')"
+                class="shrink-0"
+              />
               <PipelineStepDuration
                 v-if="workflow.started !== workflow.finished"
                 :workflow="workflow"
@@ -133,7 +138,7 @@ import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vu
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import usePipeline from '~/compositions/usePipeline';
-import { StepType } from '~/lib/api/types';
+import { StepType, WorkflowPhase } from '~/lib/api/types';
 import type { Pipeline, PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
