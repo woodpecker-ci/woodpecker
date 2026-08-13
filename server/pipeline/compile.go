@@ -140,7 +140,7 @@ func collectCompileResults(workflows []*model.Workflow) ([]compile.Config, error
 }
 
 // persistCompiledConfigs stores the merged configuration and records it as what
-// the pipeline runs, so it stays inspectable after the run.
+// the pipeline runs, so it can be inspected after the run.
 func persistCompiledConfigs(_store store.Store, currentPipeline *model.Pipeline, repo *model.Repo,
 	merged []compile.Config,
 ) ([]*model.Config, error) {

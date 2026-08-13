@@ -8,6 +8,8 @@ By placing the configurations in a folder which is by default named `.woodpecker
 
 You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](./75-project-settings.md).
 
+Workflows can also be generated while the pipeline runs, by a [compile workflow](./26-compile.md).
+
 ## Benefits of using workflows
 
 - faster lint/test feedback, the workflow doesn't have to run fully to have a lint status pushed to the remote
