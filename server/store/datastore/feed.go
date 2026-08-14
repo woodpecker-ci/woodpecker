@@ -80,7 +80,7 @@ func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 		Join("LEFT", "pipelines", "pipelines.id = "+`(
 			SELECT pipelines.id FROM pipelines
 			WHERE pipelines.repo_id = repos.id
-			ORDER BY pipelines.id DESC
+			ORDER BY pipelines.number DESC
 			LIMIT 1
 			)`).
 		Where(userPushOrAdminCondition(user.ID)).

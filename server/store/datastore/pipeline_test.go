@@ -307,3 +307,34 @@ func TestDeletePipeline(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, count)
 }
+
+// TestGetRepoLatestPipelinesUsesNumber checks a repo's latest pipeline is
+// picked by number rather than by id, in the case where the two sequences
+// disagree: the newest pipeline of each repo is given the lowest id. TiDB can
+// produce that state, as it allocates auto-increment values from per-node
+// caches instead of in insertion order.
+func TestGetRepoLatestPipelinesUsesNumber(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Pipeline))
+	defer closer()
+
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: 1, Number: 1, Status: model.StatusFailure},
+		{ID: 100, RepoID: 1, Number: 2, Status: model.StatusRunning},
+		{ID: 800, RepoID: 2, Number: 1, Status: model.StatusFailure},
+		{ID: 200, RepoID: 2, Number: 2, Status: model.StatusKilled},
+	})))
+
+	pipelines, err := store.GetRepoLatestPipelines([]int64{1, 2})
+	assert.NoError(t, err)
+	assert.Len(t, pipelines, 2)
+
+	latest := make(map[int64]*model.Pipeline, len(pipelines))
+	for _, pipeline := range pipelines {
+		latest[pipeline.RepoID] = pipeline
+	}
+
+	assert.EqualValues(t, 2, latest[1].Number)
+	assert.EqualValues(t, model.StatusRunning, latest[1].Status)
+	assert.EqualValues(t, 2, latest[2].Number)
+	assert.EqualValues(t, model.StatusKilled, latest[2].Status)
+}
