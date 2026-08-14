@@ -57,11 +57,13 @@ func (s storage) GetPipelineLastByBranch(repo *model.Repo, branch string) (*mode
 		Get(pipeline))
 }
 
+// GetPipelineLastBefore returns the pipeline of a branch that precedes the
+// given pipeline number.
 func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
-		Where(builder.Lt{"id": num}.
+		Where(builder.Lt{"number": num}.
 			And(builder.Eq{"repo_id": repo.ID, "branch": branch})).
 		Get(pipeline))
 }
@@ -106,16 +108,32 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 func (s storage) GetRepoLatestPipelines(repoIDs []int64) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, len(repoIDs))
 
-	pipelineIDs := make([]int64, 0, len(repoIDs))
-	if err := s.engine.Select("MAX(id) AS id").
+	// The latest pipeline of a repo is the one holding the highest number,
+	// which is assigned per repo in the order pipelines are created.
+	type repoLatest struct {
+		RepoID int64 `xorm:"repo_id"`
+		Number int64 `xorm:"number"`
+	}
+
+	latest := make([]*repoLatest, 0, len(repoIDs))
+	if err := s.engine.Select("repo_id, MAX(number) AS number").
 		Table("pipelines").
 		Where(builder.In("repo_id", repoIDs)).
 		GroupBy("repo_id").
-		Find(&pipelineIDs); err != nil {
+		Find(&latest); err != nil {
 		return nil, err
 	}
 
-	return pipelines, s.engine.Where(builder.In("id", pipelineIDs)).Find(&pipelines)
+	if len(latest) == 0 {
+		return pipelines, nil
+	}
+
+	cond := builder.NewCond()
+	for _, l := range latest {
+		cond = cond.Or(builder.Eq{"repo_id": l.RepoID, "number": l.Number})
+	}
+
+	return pipelines, s.engine.Where(cond).Find(&pipelines)
 }
 
 // GetActivePipelineList get all pipelines that are pending, running or blocked.
