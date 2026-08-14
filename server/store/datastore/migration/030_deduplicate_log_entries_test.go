@@ -36,21 +36,29 @@ func TestDeduplicateLogEntries(t *testing.T) {
 
 	require.NoError(t, engine.Sync(new(logEntryV030)))
 
+	// Steps of this test's own: the datastore tests run against the same
+	// database and use low step ids, so sharing them would have the two
+	// fixtures collide.
+	const stepA, stepB = 30001, 30002
+
 	_, err := engine.Insert([]*logEntryV030{
-		// step 1 had two entries resent, keeping the lowest id of each
-		{ID: 1, StepID: 1, Line: 0, Data: []byte("hello")},
-		{ID: 2, StepID: 1, Line: 1, Data: []byte("world")},
-		{ID: 3, StepID: 1, Line: 0, Data: []byte("hello")},
-		{ID: 4, StepID: 1, Line: 1, Data: []byte("world")},
+		// two entries of the first step were resent, the lowest id of each is kept
+		{ID: 301, StepID: stepA, Line: 0, Data: []byte("hello")},
+		{ID: 302, StepID: stepA, Line: 1, Data: []byte("world")},
+		{ID: 303, StepID: stepA, Line: 0, Data: []byte("hello")},
+		{ID: 304, StepID: stepA, Line: 1, Data: []byte("world")},
 		// a line number repeated three times collapses to one
-		{ID: 5, StepID: 1, Line: 2, Data: []byte("thrice")},
-		{ID: 6, StepID: 1, Line: 2, Data: []byte("thrice")},
-		{ID: 7, StepID: 1, Line: 2, Data: []byte("thrice")},
-		// same line numbers under another step must survive
-		{ID: 8, StepID: 2, Line: 0, Data: []byte("other")},
-		{ID: 9, StepID: 2, Line: 1, Data: []byte("other")},
+		{ID: 305, StepID: stepA, Line: 2, Data: []byte("thrice")},
+		{ID: 306, StepID: stepA, Line: 2, Data: []byte("thrice")},
+		{ID: 307, StepID: stepA, Line: 2, Data: []byte("thrice")},
+		// the same line numbers under another step must survive
+		{ID: 308, StepID: stepB, Line: 0, Data: []byte("other")},
+		{ID: 309, StepID: stepB, Line: 1, Data: []byte("other")},
 	})
 	require.NoError(t, err)
+	defer func() {
+		_, _ = engine.Exec("DELETE FROM log_entries WHERE step_id IN (?, ?);", stepA, stepB)
+	}()
 
 	sess := engine.NewSession()
 	defer sess.Close()
@@ -58,7 +66,7 @@ func TestDeduplicateLogEntries(t *testing.T) {
 	require.NoError(t, sess.Commit())
 
 	var remaining []*logEntryV030
-	require.NoError(t, engine.Asc("id").Find(&remaining))
+	require.NoError(t, engine.In("step_id", stepA, stepB).Asc("id").Find(&remaining))
 
 	ids := make([]int64, 0, len(remaining))
 	for _, entry := range remaining {
@@ -66,7 +74,7 @@ func TestDeduplicateLogEntries(t *testing.T) {
 	}
 
 	// the lowest id of every (step_id, line) pair, and nothing else
-	assert.Equal(t, []int64{1, 2, 5, 8, 9}, ids)
+	assert.Equal(t, []int64{301, 302, 305, 308, 309}, ids)
 }
 
 // TestMigrateRemovesDuplicateLogEntries runs the full migration over an
