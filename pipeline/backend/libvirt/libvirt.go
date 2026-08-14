@@ -850,6 +850,23 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	sshCmd.Stderr = pw
 	w.(*workflow).pipes.Store(step.UUID, &pipes{pr, pw})
 
+	done := make(chan struct{})
+	// and a go routine that watches the ctx and then triggers a signal
+	go func() {
+		select {
+		case <-ctx.Done():
+			log.Debug().Msg("Context canceled, sending SIGTERM to remote process")
+			err := sshCmd.Signal(ssh.SIGTERM)
+			if err != nil {
+				log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
+			}
+		case <-done:
+		}
+		time.Sleep(time.Second * 5)
+		log.Debug().Msg("Closing write pipe end")
+		_ = pw.Close()
+	}()
+
 	err = sshCmd.Start()
 	if err != nil {
 		return err
@@ -878,28 +895,6 @@ func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUU
 	if !ok {
 		return nil, fmt.Errorf("Could not find key %s for commands", step.UUID)
 	}
-
-	p, ok := w.(*workflow).pipes.Load(step.UUID)
-	if !ok {
-		return nil, fmt.Errorf("Could not find key %s for pipes", step.UUID)
-	}
-
-	done := make(chan struct{})
-	// and a go routine that watches the ctx and then triggers a signal
-	go func() {
-		select {
-		case <-ctx.Done():
-			log.Debug().Msg("Context canceled, sending SIGTERM to remote process")
-			err := sshCmd.(*goph.Cmd).Signal(ssh.SIGTERM)
-			if err != nil {
-				log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
-			}
-		case <-done:
-		}
-		time.Sleep(time.Second * 5)
-		log.Debug().Msg("Closing write pipe end")
-		_ = p.(*pipes).pw.Close()
-	}()
 
 	sshErr := sshCmd.(*goph.Cmd).Wait()
 
