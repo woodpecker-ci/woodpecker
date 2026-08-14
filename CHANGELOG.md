@@ -57,6 +57,7 @@
 
 ### Misc
 
+- Return step logs strictly in line order [[#6999](https://github.com/woodpecker-ci/woodpecker/pull/6999)]
 - Find the preceding pipeline by number instead of id [[#7003](https://github.com/woodpecker-ci/woodpecker/pull/7003)]
 - Drop star-history [[#6997](https://github.com/woodpecker-ci/woodpecker/pull/6997)]
 - Do not run openapi generation twice on fail [[#6987](https://github.com/woodpecker-ci/woodpecker/pull/6987)]
