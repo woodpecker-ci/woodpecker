@@ -115,7 +115,7 @@ func TestPipelines(t *testing.T) {
 	}
 	require.NoError(t, store.CreatePipeline(pipeline3))
 
-	GetPipeline, err5 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.ID)
+	GetPipeline, err5 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.Number)
 	require.NoError(t, err5)
 	assert.EqualValues(t, pipeline2, GetPipeline)
 }
@@ -337,4 +337,27 @@ func TestGetRepoLatestPipelinesUsesNumber(t *testing.T) {
 	assert.EqualValues(t, model.StatusRunning, latest[1].Status)
 	assert.EqualValues(t, 2, latest[2].Number)
 	assert.EqualValues(t, model.StatusKilled, latest[2].Status)
+}
+
+// TestGetPipelineLastBeforeUsesNumber checks the preceding pipeline is found
+// by number, in the case where the two sequences disagree: the pipelines are
+// created in number order while their ids run the other way. TiDB can produce
+// that state, as it allocates auto-increment values from per-node caches
+// instead of in insertion order.
+func TestGetPipelineLastBeforeUsesNumber(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.Pipeline))
+	defer closer()
+
+	repo := &model.Repo{ID: 1, Owner: "bradrydzewski", Name: "test", FullName: "bradrydzewski/test"}
+
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: repo.ID, Number: 1, Branch: "main", Status: model.StatusSuccess},
+		{ID: 800, RepoID: repo.ID, Number: 2, Branch: "main", Status: model.StatusFailure},
+		{ID: 700, RepoID: repo.ID, Number: 3, Branch: "main", Status: model.StatusRunning},
+	})))
+
+	previous, err := store.GetPipelineLastBefore(repo, "main", 3)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, previous.Number)
+	assert.EqualValues(t, model.StatusFailure, previous.Status)
 }
