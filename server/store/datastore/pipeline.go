@@ -57,11 +57,13 @@ func (s storage) GetPipelineLastByBranch(repo *model.Repo, branch string) (*mode
 		Get(pipeline))
 }
 
+// GetPipelineLastBefore returns the pipeline of a branch that precedes the
+// given pipeline number.
 func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
-		Where(builder.Lt{"id": num}.
+		Where(builder.Lt{"number": num}.
 			And(builder.Eq{"repo_id": repo.ID, "branch": branch})).
 		Get(pipeline))
 }
