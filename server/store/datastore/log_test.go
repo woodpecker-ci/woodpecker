@@ -135,11 +135,10 @@ func TestLogFindOrdersByLine(t *testing.T) {
 	assert.Equal(t, []string{"first", "second", "third", "fourth"}, data)
 }
 
-// TestLogAppendRejectsResentEntries covers the agent retrying the log RPC with
-// a batch the server already stored. The unique index refuses the second copy
-// and the caller is told, rather than the clash passing as success. What was
-// stored the first time stays as it is.
-func TestLogAppendRejectsResentEntries(t *testing.T) {
+// TestLogFindDropsResentEntries covers an agent reconnecting mid-step and
+// resending a batch the server already stored. Each line number is reported
+// once, which is what a UNIQUE(step_id, line) index would guarantee.
+func TestLogFindDropsResentEntries(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
 	defer closer()
 
@@ -148,13 +147,13 @@ func TestLogAppendRejectsResentEntries(t *testing.T) {
 	}
 
 	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
-		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
-		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
+		{ID: 10, StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
+		{ID: 11, StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
 	}))
-	// the agent retries with the batch it already sent
-	assert.Error(t, store.LogAppend(&step, []*model.LogEntry{
-		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
-		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
+	// the same batch arrives a second time
+	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+		{ID: 12, StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
+		{ID: 13, StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
 	}))
 
 	logEntries, err := store.LogFind(&step)
