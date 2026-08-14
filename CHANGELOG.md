@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-13
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @anbraten, @gerbsen, @kastl-ars, @qwerty287, @retif, @romain-rossi, @zmully
+@OCram85, @anbraten, @gerbsen, @kastl-ars, @qwerty287, @retif, @romain-rossi, @stevapple, @zmully
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Pick a repo's latest pipeline by number instead of id [[#7001](https://github.com/woodpecker-ci/woodpecker/pull/7001)]
 - feat: allow configuring allowed orgs per forge [[#6874](https://github.com/woodpecker-ci/woodpecker/pull/6874)]
 - Make the Kubernetes cluster domain configurable [[#6957](https://github.com/woodpecker-ci/woodpecker/pull/6957)]
 - Fix vite deprecation [[#6974](https://github.com/woodpecker-ci/woodpecker/pull/6974)]
