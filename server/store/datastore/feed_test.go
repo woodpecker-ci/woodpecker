@@ -203,3 +203,42 @@ func TestRepoListLatest(t *testing.T) {
 	assert.EqualValues(t, model.StatusKilled, pipelines[1].Status)
 	assert.Equal(t, repo2.ID, pipelines[1].RepoID)
 }
+
+// TestRepoListLatestUsesNumber checks the feed reports a repo's latest
+// pipeline by number rather than by id, in the case where the two sequences
+// disagree: the newest pipeline is given the lowest id. TiDB can produce that
+// state, as it allocates auto-increment values from per-node caches instead of
+// in insertion order.
+func TestRepoListLatestUsesNumber(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
+	defer closer()
+
+	user := &model.User{
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
+	}
+	assert.NoError(t, store.CreateUser(user))
+
+	repo := &model.Repo{
+		ID:            1,
+		Owner:         "bradrydzewski",
+		Name:          "test",
+		FullName:      "bradrydzewski/test",
+		ForgeRemoteID: "1",
+		IsActive:      true,
+	}
+	assert.NoError(t, store.CreateRepo(repo))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo.ID, Push: true}))
+
+	// the newer pipeline deliberately carries the lower id
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: repo.ID, Number: 1, Status: model.StatusFailure},
+		{ID: 100, RepoID: repo.ID, Number: 2, Status: model.StatusRunning},
+	})))
+
+	pipelines, err := store.RepoListLatest(user)
+	assert.NoError(t, err)
+	assert.Len(t, pipelines, 1)
+	assert.EqualValues(t, model.StatusRunning, pipelines[0].Status)
+}
