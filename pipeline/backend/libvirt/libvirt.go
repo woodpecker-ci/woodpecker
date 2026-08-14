@@ -841,7 +841,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	}
 	sshCmd.Env = flatMap
 
-	w.(*workflow).commands.Store(step.UUID, &sshCmd)
+	w.(*workflow).commands.Store(step.UUID, sshCmd)
 
 	// we need to create pipes and set Stdout here
 	// in TailStep it is potentially too late
