@@ -843,6 +843,14 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 	w.(*workflow).commands.Store(step.UUID, sshCmd)
 
+	{
+		err := sshCmd.RequestPty("xterm", 80, 40, ssh.TerminalModes{})
+		if err != nil {
+			return err
+		}
+
+	}
+
 	// we need to create pipes and set Stdout here
 	// in TailStep it is potentially too late
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
