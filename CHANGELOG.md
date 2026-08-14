@@ -12,6 +12,8 @@
 
 ### 📈 Enhancement
 
+- Order the user feed by creation time instead of id [[#7005](https://github.com/woodpecker-ci/woodpecker/pull/7005)]
+- Find the preceding pipeline by number instead of id [[#7003](https://github.com/woodpecker-ci/woodpecker/pull/7003)]
 - perf(schema): cache compiled YAML validation schema [[#7002](https://github.com/woodpecker-ci/woodpecker/pull/7002)]
 - Pick a repo's latest pipeline by number instead of id [[#7001](https://github.com/woodpecker-ci/woodpecker/pull/7001)]
 - feat: allow configuring allowed orgs per forge [[#6874](https://github.com/woodpecker-ci/woodpecker/pull/6874)]
@@ -58,7 +60,6 @@
 ### Misc
 
 - Return step logs strictly in line order [[#6999](https://github.com/woodpecker-ci/woodpecker/pull/6999)]
-- Find the preceding pipeline by number instead of id [[#7003](https://github.com/woodpecker-ci/woodpecker/pull/7003)]
 - Drop star-history [[#6997](https://github.com/woodpecker-ci/woodpecker/pull/6997)]
 - Do not run openapi generation twice on fail [[#6987](https://github.com/woodpecker-ci/woodpecker/pull/6987)]
 
