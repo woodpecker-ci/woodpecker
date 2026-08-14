@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @anbraten, @gerbsen, @kastl-ars, @qwerty287, @retif, @romain-rossi, @stevapple, @zmully
+@AhmadNajiKam, @OCram85, @anbraten, @gerbsen, @kastl-ars, @qwerty287, @retif, @romain-rossi, @stevapple, @zmully
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- perf(schema): cache compiled YAML validation schema [[#7002](https://github.com/woodpecker-ci/woodpecker/pull/7002)]
 - Pick a repo's latest pipeline by number instead of id [[#7001](https://github.com/woodpecker-ci/woodpecker/pull/7001)]
 - feat: allow configuring allowed orgs per forge [[#6874](https://github.com/woodpecker-ci/woodpecker/pull/6874)]
 - Make the Kubernetes cluster domain configurable [[#6957](https://github.com/woodpecker-ci/woodpecker/pull/6957)]
@@ -26,7 +27,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#6984](https://github.com/woodpecker-ci/woodpecker/pull/6984)]
 - Update pnpm to v11.21.0 [[#6982](https://github.com/woodpecker-ci/woodpecker/pull/6982)]
 - Update docs npm deps non-major [[#6979](https://github.com/woodpecker-ci/woodpecker/pull/6979)]
 - Update documentation link for NestGuard plugin [[#6954](https://github.com/woodpecker-ci/woodpecker/pull/6954)]
@@ -40,6 +40,7 @@
 - Update module golang.org/x/crypto to v0.55.0 [[#6994](https://github.com/woodpecker-ci/woodpecker/pull/6994)]
 - Update golang-packages [[#6993](https://github.com/woodpecker-ci/woodpecker/pull/6993)]
 - Update module google.golang.org/protobuf to v1.36.12 [[#6989](https://github.com/woodpecker-ci/woodpecker/pull/6989)]
+- Lock file maintenance [[#6984](https://github.com/woodpecker-ci/woodpecker/pull/6984)]
 - Update pnpm to v11.21.0 [[#6983](https://github.com/woodpecker-ci/woodpecker/pull/6983)]
 - Lock file maintenance [[#6981](https://github.com/woodpecker-ci/woodpecker/pull/6981)]
 - Update dependency eslint to v10.8.1 [[#6977](https://github.com/woodpecker-ci/woodpecker/pull/6977)]
