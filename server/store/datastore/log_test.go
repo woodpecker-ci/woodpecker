@@ -130,10 +130,6 @@ func TestLogFindOrdersByLine(t *testing.T) {
 	assert.Equal(t, []string{"first", "second", "third", "fourth"}, data)
 }
 
-// TestLogAppendRejectsResentEntries covers the agent retrying the log RPC with
-// a batch the server already stored. The unique index refuses the second copy
-// and the caller is told, rather than the clash passing as success. What was
-// stored the first time stays as it is.
 func TestLogAppendRejectsResentEntries(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
 	defer closer()
