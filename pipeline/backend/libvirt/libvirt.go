@@ -46,10 +46,9 @@ type libvirt struct {
 }
 
 type workflow struct {
-	commands  sync.Map
-	sshErrors sync.Map
-	domains   sync.Map
-	pipes     sync.Map
+	commands sync.Map
+	domains  sync.Map
+	pipes    sync.Map
 }
 
 type pipes struct {
@@ -537,10 +536,9 @@ func (e *libvirt) EphemeralizeSharedDisk(ctx context.Context, shared_disk *Share
 
 func (e *libvirt) SetupWorkflow(ctx context.Context, conf *backend_types.Config, taskUUID string) error {
 	e.workflows.Store(taskUUID, &workflow{
-		commands:  sync.Map{},
-		sshErrors: sync.Map{},
-		domains:   sync.Map{},
-		pipes:     sync.Map{},
+		commands: sync.Map{},
+		domains:  sync.Map{},
+		pipes:    sync.Map{},
 	})
 	return nil
 }
@@ -843,7 +841,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	}
 	sshCmd.Env = flatMap
 
-	w.(*workflow).commands.Store(step.UUID, sshCmd)
+	w.(*workflow).commands.Store(step.UUID, &sshCmd)
 
 	// we need to create pipes and set Stdout here
 	// in TailStep it is potentially too late
@@ -856,38 +854,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	if err != nil {
 		return err
 	}
-
-	done := make(chan struct{})
-	// Now we spawn a go routine that waits for the ssh command to exit
-	// and then closes the write end of the pipe.
-	// We need to do that here since we won't reach 'WaitStep' otherwise. After
-	// the engine executed 'TailStep' it will wait until the logs have been fully
-	// drainer before calling 'WaitStep'.
-	go func() {
-		e := sshCmd.Wait()
-		if e != nil {
-			w.(*workflow).sshErrors.Store(step.UUID, e)
-		}
-		if e != nil {
-			log.Debug().Msgf("Error in gofunc of StartStup: %s", e)
-		}
-		close(done)
-	}()
-	// and a go routine that watches the ctx and then triggers a signal
-	go func() {
-		select {
-		case <-ctx.Done():
-			log.Debug().Msg("Context canceled, sending SIGTERM to remote process")
-			err := sshCmd.Signal(ssh.SIGTERM)
-			if err != nil {
-				log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
-			}
-		case <-done:
-		}
-		time.Sleep(time.Second * 5)
-		log.Debug().Msg("Closing write pipe end")
-		_ = pw.Close()
-	}()
 
 	return nil
 }
@@ -908,13 +874,34 @@ func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUU
 		return nil, fmt.Errorf("Could not find key %s for workflows", taskUUID)
 	}
 
-	r, ok := w.(*workflow).sshErrors.Load(step.UUID)
-	var sshErr error
-	if ok {
-		sshErr = r.(error)
-	} else {
-		sshErr = nil
+	sshCmd, ok := w.(*workflow).commands.Load(step.UUID)
+	if !ok {
+		return nil, fmt.Errorf("Could not find key %s for commands", step.UUID)
 	}
+
+	p, ok := w.(*workflow).pipes.Load(step.UUID)
+	if !ok {
+		return nil, fmt.Errorf("Could not find key %s for pipes", step.UUID)
+	}
+
+	done := make(chan struct{})
+	// and a go routine that watches the ctx and then triggers a signal
+	go func() {
+		select {
+		case <-ctx.Done():
+			log.Debug().Msg("Context canceled, sending SIGTERM to remote process")
+			err := sshCmd.(*goph.Cmd).Signal(ssh.SIGTERM)
+			if err != nil {
+				log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
+			}
+		case <-done:
+		}
+		time.Sleep(time.Second * 5)
+		log.Debug().Msg("Closing write pipe end")
+		_ = p.(*pipes).pw.Close()
+	}()
+
+	sshErr := sshCmd.(*goph.Cmd).Wait()
 
 	switch e := sshErr.(type) {
 	case *ssh.ExitMissingError:
