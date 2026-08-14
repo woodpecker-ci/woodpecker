@@ -117,6 +117,8 @@ Workflows that need to run even on failures should set the `status` filter.
 
 This works just like the [`status` filter for steps](./20-workflow-syntax.md#status).
 
+A required dependency naming a workflow that is not part of the pipeline, because it does not exist or because its own `when` conditions did not match, fails the pipeline. Mark the dependency `optional: true` to tolerate its absence.
+
 ### Optional dependencies
 
 In a monorepo, workflows often use `when: path` to only run when relevant files change. A deploy workflow may need to wait for all check workflows, but some of them might not run because their path filter didn't match. With `depends_on`, this would block the deploy workflow entirely.

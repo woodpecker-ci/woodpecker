@@ -231,8 +231,7 @@ func TestBuildResolvesDependenciesWithinAPhase(t *testing.T) {
 	t.Parallel()
 
 	// The run workflow of "generate" does not exist, so a run workflow that
-	// depends on it must be dropped rather than wired to the compile workflow
-	// of the same name.
+	// depends on it must not be wired to the compile workflow of the same name.
 	b := compileBuilder(t,
 		&YamlFile{Name: "generate.yaml", Data: []byte(`
 when:
@@ -252,9 +251,7 @@ steps:
 `)},
 	)
 
-	plan, err := b.Build()
-	require.NoError(t, err)
-
-	assert.Len(t, plan.Compile, 1)
-	assert.Empty(t, plan.Run, "phase 1 cannot depend on phase 0")
+	_, err := b.Build()
+	assert.ErrorContains(t, err, `workflow "test" depends on "generate"`,
+		"phase 1 cannot depend on phase 0")
 }

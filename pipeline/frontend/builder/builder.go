@@ -122,8 +122,12 @@ func (b *PipelineBuilder) Build() (plan Plan, errorsAndWarnings error) {
 		// depend on https://github.com/woodpecker-ci/woodpecker/issues/778
 	}
 
-	plan.Compile = filterMissingDependencies(plan.Compile)
-	plan.Run = filterMissingDependencies(plan.Run)
+	if err := resolveDependencies(plan.Compile); err != nil {
+		return Plan{}, multierr.Append(errorsAndWarnings, err)
+	}
+	if err := resolveDependencies(plan.Run); err != nil {
+		return Plan{}, multierr.Append(errorsAndWarnings, err)
+	}
 
 	return plan, errorsAndWarnings
 }

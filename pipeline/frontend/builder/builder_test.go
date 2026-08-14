@@ -189,7 +189,7 @@ depends_on:
   - lint
   - test
 `)},
-			{Name: "missing dependencies", Data: []byte(`
+			{Name: "tolerates missing dependencies", Data: []byte(`
 when:
   event: push
 steps:
@@ -197,7 +197,8 @@ steps:
     image: scratch
 
 depends_on:
-  - missing
+  - name: missing
+    optional: true
 `)},
 		},
 	}
@@ -205,7 +206,7 @@ depends_on:
 	plan, err := b.Build()
 	items := plan.Run
 	assert.NoError(t, err)
-	assert.Len(t, items, 3, "Should have generated 3 items")
+	assert.Len(t, items, 4, "Should have generated 4 items")
 	assert.Len(t, items[0].DependsOn, 2, "Should have 2 dependencies")
 	assert.Equal(t, "test", items[0].DependsOn[1].Name, "Should depend on test")
 }
@@ -430,11 +431,12 @@ depends_on: [ shouldbefiltered ]
 		},
 	}
 
-	plan, err := b.Build()
-	items := plan.Run
-	assert.NoError(t, err)
-	assert.Len(t, items, 1, "Zerostep and the step that depends on it, and the one depending on it should not generate a pipeline item")
-	assert.Equal(t, "justastep", items[0].Workflow.Name, "justastep should have been generated")
+	// zerostep compiles to nothing, so it is not part of the pipeline and the
+	// workflow requiring it cannot run. That is a configuration mistake and is
+	// reported as one; previously the whole chain behind it disappeared without
+	// a word.
+	_, err := b.Build()
+	assert.ErrorContains(t, err, `workflow "shouldbefiltered" depends on "zerostep"`)
 }
 
 func TestSanitizePath(t *testing.T) {
@@ -520,7 +522,9 @@ steps:
 func TestMissingWorkflowDeps(t *testing.T) {
 	t.Parallel()
 
-	m := &testMetadata{}
+	// The event has to match, or when: filters every workflow and the
+	// assertion below passes without dependency resolution ever running.
+	m := &testMetadata{pipelineEvent: metadata.EventPush}
 
 	b := PipelineBuilder{
 		GetWorkflowMetadata: m.GetWorkflowMetadata,
@@ -541,10 +545,8 @@ depends_on:
 		},
 	}
 
-	plan, err := b.Build()
-	items := plan.Run
-	assert.NoError(t, err)
-	assert.Empty(t, items, "Workflows with missing dependencies should be filtered out")
+	_, err := b.Build()
+	assert.ErrorContains(t, err, `workflow "workflow-with-missing-deps" depends on "non-existing"`)
 }
 
 func TestDependsOnOptionalFlag(t *testing.T) {
@@ -639,7 +641,7 @@ depends_on:
 		assert.ElementsMatch(t, constraint.DependsOn{{Name: "check-a"}, {Name: "check-b"}}, deploy.DependsOn, "both deps should be present")
 	})
 
-	t.Run("missing required dep still removes workflow", func(t *testing.T) {
+	t.Run("missing required dep fails the pipeline", func(t *testing.T) {
 		b := PipelineBuilder{
 			GetWorkflowMetadata: m.GetWorkflowMetadata,
 			RepoTrusted:         &metadata.TrustedConfiguration{},
@@ -665,11 +667,8 @@ depends_on:
 			},
 		}
 
-		plan, err := b.Build()
-		items := plan.Run
-		assert.NoError(t, err)
-		assert.Len(t, items, 1, "deploy should be filtered out due to missing required dep")
-		assert.Equal(t, "check-a", items[0].Workflow.Name)
+		_, err := b.Build()
+		assert.ErrorContains(t, err, `workflow "deploy" depends on "missing"`)
 	})
 
 	t.Run("optional dep filtered by when is dropped", func(t *testing.T) {
@@ -718,7 +717,7 @@ depends_on:
 		assert.Equal(t, constraint.DependsOn{{Name: "check-a"}}, deploy.DependsOn)
 	})
 
-	t.Run("optional dep on workflow removed for own missing required dep is dropped", func(t *testing.T) {
+	t.Run("a workflow's own missing required dep fails the pipeline, optional consumers or not", func(t *testing.T) {
 		b := PipelineBuilder{
 			GetWorkflowMetadata: m.GetWorkflowMetadata,
 			RepoTrusted:         &metadata.TrustedConfiguration{},
@@ -745,12 +744,11 @@ depends_on:
 			},
 		}
 
-		plan, err := b.Build()
-		items := plan.Run
-		assert.NoError(t, err)
-		assert.Len(t, items, 1, "deploy should survive: its only dep is optional and the target was removed")
-		assert.Equal(t, "deploy", items[0].Workflow.Name)
-		assert.Empty(t, items[0].DependsOn, "optional dep on a removed workflow should be dropped")
+		// There is no transitive removal to tolerate any more: broken is a
+		// configuration mistake and surfaces as one, rather than quietly
+		// disappearing and taking its consumers' expectations with it.
+		_, err := b.Build()
+		assert.ErrorContains(t, err, `workflow "broken" depends on "missing"`)
 	})
 }
 

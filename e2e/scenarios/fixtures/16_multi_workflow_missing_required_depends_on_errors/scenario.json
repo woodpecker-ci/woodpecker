@@ -1,0 +1,5 @@
+{
+  "name": "workflow with missing required depends_on fails the pipeline",
+  "event": "push",
+  "expected_status": "error"
+}

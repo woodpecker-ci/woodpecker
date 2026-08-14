@@ -15,9 +15,13 @@
 package builder
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
+	"go.uber.org/multierr"
+
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
@@ -29,48 +33,44 @@ func SanitizePath(path string) string {
 	return path
 }
 
-// filterMissingDependencies drops items with missing required deps and
-// drops missing optional deps from items that survive. Loops until stable
-// so a transitive removal doesn't kill an optional consumer.
-func filterMissingDependencies(items []*Item) []*Item {
-	for {
-		kept := make([]*Item, 0, len(items))
-		changed := false
-		for _, item := range items {
-			var resolved constraint.DependsOn
-			missingRequired := false
-			for _, dep := range item.DependsOn {
-				if ContainsItemWithName(dep.Name, items) {
-					resolved = append(resolved, dep)
-					continue
+// resolveDependencies drops optional deps whose target is not part of the
+// pipeline, and reports an error for every required dep that cannot be
+// resolved.
+//
+// A required dep naming a workflow that does not exist, or one that was
+// filtered out by its own when:, is a configuration mistake. Dropping the
+// dependent workflow instead leaves the user with a pipeline that silently does
+// less than it says, and takes everything behind it with it. Use
+// `optional: true` to tolerate absence.
+func resolveDependencies(items []*Item) error {
+	var errs error
+
+	for _, item := range items {
+		var resolved constraint.DependsOn
+
+		for _, dep := range item.DependsOn {
+			if !ContainsItemWithName(dep.Name, items) {
+				if !dep.Optional {
+					errs = multierr.Append(errs, &pipeline_errors.PipelineError{
+						Type: pipeline_errors.PipelineErrorTypeCompiler,
+						Message: fmt.Sprintf(
+							"workflow %q depends on %q, which does not exist or was filtered out; mark the dependency optional to tolerate its absence",
+							item.Workflow.Name, dep.Name,
+						),
+					})
 				}
-				if dep.Optional {
-					changed = true
-					continue
-				}
-				missingRequired = true
-				break
-			}
-			if missingRequired {
-				changed = true
 				continue
 			}
-			item.DependsOn = resolved
-			kept = append(kept, item)
+
+			// the target is present, so the flag has no further meaning
+			dep.Optional = false
+			resolved = append(resolved, dep)
 		}
-		items = kept
-		if !changed {
-			break
-		}
+
+		item.DependsOn = resolved
 	}
 
-	// surviving deps are all present; flag is no longer relevant
-	for _, item := range items {
-		for i := range item.DependsOn {
-			item.DependsOn[i].Optional = false
-		}
-	}
-	return items
+	return errs
 }
 
 func ContainsItemWithName(name string, items []*Item) bool {
