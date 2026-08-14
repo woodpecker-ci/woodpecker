@@ -877,10 +877,10 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	go func() {
 		select {
 		case <-ctx.Done():
-			log.Debug().Msg("Context canceled, sending SIGINT to remote process")
-			err := sshCmd.Signal(ssh.SIGINT)
+			log.Debug().Msg("Context canceled, sending SIGTERM to remote process")
+			err := sshCmd.Signal(ssh.SIGTERM)
 			if err != nil {
-				log.Debug().Msgf("Failed to send SIGINT to remote process: %s", err)
+				log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
 			}
 		case <-done:
 		}
