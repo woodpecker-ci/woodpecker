@@ -97,11 +97,6 @@ func TestLogAppend(t *testing.T) {
 	assert.Len(t, _logEntries, len(logEntries)+1)
 }
 
-// TestLogFindOrdersByLine ensures the logs are returned in the order the agent
-// produced them even when the primary key was not handed out monotonically.
-// Distributed engines such as TiDB allocate auto-increment values from per-node
-// caches, so a batch written later can end up with lower ids than an earlier
-// one. The ids below are assigned explicitly to reproduce that interleaving.
 func TestLogFindOrdersByLine(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
 	defer closer()
