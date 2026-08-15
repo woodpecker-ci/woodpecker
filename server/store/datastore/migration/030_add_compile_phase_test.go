@@ -40,9 +40,21 @@ type pipelineConfigV030 struct {
 
 func (pipelineConfigV030) TableName() string { return "pipeline_configs" }
 
-func TestAddCompilePhase(t *testing.T) {
+// The name has to match `-run TestMigrate` so this runs in the serial
+// migration pass of `make test-server-datastore`. MySQL and Postgres hand
+// every package in `server/store/...` the same database, and the second pass
+// runs the datastore package alongside this one.
+func TestMigrateAddCompilePhase(t *testing.T) {
 	engine, closeDB := testDB(t, true)
 	defer closeDB()
+
+	// testDB only resets the database for Postgres, and the datastore tests
+	// sync onto whatever tables they find without truncating them. A leftover
+	// (config_id, pipeline_id) pair therefore trips the unique constraint over
+	// there rather than here.
+	defer func() {
+		require.NoError(t, engine.DropTables("pipeline_configs", "workflows"))
+	}()
 
 	// the pre-migration shape: neither column exists yet
 	type workflowsBefore struct {
