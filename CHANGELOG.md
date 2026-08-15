@@ -39,6 +39,7 @@
 
 ### 📦️ Dependency
 
+- Update postgres Docker tag to v18.6 [[#7011](https://github.com/woodpecker-ci/woodpecker/pull/7011)]
 - Update dependency golang to v1.26.6 [[#7008](https://github.com/woodpecker-ci/woodpecker/pull/7008)]
 - Update module golang.org/x/net to v0.58.0 [[#6996](https://github.com/woodpecker-ci/woodpecker/pull/6996)]
 - Update module golang.org/x/crypto to v0.55.0 [[#6994](https://github.com/woodpecker-ci/woodpecker/pull/6994)]
