@@ -129,3 +129,35 @@ func TestLogFindOrdersByLine(t *testing.T) {
 	assert.Equal(t, []int{0, 1, 2, 3}, lines)
 	assert.Equal(t, []string{"first", "second", "third", "fourth"}, data)
 }
+
+func TestLogAppendRejectsResentEntries(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
+	defer closer()
+
+	step := model.Step{
+		ID: 1,
+	}
+
+	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
+		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
+	}))
+	// the agent retries with the batch it already sent
+	assert.Error(t, store.LogAppend(&step, []*model.LogEntry{
+		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
+		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
+	}))
+
+	logEntries, err := store.LogFind(&step)
+	assert.NoError(t, err)
+
+	lines := make([]int, 0, len(logEntries))
+	data := make([]string, 0, len(logEntries))
+	for _, logEntry := range logEntries {
+		lines = append(lines, logEntry.Line)
+		data = append(data, string(logEntry.Data))
+	}
+
+	assert.Equal(t, []int{0, 1}, lines)
+	assert.Equal(t, []string{"hello", "world"}, data)
+}
