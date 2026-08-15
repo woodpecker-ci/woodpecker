@@ -130,14 +130,14 @@ func TestToContainerName(t *testing.T) {
 }
 
 func TestToHostConfigApparmorProfile(t *testing.T) {
-	hostConfig, err := toHostConfig(testCmdStep, &config{apparmor: "osgeo-woodie"})
+	hostConfig, err := toHostConfig(testCmdStep, &config{apparmor: "osgeo-woodie"}, BackendOptions{})
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, []string{"apparmor=osgeo-woodie"}, hostConfig.SecurityOpt)
 }
 
 func TestToHostConfigApparmorProfileDefault(t *testing.T) {
-	hostConfig, err := toHostConfig(testCmdStep, &config{})
+	hostConfig, err := toHostConfig(testCmdStep, &config{}, BackendOptions{})
 
 	assert.NoError(t, err)
 	assert.Nil(t, hostConfig.SecurityOpt)
