@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@AhmadNajiKam, @OCram85, @anbraten, @gerbsen, @kastl-ars, @qwerty287, @retif, @romain-rossi, @stevapple, @zmully
+@AhmadNajiKam, @OCram85, @anbraten, @gerbsen, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Enforce one log entry per line with a unique index [[#7004](https://github.com/woodpecker-ci/woodpecker/pull/7004)]
 - Order the user feed by creation time instead of id [[#7005](https://github.com/woodpecker-ci/woodpecker/pull/7005)]
 - Return step logs strictly in line order [[#6999](https://github.com/woodpecker-ci/woodpecker/pull/6999)]
 - Find the preceding pipeline by number instead of id [[#7003](https://github.com/woodpecker-ci/woodpecker/pull/7003)]
@@ -26,10 +27,12 @@
 
 ### 🐛 Bug Fixes
 
+- fix(gitlab): avoid N+1 member lookups in Repos() [[#6991](https://github.com/woodpecker-ci/woodpecker/pull/6991)]
 - agent: retry connect on DeadlineExceeded, not just Unavailable [[#6975](https://github.com/woodpecker-ci/woodpecker/pull/6975)]
 
 ### 📚 Documentation
 
+- highlight the nodeSelector doesn't work by default [[#7007](https://github.com/woodpecker-ci/woodpecker/pull/7007)]
 - Update pnpm to v11.21.0 [[#6982](https://github.com/woodpecker-ci/woodpecker/pull/6982)]
 - Update docs npm deps non-major [[#6979](https://github.com/woodpecker-ci/woodpecker/pull/6979)]
 - Update documentation link for NestGuard plugin [[#6954](https://github.com/woodpecker-ci/woodpecker/pull/6954)]
