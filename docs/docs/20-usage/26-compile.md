@@ -109,12 +109,12 @@ The emitting step should print its response and nothing else.
 
 ### What counts as a valid response
 
-| The step prints                  | Result                       |
-| -------------------------------- | ---------------------------- |
-| a block with configs             | those configs are merged     |
-| a block with `"configs": []`     | the pipeline runs unchanged  |
-| no block at all                  | the pipeline fails           |
-| a malformed or unterminated block| the pipeline fails           |
+| The step prints                   | Result                      |
+| --------------------------------- | --------------------------- |
+| a block with configs              | those configs are merged    |
+| a block with `"configs": []`      | the pipeline runs unchanged |
+| no block at all                   | the pipeline fails          |
+| a malformed or unterminated block | the pipeline fails          |
 
 Emitting nothing is an error rather than "no change", so a generator that
 crashes before it prints anything cannot be mistaken for one that deliberately
@@ -150,8 +150,8 @@ afterwards, but they are never used as input again. Restarting a pipeline
 rebuilds from the source configurations and runs the compile phase again, so a
 restart always compiles again.
 
-That means a restart is reproducible in its *input*, not necessarily in its
-*output*: a generator that reads the network or the clock can produce a
+That means a restart is reproducible in its _input_, not necessarily in its
+_output_: a generator that reads the network or the clock can produce a
 different pipeline the second time. The recorded configuration makes that
 visible when it happens.
 
