@@ -110,7 +110,7 @@ importers:
         version: 1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       concurrently:
         specifier: ^10.0.0
-        version: 10.0.4
+        version: 10.0.5
       isomorphic-dompurify:
         specifier: ^3.0.0
         version: 3.22.0
@@ -2775,8 +2775,8 @@ packages:
     resolution: {integrity: sha512-9mAqGPHLakhCLeNyxPkK4xVo746zQ/czLH1Ky+vkitMnWfWZps8r0qXuwhwizagCRttsL4lfG4pIOvaWLpAP0w==}
     engines: {node: '>= 0.8.0'}
 
-  concurrently@10.0.4:
-    resolution: {integrity: sha512-trZql+7l/0+WRAsAnEdctr4+iiOS6ZrViI6H8QWcCF9MFS/LT0dKpe8vluB1to6it+OxSI4VospFTIFMW8DJRw==}
+  concurrently@10.0.5:
+    resolution: {integrity: sha512-JaP/CoftUrCcAFW/g//RbgEGwlelnEae6cfBLgH6ZdO6s8jPkn6p9SB9u6pdVxYXoiSnFqseOlHfrEfF82TVOg==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -10123,7 +10123,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  concurrently@10.0.4:
+  concurrently@10.0.5:
     dependencies:
       chalk: 5.6.2
       rxjs: 7.8.2
