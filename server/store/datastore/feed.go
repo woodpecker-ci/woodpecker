@@ -64,7 +64,7 @@ func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 		Join("INNER", "perms", "repos.id = perms.repo_id").
 		Join("INNER", "pipelines", "repos.id = pipelines.repo_id").
 		Where(userPushOrAdminCondition(user.ID)).
-		Desc("pipelines.id").
+		Desc("pipelines.created", "pipelines.id").
 		Limit(perPage).
 		Find(&feed)
 
