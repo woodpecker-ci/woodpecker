@@ -422,7 +422,7 @@ func GetPipelineMetadata(c *gin.Context) {
 		return
 	}
 
-	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.Number)
 	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		handleDBError(c, err)
 		return
