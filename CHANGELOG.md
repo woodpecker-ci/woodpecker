@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Update `golang.org/x/mod` [[#7012](https://github.com/woodpecker-ci/woodpecker/pull/7012)]
 - Change group identifier to full_path for GitLab [[#6950](https://github.com/woodpecker-ci/woodpecker/pull/6950)]
 
 ### 📈 Enhancement
