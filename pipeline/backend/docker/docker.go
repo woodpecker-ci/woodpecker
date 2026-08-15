@@ -183,7 +183,10 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	config := e.toConfig(step, options)
+	config, err := e.toConfig(step, options)
+	if err != nil {
+		return err
+	}
 	hostConfig, err := toHostConfig(step, &e.config)
 	if err != nil {
 		return err
