@@ -35,7 +35,7 @@
             :title="$t('repo.pipeline.actions.log_download')"
             class="hover:bg-white/10!"
             icon="download"
-            @click="download"
+            :href="logDownloadUrl"
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs && hasPushPermission"
@@ -219,6 +219,8 @@ const pipelineConfigs = requiredInject('pipeline-configs');
 const apiClient = useApiClient();
 const route = useRoute();
 
+const config = useConfig();
+
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
 const step = computed(() => pipeline.value && findStep(pipeline.value.workflows || [], stepId.value));
@@ -226,6 +228,7 @@ const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();
 const fullscreen = ref(false);
+const logDownloadUrl = computed(() => `${config.rootPath}/api/repos/${repo.value.id}/logs/${pipeline.value.number}/${step.value?.id}/download`);
 
 const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(
@@ -239,8 +242,6 @@ const downloadInProgress = ref(false);
 const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
-
-const config = useConfig();
 
 const maxLineCount = config.maxPipelineLogLineCount; // TODO(2653): implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
@@ -434,35 +435,6 @@ const flushLogs = debounce((scroll: boolean) => {
     scrollDown();
   }
 }, 500);
-
-async function download() {
-  if (!repo?.value || !pipeline.value || !step.value) {
-    throw new Error('The repository, pipeline or step was undefined');
-  }
-  let logs: Blob;
-  try {
-    downloadInProgress.value = true;
-    logs = await apiClient.downloadLogs(repo.value.id, pipeline.value.number, step.value.id);
-  } catch (e) {
-    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_download_error'));
-    return;
-  } finally {
-    downloadInProgress.value = false;
-  }
-  const fileURL = window.URL.createObjectURL(logs);
-  const fileLink = document.createElement('a');
-
-  fileLink.href = fileURL;
-  fileLink.setAttribute(
-    'download',
-    `${repo.value.owner}-${repo.value.name}-${pipeline.value.number}-${step.value.name}.log`,
-  );
-  document.body.appendChild(fileLink);
-
-  fileLink.click();
-  document.body.removeChild(fileLink);
-  window.URL.revokeObjectURL(fileURL);
-}
 
 async function loadLogs() {
   if (loadedStepSlug.value === stepSlug.value) {
