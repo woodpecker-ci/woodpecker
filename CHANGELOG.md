@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7009](https://github.com/woodpecker-ci/woodpecker/pull/7009)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.58.0 [[#7014](https://github.com/woodpecker-ci/woodpecker/pull/7014)]
 - Update postgres Docker tag to v18.6 [[#7011](https://github.com/woodpecker-ci/woodpecker/pull/7011)]
 - Update dependency golang to v1.26.6 [[#7008](https://github.com/woodpecker-ci/woodpecker/pull/7008)]
