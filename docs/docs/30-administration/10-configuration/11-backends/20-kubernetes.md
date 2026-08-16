@@ -487,7 +487,7 @@ steps:
 
   - name: docker
     image: docker:dind # use 'docker:<major-version>-dind' or similar in production
-    detached: true
+    detach: true
     privileged: true
     environment:
       DOCKER_TLS_CERTDIR: /woodpecker/dind-certs
