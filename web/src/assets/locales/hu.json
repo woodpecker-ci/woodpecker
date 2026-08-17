@@ -640,5 +640,8 @@
     "developer_settings_to_create": "Menj a {0}-ra, és állítsd be az OAuth alkalmazást.",
     "developer_settings": "fejlesztői beállítások",
     "public_url_for_oauth_if": "Publikus URL az OAuth-hoz ha eltér az URLtől: {0}",
-    "forge_saved": "Kohó mentve"
+    "forge_saved": "Kohó mentve",
+    "allowed_orgs": "Engedélyezett szervezetek",
+    "allowed_orgs_desc": "Szervezetek, melynek tagjai bejelentkezhetnek ezt a kohót használva, a globális WOODPECKER_ORGS beállításon felül.",
+    "allowed_orgs_placeholder": "Szervezet neve"
 }
