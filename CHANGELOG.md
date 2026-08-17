@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Add custom list opts with all [[#6992](https://github.com/woodpecker-ci/woodpecker/pull/6992)]
 - Add pipeline log download endpoint [[#6876](https://github.com/woodpecker-ci/woodpecker/pull/6876)]
 - Reject invalid started and done workflow states [[#7029](https://github.com/woodpecker-ci/woodpecker/pull/7029)]
 - Sort workflow files by name [[#7021](https://github.com/woodpecker-ci/woodpecker/pull/7021)]
