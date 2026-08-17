@@ -17,6 +17,7 @@ package model
 import (
 	"encoding/base32"
 	"fmt"
+	"maps"
 
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
@@ -63,7 +64,8 @@ func GenerateNewAgentToken() string {
 }
 
 func (a *Agent) GetServerLabels() (map[string]string, error) {
-	filters := a.Filters
+	// clone, the returned map is amended below and must not leak back into the agent
+	filters := maps.Clone(a.Filters)
 	if filters == nil {
 		filters = make(map[string]string)
 	}
