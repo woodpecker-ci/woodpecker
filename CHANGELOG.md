@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @anbraten, @gerbsen, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
+@AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @anbraten, @gerbsen, @hasufell, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
 
 ### 🔒 Security
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Make command execution more robust on windows [[#6969](https://github.com/woodpecker-ci/woodpecker/pull/6969)]
 - Enforce one log entry per line with a unique index [[#7004](https://github.com/woodpecker-ci/woodpecker/pull/7004)]
 - Order the user feed by creation time instead of id [[#7005](https://github.com/woodpecker-ci/woodpecker/pull/7005)]
 - Return step logs strictly in line order [[#6999](https://github.com/woodpecker-ci/woodpecker/pull/6999)]
