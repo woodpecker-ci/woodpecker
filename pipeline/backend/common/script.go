@@ -46,7 +46,7 @@ func GenerateSSHConf(commands []string, osType, workDir string, stepUUID string)
 	env = make(map[string]string)
 	if osType == "windows" {
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
-		utf16leBytes, err := encoder.Bytes([]byte(generateScriptWindows(commands, workDir)))
+		utf16leBytes, err := encoder.Bytes([]byte(generateScriptWindows(commands, workDir, stepUUID)))
 		if err != nil {
 			return nil, nil, err
 		}
