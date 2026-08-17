@@ -97,10 +97,10 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 			}
 
 			if running {
-				log.Debug().Msg("SIGTERM didn't work, sending kill -9 manually")
+				log.Debug().Msg("SIGTERM didn't work, sending kill -2 manually")
 
-				// kill -9 pid
-				sshCmd, err := client.Command("kill", "-9", pid)
+				// kill -15 pid
+				sshCmd, err := client.Command("kill", "-2", pid)
 				if err != nil {
 					return err
 				}

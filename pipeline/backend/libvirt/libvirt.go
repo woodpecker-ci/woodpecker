@@ -308,8 +308,16 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	// we need to create pipes and set Stdout here
 	// in TailStep it is potentially too late
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
-	sshCmd.Stdout = pw
+	sshCmd.Stdout = nil
 	sshCmd.Stderr = pw
+
+	stdoutR, _ := sshCmd.StdoutPipe()
+
+	go func() {
+		io.Copy(pw, stdoutR) // copy from SSH stdout to your pipe
+		pw.Close()           // close your pipe writer when SSH stdout EOFs
+	}()
+
 	w.(*workflow).pipesStdOut.Store(step.UUID, &pipes{pr, pw})
 
 	done := make(chan struct{})
