@@ -158,6 +158,8 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
 You can use [WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR](#backend_k8s_pod_node_selector) if you want to set the node selector per Agent
 or [PodNodeSelector](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector) admission controller if you want to set the node selector by per-namespace basis.
 
+By default, setting `nodeSelector` from a step's backend options is **not allowed**, as it would otherwise let any user with push access pin pipeline pods onto chosen nodes. To enable it, set [`WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP`](#backend_k8s_pod_node_selector_allow_from_step) on the agent.
+
 ### Tolerations
 
 When you use `nodeSelector` and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule Pods with matching taints.
@@ -485,7 +487,7 @@ steps:
 
   - name: docker
     image: docker:dind # use 'docker:<major-version>-dind' or similar in production
-    detached: true
+    detach: true
     privileged: true
     environment:
       DOCKER_TLS_CERTDIR: /woodpecker/dind-certs
