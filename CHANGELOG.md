@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@AhmadNajiKam, @OCram85, @Palleas, @anbraten, @gerbsen, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
+@AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @anbraten, @gerbsen, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
 
 ### 🔒 Security
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- server: drop stale queued tasks for terminal workflows [[#7015](https://github.com/woodpecker-ci/woodpecker/pull/7015)]
 - k8s backend: fix step example using incorrect "detached" property [[#7016](https://github.com/woodpecker-ci/woodpecker/pull/7016)]
 - fix(gitlab): avoid N+1 member lookups in Repos() [[#6991](https://github.com/woodpecker-ci/woodpecker/pull/6991)]
 - agent: retry connect on DeadlineExceeded, not just Unavailable [[#6975](https://github.com/woodpecker-ci/woodpecker/pull/6975)]
