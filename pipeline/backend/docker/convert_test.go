@@ -24,6 +24,8 @@ import (
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/system"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/text/encoding/unicode"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -129,9 +131,24 @@ func TestToContainerName(t *testing.T) {
 	assert.EqualValues(t, "wp_d841ee40-e66e-4275-bb3f-55bf89744b21", toContainerName(testPluginStep))
 }
 
+func TestToHostConfigApparmorProfile(t *testing.T) {
+	hostConfig, err := toHostConfig(testCmdStep, &config{apparmor: "osgeo-woodie"})
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, []string{"apparmor=osgeo-woodie"}, hostConfig.SecurityOpt)
+}
+
+func TestToHostConfigApparmorProfileDefault(t *testing.T) {
+	hostConfig, err := toHostConfig(testCmdStep, &config{})
+
+	assert.NoError(t, err)
+	assert.Nil(t, hostConfig.SecurityOpt)
+}
+
 func TestStepToConfig(t *testing.T) {
 	// StepTypeCommands
-	conf := testEngine.toConfig(testCmdStep, BackendOptions{})
+	conf, err := testEngine.toConfig(testCmdStep, BackendOptions{})
+	require.NoError(t, err)
 	if assert.NotNil(t, conf) {
 		assert.EqualValues(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, conf.Entrypoint)
 		assert.Nil(t, conf.Cmd)
@@ -139,7 +156,8 @@ func TestStepToConfig(t *testing.T) {
 	}
 
 	// StepTypePlugin
-	conf = testEngine.toConfig(testPluginStep, BackendOptions{})
+	conf, err = testEngine.toConfig(testPluginStep, BackendOptions{})
+	require.NoError(t, err)
 	if assert.NotNil(t, conf) {
 		assert.Nil(t, conf.Cmd)
 		assert.EqualValues(t, testPluginStep.UUID, conf.Labels["wp_uuid"])
@@ -170,12 +188,13 @@ func TestEncodeAuthToBase64(t *testing.T) {
 func TestToConfigSmall(t *testing.T) {
 	engine := docker{info: system.Info{OSType: "linux", Architecture: "riscv64"}}
 
-	conf := engine.toConfig(&backend_types.Step{
+	conf, err := engine.toConfig(&backend_types.Step{
 		Name:     "test",
 		UUID:     "09238932",
 		Commands: []string{"go test"},
 	}, BackendOptions{})
 
+	require.NoError(t, err)
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
@@ -208,7 +227,7 @@ func TestToConfigFull(t *testing.T) {
 		},
 	}
 
-	conf := engine.toConfig(&backend_types.Step{
+	conf, err := engine.toConfig(&backend_types.Step{
 		Name:          "test",
 		UUID:          "09238932",
 		Type:          backend_types.StepTypeCommands,
@@ -235,6 +254,7 @@ func TestToConfigFull(t *testing.T) {
 		Ports:         []backend_types.Port{{Number: 21}, {Number: 22}},
 	}, BackendOptions{})
 
+	require.NoError(t, err)
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
@@ -258,6 +278,9 @@ func TestToConfigFull(t *testing.T) {
 	}, conf)
 }
 
+// windowsCIScriptBase64 is the UTF-16LE encoded script, base64 encoded for powershell's -encodedcommand.
+const windowsCIScriptBase64 = "CgAkAEwAQQBTAFQARQBYAEkAVABDAE8ARABFACAAPQAgADAACgAkAEUAcgByAG8AcgBBAGMAdABpAG8AbgBQAHIAZQBmAGUAcgBlAG4AYwBlACAAPQAgACcAUwB0AG8AcAAnADsACgBpAGYAIAAoAC0AbgBvAHQAIAAoAFQAZQBzAHQALQBQAGEAdABoACAAIgBDADoALwBzAHIAYwAvAGEAYgBjACIAKQApACAAewAgAE4AZQB3AC0ASQB0AGUAbQAgAC0AUABhAHQAaAAgACIAQwA6AC8AcwByAGMALwBhAGIAYwAiACAALQBJAHQAZQBtAFQAeQBwAGUAIABEAGkAcgBlAGMAdABvAHIAeQAgAC0ARgBvAHIAYwBlACAAfQA7AAoAaQBmACAAKAAtAG4AbwB0ACAAWwBFAG4AdgBpAHIAbwBuAG0AZQBuAHQAXQA6ADoARwBlAHQARQBuAHYAaQByAG8AbgBtAGUAbgB0AFYAYQByAGkAYQBiAGwAZQAoACcASABPAE0ARQAnACkAKQAgAHsAIABbAEUAbgB2AGkAcgBvAG4AbQBlAG4AdABdADoAOgBTAGUAdABFAG4AdgBpAHIAbwBuAG0AZQBuAHQAVgBhAHIAaQBhAGIAbABlACgAJwBIAE8ATQBFACcALAAgACcAYwA6AFwAcgBvAG8AdAAnACkAIAB9ADsACgBpAGYAIAAoAC0AbgBvAHQAIAAoAFQAZQBzAHQALQBQAGEAdABoACAAIgAkAGUAbgB2ADoASABPAE0ARQAiACkAKQAgAHsAIABOAGUAdwAtAEkAdABlAG0AIAAtAFAAYQB0AGgAIAAiACQAZQBuAHYAOgBIAE8ATQBFACIAIAAtAEkAdABlAG0AVAB5AHAAZQAgAEQAaQByAGUAYwB0AG8AcgB5ACAALQBGAG8AcgBjAGUAIAB9ADsACgBpAGYAIAAoACQARQBuAHYAOgBDAEkAXwBOAEUAVABSAEMAXwBNAEEAQwBIAEkATgBFACkAIAB7AAoAJABuAGUAdAByAGMAPQBbAHMAdAByAGkAbgBnAF0AOgA6AEYAbwByAG0AYQB0ACgAIgB7ADAAfQBcAF8AbgBlAHQAcgBjACIALAAkAEUAbgB2ADoASABPAE0ARQApADsACgAiAG0AYQBjAGgAaQBuAGUAIAAkAEUAbgB2ADoAQwBJAF8ATgBFAFQAUgBDAF8ATQBBAEMASABJAE4ARQAiACAAPgA+ACAAJABuAGUAdAByAGMAOwAKACIAbABvAGcAaQBuACAAJABFAG4AdgA6AEMASQBfAE4ARQBUAFIAQwBfAFUAUwBFAFIATgBBAE0ARQAiACAAPgA+ACAAJABuAGUAdAByAGMAOwAKACIAcABhAHMAcwB3AG8AcgBkACAAJABFAG4AdgA6AEMASQBfAE4ARQBUAFIAQwBfAFAAQQBTAFMAVwBPAFIARAAiACAAPgA+ACAAJABuAGUAdAByAGMAOwAKAH0AOwAKAFsARQBuAHYAaQByAG8AbgBtAGUAbgB0AF0AOgA6AFMAZQB0AEUAbgB2AGkAcgBvAG4AbQBlAG4AdABWAGEAcgBpAGEAYgBsAGUAKAAiAEMASQBfAE4ARQBUAFIAQwBfAFAAQQBTAFMAVwBPAFIARAAiACwAJABuAHUAbABsACkAOwAKAFsARQBuAHYAaQByAG8AbgBtAGUAbgB0AF0AOgA6AFMAZQB0AEUAbgB2AGkAcgBvAG4AbQBlAG4AdABWAGEAcgBpAGEAYgBsAGUAKAAiAEMASQBfAFMAQwBSAEkAUABUACIALAAkAG4AdQBsAGwAKQA7AAoAYwBkACAAIgBDADoALwBzAHIAYwAvAGEAYgBjACIAOwAKAAoAVwByAGkAdABlAC0ATwB1AHQAcAB1AHQAIAAoACcAKwAgACIAZwBvACAAdABlAHMAdAAiACcAKQA7AAoAJgAgAGcAbwAgAHQAZQBzAHQAOwAgAGkAZgAgACgAJABMAEEAUwBUAEUAWABJAFQAQwBPAEQARQAgAC0AbgBlACAAMAApACAAewBlAHgAaQB0ACAAJABMAEEAUwBUAEUAWABJAFQAQwBPAEQARQB9AAoACgBXAHIAaQB0AGUALQBPAHUAdABwAHUAdAAgACgAJwArACAAIgBnAG8AIAB2AGUAdAAgAC4ALwAuAC4ALgAiACcAKQA7AAoAJgAgAGcAbwAgAHYAZQB0ACAALgAvAC4ALgAuADsAIABpAGYAIAAoACQATABBAFMAVABFAFgASQBUAEMATwBEAEUAIAAtAG4AZQAgADAAKQAgAHsAZQB4AGkAdAAgACQATABBAFMAVABFAFgASQBUAEMATwBEAEUAfQAKAA=="
+
 func TestToWindowsConfig(t *testing.T) {
 	engine := docker{
 		info: system.Info{OSType: "windows", Architecture: "x86_64"},
@@ -266,7 +289,7 @@ func TestToWindowsConfig(t *testing.T) {
 		},
 	}
 
-	conf := engine.toConfig(&backend_types.Step{
+	conf, err := engine.toConfig(&backend_types.Step{
 		Name:          "test",
 		UUID:          "23434553",
 		Type:          backend_types.StepTypeCommands,
@@ -288,6 +311,7 @@ func TestToWindowsConfig(t *testing.T) {
 		Ports:       []backend_types.Port{{Number: 21}, {Number: 22}},
 	}, BackendOptions{})
 
+	require.NoError(t, err)
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
@@ -295,13 +319,13 @@ func TestToWindowsConfig(t *testing.T) {
 		WorkingDir:   "C:/src",
 		AttachStdout: true,
 		AttachStderr: true,
-		Entrypoint:   []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"},
+		Entrypoint:   []string{"powershell", "-noprofile", "-noninteractive", "-encodedcommand", windowsCIScriptBase64},
 		Labels: map[string]string{
 			"wp_step": "test",
 			"wp_uuid": "23434553",
 		},
 		Env: []string{
-			"CI_SCRIPT=CiRFcnJvckFjdGlvblByZWZlcmVuY2UgPSAnU3RvcCc7CmlmICgtbm90IChUZXN0LVBhdGggIkM6L3NyYy9hYmMiKSkgeyBOZXctSXRlbSAtUGF0aCAiQzovc3JjL2FiYyIgLUl0ZW1UeXBlIERpcmVjdG9yeSAtRm9yY2UgfTsKaWYgKC1ub3QgW0Vudmlyb25tZW50XTo6R2V0RW52aXJvbm1lbnRWYXJpYWJsZSgnSE9NRScpKSB7IFtFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoJ0hPTUUnLCAnYzpccm9vdCcpIH07CmlmICgtbm90IChUZXN0LVBhdGggIiRlbnY6SE9NRSIpKSB7IE5ldy1JdGVtIC1QYXRoICIkZW52OkhPTUUiIC1JdGVtVHlwZSBEaXJlY3RvcnkgLUZvcmNlIH07CmlmICgkRW52OkNJX05FVFJDX01BQ0hJTkUpIHsKJG5ldHJjPVtzdHJpbmddOjpGb3JtYXQoInswfVxfbmV0cmMiLCRFbnY6SE9NRSk7CiJtYWNoaW5lICRFbnY6Q0lfTkVUUkNfTUFDSElORSIgPj4gJG5ldHJjOwoibG9naW4gJEVudjpDSV9ORVRSQ19VU0VSTkFNRSIgPj4gJG5ldHJjOwoicGFzc3dvcmQgJEVudjpDSV9ORVRSQ19QQVNTV09SRCIgPj4gJG5ldHJjOwp9OwpbRW52aXJvbm1lbnRdOjpTZXRFbnZpcm9ubWVudFZhcmlhYmxlKCJDSV9ORVRSQ19QQVNTV09SRCIsJG51bGwpOwpbRW52aXJvbm1lbnRdOjpTZXRFbnZpcm9ubWVudFZhcmlhYmxlKCJDSV9TQ1JJUFQiLCRudWxsKTsKY2QgIkM6L3NyYy9hYmMiOwoKV3JpdGUtT3V0cHV0ICgnKyAiZ28gdGVzdCInKTsKJiBnbyB0ZXN0OyBpZiAoJExBU1RFWElUQ09ERSAtbmUgMCkge2V4aXQgJExBU1RFWElUQ09ERX0KCldyaXRlLU91dHB1dCAoJysgImdvIHZldCAuLy4uLiInKTsKJiBnbyB2ZXQgLi8uLi47IGlmICgkTEFTVEVYSVRDT0RFIC1uZSAwKSB7ZXhpdCAkTEFTVEVYSVRDT0RFfQo=",
+			"CI_SCRIPT=" + windowsCIScriptBase64,
 			"CI_WORKSPACE=C:/src",
 			"SHELL=powershell.exe",
 			"TAGS=sqlite",
@@ -313,9 +337,12 @@ func TestToWindowsConfig(t *testing.T) {
 		},
 	}, conf)
 
-	ciScript, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(conf.Env[0], "CI_SCRIPT="))
+	utf16leScript, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(conf.Env[0], "CI_SCRIPT="))
+	require.NoError(t, err)
+	ciScript, err := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewDecoder().Bytes(utf16leScript)
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, `
+$LASTEXITCODE = 0
 $ErrorActionPreference = 'Stop';
 if (-not (Test-Path "C:/src/abc")) { New-Item -Path "C:/src/abc" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };

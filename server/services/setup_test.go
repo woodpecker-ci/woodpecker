@@ -59,6 +59,7 @@ func forgeSetupFlags() []cli.Flag {
 		&cli.BoolFlag{Name: "github-public-only"},
 		&cli.StringFlag{Name: "github-app-id"},
 		&cli.StringFlag{Name: "github-app-private-key"},
+		&cli.StringFlag{Name: "github-app-clone-token-scope"},
 		&cli.BoolFlag{Name: "gitlab"},
 		&cli.BoolFlag{Name: "gitea"},
 		&cli.BoolFlag{Name: "forgejo"},
@@ -229,4 +230,40 @@ func TestSetupForgeServiceNotConfigured(t *testing.T) {
 	assert.False(t, validated, "validation should not run when no forge is configured")
 	mockStore.AssertNotCalled(t, "ForgeCreate", mock.Anything)
 	mockStore.AssertNotCalled(t, "ForgeUpdate", mock.Anything)
+}
+
+// TestSetupForgeServiceKeepsOrgs ensures the allowed orgs of the forge
+// configured through environment variables survive a server start. Only the
+// options that have an environment setting are written back, the orgs are
+// edited in the admin UI and must not be reset.
+func TestSetupForgeServiceKeepsOrgs(t *testing.T) {
+	t.Parallel()
+
+	_store := store_mocks.NewMockStore(t)
+	_store.On("ForgeGet", int64(1)).Return(&model.Forge{
+		ID:   1,
+		URL:  "https://github.com",
+		Orgs: []string{"github-org"},
+	}, nil)
+
+	var updated *model.Forge
+	_store.On("ForgeUpdate", mock.Anything).Run(captureForge(&updated)).Return(nil)
+
+	setupForge := func(_ *model.Forge) (forge.Forge, error) {
+		return nil, nil
+	}
+
+	err := runForgeSetup(t, []string{
+		"--github",
+		"--forge-oauth-client", "client-id",
+		"--forge-oauth-secret", "client-secret",
+		"--forge-url", "https://github.com",
+	}, _store, setupForge)
+	require.NoError(t, err)
+
+	require.NotNil(t, updated)
+	assert.Equal(t, []string{"github-org"}, updated.Orgs)
+	// the options coming from the environment are written back
+	assert.Equal(t, model.ForgeTypeGithub, updated.Type)
+	assert.Equal(t, "client-id", updated.OAuthClientID)
 }

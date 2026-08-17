@@ -33,7 +33,7 @@ import (
 const minVolumeComponents = 2
 
 // returns a container configuration.
-func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.Config {
+func (e *docker) toConfig(step *types.Step, options BackendOptions) (*container.Config, error) {
 	e.windowsPathPatch(step)
 
 	config := &container.Config{
@@ -52,7 +52,10 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) > 0 {
-		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
+		env, entry, err := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
+		if err != nil {
+			return config, err
+		}
 		maps.Copy(configEnv, env)
 		config.Entrypoint = entry
 
@@ -66,7 +69,7 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 	if len(configEnv) != 0 {
 		config.Env = toEnv(configEnv)
 	}
-	return config
+	return config, nil
 }
 
 func toContainerName(step *types.Step) string {
@@ -90,6 +93,9 @@ func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error)
 		Privileged: step.Privileged,
 	}
 
+	if conf.apparmor != "" {
+		config.SecurityOpt = []string{"apparmor=" + conf.apparmor}
+	}
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}

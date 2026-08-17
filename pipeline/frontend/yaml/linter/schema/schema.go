@@ -20,46 +20,70 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	"codeberg.org/6543/go-yaml2json/v2"
-	"codeberg.org/6543/xyaml/v2"
 	"github.com/xeipuuv/gojsonschema"
-	"go.yaml.in/yaml/v4"
+	go_yaml "go.yaml.in/yaml/v4"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 )
 
 //go:embed schema.json
 var schemaDefinition []byte
 
+var (
+	schemaOnce       sync.Once
+	compiledSchema   *gojsonschema.Schema
+	schemaCompileErr error
+)
+
+func getCompiledSchema() (*gojsonschema.Schema, error) {
+	schemaOnce.Do(func() {
+		compiledSchema, schemaCompileErr = gojsonschema.NewSchema(
+			gojsonschema.NewBytesLoader(schemaDefinition),
+		)
+	})
+
+	return compiledSchema, schemaCompileErr
+}
+
 // Lint lints an io.Reader against the Woodpecker `schema.json`.
 func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
-	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
-
-	// read yaml config
+	// Read the YAML configuration.
 	rBytes, err := io.ReadAll(r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load yml file %w", err)
 	}
 
-	// resolve sequence merges
-	yamlDoc := new(yaml.Node)
-	if err := xyaml.Unmarshal(rBytes, yamlDoc); err != nil {
+	// Parse YAML and resolve sequence merges.
+	yamlDoc := new(go_yaml.Node)
+	if err := yaml.Unmarshal(rBytes, yamlDoc); err != nil {
 		return nil, fmt.Errorf("failed to parse yml file %w", err)
 	}
 
-	// convert to json
+	// Convert the YAML document to JSON.
 	jsonDoc, err := yaml2json.ConvertNode(yamlDoc)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert yaml %w", err)
 	}
 
+	// Compile the static schema once and reuse it.
+	schema, err := getCompiledSchema()
+	if err != nil {
+		return nil, fmt.Errorf("failed to compile schema %w", err)
+	}
+
+	// Validate this pipeline document against the compiled schema.
 	documentLoader := gojsonschema.NewBytesLoader(jsonDoc)
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	result, err := schema.Validate(documentLoader)
 	if err != nil {
 		return nil, fmt.Errorf("validation failed %w", err)
 	}
 
 	if !result.Valid() {
-		return filterRedundantCompositionErrors(result.Errors()), fmt.Errorf("config not valid")
+		return filterRedundantCompositionErrors(result.Errors()),
+			fmt.Errorf("config not valid")
 	}
 
 	return nil, nil

@@ -76,8 +76,8 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.
 		IsSCMPrivate:  _repo.Visibility == gitlab.InternalVisibility || _repo.Visibility == gitlab.PrivateVisibility,
 		Perm: &model.Perm{
 			Pull:  isRead(_repo, projectMember),
-			Push:  isWrite(projectMember),
-			Admin: isAdmin(projectMember),
+			Push:  isWrite(_repo, projectMember),
+			Admin: isAdmin(_repo, projectMember),
 		},
 		PREnabled: _repo.MergeRequestsAccessLevel != gitlab.DisabledAccessControl,
 	}

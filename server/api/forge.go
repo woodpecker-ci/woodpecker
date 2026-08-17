@@ -157,6 +157,7 @@ func PatchForge(c *gin.Context) {
 	forge.OAuthClientID = in.OAuthClientID
 	forge.OAuthHost = in.OAuthHost
 	forge.SkipVerify = in.SkipVerify
+	forge.Orgs = in.Orgs
 	forge.AdditionalOptions = in.AdditionalOptions
 	if in.OAuthClientSecret != "" {
 		forge.OAuthClientSecret = in.OAuthClientSecret
@@ -241,6 +242,7 @@ func PostForge(c *gin.Context) {
 		OAuthClientSecret: in.OAuthClientSecret,
 		OAuthHost:         in.OAuthHost,
 		SkipVerify:        in.SkipVerify,
+		Orgs:              in.Orgs,
 		AdditionalOptions: in.AdditionalOptions,
 	}
 	dropSecretOptionMarkers(forge)

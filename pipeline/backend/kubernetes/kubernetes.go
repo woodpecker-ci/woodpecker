@@ -61,6 +61,7 @@ type kube struct {
 type config struct {
 	Namespace                       string
 	EnableNamespacePerOrg           bool
+	ClusterDomain                   string
 	StorageClass                    string
 	VolumeSize                      string
 	StorageRwx                      bool
@@ -110,6 +111,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			config := config{
 				Namespace:                    c.String("backend-k8s-namespace"),
 				EnableNamespacePerOrg:        c.Bool("backend-k8s-namespace-per-org"),
+				ClusterDomain:                c.String("backend-k8s-cluster-domain"),
 				StorageClass:                 c.String("backend-k8s-storage-class"),
 				VolumeSize:                   c.String("backend-k8s-volume-size"),
 				StorageRwx:                   c.Bool("backend-k8s-storage-rwx"),

@@ -8,6 +8,7 @@ export interface Forge {
   oauth_client_secret?: string;
   skip_verify?: boolean;
   oauth_host?: string;
+  orgs?: string[];
   additional_options?: Record<string, unknown>;
 }
 

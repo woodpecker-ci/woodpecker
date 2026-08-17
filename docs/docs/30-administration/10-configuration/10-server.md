@@ -18,7 +18,7 @@ You can also restrict the registration:
   WOODPECKER_ADMIN=john.smith,jane_doe
   ```
 
-- open registration and filtering by organizational affiliation with the setting `WOODPECKER_ORGS`
+- open registration and filtering by organizational affiliation with the setting `WOODPECKER_ORGS`. For GitLab forges group names have to exact match, so members of group `group` are not permitted access if you set `WOODPECKER_ORGS=group/subgroup`.
 
   ```ini
   WOODPECKER_OPEN=true
@@ -712,9 +712,12 @@ Example: `WOODPECKER_ADMIN=user1,user2`
 - Name: `WOODPECKER_ORGS`
 - Default: none
 
-Comma-separated list of approved organizations.
+Comma-separated list of approved organizations. For GitLab forges this is the `full_path` [attribute](https://docs.gitlab.com/api/groups/).
 
 Example: `org1,org2`
+
+This setting applies to all [forges](./12-forges/11-overview.md). A forge can allow further organizations in addition, configured in the admin UI (`Settings` -> `Forges` -> `Advanced options`). As organization names are only unique within a single forge, someone could create an organization with a name from this setting on another connected forge to gain access.
+If you connected more than one forge, you should therefore leave this setting empty and configure the allowed organizations per forge. See [restricting who can log in](./12-forges/11-overview.md#restricting-who-can-log-in) for details.
 
 ---
 

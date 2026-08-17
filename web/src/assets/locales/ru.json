@@ -797,5 +797,9 @@
     "secret_extension_netrc": "Включить учётные данные netrc",
     "secret_extension_netrc_desc": "Отправлять расширению учётные данные netrc платформы.",
     "extension_netrc_desc": "Передавать учётные данные netrc расширению.",
-    "extension_netrc": "Включить учётные данные netrc"
+    "extension_netrc": "Включить учётные данные netrc",
+    "delete": "Удалить",
+    "allowed_orgs_desc": "Организации, которым разрешён вход через эту платформу, в дополнение к глобальной настройке WOODPECKER_ORGS.",
+    "allowed_orgs_placeholder": "Имя организации",
+    "allowed_orgs": "Разрешённые организации"
 }

@@ -8,6 +8,10 @@ There is currently one type of extension available:
 - [Registry extension](./50-registry-extension.md) to get registry credentials from the extension.
 - [Secret extension](./55-secret-extension.md) to get secrets from an external service.
 
+:::note
+Woodpecker's permission handling is linked to the forge. A user on your forge that has admin access to the repo will also get admin permissions for the repository in Woodpecker and can then change the configured extensions. This could be used to get credentials of the forge user. Make sure you trust the repo admins that can sign in to Woodpecker.
+:::
+
 ## Security
 
 :::warning

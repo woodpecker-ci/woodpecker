@@ -16,20 +16,28 @@ package common
 
 import (
 	"encoding/base64"
+
+	"golang.org/x/text/encoding/unicode"
 )
 
-func GenerateContainerConf(commands []string, osType, workDir string) (env map[string]string, entry []string) {
+func GenerateContainerConf(commands []string, osType, workDir string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands, workDir)))
+		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+		utf16leBytes, err := encoder.Bytes([]byte(generateScriptWindows(commands, workDir)))
+		if err != nil {
+			return nil, nil, err
+		}
+
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString(utf16leBytes)
 		env["SHELL"] = "powershell.exe"
 		// cspell:disable-next-line
-		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
+		entry = []string{"powershell", "-noprofile", "-noninteractive", "-encodedcommand", env["CI_SCRIPT"]}
 	} else {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir)))
 		env["SHELL"] = "/bin/sh"
 		entry = []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
 
-	return env, entry
+	return env, entry, nil
 }
