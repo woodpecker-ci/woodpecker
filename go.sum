@@ -579,8 +579,8 @@ github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482 h1:xlSy8R55vu
 github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482/go.mod h1:cjSVza4yCaqQet06zO6QhYqXQYjGRqbUj8zok6mHDRU=
 github.com/urfave/cli/v2 v2.25.3 h1:VJkt6wvEBOoSjPFQvOkv6iWIrsJyCrKGtCtxXWwmGeY=
 github.com/urfave/cli/v2 v2.25.3/go.mod h1:GHupkWPMM0M/sj1a2b4wUrWBPzazNrIjouW6fmdJLxc=
-github.com/urfave/cli/v3 v3.10.1 h1:7Kx9H50hrHbRbyxgO1KP6/BcbiGRz0uYh5YyQ30JEEY=
-github.com/urfave/cli/v3 v3.10.1/go.mod h1:ysVLtOEmg2tOy6PknnYVhDoouyC/6N42TMeoMzskhso=
+github.com/urfave/cli/v3 v3.11.0 h1:P/euJp99kb9p0tlVY+iYTLYYTAQlfl0hR2gUO1Img1Q=
+github.com/urfave/cli/v3 v3.11.0/go.mod h1:ysVLtOEmg2tOy6PknnYVhDoouyC/6N42TMeoMzskhso=
 github.com/valyala/fastjson v1.6.4 h1:uAUNq9Z6ymTgGhcm0UynUAB6tlbakBrz6CQFax3BXVQ=
 github.com/valyala/fastjson v1.6.4/go.mod h1:CLCAqky6SMuOcxStkYQvblddUtoRxhYMGLrsQns1aXY=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=

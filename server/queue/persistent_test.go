@@ -48,13 +48,73 @@ func TestPersistentQueuePollDropsStaleTask(t *testing.T) {
 	assert.Equal(t, 0, info.Stats.Running, "stale task must be removed from running")
 }
 
-// A task that is still present in the backup store is polled normally.
+func TestPersistentQueuePollDropsTaskWithMissingWorkflow(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().TaskDelete("1").Return(nil).Once()
+	store.EXPECT().WorkflowLoad(int64(1)).Return(nil, types.ErrRecordNotExist).Once()
+
+	pq := &persistentQueue{Queue: q, store: store}
+
+	task := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+
+	got, err := pq.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.Nil(t, got, "task without a workflow must not be returned to the agent")
+
+	info := q.Info(ctx)
+	assert.Equal(t, 0, info.Stats.Pending)
+	assert.Equal(t, 0, info.Stats.Running)
+}
+
+func TestPersistentQueuePollDropsTerminalWorkflowTask(t *testing.T) {
+	terminalStates := []model.StatusValue{
+		model.StatusSuccess,
+		model.StatusFailure,
+		model.StatusKilled,
+		model.StatusCanceled,
+		model.StatusSkipped,
+		model.StatusError,
+		model.StatusDeclined,
+	}
+
+	for _, state := range terminalStates {
+		t.Run(string(state), func(t *testing.T) {
+			ctx, cancel, q := setupTestQueue(t)
+			defer cancel(nil)
+
+			store := store_mocks.NewMockStore(t)
+			store.EXPECT().TaskDelete("1").Return(nil).Once()
+			store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: state}, nil).Once()
+
+			pq := &persistentQueue{Queue: q, store: store}
+
+			task := genDummyTask()
+			assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+
+			got, err := pq.Poll(ctx, 1, filterFnTrue)
+			assert.NoError(t, err)
+			assert.Nil(t, got, "terminal workflow task must not be returned to the agent")
+
+			info := q.Info(ctx)
+			assert.Equal(t, 0, info.Stats.Pending)
+			assert.Equal(t, 0, info.Stats.Running)
+		})
+	}
+}
+
+// A task that is still present in the backup store and whose workflow is still
+// active is polled normally.
 func TestPersistentQueuePollReturnsLiveTask(t *testing.T) {
 	ctx, cancel, q := setupTestQueue(t)
 	defer cancel(nil)
 
 	store := store_mocks.NewMockStore(t)
 	store.EXPECT().TaskDelete("1").Return(nil).Once()
+	store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusPending}, nil).Once()
 
 	pq := &persistentQueue{Queue: q, store: store}
 
@@ -65,4 +125,46 @@ func TestPersistentQueuePollReturnsLiveTask(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, got)
 	assert.Equal(t, "1", got.ID)
+}
+
+func TestPersistentQueueDoneRemovesPendingTaskFromBackup(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().TaskDelete("1").Return(nil).Once()
+
+	pq := &persistentQueue{Queue: q, store: store}
+
+	task := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+	assert.NoError(t, pq.Done(ctx, task.ID, model.StatusSuccess))
+
+	info := q.Info(ctx)
+	assert.Equal(t, 0, info.Stats.Pending)
+	assert.Equal(t, 0, info.Stats.Running)
+}
+
+func TestPersistentQueueDoneIgnoresAlreadyRemovedBackupTask(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().TaskDelete("1").Return(nil).Once()
+	store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusPending}, nil).Once()
+	store.EXPECT().TaskDelete("1").Return(types.ErrRecordNotExist).Once()
+
+	pq := &persistentQueue{Queue: q, store: store}
+
+	task := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+
+	got, err := pq.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.NotNil(t, got)
+	assert.NoError(t, pq.Done(ctx, task.ID, model.StatusSuccess))
+
+	info := q.Info(ctx)
+	assert.Equal(t, 0, info.Stats.Pending)
+	assert.Equal(t, 0, info.Stats.Running)
 }
