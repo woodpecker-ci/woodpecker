@@ -15,6 +15,7 @@
 package api
 
 import (
+	"maps"
 	"net/http"
 	"strconv"
 
@@ -140,9 +141,12 @@ func PatchAgent(c *gin.Context) {
 
 	// Update allowed fields
 	agent.Name = in.Name
+	// the server applies the filters when an agent asks for work, so an agent
+	// waiting in a poll has to be kicked to pick up the new ones
+	filtersChanged := !maps.Equal(agent.Filters, in.Filters)
 	agent.Filters = in.Filters
 	agent.NoSchedule = in.NoSchedule
-	if agent.NoSchedule {
+	if agent.NoSchedule || filtersChanged {
 		server.Config.Services.Scheduler.KickAgentWorkers(agent.ID)
 	}
 
@@ -346,9 +350,12 @@ func PatchOrgAgent(c *gin.Context) {
 
 	// Update allowed fields
 	agent.Name = in.Name
+	// the server applies the filters when an agent asks for work, so an agent
+	// waiting in a poll has to be kicked to pick up the new ones
+	filtersChanged := !maps.Equal(agent.Filters, in.Filters)
 	agent.Filters = in.Filters
 	agent.NoSchedule = in.NoSchedule
-	if agent.NoSchedule {
+	if agent.NoSchedule || filtersChanged {
 		server.Config.Services.Scheduler.KickAgentWorkers(agent.ID)
 	}
 
