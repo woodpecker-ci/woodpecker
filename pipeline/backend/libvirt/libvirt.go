@@ -846,8 +846,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 	w.(*workflow).commands.Store(step.UUID, sshCmd)
 
-	// TODO: setting
-	{
+	if options.SSHConfig.Tty {
 		err := sshCmd.RequestPty("xterm", 40, 80, ssh.TerminalModes{})
 		if err != nil {
 			return err
@@ -874,7 +873,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	go func() {
 		select {
 		case <-ctx.Done():
-			err := e.TerminateSshCommand(client, sshCmd, guestOS, taskUUID, step.UUID)
+			err := e.TerminateSshCommand(options, client, sshCmd, guestOS, taskUUID, step.UUID)
 			if err != nil {
 				log.Debug().Msgf("Failed to terminate SSH command gracefully. Closing session by force. Error was: %s", err)
 				sshCmd.Close()
@@ -900,7 +899,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 // 1. send SIGINT... if that doesn't do it
 // 2. send SIGTERM... if that doesn't do it
 // 3. send the 'ctrl+c' character to stdin
-func (e *libvirt) TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, guestOS string, taskUUID string, stepUUID string) error {
+func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Client, sshCmd *goph.Cmd, guestOS string, taskUUID string, stepUUID string) error {
 	log.Debug().Msg("Context canceled, sending SIGINT to remote process")
 	err := sshCmd.Signal(ssh.SIGINT)
 	if err != nil {
@@ -924,30 +923,38 @@ func (e *libvirt) TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, gue
 		if err != nil {
 			return err
 		}
+
 		if running {
-			log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
-			w, ok := e.workflows.Load(taskUUID)
-			if !ok {
-				return fmt.Errorf("Could not find key %s for workflows", taskUUID)
-			}
+			if options.SSHConfig.Tty {
+				log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
+				w, ok := e.workflows.Load(taskUUID)
+				if !ok {
+					return fmt.Errorf("Could not find key %s for workflows", taskUUID)
+				}
 
-			p, ok := w.(*workflow).pipesStdIn.Load(stepUUID)
-			if !ok {
-				return fmt.Errorf("Could not find key %s for pipesStdIn", stepUUID)
-			}
+				p, ok := w.(*workflow).pipesStdIn.Load(stepUUID)
+				if !ok {
+					return fmt.Errorf("Could not find key %s for pipesStdIn", stepUUID)
+				}
 
-			p.(*pipes).pw.Write([]byte("\x03"))
-			time.Sleep(time.Second * 2)
-			p.(*pipes).pw.Close()
-			p.(*pipes).pr.Close()
+				p.(*pipes).pw.Write([]byte("\x03"))
+				time.Sleep(time.Second * 2)
+				p.(*pipes).pw.Close()
+				p.(*pipes).pr.Close()
 
-			// check if the process died
-			running, err := CheckSshPid(client, guestOS, stepUUID)
-			if err != nil {
-				return err
-			}
-			if running {
+				// check if the process died
+				running, err := CheckSshPid(client, guestOS, stepUUID)
+				if err != nil {
+					return err
+				}
+				if running {
+					return fmt.Errorf("Failed to stop SSH process!")
+				}
+
+			} else {
+				log.Debug().Msg("No tty allocated... skip sending Ctrl+c")
 				return fmt.Errorf("Failed to stop SSH process!")
+
 			}
 		}
 

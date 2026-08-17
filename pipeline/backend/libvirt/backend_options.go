@@ -19,6 +19,7 @@ type SSHConfig struct {
 	GuestInterface string `mapstructure:"guest_interface"`
 	// takes a duration string, such as "2m"
 	Timeout string `mapstructure:"timeout"`
+	Tty     bool   `mapstructure:"tty"`
 }
 
 type SharedDisk struct {
