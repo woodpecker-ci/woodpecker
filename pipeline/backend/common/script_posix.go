@@ -70,6 +70,7 @@ var setupScriptTmpl, _ = template.New("").Parse(setupScriptProto)
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScript = `
+set -m
 {
 	printf "%%s" "$$" > "${TMPDIR:-/tmp}/woodpecker_%s.pid"
 } || true
