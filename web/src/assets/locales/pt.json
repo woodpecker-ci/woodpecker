@@ -792,5 +792,8 @@
     "secret_extension_netrc_desc": "Envia as credenciais de netrc da forja para a extensão de segredos.",
     "extension_netrc": "Incluir credenciais netrc",
     "extension_netrc_desc": "Envia credenciais netrc da forja para a extensão.",
-    "delete": "Excluir"
+    "delete": "Excluir",
+    "allowed_orgs": "Organizações permitidas",
+    "allowed_orgs_desc": "Organizações cujos membros podem fazer login usando esta forja, além da configuração global WOODPECKER_ORGS.",
+    "allowed_orgs_placeholder": "Nome da organização"
 }
