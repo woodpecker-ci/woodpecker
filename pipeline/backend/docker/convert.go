@@ -52,7 +52,7 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) (*container.
 	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) > 0 {
-		env, entry, err := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
+		env, entry, err := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir, step.UUID)
 		if err != nil {
 			return config, err
 		}

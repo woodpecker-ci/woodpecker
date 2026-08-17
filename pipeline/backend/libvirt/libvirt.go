@@ -39,16 +39,18 @@ var (
 )
 
 type libvirt struct {
-	conn      *virt.Connect
-	workflows sync.Map
-	c         *cli.Command
-	os, arch  string
+	conn              *virt.Connect
+	workflows         sync.Map
+	c                 *cli.Command
+	os, arch, guestOS string
 }
 
 type workflow struct {
-	commands sync.Map
-	domains  sync.Map
-	pipes    sync.Map
+	commands    sync.Map
+	domains     sync.Map
+	pipes       sync.Map
+	doneChannel sync.Map
+	guestOS     sync.Map
 }
 
 type pipes struct {
@@ -289,24 +291,29 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 	}
 }
 
-func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]string, ephemeral bool, sharedDisk SharedDisk, taskUUID string, stepUUID string) (outDomain *virt.Domain, uuid string, err error) {
+func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]string, ephemeral bool, sharedDisk SharedDisk, taskUUID string, stepUUID string) (outDomain *virt.Domain, guestOS string, uuid string, err error) {
 	domain, err := e.conn.LookupDomainByName(image)
 
 	if err != nil {
-		return nil, "", err
+		return nil, "", "", err
 	}
 
 	defer domain.Free()
 
+	guestOS, err = getGuestOS(domain)
+	if err != nil {
+		return nil, "", "", err
+	}
+
 	// get the XML from the loaded domain
 	xml, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
 	if err != nil {
-		return nil, "", err
+		return nil, "", "", err
 	}
 	// parse the XML into etree
 	doc := etree.NewDocument()
 	if err := doc.ReadFromString(xml); err != nil {
-		return nil, "", err
+		return nil, "", "", err
 	}
 
 	if ephemeral {
@@ -337,7 +344,7 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 			baseImgName := fmt.Sprintf(baseImagePattern, devAttr.Value, taskUUID, stepUUID, filepath.Ext(fileAttr.Value))
 			newImg, err := e.FromBaseImage(ctx, fileAttr.Value, baseImgName, false)
 			if err != nil {
-				return nil, "", err
+				return nil, "", "", err
 			}
 			sourceEl.CreateAttr("file", newImg)
 		}
@@ -346,7 +353,7 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 	// get devices element
 	devices := doc.FindElement("/domain/devices")
 	if devices == nil {
-		return nil, "", fmt.Errorf("Could not find devices in domain XML")
+		return nil, "", "", fmt.Errorf("Could not find devices in domain XML")
 	}
 
 	// insert the shared disk if any
@@ -356,11 +363,11 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 		// generate the XML with the base image
 		sharedXml, err := e.EphemeralizeSharedDisk(ctx, &sharedDisk, taskUUID)
 		if err != nil {
-			return nil, "", err
+			return nil, "", "", err
 		}
 		sharedXmlDoc := etree.NewDocument()
 		if err := sharedXmlDoc.ReadFromString(sharedXml); err != nil {
-			return nil, "", err
+			return nil, "", "", err
 		}
 
 		uuid = sharedDisk.UUID
@@ -368,14 +375,10 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 		// insert
 		devices.AddChild(sharedXmlDoc.Root())
 	} else { // in absence of a config, create a disk from scratch (ntfs for windows, ext4 otherwise)
-		guestOS, err := getGuestOS(domain)
-		if err != nil {
-			return nil, "", err
-		}
 
 		domainType, err := GetDomainType(ctx, domain)
 		if err != nil {
-			return nil, "", err
+			return nil, "", "", err
 		}
 
 		diskSize, ok := env["LIBVIRT_DISK_SIZE"]
@@ -385,7 +388,7 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 
 		disk, diskUuid, err := e.CreateSharedDisk(ctx, guestOS, domainType, diskSize, taskUUID)
 		if err != nil {
-			return nil, "", err
+			return nil, "", "", err
 		}
 
 		// now cook up an XML config
@@ -419,7 +422,7 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 		// insert
 		sharedXmlDoc := etree.NewDocument()
 		if err := sharedXmlDoc.ReadFromString(newXml); err != nil {
-			return nil, "", err
+			return nil, "", "", err
 		}
 		devices.AddChild(sharedXmlDoc.Root())
 	}
@@ -427,12 +430,12 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 	newXml, err := doc.WriteToString()
 	log.Debug().Msgf("New domain XML: %s", newXml)
 	if err != nil {
-		return nil, "", err
+		return nil, "", "", err
 	}
 
 	domain, err = e.conn.DomainCreateXML(newXml, virt.DOMAIN_NONE)
 
-	return domain, uuid, err
+	return domain, uuid, guestOS, err
 }
 
 func (e *libvirt) FromBaseImage(ctx context.Context, baseImage string, targetImg string, overwrite bool) (string, error) {
@@ -536,9 +539,11 @@ func (e *libvirt) EphemeralizeSharedDisk(ctx context.Context, shared_disk *Share
 
 func (e *libvirt) SetupWorkflow(ctx context.Context, conf *backend_types.Config, taskUUID string) error {
 	e.workflows.Store(taskUUID, &workflow{
-		commands: sync.Map{},
-		domains:  sync.Map{},
-		pipes:    sync.Map{},
+		commands:    sync.Map{},
+		domains:     sync.Map{},
+		pipes:       sync.Map{},
+		doneChannel: sync.Map{},
+		guestOS:     sync.Map{},
 	})
 	return nil
 }
@@ -689,7 +694,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		log.Error().Err(err).Msg("could not parse backend options")
 	}
 
-	domain, uuid, err := e.LoadDomain(ctx, step.Image, step.Environment, options.Ephemeral, options.SharedDisk, taskUUID, step.UUID)
+	domain, uuid, guestOS, err := e.LoadDomain(ctx, step.Image, step.Environment, options.Ephemeral, options.SharedDisk, taskUUID, step.UUID)
 	if err != nil {
 		return err
 	}
@@ -700,13 +705,9 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	}
 
 	w.(*workflow).domains.Store(step.UUID, domain)
+	w.(*workflow).guestOS.Store(step.UUID, guestOS)
 
-	guestOS, err := getGuestOS(domain)
-	if err != nil {
-		return err
-	}
-
-	env, entry, err := common.GenerateSSHConf(step.Commands, guestOS, step.WorkingDir)
+	env, entry, err := common.GenerateSSHConf(step.Commands, guestOS, step.WorkingDir, step.UUID)
 	cmd := entry[0]
 	args := entry[1:]
 
@@ -843,8 +844,9 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 	w.(*workflow).commands.Store(step.UUID, sshCmd)
 
+	// TODO: setting
 	{
-		err := sshCmd.RequestPty("xterm", 80, 40, ssh.TerminalModes{})
+		err := sshCmd.RequestPty("xterm", 40, 80, ssh.TerminalModes{})
 		if err != nil {
 			return err
 		}
@@ -859,14 +861,15 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	w.(*workflow).pipes.Store(step.UUID, &pipes{pr, pw})
 
 	done := make(chan struct{})
+	w.(*workflow).doneChannel.Store(step.UUID, done)
 	// and a go routine that watches the ctx and then triggers a signal
 	go func() {
 		select {
 		case <-ctx.Done():
-			log.Debug().Msg("Context canceled, sending SIGINT to remote process")
-			err := sshCmd.Signal(ssh.SIGINT)
+			err := TerminateSshCommand(ctx, client, sshCmd, guestOS, step.UUID)
 			if err != nil {
-				log.Debug().Msgf("Failed to send SIGINT to remote process: %s", err)
+				log.Debug().Msg("Failed to terminate SSH command gracefully. Closing session by force.")
+				sshCmd.Close()
 			}
 		case <-done:
 		}
@@ -881,6 +884,90 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	}
 
 	return nil
+}
+
+// This tries to terminate the command we spawned, not the SSH session itself.
+// It does so, by:
+//
+// 1. send SIGINT... if that doesn't do it
+// 2. send SIGTERM... if that doesn't do it
+// 3. send the 'ctrl+c' character to stdin
+func TerminateSshCommand(ctx context.Context, client *goph.Client, sshCmd *goph.Cmd, guestOS string, stepUUID string) error {
+	log.Debug().Msg("Context canceled, sending SIGINT to remote process")
+	err := sshCmd.Signal(ssh.SIGINT)
+	if err != nil {
+		log.Debug().Msgf("Failed to send SIGINT to remote process: %s", err)
+	}
+
+	// check if the process died
+	ok, _ := CheckSshPid(ctx, client, guestOS, stepUUID)
+	if !ok {
+		log.Debug().Msg("SIGINT didn't work, trying SIGTERM")
+		err := sshCmd.Signal(ssh.SIGTERM)
+		if err != nil {
+			log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
+		}
+		ok, _ := CheckSshPid(ctx, client, guestOS, stepUUID)
+		if !ok {
+			log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
+			pr, pw := nio.Pipe(buffer.New(64 * 1024))
+			sshCmd.Stdin = pr
+			pw.Write([]byte("\x03"))
+			time.Sleep(time.Second * 2)
+			pw.Close()
+			pr.Close()
+
+			ok, _ := CheckSshPid(ctx, client, guestOS, stepUUID)
+			if !ok {
+				return fmt.Errorf("Failed to stop SSH process!")
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// (Re-)Check if the spawned process is still running with a timeout of 10s.
+func CheckSshPid(ctx context.Context, client *goph.Client, guestOS string, stepUUID string) (bool, error) {
+	maxBackOff, _ := time.ParseDuration("10s")
+
+	if guestOS == "windows" {
+		// TODO
+		return true, nil
+	} else {
+		sshCmd, err := client.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("'cat ${TMPDIR:-/tmp}/%s.pid'", stepUUID))
+		bytes, err := sshCmd.Output()
+		if err != nil {
+			return false, err
+		}
+		pid := string(bytes)
+
+		log.Debug().Msgf("Pid: %s", pid)
+
+		b, _ := backoff.Retry(ctx, func() (bool, error) {
+			sshCmd, err := client.CommandContext(ctx, "kill", "-0", pid)
+			if err != nil {
+				return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
+			}
+
+			sshErr := sshCmd.Run()
+			// if we can't figure out if it's running... assume it is
+			switch sshErr.(type) {
+			case *ssh.ExitMissingError:
+				return true, nil
+			case *exec.ExitError:
+				return false, nil
+			case nil:
+				return true, fmt.Errorf("Process still running")
+			default:
+				return true, nil
+			}
+
+		}, backoff.WithMaxElapsedTime(maxBackOff))
+
+		return b, nil
+	}
 }
 
 func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
@@ -904,7 +991,13 @@ func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUU
 		return nil, fmt.Errorf("Could not find key %s for commands", step.UUID)
 	}
 
+	done, ok := w.(*workflow).doneChannel.Load(step.UUID)
+	if !ok {
+		return nil, fmt.Errorf("Could not find key %s for doneChannel", step.UUID)
+	}
+
 	sshErr := sshCmd.(*goph.Cmd).Wait()
+	close(done.(chan struct{}))
 
 	switch e := sshErr.(type) {
 	case *ssh.ExitMissingError:

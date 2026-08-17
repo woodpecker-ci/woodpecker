@@ -255,7 +255,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if len(step.Commands) > 0 {
-		scriptEnv, command, err := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
+		scriptEnv, command, err := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir, step.UUID)
 		if err != nil {
 			return container, err
 		}

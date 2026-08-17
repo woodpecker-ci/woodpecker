@@ -20,7 +20,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 )
 
-func GenerateContainerConf(commands []string, osType, workDir string) (env map[string]string, entry []string, err error) {
+func GenerateContainerConf(commands []string, osType, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
@@ -34,7 +34,7 @@ func GenerateContainerConf(commands []string, osType, workDir string) (env map[s
 		// cspell:disable-next-line
 		entry = []string{"powershell", "-noprofile", "-noninteractive", "-encodedcommand", env["CI_SCRIPT"]}
 	} else {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir)))
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir, stepUUID)))
 		env["SHELL"] = "/bin/sh"
 		entry = []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
@@ -42,7 +42,7 @@ func GenerateContainerConf(commands []string, osType, workDir string) (env map[s
 	return env, entry, nil
 }
 
-func GenerateSSHConf(commands []string, osType, workDir string) (env map[string]string, entry []string, err error) {
+func GenerateSSHConf(commands []string, osType, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
@@ -56,10 +56,12 @@ func GenerateSSHConf(commands []string, osType, workDir string) (env map[string]
 		// cspell:disable-next-line
 		entry = []string{"powershell", "-noprofile", "-noninteractive", "-encodedcommand", env["CI_SCRIPT"]}
 	} else {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir)))
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir, stepUUID)))
 		env["SHELL"] = "/bin/sh"
 		entry = []string{"/bin/sh", "-c", "'echo $CI_SCRIPT | base64 -d | /bin/sh -e'"}
 	}
 
 	return env, entry, nil
 }
+
+// 		entry = []string{"/bin/sh", "-c", fmt.Sprintf("'echo $CI_SCRIPT | base64 -d | setsid nohup /bin/sh -e > /tmp/%s_stdout.log 2> /tmp/%s_stderr.log & echo $!'", stepUUID, stepUUID)}

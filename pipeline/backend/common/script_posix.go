@@ -24,7 +24,7 @@ import (
 
 // generateScriptPosix is a helper function that generates a step script
 // for a linux container using the given.
-func generateScriptPosix(commands []string, workDir string) string {
+func generateScriptPosix(commands []string, workDir string, stepUUID string) string {
 	var buf bytes.Buffer
 
 	if err := setupScriptTmpl.Execute(&buf, map[string]string{
@@ -38,6 +38,7 @@ func generateScriptPosix(commands []string, workDir string) string {
 		fmt.Fprintf(
 			&buf,
 			traceScript,
+			stepUUID,
 			shellescape.Quote(command),
 			command,
 		)
@@ -69,6 +70,9 @@ var setupScriptTmpl, _ = template.New("").Parse(setupScriptProto)
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScript = `
+{
+	printf "%%s" "$$" > "${TMPDIR:-/tmp}/%s.pid"
+} || true
 echo + %s
 %s
 `
