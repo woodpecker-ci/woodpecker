@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @anbraten, @gerbsen, @hasufell, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
+@6543, @AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @anbraten, @gerbsen, @hasufell, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
 
 ### 🔒 Security
 
@@ -29,6 +29,7 @@
 
 ### 🐛 Bug Fixes
 
+- Migrate modernize encryption service [[#6830](https://github.com/woodpecker-ci/woodpecker/pull/6830)]
 - Fix running multiple cmdlets on windows [[#6968](https://github.com/woodpecker-ci/woodpecker/pull/6968)]
 - server: drop stale queued tasks for terminal workflows [[#7015](https://github.com/woodpecker-ci/woodpecker/pull/7015)]
 - fix(gitlab): avoid N+1 member lookups in Repos() [[#6991](https://github.com/woodpecker-ci/woodpecker/pull/6991)]
