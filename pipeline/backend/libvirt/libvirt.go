@@ -866,7 +866,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	go func() {
 		select {
 		case <-ctx.Done():
-			err := TerminateSshCommand(ctx, client, sshCmd, guestOS, step.UUID)
+			err := TerminateSshCommand(client, sshCmd, guestOS, step.UUID)
 			if err != nil {
 				log.Debug().Msgf("Failed to terminate SSH command gracefully. Closing session by force. Error was: %s", err)
 				sshCmd.Close()
@@ -892,7 +892,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 // 1. send SIGINT... if that doesn't do it
 // 2. send SIGTERM... if that doesn't do it
 // 3. send the 'ctrl+c' character to stdin
-func TerminateSshCommand(ctx context.Context, client *goph.Client, sshCmd *goph.Cmd, guestOS string, stepUUID string) error {
+func TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, guestOS string, stepUUID string) error {
 	log.Debug().Msg("Context canceled, sending SIGINT to remote process")
 	err := sshCmd.Signal(ssh.SIGINT)
 	if err != nil {
@@ -900,7 +900,7 @@ func TerminateSshCommand(ctx context.Context, client *goph.Client, sshCmd *goph.
 	}
 
 	// check if the process died
-	ok, err := CheckSshPid(ctx, client, guestOS, stepUUID)
+	ok, err := CheckSshPid(client, guestOS, stepUUID)
 	if err != nil {
 		return err
 	}
@@ -912,7 +912,7 @@ func TerminateSshCommand(ctx context.Context, client *goph.Client, sshCmd *goph.
 		}
 
 		// check if the process died
-		ok, err := CheckSshPid(ctx, client, guestOS, stepUUID)
+		ok, err := CheckSshPid(client, guestOS, stepUUID)
 		if err != nil {
 			return err
 		}
@@ -926,7 +926,7 @@ func TerminateSshCommand(ctx context.Context, client *goph.Client, sshCmd *goph.
 			pr.Close()
 
 			// check if the process died
-			ok, err := CheckSshPid(ctx, client, guestOS, stepUUID)
+			ok, err := CheckSshPid(client, guestOS, stepUUID)
 			if err != nil {
 				return err
 			}
@@ -941,14 +941,14 @@ func TerminateSshCommand(ctx context.Context, client *goph.Client, sshCmd *goph.
 }
 
 // (Re-)Check if the spawned process is still running with a timeout of 10s.
-func CheckSshPid(ctx context.Context, client *goph.Client, guestOS string, stepUUID string) (bool, error) {
+func CheckSshPid(client *goph.Client, guestOS string, stepUUID string) (bool, error) {
 	maxBackOff, _ := time.ParseDuration("10s")
 
 	if guestOS == "windows" {
 		// TODO
 		return true, nil
 	} else {
-		sshCmd, err := client.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("'cat ${TMPDIR:-/tmp}/%s.pid'", stepUUID))
+		sshCmd, err := client.Command("/bin/sh", "-c", fmt.Sprintf("'cat ${TMPDIR:-/tmp}/%s.pid'", stepUUID))
 		if err != nil {
 			return false, err
 		}
@@ -960,8 +960,8 @@ func CheckSshPid(ctx context.Context, client *goph.Client, guestOS string, stepU
 
 		log.Debug().Msgf("Pid: %s", pid)
 
-		b, _ := backoff.Retry(ctx, func() (bool, error) {
-			sshCmd, err := client.CommandContext(ctx, "kill", "-0", pid)
+		b, _ := backoff.Retry(context.Background(), func() (bool, error) {
+			sshCmd, err := client.Command("kill", "-0", pid)
 			if err != nil {
 				return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
 			}
