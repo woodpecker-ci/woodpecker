@@ -22,6 +22,7 @@ import (
 	"maps"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -147,7 +148,10 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	)
 	agentConfigPersisted := atomic.Bool{}
 
-	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
+	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs(
+		"hostname", hostname,
+		"proto-version", strconv.Itoa(int(agent_rpc.ClientGrpcVersion)),
+	))
 
 	// check if grpc server version is compatible with agent
 	grpcServerVersion, err := client.Version(grpcCtx) //nolint:contextcheck
