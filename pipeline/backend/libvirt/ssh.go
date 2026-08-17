@@ -44,6 +44,7 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 	if err != nil {
 		return err
 	}
+	log.Debug().Msgf("PID: %s", pid)
 
 	// check if the process died
 	if guestOS == "windows" {
