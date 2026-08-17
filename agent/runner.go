@@ -204,7 +204,8 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	if doneCtx.Err() != nil {
 		shutdownCtx, shutdownCtxCancel := GetShutdownContext()
 		defer shutdownCtxCancel()
-		doneCtx = shutdownCtx
+		// keep the gRPC metadata
+		doneCtx = metadata.NewOutgoingContext(shutdownCtx, meta)
 	}
 
 	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
