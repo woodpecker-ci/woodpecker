@@ -97,34 +97,24 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 			}
 
 			if running {
-				if options.SSHConfig.Tty {
-					log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
-					w, ok := e.workflows.Load(taskUUID)
-					if !ok {
-						return fmt.Errorf("Could not find key %s for workflows", taskUUID)
-					}
+				log.Debug().Msg("SIGTERM didn't work, sending kill -9 manually")
 
-					p, ok := w.(*workflow).pipesStdIn.Load(stepUUID)
-					if !ok {
-						return fmt.Errorf("Could not find key %s for pipesStdIn", stepUUID)
-					}
+				// kill -9 pid
+				sshCmd, err := client.Command("kill", "-9", pid)
+				if err != nil {
+					return err
+				}
+				err = sshCmd.Run()
+				if err != nil {
+					return err
+				}
 
-					p.(*pipes).pw.Write([]byte("\x03"))
-					time.Sleep(time.Second * 2)
-					p.(*pipes).pw.Close()
-					p.(*pipes).pr.Close()
-
-					// check if the process died
-					running, err := CheckSshPid(pid, client, guestOS, stepUUID)
-					if err != nil {
-						return err
-					}
-					if running {
-						return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
-					}
-
-				} else {
-					log.Debug().Msg("No tty allocated... skip sending Ctrl+c")
+				// check if the process died
+				running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+				if err != nil {
+					return err
+				}
+				if running {
 					return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
 				}
 			}

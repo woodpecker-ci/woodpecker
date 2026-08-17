@@ -44,7 +44,6 @@ type workflow struct {
 	commands    sync.Map
 	domains     sync.Map
 	pipesStdOut sync.Map
-	pipesStdIn  sync.Map
 	doneChannel sync.Map
 	guestOS     sync.Map
 }
@@ -127,7 +126,6 @@ func (e *libvirt) SetupWorkflow(ctx context.Context, conf *backend_types.Config,
 		commands:    sync.Map{},
 		domains:     sync.Map{},
 		pipesStdOut: sync.Map{},
-		pipesStdIn:  sync.Map{},
 		doneChannel: sync.Map{},
 		guestOS:     sync.Map{},
 	})
@@ -314,12 +312,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	sshCmd.Stderr = pw
 	w.(*workflow).pipesStdOut.Store(step.UUID, &pipes{pr, pw})
 
-	{
-		pr, pw := nio.Pipe(buffer.New(64 * 1024))
-		sshCmd.Stdin = pr
-		w.(*workflow).pipesStdIn.Store(step.UUID, &pipes{pr, pw})
-	}
-
 	done := make(chan struct{})
 	w.(*workflow).doneChannel.Store(step.UUID, done)
 	// and a go routine that watches the ctx and then triggers a signal
@@ -336,6 +328,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		time.Sleep(time.Second * 5)
 		log.Debug().Msg("Closing write pipe end")
 		_ = pw.Close()
+		_ = pr.Close()
 	}()
 
 	err = sshCmd.Start()
@@ -424,17 +417,12 @@ func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUU
 		return nil, fmt.Errorf("Could not find key %s for pipesStdOut", step.UUID)
 	}
 
-	var once sync.Once
 	rc := struct {
 		io.Reader
 		io.Closer
 	}{
 		Reader: pOut.(*pipes).pr,
 		Closer: closerFunc(func() error {
-			log.Debug().Msgf("Output drained")
-			once.Do(func() {
-				pOut.(*pipes).pr.Close()
-			})
 			return nil
 		}),
 	}
