@@ -900,11 +900,11 @@ func TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, guestOS string, 
 	}
 
 	// check if the process died
-	ok, err := CheckSshPid(client, guestOS, stepUUID)
+	running, err := CheckSshPid(client, guestOS, stepUUID)
 	if err != nil {
 		return err
 	}
-	if !ok {
+	if running {
 		log.Debug().Msg("SIGINT didn't work, trying SIGTERM")
 		err := sshCmd.Signal(ssh.SIGTERM)
 		if err != nil {
@@ -912,11 +912,11 @@ func TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, guestOS string, 
 		}
 
 		// check if the process died
-		ok, err := CheckSshPid(client, guestOS, stepUUID)
+		running, err := CheckSshPid(client, guestOS, stepUUID)
 		if err != nil {
 			return err
 		}
-		if !ok {
+		if running {
 			log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
 			pr, pw := nio.Pipe(buffer.New(64 * 1024))
 			sshCmd.Stdin = pr
@@ -926,11 +926,11 @@ func TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, guestOS string, 
 			pr.Close()
 
 			// check if the process died
-			ok, err := CheckSshPid(client, guestOS, stepUUID)
+			running, err := CheckSshPid(client, guestOS, stepUUID)
 			if err != nil {
 				return err
 			}
-			if !ok {
+			if running {
 				return fmt.Errorf("Failed to stop SSH process!")
 			}
 		}
