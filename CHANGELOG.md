@@ -35,6 +35,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7018](https://github.com/woodpecker-ci/woodpecker/pull/7018)]
 - Update docs npm deps non-major [[#7010](https://github.com/woodpecker-ci/woodpecker/pull/7010)]
 - highlight the nodeSelector doesn't work by default [[#7007](https://github.com/woodpecker-ci/woodpecker/pull/7007)]
 - Update pnpm to v11.21.0 [[#6982](https://github.com/woodpecker-ci/woodpecker/pull/6982)]
@@ -46,6 +47,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/urfave/cli/v3 to v3.11.0 [[#7017](https://github.com/woodpecker-ci/woodpecker/pull/7017)]
 - Update web npm deps non-major [[#7009](https://github.com/woodpecker-ci/woodpecker/pull/7009)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.58.0 [[#7014](https://github.com/woodpecker-ci/woodpecker/pull/7014)]
 - Update postgres Docker tag to v18.6 [[#7011](https://github.com/woodpecker-ci/woodpecker/pull/7011)]
