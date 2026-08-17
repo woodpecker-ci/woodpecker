@@ -17,11 +17,10 @@ package encryption
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/sha3"
+	"encoding/hex"
 	"errors"
 	"fmt"
-
-	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/crypto/sha3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -31,11 +30,11 @@ func (svc *aesEncryptionService) loadCipher(password string) error {
 	if err != nil {
 		return fmt.Errorf(errTemplateAesFailedGeneratingKey, err)
 	}
-	keyHash, err := bcrypt.GenerateFromPassword(key, bcrypt.DefaultCost)
+	keyID, err := svc.deriveKeyID(key)
 	if err != nil {
 		return fmt.Errorf(errTemplateAesFailedGeneratingKeyID, err)
 	}
-	svc.keyID = string(keyHash)
+	svc.keyID = keyID
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -59,17 +58,42 @@ func (svc *aesEncryptionService) validateKey() error {
 	}
 
 	plaintext, err := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
+	if err != nil {
+		return errEncryptionKeyInvalid
+	}
 	if plaintext != svc.keyID {
 		return errEncryptionKeyInvalid
-	} else if err != nil {
-		return err
 	}
 	return nil
 }
 
+// deriveKeyID derives a deterministic, non-reversible identifier for the
+// encryption key. Domain separation ensures the id differs from the key
+// derivation of the password, so storing it (encrypted) leaks nothing about
+// the key itself. It must be deterministic: it is compared against the
+// sample stored in the database to validate the key across server restarts.
+func (svc *aesEncryptionService) deriveKeyID(key []byte) (string, error) {
+	result := make([]byte, 32)
+	sha := sha3.NewSHAKE256()
+
+	_, err := sha.Write([]byte(keyIDDomainSeparation))
+	if err != nil {
+		return "", fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
+	}
+	_, err = sha.Write(key)
+	if err != nil {
+		return "", fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
+	}
+	_, err = sha.Read(result)
+	if err != nil {
+		return "", fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
+	}
+	return hex.EncodeToString(result), nil
+}
+
 func (svc *aesEncryptionService) hash(data []byte) ([]byte, error) {
 	result := make([]byte, 32)
-	sha := sha3.NewShake256()
+	sha := sha3.NewSHAKE256()
 
 	_, err := sha.Write(data)
 	if err != nil {
