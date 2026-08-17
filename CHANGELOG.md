@@ -11,8 +11,13 @@
 - Update `golang.org/x/mod` [[#7012](https://github.com/woodpecker-ci/woodpecker/pull/7012)]
 - Change group identifier to full_path for GitLab [[#6950](https://github.com/woodpecker-ci/woodpecker/pull/6950)]
 
+### ✨ Features
+
+- Reject incompatible gRPC proto version agents [[#7028](https://github.com/woodpecker-ci/woodpecker/pull/7028)]
+
 ### 📈 Enhancement
 
+- Reject invalid started and done workflow states [[#7029](https://github.com/woodpecker-ci/woodpecker/pull/7029)]
 - Sort workflow files by name [[#7021](https://github.com/woodpecker-ci/woodpecker/pull/7021)]
 - Make command execution more robust on windows [[#6969](https://github.com/woodpecker-ci/woodpecker/pull/6969)]
 - Enforce one log entry per line with a unique index [[#7004](https://github.com/woodpecker-ci/woodpecker/pull/7004)]
@@ -30,7 +35,6 @@
 
 ### 🐛 Bug Fixes
 
-- Reject incompatible gRPC proto version agents [[#7028](https://github.com/woodpecker-ci/woodpecker/pull/7028)]
 - Migrate modernize encryption service [[#6830](https://github.com/woodpecker-ci/woodpecker/pull/6830)]
 - Fix running multiple cmdlets on windows [[#6968](https://github.com/woodpecker-ci/woodpecker/pull/6968)]
 - server: drop stale queued tasks for terminal workflows [[#7015](https://github.com/woodpecker-ci/woodpecker/pull/7015)]
