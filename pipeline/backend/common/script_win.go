@@ -21,7 +21,7 @@ import (
 	"text/template"
 )
 
-func generateScriptWindows(commands []string, workDir string) string {
+func generateScriptWindows(commands []string, workDir string, stepUUID string) string {
 	var buf bytes.Buffer
 
 	if err := setupScriptWinTmpl.Execute(&buf, map[string]string{
@@ -38,6 +38,7 @@ func generateScriptWindows(commands []string, workDir string) string {
 			&buf,
 			traceScriptWin,
 			escaped,
+			stepUUID,
 			command,
 		)
 	}
@@ -68,5 +69,6 @@ var setupScriptWinTmpl, _ = template.New("").Parse(setupScriptWinProto)
 // to trace a command.
 const traceScriptWin = `
 Write-Output ('+ %s');
+$PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline
 & %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `

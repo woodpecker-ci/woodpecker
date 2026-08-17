@@ -2,6 +2,7 @@ package libvirt
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/melbahja/goph"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/text/encoding/unicode"
 )
 
 func AdhocSSH(ctx context.Context, client *goph.Client, cmd string, args []string, taskUUID string, stepUUID string) error {
@@ -38,83 +40,171 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 		log.Debug().Msgf("Failed to send SIGINT to remote process: %s", err)
 	}
 
-	// check if the process died
-	running, err := CheckSshPid(client, guestOS, stepUUID)
+	pid, err := GetWoodpeckerPid(client, guestOS, stepUUID)
 	if err != nil {
 		return err
 	}
-	if running {
-		log.Debug().Msg("SIGINT didn't work, trying SIGTERM")
-		err := sshCmd.Signal(ssh.SIGTERM)
-		if err != nil {
-			log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
-		}
 
-		// check if the process died
-		running, err := CheckSshPid(client, guestOS, stepUUID)
+	// check if the process died
+	if guestOS == "windows" {
+		running, err := CheckSshPid(pid, client, guestOS, stepUUID)
 		if err != nil {
 			return err
 		}
-
 		if running {
-			if options.SSHConfig.Tty {
-				log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
-				w, ok := e.workflows.Load(taskUUID)
-				if !ok {
-					return fmt.Errorf("Could not find key %s for workflows", taskUUID)
+			// on windows... only SIGINT might work... otherwise we just try taskkill
+			rawCmd := fmt.Sprintf("taskkill /PID %s /F /T", pid)
+			encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+			utf16leBytes, err := encoder.Bytes([]byte(rawCmd))
+			if err != nil {
+				return err
+			}
+			base64Cmd := base64.StdEncoding.EncodeToString(utf16leBytes)
+			sshCmd, err := client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
+			if err != nil {
+				return err
+			}
+			err = sshCmd.Run()
+			if err != nil {
+				return err
+			}
+
+			running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+			if err != nil {
+				return err
+			}
+			if running {
+				return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
+			}
+
+		}
+	} else {
+		running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+		if err != nil {
+			return err
+		}
+		if running {
+			log.Debug().Msg("SIGINT didn't work, trying SIGTERM")
+			err := sshCmd.Signal(ssh.SIGTERM)
+			if err != nil {
+				log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
+			}
+
+			// check if the process died
+			running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+			if err != nil {
+				return err
+			}
+
+			if running {
+				if options.SSHConfig.Tty {
+					log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
+					w, ok := e.workflows.Load(taskUUID)
+					if !ok {
+						return fmt.Errorf("Could not find key %s for workflows", taskUUID)
+					}
+
+					p, ok := w.(*workflow).pipesStdIn.Load(stepUUID)
+					if !ok {
+						return fmt.Errorf("Could not find key %s for pipesStdIn", stepUUID)
+					}
+
+					p.(*pipes).pw.Write([]byte("\x03"))
+					time.Sleep(time.Second * 2)
+					p.(*pipes).pw.Close()
+					p.(*pipes).pr.Close()
+
+					// check if the process died
+					running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+					if err != nil {
+						return err
+					}
+					if running {
+						return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
+					}
+
+				} else {
+					log.Debug().Msg("No tty allocated... skip sending Ctrl+c")
+					return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
 				}
-
-				p, ok := w.(*workflow).pipesStdIn.Load(stepUUID)
-				if !ok {
-					return fmt.Errorf("Could not find key %s for pipesStdIn", stepUUID)
-				}
-
-				p.(*pipes).pw.Write([]byte("\x03"))
-				time.Sleep(time.Second * 2)
-				p.(*pipes).pw.Close()
-				p.(*pipes).pr.Close()
-
-				// check if the process died
-				running, err := CheckSshPid(client, guestOS, stepUUID)
-				if err != nil {
-					return err
-				}
-				if running {
-					return fmt.Errorf("Failed to stop SSH process!")
-				}
-
-			} else {
-				log.Debug().Msg("No tty allocated... skip sending Ctrl+c")
-				return fmt.Errorf("Failed to stop SSH process!")
-
 			}
 		}
-
 	}
 
 	return nil
 }
 
-// (Re-)Check if the spawned process is still running with a timeout of 10s.
-func CheckSshPid(client *goph.Client, guestOS string, stepUUID string) (bool, error) {
-	maxBackOff, _ := time.ParseDuration("10s")
-
+func GetWoodpeckerPid(client *goph.Client, guestOS string, stepUUID string) (string, error) {
 	if guestOS == "windows" {
-		// TODO
-		return true, nil
-	} else {
-		sshCmd, err := client.Command("/bin/sh", "-c", fmt.Sprintf("'cat ${TMPDIR:-/tmp}/%s.pid'", stepUUID))
+		rawCmd := fmt.Sprintf("Get-Content -Path $env:TEMP\\woodpecker_%s.pid -Raw", stepUUID)
+		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+		utf16leBytes, err := encoder.Bytes([]byte(rawCmd))
 		if err != nil {
-			return false, err
+			return "", err
+		}
+		base64Cmd := base64.StdEncoding.EncodeToString(utf16leBytes)
+
+		sshCmd, err := client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
+		if err != nil {
+			return "", err
 		}
 		bytes, err := sshCmd.Output()
 		if err != nil {
-			return false, err
+			return "", err
 		}
-		pid := string(bytes)
+		return string(bytes), nil
+	} else {
+		sshCmd, err := client.Command("/bin/sh", "-c", fmt.Sprintf("'cat ${TMPDIR:-/tmp}/woodpecker_%s.pid'", stepUUID))
+		if err != nil {
+			return "", err
+		}
+		bytes, err := sshCmd.Output()
+		if err != nil {
+			return "", err
+		}
+		return string(bytes), nil
+	}
+}
 
-		log.Debug().Msgf("Pid: %s", pid)
+// (Re-)Check if the spawned process is still running with a timeout of 10s.
+func CheckSshPid(pid string, client *goph.Client, guestOS string, stepUUID string) (bool, error) {
+	maxBackOff, _ := time.ParseDuration("10s")
+	if guestOS == "windows" {
+		b, _ := backoff.Retry(context.Background(), func() (bool, error) {
+			rawCmd := fmt.Sprintf("Get-Process -Id %s", pid)
+			encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+			utf16leBytes, err := encoder.Bytes([]byte(rawCmd))
+			if err != nil {
+				return true, err
+			}
+			base64Cmd := base64.StdEncoding.EncodeToString(utf16leBytes)
 
+			sshCmd, err := client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
+			if err != nil {
+				return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
+			}
+
+			sshErr := sshCmd.Run()
+			// if we can't figure out if it's running... assume it is
+			switch sshErr.(type) {
+			case *ssh.ExitMissingError:
+				log.Debug().Msgf("ExitMissingError in CheckSshPid: %s", sshErr)
+				return true, nil
+			case *ssh.ExitError:
+				log.Debug().Msgf("ExitError in CheckSshPid: %s", sshErr)
+				return false, nil
+			case nil:
+				return true, fmt.Errorf("Process still running")
+			default:
+				log.Debug().Msgf("Unexpected error in CheckSshPid: %s", sshErr)
+				return true, nil
+			}
+
+		}, backoff.WithMaxElapsedTime(maxBackOff))
+
+		return b, nil
+
+	} else {
 		b, _ := backoff.Retry(context.Background(), func() (bool, error) {
 			sshCmd, err := client.Command("kill", "-0", pid)
 			if err != nil {

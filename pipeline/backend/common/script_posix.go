@@ -71,7 +71,7 @@ var setupScriptTmpl, _ = template.New("").Parse(setupScriptProto)
 // to trace a command.
 const traceScript = `
 {
-	printf "%%s" "$$" > "${TMPDIR:-/tmp}/%s.pid"
+	printf "%%s" "$$" > "${TMPDIR:-/tmp}/woodpecker_%s.pid"
 } || true
 echo + %s
 %s
