@@ -67,7 +67,7 @@ func wrapInsert(c int64, err error) error {
 	return nil
 }
 
-func (s storage) paginate(p *model.ListOptions) *xorm.Session {
+func (s storage) paginate(p *model.ListOptionsWithAll) *xorm.Session {
 	if p == nil || p.All {
 		return s.engine.NewSession()
 	}

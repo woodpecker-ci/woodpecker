@@ -138,7 +138,6 @@ func TestBitbucket(t *testing.T) {
 	assert.Error(t, err)
 
 	listOpts := model.ListOptions{
-		All:     false,
 		Page:    1,
 		PerPage: 10,
 	}
