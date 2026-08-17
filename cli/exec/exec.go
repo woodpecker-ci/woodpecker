@@ -16,6 +16,7 @@ package exec
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -249,17 +250,13 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		},
 	}
 
-	items, err := b.Build()
+	plan, err := b.Build()
 	if err != nil {
 		str, fmtErr := lint.FormatLintError("pipeline", err, false)
 		fmt.Print(str)
 		if fmtErr != nil {
 			return fmtErr
 		}
-	}
-
-	if len(items) == 0 {
-		return fmt.Errorf("no workflows to execute (all filtered out)")
 	}
 
 	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
@@ -271,6 +268,49 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		return err
 	}
 
+	// The compile phase runs first and its output decides what the run phase
+	// looks like, so the run items built above are discarded and rebuilt from
+	// the merged config.
+	if len(plan.Compile) > 0 {
+		collector := newCompileCollector()
+		if err := runItems(ctx, c, backendEngine, plan.Compile, collector.logger()); err != nil {
+			return compilePhaseError(err)
+		}
+
+		emitted, err := collector.emitted()
+		if err != nil {
+			return compilePhaseError(err)
+		}
+
+		if yamls, err = mergeCompiled(yamls, emitted); err != nil {
+			return compilePhaseError(err)
+		}
+
+		b.Yamls = yamls
+		if plan, err = b.Build(); err != nil {
+			str, fmtErr := lint.FormatLintError("pipeline", err, false)
+			fmt.Print(str)
+			if fmtErr != nil {
+				return fmtErr
+			}
+		}
+		if len(plan.Compile) > 0 {
+			return compilePhaseError(errors.New("the compiled configuration declares a compile section"))
+		}
+	}
+
+	if len(plan.Run) == 0 {
+		return fmt.Errorf("no workflows to execute (all filtered out)")
+	}
+
+	return runItems(ctx, c, backendEngine, plan.Run, defaultLogger)
+}
+
+// runItems executes a set of workflows one after another and collects their
+// failures.
+func runItems(ctx context.Context, c *cli.Command, backendEngine backend_types.Backend,
+	items []*builder.Item, logger logging.Logger,
+) error {
 	var execErr error
 	// TODO: respect depends_on and run in parallel where possible
 	for _, item := range items {
@@ -285,7 +325,7 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		runtime := pipeline_runtime.New(
 			item.Config, backendEngine,
 			pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
-			pipeline_runtime.WithLogger(defaultLogger),
+			pipeline_runtime.WithLogger(logger),
 			pipeline_runtime.WithDescription(map[string]string{
 				"CLI": "exec",
 			}),

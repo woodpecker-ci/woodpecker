@@ -41,7 +41,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	}
 
 	// fetch the pipeline file from the database
-	configs, err := store.ConfigsForPipeline(currentPipeline.ID)
+	configs, err := store.SourceConfigsForPipeline(currentPipeline.ID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

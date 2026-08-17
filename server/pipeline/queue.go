@@ -70,6 +70,7 @@ func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineIte
 			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
+			Phase:   rpc.WorkflowPhase(item.Workflow.Phase),
 		})
 		if err != nil {
 			return nil, err

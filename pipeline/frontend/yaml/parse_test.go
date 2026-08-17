@@ -116,7 +116,41 @@ concurrency: 1
 		_, err := ParseString(sampleDeepYaml)
 		assert.NoError(t, err)
 	})
+
+	t.Run("Should unmarshal a compile section", func(t *testing.T) {
+		out, err := ParseString(sampleCompileYaml)
+		require.NoError(t, err)
+
+		require.Len(t, out.Compile.ContainerList, 1)
+		assert.Equal(t, "generate", out.Compile.ContainerList[0].Name)
+		assert.Equal(t, "alpine", out.Compile.ContainerList[0].Image)
+		assert.Equal(t, yaml_base_types.StringOrSlice{"./generate.sh"}, out.Compile.ContainerList[0].Commands)
+
+		// compile and steps are independent sections, not two views of one list
+		require.Len(t, out.Steps.ContainerList, 1)
+		assert.Equal(t, "test", out.Steps.ContainerList[0].Name)
+	})
+
+	t.Run("Should unmarshal a config without a compile section", func(t *testing.T) {
+		out, err := ParseString(sampleYaml)
+		require.NoError(t, err)
+		assert.Empty(t, out.Compile.ContainerList)
+	})
 }
+
+var sampleCompileYaml = `
+compile:
+  generate:
+    image: alpine
+    commands:
+      - ./generate.sh
+
+steps:
+  test:
+    image: golang
+    commands:
+      - go test ./...
+`
 
 func TestMatch(t *testing.T) {
 	matchConfig, err := ParseString(sampleYaml)

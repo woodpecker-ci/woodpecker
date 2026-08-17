@@ -19,6 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/agent/log"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -54,4 +55,33 @@ func TestLineWriter(t *testing.T) {
 	})
 
 	peer.AssertExpectations(t)
+}
+
+func TestLineWriterWithType(t *testing.T) {
+	peer := mocks.NewMockPeer(t)
+	var entries []*rpc.LogEntry
+	peer.On("EnqueueLog", mock.Anything).Run(func(args mock.Arguments) {
+		entry, ok := args.Get(0).(*rpc.LogEntry)
+		require.True(t, ok)
+		entries = append(entries, entry)
+	})
+
+	lw := log.NewLineWriter(peer, "step", "world")
+	typed := lw.WithType(rpc.LogEntryCompileConfig)
+
+	_, err := lw.Write([]byte("hello world\n"))
+	assert.NoError(t, err)
+	_, err = typed.Write([]byte("tagged world\n"))
+	assert.NoError(t, err)
+	_, err = lw.Write([]byte("plain again\n"))
+	assert.NoError(t, err)
+
+	// numbering is shared, or a log view interleaving both types would show
+	// duplicate line numbers
+	assert.Equal(t, []int{0, 1, 2}, []int{entries[0].Line, entries[1].Line, entries[2].Line})
+	assert.Equal(t, []int{rpc.LogEntryStdout, rpc.LogEntryCompileConfig, rpc.LogEntryStdout},
+		[]int{entries[0].Type, entries[1].Type, entries[2].Type})
+
+	// the typed writer masks like its parent
+	assert.Equal(t, []byte("tagged ********"), entries[1].Data)
 }

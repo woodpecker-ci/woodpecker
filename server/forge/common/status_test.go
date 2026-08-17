@@ -47,3 +47,32 @@ func TestGetPipelineStatusContext(t *testing.T) {
 	server.Config.Server.StatusContextFormat = "{{ .context }}:{{ .owner }}/{{ .repo }}:{{ .event }}:{{ .workflow }}"
 	assert.EqualValues(t, "ci:user1/repo1:push:lint", GetPipelineStatusContext(repo, pipeline, workflow))
 }
+
+// A compile workflow and an ordinary workflow may share a name. Without a way
+// to tell them apart the second to report would overwrite the first's commit
+// status (spec 5.6).
+func TestGetPipelineStatusContextCompile(t *testing.T) {
+	origFormat := server.Config.Server.StatusContextFormat
+	origCtx := server.Config.Server.StatusContext
+	defer func() {
+		server.Config.Server.StatusContextFormat = origFormat
+		server.Config.Server.StatusContext = origCtx
+	}()
+
+	repo := &model.Repo{Owner: "user1", Name: "repo1"}
+	pipeline := &model.Pipeline{Event: model.EventPush}
+
+	server.Config.Server.StatusContext = "ci/woodpecker"
+	server.Config.Server.StatusContextFormat = DefaultStatusContextFormat
+
+	run := &model.Workflow{Name: "build", Phase: model.WorkflowPhaseRun}
+	compile := &model.Workflow{Name: "build", Phase: model.WorkflowPhaseCompile}
+
+	assert.EqualValues(t, "ci/woodpecker/push/build", GetPipelineStatusContext(repo, pipeline, run),
+		"the default format stays byte-identical for every pipeline without a compile phase")
+	assert.EqualValues(t, "ci/woodpecker/push/compile/build", GetPipelineStatusContext(repo, pipeline, compile))
+
+	// a matrix axis still disambiguates on top
+	compile.AxisID = 2
+	assert.EqualValues(t, "ci/woodpecker/push/compile/build/2", GetPipelineStatusContext(repo, pipeline, compile))
+}

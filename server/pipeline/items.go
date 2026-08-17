@@ -35,7 +35,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) (builder.Plan, error) {
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
@@ -51,7 +51,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
 	secs, err := secretService.SecretListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
-		return nil, fmt.Errorf("error getting secrets for %s#%d: %w", repo.FullName, currentPipeline.Number, err)
+		return builder.Plan{}, fmt.Errorf("error getting secrets for %s#%d: %w", repo.FullName, currentPipeline.Number, err)
 	}
 
 	var secrets []compiler.Secret
@@ -72,7 +72,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline, netrc)
 	if err != nil {
-		return nil, fmt.Errorf("error getting registry credentials for %s#%d: %w", repo.FullName, currentPipeline.Number, err)
+		return builder.Plan{}, fmt.Errorf("error getting registry credentials for %s#%d: %w", repo.FullName, currentPipeline.Number, err)
 	}
 
 	var registries []compiler.Registry
@@ -92,7 +92,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	if environmentService != nil {
 		globals, err := environmentService.EnvironList(repo)
 		if err != nil {
-			return nil, fmt.Errorf("failed to list global environment for repo %s: %w", repo.FullName, err)
+			return builder.Plan{}, fmt.Errorf("failed to list global environment for repo %s: %w", repo.FullName, err)
 		}
 		for _, global := range globals {
 			envs[global.Name] = global.Value
@@ -182,9 +182,23 @@ func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Sto
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string, replaceExisting bool,
 ) (pipeline *model.Pipeline, items []*builder.Item, parseErr, err error) {
-	pipelineItems, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
+	plan, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(parseErr) {
 		return currentPipeline, nil, parseErr, nil
+	}
+
+	// The compile phase runs first and on its own. Its output decides what the
+	// run phase looks like, so the run workflows built here are discarded and
+	// rebuilt from the merged config once every compile workflow has finished.
+	// Persisting them now would give each one a forge commit status that could
+	// never be resolved if the merge changed the workflow set.
+	pipelineItems := plan.Run
+	if len(plan.Compile) > 0 {
+		pipelineItems = plan.Compile
+		currentPipeline.CompileState = model.CompileStateCompiling
+		if err := store.UpdatePipeline(currentPipeline); err != nil {
+			return currentPipeline, nil, parseErr, err
+		}
 	}
 
 	// An empty pipeline (e.g. everything filtered out) has no workflows to
@@ -267,6 +281,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 			State:      model.StatusPending,
 			Environ:    item.Workflow.Environ,
 			AxisID:     item.Workflow.AxisID,
+			Phase:      model.WorkflowPhase(item.Workflow.Phase),
 		}
 
 		if pipeline.Status == model.StatusBlocked {

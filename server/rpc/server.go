@@ -89,6 +89,7 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 	res.Workflow = new(proto.Workflow)
 	res.Workflow.Id = pipeline.ID
 	res.Workflow.Timeout = pipeline.Timeout
+	res.Workflow.Phase = string(pipeline.Phase)
 	res.Workflow.Payload, err = json.Marshal(pipeline.Config)
 
 	return res, err
@@ -131,8 +132,18 @@ func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*pro
 		Error:    req.GetState().GetError(),
 		Canceled: req.GetState().GetCanceled(),
 	}
+
+	var compileResult *rpc.CompileResult
+	if req.GetCompileResult() != nil {
+		configs := make([]rpc.CompileConfig, 0, len(req.GetCompileResult().GetConfigs()))
+		for _, config := range req.GetCompileResult().GetConfigs() {
+			configs = append(configs, rpc.CompileConfig{Name: config.GetName(), Data: config.GetData()})
+		}
+		compileResult = &rpc.CompileResult{Configs: configs, Error: req.GetCompileResult().GetError()}
+	}
+
 	res := new(proto.Empty)
-	err := s.peer.Done(c, req.GetId(), state)
+	err := s.peer.Done(c, req.GetId(), state, compileResult)
 	return res, err
 }
 

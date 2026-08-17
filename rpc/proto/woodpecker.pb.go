@@ -209,7 +209,7 @@ type LogEntry struct {
 	StepUuid      string                 `protobuf:"bytes,1,opt,name=step_uuid,json=stepUuid,proto3" json:"step_uuid,omitempty"`
 	Time          int64                  `protobuf:"varint,2,opt,name=time,proto3" json:"time,omitempty"`
 	Line          int32                  `protobuf:"varint,3,opt,name=line,proto3" json:"line,omitempty"`
-	Type          int32                  `protobuf:"varint,4,opt,name=type,proto3" json:"type,omitempty"` // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress
+	Type          int32                  `protobuf:"varint,4,opt,name=type,proto3" json:"type,omitempty"` // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress, 5 = compile-config
 	Data          []byte                 `protobuf:"bytes,5,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -325,10 +325,13 @@ func (x *Filter) GetLabels() map[string]string {
 }
 
 type Workflow struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Timeout       int64                  `protobuf:"varint,2,opt,name=timeout,proto3" json:"timeout,omitempty"`
-	Payload       []byte                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"`
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	Id      string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Timeout int64                  `protobuf:"varint,2,opt,name=timeout,proto3" json:"timeout,omitempty"`
+	Payload []byte                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"`
+	// Empty or "run" for an ordinary workflow, "compile" for one whose output is
+	// scanned for a config response.
+	Phase         string `protobuf:"bytes,4,opt,name=phase,proto3" json:"phase,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -384,6 +387,119 @@ func (x *Workflow) GetPayload() []byte {
 	return nil
 }
 
+func (x *Workflow) GetPhase() string {
+	if x != nil {
+		return x.Phase
+	}
+	return ""
+}
+
+type CompileConfig struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Empty data removes the config of that name from the pipeline.
+	Data          []byte `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompileConfig) Reset() {
+	*x = CompileConfig{}
+	mi := &file_woodpecker_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompileConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompileConfig) ProtoMessage() {}
+
+func (x *CompileConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_woodpecker_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompileConfig.ProtoReflect.Descriptor instead.
+func (*CompileConfig) Descriptor() ([]byte, []int) {
+	return file_woodpecker_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CompileConfig) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CompileConfig) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type CompileResult struct {
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	Configs []*CompileConfig       `protobuf:"bytes,1,rep,name=configs,proto3" json:"configs,omitempty"`
+	// Set when the response could not be read, e.g. a malformed block.
+	Error         string `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompileResult) Reset() {
+	*x = CompileResult{}
+	mi := &file_woodpecker_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompileResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompileResult) ProtoMessage() {}
+
+func (x *CompileResult) ProtoReflect() protoreflect.Message {
+	mi := &file_woodpecker_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompileResult.ProtoReflect.Descriptor instead.
+func (*CompileResult) Descriptor() ([]byte, []int) {
+	return file_woodpecker_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CompileResult) GetConfigs() []*CompileConfig {
+	if x != nil {
+		return x.Configs
+	}
+	return nil
+}
+
+func (x *CompileResult) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 type NextRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Filter        *Filter                `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter,omitempty"`
@@ -393,7 +509,7 @@ type NextRequest struct {
 
 func (x *NextRequest) Reset() {
 	*x = NextRequest{}
-	mi := &file_woodpecker_proto_msgTypes[5]
+	mi := &file_woodpecker_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -405,7 +521,7 @@ func (x *NextRequest) String() string {
 func (*NextRequest) ProtoMessage() {}
 
 func (x *NextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[5]
+	mi := &file_woodpecker_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -418,7 +534,7 @@ func (x *NextRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NextRequest.ProtoReflect.Descriptor instead.
 func (*NextRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{5}
+	return file_woodpecker_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *NextRequest) GetFilter() *Filter {
@@ -438,7 +554,7 @@ type InitRequest struct {
 
 func (x *InitRequest) Reset() {
 	*x = InitRequest{}
-	mi := &file_woodpecker_proto_msgTypes[6]
+	mi := &file_woodpecker_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -450,7 +566,7 @@ func (x *InitRequest) String() string {
 func (*InitRequest) ProtoMessage() {}
 
 func (x *InitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[6]
+	mi := &file_woodpecker_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -463,7 +579,7 @@ func (x *InitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitRequest.ProtoReflect.Descriptor instead.
 func (*InitRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{6}
+	return file_woodpecker_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *InitRequest) GetId() string {
@@ -489,7 +605,7 @@ type WaitRequest struct {
 
 func (x *WaitRequest) Reset() {
 	*x = WaitRequest{}
-	mi := &file_woodpecker_proto_msgTypes[7]
+	mi := &file_woodpecker_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -501,7 +617,7 @@ func (x *WaitRequest) String() string {
 func (*WaitRequest) ProtoMessage() {}
 
 func (x *WaitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[7]
+	mi := &file_woodpecker_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -514,7 +630,7 @@ func (x *WaitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaitRequest.ProtoReflect.Descriptor instead.
 func (*WaitRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{7}
+	return file_woodpecker_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *WaitRequest) GetId() string {
@@ -525,16 +641,19 @@ func (x *WaitRequest) GetId() string {
 }
 
 type DoneRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	State         *WorkflowState         `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	State *WorkflowState         `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	// Set by a compile workflow only. Absent means the workflow emitted no config
+	// response, which is not the same as an empty configs list.
+	CompileResult *CompileResult `protobuf:"bytes,3,opt,name=compile_result,json=compileResult,proto3,oneof" json:"compile_result,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DoneRequest) Reset() {
 	*x = DoneRequest{}
-	mi := &file_woodpecker_proto_msgTypes[8]
+	mi := &file_woodpecker_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -546,7 +665,7 @@ func (x *DoneRequest) String() string {
 func (*DoneRequest) ProtoMessage() {}
 
 func (x *DoneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[8]
+	mi := &file_woodpecker_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -559,7 +678,7 @@ func (x *DoneRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DoneRequest.ProtoReflect.Descriptor instead.
 func (*DoneRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{8}
+	return file_woodpecker_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DoneRequest) GetId() string {
@@ -576,6 +695,13 @@ func (x *DoneRequest) GetState() *WorkflowState {
 	return nil
 }
 
+func (x *DoneRequest) GetCompileResult() *CompileResult {
+	if x != nil {
+		return x.CompileResult
+	}
+	return nil
+}
+
 type ExtendRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -585,7 +711,7 @@ type ExtendRequest struct {
 
 func (x *ExtendRequest) Reset() {
 	*x = ExtendRequest{}
-	mi := &file_woodpecker_proto_msgTypes[9]
+	mi := &file_woodpecker_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -597,7 +723,7 @@ func (x *ExtendRequest) String() string {
 func (*ExtendRequest) ProtoMessage() {}
 
 func (x *ExtendRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[9]
+	mi := &file_woodpecker_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -610,7 +736,7 @@ func (x *ExtendRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExtendRequest.ProtoReflect.Descriptor instead.
 func (*ExtendRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{9}
+	return file_woodpecker_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ExtendRequest) GetId() string {
@@ -630,7 +756,7 @@ type UpdateRequest struct {
 
 func (x *UpdateRequest) Reset() {
 	*x = UpdateRequest{}
-	mi := &file_woodpecker_proto_msgTypes[10]
+	mi := &file_woodpecker_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -642,7 +768,7 @@ func (x *UpdateRequest) String() string {
 func (*UpdateRequest) ProtoMessage() {}
 
 func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[10]
+	mi := &file_woodpecker_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -655,7 +781,7 @@ func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{10}
+	return file_woodpecker_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UpdateRequest) GetId() string {
@@ -681,7 +807,7 @@ type LogRequest struct {
 
 func (x *LogRequest) Reset() {
 	*x = LogRequest{}
-	mi := &file_woodpecker_proto_msgTypes[11]
+	mi := &file_woodpecker_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -693,7 +819,7 @@ func (x *LogRequest) String() string {
 func (*LogRequest) ProtoMessage() {}
 
 func (x *LogRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[11]
+	mi := &file_woodpecker_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -706,7 +832,7 @@ func (x *LogRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogRequest.ProtoReflect.Descriptor instead.
 func (*LogRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{11}
+	return file_woodpecker_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *LogRequest) GetLogEntries() []*LogEntry {
@@ -724,7 +850,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_woodpecker_proto_msgTypes[12]
+	mi := &file_woodpecker_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -736,7 +862,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[12]
+	mi := &file_woodpecker_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -749,7 +875,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{12}
+	return file_woodpecker_proto_rawDescGZIP(), []int{14}
 }
 
 type ReportHealthRequest struct {
@@ -761,7 +887,7 @@ type ReportHealthRequest struct {
 
 func (x *ReportHealthRequest) Reset() {
 	*x = ReportHealthRequest{}
-	mi := &file_woodpecker_proto_msgTypes[13]
+	mi := &file_woodpecker_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -773,7 +899,7 @@ func (x *ReportHealthRequest) String() string {
 func (*ReportHealthRequest) ProtoMessage() {}
 
 func (x *ReportHealthRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[13]
+	mi := &file_woodpecker_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -786,7 +912,7 @@ func (x *ReportHealthRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportHealthRequest.ProtoReflect.Descriptor instead.
 func (*ReportHealthRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{13}
+	return file_woodpecker_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ReportHealthRequest) GetStatus() string {
@@ -809,7 +935,7 @@ type AgentInfo struct {
 
 func (x *AgentInfo) Reset() {
 	*x = AgentInfo{}
-	mi := &file_woodpecker_proto_msgTypes[14]
+	mi := &file_woodpecker_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -821,7 +947,7 @@ func (x *AgentInfo) String() string {
 func (*AgentInfo) ProtoMessage() {}
 
 func (x *AgentInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[14]
+	mi := &file_woodpecker_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -834,7 +960,7 @@ func (x *AgentInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentInfo.ProtoReflect.Descriptor instead.
 func (*AgentInfo) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{14}
+	return file_woodpecker_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *AgentInfo) GetPlatform() string {
@@ -881,7 +1007,7 @@ type RegisterAgentRequest struct {
 
 func (x *RegisterAgentRequest) Reset() {
 	*x = RegisterAgentRequest{}
-	mi := &file_woodpecker_proto_msgTypes[15]
+	mi := &file_woodpecker_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -893,7 +1019,7 @@ func (x *RegisterAgentRequest) String() string {
 func (*RegisterAgentRequest) ProtoMessage() {}
 
 func (x *RegisterAgentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[15]
+	mi := &file_woodpecker_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -906,7 +1032,7 @@ func (x *RegisterAgentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterAgentRequest.ProtoReflect.Descriptor instead.
 func (*RegisterAgentRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{15}
+	return file_woodpecker_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *RegisterAgentRequest) GetInfo() *AgentInfo {
@@ -926,7 +1052,7 @@ type VersionResponse struct {
 
 func (x *VersionResponse) Reset() {
 	*x = VersionResponse{}
-	mi := &file_woodpecker_proto_msgTypes[16]
+	mi := &file_woodpecker_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -938,7 +1064,7 @@ func (x *VersionResponse) String() string {
 func (*VersionResponse) ProtoMessage() {}
 
 func (x *VersionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[16]
+	mi := &file_woodpecker_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -951,7 +1077,7 @@ func (x *VersionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VersionResponse.ProtoReflect.Descriptor instead.
 func (*VersionResponse) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{16}
+	return file_woodpecker_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *VersionResponse) GetGrpcVersion() int32 {
@@ -977,7 +1103,7 @@ type NextResponse struct {
 
 func (x *NextResponse) Reset() {
 	*x = NextResponse{}
-	mi := &file_woodpecker_proto_msgTypes[17]
+	mi := &file_woodpecker_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -989,7 +1115,7 @@ func (x *NextResponse) String() string {
 func (*NextResponse) ProtoMessage() {}
 
 func (x *NextResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[17]
+	mi := &file_woodpecker_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1002,7 +1128,7 @@ func (x *NextResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NextResponse.ProtoReflect.Descriptor instead.
 func (*NextResponse) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{17}
+	return file_woodpecker_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *NextResponse) GetWorkflow() *Workflow {
@@ -1021,7 +1147,7 @@ type RegisterAgentResponse struct {
 
 func (x *RegisterAgentResponse) Reset() {
 	*x = RegisterAgentResponse{}
-	mi := &file_woodpecker_proto_msgTypes[18]
+	mi := &file_woodpecker_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1033,7 +1159,7 @@ func (x *RegisterAgentResponse) String() string {
 func (*RegisterAgentResponse) ProtoMessage() {}
 
 func (x *RegisterAgentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[18]
+	mi := &file_woodpecker_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1046,7 +1172,7 @@ func (x *RegisterAgentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterAgentResponse.ProtoReflect.Descriptor instead.
 func (*RegisterAgentResponse) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{18}
+	return file_woodpecker_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *RegisterAgentResponse) GetAgentId() int64 {
@@ -1065,7 +1191,7 @@ type WaitResponse struct {
 
 func (x *WaitResponse) Reset() {
 	*x = WaitResponse{}
-	mi := &file_woodpecker_proto_msgTypes[19]
+	mi := &file_woodpecker_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1077,7 +1203,7 @@ func (x *WaitResponse) String() string {
 func (*WaitResponse) ProtoMessage() {}
 
 func (x *WaitResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[19]
+	mi := &file_woodpecker_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1090,7 +1216,7 @@ func (x *WaitResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaitResponse.ProtoReflect.Descriptor instead.
 func (*WaitResponse) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{19}
+	return file_woodpecker_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *WaitResponse) GetCanceled() bool {
@@ -1110,7 +1236,7 @@ type AuthRequest struct {
 
 func (x *AuthRequest) Reset() {
 	*x = AuthRequest{}
-	mi := &file_woodpecker_proto_msgTypes[20]
+	mi := &file_woodpecker_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1122,7 +1248,7 @@ func (x *AuthRequest) String() string {
 func (*AuthRequest) ProtoMessage() {}
 
 func (x *AuthRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[20]
+	mi := &file_woodpecker_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1135,7 +1261,7 @@ func (x *AuthRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthRequest.ProtoReflect.Descriptor instead.
 func (*AuthRequest) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{20}
+	return file_woodpecker_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *AuthRequest) GetAgentToken() string {
@@ -1163,7 +1289,7 @@ type AuthResponse struct {
 
 func (x *AuthResponse) Reset() {
 	*x = AuthResponse{}
-	mi := &file_woodpecker_proto_msgTypes[21]
+	mi := &file_woodpecker_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1175,7 +1301,7 @@ func (x *AuthResponse) String() string {
 func (*AuthResponse) ProtoMessage() {}
 
 func (x *AuthResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_woodpecker_proto_msgTypes[21]
+	mi := &file_woodpecker_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1188,7 +1314,7 @@ func (x *AuthResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthResponse.ProtoReflect.Descriptor instead.
 func (*AuthResponse) Descriptor() ([]byte, []int) {
-	return file_woodpecker_proto_rawDescGZIP(), []int{21}
+	return file_woodpecker_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *AuthResponse) GetStatus() string {
@@ -1241,21 +1367,30 @@ const file_woodpecker_proto_rawDesc = "" +
 	"\x06labels\x18\x01 \x03(\v2\x19.proto.Filter.LabelsEntryR\x06labels\x1a9\n" +
 	"\vLabelsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"N\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"d\n" +
 	"\bWorkflow\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\atimeout\x18\x02 \x01(\x03R\atimeout\x12\x18\n" +
-	"\apayload\x18\x03 \x01(\fR\apayload\"4\n" +
+	"\apayload\x18\x03 \x01(\fR\apayload\x12\x14\n" +
+	"\x05phase\x18\x04 \x01(\tR\x05phase\"7\n" +
+	"\rCompileConfig\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\"U\n" +
+	"\rCompileResult\x12.\n" +
+	"\aconfigs\x18\x01 \x03(\v2\x14.proto.CompileConfigR\aconfigs\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"4\n" +
 	"\vNextRequest\x12%\n" +
 	"\x06filter\x18\x01 \x01(\v2\r.proto.FilterR\x06filter\"I\n" +
 	"\vInitRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12*\n" +
 	"\x05state\x18\x02 \x01(\v2\x14.proto.WorkflowStateR\x05state\"\x1d\n" +
 	"\vWaitRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"I\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x9e\x01\n" +
 	"\vDoneRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12*\n" +
-	"\x05state\x18\x02 \x01(\v2\x14.proto.WorkflowStateR\x05state\"\x1f\n" +
+	"\x05state\x18\x02 \x01(\v2\x14.proto.WorkflowStateR\x05state\x12@\n" +
+	"\x0ecompile_result\x18\x03 \x01(\v2\x14.proto.CompileResultH\x00R\rcompileResult\x88\x01\x01B\x11\n" +
+	"\x0f_compile_result\"\x1f\n" +
 	"\rExtendRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"G\n" +
 	"\rUpdateRequest\x12\x0e\n" +
@@ -1325,72 +1460,76 @@ func file_woodpecker_proto_rawDescGZIP() []byte {
 	return file_woodpecker_proto_rawDescData
 }
 
-var file_woodpecker_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_woodpecker_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_woodpecker_proto_goTypes = []any{
 	(*StepState)(nil),             // 0: proto.StepState
 	(*WorkflowState)(nil),         // 1: proto.WorkflowState
 	(*LogEntry)(nil),              // 2: proto.LogEntry
 	(*Filter)(nil),                // 3: proto.Filter
 	(*Workflow)(nil),              // 4: proto.Workflow
-	(*NextRequest)(nil),           // 5: proto.NextRequest
-	(*InitRequest)(nil),           // 6: proto.InitRequest
-	(*WaitRequest)(nil),           // 7: proto.WaitRequest
-	(*DoneRequest)(nil),           // 8: proto.DoneRequest
-	(*ExtendRequest)(nil),         // 9: proto.ExtendRequest
-	(*UpdateRequest)(nil),         // 10: proto.UpdateRequest
-	(*LogRequest)(nil),            // 11: proto.LogRequest
-	(*Empty)(nil),                 // 12: proto.Empty
-	(*ReportHealthRequest)(nil),   // 13: proto.ReportHealthRequest
-	(*AgentInfo)(nil),             // 14: proto.AgentInfo
-	(*RegisterAgentRequest)(nil),  // 15: proto.RegisterAgentRequest
-	(*VersionResponse)(nil),       // 16: proto.VersionResponse
-	(*NextResponse)(nil),          // 17: proto.NextResponse
-	(*RegisterAgentResponse)(nil), // 18: proto.RegisterAgentResponse
-	(*WaitResponse)(nil),          // 19: proto.WaitResponse
-	(*AuthRequest)(nil),           // 20: proto.AuthRequest
-	(*AuthResponse)(nil),          // 21: proto.AuthResponse
-	nil,                           // 22: proto.Filter.LabelsEntry
-	nil,                           // 23: proto.AgentInfo.CustomLabelsEntry
+	(*CompileConfig)(nil),         // 5: proto.CompileConfig
+	(*CompileResult)(nil),         // 6: proto.CompileResult
+	(*NextRequest)(nil),           // 7: proto.NextRequest
+	(*InitRequest)(nil),           // 8: proto.InitRequest
+	(*WaitRequest)(nil),           // 9: proto.WaitRequest
+	(*DoneRequest)(nil),           // 10: proto.DoneRequest
+	(*ExtendRequest)(nil),         // 11: proto.ExtendRequest
+	(*UpdateRequest)(nil),         // 12: proto.UpdateRequest
+	(*LogRequest)(nil),            // 13: proto.LogRequest
+	(*Empty)(nil),                 // 14: proto.Empty
+	(*ReportHealthRequest)(nil),   // 15: proto.ReportHealthRequest
+	(*AgentInfo)(nil),             // 16: proto.AgentInfo
+	(*RegisterAgentRequest)(nil),  // 17: proto.RegisterAgentRequest
+	(*VersionResponse)(nil),       // 18: proto.VersionResponse
+	(*NextResponse)(nil),          // 19: proto.NextResponse
+	(*RegisterAgentResponse)(nil), // 20: proto.RegisterAgentResponse
+	(*WaitResponse)(nil),          // 21: proto.WaitResponse
+	(*AuthRequest)(nil),           // 22: proto.AuthRequest
+	(*AuthResponse)(nil),          // 23: proto.AuthResponse
+	nil,                           // 24: proto.Filter.LabelsEntry
+	nil,                           // 25: proto.AgentInfo.CustomLabelsEntry
 }
 var file_woodpecker_proto_depIdxs = []int32{
-	22, // 0: proto.Filter.labels:type_name -> proto.Filter.LabelsEntry
-	3,  // 1: proto.NextRequest.filter:type_name -> proto.Filter
-	1,  // 2: proto.InitRequest.state:type_name -> proto.WorkflowState
-	1,  // 3: proto.DoneRequest.state:type_name -> proto.WorkflowState
-	0,  // 4: proto.UpdateRequest.state:type_name -> proto.StepState
-	2,  // 5: proto.LogRequest.logEntries:type_name -> proto.LogEntry
-	23, // 6: proto.AgentInfo.customLabels:type_name -> proto.AgentInfo.CustomLabelsEntry
-	14, // 7: proto.RegisterAgentRequest.info:type_name -> proto.AgentInfo
-	4,  // 8: proto.NextResponse.workflow:type_name -> proto.Workflow
-	12, // 9: proto.Woodpecker.Version:input_type -> proto.Empty
-	5,  // 10: proto.Woodpecker.Next:input_type -> proto.NextRequest
-	6,  // 11: proto.Woodpecker.Init:input_type -> proto.InitRequest
-	7,  // 12: proto.Woodpecker.Wait:input_type -> proto.WaitRequest
-	8,  // 13: proto.Woodpecker.Done:input_type -> proto.DoneRequest
-	9,  // 14: proto.Woodpecker.Extend:input_type -> proto.ExtendRequest
-	10, // 15: proto.Woodpecker.Update:input_type -> proto.UpdateRequest
-	11, // 16: proto.Woodpecker.Log:input_type -> proto.LogRequest
-	15, // 17: proto.Woodpecker.RegisterAgent:input_type -> proto.RegisterAgentRequest
-	12, // 18: proto.Woodpecker.UnregisterAgent:input_type -> proto.Empty
-	13, // 19: proto.Woodpecker.ReportHealth:input_type -> proto.ReportHealthRequest
-	20, // 20: proto.WoodpeckerAuth.Auth:input_type -> proto.AuthRequest
-	16, // 21: proto.Woodpecker.Version:output_type -> proto.VersionResponse
-	17, // 22: proto.Woodpecker.Next:output_type -> proto.NextResponse
-	12, // 23: proto.Woodpecker.Init:output_type -> proto.Empty
-	19, // 24: proto.Woodpecker.Wait:output_type -> proto.WaitResponse
-	12, // 25: proto.Woodpecker.Done:output_type -> proto.Empty
-	12, // 26: proto.Woodpecker.Extend:output_type -> proto.Empty
-	12, // 27: proto.Woodpecker.Update:output_type -> proto.Empty
-	12, // 28: proto.Woodpecker.Log:output_type -> proto.Empty
-	18, // 29: proto.Woodpecker.RegisterAgent:output_type -> proto.RegisterAgentResponse
-	12, // 30: proto.Woodpecker.UnregisterAgent:output_type -> proto.Empty
-	12, // 31: proto.Woodpecker.ReportHealth:output_type -> proto.Empty
-	21, // 32: proto.WoodpeckerAuth.Auth:output_type -> proto.AuthResponse
-	21, // [21:33] is the sub-list for method output_type
-	9,  // [9:21] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	24, // 0: proto.Filter.labels:type_name -> proto.Filter.LabelsEntry
+	5,  // 1: proto.CompileResult.configs:type_name -> proto.CompileConfig
+	3,  // 2: proto.NextRequest.filter:type_name -> proto.Filter
+	1,  // 3: proto.InitRequest.state:type_name -> proto.WorkflowState
+	1,  // 4: proto.DoneRequest.state:type_name -> proto.WorkflowState
+	6,  // 5: proto.DoneRequest.compile_result:type_name -> proto.CompileResult
+	0,  // 6: proto.UpdateRequest.state:type_name -> proto.StepState
+	2,  // 7: proto.LogRequest.logEntries:type_name -> proto.LogEntry
+	25, // 8: proto.AgentInfo.customLabels:type_name -> proto.AgentInfo.CustomLabelsEntry
+	16, // 9: proto.RegisterAgentRequest.info:type_name -> proto.AgentInfo
+	4,  // 10: proto.NextResponse.workflow:type_name -> proto.Workflow
+	14, // 11: proto.Woodpecker.Version:input_type -> proto.Empty
+	7,  // 12: proto.Woodpecker.Next:input_type -> proto.NextRequest
+	8,  // 13: proto.Woodpecker.Init:input_type -> proto.InitRequest
+	9,  // 14: proto.Woodpecker.Wait:input_type -> proto.WaitRequest
+	10, // 15: proto.Woodpecker.Done:input_type -> proto.DoneRequest
+	11, // 16: proto.Woodpecker.Extend:input_type -> proto.ExtendRequest
+	12, // 17: proto.Woodpecker.Update:input_type -> proto.UpdateRequest
+	13, // 18: proto.Woodpecker.Log:input_type -> proto.LogRequest
+	17, // 19: proto.Woodpecker.RegisterAgent:input_type -> proto.RegisterAgentRequest
+	14, // 20: proto.Woodpecker.UnregisterAgent:input_type -> proto.Empty
+	15, // 21: proto.Woodpecker.ReportHealth:input_type -> proto.ReportHealthRequest
+	22, // 22: proto.WoodpeckerAuth.Auth:input_type -> proto.AuthRequest
+	18, // 23: proto.Woodpecker.Version:output_type -> proto.VersionResponse
+	19, // 24: proto.Woodpecker.Next:output_type -> proto.NextResponse
+	14, // 25: proto.Woodpecker.Init:output_type -> proto.Empty
+	21, // 26: proto.Woodpecker.Wait:output_type -> proto.WaitResponse
+	14, // 27: proto.Woodpecker.Done:output_type -> proto.Empty
+	14, // 28: proto.Woodpecker.Extend:output_type -> proto.Empty
+	14, // 29: proto.Woodpecker.Update:output_type -> proto.Empty
+	14, // 30: proto.Woodpecker.Log:output_type -> proto.Empty
+	20, // 31: proto.Woodpecker.RegisterAgent:output_type -> proto.RegisterAgentResponse
+	14, // 32: proto.Woodpecker.UnregisterAgent:output_type -> proto.Empty
+	14, // 33: proto.Woodpecker.ReportHealth:output_type -> proto.Empty
+	23, // 34: proto.WoodpeckerAuth.Auth:output_type -> proto.AuthResponse
+	23, // [23:35] is the sub-list for method output_type
+	11, // [11:23] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_woodpecker_proto_init() }
@@ -1398,13 +1537,14 @@ func file_woodpecker_proto_init() {
 	if File_woodpecker_proto != nil {
 		return
 	}
+	file_woodpecker_proto_msgTypes[10].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_woodpecker_proto_rawDesc), len(file_woodpecker_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   24,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

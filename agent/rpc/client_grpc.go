@@ -56,6 +56,10 @@ type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
 	logs   chan *proto.LogEntry
+	// flush carries a completion channel to processLogs. The batcher closes it
+	// once the queued entries have been handed to the server, which lets
+	// FlushLogs block until the drain is done.
+	flush chan chan struct{}
 	// connectionRetryTimeout is the maximum time to wait for a connection to be
 	// restored before the agent gives up and exits. Zero means infinite.
 	// Maps directly onto backoff.WithMaxElapsedTime.
@@ -77,6 +81,7 @@ func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn, opts ...ClientOpt
 	}
 
 	client.logs = make(chan *proto.LogEntry, client.logEntryBufferSize) // max memory use: buffer count * 1 MiB
+	client.flush = make(chan chan struct{})
 
 	go client.processLogs(ctx)
 	return client
@@ -243,6 +248,7 @@ func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, er
 	w := &rpc.Workflow{
 		ID:      res.GetWorkflow().GetId(),
 		Timeout: res.GetWorkflow().GetTimeout(),
+		Phase:   rpc.WorkflowPhase(res.GetWorkflow().GetPhase()),
 		Config:  new(backend_types.Config),
 	}
 	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
@@ -294,7 +300,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 }
 
 // Done let agent signal to server the workflow has stopped.
-func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) error {
+func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState, compileResult *rpc.CompileResult) error {
 	req := &proto.DoneRequest{
 		Id: workflowID,
 		State: &proto.WorkflowState{
@@ -303,6 +309,14 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 			Error:    state.Error,
 			Canceled: state.Canceled,
 		},
+	}
+
+	if compileResult != nil {
+		configs := make([]*proto.CompileConfig, 0, len(compileResult.Configs))
+		for _, config := range compileResult.Configs {
+			configs = append(configs, &proto.CompileConfig{Name: config.Name, Data: config.Data})
+		}
+		req.CompileResult = &proto.CompileResult{Configs: configs, Error: compileResult.Error}
 	}
 
 	_, err := retryRPC(ctx, c, "done", func() (*proto.Empty, error) {
@@ -366,6 +380,25 @@ func (c *client) EnqueueLog(logEntry *rpc.LogEntry) {
 	}
 }
 
+// FlushLogs drains the batcher and blocks until the queued entries have been
+// handed to the server.
+func (c *client) FlushLogs(ctx context.Context) error {
+	done := make(chan struct{})
+
+	select {
+	case c.flush <- done:
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+
+	select {
+	case <-done:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
 func (c *client) processLogs(ctx context.Context) {
 	var entries []*proto.LogEntry
 	var bytes int
@@ -406,6 +439,22 @@ func (c *client) processLogs(ctx context.Context) {
 			if bytes >= maxLogBatchSize {
 				send()
 			}
+
+		case done := <-c.flush:
+			// Entries already queued must be part of this flush, but select
+			// picks between ready cases at random, so pull them in explicitly
+			// before sending.
+			for drained := false; !drained; {
+				select {
+				case entry := <-c.logs:
+					entries = append(entries, entry)
+					bytes += grpc_proto.Size(entry)
+				default:
+					drained = true
+				}
+			}
+			send()
+			close(done)
 
 		case <-time.After(maxLogFlushPeriod):
 			send()

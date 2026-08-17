@@ -17,6 +17,15 @@ package rpc
 
 import "context"
 
+// MaxMessageSize is the largest gRPC message the server accepts and the agent
+// sends.
+//
+// The gRPC default of 4 MiB is exactly the cap on the configs a compile
+// workflow may emit, leaving no room for the framing around them: the cap would
+// be unreachable and users would get an opaque gRPC error instead of a readable
+// one.
+const MaxMessageSize = 8 * 1024 * 1024
+
 // Peer defines the bidirectional communication interface between Woodpecker agents and servers.
 //
 // # Architecture and Implementations
@@ -61,6 +70,7 @@ import "context"
 //     - Update() reports step state changes as workflow progresses
 //     - EnqueueLog() streams log output from steps
 //     - Extend() extends workflow timeout if needed so queue does not reschedule it as retry
+//     - FlushLogs() drains the log batcher so queued entries reach the server before Done()
 //     - Done() signals workflow has completed
 //
 //  3. Cancellation Flow:
@@ -170,7 +180,11 @@ type Peer interface {
 	// Returns:
 	//   - nil on success
 	//   - error if communication fails or server rejects the state
-	Done(c context.Context, workflowID string, state WorkflowState) error
+	//
+	// compileResult carries what a compile workflow emitted, and is nil for an
+	// ordinary workflow. A non-nil result with no configs and no error means
+	// the workflow ran and asked for no change.
+	Done(c context.Context, workflowID string, state WorkflowState, compileResult *CompileResult) error
 
 	// Extend extends the timeout for the workflow with the given ID in the task queue.
 	//
@@ -235,6 +249,29 @@ type Peer interface {
 	//   - May be called concurrently from different steps/workflows
 	//   - Internal queue must be properly synchronized
 	EnqueueLog(logEntry *LogEntry)
+
+	// FlushLogs sends every log entry queued by EnqueueLog and blocks until the
+	// batcher has attempted to transmit them.
+	//
+	// EnqueueLog is fire-and-forget: entries sit in an in-memory buffer that is
+	// drained on a timer. Done() therefore races the batcher and can reach the
+	// server first, which closes the workflow's log stream and drops the tail of
+	// the output. Callers must FlushLogs before Done to avoid that.
+	//
+	// Transmission failures are reported to the log, but the queue is cleared
+	// either way — the batcher has already exhausted its own retries by then.
+	//
+	// Context Handling:
+	//   - Returns the context error if it is canceled while waiting
+	//   - Must be safe to call with the same shutdown context used for Done
+	//
+	// Thread Safety:
+	//   - MUST be safe to call concurrently from multiple goroutines
+	//
+	// Returns:
+	//   - nil once the queued entries have been handed to the server
+	//   - error if the context is canceled before the flush completes
+	FlushLogs(c context.Context) error
 
 	// RegisterAgent announces this agent to the server and returns an agent ID.
 	//

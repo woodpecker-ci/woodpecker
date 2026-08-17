@@ -219,6 +219,7 @@
       "no_pipelines": "No pipelines have been started yet.",
       "load_more": "Load more",
       "no_pipeline_steps": "No pipeline steps available!",
+      "compile_workflow": "compile",
       "step_not_started": "This step hasn't started yet.",
       "pipelines_for": "Pipelines for branch \"{branch}\"",
       "pipelines_for_pr": "Pipelines for pull request #{index}",

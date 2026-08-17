@@ -547,6 +547,14 @@ Further details can be found in the documentation of the used backend:
 - [Docker](../30-administration/10-configuration/11-backends/10-docker.md#step-specific-configuration)
 - [Kubernetes](../30-administration/10-configuration/11-backends/20-kubernetes.md#step-specific-configuration)
 
+## `compile`
+
+Steps that generate pipeline configuration. They run on an agent before any
+ordinary workflow starts and what they emit becomes configuration for the rest
+of the pipeline.
+
+For more details check the [compile docs](./26-compile.md).
+
 ## `services`
 
 Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of workflow.

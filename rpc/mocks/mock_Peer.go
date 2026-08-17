@@ -39,16 +39,16 @@ func (_m *MockPeer) EXPECT() *MockPeer_Expecter {
 }
 
 // Done provides a mock function for the type MockPeer
-func (_mock *MockPeer) Done(c context.Context, workflowID string, state rpc.WorkflowState) error {
-	ret := _mock.Called(c, workflowID, state)
+func (_mock *MockPeer) Done(c context.Context, workflowID string, state rpc.WorkflowState, compileResult *rpc.CompileResult) error {
+	ret := _mock.Called(c, workflowID, state, compileResult)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Done")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, rpc.WorkflowState) error); ok {
-		r0 = returnFunc(c, workflowID, state)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, rpc.WorkflowState, *rpc.CompileResult) error); ok {
+		r0 = returnFunc(c, workflowID, state, compileResult)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -64,11 +64,12 @@ type MockPeer_Done_Call struct {
 //   - c context.Context
 //   - workflowID string
 //   - state rpc.WorkflowState
-func (_e *MockPeer_Expecter) Done(c interface{}, workflowID interface{}, state interface{}) *MockPeer_Done_Call {
-	return &MockPeer_Done_Call{Call: _e.mock.On("Done", c, workflowID, state)}
+//   - compileResult *rpc.CompileResult
+func (_e *MockPeer_Expecter) Done(c interface{}, workflowID interface{}, state interface{}, compileResult interface{}) *MockPeer_Done_Call {
+	return &MockPeer_Done_Call{Call: _e.mock.On("Done", c, workflowID, state, compileResult)}
 }
 
-func (_c *MockPeer_Done_Call) Run(run func(c context.Context, workflowID string, state rpc.WorkflowState)) *MockPeer_Done_Call {
+func (_c *MockPeer_Done_Call) Run(run func(c context.Context, workflowID string, state rpc.WorkflowState, compileResult *rpc.CompileResult)) *MockPeer_Done_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -82,10 +83,15 @@ func (_c *MockPeer_Done_Call) Run(run func(c context.Context, workflowID string,
 		if args[2] != nil {
 			arg2 = args[2].(rpc.WorkflowState)
 		}
+		var arg3 *rpc.CompileResult
+		if args[3] != nil {
+			arg3 = args[3].(*rpc.CompileResult)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -96,7 +102,7 @@ func (_c *MockPeer_Done_Call) Return(err error) *MockPeer_Done_Call {
 	return _c
 }
 
-func (_c *MockPeer_Done_Call) RunAndReturn(run func(c context.Context, workflowID string, state rpc.WorkflowState) error) *MockPeer_Done_Call {
+func (_c *MockPeer_Done_Call) RunAndReturn(run func(c context.Context, workflowID string, state rpc.WorkflowState, compileResult *rpc.CompileResult) error) *MockPeer_Done_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -194,6 +200,57 @@ func (_c *MockPeer_Extend_Call) Return(err error) *MockPeer_Extend_Call {
 }
 
 func (_c *MockPeer_Extend_Call) RunAndReturn(run func(c context.Context, workflowID string) error) *MockPeer_Extend_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// FlushLogs provides a mock function for the type MockPeer
+func (_mock *MockPeer) FlushLogs(c context.Context) error {
+	ret := _mock.Called(c)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FlushLogs")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = returnFunc(c)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPeer_FlushLogs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FlushLogs'
+type MockPeer_FlushLogs_Call struct {
+	*mock.Call
+}
+
+// FlushLogs is a helper method to define mock.On call
+//   - c context.Context
+func (_e *MockPeer_Expecter) FlushLogs(c interface{}) *MockPeer_FlushLogs_Call {
+	return &MockPeer_FlushLogs_Call{Call: _e.mock.On("FlushLogs", c)}
+}
+
+func (_c *MockPeer_FlushLogs_Call) Run(run func(c context.Context)) *MockPeer_FlushLogs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPeer_FlushLogs_Call) Return(err error) *MockPeer_FlushLogs_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPeer_FlushLogs_Call) RunAndReturn(run func(c context.Context) error) *MockPeer_FlushLogs_Call {
 	_c.Call.Return(run)
 	return _c
 }

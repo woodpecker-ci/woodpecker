@@ -92,6 +92,36 @@ steps:
 	}, {
 		Title: "explicitly privileged container",
 		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+	}, {
+		Title: "compile section", Data: `
+when:
+  event: push
+
+compile:
+  generate:
+    image: alpine
+    commands:
+      - ./generate.sh
+  emit:
+    image: alpine
+    depends_on: [generate]
+    commands:
+      - ./emit.sh
+
+steps:
+  test:
+    image: golang
+    commands:
+      - go test ./...
+`,
+	}, {
+		Title: "compile section without steps", Data: `
+compile:
+  generate:
+    image: alpine
+    commands:
+      - ./generate.sh
+`,
 	}}
 
 	for _, testd := range testdatas {
@@ -215,6 +245,20 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
+			want: "One or more of the specified dependencies do not exist",
+		},
+		{
+			from: "compile: { generate: { image: alpine, detach: true } }",
+			want: "Detached compile steps are not supported, their output cannot be captured reliably",
+		},
+		{
+			from: "compile: { generate: { image: '' } }",
+			want: "Invalid or missing image",
+		},
+		{
+			// a compile step may only depend on another compile step: the two
+			// sections become separate workflows
+			from: "{ compile: { generate: { image: alpine, depends_on: [ build ] } }, steps: { build: { image: golang } } }",
 			want: "One or more of the specified dependencies do not exist",
 		},
 	}

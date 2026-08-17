@@ -88,6 +88,19 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-backend-options.yaml",
 		},
 		{
+			name:     "Compile and steps",
+			testFile: ".woodpecker/test-compile.yaml",
+		},
+		{
+			name:     "Compile without steps",
+			testFile: ".woodpecker/test-compile-only.yaml",
+		},
+		{
+			name:     "Neither steps nor compile",
+			testFile: ".woodpecker/test-no-steps-no-compile.yaml",
+			fail:     true,
+		},
+		{
 			name:     "Broken Config",
 			testFile: ".woodpecker/test-broken.yaml",
 			fail:     true,

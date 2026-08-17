@@ -216,6 +216,21 @@ func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
 	return err
 }
 
+// PipelineCompileStateCompareAndSwap moves a pipeline's compile state from one
+// value to another and reports whether this caller was the one who moved it.
+//
+// Compile workflows finish on different agents at unpredictable times, so
+// several Done calls can observe "no compile workflow is still running" at the
+// same moment. This is what makes the merge that follows exactly-once.
+func (s storage) PipelineCompileStateCompareAndSwap(pipelineID int64, from, to model.CompileState) (bool, error) {
+	updated, err := s.engine.
+		Where(builder.Eq{"id": pipelineID, "compile_state": from}).
+		Cols("compile_state").
+		Update(&model.Pipeline{CompileState: to})
+
+	return updated == 1, err
+}
+
 func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
 	return s.deletePipeline(s.engine.NewSession(), pipeline.ID)
 }

@@ -202,9 +202,10 @@ steps:
 
 	mockManager.On("EnvironmentService").Return(nil, nil)
 
-	pipelineItems, err := parsePipeline(t.Context(), forge, store, pipeline, user, repo, yamls, envs)
+	plan, err := parsePipeline(t.Context(), forge, store, pipeline, user, repo, yamls, envs)
 	assert.NoError(t, err)
 
+	pipelineItems := plan.Run
 	assert.Len(t, pipelineItems, 1)
 	assert.Equal(t, "test", pipelineItems[0].Config.Stages[0].Steps[0].Name)
 	assert.Equal(t, "alpine", pipelineItems[0].Config.Stages[0].Steps[0].Image)

@@ -26,12 +26,29 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
+// ConfigsForPipeline returns what the pipeline actually ran: the source
+// configs, with anything a compile workflow rewrote already applied.
 func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
+	return s.configsForPipeline(pipelineID, builder.Eq{"pipeline_configs.effective": true})
+}
+
+// SourceConfigsForPipeline returns what the pipeline was built from, before any
+// compile workflow rewrote it.
+//
+// What a compile workflow emits is an output artifact and is never fed back in,
+// so approving or restarting a pipeline compiles again rather than replaying
+// the previous run's output as input.
+func (s storage) SourceConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
+	return s.configsForPipeline(pipelineID, builder.Eq{"pipeline_configs.source": true})
+}
+
+func (s storage) configsForPipeline(pipelineID int64, cond builder.Cond) ([]*model.Config, error) {
 	configs := make([]*model.Config, 0, perPage)
 	return configs, s.engine.
 		Table("configs").
 		Join("LEFT", "pipeline_configs", "configs.id = pipeline_configs.config_id").
-		Where("pipeline_configs.pipeline_id = ?", pipelineID).
+		Where(builder.Eq{"pipeline_configs.pipeline_id": pipelineID}).
+		And(cond).
 		Find(&configs)
 }
 
@@ -85,4 +102,50 @@ func (s storage) configCreate(sess *xorm.Session, config *model.Config) error {
 func (s storage) PipelineConfigCreate(config *model.PipelineConfig) error {
 	// only Insert set auto created ID back to object
 	return wrapInsert(s.engine.Insert(config))
+}
+
+// PipelineConfigsSetEffective records what the compile phase produced as the
+// configs the pipeline actually runs.
+//
+// The source links are left alone: a compile workflow rewrites what runs, never
+// what the pipeline was built from.
+func (s storage) PipelineConfigsSetEffective(pipelineID int64, configs []*model.Config) error {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if _, err := sess.
+		Where(builder.Eq{"pipeline_id": pipelineID}).
+		Cols("effective").
+		Update(&model.PipelineConfig{Effective: false}); err != nil {
+		return err
+	}
+
+	for _, config := range configs {
+		link := &model.PipelineConfig{PipelineID: pipelineID, ConfigID: config.ID}
+
+		exists, err := sess.Get(link)
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			link.Effective = true
+			if err := wrapInsert(sess.Insert(link)); err != nil {
+				return err
+			}
+			continue
+		}
+
+		if _, err := sess.
+			Where(builder.Eq{"pipeline_id": pipelineID, "config_id": config.ID}).
+			Cols("effective").
+			Update(&model.PipelineConfig{Effective: true}); err != nil {
+			return err
+		}
+	}
+
+	return sess.Commit()
 }

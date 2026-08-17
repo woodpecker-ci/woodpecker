@@ -90,6 +90,10 @@ type Store interface {
 	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error
+	// PipelineCompileStateCompareAndSwap moves a pipeline's compile state and
+	// reports whether this caller was the one who moved it. It is what makes
+	// the merge after the compile phase exactly-once.
+	PipelineCompileStateCompareAndSwap(pipelineID int64, from, to model.CompileState) (bool, error)
 	// DeletePipeline deletes a pipeline.
 	DeletePipeline(*model.Pipeline) error
 
@@ -108,8 +112,10 @@ type Store interface {
 
 	// Configs
 	ConfigsForPipeline(pipelineID int64) ([]*model.Config, error)
+	SourceConfigsForPipeline(pipelineID int64) ([]*model.Config, error)
 	ConfigPersist(*model.Config) (*model.Config, error)
 	PipelineConfigCreate(*model.PipelineConfig) error
+	PipelineConfigsSetEffective(pipelineID int64, configs []*model.Config) error
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)

@@ -26,6 +26,11 @@ const (
 	LogEntryExitCode
 	LogEntryMetadata
 	LogEntryProgress
+	// LogEntryCompileConfig marks a line belonging to a config response block
+	// emitted by a compile workflow. Such lines are kept so the response stays
+	// auditable, but carry their own type so the log view can fold them away
+	// instead of showing a page of base64.
+	LogEntryCompileConfig
 )
 
 // LogEntry is a line of console output.
