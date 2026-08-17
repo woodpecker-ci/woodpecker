@@ -656,6 +656,65 @@ func (_c *MockScheduler_StartPipeline_Call) RunAndReturn(run func(c context.Cont
 	return _c
 }
 
+// ReprioritizeRepo provides a mock function for the type MockScheduler
+func (_mock *MockScheduler) ReprioritizeRepo(c context.Context, repo *model.Repo, rules []model.QueuePriorityRule) error {
+	ret := _mock.Called(c, repo, rules)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ReprioritizeRepo")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, []model.QueuePriorityRule) error); ok {
+		r0 = returnFunc(c, repo, rules)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockScheduler_ReprioritizeRepo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReprioritizeRepo'
+type MockScheduler_ReprioritizeRepo_Call struct {
+	*mock.Call
+}
+
+// ReprioritizeRepo is a helper method to define mock.On call
+//   - c context.Context
+//   - repo *model.Repo
+//   - rules []model.QueuePriorityRule
+func (_e *MockScheduler_Expecter) ReprioritizeRepo(c interface{}, repo interface{}, rules interface{}) *MockScheduler_ReprioritizeRepo_Call {
+	return &MockScheduler_ReprioritizeRepo_Call{Call: _e.mock.On("ReprioritizeRepo", c, repo, rules)}
+}
+
+func (_c *MockScheduler_ReprioritizeRepo_Call) Run(run func(c context.Context, repo *model.Repo, rules []model.QueuePriorityRule)) *MockScheduler_ReprioritizeRepo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.Repo
+		if args[1] != nil {
+			arg1 = args[1].(*model.Repo)
+		}
+		var arg2 []model.QueuePriorityRule
+		if args[2] != nil {
+			arg2 = args[2].([]model.QueuePriorityRule)
+		}
+		run(arg0, arg1, arg2)
+	})
+	return _c
+}
+
+func (_c *MockScheduler_ReprioritizeRepo_Call) Return(err error) *MockScheduler_ReprioritizeRepo_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockScheduler_ReprioritizeRepo_Call) RunAndReturn(run func(c context.Context, repo *model.Repo, rules []model.QueuePriorityRule) error) *MockScheduler_ReprioritizeRepo_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Subscribe provides a mock function for the type MockScheduler
 func (_mock *MockScheduler) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver) error {
 	ret := _mock.Called(c, t, r)

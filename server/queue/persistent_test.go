@@ -66,3 +66,21 @@ func TestPersistentQueuePollReturnsLiveTask(t *testing.T) {
 	assert.NotNil(t, got)
 	assert.Equal(t, "1", got.ID)
 }
+
+func TestPersistentQueueReprioritizeUpdatesStore(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().TaskUpdatePriority("1", 10).Return(nil).Once()
+
+	pq := &persistentQueue{Queue: q, store: store}
+
+	task := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+	assert.NoError(t, pq.Reprioritize(ctx, map[string]int{"1": 10}))
+
+	info := q.Info(ctx)
+	assert.Len(t, info.Pending, 1)
+	assert.Equal(t, 10, info.Pending[0].Priority)
+}

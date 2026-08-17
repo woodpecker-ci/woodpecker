@@ -66,7 +66,7 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tasks, err := pipelineTasks(repo, activePipeline, []*builder.Item{tc.item})
+			tasks, err := pipelineTasks(repo, activePipeline, []*builder.Item{tc.item}, nil)
 			require.NoError(t, err)
 			require.Len(t, tasks, 1)
 
@@ -77,13 +77,43 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 	}
 }
 
+func TestQueuePipelinePriority(t *testing.T) {
+	repo := &model.Repo{ID: 7, FullName: "postgis/postgis"}
+	item := &builder.Item{Workflow: &builder.Workflow{ID: 1, Name: "build"}}
+
+	priorityRules := []model.QueuePriorityRule{
+		{Priority: 100, Event: model.EventPush, Branch: "master"},
+		{Priority: 80, Event: model.EventPush, Branch: "stable-*"},
+		{Priority: -20, Event: model.EventPull, EventReason: "synchronized"},
+	}
+
+	tasks, err := pipelineTasks(repo, &model.Pipeline{
+		ID:          42,
+		Event:       model.EventPush,
+		Branch:      "stable-3.6",
+		EventReason: []string{"push"},
+	}, []*builder.Item{item}, priorityRules)
+	require.NoError(t, err)
+	require.Len(t, tasks, 1)
+	assert.Equal(t, 80, tasks[0].Priority)
+
+	tasks, err = pipelineTasks(repo, &model.Pipeline{
+		ID:          43,
+		Event:       model.EventPull,
+		EventReason: []string{"synchronized"},
+	}, []*builder.Item{item}, priorityRules)
+	require.NoError(t, err)
+	require.Len(t, tasks, 1)
+	assert.Equal(t, -20, tasks[0].Priority)
+}
+
 func TestQueuePipelineCreated(t *testing.T) {
 	repo := &model.Repo{ID: 7}
 	item := &builder.Item{Workflow: &builder.Workflow{ID: 1, Name: "build"}}
 
 	runOnce := func(t *testing.T, pipeline *model.Pipeline) *model.Task {
 		t.Helper()
-		tasks, err := pipelineTasks(repo, pipeline, []*builder.Item{item})
+		tasks, err := pipelineTasks(repo, pipeline, []*builder.Item{item}, nil)
 		require.NoError(t, err)
 		require.Len(t, tasks, 1)
 		return tasks[0]

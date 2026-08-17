@@ -120,3 +120,17 @@ func (q *persistentQueue) ErrorAtOnce(c context.Context, ids []string, err error
 	}
 	return nil
 }
+
+// Reprioritize updates pending queue priorities and persists them in the task
+// backup store used for queue restore after server restart.
+func (q *persistentQueue) Reprioritize(c context.Context, priorities map[string]int) error {
+	if err := q.Queue.Reprioritize(c, priorities); err != nil {
+		return err
+	}
+	for id, priority := range priorities {
+		if err := q.store.TaskUpdatePriority(id, priority); err != nil {
+			return err
+		}
+	}
+	return nil
+}
