@@ -73,7 +73,7 @@ type MockClient_Agent_Call struct {
 
 // Agent is a helper method to define mock.On call
 //   - n int64
-func (_e *MockClient_Expecter) Agent(n interface{}) *MockClient_Agent_Call {
+func (_e *MockClient_Expecter) Agent(n any) *MockClient_Agent_Call {
 	return &MockClient_Agent_Call{Call: _e.mock.On("Agent", n)}
 }
 
@@ -135,7 +135,7 @@ type MockClient_AgentCreate_Call struct {
 
 // AgentCreate is a helper method to define mock.On call
 //   - agent *woodpecker.Agent
-func (_e *MockClient_Expecter) AgentCreate(agent interface{}) *MockClient_AgentCreate_Call {
+func (_e *MockClient_Expecter) AgentCreate(agent any) *MockClient_AgentCreate_Call {
 	return &MockClient_AgentCreate_Call{Call: _e.mock.On("AgentCreate", agent)}
 }
 
@@ -186,7 +186,7 @@ type MockClient_AgentDelete_Call struct {
 
 // AgentDelete is a helper method to define mock.On call
 //   - n int64
-func (_e *MockClient_Expecter) AgentDelete(n interface{}) *MockClient_AgentDelete_Call {
+func (_e *MockClient_Expecter) AgentDelete(n any) *MockClient_AgentDelete_Call {
 	return &MockClient_AgentDelete_Call{Call: _e.mock.On("AgentDelete", n)}
 }
 
@@ -303,7 +303,7 @@ type MockClient_AgentTasksList_Call struct {
 
 // AgentTasksList is a helper method to define mock.On call
 //   - n int64
-func (_e *MockClient_Expecter) AgentTasksList(n interface{}) *MockClient_AgentTasksList_Call {
+func (_e *MockClient_Expecter) AgentTasksList(n any) *MockClient_AgentTasksList_Call {
 	return &MockClient_AgentTasksList_Call{Call: _e.mock.On("AgentTasksList", n)}
 }
 
@@ -365,7 +365,7 @@ type MockClient_AgentUpdate_Call struct {
 
 // AgentUpdate is a helper method to define mock.On call
 //   - agent *woodpecker.Agent
-func (_e *MockClient_Expecter) AgentUpdate(agent interface{}) *MockClient_AgentUpdate_Call {
+func (_e *MockClient_Expecter) AgentUpdate(agent any) *MockClient_AgentUpdate_Call {
 	return &MockClient_AgentUpdate_Call{Call: _e.mock.On("AgentUpdate", agent)}
 }
 
@@ -428,7 +428,7 @@ type MockClient_CronCreate_Call struct {
 // CronCreate is a helper method to define mock.On call
 //   - repoID int64
 //   - cron *woodpecker.Cron
-func (_e *MockClient_Expecter) CronCreate(repoID interface{}, cron interface{}) *MockClient_CronCreate_Call {
+func (_e *MockClient_Expecter) CronCreate(repoID any, cron any) *MockClient_CronCreate_Call {
 	return &MockClient_CronCreate_Call{Call: _e.mock.On("CronCreate", repoID, cron)}
 }
 
@@ -485,7 +485,7 @@ type MockClient_CronDelete_Call struct {
 // CronDelete is a helper method to define mock.On call
 //   - repoID int64
 //   - cronID int64
-func (_e *MockClient_Expecter) CronDelete(repoID interface{}, cronID interface{}) *MockClient_CronDelete_Call {
+func (_e *MockClient_Expecter) CronDelete(repoID any, cronID any) *MockClient_CronDelete_Call {
 	return &MockClient_CronDelete_Call{Call: _e.mock.On("CronDelete", repoID, cronID)}
 }
 
@@ -553,7 +553,7 @@ type MockClient_CronGet_Call struct {
 // CronGet is a helper method to define mock.On call
 //   - repoID int64
 //   - cronID int64
-func (_e *MockClient_Expecter) CronGet(repoID interface{}, cronID interface{}) *MockClient_CronGet_Call {
+func (_e *MockClient_Expecter) CronGet(repoID any, cronID any) *MockClient_CronGet_Call {
 	return &MockClient_CronGet_Call{Call: _e.mock.On("CronGet", repoID, cronID)}
 }
 
@@ -621,7 +621,7 @@ type MockClient_CronList_Call struct {
 // CronList is a helper method to define mock.On call
 //   - repoID int64
 //   - opt woodpecker.CronListOptions
-func (_e *MockClient_Expecter) CronList(repoID interface{}, opt interface{}) *MockClient_CronList_Call {
+func (_e *MockClient_Expecter) CronList(repoID any, opt any) *MockClient_CronList_Call {
 	return &MockClient_CronList_Call{Call: _e.mock.On("CronList", repoID, opt)}
 }
 
@@ -689,7 +689,7 @@ type MockClient_CronUpdate_Call struct {
 // CronUpdate is a helper method to define mock.On call
 //   - repoID int64
 //   - cron *woodpecker.Cron
-func (_e *MockClient_Expecter) CronUpdate(repoID interface{}, cron interface{}) *MockClient_CronUpdate_Call {
+func (_e *MockClient_Expecter) CronUpdate(repoID any, cron any) *MockClient_CronUpdate_Call {
 	return &MockClient_CronUpdate_Call{Call: _e.mock.On("CronUpdate", repoID, cron)}
 }
 
@@ -758,7 +758,7 @@ type MockClient_Deploy_Call struct {
 //   - repoID int64
 //   - pipeline int64
 //   - opt woodpecker.DeployOptions
-func (_e *MockClient_Expecter) Deploy(repoID interface{}, pipeline interface{}, opt interface{}) *MockClient_Deploy_Call {
+func (_e *MockClient_Expecter) Deploy(repoID any, pipeline any, opt any) *MockClient_Deploy_Call {
 	return &MockClient_Deploy_Call{Call: _e.mock.On("Deploy", repoID, pipeline, opt)}
 }
 
@@ -830,7 +830,7 @@ type MockClient_GlobalRegistry_Call struct {
 
 // GlobalRegistry is a helper method to define mock.On call
 //   - registry string
-func (_e *MockClient_Expecter) GlobalRegistry(registry interface{}) *MockClient_GlobalRegistry_Call {
+func (_e *MockClient_Expecter) GlobalRegistry(registry any) *MockClient_GlobalRegistry_Call {
 	return &MockClient_GlobalRegistry_Call{Call: _e.mock.On("GlobalRegistry", registry)}
 }
 
@@ -892,7 +892,7 @@ type MockClient_GlobalRegistryCreate_Call struct {
 
 // GlobalRegistryCreate is a helper method to define mock.On call
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) GlobalRegistryCreate(registry interface{}) *MockClient_GlobalRegistryCreate_Call {
+func (_e *MockClient_Expecter) GlobalRegistryCreate(registry any) *MockClient_GlobalRegistryCreate_Call {
 	return &MockClient_GlobalRegistryCreate_Call{Call: _e.mock.On("GlobalRegistryCreate", registry)}
 }
 
@@ -943,7 +943,7 @@ type MockClient_GlobalRegistryDelete_Call struct {
 
 // GlobalRegistryDelete is a helper method to define mock.On call
 //   - registry string
-func (_e *MockClient_Expecter) GlobalRegistryDelete(registry interface{}) *MockClient_GlobalRegistryDelete_Call {
+func (_e *MockClient_Expecter) GlobalRegistryDelete(registry any) *MockClient_GlobalRegistryDelete_Call {
 	return &MockClient_GlobalRegistryDelete_Call{Call: _e.mock.On("GlobalRegistryDelete", registry)}
 }
 
@@ -1005,7 +1005,7 @@ type MockClient_GlobalRegistryList_Call struct {
 
 // GlobalRegistryList is a helper method to define mock.On call
 //   - opt woodpecker.RegistryListOptions
-func (_e *MockClient_Expecter) GlobalRegistryList(opt interface{}) *MockClient_GlobalRegistryList_Call {
+func (_e *MockClient_Expecter) GlobalRegistryList(opt any) *MockClient_GlobalRegistryList_Call {
 	return &MockClient_GlobalRegistryList_Call{Call: _e.mock.On("GlobalRegistryList", opt)}
 }
 
@@ -1067,7 +1067,7 @@ type MockClient_GlobalRegistryUpdate_Call struct {
 
 // GlobalRegistryUpdate is a helper method to define mock.On call
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) GlobalRegistryUpdate(registry interface{}) *MockClient_GlobalRegistryUpdate_Call {
+func (_e *MockClient_Expecter) GlobalRegistryUpdate(registry any) *MockClient_GlobalRegistryUpdate_Call {
 	return &MockClient_GlobalRegistryUpdate_Call{Call: _e.mock.On("GlobalRegistryUpdate", registry)}
 }
 
@@ -1129,7 +1129,7 @@ type MockClient_GlobalSecret_Call struct {
 
 // GlobalSecret is a helper method to define mock.On call
 //   - secret string
-func (_e *MockClient_Expecter) GlobalSecret(secret interface{}) *MockClient_GlobalSecret_Call {
+func (_e *MockClient_Expecter) GlobalSecret(secret any) *MockClient_GlobalSecret_Call {
 	return &MockClient_GlobalSecret_Call{Call: _e.mock.On("GlobalSecret", secret)}
 }
 
@@ -1191,7 +1191,7 @@ type MockClient_GlobalSecretCreate_Call struct {
 
 // GlobalSecretCreate is a helper method to define mock.On call
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) GlobalSecretCreate(secret interface{}) *MockClient_GlobalSecretCreate_Call {
+func (_e *MockClient_Expecter) GlobalSecretCreate(secret any) *MockClient_GlobalSecretCreate_Call {
 	return &MockClient_GlobalSecretCreate_Call{Call: _e.mock.On("GlobalSecretCreate", secret)}
 }
 
@@ -1242,7 +1242,7 @@ type MockClient_GlobalSecretDelete_Call struct {
 
 // GlobalSecretDelete is a helper method to define mock.On call
 //   - secret string
-func (_e *MockClient_Expecter) GlobalSecretDelete(secret interface{}) *MockClient_GlobalSecretDelete_Call {
+func (_e *MockClient_Expecter) GlobalSecretDelete(secret any) *MockClient_GlobalSecretDelete_Call {
 	return &MockClient_GlobalSecretDelete_Call{Call: _e.mock.On("GlobalSecretDelete", secret)}
 }
 
@@ -1304,7 +1304,7 @@ type MockClient_GlobalSecretList_Call struct {
 
 // GlobalSecretList is a helper method to define mock.On call
 //   - opt woodpecker.SecretListOptions
-func (_e *MockClient_Expecter) GlobalSecretList(opt interface{}) *MockClient_GlobalSecretList_Call {
+func (_e *MockClient_Expecter) GlobalSecretList(opt any) *MockClient_GlobalSecretList_Call {
 	return &MockClient_GlobalSecretList_Call{Call: _e.mock.On("GlobalSecretList", opt)}
 }
 
@@ -1366,7 +1366,7 @@ type MockClient_GlobalSecretUpdate_Call struct {
 
 // GlobalSecretUpdate is a helper method to define mock.On call
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) GlobalSecretUpdate(secret interface{}) *MockClient_GlobalSecretUpdate_Call {
+func (_e *MockClient_Expecter) GlobalSecretUpdate(secret any) *MockClient_GlobalSecretUpdate_Call {
 	return &MockClient_GlobalSecretUpdate_Call{Call: _e.mock.On("GlobalSecretUpdate", secret)}
 }
 
@@ -1473,7 +1473,7 @@ type MockClient_LogsPurge_Call struct {
 // LogsPurge is a helper method to define mock.On call
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) LogsPurge(repoID interface{}, pipeline interface{}) *MockClient_LogsPurge_Call {
+func (_e *MockClient_Expecter) LogsPurge(repoID any, pipeline any) *MockClient_LogsPurge_Call {
 	return &MockClient_LogsPurge_Call{Call: _e.mock.On("LogsPurge", repoID, pipeline)}
 }
 
@@ -1540,7 +1540,7 @@ type MockClient_Org_Call struct {
 
 // Org is a helper method to define mock.On call
 //   - orgID int64
-func (_e *MockClient_Expecter) Org(orgID interface{}) *MockClient_Org_Call {
+func (_e *MockClient_Expecter) Org(orgID any) *MockClient_Org_Call {
 	return &MockClient_Org_Call{Call: _e.mock.On("Org", orgID)}
 }
 
@@ -1602,7 +1602,7 @@ type MockClient_OrgList_Call struct {
 
 // OrgList is a helper method to define mock.On call
 //   - opt woodpecker.ListOptions
-func (_e *MockClient_Expecter) OrgList(opt interface{}) *MockClient_OrgList_Call {
+func (_e *MockClient_Expecter) OrgList(opt any) *MockClient_OrgList_Call {
 	return &MockClient_OrgList_Call{Call: _e.mock.On("OrgList", opt)}
 }
 
@@ -1664,7 +1664,7 @@ type MockClient_OrgLookup_Call struct {
 
 // OrgLookup is a helper method to define mock.On call
 //   - orgName string
-func (_e *MockClient_Expecter) OrgLookup(orgName interface{}) *MockClient_OrgLookup_Call {
+func (_e *MockClient_Expecter) OrgLookup(orgName any) *MockClient_OrgLookup_Call {
 	return &MockClient_OrgLookup_Call{Call: _e.mock.On("OrgLookup", orgName)}
 }
 
@@ -1727,7 +1727,7 @@ type MockClient_OrgRegistry_Call struct {
 // OrgRegistry is a helper method to define mock.On call
 //   - orgID int64
 //   - registry string
-func (_e *MockClient_Expecter) OrgRegistry(orgID interface{}, registry interface{}) *MockClient_OrgRegistry_Call {
+func (_e *MockClient_Expecter) OrgRegistry(orgID any, registry any) *MockClient_OrgRegistry_Call {
 	return &MockClient_OrgRegistry_Call{Call: _e.mock.On("OrgRegistry", orgID, registry)}
 }
 
@@ -1795,7 +1795,7 @@ type MockClient_OrgRegistryCreate_Call struct {
 // OrgRegistryCreate is a helper method to define mock.On call
 //   - orgID int64
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) OrgRegistryCreate(orgID interface{}, registry interface{}) *MockClient_OrgRegistryCreate_Call {
+func (_e *MockClient_Expecter) OrgRegistryCreate(orgID any, registry any) *MockClient_OrgRegistryCreate_Call {
 	return &MockClient_OrgRegistryCreate_Call{Call: _e.mock.On("OrgRegistryCreate", orgID, registry)}
 }
 
@@ -1852,7 +1852,7 @@ type MockClient_OrgRegistryDelete_Call struct {
 // OrgRegistryDelete is a helper method to define mock.On call
 //   - orgID int64
 //   - registry string
-func (_e *MockClient_Expecter) OrgRegistryDelete(orgID interface{}, registry interface{}) *MockClient_OrgRegistryDelete_Call {
+func (_e *MockClient_Expecter) OrgRegistryDelete(orgID any, registry any) *MockClient_OrgRegistryDelete_Call {
 	return &MockClient_OrgRegistryDelete_Call{Call: _e.mock.On("OrgRegistryDelete", orgID, registry)}
 }
 
@@ -1920,7 +1920,7 @@ type MockClient_OrgRegistryList_Call struct {
 // OrgRegistryList is a helper method to define mock.On call
 //   - orgID int64
 //   - opt woodpecker.RegistryListOptions
-func (_e *MockClient_Expecter) OrgRegistryList(orgID interface{}, opt interface{}) *MockClient_OrgRegistryList_Call {
+func (_e *MockClient_Expecter) OrgRegistryList(orgID any, opt any) *MockClient_OrgRegistryList_Call {
 	return &MockClient_OrgRegistryList_Call{Call: _e.mock.On("OrgRegistryList", orgID, opt)}
 }
 
@@ -1988,7 +1988,7 @@ type MockClient_OrgRegistryUpdate_Call struct {
 // OrgRegistryUpdate is a helper method to define mock.On call
 //   - orgID int64
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) OrgRegistryUpdate(orgID interface{}, registry interface{}) *MockClient_OrgRegistryUpdate_Call {
+func (_e *MockClient_Expecter) OrgRegistryUpdate(orgID any, registry any) *MockClient_OrgRegistryUpdate_Call {
 	return &MockClient_OrgRegistryUpdate_Call{Call: _e.mock.On("OrgRegistryUpdate", orgID, registry)}
 }
 
@@ -2056,7 +2056,7 @@ type MockClient_OrgSecret_Call struct {
 // OrgSecret is a helper method to define mock.On call
 //   - orgID int64
 //   - secret string
-func (_e *MockClient_Expecter) OrgSecret(orgID interface{}, secret interface{}) *MockClient_OrgSecret_Call {
+func (_e *MockClient_Expecter) OrgSecret(orgID any, secret any) *MockClient_OrgSecret_Call {
 	return &MockClient_OrgSecret_Call{Call: _e.mock.On("OrgSecret", orgID, secret)}
 }
 
@@ -2124,7 +2124,7 @@ type MockClient_OrgSecretCreate_Call struct {
 // OrgSecretCreate is a helper method to define mock.On call
 //   - orgID int64
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) OrgSecretCreate(orgID interface{}, secret interface{}) *MockClient_OrgSecretCreate_Call {
+func (_e *MockClient_Expecter) OrgSecretCreate(orgID any, secret any) *MockClient_OrgSecretCreate_Call {
 	return &MockClient_OrgSecretCreate_Call{Call: _e.mock.On("OrgSecretCreate", orgID, secret)}
 }
 
@@ -2181,7 +2181,7 @@ type MockClient_OrgSecretDelete_Call struct {
 // OrgSecretDelete is a helper method to define mock.On call
 //   - orgID int64
 //   - secret string
-func (_e *MockClient_Expecter) OrgSecretDelete(orgID interface{}, secret interface{}) *MockClient_OrgSecretDelete_Call {
+func (_e *MockClient_Expecter) OrgSecretDelete(orgID any, secret any) *MockClient_OrgSecretDelete_Call {
 	return &MockClient_OrgSecretDelete_Call{Call: _e.mock.On("OrgSecretDelete", orgID, secret)}
 }
 
@@ -2249,7 +2249,7 @@ type MockClient_OrgSecretList_Call struct {
 // OrgSecretList is a helper method to define mock.On call
 //   - orgID int64
 //   - opt woodpecker.SecretListOptions
-func (_e *MockClient_Expecter) OrgSecretList(orgID interface{}, opt interface{}) *MockClient_OrgSecretList_Call {
+func (_e *MockClient_Expecter) OrgSecretList(orgID any, opt any) *MockClient_OrgSecretList_Call {
 	return &MockClient_OrgSecretList_Call{Call: _e.mock.On("OrgSecretList", orgID, opt)}
 }
 
@@ -2317,7 +2317,7 @@ type MockClient_OrgSecretUpdate_Call struct {
 // OrgSecretUpdate is a helper method to define mock.On call
 //   - orgID int64
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) OrgSecretUpdate(orgID interface{}, secret interface{}) *MockClient_OrgSecretUpdate_Call {
+func (_e *MockClient_Expecter) OrgSecretUpdate(orgID any, secret any) *MockClient_OrgSecretUpdate_Call {
 	return &MockClient_OrgSecretUpdate_Call{Call: _e.mock.On("OrgSecretUpdate", orgID, secret)}
 }
 
@@ -2385,7 +2385,7 @@ type MockClient_Pipeline_Call struct {
 // Pipeline is a helper method to define mock.On call
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) Pipeline(repoID interface{}, pipeline interface{}) *MockClient_Pipeline_Call {
+func (_e *MockClient_Expecter) Pipeline(repoID any, pipeline any) *MockClient_Pipeline_Call {
 	return &MockClient_Pipeline_Call{Call: _e.mock.On("Pipeline", repoID, pipeline)}
 }
 
@@ -2453,7 +2453,7 @@ type MockClient_PipelineApprove_Call struct {
 // PipelineApprove is a helper method to define mock.On call
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) PipelineApprove(repoID interface{}, pipeline interface{}) *MockClient_PipelineApprove_Call {
+func (_e *MockClient_Expecter) PipelineApprove(repoID any, pipeline any) *MockClient_PipelineApprove_Call {
 	return &MockClient_PipelineApprove_Call{Call: _e.mock.On("PipelineApprove", repoID, pipeline)}
 }
 
@@ -2521,7 +2521,7 @@ type MockClient_PipelineCreate_Call struct {
 // PipelineCreate is a helper method to define mock.On call
 //   - repoID int64
 //   - opts *woodpecker.PipelineOptions
-func (_e *MockClient_Expecter) PipelineCreate(repoID interface{}, opts interface{}) *MockClient_PipelineCreate_Call {
+func (_e *MockClient_Expecter) PipelineCreate(repoID any, opts any) *MockClient_PipelineCreate_Call {
 	return &MockClient_PipelineCreate_Call{Call: _e.mock.On("PipelineCreate", repoID, opts)}
 }
 
@@ -2589,7 +2589,7 @@ type MockClient_PipelineDecline_Call struct {
 // PipelineDecline is a helper method to define mock.On call
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) PipelineDecline(repoID interface{}, pipeline interface{}) *MockClient_PipelineDecline_Call {
+func (_e *MockClient_Expecter) PipelineDecline(repoID any, pipeline any) *MockClient_PipelineDecline_Call {
 	return &MockClient_PipelineDecline_Call{Call: _e.mock.On("PipelineDecline", repoID, pipeline)}
 }
 
@@ -2646,7 +2646,7 @@ type MockClient_PipelineDelete_Call struct {
 // PipelineDelete is a helper method to define mock.On call
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) PipelineDelete(repoID interface{}, pipeline interface{}) *MockClient_PipelineDelete_Call {
+func (_e *MockClient_Expecter) PipelineDelete(repoID any, pipeline any) *MockClient_PipelineDelete_Call {
 	return &MockClient_PipelineDelete_Call{Call: _e.mock.On("PipelineDelete", repoID, pipeline)}
 }
 
@@ -2714,7 +2714,7 @@ type MockClient_PipelineLast_Call struct {
 // PipelineLast is a helper method to define mock.On call
 //   - repoID int64
 //   - opt woodpecker.PipelineLastOptions
-func (_e *MockClient_Expecter) PipelineLast(repoID interface{}, opt interface{}) *MockClient_PipelineLast_Call {
+func (_e *MockClient_Expecter) PipelineLast(repoID any, opt any) *MockClient_PipelineLast_Call {
 	return &MockClient_PipelineLast_Call{Call: _e.mock.On("PipelineLast", repoID, opt)}
 }
 
@@ -2782,7 +2782,7 @@ type MockClient_PipelineList_Call struct {
 // PipelineList is a helper method to define mock.On call
 //   - repoID int64
 //   - opt woodpecker.PipelineListOptions
-func (_e *MockClient_Expecter) PipelineList(repoID interface{}, opt interface{}) *MockClient_PipelineList_Call {
+func (_e *MockClient_Expecter) PipelineList(repoID any, opt any) *MockClient_PipelineList_Call {
 	return &MockClient_PipelineList_Call{Call: _e.mock.On("PipelineList", repoID, opt)}
 }
 
@@ -2850,7 +2850,7 @@ type MockClient_PipelineMetadata_Call struct {
 // PipelineMetadata is a helper method to define mock.On call
 //   - repoID int64
 //   - pipelineNumber int
-func (_e *MockClient_Expecter) PipelineMetadata(repoID interface{}, pipelineNumber interface{}) *MockClient_PipelineMetadata_Call {
+func (_e *MockClient_Expecter) PipelineMetadata(repoID any, pipelineNumber any) *MockClient_PipelineMetadata_Call {
 	return &MockClient_PipelineMetadata_Call{Call: _e.mock.On("PipelineMetadata", repoID, pipelineNumber)}
 }
 
@@ -2974,7 +2974,7 @@ type MockClient_PipelineStart_Call struct {
 //   - repoID int64
 //   - num int64
 //   - opt woodpecker.PipelineStartOptions
-func (_e *MockClient_Expecter) PipelineStart(repoID interface{}, num interface{}, opt interface{}) *MockClient_PipelineStart_Call {
+func (_e *MockClient_Expecter) PipelineStart(repoID any, num any, opt any) *MockClient_PipelineStart_Call {
 	return &MockClient_PipelineStart_Call{Call: _e.mock.On("PipelineStart", repoID, num, opt)}
 }
 
@@ -3036,7 +3036,7 @@ type MockClient_PipelineStop_Call struct {
 // PipelineStop is a helper method to define mock.On call
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) PipelineStop(repoID interface{}, pipeline interface{}) *MockClient_PipelineStop_Call {
+func (_e *MockClient_Expecter) PipelineStop(repoID any, pipeline any) *MockClient_PipelineStop_Call {
 	return &MockClient_PipelineStop_Call{Call: _e.mock.On("PipelineStop", repoID, pipeline)}
 }
 
@@ -3159,7 +3159,7 @@ type MockClient_Registry_Call struct {
 // Registry is a helper method to define mock.On call
 //   - repoID int64
 //   - hostname string
-func (_e *MockClient_Expecter) Registry(repoID interface{}, hostname interface{}) *MockClient_Registry_Call {
+func (_e *MockClient_Expecter) Registry(repoID any, hostname any) *MockClient_Registry_Call {
 	return &MockClient_Registry_Call{Call: _e.mock.On("Registry", repoID, hostname)}
 }
 
@@ -3227,7 +3227,7 @@ type MockClient_RegistryCreate_Call struct {
 // RegistryCreate is a helper method to define mock.On call
 //   - repoID int64
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) RegistryCreate(repoID interface{}, registry interface{}) *MockClient_RegistryCreate_Call {
+func (_e *MockClient_Expecter) RegistryCreate(repoID any, registry any) *MockClient_RegistryCreate_Call {
 	return &MockClient_RegistryCreate_Call{Call: _e.mock.On("RegistryCreate", repoID, registry)}
 }
 
@@ -3284,7 +3284,7 @@ type MockClient_RegistryDelete_Call struct {
 // RegistryDelete is a helper method to define mock.On call
 //   - repoID int64
 //   - hostname string
-func (_e *MockClient_Expecter) RegistryDelete(repoID interface{}, hostname interface{}) *MockClient_RegistryDelete_Call {
+func (_e *MockClient_Expecter) RegistryDelete(repoID any, hostname any) *MockClient_RegistryDelete_Call {
 	return &MockClient_RegistryDelete_Call{Call: _e.mock.On("RegistryDelete", repoID, hostname)}
 }
 
@@ -3352,7 +3352,7 @@ type MockClient_RegistryList_Call struct {
 // RegistryList is a helper method to define mock.On call
 //   - repoID int64
 //   - opt woodpecker.RegistryListOptions
-func (_e *MockClient_Expecter) RegistryList(repoID interface{}, opt interface{}) *MockClient_RegistryList_Call {
+func (_e *MockClient_Expecter) RegistryList(repoID any, opt any) *MockClient_RegistryList_Call {
 	return &MockClient_RegistryList_Call{Call: _e.mock.On("RegistryList", repoID, opt)}
 }
 
@@ -3420,7 +3420,7 @@ type MockClient_RegistryUpdate_Call struct {
 // RegistryUpdate is a helper method to define mock.On call
 //   - repoID int64
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) RegistryUpdate(repoID interface{}, registry interface{}) *MockClient_RegistryUpdate_Call {
+func (_e *MockClient_Expecter) RegistryUpdate(repoID any, registry any) *MockClient_RegistryUpdate_Call {
 	return &MockClient_RegistryUpdate_Call{Call: _e.mock.On("RegistryUpdate", repoID, registry)}
 }
 
@@ -3487,7 +3487,7 @@ type MockClient_Repo_Call struct {
 
 // Repo is a helper method to define mock.On call
 //   - repoID int64
-func (_e *MockClient_Expecter) Repo(repoID interface{}) *MockClient_Repo_Call {
+func (_e *MockClient_Expecter) Repo(repoID any) *MockClient_Repo_Call {
 	return &MockClient_Repo_Call{Call: _e.mock.On("Repo", repoID)}
 }
 
@@ -3549,7 +3549,7 @@ type MockClient_RepoChown_Call struct {
 
 // RepoChown is a helper method to define mock.On call
 //   - repoID int64
-func (_e *MockClient_Expecter) RepoChown(repoID interface{}) *MockClient_RepoChown_Call {
+func (_e *MockClient_Expecter) RepoChown(repoID any) *MockClient_RepoChown_Call {
 	return &MockClient_RepoChown_Call{Call: _e.mock.On("RepoChown", repoID)}
 }
 
@@ -3600,7 +3600,7 @@ type MockClient_RepoDel_Call struct {
 
 // RepoDel is a helper method to define mock.On call
 //   - repoID int64
-func (_e *MockClient_Expecter) RepoDel(repoID interface{}) *MockClient_RepoDel_Call {
+func (_e *MockClient_Expecter) RepoDel(repoID any) *MockClient_RepoDel_Call {
 	return &MockClient_RepoDel_Call{Call: _e.mock.On("RepoDel", repoID)}
 }
 
@@ -3662,7 +3662,7 @@ type MockClient_RepoList_Call struct {
 
 // RepoList is a helper method to define mock.On call
 //   - opt woodpecker.RepoListOptions
-func (_e *MockClient_Expecter) RepoList(opt interface{}) *MockClient_RepoList_Call {
+func (_e *MockClient_Expecter) RepoList(opt any) *MockClient_RepoList_Call {
 	return &MockClient_RepoList_Call{Call: _e.mock.On("RepoList", opt)}
 }
 
@@ -3724,7 +3724,7 @@ type MockClient_RepoLookup_Call struct {
 
 // RepoLookup is a helper method to define mock.On call
 //   - repoFullName string
-func (_e *MockClient_Expecter) RepoLookup(repoFullName interface{}) *MockClient_RepoLookup_Call {
+func (_e *MockClient_Expecter) RepoLookup(repoFullName any) *MockClient_RepoLookup_Call {
 	return &MockClient_RepoLookup_Call{Call: _e.mock.On("RepoLookup", repoFullName)}
 }
 
@@ -3776,7 +3776,7 @@ type MockClient_RepoMove_Call struct {
 // RepoMove is a helper method to define mock.On call
 //   - repoID int64
 //   - opt woodpecker.RepoMoveOptions
-func (_e *MockClient_Expecter) RepoMove(repoID interface{}, opt interface{}) *MockClient_RepoMove_Call {
+func (_e *MockClient_Expecter) RepoMove(repoID any, opt any) *MockClient_RepoMove_Call {
 	return &MockClient_RepoMove_Call{Call: _e.mock.On("RepoMove", repoID, opt)}
 }
 
@@ -3844,7 +3844,7 @@ type MockClient_RepoPatch_Call struct {
 // RepoPatch is a helper method to define mock.On call
 //   - repoID int64
 //   - repo *woodpecker.RepoPatch
-func (_e *MockClient_Expecter) RepoPatch(repoID interface{}, repo interface{}) *MockClient_RepoPatch_Call {
+func (_e *MockClient_Expecter) RepoPatch(repoID any, repo any) *MockClient_RepoPatch_Call {
 	return &MockClient_RepoPatch_Call{Call: _e.mock.On("RepoPatch", repoID, repo)}
 }
 
@@ -3911,7 +3911,7 @@ type MockClient_RepoPost_Call struct {
 
 // RepoPost is a helper method to define mock.On call
 //   - opt woodpecker.RepoPostOptions
-func (_e *MockClient_Expecter) RepoPost(opt interface{}) *MockClient_RepoPost_Call {
+func (_e *MockClient_Expecter) RepoPost(opt any) *MockClient_RepoPost_Call {
 	return &MockClient_RepoPost_Call{Call: _e.mock.On("RepoPost", opt)}
 }
 
@@ -3962,7 +3962,7 @@ type MockClient_RepoRepair_Call struct {
 
 // RepoRepair is a helper method to define mock.On call
 //   - repoID int64
-func (_e *MockClient_Expecter) RepoRepair(repoID interface{}) *MockClient_RepoRepair_Call {
+func (_e *MockClient_Expecter) RepoRepair(repoID any) *MockClient_RepoRepair_Call {
 	return &MockClient_RepoRepair_Call{Call: _e.mock.On("RepoRepair", repoID)}
 }
 
@@ -4025,7 +4025,7 @@ type MockClient_Secret_Call struct {
 // Secret is a helper method to define mock.On call
 //   - repoID int64
 //   - secret string
-func (_e *MockClient_Expecter) Secret(repoID interface{}, secret interface{}) *MockClient_Secret_Call {
+func (_e *MockClient_Expecter) Secret(repoID any, secret any) *MockClient_Secret_Call {
 	return &MockClient_Secret_Call{Call: _e.mock.On("Secret", repoID, secret)}
 }
 
@@ -4093,7 +4093,7 @@ type MockClient_SecretCreate_Call struct {
 // SecretCreate is a helper method to define mock.On call
 //   - repoID int64
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) SecretCreate(repoID interface{}, secret interface{}) *MockClient_SecretCreate_Call {
+func (_e *MockClient_Expecter) SecretCreate(repoID any, secret any) *MockClient_SecretCreate_Call {
 	return &MockClient_SecretCreate_Call{Call: _e.mock.On("SecretCreate", repoID, secret)}
 }
 
@@ -4150,7 +4150,7 @@ type MockClient_SecretDelete_Call struct {
 // SecretDelete is a helper method to define mock.On call
 //   - repoID int64
 //   - secret string
-func (_e *MockClient_Expecter) SecretDelete(repoID interface{}, secret interface{}) *MockClient_SecretDelete_Call {
+func (_e *MockClient_Expecter) SecretDelete(repoID any, secret any) *MockClient_SecretDelete_Call {
 	return &MockClient_SecretDelete_Call{Call: _e.mock.On("SecretDelete", repoID, secret)}
 }
 
@@ -4218,7 +4218,7 @@ type MockClient_SecretList_Call struct {
 // SecretList is a helper method to define mock.On call
 //   - repoID int64
 //   - opt woodpecker.SecretListOptions
-func (_e *MockClient_Expecter) SecretList(repoID interface{}, opt interface{}) *MockClient_SecretList_Call {
+func (_e *MockClient_Expecter) SecretList(repoID any, opt any) *MockClient_SecretList_Call {
 	return &MockClient_SecretList_Call{Call: _e.mock.On("SecretList", repoID, opt)}
 }
 
@@ -4286,7 +4286,7 @@ type MockClient_SecretUpdate_Call struct {
 // SecretUpdate is a helper method to define mock.On call
 //   - repoID int64
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) SecretUpdate(repoID interface{}, secret interface{}) *MockClient_SecretUpdate_Call {
+func (_e *MockClient_Expecter) SecretUpdate(repoID any, secret any) *MockClient_SecretUpdate_Call {
 	return &MockClient_SecretUpdate_Call{Call: _e.mock.On("SecretUpdate", repoID, secret)}
 }
 
@@ -4386,7 +4386,7 @@ type MockClient_SetAddress_Call struct {
 
 // SetAddress is a helper method to define mock.On call
 //   - s string
-func (_e *MockClient_Expecter) SetAddress(s interface{}) *MockClient_SetAddress_Call {
+func (_e *MockClient_Expecter) SetAddress(s any) *MockClient_SetAddress_Call {
 	return &MockClient_SetAddress_Call{Call: _e.mock.On("SetAddress", s)}
 }
 
@@ -4426,7 +4426,7 @@ type MockClient_SetClient_Call struct {
 
 // SetClient is a helper method to define mock.On call
 //   - client *http.Client
-func (_e *MockClient_Expecter) SetClient(client interface{}) *MockClient_SetClient_Call {
+func (_e *MockClient_Expecter) SetClient(client any) *MockClient_SetClient_Call {
 	return &MockClient_SetClient_Call{Call: _e.mock.On("SetClient", client)}
 }
 
@@ -4488,7 +4488,7 @@ type MockClient_SetLogLevel_Call struct {
 
 // SetLogLevel is a helper method to define mock.On call
 //   - logLevel *woodpecker.LogLevel
-func (_e *MockClient_Expecter) SetLogLevel(logLevel interface{}) *MockClient_SetLogLevel_Call {
+func (_e *MockClient_Expecter) SetLogLevel(logLevel any) *MockClient_SetLogLevel_Call {
 	return &MockClient_SetLogLevel_Call{Call: _e.mock.On("SetLogLevel", logLevel)}
 }
 
@@ -4552,7 +4552,7 @@ type MockClient_StepLogEntries_Call struct {
 //   - repoID int64
 //   - pipeline int64
 //   - stepID int64
-func (_e *MockClient_Expecter) StepLogEntries(repoID interface{}, pipeline interface{}, stepID interface{}) *MockClient_StepLogEntries_Call {
+func (_e *MockClient_Expecter) StepLogEntries(repoID any, pipeline any, stepID any) *MockClient_StepLogEntries_Call {
 	return &MockClient_StepLogEntries_Call{Call: _e.mock.On("StepLogEntries", repoID, pipeline, stepID)}
 }
 
@@ -4615,7 +4615,7 @@ type MockClient_StepLogsPurge_Call struct {
 //   - repoID int64
 //   - pipelineNumber int64
 //   - stepID int64
-func (_e *MockClient_Expecter) StepLogsPurge(repoID interface{}, pipelineNumber interface{}, stepID interface{}) *MockClient_StepLogsPurge_Call {
+func (_e *MockClient_Expecter) StepLogsPurge(repoID any, pipelineNumber any, stepID any) *MockClient_StepLogsPurge_Call {
 	return &MockClient_StepLogsPurge_Call{Call: _e.mock.On("StepLogsPurge", repoID, pipelineNumber, stepID)}
 }
 
@@ -4694,9 +4694,9 @@ type MockClient_User_Call struct {
 // User is a helper method to define mock.On call
 //   - login string
 //   - forgeID ...int64
-func (_e *MockClient_Expecter) User(login interface{}, forgeID ...interface{}) *MockClient_User_Call {
+func (_e *MockClient_Expecter) User(login any, forgeID ...any) *MockClient_User_Call {
 	return &MockClient_User_Call{Call: _e.mock.On("User",
-		append([]interface{}{login}, forgeID...)...)}
+		append([]any{login}, forgeID...)...)}
 }
 
 func (_c *MockClient_User_Call) Run(run func(login string, forgeID ...int64)) *MockClient_User_Call {
@@ -4760,9 +4760,9 @@ type MockClient_UserDel_Call struct {
 // UserDel is a helper method to define mock.On call
 //   - login string
 //   - forgeID ...int64
-func (_e *MockClient_Expecter) UserDel(login interface{}, forgeID ...interface{}) *MockClient_UserDel_Call {
+func (_e *MockClient_Expecter) UserDel(login any, forgeID ...any) *MockClient_UserDel_Call {
 	return &MockClient_UserDel_Call{Call: _e.mock.On("UserDel",
-		append([]interface{}{login}, forgeID...)...)}
+		append([]any{login}, forgeID...)...)}
 }
 
 func (_c *MockClient_UserDel_Call) Run(run func(login string, forgeID ...int64)) *MockClient_UserDel_Call {
@@ -4830,7 +4830,7 @@ type MockClient_UserList_Call struct {
 
 // UserList is a helper method to define mock.On call
 //   - opt woodpecker.UserListOptions
-func (_e *MockClient_Expecter) UserList(opt interface{}) *MockClient_UserList_Call {
+func (_e *MockClient_Expecter) UserList(opt any) *MockClient_UserList_Call {
 	return &MockClient_UserList_Call{Call: _e.mock.On("UserList", opt)}
 }
 
@@ -4892,7 +4892,7 @@ type MockClient_UserPatch_Call struct {
 
 // UserPatch is a helper method to define mock.On call
 //   - user *woodpecker.User
-func (_e *MockClient_Expecter) UserPatch(user interface{}) *MockClient_UserPatch_Call {
+func (_e *MockClient_Expecter) UserPatch(user any) *MockClient_UserPatch_Call {
 	return &MockClient_UserPatch_Call{Call: _e.mock.On("UserPatch", user)}
 }
 
@@ -4954,7 +4954,7 @@ type MockClient_UserPost_Call struct {
 
 // UserPost is a helper method to define mock.On call
 //   - user *woodpecker.User
-func (_e *MockClient_Expecter) UserPost(user interface{}) *MockClient_UserPost_Call {
+func (_e *MockClient_Expecter) UserPost(user any) *MockClient_UserPost_Call {
 	return &MockClient_UserPost_Call{Call: _e.mock.On("UserPost", user)}
 }
 

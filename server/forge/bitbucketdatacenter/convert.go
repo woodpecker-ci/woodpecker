@@ -176,9 +176,6 @@ func bitbucketAvatarURL(baseURL, slug string) string {
 }
 
 func convertListOptions(p *model.ListOptions) bitbucket.ListOptions {
-	if p.All {
-		return bitbucket.ListOptions{}
-	}
 	return bitbucket.ListOptions{Limit: uint(p.PerPage), Start: uint((p.Page - 1) * p.PerPage)}
 }
 
