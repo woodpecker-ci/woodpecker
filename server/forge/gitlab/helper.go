@@ -48,17 +48,41 @@ func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error)
 // isRead is a helper function that returns true if the
 // user has Read-only access to the repository.
 func isRead(proj *gitlab.Project, projectMember *gitlab.ProjectMember) bool {
-	return proj.Visibility == gitlab.InternalVisibility || proj.Visibility == gitlab.PrivateVisibility || projectMember != nil && projectMember.AccessLevel >= gitlab.ReporterPermissions
+	return proj.Visibility == gitlab.InternalVisibility || proj.Visibility == gitlab.PrivateVisibility || userAccessLevel(proj, projectMember) >= gitlab.ReporterPermissions
 }
 
 // isWrite is a helper function that returns true if the
 // user has Read-Write access to the repository.
-func isWrite(projectMember *gitlab.ProjectMember) bool {
-	return projectMember != nil && projectMember.AccessLevel >= gitlab.DeveloperPermissions
+func isWrite(proj *gitlab.Project, projectMember *gitlab.ProjectMember) bool {
+	return userAccessLevel(proj, projectMember) >= gitlab.DeveloperPermissions
 }
 
 // isAdmin is a helper function that returns true if the
 // user has Admin access to the repository.
-func isAdmin(projectMember *gitlab.ProjectMember) bool {
-	return projectMember != nil && projectMember.AccessLevel >= gitlab.MaintainerPermissions
+func isAdmin(proj *gitlab.Project, projectMember *gitlab.ProjectMember) bool {
+	return userAccessLevel(proj, projectMember) >= gitlab.MaintainerPermissions
+}
+
+// userAccessLevel returns the effective access level of the current user for the project.
+func userAccessLevel(proj *gitlab.Project, projectMember *gitlab.ProjectMember) gitlab.AccessLevelValue {
+	if projectMember != nil {
+		return projectMember.AccessLevel
+	}
+	return embeddedAccessLevel(proj)
+}
+
+// embeddedAccessLevel returns the access level of the current user
+// See https://docs.gitlab.com/api/projects/.
+func embeddedAccessLevel(proj *gitlab.Project) gitlab.AccessLevelValue {
+	if proj == nil || proj.Permissions == nil {
+		return gitlab.NoPermissions
+	}
+	level := gitlab.NoPermissions
+	if proj.Permissions.ProjectAccess != nil {
+		level = max(level, proj.Permissions.ProjectAccess.AccessLevel)
+	}
+	if proj.Permissions.GroupAccess != nil {
+		level = max(level, proj.Permissions.GroupAccess.AccessLevel)
+	}
+	return level
 }

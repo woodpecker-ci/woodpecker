@@ -341,7 +341,9 @@
             },
             "load_more": "Загрузить ещё",
             "version_header": "Версия Woodpecker",
-            "version": "Версия Woodpecker, на которой был выполнен этот конвейер."
+            "version": "Версия Woodpecker, на которой был выполнен этот конвейер.",
+            "parse_errors": "Ошибки разбора",
+            "runtime_errors": "Ошибки выполнения"
         },
         "pull_requests": "Запросы на слияние",
         "settings": {
@@ -795,5 +797,9 @@
     "secret_extension_netrc": "Включить учётные данные netrc",
     "secret_extension_netrc_desc": "Отправлять расширению учётные данные netrc платформы.",
     "extension_netrc_desc": "Передавать учётные данные netrc расширению.",
-    "extension_netrc": "Включить учётные данные netrc"
+    "extension_netrc": "Включить учётные данные netrc",
+    "delete": "Удалить",
+    "allowed_orgs_desc": "Организации, которым разрешён вход через эту платформу, в дополнение к глобальной настройке WOODPECKER_ORGS.",
+    "allowed_orgs_placeholder": "Имя организации",
+    "allowed_orgs": "Разрешённые организации"
 }

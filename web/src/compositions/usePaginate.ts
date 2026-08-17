@@ -38,6 +38,9 @@ export function usePagination<T, S = unknown>(
   const data = ref<T[]>([]) as Ref<T[]>;
   const loading = ref(false);
   const each = ref([...(_each ?? [])]);
+  // incremented on every resetPage; a response started under an older
+  // generation is stale and must not touch any state
+  let generation = 0;
 
   async function loadData() {
     if (loading.value === true || hasMore.value === false) {
@@ -45,7 +48,13 @@ export function usePagination<T, S = unknown>(
     }
 
     loading.value = true;
+    const requestGeneration = generation;
     const newData = (await _loadData(page.value, each.value?.[0] as S)) ?? [];
+    if (requestGeneration !== generation) {
+      // resetPage was called while this request was in flight; a fresh
+      // request owns the state now, so discard this response entirely
+      return;
+    }
     hasMore.value = newData.length >= pageSize.value && newData.length > 0;
     if (newData.length > 0) {
       data.value.push(...newData);
@@ -81,6 +90,7 @@ export function usePagination<T, S = unknown>(
   async function resetPage() {
     const _page = page.value;
 
+    generation += 1;
     page.value = 1;
     hasMore.value = true;
     data.value = [];

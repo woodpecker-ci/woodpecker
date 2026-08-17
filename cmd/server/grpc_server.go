@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -33,6 +34,13 @@ import (
 func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) error {
 	network := "tcp"
 	addr := c.String("grpc-addr")
+	jwtSecret, generated := setupGrpcSecret(c.String("grpc-secret"))
+	if generated {
+		log.Warn().Msg(
+			"WOODPECKER_GRPC_SECRET is not set; generated a temporary random secret. " +
+				"Set and persist WOODPECKER_GRPC_SECRET to keep the same secret across restarts",
+		)
+	}
 
 	if strings.HasPrefix(addr, "unix://") {
 		network = "unix"
@@ -52,7 +60,7 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 		Store:            _store,
 		Scheduler:        server.Config.Services.Scheduler,
 		Logger:           server.Config.Services.Logs,
-		JWTSecret:        c.String("grpc-secret"),
+		JWTSecret:        jwtSecret,
 		AgentToken:       server.Config.Server.AgentToken,
 		KeepaliveMinTime: c.Duration("keepalive-min-time"),
 		Registerer:       prometheus.DefaultRegisterer,

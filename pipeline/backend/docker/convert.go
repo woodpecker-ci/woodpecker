@@ -93,6 +93,9 @@ func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error)
 		Privileged: step.Privileged,
 	}
 
+	if conf.apparmor != "" {
+		config.SecurityOpt = []string{"apparmor=" + conf.apparmor}
+	}
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}

@@ -202,6 +202,7 @@ func classifyRPCErr(ctx context.Context, err error) error {
 	case codes.Aborted,
 		codes.DataLoss,
 		codes.DeadlineExceeded,
+		codes.Unauthenticated,
 		codes.Unavailable:
 		return err
 	default:

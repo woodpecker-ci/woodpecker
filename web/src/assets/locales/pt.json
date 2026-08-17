@@ -331,7 +331,9 @@
             },
             "load_more": "Carregar mais",
             "version": "A versão do Woodpecker na qual este pipeline foi executado.",
-            "version_header": "Versão do Woodpecker"
+            "version_header": "Versão do Woodpecker",
+            "parse_errors": "Erros de análise",
+            "runtime_errors": "Erros em tempo de execução"
         },
         "branches": "Branches",
         "pull_requests": "Pull requests",
@@ -789,5 +791,6 @@
     "secret_extension_netrc": "Incluir cerdenciais de netrc",
     "secret_extension_netrc_desc": "Envia as credenciais de netrc da forja para a extensão de segredos.",
     "extension_netrc": "Incluir credenciais netrc",
-    "extension_netrc_desc": "Envia credenciais netrc da forja para a extensão."
+    "extension_netrc_desc": "Envia credenciais netrc da forja para a extensão.",
+    "delete": "Excluir"
 }

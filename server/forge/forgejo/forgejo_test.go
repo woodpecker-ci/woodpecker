@@ -98,6 +98,19 @@ func Test_forgejo(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("pull request list", func(t *testing.T) {
+		prs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		assert.Len(t, prs, 1)
+		assert.Equal(t, "add feature X", prs[0].Title)
+	})
+	t.Run("pull request list for repo without commits", func(t *testing.T) {
+		// Forgejo answers with 404 for repos without commits; that must be treated as an empty list, not an error
+		prs, err := c.PullRequests(ctx, fakeUser, fakeRepoEmpty, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		assert.Empty(t, prs)
+	})
+
 	t.Run("register repository", func(t *testing.T) {
 		err := c.Activate(ctx, fakeUser, fakeRepo, "http://localhost")
 		assert.NoError(t, err)
@@ -158,6 +171,12 @@ var (
 		Owner:    "test_name",
 		Name:     "repo_not_found",
 		FullName: "test_name/repo_not_found",
+	}
+
+	fakeRepoEmpty = &model.Repo{
+		Owner:    "test_name",
+		Name:     "repo_without_commits",
+		FullName: "test_name/repo_without_commits",
 	}
 
 	fakePipeline = &model.Pipeline{

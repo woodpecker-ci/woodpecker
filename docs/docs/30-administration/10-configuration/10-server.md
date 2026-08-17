@@ -18,7 +18,7 @@ You can also restrict the registration:
   WOODPECKER_ADMIN=john.smith,jane_doe
   ```
 
-- open registration and filtering by organizational affiliation with the setting `WOODPECKER_ORGS`
+- open registration and filtering by organizational affiliation with the setting `WOODPECKER_ORGS`. For GitLab forges group names have to exact match, so members of group `group` are not permitted access if you set `WOODPECKER_ORGS=group/subgroup`.
 
   ```ini
   WOODPECKER_OPEN=true
@@ -651,9 +651,19 @@ If you want an unix socket use `unix://` prefix, for example `unix:///run/woodpe
 ### GRPC_SECRET
 
 - Name: `WOODPECKER_GRPC_SECRET`
-- Default: `secret`
+- Default: none
 
-Configures the gRPC JWT secret.
+Configures the secret used to sign JWTs for gRPC connections.
+
+If this setting is empty, the server generates a secure temporary secret and logs a warning. The generated secret is not persisted and changes each time the server starts. Configure and persist a secret to keep it stable across restarts. Setting this explicitly is important for high availability (HA) setups with multiple server replicas: each replica would otherwise generate its own secret and reject the gRPC tokens issued by the other replicas. Generate a secure secret with:
+
+```shell
+openssl rand -hex 32
+```
+
+Store the generated value securely and provide it through `WOODPECKER_GRPC_SECRET` or `WOODPECKER_GRPC_SECRET_FILE`.
+
+After this secret is rotated, connected agents reauthenticate when the server rejects their old token. Agents do not need to be restarted as long as `WOODPECKER_AGENT_SECRET` remains unchanged.
 
 ---
 
@@ -662,7 +672,7 @@ Configures the gRPC JWT secret.
 - Name: `WOODPECKER_GRPC_SECRET_FILE`
 - Default: none
 
-Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath.
+Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath. The file should be stored persistently and only be readable by the Woodpecker server.
 
 ---
 
@@ -702,9 +712,12 @@ Example: `WOODPECKER_ADMIN=user1,user2`
 - Name: `WOODPECKER_ORGS`
 - Default: none
 
-Comma-separated list of approved organizations.
+Comma-separated list of approved organizations. For GitLab forges this is the `full_path` [attribute](https://docs.gitlab.com/api/groups/).
 
 Example: `org1,org2`
+
+This setting applies to all [forges](./12-forges/11-overview.md). A forge can allow further organizations in addition, configured in the admin UI (`Settings` -> `Forges` -> `Advanced options`). As organization names are only unique within a single forge, someone could create an organization with a name from this setting on another connected forge to gain access.
+If you connected more than one forge, you should therefore leave this setting empty and configure the allowed organizations per forge. See [restricting who can log in](./12-forges/11-overview.md#restricting-who-can-log-in) for details.
 
 ---
 

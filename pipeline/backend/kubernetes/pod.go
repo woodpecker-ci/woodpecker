@@ -34,11 +34,12 @@ import (
 const (
 	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
 	// This will be removed in the future.
-	StepLabelLegacy       = "step"
-	StepLabel             = "woodpecker-ci.org/step"
-	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
-	podPrefix             = "wp-"
-	defaultFSGroup  int64 = 1000
+	StepLabelLegacy            = "step"
+	StepLabel                  = "woodpecker-ci.org/step"
+	TaskUUIDLabel              = "woodpecker-ci.org/task-uuid"
+	podPrefix                  = "wp-"
+	defaultFSGroup       int64 = 1000
+	defaultClusterDomain       = "cluster.local"
 	// Because of https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/nodes/working-with-clusters
 	initContainerMemLimit = "12Mi"
 )
@@ -89,7 +90,7 @@ func stepToPodName(step *types.Step) (name string, err error) {
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(podPrefix + step.UUID)
+	return toDNSName(podPrefix + step.UUID)
 }
 
 func podMeta(step *types.Step, config *config, options BackendOptions, podName, taskUUID string) (kube_meta_v1.ObjectMeta, error) {
@@ -116,7 +117,7 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 		// Only copy user labels if allowed by agent config.
 		// Internal labels are filtered on the server-side.
 		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
-			labels[k], err = toDNSName(v)
+			labels[k], err = toLabelValue(v)
 			if err != nil {
 				return labels, err
 			}
@@ -140,11 +141,11 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 	if isService(step) {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
-	labels[StepLabelLegacy], err = stepLabel(step)
+	labels[StepLabelLegacy], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
-	labels[StepLabel], err = stepLabel(step)
+	labels[StepLabel], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
@@ -154,10 +155,6 @@ func podLabels(step *types.Step, config *config, options BackendOptions, taskUUI
 	}
 
 	return labels, nil
-}
-
-func stepLabel(step *types.Step) (string, error) {
-	return toDNSName(step.Name)
 }
 
 func podAnnotations(config *config, options BackendOptions) map[string]string {
@@ -192,7 +189,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		HostAliases:       hostAliases(step.ExtraHosts),
 		Hostname:          getHostnameOrEmpty(step.Name),
 		Subdomain:         subdomain,
-		DNSConfig:         dnsConfig(config.GetNamespace(step.OrgID), subdomain),
+		DNSConfig:         dnsConfig(config.GetNamespace(step.OrgID), subdomain, config.ClusterDomain),
 		NodeSelector:      nodeSelector(options.NodeSelector, config.PodNodeSelector, config.PodNodeSelectorAllowFromStep, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:       tolerations(options.Tolerations),
 		Affinity:          affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
@@ -750,9 +747,13 @@ func mapToEnvVars(m map[string]string) []kube_core_v1.EnvVar {
 	return ev
 }
 
-func dnsConfig(namespace, subdomain string) *kube_core_v1.PodDNSConfig {
+func dnsConfig(namespace, subdomain, clusterDomain string) *kube_core_v1.PodDNSConfig {
+	if clusterDomain == "" {
+		clusterDomain = defaultClusterDomain
+	}
+
 	return &kube_core_v1.PodDNSConfig{
-		Searches: []string{fmt.Sprintf("%s.%s.svc.cluster.local", subdomain, namespace)},
+		Searches: []string{fmt.Sprintf("%s.%s.svc.%s", subdomain, namespace, clusterDomain)},
 	}
 }
 

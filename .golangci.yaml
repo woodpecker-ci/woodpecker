@@ -46,6 +46,13 @@ linters:
   settings:
     depguard:
       rules:
+        deprecated:
+          list-mode: lax
+          files:
+            - $all
+          deny:
+            - pkg: golang.org/x/crypto/openpgp
+              desc: deprecated and frozen, use github.com/ProtonMail/go-crypto/openpgp instead
         agent:
           list-mode: lax
           files:
@@ -257,6 +264,8 @@ linters:
           alias: github_mock
         - pkg: gitlab.com/gitlab-org/api/client-go/v2
           alias: gitlab
+        - pkg: go.yaml.in/yaml/v4
+          alias: go_yaml
     misspell:
       locale: US
     mnd:
