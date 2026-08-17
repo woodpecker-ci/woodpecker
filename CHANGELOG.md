@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Add pipeline log download endpoint [[#6876](https://github.com/woodpecker-ci/woodpecker/pull/6876)]
 - Reject invalid started and done workflow states [[#7029](https://github.com/woodpecker-ci/woodpecker/pull/7029)]
 - Sort workflow files by name [[#7021](https://github.com/woodpecker-ci/woodpecker/pull/7021)]
 - Make command execution more robust on windows [[#6969](https://github.com/woodpecker-ci/woodpecker/pull/6969)]
@@ -35,6 +36,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix orphaned pipelines after repo delete [[#6971](https://github.com/woodpecker-ci/woodpecker/pull/6971)]
 - Migrate modernize encryption service [[#6830](https://github.com/woodpecker-ci/woodpecker/pull/6830)]
 - Fix running multiple cmdlets on windows [[#6968](https://github.com/woodpecker-ci/woodpecker/pull/6968)]
 - server: drop stale queued tasks for terminal workflows [[#7015](https://github.com/woodpecker-ci/woodpecker/pull/7015)]
