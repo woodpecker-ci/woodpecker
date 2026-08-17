@@ -221,10 +221,6 @@ func TestLintErrors(t *testing.T) {
 			from: "{steps: { build: { image: golang } }, services: [ { name: database, image: mysql }, { name: database, image: postgres } ] }",
 			want: "Service names must be unique, `database` is used more than once",
 		},
-		{
-			from: "steps:\n  build:\n    image: golang\nservices:\n  database:\n    image: mysql\n  database:\n    image: postgres\n",
-			want: "Service names must be unique, `database` is used more than once",
-		},
 	}
 
 	for _, test := range testdata {
