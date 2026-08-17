@@ -4,7 +4,6 @@ export interface ApiError {
 }
 
 type QueryParams = Record<string, string | number | boolean>;
-type ResponseType = 'auto' | 'blob';
 
 export function encodeQueryString(_params: unknown = {}): string {
   const __params = _params as QueryParams;
@@ -41,12 +40,7 @@ export default class ApiClient {
     this.csrf = csrf;
   }
 
-  private async _request(
-    method: string,
-    path: string,
-    data?: unknown,
-    responseType: ResponseType = 'auto',
-  ): Promise<unknown> {
+  private async _request(method: string, path: string, data?: unknown): Promise<unknown> {
     const res = await fetch(`${this.server}${path}`, {
       method,
       headers: {
@@ -73,10 +67,6 @@ export default class ApiClient {
       throw new Error(message);
     }
 
-    if (responseType === 'blob') {
-      return res.blob();
-    }
-
     const contentType = res.headers.get('Content-Type');
     if (contentType !== null && contentType.startsWith('application/json')) {
       return res.json();
@@ -87,10 +77,6 @@ export default class ApiClient {
 
   async _get(path: string) {
     return this._request('GET', path);
-  }
-
-  async _getBlob(path: string): Promise<Blob> {
-    return this._request('GET', path, undefined, 'blob') as Promise<Blob>;
   }
 
   async _post(path: string, data?: unknown) {

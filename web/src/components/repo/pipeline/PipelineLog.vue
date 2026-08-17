@@ -31,7 +31,6 @@
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs"
-            :is-loading="downloadInProgress"
             :title="$t('repo.pipeline.actions.log_download')"
             class="hover:bg-white/10!"
             icon="download"
@@ -228,7 +227,9 @@ const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();
 const fullscreen = ref(false);
-const logDownloadUrl = computed(() => `${config.rootPath}/api/repos/${repo.value.id}/logs/${pipeline.value.number}/${step.value?.id}/download`);
+const logDownloadUrl = computed(
+  () => `${config.rootPath}/api/repos/${repo.value.id}/logs/${pipeline.value.number}/${step.value?.id}/download`,
+);
 
 const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(
@@ -238,7 +239,6 @@ const hasLogs = computed(
 );
 const autoScroll = useStorage('woodpecker:log-auto-scroll', true);
 const showActions = ref(false);
-const downloadInProgress = ref(false);
 const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
