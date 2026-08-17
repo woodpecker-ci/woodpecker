@@ -75,6 +75,16 @@ func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 }
 
 func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
+	step, exists := steps[name]
+	if !exists {
+		// `name` is an optional dependency on a step that was filtered out. convertDAGToStages
+		// drops those edges, but it resolves one step at a time and runs this walk in the same
+		// loop, so the walk can reach a step whose dependsOn is not resolved yet and follow an
+		// edge to a filtered-out step. There is nothing to traverse, and a missing *required*
+		// dependency is still reported by convertDAGToStages when it reaches that step.
+		return nil
+	}
+
 	if _, ok := visited[name]; ok {
 		return &ErrStepDependencyCycle{path: path}
 	}
@@ -82,7 +92,7 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 	visited[name] = struct{}{}
 	path = append(path, name)
 
-	for _, dep := range steps[name].dependsOn {
+	for _, dep := range step.dependsOn {
 		if err := dfsVisit(steps, dep.Name, visited, path); err != nil {
 			return err
 		}

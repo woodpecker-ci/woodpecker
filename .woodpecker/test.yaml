@@ -68,7 +68,7 @@ steps:
     commands:
       - 'make generate-openapi'
       - 'DIFF=$(git diff | head)'
-      - '[ -n "$DIFF" ] && { echo "openapi not up to date, exec `make generate-openapi` and commit"; exit 1; } || true'
+      - '[ -n "$DIFF" ] && { echo "openapi not up to date, exec make generate-openapi and commit"; exit 1; } || true'
     when: *when
 
   lint-license-header:
@@ -96,6 +96,17 @@ steps:
     image: *golang_image
     commands:
       - make test-e2e
+    when:
+      - path: *when_path
+
+  test-fuzz:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - make fuzz
+    environment:
+      FUZZ_TIME: 2s
     when:
       - path: *when_path
 
@@ -137,7 +148,7 @@ steps:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.3.1
+    image: docker.io/woodpeckerci/plugin-codecov:2.3.2
     settings:
       files:
         - agent-coverage.out
@@ -162,7 +173,7 @@ services:
     when: *when
 
   mysql:
-    image: docker.io/mysql:9.7.1
+    image: docker.io/mysql:26.7.0
     ports: ['3306']
     environment:
       MYSQL_DATABASE: test

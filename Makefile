@@ -1,5 +1,5 @@
 # renovate: datasource=github-releases depName=mvdan/gofumpt
-GOFUMPT_VERSION := v0.10.0
+GOFUMPT_VERSION := v0.11.0
 # renovate: datasource=github-releases depName=golangci/golangci-lint
 GOLANGCI_LINT_VERSION := v2.12.2
 # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
@@ -208,6 +208,16 @@ test-e2e: ## Test by running yaml config and compare expected result
 
 .PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests
+
+FUZZ_TIME ?= 30s
+
+fuzz: ## Run all fuzz targets for FUZZ_TIME (default 30s) each
+	@for pkg in $$(grep -rl --include='fuzz_test.go' 'func Fuzz' . | xargs -n1 dirname | sort -u); do \
+		for target in $$(grep -h -o 'func Fuzz[A-Za-z0-9_]*' $$pkg/fuzz_test.go | cut -d' ' -f2); do \
+			echo "fuzzing $$pkg $$target"; \
+			go test -tags 'test $(TAGS)' -run 'XXX_NONE' -fuzz "^$$target"'$$' -fuzztime $(FUZZ_TIME) "./$$pkg" || exit 1; \
+		done; \
+	done
 
 ##@ Build
 

@@ -342,7 +342,9 @@
             },
             "load_more": "Mehr laden",
             "version": "Die Woodpecker-Version, mit der diese Pipeline ausgeführt wurde.",
-            "version_header": "Woodpecker-Version"
+            "version_header": "Woodpecker-Version",
+            "parse_errors": "Parse-Fehler",
+            "runtime_errors": "Laufzeitfehler"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -806,5 +808,9 @@
     "secret_extension_netrc": "Netrc-Zugangsdaten senden",
     "secret_extension_netrc_desc": "Die Netrc-Zugangsdaten für die Code-Plattform an die Geheimnis-Erweiterung senden.",
     "extension_netrc": "Netrc-Zugangsdaten bereitstellen",
-    "extension_netrc_desc": "Die Netrc-Zugangsdaten der Code-Plattform an die Erweiterung weitergeben."
+    "extension_netrc_desc": "Die Netrc-Zugangsdaten der Code-Plattform an die Erweiterung weitergeben.",
+    "delete": "Entfernen",
+    "allowed_orgs": "Erlaubte Organisationen",
+    "allowed_orgs_desc": "Die Mitglieder dieser Organisationen dürfen sich mit dieser Plattform anmelden, zusätzlich zu den in WOODPECKER_ORGS global konfigurierten.",
+    "allowed_orgs_placeholder": "Organisationsname"
 }
