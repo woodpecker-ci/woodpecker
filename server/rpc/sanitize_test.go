@@ -311,3 +311,53 @@ func TestAllowAppendingLogsDrainBoundary(t *testing.T) {
 		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
 	})
 }
+
+func TestCheckAgentReportedInitState(t *testing.T) {
+	t.Parallel()
+
+	t.Run("started set and not canceled is allowed", func(t *testing.T) {
+		t.Parallel()
+		assert.NoError(t, checkAgentReportedInitState(1, rpc.WorkflowState{Started: time.Now().Unix()}))
+	})
+
+	t.Run("zero started is rejected", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkAgentReportedInitState(1, rpc.WorkflowState{}), ErrAgentImpossibleWorkflowState)
+	})
+
+	t.Run("canceled on init is rejected", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkAgentReportedInitState(1, rpc.WorkflowState{Started: time.Now().Unix(), Canceled: true}), ErrAgentImpossibleWorkflowState)
+	})
+
+	t.Run("pre proto version 16 init signature is rejected", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkAgentReportedInitState(1, rpc.WorkflowState{Canceled: true}), ErrAgentImpossibleWorkflowState)
+	})
+}
+
+func TestCheckAgentReportedDoneState(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now().Unix()
+
+	t.Run("finished workflow is allowed", func(t *testing.T) {
+		t.Parallel()
+		assert.NoError(t, checkAgentReportedDoneState(1, rpc.WorkflowState{Started: now, Finished: now}))
+	})
+
+	t.Run("canceled workflow with started set is allowed", func(t *testing.T) {
+		t.Parallel()
+		assert.NoError(t, checkAgentReportedDoneState(1, rpc.WorkflowState{Started: now, Finished: now, Canceled: true}))
+	})
+
+	t.Run("zero-value state used to finalize skipped workflows is allowed", func(t *testing.T) {
+		t.Parallel()
+		assert.NoError(t, checkAgentReportedDoneState(1, rpc.WorkflowState{}))
+	})
+
+	t.Run("pre proto version 16 done signature is rejected", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkAgentReportedDoneState(1, rpc.WorkflowState{Canceled: true}), ErrAgentImpossibleWorkflowState)
+	})
+}
