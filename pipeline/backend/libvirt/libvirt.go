@@ -988,7 +988,7 @@ func CheckSshPid(client *goph.Client, guestOS string, stepUUID string) (bool, er
 			case *ssh.ExitMissingError:
 				log.Debug().Msgf("ExitMissingError in CheckSshPid: %s", sshErr)
 				return true, nil
-			case *exec.ExitError:
+			case *ssh.ExitError:
 				log.Debug().Msgf("ExitError in CheckSshPid: %s", sshErr)
 				return false, nil
 			case nil:
@@ -1040,10 +1040,10 @@ func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUU
 			ExitCode:  -1,
 			OOMKilled: false,
 		}, sshErr
-	case *exec.ExitError:
+	case *ssh.ExitError:
 		return &backend_types.State{
 			Exited:    true,
-			ExitCode:  e.ExitCode(),
+			ExitCode:  e.ExitStatus(),
 			OOMKilled: false,
 		}, sshErr
 	case nil:
