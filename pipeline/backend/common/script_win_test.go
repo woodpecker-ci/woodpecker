@@ -29,6 +29,7 @@ func TestGenerateScriptWin(t *testing.T) {
 		{
 			from: []string{"echo %PATH%", "go build", "go test"},
 			want: `
+$LASTEXITCODE = 0
 $ErrorActionPreference = 'Stop';
 if (-not (Test-Path "/woodpecker/some")) { New-Item -Path "/woodpecker/some" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };

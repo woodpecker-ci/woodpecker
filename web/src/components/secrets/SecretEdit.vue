@@ -24,21 +24,12 @@
       <InputField v-slot="{ id }" :label="$t('secrets.plugins.images')">
         <span class="text-wp-text-alt-100 mb-2 ml-1">{{ $t('secrets.plugins.desc') }}</span>
 
-        <div class="flex flex-col gap-2">
-          <div v-for="image in innerValue.images" :key="image" class="flex gap-2">
-            <TextField :id="id" :model-value="image" disabled />
-            <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
-          </div>
-          <div class="flex gap-2">
-            <TextField
-              :id="id"
-              v-model="newImage"
-              :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
-              @keydown.enter.prevent="addNewImage"
-            />
-            <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
-          </div>
-        </div>
+        <ListEditor
+          :id="id"
+          ref="imagesEditor"
+          v-model="innerValue.images"
+          :placeholder="$t('repo.settings.general.netrc_only_trusted.placeholder')"
+        />
       </InputField>
 
       <InputField :label="$t('secrets.events.events')">
@@ -64,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRef } from 'vue';
+import { computed, toRef, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -72,6 +63,7 @@ import Warning from '~/components/atomic/Warning.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import type { CheckboxOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
+import ListEditor from '~/components/form/ListEditor.vue';
 import TextField from '~/components/form/TextField.vue';
 import { WebhookEvents } from '~/lib/api/types';
 import type { Secret } from '~/lib/api/types';
@@ -98,17 +90,7 @@ const innerValue = computed({
 });
 const isEditingSecret = computed(() => !!innerValue.value?.id);
 
-const newImage = ref('');
-function addNewImage() {
-  if (!newImage.value) {
-    return;
-  }
-  innerValue.value.images?.push(newImage.value);
-  newImage.value = '';
-}
-function removeImage(image: string) {
-  innerValue.value.images = innerValue.value.images?.filter((i) => i !== image);
-}
+const imagesEditor = useTemplateRef<InstanceType<typeof ListEditor>>('imagesEditor');
 
 const secretEventsOptions: CheckboxOption[] = [
   { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
@@ -125,9 +107,8 @@ function save() {
     return;
   }
 
-  if (newImage.value) {
-    innerValue.value.images?.push(newImage.value);
-  }
+  // an image the user typed without confirming it should still be saved
+  imagesEditor.value?.commitPendingItem();
 
   emit('save', innerValue.value);
 }
