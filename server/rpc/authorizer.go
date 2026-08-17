@@ -48,11 +48,15 @@ package rpc
 
 import (
 	"context"
+	"strconv"
 
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 )
 
 // StreamContextWrapper wraps gRPC ServerStream to allow context modification.
@@ -139,8 +143,41 @@ func (a *Authorizer) authorize(ctx context.Context, fullMethod string) (context.
 		return ctx, status.Errorf(codes.Unauthenticated, "access token is invalid: %v", err)
 	}
 
+	if err := checkClientProtoVersion(md, claims.AgentID); err != nil {
+		return ctx, err
+	}
+
 	// inject agentID into context
 	ctx = context.WithValue(ctx, agentIDKey, claims.AgentID)
 
 	return ctx, nil
+}
+
+// checkClientProtoVersion rejects calls from agents whose reported proto
+// version differs from the servers.
+func checkClientProtoVersion(md metadata.MD, agentID int64) error {
+	values := md.Get("proto-version")
+	// For backward compatibility allow agents that do not report their version
+	if len(values) == 0 {
+		log.Debug().Int64("agentID", agentID).Msg("agent did not report its gRPC proto version")
+		return nil
+	}
+
+	clientVersion, err := strconv.ParseInt(values[0], 10, 32)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "invalid gRPC proto version %q", values[0])
+	}
+
+	if int32(clientVersion) != proto.Version {
+		log.Error().
+			Int64("agentID", agentID).
+			Int64("agentProtoVersion", clientVersion).
+			Int32("serverProtoVersion", proto.Version).
+			Msg("rejecting agent with incompatible gRPC proto version")
+		return status.Errorf(codes.FailedPrecondition,
+			"agent gRPC proto version %d is incompatible with server proto version %d",
+			clientVersion, proto.Version)
+	}
+
+	return nil
 }
