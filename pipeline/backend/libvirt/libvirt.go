@@ -305,7 +305,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		if err != nil {
 			return err
 		}
-
 	}
 
 	// we need to create pipes and set Stdout here
@@ -420,9 +419,14 @@ func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUU
 		return nil, fmt.Errorf("Could not find key %s for workflows", taskUUID)
 	}
 
-	p, ok := w.(*workflow).pipesStdOut.Load(step.UUID)
+	pOut, ok := w.(*workflow).pipesStdOut.Load(step.UUID)
 	if !ok {
 		return nil, fmt.Errorf("Could not find key %s for pipesStdOut", step.UUID)
+	}
+
+	pIn, ok := w.(*workflow).pipesStdIn.Load(step.UUID)
+	if !ok {
+		return nil, fmt.Errorf("Could not find key %s for pipesStdIn", step.UUID)
 	}
 
 	var once sync.Once
@@ -430,10 +434,14 @@ func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUU
 		io.Reader
 		io.Closer
 	}{
-		Reader: p.(*pipes).pr,
+		Reader: pOut.(*pipes).pr,
 		Closer: closerFunc(func() error {
 			once.Do(func() {
-				p.(*pipes).pr.Close()
+				pOut.(*pipes).pr.Close()
+				pOut.(*pipes).pw.Close()
+
+				pIn.(*pipes).pw.Close()
+				pIn.(*pipes).pr.Close()
 			})
 			return nil
 		}),
