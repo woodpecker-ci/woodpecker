@@ -48,7 +48,8 @@ type libvirt struct {
 type workflow struct {
 	commands    sync.Map
 	domains     sync.Map
-	pipes       sync.Map
+	pipesStdOut sync.Map
+	pipesStdIn  sync.Map
 	doneChannel sync.Map
 	guestOS     sync.Map
 }
@@ -541,7 +542,8 @@ func (e *libvirt) SetupWorkflow(ctx context.Context, conf *backend_types.Config,
 	e.workflows.Store(taskUUID, &workflow{
 		commands:    sync.Map{},
 		domains:     sync.Map{},
-		pipes:       sync.Map{},
+		pipesStdOut: sync.Map{},
+		pipesStdIn:  sync.Map{},
 		doneChannel: sync.Map{},
 		guestOS:     sync.Map{},
 	})
@@ -858,7 +860,13 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
 	sshCmd.Stdout = pw
 	sshCmd.Stderr = pw
-	w.(*workflow).pipes.Store(step.UUID, &pipes{pr, pw})
+	w.(*workflow).pipesStdOut.Store(step.UUID, &pipes{pr, pw})
+
+	{
+		pr, pw := nio.Pipe(buffer.New(64 * 1024))
+		sshCmd.Stdin = pr
+		w.(*workflow).pipesStdIn.Store(step.UUID, &pipes{pr, pw})
+	}
 
 	done := make(chan struct{})
 	w.(*workflow).doneChannel.Store(step.UUID, done)
@@ -866,7 +874,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	go func() {
 		select {
 		case <-ctx.Done():
-			err := TerminateSshCommand(client, sshCmd, guestOS, step.UUID)
+			err := e.TerminateSshCommand(client, sshCmd, guestOS, taskUUID, step.UUID)
 			if err != nil {
 				log.Debug().Msgf("Failed to terminate SSH command gracefully. Closing session by force. Error was: %s", err)
 				sshCmd.Close()
@@ -892,7 +900,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 // 1. send SIGINT... if that doesn't do it
 // 2. send SIGTERM... if that doesn't do it
 // 3. send the 'ctrl+c' character to stdin
-func TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, guestOS string, stepUUID string) error {
+func (e *libvirt) TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, guestOS string, taskUUID string, stepUUID string) error {
 	log.Debug().Msg("Context canceled, sending SIGINT to remote process")
 	err := sshCmd.Signal(ssh.SIGINT)
 	if err != nil {
@@ -918,12 +926,20 @@ func TerminateSshCommand(client *goph.Client, sshCmd *goph.Cmd, guestOS string, 
 		}
 		if running {
 			log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
-			pr, pw := nio.Pipe(buffer.New(64 * 1024))
-			sshCmd.Stdin = pr
-			pw.Write([]byte("\x03"))
+			w, ok := e.workflows.Load(taskUUID)
+			if !ok {
+				return fmt.Errorf("Could not find key %s for workflows", taskUUID)
+			}
+
+			p, ok := w.(*workflow).pipesStdIn.Load(stepUUID)
+			if !ok {
+				return fmt.Errorf("Could not find key %s for pipesStdIn", stepUUID)
+			}
+
+			p.(*pipes).pw.Write([]byte("\x03"))
 			time.Sleep(time.Second * 2)
-			pw.Close()
-			pr.Close()
+			p.(*pipes).pw.Close()
+			p.(*pipes).pr.Close()
 
 			// check if the process died
 			running, err := CheckSshPid(client, guestOS, stepUUID)
@@ -1058,9 +1074,9 @@ func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUU
 		return nil, fmt.Errorf("Could not find key %s for workflows", taskUUID)
 	}
 
-	p, ok := w.(*workflow).pipes.Load(step.UUID)
+	p, ok := w.(*workflow).pipesStdOut.Load(step.UUID)
 	if !ok {
-		return nil, fmt.Errorf("Could not find key %s for pipes", step.UUID)
+		return nil, fmt.Errorf("Could not find key %s for pipesStdOut", step.UUID)
 	}
 
 	var once sync.Once
