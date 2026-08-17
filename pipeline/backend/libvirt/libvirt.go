@@ -868,7 +868,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		case <-ctx.Done():
 			err := TerminateSshCommand(ctx, client, sshCmd, guestOS, step.UUID)
 			if err != nil {
-				log.Debug().Msg("Failed to terminate SSH command gracefully. Closing session by force.")
+				log.Debug().Msgf("Failed to terminate SSH command gracefully. Closing session by force. Error was: %s", err)
 				sshCmd.Close()
 			}
 		case <-done:
@@ -900,14 +900,22 @@ func TerminateSshCommand(ctx context.Context, client *goph.Client, sshCmd *goph.
 	}
 
 	// check if the process died
-	ok, _ := CheckSshPid(ctx, client, guestOS, stepUUID)
+	ok, err := CheckSshPid(ctx, client, guestOS, stepUUID)
+	if err != nil {
+		return err
+	}
 	if !ok {
 		log.Debug().Msg("SIGINT didn't work, trying SIGTERM")
 		err := sshCmd.Signal(ssh.SIGTERM)
 		if err != nil {
 			log.Debug().Msgf("Failed to send SIGTERM to remote process: %s", err)
 		}
-		ok, _ := CheckSshPid(ctx, client, guestOS, stepUUID)
+
+		// check if the process died
+		ok, err := CheckSshPid(ctx, client, guestOS, stepUUID)
+		if err != nil {
+			return err
+		}
 		if !ok {
 			log.Debug().Msg("SIGTERM didn't work, sending Ctrl+c to stdin")
 			pr, pw := nio.Pipe(buffer.New(64 * 1024))
@@ -917,7 +925,11 @@ func TerminateSshCommand(ctx context.Context, client *goph.Client, sshCmd *goph.
 			pw.Close()
 			pr.Close()
 
-			ok, _ := CheckSshPid(ctx, client, guestOS, stepUUID)
+			// check if the process died
+			ok, err := CheckSshPid(ctx, client, guestOS, stepUUID)
+			if err != nil {
+				return err
+			}
 			if !ok {
 				return fmt.Errorf("Failed to stop SSH process!")
 			}
@@ -937,6 +949,9 @@ func CheckSshPid(ctx context.Context, client *goph.Client, guestOS string, stepU
 		return true, nil
 	} else {
 		sshCmd, err := client.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("'cat ${TMPDIR:-/tmp}/%s.pid'", stepUUID))
+		if err != nil {
+			return false, err
+		}
 		bytes, err := sshCmd.Output()
 		if err != nil {
 			return false, err
