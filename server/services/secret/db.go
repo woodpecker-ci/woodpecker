@@ -34,12 +34,12 @@ func (d *db) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
 	return d.store.SecretFind(repo, name)
 }
 
-func (d *db) SecretList(repo *model.Repo, p *model.ListOptions) ([]*model.Secret, error) {
+func (d *db) SecretList(repo *model.Repo, p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	return d.store.SecretList(repo, false, p)
 }
 
 func (d *db) SecretListPipeline(_ context.Context, repo *model.Repo, _ *model.Pipeline, _ *model.Netrc) ([]*model.Secret, error) {
-	s, err := d.store.SecretList(repo, true, &model.ListOptions{All: true})
+	s, err := d.store.SecretList(repo, true, &model.ListOptionsWithAll{All: true})
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (d *db) OrgSecretFind(owner int64, name string) (*model.Secret, error) {
 	return d.store.OrgSecretFind(owner, name)
 }
 
-func (d *db) OrgSecretList(owner int64, p *model.ListOptions) ([]*model.Secret, error) {
+func (d *db) OrgSecretList(owner int64, p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	return d.store.OrgSecretList(owner, p)
 }
 
@@ -115,7 +115,7 @@ func (d *db) GlobalSecretFind(owner string) (*model.Secret, error) {
 	return d.store.GlobalSecretFind(owner)
 }
 
-func (d *db) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
+func (d *db) GlobalSecretList(p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	return d.store.GlobalSecretList(p)
 }
 

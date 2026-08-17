@@ -88,7 +88,7 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 }
 
 func (f *filesystem) GlobalRegistryFind(addr string) (*model.Registry, error) {
-	registries, err := f.GlobalRegistryList(&model.ListOptions{All: true})
+	registries, err := f.GlobalRegistryList(&model.ListOptionsWithAll{All: true})
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (f *filesystem) GlobalRegistryFind(addr string) (*model.Registry, error) {
 	return nil, store_types.ErrRecordNotExist
 }
 
-func (f *filesystem) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
+func (f *filesystem) GlobalRegistryList(p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	regs, err := parseDockerConfig(f.path)
 	if err != nil {
 		return nil, err
