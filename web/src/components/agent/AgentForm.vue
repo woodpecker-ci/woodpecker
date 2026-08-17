@@ -5,10 +5,10 @@
     </InputField>
 
     <InputField v-slot="{ id }" :label="$t('admin.settings.agents.filters.name')">
-      <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('admin.settings.agents.filters.desc') }}</span>
+      <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('admin.settings.agents.filters.desc') }}</span>
       <KeyValueEditor
         :id="id"
-        v-model="agent.filters"
+        v-model="filters"
         :key-placeholder="$t('admin.settings.agents.filters.key')"
         :value-placeholder="$t('admin.settings.agents.filters.value')"
         :delete-title="$t('admin.settings.agents.filters.delete')"
@@ -113,6 +113,12 @@ const date = useDate();
 const agent = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
+});
+
+// a not yet saved agent has no filters and the server sends `null` for an empty map
+const filters = computed({
+  get: () => agent.value.filters ?? {},
+  set: (value) => updateAgent({ filters: value }),
 });
 
 const baseDocsUrl = 'https://woodpecker-ci.org/docs/administration/configuration/backends/';
