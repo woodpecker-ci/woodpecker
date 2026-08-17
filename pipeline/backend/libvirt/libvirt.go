@@ -986,12 +986,15 @@ func CheckSshPid(client *goph.Client, guestOS string, stepUUID string) (bool, er
 			// if we can't figure out if it's running... assume it is
 			switch sshErr.(type) {
 			case *ssh.ExitMissingError:
+				log.Debug().Msgf("ExitMissingError in CheckSshPid: %s", sshErr)
 				return true, nil
 			case *exec.ExitError:
+				log.Debug().Msgf("ExitError in CheckSshPid: %s", sshErr)
 				return false, nil
 			case nil:
 				return true, fmt.Errorf("Process still running")
 			default:
+				log.Debug().Msgf("Unexpected error in CheckSshPid: %s", sshErr)
 				return true, nil
 			}
 
