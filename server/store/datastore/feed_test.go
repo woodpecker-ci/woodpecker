@@ -68,6 +68,7 @@ func TestGetPipelineQueue(t *testing.T) {
 
 	feedItem := feed[0]
 	assert.Equal(t, repo1.ID, feedItem.RepoID)
+	assert.Equal(t, repo1.FullName, feedItem.FullName)
 	assert.Equal(t, pipeline1.ID, feedItem.ID)
 	assert.Equal(t, pipeline1.Number, feedItem.Number)
 	assert.EqualValues(t, pipeline1.Event, feedItem.Event)
@@ -201,4 +202,95 @@ func TestRepoListLatest(t *testing.T) {
 	assert.Equal(t, repo1.ID, pipelines[0].RepoID)
 	assert.EqualValues(t, model.StatusKilled, pipelines[1].Status)
 	assert.Equal(t, repo2.ID, pipelines[1].RepoID)
+}
+
+// TestRepoListLatestUsesNumber checks the feed reports a repo's latest
+// pipeline by number rather than by id, in the case where the two sequences
+// disagree: the newest pipeline is given the lowest id. TiDB can produce that
+// state, as it allocates auto-increment values from per-node caches instead of
+// in insertion order.
+func TestRepoListLatestUsesNumber(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
+	defer closer()
+
+	user := &model.User{
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
+	}
+	assert.NoError(t, store.CreateUser(user))
+
+	repo := &model.Repo{
+		ID:            1,
+		Owner:         "bradrydzewski",
+		Name:          "test",
+		FullName:      "bradrydzewski/test",
+		ForgeRemoteID: "1",
+		IsActive:      true,
+	}
+	assert.NoError(t, store.CreateRepo(repo))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo.ID, Push: true}))
+
+	// the newer pipeline deliberately carries the lower id
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: repo.ID, Number: 1, Status: model.StatusFailure},
+		{ID: 100, RepoID: repo.ID, Number: 2, Status: model.StatusRunning},
+	})))
+
+	pipelines, err := store.RepoListLatest(user)
+	assert.NoError(t, err)
+	assert.Len(t, pipelines, 1)
+	assert.EqualValues(t, model.StatusRunning, pipelines[0].Status)
+}
+
+// TestUserFeedOrdersByCreated checks the feed is ordered by creation time
+// rather than by id, in the case where the two sequences disagree: the newest
+// pipeline is given the lowest id. TiDB can produce that state, as it
+// allocates auto-increment values from per-node caches instead of in insertion
+// order.
+//
+// The feed is capped at perPage, so the order decides which pipelines are
+// returned at all, not only how they are arranged.
+func TestUserFeedOrdersByCreated(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
+	defer closer()
+
+	user := &model.User{
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
+	}
+	assert.NoError(t, store.CreateUser(user))
+
+	repo := &model.Repo{
+		Owner:         "bradrydzewski",
+		Name:          "test",
+		FullName:      "bradrydzewski/test",
+		ForgeRemoteID: "1",
+		IsActive:      true,
+	}
+	assert.NoError(t, store.CreateRepo(repo))
+	assert.NoError(t, store.PermUpsert(&model.Perm{UserID: user.ID, RepoID: repo.ID, Push: true}))
+
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: repo.ID, Number: 1, Status: model.StatusSuccess},
+		{ID: 800, RepoID: repo.ID, Number: 2, Status: model.StatusFailure},
+		{ID: 700, RepoID: repo.ID, Number: 3, Status: model.StatusRunning},
+	})))
+
+	// xorm stamps `created` itself on insert, so set the wanted times after
+	for id, created := range map[int64]int64{900: 100, 800: 200, 700: 300} {
+		_, err := store.engine.Exec("UPDATE pipelines SET created = ? WHERE id = ?", created, id)
+		assert.NoError(t, err)
+	}
+
+	feed, err := store.UserFeed(user)
+	assert.NoError(t, err)
+
+	created := make([]int64, 0, len(feed))
+	for _, entry := range feed {
+		created = append(created, entry.Created)
+	}
+
+	assert.Equal(t, []int64{300, 200, 100}, created)
 }

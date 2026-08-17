@@ -6,7 +6,12 @@
       class="bg-wp-background-200! dark:bg-wp-background-200! items-center"
     >
       <span>{{ registry.address }}</span>
-      <div class="ml-auto flex items-center gap-2">
+      <Badge
+        v-if="registry.edit === false"
+        class="ml-2"
+        :value="registry.org_id === 0 ? $t('global_level_registry') : $t('org_level_registry')"
+      />
+      <div v-else class="ml-auto flex items-center gap-2">
         <IconButton
           :icon="registry.readonly ? 'chevron-right' : 'edit'"
           class="h-8 w-8"
@@ -35,6 +40,7 @@
 import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';

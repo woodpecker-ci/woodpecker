@@ -15,6 +15,7 @@
 package linter_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -88,6 +89,9 @@ steps:
     <<: *base-step
     image: golang:latest
 `,
+	}, {
+		Title: "explicitly privileged container",
+		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
 	}}
 
 	for _, testd := range testdatas {
@@ -106,6 +110,37 @@ steps:
 			}}), "expected lint returns no errors")
 		})
 	}
+}
+
+func TestLintDeeplyNestedBackendOptions(t *testing.T) {
+	config := `
+when:
+  event: push
+steps:
+  test:
+    image: golang
+    backend_options:
+      kubernetes:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: accelerator
+                      operator: In
+                      values:
+                        - nvidia-tesla-v100
+`
+
+	workflow, err := yaml.ParseString(config)
+	require.NoError(t, err)
+
+	err = linter.New().Lint([]*linter.WorkflowConfig{{
+		File:      "deep.yml",
+		RawConfig: config,
+		Workflow:  workflow,
+	}})
+	require.NoError(t, err)
 }
 
 func TestLintErrors(t *testing.T) {
@@ -207,6 +242,46 @@ func TestLintErrors(t *testing.T) {
 	}
 }
 
+func TestDeprecations(t *testing.T) {
+	testdata := []struct {
+		from string
+		want string // empty = expect no deprecation warning
+	}{
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_COMMIT_PRERELEASE"] } }`, want: "Usage of `CI_COMMIT_PRERELEASE` is deprecated, use `CI_PIPELINE_RELEASE_PRE`"},
+		{from: `steps: { build: { image: golang, commands: ["echo $$CI_COMMIT_PRERELEASE"] } }`, want: "Usage of `CI_COMMIT_PRERELEASE` is deprecated, use `CI_PIPELINE_RELEASE_PRE`"},
+		{from: `steps: { build: { image: golang, commands: ["echo ${CI_COMMIT_PRERELEASE}"] } }`, want: "Usage of `CI_COMMIT_PRERELEASE` is deprecated, use `CI_PIPELINE_RELEASE_PRE`"},
+		{from: `steps: { build: { image: golang, commands: ["echo ${CI_COMMIT_AUTHOR_AVATAR}"] } }`, want: "Usage of `CI_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PIPELINE_AVATAR`"},
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_PREV_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PREV_PIPELINE_AVATAR`"},
+		// new names must not warn
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PIPELINE_RELEASE_PRE"] } }`, want: ""},
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PIPELINE_AVATAR"] } }`, want: ""},
+		// must not match a longer var name
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_COMMIT_PRERELEASE_FOO"] } }`, want: ""},
+		// CI_COMMIT_AUTHOR_AVATAR regexp must not fire on CI_PREV_COMMIT_AUTHOR_AVATAR only
+		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_PREV_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PREV_PIPELINE_AVATAR`"},
+	}
+
+	for _, test := range testdata {
+		conf, err := yaml.ParseString(test.from)
+		assert.NoError(t, err)
+
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      test.from,
+			RawConfig: test.from,
+			Workflow:  conf,
+		}})
+
+		found := ""
+		for _, e := range errors.GetPipelineErrors(lerr) {
+			if e.Type == errors.PipelineErrorTypeDeprecation && !strings.Contains(e.Message, "runs_on") {
+				found = e.Message
+				break
+			}
+		}
+		assert.Equal(t, test.want, found, "config %q", test.from)
+	}
+}
+
 func TestBadHabits(t *testing.T) {
 	testdata := []struct {
 		from string
@@ -214,10 +289,14 @@ func TestBadHabits(t *testing.T) {
 	}{
 		{
 			from: "steps: { build: { image: golang } }",
-			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
+			want: "Consider adding a `when` block with an `event` filter to this step or the entire workflow",
 		},
 		{
 			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
+			want: "Consider adding a `when` block with an `event` filter to this step or the entire workflow",
+		},
+		{
+			from: "steps: { build: { image: golang, when: [{branch: main}] } }",
 			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
 		},
 	}

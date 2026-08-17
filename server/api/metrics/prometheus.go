@@ -20,7 +20,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	prometheus_http "github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 )
@@ -30,7 +30,7 @@ var errInvalidToken = errors.New("invalid or missing token")
 
 // PromHandler will pass the call from /api/metrics/prometheus to prometheus.
 func PromHandler() gin.HandlerFunc {
-	handler := prometheus_http.Handler()
+	handler := promhttp.Handler()
 
 	return func(c *gin.Context) {
 		token := server.Config.Prometheus.AuthToken

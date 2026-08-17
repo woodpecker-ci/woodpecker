@@ -45,7 +45,8 @@ var gatedToRequireApproval = xormigrate.Migration{
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": requireApprovalAllEvents}).
 				From("repos").
-				Where(builder.Eq{"gated": true})); err != nil {
+				Where(builder.Eq{"gated": true}),
+		); err != nil {
 			return err
 		}
 
@@ -53,7 +54,8 @@ var gatedToRequireApproval = xormigrate.Migration{
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": requireApprovalOldNotGated}).
 				From("repos").
-				Where(builder.Eq{"gated": false})); err != nil {
+				Where(builder.Eq{"gated": false}),
+		); err != nil {
 			return err
 		}
 

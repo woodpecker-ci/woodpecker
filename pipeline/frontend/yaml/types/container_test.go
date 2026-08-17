@@ -17,9 +17,8 @@ package types
 import (
 	"testing"
 
-	"github.com/docker/docker/api/types/strslice"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
@@ -273,15 +272,15 @@ func stringsToInterface(val ...string) []any {
 func TestIsPlugin(t *testing.T) {
 	assert.True(t, (&Container{}).IsPlugin())
 	assert.True(t, (&Container{
-		Commands: base.StringOrSlice(strslice.StrSlice{}),
+		Commands: base.StringOrSlice([]string{}),
 	}).IsPlugin())
 	assert.False(t, (&Container{
-		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Commands: base.StringOrSlice([]string{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 	assert.True(t, (&Container{
-		Entrypoint: base.StringOrSlice(strslice.StrSlice{}),
+		Entrypoint: base.StringOrSlice([]string{}),
 	}).IsPlugin())
 	assert.False(t, (&Container{
-		Entrypoint: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Entrypoint: base.StringOrSlice([]string{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }

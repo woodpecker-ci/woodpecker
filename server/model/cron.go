@@ -16,6 +16,7 @@ package model
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gdgvda/cron"
 )
@@ -27,10 +28,11 @@ type Cron struct {
 	CreatorID int64             `json:"creator_id" xorm:"creator_id INDEX"` // TODO: drop with next major version
 	NextExec  int64             `json:"next_exec"  xorm:"next_exec"`
 	Schedule  string            `json:"schedule"   xorm:"schedule NOT NULL"` //	@weekly,	3min, ...
+	Timezone  string            `json:"timezone"   xorm:"timezone NOT NULL DEFAULT 'UTC'"`
 	Created   int64             `json:"created"    xorm:"created NOT NULL DEFAULT 0"`
 	Branch    string            `json:"branch"     xorm:"branch"`
 	Enabled   bool              `json:"enabled"    xorm:"enabled NOT NULL DEFAULT TRUE"`
-	Variables map[string]string `json:"variables" xorm:"json 'variables'"`
+	Variables map[string]string `json:"variables"  xorm:"json 'variables'"`
 } //	@name	Cron
 
 // TableName returns the database table name for xorm.
@@ -48,9 +50,19 @@ func (c *Cron) Validate() error {
 		return fmt.Errorf("schedule is required")
 	}
 
-	_, err := cron.ParseStandard(c.Schedule)
+	parser, err := cron.NewDefaultParser(cron.StandardOptions)
+	if err != nil {
+		return fmt.Errorf("can't create parser: %w", err)
+	}
+
+	_, err = parser.Parse(c.Schedule)
 	if err != nil {
 		return fmt.Errorf("can't parse schedule: %w", err)
+	}
+
+	_, err = time.LoadLocation(c.Timezone)
+	if err != nil {
+		return fmt.Errorf("can't parse timezone: %w", err)
 	}
 
 	return nil
@@ -59,6 +71,7 @@ func (c *Cron) Validate() error {
 type CronPatch struct {
 	Name      *string           `json:"name"`
 	Schedule  *string           `json:"schedule"`
+	Timezone  *string           `json:"timezone"`
 	Branch    *string           `json:"branch"`
 	Enabled   *bool             `json:"enabled"`
 	Variables map[string]string `json:"variables"`

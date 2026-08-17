@@ -25,6 +25,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // Restart a pipeline by creating a new one out of the old and start it.
@@ -63,6 +64,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	newPipeline := createNewOutOfOld(lastPipeline)
 	newPipeline.Parent = lastPipeline.Number
+	newPipeline.RerunCount++
+	newPipeline.Version = version.String()
 
 	err = store.CreatePipeline(newPipeline)
 	if err != nil {
@@ -86,18 +89,24 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	newPipeline, pipelineItems, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs)
+	newPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs, false)
+	if handleParseErrors(newPipeline, parseErr) {
+		if newPipeline, uErr := UpdateToStatusError(store, *newPipeline, parseErr); uErr != nil {
+			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, newPipeline.Number)
+		} else {
+			updatePipelineStatus(ctx, forge, newPipeline, repo, user)
+		}
+		msg := fmt.Sprintf("failure to parse pipeline config for %s", repo.FullName)
+		log.Error().Err(parseErr).Msg(msg)
+		return nil, errors.New(msg)
+	}
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, errors.New(msg)
 	}
 
-	if err := prepareStart(ctx, forge, store, newPipeline, user, repo); err != nil {
-		msg := fmt.Sprintf("failure to prepare pipeline for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
-	}
+	publishPipeline(ctx, forge, newPipeline, repo, user)
 
 	newPipeline, err = start(ctx, forge, store, newPipeline, user, repo, pipelineItems)
 	if err != nil {

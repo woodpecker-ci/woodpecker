@@ -17,15 +17,18 @@ package github
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v82/github"
-	gh_mock "github.com/migueleliasweb/go-github-mock/src/mock"
+	"github.com/google/go-github/v90/github"
+	github_mock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/github/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -94,6 +97,55 @@ func Test_github(t *testing.T) {
 	})
 }
 
+func TestStatusDeployment(t *testing.T) {
+	var (
+		method    string
+		path      string
+		decodeErr error
+		body      struct {
+			State       string `json:"state"`
+			Description string `json:"description"`
+			LogURL      string `json:"log_url"`
+		}
+	)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		method = r.Method
+		path = r.URL.Path
+		decodeErr = json.NewDecoder(r.Body).Decode(&body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	t.Cleanup(server.Close)
+
+	gh, err := github.NewClient(
+		github.WithURLs(github.Ptr(server.URL+"/"), nil),
+		github.WithHTTPClient(server.Client()),
+	)
+	require.NoError(t, err)
+
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
+	c := &client{}
+	err = c.Status(ctx, fakeUser, &model.Repo{
+		ID:    7,
+		Owner: "octocat",
+		Name:  "Hello-World",
+	}, &model.Pipeline{
+		Number:   9,
+		Event:    model.EventDeploy,
+		Status:   model.StatusSuccess,
+		ForgeURL: "https://api.github.com/repos/octocat/Hello-World/deployments/42",
+	}, nil)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.MethodPost, method)
+	assert.Equal(t, "/repos/octocat/Hello-World/deployments/42/statuses", path)
+	require.NoError(t, decodeErr)
+	assert.Equal(t, "success", body.State)
+	assert.Equal(t, "Pipeline was successful", body.Description)
+	assert.Contains(t, body.LogURL, "/repos/7/pipeline/9")
+}
+
 var (
 	fakeUser = &model.User{
 		Login:       "6543",
@@ -120,9 +172,9 @@ var (
 
 func TestHook(t *testing.T) {
 	// Mock GitHub API for changed files
-	mockedHTTPClient := gh_mock.NewMockedHTTPClient(
-		gh_mock.WithRequestMatch(
-			gh_mock.GetReposCommitsByOwnerByRepoByRef,
+	mockedHTTPClient := github_mock.NewMockedHTTPClient(
+		github_mock.WithRequestMatch(
+			github_mock.GetReposCommitsByOwnerByRepoByRef,
 			github.RepositoryCommit{
 				Files: []*github.CommitFile{
 					{Filename: github.Ptr("README.md")},
@@ -130,16 +182,16 @@ func TestHook(t *testing.T) {
 				},
 			},
 		),
-		gh_mock.WithRequestMatch(
-			gh_mock.GetReposCompareByOwnerByRepoByBasehead,
+		github_mock.WithRequestMatch(
+			github_mock.GetReposCompareByOwnerByRepoByBasehead,
 			github.CommitsComparison{
 				Files: []*github.CommitFile{
 					{Filename: github.Ptr("main.go")},
 				},
 			},
 		),
-		gh_mock.WithRequestMatch(
-			gh_mock.GetReposPullsFilesByOwnerByRepoByPullNumber,
+		github_mock.WithRequestMatch(
+			github_mock.GetReposPullsFilesByOwnerByRepoByPullNumber,
 			[]*github.CommitFile{
 				{Filename: github.Ptr("README.md")},
 				{Filename: github.Ptr("main.go")},
@@ -148,7 +200,8 @@ func TestHook(t *testing.T) {
 	)
 
 	// Create a GitHub client with the mocked HTTP client
-	gh := github.NewClient(mockedHTTPClient)
+	gh, err := github.NewClient(github.WithHTTPClient(mockedHTTPClient))
+	require.NoError(t, err)
 
 	// Use the custom type as the key
 	ctx := context.WithValue(context.Background(), githubClientKey, gh)
@@ -264,11 +317,65 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/tags/the-tag-v1", pipeline.Ref)
 		assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit)
-		assert.Equal(t, "Update .woodpecker.yml", pipeline.Message)
+		assert.Equal(t, "the-tag-v1", pipeline.TagTitle)
 		assert.Equal(t, "https://github.com/6543/test_ci_tmp/commit/67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.ForgeURL)
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
 		assert.Equal(t, "6543@obermui.de", pipeline.Email)
 		assert.Empty(t, pipeline.ChangedFiles)
+	})
+}
+
+func TestGetTagCommitSHA(t *testing.T) {
+	// Tags API paginates 30 per page; put the target tag on the second page
+	// to exercise pagination instead of a first-page match.
+	mockedHTTPClient := github_mock.NewMockedHTTPClient(
+		github_mock.WithRequestMatchPages(
+			github_mock.GetReposTagsByOwnerByRepo,
+			[]github.RepositoryTag{
+				{Name: github.Ptr("v1.0.0")},
+				{Name: github.Ptr("v1.0.1")},
+			},
+			[]github.RepositoryTag{
+				{Name: github.Ptr("v1.0.2")},
+				{
+					Name:   github.Ptr("v1.0.3"),
+					Commit: &github.Commit{SHA: github.Ptr("deadbeefcafe")},
+				},
+			},
+		),
+	)
+
+	gh, err := github.NewClient(github.WithHTTPClient(mockedHTTPClient))
+	require.NoError(t, err)
+
+	ctx := context.WithValue(context.Background(), githubClientKey, gh)
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetUser", mock.Anything).Return(&model.User{
+		ID:          1,
+		Login:       "6543",
+		AccessToken: "token",
+	}, nil)
+	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(&model.Repo{
+		ID:            1,
+		ForgeRemoteID: "1",
+		Owner:         "6543",
+		Name:          "hello-world",
+		UserID:        1,
+	}, nil)
+	ctx = store.InjectToContext(ctx, mockStore)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+
+	t.Run("finds a tag beyond the first page", func(t *testing.T) {
+		sha, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "v1.0.3")
+		require.NoError(t, err)
+		assert.Equal(t, "deadbeefcafe", sha)
+	})
+
+	t.Run("returns an error instead of looping forever when the tag does not exist", func(t *testing.T) {
+		_, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
+		require.Error(t, err)
 	})
 }

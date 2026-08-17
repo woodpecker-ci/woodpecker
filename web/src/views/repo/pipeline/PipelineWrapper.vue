@@ -78,17 +78,35 @@
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
+        <div v-if="pipeline.status === 'killed' && pipeline.cancel_info" class="flex shrink-0 items-center gap-2">
+          <Icon name="status-killed" />
+          <span class="truncate">
+            <router-link
+              v-if="pipeline.cancel_info.superseded_by"
+              :to="{ name: 'repo-pipeline', params: { pipelineId: pipeline.cancel_info.superseded_by } }"
+              class="hover:underline"
+            >
+              {{ $t('repo.pipeline.cancel_info.superseded_by', { pipelineId: pipeline.cancel_info.superseded_by }) }}
+            </router-link>
+            <template v-else-if="pipeline.cancel_info.canceled_by_user">
+              {{ $t('repo.pipeline.cancel_info.canceled_by_user', { user: pipeline.cancel_info.canceled_by_user }) }}
+            </template>
+            <template v-else-if="pipeline.cancel_info.canceled_by_step">
+              {{ $t('repo.pipeline.cancel_info.canceled_by_step', { user: pipeline.cancel_info.canceled_by_step }) }}
+            </template>
+          </span>
+        </div>
       </div>
     </template>
 
     <Tab icon="tray-full" :to="{ name: 'repo-pipeline' }" :title="$t('repo.pipeline.tasks')" />
     <Tab
-      v-if="pipeline.errors && pipeline.errors.length > 0"
+      v-if="errorsTabCount > 0"
       :to="{ name: 'repo-pipeline-errors' }"
       icon="alert"
-      :title="pipeline.errors.some((e) => !e.is_warning) ? $t('repo.pipeline.errors') : $t('repo.pipeline.warnings')"
-      :count="pipeline.errors?.length"
-      :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-error-100' : 'text-wp-state-warn-100'"
+      :title="pipelineHasErrorsToShow(pipeline) ? $t('repo.pipeline.errors') : $t('repo.pipeline.warnings')"
+      :count="errorsTabCount"
+      :icon-class="pipelineHasErrorsToShow(pipeline) ? 'text-wp-error-100' : 'text-wp-state-warn-100'"
     />
     <Tab icon="file-cog-outline" :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
     <Tab
@@ -110,7 +128,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
+import { computed, onMounted, ref, toRef, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -131,6 +149,7 @@ import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Pipeline, PipelineConfig } from '~/lib/api/types';
+import { pipelineHasErrorsToShow, workflowsWithErrors } from '~/lib/pipeline';
 import { usePipelineStore } from '~/store/pipelines';
 
 const props = defineProps<{
@@ -155,6 +174,10 @@ const repoPermissions = requiredInject('repo-permissions');
 
 const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, durationElapsed, created, message, shortMessage } = usePipeline(pipeline);
+
+const errorsTabCount = computed(
+  () => (pipeline.value?.errors?.length ?? 0) + workflowsWithErrors(pipeline.value).length,
+);
 provide('pipeline', pipeline as Ref<Pipeline>); // can't be undefined because of v-if in template
 
 const pipelineConfigs = ref<PipelineConfig[]>();
@@ -202,9 +225,6 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
 
 onMounted(loadPipeline);
 watch([repositoryId, pipelineId], loadPipeline);
-onBeforeUnmount(() => {
-  favicon.updateStatus('default');
-});
 
 const goBack = useRouteBack({ name: 'repo' });
 </script>

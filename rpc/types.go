@@ -15,7 +15,7 @@
 package rpc
 
 import (
-	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 type (
@@ -33,6 +33,7 @@ type (
 		ExitCode int    `json:"exit_code"`
 		Error    string `json:"error"`
 		Canceled bool   `json:"canceled"`
+		Skipped  bool   `json:"skipped"`
 	}
 
 	// WorkflowState defines the workflow state.
@@ -45,9 +46,9 @@ type (
 
 	// Workflow defines the workflow execution details.
 	Workflow struct {
-		ID      string          `json:"id"`
-		Config  *backend.Config `json:"config"`
-		Timeout int64           `json:"timeout"`
+		ID      string                `json:"id"`
+		Config  *backend_types.Config `json:"config"`
+		Timeout int64                 `json:"timeout"`
 	}
 
 	Version struct {

@@ -50,7 +50,7 @@ func (s storage) GetRepoNameFallback(forgeID int64, remoteID model.ForgeRemoteID
 
 func (s storage) getRepoNameFallback(e *xorm.Session, forgeID int64, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
 	repo, err := s.getRepoForgeID(e, forgeID, remoteID)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		return s.getRepoName(e, fullName)
 	}
 	return repo, err
@@ -60,7 +60,7 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	repo, err := s.getRepoName(sess, fullName)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		// the repository does not exist, so look for a redirection
 		redirect, err := s.getRedirection(sess, fullName)
 		if err != nil {
@@ -90,8 +90,7 @@ func (s storage) CreateRepo(repo *model.Repo) error {
 		return fmt.Errorf("repo full name is empty")
 	}
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(repo)
-	return err
+	return wrapInsert(s.engine.Insert(repo))
 }
 
 func (s storage) UpdateRepo(repo *model.Repo) error {
@@ -104,7 +103,6 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 }
 
 func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
-	const batchSize = perPage
 	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
 	}
@@ -122,9 +120,9 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 	}
 
 	// delete related pipelines
-	for startPipelines := 0; ; startPipelines += batchSize {
-		pipelineIDs := make([]int64, 0, batchSize)
-		if err := sess.Limit(batchSize, startPipelines).Table("pipelines").Cols("id").Where("repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
+	for {
+		pipelineIDs := make([]int64, 0, perPage)
+		if err := sess.Limit(perPage).Table("pipelines").Cols("id").Where("repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
 			return err
 		}
 		if len(pipelineIDs) == 0 {
@@ -163,7 +161,7 @@ func (s storage) RepoList(user *model.User, owned, active bool, f *model.RepoFil
 }
 
 // RepoListAll list all repos.
-func (s storage) RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error) {
+func (s storage) RepoListAll(active bool, p *model.ListOptionsWithAll) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.paginate(p).Table("repos")
 	if active {

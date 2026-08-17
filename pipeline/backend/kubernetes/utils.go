@@ -15,27 +15,29 @@
 package kubernetes
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"os"
 	"regexp"
 	"strings"
 
-	v1 "k8s.io/api/core/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	client_cmd "k8s.io/client-go/tools/clientcmd"
+	kube_client_cmd "k8s.io/client-go/tools/clientcmd"
 )
 
 const maxDNSLabelLen = 63
 
 var (
-	dnsPattern = regexp.MustCompile(`^[a-z0-9]` + // must start with
-		`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
-		`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
-	)
-	dnsLabelPattern         = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)
-	dnsDisallowedCharacters = regexp.MustCompile(`[^-^.a-z0-9]+`)
+	dnsDisallowedCharacters = regexp.MustCompile(`[^-.a-z0-9]+`)
+	dotsAndDashes           = regexp.MustCompile(`[.-]{2,}`)
+	labelDisallowedChars    = regexp.MustCompile(`[^-_.a-z0-9]+`)
+	labelSeparators         = regexp.MustCompile(`[-_.]{2,}`)
 	ErrDNSPatternInvalid    = errors.New("name is not a valid kubernetes DNS name")
+	ErrLabelInvalid         = errors.New("value is not a valid kubernetes label value")
 )
 
 func getHostnameOrEmpty(name string) string {
@@ -51,31 +53,60 @@ func getHostnameOrEmpty(name string) string {
 
 	clean = strings.Trim(clean, "-")
 
-	if dnsLabelPattern.MatchString(clean) {
+	if len(validation.IsDNS1123Label(clean)) == 0 {
 		return clean
 	}
 	return ""
 }
 
-func dnsName(i string) (string, error) {
-	res := strings.ToLower(strings.ReplaceAll(i, "_", "-"))
+func toDNSName(in string) (string, error) {
+	res := strings.ToLower(in)
+	res = dnsDisallowedCharacters.ReplaceAllString(res, "-")
+	res = dotsAndDashes.ReplaceAllStringFunc(res, func(s string) string {
+		if strings.ContainsRune(s, '.') {
+			return "."
+		}
+		return "-"
+	})
+	res = strings.Trim(res, "-.")
 
-	if found := dnsPattern.FindStringIndex(res); found == nil {
+	if len(res) > validation.DNS1123SubdomainMaxLength {
+		res = truncateWithHash(res, in, validation.DNS1123SubdomainMaxLength, "-.")
+	}
+
+	if res == "" || len(validation.IsDNS1123Subdomain(res)) > 0 {
 		return "", ErrDNSPatternInvalid
 	}
 
 	return res, nil
 }
 
-func toDNSName(in string) (string, error) {
-	lower := strings.ToLower(in)
-	withoutUnderscores := strings.ReplaceAll(lower, "_", "-")
-	withoutSpaces := strings.ReplaceAll(withoutUnderscores, " ", "-")
-	almostDNS := dnsDisallowedCharacters.ReplaceAllString(withoutSpaces, "")
-	return dnsName(almostDNS)
+func truncateWithHash(s, original string, maxLen int, trimChars string) string {
+	hash := sha256.Sum256([]byte(original))
+	hashStr := hex.EncodeToString(hash[:])[:16]
+	maxBaseLength := maxLen - 1 - len(hashStr)
+	truncated := strings.TrimRight(s[:maxBaseLength], trimChars)
+	return truncated + "-" + hashStr
 }
 
-func isImagePullBackOffState(pod *v1.Pod) bool {
+func toLabelValue(in string) (string, error) {
+	res := strings.ToLower(in)
+	res = labelDisallowedChars.ReplaceAllString(res, "-")
+	res = labelSeparators.ReplaceAllString(res, "-")
+	res = strings.Trim(res, "-_.")
+
+	if len(res) > validation.LabelValueMaxLength {
+		res = truncateWithHash(res, in, validation.LabelValueMaxLength, "-_.")
+	}
+
+	if len(validation.IsValidLabelValue(res)) > 0 {
+		return "", ErrLabelInvalid
+	}
+
+	return res, nil
+}
+
+func isImagePullBackOffState(pod *kube_core_v1.Pod) bool {
 	for _, containerState := range pod.Status.ContainerStatuses {
 		if containerState.State.Waiting != nil {
 			if containerState.State.Waiting.Reason == "ImagePullBackOff" {
@@ -87,7 +118,7 @@ func isImagePullBackOffState(pod *v1.Pod) bool {
 	return false
 }
 
-func isInvalidImageName(pod *v1.Pod) bool {
+func isInvalidImageName(pod *kube_core_v1.Pod) bool {
 	for _, containerState := range pod.Status.ContainerStatuses {
 		if containerState.State.Waiting != nil {
 			if containerState.State.Waiting.Reason == "InvalidImageName" {
@@ -107,7 +138,7 @@ func getClientOutOfCluster() (kubernetes.Interface, error) {
 	}
 
 	// use the current context in kube config
-	config, err := client_cmd.BuildConfigFromFlags("", kubeConfigPath)
+	config, err := kube_client_cmd.BuildConfigFromFlags("", kubeConfigPath)
 	if err != nil {
 		return nil, err
 	}

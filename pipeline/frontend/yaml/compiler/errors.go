@@ -43,6 +43,20 @@ func (*ErrStepMissingDependency) Is(target error) bool {
 	return ok
 }
 
+type ErrStepFilteredDependency struct {
+	name,
+	dep string
+}
+
+func (err *ErrStepFilteredDependency) Error() string {
+	return fmt.Sprintf("step '%s' depends on step '%s' which is filtered out by its conditions", err.name, err.dep)
+}
+
+func (*ErrStepFilteredDependency) Is(target error) bool {
+	_, ok := target.(*ErrStepFilteredDependency)
+	return ok
+}
+
 type ErrStepDependencyCycle struct {
 	path []string
 }

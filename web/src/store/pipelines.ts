@@ -54,7 +54,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
   }
 
   function getRepoPipelines(repoId: Ref<number>) {
-    return computed(() => Array.from(pipelines.get(repoId.value)?.values() ?? []).sort(comparePipelines));
+    return computed(() => [...(pipelines.get(repoId.value)?.values() ?? [])].sort(comparePipelines));
   }
 
   function getPipeline(repoId: Ref<number>, _pipelineNumber: Ref<string | number>) {
@@ -82,12 +82,16 @@ export const usePipelineStore = defineStore('pipelines', () => {
     setPipeline(repoId, pipeline);
   }
 
+  const perPage = 50;
+  const hasMore = ref(false);
+
   async function loadRepoPipelines(repoId: number, page?: number) {
     loading.value = true;
-    const _pipelines = await apiClient.getPipelineList(repoId, { page });
+    const _pipelines = await apiClient.getPipelineList(repoId, { page, perPage });
     _pipelines.forEach((pipeline) => {
       setPipeline(repoId, pipeline);
     });
+    hasMore.value = _pipelines.length >= perPage;
     loading.value = false;
   }
 
@@ -99,16 +103,13 @@ export const usePipelineStore = defineStore('pipelines', () => {
   }
 
   const pipelineFeed = computed(() =>
-    Array.from(pipelines.entries())
+    [...pipelines.entries()]
       .reduce<PipelineFeed[]>((acc, [_repoId, repoPipelines]) => {
-        const repoPipelinesArray = Array.from(repoPipelines.entries()).map(
-          ([_pipelineNumber, pipeline]) =>
-            <PipelineFeed>{
-              ...pipeline,
-              repo_id: _repoId,
-              number: _pipelineNumber,
-            },
-        );
+        const repoPipelinesArray = Array.from(repoPipelines.entries(), ([_pipelineNumber, pipeline]) => ({
+          ...pipeline,
+          repo_id: _repoId,
+          number: _pipelineNumber,
+        }));
         return [...acc, ...repoPipelinesArray];
       }, [])
       .sort(comparePipelinesWithStatus)
@@ -139,6 +140,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
     getPipeline,
     loadRepoPipelines,
     loadPipeline,
+    hasMore,
     activePipelines,
     pipelineFeed,
     loadPipelineFeed,

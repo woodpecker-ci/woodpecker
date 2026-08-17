@@ -39,14 +39,16 @@
       "$ref": "#/definitions/labels"
     },
     "depends_on": {
-      "type": "array",
-      "minLength": 1,
-      "items": {
-        "type": "string"
-      }
+      "description": "List of workflow dependencies. Accepts strings or objects with name and optional fields. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
+      "$ref": "#/definitions/depends_on_list"
+    },
+    "concurrency": {
+      "description": "Limit how many instances of this workflow may run at the same time. Read more: https://woodpecker-ci.org/docs/usage/workflows#concurrency",
+      "$ref": "#/definitions/concurrency"
     },
     "runs_on": {
       "type": "array",
+      "description": "Deprecated: use `when.status` instead. Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
       "minLength": 1,
       "items": {
         "type": "string"
@@ -65,6 +67,69 @@
         },
         {
           "type": "string"
+        }
+      ]
+    },
+    "depends_on_item": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the dependency (step or workflow)."
+            },
+            "optional": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, the dependency is silently dropped when not present in the pipeline."
+            }
+          }
+        }
+      ]
+    },
+    "depends_on_list": {
+      "description": "A dependency or list of dependencies. Each item can be a string or an object with name and optional fields.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "$ref": "#/definitions/depends_on_item"
+          }
+        }
+      ]
+    },
+    "concurrency": {
+      "description": "Limit how many instances of this workflow may run at the same time. Provide an integer for the limit, or an object to also set a custom group.",
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["limit"],
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of workflows sharing the same group that run at once."
+            },
+            "group": {
+              "type": "string",
+              "description": "Identifier shared by workflows that are limited against each other. Defaults to the workflow name. Environment variables are substituted, e.g. `deploy-${CI_COMMIT_BRANCH}`."
+            }
+          }
         }
       ]
     },
@@ -181,11 +246,28 @@
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
-          "type": "string"
+          "$ref": "#/definitions/constraint_list"
         },
         "cron": {
           "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",
           "$ref": "#/definitions/constraint_list"
+        },
+        "status": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflows#flow-control",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string",
+                "enum": ["success", "failure"]
+              }
+            },
+            {
+              "type": "string",
+              "enum": ["success", "failure"]
+            }
+          ]
         },
         "platform": {
           "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#platform",
@@ -307,8 +389,8 @@
           "$ref": "#/definitions/step_volumes"
         },
         "depends_on": {
-          "description": "Execute a step after another step has finished.",
-          "$ref": "#/definitions/string_or_string_slice"
+          "description": "Execute a step after another step has finished. Accepts strings or objects with name and optional fields.",
+          "$ref": "#/definitions/depends_on_list"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -317,15 +399,14 @@
         "failure": {
           "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
           "type": "string",
-          "enum": ["fail", "ignore"],
+          "enum": ["fail", "ignore", "cancel"],
           "default": "fail"
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
         },
         "entrypoint": {
-          "description": "Defines container entrypoint.",
-          "$ref": "#/definitions/string_or_string_slice"
+          "$ref": "#/definitions/step_entrypoint"
         },
         "dns": {
           "description": "Change DNS server for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
@@ -369,8 +450,8 @@
           "$ref": "#/definitions/step_volumes"
         },
         "depends_on": {
-          "description": "Execute a step after another step has finished.",
-          "$ref": "#/definitions/string_or_string_slice"
+          "description": "Execute a step after another step has finished. Accepts strings or objects with name and optional fields.",
+          "$ref": "#/definitions/depends_on_list"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -420,7 +501,7 @@
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
-          "type": "string"
+          "$ref": "#/definitions/constraint_list"
         },
         "cron": {
           "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",
@@ -612,6 +693,10 @@
         "type": ["boolean", "string", "number", "array", "object"]
       }
     },
+    "step_entrypoint": {
+      "description": "Defines container entrypoint.",
+      "$ref": "#/definitions/string_or_string_slice"
+    },
     "step_settings": {
       "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/overview",
       "type": "object",
@@ -632,25 +717,44 @@
       "type": "string"
     },
     "step_backend_options": {
-      "description": "Advanced options for the different agent backends",
+      "description": "Advanced options for the different agent backends. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#backend_options",
       "type": "object",
       "properties": {
+        "docker": {
+          "$ref": "#/definitions/step_backend_docker"
+        },
         "kubernetes": {
           "$ref": "#/definitions/step_backend_kubernetes"
         }
       }
     },
-    "step_backend_kubernetes": {
-      "description": "Advanced options for the kubernetes agent backends",
+    "step_backend_docker": {
+      "description": "Advanced options for the Docker backend. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/docker#step-specific-configuration",
       "type": "object",
       "properties": {
+        "user": {
+          "description": "User or user:group used to run the container. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/docker#run-user",
+          "type": "string"
+        }
+      }
+    },
+    "step_backend_kubernetes": {
+      "description": "Advanced options for the Kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
+      "type": "object",
+      "properties": {
+        "resources": {
+          "description": "CPU, memory, and other resource requests and limits. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#resources",
+          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        },
         "labels": {
+          "description": "Additional Kubernetes pod labels. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#annotations-and-labels",
           "type": "object",
           "additionalProperties": {
             "type": ["boolean", "string", "number"]
           }
         },
         "annotations": {
+          "description": "Additional Kubernetes pod annotations. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#annotations-and-labels",
           "type": "object",
           "additionalProperties": {
             "type": ["boolean", "string", "number"]
@@ -665,14 +769,38 @@
           "minLength": 1
         },
         "securityContext": {
+          "description": "Kubernetes pod and container security context. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
         },
         "runtimeClassName": {
           "description": "Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#runtimeclassname",
           "type": "string"
         },
+        "serviceAccountName": {
+          "description": "Name of the Kubernetes service account mounted into the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#service-account",
+          "type": "string"
+        },
+        "workspaceVolume": {
+          "description": "Whether the default workspace volume is mounted into a service pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#workspace-volume",
+          "type": "boolean"
+        },
+        "hostUsers": {
+          "description": "Whether the pod uses the host user namespace. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#user-namespaces",
+          "type": "boolean"
+        },
+        "nodeSelector": {
+          "description": "Labels used to select the node on which the step is executed. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#node-selector",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "affinity": {
+          "description": "Kubernetes affinity and anti-affinity rules for the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#affinity",
+          "type": "object"
+        },
         "secrets": {
-          "description": "The secrets section defines a list of references to the native Kubernetes secrets",
+          "description": "The secrets section defines a list of references to native Kubernetes secrets. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
           "type": "array",
           "items": {
             "$ref": "#/definitions/step_kubernetes_secret"
@@ -698,61 +826,76 @@
       "type": "object",
       "properties": {
         "privileged": {
+          "description": "Whether the container runs in privileged mode. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "boolean"
         },
         "runAsNonRoot": {
+          "description": "Whether the pod must run as a non-root user. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "boolean"
         },
         "runAsUser": {
+          "description": "User ID used to run the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "number"
         },
         "runAsGroup": {
+          "description": "Group ID used to run the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "number"
         },
         "fsGroup": {
+          "description": "Filesystem group ID for mounted volumes. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "number"
         },
+        "fsGroupChangePolicy": {
+          "description": "Policy for changing mounted-volume ownership. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+          "type": "string"
+        },
         "seccompProfile": {
+          "description": "Seccomp profile for the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "$ref": "#/definitions/step_backend_kubernetes_secprofile"
         },
         "apparmorProfile": {
+          "description": "AppArmor profile for the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "$ref": "#/definitions/step_backend_kubernetes_secprofile"
+        },
+        "allowPrivilegeEscalation": {
+          "description": "Whether the container can gain additional privileges. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+          "type": "boolean"
+        },
+        "capabilities": {
+          "description": "Linux capabilities removed from the container. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+          "$ref": "#/definitions/step_backend_kubernetes_capabilities"
+        }
+      }
+    },
+    "step_backend_kubernetes_capabilities": {
+      "description": "Linux capabilities to remove from the container. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+      "type": "object",
+      "properties": {
+        "drop": {
+          "description": "Linux capabilities to remove. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
     "step_backend_kubernetes_secprofile": {
-      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
+      "description": "Pod or container security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
       "type": "object",
       "properties": {
         "type": {
+          "description": "Security profile type. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "string"
         },
         "localhostProfile": {
+          "description": "Path to the local security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "string"
         }
       }
     },
     "step_kubernetes_resources_object": {
-      "description": "A list of kubernetes resource mappings",
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "step_backend_kubernetes_service_account": {
-      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#service-account",
-      "type": "object",
-      "properties": {
-        "requests": {
-          "$ref": "#/definitions/step_kubernetes_service_account_object"
-        },
-        "limits": {
-          "$ref": "#/definitions/step_kubernetes_service_account_object"
-        }
-      }
-    },
-    "step_kubernetes_service_account_object": {
-      "description": "A list of kubernetes resource mappings",
+      "description": "Kubernetes resource quantities keyed by resource name. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#resources",
       "type": "object",
       "additionalProperties": {
         "type": "string"
@@ -867,6 +1010,9 @@
         "environment": {
           "$ref": "#/definitions/step_environment"
         },
+        "entrypoint": {
+          "$ref": "#/definitions/step_entrypoint"
+        },
         "directory": {
           "$ref": "#/definitions/step_directory"
         },
@@ -878,6 +1024,12 @@
         },
         "volumes": {
           "$ref": "#/definitions/step_volumes"
+        },
+        "failure": {
+          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/services#stopping",
+          "type": "string",
+          "enum": ["fail", "ignore"],
+          "default": "fail"
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"

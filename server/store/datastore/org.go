@@ -21,6 +21,7 @@ import (
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) OrgCreate(org *model.Org) error {
@@ -31,9 +32,7 @@ func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
 	if org.Name == "" {
 		return fmt.Errorf("org name is empty")
 	}
-	// insert
-	_, err := sess.Insert(org)
-	return err
+	return wrapInsert(sess.Insert(org))
 }
 
 func (s storage) OrgGet(id int64) (*model.Org, error) {
@@ -84,12 +83,28 @@ func (s storage) orgFindByName(sess *xorm.Session, name string, forgeID int64) (
 	return org, wrapGet(sess.Where("LOWER(name) = ?", strings.ToLower(name)).And("forge_id = ?", forgeID).Get(org))
 }
 
-func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
+func (s storage) OrgLookup(name string) (*model.Org, error) {
+	var orgs []*model.Org
+	// we limit to 2 orgs, if we have >= 2 we return an error anyways.
+	err := s.engine.Where("LOWER(name) = ?", strings.ToLower(name)).Limit(2).Find(&orgs) //nolint:mnd
+	if err != nil {
+		return nil, err
+	}
+	if len(orgs) < 1 {
+		return nil, types.ErrRecordNotExist
+	}
+	if len(orgs) > 1 {
+		return nil, fmt.Errorf("found more than one org with this name")
+	}
+	return orgs[0], nil
+}
+
+func (s storage) OrgRepoList(org *model.Org, p *model.ListOptionsWithAll) ([]*model.Repo, error) {
 	var repos []*model.Repo
 	return repos, s.paginate(p).OrderBy("id").Where("org_id = ?", org.ID).Find(&repos)
 }
 
-func (s storage) OrgList(p *model.ListOptions) ([]*model.Org, error) {
+func (s storage) OrgList(p *model.ListOptionsWithAll) ([]*model.Org, error) {
 	var orgs []*model.Org
 	return orgs, s.paginate(p).Where("is_user = ?", false).OrderBy("id").Find(&orgs)
 }

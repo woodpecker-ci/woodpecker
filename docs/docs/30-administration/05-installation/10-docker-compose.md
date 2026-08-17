@@ -2,6 +2,8 @@
 
 This example [docker-compose](https://docs.docker.com/compose/) setup shows the deployment of a Woodpecker instance connected to GitHub (`WOODPECKER_GITHUB=true`). If you are using another forge, please change this including the respective secret settings.
 
+Before starting, you will need to register an OAuth App with your forge — see the [forge documentation](https://woodpecker-ci.org/docs/administration/configuration/forges/overview) for instructions.
+
 It creates persistent volumes for the server and agent config directories. The bundled SQLite DB is stored in `/var/lib/woodpecker` and is the most important part to be persisted as it holds all users and repository information.
 
 The server uses the default port `8000` and gets exposed to the host here, so WoodpeckerWO can be accessed through this port on the host or by a reverse proxy sitting in front of it.
@@ -72,7 +74,7 @@ If the agents establish a connection via the Internet, TLS encryption should be 
      environment:
        - [...]
 +      - WOODPECKER_GRPC_SECURE=true # defaults to false
-+      - WOODPECKER_GRPC_VERIFY=true # default
++      - WOODPECKER_GRPC_SKIP_VERIFY=false # default
 ```
 
 As agents execute pipeline steps as Docker containers, they require access to the Docker daemon of the host machine:
@@ -140,3 +142,14 @@ To store values in a docker secret you can use the following command:
 ```bash
 echo "my_agent_secret_key" | docker secret create woodpecker-agent-secret -
 ```
+
+## SELinux Considerations
+
+If you're running Woodpecker on a system with SELinux enabled (RHEL, CentOS, Fedora, etc.), you may need to add the `:z` or `:Z` option to volume mounts. For the Docker socket volume:
+
+```yaml
+volumes:
+  - /var/run/docker.sock:/var/run/docker.sock:z
+```
+
+For more details and other SELinux-related solutions, see the [Troubleshooting](../../20-usage/100-troubleshooting.md#selinux-issues) page.

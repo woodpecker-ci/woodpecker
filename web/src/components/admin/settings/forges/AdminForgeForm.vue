@@ -7,12 +7,12 @@
     </InputField>
 
     <InputField v-if="forge.type !== 'bitbucket'" v-slot="{ id }" :label="$t('url')">
-      <TextField :id="id" v-model="forge.url" required />
+      <TextField :id="id" v-model="forge.url" :placeholder="$t('url')" required />
     </InputField>
 
-    <InputField :label="$t('oauth_redirect_url')" description="foo">
+    <InputField :label="$t('oauth_redirect_url')">
       <template #default="{ id }">
-        <TextField :id="id" class="mt-2" :model-value="redirectUri" disabled />
+        <TextField :id="id" class="mt-2" :model-value="redirectUri" :label="$t('oauth_redirect_url')" disabled />
       </template>
       <template #description>
         {{ $t('use_this_redirect_url_to_create') }}
@@ -26,14 +26,14 @@
 
     <template v-if="forge.type !== 'addon'">
       <InputField v-slot="{ id }" :label="$t('oauth_client_id')">
-        <TextField :id="id" v-model="forge.client" required />
+        <TextField :id="id" v-model="forge.client" required :placeholder="$t('oauth_client_id')" />
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('oauth_client_secret')">
         <TextField
           :id="id"
           v-model="forge.oauth_client_secret"
-          :placeholder="isNew ? '' : $t('leave_empty_to_keep_current_value')"
+          :placeholder="isNew ? $t('oauth_client_secret') : $t('leave_empty_to_keep_current_value')"
           :required="isNew"
         />
       </InputField>
@@ -44,6 +44,7 @@
         <p>{{ $t('executable_desc') }}</p>
         <TextField
           :id="id"
+          :placeholder="$t('executable')"
           :model-value="getAdditionalOptions('addon', 'executable')"
           @update:model-value="setAdditionalOptions('addon', 'executable', $event)"
         />
@@ -83,6 +84,7 @@
           <p>{{ $t('git_username_desc') }}</p>
           <TextField
             :id="id"
+            :placeholder="$t('git_username')"
             :model-value="getAdditionalOptions('bitbucket-dc', 'git-username')"
             @update:model-value="setAdditionalOptions('bitbucket-dc', 'git-username', $event)"
           />
@@ -91,11 +93,22 @@
           <p>{{ $t('git_password_desc') }}</p>
           <TextField
             :id="id"
+            :placeholder="$t('git_password')"
             :model-value="getAdditionalOptions('bitbucket-dc', 'git-password')"
             @update:model-value="setAdditionalOptions('bitbucket-dc', 'git-password', $event)"
           />
         </InputField>
       </template>
+
+      <InputField v-slot="{ id }" :label="$t('allowed_orgs')">
+        <p>{{ $t('allowed_orgs_desc') }}</p>
+        <ListEditor
+          :id="id"
+          ref="allowedOrgsEditor"
+          v-model="allowedOrgs"
+          :placeholder="$t('allowed_orgs_placeholder')"
+        />
+      </InputField>
 
       <InputField :label="$t('skip_verify')">
         <Checkbox
@@ -115,13 +128,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import Warning from '~/components/atomic/Warning.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
+import ListEditor from '~/components/form/ListEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
@@ -247,12 +261,23 @@ function setAdditionalOptions<T extends keyof Record<string, unknown>>(
   };
 }
 
+const allowedOrgsEditor = useTemplateRef<InstanceType<typeof ListEditor>>('allowedOrgsEditor');
+
+const allowedOrgs = computed({
+  get: () => forge.value?.orgs ?? [],
+  set: (value) => {
+    forge.value = { ...forge.value, orgs: value };
+  },
+});
+
+const replaceRegex = /\/$/;
+
 const oauthAppForgeUrl = computed(() => {
   if (!forge.value || !forge.value.type || !forge.value.url) {
     return '';
   }
 
-  const forgeUrl = `${forge.value.url.startsWith('http') ? '' : 'https://'}${forge.value.url.replace(/\/$/, '')}`;
+  const forgeUrl = `${forge.value.url.startsWith('http') ? '' : 'https://'}${forge.value.url.replace(replaceRegex, '')}`;
 
   switch (forge.value.type) {
     case 'github':
@@ -287,6 +312,9 @@ const forgeType = computed({
 const redirectUri = computed(() => [window.location.origin, config.rootPath, 'authorize'].filter((a) => !!a).join('/'));
 
 async function submit() {
+  // an org the user typed without confirming it should still be saved
+  allowedOrgsEditor.value?.commitPendingItem();
+
   if (!forge.value.url?.startsWith('http')) {
     forge.value.url = `https://${forge.value.url}`;
   }

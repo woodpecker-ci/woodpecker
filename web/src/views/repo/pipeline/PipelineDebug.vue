@@ -8,6 +8,10 @@
       <div class="flex items-center space-x-4">
         <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
       </div>
+      <InputField v-if="pipeline.version" :label="$t('repo.pipeline.version_header')" class="pt-4">
+        <p class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.pipeline.version') }}</p>
+        <pre class="code-box">{{ pipeline.version }}</pre>
+      </InputField>
     </Panel>
   </template>
   <div v-else class="flex h-full items-center justify-center">

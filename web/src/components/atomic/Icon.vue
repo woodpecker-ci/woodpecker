@@ -48,11 +48,17 @@
     :path="mdiRadioboxIndeterminateVariant"
     size="1.3rem"
   />
-  <SvgIcon v-else-if="name === 'status-skipped'" :bg-circle="bgCircle" :path="mdiMinusCircle" size="1.3rem" />
+  <SvgIcon
+    v-else-if="name === 'status-skipped' || name === 'status-canceled'"
+    :bg-circle="bgCircle"
+    :path="mdiMinusCircle"
+    size="1.3rem"
+  />
   <SvgIcon v-else-if="name === 'status-success'" :bg-circle="bgCircle" :path="mdiCheckCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'alert'" :bg-circle="bgCircle" :path="mdiAlertCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'question'" :bg-circle="bgCircle" :path="mdiHelpCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'plus'" :bg-circle="bgCircle" :path="mdiPlus" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'refresh'" :bg-circle="bgCircle" :path="mdiRefresh" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :bg-circle="bgCircle" :path="mdiFormatListBulleted" size="1.3rem" />
   <SvgIcon v-else-if="name === 'heal'" :bg-circle="bgCircle" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :bg-circle="bgCircle" :path="mdiPower" size="1.3rem" />
@@ -78,6 +84,8 @@
   <SvgIcon v-else-if="name === 'forge'" :bg-circle="bgCircle" :path="mdiCodeBraces" size="1.3rem" />
   <SvgIcon v-else-if="name === 'fullscreen'" :bg-circle="bgCircle" :path="mdiFullscreen" size="1.3rem" />
   <SvgIcon v-else-if="name === 'exit-fullscreen'" :bg-circle="bgCircle" :path="mdiFullscreenExit" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'expand-all'" :bg-circle="bgCircle" :path="mdiUnfoldMoreHorizontal" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'collapse-all'" :bg-circle="bgCircle" :path="mdiUnfoldLessHorizontal" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :bg-circle="bgCircle" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :bg-circle="bgCircle" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -171,6 +179,7 @@ import {
   mdiPuzzleOutline,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
+  mdiRefresh,
   mdiShieldKeyOutline,
   mdiSourceBranch,
   mdiSourceCommit,
@@ -182,6 +191,8 @@ import {
   mdiToolboxOutline,
   mdiTrashCanOutline,
   mdiTrayFull,
+  mdiUnfoldLessHorizontal,
+  mdiUnfoldMoreHorizontal,
   mdiWrenchCogOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
@@ -216,6 +227,7 @@ export type IconNames =
   | 'status-skipped'
   | 'status-started'
   | 'status-success'
+  | 'status-canceled'
   | 'gitea'
   | 'gitlab'
   | 'bitbucket'
@@ -224,6 +236,7 @@ export type IconNames =
   | 'question'
   | 'list'
   | 'plus'
+  | 'refresh'
   | 'blank'
   | 'heal'
   | 'chevron-right'
@@ -261,6 +274,8 @@ export type IconNames =
   | 'forge'
   | 'fullscreen'
   | 'exit-fullscreen'
+  | 'expand-all'
+  | 'collapse-all'
   | 'folder'
   | 'folder-open'
   | 'file';

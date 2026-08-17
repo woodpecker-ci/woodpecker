@@ -1,0 +1,15 @@
+skip_clone: true
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying
+    depends_on:
+      - build
+      - ghost-step

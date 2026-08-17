@@ -1,0 +1,10 @@
+skip_clone: true
+
+depends_on:
+  - build
+
+steps:
+  - name: notify
+    image: dummy
+    commands:
+      - echo notifying

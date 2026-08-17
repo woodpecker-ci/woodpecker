@@ -17,9 +17,7 @@ export const useRepoStore = defineStore('repos', () => {
   const ownedRepoIds = ref<number[]>([]);
 
   const ownedRepos = computed(() =>
-    Array.from(repos.entries())
-      .filter(([repoId]) => ownedRepoIds.value.includes(repoId))
-      .map(([, repo]) => repo),
+    [...repos.entries()].filter(([repoId]) => ownedRepoIds.value.includes(repoId)).map(([, repo]) => repo),
   );
 
   function getRepo(repoId: Ref<number>) {
@@ -69,6 +67,10 @@ export const useRepoStore = defineStore('repos', () => {
     }
   }
 
+  async function refreshRepos() {
+    await apiClient.refreshRepoList();
+  }
+
   return {
     repos,
     ownedRepos,
@@ -77,5 +79,6 @@ export const useRepoStore = defineStore('repos', () => {
     setRepo,
     loadRepo,
     loadRepos,
+    refreshRepos,
   };
 });

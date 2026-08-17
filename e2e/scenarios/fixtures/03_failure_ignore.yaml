@@ -1,0 +1,15 @@
+skip_clone: true
+
+steps:
+  - name: lint
+    image: dummy
+    commands:
+      - echo linting
+    failure: ignore
+    environment:
+      STEP_EXIT_CODE: '1'
+
+  - name: build
+    image: dummy
+    commands:
+      - echo building

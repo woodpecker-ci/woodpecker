@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -142,20 +142,6 @@ func (c *Forgejo) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mo
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(account.ID)),
 		Avatar:        expandAvatar(c.url, account.AvatarURL),
 	}, redirectURL, nil
-}
-
-// Auth uses the Forgejo oauth2 access token and refresh token to authenticate
-// a session and return the Forgejo account login.
-func (c *Forgejo) Auth(ctx context.Context, token, _ string) (string, error) {
-	client, err := c.newClientToken(ctx, token)
-	if err != nil {
-		return "", err
-	}
-	user, _, err := client.GetMyUserInfo()
-	if err != nil {
-		return "", err
-	}
-	return user.UserName, nil
 }
 
 // Refresh refreshes the Forgejo oauth2 access token. If the token is
@@ -491,12 +477,17 @@ func (c *Forgejo) PullRequests(ctx context.Context, u *model.User, r *model.Repo
 		return nil, err
 	}
 
-	pullRequests, _, err := client.ListRepoPullRequests(r.Owner, r.Name, forgejo.ListPullRequestsOptions{
+	pullRequests, resp, err := client.ListRepoPullRequests(r.Owner, r.Name, forgejo.ListPullRequestsOptions{
 		ListOptions: forgejo.ListOptions{Page: p.Page, PageSize: p.PerPage},
 		State:       forgejo.StateOpen,
 	})
 	if err != nil {
-		return nil, err
+		// Repositories without commits return empty list with status code 404
+		if pullRequests != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+			err = nil
+		} else {
+			return nil, err
+		}
 	}
 
 	result := make([]*model.PullRequest, len(pullRequests))
@@ -517,23 +508,31 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
-		tagName := strings.Split(pipeline.Ref, "/")[2]
-		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
-		if err != nil {
-			return nil, nil, err
-		}
-		pipeline.Commit = sha
-	}
+	if pipeline != nil {
+		switch pipeline.Event {
+		case model.EventRelease, model.EventTag:
+			if pipeline.TagTitle == "" {
+				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
+			}
+			if pipeline.Commit == "" {
+				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+				if err != nil {
+					return nil, nil, err
+				}
+				pipeline.Commit = sha
+			}
 
-	if pipeline != nil && pipeline.IsPullRequest() && len(pipeline.ChangedFiles) == 0 {
-		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
-		if err != nil {
-			return nil, nil, err
-		}
-		pipeline.ChangedFiles, err = c.getChangedFilesForPR(ctx, repo, index)
-		if err != nil {
-			log.Error().Err(err).Msgf("could not get changed files for PR %s#%d", repo.FullName, index)
+		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
+			if len(pipeline.ChangedFiles) == 0 {
+				index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
+				if err != nil {
+					return nil, nil, err
+				}
+				pipeline.ChangedFiles, err = c.getChangedFilesForPR(ctx, repo, index)
+				if err != nil {
+					log.Error().Err(err).Msgf("could not get changed files for PR %s#%d", repo.FullName, index)
+				}
+			}
 		}
 	}
 
@@ -652,6 +651,8 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		return nil, err
 	}
 
+	forge.Refresh(ctx, c, _store, user)
+
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
@@ -688,6 +689,8 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 	if err != nil {
 		return "", err
 	}
+
+	forge.Refresh(ctx, c, _store, user)
 
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {

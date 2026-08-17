@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"errors"
+
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 
@@ -25,25 +27,28 @@ import (
 // Too large a value results in `pq: got XX parameters but PostgreSQL only supports 65535 parameters`.
 const pgBatchSize = 1000
 
+// LogFind returns the log entries of a step in the order the agent produced
+// them, which is the order their line numbers carry.
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
-	return logEntries, s.engine.Asc("id").Where("step_id = ?", step.ID).Find(&logEntries)
+	return logEntries, s.engine.Asc("line").Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
 func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
-	var err error
+	var errs error
 
 	// TODO: adapted from slices.Chunk(); switch to it in Go 1.23+
 	for i := 0; i < len(logEntries); i += pgBatchSize {
 		end := min(pgBatchSize, len(logEntries[i:]))
 		chunk := logEntries[i : i+end]
 
-		if _, err = s.engine.Insert(chunk); err != nil {
+		if err := wrapInsert(s.engine.Insert(chunk)); err != nil {
 			log.Error().Err(err).Msg("could not store log entries to db")
+			errs = errors.Join(errs, err)
 		}
 	}
 
-	return err
+	return errs
 }
 
 func (s storage) LogDelete(step *model.Step) error {

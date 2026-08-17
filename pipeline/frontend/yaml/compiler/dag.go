@@ -18,13 +18,14 @@ import (
 	"sort"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
 type dagCompilerStep struct {
 	step      *backend_types.Step
 	position  int
 	name      string
-	dependsOn []string
+	dependsOn constraint.DependsOn
 }
 
 type dagCompiler struct {
@@ -39,7 +40,7 @@ func newDAGCompiler(steps []*dagCompilerStep) dagCompiler {
 
 func (c dagCompiler) isDAG() bool {
 	for _, v := range c.steps {
-		if v.dependsOn != nil {
+		if !v.dependsOn.IsZero() {
 			return true
 		}
 	}
@@ -74,6 +75,16 @@ func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 }
 
 func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
+	step, exists := steps[name]
+	if !exists {
+		// `name` is an optional dependency on a step that was filtered out. convertDAGToStages
+		// drops those edges, but it resolves one step at a time and runs this walk in the same
+		// loop, so the walk can reach a step whose dependsOn is not resolved yet and follow an
+		// edge to a filtered-out step. There is nothing to traverse, and a missing *required*
+		// dependency is still reported by convertDAGToStages when it reaches that step.
+		return nil
+	}
+
 	if _, ok := visited[name]; ok {
 		return &ErrStepDependencyCycle{path: path}
 	}
@@ -81,8 +92,8 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 	visited[name] = struct{}{}
 	path = append(path, name)
 
-	for _, dep := range steps[name].dependsOn {
-		if err := dfsVisit(steps, dep, visited, path); err != nil {
+	for _, dep := range step.dependsOn {
+		if err := dfsVisit(steps, dep.Name, visited, path); err != nil {
 			return err
 		}
 	}
@@ -97,12 +108,17 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 	stages := make([]*backend_types.Stage, 0)
 
 	for name, step := range steps {
-		// check if all depends_on are valid
+		var resolved constraint.DependsOn
 		for _, dep := range step.dependsOn {
-			if _, ok := steps[dep]; !ok {
-				return nil, &ErrStepMissingDependency{name: name, dep: dep}
+			if _, ok := steps[dep.Name]; !ok {
+				if dep.Optional {
+					continue
+				}
+				return nil, &ErrStepMissingDependency{name: name, dep: dep.Name}
 			}
+			resolved = append(resolved, dep)
 		}
+		step.dependsOn = resolved
 
 		// check if there are cycles
 		visited := make(map[string]struct{})
@@ -145,9 +161,8 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 }
 
 func allDependenciesSatisfied(step *dagCompilerStep, addedSteps map[string]struct{}) bool {
-	for _, childName := range step.dependsOn {
-		_, ok := addedSteps[childName]
-		if !ok {
+	for _, dep := range step.dependsOn {
+		if _, ok := addedSteps[dep.Name]; !ok {
 			return false
 		}
 	}

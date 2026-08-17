@@ -5,6 +5,8 @@
 package mocks
 
 import (
+	"context"
+
 	mock "github.com/stretchr/testify/mock"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -60,7 +62,7 @@ type MockService_GlobalSecretCreate_Call struct {
 
 // GlobalSecretCreate is a helper method to define mock.On call
 //   - secret *model.Secret
-func (_e *MockService_Expecter) GlobalSecretCreate(secret interface{}) *MockService_GlobalSecretCreate_Call {
+func (_e *MockService_Expecter) GlobalSecretCreate(secret any) *MockService_GlobalSecretCreate_Call {
 	return &MockService_GlobalSecretCreate_Call{Call: _e.mock.On("GlobalSecretCreate", secret)}
 }
 
@@ -111,7 +113,7 @@ type MockService_GlobalSecretDelete_Call struct {
 
 // GlobalSecretDelete is a helper method to define mock.On call
 //   - s string
-func (_e *MockService_Expecter) GlobalSecretDelete(s interface{}) *MockService_GlobalSecretDelete_Call {
+func (_e *MockService_Expecter) GlobalSecretDelete(s any) *MockService_GlobalSecretDelete_Call {
 	return &MockService_GlobalSecretDelete_Call{Call: _e.mock.On("GlobalSecretDelete", s)}
 }
 
@@ -173,7 +175,7 @@ type MockService_GlobalSecretFind_Call struct {
 
 // GlobalSecretFind is a helper method to define mock.On call
 //   - s string
-func (_e *MockService_Expecter) GlobalSecretFind(s interface{}) *MockService_GlobalSecretFind_Call {
+func (_e *MockService_Expecter) GlobalSecretFind(s any) *MockService_GlobalSecretFind_Call {
 	return &MockService_GlobalSecretFind_Call{Call: _e.mock.On("GlobalSecretFind", s)}
 }
 
@@ -201,8 +203,8 @@ func (_c *MockService_GlobalSecretFind_Call) RunAndReturn(run func(s string) (*m
 }
 
 // GlobalSecretList provides a mock function for the type MockService
-func (_mock *MockService) GlobalSecretList(listOptions *model.ListOptions) ([]*model.Secret, error) {
-	ret := _mock.Called(listOptions)
+func (_mock *MockService) GlobalSecretList(listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Secret, error) {
+	ret := _mock.Called(listOptionsWithAll)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalSecretList")
@@ -210,18 +212,18 @@ func (_mock *MockService) GlobalSecretList(listOptions *model.ListOptions) ([]*m
 
 	var r0 []*model.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.ListOptions) ([]*model.Secret, error)); ok {
-		return returnFunc(listOptions)
+	if returnFunc, ok := ret.Get(0).(func(*model.ListOptionsWithAll) ([]*model.Secret, error)); ok {
+		return returnFunc(listOptionsWithAll)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.ListOptions) []*model.Secret); ok {
-		r0 = returnFunc(listOptions)
+	if returnFunc, ok := ret.Get(0).(func(*model.ListOptionsWithAll) []*model.Secret); ok {
+		r0 = returnFunc(listOptionsWithAll)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.ListOptions) error); ok {
-		r1 = returnFunc(listOptions)
+	if returnFunc, ok := ret.Get(1).(func(*model.ListOptionsWithAll) error); ok {
+		r1 = returnFunc(listOptionsWithAll)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -234,16 +236,16 @@ type MockService_GlobalSecretList_Call struct {
 }
 
 // GlobalSecretList is a helper method to define mock.On call
-//   - listOptions *model.ListOptions
-func (_e *MockService_Expecter) GlobalSecretList(listOptions interface{}) *MockService_GlobalSecretList_Call {
-	return &MockService_GlobalSecretList_Call{Call: _e.mock.On("GlobalSecretList", listOptions)}
+//   - listOptionsWithAll *model.ListOptionsWithAll
+func (_e *MockService_Expecter) GlobalSecretList(listOptionsWithAll any) *MockService_GlobalSecretList_Call {
+	return &MockService_GlobalSecretList_Call{Call: _e.mock.On("GlobalSecretList", listOptionsWithAll)}
 }
 
-func (_c *MockService_GlobalSecretList_Call) Run(run func(listOptions *model.ListOptions)) *MockService_GlobalSecretList_Call {
+func (_c *MockService_GlobalSecretList_Call) Run(run func(listOptionsWithAll *model.ListOptionsWithAll)) *MockService_GlobalSecretList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.ListOptions
+		var arg0 *model.ListOptionsWithAll
 		if args[0] != nil {
-			arg0 = args[0].(*model.ListOptions)
+			arg0 = args[0].(*model.ListOptionsWithAll)
 		}
 		run(
 			arg0,
@@ -257,7 +259,7 @@ func (_c *MockService_GlobalSecretList_Call) Return(secrets []*model.Secret, err
 	return _c
 }
 
-func (_c *MockService_GlobalSecretList_Call) RunAndReturn(run func(listOptions *model.ListOptions) ([]*model.Secret, error)) *MockService_GlobalSecretList_Call {
+func (_c *MockService_GlobalSecretList_Call) RunAndReturn(run func(listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Secret, error)) *MockService_GlobalSecretList_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -286,7 +288,7 @@ type MockService_GlobalSecretUpdate_Call struct {
 
 // GlobalSecretUpdate is a helper method to define mock.On call
 //   - secret *model.Secret
-func (_e *MockService_Expecter) GlobalSecretUpdate(secret interface{}) *MockService_GlobalSecretUpdate_Call {
+func (_e *MockService_Expecter) GlobalSecretUpdate(secret any) *MockService_GlobalSecretUpdate_Call {
 	return &MockService_GlobalSecretUpdate_Call{Call: _e.mock.On("GlobalSecretUpdate", secret)}
 }
 
@@ -338,7 +340,7 @@ type MockService_OrgSecretCreate_Call struct {
 // OrgSecretCreate is a helper method to define mock.On call
 //   - n int64
 //   - secret *model.Secret
-func (_e *MockService_Expecter) OrgSecretCreate(n interface{}, secret interface{}) *MockService_OrgSecretCreate_Call {
+func (_e *MockService_Expecter) OrgSecretCreate(n any, secret any) *MockService_OrgSecretCreate_Call {
 	return &MockService_OrgSecretCreate_Call{Call: _e.mock.On("OrgSecretCreate", n, secret)}
 }
 
@@ -395,7 +397,7 @@ type MockService_OrgSecretDelete_Call struct {
 // OrgSecretDelete is a helper method to define mock.On call
 //   - n int64
 //   - s string
-func (_e *MockService_Expecter) OrgSecretDelete(n interface{}, s interface{}) *MockService_OrgSecretDelete_Call {
+func (_e *MockService_Expecter) OrgSecretDelete(n any, s any) *MockService_OrgSecretDelete_Call {
 	return &MockService_OrgSecretDelete_Call{Call: _e.mock.On("OrgSecretDelete", n, s)}
 }
 
@@ -463,7 +465,7 @@ type MockService_OrgSecretFind_Call struct {
 // OrgSecretFind is a helper method to define mock.On call
 //   - n int64
 //   - s string
-func (_e *MockService_Expecter) OrgSecretFind(n interface{}, s interface{}) *MockService_OrgSecretFind_Call {
+func (_e *MockService_Expecter) OrgSecretFind(n any, s any) *MockService_OrgSecretFind_Call {
 	return &MockService_OrgSecretFind_Call{Call: _e.mock.On("OrgSecretFind", n, s)}
 }
 
@@ -496,8 +498,8 @@ func (_c *MockService_OrgSecretFind_Call) RunAndReturn(run func(n int64, s strin
 }
 
 // OrgSecretList provides a mock function for the type MockService
-func (_mock *MockService) OrgSecretList(n int64, listOptions *model.ListOptions) ([]*model.Secret, error) {
-	ret := _mock.Called(n, listOptions)
+func (_mock *MockService) OrgSecretList(n int64, listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Secret, error) {
+	ret := _mock.Called(n, listOptionsWithAll)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgSecretList")
@@ -505,18 +507,18 @@ func (_mock *MockService) OrgSecretList(n int64, listOptions *model.ListOptions)
 
 	var r0 []*model.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptions) ([]*model.Secret, error)); ok {
-		return returnFunc(n, listOptions)
+	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptionsWithAll) ([]*model.Secret, error)); ok {
+		return returnFunc(n, listOptionsWithAll)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptions) []*model.Secret); ok {
-		r0 = returnFunc(n, listOptions)
+	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptionsWithAll) []*model.Secret); ok {
+		r0 = returnFunc(n, listOptionsWithAll)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *model.ListOptions) error); ok {
-		r1 = returnFunc(n, listOptions)
+	if returnFunc, ok := ret.Get(1).(func(int64, *model.ListOptionsWithAll) error); ok {
+		r1 = returnFunc(n, listOptionsWithAll)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -530,20 +532,20 @@ type MockService_OrgSecretList_Call struct {
 
 // OrgSecretList is a helper method to define mock.On call
 //   - n int64
-//   - listOptions *model.ListOptions
-func (_e *MockService_Expecter) OrgSecretList(n interface{}, listOptions interface{}) *MockService_OrgSecretList_Call {
-	return &MockService_OrgSecretList_Call{Call: _e.mock.On("OrgSecretList", n, listOptions)}
+//   - listOptionsWithAll *model.ListOptionsWithAll
+func (_e *MockService_Expecter) OrgSecretList(n any, listOptionsWithAll any) *MockService_OrgSecretList_Call {
+	return &MockService_OrgSecretList_Call{Call: _e.mock.On("OrgSecretList", n, listOptionsWithAll)}
 }
 
-func (_c *MockService_OrgSecretList_Call) Run(run func(n int64, listOptions *model.ListOptions)) *MockService_OrgSecretList_Call {
+func (_c *MockService_OrgSecretList_Call) Run(run func(n int64, listOptionsWithAll *model.ListOptionsWithAll)) *MockService_OrgSecretList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 int64
 		if args[0] != nil {
 			arg0 = args[0].(int64)
 		}
-		var arg1 *model.ListOptions
+		var arg1 *model.ListOptionsWithAll
 		if args[1] != nil {
-			arg1 = args[1].(*model.ListOptions)
+			arg1 = args[1].(*model.ListOptionsWithAll)
 		}
 		run(
 			arg0,
@@ -558,7 +560,7 @@ func (_c *MockService_OrgSecretList_Call) Return(secrets []*model.Secret, err er
 	return _c
 }
 
-func (_c *MockService_OrgSecretList_Call) RunAndReturn(run func(n int64, listOptions *model.ListOptions) ([]*model.Secret, error)) *MockService_OrgSecretList_Call {
+func (_c *MockService_OrgSecretList_Call) RunAndReturn(run func(n int64, listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Secret, error)) *MockService_OrgSecretList_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -588,7 +590,7 @@ type MockService_OrgSecretUpdate_Call struct {
 // OrgSecretUpdate is a helper method to define mock.On call
 //   - n int64
 //   - secret *model.Secret
-func (_e *MockService_Expecter) OrgSecretUpdate(n interface{}, secret interface{}) *MockService_OrgSecretUpdate_Call {
+func (_e *MockService_Expecter) OrgSecretUpdate(n any, secret any) *MockService_OrgSecretUpdate_Call {
 	return &MockService_OrgSecretUpdate_Call{Call: _e.mock.On("OrgSecretUpdate", n, secret)}
 }
 
@@ -645,7 +647,7 @@ type MockService_SecretCreate_Call struct {
 // SecretCreate is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - secret *model.Secret
-func (_e *MockService_Expecter) SecretCreate(repo interface{}, secret interface{}) *MockService_SecretCreate_Call {
+func (_e *MockService_Expecter) SecretCreate(repo any, secret any) *MockService_SecretCreate_Call {
 	return &MockService_SecretCreate_Call{Call: _e.mock.On("SecretCreate", repo, secret)}
 }
 
@@ -702,7 +704,7 @@ type MockService_SecretDelete_Call struct {
 // SecretDelete is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - s string
-func (_e *MockService_Expecter) SecretDelete(repo interface{}, s interface{}) *MockService_SecretDelete_Call {
+func (_e *MockService_Expecter) SecretDelete(repo any, s any) *MockService_SecretDelete_Call {
 	return &MockService_SecretDelete_Call{Call: _e.mock.On("SecretDelete", repo, s)}
 }
 
@@ -770,7 +772,7 @@ type MockService_SecretFind_Call struct {
 // SecretFind is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - s string
-func (_e *MockService_Expecter) SecretFind(repo interface{}, s interface{}) *MockService_SecretFind_Call {
+func (_e *MockService_Expecter) SecretFind(repo any, s any) *MockService_SecretFind_Call {
 	return &MockService_SecretFind_Call{Call: _e.mock.On("SecretFind", repo, s)}
 }
 
@@ -803,8 +805,8 @@ func (_c *MockService_SecretFind_Call) RunAndReturn(run func(repo *model.Repo, s
 }
 
 // SecretList provides a mock function for the type MockService
-func (_mock *MockService) SecretList(repo *model.Repo, listOptions *model.ListOptions) ([]*model.Secret, error) {
-	ret := _mock.Called(repo, listOptions)
+func (_mock *MockService) SecretList(repo *model.Repo, listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Secret, error) {
+	ret := _mock.Called(repo, listOptionsWithAll)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretList")
@@ -812,18 +814,18 @@ func (_mock *MockService) SecretList(repo *model.Repo, listOptions *model.ListOp
 
 	var r0 []*model.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions) ([]*model.Secret, error)); ok {
-		return returnFunc(repo, listOptions)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.ListOptionsWithAll) ([]*model.Secret, error)); ok {
+		return returnFunc(repo, listOptionsWithAll)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions) []*model.Secret); ok {
-		r0 = returnFunc(repo, listOptions)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.ListOptionsWithAll) []*model.Secret); ok {
+		r0 = returnFunc(repo, listOptionsWithAll)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.ListOptions) error); ok {
-		r1 = returnFunc(repo, listOptions)
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.ListOptionsWithAll) error); ok {
+		r1 = returnFunc(repo, listOptionsWithAll)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -837,20 +839,20 @@ type MockService_SecretList_Call struct {
 
 // SecretList is a helper method to define mock.On call
 //   - repo *model.Repo
-//   - listOptions *model.ListOptions
-func (_e *MockService_Expecter) SecretList(repo interface{}, listOptions interface{}) *MockService_SecretList_Call {
-	return &MockService_SecretList_Call{Call: _e.mock.On("SecretList", repo, listOptions)}
+//   - listOptionsWithAll *model.ListOptionsWithAll
+func (_e *MockService_Expecter) SecretList(repo any, listOptionsWithAll any) *MockService_SecretList_Call {
+	return &MockService_SecretList_Call{Call: _e.mock.On("SecretList", repo, listOptionsWithAll)}
 }
 
-func (_c *MockService_SecretList_Call) Run(run func(repo *model.Repo, listOptions *model.ListOptions)) *MockService_SecretList_Call {
+func (_c *MockService_SecretList_Call) Run(run func(repo *model.Repo, listOptionsWithAll *model.ListOptionsWithAll)) *MockService_SecretList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *model.Repo
 		if args[0] != nil {
 			arg0 = args[0].(*model.Repo)
 		}
-		var arg1 *model.ListOptions
+		var arg1 *model.ListOptionsWithAll
 		if args[1] != nil {
-			arg1 = args[1].(*model.ListOptions)
+			arg1 = args[1].(*model.ListOptionsWithAll)
 		}
 		run(
 			arg0,
@@ -865,14 +867,14 @@ func (_c *MockService_SecretList_Call) Return(secrets []*model.Secret, err error
 	return _c
 }
 
-func (_c *MockService_SecretList_Call) RunAndReturn(run func(repo *model.Repo, listOptions *model.ListOptions) ([]*model.Secret, error)) *MockService_SecretList_Call {
+func (_c *MockService_SecretList_Call) RunAndReturn(run func(repo *model.Repo, listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Secret, error)) *MockService_SecretList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // SecretListPipeline provides a mock function for the type MockService
-func (_mock *MockService) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Secret, error) {
-	ret := _mock.Called(repo, pipeline)
+func (_mock *MockService) SecretListPipeline(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error) {
+	ret := _mock.Called(context1, repo, pipeline, netrc)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretListPipeline")
@@ -880,18 +882,18 @@ func (_mock *MockService) SecretListPipeline(repo *model.Repo, pipeline *model.P
 
 	var r0 []*model.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) ([]*model.Secret, error)); ok {
-		return returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) ([]*model.Secret, error)); ok {
+		return returnFunc(context1, repo, pipeline, netrc)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) []*model.Secret); ok {
-		r0 = returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) []*model.Secret); ok {
+		r0 = returnFunc(context1, repo, pipeline, netrc)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.Pipeline) error); ok {
-		r1 = returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) error); ok {
+		r1 = returnFunc(context1, repo, pipeline, netrc)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -904,25 +906,37 @@ type MockService_SecretListPipeline_Call struct {
 }
 
 // SecretListPipeline is a helper method to define mock.On call
+//   - context1 context.Context
 //   - repo *model.Repo
 //   - pipeline *model.Pipeline
-func (_e *MockService_Expecter) SecretListPipeline(repo interface{}, pipeline interface{}) *MockService_SecretListPipeline_Call {
-	return &MockService_SecretListPipeline_Call{Call: _e.mock.On("SecretListPipeline", repo, pipeline)}
+//   - netrc *model.Netrc
+func (_e *MockService_Expecter) SecretListPipeline(context1 any, repo any, pipeline any, netrc any) *MockService_SecretListPipeline_Call {
+	return &MockService_SecretListPipeline_Call{Call: _e.mock.On("SecretListPipeline", context1, repo, pipeline, netrc)}
 }
 
-func (_c *MockService_SecretListPipeline_Call) Run(run func(repo *model.Repo, pipeline *model.Pipeline)) *MockService_SecretListPipeline_Call {
+func (_c *MockService_SecretListPipeline_Call) Run(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc)) *MockService_SecretListPipeline_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Repo
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*model.Repo)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *model.Pipeline
+		var arg1 *model.Repo
 		if args[1] != nil {
-			arg1 = args[1].(*model.Pipeline)
+			arg1 = args[1].(*model.Repo)
+		}
+		var arg2 *model.Pipeline
+		if args[2] != nil {
+			arg2 = args[2].(*model.Pipeline)
+		}
+		var arg3 *model.Netrc
+		if args[3] != nil {
+			arg3 = args[3].(*model.Netrc)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -933,7 +947,7 @@ func (_c *MockService_SecretListPipeline_Call) Return(secrets []*model.Secret, e
 	return _c
 }
 
-func (_c *MockService_SecretListPipeline_Call) RunAndReturn(run func(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Secret, error)) *MockService_SecretListPipeline_Call {
+func (_c *MockService_SecretListPipeline_Call) RunAndReturn(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error)) *MockService_SecretListPipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -963,7 +977,7 @@ type MockService_SecretUpdate_Call struct {
 // SecretUpdate is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - secret *model.Secret
-func (_e *MockService_Expecter) SecretUpdate(repo interface{}, secret interface{}) *MockService_SecretUpdate_Call {
+func (_e *MockService_Expecter) SecretUpdate(repo any, secret any) *MockService_SecretUpdate_Call {
 	return &MockService_SecretUpdate_Call{Call: _e.mock.On("SecretUpdate", repo, secret)}
 }
 

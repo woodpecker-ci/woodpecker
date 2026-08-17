@@ -50,7 +50,7 @@ import (
 //
 // Error Handling:
 // - types.ErrIgnoreEvent: Skippable webhook events
-// - types.RecordNotExist: Resource not found
+// - types.ErrRecordNotExist: Resource not found
 // - types.ErrNotImplemented: Can be used to signal it's not supported
 // - nil Repo/Pipeline: "No action needed" (not an error).
 type Forge interface {
@@ -72,9 +72,6 @@ type Forge interface {
 	//
 	// Returned User must contain: Login, Email, Avatar, AccessToken, RefreshToken, Expiry, ForgeRemoteID
 	Login(ctx context.Context, r *types.OAuthRequest) (*model.User, string, error)
-
-	// Auth validates an access token and returns the associated username.
-	Auth(ctx context.Context, token, secret string) (string, error)
 
 	// Teams fetches all team/organization memberships for a user.
 	// Used to determine if an user is member of an team/organization.

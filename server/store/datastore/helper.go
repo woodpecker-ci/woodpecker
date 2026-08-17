@@ -28,7 +28,7 @@ import (
 // wrapGet return error if err not nil or if requested entry do not exist.
 func wrapGet(exist bool, err error) error {
 	if !exist {
-		return types.RecordNotExist
+		return types.ErrRecordNotExist
 	}
 	if err != nil {
 		// we only ask for the function's name if needed for performance reasons
@@ -41,7 +41,7 @@ func wrapGet(exist bool, err error) error {
 // wrapDelete return error if err not nil or if requested entry do not exist.
 func wrapDelete(c int64, err error) error {
 	if c == 0 {
-		return types.RecordNotExist
+		return types.ErrRecordNotExist
 	}
 	if err != nil {
 		// we only ask for the function's name if needed for performance reasons
@@ -51,7 +51,23 @@ func wrapDelete(c int64, err error) error {
 	return nil
 }
 
-func (s storage) paginate(p *model.ListOptions) *xorm.Session {
+func wrapInsert(c int64, err error) error {
+	if err != nil {
+		// Common unique constraint violation patterns across the supported drivers.
+		if errMsg := err.Error(); strings.Contains(errMsg, "UNIQUE constraint failed") ||
+			strings.Contains(errMsg, "UNIQUE violation") ||
+			strings.Contains(errMsg, "duplicate key") ||
+			strings.Contains(errMsg, "unique constraint") ||
+			strings.Contains(errMsg, "Duplicate entry") {
+			return types.ErrInsertDuplicateDetected
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (s storage) paginate(p *model.ListOptionsWithAll) *xorm.Session {
 	if p == nil || p.All {
 		return s.engine.NewSession()
 	}

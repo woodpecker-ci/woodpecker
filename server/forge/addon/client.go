@@ -103,18 +103,6 @@ func (g *RPC) Login(_ context.Context, r *types.OAuthRequest) (*model.User, stri
 	return resp.User.asModel(), resp.RedirectURL, nil
 }
 
-func (g *RPC) Auth(_ context.Context, token, secret string) (string, error) {
-	args, err := json.Marshal(&argumentsAuth{
-		Token:  token,
-		Secret: secret,
-	})
-	if err != nil {
-		return "", err
-	}
-	var resp string
-	return resp, g.client.Call("Plugin.Auth", args, &resp)
-}
-
 func (g *RPC) Teams(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
 	args, err := json.Marshal(&argumentsTeams{
 		U: modelUserFromModel(u),

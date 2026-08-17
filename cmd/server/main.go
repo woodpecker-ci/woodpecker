@@ -20,14 +20,16 @@ import (
 	"context"
 	"os"
 
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
 
 	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/dot_env"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 func main() {
+	dot_env.Load()
+
 	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
 		log.Info().Msg("termination signal is received, shutting down server")
 	})

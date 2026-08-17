@@ -19,51 +19,120 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+	"strings"
+	"sync"
 
-	"codeberg.org/6543/go-yaml2json"
-	"codeberg.org/6543/xyaml"
-	json_schema "github.com/xeipuuv/gojsonschema"
-	"gopkg.in/yaml.v3"
+	"codeberg.org/6543/go-yaml2json/v2"
+	"github.com/xeipuuv/gojsonschema"
+	go_yaml "go.yaml.in/yaml/v4"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 )
 
 //go:embed schema.json
 var schemaDefinition []byte
 
-// Lint lints an io.Reader against the Woodpecker `schema.json`.
-func Lint(r io.Reader) ([]json_schema.ResultError, error) {
-	schemaLoader := json_schema.NewBytesLoader(schemaDefinition)
+var (
+	schemaOnce       sync.Once
+	compiledSchema   *gojsonschema.Schema
+	schemaCompileErr error
+)
 
-	// read yaml config
+func getCompiledSchema() (*gojsonschema.Schema, error) {
+	schemaOnce.Do(func() {
+		compiledSchema, schemaCompileErr = gojsonschema.NewSchema(
+			gojsonschema.NewBytesLoader(schemaDefinition),
+		)
+	})
+
+	return compiledSchema, schemaCompileErr
+}
+
+// Lint lints an io.Reader against the Woodpecker `schema.json`.
+func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
+	// Read the YAML configuration.
 	rBytes, err := io.ReadAll(r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load yml file %w", err)
 	}
 
-	// resolve sequence merges
-	yamlDoc := new(yaml.Node)
-	if err := xyaml.Unmarshal(rBytes, yamlDoc); err != nil {
+	// Parse YAML and resolve sequence merges.
+	yamlDoc := new(go_yaml.Node)
+	if err := yaml.Unmarshal(rBytes, yamlDoc); err != nil {
 		return nil, fmt.Errorf("failed to parse yml file %w", err)
 	}
 
-	// convert to json
+	// Convert the YAML document to JSON.
 	jsonDoc, err := yaml2json.ConvertNode(yamlDoc)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert yaml %w", err)
 	}
 
-	documentLoader := json_schema.NewBytesLoader(jsonDoc)
-	result, err := json_schema.Validate(schemaLoader, documentLoader)
+	// Compile the static schema once and reuse it.
+	schema, err := getCompiledSchema()
+	if err != nil {
+		return nil, fmt.Errorf("failed to compile schema %w", err)
+	}
+
+	// Validate this pipeline document against the compiled schema.
+	documentLoader := gojsonschema.NewBytesLoader(jsonDoc)
+	result, err := schema.Validate(documentLoader)
 	if err != nil {
 		return nil, fmt.Errorf("validation failed %w", err)
 	}
 
 	if !result.Valid() {
-		return result.Errors(), fmt.Errorf("config not valid")
+		return filterRedundantCompositionErrors(result.Errors()),
+			fmt.Errorf("config not valid")
 	}
 
 	return nil, nil
 }
 
-func LintString(s string) ([]json_schema.ResultError, error) {
+func LintString(s string) ([]gojsonschema.ResultError, error) {
 	return Lint(bytes.NewBufferString(s))
+}
+
+func filterRedundantCompositionErrors(schemaErrors []gojsonschema.ResultError) []gojsonschema.ResultError {
+	filtered := make([]gojsonschema.ResultError, 0, len(schemaErrors))
+	for index, schemaError := range schemaErrors {
+		if isCompositionError(schemaError) && hasSpecificSchemaError(schemaErrors, index, schemaError.Field()) {
+			continue
+		}
+
+		filtered = append(filtered, schemaError)
+	}
+
+	return filtered
+}
+
+func isCompositionError(schemaError gojsonschema.ResultError) bool {
+	switch schemaError.Type() {
+	case "number_one_of", "number_any_of":
+		return true
+	default:
+		return false
+	}
+}
+
+func hasSpecificSchemaError(schemaErrors []gojsonschema.ResultError, currentIndex int, field string) bool {
+	for index, schemaError := range schemaErrors {
+		if index == currentIndex || isCompositionError(schemaError) {
+			continue
+		}
+
+		if isSameFieldOrChild(schemaError.Field(), field) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isSameFieldOrChild(field, parent string) bool {
+	if parent == "(root)" {
+		return true
+	}
+
+	return field == parent || strings.HasPrefix(field, parent+".")
 }

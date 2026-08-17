@@ -18,6 +18,7 @@ import (
 	"encoding/base32"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -73,7 +74,11 @@ func GetFeed(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error fetching user feed. %s", err)
 		return
 	}
-	c.JSON(http.StatusOK, feed)
+	var fs []*model.APIFeed
+	for _, f := range feed {
+		fs = append(fs, f.ToAPIModel())
+	}
+	c.JSON(http.StatusOK, fs)
 }
 
 // GetRepos
@@ -109,9 +114,13 @@ func GetRepos(c *gin.Context) {
 			return
 		}
 
-		active := map[model.ForgeRemoteID]*model.Repo{}
+		dbReposMap := map[model.ForgeRemoteID]*model.Repo{}
+		dbStaleReposMap := map[int64]*model.Repo{}
+		dbReposFullNameMap := map[string]*model.Repo{}
 		for _, r := range dbRepos {
-			active[r.ForgeRemoteID] = r
+			dbReposMap[r.ForgeRemoteID] = r
+			dbReposFullNameMap[strings.ToLower(r.FullName)] = r
+			dbStaleReposMap[r.ID] = r
 		}
 
 		_repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
@@ -131,16 +140,38 @@ func GetRepos(c *gin.Context) {
 			r.ForgeID = user.ForgeID
 
 			if r.Perm.Push && server.Config.Permissions.OwnersAllowlist.IsAllowed(r) {
-				if active[r.ForgeRemoteID] != nil {
-					existingRepo := active[r.ForgeRemoteID]
+				if existingRepo := dbReposMap[r.ForgeRemoteID]; existingRepo != nil {
+					// update repo with forge response
 					existingRepo.Update(r)
-					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
+					// re-apply active info
+					existingRepo.IsActive = dbReposMap[r.ForgeRemoteID].IsActive
+					// add to final return list
 					repos = append(repos, existingRepo)
+					// not stale, so remove it
+					delete(dbStaleReposMap, existingRepo.ID)
 				} else if r.Perm.Admin {
-					// you must be admin to enable the repo
+					// you must be admin of the remote repo to enable the repo
 					repos = append(repos, r)
 				}
 			}
+		}
+
+		// detect conflicts
+		for _, r := range repos {
+			// calc if we have a remote repo with different remote id but same name as a stored one
+			if existingRepo := dbReposFullNameMap[strings.ToLower(r.FullName)]; existingRepo != nil && existingRepo.ForgeRemoteID != r.ForgeRemoteID {
+				r.ID = existingRepo.ID
+				r.HasForgeNameConflict = true
+
+				// not stale, so remove it
+				delete(dbStaleReposMap, existingRepo.ID)
+			}
+		}
+
+		// return stale repos
+		for _, staleRepo := range dbStaleReposMap {
+			staleRepo.HasNoForgeRepo = true
+			repos = append(repos, staleRepo)
 		}
 
 		c.JSON(http.StatusOK, repos)
@@ -171,13 +202,38 @@ func GetRepos(c *gin.Context) {
 
 	repos := make([]*model.RepoLastPipeline, len(activeRepos))
 	for i, repo := range activeRepos {
+		var lastAPIPipeline *model.APIPipeline
+		lastPipeline, ok := latestPipelines[repo.ID]
+		if ok {
+			lastAPIPipeline = lastPipeline.ToAPIModel()
+		}
+
 		repos[i] = &model.RepoLastPipeline{
 			Repo:         repo,
-			LastPipeline: latestPipelines[repo.ID],
+			LastPipeline: lastAPIPipeline,
 		}
 	}
 
 	c.JSON(http.StatusOK, repos)
+}
+
+func RefreshRepos(c *gin.Context) {
+	_store := store.FromContext(c)
+	user := session.User(c)
+
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	if err := updateRepoPermissions(c, user, _store, _forge, user.ForgeID); err != nil {
+		log.Error().Err(err).Msgf("Can't update repo permissions for user %s in forge %s", user.Login, _forge.Name())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, "Ok")
 }
 
 // PostToken

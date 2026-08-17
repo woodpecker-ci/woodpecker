@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
@@ -34,21 +33,17 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services"
-	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
-)
-
-const (
-	queueInfoRefreshInterval = 500 * time.Millisecond
-	storeInfoRefreshInterval = 10 * time.Second
 )
 
 func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
@@ -122,7 +117,7 @@ func setupMembershipService(_ context.Context, _store store.Store) cache.Members
 	return cache.NewMembershipService(_store)
 }
 
-func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
+func setupLogStore(c *cli.Command, s store.Store) (service_log.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
@@ -135,9 +130,17 @@ func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
 
 const jwtSecretID = "jwt-secret"
 
+func setupGrpcSecret(secret string) (string, bool) {
+	if secret != "" {
+		return secret, false
+	}
+
+	return base32.StdEncoding.EncodeToString(random.GetRandomBytes(32)), true
+}
+
 func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
-	if errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.ErrRecordNotExist) {
 		jwtSecret := base32.StdEncoding.EncodeToString(
 			random.GetRandomBytes(32),
 		)
@@ -159,12 +162,13 @@ func setupJWTSecret(_store store.Store) (string, error) {
 func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
 	server.Config.Services.Logs = logging.New()
-	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
-	server.Config.Services.Queue, err = setupQueue(ctx, s)
+	pubsub := memory.New()
+	queue, err := setupQueue(ctx, s)
 	if err != nil {
 		return fmt.Errorf("could not setup queue: %w", err)
 	}
+	server.Config.Services.Scheduler = scheduler.NewScheduler(ctx, s, queue, pubsub)
 	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
@@ -179,6 +183,8 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+	server.Config.Server.AsyncRepositoryUpdate = c.Bool("async-repository-update")
+	server.Config.Server.WebhookSyncTimeout = c.Duration("webhook-sync-timeout")
 
 	// Pull requests
 	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")
@@ -225,6 +231,10 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
 	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
 
+	// pipeline config paths
+	server.Config.Pipeline.ConfigPaths = c.StringSlice("default-pipeline-configs")
+	server.Config.Pipeline.ConfigExtensions = c.StringSlice("default-pipeline-config-extensions")
+
 	// server configuration
 	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
 	if err != nil {
@@ -258,7 +268,14 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
 	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
+	server.Config.WebUI.MaxPipelineLogLineCount = c.Uint("max-pipeline-log-line-count")
 	server.Config.Pipeline.PrivilegedPlugins = c.StringSlice("plugins-privileged")
+
+	// TODO: remove with version 4.x
+	server.Config.Pipeline.ForceIgnoreServiceFailure = c.Bool("force-ignore-service-failure")
+	if server.Config.Pipeline.ForceIgnoreServiceFailure {
+		log.Info().Msg("WOODPECKER_FORCE_IGNORE_SERVICE_FAILURE is true by default. To prepare for v4.0.0, set it to false and update your pipeline definitions if needed.")
+	}
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

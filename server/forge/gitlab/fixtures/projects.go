@@ -281,56 +281,56 @@ var project4PayloadHook = []byte(`
 
 var project4PayloadHooks = []byte(`
 [
-  {
-    "id": 10717088,
-    "url": "http://example.com/api/hook",
-    "created_at": "2021-12-18T23:29:33.852Z",
-    "push_events": true,
-    "tag_push_events": true,
-    "merge_requests_events": true,
-    "repository_update_events": false,
-    "enable_ssl_verification": true,
-    "project_id": 4,
-    "issues_events": false,
-    "confidential_issues_events": false,
-    "note_events": false,
-    "confidential_note_events": null,
-    "pipeline_events": false,
-    "wiki_page_events": false,
-    "deployment_events": true,
-    "job_events": false,
-    "releases_events": false,
-    "push_events_branch_filter": null
-  }
+	{
+		"id": 10717088,
+		"url": "http://example.com/api/hook",
+		"created_at": "2021-12-18T23:29:33.852Z",
+		"push_events": true,
+		"tag_push_events": true,
+		"merge_requests_events": true,
+		"repository_update_events": false,
+		"enable_ssl_verification": true,
+		"project_id": 4,
+		"issues_events": false,
+		"confidential_issues_events": false,
+		"note_events": false,
+		"confidential_note_events": null,
+		"pipeline_events": false,
+		"wiki_page_events": false,
+		"deployment_events": true,
+		"job_events": false,
+		"releases_events": false,
+		"push_events_branch_filter": null
+	}
 ]
 `)
 
 var project4PayloadMembers = []byte(`
 {
-  "id": 3,
-  "username": "some_user",
-  "name": "Diaspora",
-  "state": "active",
-  "locked": false,
-  "avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
-  "web_url": "https://example.com/some_user",
-  "access_level": 50,
-  "created_at": "2024-01-16T12:39:58.912Z",
-  "expires_at": null
+	"id": 3,
+	"username": "some_user",
+	"name": "Diaspora",
+	"state": "active",
+	"locked": false,
+	"avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
+	"web_url": "https://example.com/some_user",
+	"access_level": 50,
+	"created_at": "2024-01-16T12:39:58.912Z",
+	"expires_at": null
 }
 `)
 
 var project6PayloadMembers = []byte(`
 {
-  "id": 3,
-  "username": "some_user",
-  "name": "Diaspora",
-  "state": "active",
-  "locked": false,
-  "avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
-  "web_url": "https://example.com/some_user",
-  "access_level": 30,
-  "created_at": "2024-01-16T12:39:58.912Z",
-  "expires_at": null
+	"id": 3,
+	"username": "some_user",
+	"name": "Diaspora",
+	"state": "active",
+	"locked": false,
+	"avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
+	"web_url": "https://example.com/some_user",
+	"access_level": 30,
+	"created_at": "2024-01-16T12:39:58.912Z",
+	"expires_at": null
 }
 `)

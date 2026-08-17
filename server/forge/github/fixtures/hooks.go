@@ -22,6 +22,13 @@ import _ "embed"
 //go:embed HookPush.json
 var HookPush string
 
+// HookPushForced is a sample push hook from a force push. The "before" commit
+// is unreachable after the history rewrite, so it must not be used to compare.
+// https://developer.github.com/v3/activity/events/types/#pushevent
+//
+//go:embed HookPushForced.json
+var HookPushForced string
+
 // HookPushDeleted is a sample push hook that is marked as deleted, and is expected to be ignored.
 const HookPushDeleted = `
 {

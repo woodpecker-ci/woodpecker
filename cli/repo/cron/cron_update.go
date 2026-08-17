@@ -50,6 +50,11 @@ var cronUpdateCmd = &cli.Command{
 			Name:  "schedule",
 			Usage: "cron schedule",
 		},
+		&cli.BoolFlag{
+			Name:  "enabled",
+			Usage: "whether cron is enabled",
+			Value: true,
+		},
 		common.FormatFlag(tmplCronList, true),
 	},
 }
@@ -62,6 +67,7 @@ func cronUpdate(ctx context.Context, c *cli.Command) error {
 		branch           = c.String("branch")
 		schedule         = c.String("schedule")
 		format           = c.String("format") + "\n"
+		enabled          = c.Bool("enabled")
 	)
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
@@ -79,6 +85,7 @@ func cronUpdate(ctx context.Context, c *cli.Command) error {
 		Name:     jobName,
 		Branch:   branch,
 		Schedule: schedule,
+		Enabled:  enabled,
 	}
 	cron, err = client.CronUpdate(repoID, cron)
 	if err != nil {

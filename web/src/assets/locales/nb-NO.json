@@ -139,7 +139,8 @@
                 "name": "Variabel-navn",
                 "value": "Verdi for variabel"
             },
-            "show_pipelines": "Vis arbeidsflyter"
+            "show_pipelines": "Vis arbeidsflyter",
+            "no_manual_workflows": "Det var ingen manuelt utførbare jobflyter, eller filteret eksluderte alle"
         },
         "deploy_pipeline": {
             "title": "Start en utrulling for nåværende arbeidsflyt #{pipelineid}",
@@ -256,7 +257,8 @@
                 },
                 "edit": "Rediger periodisk oppgave",
                 "delete": "Slett periodisk oppgave",
-                "next_exec": "Neste kjøring"
+                "next_exec": "Neste kjøring",
+                "enabled": "Aktivert"
             },
             "badge": {
                 "badge": "Merke",
@@ -264,7 +266,9 @@
                 "type_url": "URL",
                 "type_markdown": "Markdown",
                 "type_html": "HTML",
-                "branch": "Gren"
+                "branch": "Gren",
+                "workflow": "Jobbflyt",
+                "step": "Steg"
             },
             "actions": {
                 "actions": "Handlinger",

@@ -27,6 +27,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func TestFetch(t *testing.T) {
@@ -307,6 +308,8 @@ func TestFetch(t *testing.T) {
 			configFetcher := config.NewForge(
 				time.Second*3,
 				3,
+				constant.DefaultConfigOrder,
+				[]string{".yaml", ".yml"},
 			)
 			files, err := configFetcher.Fetch(
 				t.Context(),

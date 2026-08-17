@@ -1,9 +1,9 @@
 # renovate: datasource=github-releases depName=mvdan/gofumpt
-GOFUMPT_VERSION := v0.9.2
+GOFUMPT_VERSION := v0.11.0
 # renovate: datasource=github-releases depName=golangci/golangci-lint
-GOLANGCI_LINT_VERSION := v2.8.0
+GOLANGCI_LINT_VERSION := v2.12.2
 # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
-XGO_VERSION := go-1.25.x
+XGO_VERSION := go-1.26.x
 
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
@@ -127,7 +127,7 @@ generate-openapi: ## Run openapi code generation and format it
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 generate-license-header: install-addlicense
-	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
+	addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -189,7 +189,7 @@ test-cli: ## Test cli code
 
 test-server-datastore: ## Test server datastore
 	go test -timeout 300s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
-	go test -race -timeout 100s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -race -timeout 120s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
 	go test -race -cover -coverprofile datastore-coverage.out -timeout 300s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/server/store/...
@@ -203,8 +203,21 @@ test-ui: ui-dependencies ## Test UI code
 test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
+test-e2e: ## Test by running yaml config and compare expected result
+	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...
+
 .PHONY: test
-test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
+test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests
+
+FUZZ_TIME ?= 30s
+
+fuzz: ## Run all fuzz targets for FUZZ_TIME (default 30s) each
+	@for pkg in $$(grep -rl --include='fuzz_test.go' 'func Fuzz' . | xargs -n1 dirname | sort -u); do \
+		for target in $$(grep -h -o 'func Fuzz[A-Za-z0-9_]*' $$pkg/fuzz_test.go | cut -d' ' -f2); do \
+			echo "fuzzing $$pkg $$target"; \
+			go test -tags 'test $(TAGS)' -run 'XXX_NONE' -fuzz "^$$target"'$$' -fuzztime $(FUZZ_TIME) "./$$pkg" || exit 1; \
+		done; \
+	done
 
 ##@ Build
 
@@ -295,6 +308,10 @@ release-agent: ## Create agent binaries for release
 	GOOS=windows GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	GOOS=darwin  GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	GOOS=darwin  GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=freebsd GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/freebsd_amd64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=freebsd GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/freebsd_arm64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=openbsd GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/openbsd_amd64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=openbsd GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/openbsd_arm64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	# tar binary files
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_amd64.tar.gz   -C ${DIST_DIR}/agent/linux_amd64   woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm64.tar.gz   -C ${DIST_DIR}/agent/linux_arm64   woodpecker-agent
@@ -302,6 +319,10 @@ release-agent: ## Create agent binaries for release
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm.tar.gz     -C ${DIST_DIR}/agent/linux_arm     woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_darwin_amd64.tar.gz  -C ${DIST_DIR}/agent/darwin_amd64  woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_darwin_arm64.tar.gz  -C ${DIST_DIR}/agent/darwin_arm64  woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_freebsd_amd64.tar.gz -C ${DIST_DIR}/agent/freebsd_amd64 woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_freebsd_arm64.tar.gz -C ${DIST_DIR}/agent/freebsd_arm64 woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_openbsd_amd64.tar.gz -C ${DIST_DIR}/agent/openbsd_amd64 woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_openbsd_arm64.tar.gz -C ${DIST_DIR}/agent/openbsd_arm64 woodpecker-agent
 	# zip binary files
 	rm -f  ${DIST_DIR}/woodpecker-agent_windows_amd64.zip
 	zip -j ${DIST_DIR}/woodpecker-agent_windows_amd64.zip          ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe
@@ -315,6 +336,10 @@ release-cli: ## Create cli binaries for release
 	GOOS=windows GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/windows_amd64/woodpecker-cli.exe go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	GOOS=darwin  GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_amd64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	GOOS=darwin  GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_arm64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=freebsd GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/freebsd_amd64/woodpecker-cli     go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=freebsd GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/freebsd_arm64/woodpecker-cli     go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=openbsd GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/openbsd_amd64/woodpecker-cli     go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	GOOS=openbsd GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/openbsd_arm64/woodpecker-cli     go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	# tar binary files
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_amd64.tar.gz   -C ${DIST_DIR}/cli/linux_amd64   woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm64.tar.gz   -C ${DIST_DIR}/cli/linux_arm64   woodpecker-cli
@@ -322,6 +347,10 @@ release-cli: ## Create cli binaries for release
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm.tar.gz     -C ${DIST_DIR}/cli/linux_arm     woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_amd64.tar.gz  -C ${DIST_DIR}/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_arm64.tar.gz  -C ${DIST_DIR}/cli/darwin_arm64  woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_freebsd_amd64.tar.gz -C ${DIST_DIR}/cli/freebsd_amd64 woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_freebsd_arm64.tar.gz -C ${DIST_DIR}/cli/freebsd_arm64 woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_openbsd_amd64.tar.gz -C ${DIST_DIR}/cli/openbsd_amd64 woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_openbsd_arm64.tar.gz -C ${DIST_DIR}/cli/openbsd_arm64 woodpecker-cli
 	# zip binary files
 	rm -f  ${DIST_DIR}/woodpecker-cli_windows_amd64.zip
 	zip -j ${DIST_DIR}/woodpecker-cli_windows_amd64.zip          ${DIST_DIR}/cli/windows_amd64/woodpecker-cli.exe
@@ -334,7 +363,7 @@ release-checksums: ## Create checksums for all release files
 release: release-frontend release-server release-agent release-cli ## Release all binaries
 
 bundle-prepare: ## Prepare the bundles
-	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
+	CGO_ENABLED=0 go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.45.0
 
 bundle-agent: bundle-prepare ## Create bundles for agent
 	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ${DIST_DIR} --packager deb

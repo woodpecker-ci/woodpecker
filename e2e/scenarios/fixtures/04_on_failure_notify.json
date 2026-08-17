@@ -1,0 +1,9 @@
+{
+  "name": "on-failure step runs after failure",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_steps": [
+    { "name": "build", "status": "failure", "exit_code": 2 },
+    { "name": "notify", "status": "success", "exit_code": 0 }
+  ]
+}

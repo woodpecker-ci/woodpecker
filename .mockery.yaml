@@ -10,6 +10,7 @@ packages:
       recursive: false
   go.woodpecker-ci.org/woodpecker/v3/server/forge:
   go.woodpecker-ci.org/woodpecker/v3/server/queue:
+  go.woodpecker-ci.org/woodpecker/v3/server/scheduler:
   go.woodpecker-ci.org/woodpecker/v3/server/services:
     config:
       exclude-subpkg-regex:
@@ -20,3 +21,5 @@ packages:
   go.woodpecker-ci.org/woodpecker/v3/server/services/secret:
   go.woodpecker-ci.org/woodpecker/v3/server/store:
   go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker:
+  go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing:
+  go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types:

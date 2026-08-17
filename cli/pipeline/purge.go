@@ -146,7 +146,8 @@ func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, branch string,
 		return nil, nil
 	}
 	return shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
-		return client.PipelineList(repoID,
+		return client.PipelineList(
+			repoID,
 			woodpecker.PipelineListOptions{
 				ListOptions: woodpecker.ListOptions{
 					Page: page,
@@ -159,7 +160,8 @@ func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, branch string,
 
 func fetchPipelines(client woodpecker.Client, repoID int64, branch string, before time.Time) ([]*woodpecker.Pipeline, error) {
 	return shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
-		return client.PipelineList(repoID,
+		return client.PipelineList(
+			repoID,
 			woodpecker.PipelineListOptions{
 				ListOptions: woodpecker.ListOptions{
 					Page: page,

@@ -55,6 +55,10 @@ var migrationTasks = []*xormigrate.Migration{
 	&unsanitizeOrgAndUserNames,
 	&replaceZeroForgeIDsInOrgs,
 	&fixForgeColumns,
+	&addCronField,
+	&updatePipelineStructureTagsReleases,
+	&replaceZeroForgeIDsInUsers,
+	&deduplicateLogEntries,
 	&addServerSideEnforcedAgentLabels,
 }
 

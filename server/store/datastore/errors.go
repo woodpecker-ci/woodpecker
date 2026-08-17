@@ -29,5 +29,5 @@ func (e ErrorRepoNotExist) Error() string {
 }
 
 func (ErrorRepoNotExist) Unwrap() error {
-	return types.RecordNotExist
+	return types.ErrRecordNotExist
 }

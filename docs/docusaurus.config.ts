@@ -290,7 +290,7 @@ const config = {
         },
         blog: {
           blogTitle: 'Blog',
-          blogDescription: 'A blog for release announcements, turorials...',
+          blogDescription: 'A blog for release announcements, tutorials...',
           onInlineAuthors: 'ignore',
         },
         theme: {
@@ -324,7 +324,7 @@ const config = {
     },
   },
   future: {
-    experimental_faster: true,
+    faster: true,
     v4: true,
   },
 } satisfies Config;

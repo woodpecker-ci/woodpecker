@@ -18,7 +18,7 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v82/github"
+	"github.com/google/go-github/v90/github"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -49,7 +49,7 @@ const (
 // GitHub commit status.
 func convertStatus(status model.StatusValue) string {
 	switch status {
-	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped:
+	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped, model.StatusCanceled:
 		return statusPending
 	case model.StatusFailure, model.StatusDeclined:
 		return statusFailure
@@ -164,7 +164,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 func convertLabels(from []*github.Label) []string {
 	labels := make([]string, len(from))
 	for i, label := range from {
-		labels[i] = *label.Name
+		labels[i] = label.GetName()
 	}
 	return labels
 }

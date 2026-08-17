@@ -1,0 +1,18 @@
+steps:
+  - name: test-unit
+    image: dummy
+    commands:
+      - echo unit tests
+    depends_on: []
+
+  - name: test-integration
+    image: dummy
+    commands:
+      - echo integration tests
+    depends_on: []
+
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying
+    depends_on: [test-unit, test-integration]

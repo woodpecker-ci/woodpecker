@@ -146,20 +146,6 @@ func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mode
 	}, redirectURL, nil
 }
 
-// Auth uses the Gitea oauth2 access token and refresh token to authenticate
-// a session and return the Gitea account login.
-func (c *Gitea) Auth(ctx context.Context, token, _ string) (string, error) {
-	client, err := c.newClientToken(ctx, token)
-	if err != nil {
-		return "", err
-	}
-	user, _, err := client.GetMyUserInfo()
-	if err != nil {
-		return "", err
-	}
-	return user.UserName, nil
-}
-
 // Refresh refreshes the Gitea oauth2 access token. If the token is
 // refreshed, the user is updated and a true value is returned.
 func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
@@ -524,23 +510,31 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
-		tagName := strings.Split(pipeline.Ref, "/")[2]
-		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
-		if err != nil {
-			return nil, nil, err
-		}
-		pipeline.Commit = sha
-	}
+	if pipeline != nil {
+		switch pipeline.Event {
+		case model.EventRelease, model.EventTag:
+			if pipeline.TagTitle == "" {
+				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
+			}
+			if pipeline.Commit == "" {
+				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+				if err != nil {
+					return nil, nil, err
+				}
+				pipeline.Commit = sha
+			}
 
-	if pipeline != nil && pipeline.IsPullRequest() && len(pipeline.ChangedFiles) == 0 {
-		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
-		if err != nil {
-			return nil, nil, err
-		}
-		pipeline.ChangedFiles, err = c.getChangedFilesForPR(ctx, repo, index)
-		if err != nil {
-			log.Error().Err(err).Msgf("could not get changed files for PR %s#%d", repo.FullName, index)
+		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
+			if len(pipeline.ChangedFiles) == 0 {
+				index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
+				if err != nil {
+					return nil, nil, err
+				}
+				pipeline.ChangedFiles, err = c.getChangedFilesForPR(ctx, repo, index)
+				if err != nil {
+					log.Error().Err(err).Msgf("could not get changed files for PR %s#%d", repo.FullName, index)
+				}
+			}
 		}
 	}
 
@@ -659,6 +653,8 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
+	forge.Refresh(ctx, c, _store, user)
+
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
@@ -695,6 +691,8 @@ func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName s
 	if err != nil {
 		return "", err
 	}
+
+	forge.Refresh(ctx, c, _store, user)
 
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {

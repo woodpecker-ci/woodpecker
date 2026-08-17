@@ -33,6 +33,7 @@ func Handler() http.Handler {
 	e.GET("/api/v1/repos/:owner/:name/hooks", listRepoHooks)
 	e.DELETE("/api/v1/repos/:owner/:name/hooks/:id", deleteRepoHook)
 	e.POST("/api/v1/repos/:owner/:name/statuses/:commit", createRepoCommitStatus)
+	e.GET("/api/v1/repos/:owner/:name/pulls", listRepoPulls)
 	e.GET("/api/v1/repos/:owner/:name/pulls/:index/files", getPRFiles)
 	e.GET("/api/v1/user/repos", getUserRepos)
 	e.GET("/api/v1/version", getVersion)
@@ -137,74 +138,94 @@ func getPRFiles(c *gin.Context) {
 	}
 }
 
+func listRepoPulls(c *gin.Context) {
+	// Repositories without commits answer with an empty list and status code 404
+	if c.Param("name") == "repo_without_commits" {
+		c.String(http.StatusNotFound, "[]")
+		return
+	}
+	c.String(http.StatusOK, listRepoPullsPayload)
+}
+
 const listRepoHookPayloads = `
 [
-  {
-    "id": 1,
-    "type": "forgejo",
-    "config": {
-      "content_type": "json",
-      "url": "http:\/\/localhost\/hook?access_token=1234567890"
-    }
-  }
+	{
+		"id": 1,
+		"type": "forgejo",
+		"config": {
+			"content_type": "json",
+			"url": "http:\/\/localhost\/hook?access_token=1234567890"
+		}
+	}
 ]
 `
 
 const repoPayload = `
 {
 	"id": 5,
-  "owner": {
-    "login": "test_name",
-    "email": "octocat@github.com",
-    "avatar_url": "https:\/\/secure.gravatar.com\/avatar\/8c58a0be77ee441bb8f8595b7f1b4e87"
-  },
-  "full_name": "test_name\/repo_name",
-  "private": true,
-  "html_url": "http:\/\/localhost\/test_name\/repo_name",
-  "clone_url": "http:\/\/localhost\/test_name\/repo_name.git",
-  "permissions": {
-    "admin": true,
-    "push": true,
-    "pull": true
-  }
+	"owner": {
+		"login": "test_name",
+		"email": "octocat@github.com",
+		"avatar_url": "https:\/\/secure.gravatar.com\/avatar\/8c58a0be77ee441bb8f8595b7f1b4e87"
+	},
+	"full_name": "test_name\/repo_name",
+	"private": true,
+	"html_url": "http:\/\/localhost\/test_name\/repo_name",
+	"clone_url": "http:\/\/localhost\/test_name\/repo_name.git",
+	"permissions": {
+		"admin": true,
+		"push": true,
+		"pull": true
+	}
 }
 `
 
 const repoFilePayload = `{ platform: linux/amd64 }`
 
+const listRepoPullsPayload = `
+[
+	{
+		"id": 1,
+		"number": 1,
+		"title": "add feature X",
+		"state": "open"
+	}
+]
+`
+
 const userRepoPayload = `
 [
-  {
+	{
 		"id": 5,
-    "owner": {
-      "login": "test_name",
-      "email": "octocat@github.com",
-      "avatar_url": "https:\/\/secure.gravatar.com\/avatar\/8c58a0be77ee441bb8f8595b7f1b4e87"
-    },
-    "full_name": "test_name\/repo_name",
-    "private": true,
-    "html_url": "http:\/\/localhost\/test_name\/repo_name",
-    "clone_url": "http:\/\/localhost\/test_name\/repo_name.git",
-    "permissions": {
-      "admin": true,
-      "push": true,
-      "pull": true
-    }
-  }
+		"owner": {
+			"login": "test_name",
+			"email": "octocat@github.com",
+			"avatar_url": "https:\/\/secure.gravatar.com\/avatar\/8c58a0be77ee441bb8f8595b7f1b4e87"
+		},
+		"full_name": "test_name\/repo_name",
+		"private": true,
+		"html_url": "http:\/\/localhost\/test_name\/repo_name",
+		"clone_url": "http:\/\/localhost\/test_name\/repo_name.git",
+		"permissions": {
+			"admin": true,
+			"push": true,
+			"pull": true
+		}
+	}
 ]
 `
 
 const prFilesPayload = `
 [
-  {
-    "filename": "README.md",
-    "status": "changed",
-    "additions": 2,
-    "deletions": 0,
-    "changes": 2,
-    "html_url": "http://localhost/username/repo/src/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md",
-    "contents_url": "http://localhost:3000/api/v1/repos/username/repo/contents/README.md?ref=e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd",
-    "raw_url": "http://localhost/username/repo/raw/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md"
-  }
+	{
+		"filename": "README.md",
+		"status": "changed",
+		"additions": 2,
+		"deletions": 0,
+		"changes": 2,
+		"html_url": "http://localhost/username/repo/src/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md",
+		"contents_url": "http://localhost:3000/api/v1/repos/username/repo/contents/README.md?ref=e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd",
+		"raw_url": "http://localhost/username/repo/raw/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md"
+	}
 ]
 `

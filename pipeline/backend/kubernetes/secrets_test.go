@@ -20,7 +20,7 @@ import (
 
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -78,10 +78,10 @@ func TestSimpleSecret(t *testing.T) {
 	assert.Empty(t, nsp.envVars)
 	assert.Empty(t, nsp.volumes)
 	assert.Empty(t, nsp.mounts)
-	assert.Equal(t, []v1.EnvFromSource{
+	assert.Equal(t, []kube_core_v1.EnvFromSource{
 		{
-			SecretRef: &v1.SecretEnvSource{
-				LocalObjectReference: v1.LocalObjectReference{Name: "test-secret"},
+			SecretRef: &kube_core_v1.SecretEnvSource{
+				LocalObjectReference: kube_core_v1.LocalObjectReference{Name: "test-secret"},
 			},
 		},
 	}, nsp.envFromSources)
@@ -102,12 +102,12 @@ func TestSecretWithKey(t *testing.T) {
 	assert.Empty(t, nsp.envFromSources)
 	assert.Empty(t, nsp.volumes)
 	assert.Empty(t, nsp.mounts)
-	assert.Equal(t, []v1.EnvVar{
+	assert.Equal(t, []kube_core_v1.EnvVar{
 		{
 			Name: "ACCESS_KEY",
-			ValueFrom: &v1.EnvVarSource{
-				SecretKeyRef: &v1.SecretKeySelector{
-					LocalObjectReference: v1.LocalObjectReference{Name: "test-secret"},
+			ValueFrom: &kube_core_v1.EnvVarSource{
+				SecretKeyRef: &kube_core_v1.SecretKeySelector{
+					LocalObjectReference: kube_core_v1.LocalObjectReference{Name: "test-secret"},
 					Key:                  "access_key",
 				},
 			},
@@ -133,12 +133,12 @@ func TestSecretWithKeyMapping(t *testing.T) {
 	assert.Empty(t, nsp.envFromSources)
 	assert.Empty(t, nsp.volumes)
 	assert.Empty(t, nsp.mounts)
-	assert.Equal(t, []v1.EnvVar{
+	assert.Equal(t, []kube_core_v1.EnvVar{
 		{
 			Name: "AWS_SECRET_ACCESS_KEY",
-			ValueFrom: &v1.EnvVarSource{
-				SecretKeyRef: &v1.SecretKeySelector{
-					LocalObjectReference: v1.LocalObjectReference{Name: "test-secret"},
+			ValueFrom: &kube_core_v1.EnvVarSource{
+				SecretKeyRef: &kube_core_v1.SecretKeySelector{
+					LocalObjectReference: kube_core_v1.LocalObjectReference{Name: "test-secret"},
 					Key:                  "aws-secret",
 				},
 			},
@@ -163,17 +163,17 @@ func TestFileSecret(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Empty(t, nsp.envFromSources)
 	assert.Empty(t, nsp.envVars)
-	assert.Equal(t, []v1.Volume{
+	assert.Equal(t, []kube_core_v1.Volume{
 		{
 			Name: "reg-cred",
-			VolumeSource: v1.VolumeSource{
-				Secret: &v1.SecretVolumeSource{
+			VolumeSource: kube_core_v1.VolumeSource{
+				Secret: &kube_core_v1.SecretVolumeSource{
 					SecretName: "reg-cred",
 				},
 			},
 		},
 	}, nsp.volumes)
-	assert.Equal(t, []v1.VolumeMount{
+	assert.Equal(t, []kube_core_v1.VolumeMount{
 		{
 			Name:      "reg-cred",
 			ReadOnly:  true,

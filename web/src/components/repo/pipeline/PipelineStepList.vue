@@ -110,7 +110,7 @@
                 'bg-wp-control-neutral-200': selectedStepId && selectedStepId === step.pid,
                 'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
               }"
-              @click="$emit('update:selected-step-id', step.pid)"
+              @click="$emit('update:selectedStepId', step.pid)"
             >
               <PipelineStatusIcon :service="step.type === StepType.Service" :status="step.state" class="h-4! w-4!" />
               <span class="truncate">{{ step.name }}</span>
@@ -142,7 +142,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (event: 'update:selected-step-id', selectedStepId: number): void;
+  (event: 'update:selectedStepId', selectedStepId: number): void;
 }>();
 
 const pipeline = toRef(props, 'pipeline');

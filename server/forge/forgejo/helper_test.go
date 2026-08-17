@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"testing"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo/fixtures"
@@ -95,7 +95,7 @@ func Test_parsePush(t *testing.T) {
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
 		assert.Empty(t, pipeline.Branch)
 		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world/src/tag/v1.0.0", pipeline.ForgeURL)
-		assert.Equal(t, "created tag v1.0.0", pipeline.Message)
+		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
 	})
 }
 

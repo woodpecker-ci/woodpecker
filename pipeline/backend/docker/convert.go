@@ -17,11 +17,13 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"maps"
+	"net/netip"
 	"regexp"
 	"strings"
 
-	"github.com/docker/docker/api/types/container"
+	"github.com/moby/moby/api/types/container"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -31,7 +33,7 @@ import (
 const minVolumeComponents = 2
 
 // returns a container configuration.
-func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.Config {
+func (e *docker) toConfig(step *types.Step, options BackendOptions) (*container.Config, error) {
 	e.windowsPathPatch(step)
 
 	config := &container.Config{
@@ -50,10 +52,11 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) > 0 {
-		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
-		for k, v := range env {
-			configEnv[k] = v
+		env, entry, err := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
+		if err != nil {
+			return config, err
 		}
+		maps.Copy(configEnv, env)
 		config.Entrypoint = entry
 
 		// step.WorkingDir will be respected by the generated script
@@ -66,7 +69,7 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 	if len(configEnv) != 0 {
 		config.Env = toEnv(configEnv)
 	}
-	return config
+	return config, nil
 }
 
 func toContainerName(step *types.Step) string {
@@ -74,7 +77,7 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
+func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error) {
 	config := &container.HostConfig{
 		Resources: container.Resources{
 			CPUQuota:   conf.resourceLimit.CPUQuota,
@@ -90,11 +93,22 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 		Privileged: step.Privileged,
 	}
 
+	if conf.apparmor != "" {
+		config.SecurityOpt = []string{"apparmor=" + conf.apparmor}
+	}
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}
 	if len(step.DNS) != 0 {
-		config.DNS = step.DNS
+		addrs := make([]netip.Addr, len(step.DNS))
+		for i, dns := range step.DNS {
+			a, err := netip.ParseAddr(dns)
+			if err != nil {
+				return nil, fmt.Errorf("could not parse DNS address [%s]: %w", dns, err)
+			}
+			addrs[i] = a
+		}
+		config.DNS = addrs
 	}
 	if len(step.DNSSearch) != 0 {
 		config.DNSSearch = step.DNSSearch
@@ -125,7 +139,7 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 		config.Tmpfs[parts[0]] = parts[1]
 	}
 
-	return config
+	return config, nil
 }
 
 // helper function that converts a slice of volume paths to a set of
@@ -223,4 +237,8 @@ func splitVolumeParts(volumeParts string) ([]string, error) {
 		return cleanResults, nil
 	}
 	return strings.Split(volumeParts, ":"), nil
+}
+
+func toRef[T any](v T) *T {
+	return &v
 }

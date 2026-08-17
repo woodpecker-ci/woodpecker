@@ -41,6 +41,34 @@ var (
 	ErrWorkerKicked = errors.New("worker was kicked")
 )
 
+// ErrExternal wraps an external error.
+type ErrExternal struct {
+	err error
+}
+
+func (e *ErrExternal) Error() string {
+	return fmt.Sprintf("external error: %s", e.err)
+}
+
+// Unwrap allows errors.Is and errors.As to work with the wrapped error.
+func (e *ErrExternal) Unwrap() error {
+	return e.err
+}
+
+// Is allows errors.Is to match against ErrExternal types.
+func (e *ErrExternal) Is(target error) bool {
+	_, ok := target.(*ErrExternal)
+	return ok
+}
+
+// NewErrExternal wraps an error as external one so queue can filter it out if needed.
+func NewErrExternal(err error) error {
+	if err == nil {
+		return nil
+	}
+	return &ErrExternal{err: err}
+}
+
 // InfoT provides runtime information.
 type InfoT struct {
 	Pending       []*model.Task `json:"pending"`
@@ -73,19 +101,17 @@ func (t *InfoT) String() string {
 	return sb.String()
 }
 
-// FilterFn filters tasks in the queue. If the Filter returns false,
-// the Task is skipped and not returned to the subscriber.
-// The int return value represents the matching score (higher is better).
-type FilterFn func(*model.Task) (bool, int)
-
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
 type Queue interface {
 	// PushAtOnce pushes multiple tasks to the tail of this queue.
 	PushAtOnce(c context.Context, tasks []*model.Task) error
 
-	// Poll retrieves and removes a task head of this queue.
-	Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error)
+	// Poll retrieves and removes a task head of this queue. The filter is
+	// applied to each candidate: returning false skips the task, the int is a
+	// match score (higher is better). The named scheduler.FilterFn wraps this
+	// signature for callers.
+	Poll(c context.Context, agentID int64, f func(*model.Task) (bool, int)) (*model.Task, error)
 
 	// Extend extends the deadline for a task.
 	Extend(c context.Context, agentID int64, workflowID string) error

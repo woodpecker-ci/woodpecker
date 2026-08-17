@@ -28,4 +28,10 @@ var Flags = []cli.Flag{
 		DefaultText: "system temporary directory",
 		Value:       os.TempDir(),
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_LOCAL_ISOLATED_HOME"),
+		Name:    "backend-local-isolated-home",
+		Usage:   "set HOME, USERPROFILE and other variables to an isolated directory, if false we ignore netrc",
+		Value:   true,
+	},
 }

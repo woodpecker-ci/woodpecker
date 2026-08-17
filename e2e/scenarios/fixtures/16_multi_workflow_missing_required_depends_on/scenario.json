@@ -1,0 +1,7 @@
+{
+  "name": "workflow with missing required depends_on is filtered out while siblings still run",
+  "event": "push",
+  "expected_status": "success",
+  "expected_workflows": [{ "name": "check-a", "status": "success" }],
+  "expected_steps": [{ "name": "check-a", "status": "success", "exit_code": 0 }]
+}

@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"strings"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -30,8 +30,13 @@ import (
 )
 
 const (
-	mergeRefs               = "refs/merge-requests/%d/head" // merge request merged with base
-	VisibilityLevelInternal = 10
+	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
+
+	// GitLab project visibility_level values, as sent in webhook payloads.
+	// See https://docs.gitlab.com/api/projects/#project-visibility-level.
+	visibilityLevelPrivate  = 0
+	visibilityLevelInternal = 10
+	visibilityLevelPublic   = 20
 
 	stateOpened = "opened"
 
@@ -71,8 +76,8 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.
 		IsSCMPrivate:  _repo.Visibility == gitlab.InternalVisibility || _repo.Visibility == gitlab.PrivateVisibility,
 		Perm: &model.Perm{
 			Pull:  isRead(_repo, projectMember),
-			Push:  isWrite(projectMember),
-			Admin: isAdmin(projectMember),
+			Push:  isWrite(_repo, projectMember),
+			Admin: isAdmin(_repo, projectMember),
 		},
 		PREnabled: _repo.MergeRequestsAccessLevel != gitlab.DisabledAccessControl,
 	}
@@ -174,6 +179,8 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 		return 0, 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
 	case source == nil:
 		return 0, 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
+	case hook.User == nil:
+		return 0, 0, nil, nil, fmt.Errorf("user key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {
@@ -219,7 +226,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 
 	author := lastCommit.Author
 
-	pipeline.Author = author.Name
+	pipeline.Author = hook.User.Username
 	pipeline.Email = author.Email
 
 	if len(pipeline.Email) != 0 {
@@ -229,6 +236,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 	pipeline.Title = obj.Title
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequestLabels = convertLabels(hook.Labels)
+	pipeline.PullRequestDraft = obj.Draft || obj.WorkInProgress
 	pipeline.FromFork = target.PathWithNamespace != source.PathWithNamespace
 
 	return obj.IID, hook.ObjectAttributes.MilestoneID, repo, pipeline, nil
@@ -251,12 +259,21 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
 
+	// GitLab does not send `project.visibility` (string) in push event
+	// payloads — only `project.visibility_level` (numeric), which the
+	// go-gitlab library does not expose on PushEventProject. So this switch
+	// is a no-op for real-world payloads, leaving Visibility/IsSCMPrivate
+	// at zero values. model.Repo.Update() must therefore guard against
+	// overwriting the value previously synced via the forge API.
 	switch hook.Project.Visibility {
 	case gitlab.PrivateVisibility:
+		repo.Visibility = model.VisibilityPrivate
 		repo.IsSCMPrivate = true
 	case gitlab.InternalVisibility:
+		repo.Visibility = model.VisibilityInternal
 		repo.IsSCMPrivate = true
 	case gitlab.PublicVisibility:
+		repo.Visibility = model.VisibilityPublic
 		repo.IsSCMPrivate = false
 	}
 
@@ -265,14 +282,20 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
 
+	pipeline.Author = hook.UserUsername
+
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
+		if cm == nil {
+			continue
+		}
 		if hook.After == cm.ID {
-			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
+			if cm.Timestamp != nil {
+				pipeline.Timestamp = cm.Timestamp.Unix()
+			}
 			if len(pipeline.Email) != 0 {
 				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}
@@ -287,13 +310,13 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	return repo, pipeline, nil
 }
 
-func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error) {
+func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string, error) {
 	repo := &model.Repo{}
 	pipeline := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
-		return nil, nil, err
+		return nil, nil, "", err
 	}
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
@@ -304,26 +327,37 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
 
+	// See note in convertPushHook: tag event payloads also omit
+	// `project.visibility`, so this switch typically does nothing.
 	switch hook.Project.Visibility {
 	case gitlab.PrivateVisibility:
+		repo.Visibility = model.VisibilityPrivate
 		repo.IsSCMPrivate = true
 	case gitlab.InternalVisibility:
+		repo.Visibility = model.VisibilityInternal
 		repo.IsSCMPrivate = true
 	case gitlab.PublicVisibility:
+		repo.Visibility = model.VisibilityPublic
 		repo.IsSCMPrivate = false
 	}
 
 	pipeline.Event = model.EventTag
+	pipeline.TagTitle = strings.TrimPrefix(strings.TrimPrefix(hook.Ref, "refs/heads/"), "refs/tags/")
 	pipeline.Commit = hook.After
-	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
+	pipeline.Author = hook.UserUsername
+	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, pipeline.TagTitle)
 
 	for _, cm := range hook.Commits {
+		if cm == nil {
+			continue
+		}
 		if hook.After == cm.ID {
-			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
+			if cm.Timestamp != nil {
+				pipeline.Timestamp = cm.Timestamp.Unix()
+			}
 			if len(pipeline.Email) != 0 {
 				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}
@@ -331,7 +365,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 		}
 	}
 
-	return repo, pipeline, nil
+	return repo, pipeline, hook.After, nil
 }
 
 func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline, error) {
@@ -352,20 +386,39 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
-	repo.IsSCMPrivate = hook.Project.VisibilityLevel > VisibilityLevelInternal
+
+	// Release events expose visibility as a numeric level (unlike push/tag
+	// which omit it from the payload entirely). Map it to both Visibility
+	// and IsSCMPrivate so model.Repo.Update() will propagate the value.
+	switch hook.Project.VisibilityLevel {
+	case visibilityLevelPrivate:
+		repo.Visibility = model.VisibilityPrivate
+		repo.IsSCMPrivate = true
+	case visibilityLevelInternal:
+		repo.Visibility = model.VisibilityInternal
+		repo.IsSCMPrivate = true
+	case visibilityLevelPublic:
+		repo.Visibility = model.VisibilityPublic
+		repo.IsSCMPrivate = false
+	}
 
 	pipeline := &model.Pipeline{
 		Event:    model.EventRelease,
 		Commit:   hook.Commit.ID,
 		ForgeURL: hook.URL,
-		Message:  fmt.Sprintf("created release %s", hook.Name),
 		Sender:   hook.Commit.Author.Name,
-		Author:   hook.Commit.Author.Name,
-		Email:    hook.Commit.Author.Email,
+		// Using the commit author here as Gitlab does not send the hook user.
+		// This is not an issue because releases can be created by users with
+		// push permissions only anyways.
+		Author: hook.Commit.Author.Name,
+		Email:  hook.Commit.Author.Email,
+
+		Release: &model.Release{Title: hook.Name},
 
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)
-		Ref: "refs/tags/" + hook.Tag,
+		Ref:      "refs/tags/" + hook.Tag,
+		TagTitle: hook.Tag,
 	}
 	if len(pipeline.Email) != 0 {
 		pipeline.Avatar = getUserAvatar(pipeline.Email)

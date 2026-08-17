@@ -21,11 +21,11 @@ import (
 	"os"
 	"strings"
 
-	config_file "github.com/docker/cli/cli/config/configfile"
+	"github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/cli/cli/config/types"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	model_types "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
+	store_types "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 type filesystem struct {
@@ -47,7 +47,7 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 	}
 	defer f.Close()
 
-	configFile := config_file.ConfigFile{
+	configFile := configfile.ConfigFile{
 		AuthConfigs: make(map[string]types.AuthConfig),
 	}
 
@@ -88,7 +88,7 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 }
 
 func (f *filesystem) GlobalRegistryFind(addr string) (*model.Registry, error) {
-	registries, err := f.GlobalRegistryList(&model.ListOptions{All: true})
+	registries, err := f.GlobalRegistryList(&model.ListOptionsWithAll{All: true})
 	if err != nil {
 		return nil, err
 	}
@@ -99,10 +99,10 @@ func (f *filesystem) GlobalRegistryFind(addr string) (*model.Registry, error) {
 		}
 	}
 
-	return nil, model_types.RecordNotExist
+	return nil, store_types.ErrRecordNotExist
 }
 
-func (f *filesystem) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
+func (f *filesystem) GlobalRegistryList(p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	regs, err := parseDockerConfig(f.path)
 	if err != nil {
 		return nil, err

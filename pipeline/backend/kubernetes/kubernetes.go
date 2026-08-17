@@ -16,7 +16,7 @@ package kubernetes
 
 import (
 	"context"
-	std_errs "errors"
+	"errors"
 	"fmt"
 	"io"
 	"maps"
@@ -25,13 +25,15 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	backoff "github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	v1 "k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_core_v1 "k8s.io/api/core/v1"
+	kube_errors "k8s.io/apimachinery/pkg/api/errors"
+	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -50,8 +52,6 @@ const (
 	maxRetryDuration      = 1 * time.Minute
 )
 
-var defaultDeleteOptions = newDefaultDeleteOptions()
-
 type kube struct {
 	client kubernetes.Interface
 	config *config
@@ -59,24 +59,29 @@ type kube struct {
 }
 
 type config struct {
-	Namespace                   string
-	EnableNamespacePerOrg       bool
-	StorageClass                string
-	VolumeSize                  string
-	StorageRwx                  bool
-	PodLabels                   map[string]string
-	PodLabelsAllowFromStep      bool
-	PodAnnotations              map[string]string
-	PodAnnotationsAllowFromStep bool
-	PodNodeSelector             map[string]string
-	PodTolerationsAllowFromStep bool
-	PodTolerations              []Toleration
-	PodAffinity                 *v1.Affinity
-	PodAffinityAllowFromStep    bool
-	ImagePullSecretNames        []string
-	SecurityContext             SecurityContextConfig
-	NativeSecretsAllowFromStep  bool
-	PriorityClassName           string
+	Namespace                       string
+	EnableNamespacePerOrg           bool
+	ClusterDomain                   string
+	StorageClass                    string
+	VolumeSize                      string
+	StorageRwx                      bool
+	PodLabels                       map[string]string
+	PodLabelsAllowFromStep          bool
+	PodAnnotations                  map[string]string
+	PodAnnotationsAllowFromStep     bool
+	PodNodeSelector                 map[string]string
+	PodNodeSelectorAllowFromStep    bool
+	PodTolerationsAllowFromStep     bool
+	PodTolerations                  []Toleration
+	PodAffinity                     *kube_core_v1.Affinity
+	PodAffinityAllowFromStep        bool
+	ImagePullSecretNames            []string
+	SecurityContext                 SecurityContextConfig
+	NativeSecretsAllowFromStep      bool
+	ServiceAccountNameAllowFromStep bool
+	PriorityClassName               string
+	StopTimeout                     int64
+	PermissionInitImage             string
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -91,12 +96,11 @@ type SecurityContextConfig struct {
 	FSGroup      *int64
 }
 
-func newDefaultDeleteOptions() meta_v1.DeleteOptions {
-	gracePeriodSeconds := int64(0) // immediately
-	propagationPolicy := meta_v1.DeletePropagationBackground
+func (c *config) newDefaultDeleteOptions() kube_meta_v1.DeleteOptions {
+	propagationPolicy := kube_meta_v1.DeletePropagationBackground
 
-	return meta_v1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriodSeconds,
+	return kube_meta_v1.DeleteOptions{
+		GracePeriodSeconds: &c.StopTimeout,
 		PropagationPolicy:  &propagationPolicy,
 	}
 }
@@ -105,25 +109,30 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
 			config := config{
-				Namespace:                   c.String("backend-k8s-namespace"),
-				EnableNamespacePerOrg:       c.Bool("backend-k8s-namespace-per-org"),
-				StorageClass:                c.String("backend-k8s-storage-class"),
-				VolumeSize:                  c.String("backend-k8s-volume-size"),
-				StorageRwx:                  c.Bool("backend-k8s-storage-rwx"),
-				PriorityClassName:           c.String("backend-k8s-priority-class"),
-				PodLabels:                   make(map[string]string), // just init empty map to prevent nil panic
-				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
-				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
-				PodTolerationsAllowFromStep: c.Bool("backend-k8s-pod-tolerations-allow-from-step"),
-				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
-				PodAffinityAllowFromStep:    c.Bool("backend-k8s-pod-affinity-allow-from-step"),
-				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
+				Namespace:                    c.String("backend-k8s-namespace"),
+				EnableNamespacePerOrg:        c.Bool("backend-k8s-namespace-per-org"),
+				ClusterDomain:                c.String("backend-k8s-cluster-domain"),
+				StorageClass:                 c.String("backend-k8s-storage-class"),
+				VolumeSize:                   c.String("backend-k8s-volume-size"),
+				StorageRwx:                   c.Bool("backend-k8s-storage-rwx"),
+				PriorityClassName:            c.String("backend-k8s-priority-class"),
+				PodLabels:                    make(map[string]string), // just init empty map to prevent nil panic
+				PodLabelsAllowFromStep:       c.Bool("backend-k8s-pod-labels-allow-from-step"),
+				PodAnnotations:               make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotationsAllowFromStep:  c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+				PodTolerationsAllowFromStep:  c.Bool("backend-k8s-pod-tolerations-allow-from-step"),
+				PodNodeSelectorAllowFromStep: c.Bool("backend-k8s-pod-node-selector-allow-from-step"),
+				PodNodeSelector:              make(map[string]string), // just init empty map to prevent nil panic
+				PodAffinityAllowFromStep:     c.Bool("backend-k8s-pod-affinity-allow-from-step"),
+				ImagePullSecretNames:         c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 					FSGroup:      newInt64(defaultFSGroup),
 				},
-				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
+				NativeSecretsAllowFromStep:      c.Bool("backend-k8s-allow-native-secrets"),
+				ServiceAccountNameAllowFromStep: c.Bool("backend-k8s-service-account-name-allow-from-step"),
+				StopTimeout:                     c.Int64("backend-k8s-stop-timeout"),
+				PermissionInitImage:             c.String("backend-k8s-permission-init-image"),
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -287,10 +296,11 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("waiting for pod: %s", podName)
 
-	finished := make(chan bool)
+	finished := make(chan struct{})
+	var finishedOnce sync.Once
 
 	podUpdated := func(_, newPod any) {
-		pod, ok := newPod.(*v1.Pod)
+		pod, ok := newPod.(*kube_core_v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
@@ -298,13 +308,30 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				finished <- true
+				finishedOnce.Do(func() { close(finished) })
 			}
 
 			switch pod.Status.Phase {
-			case v1.PodSucceeded, v1.PodFailed, v1.PodUnknown:
-				finished <- true
+			case kube_core_v1.PodSucceeded, kube_core_v1.PodFailed, kube_core_v1.PodUnknown:
+				finishedOnce.Do(func() { close(finished) })
 			}
+		}
+	}
+
+	podDeleted := func(obj any) {
+		pod, ok := obj.(*kube_core_v1.Pod)
+		if !ok {
+			tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
+			if !ok {
+				return
+			}
+			pod, ok = tombstone.Obj.(*kube_core_v1.Pod)
+			if !ok {
+				return
+			}
+		}
+		if pod.Name == podName {
+			finishedOnce.Do(func() { close(finished) })
 		}
 	}
 
@@ -312,6 +339,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
+			DeleteFunc: podDeleted,
 		},
 	); err != nil {
 		return nil, err
@@ -321,11 +349,49 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// TODO: Cancel on ctx.Done
-	<-finished
+	// If the pod was deleted before the informer started, no events will
+	// ever arrive. Check explicitly so we don't hang forever.
+	if _, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{}); kube_errors.IsNotFound(err) {
+		return &types.State{ExitCode: 0, Exited: true}, nil
+	}
 
-	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, meta_v1.GetOptions{})
+	select {
+	case <-finished:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+
+	// After the informer signals completion, kubelet may not have finalized
+	// containerStatuses yet (phase=Succeeded before state.terminated is set).
+	// Retry with backoff to allow kubelet to catch up.
+	pod, err := backoff.Retry(
+		ctx,
+		func() (*kube_core_v1.Pod, error) {
+			p, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
+			if err != nil {
+				if kube_errors.IsNotFound(err) {
+					return nil, backoff.Permanent(err)
+				}
+				return nil, err
+			}
+			if len(p.Status.ContainerStatuses) == 0 {
+				return nil, fmt.Errorf("no container statuses found for pod %s", podName)
+			}
+			if p.Status.ContainerStatuses[0].State.Terminated == nil {
+				return nil, fmt.Errorf("container %s/%s terminated state not yet finalized", podName, p.Status.ContainerStatuses[0].Name)
+			}
+			return p, nil
+		},
+		backoff.WithBackOff(backoff.NewExponentialBackOff()),
+		backoff.WithMaxElapsedTime(maxRetryDuration),
+		backoff.WithNotify(func(err error, delay time.Duration) {
+			log.Warn().Err(err).Str("pod", podName).Dur("backoff", delay).Msg("waiting for container terminated state, retrying with backoff")
+		}),
+	)
 	if err != nil {
+		if kube_errors.IsNotFound(backoff.AsRetryError(err).LastErr) {
+			return &types.State{ExitCode: 0, Exited: true}, nil
+		}
 		return nil, err
 	}
 
@@ -333,17 +399,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, fmt.Errorf("could not pull image for pod %s", podName)
 	}
 
-	if len(pod.Status.ContainerStatuses) == 0 {
-		return nil, fmt.Errorf("no container statuses found for pod %s", podName)
-	}
-
 	cs := pod.Status.ContainerStatuses[0]
-
-	if cs.State.Terminated == nil {
-		err := fmt.Errorf("no terminated state found for container %s/%s", podName, cs.Name)
-		log.Error().Str("taskUUID", taskUUID).Str("pod", podName).Str("container", cs.Name).Interface("state", cs.State).Msg(err.Error())
-		return nil, err
-	}
 
 	bs := &types.State{
 		ExitCode:  int(cs.State.Terminated.ExitCode),
@@ -363,10 +419,11 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of pod: %s", podName)
 
-	up := make(chan bool)
+	up := make(chan struct{})
+	var upOnce sync.Once
 
 	podUpdated := func(_, newPod any) {
-		pod, ok := newPod.(*v1.Pod)
+		pod, ok := newPod.(*kube_core_v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
@@ -374,11 +431,11 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
-				up <- true
+				upOnce.Do(func() { close(up) })
 			}
 			switch pod.Status.Phase {
-			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
-				up <- true
+			case kube_core_v1.PodRunning, kube_core_v1.PodSucceeded, kube_core_v1.PodFailed:
+				upOnce.Do(func() { close(up) })
 			}
 		}
 	}
@@ -396,14 +453,19 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	<-up
+	select {
+	case <-up:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 
-	opts := &v1.PodLogOptions{
+	opts := &kube_core_v1.PodLogOptions{
 		Follow:    true,
 		Container: podName,
 	}
 
-	logs, err := backoff.Retry(ctx,
+	logs, err := backoff.Retry(
+		ctx,
 		func() (io.ReadCloser, error) {
 			return e.client.CoreV1().RESTClient().Get().
 				Namespace(e.config.GetNamespace(step.OrgID)).
@@ -440,24 +502,24 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	if needsRegistrySecret(step) {
-		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		err := stopRegistrySecret(ctx, e, step, e.config.newDefaultDeleteOptions())
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
 	if needsStepSecret(step) {
-		err := stopStepSecret(ctx, e, step, defaultDeleteOptions)
+		err := stopStepSecret(ctx, e, step, e.config.newDefaultDeleteOptions())
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	err := stopPod(ctx, e, step, defaultDeleteOptions)
+	err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
 	if err != nil {
 		errs = append(errs, err)
 	}
-	return std_errs.Join(errs...)
+	return errors.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.
@@ -466,7 +528,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, defaultDeleteOptions)
+			err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
 			if err != nil {
 				return err
 			}
@@ -476,13 +538,13 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
-	err := stopHeadlessService(ctx, e, namespace, taskUUID)
+	err := e.stopHeadlessService(ctx, e, namespace, taskUUID)
 	if err != nil {
 		return err
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow volume")
-	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
+	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), e.config.newDefaultDeleteOptions())
 	if err != nil {
 		return err
 	}

@@ -114,6 +114,103 @@ func TestFifoBasicOperations(t *testing.T) {
 		}
 	})
 
+	t.Run("external error filtered by Wait", func(t *testing.T) {
+		// Test that external errors (from Error/ErrorAtOnce) are wrapped as ErrExternal
+		// and filtered out by Wait(), while internal errors like context cancellation
+		// are passed through
+
+		// Test 1: External error is filtered by Wait
+		task1 := &model.Task{ID: "wait-external-1"}
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task1}))
+		waitForProcess()
+
+		got1, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+
+		// Start waiting on the task
+		waitDone := make(chan error, 1)
+		go func() {
+			waitDone <- q.Wait(ctx, got1.ID)
+		}()
+
+		time.Sleep(10 * time.Millisecond)
+
+		// Report an external error (agent reported error)
+		externalErr := fmt.Errorf("agent reported error")
+		assert.NoError(t, q.Error(ctx, got1.ID, externalErr))
+
+		// Wait should return nil (external error filtered out)
+		select {
+		case err := <-waitDone:
+			assert.NoError(t, err, "Wait should filter ErrExternal and return nil")
+		case <-time.After(time.Second):
+			t.Fatal("Wait should have returned")
+		}
+
+		// Test 2: Internal error (context cancellation) passes through Wait
+		task2 := &model.Task{ID: "wait-internal-1"}
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2}))
+		waitForProcess()
+
+		got2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+
+		waitCtx, waitCancel := context.WithCancelCause(ctx)
+		waitDone2 := make(chan error, 1)
+		go func() {
+			waitDone2 <- q.Wait(waitCtx, got2.ID)
+		}()
+
+		time.Sleep(10 * time.Millisecond)
+		waitCancel(nil)
+
+		// Context cancellation should cause Wait to return (internal error handling)
+		select {
+		case err := <-waitDone2:
+			// Wait returns nil when context is canceled (normal behavior)
+			assert.NoError(t, err, "Wait should return nil when context is canceled")
+		case <-time.After(time.Second):
+			t.Fatal("Wait should return when context is canceled")
+		}
+
+		// Clean up
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+		waitForProcess()
+
+		// Test 3: Multiple waiters all get nil when external error occurs
+		task3 := &model.Task{ID: "wait-multi-1"}
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task3}))
+		waitForProcess()
+
+		got3, err := q.Poll(ctx, 3, filterFnTrue)
+		assert.NoError(t, err)
+
+		// Start multiple waiters
+		numWaiters := 3
+		waitResults := make(chan error, numWaiters)
+		for i := 0; i < numWaiters; i++ {
+			go func() {
+				waitResults <- q.Wait(ctx, got3.ID)
+			}()
+		}
+
+		time.Sleep(10 * time.Millisecond)
+
+		// Report an external error
+		batchErr := fmt.Errorf("external batch failure")
+		assert.NoError(t, q.ErrorAtOnce(ctx, []string{got3.ID}, batchErr))
+
+		// All waiters should return nil (external error filtered)
+		for i := 0; i < numWaiters; i++ {
+			select {
+			case err := <-waitResults:
+				assert.NoError(t, err, "All waiters should get nil when ErrExternal is filtered")
+			case <-time.After(time.Second):
+				t.Fatalf("Waiter %d didn't return in time", i)
+			}
+		}
+	})
+
 	t.Run("error at once", func(t *testing.T) {
 		task1 := &model.Task{ID: "batch-1"}
 		task2 := &model.Task{ID: "batch-2"}
@@ -571,6 +668,228 @@ func TestFifoDependencies(t *testing.T) {
 
 		assert.NoError(t, q.Done(ctx, gotChild.ID, model.StatusSuccess))
 		waitForProcess()
+	})
+}
+
+func TestFifoConcurrency(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	t.Run("limit serializes group in instantiation order", func(t *testing.T) {
+		// Lower Created == instantiated earlier. taskB is pushed first to
+		// prove the queue serializes by creation order, not by push/ready
+		// order. Distinct pipeline IDs model two pipelines of the same
+		// workflow. Ordering must not depend on the task ID, so taskA (the
+		// earlier one) deliberately has the higher ID.
+		taskA := &model.Task{ID: "200", PipelineID: 1, Created: 100, ConcurrencyGroup: "repo:deploy", ConcurrencyLimit: 1}
+		taskB := &model.Task{ID: "100", PipelineID: 2, Created: 200, ConcurrencyGroup: "repo:deploy", ConcurrencyLimit: 1}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{taskB, taskA}))
+		waitForProcess()
+
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "200", got.ID) // earliest instantiated (lowest Created) runs first
+
+		waitForProcess()
+		info := q.Info(ctx)
+		assert.Len(t, info.Running, 1)
+		assert.Len(t, info.Pending, 1) // taskB deferred by concurrency limit
+
+		// taskB cannot be polled while taskA holds the only slot.
+		pollCtx, pollCancel := context.WithTimeout(ctx, 200*time.Millisecond)
+		_, err = q.Poll(pollCtx, 2, filterFnTrue)
+		pollCancel()
+		assert.Error(t, err)
+
+		// finishing taskA frees the slot for taskB.
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		got2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "100", got2.ID)
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("preserves instantiation order over readiness", func(t *testing.T) {
+		// Pipeline 1's deploy (taskA) waits on its own slow check (dep), while
+		// pipeline 2's deploy (taskB) is immediately ready. taskB must still
+		// wait for the earlier taskA. Ordering is by Created, not ID, so taskA
+		// has the higher ID but the lower Created.
+		dep := &model.Task{ID: "50", PipelineID: 1, Created: 100}
+		taskA := &model.Task{
+			ID:               "200",
+			PipelineID:       1,
+			Created:          100,
+			ConcurrencyGroup: "repo:deploy2",
+			ConcurrencyLimit: 1,
+			Dependencies:     []string{"50"},
+			DepStatus:        make(map[string]model.StatusValue),
+			RunOn:            []string{"success", "failure"},
+		}
+		taskB := &model.Task{ID: "100", PipelineID: 2, Created: 200, ConcurrencyGroup: "repo:deploy2", ConcurrencyLimit: 1}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dep, taskA, taskB}))
+		waitForProcess()
+
+		info := q.Info(ctx)
+		assert.Equal(t, 1, info.Stats.WaitingOnDeps) // taskA waiting on dep
+
+		// only the dependency is runnable; taskB is held back behind taskA.
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "50", got.ID)
+
+		pollCtx, pollCancel := context.WithTimeout(ctx, 200*time.Millisecond)
+		_, err = q.Poll(pollCtx, 2, filterFnTrue)
+		pollCancel()
+		assert.Error(t, err, "taskB must not overtake the earlier taskA")
+
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		gotA, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "200", gotA.ID)
+		assert.NoError(t, q.Done(ctx, gotA.ID, model.StatusSuccess))
+		waitForProcess()
+
+		gotB, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "100", gotB.ID)
+		assert.NoError(t, q.Done(ctx, gotB.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("limit greater than one allows parallelism", func(t *testing.T) {
+		t1 := &model.Task{ID: "300", PipelineID: 1, ConcurrencyGroup: "repo:build", ConcurrencyLimit: 2}
+		t2 := &model.Task{ID: "400", PipelineID: 2, ConcurrencyGroup: "repo:build", ConcurrencyLimit: 2}
+		t3 := &model.Task{ID: "500", PipelineID: 3, ConcurrencyGroup: "repo:build", ConcurrencyLimit: 2}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{t1, t2, t3}))
+		waitForProcess()
+
+		g1, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		g2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"300", "400"}, []string{g1.ID, g2.ID})
+
+		waitForProcess()
+		info := q.Info(ctx)
+		assert.Len(t, info.Running, 2)
+		assert.Len(t, info.Pending, 1) // third deferred until a slot frees
+
+		pollCtx, pollCancel := context.WithTimeout(ctx, 200*time.Millisecond)
+		_, err = q.Poll(pollCtx, 3, filterFnTrue)
+		pollCancel()
+		assert.Error(t, err)
+
+		assert.NoError(t, q.Done(ctx, g1.ID, model.StatusSuccess))
+		waitForProcess()
+		g3, err := q.Poll(ctx, 3, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "500", g3.ID)
+		assert.NoError(t, q.Done(ctx, g2.ID, model.StatusSuccess))
+		assert.NoError(t, q.Done(ctx, g3.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("same pipeline dependency does not deadlock", func(t *testing.T) {
+		// Within one pipeline, deploy.yaml (lower ID, alphabetically first)
+		// depends on test.yaml (higher ID), and both share a concurrency group.
+		// The ordering reservation must not treat the dependent deploy as
+		// "ahead" of its own dependency, otherwise neither can ever run.
+		deploy := &model.Task{
+			ID:               "100",
+			PipelineID:       1,
+			ConcurrencyGroup: "repo:ci",
+			ConcurrencyLimit: 1,
+			Dependencies:     []string{"200"},
+			DepStatus:        make(map[string]model.StatusValue),
+			RunOn:            []string{"success", "failure"},
+		}
+		test := &model.Task{
+			ID:               "200",
+			PipelineID:       1,
+			ConcurrencyGroup: "repo:ci",
+			ConcurrencyLimit: 1,
+		}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{deploy, test}))
+		waitForProcess()
+
+		// test must be runnable even though deploy has a lower ID.
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "200", got.ID, "the dependency must not be starved by the dependent")
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		gotDeploy, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "100", gotDeploy.ID)
+		assert.NoError(t, q.Done(ctx, gotDeploy.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("different groups do not block each other", func(t *testing.T) {
+		t1 := &model.Task{ID: "600", ConcurrencyGroup: "repo:a", ConcurrencyLimit: 1}
+		t2 := &model.Task{ID: "700", ConcurrencyGroup: "repo:b", ConcurrencyLimit: 1}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{t1, t2}))
+		waitForProcess()
+
+		g1, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		g2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"600", "700"}, []string{g1.ID, g2.ID})
+
+		assert.NoError(t, q.Done(ctx, g1.ID, model.StatusSuccess))
+		assert.NoError(t, q.Done(ctx, g2.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("no limit keeps default behavior", func(t *testing.T) {
+		t1 := &model.Task{ID: "800"}
+		t2 := &model.Task{ID: "900"}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{t1, t2}))
+		waitForProcess()
+
+		g1, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		g2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"800", "900"}, []string{g1.ID, g2.ID})
+
+		assert.NoError(t, q.Done(ctx, g1.ID, model.StatusSuccess))
+		assert.NoError(t, q.Done(ctx, g2.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("task ordering uses Created with name tiebreak", func(t *testing.T) {
+		// earlier Created sorts first, regardless of ID.
+		assert.True(t, taskOrderLess(
+			&model.Task{ID: "999", Created: 100},
+			&model.Task{ID: "1", Created: 200},
+		))
+		assert.False(t, taskOrderLess(
+			&model.Task{ID: "1", Created: 200},
+			&model.Task{ID: "999", Created: 100},
+		))
+		// equal Created falls back to the workflow name, alphabetically.
+		assert.True(t, taskOrderLess(
+			&model.Task{ID: "2", Created: 100, Name: "alpha"},
+			&model.Task{ID: "1", Created: 100, Name: "beta"},
+		))
+		assert.False(t, taskOrderLess(
+			&model.Task{ID: "1", Created: 100, Name: "beta"},
+			&model.Task{ID: "2", Created: 100, Name: "alpha"},
+		))
 	})
 }
 

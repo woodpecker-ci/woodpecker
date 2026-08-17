@@ -56,6 +56,7 @@ func TestPipelines(t *testing.T) {
 		RepoID: repo.ID,
 		Status: model.StatusSuccess,
 		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		Event:  model.EventPush,
 		Branch: "some-branch",
 	}
 	err = store.CreatePipeline(&pipeline)
@@ -76,10 +77,9 @@ func TestPipelines(t *testing.T) {
 
 	// update pipeline
 	pipeline.Status = model.StatusRunning
-	err1 := store.UpdatePipeline(&pipeline)
-	GetPipeline, err2 := store.GetPipeline(pipeline.ID)
-	assert.NoError(t, err1)
-	assert.NoError(t, err2)
+	require.NoError(t, store.UpdatePipeline(&pipeline))
+	GetPipeline, err1 := store.GetPipeline(pipeline.ID)
+	require.NoError(t, err1)
 	assert.Equal(t, pipeline.ID, GetPipeline.ID)
 	assert.Equal(t, pipeline.RepoID, GetPipeline.RepoID)
 	assert.Equal(t, pipeline.Status, GetPipeline.Status)
@@ -91,38 +91,33 @@ func TestPipelines(t *testing.T) {
 		Event:  model.EventPush,
 		Branch: "main",
 	}
-	err2 = store.CreatePipeline(pipeline2, []*model.Step{}...)
-	assert.NoError(t, err2)
+	require.NoError(t, store.CreatePipeline(pipeline2, []*model.Step{}...))
 	GetPipeline, err3 := store.GetPipelineNumber(&model.Repo{ID: 1}, pipeline2.Number)
-	assert.NoError(t, err3)
+	require.NoError(t, err3)
 	assert.Equal(t, pipeline2.ID, GetPipeline.ID)
 	assert.Equal(t, pipeline2.RepoID, GetPipeline.RepoID)
 	assert.Equal(t, pipeline2.Number, GetPipeline.Number)
 
-	GetPipeline, err3 = store.GetPipelineLast(&model.Repo{ID: repo.ID}, pipeline2.Branch)
-	assert.NoError(t, err3)
+	GetPipeline, err4 := store.GetPipelineLastByBranch(&model.Repo{ID: repo.ID}, pipeline2.Branch)
+	require.NoError(t, err4)
 	assert.Equal(t, pipeline2.ID, GetPipeline.ID)
 	assert.Equal(t, pipeline2.RepoID, GetPipeline.RepoID)
 	assert.Equal(t, pipeline2.Number, GetPipeline.Number)
 	assert.Equal(t, pipeline2.Status, GetPipeline.Status)
 
 	pipeline3 := &model.Pipeline{
-		RepoID: repo.ID,
-		Status: model.StatusRunning,
-		Branch: "main",
-		Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
+		RepoID:   repo.ID,
+		Status:   model.StatusRunning,
+		Branch:   "main",
+		Event:    model.EventPull,
+		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144aa",
+		ForgeURL: "example.com/id3",
 	}
-	err1 = store.CreatePipeline(pipeline3, []*model.Step{}...)
-	assert.NoError(t, err1)
+	require.NoError(t, store.CreatePipeline(pipeline3))
 
-	GetPipeline, err4 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.ID)
-	assert.NoError(t, err4)
-	assert.Equal(t, pipeline2.ID, GetPipeline.ID)
-	assert.Equal(t, pipeline2.RepoID, GetPipeline.RepoID)
-	assert.Equal(t, pipeline2.Number, GetPipeline.Number)
-	assert.Equal(t, pipeline2.Status, GetPipeline.Status)
-	assert.Equal(t, pipeline2.Branch, GetPipeline.Branch)
-	assert.Equal(t, pipeline2.Commit, GetPipeline.Commit)
+	GetPipeline, err5 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.Number)
+	require.NoError(t, err5)
+	assert.EqualValues(t, pipeline2, GetPipeline)
 }
 
 func TestPipelineListFilter(t *testing.T) {
@@ -159,9 +154,9 @@ func TestPipelineListFilter(t *testing.T) {
 	err = store.CreatePipeline(pipeline2, []*model.Step{}...)
 	assert.NoError(t, err)
 
-	pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, nil)
+	pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}}, nil)
 	assert.NoError(t, err)
-	assert.Len(t, (pipelines), 2)
+	assert.Len(t, pipelines, 2)
 	assert.Equal(t, pipeline2.ID, pipelines[0].ID)
 	assert.Equal(t, pipeline2.RepoID, pipelines[0].RepoID)
 	assert.Equal(t, pipeline2.Status, pipelines[0].Status)
@@ -185,10 +180,10 @@ func TestPipelineListFilter(t *testing.T) {
 		RefContains: "32",
 	})
 	assert.NoError(t, err)
-	assert.Len(t, (pipelines), 1)
+	assert.Len(t, pipelines, 1)
 	assert.Equal(t, pipeline2.ID, pipelines[0].ID)
 
-	pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, &model.PipelineFilter{Before: before})
+	pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}}, &model.PipelineFilter{Before: before})
 	assert.NoError(t, err3)
 	assert.Len(t, pipelines, 1)
 	assert.Equal(t, pipeline1.ID, pipelines[0].ID)
@@ -223,12 +218,38 @@ func TestPipelineIncrement(t *testing.T) {
 	assert.EqualValues(t, 1, pipelineC.Number)
 }
 
+// Duplicates must surface as ErrInsertDuplicateDetected so the retry sees them as retryable (#6067).
+func TestCreatePipelineDuplicateIsRetryable(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	require.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1", ForgeRemoteID: "1"}))
+
+	// Duplicate step: UNIQUE(pipeline_id, pid).
+	err := store.CreatePipeline(
+		&model.Pipeline{RepoID: 1},
+		&model.Step{PID: 1, Name: "clone"},
+		&model.Step{PID: 1, Name: "dup"},
+	)
+	assert.ErrorIs(t, err, types.ErrInsertDuplicateDetected)
+
+	// Every attempt rolled back.
+	count, err := store.GetPipelineCount()
+	assert.NoError(t, err)
+	assert.Zero(t, count)
+
+	// Same for the pipeline insert. Forced through the PK: the number is MAX+1, it can't collide on demand.
+	existing := &model.Pipeline{RepoID: 1}
+	require.NoError(t, store.CreatePipeline(existing))
+	assert.ErrorIs(t, store.CreatePipeline(&model.Pipeline{ID: existing.ID, RepoID: 1}), types.ErrInsertDuplicateDetected)
+}
+
 func TestDeletePipeline(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo), new(model.Workflow),
 		new(model.Step), new(model.LogEntry), new(model.PipelineConfig), new(model.Config))
 	defer closer()
 
-	_, err := store.engine.Insert(
+	err := wrapInsert(store.engine.Insert(
 		&model.Pipeline{
 			ID:     2,
 			Number: 2,
@@ -268,11 +289,11 @@ func TestDeletePipeline(t *testing.T) {
 			PipelineID: 8,
 			ConfigID:   25,
 		},
-	)
+	))
 	assert.NoError(t, err)
 
 	// delete non existing pipeline
-	assert.ErrorIs(t, types.RecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
+	assert.ErrorIs(t, types.ErrRecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
 
 	// delete pipeline with shares config
 	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 2}))
@@ -285,4 +306,58 @@ func TestDeletePipeline(t *testing.T) {
 	count, err = store.engine.Count(new(model.Config))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, count)
+}
+
+// TestGetRepoLatestPipelinesUsesNumber checks a repo's latest pipeline is
+// picked by number rather than by id, in the case where the two sequences
+// disagree: the newest pipeline of each repo is given the lowest id. TiDB can
+// produce that state, as it allocates auto-increment values from per-node
+// caches instead of in insertion order.
+func TestGetRepoLatestPipelinesUsesNumber(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Pipeline))
+	defer closer()
+
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: 1, Number: 1, Status: model.StatusFailure},
+		{ID: 100, RepoID: 1, Number: 2, Status: model.StatusRunning},
+		{ID: 800, RepoID: 2, Number: 1, Status: model.StatusFailure},
+		{ID: 200, RepoID: 2, Number: 2, Status: model.StatusKilled},
+	})))
+
+	pipelines, err := store.GetRepoLatestPipelines([]int64{1, 2})
+	assert.NoError(t, err)
+	assert.Len(t, pipelines, 2)
+
+	latest := make(map[int64]*model.Pipeline, len(pipelines))
+	for _, pipeline := range pipelines {
+		latest[pipeline.RepoID] = pipeline
+	}
+
+	assert.EqualValues(t, 2, latest[1].Number)
+	assert.EqualValues(t, model.StatusRunning, latest[1].Status)
+	assert.EqualValues(t, 2, latest[2].Number)
+	assert.EqualValues(t, model.StatusKilled, latest[2].Status)
+}
+
+// TestGetPipelineLastBeforeUsesNumber checks the preceding pipeline is found
+// by number, in the case where the two sequences disagree: the pipelines are
+// created in number order while their ids run the other way. TiDB can produce
+// that state, as it allocates auto-increment values from per-node caches
+// instead of in insertion order.
+func TestGetPipelineLastBeforeUsesNumber(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.Pipeline))
+	defer closer()
+
+	repo := &model.Repo{ID: 1, Owner: "bradrydzewski", Name: "test", FullName: "bradrydzewski/test"}
+
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: repo.ID, Number: 1, Branch: "main", Status: model.StatusSuccess},
+		{ID: 800, RepoID: repo.ID, Number: 2, Branch: "main", Status: model.StatusFailure},
+		{ID: 700, RepoID: repo.ID, Number: 3, Branch: "main", Status: model.StatusRunning},
+	})))
+
+	previous, err := store.GetPipelineLastBefore(repo, "main", 3)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, previous.Number)
+	assert.EqualValues(t, model.StatusFailure, previous.Status)
 }

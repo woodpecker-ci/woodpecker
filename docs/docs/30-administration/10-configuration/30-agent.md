@@ -63,7 +63,7 @@ To get an _agent token_ you have to register the agent manually in the server us
 - Name: `WOODPECKER_SERVER`
 - Default: `localhost:9000`
 
-Configures gRPC address of the server.
+Configures gRPC address to the server. If you want to use an unix socket add `unix://` prefix and the path.
 
 ---
 
@@ -148,6 +148,19 @@ Configures the number of parallel workflows.
 
 ---
 
+### AGENT_SINGLE_WORKFLOW
+
+- Name: `WOODPECKER_AGENT_SINGLE_WORKFLOW`
+- Default: `false`
+
+Configures the agent to exit (shutdown) after executing one workflow. When configured,
+`WOODPECKER_MAX_WORKFLOWS` is forced to 1.
+
+This one-shot mode is useful in ephemeral environments that are provisioned on demand
+by external automation — for example, when an autoscaler spins up a dedicated machine. In these setups, the agent starts, executes exactly one workflow, and exits, allowing the environment to be cleanly torn down afterward.
+
+---
+
 ### AGENT_LABELS
 
 - Name: `WOODPECKER_AGENT_LABELS`
@@ -202,16 +215,43 @@ After pinging for a keepalive check, the agent waits for a duration of this time
 - Name: `WOODPECKER_GRPC_SECURE`
 - Default: `false`
 
-Configures if the connection to `WOODPECKER_SERVER` should be made using a secure transport.
+Configures if the connection to `WOODPECKER_SERVER` should be made using a secure transport (tls).
 
 ---
 
-### GRPC_VERIFY
+### GRPC_SKIP_VERIFY
 
-- Name: `WOODPECKER_GRPC_VERIFY`
+- Name: `WOODPECKER_GRPC_SKIP_VERIFY`
 - Default: `true`
 
 Configures if the gRPC server certificate should be verified, only valid when `WOODPECKER_GRPC_SECURE` is `true`.
+
+---
+
+## RETRY_TIMEOUT
+
+- Name: `WOODPECKER_RETRY_TIMEOUT`
+- Default: `2m`
+
+Set how long the agent keeps retrying to reconnect to the server after the gRPC connection is lost before giving up.
+
+:::warning
+If set to 0 we retry forever.
+:::
+
+---
+
+## LOG_ENTRY_STREAM_BUFFER_SIZE
+
+- Name: `WOODPECKER_LOG_ENTRY_STREAM_BUFFER_SIZE`
+- Default: `100`
+
+Set how many log lines an agent can buffer before it blocks io.Pipe, expect logentries to reach 1 MB in worst case.
+If used with local backend, tis can increase your performance in special cases significantly.
+
+:::warning
+If set to 0 we are always blocking.
+:::
 
 ---
 

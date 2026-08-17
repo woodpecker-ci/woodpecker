@@ -147,13 +147,18 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	}
 
 	// at least one constraint contain status success, or all constraints have no status set
-	onSuccess := container.When.IncludesStatusSuccess()
+	onSuccess := container.When.IncludesStatusSuccess(c.metadata, false, c.env)
 	// at least one constraint must include the status failure.
-	onFailure := container.When.IncludesStatusFailure()
+	onFailure := container.When.IncludesStatusFailure(c.metadata, false, c.env)
 
 	failure := container.Failure
 	if container.Failure == "" {
-		failure = metadata.FailureFail
+		failure = string(metadata.FailureFail)
+	}
+
+	// TODO: remove with version 4.x
+	if c.forceIgnoreServiceFailure && detached {
+		failure = string(metadata.FailureIgnore)
 	}
 
 	return &backend_types.Step{

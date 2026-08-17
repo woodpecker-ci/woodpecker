@@ -21,6 +21,7 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
@@ -29,7 +30,7 @@ import (
 func TestSecretAvailable(t *testing.T) {
 	secret := Secret{
 		AllowedPlugins: []string{},
-		Events:         []string{"push"},
+		Events:         []metadata.Event{"push"},
 	}
 	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
@@ -40,7 +41,7 @@ func TestSecretAvailable(t *testing.T) {
 	secret = Secret{
 		Name:           "foo",
 		AllowedPlugins: []string{"golang"},
-		Events:         []string{"push"},
+		Events:         []metadata.Event{"push"},
 	}
 	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Name:     "step",
@@ -222,7 +223,7 @@ func TestCompilerCompile(t *testing.T) {
 				Name:      "echo 1",
 				Image:     "bash",
 				Commands:  []string{"echo 1"},
-				DependsOn: []string{"echo env", "echo 2"},
+				DependsOn: constraint.DependsOn{{Name: "echo env"}, {Name: "echo 2"}},
 			}, {
 				Name:     "echo 2",
 				Image:    "bash",
@@ -292,10 +293,29 @@ func TestCompilerCompile(t *testing.T) {
 			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
 				Name:      "dummy",
 				Image:     "dummy_img",
-				DependsOn: []string{"not exist"},
+				DependsOn: constraint.DependsOn{{Name: "not exist"}},
 			}}}},
 			backConf:    nil,
 			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
+		},
+		{
+			name: "workflow with step depending on filtered-out step",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{
+				{
+					Name:  "build",
+					Image: "bash",
+					When: constraint.When{Constraints: []constraint.Constraint{{
+						Event: yaml_base_types.StringOrSlice{"tag"},
+					}}},
+				},
+				{
+					Name:      "deploy",
+					Image:     "bash",
+					DependsOn: constraint.DependsOn{{Name: "build"}},
+				},
+			}}},
+			backConf:    nil,
+			expectedErr: "step 'deploy' depends on step 'build' which is filtered out by its conditions",
 		},
 	}
 
@@ -440,18 +460,18 @@ func TestSecretMatch(t *testing.T) {
 	tcl := []*struct {
 		name   string
 		secret Secret
-		event  string
+		event  metadata.Event
 		match  bool
 	}{
 		{
 			name:   "should match event",
-			secret: Secret{Events: []string{"pull_request"}},
+			secret: Secret{Events: []metadata.Event{"pull_request"}},
 			event:  "pull_request",
 			match:  true,
 		},
 		{
 			name:   "should not match event",
-			secret: Secret{Events: []string{"pull_request"}},
+			secret: Secret{Events: []metadata.Event{"pull_request"}},
 			event:  "push",
 			match:  false,
 		},
@@ -463,13 +483,13 @@ func TestSecretMatch(t *testing.T) {
 		},
 		{
 			name:   "pull close should match pull",
-			secret: Secret{Events: []string{"pull_request"}},
+			secret: Secret{Events: []metadata.Event{"pull_request"}},
 			event:  "pull_request_closed",
 			match:  true,
 		},
 		{
 			name:   "pull metadata change should match pull",
-			secret: Secret{Events: []string{"pull_request"}},
+			secret: Secret{Events: []metadata.Event{"pull_request"}},
 			event:  "pull_request_metadata",
 			match:  true,
 		},
@@ -494,7 +514,7 @@ func TestCompilerCompilePrivileged(t *testing.T) {
 				{
 					Name:      "privileged-plugin",
 					Image:     "test/image",
-					DependsOn: []string{}, // no dependencies =>  enable dag mode & all steps are executed in parallel
+					DependsOn: constraint.DependsOn{}, // no dependencies =>  enable dag mode & all steps are executed in parallel
 				},
 				{
 					Name:     "no-plugin",

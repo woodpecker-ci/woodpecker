@@ -1,0 +1,16 @@
+{
+  "name": "workflows with depends_on run in order",
+  "event": "push",
+  "expected_status": "success",
+  "expected_workflows": [
+    { "name": "build", "status": "success" },
+    { "name": "deploy", "status": "success" },
+    { "name": "notify", "status": "success" }
+  ],
+  "expected_steps": [
+    { "name": "compile", "status": "success", "exit_code": 0 },
+    { "name": "unit-test", "status": "success", "exit_code": 0 },
+    { "name": "deploy", "status": "success", "exit_code": 0 },
+    { "name": "notify", "status": "success", "exit_code": 0 }
+  ]
+}

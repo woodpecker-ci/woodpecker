@@ -34,17 +34,19 @@ func generateScriptWindows(commands []string, workDir string) string {
 	for _, command := range commands {
 		escaped := fmt.Sprintf("%q", command)
 		escaped = strings.ReplaceAll(escaped, "$", `\$`)
-		buf.WriteString(fmt.Sprintf(
+		fmt.Fprintf(
+			&buf,
 			traceScriptWin,
 			escaped,
 			command,
-		))
+		)
 	}
 
 	return buf.String()
 }
 
 const setupScriptWinProto = `
+$LASTEXITCODE = 0
 $ErrorActionPreference = 'Stop';
 if (-not (Test-Path "{{.WorkDir}}")) { New-Item -Path "{{.WorkDir}}" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };

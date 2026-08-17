@@ -12,26 +12,26 @@ repos:
       - id: trailing-whitespace
         exclude: ^docs/versioned_docs/.+/40-cli.md$
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.8.0
+    rev: v2.12.2
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.47.0
+    rev: v0.49.1
     hooks:
       - id: markdownlint
         exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
-        language_version: 22.15.1
+        language_version: 24.18.0
   - repo: https://github.com/mrtazz/checkmake
     rev: v0.3.2
     hooks:
       - id: checkmake
         exclude: '^docker/Dockerfile.make$' # actually a Dockerfile and not a makefile
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.14.0
+    rev: v2.15.1
     hooks:
       - id: hadolint
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.8.1
+    rev: v3.9.6
     hooks:
       - id: prettier
   - repo: https://github.com/adrienverge/yamllint.git
@@ -46,7 +46,7 @@ repos:
         entry: YAML filenames must have .yaml extension.
         language: fail
         files: .yml$
-        exclude: '^(.gitpod.yml|.github/ISSUE_TEMPLATE/config.yml)$'
+        exclude: '^.github/ISSUE_TEMPLATE/config.yml$'
 
 ci:
   autofix_commit_msg: |

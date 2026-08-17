@@ -142,6 +142,7 @@ type Backend interface {
 	// - Clean up step-specific resources (containers, processes)
 	// - Close any open log streams
 	// - Not affect other steps in the same or other workflows
+	// - Must not fail if already invoked once
 	//
 	// Must be safe to call even if StartStep failed or the step was never started.
 	// This function must be thread-safe for concurrent calls.

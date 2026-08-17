@@ -1,0 +1,11 @@
+skip_clone: true
+
+depends_on:
+  - check-a
+  - ghost-workflow
+
+steps:
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying

@@ -5,6 +5,8 @@
 package mocks
 
 import (
+	"context"
+
 	mock "github.com/stretchr/testify/mock"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -60,7 +62,7 @@ type MockService_GlobalRegistryCreate_Call struct {
 
 // GlobalRegistryCreate is a helper method to define mock.On call
 //   - registry *model.Registry
-func (_e *MockService_Expecter) GlobalRegistryCreate(registry interface{}) *MockService_GlobalRegistryCreate_Call {
+func (_e *MockService_Expecter) GlobalRegistryCreate(registry any) *MockService_GlobalRegistryCreate_Call {
 	return &MockService_GlobalRegistryCreate_Call{Call: _e.mock.On("GlobalRegistryCreate", registry)}
 }
 
@@ -111,7 +113,7 @@ type MockService_GlobalRegistryDelete_Call struct {
 
 // GlobalRegistryDelete is a helper method to define mock.On call
 //   - s string
-func (_e *MockService_Expecter) GlobalRegistryDelete(s interface{}) *MockService_GlobalRegistryDelete_Call {
+func (_e *MockService_Expecter) GlobalRegistryDelete(s any) *MockService_GlobalRegistryDelete_Call {
 	return &MockService_GlobalRegistryDelete_Call{Call: _e.mock.On("GlobalRegistryDelete", s)}
 }
 
@@ -173,7 +175,7 @@ type MockService_GlobalRegistryFind_Call struct {
 
 // GlobalRegistryFind is a helper method to define mock.On call
 //   - s string
-func (_e *MockService_Expecter) GlobalRegistryFind(s interface{}) *MockService_GlobalRegistryFind_Call {
+func (_e *MockService_Expecter) GlobalRegistryFind(s any) *MockService_GlobalRegistryFind_Call {
 	return &MockService_GlobalRegistryFind_Call{Call: _e.mock.On("GlobalRegistryFind", s)}
 }
 
@@ -201,8 +203,8 @@ func (_c *MockService_GlobalRegistryFind_Call) RunAndReturn(run func(s string) (
 }
 
 // GlobalRegistryList provides a mock function for the type MockService
-func (_mock *MockService) GlobalRegistryList(listOptions *model.ListOptions) ([]*model.Registry, error) {
-	ret := _mock.Called(listOptions)
+func (_mock *MockService) GlobalRegistryList(listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Registry, error) {
+	ret := _mock.Called(listOptionsWithAll)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalRegistryList")
@@ -210,18 +212,18 @@ func (_mock *MockService) GlobalRegistryList(listOptions *model.ListOptions) ([]
 
 	var r0 []*model.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.ListOptions) ([]*model.Registry, error)); ok {
-		return returnFunc(listOptions)
+	if returnFunc, ok := ret.Get(0).(func(*model.ListOptionsWithAll) ([]*model.Registry, error)); ok {
+		return returnFunc(listOptionsWithAll)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.ListOptions) []*model.Registry); ok {
-		r0 = returnFunc(listOptions)
+	if returnFunc, ok := ret.Get(0).(func(*model.ListOptionsWithAll) []*model.Registry); ok {
+		r0 = returnFunc(listOptionsWithAll)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.ListOptions) error); ok {
-		r1 = returnFunc(listOptions)
+	if returnFunc, ok := ret.Get(1).(func(*model.ListOptionsWithAll) error); ok {
+		r1 = returnFunc(listOptionsWithAll)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -234,16 +236,16 @@ type MockService_GlobalRegistryList_Call struct {
 }
 
 // GlobalRegistryList is a helper method to define mock.On call
-//   - listOptions *model.ListOptions
-func (_e *MockService_Expecter) GlobalRegistryList(listOptions interface{}) *MockService_GlobalRegistryList_Call {
-	return &MockService_GlobalRegistryList_Call{Call: _e.mock.On("GlobalRegistryList", listOptions)}
+//   - listOptionsWithAll *model.ListOptionsWithAll
+func (_e *MockService_Expecter) GlobalRegistryList(listOptionsWithAll any) *MockService_GlobalRegistryList_Call {
+	return &MockService_GlobalRegistryList_Call{Call: _e.mock.On("GlobalRegistryList", listOptionsWithAll)}
 }
 
-func (_c *MockService_GlobalRegistryList_Call) Run(run func(listOptions *model.ListOptions)) *MockService_GlobalRegistryList_Call {
+func (_c *MockService_GlobalRegistryList_Call) Run(run func(listOptionsWithAll *model.ListOptionsWithAll)) *MockService_GlobalRegistryList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.ListOptions
+		var arg0 *model.ListOptionsWithAll
 		if args[0] != nil {
-			arg0 = args[0].(*model.ListOptions)
+			arg0 = args[0].(*model.ListOptionsWithAll)
 		}
 		run(
 			arg0,
@@ -257,7 +259,7 @@ func (_c *MockService_GlobalRegistryList_Call) Return(registrys []*model.Registr
 	return _c
 }
 
-func (_c *MockService_GlobalRegistryList_Call) RunAndReturn(run func(listOptions *model.ListOptions) ([]*model.Registry, error)) *MockService_GlobalRegistryList_Call {
+func (_c *MockService_GlobalRegistryList_Call) RunAndReturn(run func(listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Registry, error)) *MockService_GlobalRegistryList_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -286,7 +288,7 @@ type MockService_GlobalRegistryUpdate_Call struct {
 
 // GlobalRegistryUpdate is a helper method to define mock.On call
 //   - registry *model.Registry
-func (_e *MockService_Expecter) GlobalRegistryUpdate(registry interface{}) *MockService_GlobalRegistryUpdate_Call {
+func (_e *MockService_Expecter) GlobalRegistryUpdate(registry any) *MockService_GlobalRegistryUpdate_Call {
 	return &MockService_GlobalRegistryUpdate_Call{Call: _e.mock.On("GlobalRegistryUpdate", registry)}
 }
 
@@ -338,7 +340,7 @@ type MockService_OrgRegistryCreate_Call struct {
 // OrgRegistryCreate is a helper method to define mock.On call
 //   - n int64
 //   - registry *model.Registry
-func (_e *MockService_Expecter) OrgRegistryCreate(n interface{}, registry interface{}) *MockService_OrgRegistryCreate_Call {
+func (_e *MockService_Expecter) OrgRegistryCreate(n any, registry any) *MockService_OrgRegistryCreate_Call {
 	return &MockService_OrgRegistryCreate_Call{Call: _e.mock.On("OrgRegistryCreate", n, registry)}
 }
 
@@ -395,7 +397,7 @@ type MockService_OrgRegistryDelete_Call struct {
 // OrgRegistryDelete is a helper method to define mock.On call
 //   - n int64
 //   - s string
-func (_e *MockService_Expecter) OrgRegistryDelete(n interface{}, s interface{}) *MockService_OrgRegistryDelete_Call {
+func (_e *MockService_Expecter) OrgRegistryDelete(n any, s any) *MockService_OrgRegistryDelete_Call {
 	return &MockService_OrgRegistryDelete_Call{Call: _e.mock.On("OrgRegistryDelete", n, s)}
 }
 
@@ -463,7 +465,7 @@ type MockService_OrgRegistryFind_Call struct {
 // OrgRegistryFind is a helper method to define mock.On call
 //   - n int64
 //   - s string
-func (_e *MockService_Expecter) OrgRegistryFind(n interface{}, s interface{}) *MockService_OrgRegistryFind_Call {
+func (_e *MockService_Expecter) OrgRegistryFind(n any, s any) *MockService_OrgRegistryFind_Call {
 	return &MockService_OrgRegistryFind_Call{Call: _e.mock.On("OrgRegistryFind", n, s)}
 }
 
@@ -496,8 +498,8 @@ func (_c *MockService_OrgRegistryFind_Call) RunAndReturn(run func(n int64, s str
 }
 
 // OrgRegistryList provides a mock function for the type MockService
-func (_mock *MockService) OrgRegistryList(n int64, listOptions *model.ListOptions) ([]*model.Registry, error) {
-	ret := _mock.Called(n, listOptions)
+func (_mock *MockService) OrgRegistryList(n int64, listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Registry, error) {
+	ret := _mock.Called(n, listOptionsWithAll)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgRegistryList")
@@ -505,18 +507,18 @@ func (_mock *MockService) OrgRegistryList(n int64, listOptions *model.ListOption
 
 	var r0 []*model.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptions) ([]*model.Registry, error)); ok {
-		return returnFunc(n, listOptions)
+	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptionsWithAll) ([]*model.Registry, error)); ok {
+		return returnFunc(n, listOptionsWithAll)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptions) []*model.Registry); ok {
-		r0 = returnFunc(n, listOptions)
+	if returnFunc, ok := ret.Get(0).(func(int64, *model.ListOptionsWithAll) []*model.Registry); ok {
+		r0 = returnFunc(n, listOptionsWithAll)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *model.ListOptions) error); ok {
-		r1 = returnFunc(n, listOptions)
+	if returnFunc, ok := ret.Get(1).(func(int64, *model.ListOptionsWithAll) error); ok {
+		r1 = returnFunc(n, listOptionsWithAll)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -530,20 +532,20 @@ type MockService_OrgRegistryList_Call struct {
 
 // OrgRegistryList is a helper method to define mock.On call
 //   - n int64
-//   - listOptions *model.ListOptions
-func (_e *MockService_Expecter) OrgRegistryList(n interface{}, listOptions interface{}) *MockService_OrgRegistryList_Call {
-	return &MockService_OrgRegistryList_Call{Call: _e.mock.On("OrgRegistryList", n, listOptions)}
+//   - listOptionsWithAll *model.ListOptionsWithAll
+func (_e *MockService_Expecter) OrgRegistryList(n any, listOptionsWithAll any) *MockService_OrgRegistryList_Call {
+	return &MockService_OrgRegistryList_Call{Call: _e.mock.On("OrgRegistryList", n, listOptionsWithAll)}
 }
 
-func (_c *MockService_OrgRegistryList_Call) Run(run func(n int64, listOptions *model.ListOptions)) *MockService_OrgRegistryList_Call {
+func (_c *MockService_OrgRegistryList_Call) Run(run func(n int64, listOptionsWithAll *model.ListOptionsWithAll)) *MockService_OrgRegistryList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 int64
 		if args[0] != nil {
 			arg0 = args[0].(int64)
 		}
-		var arg1 *model.ListOptions
+		var arg1 *model.ListOptionsWithAll
 		if args[1] != nil {
-			arg1 = args[1].(*model.ListOptions)
+			arg1 = args[1].(*model.ListOptionsWithAll)
 		}
 		run(
 			arg0,
@@ -558,7 +560,7 @@ func (_c *MockService_OrgRegistryList_Call) Return(registrys []*model.Registry, 
 	return _c
 }
 
-func (_c *MockService_OrgRegistryList_Call) RunAndReturn(run func(n int64, listOptions *model.ListOptions) ([]*model.Registry, error)) *MockService_OrgRegistryList_Call {
+func (_c *MockService_OrgRegistryList_Call) RunAndReturn(run func(n int64, listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Registry, error)) *MockService_OrgRegistryList_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -588,7 +590,7 @@ type MockService_OrgRegistryUpdate_Call struct {
 // OrgRegistryUpdate is a helper method to define mock.On call
 //   - n int64
 //   - registry *model.Registry
-func (_e *MockService_Expecter) OrgRegistryUpdate(n interface{}, registry interface{}) *MockService_OrgRegistryUpdate_Call {
+func (_e *MockService_Expecter) OrgRegistryUpdate(n any, registry any) *MockService_OrgRegistryUpdate_Call {
 	return &MockService_OrgRegistryUpdate_Call{Call: _e.mock.On("OrgRegistryUpdate", n, registry)}
 }
 
@@ -645,7 +647,7 @@ type MockService_RegistryCreate_Call struct {
 // RegistryCreate is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - registry *model.Registry
-func (_e *MockService_Expecter) RegistryCreate(repo interface{}, registry interface{}) *MockService_RegistryCreate_Call {
+func (_e *MockService_Expecter) RegistryCreate(repo any, registry any) *MockService_RegistryCreate_Call {
 	return &MockService_RegistryCreate_Call{Call: _e.mock.On("RegistryCreate", repo, registry)}
 }
 
@@ -702,7 +704,7 @@ type MockService_RegistryDelete_Call struct {
 // RegistryDelete is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - s string
-func (_e *MockService_Expecter) RegistryDelete(repo interface{}, s interface{}) *MockService_RegistryDelete_Call {
+func (_e *MockService_Expecter) RegistryDelete(repo any, s any) *MockService_RegistryDelete_Call {
 	return &MockService_RegistryDelete_Call{Call: _e.mock.On("RegistryDelete", repo, s)}
 }
 
@@ -770,7 +772,7 @@ type MockService_RegistryFind_Call struct {
 // RegistryFind is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - s string
-func (_e *MockService_Expecter) RegistryFind(repo interface{}, s interface{}) *MockService_RegistryFind_Call {
+func (_e *MockService_Expecter) RegistryFind(repo any, s any) *MockService_RegistryFind_Call {
 	return &MockService_RegistryFind_Call{Call: _e.mock.On("RegistryFind", repo, s)}
 }
 
@@ -803,8 +805,8 @@ func (_c *MockService_RegistryFind_Call) RunAndReturn(run func(repo *model.Repo,
 }
 
 // RegistryList provides a mock function for the type MockService
-func (_mock *MockService) RegistryList(repo *model.Repo, listOptions *model.ListOptions) ([]*model.Registry, error) {
-	ret := _mock.Called(repo, listOptions)
+func (_mock *MockService) RegistryList(repo *model.Repo, listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Registry, error) {
+	ret := _mock.Called(repo, listOptionsWithAll)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RegistryList")
@@ -812,18 +814,18 @@ func (_mock *MockService) RegistryList(repo *model.Repo, listOptions *model.List
 
 	var r0 []*model.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions) ([]*model.Registry, error)); ok {
-		return returnFunc(repo, listOptions)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.ListOptionsWithAll) ([]*model.Registry, error)); ok {
+		return returnFunc(repo, listOptionsWithAll)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions) []*model.Registry); ok {
-		r0 = returnFunc(repo, listOptions)
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.ListOptionsWithAll) []*model.Registry); ok {
+		r0 = returnFunc(repo, listOptionsWithAll)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.ListOptions) error); ok {
-		r1 = returnFunc(repo, listOptions)
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.ListOptionsWithAll) error); ok {
+		r1 = returnFunc(repo, listOptionsWithAll)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -837,20 +839,20 @@ type MockService_RegistryList_Call struct {
 
 // RegistryList is a helper method to define mock.On call
 //   - repo *model.Repo
-//   - listOptions *model.ListOptions
-func (_e *MockService_Expecter) RegistryList(repo interface{}, listOptions interface{}) *MockService_RegistryList_Call {
-	return &MockService_RegistryList_Call{Call: _e.mock.On("RegistryList", repo, listOptions)}
+//   - listOptionsWithAll *model.ListOptionsWithAll
+func (_e *MockService_Expecter) RegistryList(repo any, listOptionsWithAll any) *MockService_RegistryList_Call {
+	return &MockService_RegistryList_Call{Call: _e.mock.On("RegistryList", repo, listOptionsWithAll)}
 }
 
-func (_c *MockService_RegistryList_Call) Run(run func(repo *model.Repo, listOptions *model.ListOptions)) *MockService_RegistryList_Call {
+func (_c *MockService_RegistryList_Call) Run(run func(repo *model.Repo, listOptionsWithAll *model.ListOptionsWithAll)) *MockService_RegistryList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *model.Repo
 		if args[0] != nil {
 			arg0 = args[0].(*model.Repo)
 		}
-		var arg1 *model.ListOptions
+		var arg1 *model.ListOptionsWithAll
 		if args[1] != nil {
-			arg1 = args[1].(*model.ListOptions)
+			arg1 = args[1].(*model.ListOptionsWithAll)
 		}
 		run(
 			arg0,
@@ -865,14 +867,14 @@ func (_c *MockService_RegistryList_Call) Return(registrys []*model.Registry, err
 	return _c
 }
 
-func (_c *MockService_RegistryList_Call) RunAndReturn(run func(repo *model.Repo, listOptions *model.ListOptions) ([]*model.Registry, error)) *MockService_RegistryList_Call {
+func (_c *MockService_RegistryList_Call) RunAndReturn(run func(repo *model.Repo, listOptionsWithAll *model.ListOptionsWithAll) ([]*model.Registry, error)) *MockService_RegistryList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RegistryListPipeline provides a mock function for the type MockService
-func (_mock *MockService) RegistryListPipeline(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error) {
-	ret := _mock.Called(repo, pipeline)
+func (_mock *MockService) RegistryListPipeline(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Registry, error) {
+	ret := _mock.Called(context1, repo, pipeline, netrc)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RegistryListPipeline")
@@ -880,18 +882,18 @@ func (_mock *MockService) RegistryListPipeline(repo *model.Repo, pipeline *model
 
 	var r0 []*model.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) ([]*model.Registry, error)); ok {
-		return returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) ([]*model.Registry, error)); ok {
+		return returnFunc(context1, repo, pipeline, netrc)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) []*model.Registry); ok {
-		r0 = returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) []*model.Registry); ok {
+		r0 = returnFunc(context1, repo, pipeline, netrc)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Repo, *model.Pipeline) error); ok {
-		r1 = returnFunc(repo, pipeline)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.Repo, *model.Pipeline, *model.Netrc) error); ok {
+		r1 = returnFunc(context1, repo, pipeline, netrc)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -904,25 +906,37 @@ type MockService_RegistryListPipeline_Call struct {
 }
 
 // RegistryListPipeline is a helper method to define mock.On call
+//   - context1 context.Context
 //   - repo *model.Repo
 //   - pipeline *model.Pipeline
-func (_e *MockService_Expecter) RegistryListPipeline(repo interface{}, pipeline interface{}) *MockService_RegistryListPipeline_Call {
-	return &MockService_RegistryListPipeline_Call{Call: _e.mock.On("RegistryListPipeline", repo, pipeline)}
+//   - netrc *model.Netrc
+func (_e *MockService_Expecter) RegistryListPipeline(context1 any, repo any, pipeline any, netrc any) *MockService_RegistryListPipeline_Call {
+	return &MockService_RegistryListPipeline_Call{Call: _e.mock.On("RegistryListPipeline", context1, repo, pipeline, netrc)}
 }
 
-func (_c *MockService_RegistryListPipeline_Call) Run(run func(repo *model.Repo, pipeline *model.Pipeline)) *MockService_RegistryListPipeline_Call {
+func (_c *MockService_RegistryListPipeline_Call) Run(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc)) *MockService_RegistryListPipeline_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Repo
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*model.Repo)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *model.Pipeline
+		var arg1 *model.Repo
 		if args[1] != nil {
-			arg1 = args[1].(*model.Pipeline)
+			arg1 = args[1].(*model.Repo)
+		}
+		var arg2 *model.Pipeline
+		if args[2] != nil {
+			arg2 = args[2].(*model.Pipeline)
+		}
+		var arg3 *model.Netrc
+		if args[3] != nil {
+			arg3 = args[3].(*model.Netrc)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -933,7 +947,7 @@ func (_c *MockService_RegistryListPipeline_Call) Return(registrys []*model.Regis
 	return _c
 }
 
-func (_c *MockService_RegistryListPipeline_Call) RunAndReturn(run func(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Registry, error)) *MockService_RegistryListPipeline_Call {
+func (_c *MockService_RegistryListPipeline_Call) RunAndReturn(run func(context1 context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Registry, error)) *MockService_RegistryListPipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -963,7 +977,7 @@ type MockService_RegistryUpdate_Call struct {
 // RegistryUpdate is a helper method to define mock.On call
 //   - repo *model.Repo
 //   - registry *model.Registry
-func (_e *MockService_Expecter) RegistryUpdate(repo interface{}, registry interface{}) *MockService_RegistryUpdate_Call {
+func (_e *MockService_Expecter) RegistryUpdate(repo any, registry any) *MockService_RegistryUpdate_Call {
 	return &MockService_RegistryUpdate_Call{Call: _e.mock.On("RegistryUpdate", repo, registry)}
 }
 

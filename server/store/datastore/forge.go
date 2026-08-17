@@ -23,15 +23,14 @@ func (s storage) ForgeGet(id int64) (*model.Forge, error) {
 	return forge, wrapGet(s.engine.ID(id).Get(forge))
 }
 
-func (s storage) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
+func (s storage) ForgeList(p *model.ListOptionsWithAll) ([]*model.Forge, error) {
 	forges := make([]*model.Forge, 0, 10)
 	return forges, s.paginate(p).Find(&forges)
 }
 
 func (s storage) ForgeCreate(forge *model.Forge) error {
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(forge)
-	return err
+	return wrapInsert(s.engine.Insert(forge))
 }
 
 func (s storage) ForgeUpdate(forge *model.Forge) error {

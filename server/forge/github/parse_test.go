@@ -80,6 +80,22 @@ func Test_parseHook(t *testing.T) {
 		sort.Strings(b.ChangedFiles)
 	})
 
+	t.Run("forced push hook", func(t *testing.T) {
+		// On a force push the "before" commit may be unreachable after the
+		// history rewrite. Comparing against it (CompareCommits) fails with a
+		// 404 on the forge, so the previous commit must be empty to make the
+		// downstream changed-files lookup fall back to the head commit only.
+		req := testHookRequest([]byte(fixtures.HookPushForced), hookPush)
+		p, r, b, cc, pc, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.Equal(t, "f7220f1f753260bf6f1c533357c70213e9fd4abe", cc)
+		assert.Empty(t, pc, "forced push must not expose the unreachable before commit")
+		assert.Nil(t, p)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPush, b.Event)
+	})
+
 	t.Run("PR hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequest), hookPull)
 		p, r, b, cc, pc, err := parseHook(req, false)
@@ -90,6 +106,22 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, b)
 		assert.NotNil(t, p)
 		assert.Equal(t, model.EventPull, b.Event)
+		assert.False(t, b.PullRequestDraft)
+	})
+
+	t.Run("PR draft hook", func(t *testing.T) {
+		payload := strings.Replace(
+			fixtures.HookPullRequest,
+			`"state": "open",`,
+			`"state": "open",`+"\n    "+`"draft": true,`,
+			1,
+		)
+		req := testHookRequest([]byte(payload), hookPull)
+		_, _, b, _, _, err := parseHook(req, false)
+		assert.NoError(t, err)
+		if assert.NotNil(t, b) {
+			assert.True(t, b.PullRequestDraft)
+		}
 	})
 	t.Run("PR closed hook", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequestClosed), hookPull)
@@ -248,9 +280,9 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
-				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
+				assert.Equal(t, "d73a4a", p.Labels[0].Color)
 				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
 			}
 			assert.Nil(t, p.Milestone)
@@ -290,13 +322,13 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 2) {
-				assert.Equal(t, int64(9024465376), *p.Labels[0].ID)
-				assert.Equal(t, "documentation", *p.Labels[0].Name)
-				assert.Equal(t, "0075ca", *p.Labels[0].Color)
-				assert.Equal(t, "Improvements or additions to documentation", *p.Labels[0].Description)
-				assert.Equal(t, int64(9024465382), *p.Labels[1].ID)
-				assert.Equal(t, "enhancement", *p.Labels[1].Name)
-				assert.Equal(t, "a2eeef", *p.Labels[1].Color)
+				assert.Equal(t, int64(9024465376), p.Labels[0].ID)
+				assert.Equal(t, "documentation", p.Labels[0].Name)
+				assert.Equal(t, "0075ca", p.Labels[0].Color)
+				assert.Equal(t, "Improvements or additions to documentation", p.Labels[0].GetDescription())
+				assert.Equal(t, int64(9024465382), p.Labels[1].ID)
+				assert.Equal(t, "enhancement", p.Labels[1].Name)
+				assert.Equal(t, "a2eeef", p.Labels[1].Color)
 				assert.Equal(t, "New feature or request", *p.Labels[1].Description)
 			}
 			if assert.NotNil(t, p.Milestone) {
@@ -337,9 +369,9 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
-				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
+				assert.Equal(t, "d73a4a", p.Labels[0].Color)
 				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
 			}
 			if assert.NotNil(t, p.Head) {
@@ -412,8 +444,8 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(223550959), *p.Assignees[0].ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
 			}
 			assert.Nil(t, p.Milestone)
 			if assert.NotNil(t, p.Head) {
@@ -451,8 +483,8 @@ func Test_parseHook(t *testing.T) {
 			assert.Nil(t, p.Assignee)
 			assert.Empty(t, p.Assignees)
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
 			}
 			assert.Nil(t, p.Milestone)
 			if assert.NotNil(t, p.Head) {

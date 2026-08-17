@@ -14,24 +14,6 @@
 
 package utils
 
-// MergeSlices return a new slice that combines all values of input slices
-// TODO: once https://github.com/golang/go/pull/61817 got merged, we should switch to it
-func MergeSlices[T any](slices ...[]T) []T {
-	sl := 0
-	for i := range slices {
-		sl += len(slices[i])
-	}
-	result := make([]T, sl)
-	cp := 0
-	for _, s := range slices {
-		if sLen := len(s); sLen != 0 {
-			copy(result[cp:], s)
-			cp += sLen
-		}
-	}
-	return result
-}
-
 // EqualSliceValues compare two slices if they have equal values independent of how they are sorted.
 func EqualSliceValues[E comparable](s1, s2 []E) bool {
 	if len(s1) != len(s2) {
