@@ -308,14 +308,20 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	// we need to create pipes and set Stdout here
 	// in TailStep it is potentially too late
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
-	sshCmd.Stdout = nil
+	sshCmd.Stdout = nil // see comment below
 	sshCmd.Stderr = pw
 
 	stdoutR, _ := sshCmd.StdoutPipe()
 
 	go func() {
-		io.Copy(pw, stdoutR) // copy from SSH stdout to your pipe
-		pw.Close()           // close your pipe writer when SSH stdout EOFs
+		// We need to close the write end ourselves on EOF from the server
+		// otherwise the read side of our pipe never drains and Wait() deadlocks.
+		// If we assign 'sshCmd.Stdout = pw', the library internals only copy
+		// but never close pw, because they are oblivious to the fact that it's
+		// a pipe. So we need to implement the copy+close ourselves. There is no
+		// EOF callback.
+		io.Copy(pw, stdoutR)
+		pw.Close()
 	}()
 
 	w.(*workflow).pipesStdOut.Store(step.UUID, &pipes{pr, pw})
@@ -335,7 +341,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		}
 		time.Sleep(time.Second * 5)
 		log.Debug().Msg("Closing write pipe end")
-		_ = pw.Close()
 		_ = pr.Close()
 	}()
 
