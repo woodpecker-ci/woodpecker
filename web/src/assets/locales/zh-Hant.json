@@ -513,5 +513,7 @@
     "git_username_desc": "Git 使用者名稱。",
     "delete": "刪除",
     "registration_closed": "註冊功能已關閉",
-    "invalid_state": "OAuth 狀態不可用"
+    "invalid_state": "OAuth 狀態不可用",
+    "allowed_orgs_placeholder": "組織名稱",
+    "git_password_desc": "Git 使用者的密碼或個人存取權杖。"
 }
