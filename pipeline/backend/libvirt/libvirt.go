@@ -424,11 +424,6 @@ func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUU
 		return nil, fmt.Errorf("Could not find key %s for pipesStdOut", step.UUID)
 	}
 
-	pIn, ok := w.(*workflow).pipesStdIn.Load(step.UUID)
-	if !ok {
-		return nil, fmt.Errorf("Could not find key %s for pipesStdIn", step.UUID)
-	}
-
 	var once sync.Once
 	rc := struct {
 		io.Reader
@@ -436,12 +431,9 @@ func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUU
 	}{
 		Reader: pOut.(*pipes).pr,
 		Closer: closerFunc(func() error {
+			log.Debug().Msgf("Output drained")
 			once.Do(func() {
 				pOut.(*pipes).pr.Close()
-				pOut.(*pipes).pw.Close()
-
-				pIn.(*pipes).pw.Close()
-				pIn.(*pipes).pr.Close()
 			})
 			return nil
 		}),
