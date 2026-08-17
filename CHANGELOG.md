@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-16
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@AhmadNajiKam, @OCram85, @anbraten, @gerbsen, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
+@AhmadNajiKam, @OCram85, @Palleas, @anbraten, @gerbsen, @jrouly, @kastl-ars, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
 
 ### 🔒 Security
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- k8s backend: fix step example using incorrect "detached" property [[#7016](https://github.com/woodpecker-ci/woodpecker/pull/7016)]
 - fix(gitlab): avoid N+1 member lookups in Repos() [[#6991](https://github.com/woodpecker-ci/woodpecker/pull/6991)]
 - agent: retry connect on DeadlineExceeded, not just Unavailable [[#6975](https://github.com/woodpecker-ci/woodpecker/pull/6975)]
 
