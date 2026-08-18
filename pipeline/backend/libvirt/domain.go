@@ -136,7 +136,8 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 
 		// on windows we mount via the serial, which is stepUUID
 		if guestOS == "windows" {
-			uuid = stepUUID
+			// 20 is the max amount of chars allowed for the serial number
+			uuid = stepUUID[:20]
 		} else {
 			// on unix we mount via the disk uuid, which we must discover
 			uuid = diskUuid
