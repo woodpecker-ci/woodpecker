@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-17
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -58,6 +58,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7035](https://github.com/woodpecker-ci/woodpecker/pull/7035)]
 - Update module github.com/urfave/cli/v3 to v3.11.0 [[#7017](https://github.com/woodpecker-ci/woodpecker/pull/7017)]
 - Lock file maintenance [[#7018](https://github.com/woodpecker-ci/woodpecker/pull/7018)]
 - Update web npm deps non-major [[#7009](https://github.com/woodpecker-ci/woodpecker/pull/7009)]
