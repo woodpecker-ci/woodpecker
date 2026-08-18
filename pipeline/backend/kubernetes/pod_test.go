@@ -202,6 +202,26 @@ func TestPodHostnameSanitized(t *testing.T) {
 	assert.Equal(t, "update-repos", pod.Spec.Hostname)
 }
 
+func TestPodClusterDomain(t *testing.T) {
+	step := &types.Step{
+		Name:  "build",
+		Image: "alpine:latest",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}
+
+	pod, err := mkPod(step, &config{
+		Namespace:     "woodpecker",
+		ClusterDomain: "k8s.example.com",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"wp-hsvc-11301.woodpecker.svc.k8s.example.com"}, pod.Spec.DNSConfig.Searches)
+
+	// an unset cluster domain falls back to the Kubernetes default
+	pod, err = mkPod(step, &config{Namespace: "woodpecker"}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"wp-hsvc-11301.woodpecker.svc.cluster.local"}, pod.Spec.DNSConfig.Searches)
+}
+
 func TestTinyPod(t *testing.T) {
 	const expected = `
 	{

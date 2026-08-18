@@ -510,5 +510,10 @@
     "access_denied": "您不被允許存取此實例",
     "org_access_denied": "您不被允許存取此組織",
     "use_this_redirect_url_to_create": "使用此重新導向 URL 來建立或更新 OAuth 應用程式。",
-    "git_username_desc": "Git 使用者名稱。"
+    "git_username_desc": "Git 使用者名稱。",
+    "delete": "刪除",
+    "registration_closed": "註冊功能已關閉",
+    "invalid_state": "OAuth 狀態不可用",
+    "allowed_orgs_placeholder": "組織名稱",
+    "git_password_desc": "Git 使用者的密碼或個人存取權杖。"
 }

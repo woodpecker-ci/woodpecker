@@ -154,7 +154,7 @@ func PatchSecret(c *gin.Context) {
 func GetSecretList(c *gin.Context) {
 	repo := session.Repo(c)
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	list, err := secretService.SecretList(repo, session.Pagination(c))
+	list, err := secretService.SecretList(repo, session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list. %s", err)
 		return

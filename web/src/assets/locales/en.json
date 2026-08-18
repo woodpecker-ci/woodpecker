@@ -227,7 +227,6 @@
       "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
-      "log_download_error": "An error occurred while downloading the log file",
       "log_delete_confirm": "Do you really want to delete the step logs?",
       "log_delete_error": "An error occurred when deleting the step logs",
       "actions": {
@@ -612,6 +611,10 @@
   "executable_desc": "Path to the addon executable.",
   "save": "Save",
   "add": "Add",
+  "delete": "Delete",
+  "allowed_orgs": "Allowed organizations",
+  "allowed_orgs_desc": "Organizations whose members may log in using this forge, in addition to the global WOODPECKER_ORGS setting.",
+  "allowed_orgs_placeholder": "Organization name",
   "skip_verify": "Skip SSL verification",
   "skip_verify_desc": "Skip SSL verification for the API connection. This is not recommended for production use.",
   "url": "URL",

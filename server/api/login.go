@@ -137,7 +137,15 @@ func HandleAuth(c *gin.Context) {
 
 	// if organization filter is enabled, we need to check if the user is a member of one
 	// of the configured organizations
-	if server.Config.Permissions.Orgs.IsConfigured {
+	forgeModel, err := _store.ForgeGet(forgeID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot get forge by id %d", forgeID)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		return
+	}
+
+	allowedOrgs := server.Config.Permissions.Orgs.With(forgeModel.Orgs)
+	if allowedOrgs.IsConfigured {
 		isMember := false
 		for page := 1; page <= maxPage; page++ {
 			teams, terr := _forge.Teams(c, userFromForge, &model.ListOptions{
@@ -151,8 +159,12 @@ func HandleAuth(c *gin.Context) {
 				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 				return
 			}
-			if server.Config.Permissions.Orgs.IsMember(teams) {
+			if allowedOrgs.IsMember(teams) {
 				isMember = true
+				break
+			}
+			// we don't want to walk through 10k page requests if there are no more teams
+			if len(teams) < perPage {
 				break
 			}
 		}

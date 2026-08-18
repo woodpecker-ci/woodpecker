@@ -18,11 +18,14 @@ package gitlab
 import (
 	"bytes"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strconv"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitlab/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -102,6 +105,19 @@ func Test_GitLab(t *testing.T) {
 		_repo, err := client.Repo(ctx, &user, "6", "brightbox", "puppet")
 		assert.NoError(t, err)
 		assert.True(t, _repo.Perm.Push)
+	})
+
+	// Test teams membership method
+	t.Run("Should identify groups by full path, not display name", func(t *testing.T) {
+		teams, err := client.Teams(ctx, &user, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+
+		logins := make([]string, 0, len(teams))
+		for _, team := range teams {
+			logins = append(logins, team.Login)
+		}
+		// both groups are named "woodpecker", only the full path tells them apart
+		assert.Equal(t, []string{"woodpecker", "eve/woodpecker"}, logins)
 	})
 
 	// Test activate method
@@ -628,4 +644,77 @@ func TestExtractFromPath(t *testing.T) {
 			assert.EqualValues(t, tc.wantName, name)
 		})
 	}
+}
+
+func TestGitLabReposUsesEmbeddedPermissions(t *testing.T) {
+	var memberCalls atomic.Int64
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v4/projects", func(w http.ResponseWriter, _ *http.Request) {
+		// project 4 reports the current user's permissions inline,
+		// project 6 does not (e.g. access inherited from a nested parent group)
+		_, _ = w.Write([]byte(`[` +
+			`{"id":4,"path_with_namespace":"diaspora/diaspora-client","visibility":"private","permissions":` +
+			`{"project_access":{"access_level":10},"group_access":{"access_level":50}}},` +
+			`{"id":6,"path_with_namespace":"brightbox/puppet","visibility":"private","permissions":null}` +
+			`]`))
+	})
+	mux.HandleFunc("/api/v4/projects/4/members/all/3", func(w http.ResponseWriter, _ *http.Request) {
+		memberCalls.Add(1)
+		http.Error(w, "unexpected membership lookup for project with embedded permissions", http.StatusInternalServerError)
+	})
+	mux.HandleFunc("/api/v4/projects/6/members/all/3", func(w http.ResponseWriter, _ *http.Request) {
+		memberCalls.Add(1)
+		_, _ = w.Write([]byte(`{"id":3,"username":"test_user","access_level":30}`))
+	})
+
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	client := load(server.URL + "?client_id=test&client_secret=test")
+	user := model.User{Login: "test_user", AccessToken: "token", ForgeRemoteID: "3"}
+
+	repos, err := client.Repos(t.Context(), &user, &model.ListOptions{Page: 1, PerPage: 10})
+	require.NoError(t, err)
+	require.Len(t, repos, 2)
+
+	// only the project without embedded permissions should trigger a
+	// membership lookup, i.e. no N+1 requests
+	assert.Equal(t, int64(1), memberCalls.Load())
+
+	// project 4: owner via group access -> read, write and admin
+	assert.True(t, repos[0].Perm.Pull)
+	assert.True(t, repos[0].Perm.Push)
+	assert.True(t, repos[0].Perm.Admin)
+
+	// project 6: permissions missing -> fallback lookup reports developer -> read and write, but no admin
+	assert.True(t, repos[1].Perm.Pull)
+	assert.True(t, repos[1].Perm.Push)
+	assert.False(t, repos[1].Perm.Admin)
+}
+
+func TestGitLabReposSkipsProjectOnMembershipLookupNotFound(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v4/projects", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`[` +
+			`{"id":4,"path_with_namespace":"diaspora/diaspora-client","visibility":"private","permissions":` +
+			`{"project_access":{"access_level":40},"group_access":null}},` +
+			`{"id":7,"path_with_namespace":"other/personal-project","visibility":"private","permissions":null}` +
+			`]`))
+	})
+	mux.HandleFunc("/api/v4/projects/7/members/all/3", func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+	})
+
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	client := load(server.URL + "?client_id=test&client_secret=test")
+	user := model.User{Login: "test_user", AccessToken: "token", ForgeRemoteID: "3"}
+
+	repos, err := client.Repos(t.Context(), &user, &model.ListOptions{Page: 1, PerPage: 10})
+	require.NoError(t, err)
+	require.Len(t, repos, 1)
+
+	assert.Equal(t, "diaspora/diaspora-client", repos[0].FullName)
 }

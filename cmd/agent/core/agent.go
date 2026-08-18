@@ -22,6 +22,7 @@ import (
 	"maps"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -110,12 +111,18 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		log.Trace().Msg("use ssl for grpc")
 	}
 
+	skipInsecure := c.Bool("grpc-skip-insecure")
+	if c.IsSet("grpc-skip-insecure-deprecated") && !c.IsSet("grpc-skip-insecure") {
+		skipInsecure = c.Bool("grpc-skip-insecure-deprecated")
+		log.Warn().Msg("WOODPECKER_GRPC_VERIFY is deprecated, use WOODPECKER_GRPC_SKIP_VERIFY")
+	}
+
 	agentConn, err := agent_rpc.Dial(grpcClientCtx, agent_rpc.DialConfig{ //nolint:contextcheck
 		ServerAddr:       c.String("server"),
 		AgentToken:       c.String("grpc-token"),
 		AgentID:          agentConfig.AgentID,
 		Secure:           c.Bool("grpc-secure"),
-		SkipTLSVerify:    c.Bool("grpc-skip-insecure"),
+		SkipTLSVerify:    skipInsecure,
 		KeepaliveTime:    c.Duration("grpc-keepalive-time"),
 		KeepaliveTimeout: c.Duration("grpc-keepalive-timeout"),
 		AuthRefreshEvery: authInterceptorRefreshInterval,
@@ -141,7 +148,10 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	)
 	agentConfigPersisted := atomic.Bool{}
 
-	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
+	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs(
+		"hostname", hostname,
+		"proto-version", strconv.Itoa(int(agent_rpc.ClientGrpcVersion)),
+	))
 
 	// check if grpc server version is compatible with agent
 	grpcServerVersion, err := client.Version(grpcCtx) //nolint:contextcheck
@@ -333,7 +343,8 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for range retryCount {
-			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
+			err = run(ctx, c, backendEngines)
+			if code := status.Code(err); code == codes.Unavailable || code == codes.DeadlineExceeded {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to %s, retrying in %v", c.String("server"), retryDelay))
 				time.Sleep(retryDelay)
 			} else {

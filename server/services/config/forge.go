@@ -128,6 +128,10 @@ func (f *forgeFetcherContext) filterPipelineFiles(files []*types.FileMeta) []*ty
 		}
 	}
 
+	slices.SortFunc(res, func(a, b *types.FileMeta) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
 	return res
 }
 
@@ -150,9 +154,9 @@ func (f *forgeFetcherContext) getFirstAvailableConfig(c context.Context, configs
 	var forgeErr []error
 	for _, fileOrFolder := range configs {
 		log.Trace().Msgf("fetching %s from forge", fileOrFolder)
-		if strings.HasSuffix(fileOrFolder, "/") {
+		if cut, has := strings.CutSuffix(fileOrFolder, "/"); has {
 			// config is a folder
-			files, err := f.forge.Dir(c, f.user, f.repo, f.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
+			files, err := f.forge.Dir(c, f.user, f.repo, f.pipeline, cut)
 			// if folder is not supported we will get a "Not implemented" error and continue
 			if err != nil {
 				if errors.Is(err, types.ErrNotImplemented) {
