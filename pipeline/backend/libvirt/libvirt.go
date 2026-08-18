@@ -237,7 +237,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	if guestOS == "windows" {
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
 		cmd := "powershell"
-		exec := fmt.Sprintf("$mount = '%s' ; $ErrorActionPreference = 'Stop' ; New-Item -ItemType Directory -Path $mount ; $disk = Get-Disk | Where-Object { $_.SerialNumber -eq '%s' } ; $partition = Get-Partition -DiskNumber $disk.DiskNumber | Where-Object { $_.Type -eq 'Basic' } ; Add-PartitionAccessPath -DiskNumber $disk.DiskNumber -PartitionNumber $partition.PartitionNumber -AccessPath $mount", step.WorkspaceBase, uuid)
+		exec := fmt.Sprintf("$mount = '%s' ; $ErrorActionPreference = 'Stop' ; New-Item -ItemType Directory -Path $mount ; $disk = Get-Disk | Where-Object { $_.SerialNumber -eq '%s' } ; $partition = Get-Partition -DiskNumber $disk.DiskNumber | Where-Object { $_.Type -in 'Basic', 'IFS' } ; Add-PartitionAccessPath -DiskNumber $disk.DiskNumber -PartitionNumber $partition.PartitionNumber -AccessPath $mount", step.WorkspaceBase, uuid)
 		utf16leBytes, err := encoder.Bytes([]byte(exec))
 		if err != nil {
 			return err

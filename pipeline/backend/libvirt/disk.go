@@ -44,12 +44,21 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 		// On other systems, this may work if the host has the appropriate tools.
 		// May need 'libguestfs-winsupport' installed.
 		{
-			cmd := exec.Command("guestfish", "-a", disk, "--", "run", ":",
-				"part-init", "/dev/sda", "mbr", ":", // initialize MBR
-				"part-add", "/dev/sda", "p", "2048", "-1", ":", // create primary partition
-				"part-set-mbr-id", "/dev/sda", "1", "0x07", ":", // sets NTFS type
-				"mkfs", fstype, "/dev/sda1", // format NTFS
-			)
+			var cmd *exec.Cmd
+			if fstype == "ntfs" {
+				cmd = exec.Command("guestfish", "-a", disk, "--", "run", ":",
+					"part-init", "/dev/sda", "mbr", ":", // initialize MBR
+					"part-add", "/dev/sda", "p", "2048", "-1", ":", // create primary partition
+					"part-set-mbr-id", "/dev/sda", "1", "0x07", ":", // sets NTFS type
+					"mkfs", "ntfs", "/dev/sda1", // format NTFS
+				)
+
+			} else {
+				cmd = exec.Command("guestfish", "-a", disk, "--", "run", ":",
+					"mkfs", fstype, "/dev/sda", // format
+				)
+
+			}
 			err := cmd.Run()
 			if err != nil {
 				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
@@ -119,6 +128,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 		}
 
 		// format
+		// TODO: this probably doesn't work for NTFS
 		{
 			cmd := CmdViaSudo(fmt.Sprintf("mkfs.%s", fstype), "-E", "lazy_itable_init=1,lazy_journal_init=1", string(loop_dev))
 			err := cmd.Run()
