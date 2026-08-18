@@ -10,3 +10,8 @@ overrides:
   serialize-javascript: '^7.0.5'
   uuid: '^14.0.0'
   brace-expansion: '^5.0.0'
+
+  # image-size is archived upstream and its last release (2.0.2) is affected by
+  # CVE-2025-71329 and CVE-2025-71330 with no fixed version available.
+  # image-size-next is a drop-in community fork of 2.0.2 carrying those fixes.
+  image-size: 'npm:image-size-next@^2.1.1'

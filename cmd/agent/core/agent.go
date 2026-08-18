@@ -22,6 +22,7 @@ import (
 	"maps"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -147,7 +148,10 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	)
 	agentConfigPersisted := atomic.Bool{}
 
-	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
+	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs(
+		"hostname", hostname,
+		"proto-version", strconv.Itoa(int(agent_rpc.ClientGrpcVersion)),
+	))
 
 	// check if grpc server version is compatible with agent
 	grpcServerVersion, err := client.Version(grpcCtx) //nolint:contextcheck
@@ -339,7 +343,8 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for range retryCount {
-			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
+			err = run(ctx, c, backendEngines)
+			if code := status.Code(err); code == codes.Unavailable || code == codes.DeadlineExceeded {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to %s, retrying in %v", c.String("server"), retryDelay))
 				time.Sleep(retryDelay)
 			} else {

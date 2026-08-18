@@ -309,12 +309,22 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 	repos := make([]*model.Repo, 0, len(projects))
 
 	for i := range projects {
-		projectMember, _, err := client.ProjectMembers.GetInheritedProjectMember(projects[i].ID, int64(intUserID), gitlab.WithContext(ctx))
-		if err != nil {
-			return nil, err
+		project := projects[i]
+
+		// The projects list API already reports the current user's access level
+		var projectMember *gitlab.ProjectMember
+		if embeddedAccessLevel(project) == gitlab.NoPermissions {
+			var resp *gitlab.Response
+			projectMember, resp, err = client.ProjectMembers.GetInheritedProjectMember(project.ID, int64(intUserID), gitlab.WithContext(ctx))
+			if err != nil {
+				if resp != nil && resp.StatusCode == http.StatusNotFound {
+					continue
+				}
+				return nil, err
+			}
 		}
 
-		repo, err := g.convertGitLabRepo(projects[i], projectMember)
+		repo, err := g.convertGitLabRepo(project, projectMember)
 		if err != nil {
 			return nil, err
 		}
@@ -322,7 +332,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 		repos = append(repos, repo)
 	}
 
-	return repos, err
+	return repos, nil
 }
 
 func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {

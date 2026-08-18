@@ -41,7 +41,7 @@ import (
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetAgents(c *gin.Context) {
-	agents, err := store.FromContext(c).AgentList(session.Pagination(c))
+	agents, err := store.FromContext(c).AgentList(session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting agent list. %s", err)
 		return
@@ -294,7 +294,7 @@ func GetOrgAgents(c *gin.Context) {
 	_store := store.FromContext(c)
 	org := session.Org(c)
 
-	agents, err := _store.AgentListForOrg(org.ID, session.Pagination(c))
+	agents, err := _store.AgentListForOrg(org.ID, session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting agent list. %s", err)
 		return

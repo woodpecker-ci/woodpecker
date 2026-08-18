@@ -29,7 +29,7 @@ func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, e
 	).Get(reg))
 }
 
-func (s storage) RegistryList(repo *model.Repo, includeGlobalAndOrg bool, p *model.ListOptions) ([]*model.Registry, error) {
+func (s storage) RegistryList(repo *model.Repo, includeGlobalAndOrg bool, p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	var regs []*model.Registry
 	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrg {
@@ -65,7 +65,7 @@ func (s storage) OrgRegistryFind(orgID int64, name string) (*model.Registry, err
 	).Get(registry))
 }
 
-func (s storage) OrgRegistryList(orgID int64, p *model.ListOptions) ([]*model.Registry, error) {
+func (s storage) OrgRegistryList(orgID int64, p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	registries := make([]*model.Registry, 0)
 	return registries, s.paginate(p).Where("org_id = ?", orgID).OrderBy(orderRegistriesBy).Find(&registries)
 }
@@ -77,7 +77,7 @@ func (s storage) GlobalRegistryFind(name string) (*model.Registry, error) {
 	).Get(registry))
 }
 
-func (s storage) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
+func (s storage) GlobalRegistryList(p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	registries := make([]*model.Registry, 0)
 	return registries, s.paginate(p).Where(
 		builder.Eq{"org_id": 0, "repo_id": 0},

@@ -716,6 +716,9 @@ Comma-separated list of approved organizations. For GitLab forges this is the `f
 
 Example: `org1,org2`
 
+This setting applies to all [forges](./12-forges/11-overview.md). A forge can allow further organizations in addition, configured in the admin UI (`Settings` -> `Forges` -> `Advanced options`). As organization names are only unique within a single forge, someone could create an organization with a name from this setting on another connected forge to gain access.
+If you connected more than one forge, you should therefore leave this setting empty and configure the allowed organizations per forge. See [restricting who can log in](./12-forges/11-overview.md#restricting-who-can-log-in) for details.
+
 ---
 
 ### REPO_OWNERS
