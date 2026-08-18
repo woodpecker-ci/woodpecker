@@ -267,6 +267,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 			State:      model.StatusPending,
 			Environ:    item.Workflow.Environ,
 			AxisID:     item.Workflow.AxisID,
+			DependsOn:  item.DependsOn.Names(),
 		}
 
 		if pipeline.Status == model.StatusBlocked {
@@ -286,6 +287,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 					State:      model.StatusPending,
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
+					DependsOn:  step.DependsOn,
 				}
 
 				if pipeline.Status == model.StatusBlocked {
