@@ -382,8 +382,8 @@
         "filters": {
           "name": "Filters",
           "desc": "Server side enforced labels of agents to filter workflows",
-          "key": "Label name ...",
-          "value": "Filter value ...",
+          "key": "Label name",
+          "value": "Filter value",
           "delete": "Delete filter"
         }
       },
