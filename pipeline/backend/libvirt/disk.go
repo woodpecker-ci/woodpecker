@@ -46,7 +46,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 		{
 			cmd := exec.Command("guestfish", "-a", disk, "--", "run", ":",
 				"part-disk", "/dev/sda", "mbr", ":",
-				"mkfs", fstype, "/dev/sda")
+				"mkfs", fstype, "/dev/sda1")
 			err := cmd.Run()
 			if err != nil {
 				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
