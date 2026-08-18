@@ -86,6 +86,7 @@ type Compiler struct {
 	volumes                 []string
 	networks                []string
 	env                     map[string]string
+	axisEnv                 map[string]string
 	cloneEnv                map[string]string
 	workspaceBase           string
 	workspacePath           string
@@ -103,6 +104,7 @@ type Compiler struct {
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
 		env:                 map[string]string{},
+		axisEnv:             map[string]string{},
 		cloneEnv:            map[string]string{},
 		secrets:             map[string]Secret{},
 		defaultClonePlugin:  constant.DefaultClonePlugin,
@@ -119,7 +121,11 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, error) {
 	config := new(backend_types.Config)
 
-	if match, err := conf.When.Match(c.metadata, true, c.env); !match && err == nil {
+	whenEnv := map[string]string{}
+	maps.Copy(whenEnv, c.env)
+	maps.Copy(whenEnv, c.axisEnv)
+
+	if match, err := conf.When.Match(c.metadata, true, whenEnv); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
 		// An empty pipeline will just be skipped completely.
 		return config, nil
@@ -176,7 +182,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for _, container := range conf.Clone.ContainerList {
-			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, whenEnv); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -205,7 +211,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		stage := new(backend_types.Stage)
 
 		for _, container := range conf.Services.ContainerList {
-			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, whenEnv); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -234,7 +240,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			continue
 		}
 
-		if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
+		if match, err := container.When.Match(c.metadata, false, whenEnv); !match && err == nil {
 			continue
 		} else if err != nil {
 			return nil, err
