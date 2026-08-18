@@ -20,7 +20,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 )
 
-func GenerateContainerConf(commands []string, osType, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
+func GenerateContainerConf(commands []string, osType string, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
@@ -42,7 +42,7 @@ func GenerateContainerConf(commands []string, osType, workDir string, stepUUID s
 	return env, entry, nil
 }
 
-func GenerateSSHConf(commands []string, osType, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
+func GenerateSSHConf(commands []string, osType string, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
