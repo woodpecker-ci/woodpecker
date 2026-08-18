@@ -69,6 +69,11 @@ func (c dagCompiler) compileSequence() ([]*backend_types.Stage, error) {
 func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 	stepMap := make(map[string]*dagCompilerStep, len(c.steps))
 	for _, s := range c.steps {
+		// a step is looked up by name to resolve 'depends_on', so a second step
+		// under the same name would silently replace the first one
+		if _, exists := stepMap[s.name]; exists {
+			return nil, &ErrStepDuplicateName{name: s.name}
+		}
 		stepMap[s.name] = s
 	}
 	return convertDAGToStages(stepMap)
