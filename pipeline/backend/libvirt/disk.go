@@ -39,9 +39,10 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			}
 		}
 
-		// format the disk
-		// on redhat systems, this will fail on 'ntfs', because they do not support ntfs inside libguest
-		// on other systems, this may work if the host has the appropriate tools
+		// Format the disk.
+		// On redhat systems, this will fail on 'ntfs', because they do not support ntfs inside libguest.
+		// On other systems, this may work if the host has the appropriate tools.
+		// May need 'libguestfs-winsupport' installed.
 		{
 			cmd := exec.Command("guestfish", "-a", disk, "--", "run", ":", "mkfs", fstype, "/dev/sda")
 			err := cmd.Run()

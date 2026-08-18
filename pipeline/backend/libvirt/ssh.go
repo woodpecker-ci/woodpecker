@@ -32,7 +32,10 @@ func AdhocSSH(ctx context.Context, client *goph.Client, cmd string, args []strin
 //
 // 1. send SIGINT... if that doesn't do it
 // 2. send SIGTERM... if that doesn't do it
-// 3. send the 'ctrl+c' character to stdin
+// 3. execute 'kill -2 <pid>'
+//
+// We could also try to attach to stdin and send 'Ctrl+c', but that opens up other issues (closing channel
+// at the appropriate time etc.).
 func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Client, sshCmd *goph.Cmd, guestOS string, taskUUID string, stepUUID string) error {
 	log.Debug().Msg("Context canceled, sending SIGINT to remote process")
 	err := sshCmd.Signal(ssh.SIGINT)

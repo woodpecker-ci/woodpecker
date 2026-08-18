@@ -42,7 +42,7 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 	if ephemeral {
 		log.Debug().Msgf("Setting up ephemeral disks")
 		// replacing all the disks with temporary ones
-		el := doc.FindElements("/domain/devices/disk[@type='file']")
+		el := doc.FindElements("/domain/devices/disk[@type='file' and @device='disk']")
 		for _, child := range el {
 			// get target to disambiguate
 			targetEl := child.FindElement("./target[@dev]")
