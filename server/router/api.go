@@ -109,6 +109,7 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.GET("", api.GetRepo)
 
 					repo.GET("/branches", api.GetRepoBranches)
+					repo.GET("/tags", api.GetRepoTags)
 					repo.GET("/pull_requests", api.GetRepoPullRequests)
 
 					repo.GET("/pipelines", api.GetPipelines)

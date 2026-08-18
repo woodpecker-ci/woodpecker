@@ -29,6 +29,7 @@ const (
 	pathRepoMove       = "%s/api/repos/%d/move"
 	pathChown          = "%s/api/repos/%d/chown"
 	pathRepair         = "%s/api/repos/%d/repair"
+	pathRepoTags       = "%s/api/repos/%d/tags"
 	pathPipelines      = "%s/api/repos/%d/pipelines"
 	pathPipeline       = "%s/api/repos/%d/pipelines/%v"
 	pathPipelineLogs   = "%s/api/repos/%d/logs/%d"
@@ -202,6 +203,15 @@ func (c *client) RepoDel(repoID int64) error {
 	uri := fmt.Sprintf(pathRepo, c.addr, repoID)
 	err := c.delete(uri)
 	return err
+}
+
+// RepoTags returns a list of repository tags.
+func (c *client) RepoTags(repoID int64, opt ListOptions) ([]string, error) {
+	var out []string
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoTags, c.addr, repoID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
+	return out, err
 }
 
 // RepoMove moves a repository.

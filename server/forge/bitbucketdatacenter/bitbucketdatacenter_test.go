@@ -15,11 +15,14 @@
 package bitbucketdatacenter
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/fixtures"
@@ -95,6 +98,65 @@ func TestBitbucketDC(t *testing.T) {
 	// Execute the Status method
 	err = c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 	assert.NoError(t, err)
+}
+
+func TestTagHeadResolvesTagBeforeFetchingCommit(t *testing.T) {
+	var tagCalls, commitCalls int
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		switch r.URL.Path {
+		case "/api/latest/projects/PRJ/repos/repo/tags":
+			tagCalls++
+			assert.Equal(t, "v1.0.0", r.URL.Query().Get("filterText"))
+			_, _ = w.Write([]byte(`{"isLastPage":true,"values":[{"displayId":"v1.0.0","latestCommit":"resolved-sha"}]}`))
+		case "/api/latest/projects/PRJ/repos/repo/commits/resolved-sha":
+			commitCalls++
+			_, _ = w.Write([]byte(`{"id":"resolved-sha"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	t.Cleanup(s.Close)
+
+	c := &client{urlAPI: s.URL}
+	commit, err := c.TagHead(t.Context(), &model.User{AccessToken: "token"}, &model.Repo{
+		Owner:    "PRJ",
+		Name:     "repo",
+		ForgeURL: "https://bitbucket.example/projects/PRJ/repos/repo/browse",
+	}, "v1.0.0")
+
+	require.NoError(t, err)
+	assert.Equal(t, &model.Commit{
+		SHA:      "resolved-sha",
+		ForgeURL: "https://bitbucket.example/projects/PRJ/repos/repo/commits/resolved-sha",
+	}, commit)
+	assert.Equal(t, 1, tagCalls)
+	assert.Equal(t, 1, commitCalls)
+}
+
+func TestTagsFetchesSinglePage(t *testing.T) {
+	var calls int
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		w.Header().Set("Content-Type", "application/json")
+		if calls == 1 {
+			_, _ = w.Write([]byte(`{"isLastPage":false,"nextPageStart":25,"values":[{"displayId":"v1.0.0"}]}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"isLastPage":true,"values":[{"displayId":"v2.0.0"}]}`))
+	}))
+	t.Cleanup(s.Close)
+
+	c := &client{urlAPI: s.URL}
+	tags, err := c.Tags(t.Context(), &model.User{AccessToken: "token"}, &model.Repo{
+		Owner: "PRJ",
+		Name:  "repo",
+	}, &model.ListOptions{All: true, Page: 1, PerPage: 25})
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{"v1.0.0"}, tags)
+	assert.Equal(t, 1, calls)
 }
 
 var (
