@@ -522,6 +522,10 @@ steps:
 
 :::
 
+:::warning
+As soon as one step uses `depends_on`, steps are looked up by name, so all step names of the workflow must be unique. Duplicate names are rejected.
+:::
+
 ### `volumes`
 
 Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.

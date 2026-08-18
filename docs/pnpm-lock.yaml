@@ -8,6 +8,7 @@ overrides:
   serialize-javascript: ^7.0.5
   uuid: ^14.0.0
   brace-expansion: ^5.0.0
+  image-size: npm:image-size-next@^2.1.1
 
 importers:
 
@@ -3708,9 +3709,9 @@ packages:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
 
-  image-size@2.0.2:
-    resolution: {integrity: sha512-IRqXKlaXwgSMAMtpNzZa1ZAe8m+Sa1770Dhk8VkSsP9LS+iHD62Zd8FQKs8fbPiagBE7BzoFX23cxFnwshpV6w==}
-    engines: {node: '>=16.x'}
+  image-size-next@2.1.1:
+    resolution: {integrity: sha512-n+DFjUct+G9mxZck+lvzqrTsqBJvSHMs6iEo//W5iAgRV7oUbrh1JWmKgAEpmyRB5lw6plIQizS1wK1dvrsvAw==}
+    engines: {node: '>=18'}
     hasBin: true
 
   immediate@3.3.0:
@@ -7806,7 +7807,7 @@ snapshots:
       estree-util-value-to-estree: 3.5.0
       file-loader: 6.2.0(webpack@5.109.2(@swc/core@1.16.0)(@swc/html@1.16.0)(clean-css@5.3.3)(cssnano@6.1.2(postcss@8.5.26))(csso@5.0.5)(html-minifier-terser@7.2.0)(lightningcss@1.33.0)(postcss@8.5.26))
       fs-extra: 11.4.0
-      image-size: 2.0.2
+      image-size: image-size-next@2.1.1
       mdast-util-mdx: 3.0.0(supports-color@10.2.2)
       mdast-util-to-string: 4.0.0
       react: 19.2.8
@@ -11234,7 +11235,7 @@ snapshots:
 
   ignore@5.3.2: {}
 
-  image-size@2.0.2: {}
+  image-size-next@2.1.1: {}
 
   immediate@3.3.0: {}
 
