@@ -114,6 +114,10 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 			return nil, "", "", err
 		}
 
+		// 20 is the max amount of chars allowed for the serial number
+		// on windows, so we just limit to that
+		serial := stepUUID[:20]
+
 		// now cook up an XML config
 		var newXml string
 		if domainType == "kvm" || domainType == "qemu" {
@@ -123,7 +127,7 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
           <source file='%s'/>
           <target dev='sdz' bus='sata'/>
           <serial>%s</serial>
-        </disk>`, disk, stepUUID)
+        </disk>`, disk, serial)
 		} else {
 			newXml = fmt.Sprintf(`
         <disk type='file'>
@@ -131,13 +135,12 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
           <source file='%s'/>
           <target dev='sdz' bus='sata'/>
           <serial>%s</serial>
-        </disk>`, disk, stepUUID)
+        </disk>`, disk, serial)
 		}
 
 		// on windows we mount via the serial, which is stepUUID
 		if guestOS == "windows" {
-			// 20 is the max amount of chars allowed for the serial number
-			uuid = stepUUID[:20]
+			uuid = serial
 		} else {
 			// on unix we mount via the disk uuid, which we must discover
 			uuid = diskUuid

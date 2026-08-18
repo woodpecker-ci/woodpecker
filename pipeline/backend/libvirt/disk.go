@@ -44,7 +44,9 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 		// On other systems, this may work if the host has the appropriate tools.
 		// May need 'libguestfs-winsupport' installed.
 		{
-			cmd := exec.Command("guestfish", "-a", disk, "--", "run", ":", "mkfs", fstype, "/dev/sda")
+			cmd := exec.Command("guestfish", "-a", disk, "--", "run", ":",
+				"part-disk", "/dev/sda", "mbr", ":",
+				"mkfs", fstype, "/dev/sda")
 			err := cmd.Run()
 			if err != nil {
 				return "", "", fmt.Errorf("command %s failed with: %s", cmd.String(), err.Error())
