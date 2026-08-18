@@ -278,6 +278,11 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	// sanitize agent input: reject states no compatible agent can produce
+	if err := checkAgentReportedInitState(agent.ID, state); err != nil {
+		return err
+	}
+
 	if currentPipeline.Status == model.StatusPending {
 		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
 			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
@@ -345,6 +350,11 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	// check workflow's own state to prevent finishing an already-finished or blocked workflow
 	if err := checkWorkflowState(workflow.State); err != nil {
+		return err
+	}
+
+	// sanitize agent input: reject states no compatible agent can produce
+	if err := checkAgentReportedDoneState(agent.ID, state); err != nil {
 		return err
 	}
 

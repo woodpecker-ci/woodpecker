@@ -227,7 +227,6 @@
       "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
-      "log_download_error": "An error occurred while downloading the log file",
       "log_delete_confirm": "Do you really want to delete the step logs?",
       "log_delete_error": "An error occurred when deleting the step logs",
       "actions": {
