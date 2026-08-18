@@ -137,6 +137,11 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-concurrency-invalid.yaml",
 			fail:     true,
 		},
+		{
+			name:     "Service without name in array syntax",
+			testFile: ".woodpecker/test-broken-service-without-name.yaml",
+			fail:     true,
+		},
 	}
 
 	for _, tt := range testTable {
@@ -185,4 +190,28 @@ func TestSchemaFiltersRedundantCompositionErrors(t *testing.T) {
 	assert.NotContains(t, descriptions, "Must validate one and only one schema (oneOf)")
 	assert.NotContains(t, descriptions, "Must validate at least one schema (anyOf)")
 	assert.Contains(t, descriptions, "Additional property settings is not allowed")
+}
+
+func TestLintConcurrent(t *testing.T) {
+	const config = `steps:
+  test:
+    image: alpine
+    commands:
+      - echo hello
+`
+
+	for i := 0; i < 16; i++ {
+		i := i
+
+		t.Run(fmt.Sprintf("worker-%d", i), func(t *testing.T) {
+			t.Parallel()
+
+			for j := 0; j < 10; j++ {
+				configErrors, err := schema.LintString(config)
+
+				require.NoError(t, err)
+				require.Empty(t, configErrors)
+			}
+		})
+	}
 }

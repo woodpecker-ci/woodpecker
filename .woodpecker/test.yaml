@@ -68,7 +68,7 @@ steps:
     commands:
       - 'make generate-openapi'
       - 'DIFF=$(git diff | head)'
-      - '[ -n "$DIFF" ] && { echo "openapi not up to date, exec `make generate-openapi` and commit"; exit 1; } || true'
+      - '[ -n "$DIFF" ] && { echo "openapi not up to date, exec make generate-openapi and commit"; exit 1; } || true'
     when: *when
 
   lint-license-header:

@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"mime"
 	"net/http"
 	"strconv"
 	"strings"
@@ -175,7 +177,7 @@ func GetPipelines(c *gin.Context) {
 		filter.After = afterDt.Unix()
 	}
 
-	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c), filter)
+	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c).All(), filter)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -199,27 +201,14 @@ func GetPipelines(c *gin.Context) {
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 func DeletePipeline(c *gin.Context) {
-	_store := store.FromContext(c)
-
-	repo := session.Repo(c)
-	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	pl := session.Pipeline(c)
 
 	if ok := pipelineDeleteAllowed(pl); !ok {
 		c.String(http.StatusUnprocessableEntity, "Cannot delete pipeline with status %s", pl.Status)
 		return
 	}
 
-	err = store.FromContext(c).DeletePipeline(pl)
+	err := store.FromContext(c).DeletePipeline(pl)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting pipeline. %s", err)
 		return
@@ -295,34 +284,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 //	@Param		step_id			path	int		true	"the step id"
 func GetStepLogs(c *gin.Context) {
-	_store := store.FromContext(c)
-	repo := session.Repo(c)
-
-	// parse the pipeline number and step sequence number from
-	// the request parameter.
-	num, err := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
-
-	stepID, err := strconv.ParseInt(c.Params.ByName("step_id"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	step, err := _store.StepLoad(pl.ID, stepID)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	step := session.Step(c)
 
 	logs, err := server.Config.Services.LogStore.LogFind(step)
 	if err != nil {
@@ -331,6 +293,59 @@ func GetStepLogs(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, logs)
+}
+
+// DownloadStepLogs
+//
+//	@Summary	Download logs for a pipeline step
+//	@Router		/repos/{repo_id}/logs/{pipeline_number}/{step_id}/download [get]
+//	@Produce	plain
+//	@Success	200	{string}	string
+//	@Tags		Pipeline logs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		pipeline_number	path	int		true	"the number of the pipeline"
+//	@Param		step_id			path	int		true	"the step id"
+func DownloadStepLogs(c *gin.Context) {
+	step := session.Step(c)
+
+	logs, err := server.Config.Services.LogStore.LogFind(step)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	repo := session.Repo(c)
+	pl := session.Pipeline(c)
+	filename := sanitizeDownloadFilename(fmt.Sprintf("%s-%s-%d-%s.log", repo.Owner, repo.Name, pl.Number, step.Name))
+	c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": filename}))
+	c.Header("Content-Type", "text/plain; charset=utf-8")
+	c.Header("X-Content-Type-Options", "nosniff")
+	c.Status(http.StatusOK)
+
+	for i, entry := range logs {
+		if i > 0 {
+			if _, err = io.WriteString(c.Writer, "\n"); err != nil {
+				_ = c.Error(err)
+				return
+			}
+		}
+		if _, err = c.Writer.Write(entry.Data); err != nil {
+			_ = c.Error(err)
+			return
+		}
+	}
+}
+
+func sanitizeDownloadFilename(filename string) string {
+	filename = strings.Map(func(r rune) rune {
+		if r < ' ' || r == '\x7f' || strings.ContainsRune(`<>:"/\|?*`, r) {
+			return '-'
+		}
+		return r
+	}, filename)
+	filename = strings.TrimRight(filename, ".")
+	return strings.TrimSpace(filename)
 }
 
 // DeleteStepLogs
@@ -346,31 +361,7 @@ func GetStepLogs(c *gin.Context) {
 //	@Param		step_id			path	int		true	"the step id"
 func DeleteStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo := session.Repo(c)
-
-	pipelineNumber, err := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	_pipeline, err := _store.GetPipelineNumber(repo, pipelineNumber)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
-
-	stepID, err := strconv.ParseInt(c.Params.ByName("step_id"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	_step, err := _store.StepLoad(_pipeline.ID, stepID)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	_step := session.Step(c)
 
 	switch _step.State {
 	case model.StatusRunning, model.StatusPending:
@@ -378,7 +369,7 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	err = _store.LogDelete(_step)
+	err := _store.LogDelete(_step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -399,18 +390,7 @@ func DeleteStepLogs(c *gin.Context) {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 func GetPipelineConfig(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo := session.Repo(c)
-	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	pl := session.Pipeline(c)
 
 	configs, err := _store.ConfigsForPipeline(pl.ID)
 	if err != nil {
@@ -433,18 +413,8 @@ func GetPipelineConfig(c *gin.Context) {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 func GetPipelineMetadata(c *gin.Context) {
 	repo := session.Repo(c)
-	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
 	_store := store.FromContext(c)
-	currentPipeline, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	currentPipeline := session.Pipeline(c)
 
 	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
@@ -452,7 +422,7 @@ func GetPipelineMetadata(c *gin.Context) {
 		return
 	}
 
-	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.Number)
 	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		handleDBError(c, err)
 		return
@@ -483,13 +453,7 @@ func CancelPipeline(c *gin.Context) {
 		return
 	}
 
-	num, _ := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	pl := session.Pipeline(c)
 
 	if err := pipeline.Cancel(c, _forge, _store, repo, user, pl, &model.CancelInfo{
 		CanceledByUser: user.Login,
@@ -515,14 +479,8 @@ func PostApproval(c *gin.Context) {
 		_store = store.FromContext(c)
 		repo   = session.Repo(c)
 		user   = session.User(c)
-		num, _ = strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
+		pl     = session.Pipeline(c)
 	)
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
 
 	newPipeline, err := pipeline.Approve(c, _store, pl, user, repo)
 	if err != nil {
@@ -547,16 +505,10 @@ func PostDecline(c *gin.Context) {
 		_store = store.FromContext(c)
 		repo   = session.Repo(c)
 		user   = session.User(c)
-		num, _ = strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
+		pl     = session.Pipeline(c)
 	)
 
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
-
-	pl, err = pipeline.Decline(c, _store, pl, user, repo)
+	pl, err := pipeline.Decline(c, _store, pl, user, repo)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
@@ -597,20 +549,9 @@ func GetPipelineQueue(c *gin.Context) {
 func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
-
-	num, err := strconv.ParseInt(c.Param("pipeline_number"), 10, 64)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
+	pl := session.Pipeline(c)
 
 	user, err := _store.GetUser(repo.UserID)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
-
-	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -676,15 +617,7 @@ func PostPipeline(c *gin.Context) {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 func DeletePipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
-
-	repo := session.Repo(c)
-	num, _ := strconv.ParseInt(c.Params.ByName("pipeline_number"), 10, 64)
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	pl := session.Pipeline(c)
 
 	steps, err := _store.StepList(pl.ID)
 	if err != nil {

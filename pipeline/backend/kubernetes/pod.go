@@ -34,11 +34,12 @@ import (
 const (
 	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
 	// This will be removed in the future.
-	StepLabelLegacy       = "step"
-	StepLabel             = "woodpecker-ci.org/step"
-	TaskUUIDLabel         = "woodpecker-ci.org/task-uuid"
-	podPrefix             = "wp-"
-	defaultFSGroup  int64 = 1000
+	StepLabelLegacy            = "step"
+	StepLabel                  = "woodpecker-ci.org/step"
+	TaskUUIDLabel              = "woodpecker-ci.org/task-uuid"
+	podPrefix                  = "wp-"
+	defaultFSGroup       int64 = 1000
+	defaultClusterDomain       = "cluster.local"
 	// Because of https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/nodes/working-with-clusters
 	initContainerMemLimit = "12Mi"
 )
@@ -188,7 +189,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		HostAliases:       hostAliases(step.ExtraHosts),
 		Hostname:          getHostnameOrEmpty(step.Name),
 		Subdomain:         subdomain,
-		DNSConfig:         dnsConfig(config.GetNamespace(step.OrgID), subdomain),
+		DNSConfig:         dnsConfig(config.GetNamespace(step.OrgID), subdomain, config.ClusterDomain),
 		NodeSelector:      nodeSelector(options.NodeSelector, config.PodNodeSelector, config.PodNodeSelectorAllowFromStep, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:       tolerations(options.Tolerations),
 		Affinity:          affinity(options.Affinity, config.PodAffinity, config.PodAffinityAllowFromStep),
@@ -254,7 +255,10 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if len(step.Commands) > 0 {
-		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
+		scriptEnv, command, err := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
+		if err != nil {
+			return container, err
+		}
 		container.Command = command
 		maps.Copy(step.Environment, scriptEnv)
 
@@ -743,9 +747,13 @@ func mapToEnvVars(m map[string]string) []kube_core_v1.EnvVar {
 	return ev
 }
 
-func dnsConfig(namespace, subdomain string) *kube_core_v1.PodDNSConfig {
+func dnsConfig(namespace, subdomain, clusterDomain string) *kube_core_v1.PodDNSConfig {
+	if clusterDomain == "" {
+		clusterDomain = defaultClusterDomain
+	}
+
 	return &kube_core_v1.PodDNSConfig{
-		Searches: []string{fmt.Sprintf("%s.%s.svc.cluster.local", subdomain, namespace)},
+		Searches: []string{fmt.Sprintf("%s.%s.svc.%s", subdomain, namespace, clusterDomain)},
 	}
 }
 
