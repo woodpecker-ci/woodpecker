@@ -100,7 +100,7 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 			if running {
 				log.Debug().Msg("SIGTERM didn't work, sending kill -2 manually")
 
-				// kill -15 pid
+				// kill -2 pid
 				sshCmd, err := client.Command("kill", "-2", pid)
 				if err != nil {
 					return err
@@ -126,6 +126,9 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 }
 
 func GetWoodpeckerPid(client *goph.Client, guestOS string, stepUUID string) (string, error) {
+	var sshCmd *goph.Cmd
+
+	// assembler the per-platform command to get the running pid
 	if guestOS == "windows" {
 		rawCmd := fmt.Sprintf("Get-Content -Path $env:TEMP\\woodpecker_%s.pid -Raw", stepUUID)
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
@@ -135,91 +138,72 @@ func GetWoodpeckerPid(client *goph.Client, guestOS string, stepUUID string) (str
 		}
 		base64Cmd := base64.StdEncoding.EncodeToString(utf16leBytes)
 
-		sshCmd, err := client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
+		sshCmd, err = client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
 		if err != nil {
 			return "", err
 		}
-		bytes, err := sshCmd.Output()
-		if err != nil {
-			return "", err
-		}
-		return string(bytes), nil
 	} else {
-		sshCmd, err := client.Command("/bin/sh", "-c", fmt.Sprintf("'cat ${TMPDIR:-/tmp}/woodpecker_%s.pid'", stepUUID))
+		var err error
+		sshCmd, err = client.Command("/bin/sh", "-c", fmt.Sprintf("'cat ${TMPDIR:-/tmp}/woodpecker_%s.pid'", stepUUID))
 		if err != nil {
 			return "", err
 		}
-		bytes, err := sshCmd.Output()
-		if err != nil {
-			return "", err
-		}
-		return string(bytes), nil
 	}
+
+	// extract stdout
+	bytes, err := sshCmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }
 
-// (Re-)Check if the spawned process is still running with a timeout of 10s.
+// (Re-)Check if the spawned process is still running with a timeout of 15s.
 func CheckSshPid(pid string, client *goph.Client, guestOS string, stepUUID string) (bool, error) {
-	maxBackOff, _ := time.ParseDuration("10s")
+	var sshCmd *goph.Cmd
+	maxBackOff, _ := time.ParseDuration("15s")
+
+	// assemble the per-platform command to check for pid
 	if guestOS == "windows" {
-		b, _ := backoff.Retry(context.Background(), func() (bool, error) {
-			rawCmd := fmt.Sprintf("Get-Process -Id %s", pid)
-			encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
-			utf16leBytes, err := encoder.Bytes([]byte(rawCmd))
-			if err != nil {
-				return true, err
-			}
-			base64Cmd := base64.StdEncoding.EncodeToString(utf16leBytes)
+		rawCmd := fmt.Sprintf("Get-Process -Id %s", pid)
+		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+		utf16leBytes, err := encoder.Bytes([]byte(rawCmd))
+		if err != nil {
+			return true, err
+		}
+		base64Cmd := base64.StdEncoding.EncodeToString(utf16leBytes)
 
-			sshCmd, err := client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
-			if err != nil {
-				return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
-			}
-
-			sshErr := sshCmd.Run()
-			// if we can't figure out if it's running... assume it is
-			switch sshErr.(type) {
-			case *ssh.ExitMissingError:
-				log.Debug().Msgf("ExitMissingError in CheckSshPid: %s", sshErr)
-				return true, nil
-			case *ssh.ExitError:
-				log.Debug().Msgf("ExitError in CheckSshPid: %s", sshErr)
-				return false, nil
-			case nil:
-				return true, fmt.Errorf("Process still running")
-			default:
-				log.Debug().Msgf("Unexpected error in CheckSshPid: %s", sshErr)
-				return true, nil
-			}
-
-		}, backoff.WithMaxElapsedTime(maxBackOff))
-
-		return b, nil
-
+		sshCmd, err = client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
+		if err != nil {
+			return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
+		}
 	} else {
-		b, _ := backoff.Retry(context.Background(), func() (bool, error) {
-			sshCmd, err := client.Command("kill", "-0", pid)
-			if err != nil {
-				return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
-			}
-
-			sshErr := sshCmd.Run()
-			// if we can't figure out if it's running... assume it is
-			switch sshErr.(type) {
-			case *ssh.ExitMissingError:
-				log.Debug().Msgf("ExitMissingError in CheckSshPid: %s", sshErr)
-				return true, nil
-			case *ssh.ExitError:
-				log.Debug().Msgf("ExitError in CheckSshPid: %s", sshErr)
-				return false, nil
-			case nil:
-				return true, fmt.Errorf("Process still running")
-			default:
-				log.Debug().Msgf("Unexpected error in CheckSshPid: %s", sshErr)
-				return true, nil
-			}
-
-		}, backoff.WithMaxElapsedTime(maxBackOff))
-
-		return b, nil
+		var err error
+		sshCmd, err = client.Command("kill", "-0", pid)
+		if err != nil {
+			return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
+		}
 	}
+
+	// run with exponential backoff
+	b, _ := backoff.Retry(context.Background(), func() (bool, error) {
+		sshErr := sshCmd.Run()
+		// if we can't figure out if it's running... assume it is
+		switch sshErr.(type) {
+		case *ssh.ExitMissingError:
+			log.Debug().Msgf("ExitMissingError in CheckSshPid: %s", sshErr)
+			return true, nil
+		case *ssh.ExitError:
+			log.Debug().Msgf("ExitError in CheckSshPid: %s", sshErr)
+			return false, nil
+		case nil:
+			return true, fmt.Errorf("Process still running")
+		default:
+			log.Debug().Msgf("Unexpected error in CheckSshPid: %s", sshErr)
+			return true, nil
+		}
+
+	}, backoff.WithMaxElapsedTime(maxBackOff))
+
+	return b, nil
 }
