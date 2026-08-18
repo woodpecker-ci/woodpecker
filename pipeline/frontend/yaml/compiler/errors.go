@@ -57,6 +57,19 @@ func (*ErrStepFilteredDependency) Is(target error) bool {
 	return ok
 }
 
+type ErrStepDuplicateName struct {
+	name string
+}
+
+func (err *ErrStepDuplicateName) Error() string {
+	return fmt.Sprintf("step name '%s' is used more than once, step names must be unique to be referenced by 'depends_on'", err.name)
+}
+
+func (*ErrStepDuplicateName) Is(target error) bool {
+	_, ok := target.(*ErrStepDuplicateName)
+	return ok
+}
+
 type ErrStepDependencyCycle struct {
 	path []string
 }
