@@ -362,18 +362,12 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 
 	opts := &bitbucket.BranchSearchOptions{ListOptions: convertListOptions(p)}
 	all := make([]string, 0, p.PerPage)
-	for {
-		branches, resp, err := bc.Projects.SearchBranches(ctx, r.Owner, r.Name, opts)
-		if err != nil {
-			return nil, fmt.Errorf("unable to list branches: %w", err)
-		}
-		for _, b := range branches {
-			all = append(all, b.DisplayID)
-		}
-		if !p.All || resp.LastPage {
-			break
-		}
-		opts.Start = resp.NextPageStart
+	branches, _, err := bc.Projects.SearchBranches(ctx, r.Owner, r.Name, opts)
+	if err != nil {
+		return nil, fmt.Errorf("unable to list branches: %w", err)
+	}
+	for _, b := range branches {
+		all = append(all, b.DisplayID)
 	}
 
 	return all, nil
@@ -410,18 +404,12 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 	opts := &bitbucket.PullRequestSearchOptions{ListOptions: convertListOptions(p)}
 	all := make([]*model.PullRequest, 0)
-	for {
-		prs, resp, err := bc.Projects.SearchPullRequests(ctx, r.Owner, r.Name, opts)
-		if err != nil {
-			return nil, fmt.Errorf("unable to list pull-requests: %w", err)
-		}
-		for _, pr := range prs {
-			all = append(all, &model.PullRequest{Index: convertID(pr.ID), Title: pr.Title})
-		}
-		if !p.All || resp.LastPage {
-			break
-		}
-		opts.Start = resp.NextPageStart
+	prs, _, err := bc.Projects.SearchPullRequests(ctx, r.Owner, r.Name, opts)
+	if err != nil {
+		return nil, fmt.Errorf("unable to list pull-requests: %w", err)
+	}
+	for _, pr := range prs {
+		all = append(all, &model.PullRequest{Index: convertID(pr.ID), Title: pr.Title})
 	}
 
 	return all, nil
