@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Enforce unique name for services and steps if dag is used [[#7032](https://github.com/woodpecker-ci/woodpecker/pull/7032)]
 - Add custom list opts with all [[#6992](https://github.com/woodpecker-ci/woodpecker/pull/6992)]
 - Add pipeline log download endpoint [[#6876](https://github.com/woodpecker-ci/woodpecker/pull/6876)]
 - Reject invalid started and done workflow states [[#7029](https://github.com/woodpecker-ci/woodpecker/pull/7029)]
