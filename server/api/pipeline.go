@@ -107,7 +107,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 		ForgeURL: commit.ForgeURL,
 	}
 
-	if opts.Message == "" {
+	if opts.Message != "" {
 		pl.Message = "MANUAL: " + opts.Message + " @ " + opts.Branch
 	}
 
