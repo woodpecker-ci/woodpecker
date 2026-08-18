@@ -152,7 +152,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
-	ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
+	ir, err := b.toInternalRepresentation(parsed, axis, workflowMetadata, workflow.ID)
 	if err != nil {
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
@@ -214,11 +214,11 @@ func (b *PipelineBuilder) environmentVariables(metadata metadata.Metadata, axis 
 	return environ
 }
 
-func (b *PipelineBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
+func (b *PipelineBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, axis map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	options := []compiler.Option{}
 	options = append(
 		options,
-		compiler.WithEnviron(environ),
+		compiler.WithAxisEnviron(axis),
 		compiler.WithEnviron(b.Envs),
 		compiler.WithEscalated(b.PrivilegedPlugins...),
 		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins),
