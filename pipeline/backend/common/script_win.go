@@ -40,7 +40,8 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 		)
 	}
 
-	// wrap everything in a scr
+	// wrap everything in a block, in case
+	// we feed it into stdin... otherwise it may be executed line by line
 	wrapped := fmt.Sprintf(
 		`
 		& {
@@ -76,6 +77,7 @@ Write-Output @'
 '@
 
 & { %s } ;
+Write-Output "DEBUG: LASTEXITCODE=$LASTEXITCODE"
 if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 
 `
