@@ -17,7 +17,6 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"text/template"
 )
 
@@ -33,12 +32,10 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 	}
 
 	for _, command := range commands {
-		escaped := fmt.Sprintf("%q", command)
-		escaped = strings.ReplaceAll(escaped, "$", `\$`)
 		fmt.Fprintf(
 			&buf,
 			traceScriptWin,
-			escaped,
+			command,
 			command,
 		)
 	}
@@ -74,7 +71,10 @@ $PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScriptWin = `
-Write-Output ('+ %s');
+Write-Output @'
++ %s
+'@
+
 & { %s } ;
 if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 
