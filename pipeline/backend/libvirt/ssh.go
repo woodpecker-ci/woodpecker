@@ -45,7 +45,8 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 	log.Debug().Msgf("PID: %s", pid)
 
 	if guestOS == "windows" {
-		// on windows...  we just try taskkill
+		// on windows...  we just do taskkill
+		// SIGINT works, but doesn't seem to kill the whole process group
 		rawCmd := fmt.Sprintf("taskkill /PID %s /F /T", pid)
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
 		utf16leBytes, err := encoder.Bytes([]byte(rawCmd))
