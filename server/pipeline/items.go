@@ -19,7 +19,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"maps"
 
 	"github.com/rs/zerolog/log"
 
