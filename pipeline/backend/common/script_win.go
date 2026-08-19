@@ -52,7 +52,6 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 }
 
 const setupScriptWinProto = `
-$LASTEXITCODE = 0 ;
 $ErrorActionPreference = 'Stop';
 if (-not (Test-Path "{{.WorkDir}}")) { New-Item -Path "{{.WorkDir}}" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
@@ -77,7 +76,6 @@ Write-Output @'
 '@
 
 & { %s } ;
-Write-Output "DEBUG: LASTEXITCODE=$LASTEXITCODE"
-if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
+if ($LASTEXITCODE) {exit $LASTEXITCODE}
 
 `
