@@ -45,23 +45,15 @@ func GenerateContainerConf(commands []string, osType string, workDir string, ste
 func GenerateSSHConf(commands []string, osType string, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
-		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
-		utf16leBytes, err := encoder.Bytes([]byte(generateScriptWindows(commands, workDir, stepUUID)))
-		if err != nil {
-			return nil, nil, err
-		}
-
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString(utf16leBytes)
+		env["CI_SCRIPT"] = generateScriptWindows(commands, workDir, stepUUID)
 		env["SHELL"] = "powershell.exe"
 		// cspell:disable-next-line
-		entry = []string{"powershell", "-noprofile", "-noninteractive", "-encodedcommand", env["CI_SCRIPT"]}
+		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "-"}
 	} else {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir, stepUUID)))
+		env["CI_SCRIPT"] = generateScriptPosix(commands, workDir, stepUUID)
 		env["SHELL"] = "/bin/sh"
-		entry = []string{"/bin/sh", "-c", "'echo $CI_SCRIPT | base64 -d | /bin/sh -e'"}
+		entry = []string{"/bin/sh -e"}
 	}
 
 	return env, entry, nil
 }
-
-// 		entry = []string{"/bin/sh", "-c", fmt.Sprintf("'echo $CI_SCRIPT | base64 -d | setsid nohup /bin/sh -e > /tmp/%s_stdout.log 2> /tmp/%s_stderr.log & echo $!'", stepUUID, stepUUID)}

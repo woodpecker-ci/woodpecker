@@ -311,7 +311,10 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	sshCmd.Stdout = nil // see comment below
 	sshCmd.Stderr = pw
 
-	stdoutR, _ := sshCmd.StdoutPipe()
+	stdoutR, err := sshCmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
 
 	go func() {
 		// We need to close the write end ourselves on EOF from the server
@@ -348,6 +351,23 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	if err != nil {
 		return err
 	}
+
+	// now feed the actual command to stdin
+	stdinWC, err := sshCmd.StdinPipe()
+	if err != nil {
+		return err
+	}
+	cmdIn, ok := step.Environment["CI_SCRIPT"]
+	if !ok {
+		return fmt.Errorf("Could not find CI_SCRIPT in env")
+	}
+	go func() {
+		_, err := stdinWC.Write([]byte(cmdIn))
+		if err != nil {
+			log.Debug().Msgf("Failed to write cmd to stdin: %s", err)
+		}
+		stdinWC.Close()
+	}()
 
 	return nil
 }
