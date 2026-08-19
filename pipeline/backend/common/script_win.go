@@ -43,7 +43,14 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 		)
 	}
 
-	return buf.String()
+	// wrap everything in a scr
+	wrapped := fmt.Sprintf(
+		`
+		& {
+			%s
+    }
+    `, buf.String())
+	return wrapped
 }
 
 const setupScriptWinProto = `
@@ -68,8 +75,7 @@ $PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
 // to trace a command.
 const traceScriptWin = `
 Write-Output ('+ %s');
-& { %s }
-
+& { %s } ;
 if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 
 `
