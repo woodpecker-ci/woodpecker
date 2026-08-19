@@ -24,6 +24,7 @@ import (
 func generateScriptWindows(commands []string, workDir string, stepUUID string) string {
 	var buf bytes.Buffer
 
+	setupScriptWinTmpl, _ := template.New("").Parse(fmt.Sprintf(setupScriptWinProto, stepUUID))
 	if err := setupScriptWinTmpl.Execute(&buf, map[string]string{
 		"WorkDir": workDir,
 	}); err != nil {
@@ -38,7 +39,6 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 			&buf,
 			traceScriptWin,
 			escaped,
-			stepUUID,
 			command,
 		)
 	}
@@ -61,15 +61,12 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 [Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 cd "{{.WorkDir}}";
+$PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
 `
-
-var setupScriptWinTmpl, _ = template.New("").Parse(setupScriptWinProto)
 
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScriptWin = `
 Write-Output ('+ %s');
-$PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
-& { %s };
-if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE} ;
+& { %s }; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `

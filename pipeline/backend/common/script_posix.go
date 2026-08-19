@@ -27,6 +27,8 @@ import (
 func generateScriptPosix(commands []string, workDir string, stepUUID string) string {
 	var buf bytes.Buffer
 
+	setupScriptTmpl, _ := template.New("").Parse(fmt.Sprintf(setupScriptProto, stepUUID))
+
 	if err := setupScriptTmpl.Execute(&buf, map[string]string{
 		"WorkDir": workDir,
 	}); err != nil {
@@ -38,7 +40,6 @@ func generateScriptPosix(commands []string, workDir string, stepUUID string) str
 		fmt.Fprintf(
 			&buf,
 			traceScript,
-			stepUUID,
 			shellescape.Quote(command),
 			command,
 		)
@@ -50,6 +51,7 @@ func generateScriptPosix(commands []string, workDir string, stepUUID string) str
 // setupScriptProto is a helper script this is added to the step script to ensure
 // a minimum set of environment variables are set correctly.
 const setupScriptProto = `
+set -m
 if [ -n "$CI_NETRC_MACHINE" ]; then
 cat <<EOF > $HOME/.netrc
 machine $CI_NETRC_MACHINE
@@ -63,17 +65,14 @@ unset CI_NETRC_PASSWORD
 unset CI_SCRIPT
 mkdir -p "{{.WorkDir}}"
 cd "{{.WorkDir}}"
+{
+	printf "%%s" "$$" > "${TMPDIR:-/tmp}/woodpecker_%s.pid"
+} || true
 `
-
-var setupScriptTmpl, _ = template.New("").Parse(setupScriptProto)
 
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScript = `
-set -m
-{
-	printf "%%s" "$$" > "${TMPDIR:-/tmp}/woodpecker_%s.pid"
-} || true
 echo + %s
 {
 	%s
