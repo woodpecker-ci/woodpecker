@@ -86,7 +86,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	// view. It is reported through the step states, which make the workflow fail,
 	// so it must not surface as a runtime error. Use Err() to get it anyway.
 	// Also errors caused by cancellation are none workflow-wise.
-	if err := r.err.Get(); !pipeline_errors.IsStepFailure(err) ||
+	if err := r.err.Get(); !pipeline_errors.IsStepFailure(err) &&
 		!errors.Is(err, pipeline_errors.ErrCancel) {
 		return err
 	}
