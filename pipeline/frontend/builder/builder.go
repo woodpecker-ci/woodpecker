@@ -41,6 +41,7 @@ import (
 type PipelineBuilder struct {
 	Yamls               []*YamlFile
 	Envs                map[string]string
+	AdditionalEnvs      map[string]string
 	DefaultLabels       map[string]string
 	RepoTrusted         *metadata.TrustedConfiguration
 	TrustedClonePlugins []string
@@ -218,7 +219,8 @@ func (b *PipelineBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, 
 	options := []compiler.Option{}
 	options = append(
 		options,
-		compiler.WithAxisEnviron(axis),
+		compiler.WithNonPluginEnviron(axis),
+		compiler.WithNonPluginEnviron(b.AdditionalEnvs),
 		compiler.WithEnviron(b.Envs),
 		compiler.WithEscalated(b.PrivilegedPlugins...),
 		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins),

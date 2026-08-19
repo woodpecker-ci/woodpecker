@@ -99,8 +99,6 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 		}
 	}
 
-	maps.Copy(envs, currentPipeline.AdditionalVariables)
-
 	serverMetadata := metadata.NewServerMetadata(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
 	yamls := make([]*builder.YamlFile, 0, len(forgeYamls))
@@ -114,6 +112,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	b := builder.PipelineBuilder{
 		GetWorkflowMetadata: serverMetadata.GetWorkflowMetadata,
 		Envs:                envs,
+		AdditionalEnvs:      currentPipeline.AdditionalVariables,
 		Yamls:               yamls,
 		TrustedClonePlugins: append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
 		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
