@@ -43,7 +43,13 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 		)
 	}
 
-	return buf.String()
+	// wrap everything in a script block
+	scriptBlock := fmt.Sprintf(`{
+		%s
+	}
+	`, buf.String())
+
+	return scriptBlock
 }
 
 const setupScriptWinProto = `
@@ -67,6 +73,6 @@ $PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScriptWin = `
-Write-Output ('+' + %s);
-& { %s }; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
+Write-Output ('+ %s');
+& %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `
