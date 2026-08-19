@@ -66,6 +66,7 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 cd "{{.WorkDir}}";
 $PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
+Write-Output "DEBUG: $PID" ;
 
 # Source - https://stackoverflow.com/a/70180276
 # Posted by Lieven Keersmaekers, modified by community. See post 'Timeline' for change history
