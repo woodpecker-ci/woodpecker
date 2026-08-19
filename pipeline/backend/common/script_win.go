@@ -89,7 +89,11 @@ Write-Output @'
 & {
   %s ;
   Write-Output "DEBUG: $LASTEXITCODE" ;
-  if ($LASTEXITCODE) { Kill-ChildProcesses $PID ; exit $LASTEXITCODE } ;
+  if ($LASTEXITCODE) {
+    Write-Output "Killing children"
+		Kill-ChildProcesses $PID
+		exit $LASTEXITCODE
+	} ;
 } ;
 
 `
