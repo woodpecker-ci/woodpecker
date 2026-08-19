@@ -361,8 +361,8 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 			err := e.TerminateSshCommand(options, client, sshCmd, guestOS, taskUUID, step.UUID)
 			if err != nil {
 				log.Debug().Msgf("Failed to terminate SSH command gracefully. Closing session by force. Error was: %s", err)
-				sshCmd.Close()
 			}
+			sshCmd.Close()
 		case <-done:
 		}
 		time.Sleep(time.Second * 5)
