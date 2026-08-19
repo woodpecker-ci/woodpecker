@@ -674,6 +674,87 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	}, nil
 }
 
+// Tags returns the tags for the named repository.
+func (c *client) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	githubTags, _, err := client.Repositories.ListTags(ctx, r.Owner, r.Name, &github.ListOptions{
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	tags := make([]*model.RepoTag, 0, len(githubTags))
+	for _, tag := range githubTags {
+		tags = append(tags, &model.RepoTag{
+			Name: tag.GetName(),
+			SHA:  tag.GetCommit().GetSHA(),
+		})
+	}
+	return tags, nil
+}
+
+// TagHead returns the commit for the specified tag.
+func (c *client) TagHead(ctx context.Context, u *model.User, r *model.Repo, tagName string) (*model.Commit, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := &github.ListOptions{Page: 1}
+	var sha string
+	for opts.Page > 0 {
+		tags, resp, err := client.Repositories.ListTags(ctx, r.Owner, r.Name, opts)
+		if err != nil {
+			return nil, err
+		}
+		for _, tag := range tags {
+			if tag.GetName() == tagName {
+				sha = tag.GetCommit().GetSHA()
+				break
+			}
+		}
+		if sha != "" {
+			break
+		}
+		opts.Page = resp.NextPage
+	}
+	if sha == "" {
+		return nil, fmt.Errorf("could not find tag %s", tagName)
+	}
+
+	return c.commit(ctx, client, r, sha)
+}
+
+// Commit returns the commit for the specified SHA.
+func (c *client) Commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.commit(ctx, client, r, sha)
+}
+
+func (c *client) commit(ctx context.Context, client *github.Client, r *model.Repo, sha string) (*model.Commit, error) {
+	commit, _, err := client.Repositories.GetCommit(ctx, r.Owner, r.Name, sha, nil)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Commit{
+		SHA:      commit.GetSHA(),
+		ForgeURL: commit.GetHTMLURL(),
+	}, nil
+}
+
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {

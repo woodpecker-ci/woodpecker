@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -579,6 +580,53 @@ func Test_GitLab(t *testing.T) {
 			assert.Nil(t, pipeline)
 		})
 	})
+}
+
+func TestRepositoryRefs(t *testing.T) {
+	createdAt := time.Date(2026, time.August, 6, 12, 0, 0, 0, time.UTC)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		switch r.URL.Path {
+		case "/api/v4/projects/5":
+			_, _ = w.Write([]byte(`{"id":5}`))
+		case "/api/v4/projects/5/repository/tags":
+			assert.Equal(t, "updated", r.URL.Query().Get("order_by"))
+			assert.Equal(t, "desc", r.URL.Query().Get("sort"))
+			assert.Equal(t, "2", r.URL.Query().Get("page"))
+			assert.Equal(t, "25", r.URL.Query().Get("per_page"))
+			_, _ = w.Write([]byte(`[{"name":"v1.0.0","commit":{"id":"tag-sha","web_url":"https://gitlab.example/group/project/-/commit/tag-sha"},"created_at":"2026-08-06T12:00:00Z"}]`))
+		case "/api/v4/projects/5/repository/tags/v1.0.0":
+			_, _ = w.Write([]byte(`{"name":"v1.0.0","commit":{"id":"tag-sha","web_url":"https://gitlab.example/group/project/-/commit/tag-sha"}}`))
+		case "/api/v4/projects/5/repository/commits/commit-sha":
+			_, _ = w.Write([]byte(`{"id":"commit-sha","web_url":"https://gitlab.example/group/project/-/commit/commit-sha"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	t.Cleanup(server.Close)
+
+	client := &GitLab{url: server.URL}
+	user := &model.User{AccessToken: "token"}
+	repo := &model.Repo{ForgeRemoteID: "5", Owner: "group", Name: "project"}
+
+	tags, err := client.Tags(t.Context(), user, repo, &model.ListOptions{Page: 2, PerPage: 25})
+	assert.NoError(t, err)
+	assert.Equal(t, []*model.RepoTag{{Name: "v1.0.0", SHA: "tag-sha", CreatedAt: createdAt.Unix()}}, tags)
+
+	tagCommit, err := client.TagHead(t.Context(), user, repo, "v1.0.0")
+	assert.NoError(t, err)
+	assert.Equal(t, &model.Commit{
+		SHA:      "tag-sha",
+		ForgeURL: "https://gitlab.example/group/project/-/commit/tag-sha",
+	}, tagCommit)
+
+	commit, err := client.Commit(t.Context(), user, repo, "commit-sha")
+	assert.NoError(t, err)
+	assert.Equal(t, &model.Commit{
+		SHA:      "commit-sha",
+		ForgeURL: "https://gitlab.example/group/project/-/commit/commit-sha",
+	}, commit)
 }
 
 func TestExtractFromPath(t *testing.T) {

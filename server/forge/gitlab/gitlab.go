@@ -629,6 +629,94 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	}, nil
 }
 
+// Tags returns the tags for the named repository.
+func (g *GitLab) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := newClient(g.url, token, g.skipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, r.ForgeRemoteID, r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabTags, _, err := client.Tags.ListTags(_repo.ID, &gitlab.ListTagsOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    int64(p.Page),
+			PerPage: int64(p.PerPage),
+		},
+		OrderBy: gitlab.Ptr("updated"),
+		Sort:    gitlab.Ptr("desc"),
+	}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	tags := make([]*model.RepoTag, 0, len(gitlabTags))
+	for _, tag := range gitlabTags {
+		repoTag := &model.RepoTag{Name: tag.Name}
+		if tag.Commit != nil {
+			repoTag.SHA = tag.Commit.ID
+		}
+		if tag.CreatedAt != nil {
+			repoTag.CreatedAt = tag.CreatedAt.Unix()
+		}
+		tags = append(tags, repoTag)
+	}
+	return tags, nil
+}
+
+// TagHead returns the commit for the specified tag.
+func (g *GitLab) TagHead(ctx context.Context, u *model.User, r *model.Repo, tagName string) (*model.Commit, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := newClient(g.url, token, g.skipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, r.ForgeRemoteID, r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	tag, _, err := client.Tags.GetTag(_repo.ID, tagName, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	if tag.Commit == nil {
+		return nil, fmt.Errorf("tag %s has no commit", tagName)
+	}
+	return &model.Commit{
+		SHA:      tag.Commit.ID,
+		ForgeURL: tag.Commit.WebURL,
+	}, nil
+}
+
+// Commit returns the commit for the specified SHA.
+func (g *GitLab) Commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := newClient(g.url, token, g.skipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, r.ForgeRemoteID, r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	commit, _, err := client.Commits.GetCommit(_repo.ID, sha, &gitlab.GetCommitOptions{}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return &model.Commit{
+		SHA:      commit.ID,
+		ForgeURL: commit.WebURL,
+	}, nil
+}
+
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {

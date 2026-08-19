@@ -146,6 +146,62 @@ func TestStatusDeployment(t *testing.T) {
 	assert.Contains(t, body.LogURL, "/repos/7/pipeline/9")
 }
 
+func TestRepositoryRefs(t *testing.T) {
+	var tagListCalls, commitCalls int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		switch r.URL.Path {
+		case "/repos/octocat/Hello-World/tags":
+			tagListCalls++
+			if tagListCalls == 1 {
+				assert.Equal(t, "2", r.URL.Query().Get("page"))
+				assert.Equal(t, "25", r.URL.Query().Get("per_page"))
+			}
+			_, _ = w.Write([]byte(`[{"name":"v1.0.0","commit":{"sha":"tag-sha"}}]`))
+		case "/repos/octocat/Hello-World/commits/tag-sha":
+			commitCalls++
+			_, _ = w.Write([]byte(`{"sha":"tag-sha","html_url":"https://github.com/octocat/Hello-World/commit/tag-sha"}`))
+		case "/repos/octocat/Hello-World/commits/commit-sha":
+			commitCalls++
+			_, _ = w.Write([]byte(`{"sha":"commit-sha","html_url":"https://github.com/octocat/Hello-World/commit/commit-sha"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	t.Cleanup(server.Close)
+
+	gh, err := github.NewClient(
+		github.WithURLs(github.Ptr(server.URL+"/"), nil),
+		github.WithHTTPClient(server.Client()),
+	)
+	require.NoError(t, err)
+
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
+	c := &client{}
+	repo := &model.Repo{Owner: "octocat", Name: "Hello-World"}
+	user := &model.User{AccessToken: "token"}
+
+	tags, err := c.Tags(ctx, user, repo, &model.ListOptions{Page: 2, PerPage: 25})
+	require.NoError(t, err)
+	assert.Equal(t, []*model.RepoTag{{Name: "v1.0.0", SHA: "tag-sha"}}, tags)
+
+	tagCommit, err := c.TagHead(ctx, user, repo, "v1.0.0")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Commit{
+		SHA:      "tag-sha",
+		ForgeURL: "https://github.com/octocat/Hello-World/commit/tag-sha",
+	}, tagCommit)
+
+	commit, err := c.Commit(ctx, user, repo, "commit-sha")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Commit{
+		SHA:      "commit-sha",
+		ForgeURL: "https://github.com/octocat/Hello-World/commit/commit-sha",
+	}, commit)
+	assert.Equal(t, 2, commitCalls)
+}
+
 var (
 	fakeUser = &model.User{
 		Login:       "6543",

@@ -42,9 +42,12 @@ const (
 	pathSource        = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
 	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
+	pathTags          = "%s/2.0/repositories/%s/%s/refs/tags?%s"
+	pathTag           = "%s/2.0/repositories/%s/%s/refs/tags/%s"
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathCommit        = "%s/2.0/repositories/%s/%s/commit/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathDiffStat      = "%s/2.0/repositories/%s/%s/diffstat/%s?%s"
 	pageSize          = 100
@@ -204,6 +207,27 @@ func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 		return nil, fmt.Errorf("no commits in branch %s", branch)
 	}
 	return out.Values[0], nil
+}
+
+func (c *Client) ListTags(owner, name string, opts *ListOpts) ([]*Tag, error) {
+	out := new(TagResp)
+	uri := fmt.Sprintf(pathTags, c.base, owner, name, opts.Encode())
+	_, err := c.do(uri, http.MethodGet, nil, out)
+	return out.Values, err
+}
+
+func (c *Client) GetTag(owner, name, tag string) (*Tag, error) {
+	out := new(Tag)
+	uri := fmt.Sprintf(pathTag, c.base, owner, name, tag)
+	_, err := c.do(uri, http.MethodGet, nil, out)
+	return out, err
+}
+
+func (c *Client) GetCommit(owner, name, sha string) (*Commit, error) {
+	out := new(Commit)
+	uri := fmt.Sprintf(pathCommit, c.base, owner, name, sha)
+	_, err := c.do(uri, http.MethodGet, nil, out)
+	return out, err
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {

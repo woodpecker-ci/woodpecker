@@ -297,6 +297,60 @@ func (g *RPC) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
+func (g *RPC) Tags(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+	args, err := json.Marshal(&argumentsBranchesPullRequests{
+		U: modelUserFromModel(u),
+		R: modelRepoFromModel(r),
+		P: p,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.Tags", args, &jsonResp)
+	if err != nil {
+		return nil, err
+	}
+	var resp []*model.RepoTag
+	return resp, json.Unmarshal(jsonResp, &resp)
+}
+
+func (g *RPC) TagHead(_ context.Context, u *model.User, r *model.Repo, tag string) (*model.Commit, error) {
+	args, err := json.Marshal(&argumentsTagHead{
+		U:   modelUserFromModel(u),
+		R:   modelRepoFromModel(r),
+		Tag: tag,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.TagHead", args, &jsonResp)
+	if err != nil {
+		return nil, err
+	}
+	var resp *model.Commit
+	return resp, json.Unmarshal(jsonResp, &resp)
+}
+
+func (g *RPC) Commit(_ context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	args, err := json.Marshal(&argumentsCommit{
+		U:   modelUserFromModel(u),
+		R:   modelRepoFromModel(r),
+		SHA: sha,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.Commit", args, &jsonResp)
+	if err != nil {
+		return nil, err
+	}
+	var resp *model.Commit
+	return resp, json.Unmarshal(jsonResp, &resp)
+}
+
 func (g *RPC) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	args, err := json.Marshal(&argumentsBranchesPullRequests{
 		U: modelUserFromModel(u),

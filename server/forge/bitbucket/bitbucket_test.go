@@ -24,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -136,6 +137,22 @@ func TestBitbucket(t *testing.T) {
 
 	_, err = c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")
 	assert.Error(t, err)
+
+	tags, err := c.Tags(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+	assert.NoError(t, err)
+	require.Len(t, tags, 1)
+	assert.Equal(t, "v1.0.0", tags[0].Name)
+	assert.Equal(t, "tag-sha", tags[0].SHA)
+
+	tagCommit, err := c.TagHead(ctx, fakeUser, fakeRepo, "v1.0.0")
+	assert.NoError(t, err)
+	assert.Equal(t, "tag-sha", tagCommit.SHA)
+	assert.Equal(t, "https://bitbucket.org/test_name/repo_name/commits/tag-sha", tagCommit.ForgeURL)
+
+	commit, err := c.Commit(ctx, fakeUser, fakeRepo, "commit-sha")
+	assert.NoError(t, err)
+	assert.Equal(t, "commit-sha", commit.SHA)
+	assert.Equal(t, "https://bitbucket.org/test_name/repo_name/commits/commit-sha", commit.ForgeURL)
 
 	listOpts := model.ListOptions{
 		Page:    1,

@@ -3981,6 +3981,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/tags": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repositories"
+                ],
+                "summary": "Get tags of a repository",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "for response pagination, page offset number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "for response pagination, max items per page",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RepoTag"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/secrets": {
             "get": {
                 "produces": [
@@ -5225,6 +5278,12 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
+                "sha": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                },
                 "variables": {
                     "type": "object",
                     "additionalProperties": {
@@ -5626,6 +5685,21 @@ const docTemplate = `{
                     "$ref": "#/definitions/model.TrustedConfigurationPatch"
                 },
                 "visibility": {
+                    "type": "string"
+                }
+            }
+        },
+        "RepoTag": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "unix seconds when known",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sha": {
                     "type": "string"
                 }
             }

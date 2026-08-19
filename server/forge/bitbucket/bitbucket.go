@@ -411,6 +411,53 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	}, nil
 }
 
+// Tags returns the tags for the named repository.
+func (c *config) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+	setListOptions(p)
+
+	bitbucketTags, err := c.newClient(ctx, u).ListTags(r.Owner, r.Name, &internal.ListOpts{
+		Page:    p.Page,
+		PageLen: p.PerPage,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	tags := make([]*model.RepoTag, 0, len(bitbucketTags))
+	for _, tag := range bitbucketTags {
+		tags = append(tags, &model.RepoTag{
+			Name: tag.Name,
+			SHA:  tag.Target.Hash,
+		})
+	}
+	return tags, nil
+}
+
+// TagHead returns the commit for the specified tag.
+func (c *config) TagHead(ctx context.Context, u *model.User, r *model.Repo, tagName string) (*model.Commit, error) {
+	tag, err := c.newClient(ctx, u).GetTag(r.Owner, r.Name, tagName)
+	if err != nil {
+		return nil, err
+	}
+	return c.commit(ctx, u, r, tag.Target.Hash)
+}
+
+// Commit returns the commit for the specified SHA.
+func (c *config) Commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	return c.commit(ctx, u, r, sha)
+}
+
+func (c *config) commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	commit, err := c.newClient(ctx, u).GetCommit(r.Owner, r.Name, sha)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Commit{
+		SHA:      commit.Hash,
+		ForgeURL: commit.Links.HTML.Href,
+	}, nil
+}
+
 // PullRequests returns the pull requests of the named repository.
 func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	setListOptions(p)

@@ -269,6 +269,86 @@ func (_c *MockForge_Branches_Call) RunAndReturn(run func(ctx context.Context, u 
 	return _c
 }
 
+// Commit provides a mock function for the type MockForge
+func (_mock *MockForge) Commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	ret := _mock.Called(ctx, u, r, sha)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Commit")
+	}
+
+	var r0 *model.Commit
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, string) (*model.Commit, error)); ok {
+		return returnFunc(ctx, u, r, sha)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, string) *model.Commit); ok {
+		r0 = returnFunc(ctx, u, r, sha)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Commit)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, string) error); ok {
+		r1 = returnFunc(ctx, u, r, sha)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockForge_Commit_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Commit'
+type MockForge_Commit_Call struct {
+	*mock.Call
+}
+
+// Commit is a helper method to define mock.On call
+//   - ctx context.Context
+//   - u *model.User
+//   - r *model.Repo
+//   - sha string
+func (_e *MockForge_Expecter) Commit(ctx interface{}, u interface{}, r interface{}, sha interface{}) *MockForge_Commit_Call {
+	return &MockForge_Commit_Call{Call: _e.mock.On("Commit", ctx, u, r, sha)}
+}
+
+func (_c *MockForge_Commit_Call) Run(run func(ctx context.Context, u *model.User, r *model.Repo, sha string)) *MockForge_Commit_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.User
+		if args[1] != nil {
+			arg1 = args[1].(*model.User)
+		}
+		var arg2 *model.Repo
+		if args[2] != nil {
+			arg2 = args[2].(*model.Repo)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockForge_Commit_Call) Return(commit *model.Commit, err error) *MockForge_Commit_Call {
+	_c.Call.Return(commit, err)
+	return _c
+}
+
+func (_c *MockForge_Commit_Call) RunAndReturn(run func(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error)) *MockForge_Commit_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Deactivate provides a mock function for the type MockForge
 func (_mock *MockForge) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	ret := _mock.Called(ctx, u, r, link)
@@ -1231,6 +1311,166 @@ func (_c *MockForge_Status_Call) Return(err error) *MockForge_Status_Call {
 }
 
 func (_c *MockForge_Status_Call) RunAndReturn(run func(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Workflow) error) *MockForge_Status_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// TagHead provides a mock function for the type MockForge
+func (_mock *MockForge) TagHead(ctx context.Context, u *model.User, r *model.Repo, tag string) (*model.Commit, error) {
+	ret := _mock.Called(ctx, u, r, tag)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TagHead")
+	}
+
+	var r0 *model.Commit
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, string) (*model.Commit, error)); ok {
+		return returnFunc(ctx, u, r, tag)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, string) *model.Commit); ok {
+		r0 = returnFunc(ctx, u, r, tag)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Commit)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, string) error); ok {
+		r1 = returnFunc(ctx, u, r, tag)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockForge_TagHead_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TagHead'
+type MockForge_TagHead_Call struct {
+	*mock.Call
+}
+
+// TagHead is a helper method to define mock.On call
+//   - ctx context.Context
+//   - u *model.User
+//   - r *model.Repo
+//   - tag string
+func (_e *MockForge_Expecter) TagHead(ctx interface{}, u interface{}, r interface{}, tag interface{}) *MockForge_TagHead_Call {
+	return &MockForge_TagHead_Call{Call: _e.mock.On("TagHead", ctx, u, r, tag)}
+}
+
+func (_c *MockForge_TagHead_Call) Run(run func(ctx context.Context, u *model.User, r *model.Repo, tag string)) *MockForge_TagHead_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.User
+		if args[1] != nil {
+			arg1 = args[1].(*model.User)
+		}
+		var arg2 *model.Repo
+		if args[2] != nil {
+			arg2 = args[2].(*model.Repo)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockForge_TagHead_Call) Return(commit *model.Commit, err error) *MockForge_TagHead_Call {
+	_c.Call.Return(commit, err)
+	return _c
+}
+
+func (_c *MockForge_TagHead_Call) RunAndReturn(run func(ctx context.Context, u *model.User, r *model.Repo, tag string) (*model.Commit, error)) *MockForge_TagHead_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Tags provides a mock function for the type MockForge
+func (_mock *MockForge) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+	ret := _mock.Called(ctx, u, r, p)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Tags")
+	}
+
+	var r0 []*model.RepoTag
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) ([]*model.RepoTag, error)); ok {
+		return returnFunc(ctx, u, r, p)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) []*model.RepoTag); ok {
+		r0 = returnFunc(ctx, u, r, p)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.RepoTag)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) error); ok {
+		r1 = returnFunc(ctx, u, r, p)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockForge_Tags_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Tags'
+type MockForge_Tags_Call struct {
+	*mock.Call
+}
+
+// Tags is a helper method to define mock.On call
+//   - ctx context.Context
+//   - u *model.User
+//   - r *model.Repo
+//   - p *model.ListOptions
+func (_e *MockForge_Expecter) Tags(ctx interface{}, u interface{}, r interface{}, p interface{}) *MockForge_Tags_Call {
+	return &MockForge_Tags_Call{Call: _e.mock.On("Tags", ctx, u, r, p)}
+}
+
+func (_c *MockForge_Tags_Call) Run(run func(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions)) *MockForge_Tags_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.User
+		if args[1] != nil {
+			arg1 = args[1].(*model.User)
+		}
+		var arg2 *model.Repo
+		if args[2] != nil {
+			arg2 = args[2].(*model.Repo)
+		}
+		var arg3 *model.ListOptions
+		if args[3] != nil {
+			arg3 = args[3].(*model.ListOptions)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockForge_Tags_Call) Return(repoTags []*model.RepoTag, err error) *MockForge_Tags_Call {
+	_c.Call.Return(repoTags, err)
+	return _c
+}
+
+func (_c *MockForge_Tags_Call) RunAndReturn(run func(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error)) *MockForge_Tags_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -470,6 +470,74 @@ func (c *Forgejo) BranchHead(ctx context.Context, u *model.User, r *model.Repo, 
 	}, nil
 }
 
+// Tags returns the tags for the named repository.
+func (c *Forgejo) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.RepoTag, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	forgejoTags, _, err := client.ListRepoTags(r.Owner, r.Name,
+		forgejo.ListRepoTagsOptions{ListOptions: forgejo.ListOptions{Page: p.Page, PageSize: p.PerPage}})
+	if err != nil {
+		return nil, err
+	}
+
+	tags := make([]*model.RepoTag, 0, len(forgejoTags))
+	for _, tag := range forgejoTags {
+		repoTag := &model.RepoTag{Name: tag.Name}
+		if tag.Commit != nil {
+			repoTag.SHA = tag.Commit.SHA
+			if !tag.Commit.Created.IsZero() {
+				repoTag.CreatedAt = tag.Commit.Created.Unix()
+			}
+		}
+		tags = append(tags, repoTag)
+	}
+	return tags, nil
+}
+
+// TagHead returns the commit for the specified tag.
+func (c *Forgejo) TagHead(ctx context.Context, u *model.User, r *model.Repo, tagName string) (*model.Commit, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	tag, _, err := client.GetTag(r.Owner, r.Name, tagName)
+	if err != nil {
+		return nil, err
+	}
+	if tag.Commit == nil {
+		return nil, fmt.Errorf("tag %s has no commit", tagName)
+	}
+	return c.commit(client, r, tag.Commit.SHA)
+}
+
+// Commit returns the commit for the specified SHA.
+func (c *Forgejo) Commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	token := common.UserToken(ctx, r, u)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.commit(client, r, sha)
+}
+
+func (c *Forgejo) commit(client *forgejo.Client, r *model.Repo, sha string) (*model.Commit, error) {
+	commit, _, err := client.GetSingleCommit(r.Owner, r.Name, sha)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Commit{
+		SHA:      commit.SHA,
+		ForgeURL: commit.HTMLURL,
+	}, nil
+}
+
 func (c *Forgejo) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := c.newClientToken(ctx, token)
