@@ -75,5 +75,7 @@ set -m
 	printf "%%s" "$$" > "${TMPDIR:-/tmp}/woodpecker_%s.pid"
 } || true
 echo + %s
-%s
+{
+	%s
+}
 `

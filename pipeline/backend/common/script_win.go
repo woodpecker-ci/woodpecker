@@ -47,7 +47,7 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 }
 
 const setupScriptWinProto = `
-$LASTEXITCODE = 0
+$LASTEXITCODE = 0 ;
 $ErrorActionPreference = 'Stop';
 if (-not (Test-Path "{{.WorkDir}}")) { New-Item -Path "{{.WorkDir}}" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
@@ -69,6 +69,7 @@ var setupScriptWinTmpl, _ = template.New("").Parse(setupScriptWinProto)
 // to trace a command.
 const traceScriptWin = `
 Write-Output ('+ %s');
-$PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline
-& %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
+$PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
+& { %s };
+if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE} ;
 `
