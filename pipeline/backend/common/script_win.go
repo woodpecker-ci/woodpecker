@@ -66,6 +66,17 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 cd "{{.WorkDir}}";
 $PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
+
+# Source - https://stackoverflow.com/a/70180276
+# Posted by Lieven Keersmaekers, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-08-19, License - CC BY-SA 4.0
+function Kill-ChildProcesses ($ParentProcessId) {
+    $filter = "parentprocessid = '$($ParentProcessId)'"
+    Get-CIMInstance -ClassName win32_process -filter $filter | Foreach-Object {
+            & taskkill /PID $_.ProcessId /F /T
+        }
+}
+
 `
 
 // traceScript is a helper script that is added to the step script
@@ -78,7 +89,7 @@ Write-Output @'
 & {
   %s ;
   Write-Output "DEBUG: $LASTEXITCODE" ;
-  if ($LASTEXITCODE) { taskkill /PID $PID /F /T } ;
+  if ($LASTEXITCODE) { Kill-ChildProcesses $PID ; exit $LASTEXITCODE } ;
 } ;
 
 `
