@@ -309,7 +309,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	// in TailStep it is potentially too late
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
 	sshCmd.Stdout = nil // see comment below
-	sshCmd.Stderr = pw
+	sshCmd.Stderr = nil
 
 	stdoutR, err := sshCmd.StdoutPipe()
 	if err != nil {
