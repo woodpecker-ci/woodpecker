@@ -357,7 +357,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	}
 
 	// now feed the actual command to stdin
-	cmdIn, ok := step.Environment["CI_SCRIPT"]
+	cmdIn, ok := env["CI_SCRIPT"]
 	if !ok {
 		return fmt.Errorf("Could not find CI_SCRIPT in env")
 	}
