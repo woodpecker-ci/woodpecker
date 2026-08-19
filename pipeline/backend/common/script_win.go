@@ -73,6 +73,7 @@ $PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
 function Kill-ChildProcesses ($ParentProcessId) {
     $filter = "parentprocessid = '$($ParentProcessId)'"
     Get-CIMInstance -ClassName win32_process -filter $filter | Foreach-Object {
+            Write-Output "Killing $_.ProcessId"
             & taskkill /PID $_.ProcessId /F /T
         }
 }
@@ -90,7 +91,6 @@ Write-Output @'
   %s ;
   Write-Output "DEBUG: $LASTEXITCODE" ;
   if ($LASTEXITCODE) {
-    Write-Output "Killing children"
 		Kill-ChildProcesses $PID
 		exit $LASTEXITCODE
 	} ;
