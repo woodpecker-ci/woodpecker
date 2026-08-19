@@ -309,7 +309,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	// in TailStep it is potentially too late
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
 	sshCmd.Stdout = nil // see comment below
-	sshCmd.Stderr = nil
+	sshCmd.Stderr = pw
 
 	stdoutR, err := sshCmd.StdoutPipe()
 	if err != nil {
@@ -329,6 +329,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		// EOF callback.
 		io.Copy(pw, stdoutR)
 		pw.Close()
+		log.Debug().Msg("Closing write pipe end")
 	}()
 
 	w.(*workflow).pipesStdOut.Store(step.UUID, &pipes{pr, pw})
@@ -347,7 +348,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		case <-done:
 		}
 		time.Sleep(time.Second * 5)
-		log.Debug().Msg("Closing write pipe end")
+		log.Debug().Msg("Closing read pipe end")
 		_ = pr.Close()
 	}()
 

@@ -37,11 +37,6 @@ func AdhocSSH(ctx context.Context, client *goph.Client, cmd string, args []strin
 // We could also try to attach to stdin and send 'Ctrl+c', but that opens up other issues (closing channel
 // at the appropriate time etc.).
 func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Client, sshCmd *goph.Cmd, guestOS string, taskUUID string, stepUUID string) error {
-	log.Debug().Msg("Context canceled, sending SIGINT to remote process")
-	err := sshCmd.Signal(ssh.SIGINT)
-	if err != nil {
-		log.Debug().Msgf("Failed to send SIGINT to remote process: %s", err)
-	}
 
 	pid, err := GetWoodpeckerPid(client, guestOS, stepUUID)
 	if err != nil {
@@ -49,44 +44,46 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 	}
 	log.Debug().Msgf("PID: %s", pid)
 
-	// check if the process died
 	if guestOS == "windows" {
+		// on windows...  we just try taskkill
+		rawCmd := fmt.Sprintf("taskkill /PID %s /F /T", pid)
+		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+		utf16leBytes, err := encoder.Bytes([]byte(rawCmd))
+		if err != nil {
+			return err
+		}
+		base64Cmd := base64.StdEncoding.EncodeToString(utf16leBytes)
+		sshCmd, err := client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
+		if err != nil {
+			return err
+		}
+		err = sshCmd.Run()
+		if err != nil {
+			return err
+		}
+
 		running, err := CheckSshPid(pid, client, guestOS, stepUUID)
 		if err != nil {
 			return err
 		}
 		if running {
-			// on windows... only SIGINT might work... otherwise we just try taskkill
-			rawCmd := fmt.Sprintf("taskkill /PID %s /F /T", pid)
-			encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
-			utf16leBytes, err := encoder.Bytes([]byte(rawCmd))
-			if err != nil {
-				return err
-			}
-			base64Cmd := base64.StdEncoding.EncodeToString(utf16leBytes)
-			sshCmd, err := client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
-			if err != nil {
-				return err
-			}
-			err = sshCmd.Run()
-			if err != nil {
-				return err
-			}
-
-			running, err := CheckSshPid(pid, client, guestOS, stepUUID)
-			if err != nil {
-				return err
-			}
-			if running {
-				return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
-			}
-
+			return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
 		}
+
 	} else {
+		// try sigint first
+		log.Debug().Msg("Context canceled, sending SIGINT to remote process")
+		err := sshCmd.Signal(ssh.SIGINT)
+		if err != nil {
+			log.Debug().Msgf("Failed to send SIGINT to remote process: %s", err)
+		}
+
+		// check if the process died
 		running, err := CheckSshPid(pid, client, guestOS, stepUUID)
 		if err != nil {
 			return err
 		}
+		// try SIGTERM
 		if running {
 			log.Debug().Msg("SIGINT didn't work, trying SIGTERM")
 			err := sshCmd.Signal(ssh.SIGTERM)
@@ -103,7 +100,7 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 			if running {
 				log.Debug().Msg("SIGTERM didn't work, sending kill -2 manually")
 
-				// kill -2 pid
+				// try kill -2 pid
 				sshCmd, err := client.Command("kill", "-2", pid)
 				if err != nil {
 					return err
