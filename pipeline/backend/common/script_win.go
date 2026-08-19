@@ -78,7 +78,7 @@ Write-Output @'
 & {
   %s ;
   Write-Output "DEBUG: $LASTEXITCODE" ;
-  if ($LASTEXITCODE) { [Environment]::Exit($LASTEXITCODE) } ;
+  if ($LASTEXITCODE) { taskkill /PID $PID /F /T } ;
 } ;
 
 `
