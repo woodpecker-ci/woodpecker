@@ -89,10 +89,11 @@ Write-Output @'
 
 & {
   %s ;
-  Write-Output "DEBUG: $LASTEXITCODE" ;
-  if ($LASTEXITCODE) {
+	$err = $LASTEXITCODE
+  Write-Output "DEBUG: $err" ;
+  if ($err) {
 		Kill-ChildProcesses $PID
-		exit $LASTEXITCODE
+		exit $err
 	} ;
 } ;
 

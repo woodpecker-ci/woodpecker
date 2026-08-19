@@ -60,7 +60,7 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 		}
 		err = sshCmd.Run()
 		if err != nil {
-			return err
+			log.Debug().Msgf("Running taskkill failed with: %s", err)
 		}
 
 		running, err := CheckSshPid(pid, client, guestOS, stepUUID)
