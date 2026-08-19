@@ -367,6 +367,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 			log.Debug().Msgf("Failed to write cmd to stdin: %s", err)
 		}
 		stdinWC.Close()
+		log.Debug().Msg("Closing stdin")
 	}()
 
 	return nil
@@ -456,6 +457,7 @@ func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUU
 	}{
 		Reader: pOut.(*pipes).pr,
 		Closer: closerFunc(func() error {
+			log.Debug().Msgf("Done log streaming")
 			return nil
 		}),
 	}

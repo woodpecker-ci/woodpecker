@@ -209,7 +209,7 @@ func ShutdownVM(ctx context.Context, domain *virt.Domain) error {
 
 	// wait 2 minutes for clean shutdown
 	// otherwise force via 'Destroy()'
-	maxBackOff, _ := time.ParseDuration("2m")
+	maxBackOff, _ := time.ParseDuration("45s")
 	log.Debug().Msgf("Checking if domain has shutdown for %.1f minutes", maxBackOff.Minutes())
 	_, err := backoff.Retry(ctx, func() (any, error) {
 		info, err := domain.GetInfo()
