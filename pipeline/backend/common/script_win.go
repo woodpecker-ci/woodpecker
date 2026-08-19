@@ -75,8 +75,10 @@ Write-Output @'
 + %s
 '@
 
-& { %s } ;
-Write-Output "DEBUG: $LASTEXITCODE"
-if ($LASTEXITCODE) { [Environment]::Exit($LASTEXITCODE) }
+& {
+  %s ;
+  Write-Output "DEBUG: $LASTEXITCODE" ;
+  if ($LASTEXITCODE) { [Environment]::Exit($LASTEXITCODE) } ;
+} ;
 
 `
