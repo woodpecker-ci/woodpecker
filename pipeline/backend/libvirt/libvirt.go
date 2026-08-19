@@ -309,9 +309,17 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	// in TailStep it is potentially too late
 	pr, pw := nio.Pipe(buffer.New(64 * 1024))
 	sshCmd.Stdout = nil // see comment below
-	sshCmd.Stderr = pw
+	sshCmd.Stderr = nil
 
+	var wg sync.WaitGroup
+
+	wg.Add(1)
 	stdoutR, err := sshCmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	wg.Add(1)
+	stderrR, err := sshCmd.StderrPipe()
 	if err != nil {
 		return err
 	}
@@ -328,6 +336,16 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		// a pipe. So we need to implement the copy+close ourselves. There is no
 		// EOF callback.
 		io.Copy(pw, stdoutR)
+		wg.Done()
+	}()
+
+	go func() {
+		io.Copy(pw, stderrR)
+		wg.Done()
+	}()
+
+	go func() {
+		wg.Wait()
 		pw.Close()
 		log.Debug().Msg("Closing write pipe end")
 	}()
