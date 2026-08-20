@@ -19,6 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
@@ -76,4 +77,35 @@ func GetRepoToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, token)
+}
+
+// RotateRepoTokens
+//
+//	@Summary		Rotate all tokens of the repository
+//	@Description	Replaces every token of the repository with a freshly generated one and drops the ones no longer in use. URLs carrying an old token, such as badge URLs, stop working.
+//	@Router			/repos/{repo_id}/token/rotate [post]
+//	@Produce		json
+//	@Success		200	{array}	Token
+//	@Tags			Repositories
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			repo_id			path	int		true	"the repository id"
+func RotateRepoTokens(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+
+	// Badge is the only persistent repo token today. Future short-lived kinds,
+	// such as tokens scoped to one pipeline execution, need separate rotation
+	// logic that only replaces existing rows.
+	rotated := []*model.Token{
+		model.NewToken(repo.ID, model.TokenTypeBadge),
+	}
+
+	if err := _store.TokenReplace(repo, rotated); err != nil {
+		msg := "could not rotate repo tokens."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
+	c.JSON(http.StatusOK, rotated)
 }

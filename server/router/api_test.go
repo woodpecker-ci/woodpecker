@@ -88,3 +88,66 @@ func TestRepoTokenRouteRequiresPush(t *testing.T) {
 	_, err = s.TokenFind(repo, model.TokenTypeBadge)
 	assert.NoError(t, err)
 }
+
+func TestRepoTokenRotateRouteRequiresAdmin(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	s := datastore.NewTestStore(t)
+	repo := &model.Repo{
+		ForgeID:       1,
+		ForgeRemoteID: "repo-token-rotate-route",
+		Owner:         "owner",
+		Name:          "repo-token-rotate-route",
+		FullName:      "owner/repo-token-rotate-route",
+		Visibility:    model.VisibilityPrivate,
+	}
+	require.NoError(t, s.CreateRepo(repo))
+	old := model.NewToken(repo.ID, model.TokenTypeBadge)
+	require.NoError(t, s.TokenCreate(old))
+	user := &model.User{ID: 1, Login: "user", ForgeID: repo.ForgeID}
+
+	manager := manager_mocks.NewMockManager(t)
+	manager.On("ForgeFromRepo", mock.Anything).Return(forge_mocks.NewMockForge(t), nil)
+	previousManager := server.Config.Services.Manager
+	server.Config.Services.Manager = manager
+	t.Cleanup(func() { server.Config.Services.Manager = previousManager })
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set("store", s)
+		c.Set("user", user)
+		c.Next()
+	})
+	apiRoutes(engine.Group(""))
+
+	rotateToken := func() *httptest.ResponseRecorder {
+		t.Helper()
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, "/api/repos/"+strconv.FormatInt(repo.ID, 10)+"/token/rotate", nil)
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	perm := &model.Perm{
+		UserID: user.ID,
+		RepoID: repo.ID,
+		Pull:   true,
+		Push:   true,
+		Synced: time.Now().Unix(),
+	}
+	require.NoError(t, s.PermUpsert(perm))
+
+	denied := rotateToken()
+	assert.Equal(t, http.StatusForbidden, denied.Code)
+	stored, err := s.TokenFind(repo, model.TokenTypeBadge)
+	require.NoError(t, err)
+	assert.Equal(t, old.Value, stored.Value)
+
+	perm.Admin = true
+	require.NoError(t, s.PermUpsert(perm))
+
+	allowed := rotateToken()
+	assert.Equal(t, http.StatusOK, allowed.Code)
+	stored, err = s.TokenFind(repo, model.TokenTypeBadge)
+	require.NoError(t, err)
+	assert.NotEqual(t, old.Value, stored.Value)
+}

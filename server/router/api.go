@@ -133,6 +133,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 					// requires push permissions
 					repo.GET("/token", session.MustPush, api.GetRepoToken)
+					repo.POST("/token/rotate", session.MustRepoAdmin(), api.RotateRepoTokens)
 
 					// requires push permissions
 					repo.GET("/secrets", session.MustPush, api.GetSecretList)

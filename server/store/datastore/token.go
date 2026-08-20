@@ -37,3 +37,35 @@ func (s storage) TokenFind(repo *model.Repo, tokenType model.TokenType) (*model.
 	token := new(model.Token)
 	return token, wrapGet(s.engine.Where("repo_id = ? AND type = ?", repo.ID, tokenType).Get(token))
 }
+
+// TokenReplace swaps all tokens of a repo for the given ones in a single
+// transaction, so a repo is never left without or with half of its tokens.
+func (s storage) TokenReplace(repo *model.Repo, tokens []*model.Token) error {
+	for _, token := range tokens {
+		if err := token.Validate(); err != nil {
+			return err
+		}
+		if token.RepoID != repo.ID {
+			return fmt.Errorf("token repo id %d does not match repo id %d", token.RepoID, repo.ID)
+		}
+	}
+
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Token)); err != nil {
+		return err
+	}
+
+	for _, token := range tokens {
+		token.ID = 0
+		if err := wrapInsert(sess.Insert(token)); err != nil {
+			return err
+		}
+	}
+
+	return sess.Commit()
+}

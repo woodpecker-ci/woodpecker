@@ -111,6 +111,7 @@ const forgeIcon = computed<IconNames>(() => {
 // non-public repos only serve their badge to holders of the badge token, which
 // in turn is only readable with push permissions
 const badgeToken = ref<string>('');
+provide('badge-token', badgeToken);
 
 async function loadBadgeToken() {
   badgeToken.value = '';

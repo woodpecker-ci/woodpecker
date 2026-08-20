@@ -77,6 +77,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/token?type=${type}`) as Promise<Token>;
   }
 
+  async rotateRepoTokens(repoId: number): Promise<Token[]> {
+    return this._post(`/api/repos/${repoId}/token/rotate`) as Promise<Token[]>;
+  }
+
   async getRepoPullRequests(repoId: number, opts?: PaginationOptions): Promise<PullRequest[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/pull_requests?${query}`) as Promise<PullRequest[]>;

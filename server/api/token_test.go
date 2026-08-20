@@ -98,3 +98,64 @@ func TestGetRepoToken(t *testing.T) {
 		assert.Equal(t, got.Value, again.Value)
 	})
 }
+
+func TestRotateRepoTokens(t *testing.T) {
+	s := newTestStore(t)
+
+	repo := &model.Repo{
+		ForgeRemoteID: "rotate",
+		Owner:         "owner",
+		Name:          "rotate",
+		FullName:      "owner/rotate",
+		IsActive:      true,
+	}
+	require.NoError(t, s.CreateRepo(repo))
+
+	old := model.NewToken(repo.ID, model.TokenTypeBadge)
+	require.NoError(t, s.TokenCreate(old))
+
+	rotated := rotateTokens(t, s, repo)
+
+	require.Len(t, rotated, 1)
+	assert.Equal(t, model.TokenTypeBadge, rotated[0].Type)
+	assert.NotEqual(t, old.Value, rotated[0].Value, "the old token has to stop working")
+
+	stored, err := s.TokenFind(repo, model.TokenTypeBadge)
+	require.NoError(t, err)
+	assert.Equal(t, rotated[0].Value, stored.Value)
+}
+
+// Rotating a repo that never had a token must equip it rather than fail.
+func TestRotateRepoTokensWithoutExisting(t *testing.T) {
+	s := newTestStore(t)
+
+	repo := &model.Repo{
+		ForgeRemoteID: "rotate-fresh",
+		Owner:         "owner",
+		Name:          "rotate-fresh",
+		FullName:      "owner/rotate-fresh",
+		IsActive:      true,
+	}
+	require.NoError(t, s.CreateRepo(repo))
+
+	rotated := rotateTokens(t, s, repo)
+
+	require.Len(t, rotated, 1)
+	_, err := s.TokenFind(repo, model.TokenTypeBadge)
+	assert.NoError(t, err)
+}
+
+func rotateTokens(t *testing.T, s store.Store, repo *model.Repo) []*model.Token {
+	t.Helper()
+
+	tc := newTestContext(t, s)
+	withRepo(repo, nil)(tc)
+	tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/", nil)
+	RotateRepoTokens(tc.Ctx)
+
+	require.Equal(t, http.StatusOK, tc.Recorder.Code)
+
+	var rotated []*model.Token
+	require.NoError(t, json.Unmarshal(tc.Recorder.Body.Bytes(), &rotated))
+	return rotated
+}

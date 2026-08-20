@@ -83,3 +83,90 @@ func TestTokenDeletedWithRepo(t *testing.T) {
 	_, err := store.TokenFind(repo, model.TokenTypeBadge)
 	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 }
+
+// Replacing has to clear rows of a type this version no longer knows too,
+// those can only be dropped wholesale.
+func TestTokenReplace(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Token))
+	defer closer()
+
+	repo := &model.Repo{ID: 1, Name: "repo"}
+	other := &model.Repo{ID: 2, Name: "other"}
+	assert.NoError(t, store.TokenCreate(model.NewToken(repo.ID, model.TokenTypeBadge)))
+	otherToken := model.NewToken(other.ID, model.TokenTypeBadge)
+	assert.NoError(t, store.TokenCreate(otherToken))
+
+	// a stale token of a type this server version no longer supports
+	_, err := store.engine.Insert(&model.Token{RepoID: repo.ID, Type: model.TokenType("gone"), Value: "stale"})
+	assert.NoError(t, err)
+
+	fresh := model.NewToken(repo.ID, model.TokenTypeBadge)
+	assert.NoError(t, store.TokenReplace(repo, []*model.Token{fresh}))
+
+	stored, err := store.TokenFind(repo, model.TokenTypeBadge)
+	assert.NoError(t, err)
+	assert.Equal(t, fresh.Value, stored.Value)
+	_, err = store.TokenFind(repo, model.TokenType("gone"))
+	assert.ErrorIs(t, err, types.ErrRecordNotExist)
+
+	// tokens of other repos are untouched
+	stored, err = store.TokenFind(other, model.TokenTypeBadge)
+	assert.NoError(t, err)
+	assert.Equal(t, otherToken.Value, stored.Value)
+}
+
+// A rejected token must not take the old ones down with it.
+func TestTokenReplaceKeepsOldOnInvalid(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Token))
+	defer closer()
+
+	repo := &model.Repo{ID: 1, Name: "repo"}
+	old := model.NewToken(repo.ID, model.TokenTypeBadge)
+	assert.NoError(t, store.TokenCreate(old))
+
+	err := store.TokenReplace(repo, []*model.Token{{RepoID: repo.ID, Type: model.TokenType("unknown"), Value: "x"}})
+	assert.Error(t, err)
+
+	stored, err := store.TokenFind(repo, model.TokenTypeBadge)
+	assert.NoError(t, err)
+	assert.Equal(t, old.Value, stored.Value)
+}
+
+func TestTokenReplaceRejectsTokenForAnotherRepo(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Token))
+	defer closer()
+
+	repo := &model.Repo{ID: 1, Name: "repo"}
+	other := &model.Repo{ID: 2, Name: "other"}
+	old := model.NewToken(repo.ID, model.TokenTypeBadge)
+	assert.NoError(t, store.TokenCreate(old))
+
+	err := store.TokenReplace(repo, []*model.Token{model.NewToken(other.ID, model.TokenTypeBadge)})
+	assert.ErrorContains(t, err, "does not match repo id")
+
+	stored, err := store.TokenFind(repo, model.TokenTypeBadge)
+	assert.NoError(t, err)
+	assert.Equal(t, old.Value, stored.Value)
+	_, err = store.TokenFind(other, model.TokenTypeBadge)
+	assert.ErrorIs(t, err, types.ErrRecordNotExist)
+}
+
+func TestTokenReplaceRollsBackInsertFailure(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Token))
+	defer closer()
+
+	repo := &model.Repo{ID: 1, Name: "repo"}
+	other := &model.Repo{ID: 2, Name: "other"}
+	old := model.NewToken(repo.ID, model.TokenTypeBadge)
+	assert.NoError(t, store.TokenCreate(old))
+	conflicting := model.NewToken(other.ID, model.TokenTypeBadge)
+	assert.NoError(t, store.TokenCreate(conflicting))
+
+	replacement := model.NewToken(repo.ID, model.TokenTypeBadge)
+	replacement.Value = conflicting.Value
+	assert.Error(t, store.TokenReplace(repo, []*model.Token{replacement}))
+
+	stored, err := store.TokenFind(repo, model.TokenTypeBadge)
+	assert.NoError(t, err)
+	assert.Equal(t, old.Value, stored.Value)
+}

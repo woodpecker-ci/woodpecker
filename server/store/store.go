@@ -171,6 +171,7 @@ type Store interface {
 	// Token
 	TokenCreate(*model.Token) error
 	TokenFind(*model.Repo, model.TokenType) (*model.Token, error)
+	TokenReplace(*model.Repo, []*model.Token) error
 
 	// Forge
 	ForgeCreate(*model.Forge) error

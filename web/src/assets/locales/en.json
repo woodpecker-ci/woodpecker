@@ -197,6 +197,12 @@
           "repair": "Repair repository",
           "success": "Repository repaired"
         },
+        "rotate_tokens": {
+          "rotate_tokens": "Rotate all tokens",
+          "desc": "Rotate all repository tokens and clean up stale ones",
+          "confirm": "Existing private badge URLs and other links containing a repository token will stop working immediately.\n\nRotate all repository tokens?",
+          "success": "Repository tokens rotated"
+        },
         "disable": {
           "disable": "Disable repository",
           "success": "Repository disabled"
