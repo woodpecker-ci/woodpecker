@@ -137,6 +137,11 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-concurrency-invalid.yaml",
 			fail:     true,
 		},
+		{
+			name:     "Service without name in array syntax",
+			testFile: ".woodpecker/test-broken-service-without-name.yaml",
+			fail:     true,
+		},
 	}
 
 	for _, tt := range testTable {

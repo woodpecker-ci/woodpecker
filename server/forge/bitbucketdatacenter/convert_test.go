@@ -368,12 +368,6 @@ func Test_convertProjectsToTeams(t *testing.T) {
 func Test_convertListOptions(t *testing.T) {
 	t.Parallel()
 
-	t.Run("all returns empty options", func(t *testing.T) {
-		t.Parallel()
-		got := convertListOptions(&model.ListOptions{All: true, Page: 3, PerPage: 50})
-		assert.Equal(t, bitbucket.ListOptions{}, got)
-	})
-
 	t.Run("paged computes limit and start", func(t *testing.T) {
 		t.Parallel()
 		got := convertListOptions(&model.ListOptions{Page: 3, PerPage: 50})

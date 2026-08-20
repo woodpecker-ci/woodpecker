@@ -66,7 +66,7 @@ type MockScheduler_CancelWorkflows_Call struct {
 // CancelWorkflows is a helper method to define mock.On call
 //   - c context.Context
 //   - workflowIDs []string
-func (_e *MockScheduler_Expecter) CancelWorkflows(c interface{}, workflowIDs interface{}) *MockScheduler_CancelWorkflows_Call {
+func (_e *MockScheduler_Expecter) CancelWorkflows(c any, workflowIDs any) *MockScheduler_CancelWorkflows_Call {
 	return &MockScheduler_CancelWorkflows_Call{Call: _e.mock.On("CancelWorkflows", c, workflowIDs)}
 }
 
@@ -124,7 +124,7 @@ type MockScheduler_Done_Call struct {
 //   - c context.Context
 //   - id string
 //   - exitStatus model.StatusValue
-func (_e *MockScheduler_Expecter) Done(c interface{}, id interface{}, exitStatus interface{}) *MockScheduler_Done_Call {
+func (_e *MockScheduler_Expecter) Done(c any, id any, exitStatus any) *MockScheduler_Done_Call {
 	return &MockScheduler_Done_Call{Call: _e.mock.On("Done", c, id, exitStatus)}
 }
 
@@ -187,7 +187,7 @@ type MockScheduler_Error_Call struct {
 //   - c context.Context
 //   - id string
 //   - err error
-func (_e *MockScheduler_Expecter) Error(c interface{}, id interface{}, err interface{}) *MockScheduler_Error_Call {
+func (_e *MockScheduler_Expecter) Error(c any, id any, err any) *MockScheduler_Error_Call {
 	return &MockScheduler_Error_Call{Call: _e.mock.On("Error", c, id, err)}
 }
 
@@ -250,7 +250,7 @@ type MockScheduler_Extend_Call struct {
 //   - c context.Context
 //   - agentID int64
 //   - workflowID string
-func (_e *MockScheduler_Expecter) Extend(c interface{}, agentID interface{}, workflowID interface{}) *MockScheduler_Extend_Call {
+func (_e *MockScheduler_Expecter) Extend(c any, agentID any, workflowID any) *MockScheduler_Extend_Call {
 	return &MockScheduler_Extend_Call{Call: _e.mock.On("Extend", c, agentID, workflowID)}
 }
 
@@ -311,7 +311,7 @@ type MockScheduler_Info_Call struct {
 
 // Info is a helper method to define mock.On call
 //   - c context.Context
-func (_e *MockScheduler_Expecter) Info(c interface{}) *MockScheduler_Info_Call {
+func (_e *MockScheduler_Expecter) Info(c any) *MockScheduler_Info_Call {
 	return &MockScheduler_Info_Call{Call: _e.mock.On("Info", c)}
 }
 
@@ -351,7 +351,7 @@ type MockScheduler_KickAgentWorkers_Call struct {
 
 // KickAgentWorkers is a helper method to define mock.On call
 //   - agentID int64
-func (_e *MockScheduler_Expecter) KickAgentWorkers(agentID interface{}) *MockScheduler_KickAgentWorkers_Call {
+func (_e *MockScheduler_Expecter) KickAgentWorkers(agentID any) *MockScheduler_KickAgentWorkers_Call {
 	return &MockScheduler_KickAgentWorkers_Call{Call: _e.mock.On("KickAgentWorkers", agentID)}
 }
 
@@ -449,7 +449,7 @@ type MockScheduler_Poll_Call struct {
 //   - agentID int64
 //   - agentFilter rpc.Filter
 //   - markSkipped func(taskID string) error
-func (_e *MockScheduler_Expecter) Poll(c interface{}, agentID interface{}, agentFilter interface{}, markSkipped interface{}) *MockScheduler_Poll_Call {
+func (_e *MockScheduler_Expecter) Poll(c any, agentID any, agentFilter any, markSkipped any) *MockScheduler_Poll_Call {
 	return &MockScheduler_Poll_Call{Call: _e.mock.On("Poll", c, agentID, agentFilter, markSkipped)}
 }
 
@@ -517,7 +517,7 @@ type MockScheduler_PublishPipelineEvent_Call struct {
 //   - c context.Context
 //   - repo *model.Repo
 //   - pipeline *model.Pipeline
-func (_e *MockScheduler_Expecter) PublishPipelineEvent(c interface{}, repo interface{}, pipeline interface{}) *MockScheduler_PublishPipelineEvent_Call {
+func (_e *MockScheduler_Expecter) PublishPipelineEvent(c any, repo any, pipeline any) *MockScheduler_PublishPipelineEvent_Call {
 	return &MockScheduler_PublishPipelineEvent_Call{Call: _e.mock.On("PublishPipelineEvent", c, repo, pipeline)}
 }
 
@@ -614,7 +614,7 @@ type MockScheduler_StartPipeline_Call struct {
 //   - repo *model.Repo
 //   - pipeline *model.Pipeline
 //   - tasks []*model.Task
-func (_e *MockScheduler_Expecter) StartPipeline(c interface{}, repo interface{}, pipeline interface{}, tasks interface{}) *MockScheduler_StartPipeline_Call {
+func (_e *MockScheduler_Expecter) StartPipeline(c any, repo any, pipeline any, tasks any) *MockScheduler_StartPipeline_Call {
 	return &MockScheduler_StartPipeline_Call{Call: _e.mock.On("StartPipeline", c, repo, pipeline, tasks)}
 }
 
@@ -682,7 +682,7 @@ type MockScheduler_Subscribe_Call struct {
 //   - c context.Context
 //   - t pubsub.Topics
 //   - r pubsub.Receiver
-func (_e *MockScheduler_Expecter) Subscribe(c interface{}, t interface{}, r interface{}) *MockScheduler_Subscribe_Call {
+func (_e *MockScheduler_Expecter) Subscribe(c any, t any, r any) *MockScheduler_Subscribe_Call {
 	return &MockScheduler_Subscribe_Call{Call: _e.mock.On("Subscribe", c, t, r)}
 }
 
@@ -744,7 +744,7 @@ type MockScheduler_Wait_Call struct {
 // Wait is a helper method to define mock.On call
 //   - c context.Context
 //   - id string
-func (_e *MockScheduler_Expecter) Wait(c interface{}, id interface{}) *MockScheduler_Wait_Call {
+func (_e *MockScheduler_Expecter) Wait(c any, id any) *MockScheduler_Wait_Call {
 	return &MockScheduler_Wait_Call{Call: _e.mock.On("Wait", c, id)}
 }
 
