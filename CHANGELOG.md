@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Don't inject additional env vars into plugins [[#7040](https://github.com/woodpecker-ci/woodpecker/pull/7040)]
 - Don't inject matrix env vars into plugins [[#7036](https://github.com/woodpecker-ci/woodpecker/pull/7036)]
 - Update `golang.org/x/mod` [[#7012](https://github.com/woodpecker-ci/woodpecker/pull/7012)]
 - Change group identifier to full_path for GitLab [[#6950](https://github.com/woodpecker-ci/woodpecker/pull/6950)]
@@ -19,6 +20,7 @@
 ### 📈 Enhancement
 
 - Allow to add custom message to manual pipelines [[#6973](https://github.com/woodpecker-ci/woodpecker/pull/6973)]
+- Add hidden `decode-base64` agent command for Windows local backend [[#7023](https://github.com/woodpecker-ci/woodpecker/pull/7023)]
 - Enforce unique name for services and steps if dag is used [[#7032](https://github.com/woodpecker-ci/woodpecker/pull/7032)]
 - Add custom list opts with all [[#6992](https://github.com/woodpecker-ci/woodpecker/pull/6992)]
 - Add pipeline log download endpoint [[#6876](https://github.com/woodpecker-ci/woodpecker/pull/6876)]
@@ -40,6 +42,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix runtime to ignore cancel as runtime error [[#7031](https://github.com/woodpecker-ci/woodpecker/pull/7031)]
 - Fix orphaned pipelines after repo delete [[#6971](https://github.com/woodpecker-ci/woodpecker/pull/6971)]
 - Migrate modernize encryption service [[#6830](https://github.com/woodpecker-ci/woodpecker/pull/6830)]
 - Fix running multiple cmdlets on windows [[#6968](https://github.com/woodpecker-ci/woodpecker/pull/6968)]
@@ -89,7 +92,6 @@
 
 ### Misc
 
-- Add hidden `decode-base64` agent command for Windows local backend [[#7023](https://github.com/woodpecker-ci/woodpecker/pull/7023)]
 - Remove gitpod [[#7013](https://github.com/woodpecker-ci/woodpecker/pull/7013)]
 - Drop star-history [[#6997](https://github.com/woodpecker-ci/woodpecker/pull/6997)]
 - Do not run openapi generation twice on fail [[#6987](https://github.com/woodpecker-ci/woodpecker/pull/6987)]
