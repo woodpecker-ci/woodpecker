@@ -175,6 +175,8 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 	var flatMap []string
 	for key, value := range configEnv {
+		log.Debug().Msgf("key: %s", key)
+		log.Debug().Msgf("value: %s", value)
 		flatMap = append(flatMap, fmt.Sprintf("%s=%s", key, value))
 	}
 
@@ -299,10 +301,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	if err != nil {
 		return err
 	}
-	sshCmd.Env = nil
-	if err := sshCmd.Setenv("CHERE_INVOKING", "1"); err != nil {
-		return fmt.Errorf("setenv:%s", err)
-	}
+	sshCmd.Env = flatMap
 
 	//for _, kv := range flatMap {
 	//	parts := strings.SplitN(kv, "=", 2)
