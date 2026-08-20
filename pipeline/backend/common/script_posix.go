@@ -65,15 +65,18 @@ unset CI_NETRC_PASSWORD
 unset CI_SCRIPT
 mkdir -p "{{.WorkDir}}"
 cd "{{.WorkDir}}"
+if [ -n "$CI_WRITE_PID" ]; then
 {
-	printf "%%s" "$$" > "${TMPDIR:-/tmp}/woodpecker_%s.pid"
-} || true
+	printf "%%s" "$$" > "${TMPDIR:-/tmp}/woodpecker_%s.pid" || true
+}
 `
 
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScript = `
-echo + %s
+cat <<EOF
++ %s
+EOF
 {
 	%s
 }
