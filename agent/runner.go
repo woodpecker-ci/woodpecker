@@ -186,11 +186,13 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	state.Finished = time.Now().Unix()
 
 	if err != nil {
-		state.Error = err.Error()
 		if errors.Is(err, pipeline_errors.ErrCancel) {
+			// A canceled workflow did not fail. The server stores Error as the
+			// workflow error and shows it as a runtime error, so only report
+			// the cancellation itself.
 			state.Canceled = true
-			// cleanup joined error messages
-			state.Error = pipeline_errors.ErrCancel.Error()
+		} else {
+			state.Error = err.Error()
 		}
 	}
 
