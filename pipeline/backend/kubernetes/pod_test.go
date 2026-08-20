@@ -557,6 +557,7 @@ func TestFullPod(t *testing.T) {
 		PodNodeSelectorAllowFromStep:    true,
 		SecurityContext:                 SecurityContextConfig{RunAsNonRoot: false},
 		ServiceAccountNameAllowFromStep: true,
+		RuntimeClassAllowFromStep:       true,
 	},
 		"wp-01he8bebctabr3kgk0qj36d2me-0",
 		"linux/amd64",

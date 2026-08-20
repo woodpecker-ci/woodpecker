@@ -45,7 +45,8 @@ func TestNewAppRunsDecodeBase64WithoutConfig(t *testing.T) {
 	}
 
 	command := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestNewAppRunsDecodeBase64WithoutConfig$")
-	command.Env = append(os.Environ(),
+	command.Env = append(
+		os.Environ(),
 		"WOODPECKER_DECODE_BASE64_HELPER=1",
 		"WOODPECKER_DISABLE_UPDATE_CHECK=true",
 		"XDG_CONFIG_HOME="+t.TempDir(),

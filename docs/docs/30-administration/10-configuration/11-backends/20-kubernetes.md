@@ -673,3 +673,12 @@ Container image used for the workspace permission init container, which is used 
 - Default: `false`
 
 Determines if the Pod `serviceAccountName` can be defined from a step's backend options. Disabled by default, as it would otherwise allow any user with push access to run pods under an arbitrary service account and escalate privileges.
+
+---
+
+### BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP`
+- Default: `false`
+
+Determines if the Pod `runtimeClassName` can be defined from a step's backend options. Disabled by default, as it would otherwise allow any user with push access to run pods runtime class.
