@@ -118,6 +118,9 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Redirection)); err != nil {
 		return err
 	}
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Token)); err != nil {
+		return err
+	}
 
 	// delete related pipelines
 	for {
