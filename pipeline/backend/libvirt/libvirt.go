@@ -387,6 +387,9 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		return fmt.Errorf("Could not find CI_SCRIPT in env")
 	}
 	cmdIn, err := base64.StdEncoding.DecodeString(cmdInB64)
+	if err != nil {
+		return err
+	}
 	go func() {
 		_, err := stdinWC.Write(cmdIn)
 		if err != nil {
