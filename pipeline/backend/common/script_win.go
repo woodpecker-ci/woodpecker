@@ -67,18 +67,6 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 cd "{{.WorkDir}}";
 $PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline ;
 Write-Output "DEBUG: $PID" ;
-
-# Source - https://stackoverflow.com/a/70180276
-# Posted by Lieven Keersmaekers, modified by community. See post 'Timeline' for change history
-# Retrieved 2026-08-19, License - CC BY-SA 4.0
-function Kill-ChildProcesses ($ParentProcessId) {
-    $filter = "parentprocessid = '$($ParentProcessId)'"
-    Get-CIMInstance -ClassName win32_process -filter $filter | Foreach-Object {
-            Write-Output "Killing $_.ProcessId"
-            & taskkill /PID $_.ProcessId /F /T
-        }
-}
-
 `
 
 // traceScript is a helper script that is added to the step script
@@ -90,12 +78,7 @@ Write-Output @'
 
 & {
   %s ;
-	$err = $LASTEXITCODE
-  Write-Output "DEBUG: $err" ;
-  if ($err) {
-		Kill-ChildProcesses $PID
-		exit $err
-	} ;
+  if ($LASTEXITCODE) { exit $LASTEXITCODE } ;
 } ;
 
 `
