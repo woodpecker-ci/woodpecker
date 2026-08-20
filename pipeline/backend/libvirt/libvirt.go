@@ -163,6 +163,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	w.(*workflow).guestOS.Store(step.UUID, guestOS)
 
 	configEnv := make(map[string]string)
+	log.Debug().Msgf("stepEnv: %s", step.Environment)
 	maps.Copy(configEnv, step.Environment)
 
 	env, entry, err := common.GenerateSSHConf(step.Commands, guestOS, step.WorkingDir, step.UUID)
