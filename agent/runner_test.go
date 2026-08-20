@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	backend_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	rpc_mocks "go.woodpecker-ci.org/woodpecker/v3/rpc/mocks"
 )
@@ -54,7 +54,7 @@ func dummyWorkflow() *rpc.Workflow {
 // must be reported next to it: the server stores that text as the workflow
 // error and the web UI shows it as a runtime error.
 func TestRunReportsCancelWithoutError(t *testing.T) {
-	engine := backend_mocks.NewMockBackend(t)
+	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	// The step start is aborted mid-flight once the workflow is canceled, the

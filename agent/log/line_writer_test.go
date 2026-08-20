@@ -22,11 +22,11 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/agent/log"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
-	"go.woodpecker-ci.org/woodpecker/v3/rpc/mocks"
+	rpc_mocks "go.woodpecker-ci.org/woodpecker/v3/rpc/mocks"
 )
 
 func TestLineWriter(t *testing.T) {
-	peer := mocks.NewMockPeer(t)
+	peer := rpc_mocks.NewMockPeer(t)
 	peer.On("EnqueueLog", mock.Anything)
 
 	secrets := []string{"world"}
