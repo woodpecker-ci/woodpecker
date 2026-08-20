@@ -382,13 +382,13 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	}
 
 	// now feed the actual command to stdin
-	cmdIn, ok := env["CI_SCRIPT"]
-	log.Debug().Msgf("%s", cmdIn)
+	cmdInB64, ok := env["CI_SCRIPT"]
 	if !ok {
 		return fmt.Errorf("Could not find CI_SCRIPT in env")
 	}
+	cmdIn, err := base64.StdEncoding.DecodeString(cmdInB64)
 	go func() {
-		_, err := stdinWC.Write([]byte(cmdIn))
+		_, err := stdinWC.Write(cmdIn)
 		if err != nil {
 			log.Debug().Msgf("Failed to write cmd to stdin: %s", err)
 		}

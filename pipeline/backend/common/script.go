@@ -45,13 +45,13 @@ func GenerateContainerConf(commands []string, osType string, workDir string, ste
 func GenerateSSHConf(commands []string, osType string, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
-		env["CI_SCRIPT"] = generateScriptWindows(commands, workDir, stepUUID)
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands, workDir, stepUUID)))
 		env["SHELL"] = "powershell.exe"
 		env["CI_WRITE_PID"] = "yes"
 		// cspell:disable-next-line
 		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "-"}
 	} else {
-		env["CI_SCRIPT"] = generateScriptPosix(commands, workDir, stepUUID)
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir, stepUUID)))
 		env["SHELL"] = "/bin/sh"
 		env["CI_WRITE_PID"] = "yes"
 		entry = []string{"/bin/sh -e"}
