@@ -1,4 +1,5 @@
 import ApiClient, { encodeQueryString } from './client';
+import { TokenType } from './types';
 import type {
   Agent,
   Cron,
@@ -17,6 +18,7 @@ import type {
   RepoPermissions,
   RepoSettings,
   Secret,
+  Token,
   User,
 } from './types';
 
@@ -69,6 +71,10 @@ export default class WoodpeckerClient extends ApiClient {
   async getRepoBranches(repoId: number, opts?: PaginationOptions): Promise<string[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/branches?${query}`) as Promise<string[]>;
+  }
+
+  async getRepoToken(repoId: number, type: TokenType = TokenType.Badge): Promise<Token> {
+    return this._get(`/api/repos/${repoId}/token?type=${type}`) as Promise<Token>;
   }
 
   async getRepoPullRequests(repoId: number, opts?: PaginationOptions): Promise<PullRequest[]> {

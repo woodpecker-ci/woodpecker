@@ -70,7 +70,7 @@ import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
-import { WebhookEvents } from '~/lib/api/types';
+import { RepoVisibility, WebhookEvents } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const repo = requiredInject('repo');
@@ -83,6 +83,18 @@ const branch = ref<string>('');
 const events = ref<string[]>([WebhookEvents.Push]);
 const workflow = ref<string>('');
 const step = ref<string>('');
+
+// non-public repos only serve their badge when the badge token is passed along
+const badgeToken = ref<string>('');
+const needsToken = computed(() => repo.value.visibility !== RepoVisibility.Public);
+
+async function loadBadgeToken() {
+  if (!needsToken.value) {
+    badgeToken.value = '';
+    return;
+  }
+  badgeToken.value = (await apiClient.getRepoToken(repo.value.id)).value;
+}
 
 async function loadBranches() {
   branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
@@ -123,6 +135,10 @@ const badgeUrl = computed(() => {
     }
   }
 
+  if (badgeToken.value !== '') {
+    params.push(`token=${encodeURIComponent(badgeToken.value)}`);
+  }
+
   return `${rootPath}/api/badges/${repo.value.id}/status.svg${params.length > 0 ? `?${params.join('&')}` : ''}`;
 });
 const repoUrl = computed(
@@ -140,7 +156,7 @@ const badgeContent = computed(() => {
   }
 
   if (badgeType.value === 'html') {
-    return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${badgeUrl.value.replace('&', '&amp;')}" alt="status-badge" />\n</a>`;
+    return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${badgeUrl.value.replaceAll('&', '&amp;')}" alt="status-badge" />\n</a>`;
   }
 
   return '';
@@ -148,10 +164,12 @@ const badgeContent = computed(() => {
 
 onMounted(() => {
   loadBranches();
+  loadBadgeToken();
 });
 
 watch(repo, () => {
   loadBranches();
+  loadBadgeToken();
 });
 
 const { t } = useI18n();
