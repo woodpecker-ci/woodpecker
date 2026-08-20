@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- k8s: allow to disable runtime class name backend option [[#7046](https://github.com/woodpecker-ci/woodpecker/pull/7046)]
 - Don't inject additional env vars into plugins [[#7040](https://github.com/woodpecker-ci/woodpecker/pull/7040)]
 - Don't inject matrix env vars into plugins [[#7036](https://github.com/woodpecker-ci/woodpecker/pull/7036)]
 - Update `golang.org/x/mod` [[#7012](https://github.com/woodpecker-ci/woodpecker/pull/7012)]
