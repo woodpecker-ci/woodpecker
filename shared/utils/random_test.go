@@ -15,6 +15,7 @@
 package utils
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -49,4 +50,14 @@ func TestRandomStringIsRandom(t *testing.T) {
 func TestRandomStringWithoutLength(t *testing.T) {
 	assert.Empty(t, RandomString(0))
 	assert.Empty(t, RandomString(-1))
+}
+
+func TestRandomStringTooLong(t *testing.T) {
+	tooLong := int(^uint(0) >> 1)
+	maxLength := uint64(math.MaxUint32) * bitsPerByte / bitsPerBase32Char
+	if uint64(tooLong) <= maxLength {
+		t.Skip("int cannot represent an oversized request on this platform")
+	}
+
+	assert.Empty(t, RandomString(tooLong))
 }

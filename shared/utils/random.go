@@ -27,8 +27,9 @@ var base32NoPadding = base32.StdEncoding.WithPadding(base32.NoPadding)
 
 const (
 	// Every base32 character carries five bits.
-	bitsPerBase32Char = 5
-	bitsPerByte       = 8
+	bitsPerBase32Char     = 5
+	bitsPerByte           = 8
+	maxRandomStringLength = uint64(math.MaxUint32) * bitsPerByte / bitsPerBase32Char
 )
 
 // RandomString returns a cryptographically secure random string of exactly
@@ -40,10 +41,11 @@ func RandomString(length int) string {
 		return ""
 	}
 
-	byteLen := (length*bitsPerBase32Char + bitsPerByte - 1) / bitsPerByte
-	if byteLen > math.MaxUint32 {
-		byteLen = math.MaxUint32
+	requestedLength := uint64(length)
+	if requestedLength > maxRandomStringLength {
+		return ""
 	}
+	byteLen := (requestedLength*bitsPerBase32Char + bitsPerByte - 1) / bitsPerByte
 
 	return base32NoPadding.EncodeToString(random.GetRandomBytes(uint32(byteLen)))[:length]
 }

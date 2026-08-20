@@ -58,7 +58,7 @@ func (Token) TableName() string {
 
 // Validate ensures the token is bound to a repo and has a known type and a value.
 func (t *Token) Validate() error {
-	if t.RepoID == 0 {
+	if t.RepoID <= 0 {
 		return fmt.Errorf("repo id is required")
 	}
 

@@ -36,6 +36,11 @@ func TestTokenValidate(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "negative repo",
+			token:   Token{RepoID: -1, Type: TokenTypeBadge, Value: "secret"},
+			wantErr: true,
+		},
+		{
 			name:    "unknown type",
 			token:   Token{RepoID: 1, Type: TokenType("cron"), Value: "secret"},
 			wantErr: true,
