@@ -54,7 +54,7 @@ func GenerateSSHConf(commands []string, osType string, workDir string, stepUUID 
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir, stepUUID)))
 		env["SHELL"] = "/bin/sh"
 		env["CI_WRITE_PID"] = "yes"
-		entry = []string{"/bin/sh -e"}
+		entry = []string{"/bin/sh", "-e"}
 	}
 
 	return env, entry, nil

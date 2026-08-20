@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -299,7 +300,14 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	if err != nil {
 		return err
 	}
-	sshCmd.Env = flatMap
+	sshCmd.Env = nil
+	for _, kv := range flatMap {
+		parts := strings.SplitN(kv, "=", 2)
+		if err := sshCmd.Setenv(parts[0], parts[1]); err != nil {
+			return fmt.Errorf("setenv %s: %w", parts[0], err)
+		}
+	}
+
 	log.Debug().Msgf("env: %s", flatMap)
 
 	w.(*workflow).commands.Store(step.UUID, sshCmd)
@@ -313,7 +321,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 	// we need to create pipes and set Stdout here
 	// in TailStep it is potentially too late
-	pr, pw := nio.Pipe(buffer.New(64 * 1024))
+	pr, pw := nio.Pipe(buffer.New(1024 * 1024))
 	sshCmd.Stdout = nil // see comment below
 	sshCmd.Stderr = nil
 
