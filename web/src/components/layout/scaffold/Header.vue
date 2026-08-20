@@ -22,7 +22,7 @@
           </div>
           <TextField
             v-if="searchBoxPresent"
-            class="order-3 w-full grow md:order-none md:w-auto"
+            class="order-3 h-9 w-full grow md:order-none md:w-auto"
             :aria-label="$t('search')"
             :placeholder="$t('search')"
             :model-value="search"
