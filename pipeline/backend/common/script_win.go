@@ -17,7 +17,6 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"text/template"
 )
 
@@ -32,12 +31,10 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 		return fmt.Sprintf("echo 'failed to generate posix script from commands: %s'; exit 1", err.Error())
 	}
 	for _, command := range commands {
-		escaped := fmt.Sprintf("%q", command)
-		escaped = strings.ReplaceAll(escaped, "$", `\$`)
 		fmt.Fprintf(
 			&buf,
 			traceScriptWin,
-			escaped,
+			command,
 			command,
 		)
 	}
