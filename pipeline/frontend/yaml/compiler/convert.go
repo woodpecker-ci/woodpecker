@@ -91,7 +91,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	maps.Copy(environment, c.env)
 
 	if !container.IsPlugin() {
-		maps.Copy(environment, c.axisEnv)
+		maps.Copy(environment, c.nonPluginEnv)
 	}
 
 	environment["CI_WORKSPACE"] = path.Join(workspaceBase, c.workspacePath)
@@ -152,7 +152,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 
 	whenEnv := map[string]string{}
 	maps.Copy(whenEnv, c.env)
-	maps.Copy(whenEnv, c.axisEnv)
+	maps.Copy(whenEnv, c.nonPluginEnv)
 
 	// at least one constraint contain status success, or all constraints have no status set
 	onSuccess := container.When.IncludesStatusSuccess(c.metadata, false, whenEnv)

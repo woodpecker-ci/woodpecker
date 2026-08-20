@@ -142,6 +142,28 @@ func (r *Runtime) startStep(step *backend_types.Step) (func(), int64, error) {
 	return wg.Wait, startTime, nil
 }
 
+// cancelFallout reports whether err is a consequence of the workflow being
+// canceled rather than of the step itself. Once the workflow context is done,
+// every backend call is aborted mid-flight and the error it returns describes
+// that abort. Its shape is backend specific: context.Canceled, ErrCancel, or a
+// transport error wrapping whichever cancel cause the caller set, so the
+// context is the only reliable signal.
+func (r *Runtime) cancelFallout(err error) bool {
+	if err == nil {
+		return false
+	}
+	return r.canceled() || errors.Is(err, context.Canceled) || errors.Is(err, pipeline_errors.ErrCancel)
+}
+
+// cancelErr logs the original error and returns ErrCancel in its place, so a
+// canceled step reports the cancellation instead of the backend's internal
+// error text.
+func (r *Runtime) cancelErr(err error, step *backend_types.Step) error {
+	logger := r.makeLogger()
+	logger.Debug().Err(err).Str("step", step.Name).Msg("step error caused by workflow cancellation")
+	return pipeline_errors.ErrCancel
+}
+
 // completeStep drains the log stream, waits for the process to exit, destroys
 // the container, and maps exit conditions (OOM kill, non-zero exit code, context
 // cancellation) to typed errors.
@@ -154,14 +176,13 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID) //nolint:contextcheck
 	if err != nil {
-		if errors.Is(err, context.Canceled) {
-			if waitState == nil {
-				waitState = &backend_types.State{}
-			}
-			waitState.Error = pipeline_errors.ErrCancel
-		} else {
+		if !r.cancelFallout(err) {
 			return nil, err
 		}
+		if waitState == nil {
+			waitState = &backend_types.State{}
+		}
+		waitState.Error = r.cancelErr(err, step)
 	}
 
 	// Use runnerCtx here: the workflow context may already be canceled but we
@@ -173,7 +194,7 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 	waitState.Started = startTime
 
 	// Re-check context cancellation: the wait may have raced with cancellation.
-	if ctxErr := r.ctx.Err(); ctxErr != nil && errors.Is(ctxErr, context.Canceled) {
+	if r.canceled() {
 		waitState.Error = pipeline_errors.ErrCancel
 	}
 
@@ -202,14 +223,17 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types
 	waitForLogs, startTime, err := r.startStep(step)
 	if err != nil {
 		// The step never ran — trace the start failure and surface it.
+		if r.cancelFallout(err) {
+			err = r.cancelErr(err, step)
+		}
 		return r.traceStep(nil, err, step)
 	}
 
 	processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
 	logger.Debug().Str("step", step.Name).Msg("complete")
 
-	if errors.Is(err, context.Canceled) {
-		err = pipeline_errors.ErrCancel
+	if r.cancelFallout(err) {
+		err = r.cancelErr(err, step)
 	}
 
 	err = r.traceStep(processState, err, step)
@@ -229,6 +253,9 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 	if err != nil {
 		// Setup failed before the container was running — treat it like a
 		// blocking failure so the pipeline is aware.
+		if r.cancelFallout(err) {
+			err = r.cancelErr(err, step)
+		}
 		return r.traceStep(nil, err, step)
 	}
 
@@ -242,10 +269,9 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
 		logger.Debug().Str("step", step.Name).Msg("complete")
 
-		if errors.Is(err, context.Canceled) {
-			err = pipeline_errors.ErrCancel
-		}
-		if err != nil {
+		if r.cancelFallout(err) {
+			err = r.cancelErr(err, step)
+		} else if err != nil {
 			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed while running")
 		}
 
