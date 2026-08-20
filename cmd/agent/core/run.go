@@ -43,7 +43,7 @@ func GenApp(backends []backend_types.Backend) *cli.Command {
 		{
 			Name:   "decode-base64",
 			Usage:  "decodes a base64 string",
-			Hidden: true,
+			Hidden: true, // internal helper for local backend and cmd
 			Action: shared.Base64Decoder,
 		},
 	}
