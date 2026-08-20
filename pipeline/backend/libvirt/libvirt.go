@@ -312,7 +312,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 	w.(*workflow).commands.Store(step.UUID, sshCmd)
 
-	if options.SSHConfig.Tty {
+	{
 		err := sshCmd.RequestPty("xterm", 40, 80, ssh.TerminalModes{})
 		if err != nil {
 			return err
