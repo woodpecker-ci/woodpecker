@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -161,15 +162,19 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	w.(*workflow).domains.Store(step.UUID, domain)
 	w.(*workflow).guestOS.Store(step.UUID, guestOS)
 
-	env, entry, err := common.GenerateSSHConf(step.Commands, guestOS, step.WorkingDir, step.UUID)
-	cmd := entry[0]
-	args := entry[1:]
+	configEnv := make(map[string]string)
+	maps.Copy(configEnv, step.Environment)
 
+	env, entry, err := common.GenerateSSHConf(step.Commands, guestOS, step.WorkingDir, step.UUID)
 	if err != nil {
 		return err
 	}
+	cmd := entry[0]
+	args := entry[1:]
+	maps.Copy(configEnv, env)
+
 	var flatMap []string
-	for key, value := range env {
+	for key, value := range configEnv {
 		flatMap = append(flatMap, fmt.Sprintf("%s=%s", key, value))
 	}
 
