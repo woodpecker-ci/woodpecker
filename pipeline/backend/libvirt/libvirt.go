@@ -178,6 +178,9 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	for key, value := range configEnv {
 		log.Debug().Msgf("key: %s", key)
 		log.Debug().Msgf("value: %s", value)
+		if key == "CI_SCRIPT" {
+			continue
+		}
 		flatMap = append(flatMap, fmt.Sprintf("%s=%s", key, value))
 	}
 
