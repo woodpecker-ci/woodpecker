@@ -16,10 +16,6 @@ WOODPECKER_GITHUB_SECRET=YOUR_GITHUB_CLIENT_SECRET
 You will get these values from GitHub when you register your OAuth application.
 To do so, go to Settings -> Developer Settings -> GitHub Apps -> New Oauth2 App.
 
-:::warning
-Do not use a "GitHub App" instead of an Oauth2 app as the former will not work correctly with Woodpecker right now (because user access tokens are not being refreshed automatically)
-:::
-
 ## App Settings
 
 - Name: An arbitrary name for your App
@@ -31,6 +27,47 @@ Do not use a "GitHub App" instead of an Oauth2 app as the former will not work c
 
 After your App has been created, you can generate a client secret.
 Use this one for the `WOODPECKER_GITHUB_SECRET` environment variable.
+
+## GitHub App
+
+In addition to the OAuth login, Woodpecker can authenticate as a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps) using installation access tokens for server-side API calls (commit statuses, pipeline configuration fetching, changed-file lookups) and for cloning repositories.
+This is recommended for larger organizations:
+
+- API calls are counted against the [rate limit of the app installation](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api#primary-rate-limit-for-github-app-installations) (5,000 requests/hour and more, scaling with the number of repositories) instead of the personal rate limit of the user who enabled the repository.
+- Pipelines keep working even if the user who enabled the repository loses access or leaves the organization.
+- Commit statuses are posted by the app's bot account instead of a personal user account.
+
+To use it, create a GitHub App (Settings -> Developer Settings -> GitHub Apps -> New GitHub App) and install it on your organization or the repositories you want to build.
+Disable the app's own webhook (uncheck "Active" under "Webhook") — Woodpecker keeps creating a webhook on each enabled repository itself.
+Grant the following repository permissions:
+
+- `Contents`: `Read-only` (clone repositories and read pipeline configuration)
+- `Commit statuses`: `Read and write` (report pipeline status)
+- `Pull requests`: `Read-only` (list changed files of pull requests)
+- `Deployments`: `Read and write` (only needed to report the status of deployment pipelines)
+
+Then configure the app credentials in addition to the OAuth settings. An OAuth client is still required for user login: keep using your OAuth2 app for `WOODPECKER_GITHUB_CLIENT`/`WOODPECKER_GITHUB_SECRET`. (The GitHub App's own OAuth credentials work for login too, but user tokens issued by a GitHub App only grant access to repositories the app is installed on, which limits repository listing and the user-token fallback described below.)
+
+```ini
+WOODPECKER_GITHUB_APP_ID=YOUR_GITHUB_APP_OR_CLIENT_ID
+WOODPECKER_GITHUB_APP_PRIVATE_KEY_FILE=/etc/woodpecker/github-app-private-key.pem
+```
+
+For repositories the app is not installed on, Woodpecker falls back to the OAuth token of the user who enabled the repository.
+
+Clone credentials handed to agents are restricted by default to the repository being built with read-only contents access.
+If your pipelines need to clone other private repositories of the same installation (e.g. git submodules or private go modules), set `WOODPECKER_GITHUB_APP_CLONE_TOKEN_SCOPE=installation` to hand out clone tokens covering all repositories of the app installation instead.
+Server-side API calls always use installation-wide tokens; those never leave the server.
+
+The private key is write-only: the API and the admin UI never return it, and leaving the field empty when updating a forge keeps the stored key.
+After saving, the "Test GitHub App" button in the admin UI (or `GET /api/forges/{id}/app-health`) verifies that the credentials work.
+
+:::note
+Installation access tokens expire after one hour.
+Clone credentials of pipelines that stay queued for a very long time may therefore expire before the clone step runs.
+This limitation will be resolved by injecting credentials when an agent picks up the workflow instead of at creation time, see [woodpecker-ci/woodpecker#2851](https://github.com/woodpecker-ci/woodpecker/issues/2851).
+Clone access to private repositories outside the installation (e.g. git submodules in another organization) requires falling back to user OAuth tokens by not installing the app on the affected repositories.
+:::
 
 ## Configuration
 
@@ -114,3 +151,39 @@ Configure if SSL verification should be skipped.
 - Default: `false`
 
 Configures the GitHub OAuth client to only obtain a token that can manage public repositories.
+
+---
+
+### GITHUB_APP_ID
+
+- Name: `WOODPECKER_GITHUB_APP_ID`
+- Default: none
+
+Configures the app id (or client id) of a GitHub App. When set together with the private key, Woodpecker uses installation access tokens of the app for server-side API calls and for cloning repositories the app is installed on.
+
+---
+
+### GITHUB_APP_PRIVATE_KEY
+
+- Name: `WOODPECKER_GITHUB_APP_PRIVATE_KEY`
+- Default: none
+
+Configures the private key of the GitHub App, either as plain PEM or base64-encoded PEM.
+
+---
+
+### GITHUB_APP_PRIVATE_KEY_FILE
+
+- Name: `WOODPECKER_GITHUB_APP_PRIVATE_KEY_FILE`
+- Default: none
+
+Read the value for `WOODPECKER_GITHUB_APP_PRIVATE_KEY` from the specified filepath, e.g. the `.pem` file downloaded from GitHub.
+
+---
+
+### GITHUB_APP_CLONE_TOKEN_SCOPE
+
+- Name: `WOODPECKER_GITHUB_APP_CLONE_TOKEN_SCOPE`
+- Default: `repo`
+
+Scope of the installation access tokens handed out as clone credentials. `repo` restricts them to the repository being built with read-only contents access. `installation` covers all repositories of the app installation with the app's permissions, which is needed to clone other private repositories during a pipeline (e.g. git submodules or private go modules of the same organization).
