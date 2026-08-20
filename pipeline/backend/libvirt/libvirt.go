@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"sync"
 	"time"
 
@@ -301,12 +300,16 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		return err
 	}
 	sshCmd.Env = nil
-	for _, kv := range flatMap {
-		parts := strings.SplitN(kv, "=", 2)
-		if err := sshCmd.Setenv(parts[0], parts[1]); err != nil {
-			return fmt.Errorf("setenv %s: %w", parts[0], err)
-		}
+	if err := sshCmd.Setenv("CHERE_INVOKING", "1"); err != nil {
+		return fmt.Errorf("setenv:%s", err)
 	}
+
+	//for _, kv := range flatMap {
+	//	parts := strings.SplitN(kv, "=", 2)
+	//	if err := sshCmd.Setenv(parts[0], parts[1]); err != nil {
+	//		return fmt.Errorf("setenv %s: %w", parts[0], err)
+	//	}
+	//}
 
 	log.Debug().Msgf("env: %s", flatMap)
 
