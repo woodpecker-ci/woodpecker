@@ -146,11 +146,11 @@ func WithEnviron(env map[string]string) Option {
 	}
 }
 
-// WithAxisEnviron configures the compiler with axis environment variables
+// WithNonPluginEnviron configures the compiler with environment variables
 // added to non-plugin containers only, but can also be used for filters.
-func WithAxisEnviron(env map[string]string) Option {
+func WithNonPluginEnviron(env map[string]string) Option {
 	return func(compiler *Compiler) {
-		maps.Copy(compiler.axisEnv, env)
+		maps.Copy(compiler.nonPluginEnv, env)
 	}
 }
 
