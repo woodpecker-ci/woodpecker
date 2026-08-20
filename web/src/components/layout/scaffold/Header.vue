@@ -30,7 +30,7 @@
           />
           <div
             v-if="$slots.headerActions"
-            class="flex min-w-0 items-center gap-x-2 md:justify-end"
+            class="flex items-center gap-x-2 md:justify-end"
             :class="{
               'md:flex-1': searchBoxPresent,
             }"
