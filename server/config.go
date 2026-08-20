@@ -76,6 +76,7 @@ var Config = struct {
 		Volumes                             []string
 		Networks                            []string
 		PrivilegedPlugins                   []string
+		DisableWorkflowPriority             bool
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
 		Proxy                               struct {

@@ -5865,6 +5865,10 @@ const docTemplate = `{
                 "pipeline_id": {
                     "type": "integer"
                 },
+                "priority": {
+                    "description": "Priority controls queue ordering. Higher priority tasks run before lower\npriority tasks, with Created and Name preserving FIFO behavior for ties.",
+                    "type": "integer"
+                },
                 "repo_id": {
                     "type": "integer"
                 },
@@ -6375,6 +6379,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "pipeline_number": {
+                    "type": "integer"
+                },
+                "priority": {
+                    "description": "Priority controls queue ordering. Higher priority tasks run before lower\npriority tasks, with Created and Name preserving FIFO behavior for ties.",
                     "type": "integer"
                 },
                 "repo_id": {
