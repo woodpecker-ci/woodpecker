@@ -300,6 +300,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		return err
 	}
 	sshCmd.Env = flatMap
+	log.Debug().Msgf("env: %s", flatMap)
 
 	w.(*workflow).commands.Store(step.UUID, sshCmd)
 
