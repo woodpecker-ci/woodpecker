@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-19
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @anbraten, @gerbsen, @hasufell, @jrouly, @kastl-ars, @lafriks, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
+@6543, @AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @anbraten, @confusedsushi, @gerbsen, @hasufell, @jrouly, @kastl-ars, @lafriks, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
 
 ### 🔒 Security
 
@@ -81,14 +81,13 @@
 - Update woodpeckerci/plugin-git Docker tag to v2.9.3 [[#6978](https://github.com/woodpecker-ci/woodpecker/pull/6978)]
 - Update web npm deps non-major [[#6939](https://github.com/woodpecker-ci/woodpecker/pull/6939)]
 - Update module github.com/docker/cli to v29.7.2+incompatible [[#6966](https://github.com/woodpecker-ci/woodpecker/pull/6966)]
-- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.56.0 [[#6960](https://github.com/woodpecker-ci/woodpecker/pull/6960)]
-- Update module github.com/getkin/kin-openapi to v0.146.0 [[#6944](https://github.com/woodpecker-ci/woodpecker/pull/6944)]
 - Lock file maintenance [[#6940](https://github.com/woodpecker-ci/woodpecker/pull/6940)]
 - Update web npm deps non-major [[#6928](https://github.com/woodpecker-ci/woodpecker/pull/6928)]
 - Update golang-packages [[#6937](https://github.com/woodpecker-ci/woodpecker/pull/6937)]
 
 ### Misc
 
+- Add hidden `decode-base64` agent command for Windows local backend [[#7023](https://github.com/woodpecker-ci/woodpecker/pull/7023)]
 - Remove gitpod [[#7013](https://github.com/woodpecker-ci/woodpecker/pull/7013)]
 - Drop star-history [[#6997](https://github.com/woodpecker-ci/woodpecker/pull/6997)]
 - Do not run openapi generation twice on fail [[#6987](https://github.com/woodpecker-ci/woodpecker/pull/6987)]
