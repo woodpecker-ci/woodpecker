@@ -60,6 +60,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7045](https://github.com/woodpecker-ci/woodpecker/pull/7045)]
 - Update module github.com/getkin/kin-openapi to v0.147.0 [[#7039](https://github.com/woodpecker-ci/woodpecker/pull/7039)]
 - Update golang-packages [[#7035](https://github.com/woodpecker-ci/woodpecker/pull/7035)]
 - Update module github.com/urfave/cli/v3 to v3.11.0 [[#7017](https://github.com/woodpecker-ci/woodpecker/pull/7017)]
