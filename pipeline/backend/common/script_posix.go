@@ -74,9 +74,9 @@ if [ -n "$CI_WRITE_PID" ]; then
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScript = `
-cat <<EOF
+cat <<'WOODPECKER_EOF'
 + %s
-EOF
+WOODPECKER_EOF
 {
 	%s
 }
