@@ -5765,6 +5765,12 @@ const docTemplate = `{
         "Step": {
             "type": "object",
             "properties": {
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "error": {
                     "type": "string"
                 },
@@ -6429,6 +6435,12 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Step"
+                    }
+                },
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
                     }
                 },
                 "environ": {
