@@ -18,6 +18,7 @@ package local
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -102,19 +103,20 @@ func (e *local) genCmdByShell(shell string, cmdList []string, baseDir string) (a
 	case "":
 		return nil, ErrNoShellSet
 	case "cmd":
-		script := "@SET PROMPT=$\n"
+		agentPath, err := os.Executable()
+		if err != nil {
+			return nil, err
+		}
+		script := "@echo off\n"
 		for _, cmd := range cmdList {
-			quotedCmd := strings.TrimSpace(shellescape.Quote(cmd))
-			// As cmd echo does not allow strings with newlines we need to replace them ...
-			quotedCmd = strings.ReplaceAll(quotedCmd, "\n", "\\n")
-			// Also the shellescape.Quote fail with any | or & char and wrapping them in quotes again can be bypassed
-			// by just leaving an string halve quoted we just replace them with symbolic representations
-			quotedCmd = strings.ReplaceAll(quotedCmd, "&", "\\AND")
-			quotedCmd = strings.ReplaceAll(quotedCmd, "|", "\\OR")
+			// Escaping in cmd.exe is a pain, because of that, the command is encoded in Base64, then the output is done
+			// by a special agent command, the decoder intentionally does not add a new line, so we have to add it here
+			encodedCmd := base64.StdEncoding.EncodeToString([]byte("+ " + cmd + "\n"))
 
-			script += fmt.Sprintf("@echo + %s\n", quotedCmd)
-			script += fmt.Sprintf("@%s\n", cmd)
-			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
+			script += "\n"
+			script += agentPath + " decode-base64 " + encodedCmd + "\n"
+			script += cmd + "\n"
+			script += "if not %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
 		cmd, err := os.CreateTemp(baseDir, "*.cmd")
 		if err != nil {

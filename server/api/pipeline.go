@@ -91,7 +91,7 @@ func CreatePipeline(c *gin.Context) {
 }
 
 func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
-	return &model.Pipeline{
+	pl := &model.Pipeline{
 		Event:     event,
 		Commit:    commit.SHA,
 		Branch:    opts.Branch,
@@ -108,6 +108,12 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 		ForgeURL: commit.ForgeURL,
 	}
+
+	if opts.Message != "" {
+		pl.Message = "MANUAL: " + opts.Message + " @ " + opts.Branch
+	}
+
+	return pl
 }
 
 // GetPipelines
