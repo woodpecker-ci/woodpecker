@@ -118,7 +118,7 @@ var Flags = []cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP"),
 		Name:    "backend-k8s-runtime-class-allow-from-step",
-		Usage:   "whether to allow using runtime classs name from step's backend options",
+		Usage:   "whether to allow using runtime class name from step's backend options",
 		Value:   false,
 	},
 	&cli.BoolFlag{
