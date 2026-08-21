@@ -16,6 +16,7 @@ package common
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	"golang.org/x/text/encoding/unicode"
 
@@ -44,12 +45,15 @@ func GenerateContainerConf(commands []string, osType string, workDir string, ste
 	return env, entry, nil
 }
 
-func GenerateSSHConf(step *backend_types.Step, osType string) (env map[string]string, entry []string, err error) {
-	env = make(map[string]string)
+func GenerateSSHConf(step *backend_types.Step, osType string) (stdin string, entry []string, err error) {
+	env := make(map[string]string)
+	var script string
 	if osType == "windows" {
 		step.Environment["SHELL"] = "powershell.exe"
 		step.Environment["CI_WRITE_PID"] = "yes"
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(step.Commands, step.Environment, step.WorkingDir, step.UUID)))
+		script := generateScriptWindows(step.Commands, step.Environment, step.WorkingDir, step.UUID)
+		scriptWithoutCIScript := fmt.Sprintf(script, "")
+		script = fmt.Sprintf(script, `[Environment]::SetEnvironmentVariable("CI_SCRIPT","`+base64.StdEncoding.EncodeToString([]byte(scriptWithoutCIScript))+`");`)
 		// cspell:disable-next-line
 		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "-"}
 	} else {
@@ -59,5 +63,5 @@ func GenerateSSHConf(step *backend_types.Step, osType string) (env map[string]st
 		entry = []string{"/bin/sh", "-e"}
 	}
 
-	return env, entry, nil
+	return script, entry, nil
 }

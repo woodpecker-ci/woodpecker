@@ -76,6 +76,7 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 cd "{{.WorkDir}}";
 if ([Environment]::GetEnvironmentVariable('CI_WRITE_PID')) { $PID | Set-Content -Path "$env:TEMP\woodpecker_%s.pid" -NoNewline };
+%%s
 `
 
 // traceScript is a helper script that is added to the step script

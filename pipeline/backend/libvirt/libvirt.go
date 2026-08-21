@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"maps"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -162,27 +161,12 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	w.(*workflow).domains.Store(step.UUID, domain)
 	w.(*workflow).guestOS.Store(step.UUID, guestOS)
 
-	configEnv := make(map[string]string)
-	log.Debug().Msgf("stepEnv: %s", step.Environment)
-	maps.Copy(configEnv, step.Environment)
-
-	env, entry, err := common.GenerateSSHConf(step, guestOS)
+	scriptIn, entry, err := common.GenerateSSHConf(step, guestOS)
 	if err != nil {
 		return err
 	}
 	cmd := entry[0]
 	args := entry[1:]
-	maps.Copy(configEnv, env)
-
-	var flatMap []string
-	for key, value := range configEnv {
-		if key == "CI_SCRIPT" {
-			continue
-		}
-		log.Debug().Msgf("key: %s", key)
-		log.Debug().Msgf("value: %s", value)
-		flatMap = append(flatMap, fmt.Sprintf("%s=%s", key, value))
-	}
 
 	// get the timeout duration for SSH
 	var maxBackOff time.Duration
@@ -305,16 +289,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	if err != nil {
 		return err
 	}
-	sshCmd.Env = flatMap
-
-	//for _, kv := range flatMap {
-	//	parts := strings.SplitN(kv, "=", 2)
-	//	if err := sshCmd.Setenv(parts[0], parts[1]); err != nil {
-	//		return fmt.Errorf("setenv %s: %w", parts[0], err)
-	//	}
-	//}
-
-	log.Debug().Msgf("env: %s", flatMap)
 
 	w.(*workflow).commands.Store(step.UUID, sshCmd)
 
@@ -396,16 +370,8 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	}
 
 	// now feed the actual command to stdin
-	cmdInB64, ok := env["CI_SCRIPT"]
-	if !ok {
-		return fmt.Errorf("Could not find CI_SCRIPT in env")
-	}
-	cmdIn, err := base64.StdEncoding.DecodeString(cmdInB64)
-	if err != nil {
-		return err
-	}
 	go func() {
-		_, err := stdinWC.Write(cmdIn)
+		_, err := stdinWC.Write([]byte(scriptIn))
 		if err != nil {
 			log.Debug().Msgf("Failed to write cmd to stdin: %s", err)
 		}
