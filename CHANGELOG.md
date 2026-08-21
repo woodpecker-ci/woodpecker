@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-20
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -14,10 +14,6 @@
 - Update `golang.org/x/mod` [[#7012](https://github.com/woodpecker-ci/woodpecker/pull/7012)]
 - Change group identifier to full_path for GitLab [[#6950](https://github.com/woodpecker-ci/woodpecker/pull/6950)]
 
-### ✨ Features
-
-- Reject incompatible gRPC proto version agents [[#7028](https://github.com/woodpecker-ci/woodpecker/pull/7028)]
-
 ### 📈 Enhancement
 
 - Allow to add custom message to manual pipelines [[#6973](https://github.com/woodpecker-ci/woodpecker/pull/6973)]
@@ -27,6 +23,7 @@
 - Add pipeline log download endpoint [[#6876](https://github.com/woodpecker-ci/woodpecker/pull/6876)]
 - Reject invalid started and done workflow states [[#7029](https://github.com/woodpecker-ci/woodpecker/pull/7029)]
 - Sort workflow files by name [[#7021](https://github.com/woodpecker-ci/woodpecker/pull/7021)]
+- Reject incompatible gRPC proto version agents [[#7028](https://github.com/woodpecker-ci/woodpecker/pull/7028)]
 - Make command execution more robust on windows [[#6969](https://github.com/woodpecker-ci/woodpecker/pull/6969)]
 - Enforce one log entry per line with a unique index [[#7004](https://github.com/woodpecker-ci/woodpecker/pull/7004)]
 - Order the user feed by creation time instead of id [[#7005](https://github.com/woodpecker-ci/woodpecker/pull/7005)]
@@ -65,9 +62,9 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages to v0.36.4 [[#7050](https://github.com/woodpecker-ci/woodpecker/pull/7050)]
 - Update golang-packages [[#7045](https://github.com/woodpecker-ci/woodpecker/pull/7045)]
 - Update module github.com/getkin/kin-openapi to v0.147.0 [[#7039](https://github.com/woodpecker-ci/woodpecker/pull/7039)]
-- Update golang-packages [[#7035](https://github.com/woodpecker-ci/woodpecker/pull/7035)]
 - Update module github.com/urfave/cli/v3 to v3.11.0 [[#7017](https://github.com/woodpecker-ci/woodpecker/pull/7017)]
 - Lock file maintenance [[#7018](https://github.com/woodpecker-ci/woodpecker/pull/7018)]
 - Update web npm deps non-major [[#7009](https://github.com/woodpecker-ci/woodpecker/pull/7009)]
@@ -76,20 +73,15 @@
 - Update dependency golang to v1.26.6 [[#7008](https://github.com/woodpecker-ci/woodpecker/pull/7008)]
 - Update module golang.org/x/net to v0.58.0 [[#6996](https://github.com/woodpecker-ci/woodpecker/pull/6996)]
 - Update module golang.org/x/crypto to v0.55.0 [[#6994](https://github.com/woodpecker-ci/woodpecker/pull/6994)]
-- Update golang-packages [[#6993](https://github.com/woodpecker-ci/woodpecker/pull/6993)]
 - Update module google.golang.org/protobuf to v1.36.12 [[#6989](https://github.com/woodpecker-ci/woodpecker/pull/6989)]
-- Lock file maintenance [[#6984](https://github.com/woodpecker-ci/woodpecker/pull/6984)]
 - Update pnpm to v11.21.0 [[#6983](https://github.com/woodpecker-ci/woodpecker/pull/6983)]
-- Lock file maintenance [[#6981](https://github.com/woodpecker-ci/woodpecker/pull/6981)]
 - Update dependency eslint to v10.8.1 [[#6977](https://github.com/woodpecker-ci/woodpecker/pull/6977)]
 - Update module github.com/google/go-github/v89 to v90 [[#6980](https://github.com/woodpecker-ci/woodpecker/pull/6980)]
 - Update google.golang.org/protobuf digest to 644d026 [[#6976](https://github.com/woodpecker-ci/woodpecker/pull/6976)]
 - Update woodpeckerci/plugin-git Docker tag to v2.9.3 [[#6978](https://github.com/woodpecker-ci/woodpecker/pull/6978)]
 - Update web npm deps non-major [[#6939](https://github.com/woodpecker-ci/woodpecker/pull/6939)]
 - Update module github.com/docker/cli to v29.7.2+incompatible [[#6966](https://github.com/woodpecker-ci/woodpecker/pull/6966)]
-- Lock file maintenance [[#6940](https://github.com/woodpecker-ci/woodpecker/pull/6940)]
 - Update web npm deps non-major [[#6928](https://github.com/woodpecker-ci/woodpecker/pull/6928)]
-- Update golang-packages [[#6937](https://github.com/woodpecker-ci/woodpecker/pull/6937)]
 
 ### Misc
 
