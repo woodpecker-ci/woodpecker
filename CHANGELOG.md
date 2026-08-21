@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @YouCD, @anbraten, @confusedsushi, @gerbsen, @hasufell, @jrouly, @kastl-ars, @lafriks, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @zmully
+@6543, @AhmadNajiKam, @DEATIN, @OCram85, @Palleas, @YouCD, @anbraten, @confusedsushi, @gerbsen, @hasufell, @jrouly, @kastl-ars, @lafriks, @qwerty287, @retif, @romain-rossi, @spam-n-eggs, @stevapple, @xoxys, @zmully
 
 ### 🔒 Security
 
@@ -40,6 +40,7 @@
 
 ### 🐛 Bug Fixes
 
+- Prevent repository buttons from overlapping search bar [[#7047](https://github.com/woodpecker-ci/woodpecker/pull/7047)]
 - fix(server): prefix manual trigger Ref with refs/heads/ [[#7051](https://github.com/woodpecker-ci/woodpecker/pull/7051)]
 - fix runtime to ignore cancel as runtime error [[#7031](https://github.com/woodpecker-ci/woodpecker/pull/7031)]
 - Fix orphaned pipelines after repo delete [[#6971](https://github.com/woodpecker-ci/woodpecker/pull/6971)]
