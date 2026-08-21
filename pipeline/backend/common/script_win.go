@@ -20,7 +20,7 @@ import (
 	"text/template"
 )
 
-func generateScriptWindows(commands []string, workDir string, stepUUID string) string {
+func generateScriptWindows(commands []string, env map[string]string, workDir string, stepUUID string) string {
 	var buf bytes.Buffer
 
 	setupScriptWinTmpl, _ := template.New("").Parse(fmt.Sprintf(setupScriptWinProto, stepUUID))
@@ -36,6 +36,16 @@ func generateScriptWindows(commands []string, workDir string, stepUUID string) s
 			traceScriptWin,
 			command,
 			command,
+		)
+	}
+
+	for key, val := range env {
+		fmt.Fprintf(
+			&buf,
+			`[Environment]::SetEnvironmentVariable("%s","%s");
+			`,
+			key,
+			val,
 		)
 	}
 

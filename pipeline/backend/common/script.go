@@ -18,13 +18,15 @@ import (
 	"encoding/base64"
 
 	"golang.org/x/text/encoding/unicode"
+
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func GenerateContainerConf(commands []string, osType string, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
-		utf16leBytes, err := encoder.Bytes([]byte(generateScriptWindows(commands, workDir, stepUUID)))
+		utf16leBytes, err := encoder.Bytes([]byte(generateScriptWindows(commands, nil, workDir, stepUUID)))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -42,16 +44,16 @@ func GenerateContainerConf(commands []string, osType string, workDir string, ste
 	return env, entry, nil
 }
 
-func GenerateSSHConf(commands []string, osType string, workDir string, stepUUID string) (env map[string]string, entry []string, err error) {
+func GenerateSSHConf(step *backend_types.Step, osType string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands, workDir, stepUUID)))
-		env["SHELL"] = "powershell.exe"
-		env["CI_WRITE_PID"] = "yes"
+		step.Environment["SHELL"] = "powershell.exe"
+		step.Environment["CI_WRITE_PID"] = "yes"
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(step.Commands, step.Environment, step.WorkingDir, step.UUID)))
 		// cspell:disable-next-line
 		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "-"}
 	} else {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir, stepUUID)))
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(step.Commands, step.WorkingDir, step.UUID)))
 		env["SHELL"] = "/bin/sh"
 		env["CI_WRITE_PID"] = "yes"
 		entry = []string{"/bin/sh", "-e"}

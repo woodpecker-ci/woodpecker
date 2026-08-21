@@ -166,7 +166,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	log.Debug().Msgf("stepEnv: %s", step.Environment)
 	maps.Copy(configEnv, step.Environment)
 
-	env, entry, err := common.GenerateSSHConf(step.Commands, guestOS, step.WorkingDir, step.UUID)
+	env, entry, err := common.GenerateSSHConf(step, guestOS)
 	if err != nil {
 		return err
 	}
