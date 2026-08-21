@@ -200,6 +200,15 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
+	// a badge token is required to access the badge endpoints of non-public
+	// repos, so every repo gets one on activation
+	if _, err := getOrCreateToken(_store, repo, model.TokenTypeBadge); err != nil {
+		msg := "could not create badge token."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
 	repo.Perm = from.Perm
 	repo.Perm.Synced = time.Now().Unix()
 	repo.Perm.UserID = user.ID

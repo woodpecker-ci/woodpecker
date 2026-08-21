@@ -267,6 +267,12 @@ const docTemplate = `{
                         "name": "repo_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the badge token of the repository, required for non-public repos",
+                        "name": "token",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -292,6 +298,12 @@ const docTemplate = `{
                         "name": "repo_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the badge token of the repository, required for non-public repos",
+                        "name": "token",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3981,6 +3993,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/token": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repositories"
+                ],
+                "summary": "Get a token of the repository",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "badge",
+                        "description": "the type of the token",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                }
+            }
+        },
+        "/repos/{repo_id}/token/rotate": {
+            "post": {
+                "description": "Replaces every token of the repository with a freshly generated one and drops the ones no longer in use. URLs carrying an old token, such as badge URLs, stop working.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repositories"
+                ],
+                "summary": "Rotate all tokens of the repository",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Token"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/secrets": {
             "get": {
                 "produces": [
@@ -5878,6 +5973,35 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "Token": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/TokenType"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "TokenType": {
+            "type": "string",
+            "enum": [
+                "badge"
+            ],
+            "x-enum-varnames": [
+                "TokenTypeBadge"
+            ]
         },
         "User": {
             "type": "object",
