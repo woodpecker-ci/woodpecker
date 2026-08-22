@@ -65,6 +65,8 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/golang Docker tag to v1.27 [[#7055](https://github.com/woodpecker-ci/woodpecker/pull/7055)]
+- Update pre-commit hook golangci/golangci-lint to v2.13.1 [[#7058](https://github.com/woodpecker-ci/woodpecker/pull/7058)]
 - Update docker.io/techknowlogick/xgo Docker tag to go-1.27.x [[#7056](https://github.com/woodpecker-ci/woodpecker/pull/7056)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.58.2 [[#7053](https://github.com/woodpecker-ci/woodpecker/pull/7053)]
 - Update golang-packages to v0.36.4 [[#7050](https://github.com/woodpecker-ci/woodpecker/pull/7050)]
