@@ -65,6 +65,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/techknowlogick/xgo Docker tag to go-1.27.x [[#7056](https://github.com/woodpecker-ci/woodpecker/pull/7056)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.58.2 [[#7053](https://github.com/woodpecker-ci/woodpecker/pull/7053)]
 - Update golang-packages to v0.36.4 [[#7050](https://github.com/woodpecker-ci/woodpecker/pull/7050)]
 - Update golang-packages [[#7045](https://github.com/woodpecker-ci/woodpecker/pull/7045)]
