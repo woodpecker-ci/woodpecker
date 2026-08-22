@@ -81,6 +81,12 @@ steps:
 
 To give steps access to the Kubernetes API via service account, take a look at [RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 
+By default, setting `serviceAccountName` from a step's backend options is **not allowed** for security reasons, as it would let any user with push access run pipeline pods under an arbitrary service account and inherit its permissions. To enable it, set [`WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT_NAME_ALLOW_FROM_STEP`](#backend_k8s_service_account_name_allow_from_step) on the agent.
+
+:::warning
+Enabling `WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT_NAME_ALLOW_FROM_STEP` in multi-tenant environments allows pipeline authors to run pods as any service account in the namespace, which may lead to privilege escalation. Only enable it if you trust everyone with push access.
+:::
+
 ### Workspace volume
 
 `workspaceVolume` controls whether the default workspace volume is mounted into a service Pod. It only affects service
@@ -96,6 +102,29 @@ services:
       kubernetes:
         workspaceVolume: false
 ```
+
+### User namespaces
+
+`hostUsers` controls whether the Pod uses the host's user namespace. When set to `false`, Kubernetes runs the Pod in a dedicated user namespace where UID 0 inside the container maps to a non-root UID on the host, providing an additional layer of isolation.
+
+See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) for more information on user namespaces.
+
+```yaml
+steps:
+  - name: build
+    image: alpine
+    commands:
+      - whoami
+    backend_options:
+      kubernetes:
+        hostUsers: false
+        securityContext:
+          runAsUser: 0
+```
+
+:::note
+User namespaces require Kubernetes v1.25+ with the `UserNamespacesSupport` feature gate enabled, and a compatible container runtime (e.g. CRI-O, containerd v2.0+).
+:::
 
 ### Node selector
 
@@ -128,6 +157,8 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
 
 You can use [WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR](#backend_k8s_pod_node_selector) if you want to set the node selector per Agent
 or [PodNodeSelector](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector) admission controller if you want to set the node selector by per-namespace basis.
+
+By default, setting `nodeSelector` from a step's backend options is **not allowed**, as it would otherwise let any user with push access pin pipeline pods onto chosen nodes. To enable it, set [`WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP`](#backend_k8s_pod_node_selector_allow_from_step) on the agent.
 
 ### Tolerations
 
@@ -456,7 +487,7 @@ steps:
 
   - name: docker
     image: docker:dind # use 'docker:<major-version>-dind' or similar in production
-    detached: true
+    detach: true
     privileged: true
     environment:
       DOCKER_TLS_CERTDIR: /woodpecker/dind-certs
@@ -487,6 +518,19 @@ The namespace to create worker Pods in.
 Enables namespace isolation per Woodpecker organization. When enabled, each organization gets its own dedicated Kubernetes namespace for improved security and resource isolation.
 
 With this feature enabled, Woodpecker creates separate Kubernetes namespaces for each organization using the format `{WOODPECKER_BACKEND_K8S_NAMESPACE}-{organization-id}`. Namespaces are created automatically when needed, but they are not automatically deleted when organizations are removed from Woodpecker.
+
+---
+
+### BACKEND_K8S_CLUSTER_DOMAIN
+
+- Name: `WOODPECKER_BACKEND_K8S_CLUSTER_DOMAIN`
+- Default: `cluster.local`
+
+The DNS domain of the Kubernetes cluster. It is used to build the DNS search entry that lets a step reach a service by its hostname.
+
+Set this value if your cluster was installed with a custom cluster domain.
+
+---
 
 ### BACKEND_K8S_VOLUME_SIZE
 
@@ -578,6 +622,15 @@ Additional node selector to apply to worker pods. Must be a YAML object, e.g. `{
 
 ---
 
+### BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP`
+- Default: `false`
+
+Determines if the Pod `nodeSelector` can be defined from a step's backend options. Disabled by default, as it would otherwise let any user with push access pin pipeline pods onto chosen nodes.
+
+---
+
 ### BACKEND_K8S_SECCTX_NONROOT <!-- cspell:ignore SECCTX NONROOT -->
 
 - Name: `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`
@@ -602,3 +655,30 @@ Secret names to pull images from private repositories. See, how to [Pull an Imag
 - Default: none, which will use the default priority class configured in Kubernetes
 
 Which [Kubernetes PriorityClass](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/priority-class-v1/) to assign to created job pods.
+
+---
+
+### BACKEND_K8S_PERMISSION_INIT_IMAGE
+
+- Name: `WOODPECKER_BACKEND_K8S_PERMISSION_INIT_IMAGE`
+- Default: 'busybox:stable-musl'
+
+Container image used for the workspace permission init container, which is used to create the workspace directory and ensure correct permissions when running steps as non-root users.
+
+---
+
+### BACKEND_K8S_SERVICE_ACCOUNT_NAME_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT_NAME_ALLOW_FROM_STEP`
+- Default: `false`
+
+Determines if the Pod `serviceAccountName` can be defined from a step's backend options. Disabled by default, as it would otherwise allow any user with push access to run pods under an arbitrary service account and escalate privileges.
+
+---
+
+### BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP`
+- Default: `false`
+
+Determines if the Pod `runtimeClassName` can be defined from a step's backend options. Disabled by default, as it would otherwise allow any user with push access to run pods under an arbitrary runtime class.
