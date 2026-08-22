@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-21
+## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -52,6 +52,7 @@
 
 ### 📚 Documentation
 
+- Update dependency marked to v18.0.10 [[#7052](https://github.com/woodpecker-ci/woodpecker/pull/7052)]
 - k8s backend: fix step example using incorrect "detached" property [[#7016](https://github.com/woodpecker-ci/woodpecker/pull/7016)]
 - Update docs npm deps non-major [[#7010](https://github.com/woodpecker-ci/woodpecker/pull/7010)]
 - highlight the nodeSelector doesn't work by default [[#7007](https://github.com/woodpecker-ci/woodpecker/pull/7007)]
