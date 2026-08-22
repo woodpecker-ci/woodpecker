@@ -65,6 +65,7 @@
 
 ### 📦️ Dependency
 
+- Update woodpeckerci/plugin-git Docker tag to v2.10.0 [[#7059](https://github.com/woodpecker-ci/woodpecker/pull/7059)]
 - Update docker.io/golang Docker tag to v1.27 [[#7055](https://github.com/woodpecker-ci/woodpecker/pull/7055)]
 - Update pre-commit hook golangci/golangci-lint to v2.13.1 [[#7058](https://github.com/woodpecker-ci/woodpecker/pull/7058)]
 - Update docker.io/techknowlogick/xgo Docker tag to go-1.27.x [[#7056](https://github.com/woodpecker-ci/woodpecker/pull/7056)]
