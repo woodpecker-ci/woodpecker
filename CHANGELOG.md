@@ -52,7 +52,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7062](https://github.com/woodpecker-ci/woodpecker/pull/7062)]
 - Update pnpm to v11.23.0 [[#7061](https://github.com/woodpecker-ci/woodpecker/pull/7061)]
 - Update dependency marked to v18.0.10 [[#7052](https://github.com/woodpecker-ci/woodpecker/pull/7052)]
 - k8s backend: fix step example using incorrect "detached" property [[#7016](https://github.com/woodpecker-ci/woodpecker/pull/7016)]
@@ -67,6 +66,7 @@
 
 ### 📦️ Dependency
 
+- Lock file maintenance [[#7062](https://github.com/woodpecker-ci/woodpecker/pull/7062)]
 - Update web npm deps non-major [[#7054](https://github.com/woodpecker-ci/woodpecker/pull/7054)]
 - Update woodpeckerci/plugin-git Docker tag to v2.10.0 [[#7059](https://github.com/woodpecker-ci/woodpecker/pull/7059)]
 - Update docker.io/golang Docker tag to v1.27 [[#7055](https://github.com/woodpecker-ci/woodpecker/pull/7055)]
