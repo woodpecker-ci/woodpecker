@@ -15,8 +15,11 @@
 package migration
 
 import (
+	"fmt"
+
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
 // Clears the way for the UNIQUE(step_id, line) index on log_entries by keeping
