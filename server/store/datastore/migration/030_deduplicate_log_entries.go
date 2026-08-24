@@ -36,27 +36,29 @@ var deduplicateLogEntries = xormigrate.Migration{
 		// The error can be ignored as it does not matter if creation failed.
 		_, _ := sess.Exec(`CREATE INDEX idx_log_entries_step_line ON log_entries (step_id, line);`)
 
-
 		// Find duplicat log entries and delete second ones.
 		dialect := sess.Engine().Dialect().URI().DBType
 		switch dialect {
 		case schemas.MYSQL:
-			_, err = sess.Exec(`DELETE a FROM log_entries a
+			_, err = sess.Exec(`
+DELETE a FROM log_entries a
 JOIN log_entries b
-  ON a.step_id = b.step_id
- AND a.line = b.line
- AND a.id > b.id;`)
+ON a.step_id = b.step_id
+AND a.line = b.line
+AND a.id > b.id;`)
 		case schemas.POSTGRES:
-			_, err = sess.Exec(`DELETE FROM log_entries a
+			_, err = sess.Exec(`
+DELETE FROM log_entries a
 USING log_entries b
 WHERE a.step_id = b.step_id
-  AND a.line = b.line
-  AND a.id > b.id;`)
+AND a.line = b.line
+AND a.id > b.id;`)
 		case schemas.SQLITE:
-			_, err = sess.Exec(`DELETE FROM log_entries AS a
+			_, err = sess.Exec(`
+DELETE FROM log_entries AS a
 WHERE EXISTS (
-  SELECT 1 FROM log_entries b
-  WHERE b.step_id = a.step_id AND b.line = a.line AND b.id < a.id
+SELECT 1 FROM log_entries b
+WHERE b.step_id = a.step_id AND b.line = a.line AND b.id < a.id
 );`)
 		default:
 			err = fmt.Errorf("dialect '%s' not supported", dialect)
