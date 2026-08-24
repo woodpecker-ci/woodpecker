@@ -35,7 +35,7 @@ import (
 var deduplicateLogEntries = xormigrate.Migration{
 	ID: "deduplicate-log-entries",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		// To speedup delete query we first create an index (will be droped via Sync2 later).
+		// To speedup delete query we first create an index.
 		// The error can be ignored as it does not matter if creation failed.
 		_, _ = sess.Exec(`CREATE INDEX idx_log_entries_tmp ON log_entries (step_id, line, id);`)
 
