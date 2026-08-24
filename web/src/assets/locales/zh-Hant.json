@@ -30,6 +30,9 @@
                 "desc": "指定在 pipeline 中額外使用的變數。相同變數名稱會被覆蓋掉。",
                 "name": "變數名稱",
                 "delete": "刪除變數"
+            },
+            "message": {
+                "title": "訊息"
             }
         },
         "pipeline": {
