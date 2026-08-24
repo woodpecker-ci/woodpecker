@@ -109,7 +109,13 @@ format: install-gofumpt ## Format source code
 clean: ## Clean build artifacts
 	go clean -i ./...
 	rm -rf build
-	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
+	@if ! command -v docker > /dev/null 2>&1; then \
+		echo "docker not installed, skipping image cleanup"; \
+	elif [ -n "$$(docker image ls -q woodpecker/make:local)" ]; then \
+		docker image rm woodpecker/make:local; \
+	else \
+		echo "no docker image to clean"; \
+	fi
 
 .PHONY: clean-all
 clean-all: clean ## Clean all artifacts
