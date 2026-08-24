@@ -102,8 +102,8 @@ vendor: ## Update the vendor directory
 	go mod tidy
 	go mod vendor
 
-format: install-gofumpt ## Format source code
-	@gofumpt -extra -w .
+format: ## Format source code
+	@go run mvdan.cc/gofumpt@$(GOFUMPT_VERSION) -extra -w .
 
 .PHONY: clean
 clean: ## Clean build artifacts
@@ -124,16 +124,16 @@ clean-all: clean ## Clean all artifacts
 	rm -rf docs/docs/40-cli.md docs/openapi.json
 
 .PHONY: generate
-generate: install-mockery generate-openapi ## Run all code generations
-	mockery
+generate: generate-openapi ## Run all code generations
+	go run github.com/vektra/mockery/v3@latest
 	CGO_ENABLED=0 go generate ./...
 
 generate-openapi: ## Run openapi code generation and format it
 	CGO_ENABLED=0 go run github.com/swaggo/swag/cmd/swag fmt --exclude rpc/proto
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
-generate-license-header: install-addlicense
-	addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go
+generate-license-header:
+	go run github.com/google/addlicense@latest -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -145,19 +145,9 @@ install-golangci-lint:
 		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) ; \
 	fi
 
-install-gofumpt:
-	@hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION); \
-	fi
-
 install-addlicense:
 	@hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/google/addlicense@latest; \
-	fi
-
-install-mockery:
-	@hash mockery > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/vektra/mockery/v3@latest; \
 	fi
 
 install-protoc-gen-go:
@@ -169,7 +159,7 @@ install-protoc-gen-go:
 	fi
 
 .PHONY: install-tools
-install-tools: install-golangci-lint install-gofumpt install-addlicense install-mockery install-protoc-gen-go ## Install development tools
+install-tools: install-golangci-lint install-addlicense install-protoc-gen-go ## Install development tools
 
 ui-dependencies: ## Install UI dependencies
 	(cd web/; pnpm install --frozen-lockfile)
