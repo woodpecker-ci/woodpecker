@@ -22,6 +22,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/cmd/agent/core"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/libvirt"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/dot_env"
@@ -32,6 +33,7 @@ var backends = []backend_types.Backend{
 	kubernetes.New(),
 	docker.New(),
 	local.New(),
+	libvirt.New(),
 }
 
 func main() {
