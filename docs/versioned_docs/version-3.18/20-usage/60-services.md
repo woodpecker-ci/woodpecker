@@ -5,6 +5,8 @@ The below configuration composes database and cache containers.
 
 Services are accessed using custom hostnames.
 In the example below, the MySQL service is assigned the hostname `database` and is available at `database:3306`.
+Because the name becomes the hostname, every service in the list syntax must set `name` explicitly. In the map syntax the map key is used as the name.
+Service names must be unique within a workflow, otherwise the hostname would resolve to an arbitrary one of them.
 
 ```yaml
 steps:
