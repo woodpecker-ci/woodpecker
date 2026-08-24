@@ -322,7 +322,11 @@
                     "name": "停用代理"
                 },
                 "edit_agent": "編輯代理",
-                "delete_agent": "刪除代理"
+                "delete_agent": "刪除代理",
+                "last_contact": {
+                    "last_contact": "上次聯繫",
+                    "badge": "上次聯繫"
+                }
             },
             "repos": {
                 "disabled": "已停用",
