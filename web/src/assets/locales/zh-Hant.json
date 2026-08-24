@@ -188,7 +188,9 @@
                 "not_executed_yet": "尚未執行",
                 "crons": "Crons",
                 "your_timezone": "使用您的瀏覽器時區。",
-                "none": "還沒有任何 cron。"
+                "none": "還沒有任何 cron。",
+                "next_exec_local": "下次執行: {local}",
+                "next_exec_both": "下次執行: {local} ({zoned} {timezone})"
             },
             "actions": {
                 "repair": {
@@ -205,7 +207,8 @@
                 },
                 "delete": {
                     "delete": "刪除儲存庫",
-                    "success": "儲存庫已刪除"
+                    "success": "儲存庫已刪除",
+                    "confirm": "此動作將刪除所有資料！\n\n您真的要繼續嗎？"
                 },
                 "actions": "Actions"
             },
