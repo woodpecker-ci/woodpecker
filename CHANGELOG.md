@@ -65,6 +65,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7060](https://github.com/woodpecker-ci/woodpecker/pull/7060)]
 - Lock file maintenance [[#7062](https://github.com/woodpecker-ci/woodpecker/pull/7062)]
 - Update web npm deps non-major [[#7054](https://github.com/woodpecker-ci/woodpecker/pull/7054)]
 - Update woodpeckerci/plugin-git Docker tag to v2.10.0 [[#7059](https://github.com/woodpecker-ci/woodpecker/pull/7059)]
