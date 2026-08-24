@@ -42,7 +42,7 @@ STATIC_BUILD ?= true
 ifeq ($(STATIC_BUILD),true)
 	LDFLAGS := -s -w -extldflags "-static" $(LDFLAGS)
 endif
-CGO_ENABLED ?= 1 # only used to compile server
+CGO_ENABLED ?= 1 # only used to compile server and agent and cli
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO),GO)
@@ -243,10 +243,10 @@ build-server: build-ui generate-openapi ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/server
 
 build-agent: ## Build agent
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-agent${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-agent${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 
 build-cli: ## Build cli
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 
 build-tarball: ## Build tar archive
 	mkdir -p ${DIST_DIR} && tar chzvf ${DIST_DIR}/woodpecker-src.tar.gz \
@@ -316,17 +316,17 @@ release-server: ## Create server binaries for release
 
 release-agent: ## Create agent binaries for release
 	# compile
-	GOOS=linux   GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux   GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux   GOARCH=riscv64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_riscv64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux   GOARCH=arm     CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=windows GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=darwin  GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=darwin  GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=freebsd GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/freebsd_amd64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=freebsd GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/freebsd_arm64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=openbsd GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/openbsd_amd64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=openbsd GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/openbsd_arm64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=linux   GOARCH=amd64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=linux   GOARCH=arm64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=linux   GOARCH=riscv64 CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_riscv64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=linux   GOARCH=arm     CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=windows GOARCH=amd64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=darwin  GOARCH=amd64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=darwin  GOARCH=arm64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=freebsd GOARCH=amd64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/freebsd_amd64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=freebsd GOARCH=arm64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/freebsd_arm64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=openbsd GOARCH=amd64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/openbsd_amd64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	GOOS=openbsd GOARCH=arm64   CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/openbsd_arm64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	# tar binary files
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_amd64.tar.gz   -C ${DIST_DIR}/agent/linux_amd64   woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm64.tar.gz   -C ${DIST_DIR}/agent/linux_arm64   woodpecker-agent
@@ -410,7 +410,7 @@ docs-dependencies: ## Install docs dependencies
 
 .PHONY: generate-docs
 generate-docs: ## Generate docs (currently only for the cli)
-	CGO_ENABLED=0 go generate cmd/cli/app.go
+	CGO_ENABLED=${CGO_ENABLED} go generate cmd/cli/app.go
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 .PHONY: build-docs
