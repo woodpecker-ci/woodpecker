@@ -56,7 +56,11 @@
             "trigger": "Executar pipeline",
             "select_branch": "Selecionar branch",
             "show_pipelines": "Mostrar pipelines",
-            "no_manual_workflows": "Nenhum fluxo de trabalho correspondente foi encontrado. Certifique-se de que pelo menos um fluxo de trabalho seja executado no evento manual."
+            "no_manual_workflows": "Nenhum fluxo de trabalho correspondente foi encontrado. Certifique-se de que pelo menos um fluxo de trabalho seja executado no evento manual.",
+            "message": {
+                "title": "Mensagem",
+                "desc": "Esta mensagem é adicionada à mensagem de pipeline como uma informação adicional."
+            }
         },
         "not_allowed": "Você não está autorizado a acessar este repositório",
         "open_in_forge": "Abrir repositório na forja",
