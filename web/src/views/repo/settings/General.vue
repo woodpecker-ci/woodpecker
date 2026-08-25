@@ -158,6 +158,18 @@
         </template>
       </InputField>
 
+      <InputField
+        label="Expose Woodpecker token"
+      >
+        <CheckboxesField
+          v-model="repoSettings.expose_access_token_events"
+          :options="exposeAccessTokenEventsOptions"
+        />
+        <template #description>
+          Selected event triggers will expose the <span class="code-box-inline">woodpecker_token</span> secret to the pipeline.
+        </template>
+      </InputField>
+
       <Button
         type="submit"
         class="mr-auto"
@@ -219,6 +231,7 @@ function loadRepoSettings() {
     allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
     netrc_trusted: repo.value.netrc_trusted || [],
+    expose_access_token_events: repo.value.expose_access_token_events || [],
   };
 }
 
@@ -271,6 +284,16 @@ const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
     text: i18n.t('repo.pipeline.event.pr'),
   },
   { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
+];
+
+const exposeAccessTokenEventsOptions: CheckboxOption[] = [
+  { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+  { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
+  { value: WebhookEvents.Release, text: i18n.t('repo.pipeline.event.release') },
+  { value: WebhookEvents.PullRequest, text: i18n.t('repo.pipeline.event.pr') },
+  { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
+  { value: WebhookEvents.Cron, text: i18n.t('repo.pipeline.event.cron') },
+  { value: WebhookEvents.Manual, text: i18n.t('repo.pipeline.event.manual') },
 ];
 
 useWPTitle(computed(() => [i18n.t('repo.settings.general.project'), repo.value.full_name]));

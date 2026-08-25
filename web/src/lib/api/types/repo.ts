@@ -105,6 +105,8 @@ export interface Repo {
 
   // True if repo only exist in the woodpecker store and not at the forge anymore
   has_no_forge_repo?: boolean;
+
+  expose_access_token_events: string[];
 }
 
 /* eslint-disable no-unused-vars */
@@ -134,6 +136,7 @@ export type RepoSettings = Pick<
   | 'allow_deploy'
   | 'cancel_previous_pipeline_events'
   | 'netrc_trusted'
+  | 'expose_access_token_events'
 >;
 
 export type ExtensionSettings = Pick<
