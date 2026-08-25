@@ -70,17 +70,27 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 		})
 	}
 
-	t := token.New(token.PipelineToken)
-	t.Set("user-id", strconv.FormatInt(user.ID, 10))
-	t.Set("pipeline-id", strconv.FormatInt(currentPipeline.ID, 10))
-	// TODO: If a pipeline is restarted, Timestamp is equal to the timestamp of start of the last pipeline.
-	tokenString, err := t.SignExpires(user.Hash, currentPipeline.Timestamp+repo.Timeout*60)
+	if len(repo.ExposeAccessTokenEvents) > 0 {
+		t := token.New(token.PipelineToken)
+		t.Set("user-id", strconv.FormatInt(user.ID, 10))
+		t.Set("pipeline-id", strconv.FormatInt(currentPipeline.ID, 10))
+		// TODO: If a pipeline is restarted, Timestamp is equal to the timestamp of start of the last pipeline.
+		tokenString, err := t.SignExpires(user.Hash, currentPipeline.Timestamp+repo.Timeout*60)
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate pipeline token: %w", err)
+		}
 
-	secrets = append(secrets, compiler.Secret{
-		Name:   "woodpecker_token",
-		Value:  tokenString,
-		Events: []pipeline_metadata.Event{pipeline_metadata.EventPush, pipeline_metadata.EventManual},
-	})
+		var events []pipeline_metadata.Event
+		for _, event := range repo.ExposeAccessTokenEvents {
+			events = append(events, pipeline_metadata.Event(event))
+		}
+
+		secrets = append(secrets, compiler.Secret{
+			Name:   "woodpecker_token",
+			Value:  tokenString,
+			Events: events,
+		})
+	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline, netrc)

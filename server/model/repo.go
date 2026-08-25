@@ -78,6 +78,7 @@ type Repo struct {
 	RegistryExtensionNetrc       bool                 `json:"registry_extension_netrc"          xorm:"DEFAULT FALSE 'registry_extension_netrc'"`
 	SecretExtensionEndpoint      string               `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
 	SecretExtensionNetrc         bool                 `json:"secret_extension_netrc"          xorm:"DEFAULT FALSE 'secret_extension_netrc'"`
+	ExposeAccessTokenEvents      []WebhookEvent       `json:"expose_access_token_events" xorm:"json 'expose_access_token_events'"`
 
 	// Rest API Only
 
@@ -169,6 +170,7 @@ type RepoPatch struct {
 	RegistryExtensionNetrc       *bool                      `json:"registry_extension_netrc"`
 	SecretExtensionEndpoint      *string                    `json:"secret_extension_endpoint,omitempty"`
 	SecretExtensionNetrc         *bool                      `json:"secret_extension_netrc,omitempty"`
+	ExposeAccessTokenEvents      *[]WebhookEvent            `json:"expose_access_token_events"`
 } //	@name	RepoPatch
 
 type ForgeRemoteID string
