@@ -19,6 +19,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/rs/zerolog/log"
 
@@ -32,6 +33,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
 func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
@@ -67,6 +69,18 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			Events:         events,
 		})
 	}
+
+	t := token.New(token.PipelineToken)
+	t.Set("user-id", strconv.FormatInt(user.ID, 10))
+	t.Set("pipeline-id", strconv.FormatInt(currentPipeline.ID, 10))
+	// TODO: If a pipeline is restarted, Timestamp is equal to the timestamp of start of the last pipeline.
+	tokenString, err := t.SignExpires(user.Hash, currentPipeline.Timestamp+repo.Timeout*60)
+
+	secrets = append(secrets, compiler.Secret{
+		Name:   "woodpecker_token",
+		Value:  tokenString,
+		Events: []pipeline_metadata.Event{pipeline_metadata.EventPush, pipeline_metadata.EventManual},
+	})
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(ctx, repo, currentPipeline, netrc)

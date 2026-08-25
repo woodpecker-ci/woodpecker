@@ -43,7 +43,7 @@ func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user *model.User
 
-		t, err := token.ParseRequest([]token.Type{token.UserToken, token.SessToken}, c.Request, func(t *token.Token) (string, error) {
+		t, err := token.ParseRequest([]token.Type{token.UserToken, token.SessToken, token.PipelineToken}, c.Request, func(t *token.Token) (string, error) {
 			var err error
 			userID, err := strconv.ParseInt(t.Get("user-id"), 10, 64)
 			if err != nil {
@@ -55,16 +55,34 @@ func SetUser() gin.HandlerFunc {
 		if err == nil {
 			c.Set("user", user)
 
-			// if this is a session token (ie not the API token)
-			// this means the user is accessing with a web browser,
-			// so we should implement CSRF protection measures.
-			if t.Type == token.SessToken {
+			switch t.Type {
+			case token.SessToken:
+				// if this is a session token (ie not the API token)
+				// this means the user is accessing with a web browser,
+				// so we should implement CSRF protection measures.
 				err = token.CheckCsrf(c.Request, func(_ *token.Token) (string, error) {
 					return user.Hash, nil
 				})
 				// if csrf token validation fails, exit immediately
 				// with a not authorized error.
 				if err != nil {
+					c.AbortWithStatus(http.StatusUnauthorized)
+					return
+				}
+			case token.PipelineToken:
+				/// If this is a token generated for a pipeline,
+				// check if the pipeline is still running.
+				pipelineID, err := strconv.ParseInt(t.Get("pipeline-id"), 10, 64)
+				if err != nil {
+					c.AbortWithStatus(http.StatusInternalServerError)
+					return
+				}
+				pipeline, err := store.FromContext(c).GetPipeline(pipelineID)
+				if err != nil {
+					c.AbortWithError(http.StatusInternalServerError, err)
+					return
+				}
+				if pipeline.Status != model.StatusRunning {
 					c.AbortWithStatus(http.StatusUnauthorized)
 					return
 				}

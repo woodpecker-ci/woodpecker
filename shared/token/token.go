@@ -34,6 +34,7 @@ const (
 	CsrfToken       Type = "csrf"
 	AgentToken      Type = "agent"
 	OAuthStateToken Type = "oauth-state"
+	PipelineToken   Type = "pipeline"
 )
 
 // SignerAlgo id default algorithm used to sign JWT tokens.
