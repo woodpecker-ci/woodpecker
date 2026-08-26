@@ -88,10 +88,28 @@ func TestRunReportsCancelWithoutError(t *testing.T) {
 		Return(nil)
 
 	counter := &State{Metadata: map[string]Info{}}
-	runner := NewRunner(peer, rpc.Filter{}, "test-agent", counter, engine)
+	runner := NewRunner(peer, rpc.Filter{}, "test-agent", 1, counter, engine)
 
 	assert.NoError(t, runner.Run(t.Context()))
 
 	assert.True(t, done.Canceled, "the workflow must be reported as canceled")
 	assert.Empty(t, done.Error, "a cancellation is not a workflow error")
+}
+
+func TestFormatAgentLabels(t *testing.T) {
+	// Empty label set renders as an empty string, not "map[]" or similar.
+	assert.Empty(t, formatAgentLabels(nil))
+	assert.Empty(t, formatAgentLabels(map[string]string{}))
+
+	// Keys are sorted so the value is stable across runs regardless of map
+	// iteration order.
+	got := formatAgentLabels(map[string]string{
+		"platform": "linux/amd64",
+		"backend":  "docker",
+		"hostname": "agent-1",
+		"repo":     "*",
+	})
+	assert.Equal(t, "backend=docker,hostname=agent-1,platform=linux/amd64,repo=*", got)
+
+	assert.Equal(t, "gpu=true", formatAgentLabels(map[string]string{"gpu": "true"}))
 }
