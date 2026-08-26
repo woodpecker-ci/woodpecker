@@ -103,7 +103,11 @@ vendor: ## Update the vendor directory
 	go mod vendor
 
 format: ## Format source code
-	@go run mvdan.cc/gofumpt@$(GOFUMPT_VERSION) -extra -w .
+	@if command -v gofumpt > /dev/null 2>&1; then \
+		gofumpt -extra -w .; \
+	else \
+		go run mvdan.cc/gofumpt@$(GOFUMPT_VERSION) -extra -w .; \
+	fi
 
 .PHONY: clean
 clean: ## Clean build artifacts
@@ -125,7 +129,11 @@ clean-all: clean ## Clean all artifacts
 
 .PHONY: generate
 generate: generate-openapi ## Run all code generations
-	go run github.com/vektra/mockery/v3@latest
+	@if command -v mockery > /dev/null 2>&1; then \
+		mockery; \
+	else \
+		go run github.com/vektra/mockery/v3@latest; \
+	fi
 	CGO_ENABLED=0 go generate ./...
 
 generate-openapi: ## Run openapi code generation and format it
@@ -133,7 +141,11 @@ generate-openapi: ## Run openapi code generation and format it
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 generate-license-header:
-	go run github.com/google/addlicense@latest -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go
+	@if command -v addlicense > /dev/null 2>&1; then \
+		addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go; \
+	else \
+		go run github.com/google/addlicense@latest -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go; \
+	fi
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -141,14 +153,16 @@ check-xgo: ## Check if xgo is installed
 	fi
 
 install-golangci-lint:
-	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) ; \
-	fi
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
+
+install-gofumpt:
+	go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
 
 install-addlicense:
-	@hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/google/addlicense@latest; \
-	fi
+	go install github.com/google/addlicense@latest
+
+install-mockery:
+	go install github.com/vektra/mockery/v3@latest
 
 install-protoc-gen-go:
 	@hash protoc-gen-go > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -159,7 +173,7 @@ install-protoc-gen-go:
 	fi
 
 .PHONY: install-tools
-install-tools: install-golangci-lint install-addlicense install-protoc-gen-go ## Install development tools
+install-tools: install-golangci-lint install-gofumpt install-addlicense install-mockery install-protoc-gen-go ## Install development tools
 
 ui-dependencies: ## Install UI dependencies
 	(cd web/; pnpm install --frozen-lockfile)
@@ -167,9 +181,13 @@ ui-dependencies: ## Install UI dependencies
 ##@ Test
 
 .PHONY: lint
-lint: install-golangci-lint ## Lint code
+lint: ## Lint code
 	@echo "Running golangci-lint"
-	golangci-lint run
+	@if command -v golangci-lint > /dev/null 2>&1; then \
+		golangci-lint run; \
+	else \
+		go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run; \
+	fi
 
 lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
