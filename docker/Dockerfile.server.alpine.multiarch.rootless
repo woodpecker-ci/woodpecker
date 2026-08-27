@@ -1,3 +1,5 @@
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.27 AS timezone-data
+
 FROM docker.io/alpine:3.24
 
 ARG TARGETOS TARGETARCH
@@ -12,8 +14,11 @@ ENV WOODPECKER_IN_CONTAINER=true
 ENV XDG_CACHE_HOME=/var/lib/woodpecker
 ENV XDG_DATA_HOME=/var/lib/woodpecker
 ENV SQLITE_TMPDIR=/var/lib/woodpecker
+# Keep the .zip suffix: Go uses this IANA archive for named cron timezones.
+ENV ZONEINFO=/usr/share/zoneinfo.zip
 EXPOSE 8000 9000 80 443
 
+COPY --from=timezone-data /usr/local/go/lib/time/zoneinfo.zip /usr/share/zoneinfo.zip
 COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
 
 USER woodpecker

@@ -16,6 +16,9 @@ EXPOSE 8000 9000 80 443
 
 # copy certs from certs image
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# Keep the .zip suffix: Go uses this IANA archive for named cron timezones.
+COPY --from=build /usr/local/go/lib/time/zoneinfo.zip /usr/share/zoneinfo.zip
+ENV ZONEINFO=/usr/share/zoneinfo.zip
 # copy server binary
 COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
 COPY --from=build /etc/passwd /etc/passwd
