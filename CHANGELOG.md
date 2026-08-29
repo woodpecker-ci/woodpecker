@@ -1,9 +1,10 @@
 # Changelog
 
-## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-08-27
+## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-08-29
 
 ### 📦️ Dependency
 
+- Update pre-commit hook golangci/golangci-lint to v2.13.2 [[#7080](https://github.com/woodpecker-ci/woodpecker/pull/7080)]
 - Update golang-packages [[#7075](https://github.com/woodpecker-ci/woodpecker/pull/7075)]
 - Update golang-packages [[#7071](https://github.com/woodpecker-ci/woodpecker/pull/7071)]
 
