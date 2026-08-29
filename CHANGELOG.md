@@ -2,6 +2,10 @@
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-08-29
 
+### 📚 Documentation
+
+- Update docs npm deps non-major [[#7083](https://github.com/woodpecker-ci/woodpecker/pull/7083)]
+
 ### 📦️ Dependency
 
 - Update web npm deps non-major [[#7081](https://github.com/woodpecker-ci/woodpecker/pull/7081)]
