@@ -4,6 +4,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7081](https://github.com/woodpecker-ci/woodpecker/pull/7081)]
 - Update pre-commit hook golangci/golangci-lint to v2.13.2 [[#7080](https://github.com/woodpecker-ci/woodpecker/pull/7080)]
 - Update golang-packages [[#7075](https://github.com/woodpecker-ci/woodpecker/pull/7075)]
 - Update golang-packages [[#7071](https://github.com/woodpecker-ci/woodpecker/pull/7071)]
