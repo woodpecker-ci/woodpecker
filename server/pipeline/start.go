@@ -51,8 +51,16 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 }
 
 func publishPipeline(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
+	publishPipelineEvent(ctx, pipeline, repo)
+	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
+}
+
+// publishPipelineEvent informs UI subscribers about a pipeline change without
+// posting commit statuses to the forge. Pre-start pipeline transitions use it
+// so the forge statuses of a pipeline with many workflows are only posted
+// once, by start().
+func publishPipelineEvent(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo) {
 	if err := server.Config.Services.Scheduler.PublishPipelineEvent(ctx, repo, pipeline); err != nil {
 		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
 	}
-	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
 }
