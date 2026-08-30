@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRef, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Icon from '~/components/atomic/Icon.vue';
@@ -51,11 +51,22 @@ const options = ref<CheckboxOption[]>([]);
 const loading = ref(false);
 const error = ref('');
 
+// The branch can come from a text input, so this is called on every keystroke.
+// Requests are debounced, and each one carries a sequence number so a slow
+// response for an abandoned branch cannot overwrite a newer result.
+const debounceMs = 300;
+let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+let latestRequest = 0;
+
 async function loadWorkflows(branch?: string) {
+  const request = ++latestRequest;
   loading.value = true;
   error.value = '';
   try {
     const workflows = await apiClient.getRepoWorkflows(props.repoId, branch);
+    if (request !== latestRequest) {
+      return;
+    }
     options.value = workflows.map((workflow) => ({ text: workflow, value: workflow }));
 
     // a workflow that no longer exists on this branch cannot stay selected
@@ -65,12 +76,35 @@ async function loadWorkflows(branch?: string) {
       innerValue.value = stillValid;
     }
   } catch {
+    if (request !== latestRequest) {
+      return;
+    }
     options.value = [];
     error.value = i18n.t('repo.workflow_select.error');
   } finally {
-    loading.value = false;
+    if (request === latestRequest) {
+      loading.value = false;
+    }
   }
 }
 
-watch(() => props.branch, loadWorkflows, { immediate: true });
+function scheduleLoad(branch?: string, immediate = false) {
+  clearTimeout(debounceTimer);
+  if (immediate) {
+    void loadWorkflows(branch);
+    return;
+  }
+  // show the spinner straight away, so the list is never silently stale while
+  // the debounce window is open
+  loading.value = true;
+  debounceTimer = setTimeout(() => void loadWorkflows(branch), debounceMs);
+}
+
+watch(
+  () => props.branch,
+  (branch, previous) => scheduleLoad(branch, previous === undefined),
+  { immediate: true },
+);
+
+onBeforeUnmount(() => clearTimeout(debounceTimer));
 </script>
