@@ -257,6 +257,25 @@ func TestPostCron(t *testing.T) {
 		forge.AssertCalled(t, "BranchHead", mock.Anything, user, mock.Anything, "feature")
 	})
 
+	t.Run("workflow selection is persisted", func(t *testing.T) {
+		cronForgeManager(t)
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withRequest(http.MethodPost, &model.Cron{Name: "selective", Schedule: "@every 1h", Workflows: []string{"build", "deploy"}})(tc)
+
+		PostCron(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		var got model.Cron
+		tc.decodeJSON(t, &got)
+		assert.Equal(t, []string{"build", "deploy"}, got.Workflows)
+
+		stored, err := s.CronFind(repo, got.ID)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"build", "deploy"}, stored.Workflows)
+	})
+
 	t.Run("duplicate cron returns conflict", func(t *testing.T) {
 		seedCron(t, s, repo.ID, "dup")
 		cronForgeManager(t)
@@ -384,5 +403,69 @@ func TestPatchCron(t *testing.T) {
 		var got model.Cron
 		tc.decodeJSON(t, &got)
 		assert.Equal(t, "develop", got.Branch)
+	})
+
+	t.Run("workflow selection is replaced when patched", func(t *testing.T) {
+		cron := seedCron(t, s, repo.ID, "wfpatch")
+		cron.Workflows = []string{"build"}
+		require.NoError(t, s.CronUpdate(repo, cron))
+		cronForgeManager(t)
+
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withParam("cron", strItoa(cron.ID))(tc)
+		withRequest(http.MethodPatch, &model.CronPatch{Workflows: []string{"deploy"}})(tc)
+
+		PatchCron(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		var got model.Cron
+		tc.decodeJSON(t, &got)
+		assert.Equal(t, []string{"deploy"}, got.Workflows)
+	})
+
+	// The nil guard is what lets a patch touch only the schedule without
+	// silently widening the cron back to every workflow.
+	t.Run("workflow selection survives an unrelated patch", func(t *testing.T) {
+		cron := seedCron(t, s, repo.ID, "wfkeep")
+		cron.Workflows = []string{"build"}
+		require.NoError(t, s.CronUpdate(repo, cron))
+		cronForgeManager(t)
+
+		newSchedule := "@every 3h"
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withParam("cron", strItoa(cron.ID))(tc)
+		withRequest(http.MethodPatch, &model.CronPatch{Schedule: &newSchedule})(tc)
+
+		PatchCron(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		var got model.Cron
+		tc.decodeJSON(t, &got)
+		assert.Equal(t, "@every 3h", got.Schedule)
+		assert.Equal(t, []string{"build"}, got.Workflows)
+	})
+
+	t.Run("workflow selection can be cleared with an empty list", func(t *testing.T) {
+		cron := seedCron(t, s, repo.ID, "wfclear")
+		cron.Workflows = []string{"build"}
+		require.NoError(t, s.CronUpdate(repo, cron))
+		cronForgeManager(t)
+
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withParam("cron", strItoa(cron.ID))(tc)
+		withRequest(http.MethodPatch, &model.CronPatch{Workflows: []string{}})(tc)
+
+		PatchCron(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		var got model.Cron
+		tc.decodeJSON(t, &got)
+		assert.Empty(t, got.Workflows)
 	})
 }
