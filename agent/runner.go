@@ -17,12 +17,11 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"runtime"
-	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -58,21 +57,19 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, agentID int64, state
 	}
 }
 
-// formatAgentLabels renders the agent's labels as a deterministic,
-// comma-separated list of key=value pairs so they can be exposed to steps
-// through a single environment variable.
+// formatAgentLabels renders the agent's labels as a JSON object so they can be
+// exposed to steps through a single environment variable. JSON keeps the format
+// consistent with other structured pipeline data such as CI_PIPELINE_FILES.
+// json.Marshal sorts map keys, so the output is deterministic across runs.
 func formatAgentLabels(labels map[string]string) string {
-	keys := make([]string, 0, len(labels))
-	for k := range labels {
-		keys = append(keys, k)
+	if len(labels) == 0 {
+		return ""
 	}
-	sort.Strings(keys)
-
-	pairs := make([]string, 0, len(keys))
-	for _, k := range keys {
-		pairs = append(pairs, k+"="+labels[k])
+	out, err := json.Marshal(labels)
+	if err != nil {
+		return ""
 	}
-	return strings.Join(pairs, ",")
+	return string(out)
 }
 
 func GetShutdownContext() (context.Context, context.CancelFunc) {

@@ -101,15 +101,15 @@ func TestFormatAgentLabels(t *testing.T) {
 	assert.Empty(t, formatAgentLabels(nil))
 	assert.Empty(t, formatAgentLabels(map[string]string{}))
 
-	// Keys are sorted so the value is stable across runs regardless of map
-	// iteration order.
+	// Labels render as a JSON object with keys sorted, so the value is stable
+	// across runs regardless of map iteration order.
 	got := formatAgentLabels(map[string]string{
 		"platform": "linux/amd64",
 		"backend":  "docker",
 		"hostname": "agent-1",
 		"repo":     "*",
 	})
-	assert.Equal(t, "backend=docker,hostname=agent-1,platform=linux/amd64,repo=*", got)
+	assert.JSONEq(t, `{"backend":"docker","hostname":"agent-1","platform":"linux/amd64","repo":"*"}`, got)
 
-	assert.Equal(t, "gpu=true", formatAgentLabels(map[string]string{"gpu": "true"}))
+	assert.Equal(t, `{"gpu":"true"}`, formatAgentLabels(map[string]string{"gpu": "true"}))
 }
