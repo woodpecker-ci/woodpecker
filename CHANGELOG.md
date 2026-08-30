@@ -2,6 +2,14 @@
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-08-30
 
+### ❤️ Thanks to all contributors! ❤️
+
+@lafriks
+
+### 🐛 Bug Fixes
+
+- Fix injecting additional variables for substituting [[#7077](https://github.com/woodpecker-ci/woodpecker/pull/7077)]
+
 ### 📚 Documentation
 
 - Update docs npm deps non-major [[#7083](https://github.com/woodpecker-ci/woodpecker/pull/7083)]
