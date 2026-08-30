@@ -5245,6 +5245,13 @@ const docTemplate = `{
                 "reviewed_by": {
                     "type": "string"
                 },
+                "selected_workflows": {
+                    "description": "workflow selection of a manual or cron trigger, empty means all",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "sender": {
                     "description": "uses reported user for webhooks and name of cron for cron pipelines",
                     "type": "string"

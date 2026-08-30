@@ -169,6 +169,36 @@ func TestRestartReplaysSelection(t *testing.T) {
 	assert.Equal(t, []string{"b"}, workflowNames(t, env, finished), "restart must replay the original selection")
 }
 
+// TestRestartReplaysSelectionFromStore proves the selection survives a server
+// process restart. It reloads the pipeline from the store and clears the
+// in-memory selection, so the restart has nothing but persisted state to work
+// from: the configs linked to the pipeline, and the selection column.
+func TestRestartReplaysSelectionFromStore(t *testing.T) {
+	env := setup.StartServer(t.Context(), t, selectionFiles())
+	agent := setup.StartAgent(t, env.GRPCAddr)
+	setup.WaitForAgentRegistered(t, env.Store, agent)
+
+	pl := env.DummyPipeline(model.EventManual)
+	pl.SelectedWorkflows = []string{"b"}
+
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, pl)
+	require.NoError(t, err)
+	setup.WaitForPipeline(t, env.Store, created.ID)
+
+	// reload exactly as a fresh server process would
+	reloaded, err := env.Store.GetPipeline(created.ID)
+	require.NoError(t, err)
+	require.Equal(t, []string{"b"}, reloaded.SelectedWorkflows, "selection must be persisted, not just in memory")
+
+	restarted, err := pipeline.Restart(t.Context(), env.Store, reloaded, env.Fixtures.Owner, env.Fixtures.Repo, nil)
+	require.NoError(t, err)
+
+	finished := setup.WaitForPipeline(t, env.Store, restarted.ID)
+	assert.Equal(t, model.StatusSuccess, finished.Status)
+	assert.Equal(t, []string{"b"}, workflowNames(t, env, finished))
+	assert.Equal(t, []string{"b"}, finished.SelectedWorkflows, "the restart carries the selection forward")
+}
+
 // TestSelectionRejectsUnknownWorkflow: a typo must be reported, not silently
 // swallowed into an empty run.
 func TestSelectionRejectsUnknownWorkflow(t *testing.T) {

@@ -49,7 +49,7 @@ type Pipeline struct {
 	Reviewed             int64                   `json:"reviewed"                xorm:"reviewed"`
 	CancelInfo           *CancelInfo             `json:"cancel_info,omitempty"   xorm:"json 'cancel_info'"`
 	Workflows            []*Workflow             `json:"workflows,omitempty"     xorm:"-"`
-	SelectedWorkflows    []string                `json:"-"                       xorm:"-"` // workflow selection for manual/cron triggers, never persisted on the pipeline
+	SelectedWorkflows    []string                `json:"selected_workflows,omitempty" xorm:"json 'selected_workflows'"` // workflow selection of a manual or cron trigger, empty means all
 	ChangedFiles         []string                `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables  map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels    []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`

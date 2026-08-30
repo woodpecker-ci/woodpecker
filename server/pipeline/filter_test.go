@@ -91,7 +91,7 @@ func TestFilterConfigsByWorkflows(t *testing.T) {
 		{
 			name:     "missing required dependency is rejected",
 			selected: []string{"test"},
-			wantErr:  `selected workflows depend on "lint", which is not selected`,
+			wantErr:  `selected workflows depend on "lint", which is not in the selection`,
 		},
 		{
 			name:     "required dependency included is fine",

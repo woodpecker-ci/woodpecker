@@ -127,7 +127,7 @@ func checkSelectedDependencies(selected []*forge_types.FileMeta) error {
 
 	if len(missing) > 0 {
 		return &ErrBadRequest{Msg: fmt.Sprintf(
-			"selected workflows depend on %s, which %s not selected",
+			"selected workflows depend on %s, which %s not in the selection",
 			quoteList(missing), plural(len(missing), "is", "are"),
 		)}
 	}

@@ -60,6 +60,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&replaceZeroForgeIDsInUsers,
 	&deduplicateLogEntries,
 	&addCronWorkflows,
+	&addPipelineSelectedWorkflows,
 }
 
 var allBeans = []any{
