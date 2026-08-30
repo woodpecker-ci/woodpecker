@@ -101,6 +101,15 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	workflowMetadata := b.GetWorkflowMetadata(workflow)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
+	// add additional environment variables for substituting
+	for k, v := range b.AdditionalEnvs {
+		if _, exists := environ[k]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[k] = v
+	}
+
 	// add global environment variables for substituting
 	for k, v := range b.Envs {
 		if _, exists := environ[k]; exists {
