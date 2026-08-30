@@ -31,6 +31,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
@@ -436,9 +438,11 @@ func GetRepoWorkflows(c *gin.Context) {
 		branch = repo.Branch
 	}
 
+	// the branch comes from a query parameter typed by a user, so a lookup
+	// failure is reported as a bad request rather than a server error
 	commit, err := _forge.BranchHead(c, user, repo, branch)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch branch head: %w", err))
+		c.String(http.StatusBadRequest, "Branch not resolved: %s", err)
 		return
 	}
 
@@ -456,10 +460,20 @@ func GetRepoWorkflows(c *gin.Context) {
 		return
 	}
 
+	// the repo owner's token is what the config service reads the repo with, and
+	// it may be stale
+	forge.Refresh(c, _forge, _store, repoUser)
+
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	configs, err := configService.Fetch(c, _forge, repoUser, repo, tmpPipeline, nil, false)
+	// a branch without any config is not an error, it just has no workflows to
+	// offer, and the caller renders that as an empty list
+	if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+		c.JSON(http.StatusOK, []string{})
+		return
+	}
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, fmt.Errorf("could not fetch workflow configs: %w", err))
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch workflow configs: %w", err))
 		return
 	}
 
