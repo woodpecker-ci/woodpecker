@@ -50,6 +50,14 @@ var cronUpdateCmd = &cli.Command{
 			Name:  "schedule",
 			Usage: "cron schedule",
 		},
+		&cli.StringSliceFlag{
+			Name:    "workflow",
+			Aliases: []string{"w"},
+			Usage:   "run only the named workflow, repeat to select several (default: all)",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
+		},
 		&cli.BoolFlag{
 			Name:  "enabled",
 			Usage: "whether cron is enabled",
@@ -81,11 +89,12 @@ func cronUpdate(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 	cron := &woodpecker.Cron{
-		ID:       cronID,
-		Name:     jobName,
-		Branch:   branch,
-		Schedule: schedule,
-		Enabled:  enabled,
+		ID:        cronID,
+		Name:      jobName,
+		Branch:    branch,
+		Schedule:  schedule,
+		Enabled:   enabled,
+		Workflows: c.StringSlice("workflow"),
 	}
 	cron, err = client.CronUpdate(repoID, cron)
 	if err != nil {

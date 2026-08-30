@@ -12,6 +12,8 @@
         <SelectField :id="id" v-model="payload.branch" :options="branches" required />
       </InputField>
 
+      <WorkflowSelect v-model="payload.workflows" :repo-id="repo.id" :branch="payload.branch" />
+
       <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
         <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
         <KeyValueEditor
@@ -45,6 +47,7 @@ import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
+import WorkflowSelect from '~/components/repo/WorkflowSelect.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
@@ -67,10 +70,11 @@ const repoPermissions = requiredInject('repo-permissions');
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
-const payload = ref<{ message: string; branch: string; variables: Record<string, string> }>({
+const payload = ref<{ message: string; branch: string; variables: Record<string, string>; workflows: string[] }>({
   message: '',
   branch: 'main',
   variables: {},
+  workflows: [],
 });
 
 const isVariablesValid = ref(true);

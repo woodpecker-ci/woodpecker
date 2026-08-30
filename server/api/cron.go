@@ -133,6 +133,7 @@ func PostCron(c *gin.Context) {
 		Timezone:  strings.TrimSpace(in.Timezone),
 		Branch:    strings.TrimSpace(in.Branch),
 		Variables: in.Variables,
+		Workflows: in.Workflows,
 		Enabled:   in.Enabled,
 	}
 	if cron.Timezone == "" {
@@ -262,6 +263,9 @@ func PatchCron(c *gin.Context) {
 	}
 	if in.Variables != nil {
 		cron.Variables = in.Variables
+	}
+	if in.Workflows != nil {
+		cron.Workflows = in.Workflows
 	}
 	cron.CreatorID = user.ID
 

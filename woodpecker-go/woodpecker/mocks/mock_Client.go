@@ -3989,6 +3989,74 @@ func (_c *MockClient_RepoRepair_Call) RunAndReturn(run func(repoID int64) error)
 	return _c
 }
 
+// RepoWorkflows provides a mock function for the type MockClient
+func (_mock *MockClient) RepoWorkflows(repoID int64, branch string) ([]string, error) {
+	ret := _mock.Called(repoID, branch)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RepoWorkflows")
+	}
+
+	var r0 []string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, string) ([]string, error)); ok {
+		return returnFunc(repoID, branch)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, string) []string); ok {
+		r0 = returnFunc(repoID, branch)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, string) error); ok {
+		r1 = returnFunc(repoID, branch)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_RepoWorkflows_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RepoWorkflows'
+type MockClient_RepoWorkflows_Call struct {
+	*mock.Call
+}
+
+// RepoWorkflows is a helper method to define mock.On call
+//   - repoID int64
+//   - branch string
+func (_e *MockClient_Expecter) RepoWorkflows(repoID any, branch any) *MockClient_RepoWorkflows_Call {
+	return &MockClient_RepoWorkflows_Call{Call: _e.mock.On("RepoWorkflows", repoID, branch)}
+}
+
+func (_c *MockClient_RepoWorkflows_Call) Run(run func(repoID int64, branch string)) *MockClient_RepoWorkflows_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_RepoWorkflows_Call) Return(strings []string, err error) *MockClient_RepoWorkflows_Call {
+	_c.Call.Return(strings, err)
+	return _c
+}
+
+func (_c *MockClient_RepoWorkflows_Call) RunAndReturn(run func(repoID int64, branch string) ([]string, error)) *MockClient_RepoWorkflows_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Secret provides a mock function for the type MockClient
 func (_mock *MockClient) Secret(repoID int64, secret string) (*woodpecker.Secret, error) {
 	ret := _mock.Called(repoID, secret)

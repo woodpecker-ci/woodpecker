@@ -49,6 +49,7 @@ type Pipeline struct {
 	Reviewed             int64                   `json:"reviewed"                xorm:"reviewed"`
 	CancelInfo           *CancelInfo             `json:"cancel_info,omitempty"   xorm:"json 'cancel_info'"`
 	Workflows            []*Workflow             `json:"workflows,omitempty"     xorm:"-"`
+	SelectedWorkflows    []string                `json:"-"                       xorm:"-"` // workflow selection for manual/cron triggers, never persisted on the pipeline
 	ChangedFiles         []string                `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables  map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels    []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
@@ -128,6 +129,9 @@ type PipelineOptions struct {
 	Message   string            `json:"message"`
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
+	// Workflows optionally narrows the run to the named workflows. An empty
+	// list runs every workflow config found in the repo.
+	Workflows []string `json:"workflows,omitempty"`
 } //	@name	PipelineOptions
 
 type Release struct {

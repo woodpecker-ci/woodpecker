@@ -121,6 +121,8 @@
           <span v-else class="text-wp-text-100">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </div>
 
+        <WorkflowSelect v-model="selectedCronWorkflows" :repo-id="repo.id" :branch="selectedCron.branch" />
+
         <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
           <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
           <KeyValueEditor
@@ -162,6 +164,7 @@ import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
+import WorkflowSelect from '~/components/repo/WorkflowSelect.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
@@ -194,6 +197,15 @@ const selectedCronTimezone = computed<string>({
     return selectedCron.value!.timezone ?? 'UTC';
   },
 });
+const selectedCronWorkflows = computed<string[]>({
+  set(workflows) {
+    selectedCron.value!.workflows = workflows;
+  },
+  get() {
+    return selectedCron.value!.workflows ?? [];
+  },
+});
+
 const selectedCronVariables = computed<Record<string, string>>({
   async set(_vars) {
     selectedCron.value!.variables = _vars;

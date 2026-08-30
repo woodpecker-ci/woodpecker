@@ -145,6 +145,34 @@ Some workflows don't need the source code, like creating a notification on failu
 Read more about `skip_clone` at [pipeline syntax](./20-workflow-syntax.md#skip_clone)
 :::
 
+## Running only some workflows
+
+A push runs every workflow whose `when` conditions match. Manual runs and cron jobs can instead pick the workflows to run, which is useful when a repository holds workflows that are unrelated to each other, such as a deploy workflow that should not run every time you re-run the tests.
+
+The "Run pipeline" form lists the workflows found on the selected branch. Ticking none of them runs all of them, which is the behavior of previous versions.
+
+The same selection can be made from the CLI, where a workflow is named by its file name without the path and extension:
+
+```bash
+woodpecker-cli pipeline create --branch main --workflow deploy my-org/my-repo
+```
+
+Repeat the flag to select several workflows:
+
+```bash
+woodpecker-cli pipeline create --branch main --workflow lint --workflow test my-org/my-repo
+```
+
+Cron jobs carry a selection too, set in the repository settings alongside the schedule, or from the CLI:
+
+```bash
+woodpecker-cli repo cron add --repository my-org/my-repo --name nightly --schedule @daily --workflow build-db
+```
+
+A selection is rejected rather than silently ignored when it names a workflow that does not exist on the branch, or when it leaves a required `depends_on` unsatisfied. To run a workflow that depends on another one, select both.
+
+The selection is stored with the pipeline, so restarting a pipeline runs the same workflows it ran the first time.
+
 ## Concurrency
 
 By default workflows run with no concurrency limit. Some workflows, however, must not run more than a given number of times at once. A typical example is a deployment workflow: running two deployments at the same time can cause race conditions or corrupt state. Cancelling the previous pipeline is often not an option either, since it could interrupt an ongoing deployment.

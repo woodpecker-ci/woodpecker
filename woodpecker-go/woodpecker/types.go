@@ -266,12 +266,18 @@ type (
 		Created   int64  `json:"created"`
 		Branch    string `json:"branch"`
 		Enabled   bool   `json:"enabled"`
+		// Workflows optionally narrows the run to the named workflows.
+		// An empty list runs every workflow config found in the repo.
+		Workflows []string `json:"workflows,omitempty"`
 	}
 
 	// PipelineOptions is the JSON data for creating a new pipeline.
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
+		// Workflows optionally narrows the run to the named workflows.
+		// An empty list runs every workflow config found in the repo.
+		Workflows []string `json:"workflows,omitempty"`
 	}
 
 	// Agent is the JSON data for an agent.

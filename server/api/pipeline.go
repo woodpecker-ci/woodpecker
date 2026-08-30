@@ -102,6 +102,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 		Ref:                 "refs/heads/" + opts.Branch,
 		AdditionalVariables: opts.Variables,
+		SelectedWorkflows:   opts.Workflows,
 
 		Author: user.Login,
 		Email:  user.Email,
@@ -405,6 +406,64 @@ func GetPipelineConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// GetRepoWorkflows
+//
+//	@Summary		List the workflows a trigger can select
+//	@Description	Returns the names of the workflow configs currently defined on a branch. These are the names accepted by the workflows option of a manual pipeline or a cron job.
+//	@Router			/repos/{repo_id}/workflows [get]
+//	@Produce		json
+//	@Success		200	{array}	string
+//	@Tags			Pipelines
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			repo_id			path	int		true	"the repository id"
+//	@Param			branch			query	string	false	"the branch to read the workflows from, defaults to the repo default branch"
+func GetRepoWorkflows(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+	user := session.User(c)
+
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	branch := c.Query("branch")
+	if branch == "" {
+		branch = repo.Branch
+	}
+
+	commit, err := _forge.BranchHead(c, user, repo, branch)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch branch head: %w", err))
+		return
+	}
+
+	// a throw-away pipeline, only used to point the config service at the right ref
+	tmpPipeline := &model.Pipeline{
+		Event:  model.EventManual,
+		Commit: commit.SHA,
+		Branch: branch,
+		Ref:    "refs/heads/" + branch,
+	}
+
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not find repo owner: %w", err))
+		return
+	}
+
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	configs, err := configService.Fetch(c, _forge, repoUser, repo, tmpPipeline, nil, false)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusNotFound, fmt.Errorf("could not fetch workflow configs: %w", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, pipeline.WorkflowNames(configs))
 }
 
 // GetPipelineMetadata

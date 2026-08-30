@@ -30,6 +30,7 @@ const (
 	pathChown          = "%s/api/repos/%d/chown"
 	pathRepair         = "%s/api/repos/%d/repair"
 	pathPipelines      = "%s/api/repos/%d/pipelines"
+	pathRepoWorkflows  = "%s/api/repos/%d/workflows"
 	pathPipeline       = "%s/api/repos/%d/pipelines/%v"
 	pathPipelineLogs   = "%s/api/repos/%d/logs/%d"
 	pathStepLogs       = "%s/api/repos/%d/logs/%d/%d"
@@ -364,6 +365,24 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 	var out *Pipeline
 	uri := fmt.Sprintf(pathPipelines, c.addr, repoID)
 	err := c.post(uri, options, &out)
+	return out, err
+}
+
+// RepoWorkflows returns the workflow names defined on the given branch. These
+// are the names accepted by PipelineOptions.Workflows and Cron.Workflows. An
+// empty branch falls back to the repo default branch.
+func (c *client) RepoWorkflows(repoID int64, branch string) ([]string, error) {
+	var out []string
+	uri, err := url.Parse(fmt.Sprintf(pathRepoWorkflows, c.addr, repoID))
+	if err != nil {
+		return nil, err
+	}
+	if branch != "" {
+		query := uri.Query()
+		query.Set("branch", branch)
+		uri.RawQuery = query.Encode()
+	}
+	err = c.get(uri.String(), &out)
 	return out, err
 }
 

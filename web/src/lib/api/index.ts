@@ -30,6 +30,8 @@ interface RepoListOptions {
 interface PipelineOptions {
   branch: string;
   variables: Record<string, string>;
+  // workflows narrows the run to the named workflows. An empty list runs all of them.
+  workflows?: string[];
 }
 
 interface DeploymentOptions {
@@ -91,6 +93,12 @@ export default class WoodpeckerClient extends ApiClient {
 
   async repairRepo(repoId: number): Promise<unknown> {
     return this._post(`/api/repos/${repoId}/repair`);
+  }
+
+  // getRepoWorkflows lists the workflow names a manual pipeline or cron job can select on a branch.
+  async getRepoWorkflows(repoId: number, branch?: string): Promise<string[]> {
+    const query = encodeQueryString({ branch });
+    return this._get(`/api/repos/${repoId}/workflows?${query}`) as Promise<string[]>;
   }
 
   async createPipeline(repoId: number, options: PipelineOptions): Promise<Pipeline | string> {
