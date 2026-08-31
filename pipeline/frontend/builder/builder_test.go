@@ -85,6 +85,100 @@ steps:
 	assert.Error(t, err, "test erroneously succeeded")
 }
 
+func TestAdditionalEnvsSubstitution(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "manual",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		AdditionalEnvs: map[string]string{
+			"TAG": "1.2.3",
+		},
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		TrustedClonePlugins: []string{"woodpeckerci/plugin-git"},
+		Yamls: []*YamlFile{
+			{Data: []byte(`
+when:
+  event: manual
+clone:
+  - name: clone
+    image: woodpeckerci/plugin-git
+    settings:
+      ref: refs/tags/${TAG}
+steps:
+  - name: build
+    image: scratch
+    commands:
+      - go build
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1)
+	cloneStep := items[0].Config.Stages[0].Steps[0]
+	assert.Equal(t, "clone", cloneStep.Name)
+	assert.Equal(t, "refs/tags/1.2.3", cloneStep.Environment["PLUGIN_REF"],
+		"additional (manual trigger) variables must be substituted in the yaml")
+}
+
+func TestAdditionalAndMatrixEnvsNotInjectedIntoPlugins(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "manual",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		AdditionalEnvs: map[string]string{
+			"TAG": "1.2.3",
+		},
+		RepoTrusted: &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Data: []byte(`
+when:
+  event: manual
+skip_clone: true
+matrix:
+  GO_VERSION:
+    - "1.22"
+steps:
+  - name: build
+    image: scratch
+    commands:
+      - go build
+  - name: publish
+    image: scratch
+    settings:
+      ref: refs/tags/${TAG}
+`)},
+		},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1)
+
+	assert.Len(t, items[0].Config.Stages, 2)
+	buildStep := items[0].Config.Stages[0].Steps[0]
+	publishStep := items[0].Config.Stages[1].Steps[0]
+	assert.Equal(t, "build", buildStep.Name)
+	assert.Equal(t, "publish", publishStep.Name)
+
+	// non-plugin steps get additional (manual trigger) and matrix envs
+	assert.Equal(t, "1.2.3", buildStep.Environment["TAG"])
+	assert.Equal(t, "1.22", buildStep.Environment["GO_VERSION"])
+
+	// plugin steps must not have them injected to avoid smuggling settings
+	assert.NotContains(t, publishStep.Environment, "TAG")
+	assert.NotContains(t, publishStep.Environment, "GO_VERSION")
+}
+
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
