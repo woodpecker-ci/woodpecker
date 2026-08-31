@@ -15,6 +15,10 @@
 package setup
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,6 +26,16 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
+
+func generateAppPrivateKey(t *testing.T) string {
+	t.Helper()
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+	return string(pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(key),
+	}))
+}
 
 func TestForgeUnknownType(t *testing.T) {
 	t.Parallel()
@@ -51,6 +65,74 @@ func TestForgeGitHub(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.NotNil(t, f)
+}
+
+func TestForgeGitHubApp(t *testing.T) {
+	t.Parallel()
+	pemKey := generateAppPrivateKey(t)
+
+	t.Run("app-id as string", func(t *testing.T) {
+		t.Parallel()
+		f, err := Forge(&model.Forge{
+			ID:   1,
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			AdditionalOptions: map[string]any{
+				"app-id":          "12345",
+				"app-private-key": pemKey,
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, f)
+		assert.Equal(t, "github", f.Name())
+	})
+
+	t.Run("app-id as JSON number", func(t *testing.T) {
+		t.Parallel()
+		// the API rejects non-string app ids at save time, so setup treats a
+		// numeric value as unset - together with the private key this fails
+		// the pairing check instead of being silently coerced
+		_, err := Forge(&model.Forge{
+			ID:   1,
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			AdditionalOptions: map[string]any{
+				"app-id":          float64(12345),
+				"app-private-key": pemKey,
+			},
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("app-id without private key", func(t *testing.T) {
+		t.Parallel()
+		_, err := Forge(&model.Forge{
+			ID:   1,
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			AdditionalOptions: map[string]any{
+				"app-id": "12345",
+			},
+		})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "app id")
+		assert.Contains(t, err.Error(), "private key")
+	})
+
+	t.Run("app disabled when neither is set", func(t *testing.T) {
+		t.Parallel()
+		f, err := Forge(&model.Forge{
+			ID:   1,
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			AdditionalOptions: map[string]any{
+				"merge-ref":   true,
+				"public-only": true,
+			},
+		})
+		require.NoError(t, err)
+		assert.NotNil(t, f)
+	})
 }
 
 func TestForgeGiteaRequiresURL(t *testing.T) {
