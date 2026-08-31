@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-08-30
+## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-08-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7087](https://github.com/woodpecker-ci/woodpecker/pull/7087)]
 - Update docs npm deps non-major [[#7083](https://github.com/woodpecker-ci/woodpecker/pull/7083)]
 
 ### 📦️ Dependency
