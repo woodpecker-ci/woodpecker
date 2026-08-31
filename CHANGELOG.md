@@ -26,6 +26,10 @@
 - Update golang-packages [[#7075](https://github.com/woodpecker-ci/woodpecker/pull/7075)]
 - Update golang-packages [[#7071](https://github.com/woodpecker-ci/woodpecker/pull/7071)]
 
+### Misc
+
+- Makefile enhancement [[#7067](https://github.com/woodpecker-ci/woodpecker/pull/7067)]
+
 ## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-24
 
 ### ❤️ Thanks to all contributors! ❤️
