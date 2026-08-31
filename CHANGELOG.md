@@ -4,19 +4,20 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@lafriks
+@YouCD, @lafriks
 
 ### 🐛 Bug Fixes
 
+- fix(forge/gitlab): use group Path instead of Name for membership lookup [[#7086](https://github.com/woodpecker-ci/woodpecker/pull/7086)]
 - Fix injecting additional variables for substituting [[#7077](https://github.com/woodpecker-ci/woodpecker/pull/7077)]
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7087](https://github.com/woodpecker-ci/woodpecker/pull/7087)]
 - Update docs npm deps non-major [[#7083](https://github.com/woodpecker-ci/woodpecker/pull/7083)]
 
 ### 📦️ Dependency
 
+- Lock file maintenance [[#7087](https://github.com/woodpecker-ci/woodpecker/pull/7087)]
 - Update dependency simple-icons to v16.29.0 [[#7082](https://github.com/woodpecker-ci/woodpecker/pull/7082)]
 - Update module github.com/getkin/kin-openapi to v0.149.0 [[#7084](https://github.com/woodpecker-ci/woodpecker/pull/7084)]
 - Update web npm deps non-major [[#7081](https://github.com/woodpecker-ci/woodpecker/pull/7081)]
