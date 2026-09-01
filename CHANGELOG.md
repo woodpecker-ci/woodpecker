@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-08-31
+## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -18,6 +18,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.61.0 [[#7088](https://github.com/woodpecker-ci/woodpecker/pull/7088)]
 - Lock file maintenance [[#7087](https://github.com/woodpecker-ci/woodpecker/pull/7087)]
 - Update dependency simple-icons to v16.29.0 [[#7082](https://github.com/woodpecker-ci/woodpecker/pull/7082)]
 - Update module github.com/getkin/kin-openapi to v0.149.0 [[#7084](https://github.com/woodpecker-ci/woodpecker/pull/7084)]
