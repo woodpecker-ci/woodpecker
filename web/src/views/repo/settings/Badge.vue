@@ -70,7 +70,7 @@ import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
-import { WebhookEvents } from '~/lib/api/types';
+import { RepoVisibility, WebhookEvents } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const repo = requiredInject('repo');
@@ -83,6 +83,28 @@ const branch = ref<string>('');
 const events = ref<string[]>([WebhookEvents.Push]);
 const workflow = ref<string>('');
 const step = ref<string>('');
+
+// non-public repos only serve their badge when the badge token is passed along
+const badgeToken = ref<string>('');
+const needsToken = computed(() => repo.value.visibility !== RepoVisibility.Public);
+let badgeTokenRequest = 0;
+
+async function loadBadgeToken() {
+  const request = ++badgeTokenRequest;
+  badgeToken.value = '';
+  if (!needsToken.value) {
+    return;
+  }
+
+  try {
+    const token = await apiClient.getRepoToken(repo.value.id);
+    if (request === badgeTokenRequest) {
+      badgeToken.value = token.value;
+    }
+  } catch {
+    // The API client reports the request error; keep token-bound output hidden.
+  }
+}
 
 async function loadBranches() {
   branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
@@ -102,6 +124,10 @@ const baseUrl = `${window.location.protocol}//${window.location.hostname}${
 }`;
 const { rootPath } = useConfig();
 const badgeUrl = computed(() => {
+  if (needsToken.value && badgeToken.value === '') {
+    return undefined;
+  }
+
   const params = [];
 
   if (branch.value !== '') {
@@ -123,6 +149,10 @@ const badgeUrl = computed(() => {
     }
   }
 
+  if (badgeToken.value !== '') {
+    params.push(`token=${encodeURIComponent(badgeToken.value)}`);
+  }
+
   return `${rootPath}/api/badges/${repo.value.id}/status.svg${params.length > 0 ? `?${params.join('&')}` : ''}`;
 });
 const repoUrl = computed(
@@ -131,16 +161,21 @@ const repoUrl = computed(
 );
 
 const badgeContent = computed(() => {
+  const url = badgeUrl.value;
+  if (!url) {
+    return '';
+  }
+
   if (badgeType.value === 'url') {
-    return `${baseUrl}${badgeUrl.value}`;
+    return `${baseUrl}${url}`;
   }
 
   if (badgeType.value === 'markdown') {
-    return `[![status-badge](${baseUrl}${badgeUrl.value})](${baseUrl}${repoUrl.value})`;
+    return `[![status-badge](${baseUrl}${url})](${baseUrl}${repoUrl.value})`;
   }
 
   if (badgeType.value === 'html') {
-    return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${badgeUrl.value.replace('&', '&amp;')}" alt="status-badge" />\n</a>`;
+    return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${url.replaceAll('&', '&amp;')}" alt="status-badge" />\n</a>`;
   }
 
   return '';
@@ -148,10 +183,12 @@ const badgeContent = computed(() => {
 
 onMounted(() => {
   loadBranches();
+  loadBadgeToken();
 });
 
 watch(repo, () => {
   loadBranches();
+  loadBadgeToken();
 });
 
 const { t } = useI18n();

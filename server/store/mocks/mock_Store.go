@@ -6120,6 +6120,182 @@ func (_c *MockStore_TaskList_Call) RunAndReturn(run func() ([]*model.Task, error
 	return _c
 }
 
+// TokenCreate provides a mock function for the type MockStore
+func (_mock *MockStore) TokenCreate(token *model.Token) error {
+	ret := _mock.Called(token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TokenCreate")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Token) error); ok {
+		r0 = returnFunc(token)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_TokenCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenCreate'
+type MockStore_TokenCreate_Call struct {
+	*mock.Call
+}
+
+// TokenCreate is a helper method to define mock.On call
+//   - token *model.Token
+func (_e *MockStore_Expecter) TokenCreate(token any) *MockStore_TokenCreate_Call {
+	return &MockStore_TokenCreate_Call{Call: _e.mock.On("TokenCreate", token)}
+}
+
+func (_c *MockStore_TokenCreate_Call) Run(run func(token *model.Token)) *MockStore_TokenCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Token
+		if args[0] != nil {
+			arg0 = args[0].(*model.Token)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_TokenCreate_Call) Return(err error) *MockStore_TokenCreate_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_TokenCreate_Call) RunAndReturn(run func(token *model.Token) error) *MockStore_TokenCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// TokenFind provides a mock function for the type MockStore
+func (_mock *MockStore) TokenFind(repo *model.Repo, tokenType model.TokenType) (*model.Token, error) {
+	ret := _mock.Called(repo, tokenType)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TokenFind")
+	}
+
+	var r0 *model.Token
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, model.TokenType) (*model.Token, error)); ok {
+		return returnFunc(repo, tokenType)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, model.TokenType) *model.Token); ok {
+		r0 = returnFunc(repo, tokenType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Token)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Repo, model.TokenType) error); ok {
+		r1 = returnFunc(repo, tokenType)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_TokenFind_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenFind'
+type MockStore_TokenFind_Call struct {
+	*mock.Call
+}
+
+// TokenFind is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - tokenType model.TokenType
+func (_e *MockStore_Expecter) TokenFind(repo any, tokenType any) *MockStore_TokenFind_Call {
+	return &MockStore_TokenFind_Call{Call: _e.mock.On("TokenFind", repo, tokenType)}
+}
+
+func (_c *MockStore_TokenFind_Call) Run(run func(repo *model.Repo, tokenType model.TokenType)) *MockStore_TokenFind_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 model.TokenType
+		if args[1] != nil {
+			arg1 = args[1].(model.TokenType)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_TokenFind_Call) Return(token *model.Token, err error) *MockStore_TokenFind_Call {
+	_c.Call.Return(token, err)
+	return _c
+}
+
+func (_c *MockStore_TokenFind_Call) RunAndReturn(run func(repo *model.Repo, tokenType model.TokenType) (*model.Token, error)) *MockStore_TokenFind_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// TokenReplace provides a mock function for the type MockStore
+func (_mock *MockStore) TokenReplace(repo *model.Repo, tokens []*model.Token) error {
+	ret := _mock.Called(repo, tokens)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TokenReplace")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Repo, []*model.Token) error); ok {
+		r0 = returnFunc(repo, tokens)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_TokenReplace_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TokenReplace'
+type MockStore_TokenReplace_Call struct {
+	*mock.Call
+}
+
+// TokenReplace is a helper method to define mock.On call
+//   - repo *model.Repo
+//   - tokens []*model.Token
+func (_e *MockStore_Expecter) TokenReplace(repo any, tokens any) *MockStore_TokenReplace_Call {
+	return &MockStore_TokenReplace_Call{Call: _e.mock.On("TokenReplace", repo, tokens)}
+}
+
+func (_c *MockStore_TokenReplace_Call) Run(run func(repo *model.Repo, tokens []*model.Token)) *MockStore_TokenReplace_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Repo
+		if args[0] != nil {
+			arg0 = args[0].(*model.Repo)
+		}
+		var arg1 []*model.Token
+		if args[1] != nil {
+			arg1 = args[1].([]*model.Token)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_TokenReplace_Call) Return(err error) *MockStore_TokenReplace_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_TokenReplace_Call) RunAndReturn(run func(repo *model.Repo, tokens []*model.Token) error) *MockStore_TokenReplace_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdatePipeline provides a mock function for the type MockStore
 func (_mock *MockStore) UpdatePipeline(pipeline *model.Pipeline) error {
 	ret := _mock.Called(pipeline)
