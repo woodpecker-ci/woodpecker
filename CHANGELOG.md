@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-01
+## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -11,6 +11,10 @@
 - Speedup migration "deduplicate-log-entries" [[#7068](https://github.com/woodpecker-ci/woodpecker/pull/7068)]
 - fix(forge/gitlab): use group Path instead of Name for membership lookup [[#7086](https://github.com/woodpecker-ci/woodpecker/pull/7086)]
 - Fix injecting additional variables for substituting [[#7077](https://github.com/woodpecker-ci/woodpecker/pull/7077)]
+
+### 🧪 Tests
+
+- Add test to verify that additional envs from manual run are available to when conditions [[#7090](https://github.com/woodpecker-ci/woodpecker/pull/7090)]
 
 ### 📚 Documentation
 
