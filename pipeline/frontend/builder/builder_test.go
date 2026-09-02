@@ -179,6 +179,39 @@ steps:
 	assert.NotContains(t, publishStep.Environment, "GO_VERSION")
 }
 
+func TestAdditionalEnvsWhenEvaluate(t *testing.T) {
+	t.Parallel()
+
+	yamlData := []byte(`
+when:
+  event: manual
+  evaluate: 'TAG == "1.2.3"'
+steps:
+  - name: build
+    image: scratch
+    commands:
+      - go build
+`)
+
+	m := &testMetadata{
+		pipelineEvent: "manual",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		AdditionalEnvs: map[string]string{
+			"TAG": "1.2.3",
+		},
+		RepoTrusted: &metadata.TrustedConfiguration{},
+		Yamls:       []*YamlFile{{Data: yamlData}},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1,
+		"workflow must not be filtered when evaluate matches an additional (manual trigger) variable")
+}
+
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
