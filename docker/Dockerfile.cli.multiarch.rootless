@@ -10,18 +10,24 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-cli
 
+FROM scratch AS stage
+
+# collect certs, timezone data and user from build image
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+
 FROM scratch
 WORKDIR /woodpecker
 
 ENV GODEBUG=netdns=go
 ENV WOODPECKER_DISABLE_UPDATE_CHECK=true
 
-# copy certs from build image
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# copy system files as single layer from stage image
+COPY --from=stage / /
 # copy cli binary
 COPY --from=build /src/dist/woodpecker-cli /bin/
-COPY --from=build /etc/passwd /etc/passwd
-COPY --from=build /etc/group /etc/group
 
 USER woodpecker
 

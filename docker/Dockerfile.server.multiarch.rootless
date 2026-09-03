@@ -4,6 +4,15 @@ RUN groupadd -g 1000 woodpecker && \
   useradd -u 1000 -g 1000 woodpecker && \
   mkdir -p /var/lib/woodpecker
 
+FROM scratch AS stage
+
+# collect certs, timezone data, user and data directory from build image
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+COPY --from=build --chown=woodpecker:woodpecker /var/lib/woodpecker /var/lib/woodpecker
+
 FROM scratch
 ARG TARGETOS TARGETARCH
 ENV GODEBUG=netdns=go
@@ -14,13 +23,10 @@ ENV XDG_DATA_HOME=/var/lib/woodpecker
 ENV SQLITE_TMPDIR=/var/lib/woodpecker
 EXPOSE 8000 9000 80 443
 
-# copy certs from certs image
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# copy system files as single layer from stage image
+COPY --from=stage / /
 # copy server binary
 COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
-COPY --from=build /etc/passwd /etc/passwd
-COPY --from=build /etc/group /etc/group
-COPY --from=build --chown=woodpecker:woodpecker /var/lib/woodpecker /var/lib/woodpecker
 
 USER woodpecker
 
