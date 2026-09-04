@@ -25,6 +25,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/google/go-github/v90 to v91 [[#7099](https://github.com/woodpecker-ci/woodpecker/pull/7099)]
 - Lock file maintenance [[#7100](https://github.com/woodpecker-ci/woodpecker/pull/7100)]
 - Update web npm deps non-major [[#7096](https://github.com/woodpecker-ci/woodpecker/pull/7096)]
 - Update golang-packages [[#7092](https://github.com/woodpecker-ci/woodpecker/pull/7092)]
