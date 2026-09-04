@@ -211,6 +211,12 @@ var flags = append([]cli.Flag{
 		Usage:   "session expiration time",
 		Value:   time.Hour * 72,
 	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_OAUTH_REFRESH_TIME"),
+		Name:    "oauth-refresh-time",
+		Usage:   "how long before a forge oauth token expires to refresh it",
+		Value:   time.Minute * 30,
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "plugins-privileged",

@@ -870,6 +870,13 @@ Context: when someone does log into Woodpecker, a temporary session token is cre
 As long as the session is valid (until it expires or log-out),
 a user can log into Woodpecker, without re-authentication.
 
+### OAUTH_REFRESH_TIME
+
+- Name: `WOODPECKER_OAUTH_REFRESH_TIME`
+- Default: `30m`
+
+How long before a forge oauth token expires that Woodpecker should refresh it.
+
 ### PLUGINS_PRIVILEGED
 
 - Name: `WOODPECKER_PLUGINS_PRIVILEGED`
