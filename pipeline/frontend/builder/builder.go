@@ -18,7 +18,6 @@ package builder
 import (
 	"fmt"
 	"maps"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -187,11 +186,13 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
 
-	if !slices.Contains(item.RunsOn, "failure") && parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
-		item.RunsOn = append(item.RunsOn, "failure")
-	}
-	if !slices.Contains(item.RunsOn, "success") && parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
-		item.RunsOn = append(item.RunsOn, "success")
+	if len(item.RunsOn) == 0 {
+		if parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
+			item.RunsOn = append(item.RunsOn, "failure")
+		}
+		if parsed.When.IncludesStatusSuccess(workflowMetadata, true, environ) {
+			item.RunsOn = append(item.RunsOn, "success")
+		}
 	}
 
 	// "woodpecker-ci.org" namespace is reserved for internal use — drop any
