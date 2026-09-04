@@ -186,10 +186,6 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
 
-	// Derive from when.status only when the deprecated runs_on was not set,
-	// so that runs_on keeps deciding on its own. IncludesStatusSuccess is true
-	// for a constraint that sets no status at all, which would otherwise add
-	// "success" to an explicit runs_on: [failure].
 	if len(item.RunsOn) == 0 {
 		if parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
 			item.RunsOn = append(item.RunsOn, "failure")
