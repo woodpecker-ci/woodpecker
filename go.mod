@@ -1,6 +1,6 @@
 module go.woodpecker-ci.org/woodpecker/v3
 
-go 1.27.0
+go 1.26.0
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.1
