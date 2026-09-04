@@ -25,6 +25,7 @@
 
 ### 📦️ Dependency
 
+- Lock file maintenance [[#7100](https://github.com/woodpecker-ci/woodpecker/pull/7100)]
 - Update web npm deps non-major [[#7096](https://github.com/woodpecker-ci/woodpecker/pull/7096)]
 - Update golang-packages [[#7092](https://github.com/woodpecker-ci/woodpecker/pull/7092)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.61.0 [[#7088](https://github.com/woodpecker-ci/woodpecker/pull/7088)]
