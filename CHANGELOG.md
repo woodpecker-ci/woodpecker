@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @YouCD, @lafriks
+@6543, @YouCD, @dylanpulver, @lafriks
 
 ### 🐛 Bug Fixes
 
+- Fix workflow-level when.status so a failure-only workflow does not run on success [[#7091](https://github.com/woodpecker-ci/woodpecker/pull/7091)]
 - Speedup migration "deduplicate-log-entries" [[#7068](https://github.com/woodpecker-ci/woodpecker/pull/7068)]
 - fix(forge/gitlab): use group Path instead of Name for membership lookup [[#7086](https://github.com/woodpecker-ci/woodpecker/pull/7086)]
 - Fix injecting additional variables for substituting [[#7077](https://github.com/woodpecker-ci/woodpecker/pull/7077)]
@@ -18,10 +19,13 @@
 
 ### 📚 Documentation
 
+- Update dependency isomorphic-dompurify to v4 [[#7097](https://github.com/woodpecker-ci/woodpecker/pull/7097)]
+- Update pnpm to v11.25.0 [[#7095](https://github.com/woodpecker-ci/woodpecker/pull/7095)]
 - Update docs npm deps non-major [[#7083](https://github.com/woodpecker-ci/woodpecker/pull/7083)]
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7096](https://github.com/woodpecker-ci/woodpecker/pull/7096)]
 - Update golang-packages [[#7092](https://github.com/woodpecker-ci/woodpecker/pull/7092)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.61.0 [[#7088](https://github.com/woodpecker-ci/woodpecker/pull/7088)]
 - Lock file maintenance [[#7087](https://github.com/woodpecker-ci/woodpecker/pull/7087)]
