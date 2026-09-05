@@ -3,7 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@11.24.0",
+  "packageManager": "pnpm@11.25.0",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -65,7 +65,7 @@
     "vite": "^8.0.5",
     "vite-plugin-prismjs": "^0.0.11",
     "vite-svg-loader": "^5.1.1",
-    "vitest": "^4.1.4",
+    "vitest": "^5.0.0",
     "vue-tsc": "^3.2.6"
   }
 }
