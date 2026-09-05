@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @YouCD, @dylanpulver, @lafriks
+@6543, @YouCD, @dylanpulver, @lafriks, @qwerty287
+
+### 🔒 Security
+
+- Fix docs securityscan [[#7094](https://github.com/woodpecker-ci/woodpecker/pull/7094)]
 
 ### 🐛 Bug Fixes
 
