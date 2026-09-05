@@ -1,5 +1,53 @@
 # Changelog
 
+## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-05
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @YouCD, @dylanpulver, @lafriks, @qwerty287
+
+### 🔒 Security
+
+- Fix docs securityscan [[#7094](https://github.com/woodpecker-ci/woodpecker/pull/7094)]
+
+### 🐛 Bug Fixes
+
+- Fix workflow-level when.status so a failure-only workflow does not run on success [[#7091](https://github.com/woodpecker-ci/woodpecker/pull/7091)]
+- Speedup migration "deduplicate-log-entries" [[#7068](https://github.com/woodpecker-ci/woodpecker/pull/7068)]
+- fix(forge/gitlab): use group Path instead of Name for membership lookup [[#7086](https://github.com/woodpecker-ci/woodpecker/pull/7086)]
+- Fix injecting additional variables for substituting [[#7077](https://github.com/woodpecker-ci/woodpecker/pull/7077)]
+
+### 🧪 Tests
+
+- Add test to verify that additional envs from manual run are available to when conditions [[#7090](https://github.com/woodpecker-ci/woodpecker/pull/7090)]
+
+### 📚 Documentation
+
+- Update dependency isomorphic-dompurify to v4 [[#7097](https://github.com/woodpecker-ci/woodpecker/pull/7097)]
+- Update pnpm to v11.25.0 [[#7095](https://github.com/woodpecker-ci/woodpecker/pull/7095)]
+- Update docs npm deps non-major [[#7083](https://github.com/woodpecker-ci/woodpecker/pull/7083)]
+
+### 📦️ Dependency
+
+- Update dependency eslint to v10.10.0 [[#7105](https://github.com/woodpecker-ci/woodpecker/pull/7105)]
+- Update dependency vitest to v5 [[#7098](https://github.com/woodpecker-ci/woodpecker/pull/7098)]
+- Update module github.com/google/go-github/v90 to v91 [[#7099](https://github.com/woodpecker-ci/woodpecker/pull/7099)]
+- Lock file maintenance [[#7100](https://github.com/woodpecker-ci/woodpecker/pull/7100)]
+- Update web npm deps non-major [[#7096](https://github.com/woodpecker-ci/woodpecker/pull/7096)]
+- Update golang-packages [[#7092](https://github.com/woodpecker-ci/woodpecker/pull/7092)]
+- Update module gitlab.com/gitlab-org/api/client-go/v2 to v2.61.0 [[#7088](https://github.com/woodpecker-ci/woodpecker/pull/7088)]
+- Lock file maintenance [[#7087](https://github.com/woodpecker-ci/woodpecker/pull/7087)]
+- Update dependency simple-icons to v16.29.0 [[#7082](https://github.com/woodpecker-ci/woodpecker/pull/7082)]
+- Update module github.com/getkin/kin-openapi to v0.149.0 [[#7084](https://github.com/woodpecker-ci/woodpecker/pull/7084)]
+- Update web npm deps non-major [[#7081](https://github.com/woodpecker-ci/woodpecker/pull/7081)]
+- Update pre-commit hook golangci/golangci-lint to v2.13.2 [[#7080](https://github.com/woodpecker-ci/woodpecker/pull/7080)]
+- Update golang-packages [[#7075](https://github.com/woodpecker-ci/woodpecker/pull/7075)]
+- Update golang-packages [[#7071](https://github.com/woodpecker-ci/woodpecker/pull/7071)]
+
+### Misc
+
+- Makefile enhancement [[#7067](https://github.com/woodpecker-ci/woodpecker/pull/7067)]
+
 ## [3.18.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.0) - 2026-08-24
 
 ### ❤️ Thanks to all contributors! ❤️
