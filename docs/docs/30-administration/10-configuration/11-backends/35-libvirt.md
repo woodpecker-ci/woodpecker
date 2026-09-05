@@ -196,4 +196,3 @@ steps:
 
 Plugins don't work. They are docker specific. That also means that automatic cloning
 doesn't work and we always need `skip_clone: true`.
-
