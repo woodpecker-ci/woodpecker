@@ -120,6 +120,34 @@ func TestSetupWorkflow(t *testing.T) {
 	assert.NoError(t, os.RemoveAll(state.baseDir))
 }
 
+func TestIsolatedHomeEnv(t *testing.T) {
+	t.Run("linux keeps existing home variables", func(t *testing.T) {
+		backend := &local{os: "linux"}
+		state := &workflowState{homeDir: "/tmp/woodpecker-local/home"}
+
+		assert.ElementsMatch(t, []string{
+			"HOME=/tmp/woodpecker-local/home",
+			"USERPROFILE=/tmp/woodpecker-local/home",
+		}, backend.isolatedHomeEnv(state))
+	})
+
+	t.Run("windows redirects user profile locations", func(t *testing.T) {
+		backend := &local{os: "windows"}
+		state := &workflowState{homeDir: `C:\Temp\woodpecker-local\home`}
+
+		assert.ElementsMatch(t, []string{
+			`HOME=C:\Temp\woodpecker-local\home`,
+			`USERPROFILE=C:\Temp\woodpecker-local\home`,
+			`HOMEDRIVE=C:`,
+			`HOMEPATH=\Temp\woodpecker-local\home`,
+			`APPDATA=C:\Temp\woodpecker-local\home\AppData\Roaming`,
+			`LOCALAPPDATA=C:\Temp\woodpecker-local\home\AppData\Local`,
+			`TEMP=C:\Temp\woodpecker-local\home\AppData\Local\Temp`,
+			`TMP=C:\Temp\woodpecker-local\home\AppData\Local\Temp`,
+		}, backend.isolatedHomeEnv(state))
+	})
+}
+
 func TestDestroyWorkflow(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
@@ -363,6 +391,75 @@ func TestRunStep(t *testing.T) {
 
 	// Cleanup
 	assert.NoError(t, backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID))
+}
+
+func TestRunStepWithWindowsIsolatedHomeEnv(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("skipping on non linux due to shell availability")
+	}
+
+	shBinary, err := exec.LookPath("sh")
+	require.NoError(t, err)
+	envBinary, err := exec.LookPath("env")
+	require.NoError(t, err)
+	path := []string{filepath.Dir(shBinary)}
+	if envPath := filepath.Dir(envBinary); !slices.Contains(path, envPath) {
+		path = append(path, envPath)
+	}
+
+	prepairEnv(t)
+	//nolint:usetesting // reason: we use prepairEnv()
+	os.Setenv("PATH", strings.Join(path, ":"))
+
+	backend := &local{
+		tempDir:      t.TempDir(),
+		isolatedHome: true,
+		os:           "windows",
+		arch:         runtime.GOARCH,
+	}
+	ctx := t.Context()
+	taskUUID := "test-windows-home-env"
+	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
+	t.Cleanup(func() {
+		assert.NoError(t, backend.DestroyWorkflow(ctx, &types.Config{}, taskUUID))
+	})
+
+	step := &types.Step{
+		UUID:     "step-windows-env",
+		Name:     "windows-env",
+		Type:     types.StepTypeCommands,
+		Image:    "sh",
+		Commands: []string{"env"},
+	}
+	require.NoError(t, backend.StartStep(ctx, step, taskUUID))
+
+	output, err := backend.TailStep(ctx, step, taskUUID)
+	require.NoError(t, err)
+	data, err := io.ReadAll(output)
+	require.NoError(t, err)
+
+	state, err := backend.WaitStep(ctx, step, taskUUID)
+	require.NoError(t, err)
+	assert.True(t, state.Exited)
+	assert.Equal(t, 0, state.ExitCode)
+
+	workflowState, err := backend.getWorkflowState(taskUUID)
+	require.NoError(t, err)
+	localAppData := backend.homePath(workflowState.homeDir, "AppData", "Local")
+	_, homePath := splitWindowsHome(workflowState.homeDir)
+	outputLines := strings.Split(strings.TrimSpace(string(data)), "\n")
+	for _, want := range []string{
+		"HOME=" + workflowState.homeDir,
+		"USERPROFILE=" + workflowState.homeDir,
+		"HOMEPATH=" + homePath,
+		"APPDATA=" + backend.homePath(workflowState.homeDir, "AppData", "Roaming"),
+		"LOCALAPPDATA=" + localAppData,
+		"TEMP=" + backend.homePath(localAppData, "Temp"),
+		"TMP=" + backend.homePath(localAppData, "Temp"),
+		"CI_WORKSPACE=" + workflowState.workspaceDir,
+	} {
+		assert.Contains(t, outputLines, want)
+	}
 }
 
 func TestStateManagement(t *testing.T) {
