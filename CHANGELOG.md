@@ -29,6 +29,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency eslint to v10.10.0 [[#7105](https://github.com/woodpecker-ci/woodpecker/pull/7105)]
 - Update dependency vitest to v5 [[#7098](https://github.com/woodpecker-ci/woodpecker/pull/7098)]
 - Update module github.com/google/go-github/v90 to v91 [[#7099](https://github.com/woodpecker-ci/woodpecker/pull/7099)]
 - Lock file maintenance [[#7100](https://github.com/woodpecker-ci/woodpecker/pull/7100)]
