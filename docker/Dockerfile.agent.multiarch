@@ -11,19 +11,25 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-agent
 
+FROM scratch AS stage
+
+# collect certs, timezone data, user and config directory from build image
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+COPY --from=build --chown=woodpecker:woodpecker /etc/woodpecker /etc
+
 FROM scratch
 ENV GODEBUG=netdns=go
 # Internal setting do NOT change! Signals that woodpecker is running inside a container
 ENV WOODPECKER_IN_CONTAINER=true
 EXPOSE 3000
 
-# copy certs from build image
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# copy system files as single layer from stage image
+COPY --from=stage / /
 # copy agent binary
 COPY --from=build /src/dist/woodpecker-agent /bin/
-COPY --from=build --chown=woodpecker:woodpecker /etc/woodpecker /etc
-COPY --from=build /etc/passwd /etc/passwd
-COPY --from=build /etc/group /etc/group
 
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 ENTRYPOINT ["/bin/woodpecker-agent"]
