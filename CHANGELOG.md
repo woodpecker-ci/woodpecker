@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-05
+## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -29,6 +29,8 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7106](https://github.com/woodpecker-ci/woodpecker/pull/7106)]
+- Update pnpm to v12 [[#7108](https://github.com/woodpecker-ci/woodpecker/pull/7108)]
 - Update dependency eslint to v10.10.0 [[#7105](https://github.com/woodpecker-ci/woodpecker/pull/7105)]
 - Update dependency vitest to v5 [[#7098](https://github.com/woodpecker-ci/woodpecker/pull/7098)]
 - Update module github.com/google/go-github/v90 to v91 [[#7099](https://github.com/woodpecker-ci/woodpecker/pull/7099)]
