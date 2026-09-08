@@ -310,6 +310,7 @@ formatters:
     - gci
     - gofmt
     - gofumpt
+    - swaggo
   settings:
     gci:
       sections:
