@@ -25,6 +25,7 @@
 
 ### 📚 Documentation
 
+- Fix RPM URL [[#7124](https://github.com/woodpecker-ci/woodpecker/pull/7124)]
 - Update dependency isomorphic-dompurify to v4 [[#7097](https://github.com/woodpecker-ci/woodpecker/pull/7097)]
 - Update pnpm to v11.25.0 [[#7095](https://github.com/woodpecker-ci/woodpecker/pull/7095)]
 - Update docs npm deps non-major [[#7083](https://github.com/woodpecker-ci/woodpecker/pull/7083)]
