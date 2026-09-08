@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-07
+## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @YouCD, @dylanpulver, @lafriks, @qwerty287
+@6543, @YouCD, @dylanpulver, @lafriks, @mattwilkinsonn, @qwerty287
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+- Log a filtered webhook at debug instead of error [[#7116](https://github.com/woodpecker-ci/woodpecker/pull/7116)]
 - Fix workflow-level when.status so a failure-only workflow does not run on success [[#7091](https://github.com/woodpecker-ci/woodpecker/pull/7091)]
 - Speedup migration "deduplicate-log-entries" [[#7068](https://github.com/woodpecker-ci/woodpecker/pull/7068)]
 - fix(forge/gitlab): use group Path instead of Name for membership lookup [[#7086](https://github.com/woodpecker-ci/woodpecker/pull/7086)]
