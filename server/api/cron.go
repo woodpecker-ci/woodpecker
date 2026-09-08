@@ -16,6 +16,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,6 +27,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	cron_scheduler "go.woodpecker-ci.org/woodpecker/v3/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
@@ -99,6 +101,49 @@ func RunCron(c *gin.Context) {
 	c.JSON(http.StatusOK, pl)
 }
 
+// validateCronWorkflows refuses a cron whose workflow selection could never
+// run: an unknown name, or one that leaves a required depends_on unsatisfied.
+// Without this the cron saves happily and then fails on every single tick,
+// visible only in the server log.
+//
+// The repo can of course change after the cron is saved, so the same check
+// still runs when the pipeline is created. This one exists to catch the
+// mistake while the user is still on the form.
+func validateCronWorkflows(c *gin.Context, _store store.Store, _forge forge.Forge, repo *model.Repo, cron *model.Cron) error {
+	if len(cron.Workflows) == 0 {
+		return nil
+	}
+
+	branch := cron.Branch
+	if branch == "" {
+		branch = repo.Branch
+	}
+
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return fmt.Errorf("could not find repo owner: %w", err)
+	}
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	commit, err := _forge.BranchHead(c, repoUser, repo, branch)
+	if err != nil {
+		return fmt.Errorf("could not resolve branch %q: %w", branch, err)
+	}
+
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	configs, err := configService.Fetch(c, _forge, repoUser, repo, &model.Pipeline{
+		Event:  model.EventCron,
+		Commit: commit.SHA,
+		Branch: branch,
+		Ref:    "refs/heads/" + branch,
+	}, nil, false)
+	if err != nil {
+		return fmt.Errorf("could not fetch workflow configs: %w", err)
+	}
+
+	return pipeline.ValidateWorkflowSelection(configs, cron.Workflows)
+}
+
 // PostCron
 //
 //	@Summary	Create a cron job
@@ -158,6 +203,11 @@ func PostCron(c *gin.Context) {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
 		}
+	}
+
+	if err := validateCronWorkflows(c, _store, _forge, repo, cron); err != nil {
+		c.String(http.StatusUnprocessableEntity, "Error inserting cron. %s", err)
+		return
 	}
 
 	if err := _store.CronCreate(cron); err != nil {
@@ -273,6 +323,11 @@ func PatchCron(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
+	if err := validateCronWorkflows(c, _store, _forge, repo, cron); err != nil {
+		c.String(http.StatusUnprocessableEntity, "Error updating cron. %s", err)
+		return
+	}
+
 	if err := _store.CronUpdate(repo, cron); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating cron %q. %s", in.Name, err)
 		return

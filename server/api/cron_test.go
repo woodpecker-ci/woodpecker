@@ -26,7 +26,9 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
@@ -74,6 +76,39 @@ func cronForgeManager(t *testing.T) *forge_mocks.MockForge {
 	mgr.On("ForgeFromRepo", mock.Anything).Return(forge, nil)
 	server.Config.Services.Manager = mgr
 	return forge
+}
+
+// cronWorkflowFile builds a minimal workflow config, optionally depending on
+// another workflow, for the cron selection-validation tests.
+func cronWorkflowFile(name string, dependsOn ...string) *forge_types.FileMeta {
+	body := ""
+	if len(dependsOn) > 0 {
+		body += "depends_on:\n"
+		for _, dep := range dependsOn {
+			body += "  - " + dep + "\n"
+		}
+	}
+	body += "steps:\n  - name: " + name + "\n    image: alpine\n"
+	return &forge_types.FileMeta{Name: ".woodpecker/" + name + ".yaml", Data: []byte(body)}
+}
+
+// cronForgeWithWorkflows is cronForgeManager plus a config service that serves
+// the given workflow files, which the cron selection validation reads.
+func cronForgeWithWorkflows(t *testing.T, files ...*forge_types.FileMeta) {
+	t.Helper()
+	mgr := manager_mocks.NewMockManager(t)
+	forge := forge_mocks.NewMockForge(t)
+	mgr.On("ForgeFromRepo", mock.Anything).Return(forge, nil)
+
+	configService := config_service_mocks.NewMockService(t)
+	configService.On("Fetch", mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+		mock.Anything, mock.Anything, mock.Anything).Return(files, nil).Maybe()
+	mgr.On("ConfigServiceFromRepo", mock.Anything).Return(configService).Maybe()
+
+	forge.On("BranchHead", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(&model.Commit{SHA: "abc"}, nil).Maybe()
+
+	server.Config.Services.Manager = mgr
 }
 
 func TestGetCron(t *testing.T) {
@@ -258,7 +293,7 @@ func TestPostCron(t *testing.T) {
 	})
 
 	t.Run("workflow selection is persisted", func(t *testing.T) {
-		cronForgeManager(t)
+		cronForgeWithWorkflows(t, cronWorkflowFile("build"), cronWorkflowFile("deploy"))
 		tc := newTestContext(t, s)
 		withUser(user)(tc)
 		withRepo(repo, &model.Perm{})(tc)
@@ -274,6 +309,47 @@ func TestPostCron(t *testing.T) {
 		stored, err := s.CronFind(repo, got.ID)
 		require.NoError(t, err)
 		assert.Equal(t, []string{"build", "deploy"}, stored.Workflows)
+	})
+
+	// A cron stores its selection and runs later, so an impossible selection has
+	// to be caught here. Otherwise it saves fine and then fails on every tick,
+	// with nothing but a server log to show for it.
+	t.Run("unknown workflow is rejected", func(t *testing.T) {
+		cronForgeWithWorkflows(t, cronWorkflowFile("build"))
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withRequest(http.MethodPost, &model.Cron{Name: "bad-name", Schedule: "@every 1h", Workflows: []string{"nope"}})(tc)
+
+		PostCron(tc.Ctx)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, tc.Recorder.Code)
+		assert.Contains(t, tc.Recorder.Body.String(), "nope")
+	})
+
+	t.Run("selection missing a required dependency is rejected", func(t *testing.T) {
+		cronForgeWithWorkflows(t, cronWorkflowFile("nightly"), cronWorkflowFile("report", "nightly"))
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withRequest(http.MethodPost, &model.Cron{Name: "bad-dep", Schedule: "@every 1h", Workflows: []string{"report"}})(tc)
+
+		PostCron(tc.Ctx)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, tc.Recorder.Code)
+		assert.Contains(t, tc.Recorder.Body.String(), "nightly")
+	})
+
+	t.Run("selection including the dependency is accepted", func(t *testing.T) {
+		cronForgeWithWorkflows(t, cronWorkflowFile("nightly"), cronWorkflowFile("report", "nightly"))
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withRequest(http.MethodPost, &model.Cron{Name: "good-dep", Schedule: "@every 1h", Workflows: []string{"report", "nightly"}})(tc)
+
+		PostCron(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
 	})
 
 	t.Run("duplicate cron returns conflict", func(t *testing.T) {
@@ -409,7 +485,7 @@ func TestPatchCron(t *testing.T) {
 		cron := seedCron(t, s, repo.ID, "wfpatch")
 		cron.Workflows = []string{"build"}
 		require.NoError(t, s.CronUpdate(repo, cron))
-		cronForgeManager(t)
+		cronForgeWithWorkflows(t, cronWorkflowFile("build"), cronWorkflowFile("deploy"))
 
 		tc := newTestContext(t, s)
 		withUser(user)(tc)
@@ -431,7 +507,7 @@ func TestPatchCron(t *testing.T) {
 		cron := seedCron(t, s, repo.ID, "wfkeep")
 		cron.Workflows = []string{"build"}
 		require.NoError(t, s.CronUpdate(repo, cron))
-		cronForgeManager(t)
+		cronForgeWithWorkflows(t, cronWorkflowFile("build"))
 
 		newSchedule := "@every 3h"
 		tc := newTestContext(t, s)

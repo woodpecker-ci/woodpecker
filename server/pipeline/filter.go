@@ -24,6 +24,16 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 )
 
+// ValidateWorkflowSelection reports whether a selection can be run against the
+// given configs, without building anything. Triggers that store a selection for
+// later (cron jobs) use this at save time, so a selection that could never run
+// is refused while the user is still looking at the form, rather than failing
+// on every tick with nothing but a server log to show for it.
+func ValidateWorkflowSelection(configs []*forge_types.FileMeta, selected []string) error {
+	_, err := filterConfigsByWorkflows(configs, selected)
+	return err
+}
+
 // filterConfigsByWorkflows narrows the configs fetched from the forge down to
 // the ones the trigger asked for. An empty selection means "run everything",
 // which is the behavior of every trigger that cannot select (webhooks).
