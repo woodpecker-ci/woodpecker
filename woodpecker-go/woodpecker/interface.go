@@ -92,8 +92,9 @@ type Client interface {
 	// PipelineCreate returns creates a pipeline on specified branch.
 	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
 
-	// RepoWorkflows returns the workflow names defined on the given branch.
-	RepoWorkflows(repoID int64, branch string) ([]string, error)
+	// RepoWorkflows returns the workflows defined on the given branch, each
+	// with the workflows it requires.
+	RepoWorkflows(repoID int64, branch string) ([]*WorkflowInfo, error)
 
 	// PipelineStart re-starts a stopped pipeline.
 	PipelineStart(repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)

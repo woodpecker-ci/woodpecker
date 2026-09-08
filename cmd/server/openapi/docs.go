@@ -3983,7 +3983,7 @@ const docTemplate = `{
         },
         "/repos/{repo_id}/workflows": {
             "get": {
-                "description": "Returns the names of the workflow configs currently defined on a branch. These are the names accepted by the workflows option of a manual pipeline or a cron job.",
+                "description": "Returns the workflow configs currently defined on a branch, each with the workflows it requires. The names are those accepted by the workflows option of a manual pipeline or a cron job.",
                 "produces": [
                     "application/json"
                 ],
@@ -4020,7 +4020,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/WorkflowInfo"
                             }
                         }
                     }
@@ -6021,6 +6021,21 @@ const docTemplate = `{
                 "EventCron",
                 "EventManual"
             ]
+        },
+        "WorkflowInfo": {
+            "type": "object",
+            "properties": {
+                "depends_on": {
+                    "description": "DependsOn lists the workflows that must be selected alongside this one.\nOptional dependencies are left out: they are dropped when absent, so they\nnever make a selection invalid.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "errors.PipelineError": {
             "type": "object",

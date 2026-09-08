@@ -18,6 +18,7 @@ import type {
   RepoSettings,
   Secret,
   User,
+  WorkflowInfo,
 } from './types';
 
 const DEFAULT_FORGE_ID = 1;
@@ -95,10 +96,11 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${repoId}/repair`);
   }
 
-  // getRepoWorkflows lists the workflow names a manual pipeline or cron job can select on a branch.
-  async getRepoWorkflows(repoId: number, branch?: string): Promise<string[]> {
+  // getRepoWorkflows lists the workflows a manual pipeline or cron job can select on a
+  // branch, each with the workflows it requires.
+  async getRepoWorkflows(repoId: number, branch?: string): Promise<WorkflowInfo[]> {
     const query = encodeQueryString({ branch });
-    return this._get(`/api/repos/${repoId}/workflows?${query}`) as Promise<string[]>;
+    return this._get(`/api/repos/${repoId}/workflows?${query}`) as Promise<WorkflowInfo[]>;
   }
 
   async createPipeline(repoId: number, options: PipelineOptions): Promise<Pipeline | string> {

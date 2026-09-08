@@ -271,6 +271,12 @@ type (
 		Workflows []string `json:"workflows,omitempty"`
 	}
 
+	// WorkflowInfo is one selectable workflow and the workflows it requires.
+	WorkflowInfo struct {
+		Name      string   `json:"name"`
+		DependsOn []string `json:"depends_on,omitempty"`
+	}
+
 	// PipelineOptions is the JSON data for creating a new pipeline.
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`

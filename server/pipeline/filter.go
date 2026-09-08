@@ -108,6 +108,34 @@ func WorkflowNames(configs []*forge_types.FileMeta) []string {
 	return names
 }
 
+// WorkflowInfo describes one selectable workflow.
+type WorkflowInfo struct {
+	Name string `json:"name"`
+	// DependsOn lists the workflows that must be selected alongside this one.
+	// Optional dependencies are left out: they are dropped when absent, so they
+	// never make a selection invalid.
+	DependsOn []string `json:"depends_on,omitempty"`
+} //	@name	WorkflowInfo
+
+// WorkflowInfos returns the selectable workflows together with their required
+// dependencies, so a caller can offer a selection that is valid by
+// construction rather than discovering the constraint through an error.
+//
+// A config that fails to parse still appears, with no dependencies. Its real
+// problem is reported when a pipeline is built from it, with a better message
+// than anything this could produce.
+func WorkflowInfos(configs []*forge_types.FileMeta) []WorkflowInfo {
+	infos := make([]WorkflowInfo, 0, len(configs))
+	for _, config := range configs {
+		info := WorkflowInfo{Name: builder.SanitizePath(config.Name)}
+		if parsed, err := yaml.ParseBytes(config.Data); err == nil {
+			info.DependsOn = parsed.DependsOn.RequiredNames()
+		}
+		infos = append(infos, info)
+	}
+	return infos
+}
+
 // checkSelectedDependencies rejects a selection that leaves a required
 // depends_on unsatisfied.
 //

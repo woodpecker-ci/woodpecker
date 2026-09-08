@@ -60,7 +60,9 @@
       "desc": "Select the workflows to run. If you select none, every workflow runs.",
       "loading": "Loading workflows",
       "none": "No workflows found on this branch.",
-      "error": "Could not load the workflows of this branch."
+      "error": "Could not load the workflows of this branch.",
+      "auto_selected": "Also selected {workflows}, which the workflow you picked depends on.",
+      "auto_deselected": "Also deselected {workflows}, which depends on the workflow you removed."
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",

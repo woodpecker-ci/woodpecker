@@ -368,11 +368,12 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 	return out, err
 }
 
-// RepoWorkflows returns the workflow names defined on the given branch. These
-// are the names accepted by PipelineOptions.Workflows and Cron.Workflows. An
-// empty branch falls back to the repo default branch.
-func (c *client) RepoWorkflows(repoID int64, branch string) ([]string, error) {
-	var out []string
+// RepoWorkflows returns the workflows defined on the given branch, each with
+// the workflows it requires. The names are those accepted by
+// PipelineOptions.Workflows and Cron.Workflows. An empty branch falls back to
+// the repo default branch.
+func (c *client) RepoWorkflows(repoID int64, branch string) ([]*WorkflowInfo, error) {
+	var out []*WorkflowInfo
 	uri, err := url.Parse(fmt.Sprintf(pathRepoWorkflows, c.addr, repoID))
 	if err != nil {
 		return nil, err

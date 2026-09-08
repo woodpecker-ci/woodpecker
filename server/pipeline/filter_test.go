@@ -140,6 +140,25 @@ func TestFilterConfigsByWorkflowsIgnoresUnparsableConfig(t *testing.T) {
 	assert.Len(t, got, 1)
 }
 
+func TestWorkflowInfos(t *testing.T) {
+	infos := WorkflowInfos(testConfigs())
+
+	require.Len(t, infos, 3)
+	assert.Equal(t, WorkflowInfo{Name: "lint"}, infos[0])
+	assert.Equal(t, WorkflowInfo{Name: "test", DependsOn: []string{"lint"}}, infos[1])
+	// the deploy fixture depends on test optionally, and optional dependencies
+	// never make a selection invalid, so they are not reported
+	assert.Equal(t, WorkflowInfo{Name: "deploy"}, infos[2])
+}
+
+func TestWorkflowInfosIgnoresUnparsableConfig(t *testing.T) {
+	configs := []*forge_types.FileMeta{
+		{Name: ".woodpecker/broken.yaml", Data: []byte("\tthis: is: not: yaml\n")},
+	}
+
+	assert.Equal(t, []WorkflowInfo{{Name: "broken"}}, WorkflowInfos(configs))
+}
+
 func TestWorkflowNames(t *testing.T) {
 	assert.Equal(t, []string{"lint", "test", "deploy"}, WorkflowNames(testConfigs()))
 	assert.Empty(t, WorkflowNames(nil))

@@ -413,10 +413,10 @@ func GetPipelineConfig(c *gin.Context) {
 // GetRepoWorkflows
 //
 //	@Summary		List the workflows a trigger can select
-//	@Description	Returns the names of the workflow configs currently defined on a branch. These are the names accepted by the workflows option of a manual pipeline or a cron job.
+//	@Description	Returns the workflow configs currently defined on a branch, each with the workflows it requires. The names are those accepted by the workflows option of a manual pipeline or a cron job.
 //	@Router			/repos/{repo_id}/workflows [get]
 //	@Produce		json
-//	@Success		200	{array}	string
+//	@Success		200	{array}	WorkflowInfo
 //	@Tags			Pipelines
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			repo_id			path	int		true	"the repository id"
@@ -469,7 +469,7 @@ func GetRepoWorkflows(c *gin.Context) {
 	// a branch without any config is not an error, it just has no workflows to
 	// offer, and the caller renders that as an empty list
 	if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
-		c.JSON(http.StatusOK, []string{})
+		c.JSON(http.StatusOK, []pipeline.WorkflowInfo{})
 		return
 	}
 	if err != nil {
@@ -477,7 +477,7 @@ func GetRepoWorkflows(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, pipeline.WorkflowNames(configs))
+	c.JSON(http.StatusOK, pipeline.WorkflowInfos(configs))
 }
 
 // GetPipelineMetadata
