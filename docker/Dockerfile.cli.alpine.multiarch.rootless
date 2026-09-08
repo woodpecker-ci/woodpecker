@@ -11,7 +11,7 @@ FROM docker.io/alpine:3.24
 
 WORKDIR /woodpecker
 
-RUN apk add -U --no-cache ca-certificates && \
+RUN apk add -U --no-cache ca-certificates tzdata && \
   adduser -u 1000 -g 1000 -D woodpecker
 
 ENV GODEBUG=netdns=go

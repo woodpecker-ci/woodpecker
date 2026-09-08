@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM docker.io/alpine:3.24
 
-RUN apk add -U --no-cache ca-certificates && \
+RUN apk add -U --no-cache ca-certificates tzdata && \
   adduser -u 1000 -g 1000 woodpecker -D && \
   mkdir -p /etc/woodpecker && \
   chown -R woodpecker:woodpecker /etc/woodpecker
