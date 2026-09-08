@@ -31,11 +31,7 @@ import (
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
-// Callers distinguish a filtered pipeline from a real failure with
-// errors.Is(err, ErrFiltered), so Create must return the sentinel unwrapped.
-// Wrapping it with a formatted message would keep errors.Is working, but
-// returning a fresh errors.New with the same text would not, and that
-// difference is invisible at the call site.
+// Create must return ErrFiltered unwrapped so callers can use errors.Is.
 func TestCreateSkipCommitMessageReturnsErrFiltered(t *testing.T) {
 	t.Parallel()
 
@@ -43,9 +39,7 @@ func TestCreateSkipCommitMessageReturnsErrFiltered(t *testing.T) {
 	repo := &model.Repo{ID: 10, UserID: 1, FullName: "octocat/hello-world"}
 	mockStore.On("GetUser", int64(1)).Return(&model.User{ID: 1, Login: "octocat"}, nil)
 
-	// A skip-ci commit is filtered before the pipeline is ever persisted, so
-	// no CreatePipeline or DeletePipeline call is expected. mockStore is
-	// strict: an unexpected store call fails the test.
+	// Filtered before the pipeline is persisted, so the store is untouched.
 	created, err := Create(t.Context(), mockStore, repo, &model.Pipeline{
 		Event:   model.EventPush,
 		Message: "chore: tidy up [skip ci]",
@@ -55,16 +49,11 @@ func TestCreateSkipCommitMessageReturnsErrFiltered(t *testing.T) {
 	assert.ErrorIs(t, err, ErrFiltered)
 }
 
-// The webhook error-log spam this change addresses comes from the `when`
-// filter path: the config parses, but every workflow is filtered out, so
-// Create deletes the pipeline it just persisted and returns ErrFiltered.
-// Unlike the skip-ci case this happens after CreatePipeline, so the store
-// sees both calls.
+// The `when` filter path persists the pipeline first, then deletes it.
 func TestCreateAllWorkflowsFilteredReturnsErrFiltered(t *testing.T) {
 	repo := &model.Repo{ID: 1, UserID: 1, FullName: "octocat/hello-world", Config: ".woodpecker.yaml"}
 
-	// A push webhook against a config whose only workflow runs on tag events
-	// leaves nothing to run.
+	// A push webhook against a tag-only workflow leaves nothing to run.
 	yaml := []byte("when:\n  - event: tag\n\nsteps:\n  - name: test\n    image: alpine\n    commands:\n      - echo hi\n")
 
 	mockStore := store_mocks.NewMockStore(t)
@@ -73,7 +62,7 @@ func TestCreateAllWorkflowsFilteredReturnsErrFiltered(t *testing.T) {
 	mockStore.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(&model.Pipeline{}, nil)
 	mockStore.On("ConfigPersist", mock.Anything).Return(&model.Config{ID: 1, RepoID: 1}, nil)
 	mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil)
-	// The pipeline row is created and then removed again.
+	// The row is created and then removed again.
 	mockStore.On("DeletePipeline", mock.Anything).Return(nil).Once()
 
 	mockForge := forge_mocks.NewMockForge(t)
