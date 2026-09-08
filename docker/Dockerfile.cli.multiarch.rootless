@@ -3,6 +3,11 @@ FROM --platform=$BUILDPLATFORM docker.io/golang:1.27 AS build
 RUN groupadd -g 1000 woodpecker && \
   useradd -u 1000 -g 1000 woodpecker
 
+# add backward compatible timezone names (US/Eastern, Asia/Calcutta, ...) to match alpine images
+RUN apt update && \
+  apt install -y --no-install-recommends tzdata-legacy && \
+  rm -rf /usr/share/zoneinfo/right
+
 WORKDIR /src
 COPY . .
 ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
