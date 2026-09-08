@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+- Add timezone data to docker images [[#7093](https://github.com/woodpecker-ci/woodpecker/pull/7093)]
 - Log an expected log-stream close failure at debug instead of error [[#7117](https://github.com/woodpecker-ci/woodpecker/pull/7117)]
 - Log a filtered webhook at debug instead of error [[#7116](https://github.com/woodpecker-ci/woodpecker/pull/7116)]
 - Fix workflow-level when.status so a failure-only workflow does not run on success [[#7091](https://github.com/woodpecker-ci/woodpecker/pull/7091)]
