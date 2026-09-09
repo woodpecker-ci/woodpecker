@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@ChrisJr404, @mattwilkinsonn, @thiagola92
+@ChrisJr404, @mattwilkinsonn, @qwerty287, @thiagola92
 
 ### 📈 Enhancement
 
@@ -14,6 +14,10 @@
 
 - Update CLI command in CLI & API example [[#7129](https://github.com/woodpecker-ci/woodpecker/pull/7129)]
 - Fix crash rendering a pipeline with a stepless workflow [[#7119](https://github.com/woodpecker-ci/woodpecker/pull/7119)]
+
+### Misc
+
+- Run swaggo in golangci-lint [[#7121](https://github.com/woodpecker-ci/woodpecker/pull/7121)]
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
 
