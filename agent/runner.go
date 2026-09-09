@@ -60,7 +60,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, agentID int64, state
 // formatAgentLabels renders the agent's labels as a JSON object so they can be
 // exposed to steps through a single environment variable. JSON keeps the format
 // consistent with other structured pipeline data such as CI_PIPELINE_FILES.
-// json.Marshal sorts map keys, so the output is deterministic across runs.
+// Map keys are sorted by json.Marshal, so the output is deterministic across runs.
 func formatAgentLabels(labels map[string]string) string {
 	if len(labels) == 0 {
 		return ""
