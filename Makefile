@@ -136,8 +136,7 @@ generate: generate-openapi ## Run all code generations
 	fi
 	CGO_ENABLED=0 go generate ./...
 
-generate-openapi: ## Run openapi code generation and format it
-	CGO_ENABLED=0 go run github.com/swaggo/swag/cmd/swag fmt --exclude rpc/proto
+generate-openapi: ## Run openapi code generation
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 generate-license-header:
