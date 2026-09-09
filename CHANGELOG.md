@@ -1,13 +1,18 @@
 # Changelog
 
-## [3.18.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.2) - 2026-09-09
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@mattwilkinsonn
+@ChrisJr404, @mattwilkinsonn, @thiagola92
+
+### 📈 Enhancement
+
+- feat(agent): add CI_AGENT_ID and CI_AGENT_LABELS runtime env vars [[#7070](https://github.com/woodpecker-ci/woodpecker/pull/7070)]
 
 ### 🐛 Bug Fixes
 
+- Update CLI command in CLI & API example [[#7129](https://github.com/woodpecker-ci/woodpecker/pull/7129)]
 - Fix crash rendering a pipeline with a stepless workflow [[#7119](https://github.com/woodpecker-ci/woodpecker/pull/7119)]
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
