@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.18.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.2) - 2026-09-09
+
+### ❤️ Thanks to all contributors! ❤️
+
+@mattwilkinsonn
+
+### 🐛 Bug Fixes
+
+- Fix crash rendering a pipeline with a stepless workflow [[#7119](https://github.com/woodpecker-ci/woodpecker/pull/7119)]
+
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
 
 ### ❤️ Thanks to all contributors! ❤️
