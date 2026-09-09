@@ -102,14 +102,24 @@ vendor: ## Update the vendor directory
 	go mod tidy
 	go mod vendor
 
-format: install-gofumpt ## Format source code
-	@gofumpt -extra -w .
+format: ## Format source code
+	@if command -v gofumpt > /dev/null 2>&1; then \
+		gofumpt -extra -w .; \
+	else \
+		go run mvdan.cc/gofumpt@$(GOFUMPT_VERSION) -extra -w .; \
+	fi
 
 .PHONY: clean
 clean: ## Clean build artifacts
 	go clean -i ./...
 	rm -rf build
-	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
+	@if ! command -v docker > /dev/null 2>&1; then \
+		echo "docker not installed, skipping image cleanup"; \
+	elif [ -n "$$(docker image ls -q woodpecker/make:local)" ]; then \
+		docker image rm woodpecker/make:local; \
+	else \
+		echo "no docker image to clean"; \
+	fi
 
 .PHONY: clean-all
 clean-all: clean ## Clean all artifacts
@@ -118,16 +128,24 @@ clean-all: clean ## Clean all artifacts
 	rm -rf docs/docs/40-cli.md docs/openapi.json
 
 .PHONY: generate
-generate: install-mockery generate-openapi ## Run all code generations
-	mockery
+generate: generate-openapi ## Run all code generations
+	@if command -v mockery > /dev/null 2>&1; then \
+		mockery; \
+	else \
+		go run github.com/vektra/mockery/v3@latest; \
+	fi
 	CGO_ENABLED=0 go generate ./...
 
 generate-openapi: ## Run openapi code generation and format it
 	CGO_ENABLED=0 go run github.com/swaggo/swag/cmd/swag fmt --exclude rpc/proto
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
-generate-license-header: install-addlicense
-	addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go
+generate-license-header:
+	@if command -v addlicense > /dev/null 2>&1; then \
+		addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go; \
+	else \
+		go run github.com/google/addlicense@latest -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go; \
+	fi
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -135,24 +153,16 @@ check-xgo: ## Check if xgo is installed
 	fi
 
 install-golangci-lint:
-	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) ; \
-	fi
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 
 install-gofumpt:
-	@hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION); \
-	fi
+	go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
 
 install-addlicense:
-	@hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/google/addlicense@latest; \
-	fi
+	go install github.com/google/addlicense@latest
 
 install-mockery:
-	@hash mockery > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/vektra/mockery/v3@latest; \
-	fi
+	go install github.com/vektra/mockery/v3@latest
 
 install-protoc-gen-go:
 	@hash protoc-gen-go > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -171,9 +181,13 @@ ui-dependencies: ## Install UI dependencies
 ##@ Test
 
 .PHONY: lint
-lint: install-golangci-lint ## Lint code
+lint: ## Lint code
 	@echo "Running golangci-lint"
-	golangci-lint run
+	@if command -v golangci-lint > /dev/null 2>&1; then \
+		golangci-lint run; \
+	else \
+		go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run; \
+	fi
 
 lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)

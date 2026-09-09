@@ -179,6 +179,39 @@ steps:
 	assert.NotContains(t, publishStep.Environment, "GO_VERSION")
 }
 
+func TestAdditionalEnvsWhenEvaluate(t *testing.T) {
+	t.Parallel()
+
+	yamlData := []byte(`
+when:
+  event: manual
+  evaluate: 'TAG == "1.2.3"'
+steps:
+  - name: build
+    image: scratch
+    commands:
+      - go build
+`)
+
+	m := &testMetadata{
+		pipelineEvent: "manual",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		AdditionalEnvs: map[string]string{
+			"TAG": "1.2.3",
+		},
+		RepoTrusted: &metadata.TrustedConfiguration{},
+		Yamls:       []*YamlFile{{Data: yamlData}},
+	}
+
+	items, err := b.Build()
+	assert.NoError(t, err)
+	assert.Len(t, items, 1,
+		"workflow must not be filtered when evaluate matches an additional (manual trigger) variable")
+}
+
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
@@ -330,6 +363,62 @@ steps:
 	assert.Len(t, items, 1, "Should have generated 1 pipeline")
 	assert.Len(t, items[0].RunsOn, 2, "Should run on success and failure")
 	assert.ElementsMatchf(t, []string{"success", "failure"}, items[0].RunsOn, "Should run on failure")
+}
+
+func TestRunsOnStatus(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		when string
+		want []string
+	}{
+		{
+			name: "only failure",
+			when: "when:\n  event: push\n  status: [ failure ]\n",
+			want: []string{"failure"},
+		},
+		{
+			name: "only success",
+			when: "when:\n  event: push\n  status: [ success ]\n",
+			want: []string{"success"},
+		},
+		{
+			name: "no status at all",
+			when: "when:\n  event: push\n",
+			want: []string{"success"},
+		},
+		{
+			// The deprecated spelling must keep deciding on its own, even
+			// though the when above it sets no status.
+			name: "deprecated runs_on wins over when",
+			when: "when:\n  event: push\nruns_on: [ failure ]\n",
+			want: []string{"failure"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			m := &testMetadata{
+				pipelineEvent: "push",
+			}
+
+			b := PipelineBuilder{
+				GetWorkflowMetadata: m.GetWorkflowMetadata,
+				RepoTrusted:         &metadata.TrustedConfiguration{},
+				Yamls: []*YamlFile{
+					{Data: []byte(tt.when + "\nsteps:\n  - name: deploy\n    image: scratch\n")},
+				},
+			}
+
+			// runs_on is deprecated, so Build reports a warning for that case.
+			items, _ := b.Build()
+			assert.Len(t, items, 1, "Should have generated 1 pipeline")
+			assert.ElementsMatch(t, tt.want, items[0].RunsOn)
+		})
+	}
 }
 
 func TestPipelineName(t *testing.T) {
