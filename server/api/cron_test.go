@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"testing"
 
@@ -323,7 +324,7 @@ func TestPostCron(t *testing.T) {
 
 		PostCron(tc.Ctx)
 
-		assert.Equal(t, http.StatusUnprocessableEntity, tc.Recorder.Code)
+		assert.Equal(t, http.StatusBadRequest, tc.Recorder.Code)
 		assert.Contains(t, tc.Recorder.Body.String(), "nope")
 	})
 
@@ -336,7 +337,7 @@ func TestPostCron(t *testing.T) {
 
 		PostCron(tc.Ctx)
 
-		assert.Equal(t, http.StatusUnprocessableEntity, tc.Recorder.Code)
+		assert.Equal(t, http.StatusBadRequest, tc.Recorder.Code)
 		assert.Contains(t, tc.Recorder.Body.String(), "nightly")
 	})
 
@@ -350,6 +351,49 @@ func TestPostCron(t *testing.T) {
 		PostCron(tc.Ctx)
 
 		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+	})
+
+	t.Run("config service failure is a server error", func(t *testing.T) {
+		mgr := manager_mocks.NewMockManager(t)
+		forge := forge_mocks.NewMockForge(t)
+		mgr.On("ForgeFromRepo", mock.Anything).Return(forge, nil)
+		forge.On("BranchHead", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			Return(&model.Commit{SHA: "abc"}, nil)
+		configService := config_service_mocks.NewMockService(t)
+		configService.On("Fetch", mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("forge down"))
+		mgr.On("ConfigServiceFromRepo", mock.Anything).Return(configService)
+		server.Config.Services.Manager = mgr
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withRequest(http.MethodPost, &model.Cron{Name: "forge-down", Schedule: "@every 1h", Workflows: []string{"build"}})(tc)
+
+		PostCron(tc.Ctx)
+
+		assert.Equal(t, http.StatusInternalServerError, tc.Recorder.Code)
+	})
+
+	t.Run("branch is resolved once when set with a selection", func(t *testing.T) {
+		mgr := manager_mocks.NewMockManager(t)
+		forge := forge_mocks.NewMockForge(t)
+		mgr.On("ForgeFromRepo", mock.Anything).Return(forge, nil)
+		forge.On("BranchHead", mock.Anything, user, mock.Anything, "feature").
+			Return(&model.Commit{SHA: "abc"}, nil).Once()
+		configService := config_service_mocks.NewMockService(t)
+		configService.On("Fetch", mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything).Return([]*forge_types.FileMeta{cronWorkflowFile("build")}, nil)
+		mgr.On("ConfigServiceFromRepo", mock.Anything).Return(configService)
+		server.Config.Services.Manager = mgr
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withRequest(http.MethodPost, &model.Cron{Name: "once", Schedule: "@every 1h", Branch: "feature", Workflows: []string{"build"}})(tc)
+
+		PostCron(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		forge.AssertNumberOfCalls(t, "BranchHead", 1)
 	})
 
 	t.Run("duplicate cron returns conflict", func(t *testing.T) {

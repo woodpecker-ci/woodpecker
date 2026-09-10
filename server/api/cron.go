@@ -109,7 +109,14 @@ func RunCron(c *gin.Context) {
 // The repo can of course change after the cron is saved, so the same check
 // still runs when the pipeline is created. This one exists to catch the
 // mistake while the user is still on the form.
-func validateCronWorkflows(c *gin.Context, _store store.Store, _forge forge.Forge, repo *model.Repo, cron *model.Cron) error {
+//
+// The head argument is the already resolved commit of the cron branch when the caller has
+// it, so the forge is not asked twice. When nil the branch is resolved here.
+//
+// Errors are typed so the caller can hand them to handlePipelineErr: a branch
+// that does not resolve or a bad selection is a pipeline.ErrBadRequest, while
+// a store or config-service failure is a plain error.
+func validateCronWorkflows(c *gin.Context, _store store.Store, _forge forge.Forge, repo *model.Repo, cron *model.Cron, head *model.Commit) error {
 	if len(cron.Workflows) == 0 {
 		return nil
 	}
@@ -125,15 +132,17 @@ func validateCronWorkflows(c *gin.Context, _store store.Store, _forge forge.Forg
 	}
 	forge.Refresh(c, _forge, _store, repoUser)
 
-	commit, err := _forge.BranchHead(c, repoUser, repo, branch)
-	if err != nil {
-		return fmt.Errorf("could not resolve branch %q: %w", branch, err)
+	if head == nil {
+		head, err = _forge.BranchHead(c, repoUser, repo, branch)
+		if err != nil {
+			return &pipeline.ErrBadRequest{Msg: fmt.Sprintf("branch not resolved: %s", err)}
+		}
 	}
 
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	configs, err := configService.Fetch(c, _forge, repoUser, repo, &model.Pipeline{
 		Event:  model.EventCron,
-		Commit: commit.SHA,
+		Commit: head.SHA,
 		Branch: branch,
 		Ref:    "refs/heads/" + branch,
 	}, nil, false)
@@ -196,17 +205,18 @@ func PostCron(c *gin.Context) {
 	}
 	cron.NextExec = nextExec.Unix()
 
+	var head *model.Commit
 	if in.Branch != "" {
 		// check if branch exists on forge
-		_, err := _forge.BranchHead(c, user, repo, cron.Branch)
+		head, err = _forge.BranchHead(c, user, repo, cron.Branch)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
 		}
 	}
 
-	if err := validateCronWorkflows(c, _store, _forge, repo, cron); err != nil {
-		c.String(http.StatusUnprocessableEntity, "Error inserting cron. %s", err)
+	if err := validateCronWorkflows(c, _store, _forge, repo, cron, head); err != nil {
+		handlePipelineErr(c, fmt.Errorf("error inserting cron: %w", err))
 		return
 	}
 
@@ -261,10 +271,11 @@ func PatchCron(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
+	var head *model.Commit
 	if in.Branch != nil {
 		if branch := strings.TrimSpace(*in.Branch); branch != "" {
 			// check if branch exists on forge
-			_, err := _forge.BranchHead(c, user, repo, branch)
+			head, err = _forge.BranchHead(c, user, repo, branch)
 			if err != nil {
 				c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 				return
@@ -323,8 +334,8 @@ func PatchCron(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
-	if err := validateCronWorkflows(c, _store, _forge, repo, cron); err != nil {
-		c.String(http.StatusUnprocessableEntity, "Error updating cron. %s", err)
+	if err := validateCronWorkflows(c, _store, _forge, repo, cron, head); err != nil {
+		handlePipelineErr(c, fmt.Errorf("error updating cron: %w", err))
 		return
 	}
 
