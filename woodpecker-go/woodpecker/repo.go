@@ -80,6 +80,10 @@ type PipelineLastOptions struct {
 	Branch string // last pipeline from given branch, an empty branch will result in the default branch
 }
 
+type RepoWorkflowsOptions struct {
+	Branch string // workflows defined on given branch, an empty branch will result in the default branch
+}
+
 type RepoPostOptions struct {
 	ForgeRemoteID int64
 }
@@ -130,6 +134,15 @@ func (opt *PipelineStartOptions) QueryEncode() string {
 
 // QueryEncode returns the URL query parameters for the PipelineLastOptions.
 func (opt *PipelineLastOptions) QueryEncode() string {
+	query := make(url.Values)
+	if opt.Branch != "" {
+		query.Add("branch", opt.Branch)
+	}
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the RepoWorkflowsOptions.
+func (opt *RepoWorkflowsOptions) QueryEncode() string {
 	query := make(url.Values)
 	if opt.Branch != "" {
 		query.Add("branch", opt.Branch)
@@ -372,18 +385,11 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 // the workflows it requires. The names are those accepted by
 // PipelineOptions.Workflows and Cron.Workflows. An empty branch falls back to
 // the repo default branch.
-func (c *client) RepoWorkflows(repoID int64, branch string) ([]*WorkflowInfo, error) {
+func (c *client) RepoWorkflows(repoID int64, opt RepoWorkflowsOptions) ([]*WorkflowInfo, error) {
 	var out []*WorkflowInfo
-	uri, err := url.Parse(fmt.Sprintf(pathRepoWorkflows, c.addr, repoID))
-	if err != nil {
-		return nil, err
-	}
-	if branch != "" {
-		query := uri.Query()
-		query.Set("branch", branch)
-		uri.RawQuery = query.Encode()
-	}
-	err = c.get(uri.String(), &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoWorkflows, c.addr, repoID))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

@@ -3990,8 +3990,8 @@ func (_c *MockClient_RepoRepair_Call) RunAndReturn(run func(repoID int64) error)
 }
 
 // RepoWorkflows provides a mock function for the type MockClient
-func (_mock *MockClient) RepoWorkflows(repoID int64, branch string) ([]*woodpecker.WorkflowInfo, error) {
-	ret := _mock.Called(repoID, branch)
+func (_mock *MockClient) RepoWorkflows(repoID int64, opt woodpecker.RepoWorkflowsOptions) ([]*woodpecker.WorkflowInfo, error) {
+	ret := _mock.Called(repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoWorkflows")
@@ -3999,18 +3999,18 @@ func (_mock *MockClient) RepoWorkflows(repoID int64, branch string) ([]*woodpeck
 
 	var r0 []*woodpecker.WorkflowInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) ([]*woodpecker.WorkflowInfo, error)); ok {
-		return returnFunc(repoID, branch)
+	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.RepoWorkflowsOptions) ([]*woodpecker.WorkflowInfo, error)); ok {
+		return returnFunc(repoID, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, string) []*woodpecker.WorkflowInfo); ok {
-		r0 = returnFunc(repoID, branch)
+	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.RepoWorkflowsOptions) []*woodpecker.WorkflowInfo); ok {
+		r0 = returnFunc(repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.WorkflowInfo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, string) error); ok {
-		r1 = returnFunc(repoID, branch)
+	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.RepoWorkflowsOptions) error); ok {
+		r1 = returnFunc(repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4024,20 +4024,20 @@ type MockClient_RepoWorkflows_Call struct {
 
 // RepoWorkflows is a helper method to define mock.On call
 //   - repoID int64
-//   - branch string
-func (_e *MockClient_Expecter) RepoWorkflows(repoID any, branch any) *MockClient_RepoWorkflows_Call {
-	return &MockClient_RepoWorkflows_Call{Call: _e.mock.On("RepoWorkflows", repoID, branch)}
+//   - opt woodpecker.RepoWorkflowsOptions
+func (_e *MockClient_Expecter) RepoWorkflows(repoID any, opt any) *MockClient_RepoWorkflows_Call {
+	return &MockClient_RepoWorkflows_Call{Call: _e.mock.On("RepoWorkflows", repoID, opt)}
 }
 
-func (_c *MockClient_RepoWorkflows_Call) Run(run func(repoID int64, branch string)) *MockClient_RepoWorkflows_Call {
+func (_c *MockClient_RepoWorkflows_Call) Run(run func(repoID int64, opt woodpecker.RepoWorkflowsOptions)) *MockClient_RepoWorkflows_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 int64
 		if args[0] != nil {
 			arg0 = args[0].(int64)
 		}
-		var arg1 string
+		var arg1 woodpecker.RepoWorkflowsOptions
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(woodpecker.RepoWorkflowsOptions)
 		}
 		run(
 			arg0,
@@ -4052,7 +4052,7 @@ func (_c *MockClient_RepoWorkflows_Call) Return(workflowInfos []*woodpecker.Work
 	return _c
 }
 
-func (_c *MockClient_RepoWorkflows_Call) RunAndReturn(run func(repoID int64, branch string) ([]*woodpecker.WorkflowInfo, error)) *MockClient_RepoWorkflows_Call {
+func (_c *MockClient_RepoWorkflows_Call) RunAndReturn(run func(repoID int64, opt woodpecker.RepoWorkflowsOptions) ([]*woodpecker.WorkflowInfo, error)) *MockClient_RepoWorkflows_Call {
 	_c.Call.Return(run)
 	return _c
 }

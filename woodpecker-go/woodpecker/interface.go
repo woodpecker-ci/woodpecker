@@ -94,7 +94,7 @@ type Client interface {
 
 	// RepoWorkflows returns the workflows defined on the given branch, each
 	// with the workflows it requires.
-	RepoWorkflows(repoID int64, branch string) ([]*WorkflowInfo, error)
+	RepoWorkflows(repoID int64, opt RepoWorkflowsOptions) ([]*WorkflowInfo, error)
 
 	// PipelineStart re-starts a stopped pipeline.
 	PipelineStart(repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)
