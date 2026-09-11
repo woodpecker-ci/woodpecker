@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/google/go-github/v91/github"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -49,13 +50,16 @@ const (
 // GitHub commit status.
 func convertStatus(status model.StatusValue) string {
 	switch status {
-	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped, model.StatusCanceled:
+	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped, model.StatusCanceled, model.StatusCreated:
 		return statusPending
 	case model.StatusFailure, model.StatusDeclined:
 		return statusFailure
+	case model.StatusKilled, model.StatusError:
+		return statusError
 	case model.StatusSuccess:
 		return statusSuccess
 	default:
+		log.Warn().Str("status", string(status)).Msg("unknown pipeline status")
 		return statusError
 	}
 }
