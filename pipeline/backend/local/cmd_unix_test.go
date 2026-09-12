@@ -34,8 +34,8 @@ import (
 func startCanceledStep(t *testing.T, backend *local, taskUUID string) *types.Step {
 	t.Helper()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
+	ctx, cancel := context.WithCancelCause(context.Background())
+	cancel(nil) // pre-cancel
 
 	step := &types.Step{
 		UUID:     "step-canceled-before-start",
