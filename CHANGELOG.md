@@ -19,6 +19,7 @@
 
 ### 📦️ Dependency
 
+- Update woodpeckerci/plugin-git Docker tag to v2.10.1 [[#7135](https://github.com/woodpecker-ci/woodpecker/pull/7135)]
 - Update web npm deps non-major [[#7134](https://github.com/woodpecker-ci/woodpecker/pull/7134)]
 
 ### Misc
