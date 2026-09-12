@@ -28,6 +28,11 @@ func newCmd(ctx context.Context, binary string, args ...string) *exec.Cmd {
 	// Non perfect workaround till std exec supports JOB_OBJECT
 	// https://github.com/woodpecker-ci/woodpecker/issues/6717 & https://github.com/golang/go/issues/79927
 	cmd.Cancel = func() error {
+		// the command can have never been started (e.g. the workflow got canceled
+		// before), so there is no process to kill.
+		if cmd.Process == nil {
+			return nil
+		}
 		return exec.Command("taskkill", "/F", "/T", "/PID",
 			strconv.Itoa(cmd.Process.Pid)).Run()
 	}
