@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@ChrisJr404, @mattwilkinsonn, @qwerty287, @thiagola92
+@ChrisJr404, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
 
 ### 📈 Enhancement
 
@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix agent panic in local backend cleanup when a workflow is canceled before a step started [[#7132](https://github.com/woodpecker-ci/woodpecker/pull/7132)]
 - Report an in-setup pipeline status as pending on all forges [[#7118](https://github.com/woodpecker-ci/woodpecker/pull/7118)]
 - Update CLI command in CLI & API example [[#7129](https://github.com/woodpecker-ci/woodpecker/pull/7129)]
 - Fix crash rendering a pipeline with a stepless workflow [[#7119](https://github.com/woodpecker-ci/woodpecker/pull/7119)]
