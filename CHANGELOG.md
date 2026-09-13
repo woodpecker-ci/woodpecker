@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-12
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,6 +16,10 @@
 - Report an in-setup pipeline status as pending on all forges [[#7118](https://github.com/woodpecker-ci/woodpecker/pull/7118)]
 - Update CLI command in CLI & API example [[#7129](https://github.com/woodpecker-ci/woodpecker/pull/7129)]
 - Fix crash rendering a pipeline with a stepless workflow [[#7119](https://github.com/woodpecker-ci/woodpecker/pull/7119)]
+
+### 📚 Documentation
+
+- Update docs npm deps non-major [[#7133](https://github.com/woodpecker-ci/woodpecker/pull/7133)]
 
 ### 📦️ Dependency
 
