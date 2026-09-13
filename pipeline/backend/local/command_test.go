@@ -15,6 +15,7 @@
 package local
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -49,14 +50,18 @@ func TestGenCmdByShell(t *testing.T) {
 			// Verify the temp file was created and contains expected content
 			content, err := os.ReadFile(args[1])
 			require.NoError(t, err)
-			assert.EqualValues(t, `@SET PROMPT=$
-@echo + 'echo hi'
-@echo hi
-@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%
-@echo + 'call build.bat'
-@call build.bat
-@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%
-`, string(content))
+			agentPath, err := os.Executable()
+			require.NoError(t, err)
+			assert.EqualValues(t, fmt.Sprintf(`@echo off
+
+%s decode-base64 KyBlY2hvIGhpCg==
+echo hi
+if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
+
+%s decode-base64 KyBjYWxsIGJ1aWxkLmJhdAo=
+call build.bat
+if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
+`, agentPath, agentPath), string(content))
 		})
 
 		t.Run("powershell", func(t *testing.T) {
@@ -119,16 +124,20 @@ echo test`, args[3])
 		require.NoError(t, err)
 		content, err := os.ReadFile(args[1])
 		require.NoError(t, err)
-		assert.EqualValues(t, `@SET PROMPT=$
-@echo + 'echo '"'"'test with \OR pipe'"'"''
-@echo 'test with | pipe'
-@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%
-@echo + 'echo '"'"'test \AND ampersand'"'"'\n\necho new line'
-@echo 'test & ampersand'
+		agentPath, err := os.Executable()
+		require.NoError(t, err)
+		assert.EqualValues(t, fmt.Sprintf(`@echo off
+
+%s decode-base64 KyBlY2hvICd0ZXN0IHdpdGggfCBwaXBlJwo=
+echo 'test with | pipe'
+if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
+
+%s decode-base64 KyBlY2hvICd0ZXN0ICYgYW1wZXJzYW5kJwoKZWNobyBuZXcgbGluZQo=
+echo 'test & ampersand'
 
 echo new line
-@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%
-`, string(content))
+if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
+`, agentPath, agentPath), string(content))
 	})
 
 	t.Run("shell with .exe suffix", func(t *testing.T) {

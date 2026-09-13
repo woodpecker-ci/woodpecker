@@ -213,7 +213,7 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 
 	for i := range cfg.capacity {
 		go func(slot int) {
-			runner := agent.NewRunner(client, filter, cfg.hostname, counter, backend)
+			runner := agent.NewRunner(client, filter, cfg.hostname, env.AgentID, counter, backend)
 			log.Debug().Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner started")
 			for {
 				if agentCtx.Err() != nil {

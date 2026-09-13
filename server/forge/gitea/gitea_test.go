@@ -21,6 +21,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"code.gitea.io/sdk/gitea"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -170,3 +171,29 @@ var (
 		State: model.StatusSuccess,
 	}
 )
+
+func TestGetStatus(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		status model.StatusValue
+		want   gitea.StatusState
+	}{
+		{model.StatusPending, gitea.StatusPending},
+		{model.StatusBlocked, gitea.StatusPending},
+		{model.StatusCreated, gitea.StatusPending},
+		{model.StatusRunning, gitea.StatusPending},
+		{model.StatusSuccess, gitea.StatusSuccess},
+		{model.StatusFailure, gitea.StatusFailure},
+		{model.StatusKilled, gitea.StatusFailure},
+		{model.StatusSkipped, gitea.StatusFailure},
+		{model.StatusCanceled, gitea.StatusFailure},
+		{model.StatusDeclined, gitea.StatusWarning},
+		{model.StatusError, gitea.StatusError},
+		{model.StatusValue("bogus"), gitea.StatusFailure},
+	}
+
+	for _, tt := range tests {
+		assert.Equalf(t, tt.want, getStatus(tt.status), "status %q", tt.status)
+	}
+}

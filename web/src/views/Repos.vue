@@ -5,8 +5,21 @@
     </template>
 
     <template #headerActions>
-      <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
-      <Button start-icon="refresh" :is-loading="isRefreshing" :text="$t('repo.refresh')" @click="refreshRepositories" />
+      <Button
+        :to="{ name: 'repo-add' }"
+        start-icon="plus"
+        :title="$t('repo.add')"
+        :aria-label="$t('repo.add')"
+        class="h-9"
+      />
+      <Button
+        start-icon="refresh"
+        :is-loading="isRefreshing"
+        :title="$t('repo.refresh')"
+        :aria-label="$t('repo.refresh')"
+        class="h-9"
+        @click="refreshRepositories"
+      />
     </template>
 
     <Transition name="fade" mode="out-in">

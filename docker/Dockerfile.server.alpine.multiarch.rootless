@@ -1,7 +1,7 @@
 FROM docker.io/alpine:3.24
 
 ARG TARGETOS TARGETARCH
-RUN apk add -U --no-cache ca-certificates && \
+RUN apk add -U --no-cache ca-certificates tzdata && \
   adduser -u 1000 -g 1000 woodpecker -D && \
   mkdir -p /var/lib/woodpecker && \
   chown -R woodpecker:woodpecker /var/lib/woodpecker
@@ -11,6 +11,7 @@ ENV GODEBUG=netdns=go
 ENV WOODPECKER_IN_CONTAINER=true
 ENV XDG_CACHE_HOME=/var/lib/woodpecker
 ENV XDG_DATA_HOME=/var/lib/woodpecker
+ENV SQLITE_TMPDIR=/var/lib/woodpecker
 EXPOSE 8000 9000 80 443
 
 COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/

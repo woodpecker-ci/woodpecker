@@ -2,9 +2,16 @@
   <Panel v-if="!loading">
     <form @submit.prevent="triggerManualPipeline">
       <span class="text-wp-text-100 text-xl">{{ $t('repo.manual_pipeline.title') }}</span>
+
+      <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.message.title')">
+        <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.message.desc') }}</span>
+        <TextField :id="id" v-model="payload.message" :placeholder="$t('repo.manual_pipeline.message.title')" />
+      </InputField>
+
       <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.select_branch')">
         <SelectField :id="id" v-model="payload.branch" :options="branches" required />
       </InputField>
+
       <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
         <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
         <KeyValueEditor
@@ -16,6 +23,7 @@
           @update:is-valid="isVariablesValid = $event"
         />
       </InputField>
+
       <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" :disabled="!isFormValid" />
     </form>
   </Panel>
@@ -35,6 +43,7 @@ import Icon from '~/components/atomic/Icon.vue';
 import InputField from '~/components/form/InputField.vue';
 import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
+import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { requiredInject } from '~/compositions/useInjectProvide';
@@ -58,7 +67,8 @@ const repoPermissions = requiredInject('repo-permissions');
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
-const payload = ref<{ branch: string; variables: Record<string, string> }>({
+const payload = ref<{ message: string; branch: string; variables: Record<string, string> }>({
+  message: '',
   branch: 'main',
   variables: {},
 });

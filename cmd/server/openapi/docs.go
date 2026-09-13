@@ -5232,6 +5232,9 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
+                "message": {
+                    "type": "string"
+                },
                 "variables": {
                     "type": "object",
                     "additionalProperties": {

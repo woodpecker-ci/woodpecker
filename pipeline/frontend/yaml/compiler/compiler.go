@@ -86,7 +86,7 @@ type Compiler struct {
 	volumes                 []string
 	networks                []string
 	env                     map[string]string
-	axisEnv                 map[string]string
+	nonPluginEnv            map[string]string
 	cloneEnv                map[string]string
 	workspaceBase           string
 	workspacePath           string
@@ -104,7 +104,7 @@ type Compiler struct {
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
 		env:                 map[string]string{},
-		axisEnv:             map[string]string{},
+		nonPluginEnv:        map[string]string{},
 		cloneEnv:            map[string]string{},
 		secrets:             map[string]Secret{},
 		defaultClonePlugin:  constant.DefaultClonePlugin,
@@ -123,7 +123,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	whenEnv := map[string]string{}
 	maps.Copy(whenEnv, c.env)
-	maps.Copy(whenEnv, c.axisEnv)
+	maps.Copy(whenEnv, c.nonPluginEnv)
 
 	if match, err := conf.When.Match(c.metadata, true, whenEnv); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.

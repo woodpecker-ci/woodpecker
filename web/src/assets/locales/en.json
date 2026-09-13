@@ -48,6 +48,10 @@
         "name": "Variable name",
         "value": "Variable value"
       },
+      "message": {
+        "title": "Message",
+        "desc": "This message is added to the pipeline's message as additional information."
+      },
       "show_pipelines": "Show pipelines",
       "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
     },
