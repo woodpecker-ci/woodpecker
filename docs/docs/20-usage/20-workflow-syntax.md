@@ -639,6 +639,8 @@ You can define labels for your workflow in order to select an agent to execute t
 
 To specify additional agent labels, check the [Agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). The agents have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of agent backend) and `repo=*`. Agents can use an `*` as a placeholder for a label. For example, `repo=*` matches any repo.
 
+Administrators can additionally restrict an agent with [agent filters](../30-administration/10-configuration/30-agent.md#agent-filters), so a workflow might not be picked up by an agent even though its own labels match.
+
 Workflow labels with an empty value are ignored.
 By default, each workflow has at least the label `repo=your-user/your-repo-name`. If you have set the [platform attribute](#platform) for your workflow, it will also have a label such as `platform=your-os/your-arch`.
 
