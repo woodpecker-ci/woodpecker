@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Use more unique sign to detect commands [[#7122](https://github.com/woodpecker-ci/woodpecker/pull/7122)]
 - feat(agent): add CI_AGENT_ID and CI_AGENT_LABELS runtime env vars [[#7070](https://github.com/woodpecker-ci/woodpecker/pull/7070)]
 
 ### 🐛 Bug Fixes
