@@ -24,6 +24,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#7137](https://github.com/woodpecker-ci/woodpecker/pull/7137)]
 - Update docs npm deps non-major [[#7133](https://github.com/woodpecker-ci/woodpecker/pull/7133)]
 
 ### 📦️ Dependency
