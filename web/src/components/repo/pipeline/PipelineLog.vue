@@ -292,8 +292,8 @@ const groupedLogs = computed(() => {
     const trimmedText = (line.rawText || '').trim();
 
     let isCommand = false;
-    if (trimmedText.startsWith('+ ')) {
-      const cmdPart = trimmedText.slice(2).trim();
+    if (trimmedText.startsWith('▶  ')) {
+      const cmdPart = trimmedText.slice(3).trim();
       isCommand = knownCommandMatchers.value.some((matcher) => matcher.test(cmdPart));
     }
 
