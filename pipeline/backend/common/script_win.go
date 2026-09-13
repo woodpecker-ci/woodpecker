@@ -67,6 +67,6 @@ var setupScriptWinTmpl, _ = template.New("").Parse(setupScriptWinProto)
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScriptWin = `
-Write-Output ('+ %s');
+Write-Output ('▶  %s');
 & %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `
