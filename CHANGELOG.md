@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@ChrisJr404, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
+
+### ✨ Features
+
+- Server side enforced agent labels [[#4131](https://github.com/woodpecker-ci/woodpecker/pull/4131)]
 
 ### 📈 Enhancement
 
