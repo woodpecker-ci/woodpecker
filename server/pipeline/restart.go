@@ -74,8 +74,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	// Guard on the refetched config: a pipeline that errored before persisting
-	// any config has no old rows but can still refetch a valid definition.
+	// Guard on the newly fetched config: a pipeline that errored before
+	// persisting any config has no old rows but can still fetch a valid definition.
 	if len(pipelineFiles) == 0 {
 		newPipeline, uErr := UpdateToStatusError(store, *newPipeline, errors.New("pipeline definition not found"))
 		if uErr != nil {
@@ -85,8 +85,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		}
 		return newPipeline, nil
 	}
-	// Persist and link the refetched config, as Create does. ConfigPersist
-	// dedups on (repo, name, hash).
+	// Persist and link the new config, as Create does. ConfigPersist
+	// deduplicates on (repo, name, hash).
 	configs := make([]*model.Config, 0, len(pipelineFiles))
 	for _, pipelineFile := range pipelineFiles {
 		config, cErr := findOrPersistPipelineConfig(store, newPipeline, pipelineFile)

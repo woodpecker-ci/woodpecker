@@ -490,7 +490,7 @@ func TestPostPipeline(t *testing.T) {
 		{Name: ".woodpecker.yml", Data: []byte("when:\n  event: pull_request\nsteps:\n  test:\n    image: alpine:latest\n    commands:\n      - echo test")},
 	}
 
-	// fetchResult is what the config service serves on the refetch. The store is
+	// fetchResult is what the config service serves on the fetch. The store is
 	// returned so callers can assert which persist calls ran.
 	setupPost := func(t *testing.T, parent *model.Pipeline, fetchResult []*forge_types.FileMeta) (*httptest.ResponseRecorder, *store_mocks.MockStore) {
 		mockStore := store_mocks.NewMockStore(t)
@@ -547,7 +547,7 @@ func TestPostPipeline(t *testing.T) {
 	}
 
 	// Before the fix, Restart guarded on the empty old config rows.
-	t.Run("restart of a config-less errored pipeline succeeds when the refetch yields config", func(t *testing.T) {
+	t.Run("restart of a config-less errored pipeline succeeds when the fetch yields config", func(t *testing.T) {
 		w, mockStore := setupPost(t, newErroredParent(), validConfig)
 
 		require.Equal(t, http.StatusOK, w.Code)
@@ -558,14 +558,14 @@ func TestPostPipeline(t *testing.T) {
 			assert.NotEqual(t, "pipeline definition not found", e.Message)
 		}
 		// The config must be compiled into real work, not just fetched.
-		assert.NotEmpty(t, got.Workflows, "restart should produce workflows from the refetched config")
+		assert.NotEmpty(t, got.Workflows, "restart should produce workflows from the fetched config")
 		mockStore.AssertCalled(t, "ConfigPersist", mock.Anything)
 		mockStore.AssertCalled(t, "PipelineConfigCreate", mock.Anything)
 		mockStore.AssertCalled(t, "WorkflowsCreate", mock.Anything)
 	})
 
-	// No old config and an empty refetch is a genuine "not found".
-	t.Run("restart still errors when no old config and the refetch is empty", func(t *testing.T) {
+	// No old config and an empty fetch is a genuine "not found".
+	t.Run("restart still errors when no old config and the fetch is empty", func(t *testing.T) {
 		w, _ := setupPost(t, newErroredParent(), []*forge_types.FileMeta{})
 
 		require.Equal(t, http.StatusOK, w.Code)
