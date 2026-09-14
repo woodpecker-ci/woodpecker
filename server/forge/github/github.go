@@ -306,20 +306,22 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	errChan := make(chan error)
 
 	for _, file := range data {
-		go func(path string) {
-			content, err := c.File(ctx, u, r, b, path)
-			if err != nil {
-				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
-					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+		if file.GetType() == "file" {
+			go func(path string) {
+				content, err := c.File(ctx, u, r, b, path)
+				if err != nil {
+					if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+						err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+					}
+					errChan <- err
+				} else {
+					fc <- &forge_types.FileMeta{
+						Name: path,
+						Data: content,
+					}
 				}
-				errChan <- err
-			} else {
-				fc <- &forge_types.FileMeta{
-					Name: path,
-					Data: content,
-				}
-			}
-		}(f + "/" + *file.Name)
+			}(f + "/" + file.GetName())
+		}
 	}
 
 	var files []*forge_types.FileMeta
