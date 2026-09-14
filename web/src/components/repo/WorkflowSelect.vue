@@ -13,20 +13,28 @@
       {{ $t('repo.workflow_select.none') }}
     </span>
 
-    <CheckboxesField v-else :id="id" :model-value="innerValue" :options="options" @update:model-value="onSelect" />
+    <template v-else>
+      <CheckboxesField :id="id" :model-value="innerValue" :options="options" @update:model-value="update" />
+
+      <Warning
+        v-if="unmetDependencies.length > 0"
+        class="mt-2 text-sm"
+        :text="$t('repo.workflow_select.unmet_dependencies', { workflows: unmetDependenciesText })"
+      />
+    </template>
   </InputField>
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, ref, toRef, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Icon from '~/components/atomic/Icon.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import type { CheckboxOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import useApiClient from '~/compositions/useApiClient';
-import useNotifications from '~/compositions/useNotifications';
 
 const props = defineProps<{
   modelValue?: string[];
@@ -40,7 +48,6 @@ const emit = defineEmits<{
 }>();
 
 const apiClient = useApiClient();
-const notifications = useNotifications();
 const i18n = useI18n();
 
 const modelValue = toRef(props, 'modelValue');
@@ -53,7 +60,7 @@ const options = ref<CheckboxOption[]>([]);
 const loading = ref(false);
 const error = ref('');
 
-// name -> the workflows it requires, straight from each config's depends_on
+// name -> the workflows it names in depends_on, straight from each config
 const requires = ref<Record<string, string[]>>({});
 
 function update(selection: string[]) {
@@ -62,89 +69,27 @@ function update(selection: string[]) {
 }
 
 /**
- * A workflow cannot run without the workflows it depends on, so selecting one
- * has to bring them along, and dropping one has to drop whatever needed it.
- * Doing this here means the selection is always valid by construction and the
- * server's rejection becomes unreachable from the UI.
+ * A workflow whose depends_on names something outside the current selection
+ * still runs: it just does not wait for that dependency, and may fail on its
+ * own if it actually needed its output. This lists which selected workflows
+ * that applies to, so the non-blocking warning below can name them instead of
+ * the person only finding out from a failed run.
  */
-function withRequirements(name: string, seen = new Set<string>()): Set<string> {
-  if (seen.has(name)) {
-    return seen; // depends_on cycles are rejected elsewhere; just don't hang
-  }
-  seen.add(name);
-  for (const dependency of requires.value[name] ?? []) {
-    withRequirements(dependency, seen);
-  }
-  return seen;
-}
-
-function dependentsOf(names: Set<string>): Set<string> {
-  const doomed = new Set(names);
-  let changed = true;
-  while (changed) {
-    changed = false;
-    for (const [name, dependencies] of Object.entries(requires.value)) {
-      if (doomed.has(name)) {
-        continue;
-      }
-      if (dependencies.some((dependency) => doomed.has(dependency))) {
-        doomed.add(name);
-        changed = true;
-      }
+const unmetDependencies = computed(() => {
+  const selected = new Set(innerValue.value);
+  const items: { name: string; missing: string[] }[] = [];
+  for (const name of innerValue.value) {
+    const missing = (requires.value[name] ?? []).filter((dependency) => !selected.has(dependency));
+    if (missing.length > 0) {
+      items.push({ name, missing });
     }
   }
-  return doomed;
-}
+  return items;
+});
 
-function onSelect(selection: string[]) {
-  const before = new Set(innerValue.value);
-  const after = new Set(selection);
-
-  const added = selection.filter((name) => !before.has(name));
-  const removed = innerValue.value.filter((name) => !after.has(name));
-
-  const next = new Set(selection);
-
-  const pulledIn: string[] = [];
-  for (const name of added) {
-    for (const required of withRequirements(name)) {
-      if (!next.has(required)) {
-        next.add(required);
-        pulledIn.push(required);
-      }
-    }
-  }
-
-  const droppedOut: string[] = [];
-  if (removed.length > 0) {
-    for (const dependent of dependentsOf(new Set(removed))) {
-      if (next.has(dependent)) {
-        next.delete(dependent);
-        droppedOut.push(dependent);
-      }
-    }
-  }
-
-  // keep the order the workflows are listed in, so the checkboxes do not jump
-  update(options.value.map((option) => option.value).filter((name) => next.has(name)));
-
-  if (pulledIn.length > 0) {
-    notifications.notify({
-      type: 'info',
-      title: i18n.t('repo.workflow_select.auto_selected', {
-        workflows: pulledIn.join(', '),
-      }),
-    });
-  }
-  if (droppedOut.length > 0) {
-    notifications.notify({
-      type: 'info',
-      title: i18n.t('repo.workflow_select.auto_deselected', {
-        workflows: droppedOut.join(', '),
-      }),
-    });
-  }
-}
+const unmetDependenciesText = computed(() =>
+  unmetDependencies.value.map((item) => `${item.name} (${item.missing.join(', ')})`).join(', '),
+);
 
 // The branch can come from a text input, so this is called on every keystroke.
 // Requests are debounced, and each one carries a sequence number so a slow
@@ -162,7 +107,14 @@ async function loadWorkflows(branch?: string) {
     if (request !== latestRequest) {
       return;
     }
-    options.value = workflows.map((workflow) => ({ text: workflow.name, value: workflow.name }));
+    options.value = workflows.map((workflow) => ({
+      text: workflow.name,
+      value: workflow.name,
+      description:
+        workflow.depends_on && workflow.depends_on.length > 0
+          ? i18n.t('repo.workflow_select.depends_on', { workflows: workflow.depends_on.join(', ') })
+          : undefined,
+    }));
     requires.value = Object.fromEntries(workflows.map((workflow) => [workflow.name, workflow.depends_on ?? []]));
 
     // a workflow that no longer exists on this branch cannot stay selected

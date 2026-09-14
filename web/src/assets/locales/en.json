@@ -61,8 +61,8 @@
       "loading": "Loading workflows",
       "none": "No workflows found on this branch.",
       "error": "Could not load the workflows of this branch.",
-      "auto_selected": "Also selected {workflows}, which the workflow you picked depends on.",
-      "auto_deselected": "Also deselected {workflows}, which depends on the workflow you removed."
+      "depends_on": "Depends on: {workflows}",
+      "unmet_dependencies": "These will run without waiting for a dependency you did not select: {workflows}"
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",

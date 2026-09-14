@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, nextTick, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 
@@ -9,14 +9,9 @@ import type { WorkflowInfo } from '~/lib/api/types';
 import WorkflowSelect from './WorkflowSelect.vue';
 
 const getRepoWorkflows = vi.fn<(repoId: number, branch?: string) => Promise<WorkflowInfo[]>>();
-const notify = vi.fn();
 
 vi.mock('~/compositions/useApiClient', () => ({
   default: () => ({ getRepoWorkflows: async (...args: [number, string?]) => getRepoWorkflows(...args) }),
-}));
-
-vi.mock('~/compositions/useNotifications', () => ({
-  default: () => ({ notify, notifyError: vi.fn() }),
 }));
 
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } });
@@ -61,59 +56,55 @@ async function mountSelect(initial: string[] = []) {
 }
 
 describe('workflowSelect', () => {
-  beforeEach(() => {
-    notify.mockClear();
-  });
-
-  it('pulls in the workflows a selection depends on', async () => {
+  it('adds a clicked workflow without pulling in anything it depends on', async () => {
     const { selection, boxAt } = await mountSelect();
 
     await boxAt('deploy');
 
-    // deploy needs build and test, and test in turn needs lint
-    expect(selection.value).toEqual(['lint', 'build', 'test', 'deploy']);
+    expect(selection.value).toEqual(['deploy']);
   });
 
-  it('explains what it pulled in', async () => {
-    const { boxAt } = await mountSelect();
+  it('removes a clicked workflow without dropping anything that depends on it', async () => {
+    const { selection, boxAt } = await mountSelect(['lint', 'test', 'deploy']);
 
-    await boxAt('test');
+    await boxAt('lint');
 
-    expect(notify).toHaveBeenCalledWith(
-      expect.objectContaining({ title: expect.stringContaining('lint') as unknown as string }),
-    );
+    expect(selection.value).toEqual(['test', 'deploy']);
   });
 
-  it('drops the workflows that depended on a removed one', async () => {
-    const { selection, boxAt } = await mountSelect();
+  it('shows the dependencies of a workflow as its checkbox description', async () => {
+    const { wrapper } = await mountSelect();
+
+    expect(wrapper.text()).toContain('Depends on: build, test');
+  });
+
+  it('does not show a description for a workflow with no dependencies', async () => {
+    const { wrapper } = await mountSelect();
+
+    const lintLabel = wrapper.findAll('label').find((label) => label.text() === 'lint');
+    const description = lintLabel?.element.parentElement?.querySelector('span.text-sm');
+
+    expect(description).toBeNull();
+  });
+
+  it('warns about a selected workflow whose dependency is not selected', async () => {
+    const { wrapper, boxAt } = await mountSelect();
 
     await boxAt('deploy');
-    notify.mockClear();
-    await boxAt('lint');
 
-    // removing lint removes test, and deploy cannot survive without test
-    expect(selection.value).toEqual(['build']);
-    expect(notify).toHaveBeenCalledWith(
-      expect.objectContaining({ title: expect.stringContaining('test') as unknown as string }),
-    );
+    expect(wrapper.text()).toContain('deploy (build, test)');
   });
 
-  it('leaves an unrelated workflow alone', async () => {
-    const { selection, boxAt } = await mountSelect();
+  it('does not warn once every dependency is also selected', async () => {
+    const { wrapper } = await mountSelect(['lint', 'build', 'test', 'deploy']);
+    await nextTick();
 
-    await boxAt('lint');
-    await boxAt('build');
-
-    expect(selection.value).toEqual(['lint', 'build']);
-    expect(notify).not.toHaveBeenCalled();
+    expect(wrapper.text()).not.toContain('will run without waiting');
   });
 
-  it('keeps the listed order rather than the click order', async () => {
-    const { selection, boxAt } = await mountSelect();
+  it('does not warn when nothing is selected', async () => {
+    const { wrapper } = await mountSelect();
 
-    await boxAt('build');
-    await boxAt('lint');
-
-    expect(selection.value).toEqual(['lint', 'build']);
+    expect(wrapper.text()).not.toContain('will run without waiting');
   });
 });
