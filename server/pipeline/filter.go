@@ -80,10 +80,6 @@ func filterConfigsByWorkflows(configs []*forge_types.FileMeta, selected []string
 		return nil, &ErrBadRequest{Msg: "no workflow selected"}
 	}
 
-	if err := checkSelectedDependencies(matched); err != nil {
-		return nil, err
-	}
-
 	return matched, nil
 }
 
@@ -111,15 +107,17 @@ func WorkflowNames(configs []*forge_types.FileMeta) []string {
 // WorkflowInfo describes one selectable workflow.
 type WorkflowInfo struct {
 	Name string `json:"name"`
-	// DependsOn lists the workflows that must be selected alongside this one.
-	// Optional dependencies are left out: they are dropped when absent, so they
-	// never make a selection invalid.
+	// DependsOn lists every workflow named in this one's depends_on, required
+	// or optional. A dependency left out of a selection no longer makes the
+	// selection invalid (see PipelineBuilder.IgnoreMissingDependencies), so
+	// the distinction stops mattering here: this is purely informational, for
+	// a caller that wants to show the dependency before the user picks.
 	DependsOn []string `json:"depends_on,omitempty"`
 } //	@name	WorkflowInfo
 
-// WorkflowInfos returns the selectable workflows together with their required
-// dependencies, so a caller can offer a selection that is valid by
-// construction rather than discovering the constraint through an error.
+// WorkflowInfos returns the selectable workflows together with the
+// dependencies each one names, so a caller can show them before the user
+// picks rather than the user discovering them by trial and error.
 //
 // A config that fails to parse still appears, with no dependencies. Its real
 // problem is reported when a pipeline is built from it, with a better message
@@ -129,48 +127,49 @@ func WorkflowInfos(configs []*forge_types.FileMeta) []WorkflowInfo {
 	for _, config := range configs {
 		info := WorkflowInfo{Name: builder.SanitizePath(config.Name)}
 		if parsed, err := yaml.ParseBytes(config.Data); err == nil {
-			info.DependsOn = parsed.DependsOn.RequiredNames()
+			info.DependsOn = parsed.DependsOn.Names()
 		}
 		infos = append(infos, info)
 	}
 	return infos
 }
 
-// checkSelectedDependencies rejects a selection that leaves a required
-// depends_on unsatisfied.
+// namesExcludedBySelection returns the names any of the given yamls' depends_on
+// reference that are not among the yamls themselves — i.e. names a workflow
+// selection left out. PipelineBuilder.IgnoreMissingDependencies uses this to
+// tell "left out on purpose by the trigger's selection" apart from "pruned by
+// a when filter for this run", which must still drop its dependents.
 //
-// Without this check the builder's filterMissingDependencies silently drops the
-// dependent workflow, and a selection of a single dependent workflow collapses
-// into an empty pipeline that the caller reports as "filtered" with no
-// explanation of what went wrong.
-//
-// Configs that fail to parse are skipped: the builder reports the parse error
-// properly a moment later, and guessing at dependencies here would only
-// duplicate that failure with a worse message.
-func checkSelectedDependencies(selected []*forge_types.FileMeta) error {
-	present := WorkflowNames(selected)
+// The selected argument being empty means every workflow is running, so
+// there is nothing to be lenient about: nil is returned and the builder enforces depends_on
+// exactly as it always has. A selection is validated by
+// filterConfigsByWorkflows/ValidateWorkflowSelection before this ever runs,
+// so a name found here really was excluded by choice, not misspelled — an
+// unparsable config or a genuinely unknown dependency name is a separate,
+// pre-existing problem the builder reports on its own a moment later.
+func namesExcludedBySelection(selected []string, yamls []*forge_types.FileMeta) map[string]bool {
+	if len(selected) == 0 {
+		return nil
+	}
 
-	var missing []string
-	for _, config := range selected {
-		parsed, err := yaml.ParseBytes(config.Data)
+	present := make(map[string]bool, len(yamls))
+	for _, name := range WorkflowNames(yamls) {
+		present[name] = true
+	}
+
+	excluded := make(map[string]bool)
+	for _, y := range yamls {
+		parsed, err := yaml.ParseBytes(y.Data)
 		if err != nil {
 			continue
 		}
-		for _, dep := range parsed.DependsOn.RequiredNames() {
-			if !slices.Contains(present, dep) && !slices.Contains(missing, dep) {
-				missing = append(missing, dep)
+		for _, dep := range parsed.DependsOn.Names() {
+			if !present[dep] {
+				excluded[dep] = true
 			}
 		}
 	}
-
-	if len(missing) > 0 {
-		return &ErrBadRequest{Msg: fmt.Sprintf(
-			"selected workflows depend on %s, which %s not in the selection",
-			quoteList(missing), plural(len(missing), "is", "are"),
-		)}
-	}
-
-	return nil
+	return excluded
 }
 
 func quoteList(names []string) string {
@@ -179,11 +178,4 @@ func quoteList(names []string) string {
 		quoted = append(quoted, fmt.Sprintf("%q", name))
 	}
 	return strings.Join(quoted, ", ")
-}
-
-func plural(n int, one, many string) string {
-	if n == 1 {
-		return one
-	}
-	return many
 }

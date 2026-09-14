@@ -54,8 +54,10 @@ steps:
       - echo c
 `)
 
-	// Requires workflow "a", so selecting it alone must be rejected rather than
-	// silently producing an empty pipeline.
+	// Depends on workflow "a". Selecting it alone is allowed: the missing
+	// dependency is dropped rather than dragging "dependent" down with it, so
+	// it runs standalone (it would be on the user if it actually needed "a"'s
+	// output).
 	selectionDependentYAML = []byte(`
 depends_on:
   - a
@@ -215,22 +217,28 @@ func TestSelectionRejectsUnknownWorkflow(t *testing.T) {
 	assert.Nil(t, created)
 }
 
-// TestSelectionRejectsMissingDependency covers the trap: without this check the
-// builder drops the dependent workflow and the run collapses to nothing.
-func TestSelectionRejectsMissingDependency(t *testing.T) {
+// TestSelectionRunsStandaloneWithoutDependency covers the case the trap in
+// the pre-check version of this used to reject: selecting a workflow without
+// a workflow it depends on no longer fails the selection, and no longer
+// collapses the pipeline to nothing either — "dependent" builds and runs on
+// its own, without waiting for "a".
+func TestSelectionRunsStandaloneWithoutDependency(t *testing.T) {
 	files := append(selectionFiles(), &forge_types.FileMeta{
 		Name: ".woodpecker/dependent.yaml", Data: selectionDependentYAML,
 	})
 	env := setup.StartServer(t.Context(), t, files)
+	agent := setup.StartAgent(t, env.GRPCAddr)
+	setup.WaitForAgentRegistered(t, env.Store, agent)
 
 	pl := env.DummyPipeline(model.EventManual)
 	pl.SelectedWorkflows = []string{"dependent"}
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, pl)
+	require.NoError(t, err)
 
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), `depend on "a"`)
-	assert.Nil(t, created)
+	finished := setup.WaitForPipeline(t, env.Store, created.ID)
+	assert.Equal(t, model.StatusSuccess, finished.Status)
+	assert.Equal(t, []string{"dependent"}, workflowNames(t, env, finished))
 }
 
 // TestSelectionWithDependencyIncluded is the same setup, but selecting the

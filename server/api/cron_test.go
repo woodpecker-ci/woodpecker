@@ -328,17 +328,23 @@ func TestPostCron(t *testing.T) {
 		assert.Contains(t, tc.Recorder.Body.String(), "nope")
 	})
 
-	t.Run("selection missing a required dependency is rejected", func(t *testing.T) {
+	// A dependency left out of the selection is no longer a save-time error:
+	// PipelineBuilder.IgnoreMissingDependencies lets the dependent run without
+	// it when the pipeline is actually built, and it may fail there on its own
+	// merits. See namesExcludedBySelection in server/pipeline/filter.go.
+	t.Run("selection missing a required dependency is still saved", func(t *testing.T) {
 		cronForgeWithWorkflows(t, cronWorkflowFile("nightly"), cronWorkflowFile("report", "nightly"))
 		tc := newTestContext(t, s)
 		withUser(user)(tc)
 		withRepo(repo, &model.Perm{})(tc)
-		withRequest(http.MethodPost, &model.Cron{Name: "bad-dep", Schedule: "@every 1h", Workflows: []string{"report"}})(tc)
+		withRequest(http.MethodPost, &model.Cron{Name: "missing-dep", Schedule: "@every 1h", Workflows: []string{"report"}})(tc)
 
 		PostCron(tc.Ctx)
 
-		assert.Equal(t, http.StatusBadRequest, tc.Recorder.Code)
-		assert.Contains(t, tc.Recorder.Body.String(), "nightly")
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		var got model.Cron
+		tc.decodeJSON(t, &got)
+		assert.Equal(t, []string{"report"}, got.Workflows)
 	})
 
 	t.Run("selection including the dependency is accepted", func(t *testing.T) {

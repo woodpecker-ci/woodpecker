@@ -89,9 +89,9 @@ func TestFilterConfigsByWorkflows(t *testing.T) {
 			wantErr:  "no workflow selected",
 		},
 		{
-			name:     "missing required dependency is rejected",
+			name:     "missing required dependency is left to the builder, not rejected here",
 			selected: []string{"test"},
-			wantErr:  `selected workflows depend on "lint", which is not in the selection`,
+			want:     []string{".woodpecker/test.yaml"},
 		},
 		{
 			name:     "required dependency included is fine",
@@ -146,9 +146,9 @@ func TestWorkflowInfos(t *testing.T) {
 	require.Len(t, infos, 3)
 	assert.Equal(t, WorkflowInfo{Name: "lint"}, infos[0])
 	assert.Equal(t, WorkflowInfo{Name: "test", DependsOn: []string{"lint"}}, infos[1])
-	// the deploy fixture depends on test optionally, and optional dependencies
-	// never make a selection invalid, so they are not reported
-	assert.Equal(t, WorkflowInfo{Name: "deploy"}, infos[2])
+	// required and optional dependencies are both informational now, so the
+	// deploy fixture's optional dependency on test is reported too
+	assert.Equal(t, WorkflowInfo{Name: "deploy", DependsOn: []string{"test"}}, infos[2])
 }
 
 func TestWorkflowInfosIgnoresUnparsableConfig(t *testing.T) {
@@ -162,4 +162,31 @@ func TestWorkflowInfosIgnoresUnparsableConfig(t *testing.T) {
 func TestWorkflowNames(t *testing.T) {
 	assert.Equal(t, []string{"lint", "test", "deploy"}, WorkflowNames(testConfigs()))
 	assert.Empty(t, WorkflowNames(nil))
+}
+
+func TestNamesExcludedBySelection(t *testing.T) {
+	// "test" (selected) depends on "lint", which was left out of the
+	// selection, so it belongs in the ignore set for the builder.
+	only := []*forge_types.FileMeta{testConfigs()[1]} // .woodpecker/test.yaml
+
+	assert.Equal(t, map[string]bool{"lint": true}, namesExcludedBySelection([]string{"test"}, only))
+}
+
+func TestNamesExcludedBySelectionEmptyWhenNoSelection(t *testing.T) {
+	// no selection means every workflow runs, so there is nothing a `when`
+	// filter can't already explain: the builder's default behavior applies.
+	assert.Nil(t, namesExcludedBySelection(nil, testConfigs()))
+	assert.Nil(t, namesExcludedBySelection([]string{}, testConfigs()))
+}
+
+func TestNamesExcludedBySelectionEmptyWhenDependencySatisfied(t *testing.T) {
+	assert.Empty(t, namesExcludedBySelection([]string{"lint", "test"}, testConfigs()[:2]))
+}
+
+func TestNamesExcludedBySelectionIgnoresUnparsableConfig(t *testing.T) {
+	configs := []*forge_types.FileMeta{
+		{Name: ".woodpecker/broken.yaml", Data: []byte("\tthis: is: not: yaml\n")},
+	}
+
+	assert.Empty(t, namesExcludedBySelection([]string{"broken"}, configs))
 }
