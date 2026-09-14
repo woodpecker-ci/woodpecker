@@ -396,6 +396,73 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	return nil, fmt.Errorf("no matching branches found")
 }
 
+// Tags returns the names of all tags for the named repository.
+func (c *client) Tags(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
+	}
+
+	opts := convertListOptions(p)
+	var tags bitbucketTagList
+	_, err = bc.GetPaged(ctx, "api", fmt.Sprintf("projects/%s/repos/%s/tags", r.Owner, r.Name), &tags, &opts)
+	if err != nil {
+		return nil, fmt.Errorf("unable to list tags: %w", err)
+	}
+
+	result := make([]string, 0, len(tags.Values))
+	for _, tag := range tags.Values {
+		result = append(result, tag.DisplayID)
+	}
+	return result, nil
+}
+
+// TagHead returns the commit for the specified tag.
+func (c *client) TagHead(ctx context.Context, u *model.User, r *model.Repo, tagName string) (*model.Commit, error) {
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
+	}
+
+	var tags bitbucketTagList
+	_, err = bc.GetPaged(ctx, "api", fmt.Sprintf("projects/%s/repos/%s/tags", r.Owner, r.Name), &tags, &bitbucket.BranchSearchOptions{Filter: tagName})
+	if err != nil {
+		return nil, fmt.Errorf("unable to get tag: %w", err)
+	}
+	for _, tag := range tags.Values {
+		if tag.DisplayID == tagName {
+			return c.commit(ctx, u, r, tag.LatestCommit)
+		}
+	}
+	return nil, fmt.Errorf("no matching tag found")
+}
+
+// Commit returns the commit for the specified SHA.
+func (c *client) Commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	return c.commit(ctx, u, r, sha)
+}
+
+func (c *client) commit(ctx context.Context, u *model.User, r *model.Repo, sha string) (*model.Commit, error) {
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
+	}
+
+	commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, sha)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Commit{
+		SHA:      commit.ID,
+		ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), commit.ID),
+	}, nil
+}
+
+type bitbucketTagList struct {
+	bitbucket.ListResponse
+	Values []*bitbucket.Branch `json:"values"`
+}
+
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	bc, err := c.newClient(ctx, u)
 	if err != nil {

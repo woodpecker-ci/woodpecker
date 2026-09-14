@@ -350,6 +350,142 @@ func TestCreatePipeline(t *testing.T) {
 		mockStore.AssertCalled(t, "CreatePipeline", mock.Anything)
 	})
 
+	t.Run("tag mode", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
+		mockSecretService := secret_service_mocks.NewMockService(t)
+		mockRegistryService := registry_service_mocks.NewMockService(t)
+		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
+		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}
+		fakeCommit := &model.Commit{SHA: "full-tag-sha", ForgeURL: "https://example.com/commit/full-tag-sha"}
+
+		mockForge := forge_mocks.NewMockForge(t)
+		mockForge.On("Name").Return("mock").Maybe()
+		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("TagHead", mock.Anything, fakeUser, fakeRepo, "v1.0.0").Return(fakeCommit, nil)
+		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{Machine: "example.com", Login: "testuser", Password: "testpass"}, nil).Maybe()
+		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
+
+		mockManager := manager_mocks.NewMockManager(t)
+		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
+		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
+		mockManager.On("SecretServiceFromRepo", fakeRepo).Return(mockSecretService).Maybe()
+		mockManager.On("RegistryServiceFromRepo", fakeRepo).Return(mockRegistryService).Maybe()
+		mockManager.On("EnvironmentService").Return(nil).Maybe()
+		server.Config.Services.Manager = mockManager
+
+		mockQueue := queue_mocks.NewMockQueue(t)
+		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
+		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), mockStore, mockQueue, memory.New())
+		configData := []*forge_types.FileMeta{{Name: ".woodpecker.yml", Data: []byte("when:\n  event: manual\nsteps:\n  test:\n    image: alpine:latest")}}
+		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(configData, nil)
+		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
+		mockStore.On("CreatePipeline", mock.MatchedBy(func(p *model.Pipeline) bool {
+			return p.Event == model.EventManual && p.Ref == "refs/tags/v1.0.0" && p.TagTitle == "v1.0.0" && p.Branch == "" && p.Commit == fakeCommit.SHA
+		})).Return(nil)
+		mockStore.On("GetPipelineLastBefore", fakeRepo, "", mock.Anything).Return(nil, types.ErrRecordNotExist).Maybe()
+		mockStore.On("ConfigPersist", mock.Anything).Return(&model.Config{ID: 1}, nil).Maybe()
+		mockStore.On("ConfigFindIdentical", mock.Anything, mock.Anything).Return(nil, nil).Maybe()
+		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
+		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
+		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Set("repo", fakeRepo)
+		c.Set("user", fakeUser)
+		c.Request, _ = http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(`{"tag":"v1.0.0"}`)))
+		c.Request.Header.Set("Content-Type", "application/json")
+
+		CreatePipeline(c)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		mockForge.AssertCalled(t, "TagHead", mock.Anything, fakeUser, fakeRepo, "v1.0.0")
+		mockStore.AssertCalled(t, "CreatePipeline", mock.Anything)
+	})
+
+	t.Run("sha mode", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
+		mockSecretService := secret_service_mocks.NewMockService(t)
+		mockRegistryService := registry_service_mocks.NewMockService(t)
+		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
+		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}
+		fakeCommit := &model.Commit{SHA: "0123456789abcdef", ForgeURL: "https://example.com/commit/0123456789abcdef"}
+
+		mockForge := forge_mocks.NewMockForge(t)
+		mockForge.On("Name").Return("mock").Maybe()
+		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("Commit", mock.Anything, fakeUser, fakeRepo, "deadbeef").Return(fakeCommit, nil)
+		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{Machine: "example.com", Login: "testuser", Password: "testpass"}, nil).Maybe()
+		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
+
+		mockManager := manager_mocks.NewMockManager(t)
+		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
+		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
+		mockManager.On("SecretServiceFromRepo", fakeRepo).Return(mockSecretService).Maybe()
+		mockManager.On("RegistryServiceFromRepo", fakeRepo).Return(mockRegistryService).Maybe()
+		mockManager.On("EnvironmentService").Return(nil).Maybe()
+		server.Config.Services.Manager = mockManager
+
+		mockQueue := queue_mocks.NewMockQueue(t)
+		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
+		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), mockStore, mockQueue, memory.New())
+		configData := []*forge_types.FileMeta{{Name: ".woodpecker.yml", Data: []byte("when:\n  event: manual\nsteps:\n  test:\n    image: alpine:latest")}}
+		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(configData, nil)
+		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
+		mockStore.On("CreatePipeline", mock.MatchedBy(func(p *model.Pipeline) bool {
+			return p.Event == model.EventManual && p.Ref == fakeCommit.SHA && p.TagTitle == "" && p.Branch == "" && p.Commit == fakeCommit.SHA
+		})).Return(nil)
+		mockStore.On("GetPipelineLastBefore", fakeRepo, "", mock.Anything).Return(nil, types.ErrRecordNotExist).Maybe()
+		mockStore.On("ConfigPersist", mock.Anything).Return(&model.Config{ID: 1}, nil).Maybe()
+		mockStore.On("ConfigFindIdentical", mock.Anything, mock.Anything).Return(nil, nil).Maybe()
+		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
+		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
+		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Set("repo", fakeRepo)
+		c.Set("user", fakeUser)
+		c.Request, _ = http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(`{"sha":"deadbeef"}`)))
+		c.Request.Header.Set("Content-Type", "application/json")
+
+		CreatePipeline(c)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		mockForge.AssertCalled(t, "Commit", mock.Anything, fakeUser, fakeRepo, "deadbeef")
+		mockStore.AssertCalled(t, "CreatePipeline", mock.Anything)
+	})
+
+	t.Run("invalid both branch and tag", func(t *testing.T) {
+		fakeRepo := &model.Repo{ID: 1}
+		mockForge := forge_mocks.NewMockForge(t)
+		mockManager := manager_mocks.NewMockManager(t)
+		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
+		server.Config.Services.Manager = mockManager
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("repo", fakeRepo)
+		c.Request, _ = http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(`{"branch":"main","tag":"v1"}`)))
+		c.Request.Header.Set("Content-Type", "application/json")
+
+		CreatePipeline(c)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		mockForge.AssertNotCalled(t, "BranchHead", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+		mockForge.AssertNotCalled(t, "TagHead", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+	})
+
 	// 2. abnormal with oldconfig: config fetch fails but returns config data (error + non-nil config) -> continues with fallback
 	t.Run("abnormal workflow - cannot read config but has oldconfig", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)

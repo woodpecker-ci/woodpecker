@@ -15,6 +15,7 @@
 package fixtures
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,10 +36,35 @@ func Handler() http.Handler {
 	e.POST("/api/v1/repos/:owner/:name/statuses/:commit", createRepoCommitStatus)
 	e.GET("/api/v1/repos/:owner/:name/pulls", listRepoPulls)
 	e.GET("/api/v1/repos/:owner/:name/pulls/:index/files", getPRFiles)
+	e.GET("/api/v1/repos/:owner/:name/tags", listRepoTags)
+	e.GET("/api/v1/repos/:owner/:name/tags/:tag", getRepoTag)
+	e.GET("/api/v1/repos/:owner/:name/git/commits/:sha", getRepoCommit)
 	e.GET("/api/v1/user/repos", getUserRepos)
 	e.GET("/api/v1/version", getVersion)
 
 	return e
+}
+
+func listRepoTags(c *gin.Context) {
+	c.String(http.StatusOK, repoTagsPayload)
+}
+
+func getRepoTag(c *gin.Context) {
+	switch c.Param("tag") {
+	case "v1.0.0":
+		c.String(http.StatusOK, repoTagPayload)
+	default:
+		c.String(http.StatusNotFound, "")
+	}
+}
+
+func getRepoCommit(c *gin.Context) {
+	switch c.Param("sha") {
+	case "tag-sha", "commit-sha":
+		c.String(http.StatusOK, fmt.Sprintf(repoCommitPayload, c.Param("sha"), c.Param("sha")))
+	default:
+		c.String(http.StatusNotFound, "")
+	}
 }
 
 func listRepoHooks(c *gin.Context) {
@@ -228,4 +254,40 @@ const prFilesPayload = `
 		"raw_url": "http://localhost/username/repo/raw/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md"
 	}
 ]
+`
+
+const repoTagsPayload = `
+[
+	{
+		"name": "v1.0.0",
+		"id": "tag-sha",
+		"commit": {
+			"url": "http://localhost/api/v1/repos/test_name/repo_name/git/commits/tag-sha",
+			"sha": "tag-sha",
+			"created": "2026-08-06T12:00:00Z"
+		}
+	}
+]
+`
+
+const repoTagPayload = `
+{
+	"name": "v1.0.0",
+	"id": "tag-sha",
+	"commit": {
+		"url": "http://localhost/api/v1/repos/test_name/repo_name/git/commits/tag-sha",
+		"sha": "tag-sha",
+		"created": "2026-08-06T12:00:00Z"
+	}
+}
+`
+
+const repoCommitPayload = `
+{
+	"sha": "%s",
+	"html_url": "http://localhost/test_name/repo_name/commit/%s",
+	"commit": {
+		"message": "test commit"
+	}
+}
 `
