@@ -169,9 +169,9 @@ Cron jobs carry a selection too, set in the repository settings alongside the sc
 woodpecker-cli repo cron add --repository my-org/my-repo --name nightly --schedule @daily --workflow build-db
 ```
 
-In the UI the dependencies look after themselves: ticking a workflow also ticks everything it requires, and unticking one unticks whatever required it, with a message naming what changed. Optional dependencies are left alone, since they are dropped when absent.
+The UI shows each workflow's `depends_on` next to its checkbox, so the dependency is visible before you pick. Selecting a workflow without its dependency is allowed: the dependency is not run for it, so it starts without waiting and may fail on its own if it actually needed the other workflow's output. A non-blocking warning names any selected workflow left in that situation. To have a workflow wait for another, select both.
 
-From the API or the CLI, a selection is rejected rather than silently ignored when it names a workflow that does not exist on the branch, or when it leaves a required `depends_on` unsatisfied. To run a workflow that depends on another one, select both. For a cron job the same check runs when the job is saved, so an impossible selection is refused up front instead of failing on every scheduled run.
+A selection is still rejected when it names a workflow that does not exist on the branch. For a cron job the same check runs when the job is saved, so a typo is caught up front instead of failing on every scheduled run.
 
 The selection is stored with the pipeline, so restarting a pipeline runs the same workflows it ran the first time.
 
