@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-13
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -24,6 +24,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7140](https://github.com/woodpecker-ci/woodpecker/pull/7140)]
 - Update docs npm deps non-major [[#7137](https://github.com/woodpecker-ci/woodpecker/pull/7137)]
 - Update docs npm deps non-major [[#7133](https://github.com/woodpecker-ci/woodpecker/pull/7133)]
 
