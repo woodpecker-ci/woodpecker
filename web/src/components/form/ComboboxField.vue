@@ -1,6 +1,15 @@
 <template>
   <div ref="root" class="relative">
-    <input v-if="required" type="text" class="sr-only" :value="modelValue" required tabindex="-1" readonly aria-hidden="true" />
+    <input
+      v-if="required"
+      type="text"
+      class="sr-only"
+      :value="modelValue"
+      required
+      tabindex="-1"
+      readonly
+      aria-hidden="true"
+    />
     <button
       :id="id"
       type="button"

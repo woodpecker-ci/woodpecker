@@ -172,7 +172,7 @@ func TestRepositoryRefs(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	gh, err := github.NewClient(
-		github.WithURLs(github.Ptr(server.URL+"/"), nil),
+		github.WithURLs(new(server.URL+"/"), nil),
 		github.WithHTTPClient(server.Client()),
 	)
 	require.NoError(t, err)
