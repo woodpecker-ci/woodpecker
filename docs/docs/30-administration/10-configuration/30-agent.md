@@ -56,6 +56,32 @@ To get an _agent token_ you have to register the agent manually in the server us
 1. The agent will connect to the server using the provided token and will update its status in the UI:
    ![Agent connected](./new-agent-connected.png)
 
+## Agent filters
+
+Labels set with [`WOODPECKER_AGENT_LABELS`](#agent_labels) are reported by the agent itself. An agent can therefore claim any label it likes, which makes them unsuitable to restrict what an agent is allowed to pick up.
+
+_Agent filters_ are the server-side counterpart: they are stored in the server database and are applied by the server every time the agent asks for work. An agent cannot see, change or drop them.
+
+Filters use the same syntax as agent labels:
+
+- `key=value` matches workflows whose label `key` is `value`
+- `key=*` matches workflows with any value for `key`
+- `!key=value` additionally requires the workflow to have that label set and matched
+
+Filters are managed as a key-value list in the UI when creating or editing an agent:
+
+- instance-wide agents at `Settings -> Agents`
+- organization agents at `Organization settings -> Agents`
+- personal agents at `User settings -> Agents`
+
+If a filter uses the same key as a label reported by the agent, the filter wins.
+
+:::info
+Changes to the filters of an agent apply the next time that agent requests a workflow.
+:::
+
+Organization and personal agents always get the `org-id` filter enforced on top of the configured filters, so they can never pick up workflows of another organization.
+
 ## Environment variables
 
 ### SERVER
@@ -171,6 +197,8 @@ Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as 
 If you use `!` as key prefix it is mandatory for the workflow to have that label set (without !) set and matched.
 By default, agents provide four additional labels `platform=os/arch`, `hostname=my-agent`, `backend=my-backend` and `repo=*` which can be overwritten if needed.
 To learn how labels work, check out the [pipeline syntax page](../../20-usage/20-workflow-syntax.md#labels).
+
+Labels set here are reported by the agent and can be overruled by the server-side [agent filters](#agent-filters).
 
 ---
 
