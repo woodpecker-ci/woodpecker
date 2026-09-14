@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strings"
 	"sync"
 
 	"github.com/rs/zerolog/log"
@@ -112,6 +113,9 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	if err := os.Mkdir(state.homeDir, 0o700); err != nil {
 		return err
 	}
+	if err := e.ensureIsolatedHomeDirs(state); err != nil {
+		return err
+	}
 
 	// normal workspace setup case
 	if CLIWorkaroundExecAtDir == "" {
@@ -157,8 +161,7 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 	}
 
 	if e.isolatedHome {
-		env = append(env, "HOME="+state.homeDir)
-		env = append(env, "USERPROFILE="+state.homeDir)
+		env = append(env, e.isolatedHomeEnv(state)...)
 	}
 
 	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
@@ -173,6 +176,74 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 	default:
 		return ErrUnsupportedStepType
 	}
+}
+
+func (e *local) ensureIsolatedHomeDirs(state *workflowState) error {
+	if !e.isolatedHome || e.os != "windows" {
+		return nil
+	}
+
+	for _, dir := range []string{
+		e.homePath(state.homeDir, "AppData", "Roaming"),
+		e.homePath(state.homeDir, "AppData", "Local", "Temp"),
+	} {
+		if err := os.MkdirAll(dir, 0o700); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (e *local) isolatedHomeEnv(state *workflowState) []string {
+	env := []string{
+		"HOME=" + state.homeDir,
+		"USERPROFILE=" + state.homeDir,
+	}
+
+	if e.os != "windows" {
+		return env
+	}
+
+	localAppData := e.homePath(state.homeDir, "AppData", "Local")
+	homeDrive, homePath := splitWindowsHome(state.homeDir)
+	if homeDrive != "" {
+		env = append(env, "HOMEDRIVE="+homeDrive)
+	}
+
+	return append(env,
+		"HOMEPATH="+homePath,
+		"APPDATA="+e.homePath(state.homeDir, "AppData", "Roaming"),
+		"LOCALAPPDATA="+localAppData,
+		"TEMP="+e.homePath(localAppData, "Temp"),
+		"TMP="+e.homePath(localAppData, "Temp"),
+	)
+}
+
+func (e *local) homePath(base string, elems ...string) string {
+	if e.os != "windows" {
+		return filepath.Join(append([]string{base}, elems...)...)
+	}
+
+	parts := make([]string, 0, len(elems)+1)
+	parts = append(parts, strings.TrimRight(base, `\/`))
+	parts = append(parts, elems...)
+	return strings.Join(parts, `\`)
+}
+
+func splitWindowsHome(home string) (string, string) {
+	if len(home) >= 2 && home[1] == ':' {
+		homePath := strings.ReplaceAll(home[2:], "/", `\`)
+		if homePath == "" {
+			homePath = `\`
+		}
+		if !strings.HasPrefix(homePath, `\`) {
+			homePath = `\` + homePath
+		}
+		return home[:2], homePath
+	}
+
+	return "", strings.ReplaceAll(home, "/", `\`)
 }
 
 func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
