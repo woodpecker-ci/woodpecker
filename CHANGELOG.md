@@ -17,6 +17,7 @@
 
 ### 🐛 Bug Fixes
 
+- Skip short multi-line secret lines [[#7144](https://github.com/woodpecker-ci/woodpecker/pull/7144)]
 - Fix agent panic in local backend cleanup when a workflow is canceled before a step started [[#7132](https://github.com/woodpecker-ci/woodpecker/pull/7132)]
 - Report an in-setup pipeline status as pending on all forges [[#7118](https://github.com/woodpecker-ci/woodpecker/pull/7118)]
 - Update CLI command in CLI & API example [[#7129](https://github.com/woodpecker-ci/woodpecker/pull/7129)]
