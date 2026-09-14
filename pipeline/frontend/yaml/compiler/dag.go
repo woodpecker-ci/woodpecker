@@ -124,6 +124,7 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 			resolved = append(resolved, dep)
 		}
 		step.dependsOn = resolved
+		step.step.DependsOn = resolved.Names()
 
 		// check if there are cycles
 		visited := make(map[string]struct{})
