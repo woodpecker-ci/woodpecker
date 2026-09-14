@@ -296,6 +296,7 @@ func TestRepoCrud(t *testing.T) {
 		new(model.Registry),
 		new(model.Config),
 		new(model.Redirection),
+		new(model.Token),
 		new(model.Workflow))
 	defer closer()
 
@@ -362,6 +363,7 @@ func TestRepoDelete(t *testing.T) {
 		new(model.Registry),
 		new(model.Config),
 		new(model.Redirection),
+		new(model.Token),
 		new(model.Workflow))
 	defer closer()
 
