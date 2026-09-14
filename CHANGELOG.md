@@ -17,6 +17,7 @@
 
 ### 🐛 Bug Fixes
 
+- Ignore directories while fetching files [[#7145](https://github.com/woodpecker-ci/woodpecker/pull/7145)]
 - Skip short multi-line secret lines [[#7144](https://github.com/woodpecker-ci/woodpecker/pull/7144)]
 - Fix agent panic in local backend cleanup when a workflow is canceled before a step started [[#7132](https://github.com/woodpecker-ci/woodpecker/pull/7132)]
 - Report an in-setup pipeline status as pending on all forges [[#7118](https://github.com/woodpecker-ci/woodpecker/pull/7118)]
@@ -25,7 +26,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7140](https://github.com/woodpecker-ci/woodpecker/pull/7140)]
 - Update docs npm deps non-major [[#7137](https://github.com/woodpecker-ci/woodpecker/pull/7137)]
 - Update docs npm deps non-major [[#7133](https://github.com/woodpecker-ci/woodpecker/pull/7133)]
 
@@ -33,6 +33,7 @@
 
 - Update golang-packages [[#7127](https://github.com/woodpecker-ci/woodpecker/pull/7127)]
 - Update dependency simple-icons to v16.31.0 [[#7138](https://github.com/woodpecker-ci/woodpecker/pull/7138)]
+- Lock file maintenance [[#7140](https://github.com/woodpecker-ci/woodpecker/pull/7140)]
 - Update woodpeckerci/plugin-git Docker tag to v2.10.1 [[#7135](https://github.com/woodpecker-ci/woodpecker/pull/7135)]
 - Update web npm deps non-major [[#7134](https://github.com/woodpecker-ci/woodpecker/pull/7134)]
 
