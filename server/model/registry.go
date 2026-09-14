@@ -17,7 +17,8 @@ package model
 
 import (
 	"errors"
-	"net/url"
+
+	"github.com/distribution/reference"
 )
 
 var (
@@ -67,8 +68,31 @@ func (r *Registry) Validate() error {
 		return errRegistryPasswordInvalid
 	}
 
-	_, err := url.Parse(r.Address)
-	return err
+	if !isRegistryAddress(r.Address) {
+		return errRegistryAddressInvalid
+	}
+	return nil
+}
+
+// isRegistryAddress reports whether address is a bare registry domain
+// (host, host:port, IPv4/IPv6[:port] or localhost[:port]) as it appears in an
+// OCI image reference. Credentials are matched against the domain of the step
+// image reference (see pipeline/frontend/yaml/utils.MatchHostname), which never
+// carries a scheme, so the address must be validated the same way: parse it as
+// the domain of an image reference and require it to round-trip unchanged.
+// This rejects schemes (http://...), paths, credentials and bare single-label
+// names (which are Docker Hub namespaces, not registries).
+func isRegistryAddress(address string) bool {
+	// index.docker.io is the legacy spelling of docker.io and is accepted by
+	// the matcher, but reference normalizes it to docker.io.
+	if address == "index.docker.io" {
+		return true
+	}
+	named, err := reference.ParseNormalizedNamed(address + "/x")
+	if err != nil {
+		return false
+	}
+	return reference.Domain(named) == address
 }
 
 // Copy makes a copy of the registry without the password.
