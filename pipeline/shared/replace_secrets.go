@@ -31,8 +31,6 @@ func NewSecretsReplacer(secrets []string) *strings.Replacer {
 	for _, old := range secrets {
 		old = strings.TrimSpace(old)
 		// since replacer is executed on each line we have to split multi-line-secrets.
-		// Apply the min length per line after splitting so short fragments of a
-		// multi-line secret (e.g. "two" from "two\n\nnewlines") do not over-mask.
 		for _, part := range strings.Split(old, "\n") {
 			if len(part) <= minStringLength {
 				continue
