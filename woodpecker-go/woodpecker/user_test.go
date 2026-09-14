@@ -331,6 +331,18 @@ func TestClient_RepoList(t *testing.T) {
 			expected: []*Repo{},
 			wantErr:  false,
 		},
+		{
+			name: "with name filter",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "/api/user/repos?all=true&name=repo1", r.URL.RequestURI())
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `[{"id":1,"name":"repo1","full_name":"owner/repo1"}]`)
+				assert.NoError(t, err)
+			},
+			opt:      RepoListOptions{All: true, Name: "repo1"},
+			expected: []*Repo{{ID: 1, Name: "repo1", FullName: "owner/repo1"}},
+			wantErr:  false,
+		},
 	}
 
 	for _, tt := range tests {
