@@ -80,10 +80,14 @@ func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 		if err != nil {
 			return nil, err
 		}
+		contextDialer, ok := dialer.(proxy.ContextDialer)
+		if !ok {
+			return nil, fmt.Errorf("failed to create SOCKS5 dialer with context support")
+		}
 		baseTransport = &http.Transport{
 			TLSClientConfig: tlsConfig,
 			Proxy:           http.ProxyFromEnvironment,
-			Dial:            dialer.Dial,
+			DialContext:     contextDialer.DialContext,
 		}
 	} else {
 		baseTransport = &http.Transport{
