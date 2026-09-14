@@ -361,6 +361,11 @@ func Test_matchHostname(t *testing.T) {
 			want:     true,
 		},
 		{
+			image:    "registry.example.com:5000/team/golang:1.0.0",
+			hostname: "registry.example.com:5000",
+			want:     true,
+		},
+		{
 			image:    "*&^%",
 			hostname: "1.2.3.4:8000",
 			want:     false,
