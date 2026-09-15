@@ -243,8 +243,15 @@ type Client interface {
 	// CronUpdate update an existing cron job of a repo.
 	CronUpdate(repoID int64, cron *Cron) (*Cron, error)
 
-	// AgentList returns a list of all registered agents.
+	// AgentList returns the first page of registered agents.
+	//
+	// Deprecated: use AgentListWithOpts instead, which can ask for any page.
 	AgentList() ([]*Agent, error)
+
+	// AgentListWithOpts returns a page of registered agents. The server never
+	// returns more than one page, so a caller that needs every agent has to
+	// walk the pages until one comes back short.
+	AgentListWithOpts(opt AgentListOptions) ([]*Agent, error)
 
 	// Agent returns an agent by id.
 	Agent(int64) (*Agent, error)
