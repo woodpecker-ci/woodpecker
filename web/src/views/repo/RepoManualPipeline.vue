@@ -105,28 +105,33 @@ onMounted(async () => {
 
 async function triggerManualPipeline() {
   loading.value = true;
-  const pipeline = await apiClient.createPipeline(repo.value.id, pipelineOptions.value);
+  // A failed create (e.g. an invalid selection) already surfaces its own toast
+  // via the global error handler in App.vue; this only has to make sure the
+  // form comes back instead of the spinner spinning forever.
+  try {
+    const pipeline = await apiClient.createPipeline(repo.value.id, pipelineOptions.value);
 
-  emit('close');
+    emit('close');
 
-  if (typeof pipeline == 'string') {
-    // if this is a string (http 204) there is no workflow to run with the 'manual' event
+    if (typeof pipeline == 'string') {
+      // if this is a string (http 204) there is no workflow to run with the 'manual' event
 
-    await router.push({
-      name: 'repo',
-    });
+      await router.push({
+        name: 'repo',
+      });
 
-    notifications.notify({ type: 'warn', title: i18n.t('repo.manual_pipeline.no_manual_workflows') });
-  } else {
-    await router.push({
-      name: 'repo-pipeline',
-      params: {
-        pipelineId: pipeline.number,
-      },
-    });
+      notifications.notify({ type: 'warn', title: i18n.t('repo.manual_pipeline.no_manual_workflows') });
+    } else {
+      await router.push({
+        name: 'repo-pipeline',
+        params: {
+          pipelineId: pipeline.number,
+        },
+      });
+    }
+  } finally {
+    loading.value = false;
   }
-
-  loading.value = false;
 }
 
 useWPTitle(computed(() => [i18n.t('repo.manual_pipeline.trigger'), repo.value.full_name]));
