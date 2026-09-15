@@ -46,13 +46,18 @@ func (c registeredWaitContext) Done() <-chan struct{} {
 	return c.Context.Done()
 }
 
+func withWaitRegistration(ctx context.Context) (context.Context, <-chan struct{}) {
+	registered := make(chan struct{})
+	return registeredWaitContext{Context: ctx, registered: registered}, registered
+}
+
 func expirePersistentLease(t *testing.T, ctx context.Context, q *fifo, id string) <-chan error {
 	t.Helper()
-	waitCtx := registeredWaitContext{Context: ctx, registered: make(chan struct{})}
+	waitCtx, registered := withWaitRegistration(ctx)
 	waitResult := make(chan error, 1)
-	go func() { waitResult <- q.Wait(waitCtx, id) }()
+	go func(waitCtx context.Context) { waitResult <- q.Wait(waitCtx, id) }(waitCtx)
 	select {
-	case <-waitCtx.registered:
+	case <-registered:
 	case <-ctx.Done():
 		t.Fatal("waiter did not register")
 	}
