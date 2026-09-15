@@ -15,16 +15,32 @@
 package queue
 
 import (
+	"context"
 	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
+
+type wrappedPollTestQueue struct {
+	Queue
+	task      *model.Task
+	err       error
+	doneID    string
+	doneState model.StatusValue
+}
+
+func (q *wrappedPollTestQueue) Poll(context.Context, int64, func(*model.Task) (bool, int)) (*model.Task, error) {
+	return q.task, q.err
+}
+
+func (q *wrappedPollTestQueue) Done(_ context.Context, id string, state model.StatusValue) error {
+	q.doneID, q.doneState = id, state
+	return nil
+}
 
 // WithTaskStore can wrap queues other than FIFO. A partial Poll result must
 // still be validated, without losing the wrapped queue's error for live work.
@@ -32,7 +48,6 @@ func TestPersistentQueueWrappedPollError(t *testing.T) {
 	for _, state := range []model.StatusValue{model.StatusPending, model.StatusCanceled, "no-task"} {
 		t.Run(string(state), func(t *testing.T) {
 			ctx := t.Context()
-			q := queue_mocks.NewMockQueue(t)
 			store := store_mocks.NewMockStore(t)
 			pollErr := errors.New("wrapped queue poll error")
 			var task *model.Task
@@ -41,19 +56,19 @@ func TestPersistentQueueWrappedPollError(t *testing.T) {
 				store.EXPECT().TaskDelete(task.ID).Return(nil).Once()
 				store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: state}, nil).Once()
 			}
-			q.EXPECT().Poll(ctx, int64(7), mock.Anything).Return(task, pollErr).Once()
-			if state == model.StatusCanceled {
-				q.EXPECT().Done(ctx, task.ID, state).Return(nil).Once()
-			}
+			q := &wrappedPollTestQueue{task: task, err: pollErr}
 			pq := &persistentQueue{Queue: q, store: store}
 
 			got, err := pq.Poll(ctx, 7, filterFnTrue)
 			if state == model.StatusCanceled {
 				assert.Nil(t, got, "stale partial results must still be removed")
 				assert.NoError(t, err)
+				assert.Equal(t, task.ID, q.doneID)
+				assert.Equal(t, state, q.doneState)
 			} else {
 				assert.Same(t, task, got)
 				assert.ErrorIs(t, err, pollErr)
+				assert.Empty(t, q.doneID)
 			}
 		})
 	}
