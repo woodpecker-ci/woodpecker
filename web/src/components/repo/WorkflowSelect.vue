@@ -1,5 +1,5 @@
 <template>
-  <InputField v-slot="{ id }" :label="$t('repo.workflow_select.title')">
+  <InputField :label="$t('repo.workflow_select.title')">
     <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.workflow_select.desc') }}</span>
 
     <div v-if="loading" class="text-wp-text-alt-100 flex items-center gap-2 text-sm">
@@ -14,7 +14,7 @@
     </span>
 
     <template v-else>
-      <CheckboxesField :id="id" :model-value="innerValue" :options="options" @update:model-value="update" />
+      <CheckboxesField :model-value="innerValue" :options="options" @update:model-value="update" />
 
       <Warning
         v-if="unmetDependencies.length > 0"
