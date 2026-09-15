@@ -77,10 +77,10 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		extraHosts[i].IP = ip
 	}
 
-	// The workflow volume is always mounted into the steps; the backend creates
-	// the matching volume/PVC named after config.Volume. In local mode the
-	// caller only adds the local working directory on top of it.
-	volumes := []string{workspaceVolume}
+	var volumes []string
+	if !c.local {
+		volumes = append(volumes, workspaceVolume)
+	}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
 		volumes = append(volumes, volume.String())

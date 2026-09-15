@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"codeberg.org/6543/xyaml/v2"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/multierr"
@@ -140,17 +141,6 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		local.CLIWorkaroundExecAtDir = repoPath
 	}
 
-	// resolve the backend before compiling: whether the local working directory
-	// can be mounted depends on the selected engine.
-	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
-	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
-	if err != nil {
-		return err
-	}
-	if _, err = backendEngine.Load(backendCtx); err != nil {
-		return err
-	}
-
 	// collect secrets from flags
 	var secrets []compiler.Secret
 	for key, val := range c.StringMap("secrets") {
@@ -178,6 +168,9 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	}
 
 	privilegedPlugins := c.StringSlice("plugins-privileged")
+
+	// prefix for the local-execution workspace volume name
+	prefix := "wp_" + ulid.Make().String()
 
 	// build compiler options — mirrors server behavior
 	compilerOpts := []compiler.Option{
@@ -208,14 +201,11 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 				c.String("workspace-path"),
 			),
 		)
-		// The Kubernetes backend maps every step volume to a
-		// PersistentVolumeClaim, so a local host path cannot be mounted there.
-		if backendEngine.Name() != kubernetes.EngineName {
-			volumes = append(
-				volumes,
-				repoPath+":"+c.String("workspace-base")+"/"+c.String("workspace-path"),
-			)
-		}
+		volumes = append(
+			volumes,
+			prefix+"_default:"+c.String("workspace-base"),
+			repoPath+":"+c.String("workspace-base")+"/"+c.String("workspace-path"),
+		)
 	} else {
 		compilerOpts = append(
 			compilerOpts,
@@ -270,6 +260,15 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	if len(items) == 0 {
 		return fmt.Errorf("no workflows to execute (all filtered out)")
+	}
+
+	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
+	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
+	if err != nil {
+		return err
+	}
+	if _, err = backendEngine.Load(backendCtx); err != nil {
+		return err
 	}
 
 	var execErr error
