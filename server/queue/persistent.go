@@ -89,10 +89,13 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f func(*model.T
 	}
 
 	task, err := q.Queue.Poll(c, agentID, f)
-	if err != nil || task == nil {
-		return task, err
+	if task != nil {
+		task = validate(task)
+		if task == nil {
+			return nil, nil
+		}
 	}
-	return validate(task), nil
+	return task, err
 }
 
 func (q *persistentQueue) validateTask(c context.Context, task *model.Task) *model.Task {
