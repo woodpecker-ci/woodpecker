@@ -85,8 +85,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		}
 		return newPipeline, nil
 	}
-	// Persist and link the new config, as Create does. ConfigPersist
-	// deduplicates on (repo, name, hash).
+	// Persist and link the new config, as Create does.
 	configs := make([]*model.Config, 0, len(pipelineFiles))
 	for _, pipelineFile := range pipelineFiles {
 		config, cErr := findOrPersistPipelineConfig(store, newPipeline, pipelineFile)
