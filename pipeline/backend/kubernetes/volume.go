@@ -104,12 +104,7 @@ func stopVolume(ctx context.Context, engine *kube, name, namespace string, delet
 	return err
 }
 
-// useWorkflowVolumeForWorkspace points the workspace mount of every step at the
-// workflow volume this backend creates. Callers may name the workspace volume
-// differently from config.Volume, which left pods referencing a PVC that never
-// existed (see https://github.com/woodpecker-ci/woodpecker/issues/7148). Local
-// filesystem paths mounted inside the workspace are dropped, because Kubernetes
-// cannot provide them and the workspace volume already covers that path.
+// useWorkflowVolumeForWorkspace makes every step mount the workflow volume this backend creates.
 func useWorkflowVolumeForWorkspace(conf *types.Config) error {
 	workflowVolume, err := volumeName(conf.Volume)
 	if err != nil {
@@ -125,7 +120,7 @@ func useWorkflowVolumeForWorkspace(conf *types.Config) error {
 				case mountPath == step.WorkspaceBase:
 					volumes = append(volumes, workflowVolume+":"+mountPath)
 				case isLocalPath(volume) && isBelowPath(mountPath, step.WorkspaceBase):
-					// Covered by the workspace volume mounted at the workspace base.
+					// covered by the workspace volume
 				default:
 					volumes = append(volumes, volume)
 				}
@@ -137,13 +132,12 @@ func useWorkflowVolumeForWorkspace(conf *types.Config) error {
 	return nil
 }
 
-// isLocalPath reports whether a volume is backed by a local filesystem path
-// instead of an existing PVC.
+// isLocalPath reports whether a volume is backed by a local path.
 func isLocalPath(volume string) bool {
 	return strings.HasPrefix(strings.Split(volume, ":")[0], "/")
 }
 
-// isBelowPath reports whether path is located below base.
+// isBelowPath reports whether path is below base.
 func isBelowPath(path, base string) bool {
 	return base != "" && strings.HasPrefix(path, strings.TrimSuffix(base, "/")+"/")
 }
