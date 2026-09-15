@@ -45,10 +45,8 @@ func mkPersistentVolumeClaim(config *config, name, namespace string) (*kube_core
 	}
 
 	pvc := &kube_core_v1.PersistentVolumeClaim{
-		ObjectMeta: kube_meta_v1.ObjectMeta{
-			Name:      volumeName,
-			Namespace: namespace,
-		},
+		Name:      volumeName,
+		Namespace: namespace,
 		Spec: kube_core_v1.PersistentVolumeClaimSpec{
 			AccessModes:      []kube_core_v1.PersistentVolumeAccessMode{accessMode},
 			StorageClassName: _storageClass,

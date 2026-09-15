@@ -188,7 +188,7 @@ func TestFifoBasicOperations(t *testing.T) {
 		// Start multiple waiters
 		numWaiters := 3
 		waitResults := make(chan error, numWaiters)
-		for i := 0; i < numWaiters; i++ {
+		for range numWaiters {
 			go func() {
 				waitResults <- q.Wait(ctx, got3.ID)
 			}()
@@ -201,7 +201,7 @@ func TestFifoBasicOperations(t *testing.T) {
 		assert.NoError(t, q.ErrorAtOnce(ctx, []string{got3.ID}, batchErr))
 
 		// All waiters should return nil (external error filtered)
-		for i := 0; i < numWaiters; i++ {
+		for i := range numWaiters {
 			select {
 			case err := <-waitResults:
 				assert.NoError(t, err, "All waiters should get nil when ErrExternal is filtered")
@@ -318,11 +318,9 @@ func TestFifoBasicOperations(t *testing.T) {
 		dummyTask := &model.Task{ID: "pause-1"}
 
 		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
+		wg.Go(func() {
 			_, _ = q.Poll(ctx, 99, filterFnTrue)
-			wg.Done()
-		}()
+		})
 
 		q.Pause()
 		t0 := time.Now()
@@ -952,7 +950,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 		assert.ErrorIs(t, q.Extend(ctx, 1, "non-existent"), ErrNotFound)
 
 		// Edge case: extend multiple times rapidly
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			time.Sleep(30 * time.Millisecond)
 			assert.NoError(t, q.Extend(ctx, 5, got.ID))
 		}
@@ -985,11 +983,9 @@ func TestFifoLeaseManagement(t *testing.T) {
 		got, _ := q.Poll(ctx, 1, filterFnTrue)
 
 		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
+		wg.Go(func() {
 			assert.NoError(t, q.Wait(ctx, got.ID))
-			wg.Done()
-		}()
+		})
 
 		time.Sleep(time.Millisecond)
 		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
@@ -1029,7 +1025,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 
 		var wg2 sync.WaitGroup
 		wg2.Add(3)
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			go func() {
 				assert.NoError(t, q.Wait(ctx, got3.ID))
 				wg2.Done()
@@ -1076,7 +1072,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 
 	t.Run("kick agent workers", func(t *testing.T) {
 		pollResults := make(chan error, 5)
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			go func() {
 				_, err := q.Poll(ctx, 42, filterFnTrue)
 				pollResults <- err
@@ -1092,7 +1088,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 		q.KickAgentWorkers(42)
 
 		kickedCount := 0
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			select {
 			case err := <-pollResults:
 				if errors.Is(err, context.Canceled) {
@@ -1121,7 +1117,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 		}, 10)
 
 		// Start workers for agent 1
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			go func() {
 				_, err := q.Poll(ctx, 1, filterFnTrue)
 				pollResults <- struct {
@@ -1132,7 +1128,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 		}
 
 		// Start workers for agent 2
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			go func() {
 				_, err := q.Poll(ctx, 2, filterFnTrue)
 				pollResults <- struct {
@@ -1151,7 +1147,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 
 		kickedAgent1 := 0
 		kickedAgent2 := 0
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			select {
 			case result := <-pollResults:
 				if errors.Is(result.err, context.Canceled) {
@@ -1171,7 +1167,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 
 		// Clean up agent 2 workers
 		q.KickAgentWorkers(2)
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			<-pollResults
 		}
 	})
@@ -1216,7 +1212,7 @@ func TestFifoLabelBasedScoring(t *testing.T) {
 	}()
 
 	receivedTasks := make(map[string]int64)
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		select {
 		case task := <-results:
 			receivedTasks[task.ID] = task.AgentID
