@@ -61,8 +61,8 @@ func TestPersistentQueueExpiryAssignsOnlyOneRecoveryPoller(t *testing.T) {
 	require.Equal(t, 1, q.Info(ctx).Stats.Pending)
 
 	q.Pause()
-	pollCtx, stopPollers := context.WithCancel(ctx)
-	defer stopPollers()
+	pollCtx, stopPollers := context.WithCancelCause(ctx)
+	defer stopPollers(nil)
 	type pollResult struct {
 		agentID int64
 		task    *model.Task
@@ -106,7 +106,7 @@ func TestPersistentQueueExpiryAssignsOnlyOneRecoveryPoller(t *testing.T) {
 	require.Equal(t, 1, info.Stats.Workers)
 	require.Zero(t, info.Stats.Pending)
 
-	stopPollers()
+	stopPollers(nil)
 	select {
 	case loser := <-results:
 		require.NotEqual(t, winner.agentID, loser.agentID)

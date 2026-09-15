@@ -59,7 +59,8 @@ func openQueueSQLiteStore(t *testing.T, ctx context.Context, path string) (store
 func newSQLitePersistentQueue(t *testing.T, ctx context.Context, s store.Store) (Queue, *fifo, context.CancelFunc) {
 	t.Helper()
 
-	queueCtx, stop := context.WithCancel(ctx)
+	queueCtx, cancel := context.WithCancelCause(ctx)
+	stop := func() { cancel(nil) }
 	t.Cleanup(stop)
 	memory, ok := NewMemoryQueue(queueCtx).(*fifo)
 	require.True(t, ok)

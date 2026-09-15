@@ -29,6 +29,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
+type persistentValidationResult struct {
+	task *model.Task
+	err  error
+}
+
 // Wait evaluates Done after capturing its running entry. This handshake lets
 // the test expire that lease only after the waiter has registered for it.
 type registeredWaitContext struct {
@@ -167,8 +172,20 @@ func TestPersistentQueuePollRejectsCanceledAssignment(t *testing.T) {
 			store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusRunning}, nil).Maybe()
 			pq := &persistentQueue{Queue: q, store: store}
 			require.NoError(t, q.PushAtOnce(ctx, []*model.Task{genDummyTask()}))
-			result := make(chan *model.Task, 1)
-			go func() { got, _ := pq.Poll(ctx, 1, filterFnTrue); result <- got }()
+			result := make(chan persistentValidationResult, 1)
+			pollDone := make(chan struct{})
+			go func() {
+				defer close(pollDone)
+				got, err := pq.Poll(ctx, 1, filterFnTrue)
+				result <- persistentValidationResult{got, err}
+			}()
+			defer func() {
+				unblock()
+				select {
+				case <-pollDone:
+				case <-ctx.Done():
+				}
+			}()
 			select {
 			case <-validating:
 			case <-ctx.Done():
@@ -176,11 +193,20 @@ func TestPersistentQueuePollRejectsCanceledAssignment(t *testing.T) {
 			}
 			// This must complete while storage is blocked: validation cannot
 			// hold the FIFO mutex or resurrect this canceled assignment.
-			require.NoError(t, pq.ErrorAtOnce(ctx, []string{"1"}, ErrCancel))
+			canceled := make(chan error, 1)
+			go func() { canceled <- pq.ErrorAtOnce(ctx, []string{"1"}, ErrCancel) }()
+			select {
+			case cancelErr := <-canceled:
+				require.NoError(t, cancelErr)
+				require.NoError(t, ctx.Err(), "cancellation must finish before storage is released")
+			case <-ctx.Done():
+				t.Fatal("cancellation blocked on storage validation")
+			}
 			unblock()
 			select {
 			case got := <-result:
-				assert.Nil(t, got)
+				require.NoError(t, got.err)
+				assert.Nil(t, got.task)
 			case <-ctx.Done():
 				t.Fatal("Poll did not return")
 			}
@@ -209,8 +235,20 @@ func TestPersistentQueuePollRejectsReplacedLease(t *testing.T) {
 	store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusRunning}, nil).Maybe()
 	pq := &persistentQueue{Queue: q, store: store}
 	require.NoError(t, q.PushAtOnce(ctx, []*model.Task{genDummyTask()}))
-	oldResult := make(chan *model.Task, 1)
-	go func() { got, _ := pq.Poll(ctx, 1, filterFnTrue); oldResult <- got }()
+	oldResult := make(chan persistentValidationResult, 1)
+	pollDone := make(chan struct{})
+	go func() {
+		defer close(pollDone)
+		got, err := pq.Poll(ctx, 1, filterFnTrue)
+		oldResult <- persistentValidationResult{got, err}
+	}()
+	defer func() {
+		unblock()
+		select {
+		case <-pollDone:
+		case <-ctx.Done():
+		}
+	}()
 	select {
 	case <-validating:
 	case <-ctx.Done():
@@ -225,11 +263,17 @@ func TestPersistentQueuePollRejectsReplacedLease(t *testing.T) {
 	unblock()
 	select {
 	case old := <-oldResult:
-		assert.Nil(t, old)
+		require.NoError(t, old.err)
+		assert.Nil(t, old.task)
 	case <-ctx.Done():
 		t.Fatal("old Poll did not return")
 	}
-	assert.ErrorIs(t, <-oldWaiter, ErrTaskExpired)
+	select {
+	case waitErr := <-oldWaiter:
+		assert.ErrorIs(t, waitErr, ErrTaskExpired)
+	case <-ctx.Done():
+		t.Fatal("old lease waiter did not return")
+	}
 	assert.Equal(t, 1, q.Info(ctx).Stats.Running)
 	require.NoError(t, pq.Done(ctx, "1", model.StatusSuccess))
 }
@@ -276,14 +320,38 @@ func TestPersistentQueueMissingBackupRejectsInvalidWorkflowID(t *testing.T) {
 }
 
 func TestPersistentQueueCanceledPollReturns(t *testing.T) {
-	ctx, cancel := context.WithCancel(t.Context())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	q, ok := NewMemoryQueue(ctx).(*fifo)
 	require.True(t, ok)
 	store := store_mocks.NewMockStore(t)
 	pq := &persistentQueue{Queue: q, store: store}
-	cancel()
+	cancel(nil)
 	got, err := pq.Poll(ctx, 1, filterFnTrue)
 	assert.ErrorIs(t, err, context.Canceled)
 	assert.Nil(t, got)
 	assert.Zero(t, q.Info(ctx).Stats.Workers)
+}
+
+func TestPersistentQueueDeleteErrorStillFiltersStaleWorkflow(t *testing.T) {
+	for _, state := range []model.StatusValue{model.StatusCanceled, "missing"} {
+		t.Run(string(state), func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+			defer cancel()
+			q, ok := NewMemoryQueue(ctx).(*fifo)
+			require.True(t, ok)
+			store := store_mocks.NewMockStore(t)
+			store.EXPECT().TaskDelete("1").Return(errors.New("temporary delete failure")).Once()
+			if state == "missing" {
+				store.EXPECT().WorkflowLoad(int64(1)).Return(nil, types.ErrRecordNotExist).Once()
+			} else {
+				store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: state}, nil).Once()
+			}
+			pq := &persistentQueue{Queue: q, store: store}
+			require.NoError(t, q.PushAtOnce(ctx, []*model.Task{genDummyTask()}))
+			got, err := pq.Poll(ctx, 1, filterFnTrue)
+			require.NoError(t, err)
+			assert.Nil(t, got, "a failed backup delete must not bypass known stale workflow state")
+			assert.Zero(t, q.Info(ctx).Stats.Running)
+		})
+	}
 }
