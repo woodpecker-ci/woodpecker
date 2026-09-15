@@ -247,6 +247,11 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
+	// Mount the volume created below.
+	if err := useWorkflowVolumeForWorkspace(conf); err != nil {
+		return err
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating workflow volume")
 	_, err := startVolume(ctx, e, conf.Volume, namespace)
 	if err != nil {
