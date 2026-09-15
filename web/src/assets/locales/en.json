@@ -62,7 +62,7 @@
       "none": "No workflows found on this branch.",
       "error": "Could not load the workflows of this branch.",
       "depends_on": "Depends on: {workflows}",
-      "unmet_dependencies": "These will run without waiting for a dependency you did not select: {workflows}"
+      "unmet_dependencies": "This will run without all of its dependencies: {workflows}"
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",

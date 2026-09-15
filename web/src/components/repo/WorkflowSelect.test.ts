@@ -99,12 +99,12 @@ describe('workflowSelect', () => {
     const { wrapper } = await mountSelect(['lint', 'build', 'test', 'deploy']);
     await nextTick();
 
-    expect(wrapper.text()).not.toContain('will run without waiting');
+    expect(wrapper.text()).not.toContain('will run without all of its dependencies');
   });
 
   it('does not warn when nothing is selected', async () => {
     const { wrapper } = await mountSelect();
 
-    expect(wrapper.text()).not.toContain('will run without waiting');
+    expect(wrapper.text()).not.toContain('will run without all of its dependencies');
   });
 });
