@@ -26,7 +26,10 @@
         />
       </InputField>
 
-      <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" :disabled="!isFormValid" />
+      <div class="flex items-center gap-2">
+        <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" :disabled="!isFormValid" />
+        <span class="text-wp-text-alt-100 text-sm">{{ workflowSummary }}</span>
+      </div>
     </form>
   </Panel>
   <div v-else class="text-wp-text-100 flex justify-center">
@@ -87,6 +90,20 @@ const pipelineOptions = computed(() => ({
   ...payload.value,
   variables: payload.value.variables,
 }));
+
+// An empty selection runs every workflow, same as ticking none of the
+// checkboxes above, so this has to say so next to the button rather than
+// just going quiet once nothing is selected.
+const workflowSummary = computed(() => {
+  const count = payload.value.workflows.length;
+  if (count === 0) {
+    return i18n.t('repo.manual_pipeline.workflow_summary.all');
+  }
+  if (count === 1) {
+    return i18n.t('repo.manual_pipeline.workflow_summary.one');
+  }
+  return i18n.t('repo.manual_pipeline.workflow_summary.many', { count });
+});
 
 const loading = ref(true);
 onMounted(async () => {
