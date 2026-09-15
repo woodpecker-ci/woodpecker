@@ -95,10 +95,23 @@ func TestClient_AgentCreate(t *testing.T) {
 func TestClient_AgentList(t *testing.T) {
 	tests := []struct {
 		name     string
+		opt      AgentListOptions
 		handler  http.HandlerFunc
 		expected []*Agent
 		wantErr  bool
 	}{
+		{
+			name: "requests the asked-for page",
+			opt:  AgentListOptions{ListOptions{Page: 3, PerPage: 50}},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "/api/agents?page=3&perPage=50", r.URL.Path+"?"+r.URL.RawQuery)
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `[]`)
+				assert.NoError(t, err)
+			},
+			expected: []*Agent{},
+			wantErr:  false,
+		},
 		{
 			name: "success",
 			handler: func(w http.ResponseWriter, _ *http.Request) {
@@ -165,7 +178,7 @@ func TestClient_AgentList(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			agents, err := client.AgentList()
+			agents, err := client.AgentList(tt.opt)
 
 			if tt.wantErr {
 				assert.Error(t, err)
