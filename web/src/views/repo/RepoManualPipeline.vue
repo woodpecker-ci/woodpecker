@@ -54,6 +54,7 @@ import WorkflowSelect from '~/components/repo/WorkflowSelect.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
+import { useWorkflowSummary } from '~/compositions/useWorkflowSummary';
 import { useWPTitle } from '~/compositions/useWPTitle';
 
 defineProps<{
@@ -91,19 +92,7 @@ const pipelineOptions = computed(() => ({
   variables: payload.value.variables,
 }));
 
-// An empty selection runs every workflow, same as ticking none of the
-// checkboxes above, so this has to say so next to the button rather than
-// just going quiet once nothing is selected.
-const workflowSummary = computed(() => {
-  const count = payload.value.workflows.length;
-  if (count === 0) {
-    return i18n.t('repo.manual_pipeline.workflow_summary.all');
-  }
-  if (count === 1) {
-    return i18n.t('repo.manual_pipeline.workflow_summary.one');
-  }
-  return i18n.t('repo.manual_pipeline.workflow_summary.many', { count });
-});
+const workflowSummary = useWorkflowSummary(computed(() => payload.value.workflows));
 
 const loading = ref(true);
 onMounted(async () => {

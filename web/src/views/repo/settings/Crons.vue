@@ -135,7 +135,7 @@
           />
         </InputField>
 
-        <div class="flex gap-2">
+        <div class="flex items-center gap-2">
           <Button type="button" color="gray" :text="$t('cancel')" @click="selectedCron = undefined" />
           <Button
             type="submit"
@@ -144,6 +144,7 @@
             :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
             :disabled="!isFormValid"
           />
+          <span class="text-wp-text-alt-100 text-sm">{{ workflowSummary }}</span>
         </div>
       </form>
     </div>
@@ -171,6 +172,7 @@ import { useDate } from '~/compositions/useDate';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWorkflowSummary } from '~/compositions/useWorkflowSummary';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Cron } from '~/lib/api/types';
 import router from '~/router';
@@ -205,6 +207,8 @@ const selectedCronWorkflows = computed<string[]>({
     return selectedCron.value!.workflows ?? [];
   },
 });
+
+const workflowSummary = useWorkflowSummary(selectedCronWorkflows);
 
 const selectedCronVariables = computed<Record<string, string>>({
   async set(_vars) {
