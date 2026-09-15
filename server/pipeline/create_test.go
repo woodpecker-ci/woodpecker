@@ -99,4 +99,3 @@ func TestRestartRefetchedConfigPersisted(t *testing.T) {
 
 	mockStore.AssertExpectations(t)
 }
-
