@@ -200,13 +200,13 @@ func TestLintConcurrent(t *testing.T) {
       - echo hello
 `
 
-	for i := 0; i < 16; i++ {
+	for i := range 16 {
 		i := i
 
 		t.Run(fmt.Sprintf("worker-%d", i), func(t *testing.T) {
 			t.Parallel()
 
-			for j := 0; j < 10; j++ {
+			for range 10 {
 				configErrors, err := schema.LintString(config)
 
 				require.NoError(t, err)

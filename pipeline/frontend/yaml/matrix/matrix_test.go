@@ -88,7 +88,7 @@ func TestMatrixDeterministicOrder(t *testing.T) {
 	first, err := ParseString(fakeMatrix)
 	assert.NoError(t, err)
 
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		again, err := ParseString(fakeMatrix)
 		assert.NoError(t, err)
 		assert.EqualValues(t, first, again)

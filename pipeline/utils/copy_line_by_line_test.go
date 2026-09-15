@@ -114,13 +114,11 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		err := utils.CopyLineByLine(testWriter, r, 4)
 		assert.NoError(t, err)
-	}()
+	})
 
 	// wait for the goroutine to start
 	time.Sleep(time.Millisecond)
