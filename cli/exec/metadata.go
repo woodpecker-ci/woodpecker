@@ -65,7 +65,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 				err = fmt.Errorf("pipeline-changed-files detected json but could not parse it: %w", jsonErr)
 			}
 		} else {
-			for _, file := range strings.Split(changedFilesRaw, ",") {
+			for file := range strings.SplitSeq(changedFilesRaw, ",") {
 				changedFiles = append(changedFiles, strings.TrimSpace(file))
 			}
 		}

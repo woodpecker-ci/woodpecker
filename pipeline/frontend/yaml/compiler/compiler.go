@@ -274,8 +274,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		// If the missing dep exists in the config but isn't in the surviving
 		// step list, it was filtered out by its 'when' conditions. Surface a
 		// more actionable error.
-		var missingDepErr *ErrStepMissingDependency
-		if errors.As(err, &missingDepErr) {
+		if missingDepErr, ok := errors.AsType[*ErrStepMissingDependency](err); ok {
 			if _, inConfig := stepNames[missingDepErr.dep]; inConfig {
 				return nil, &ErrStepFilteredDependency{name: missingDepErr.name, dep: missingDepErr.dep}
 			}
