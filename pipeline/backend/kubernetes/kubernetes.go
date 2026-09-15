@@ -247,8 +247,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
-	// Steps must mount the volume of the PVC created below, even if the caller
-	// named the workspace volume differently.
+	// Mount the volume created below.
 	if err := useWorkflowVolumeForWorkspace(conf); err != nil {
 		return err
 	}
