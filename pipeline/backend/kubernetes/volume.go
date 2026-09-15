@@ -23,6 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func mkPersistentVolumeClaim(config *config, name, namespace string) (*kube_core_v1.PersistentVolumeClaim, error) {
@@ -100,4 +102,48 @@ func stopVolume(ctx context.Context, engine *kube, name, namespace string, delet
 		return nil
 	}
 	return err
+}
+
+// useWorkflowVolumeForWorkspace points the workspace mount of every step at the
+// workflow volume this backend creates. Callers may name the workspace volume
+// differently from config.Volume, which left pods referencing a PVC that never
+// existed (see https://github.com/woodpecker-ci/woodpecker/issues/7148). Local
+// filesystem paths mounted inside the workspace are dropped, because Kubernetes
+// cannot provide them and the workspace volume already covers that path.
+func useWorkflowVolumeForWorkspace(conf *types.Config) error {
+	workflowVolume, err := volumeName(conf.Volume)
+	if err != nil {
+		return err
+	}
+
+	for _, stage := range conf.Stages {
+		for _, step := range stage.Steps {
+			volumes := make([]string, 0, len(step.Volumes))
+			for _, volume := range step.Volumes {
+				mountPath := volumeMountPath(volume)
+				switch {
+				case mountPath == step.WorkspaceBase:
+					volumes = append(volumes, workflowVolume+":"+mountPath)
+				case isLocalPath(volume) && isBelowPath(mountPath, step.WorkspaceBase):
+					// Covered by the workspace volume mounted at the workspace base.
+				default:
+					volumes = append(volumes, volume)
+				}
+			}
+			step.Volumes = volumes
+		}
+	}
+
+	return nil
+}
+
+// isLocalPath reports whether a volume is backed by a local filesystem path
+// instead of an existing PVC.
+func isLocalPath(volume string) bool {
+	return strings.HasPrefix(strings.Split(volume, ":")[0], "/")
+}
+
+// isBelowPath reports whether path is located below base.
+func isBelowPath(path, base string) bool {
+	return base != "" && strings.HasPrefix(path, strings.TrimSuffix(base, "/")+"/")
 }
