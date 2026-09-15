@@ -74,7 +74,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	if len(configs) == 0 {
+	if len(pipelineFiles) == 0 {
 		newPipeline, uErr := UpdateToStatusError(store, *newPipeline, errors.New("pipeline definition not found"))
 		if uErr != nil {
 			log.Debug().Err(uErr).Msg("failure to update pipeline status")
@@ -83,7 +83,19 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		}
 		return newPipeline, nil
 	}
-	if err := linkPipelineConfigs(store, configs, newPipeline.ID); err != nil {
+
+	// persist the pipeline config for historical correctness, restarts, etc
+	var newConfigs []*model.Config
+	for _, forgeYamlConfig := range pipelineFiles {
+		config, err := findOrPersistPipelineConfig(store, newPipeline, forgeYamlConfig)
+		if err != nil {
+			msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
+			log.Error().Err(err).Msg(msg)
+			return nil, errors.New(msg)
+		}
+		newConfigs = append(newConfigs, config)
+	}
+	if err := linkPipelineConfigs(store, newConfigs, newPipeline.ID); err != nil {
 		msg := fmt.Sprintf("failure to persist pipeline config for %s.", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, errors.New(msg)

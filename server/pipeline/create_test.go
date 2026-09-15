@@ -62,3 +62,41 @@ func TestConfigPersistedBeforeParsing(t *testing.T) {
 
 	mockStore.AssertExpectations(t)
 }
+
+// TestRestartRefetchedConfigPersisted verifies that when restarting a pipeline whose
+// original config was not persisted (e.g. initial fetch failed), refetched configs
+// are persisted and linked to the new pipeline (fixes #7115).
+func TestRestartRefetchedConfigPersisted(t *testing.T) {
+	t.Parallel()
+
+	mockStore := store_mocks.NewMockStore(t)
+
+	newPipeline := &model.Pipeline{ID: 2, RepoID: 10}
+	refetchedYamls := []*forge_types.FileMeta{
+		{Name: ".woodpecker.yaml", Data: []byte("steps:\n  build:\n    image: golang")},
+	}
+
+	persistedConfig := &model.Config{ID: 5, RepoID: 10, Name: "woodpecker"}
+	mockStore.On("ConfigPersist", &model.Config{
+		RepoID: int64(10),
+		Name:   "woodpecker",
+		Data:   refetchedYamls[0].Data,
+	}).Return(persistedConfig, nil)
+
+	mockStore.On("PipelineConfigCreate", &model.PipelineConfig{
+		ConfigID:   int64(5),
+		PipelineID: int64(2),
+	}).Return(nil)
+
+	var newConfigs []*model.Config
+	for _, forgeYamlConfig := range refetchedYamls {
+		config, err := findOrPersistPipelineConfig(mockStore, newPipeline, forgeYamlConfig)
+		assert.NoError(t, err)
+		newConfigs = append(newConfigs, config)
+	}
+	err := linkPipelineConfigs(mockStore, newConfigs, newPipeline.ID)
+	assert.NoError(t, err)
+
+	mockStore.AssertExpectations(t)
+}
+
