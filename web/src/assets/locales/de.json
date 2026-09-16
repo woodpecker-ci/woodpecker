@@ -49,6 +49,13 @@
                 "custom_labels": {
                     "desc": "Die benutzerdefinierten Labels, die vom Agent-Administrator beim Start des Agenten festgelegt wurden.",
                     "custom_labels": "Benutzerdefinierte Labels"
+                },
+                "filters": {
+                    "name": "Filter",
+                    "desc": "Agenten-Labels, die auf Server-Seite erzwungen werden, um Workflows zu filtern",
+                    "key": "Labelname",
+                    "value": "Filterwert",
+                    "delete": "Filter löschen"
                 }
             },
             "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
