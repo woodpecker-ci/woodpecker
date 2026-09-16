@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-14
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -39,6 +39,7 @@
 
 ### Misc
 
+- Restart a pipeline that errored before its config was persisted [[#7120](https://github.com/woodpecker-ci/woodpecker/pull/7120)]
 - Run swaggo in golangci-lint [[#7121](https://github.com/woodpecker-ci/woodpecker/pull/7121)]
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
