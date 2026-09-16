@@ -214,8 +214,8 @@ func (_c *MockClient_AgentDelete_Call) RunAndReturn(run func(n int64) error) *Mo
 }
 
 // AgentList provides a mock function for the type MockClient
-func (_mock *MockClient) AgentList() ([]*woodpecker.Agent, error) {
-	ret := _mock.Called()
+func (_mock *MockClient) AgentList(opt woodpecker.AgentListOptions) ([]*woodpecker.Agent, error) {
+	ret := _mock.Called(opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AgentList")
@@ -223,18 +223,18 @@ func (_mock *MockClient) AgentList() ([]*woodpecker.Agent, error) {
 
 	var r0 []*woodpecker.Agent
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() ([]*woodpecker.Agent, error)); ok {
-		return returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(woodpecker.AgentListOptions) ([]*woodpecker.Agent, error)); ok {
+		return returnFunc(opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func() []*woodpecker.Agent); ok {
-		r0 = returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(woodpecker.AgentListOptions) []*woodpecker.Agent); ok {
+		r0 = returnFunc(opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Agent)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func() error); ok {
-		r1 = returnFunc()
+	if returnFunc, ok := ret.Get(1).(func(woodpecker.AgentListOptions) error); ok {
+		r1 = returnFunc(opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -247,13 +247,20 @@ type MockClient_AgentList_Call struct {
 }
 
 // AgentList is a helper method to define mock.On call
-func (_e *MockClient_Expecter) AgentList() *MockClient_AgentList_Call {
-	return &MockClient_AgentList_Call{Call: _e.mock.On("AgentList")}
+//   - opt woodpecker.AgentListOptions
+func (_e *MockClient_Expecter) AgentList(opt any) *MockClient_AgentList_Call {
+	return &MockClient_AgentList_Call{Call: _e.mock.On("AgentList", opt)}
 }
 
-func (_c *MockClient_AgentList_Call) Run(run func()) *MockClient_AgentList_Call {
+func (_c *MockClient_AgentList_Call) Run(run func(opt woodpecker.AgentListOptions)) *MockClient_AgentList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		var arg0 woodpecker.AgentListOptions
+		if args[0] != nil {
+			arg0 = args[0].(woodpecker.AgentListOptions)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -263,7 +270,7 @@ func (_c *MockClient_AgentList_Call) Return(agents []*woodpecker.Agent, err erro
 	return _c
 }
 
-func (_c *MockClient_AgentList_Call) RunAndReturn(run func() ([]*woodpecker.Agent, error)) *MockClient_AgentList_Call {
+func (_c *MockClient_AgentList_Call) RunAndReturn(run func(opt woodpecker.AgentListOptions) ([]*woodpecker.Agent, error)) *MockClient_AgentList_Call {
 	_c.Call.Return(run)
 	return _c
 }
