@@ -6026,7 +6026,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "depends_on": {
-                    "description": "DependsOn lists the workflows that must be selected alongside this one.\nOptional dependencies are left out: they are dropped when absent, so they\nnever make a selection invalid.",
+                    "description": "DependsOn lists every workflow named in this one's depends_on, required\nor optional. A dependency left out of a selection no longer makes the\nselection invalid (see PipelineBuilder.IgnoreMissingDependencies), so\nthe distinction stops mattering here: this is purely informational, for\na caller that wants to show the dependency before the user picks.",
                     "type": "array",
                     "items": {
                         "type": "string"
