@@ -149,7 +149,7 @@ Read more about `skip_clone` at [pipeline syntax](./20-workflow-syntax.md#skip_c
 
 A push runs every workflow whose `when` conditions match. Manual runs and cron jobs can instead pick the workflows to run, which is useful when a repository holds workflows that are unrelated to each other, such as a deploy workflow that should not run every time you re-run the tests.
 
-The "Run pipeline" form lists the workflows found on the selected branch. Ticking none of them runs all of them, which is the behavior of previous versions.
+The "Run pipeline" form lists the workflows found on the selected branch. Ticking none of them runs all of them, which is the behavior of previous versions. Ticking every one of them is stored the same way, as "all", so a workflow added to the repository later is picked up by that cron job or restart too.
 
 The same selection can be made from the CLI, where a workflow is named by its file name without the path and extension. The full path (`.woodpecker/deploy.yaml`) is accepted too, and is the only way to select a workflow when two files share a name with different extensions, such as `a.yml` next to `a.yaml`: selecting `a` is then rejected as ambiguous, and the form lists those two by their path.
 

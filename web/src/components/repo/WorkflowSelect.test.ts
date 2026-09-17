@@ -102,6 +102,25 @@ describe('workflowSelect', () => {
     expect(wrapper.text()).not.toContain('will run without all of its dependencies');
   });
 
+  it('reports every workflow ticked as no selection, so new workflows are not left out later', async () => {
+    const { wrapper, selection, boxAt } = await mountSelect(['lint', 'build', 'test']);
+
+    await boxAt('deploy');
+
+    expect(selection.value).toEqual([]);
+    const checked = wrapper.findAll('input[type="checkbox"]').map((box) => (box.element as HTMLInputElement).checked);
+    expect(checked).toEqual([true, true, true, true]);
+  });
+
+  it('unticking one workflow after ticking all selects the remaining ones', async () => {
+    const { selection, boxAt } = await mountSelect(['lint', 'build', 'test']);
+    await boxAt('deploy');
+
+    await boxAt('lint');
+
+    expect(selection.value).toEqual(['build', 'test', 'deploy']);
+  });
+
   it('does not warn when nothing is selected', async () => {
     const { wrapper } = await mountSelect();
 

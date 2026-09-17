@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, toRaw, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Icon from '~/components/atomic/Icon.vue';
@@ -50,12 +50,6 @@ const emit = defineEmits<{
 const apiClient = useApiClient();
 const i18n = useI18n();
 
-const modelValue = toRef(props, 'modelValue');
-const innerValue = ref<string[]>(modelValue.value ?? []);
-watch(modelValue, (value) => {
-  innerValue.value = value ?? [];
-});
-
 const options = ref<CheckboxOption[]>([]);
 const loading = ref(false);
 const error = ref('');
@@ -63,9 +57,32 @@ const error = ref('');
 // name -> the workflows it names in depends_on, straight from each config
 const requires = ref<Record<string, string[]>>({});
 
+const modelValue = toRef(props, 'modelValue');
+const innerValue = ref<string[]>(modelValue.value ?? []);
+
+// The last value handed to the parent. An empty selection means "every
+// workflow" to the server, so ticking every box is reported as [] rather than
+// as the full list: a full list would be stored verbatim and a workflow added
+// to the repo later would be left out of that cron or restart. The boxes stay
+// ticked, so when the parent echoes that [] back through modelValue it must
+// not be mistaken for a reset of the form.
+let lastEmitted: string[] | undefined;
+
+watch(modelValue, (value) => {
+  if (value !== undefined && toRaw(value) === lastEmitted) {
+    return;
+  }
+  innerValue.value = value ?? [];
+});
+
+function coversEveryWorkflow(selection: string[]) {
+  return options.value.length > 0 && options.value.every((option) => selection.includes(option.value));
+}
+
 function update(selection: string[]) {
   innerValue.value = selection;
-  emit('update:modelValue', selection);
+  lastEmitted = coversEveryWorkflow(selection) ? [] : selection;
+  emit('update:modelValue', lastEmitted);
 }
 
 /**
