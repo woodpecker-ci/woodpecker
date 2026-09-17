@@ -232,3 +232,44 @@ func TestWorkflowInfosUsePathWhenSanitizedNameCollides(t *testing.T) {
 	assert.Equal(t, ".woodpecker/a.yaml", infos[1].Name)
 	assert.Equal(t, "b", infos[2].Name)
 }
+
+// A selected workflow whose required depends_on names a workflow that does not
+// exist anywhere in the repo is a config bug, not a selection choice. It must
+// be rejected here, otherwise namesExcludedBySelection cannot tell it apart
+// from a dependency the trigger left out on purpose and the workflow would run
+// standalone, hiding the typo.
+func TestFilterConfigsByWorkflowsRejectsUnknownRequiredDependency(t *testing.T) {
+	configs := []*forge_types.FileMeta{
+		{Name: ".woodpecker/lint.yaml", Data: []byte("steps:\n  - name: lint\n    image: alpine\n")},
+		{Name: ".woodpecker/test.yaml", Data: []byte("depends_on:\n  - lnit\nsteps:\n  - name: test\n    image: alpine\n")},
+	}
+
+	got, err := filterConfigsByWorkflows(configs, []string{"test"})
+
+	require.Error(t, err)
+	assert.ErrorIs(t, err, &ErrBadRequest{})
+	assert.Contains(t, err.Error(), `workflow "test" depends on unknown workflow "lnit", this repo defines "lint", "test"`)
+	assert.Nil(t, got)
+}
+
+func TestFilterConfigsByWorkflowsToleratesUnknownOptionalDependency(t *testing.T) {
+	configs := []*forge_types.FileMeta{
+		{Name: ".woodpecker/deploy.yaml", Data: []byte("depends_on:\n  - name: nope\n    optional: true\nsteps:\n  - name: deploy\n    image: alpine\n")},
+	}
+
+	got, err := filterConfigsByWorkflows(configs, []string{"deploy"})
+
+	require.NoError(t, err)
+	assert.Len(t, got, 1)
+}
+
+func TestFilterConfigsByWorkflowsLeavesUnknownDependencyToBuilderWithoutSelection(t *testing.T) {
+	configs := []*forge_types.FileMeta{
+		{Name: ".woodpecker/test.yaml", Data: []byte("depends_on:\n  - lnit\nsteps:\n  - name: test\n    image: alpine\n")},
+	}
+
+	got, err := filterConfigsByWorkflows(configs, nil)
+
+	require.NoError(t, err)
+	assert.Len(t, got, 1)
+}

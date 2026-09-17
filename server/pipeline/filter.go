@@ -90,7 +90,45 @@ func filterConfigsByWorkflows(configs []*forge_types.FileMeta, selected []string
 		return nil, &ErrBadRequest{Msg: "no workflow selected"}
 	}
 
+	if err := checkRequiredDependenciesExist(configs, matched); err != nil {
+		return nil, err
+	}
+
 	return matched, nil
+}
+
+// checkRequiredDependenciesExist refuses a selected workflow whose required
+// depends_on names a workflow that exists nowhere in the repo. Without a
+// selection the builder drops such a workflow on its own, so a typo has
+// always meant "this never runs". With a selection active the builder is
+// told to tolerate dependencies the selection left out, and it cannot tell a
+// left-out name from a misspelled one: the typo would make the workflow run
+// standalone instead. Catching it here, against the full config list, keeps
+// that distinction honest. Optional dependencies are dropped when absent
+// either way, so an unknown optional name is not an error.
+func checkRequiredDependenciesExist(all, selected []*forge_types.FileMeta) error {
+	defined := make(map[string]bool, len(all))
+	for _, config := range all {
+		defined[builder.SanitizePath(config.Name)] = true
+	}
+
+	for _, config := range selected {
+		parsed, err := yaml.ParseBytes(config.Data)
+		if err != nil {
+			// the builder reports the parse error with a better message
+			continue
+		}
+		for _, dep := range parsed.DependsOn {
+			if dep.Optional || defined[dep.Name] {
+				continue
+			}
+			return &ErrBadRequest{Msg: fmt.Sprintf(
+				"workflow %q depends on unknown workflow %q, this repo defines %s",
+				builder.SanitizePath(config.Name), dep.Name, quoteList(WorkflowNames(all)),
+			)}
+		}
+	}
+	return nil
 }
 
 // findConfigsByName resolves a selected name to the configs it could mean. A
@@ -174,9 +212,11 @@ func WorkflowInfos(configs []*forge_types.FileMeta) []WorkflowInfo {
 // there is nothing to be lenient about: nil is returned and the builder enforces depends_on
 // exactly as it always has. A selection is validated by
 // filterConfigsByWorkflows/ValidateWorkflowSelection before this ever runs,
-// so a name found here really was excluded by choice, not misspelled — an
-// unparsable config or a genuinely unknown dependency name is a separate,
-// pre-existing problem the builder reports on its own a moment later.
+// and that validation rejects a selected workflow whose required depends_on
+// names nothing in the repo (checkRequiredDependenciesExist), so a name found
+// here really was excluded by choice, not misspelled. An unparsable config is
+// a separate, pre-existing problem the builder reports on its own a moment
+// later.
 func namesExcludedBySelection(selected []string, yamls []*forge_types.FileMeta) map[string]bool {
 	if len(selected) == 0 {
 		return nil

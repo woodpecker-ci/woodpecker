@@ -102,7 +102,9 @@ func RunCron(c *gin.Context) {
 }
 
 // validateCronWorkflows refuses a cron whose workflow selection could never
-// run: an unknown name, or one that leaves a required depends_on unsatisfied.
+// run: an unknown name, or a selected workflow whose required depends_on
+// names a workflow the repo does not define. Leaving a dependency out of the
+// selection is allowed; the workflow then runs without waiting for it.
 // Without this the cron saves happily and then fails on every single tick,
 // visible only in the server log.
 //
