@@ -190,3 +190,45 @@ func TestNamesExcludedBySelectionIgnoresUnparsableConfig(t *testing.T) {
 
 	assert.Empty(t, namesExcludedBySelection([]string{"broken"}, configs))
 }
+
+// Two configs that sanitize to the same workflow name cannot be told apart by
+// that name, so selecting it must not silently pick whichever the forge listed
+// first.
+func collidingConfigs() []*forge_types.FileMeta {
+	return []*forge_types.FileMeta{
+		{Name: ".woodpecker/a.yml", Data: []byte("steps:\n  - name: one\n    image: alpine\n")},
+		{Name: ".woodpecker/a.yaml", Data: []byte("steps:\n  - name: two\n    image: alpine\n")},
+		{Name: ".woodpecker/b.yaml", Data: []byte("steps:\n  - name: b\n    image: alpine\n")},
+	}
+}
+
+func TestFilterConfigsByWorkflowsRejectsAmbiguousName(t *testing.T) {
+	got, err := filterConfigsByWorkflows(collidingConfigs(), []string{"a"})
+
+	require.Error(t, err)
+	assert.ErrorIs(t, err, &ErrBadRequest{})
+	assert.Contains(t, err.Error(), `ambiguous workflow "a" matches ".woodpecker/a.yml", ".woodpecker/a.yaml", select it by path`)
+	assert.Nil(t, got)
+}
+
+func TestFilterConfigsByWorkflowsSelectsCollidingConfigByPath(t *testing.T) {
+	got, err := filterConfigsByWorkflows(collidingConfigs(), []string{".woodpecker/a.yaml", "b"})
+
+	require.NoError(t, err)
+	require.Len(t, got, 2)
+	assert.Equal(t, ".woodpecker/a.yaml", got[0].Name)
+	assert.Equal(t, ".woodpecker/b.yaml", got[1].Name)
+}
+
+func TestWorkflowNamesUsePathWhenSanitizedNameCollides(t *testing.T) {
+	assert.Equal(t, []string{".woodpecker/a.yml", ".woodpecker/a.yaml", "b"}, WorkflowNames(collidingConfigs()))
+}
+
+func TestWorkflowInfosUsePathWhenSanitizedNameCollides(t *testing.T) {
+	infos := WorkflowInfos(collidingConfigs())
+
+	require.Len(t, infos, 3)
+	assert.Equal(t, ".woodpecker/a.yml", infos[0].Name)
+	assert.Equal(t, ".woodpecker/a.yaml", infos[1].Name)
+	assert.Equal(t, "b", infos[2].Name)
+}

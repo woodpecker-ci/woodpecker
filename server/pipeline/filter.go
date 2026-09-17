@@ -58,11 +58,21 @@ func filterConfigsByWorkflows(configs []*forge_types.FileMeta, selected []string
 			continue
 		}
 
-		config := findConfigByName(configs, name)
-		if config == nil {
+		candidates := findConfigsByName(configs, name)
+		if len(candidates) == 0 {
 			unknown = append(unknown, name)
 			continue
 		}
+		if len(candidates) > 1 {
+			paths := make([]string, 0, len(candidates))
+			for _, candidate := range candidates {
+				paths = append(paths, candidate.Name)
+			}
+			return nil, &ErrBadRequest{Msg: fmt.Sprintf(
+				"ambiguous workflow %q matches %s, select it by path", name, quoteList(paths),
+			)}
+		}
+		config := candidates[0]
 		// tolerate the same workflow being selected twice
 		if !slices.Contains(matched, config) {
 			matched = append(matched, config)
@@ -83,25 +93,45 @@ func filterConfigsByWorkflows(configs []*forge_types.FileMeta, selected []string
 	return matched, nil
 }
 
-// findConfigByName resolves a selected name to a config, accepting either the
-// forge path or the sanitized workflow name.
-func findConfigByName(configs []*forge_types.FileMeta, name string) *forge_types.FileMeta {
+// findConfigsByName resolves a selected name to the configs it could mean. A
+// forge path names exactly one config; a sanitized workflow name can match
+// several when e.g. both a.yml and a.yaml exist, since SanitizePath drops the
+// extension. The caller decides what to do with more than one.
+func findConfigsByName(configs []*forge_types.FileMeta, name string) []*forge_types.FileMeta {
 	for _, config := range configs {
-		if config.Name == name || builder.SanitizePath(config.Name) == name {
-			return config
+		if config.Name == name {
+			return []*forge_types.FileMeta{config}
 		}
 	}
-	return nil
+	var matched []*forge_types.FileMeta
+	for _, config := range configs {
+		if builder.SanitizePath(config.Name) == name {
+			matched = append(matched, config)
+		}
+	}
+	return matched
 }
 
-// WorkflowNames returns the sanitized workflow name of every config, in the
-// order the forge returned them. These are the names a trigger can select.
+// WorkflowNames returns the name a trigger can select for every config, in the
+// order the forge returned them. That is the sanitized workflow name, except
+// when two configs sanitize to the same one: those are listed by their full
+// path instead, which is the only name that still tells them apart.
 func WorkflowNames(configs []*forge_types.FileMeta) []string {
 	names := make([]string, 0, len(configs))
 	for _, config := range configs {
-		names = append(names, builder.SanitizePath(config.Name))
+		names = append(names, selectableName(configs, config))
 	}
 	return names
+}
+
+func selectableName(configs []*forge_types.FileMeta, config *forge_types.FileMeta) string {
+	name := builder.SanitizePath(config.Name)
+	for _, other := range configs {
+		if other != config && builder.SanitizePath(other.Name) == name {
+			return config.Name
+		}
+	}
+	return name
 }
 
 // WorkflowInfo describes one selectable workflow.
@@ -125,7 +155,7 @@ type WorkflowInfo struct {
 func WorkflowInfos(configs []*forge_types.FileMeta) []WorkflowInfo {
 	infos := make([]WorkflowInfo, 0, len(configs))
 	for _, config := range configs {
-		info := WorkflowInfo{Name: builder.SanitizePath(config.Name)}
+		info := WorkflowInfo{Name: selectableName(configs, config)}
 		if parsed, err := yaml.ParseBytes(config.Data); err == nil {
 			info.DependsOn = parsed.DependsOn.Names()
 		}
@@ -153,8 +183,8 @@ func namesExcludedBySelection(selected []string, yamls []*forge_types.FileMeta) 
 	}
 
 	present := make(map[string]bool, len(yamls))
-	for _, name := range WorkflowNames(yamls) {
-		present[name] = true
+	for _, y := range yamls {
+		present[builder.SanitizePath(y.Name)] = true
 	}
 
 	excluded := make(map[string]bool)

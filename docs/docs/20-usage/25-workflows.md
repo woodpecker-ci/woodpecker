@@ -151,7 +151,7 @@ A push runs every workflow whose `when` conditions match. Manual runs and cron j
 
 The "Run pipeline" form lists the workflows found on the selected branch. Ticking none of them runs all of them, which is the behavior of previous versions.
 
-The same selection can be made from the CLI, where a workflow is named by its file name without the path and extension:
+The same selection can be made from the CLI, where a workflow is named by its file name without the path and extension. The full path (`.woodpecker/deploy.yaml`) is accepted too, and is the only way to select a workflow when two files share a name with different extensions, such as `a.yml` next to `a.yaml`: selecting `a` is then rejected as ambiguous, and the form lists those two by their path.
 
 ```bash
 woodpecker-cli pipeline create --branch main --workflow deploy my-org/my-repo
