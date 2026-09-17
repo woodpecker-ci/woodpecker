@@ -16,6 +16,7 @@ package cron
 
 import (
 	"context"
+	"errors"
 	"html/template"
 	"os"
 
@@ -53,10 +54,14 @@ var cronUpdateCmd = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:    "workflow",
 			Aliases: []string{"w"},
-			Usage:   "run only the named workflow, repeat to select several (default: all)",
+			Usage:   "run only the named workflow, repeat to select several (omit to keep the current selection)",
 			Config: cli.StringConfig{
 				TrimSpace: true,
 			},
+		},
+		&cli.BoolFlag{
+			Name:  "clear-workflows",
+			Usage: "drop the workflow selection so the cron runs every workflow again",
 		},
 		&cli.BoolFlag{
 			Name:  "enabled",
@@ -88,13 +93,17 @@ func cronUpdate(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
+	workflows, err := cronWorkflowsFromFlags(c)
+	if err != nil {
+		return err
+	}
 	cron := &woodpecker.Cron{
 		ID:        cronID,
 		Name:      jobName,
 		Branch:    branch,
 		Schedule:  schedule,
 		Enabled:   enabled,
-		Workflows: c.StringSlice("workflow"),
+		Workflows: workflows,
 	}
 	cron, err = client.CronUpdate(repoID, cron)
 	if err != nil {
@@ -105,4 +114,25 @@ func cronUpdate(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 	return tmpl.Execute(os.Stdout, cron)
+}
+
+// cronWorkflowsFromFlags turns the --workflow and --clear-workflows flags into
+// the value the server's cron patch expects: nil when neither was given, so
+// the selection is left alone (the field marshals as null), and an empty,
+// non-nil slice for --clear-workflows, which reaches the server as [] and
+// resets the cron to every workflow. A StringSliceFlag alone cannot express
+// the second case: an unset flag and a cleared one both read back as nil.
+func cronWorkflowsFromFlags(c *cli.Command) ([]string, error) {
+	switch {
+	case c.Bool("clear-workflows") && c.IsSet("workflow"):
+		return nil, errors.New("--clear-workflows cannot be combined with --workflow")
+	case c.Bool("clear-workflows"):
+		return []string{}, nil
+	case c.IsSet("workflow"):
+		return c.StringSlice("workflow"), nil
+	default:
+		// an unset StringSliceFlag reads back as an empty slice, which would
+		// marshal as [] and clear the selection, so it has to become nil here
+		return nil, nil
+	}
 }

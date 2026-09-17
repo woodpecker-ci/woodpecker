@@ -32,3 +32,9 @@ To configure cron jobs you need at least push access to the repository.
 By default a cron job runs every workflow that matches the `cron` event. A cron job can instead be limited to a subset of the repository's workflows, which is set next to the schedule in the repository settings, or with the `--workflow` flag of the CLI.
 
 See [running only some workflows](./25-workflows.md#running-only-some-workflows).
+
+When updating a cron job from the CLI, leaving out `--workflow` keeps the current selection. To go back to running every workflow, pass `--clear-workflows`:
+
+```bash
+woodpecker-cli repo cron update --id 3 --clear-workflows my-org/my-repo
+```

@@ -267,8 +267,11 @@ type (
 		Branch    string `json:"branch"`
 		Enabled   bool   `json:"enabled"`
 		// Workflows optionally narrows the run to the named workflows.
-		// An empty list runs every workflow config found in the repo.
-		Workflows []string `json:"workflows,omitempty"`
+		// An empty list runs every workflow config found in the repo. Not
+		// omitempty: on update the server leaves the selection alone when the
+		// field is null and clears it when it is an empty list, so both must
+		// reach the wire.
+		Workflows []string `json:"workflows"`
 	}
 
 	// WorkflowInfo is one selectable workflow and the workflows it requires.
