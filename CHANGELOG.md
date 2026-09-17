@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-16
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @6543, @ChrisJr404, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
+
+### 🔒 Security
+
+- Prevent injection of matrix env vars into default clone step [[#7157](https://github.com/woodpecker-ci/woodpecker/pull/7157)]
 
 ### ✨ Features
 
