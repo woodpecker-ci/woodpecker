@@ -33,7 +33,7 @@ var cronUpdateCmd = &cli.Command{
 	Action:    cronUpdate,
 	Flags: []cli.Flag{
 		common.RepoFlag,
-		&cli.StringFlag{
+		&cli.Int64Flag{
 			Name:     "id",
 			Usage:    "cron id",
 			Required: true,
