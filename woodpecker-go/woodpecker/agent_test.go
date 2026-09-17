@@ -178,6 +178,81 @@ func TestClient_AgentList(t *testing.T) {
 	}
 }
 
+func TestClient_AgentListWithOpts(t *testing.T) {
+	tests := []struct {
+		name     string
+		opt      AgentListOptions
+		handler  http.HandlerFunc
+		expected []*Agent
+		wantErr  bool
+	}{
+		{
+			name: "requests the asked-for page",
+			opt:  AgentListOptions{ListOptions{Page: 3, PerPage: 50}},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "/api/agents?page=3&perPage=50", r.URL.Path+"?"+r.URL.RawQuery)
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `[]`)
+				assert.NoError(t, err)
+			},
+			expected: []*Agent{},
+			wantErr:  false,
+		},
+		{
+			name: "success",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `[
+					{
+						"id": 1,
+						"name": "agent-1",
+						"backend": "local",
+						"capacity": 2,
+						"version": "1.0.0"
+					}
+				]`)
+				assert.NoError(t, err)
+			},
+			expected: []*Agent{
+				{
+					ID:       1,
+					Name:     "agent-1",
+					Backend:  "local",
+					Capacity: 2,
+					Version:  "1.0.0",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "server error",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			expected: nil,
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(tt.handler)
+			defer ts.Close()
+
+			client := NewClient(ts.URL, http.DefaultClient)
+			agents, err := client.AgentListWithOpts(tt.opt)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, agents)
+		})
+	}
+}
+
 func TestClient_Agent(t *testing.T) {
 	tests := []struct {
 		name     string
