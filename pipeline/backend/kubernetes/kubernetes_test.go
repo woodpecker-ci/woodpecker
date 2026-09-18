@@ -27,7 +27,9 @@ import (
 	"github.com/urfave/cli/v3"
 	kube_core_v1 "k8s.io/api/core/v1"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
+	kube_testing "k8s.io/client-go/testing"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -289,6 +291,52 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 		assert.Equal(t, 0, r.state.ExitCode)
 	case <-time.After(3 * time.Second):
 		t.Fatal("WaitStep did not return for already-deleted pod")
+	}
+}
+
+func TestWaitStepReturnsOnPodDeletedBeforeInformerSync(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("pod-delete-03")
+	namespace := "test-ns"
+
+	podName := createPod(t, client, step, namespace)
+
+	// Delete the pod right after the first Get has seen it, like a workflow
+	// teardown removing a service pod while WaitStep sets up its informer.
+	deleted := false
+	client.PrependReactor("get", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
+		get, ok := action.(kube_testing.GetAction)
+		if !ok || deleted || get.GetName() != podName {
+			return false, nil, nil
+		}
+		gvr := action.GetResource()
+		pod, err := client.Tracker().Get(gvr, namespace, podName)
+		if err != nil {
+			return true, nil, err
+		}
+		deleted = true
+		return true, pod, client.Tracker().Delete(gvr, namespace, podName)
+	})
+
+	type result struct {
+		state *types.State
+		err   error
+	}
+	ch := make(chan result, 1)
+	go func() {
+		s, err := engine.WaitStep(context.Background(), step, "task-1")
+		ch <- result{s, err}
+	}()
+
+	select {
+	case r := <-ch:
+		require.NoError(t, r.err)
+		require.NotNil(t, r.state)
+		assert.True(t, r.state.Exited)
+		assert.Equal(t, 0, r.state.ExitCode)
+	case <-time.After(3 * time.Second):
+		t.Fatal("WaitStep did not return for pod deleted before informer sync")
 	}
 }
 
