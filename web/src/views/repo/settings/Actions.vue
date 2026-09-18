@@ -11,6 +11,16 @@
       />
 
       <Button
+        class="my-1 mr-4"
+        color="blue"
+        start-icon="secret"
+        :is-loading="isRotatingTokens"
+        :text="$t('repo.settings.actions.rotate_tokens.rotate_tokens')"
+        :title="$t('repo.settings.actions.rotate_tokens.desc')"
+        @click="rotateTokens"
+      />
+
+      <Button
         v-if="isActive"
         color="blue"
         class="my-1 mr-4"
@@ -53,6 +63,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
+import { TokenType } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const router = useRouter();
@@ -60,10 +71,23 @@ const notifications = useNotifications();
 const i18n = useI18n();
 
 const repo = requiredInject('repo');
+const badgeToken = requiredInject('badge-token');
 
 const { doSubmit: repairRepo, isLoading: isRepairingRepo } = useAsyncAction(async () => {
   await apiClient.repairRepo(repo.value.id);
   notifications.notify({ title: i18n.t('repo.settings.actions.repair.success'), type: 'success' });
+});
+
+const { doSubmit: rotateTokens, isLoading: isRotatingTokens } = useAsyncAction(async () => {
+  // TODO: use proper dialog
+  // eslint-disable-next-line no-alert
+  if (!confirm(i18n.t('repo.settings.actions.rotate_tokens.confirm'))) {
+    return;
+  }
+
+  const tokens = await apiClient.rotateRepoTokens(repo.value.id);
+  badgeToken.value = tokens.find((token) => token.type === TokenType.Badge)?.value ?? '';
+  notifications.notify({ title: i18n.t('repo.settings.actions.rotate_tokens.success'), type: 'success' });
 });
 
 const { doSubmit: deleteRepo, isLoading: isDeletingRepo } = useAsyncAction(async () => {
