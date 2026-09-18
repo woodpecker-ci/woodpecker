@@ -131,10 +131,11 @@ func TestConvertDAGToStages(t *testing.T) {
 		}},
 	}, {
 		Steps: []*backend_types.Step{{
-			UUID:  "01HJDPF770QGRZER8RF79XVS4M",
-			Type:  "commands",
-			Name:  "echo 1",
-			Image: "bash",
+			UUID:      "01HJDPF770QGRZER8RF79XVS4M",
+			Type:      "commands",
+			Name:      "echo 1",
+			Image:     "bash",
+			DependsOn: []string{"echo env", "echo 2"},
 		}},
 	}}, stages)
 }
