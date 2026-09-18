@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-17
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @LaGrunge, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @LaGrunge, @joseph0531, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
 
 ### 🔒 Security
 
@@ -31,6 +31,7 @@
 
 ### 📚 Documentation
 
+- docs: document manual Linux binary installation [[#7160](https://github.com/woodpecker-ci/woodpecker/pull/7160)]
 - Update docs npm deps non-major [[#7137](https://github.com/woodpecker-ci/woodpecker/pull/7137)]
 - Update docs npm deps non-major [[#7133](https://github.com/woodpecker-ci/woodpecker/pull/7133)]
 
