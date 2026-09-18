@@ -49,7 +49,7 @@ const (
 //
 //	@Summary		Stream events like pipeline updates
 //	@Description	With quic and http2 support
-//	@Router			/stream/events [get]
+//	@Router			/stream/sse/events [get]
 //	@Produce		plain
 //	@Success		200
 //	@Tags			Events
@@ -130,7 +130,7 @@ func EventStreamSSE(c *gin.Context) {
 // LogStreamSSE
 //
 //	@Summary	Stream logs of a pipeline step
-//	@Router		/stream/logs/{repo_id}/{pipeline}/{step_id} [get]
+//	@Router		/stream/sse/logs/{repo_id}/{pipeline}/{step_id} [get]
 //	@Produce	plain
 //	@Success	200
 //	@Tags		Pipeline logs
