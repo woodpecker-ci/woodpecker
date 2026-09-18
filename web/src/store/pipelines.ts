@@ -125,9 +125,13 @@ export const usePipelineStore = defineStore('pipelines', () => {
 
     loading.value = true;
     const _pipelines = await apiClient.getPipelineFeed();
+    const activePipelineIds = new Set(_pipelines.map((pipeline) => pipeline.id));
+    const staleActivePipelines = activePipelines.value.filter((pipeline) => !activePipelineIds.has(pipeline.id));
+
     _pipelines.forEach((pipeline) => {
       setPipeline(pipeline.repo_id, pipeline);
     });
+    await Promise.all(staleActivePipelines.map(async (pipeline) => loadPipeline(pipeline.repo_id, pipeline.number)));
     loading.value = false;
   }
 

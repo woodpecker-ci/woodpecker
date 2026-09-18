@@ -15,19 +15,24 @@ export default () => {
 
   initialized = true;
 
-  apiClient.on((data) => {
-    // contains repo update
-    if (!data.repo) {
-      return;
-    }
-    const { repo } = data;
-    repoStore.setRepo(repo);
+  apiClient.on(
+    (data) => {
+      // contains repo update
+      if (!data.repo) {
+        return;
+      }
+      const { repo } = data;
+      repoStore.setRepo(repo);
 
-    // contains pipeline update
-    if (!data.pipeline) {
-      return;
-    }
-    const { pipeline } = data;
-    pipelineStore.setPipeline(repo.id, pipeline);
-  });
+      // contains pipeline update
+      if (!data.pipeline) {
+        return;
+      }
+      const { pipeline } = data;
+      pipelineStore.setPipeline(repo.id, pipeline);
+    },
+    () => {
+      void pipelineStore.loadPipelineFeed();
+    },
+  );
 };
