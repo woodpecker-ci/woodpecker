@@ -40,7 +40,7 @@ func (m *mockNamespaceClient) Get(_ context.Context, name string, _ kube_meta_v1
 		return nil, m.getError
 	}
 	return &kube_core_v1.Namespace{
-		ObjectMeta: kube_meta_v1.ObjectMeta{Name: name},
+		Name: name,
 	}, nil
 }
 

@@ -358,10 +358,8 @@ func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []kube_co
 			Name: key,
 			ValueFrom: &kube_core_v1.EnvVarSource{
 				SecretKeyRef: &kube_core_v1.SecretKeySelector{
-					LocalObjectReference: kube_core_v1.LocalObjectReference{
-						Name: stepSecretName,
-					},
-					Key: key,
+					Name: stepSecretName,
+					Key:  key,
 				},
 			},
 		})
@@ -424,10 +422,8 @@ func pvcVolume(name string) kube_core_v1.Volume {
 		ReadOnly:  false,
 	}
 	return kube_core_v1.Volume{
-		Name: name,
-		VolumeSource: kube_core_v1.VolumeSource{
-			PersistentVolumeClaim: &pvcSource,
-		},
+		Name:                  name,
+		PersistentVolumeClaim: &pvcSource,
 	}
 }
 

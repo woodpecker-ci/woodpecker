@@ -184,7 +184,7 @@ func pidAlive(pid int) bool {
 	if err != nil {
 		return false
 	}
-	for _, line := range strings.Split(string(data), "\n") {
+	for line := range strings.SplitSeq(string(data), "\n") {
 		if strings.HasPrefix(line, "State:") {
 			// e.g. "State:\tZ (zombie)"
 			return !strings.Contains(line, "Z")

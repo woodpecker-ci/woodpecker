@@ -107,32 +107,33 @@ func (e *local) genCmdByShell(shell string, cmdList []string, baseDir string) (a
 		if err != nil {
 			return nil, err
 		}
-		script := "@echo off\n"
+		var script strings.Builder
+		script.WriteString("@echo off\n")
 		for _, cmd := range cmdList {
 			// Escaping in cmd.exe is a pain, because of that, the command is encoded in Base64, then the output is done
 			// by a special agent command, the decoder intentionally does not add a new line, so we have to add it here
 			encodedCmd := base64.StdEncoding.EncodeToString([]byte("+ " + cmd + "\n"))
 
-			script += "\n"
-			script += agentPath + " decode-base64 " + encodedCmd + "\n"
-			script += cmd + "\n"
-			script += "if not %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
+			script.WriteString("\n")
+			script.WriteString(agentPath + " decode-base64 " + encodedCmd + "\n")
+			script.WriteString(cmd + "\n")
+			script.WriteString("if not %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n")
 		}
 		cmd, err := os.CreateTemp(baseDir, "*.cmd")
 		if err != nil {
 			return nil, err
 		}
 		defer cmd.Close()
-		if _, err := cmd.WriteString(script); err != nil {
+		if _, err := cmd.WriteString(script.String()); err != nil {
 			return nil, err
 		}
 		return []string{"/c", cmd.Name()}, nil
 	case "fish":
-		script := ""
+		var script strings.Builder
 		for _, cmd := range cmdList {
-			script += fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+			script.WriteString(fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd))
 		}
-		return []string{"-c", script}, nil
+		return []string{"-c", script.String()}, nil
 	case "nu":
 		return []string{"--commands", script}, nil
 	case "powershell", "pwsh":
