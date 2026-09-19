@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-18
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -37,6 +37,7 @@
 
 ### 📦️ Dependency
 
+- Update pre-commit hook rbubley/mirrors-prettier to v3.9.8 [[#7164](https://github.com/woodpecker-ci/woodpecker/pull/7164)]
 - Update golang-packages [[#7127](https://github.com/woodpecker-ci/woodpecker/pull/7127)]
 - Update dependency simple-icons to v16.31.0 [[#7138](https://github.com/woodpecker-ci/woodpecker/pull/7138)]
 - Lock file maintenance [[#7140](https://github.com/woodpecker-ci/woodpecker/pull/7140)]
