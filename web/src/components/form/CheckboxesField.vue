@@ -35,10 +35,13 @@ const innerValue = computed({
 });
 
 function clickOption(option: CheckboxOption) {
+  // Both branches must assign rather than mutate. Pushing onto the array the
+  // getter returned skips the setter, so no update:modelValue is emitted, and a
+  // parent whose v-model is a computed never sees the value.
   if (innerValue.value.includes(option.value)) {
     innerValue.value = innerValue.value.filter((o) => o !== option.value);
   } else {
-    innerValue.value.push(option.value);
+    innerValue.value = [...innerValue.value, option.value];
   }
 }
 </script>

@@ -55,6 +55,20 @@
       "show_pipelines": "Show pipelines",
       "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
     },
+    "workflow_select": {
+      "title": "Workflows",
+      "desc": "Select the workflows to run. If you select none, every workflow runs.",
+      "loading": "Loading workflows",
+      "none": "No workflows found on this branch.",
+      "error": "Could not load the workflows of this branch.",
+      "depends_on": "Depends on: {workflows}",
+      "unmet_dependencies": "This will run without all of its dependencies: {workflows}",
+      "summary": {
+        "all": "All workflows",
+        "one": "1 workflow",
+        "many": "{count} workflows"
+      }
+    },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
       "enter_target": "Target environment for deployment",

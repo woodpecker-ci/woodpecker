@@ -7,4 +7,6 @@ export interface Cron {
   enabled: boolean;
   next_exec: number;
   variables: Record<string, string>;
+  // workflows narrows the run to the named workflows. An empty list runs all of them.
+  workflows?: string[];
 }
