@@ -251,6 +251,13 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	unlock := pipeline.LockLifecycle(workflow.PipelineID)
+	defer unlock()
+	workflow, err = s.store.WorkflowLoad(workflowID)
+	if err != nil {
+		return err
+	}
+
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
 		return err
@@ -283,6 +290,11 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	workflow, err = pipeline.UpdateWorkflowStatusToRunning(s.store, *workflow, state)
+	if err != nil {
+		return err
+	}
+
 	if currentPipeline.Status == model.StatusPending {
 		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
 			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
@@ -299,10 +311,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}()
 
-	workflow, err = pipeline.UpdateWorkflowStatusToRunning(s.store, *workflow, state)
-	if err != nil {
-		return err
-	}
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
 	return s.updateAgentLastWork(agent)
@@ -318,6 +326,13 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
+		return err
+	}
+
+	unlock := pipeline.LockLifecycle(workflow.PipelineID)
+	defer unlock()
+	workflow, err = s.store.WorkflowLoad(workflowID)
+	if err != nil {
 		return err
 	}
 
@@ -372,6 +387,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
+		return err
 	}
 
 	var queueErr error
@@ -397,7 +413,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	if !model.IsThereRunningStage(currentPipeline.Workflows) {
+	if currentPipeline.CancelInfo == nil && !model.IsThereRunningStage(currentPipeline.Workflows) {
 		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
 			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
 		}

@@ -48,6 +48,7 @@ type fifo struct {
 	ctx           context.Context
 	workers       map[*worker]struct{}
 	running       map[string]*entry
+	canceled      map[string]*entry
 	pending       *list.List
 	waitingOnDeps *list.List
 	extension     time.Duration
@@ -64,6 +65,7 @@ func NewMemoryQueue(ctx context.Context) Queue {
 		ctx:           ctx,
 		workers:       map[*worker]struct{}{},
 		running:       map[string]*entry{},
+		canceled:      map[string]*entry{},
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
 		extension:     constant.TaskTimeout,
@@ -144,8 +146,28 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 			taskEntry.error = err
 			close(taskEntry.done)
 			delete(q.running, id)
+			if errors.Is(err, ErrCancel) {
+				if q.canceled == nil {
+					q.canceled = make(map[string]*entry)
+				}
+				taskEntry.deadline = time.Now().Add(q.extension)
+				q.canceled[id] = taskEntry
+			}
+		} else if _, ok := q.canceled[id]; ok {
+			if !errors.Is(err, ErrCancel) {
+				delete(q.canceled, id)
+			}
 		} else {
-			errs = append(errs, q.removeFromPendingAndWaiting(id))
+			removeErr := q.removeFromPendingAndWaiting(id)
+			errs = append(errs, removeErr)
+			if removeErr == nil && errors.Is(err, ErrCancel) {
+				if q.canceled == nil {
+					q.canceled = make(map[string]*entry)
+				}
+				done := make(chan bool)
+				close(done)
+				q.canceled[id] = &entry{done: done, error: err, deadline: time.Now().Add(q.extension)}
+			}
 		}
 	}
 
@@ -164,6 +186,9 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 func (q *fifo) Wait(ctx context.Context, taskID string) error {
 	q.Lock()
 	state := q.running[taskID]
+	if state == nil {
+		state = q.canceled[taskID]
+	}
 	q.Unlock()
 	if state != nil {
 		select {
@@ -419,6 +444,12 @@ func taskOrderLess(a, b *model.Task) bool {
 }
 
 func (q *fifo) resubmitExpiredPipelines() {
+	// Retain cancellation for late Wait calls for one lease, but never requeue it.
+	for id, state := range q.canceled {
+		if time.Now().After(state.deadline) {
+			delete(q.canceled, id)
+		}
+	}
 	for taskID, taskState := range q.running {
 		if time.Now().After(taskState.deadline) {
 			log.Info().Msgf("queue: resubmitting expired task %s", taskID)

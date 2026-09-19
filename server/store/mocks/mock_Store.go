@@ -6397,6 +6397,72 @@ func (_c *MockStore_WorkflowByStep_Call) RunAndReturn(run func(step *model.Step)
 	return _c
 }
 
+// WorkflowCancelPending provides a mock function for the type MockStore
+func (_mock *MockStore) WorkflowCancelPending(n int64, n1 int64) (bool, error) {
+	ret := _mock.Called(n, n1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WorkflowCancelPending")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, int64) (bool, error)); ok {
+		return returnFunc(n, n1)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, int64) bool); ok {
+		r0 = returnFunc(n, n1)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, int64) error); ok {
+		r1 = returnFunc(n, n1)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_WorkflowCancelPending_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WorkflowCancelPending'
+type MockStore_WorkflowCancelPending_Call struct {
+	*mock.Call
+}
+
+// WorkflowCancelPending is a helper method to define mock.On call
+//   - n int64
+//   - n1 int64
+func (_e *MockStore_Expecter) WorkflowCancelPending(n any, n1 any) *MockStore_WorkflowCancelPending_Call {
+	return &MockStore_WorkflowCancelPending_Call{Call: _e.mock.On("WorkflowCancelPending", n, n1)}
+}
+
+func (_c *MockStore_WorkflowCancelPending_Call) Run(run func(n int64, n1 int64)) *MockStore_WorkflowCancelPending_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_WorkflowCancelPending_Call) Return(b bool, err error) *MockStore_WorkflowCancelPending_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockStore_WorkflowCancelPending_Call) RunAndReturn(run func(n int64, n1 int64) (bool, error)) *MockStore_WorkflowCancelPending_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // WorkflowGetTree provides a mock function for the type MockStore
 func (_mock *MockStore) WorkflowGetTree(pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	ret := _mock.Called(pipeline)
@@ -6568,6 +6634,63 @@ func (_c *MockStore_WorkflowUpdate_Call) Return(err error) *MockStore_WorkflowUp
 }
 
 func (_c *MockStore_WorkflowUpdate_Call) RunAndReturn(run func(workflow *model.Workflow) error) *MockStore_WorkflowUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WorkflowUpdateIfState provides a mock function for the type MockStore
+func (_mock *MockStore) WorkflowUpdateIfState(workflow *model.Workflow, statusValue model.StatusValue) error {
+	ret := _mock.Called(workflow, statusValue)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WorkflowUpdateIfState")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Workflow, model.StatusValue) error); ok {
+		r0 = returnFunc(workflow, statusValue)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_WorkflowUpdateIfState_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WorkflowUpdateIfState'
+type MockStore_WorkflowUpdateIfState_Call struct {
+	*mock.Call
+}
+
+// WorkflowUpdateIfState is a helper method to define mock.On call
+//   - workflow *model.Workflow
+//   - statusValue model.StatusValue
+func (_e *MockStore_Expecter) WorkflowUpdateIfState(workflow any, statusValue any) *MockStore_WorkflowUpdateIfState_Call {
+	return &MockStore_WorkflowUpdateIfState_Call{Call: _e.mock.On("WorkflowUpdateIfState", workflow, statusValue)}
+}
+
+func (_c *MockStore_WorkflowUpdateIfState_Call) Run(run func(workflow *model.Workflow, statusValue model.StatusValue)) *MockStore_WorkflowUpdateIfState_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Workflow
+		if args[0] != nil {
+			arg0 = args[0].(*model.Workflow)
+		}
+		var arg1 model.StatusValue
+		if args[1] != nil {
+			arg1 = args[1].(model.StatusValue)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_WorkflowUpdateIfState_Call) Return(err error) *MockStore_WorkflowUpdateIfState_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_WorkflowUpdateIfState_Call) RunAndReturn(run func(workflow *model.Workflow, statusValue model.StatusValue) error) *MockStore_WorkflowUpdateIfState_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -191,6 +191,8 @@ type Store interface {
 	WorkflowLoad(int64) (*model.Workflow, error)
 	WorkflowByStep(*model.Step) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error
+	WorkflowUpdateIfState(*model.Workflow, model.StatusValue) error
+	WorkflowCancelPending(int64, int64) (bool, error)
 
 	// Org
 	OrgCreate(*model.Org) error

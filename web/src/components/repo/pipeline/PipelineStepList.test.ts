@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 
+import en from '~/assets/locales/en.json';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 
@@ -13,7 +14,7 @@ const i18n = createI18n({
   fallbackLocale: 'en',
   missingWarn: false,
   fallbackWarn: false,
-  messages: { en: {} },
+  messages: { en },
 });
 
 const pipelineConfigs = ref<PipelineConfig[]>([{ hash: 'h', name: 'default', data: '' }]);
@@ -144,5 +145,61 @@ describe('pipelineStepList', () => {
     const pipeline = makePipeline([makeWorkflow(1, undefined, 'skipped'), makeWorkflow(2, [makeStep(1)], 'success')]);
 
     expect(() => mountStepList(pipeline)).not.toThrow();
+  });
+});
+
+describe('workflow cancellation', () => {
+  it('emits the database ID without changing selection or collapse state', async () => {
+    const pipeline = makePipeline([makeWorkflow(91, [makeStep(2)], 'running'), makeWorkflow(92, [], 'pending')]);
+    pipeline.status = 'running';
+    const wrapper = mountStepList(pipeline);
+    await wrapper.setProps({ canCancel: true });
+    const button = wrapper.get('button[aria-label="Cancel workflow workflow-91"]');
+    const before = wrapper.html();
+    await button.trigger('click');
+    expect(wrapper.emitted('cancelWorkflow')).toEqual([[91]]);
+    expect(wrapper.emitted('update:selectedStepId')).toBeUndefined();
+    expect(wrapper.html()).toBe(before);
+    await wrapper.setProps({ cancelingWorkflowIds: [91] });
+    expect(button.attributes('disabled')).toBeDefined();
+    expect(button.attributes('aria-busy')).toBe('true');
+    expect(wrapper.get('button[aria-label="Cancel workflow workflow-92"]').attributes('disabled')).toBeUndefined();
+    await button.trigger('click');
+    expect(wrapper.emitted('cancelWorkflow')).toHaveLength(1);
+  });
+
+  it('supports single and collapsed workflow layouts', async () => {
+    const pipeline = makePipeline([makeWorkflow(91, [makeStep(2)], 'pending')]);
+    pipeline.status = 'pending';
+    const wrapper = mountStepList(pipeline);
+    await wrapper.setProps({ canCancel: true });
+    expect(wrapper.find('button[aria-label="Cancel workflow workflow-91"]').exists()).toBe(true);
+    const multiple = makePipeline([makeWorkflow(91, [], 'running'), makeWorkflow(92, [], 'pending')]);
+    multiple.status = 'running';
+    const expanded = mountStepList(multiple);
+    await expanded.setProps({ canCancel: true });
+    await expanded.get('button[title="workflow-91"]').trigger('click');
+    expect(expanded.find('button[aria-label="Cancel workflow workflow-91"]').exists()).toBe(true);
+  });
+
+  it.each(['blocked', 'success', 'failure', 'killed', 'canceled', 'skipped'] as const)(
+    'hides cancellation for %s workflows and pipelines',
+    async (state) => {
+      const pipeline = makePipeline([makeWorkflow(91, [], state)]);
+      pipeline.status = 'running';
+      const wrapper = mountStepList(pipeline);
+      await wrapper.setProps({ canCancel: true });
+      expect(wrapper.find('button[aria-label]').exists()).toBe(false);
+      pipeline.workflows![0].state = 'running';
+      pipeline.status = state;
+      await wrapper.setProps({ pipeline: { ...pipeline } });
+      expect(wrapper.find('button[aria-label]').exists()).toBe(false);
+    },
+  );
+
+  it('requires push permission', () => {
+    const pipeline = makePipeline([makeWorkflow(91, [], 'running')]);
+    pipeline.status = 'running';
+    expect(mountStepList(pipeline).find('button[aria-label]').exists()).toBe(false);
   });
 });
