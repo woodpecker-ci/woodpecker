@@ -24,7 +24,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/rs/zerolog/log"
@@ -153,9 +152,7 @@ func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config.RedirectURL = ""
 
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
