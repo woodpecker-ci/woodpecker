@@ -87,3 +87,58 @@ func TestTask_GetLabels(t *testing.T) {
 		}, task.Labels)
 	})
 }
+
+func TestTask_ShouldRun(t *testing.T) {
+	t.Run("runsOnSuccess with complete successful dependencies", func(t *testing.T) {
+		task := &Task{
+			Dependencies: []string{"dep1", "dep2"},
+			DepStatus: map[string]StatusValue{
+				"dep1": StatusSuccess,
+				"dep2": StatusSuccess,
+			},
+		}
+		assert.True(t, task.ShouldRun())
+	})
+
+	t.Run("runsOnSuccess with failed dependency", func(t *testing.T) {
+		task := &Task{
+			Dependencies: []string{"dep1", "dep2"},
+			DepStatus: map[string]StatusValue{
+				"dep1": StatusSuccess,
+				"dep2": StatusFailure,
+			},
+		}
+		assert.False(t, task.ShouldRun())
+	})
+
+	t.Run("runsOnSuccess with missing dependency status (e.g. lost on reload)", func(t *testing.T) {
+		task := &Task{
+			Dependencies: []string{"dep1", "dep2"},
+			DepStatus:    map[string]StatusValue{},
+		}
+		assert.False(t, task.ShouldRun())
+	})
+
+	t.Run("runsOnFailure with failed dependency", func(t *testing.T) {
+		task := &Task{
+			RunOn:        []string{string(StatusFailure)},
+			Dependencies: []string{"dep1"},
+			DepStatus: map[string]StatusValue{
+				"dep1": StatusFailure,
+			},
+		}
+		assert.True(t, task.ShouldRun())
+	})
+
+	t.Run("runsOnFailure with successful dependency", func(t *testing.T) {
+		task := &Task{
+			RunOn:        []string{string(StatusFailure)},
+			Dependencies: []string{"dep1"},
+			DepStatus: map[string]StatusValue{
+				"dep1": StatusSuccess,
+			},
+		}
+		assert.False(t, task.ShouldRun())
+	})
+}
+
