@@ -1311,3 +1311,40 @@ func findTaskByAgent(tasks map[string]int64, agentID int64) string {
 	}
 	return ""
 }
+
+// A caller that has to act per task — Cancel, which must close workflows the
+// queue no longer holds — needs to know WHICH ids were missing, not only that
+// something was.
+func TestFifoErrorAtOnceReportsMissingIDs(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	task := &model.Task{ID: "present"}
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+	waitForProcess()
+	got, _ := q.Poll(ctx, 1, filterFnTrue)
+	assert.Equal(t, "present", got.ID)
+
+	err := q.ErrorAtOnce(ctx, []string{got.ID, "gone-1", "gone-2"}, ErrCancel)
+	assert.Error(t, err)
+	// the sentinel keeps working for callers that only ask "was anything missing"
+	assert.ErrorIs(t, err, ErrNotFound)
+
+	var notFound *ErrTasksNotFound
+	assert.ErrorAs(t, err, &notFound)
+	assert.Equal(t, []string{"gone-1", "gone-2"}, notFound.IDs)
+	// the task that WAS there is not reported as missing
+	assert.NotContains(t, notFound.IDs, "present")
+}
+
+func TestFifoErrorAtOnceReportsNoMissingIDsWhenAllPresent(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	task := &model.Task{ID: "only"}
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+	waitForProcess()
+	got, _ := q.Poll(ctx, 1, filterFnTrue)
+
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got.ID}, ErrCancel))
+}

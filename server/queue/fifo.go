@@ -137,16 +137,33 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 	// it's an external error so we wrap it
 	err = NewErrExternal(err)
 
-	var errs []error
+	var (
+		errs []error
+		// IDs the queue holds no task for at all. They are collected instead of
+		// being joined one by one so the caller can tell WHICH tasks were
+		// missing, not merely that some were: a workflow with no task is a
+		// workflow no agent is running, and only the caller knows what that
+		// means for it.
+		missing []string
+	)
 	// we first process the tasks itself
 	for _, id := range ids {
 		if taskEntry, ok := q.running[id]; ok {
 			taskEntry.error = err
 			close(taskEntry.done)
 			delete(q.running, id)
-		} else {
-			errs = append(errs, q.removeFromPendingAndWaiting(id))
+			continue
 		}
+		switch rmErr := q.removeFromPendingAndWaiting(id); {
+		case rmErr == nil:
+		case errors.Is(rmErr, ErrNotFound):
+			missing = append(missing, id)
+		default:
+			errs = append(errs, rmErr)
+		}
+	}
+	if len(missing) > 0 {
+		errs = append(errs, &ErrTasksNotFound{IDs: missing})
 	}
 
 	// next we aim for there dependencies
