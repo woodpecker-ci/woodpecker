@@ -141,4 +141,3 @@ func TestTask_ShouldRun(t *testing.T) {
 		assert.False(t, task.ShouldRun())
 	})
 }
-
