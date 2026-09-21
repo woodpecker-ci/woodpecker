@@ -43,12 +43,13 @@ func TestGenCmdByShell(t *testing.T) {
 		t.Run("cmd", func(t *testing.T) {
 			args, err := e.genCmdByShell("cmd.exe", []string{"echo hi", "call build.bat"}, t.TempDir())
 			require.NoError(t, err)
-			require.Len(t, args, 2)
-			assert.Equal(t, "/c", args[0])
-			assert.True(t, strings.HasSuffix(args[1], ".cmd"))
+			require.Len(t, args, 3)
+			assert.Equal(t, "/D", args[0])
+			assert.Equal(t, "/C", args[1])
+			assert.True(t, strings.HasSuffix(args[2], ".cmd"))
 
 			// Verify the temp file was created and contains expected content
-			content, err := os.ReadFile(args[1])
+			content, err := os.ReadFile(args[2])
 			require.NoError(t, err)
 			agentPath, err := os.Executable()
 			require.NoError(t, err)
@@ -122,7 +123,7 @@ echo test`, args[3])
 	t.Run("command escaping", func(t *testing.T) {
 		args, err := e.genCmdByShell("cmd", []string{"echo 'test with | pipe'", "echo 'test & ampersand'\n\necho new line"}, t.TempDir())
 		require.NoError(t, err)
-		content, err := os.ReadFile(args[1])
+		content, err := os.ReadFile(args[2])
 		require.NoError(t, err)
 		agentPath, err := os.Executable()
 		require.NoError(t, err)
