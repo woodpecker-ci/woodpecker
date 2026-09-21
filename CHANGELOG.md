@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @LaGrunge, @confusedsushi, @joseph0531, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @confusedsushi, @joseph0531, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
 
 ### 🔒 Security
 
@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix data race in SSE stream handlers when the client disconnects early [[#7139](https://github.com/woodpecker-ci/woodpecker/pull/7139)]
 - Disable `cmd.exe` AutoRun commands for local pipelines on Windows [[#7162](https://github.com/woodpecker-ci/woodpecker/pull/7162)]
 - Ignore directories while fetching files [[#7145](https://github.com/woodpecker-ci/woodpecker/pull/7145)]
 - Skip short multi-line secret lines [[#7144](https://github.com/woodpecker-ci/woodpecker/pull/7144)]
