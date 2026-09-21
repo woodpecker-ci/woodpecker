@@ -126,7 +126,7 @@ func (e *local) genCmdByShell(shell string, cmdList []string, baseDir string) (a
 		if _, err := cmd.WriteString(script); err != nil {
 			return nil, err
 		}
-		return []string{"/c", cmd.Name()}, nil
+		return []string{"/D", "/C", cmd.Name()}, nil
 	case "fish":
 		script := ""
 		for _, cmd := range cmdList {
