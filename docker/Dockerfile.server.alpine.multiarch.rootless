@@ -3,7 +3,7 @@ FROM docker.io/alpine:3.24
 ARG TARGETOS TARGETARCH
 RUN apk add -U --no-cache ca-certificates tzdata && \
   adduser -u 1000 -g 1000 woodpecker -D && \
-  mkdir -p /var/lib/woodpecker && \
+  mkdir -p /var/lib/woodpecker/goimports && \
   chown -R woodpecker:woodpecker /var/lib/woodpecker
 
 ENV GODEBUG=netdns=go

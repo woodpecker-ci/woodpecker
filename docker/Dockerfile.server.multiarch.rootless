@@ -2,7 +2,8 @@ FROM --platform=$BUILDPLATFORM docker.io/golang:1.27 AS build
 
 RUN groupadd -g 1000 woodpecker && \
   useradd -u 1000 -g 1000 woodpecker && \
-  mkdir -p /var/lib/woodpecker
+  mkdir -p /var/lib/woodpecker && \
+  mkdir -p /var/lib/woodpecker/goimports
 
 # add backward compatible timezone names (US/Eastern, Asia/Calcutta, ...) to match alpine images
 RUN apt update && \
