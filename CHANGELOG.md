@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-19
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @LaGrunge, @joseph0531, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @LaGrunge, @confusedsushi, @joseph0531, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
 
 ### 🔒 Security
 
@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- Disable `cmd.exe` AutoRun commands for local pipelines on Windows [[#7162](https://github.com/woodpecker-ci/woodpecker/pull/7162)]
 - Ignore directories while fetching files [[#7145](https://github.com/woodpecker-ci/woodpecker/pull/7145)]
 - Skip short multi-line secret lines [[#7144](https://github.com/woodpecker-ci/woodpecker/pull/7144)]
 - Fix agent panic in local backend cleanup when a workflow is canceled before a step started [[#7132](https://github.com/woodpecker-ci/woodpecker/pull/7132)]
