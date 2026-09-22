@@ -318,9 +318,20 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 			projectMember, resp, err = client.ProjectMembers.GetInheritedProjectMember(project.ID, int64(intUserID), gitlab.WithContext(ctx))
 			if err != nil {
 				if resp != nil && resp.StatusCode == http.StatusNotFound {
-					continue
+					// User is not directly listed as a member, but may have access
+					// via group inheritance (e.g. maintainer of a parent group).
+					// The projects list API may not return the effective permissions,
+					// so fetch the full project to get the embedded
+					// group_access/project_access. If this lookup fails we keep the
+					// list data (access level 0) rather than failing the whole page;
+					// such a repo will simply be filtered out later for lacking write access.
+					if projectDetails, _, getErr := client.Projects.GetProject(project.ID, nil, gitlab.WithContext(ctx)); getErr == nil {
+						project = projectDetails
+					}
+					// projectMember stays nil; permissions come from project.Permissions
+				} else {
+					return nil, err
 				}
-				return nil, err
 			}
 		}
 
