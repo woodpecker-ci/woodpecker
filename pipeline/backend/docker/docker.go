@@ -284,18 +284,38 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 
 	containerName := toContainerName(step)
 
-	wait := e.client.ContainerWait(ctx, containerName, client.ContainerWaitOptions{})
-	select {
-	case resp := <-wait.Result:
-		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
-		if resp.Error != nil {
-			return nil, fmt.Errorf("ContainerWait error: %s", resp.Error.Message)
+	// ContainerWait is a long-polling request that blocks until the container
+	// exits. If the Docker daemon is temporarily unavailable (e.g. restart or
+	// high load), the request fails with a connection error such as "backoff:
+	// maximum elapsed time exceeded" even though the container is still
+	// running. Retry the wait request so transient daemon outages do not fail
+	// the step.
+	if err := backoff.Retry(ctx, func() (any, error) {
+		wait := e.client.ContainerWait(ctx, containerName, client.ContainerWaitOptions{})
+		select {
+		case resp := <-wait.Result:
+			log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
+			if resp.Error != nil {
+				return nil, backoff.Permanent(fmt.Errorf("ContainerWait error: %s", resp.Error.Message))
+			}
+			return nil, nil
+		case err := <-wait.Error:
+			log.Trace().Msgf("ContainerWait returned with err: %v", err)
+			if ctx.Err() != nil {
+				return nil, backoff.Permanent(ctx.Err())
+			}
+			if isErrContainerNotFoundOrNotRunning(err) {
+				return nil, backoff.Permanent(err)
+			}
+			return nil, err
+		case <-ctx.Done():
+			return nil, backoff.Permanent(ctx.Err())
 		}
-	case err := <-wait.Error:
-		log.Trace().Msgf("ContainerWait returned with err: %v", err)
+	}, backoff.WithMaxTries(maxRetry), backoff.WithBackOff(&backoff.ExponentialBackOff{
+		InitialInterval: volumeRetryWait,
+		Multiplier:      2, //nolint:mnd
+	})); err != nil {
 		return nil, err
-	case <-ctx.Done():
-		return nil, ctx.Err()
 	}
 
 	info, err := e.client.ContainerInspect(ctx, containerName, client.ContainerInspectOptions{})
