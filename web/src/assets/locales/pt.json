@@ -56,7 +56,11 @@
             "trigger": "Executar pipeline",
             "select_branch": "Selecionar branch",
             "show_pipelines": "Mostrar pipelines",
-            "no_manual_workflows": "Nenhum fluxo de trabalho correspondente foi encontrado. Certifique-se de que pelo menos um fluxo de trabalho seja executado no evento manual."
+            "no_manual_workflows": "Nenhum fluxo de trabalho correspondente foi encontrado. Certifique-se de que pelo menos um fluxo de trabalho seja executado no evento manual.",
+            "message": {
+                "title": "Mensagem",
+                "desc": "Esta mensagem é adicionada à mensagem de pipeline como uma informação adicional."
+            }
         },
         "not_allowed": "Você não está autorizado a acessar este repositório",
         "open_in_forge": "Abrir repositório na forja",
@@ -509,6 +513,13 @@
                 "custom_labels": {
                     "custom_labels": "Etiquetas personalizadas",
                     "desc": "As etiquetas personalizadas definidas pelo administrador do agente na inicialização do agente."
+                },
+                "filters": {
+                    "name": "Filtros",
+                    "desc": "Etiquetas de agentes aplicadas no lado do servidor para filtrar fluxos de trabalho",
+                    "key": "Nome da etiqueta",
+                    "value": "Valor do filtro",
+                    "delete": "Excluir filtro"
                 }
             },
             "settings": "Configurações administrativas",

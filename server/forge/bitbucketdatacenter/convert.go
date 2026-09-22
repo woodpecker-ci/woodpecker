@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/neticdk/go-bitbucket/bitbucket"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -28,11 +29,14 @@ import (
 
 func convertStatus(status model.StatusValue) bitbucket.BuildStatusState {
 	switch status {
-	case model.StatusPending, model.StatusRunning:
+	case model.StatusPending, model.StatusRunning, model.StatusCreated:
 		return bitbucket.BuildStatusStateInProgress
 	case model.StatusSuccess:
 		return bitbucket.BuildStatusStateSuccessful
+	case model.StatusFailure, model.StatusKilled, model.StatusError, model.StatusDeclined, model.StatusSkipped, model.StatusCanceled, model.StatusBlocked:
+		return bitbucket.BuildStatusStateFailed
 	default:
+		log.Warn().Str("status", string(status)).Msg("unknown pipeline status")
 		return bitbucket.BuildStatusStateFailed
 	}
 }

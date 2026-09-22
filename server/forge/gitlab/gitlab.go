@@ -706,7 +706,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	}
 	var gid int64
 	for _, group := range groups {
-		if group.Name == owner {
+		if group.Path == owner {
 			gid = group.ID
 			break
 		}

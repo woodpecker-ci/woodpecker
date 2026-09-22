@@ -30,6 +30,9 @@
                 "desc": "指定在 pipeline 中額外使用的變數。相同變數名稱會被覆蓋掉。",
                 "name": "變數名稱",
                 "delete": "刪除變數"
+            },
+            "message": {
+                "title": "訊息"
             }
         },
         "pipeline": {
@@ -185,7 +188,9 @@
                 "not_executed_yet": "尚未執行",
                 "crons": "Crons",
                 "your_timezone": "使用您的瀏覽器時區。",
-                "none": "還沒有任何 cron。"
+                "none": "還沒有任何 cron。",
+                "next_exec_local": "下次執行: {local}",
+                "next_exec_both": "下次執行: {local} ({zoned} {timezone})"
             },
             "actions": {
                 "repair": {
@@ -202,7 +207,8 @@
                 },
                 "delete": {
                     "delete": "刪除儲存庫",
-                    "success": "儲存庫已刪除"
+                    "success": "儲存庫已刪除",
+                    "confirm": "此動作將刪除所有資料！\n\n您真的要繼續嗎？"
                 },
                 "actions": "Actions"
             },
@@ -282,7 +288,7 @@
             "agents": {
                 "name": {
                     "name": "名稱",
-                    "placeholder": "代理的名稱"
+                    "placeholder": "代理執行器的名稱"
                 },
                 "id": "ID",
                 "token": "權杖",
@@ -305,18 +311,22 @@
                 "custom_labels": {
                     "custom_labels": "自訂標籤"
                 },
-                "agents": "代理",
-                "add": "新增代理",
-                "save": "儲存代理",
-                "show": "顯示代理",
-                "created": "代理已建立",
-                "saved": "代理已儲存",
-                "deleted": "代理已刪除",
+                "agents": "代理執行器",
+                "add": "新增代理執行器",
+                "save": "儲存代理執行器",
+                "show": "顯示代理執行器",
+                "created": "代理執行器已建立",
+                "saved": "代理執行器已儲存",
+                "deleted": "代理執行器已刪除",
                 "no_schedule": {
-                    "name": "停用代理"
+                    "name": "停用代理執行器"
                 },
-                "edit_agent": "編輯代理",
-                "delete_agent": "刪除代理"
+                "edit_agent": "編輯代理執行器",
+                "delete_agent": "刪除代理執行器",
+                "last_contact": {
+                    "last_contact": "上次聯繫",
+                    "badge": "上次聯繫"
+                }
             },
             "repos": {
                 "disabled": "已停用",
@@ -345,7 +355,7 @@
                 "task_running": "任務執行中",
                 "task_pending": "任務等待中",
                 "waiting_for": "正在等待",
-                "agent": "代理"
+                "agent": "代理執行器"
             },
             "orgs": {
                 "orgs": "組織",

@@ -150,6 +150,55 @@ func TestPatchAgent(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "updated-agent", response.Name)
 	})
+
+	t.Run("should kick agent workers when the filters changed", func(t *testing.T) {
+		agent := &model.Agent{ID: 1, Name: "test-agent", Filters: map[string]string{"gpu": "true"}}
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("AgentUpdate", mock.AnythingOfType("*model.Agent")).Return(nil)
+
+		mockQueue := queue_mocks.NewMockQueue(t)
+		mockQueue.On("KickAgentWorkers", int64(1)).Return()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), mockStore, mockQueue, memory.New())
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Params = gin.Params{{Key: "agent_id", Value: "1"}}
+		c.Request, _ = http.NewRequest(http.MethodPatch, "/", strings.NewReader(`{"name":"test-agent","filters":{"gpu":"false"}}`))
+		c.Request.Header.Set("Content-Type", "application/json")
+
+		PatchAgent(c)
+		c.Writer.WriteHeaderNow()
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		mockQueue.AssertCalled(t, "KickAgentWorkers", int64(1))
+	})
+
+	t.Run("should not kick agent workers when the filters stayed the same", func(t *testing.T) {
+		agent := &model.Agent{ID: 1, Name: "test-agent", Filters: map[string]string{"gpu": "true"}}
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("AgentUpdate", mock.AnythingOfType("*model.Agent")).Return(nil)
+
+		// an unexpected call on the mock fails the test
+		mockQueue := queue_mocks.NewMockQueue(t)
+		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), mockStore, mockQueue, memory.New())
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Params = gin.Params{{Key: "agent_id", Value: "1"}}
+		c.Request, _ = http.NewRequest(http.MethodPatch, "/", strings.NewReader(`{"name":"renamed-agent","filters":{"gpu":"true"}}`))
+		c.Request.Header.Set("Content-Type", "application/json")
+
+		PatchAgent(c)
+		c.Writer.WriteHeaderNow()
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
 }
 
 func TestPostAgent(t *testing.T) {

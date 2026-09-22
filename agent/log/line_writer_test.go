@@ -23,11 +23,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/agent/log"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/shared"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
-	"go.woodpecker-ci.org/woodpecker/v3/rpc/mocks"
+	rpc_mocks "go.woodpecker-ci.org/woodpecker/v3/rpc/mocks"
 )
 
 func TestLineWriter(t *testing.T) {
-	peer := mocks.NewMockPeer(t)
+	peer := rpc_mocks.NewMockPeer(t)
 	peer.On("EnqueueLog", mock.Anything)
 
 	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d")
