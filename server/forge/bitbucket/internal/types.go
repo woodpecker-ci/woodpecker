@@ -257,6 +257,15 @@ type Branch struct {
 	Name string `json:"name"`
 }
 
+type TagResp struct {
+	Values []*Tag `json:"values"`
+}
+
+type Tag struct {
+	Name   string `json:"name"`
+	Target Commit `json:"target"`
+}
+
 type PullRequestResp struct {
 	Page    uint           `json:"page"`
 	PageLen uint           `json:"pagelen"`

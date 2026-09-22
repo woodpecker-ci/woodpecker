@@ -126,9 +126,29 @@ func (p Pipeline) IsPullRequest() bool {
 
 type PipelineOptions struct {
 	Message   string            `json:"message"`
-	Branch    string            `json:"branch"`
+	Branch    string            `json:"branch,omitempty"`
+	Tag       string            `json:"tag,omitempty"`
+	SHA       string            `json:"sha,omitempty"`
 	Variables map[string]string `json:"variables"`
 } //	@name	PipelineOptions
+
+// Validate ensures exactly one of Branch, Tag, or SHA is set.
+func (o *PipelineOptions) Validate() error {
+	n := 0
+	if o.Branch != "" {
+		n++
+	}
+	if o.Tag != "" {
+		n++
+	}
+	if o.SHA != "" {
+		n++
+	}
+	if n != 1 {
+		return fmt.Errorf("exactly one of branch, tag, or sha must be set")
+	}
+	return nil
+}
 
 type Release struct {
 	Title        string `json:"title,omitempty"`
