@@ -43,10 +43,8 @@ func mkHeadlessService(namespace, taskUUID string) (*kube_core_v1.Service, error
 
 	log.Trace().Str("name", name).Interface("selector", selector).Msg("creating headless service")
 	return &kube_core_v1.Service{
-		ObjectMeta: kube_meta_v1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: kube_core_v1.ServiceSpec{
 			Type:      kube_core_v1.ServiceTypeClusterIP,
 			ClusterIP: "None",

@@ -260,10 +260,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 	}
 
 	// Container is up and logging is streaming — hand off to background.
-	r.uploadWait.Add(1)
-	go func() {
-		defer r.uploadWait.Done()
-
+	r.uploadWait.Go(func() {
 		logger := r.makeLogger()
 
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
@@ -278,7 +275,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 		if traceErr := r.traceStep(processState, err, step); traceErr != nil {
 			logger.Error().Err(traceErr).Str("step", step.Name).Msg("failed to trace detached step result")
 		}
-	}()
+	})
 
 	return nil
 }

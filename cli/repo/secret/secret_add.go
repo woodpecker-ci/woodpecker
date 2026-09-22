@@ -73,8 +73,8 @@ func secretCreate(ctx context.Context, c *cli.Command) error {
 	if len(secret.Events) == 0 {
 		secret.Events = defaultSecretEvents
 	}
-	if strings.HasPrefix(secret.Value, "@") {
-		path := strings.TrimPrefix(secret.Value, "@")
+	if after, ok := strings.CutPrefix(secret.Value, "@"); ok {
+		path := after
 		out, err := os.ReadFile(path)
 		if err != nil {
 			return err

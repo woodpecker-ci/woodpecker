@@ -209,10 +209,8 @@ func createPod(
 	require.NoError(t, err)
 
 	pod := &kube_core_v1.Pod{
-		ObjectMeta: kube_meta_v1.ObjectMeta{
-			Name:      podName,
-			Namespace: namespace,
-		},
+		Name:      podName,
+		Namespace: namespace,
 		Status: kube_core_v1.PodStatus{
 			Phase: kube_core_v1.PodPending,
 		},
@@ -310,10 +308,7 @@ func TestWaitStepNoGoroutineLeak(t *testing.T) {
 
 	var wg sync.WaitGroup
 	for i := range numSteps {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-
+		wg.Go(func() {
 			ctx, cancel := context.WithCancelCause(context.Background())
 
 			go func() {
@@ -322,7 +317,7 @@ func TestWaitStepNoGoroutineLeak(t *testing.T) {
 
 			time.Sleep(200 * time.Millisecond)
 			cancel(nil)
-		}()
+		})
 	}
 	wg.Wait()
 

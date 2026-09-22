@@ -44,16 +44,14 @@ func NewJWTManager(secretKey string) *JWTManager {
 // Generate generates and signs a new token for a user.
 func (manager *JWTManager) Generate(agentID int64) (string, error) {
 	claims := AgentTokenClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "woodpecker",
-			Subject:   fmt.Sprintf("%d", agentID),
-			Audience:  jwt.ClaimStrings{},
-			NotBefore: jwt.NewNumericDate(time.Now()),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ID:        fmt.Sprintf("%d", agentID),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(manager.tokenDuration)),
-		},
-		AgentID: agentID,
+		Issuer:    "woodpecker",
+		Subject:   fmt.Sprintf("%d", agentID),
+		Audience:  jwt.ClaimStrings{},
+		NotBefore: jwt.NewNumericDate(time.Now()),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ID:        fmt.Sprintf("%d", agentID),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(manager.tokenDuration)),
+		AgentID:   agentID,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
