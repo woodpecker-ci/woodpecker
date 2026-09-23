@@ -501,6 +501,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 
 	if err = server.Config.Services.LogStore.LogAppend(step, logEntries); err != nil {
 		log.Error().Err(err).Msg("could not store log entries")
+		return err
 	}
 
 	return nil
