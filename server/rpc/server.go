@@ -177,7 +177,9 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 			Type:     int(reqEntry.GetType()),
 		}
 		if entry.StepUUID != stepUUID {
-			_ = write()
+			if err := write(); err != nil {
+				return nil, err
+			}
 			stepUUID = entry.StepUUID
 			entries = entries[:0]
 		}
