@@ -28,6 +28,7 @@ type Workflow struct {
 	AgentID    int64             `json:"agent_id,omitempty"   xorm:"agent_id"`
 	Platform   string            `json:"platform,omitempty"   xorm:"platform"`
 	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'environ'"`
+	DependsOn  []string          `json:"depends_on,omitempty" xorm:"json 'depends_on'"`
 	AxisID     int               `json:"-"                    xorm:"axis_id"`
 	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
 }

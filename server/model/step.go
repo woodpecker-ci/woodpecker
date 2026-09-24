@@ -37,6 +37,7 @@ type Step struct {
 	Started    int64       `json:"started,omitempty"    xorm:"started"`
 	Finished   int64       `json:"finished,omitempty"   xorm:"finished"`
 	Type       StepType    `json:"type,omitempty"       xorm:"type"`
+	DependsOn  []string    `json:"depends_on,omitempty" xorm:"json 'depends_on'"`
 } //	@name	Step
 
 // TableName return database table name for xorm.
