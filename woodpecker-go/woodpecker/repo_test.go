@@ -345,11 +345,33 @@ func TestClientRepoPost(t *testing.T) {
 				assert.NoError(t, err)
 			},
 			opts: RepoPostOptions{
-				ForgeRemoteID: 10,
+				ForgeRemoteID: "10",
 			},
 			expected: &Repo{
 				ID:            1,
 				ForgeRemoteID: "10",
+				Name:          "test",
+				Owner:         "owner",
+				FullName:      "owner/test",
+			},
+			wantErr: false,
+		},
+		{
+			name: "string forge remote id",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/api/repos?forge_remote_id=%7Bworkspace-repo%7D", r.URL.RequestURI())
+
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `{"id":1,"name":"test","owner":"owner","full_name":"owner/test","forge_remote_id":"{workspace-repo}"}`)
+				assert.NoError(t, err)
+			},
+			opts: RepoPostOptions{
+				ForgeRemoteID: "{workspace-repo}",
+			},
+			expected: &Repo{
+				ID:            1,
+				ForgeRemoteID: "{workspace-repo}",
 				Name:          "test",
 				Owner:         "owner",
 				FullName:      "owner/test",
