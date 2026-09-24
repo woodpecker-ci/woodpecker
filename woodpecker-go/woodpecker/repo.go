@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -33,6 +34,7 @@ const (
 	pathPipeline       = "%s/api/repos/%d/pipelines/%v"
 	pathPipelineLogs   = "%s/api/repos/%d/logs/%d"
 	pathStepLogs       = "%s/api/repos/%d/logs/%d/%d"
+	pathStepLogStream  = "%s/api/stream/logs/%d/%d/%d"
 	pathApprove        = "%s/api/repos/%d/pipelines/%d/approve"
 	pathDecline        = "%s/api/repos/%d/pipelines/%d/decline"
 	pathStop           = "%s/api/repos/%d/pipelines/%d/cancel"
@@ -422,6 +424,62 @@ func (c *client) StepLogEntries(repoID, num, step int64) ([]*LogEntry, error) {
 	var out []*LogEntry
 	err := c.get(uri, &out)
 	return out, err
+}
+
+// StreamLogEntries returns a channel receiving the pipeline logs for the specified step.
+func (c *client) StreamLogEntries(repoID, num, step int64) (<-chan *LogEntry, <-chan error, error) {
+	uri := fmt.Sprintf(pathStepLogStream, c.addr, repoID, num, step)
+
+	logCh := make(chan *LogEntry)
+	errCh := make(chan error, 1)
+
+	msgs, errs, err := c.stream(uri, "GET", nil)
+
+	go func() {
+		defer close(logCh)
+		defer close(errCh)
+
+		for {
+			select {
+			case err := <-errs:
+				if err != nil {
+					errCh <- err
+					return
+				}
+
+			case msg := <-msgs:
+				if msgData, ok := msg["data"]; ok {
+					if _, ok := msg["id"]; ok {
+						var entry LogEntry
+						if err := json.Unmarshal([]byte(msgData), &entry); err != nil {
+							errCh <- err
+							return
+						}
+
+						logCh <- &entry
+					}
+
+					if msgEvent, ok := msg["event"]; ok {
+						switch event := msgEvent; event {
+						case "error":
+							errCh <- fmt.Errorf(msgData)
+							return
+						case "eof":
+							errCh <- nil
+							return
+						default:
+							errCh <- fmt.Errorf("unknown event %s: %s", msgEvent, msgData)
+							return
+						}
+					}
+				}
+
+				continue
+			}
+		}
+	}()
+
+	return logCh, errCh, err
 }
 
 // StepLogsPurge purges the pipeline logs for the specified step.
