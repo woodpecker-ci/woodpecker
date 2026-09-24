@@ -236,6 +236,7 @@
       "actions": {
         "cancel": "Cancel",
         "restart": "Restart",
+        "restart_failed": "Restart failed",
         "canceled": "This step has been canceled.",
         "skipped": "This step has been skipped.",
         "cancel_success": "Pipeline canceled",

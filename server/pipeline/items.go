@@ -179,10 +179,34 @@ func handleParseErrors(pipeline *model.Pipeline, parseErr error) (blocking bool)
 func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string, replaceExisting bool,
+	lastPipeline *model.Pipeline,
 ) (pipeline *model.Pipeline, items []*builder.Item, parseErr, err error) {
 	pipelineItems, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(parseErr) {
 		return currentPipeline, nil, parseErr, nil
+	}
+	if lastPipeline != nil {
+		// remove them from the pipelineItems, which are determining the queue tasks later
+		newPipelineItems := []*builder.Item{}
+		for _, item := range pipelineItems {
+			for _, lastWorkflow := range lastPipeline.Workflows {
+				if item != nil &&
+					item.Workflow != nil &&
+					item.Workflow.Name == lastWorkflow.Name &&
+					item.Workflow.AxisID == lastWorkflow.AxisID &&
+					lastWorkflow.State != model.StatusSuccess {
+
+					// flip all dependencies to optional, because
+					// we might be skipping them if they succeeded
+					for ix := range item.DependsOn {
+						item.DependsOn[ix].Optional = true
+					}
+
+					newPipelineItems = append(newPipelineItems, item)
+				}
+			}
+		}
+		pipelineItems = newPipelineItems
 	}
 
 	// An empty pipeline (e.g. everything filtered out) has no workflows to
