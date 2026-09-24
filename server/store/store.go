@@ -31,7 +31,7 @@ type Store interface {
 	// GetUserByLogin gets a user by its login name.
 	GetUserByLogin(int64, string) (*model.User, error)
 	// GetUserList gets a list of all users in the system.
-	GetUserList(p *model.ListOptions) ([]*model.User, error)
+	GetUserList(p *model.ListOptionsWithAll) ([]*model.User, error)
 	// GetUserCount gets a count of all users in the system.
 	GetUserCount() (int64, error)
 	// CreateUser creates a new user account.
@@ -77,7 +77,7 @@ type Store interface {
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository
-	GetPipelineList(*model.Repo, *model.ListOptions, *model.PipelineFilter) ([]*model.Pipeline, error)
+	GetPipelineList(*model.Repo, *model.ListOptionsWithAll, *model.PipelineFilter) ([]*model.Pipeline, error)
 	// GetRepoLatestPipelines gets the latest pipelines for the given repo IDs.
 	GetRepoLatestPipelines([]int64) ([]*model.Pipeline, error)
 	// GetActivePipelineList gets a list of the active pipelines for the repository
@@ -99,7 +99,7 @@ type Store interface {
 	// Repositories
 	RepoList(user *model.User, owned, active bool, filter *model.RepoFilter) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
-	RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error)
+	RepoListAll(active bool, p *model.ListOptionsWithAll) ([]*model.Repo, error)
 
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
@@ -113,27 +113,27 @@ type Store interface {
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo, bool, *model.ListOptions) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool, *model.ListOptionsWithAll) ([]*model.Secret, error)
 	SecretListAll() ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
 	OrgSecretFind(int64, string) (*model.Secret, error)
-	OrgSecretList(int64, *model.ListOptions) ([]*model.Secret, error)
+	OrgSecretList(int64, *model.ListOptionsWithAll) ([]*model.Secret, error)
 	GlobalSecretFind(string) (*model.Secret, error)
-	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
+	GlobalSecretList(*model.ListOptionsWithAll) ([]*model.Secret, error)
 
 	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
-	RegistryList(*model.Repo, bool, *model.ListOptions) ([]*model.Registry, error)
+	RegistryList(*model.Repo, bool, *model.ListOptionsWithAll) ([]*model.Registry, error)
 	RegistryListAll() ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(*model.Registry) error
 	OrgRegistryFind(int64, string) (*model.Registry, error)
-	OrgRegistryList(int64, *model.ListOptions) ([]*model.Registry, error)
+	OrgRegistryList(int64, *model.ListOptionsWithAll) ([]*model.Registry, error)
 	GlobalRegistryFind(string) (*model.Registry, error)
-	GlobalRegistryList(*model.ListOptions) ([]*model.Registry, error)
+	GlobalRegistryList(*model.ListOptionsWithAll) ([]*model.Registry, error)
 
 	// Steps
 	StepLoad(pipelineID, stepID int64) (*model.Step, error)
@@ -162,7 +162,7 @@ type Store interface {
 	// Cron
 	CronCreate(*model.Cron) error
 	CronFind(*model.Repo, int64) (*model.Cron, error)
-	CronList(*model.Repo, *model.ListOptions) ([]*model.Cron, error)
+	CronList(*model.Repo, *model.ListOptionsWithAll) ([]*model.Cron, error)
 	CronUpdate(*model.Repo, *model.Cron) error
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
@@ -171,7 +171,7 @@ type Store interface {
 	// Forge
 	ForgeCreate(*model.Forge) error
 	ForgeGet(int64) (*model.Forge, error)
-	ForgeList(p *model.ListOptions) ([]*model.Forge, error)
+	ForgeList(p *model.ListOptionsWithAll) ([]*model.Forge, error)
 	ForgeUpdate(*model.Forge) error
 	ForgeDelete(*model.Forge) error
 
@@ -179,10 +179,10 @@ type Store interface {
 	AgentCreate(*model.Agent) error
 	AgentFind(int64) (*model.Agent, error)
 	AgentFindByToken(string) (*model.Agent, error)
-	AgentList(p *model.ListOptions) ([]*model.Agent, error)
+	AgentList(p *model.ListOptionsWithAll) ([]*model.Agent, error)
 	AgentUpdate(*model.Agent) error
 	AgentDelete(*model.Agent) error
-	AgentListForOrg(orgID int64, opt *model.ListOptions) ([]*model.Agent, error)
+	AgentListForOrg(orgID int64, opt *model.ListOptionsWithAll) ([]*model.Agent, error)
 
 	// Workflow
 	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
@@ -199,10 +199,10 @@ type Store interface {
 	OrgLookup(string) (*model.Org, error)
 	OrgUpdate(*model.Org) error
 	OrgDelete(int64) error
-	OrgList(*model.ListOptions) ([]*model.Org, error)
+	OrgList(*model.ListOptionsWithAll) ([]*model.Org, error)
 
 	// Org repos
-	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
+	OrgRepoList(*model.Org, *model.ListOptionsWithAll) ([]*model.Repo, error)
 
 	// Store operations
 	Ping() error

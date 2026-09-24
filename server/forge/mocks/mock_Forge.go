@@ -67,7 +67,7 @@ type MockForge_Activate_Call struct {
 //   - u *model.User
 //   - r *model.Repo
 //   - link string
-func (_e *MockForge_Expecter) Activate(ctx interface{}, u interface{}, r interface{}, link interface{}) *MockForge_Activate_Call {
+func (_e *MockForge_Expecter) Activate(ctx any, u any, r any, link any) *MockForge_Activate_Call {
 	return &MockForge_Activate_Call{Call: _e.mock.On("Activate", ctx, u, r, link)}
 }
 
@@ -147,7 +147,7 @@ type MockForge_BranchHead_Call struct {
 //   - u *model.User
 //   - r *model.Repo
 //   - branch string
-func (_e *MockForge_Expecter) BranchHead(ctx interface{}, u interface{}, r interface{}, branch interface{}) *MockForge_BranchHead_Call {
+func (_e *MockForge_Expecter) BranchHead(ctx any, u any, r any, branch any) *MockForge_BranchHead_Call {
 	return &MockForge_BranchHead_Call{Call: _e.mock.On("BranchHead", ctx, u, r, branch)}
 }
 
@@ -227,7 +227,7 @@ type MockForge_Branches_Call struct {
 //   - u *model.User
 //   - r *model.Repo
 //   - p *model.ListOptions
-func (_e *MockForge_Expecter) Branches(ctx interface{}, u interface{}, r interface{}, p interface{}) *MockForge_Branches_Call {
+func (_e *MockForge_Expecter) Branches(ctx any, u any, r any, p any) *MockForge_Branches_Call {
 	return &MockForge_Branches_Call{Call: _e.mock.On("Branches", ctx, u, r, p)}
 }
 
@@ -296,7 +296,7 @@ type MockForge_Deactivate_Call struct {
 //   - u *model.User
 //   - r *model.Repo
 //   - link string
-func (_e *MockForge_Expecter) Deactivate(ctx interface{}, u interface{}, r interface{}, link interface{}) *MockForge_Deactivate_Call {
+func (_e *MockForge_Expecter) Deactivate(ctx any, u any, r any, link any) *MockForge_Deactivate_Call {
 	return &MockForge_Deactivate_Call{Call: _e.mock.On("Deactivate", ctx, u, r, link)}
 }
 
@@ -377,7 +377,7 @@ type MockForge_Dir_Call struct {
 //   - r *model.Repo
 //   - b *model.Pipeline
 //   - dirName string
-func (_e *MockForge_Expecter) Dir(ctx interface{}, u interface{}, r interface{}, b interface{}, dirName interface{}) *MockForge_Dir_Call {
+func (_e *MockForge_Expecter) Dir(ctx any, u any, r any, b any, dirName any) *MockForge_Dir_Call {
 	return &MockForge_Dir_Call{Call: _e.mock.On("Dir", ctx, u, r, b, dirName)}
 }
 
@@ -463,7 +463,7 @@ type MockForge_File_Call struct {
 //   - r *model.Repo
 //   - b *model.Pipeline
 //   - fileName string
-func (_e *MockForge_Expecter) File(ctx interface{}, u interface{}, r interface{}, b interface{}, fileName interface{}) *MockForge_File_Call {
+func (_e *MockForge_Expecter) File(ctx any, u any, r any, b any, fileName any) *MockForge_File_Call {
 	return &MockForge_File_Call{Call: _e.mock.On("File", ctx, u, r, b, fileName)}
 }
 
@@ -554,7 +554,7 @@ type MockForge_Hook_Call struct {
 // Hook is a helper method to define mock.On call
 //   - ctx context.Context
 //   - r *http.Request
-func (_e *MockForge_Expecter) Hook(ctx interface{}, r interface{}) *MockForge_Hook_Call {
+func (_e *MockForge_Expecter) Hook(ctx any, r any) *MockForge_Hook_Call {
 	return &MockForge_Hook_Call{Call: _e.mock.On("Hook", ctx, r)}
 }
 
@@ -628,7 +628,7 @@ type MockForge_Login_Call struct {
 // Login is a helper method to define mock.On call
 //   - ctx context.Context
 //   - r *types.OAuthRequest
-func (_e *MockForge_Expecter) Login(ctx interface{}, r interface{}) *MockForge_Login_Call {
+func (_e *MockForge_Expecter) Login(ctx any, r any) *MockForge_Login_Call {
 	return &MockForge_Login_Call{Call: _e.mock.On("Login", ctx, r)}
 }
 
@@ -740,7 +740,7 @@ type MockForge_Netrc_Call struct {
 // Netrc is a helper method to define mock.On call
 //   - u *model.User
 //   - r *model.Repo
-func (_e *MockForge_Expecter) Netrc(u interface{}, r interface{}) *MockForge_Netrc_Call {
+func (_e *MockForge_Expecter) Netrc(u any, r any) *MockForge_Netrc_Call {
 	return &MockForge_Netrc_Call{Call: _e.mock.On("Netrc", u, r)}
 }
 
@@ -809,7 +809,7 @@ type MockForge_Org_Call struct {
 //   - ctx context.Context
 //   - u *model.User
 //   - org string
-func (_e *MockForge_Expecter) Org(ctx interface{}, u interface{}, org interface{}) *MockForge_Org_Call {
+func (_e *MockForge_Expecter) Org(ctx any, u any, org any) *MockForge_Org_Call {
 	return &MockForge_Org_Call{Call: _e.mock.On("Org", ctx, u, org)}
 }
 
@@ -883,7 +883,7 @@ type MockForge_OrgMembership_Call struct {
 //   - ctx context.Context
 //   - u *model.User
 //   - org string
-func (_e *MockForge_Expecter) OrgMembership(ctx interface{}, u interface{}, org interface{}) *MockForge_OrgMembership_Call {
+func (_e *MockForge_Expecter) OrgMembership(ctx any, u any, org any) *MockForge_OrgMembership_Call {
 	return &MockForge_OrgMembership_Call{Call: _e.mock.On("OrgMembership", ctx, u, org)}
 }
 
@@ -958,7 +958,7 @@ type MockForge_PullRequests_Call struct {
 //   - u *model.User
 //   - r *model.Repo
 //   - p *model.ListOptions
-func (_e *MockForge_Expecter) PullRequests(ctx interface{}, u interface{}, r interface{}, p interface{}) *MockForge_PullRequests_Call {
+func (_e *MockForge_Expecter) PullRequests(ctx any, u any, r any, p any) *MockForge_PullRequests_Call {
 	return &MockForge_PullRequests_Call{Call: _e.mock.On("PullRequests", ctx, u, r, p)}
 }
 
@@ -1039,7 +1039,7 @@ type MockForge_Repo_Call struct {
 //   - remoteID model.ForgeRemoteID
 //   - owner string
 //   - name string
-func (_e *MockForge_Expecter) Repo(ctx interface{}, u interface{}, remoteID interface{}, owner interface{}, name interface{}) *MockForge_Repo_Call {
+func (_e *MockForge_Expecter) Repo(ctx any, u any, remoteID any, owner any, name any) *MockForge_Repo_Call {
 	return &MockForge_Repo_Call{Call: _e.mock.On("Repo", ctx, u, remoteID, owner, name)}
 }
 
@@ -1123,7 +1123,7 @@ type MockForge_Repos_Call struct {
 //   - ctx context.Context
 //   - u *model.User
 //   - p *model.ListOptions
-func (_e *MockForge_Expecter) Repos(ctx interface{}, u interface{}, p interface{}) *MockForge_Repos_Call {
+func (_e *MockForge_Expecter) Repos(ctx any, u any, p any) *MockForge_Repos_Call {
 	return &MockForge_Repos_Call{Call: _e.mock.On("Repos", ctx, u, p)}
 }
 
@@ -1188,7 +1188,7 @@ type MockForge_Status_Call struct {
 //   - r *model.Repo
 //   - b *model.Pipeline
 //   - p *model.Workflow
-func (_e *MockForge_Expecter) Status(ctx interface{}, u interface{}, r interface{}, b interface{}, p interface{}) *MockForge_Status_Call {
+func (_e *MockForge_Expecter) Status(ctx any, u any, r any, b any, p any) *MockForge_Status_Call {
 	return &MockForge_Status_Call{Call: _e.mock.On("Status", ctx, u, r, b, p)}
 }
 
@@ -1272,7 +1272,7 @@ type MockForge_Teams_Call struct {
 //   - ctx context.Context
 //   - u *model.User
 //   - p *model.ListOptions
-func (_e *MockForge_Expecter) Teams(ctx interface{}, u interface{}, p interface{}) *MockForge_Teams_Call {
+func (_e *MockForge_Expecter) Teams(ctx any, u any, p any) *MockForge_Teams_Call {
 	return &MockForge_Teams_Call{Call: _e.mock.On("Teams", ctx, u, p)}
 }
 

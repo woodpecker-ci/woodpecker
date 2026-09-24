@@ -69,6 +69,6 @@ var setupScriptTmpl, _ = template.New("").Parse(setupScriptProto)
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScript = `
-echo + %s
+echo '▶  '%s
 %s
 `

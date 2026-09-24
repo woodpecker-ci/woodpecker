@@ -40,7 +40,7 @@ func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
 	return cron, wrapGet(s.engine.ID(id).Where("repo_id = ?", repo.ID).Get(cron))
 }
 
-func (s storage) CronList(repo *model.Repo, p *model.ListOptions) ([]*model.Cron, error) {
+func (s storage) CronList(repo *model.Repo, p *model.ListOptionsWithAll) ([]*model.Cron, error) {
 	var crons []*model.Cron
 	return crons, s.paginate(p).Where("repo_id = ?", repo.ID).OrderBy("name").Find(&crons)
 }

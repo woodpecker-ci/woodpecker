@@ -88,7 +88,8 @@ func TestMigrateRemovesDuplicateLogEntries(t *testing.T) {
 	// the fixture already holds (step_id 2, line 0); store it a second time
 	_, err := engine.Exec(
 		"INSERT INTO log_entries (id, step_id, time, line, data, created, type) VALUES (?,?,?,?,?,?,?)",
-		900001, 2, 0, 0, []byte("resent"), 1641630525, 0)
+		900001, 2, 0, 0, []byte("resent"), 1641630525, 0,
+	)
 	require.NoError(t, err)
 
 	require.NoError(t, Migrate(t.Context(), engine, true))

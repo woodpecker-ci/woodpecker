@@ -41,15 +41,15 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, &ErrBadRequest{Msg: "cannot restart a pipeline with status blocked"}
 	}
 
-	// fetch the old pipeline config from the database
-	configs, err := store.ConfigsForPipeline(lastPipeline.ID)
+	// The forge fetcher reuses this as-is; a config extension may replace it.
+	oldConfigs, err := store.ConfigsForPipeline(lastPipeline.ID)
 	if err != nil {
 		log.Error().Err(err).Msgf("failure to get pipeline config for %s", repo.FullName)
 		return nil, &ErrNotFound{Msg: fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)}
 	}
 
 	var pipelineFiles []*forge_types.FileMeta
-	for _, y := range configs {
+	for _, y := range oldConfigs {
 		pipelineFiles = append(pipelineFiles, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
@@ -74,7 +74,9 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	if len(configs) == 0 {
+	// Guard on the newly fetched config: a pipeline that errored before
+	// persisting any config has no old rows but can still fetch a valid definition.
+	if len(pipelineFiles) == 0 {
 		newPipeline, uErr := UpdateToStatusError(store, *newPipeline, errors.New("pipeline definition not found"))
 		if uErr != nil {
 			log.Debug().Err(uErr).Msg("failure to update pipeline status")
@@ -82,6 +84,17 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 			updatePipelineStatus(ctx, forge, newPipeline, repo, user)
 		}
 		return newPipeline, nil
+	}
+	// Persist and link the new config, as Create does.
+	configs := make([]*model.Config, 0, len(pipelineFiles))
+	for _, pipelineFile := range pipelineFiles {
+		config, cErr := findOrPersistPipelineConfig(store, newPipeline, pipelineFile)
+		if cErr != nil {
+			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
+			log.Error().Err(cErr).Msg(msg)
+			return nil, errors.New(msg)
+		}
+		configs = append(configs, config)
 	}
 	if err := linkPipelineConfigs(store, configs, newPipeline.ID); err != nil {
 		msg := fmt.Sprintf("failure to persist pipeline config for %s.", repo.FullName)
