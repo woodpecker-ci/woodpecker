@@ -692,3 +692,29 @@ func TestGitLabReposUsesEmbeddedPermissions(t *testing.T) {
 	assert.True(t, repos[1].Perm.Push)
 	assert.False(t, repos[1].Perm.Admin)
 }
+
+func TestGitLabReposSkipsProjectOnMembershipLookupNotFound(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v4/projects", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`[` +
+			`{"id":4,"path_with_namespace":"diaspora/diaspora-client","visibility":"private","permissions":` +
+			`{"project_access":{"access_level":40},"group_access":null}},` +
+			`{"id":7,"path_with_namespace":"other/personal-project","visibility":"private","permissions":null}` +
+			`]`))
+	})
+	mux.HandleFunc("/api/v4/projects/7/members/all/3", func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+	})
+
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	client := load(server.URL + "?client_id=test&client_secret=test")
+	user := model.User{Login: "test_user", AccessToken: "token", ForgeRemoteID: "3"}
+
+	repos, err := client.Repos(t.Context(), &user, &model.ListOptions{Page: 1, PerPage: 10})
+	require.NoError(t, err)
+	require.Len(t, repos, 1)
+
+	assert.Equal(t, "diaspora/diaspora-client", repos[0].FullName)
+}

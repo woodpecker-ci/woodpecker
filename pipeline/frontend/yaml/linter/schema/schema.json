@@ -969,20 +969,35 @@
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
       "oneOf": [
         {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/service"
-          },
-          "minProperties": 1
+          "$ref": "#/definitions/services_map"
         },
         {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/service"
-          },
-          "minLength": 1
+          "$ref": "#/definitions/services_list"
         }
       ]
+    },
+    "services_map": {
+      "description": "Services keyed by name, where the map key is used as the service name. Read more: https://woodpecker-ci.org/docs/usage/services",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/service"
+      },
+      "minProperties": 1
+    },
+    "services_list": {
+      "description": "Services as a list. There is no map key to take the name from, so each service must set `name` itself. Read more: https://woodpecker-ci.org/docs/usage/services",
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/service"
+          },
+          {
+            "required": ["name"]
+          }
+        ]
+      },
+      "minLength": 1
     },
     "service": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
@@ -992,7 +1007,7 @@
       "required": ["image"],
       "properties": {
         "name": {
-          "description": "The name of the service. Can be used if using the array style services list",
+          "description": "The name of the service. It is used as the hostname other containers reach the service by, and is required when using the array style services list",
           "type": "string"
         },
         "image": {

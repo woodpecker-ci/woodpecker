@@ -66,7 +66,7 @@ type MockBackend_DestroyStep_Call struct {
 //   - ctx context.Context
 //   - step *types.Step
 //   - taskUUID string
-func (_e *MockBackend_Expecter) DestroyStep(ctx interface{}, step interface{}, taskUUID interface{}) *MockBackend_DestroyStep_Call {
+func (_e *MockBackend_Expecter) DestroyStep(ctx any, step any, taskUUID any) *MockBackend_DestroyStep_Call {
 	return &MockBackend_DestroyStep_Call{Call: _e.mock.On("DestroyStep", ctx, step, taskUUID)}
 }
 
@@ -129,7 +129,7 @@ type MockBackend_DestroyWorkflow_Call struct {
 //   - ctx context.Context
 //   - conf *types.Config
 //   - taskUUID string
-func (_e *MockBackend_Expecter) DestroyWorkflow(ctx interface{}, conf interface{}, taskUUID interface{}) *MockBackend_DestroyWorkflow_Call {
+func (_e *MockBackend_Expecter) DestroyWorkflow(ctx any, conf any, taskUUID any) *MockBackend_DestroyWorkflow_Call {
 	return &MockBackend_DestroyWorkflow_Call{Call: _e.mock.On("DestroyWorkflow", ctx, conf, taskUUID)}
 }
 
@@ -236,7 +236,7 @@ type MockBackend_IsAvailable_Call struct {
 
 // IsAvailable is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockBackend_Expecter) IsAvailable(ctx interface{}) *MockBackend_IsAvailable_Call {
+func (_e *MockBackend_Expecter) IsAvailable(ctx any) *MockBackend_IsAvailable_Call {
 	return &MockBackend_IsAvailable_Call{Call: _e.mock.On("IsAvailable", ctx)}
 }
 
@@ -298,7 +298,7 @@ type MockBackend_Load_Call struct {
 
 // Load is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockBackend_Expecter) Load(ctx interface{}) *MockBackend_Load_Call {
+func (_e *MockBackend_Expecter) Load(ctx any) *MockBackend_Load_Call {
 	return &MockBackend_Load_Call{Call: _e.mock.On("Load", ctx)}
 }
 
@@ -395,7 +395,7 @@ type MockBackend_SetupWorkflow_Call struct {
 //   - ctx context.Context
 //   - conf *types.Config
 //   - taskUUID string
-func (_e *MockBackend_Expecter) SetupWorkflow(ctx interface{}, conf interface{}, taskUUID interface{}) *MockBackend_SetupWorkflow_Call {
+func (_e *MockBackend_Expecter) SetupWorkflow(ctx any, conf any, taskUUID any) *MockBackend_SetupWorkflow_Call {
 	return &MockBackend_SetupWorkflow_Call{Call: _e.mock.On("SetupWorkflow", ctx, conf, taskUUID)}
 }
 
@@ -458,7 +458,7 @@ type MockBackend_StartStep_Call struct {
 //   - ctx context.Context
 //   - step *types.Step
 //   - taskUUID string
-func (_e *MockBackend_Expecter) StartStep(ctx interface{}, step interface{}, taskUUID interface{}) *MockBackend_StartStep_Call {
+func (_e *MockBackend_Expecter) StartStep(ctx any, step any, taskUUID any) *MockBackend_StartStep_Call {
 	return &MockBackend_StartStep_Call{Call: _e.mock.On("StartStep", ctx, step, taskUUID)}
 }
 
@@ -532,7 +532,7 @@ type MockBackend_TailStep_Call struct {
 //   - ctx context.Context
 //   - step *types.Step
 //   - taskUUID string
-func (_e *MockBackend_Expecter) TailStep(ctx interface{}, step interface{}, taskUUID interface{}) *MockBackend_TailStep_Call {
+func (_e *MockBackend_Expecter) TailStep(ctx any, step any, taskUUID any) *MockBackend_TailStep_Call {
 	return &MockBackend_TailStep_Call{Call: _e.mock.On("TailStep", ctx, step, taskUUID)}
 }
 
@@ -606,7 +606,7 @@ type MockBackend_WaitStep_Call struct {
 //   - ctx context.Context
 //   - step *types.Step
 //   - taskUUID string
-func (_e *MockBackend_Expecter) WaitStep(ctx interface{}, step interface{}, taskUUID interface{}) *MockBackend_WaitStep_Call {
+func (_e *MockBackend_Expecter) WaitStep(ctx any, step any, taskUUID any) *MockBackend_WaitStep_Call {
 	return &MockBackend_WaitStep_Call{Call: _e.mock.On("WaitStep", ctx, step, taskUUID)}
 }
 

@@ -154,7 +154,7 @@ func TestPipelineListFilter(t *testing.T) {
 	err = store.CreatePipeline(pipeline2, []*model.Step{}...)
 	assert.NoError(t, err)
 
-	pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, nil)
+	pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}}, nil)
 	assert.NoError(t, err)
 	assert.Len(t, pipelines, 2)
 	assert.Equal(t, pipeline2.ID, pipelines[0].ID)
@@ -183,7 +183,7 @@ func TestPipelineListFilter(t *testing.T) {
 	assert.Len(t, pipelines, 1)
 	assert.Equal(t, pipeline2.ID, pipelines[0].ID)
 
-	pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, &model.PipelineFilter{Before: before})
+	pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}}, &model.PipelineFilter{Before: before})
 	assert.NoError(t, err3)
 	assert.Len(t, pipelines, 1)
 	assert.Equal(t, pipeline1.ID, pipelines[0].ID)

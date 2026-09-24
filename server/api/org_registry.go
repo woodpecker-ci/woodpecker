@@ -62,7 +62,7 @@ func GetOrgRegistryList(c *gin.Context) {
 	org := session.Org(c)
 
 	registryService := server.Config.Services.Manager.RegistryService()
-	list, err := registryService.OrgRegistryList(org.ID, session.Pagination(c))
+	list, err := registryService.OrgRegistryList(org.ID, session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting registry list for %q. %s", org.ID, err)
 		return

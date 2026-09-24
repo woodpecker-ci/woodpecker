@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -156,5 +157,49 @@ func TestLogStreamSSEConcurrentDisconnect(t *testing.T) {
 			wg.Wait()
 			<-done
 		})
+	}
+}
+
+// The handlers must not leave a goroutine behind that still reads
+// server.Config after the handler returned: the t.Cleanup of the stress tests
+// above resets the service, and the race detector reports the unsynchronized
+// read/write pair (issue #6766). Swapping the service around every request
+// reproduces that reliably.
+func TestEventStreamSSEDisconnectedClient(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	for range 50 {
+		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), nil, nil, memory.New())
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+
+		ctx, cancel := context.WithCancelCause(t.Context())
+		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/stream/events", nil)
+		c.Request = req
+
+		// The client is already gone when the handler starts.
+		cancel(nil)
+		EventStreamSSE(c)
+		assert.Contains(t, w.Body.String(), ": ping\n\n")
+
+		server.Config.Services.Scheduler = nil
+	}
+}
+
+func TestLogStreamSSEDisconnectedClient(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	for range 50 {
+		server.Config.Services.Logs = logging.New()
+
+		w, c, cancel := setupLogStreamContext(t)
+
+		// The client is already gone when the handler starts.
+		cancel(nil)
+		LogStreamSSE(c)
+		assert.Contains(t, w.Body.String(), ": ping\n\n")
+
+		server.Config.Services.Logs = nil
 	}
 }

@@ -217,6 +217,10 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
 			want: "One or more of the specified dependencies do not exist",
 		},
+		{
+			from: "{steps: { build: { image: golang } }, services: [ { name: database, image: mysql }, { name: database, image: postgres } ] }",
+			want: "Service names must be unique, `database` is used more than once",
+		},
 	}
 
 	for _, test := range testdata {
