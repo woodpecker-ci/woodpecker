@@ -69,7 +69,7 @@ type MockManager_ConfigServiceFromRepo_Call struct {
 
 // ConfigServiceFromRepo is a helper method to define mock.On call
 //   - repo *model.Repo
-func (_e *MockManager_Expecter) ConfigServiceFromRepo(repo interface{}) *MockManager_ConfigServiceFromRepo_Call {
+func (_e *MockManager_Expecter) ConfigServiceFromRepo(repo any) *MockManager_ConfigServiceFromRepo_Call {
 	return &MockManager_ConfigServiceFromRepo_Call{Call: _e.mock.On("ConfigServiceFromRepo", repo)}
 }
 
@@ -177,7 +177,7 @@ type MockManager_ForgeByID_Call struct {
 
 // ForgeByID is a helper method to define mock.On call
 //   - forgeID int64
-func (_e *MockManager_Expecter) ForgeByID(forgeID interface{}) *MockManager_ForgeByID_Call {
+func (_e *MockManager_Expecter) ForgeByID(forgeID any) *MockManager_ForgeByID_Call {
 	return &MockManager_ForgeByID_Call{Call: _e.mock.On("ForgeByID", forgeID)}
 }
 
@@ -239,7 +239,7 @@ type MockManager_ForgeFromRepo_Call struct {
 
 // ForgeFromRepo is a helper method to define mock.On call
 //   - repo *model.Repo
-func (_e *MockManager_Expecter) ForgeFromRepo(repo interface{}) *MockManager_ForgeFromRepo_Call {
+func (_e *MockManager_Expecter) ForgeFromRepo(repo any) *MockManager_ForgeFromRepo_Call {
 	return &MockManager_ForgeFromRepo_Call{Call: _e.mock.On("ForgeFromRepo", repo)}
 }
 
@@ -301,7 +301,7 @@ type MockManager_ForgeFromUser_Call struct {
 
 // ForgeFromUser is a helper method to define mock.On call
 //   - user *model.User
-func (_e *MockManager_Expecter) ForgeFromUser(user interface{}) *MockManager_ForgeFromUser_Call {
+func (_e *MockManager_Expecter) ForgeFromUser(user any) *MockManager_ForgeFromUser_Call {
 	return &MockManager_ForgeFromUser_Call{Call: _e.mock.On("ForgeFromUser", user)}
 }
 
@@ -400,7 +400,7 @@ type MockManager_RegistryServiceFromRepo_Call struct {
 
 // RegistryServiceFromRepo is a helper method to define mock.On call
 //   - repo *model.Repo
-func (_e *MockManager_Expecter) RegistryServiceFromRepo(repo interface{}) *MockManager_RegistryServiceFromRepo_Call {
+func (_e *MockManager_Expecter) RegistryServiceFromRepo(repo any) *MockManager_RegistryServiceFromRepo_Call {
 	return &MockManager_RegistryServiceFromRepo_Call{Call: _e.mock.On("RegistryServiceFromRepo", repo)}
 }
 
@@ -499,7 +499,7 @@ type MockManager_SecretServiceFromRepo_Call struct {
 
 // SecretServiceFromRepo is a helper method to define mock.On call
 //   - repo *model.Repo
-func (_e *MockManager_Expecter) SecretServiceFromRepo(repo interface{}) *MockManager_SecretServiceFromRepo_Call {
+func (_e *MockManager_Expecter) SecretServiceFromRepo(repo any) *MockManager_SecretServiceFromRepo_Call {
 	return &MockManager_SecretServiceFromRepo_Call{Call: _e.mock.On("SecretServiceFromRepo", repo)}
 }
 

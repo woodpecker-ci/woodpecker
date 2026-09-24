@@ -39,7 +39,7 @@ func (c *combined) RegistryFind(repo *model.Repo, addr string) (*model.Registry,
 	return c.dbRegistry.RegistryFind(repo, addr)
 }
 
-func (c *combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+func (c *combined) RegistryList(repo *model.Repo, p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	return c.dbRegistry.RegistryList(repo, p)
 }
 
@@ -59,7 +59,7 @@ func (c *combined) RegistryListPipeline(ctx context.Context, repo *model.Repo, p
 	}
 
 	for _, registry := range c.registries {
-		list, err := registry.GlobalRegistryList(&model.ListOptions{All: true})
+		list, err := registry.GlobalRegistryList(&model.ListOptionsWithAll{All: true})
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +91,7 @@ func (c *combined) OrgRegistryFind(owner int64, addr string) (*model.Registry, e
 	return c.dbRegistry.OrgRegistryFind(owner, addr)
 }
 
-func (c *combined) OrgRegistryList(owner int64, p *model.ListOptions) ([]*model.Registry, error) {
+func (c *combined) OrgRegistryList(owner int64, p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	return c.dbRegistry.OrgRegistryList(owner, p)
 }
 
@@ -123,8 +123,8 @@ func (c *combined) GlobalRegistryFind(addr string) (*model.Registry, error) {
 	return nil, types.ErrRecordNotExist
 }
 
-func (c *combined) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
-	dbRegistries, err := c.dbRegistry.GlobalRegistryList(&model.ListOptions{All: true})
+func (c *combined) GlobalRegistryList(p *model.ListOptionsWithAll) ([]*model.Registry, error) {
+	dbRegistries, err := c.dbRegistry.GlobalRegistryList(&model.ListOptionsWithAll{All: true})
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (c *combined) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, 
 	}
 
 	for _, registry := range c.registries {
-		list, err := registry.GlobalRegistryList(&model.ListOptions{All: true})
+		list, err := registry.GlobalRegistryList(&model.ListOptionsWithAll{All: true})
 		if err != nil {
 			return nil, err
 		}

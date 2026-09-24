@@ -22,6 +22,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
+	"go.woodpecker-ci.org/woodpecker/v3/cmd/shared"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
@@ -38,6 +39,12 @@ func GenApp(backends []backend_types.Backend) *cli.Command {
 			Name:   "ping",
 			Usage:  "ping the agent",
 			Action: pinger,
+		},
+		{
+			Name:   "decode-base64",
+			Usage:  "decodes a base64 string",
+			Hidden: true, // internal helper for local backend and cmd
+			Action: shared.Base64Decoder,
 		},
 	}
 	agentFlags := slices.Concat(flags, logger.GlobalLoggerFlags)

@@ -144,7 +144,7 @@ func PatchRegistry(c *gin.Context) {
 func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	list, err := registryService.RegistryList(repo, session.Pagination(c))
+	list, err := registryService.RegistryList(repo, session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting registry list. %s", err)
 		return

@@ -26,7 +26,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v91/github"
 	github_mock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -335,7 +335,7 @@ func TestStatusDeployment(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	gh, err := github.NewClient(
-		github.WithURLs(github.Ptr(server.URL+"/"), nil),
+		github.WithURLs(new(server.URL+"/"), nil),
 		github.WithHTTPClient(server.Client()),
 	)
 	require.NoError(t, err)
@@ -393,8 +393,8 @@ func TestHook(t *testing.T) {
 			github_mock.GetReposCommitsByOwnerByRepoByRef,
 			github.RepositoryCommit{
 				Files: []*github.CommitFile{
-					{Filename: github.Ptr("README.md")},
-					{Filename: github.Ptr("main.go")},
+					{Filename: new("README.md")},
+					{Filename: new("main.go")},
 				},
 			},
 		),
@@ -402,15 +402,15 @@ func TestHook(t *testing.T) {
 			github_mock.GetReposCompareByOwnerByRepoByBasehead,
 			github.CommitsComparison{
 				Files: []*github.CommitFile{
-					{Filename: github.Ptr("main.go")},
+					{Filename: new("main.go")},
 				},
 			},
 		),
 		github_mock.WithRequestMatch(
 			github_mock.GetReposPullsFilesByOwnerByRepoByPullNumber,
 			[]*github.CommitFile{
-				{Filename: github.Ptr("README.md")},
-				{Filename: github.Ptr("main.go")},
+				{Filename: new("README.md")},
+				{Filename: new("main.go")},
 			},
 		),
 	)
@@ -549,14 +549,14 @@ func TestGetTagCommitSHA(t *testing.T) {
 		github_mock.WithRequestMatchPages(
 			github_mock.GetReposTagsByOwnerByRepo,
 			[]github.RepositoryTag{
-				{Name: github.Ptr("v1.0.0")},
-				{Name: github.Ptr("v1.0.1")},
+				{Name: new("v1.0.0")},
+				{Name: new("v1.0.1")},
 			},
 			[]github.RepositoryTag{
-				{Name: github.Ptr("v1.0.2")},
+				{Name: new("v1.0.2")},
 				{
-					Name:   github.Ptr("v1.0.3"),
-					Commit: &github.Commit{SHA: github.Ptr("deadbeefcafe")},
+					Name:   new("v1.0.3"),
+					Commit: &github.Commit{SHA: new("deadbeefcafe")},
 				},
 			},
 		),

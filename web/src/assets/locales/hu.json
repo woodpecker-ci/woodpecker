@@ -241,7 +241,11 @@
             "title": "Manuális pipeline futtatás előidézése",
             "trigger": "Pipeline futtatása",
             "show_pipelines": "Pipelineok mutatása",
-            "no_manual_workflows": "Nem található egyező munkafolyamat. Győződj meg róla, hogy legalább egy munkafolyamatot elindít a kézi esemény."
+            "no_manual_workflows": "Nem található egyező munkafolyamat. Győződj meg róla, hogy legalább egy munkafolyamatot elindít a kézi esemény.",
+            "message": {
+                "title": "Üzenet",
+                "desc": "Ez az üzenet további információként hozzáadásra kerül a pipeline üzeneteihez."
+            }
         },
         "deploy_pipeline": {
             "variables": {

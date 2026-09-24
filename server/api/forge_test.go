@@ -149,7 +149,7 @@ func TestGetForges(t *testing.T) {
 	listForgesRequest := func(t *testing.T, user *model.User) *httptest.ResponseRecorder {
 		t.Helper()
 		mockStore := store_mocks.NewMockStore(t)
-		mockStore.On("ForgeList", &model.ListOptions{Page: 1, PerPage: 50}).Return([]*model.Forge{{
+		mockStore.On("ForgeList", &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}}).Return([]*model.Forge{{
 			ID:            1,
 			Type:          model.ForgeTypeGithub,
 			URL:           "https://github.com",

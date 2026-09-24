@@ -261,3 +261,36 @@ func TestIsDag(t *testing.T) {
 	c = newDAGCompiler(steps)
 	assert.True(t, c.isDAG())
 }
+
+func TestDuplicateStepNameInDAG(t *testing.T) {
+	steps := []*dagCompilerStep{
+		{
+			name:      "build",
+			position:  0,
+			step:      &backend_types.Step{Name: "build"},
+			dependsOn: constraint.DependsOn{{Name: "clone"}},
+		},
+		{
+			name:     "clone",
+			position: 1,
+			step:     &backend_types.Step{Name: "clone"},
+		},
+		{
+			name:      "build",
+			position:  2,
+			step:      &backend_types.Step{Name: "build"},
+			dependsOn: constraint.DependsOn{{Name: "clone"}},
+		},
+	}
+	_, err := newDAGCompiler(steps).compile()
+	assert.ErrorIs(t, err, &ErrStepDuplicateName{})
+
+	// without a dependency the steps run as a sequence, where duplicate names are fine
+	steps = []*dagCompilerStep{
+		{name: "build", position: 0, step: &backend_types.Step{Name: "build"}},
+		{name: "build", position: 1, step: &backend_types.Step{Name: "build"}},
+	}
+	stages, err := newDAGCompiler(steps).compile()
+	assert.NoError(t, err)
+	assert.Len(t, stages, 2)
+}

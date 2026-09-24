@@ -30,12 +30,9 @@ func NewSecretsReplacer(secrets []string) *strings.Replacer {
 
 	for _, old := range secrets {
 		old = strings.TrimSpace(old)
-		if len(old) <= minStringLength {
-			continue
-		}
-		// since replacer is executed on each line we have to split multi-line-secrets
+		// since replacer is executed on each line we have to split multi-line-secrets.
 		for _, part := range strings.Split(old, "\n") {
-			if len(part) == 0 {
+			if len(part) <= minStringLength {
 				continue
 			}
 			oldNew = append(oldNew, part)

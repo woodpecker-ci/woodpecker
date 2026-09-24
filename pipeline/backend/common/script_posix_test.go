@@ -43,13 +43,13 @@ unset CI_SCRIPT
 mkdir -p "/woodpecker/some"
 cd "/woodpecker/some"
 
-echo + 'echo ${PATH}'
+echo '▶  ''echo ${PATH}'
 echo ${PATH}
 
-echo + 'go build'
+echo '▶  ''go build'
 go build
 
-echo + 'go test'
+echo '▶  ''go test'
 go test
 `,
 		},

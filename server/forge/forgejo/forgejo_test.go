@@ -20,6 +20,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -188,3 +189,29 @@ var (
 		State: model.StatusSuccess,
 	}
 )
+
+func TestGetStatus(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		status model.StatusValue
+		want   forgejo.StatusState
+	}{
+		{model.StatusPending, forgejo.StatusPending},
+		{model.StatusBlocked, forgejo.StatusPending},
+		{model.StatusCreated, forgejo.StatusPending},
+		{model.StatusRunning, forgejo.StatusPending},
+		{model.StatusSuccess, forgejo.StatusSuccess},
+		{model.StatusFailure, forgejo.StatusFailure},
+		{model.StatusKilled, forgejo.StatusFailure},
+		{model.StatusSkipped, forgejo.StatusFailure},
+		{model.StatusCanceled, forgejo.StatusFailure},
+		{model.StatusDeclined, forgejo.StatusWarning},
+		{model.StatusError, forgejo.StatusError},
+		{model.StatusValue("bogus"), forgejo.StatusFailure},
+	}
+
+	for _, tt := range tests {
+		assert.Equalf(t, tt.want, getStatus(tt.status), "status %q", tt.status)
+	}
+}

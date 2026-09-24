@@ -17,6 +17,7 @@ package rpc
 import (
 	"context"
 	"errors"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 )
 
 func newAuthorizer(t *testing.T) *Authorizer {
@@ -161,6 +164,93 @@ func TestAuthorize(t *testing.T) {
 		a := newAuthorizer(t)
 		// Passing an empty string as the token value.
 		ctx := ctxWithToken(t.Context(), "")
+
+		_, err := a.authorize(ctx, "/proto.WoodpeckerServer/Next")
+
+		require.Error(t, err)
+		s, _ := status.FromError(err)
+		assert.Equal(t, codes.Unauthenticated, s.Code())
+	})
+}
+
+func TestAuthorizeProtoVersion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("matching proto version is allowed", func(t *testing.T) {
+		t.Parallel()
+
+		a := newAuthorizer(t)
+		token := validTokenForAgent(t, 7)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs(
+			"token", token,
+			"proto-version", strconv.Itoa(int(proto.Version)),
+		))
+
+		newCtx, err := a.authorize(ctx, "/proto.WoodpeckerServer/Next")
+
+		require.NoError(t, err)
+		agentID, ok := newCtx.Value(agentIDKey).(int64)
+		require.True(t, ok)
+		assert.EqualValues(t, 7, agentID)
+	})
+
+	t.Run("missing proto version is allowed for backward compatibility", func(t *testing.T) {
+		t.Parallel()
+
+		a := newAuthorizer(t)
+		token := validTokenForAgent(t, 7)
+		ctx := ctxWithToken(t.Context(), token)
+
+		_, err := a.authorize(ctx, "/proto.WoodpeckerServer/Next")
+
+		require.NoError(t, err)
+	})
+
+	t.Run("mismatching proto version returns FailedPrecondition", func(t *testing.T) {
+		t.Parallel()
+
+		a := newAuthorizer(t)
+		token := validTokenForAgent(t, 7)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs(
+			"token", token,
+			"proto-version", strconv.Itoa(int(proto.Version)-1),
+		))
+
+		_, err := a.authorize(ctx, "/proto.WoodpeckerServer/Next")
+
+		require.Error(t, err)
+		s, ok := status.FromError(err)
+		require.True(t, ok)
+		assert.Equal(t, codes.FailedPrecondition, s.Code())
+		assert.Contains(t, s.Message(), "incompatible with server proto version")
+	})
+
+	t.Run("unparseable proto version returns InvalidArgument", func(t *testing.T) {
+		t.Parallel()
+
+		a := newAuthorizer(t)
+		token := validTokenForAgent(t, 7)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs(
+			"token", token,
+			"proto-version", "next-abc123",
+		))
+
+		_, err := a.authorize(ctx, "/proto.WoodpeckerServer/Next")
+
+		require.Error(t, err)
+		s, ok := status.FromError(err)
+		require.True(t, ok)
+		assert.Equal(t, codes.InvalidArgument, s.Code())
+	})
+
+	t.Run("proto version check happens after authentication", func(t *testing.T) {
+		t.Parallel()
+
+		a := newAuthorizer(t)
+		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs(
+			"token", "not-a-jwt",
+			"proto-version", "1",
+		))
 
 		_, err := a.authorize(ctx, "/proto.WoodpeckerServer/Next")
 

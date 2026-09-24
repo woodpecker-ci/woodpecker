@@ -71,7 +71,7 @@ type MockService_EnvironList_Call struct {
 
 // EnvironList is a helper method to define mock.On call
 //   - repo *model.Repo
-func (_e *MockService_Expecter) EnvironList(repo interface{}) *MockService_EnvironList_Call {
+func (_e *MockService_Expecter) EnvironList(repo any) *MockService_EnvironList_Call {
 	return &MockService_EnvironList_Call{Call: _e.mock.On("EnvironList", repo)}
 }
 

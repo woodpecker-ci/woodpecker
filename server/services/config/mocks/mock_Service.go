@@ -81,7 +81,7 @@ type MockService_Fetch_Call struct {
 //   - pipeline *model.Pipeline
 //   - oldConfigData []*types.FileMeta
 //   - restart bool
-func (_e *MockService_Expecter) Fetch(ctx interface{}, forge1 interface{}, user interface{}, repo interface{}, pipeline interface{}, oldConfigData interface{}, restart interface{}) *MockService_Fetch_Call {
+func (_e *MockService_Expecter) Fetch(ctx any, forge1 any, user any, repo any, pipeline any, oldConfigData any, restart any) *MockService_Fetch_Call {
 	return &MockService_Fetch_Call{Call: _e.mock.On("Fetch", ctx, forge1, user, repo, pipeline, oldConfigData, restart)}
 }
 
