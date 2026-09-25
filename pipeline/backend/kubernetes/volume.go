@@ -104,32 +104,23 @@ func stopVolume(ctx context.Context, engine *kube, name, namespace string, delet
 	return err
 }
 
-// useWorkflowVolumeForWorkspace makes every step mount the workflow volume this backend creates.
-func useWorkflowVolumeForWorkspace(conf *types.Config) error {
-	workflowVolume, err := volumeName(conf.Volume)
-	if err != nil {
-		return err
-	}
-
+// dropLocalPathsInsideWorkspace removes local filesystem volumes that mount
+// at or inside the workspace, because Kubernetes cannot provide host paths and the
+// workspace volume already covers that directory tree.
+func dropLocalPathsInsideWorkspace(conf *types.Config) {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			volumes := make([]string, 0, len(step.Volumes))
 			for _, volume := range step.Volumes {
 				mountPath := volumeMountPath(volume)
-				switch {
-				case mountPath == step.WorkspaceBase:
-					volumes = append(volumes, workflowVolume+":"+mountPath)
-				case isLocalPath(volume) && isBelowPath(mountPath, step.WorkspaceBase):
-					// covered by the workspace volume
-				default:
-					volumes = append(volumes, volume)
+				if isLocalPath(volume) && (mountPath == step.WorkspaceBase || isBelowPath(mountPath, step.WorkspaceBase)) {
+					continue
 				}
+				volumes = append(volumes, volume)
 			}
 			step.Volumes = volumes
 		}
 	}
-
-	return nil
 }
 
 // isLocalPath reports whether a volume is backed by a local path.
