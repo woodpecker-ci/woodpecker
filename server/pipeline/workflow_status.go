@@ -60,3 +60,28 @@ func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, stat
 	}
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
+
+// UpdateWorkflowToStatusKilled closes a workflow nobody will report on: the
+// queue holds no task for it, so the agent that would normally send its result
+// back is gone. Its still-open steps are closed with it, because a killed
+// workflow holding running steps is the same lie one level down.
+func UpdateWorkflowToStatusKilled(store store.Store, workflow model.Workflow, finished int64) (*model.Workflow, error) {
+	for _, step := range workflow.Children {
+		if step.State != model.StatusRunning && step.State != model.StatusPending {
+			continue
+		}
+		step.State = model.StatusKilled
+		if step.Started != 0 {
+			step.Finished = finished
+		}
+		if err := store.StepUpdate(step); err != nil {
+			return nil, err
+		}
+	}
+
+	workflow.State = model.StatusKilled
+	if workflow.Started != 0 {
+		workflow.Finished = finished
+	}
+	return &workflow, store.WorkflowUpdate(&workflow)
+}

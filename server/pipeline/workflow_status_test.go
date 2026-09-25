@@ -298,3 +298,51 @@ func TestUpdateWorkflowStatusToDone(t *testing.T) {
 		assert.Equal(t, int64(1234567900), result.Finished)
 	})
 }
+
+func TestUpdateWorkflowToStatusKilled(t *testing.T) {
+	t.Run("closes the workflow and every step still open", func(t *testing.T) {
+		running := &model.Step{ID: 1, State: model.StatusRunning, Started: 1234567800}
+		pending := &model.Step{ID: 2, State: model.StatusPending}
+		done := &model.Step{ID: 3, State: model.StatusSuccess, Started: 1234567700, Finished: 1234567750}
+		workflow := model.Workflow{
+			ID:       7,
+			State:    model.StatusRunning,
+			Started:  1234567800,
+			Children: []*model.Step{running, pending, done},
+		}
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepUpdate", mock.Anything).Return(nil).Twice()
+		mockStore.On("WorkflowUpdate", mock.MatchedBy(func(w *model.Workflow) bool {
+			return w.State == model.StatusKilled
+		})).Return(nil)
+
+		result, err := UpdateWorkflowToStatusKilled(mockStore, workflow, 1234567900)
+
+		assert.NoError(t, err)
+		assert.Equal(t, model.StatusKilled, result.State)
+		assert.Equal(t, int64(1234567900), result.Finished)
+		assert.Equal(t, model.StatusKilled, running.State)
+		assert.Equal(t, int64(1234567900), running.Finished)
+		assert.Equal(t, model.StatusKilled, pending.State)
+		// a step that never started gets no finish time, and a finished step is
+		// left exactly as it was
+		assert.Equal(t, int64(0), pending.Finished)
+		assert.Equal(t, model.StatusSuccess, done.State)
+		assert.Equal(t, int64(1234567750), done.Finished)
+		mockStore.AssertNumberOfCalls(t, "StepUpdate", 2)
+	})
+
+	t.Run("leaves finished untouched for a workflow that never started", func(t *testing.T) {
+		workflow := model.Workflow{ID: 8, State: model.StatusPending}
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+
+		result, err := UpdateWorkflowToStatusKilled(mockStore, workflow, 1234567900)
+
+		assert.NoError(t, err)
+		assert.Equal(t, model.StatusKilled, result.State)
+		assert.Equal(t, int64(0), result.Finished)
+	})
+}

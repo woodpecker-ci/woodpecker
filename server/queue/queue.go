@@ -41,6 +41,26 @@ var (
 	ErrWorkerKicked = errors.New("worker was kicked")
 )
 
+// ErrTasksNotFound reports the task IDs the queue held no task for. It
+// satisfies errors.Is(err, ErrNotFound), so callers that only care that
+// something was missing keep working unchanged, while callers that have to
+// react per task can errors.As it and read IDs.
+//
+// Cancel is such a caller: a workflow the queue has no task for is a workflow
+// no agent is executing, so the report that normally comes back from the agent
+// will never arrive, and the server has to close that workflow itself.
+type ErrTasksNotFound struct {
+	IDs []string
+}
+
+func (e *ErrTasksNotFound) Error() string {
+	return fmt.Sprintf("%s: %s", ErrNotFound, strings.Join(e.IDs, ", "))
+}
+
+func (e *ErrTasksNotFound) Is(target error) bool {
+	return target == ErrNotFound //nolint:errorlint // comparing to the sentinel is the point
+}
+
 // ErrExternal wraps an external error.
 type ErrExternal struct {
 	err error
