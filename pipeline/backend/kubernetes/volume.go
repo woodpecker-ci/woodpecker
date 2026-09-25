@@ -104,9 +104,9 @@ func stopVolume(ctx context.Context, engine *kube, name, namespace string, delet
 	return err
 }
 
-// dropLocalPathsInsideWorkspace removes local filesystem volumes that mount
-// at or inside the workspace, because Kubernetes cannot provide host paths and the
-// workspace volume already covers that directory tree.
+// dropLocalPathsInsideWorkspace removes local filesystem volumes that mount at or
+// inside the workspace. Kubernetes cannot mount host paths, and the workspace
+// volume already covers that directory tree. Each dropped volume is logged.
 func dropLocalPathsInsideWorkspace(conf *types.Config) {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
@@ -114,6 +114,7 @@ func dropLocalPathsInsideWorkspace(conf *types.Config) {
 			for _, volume := range step.Volumes {
 				mountPath := volumeMountPath(volume)
 				if isLocalPath(volume) && (mountPath == step.WorkspaceBase || isBelowPath(mountPath, step.WorkspaceBase)) {
+					log.Warn().Str("step", step.Name).Str("volume", volume).Msg("dropping local-path volume inside workspace, Kubernetes cannot mount host paths, use --local=false to clone inside the cluster")
 					continue
 				}
 				volumes = append(volumes, volume)
@@ -123,12 +124,12 @@ func dropLocalPathsInsideWorkspace(conf *types.Config) {
 	}
 }
 
-// isLocalPath reports whether a volume is backed by a local path.
+// isLocalPath reports whether a volume is backed by a local filesystem path.
 func isLocalPath(volume string) bool {
 	return strings.HasPrefix(strings.Split(volume, ":")[0], "/")
 }
 
-// isBelowPath reports whether path is below base.
+// isBelowPath reports whether path lies below the base directory.
 func isBelowPath(path, base string) bool {
 	return base != "" && strings.HasPrefix(path, strings.TrimSuffix(base, "/")+"/")
 }

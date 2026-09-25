@@ -128,10 +128,9 @@ func TestRepoRootFromFile(t *testing.T) {
 	assert.Equal(t, rootDir, repoRootFromFile(otherFile))
 }
 
-// TestExecStepVolumesReferenceWorkflowVolume ensures that the workspace volume
-// mounted into every step is the same volume the backend creates from
-// config.Volume, and that the local repository path is still mounted for
-// backends that run on the host.
+// TestExecStepVolumesReferenceWorkflowVolume ensures every step mounts the workspace
+// volume the backend creates from config.Volume, and that the local repository path
+// is still mounted for backends running on the host.
 func TestExecStepVolumesReferenceWorkflowVolume(t *testing.T) {
 	const (
 		workspaceBase = "/woodpecker"
@@ -159,12 +158,14 @@ steps:
 
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			workflowVolume = args.Get(1).(*backend_types.Config).Volume
+			conf, _ := args.Get(1).(*backend_types.Config)
+			workflowVolume = conf.Volume
 		}).
 		Return(nil)
 	engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			stepVolumes = append(stepVolumes, args.Get(1).(*backend_types.Step).Volumes)
+			step, _ := args.Get(1).(*backend_types.Step)
+			stepVolumes = append(stepVolumes, step.Volumes)
 		}).
 		Return(nil)
 	engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).

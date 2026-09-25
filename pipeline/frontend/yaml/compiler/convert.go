@@ -77,10 +77,8 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		extraHosts[i].IP = ip
 	}
 
-	// The workspace volume is always mounted; the backend creates the matching
-	// volume/PVC from config.Volume, which shares the compiler prefix. Keeping
-	// it for local runs too ensures the workspace mount always references the
-	// volume the backend actually provisions.
+	// always mount the workspace volume: it references config.Volume, which the
+	// backend provisions, so steps mount the volume the backend actually creates
 	volumes := []string{workspaceVolume}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
