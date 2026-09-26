@@ -26,6 +26,16 @@ steps:
 
         The changelog entry: {{ changelog }}
 
+  - name: mastodon-profile
+    image: docker.io/woodpeckerci/plugin-mastodon-profile
+    settings:
+      server_url: https://floss.social
+      access_token:
+        from_secret: mastodon_token
+      update_fields:
+        - name: Latest version
+          value: ${CI_COMMIT_TAG##v}
+
   - name: bluesky-post
     image: docker.io/woodpeckerci/plugin-bluesky-post
     settings:
