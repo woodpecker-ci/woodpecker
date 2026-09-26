@@ -12,6 +12,8 @@
         <SelectField :id="id" v-model="payload.branch" :options="branches" required />
       </InputField>
 
+      <WorkflowSelect v-model="payload.workflows" :repo-id="repo.id" :branch="payload.branch" />
+
       <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
         <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
         <KeyValueEditor
@@ -24,7 +26,10 @@
         />
       </InputField>
 
-      <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" :disabled="!isFormValid" />
+      <div class="flex items-center gap-2">
+        <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" :disabled="!isFormValid" />
+        <span class="text-wp-text-alt-100 text-sm">{{ workflowSummary }}</span>
+      </div>
     </form>
   </Panel>
   <div v-else class="text-wp-text-100 flex justify-center">
@@ -45,9 +50,11 @@ import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
+import WorkflowSelect from '~/components/repo/WorkflowSelect.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
+import { useWorkflowSummary } from '~/compositions/useWorkflowSummary';
 import { useWPTitle } from '~/compositions/useWPTitle';
 
 defineProps<{
@@ -67,10 +74,11 @@ const repoPermissions = requiredInject('repo-permissions');
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
-const payload = ref<{ message: string; branch: string; variables: Record<string, string> }>({
+const payload = ref<{ message: string; branch: string; variables: Record<string, string>; workflows: string[] }>({
   message: '',
   branch: 'main',
   variables: {},
+  workflows: [],
 });
 
 const isVariablesValid = ref(true);
@@ -83,6 +91,8 @@ const pipelineOptions = computed(() => ({
   ...payload.value,
   variables: payload.value.variables,
 }));
+
+const workflowSummary = useWorkflowSummary(computed(() => payload.value.workflows));
 
 const loading = ref(true);
 onMounted(async () => {
@@ -101,28 +111,33 @@ onMounted(async () => {
 
 async function triggerManualPipeline() {
   loading.value = true;
-  const pipeline = await apiClient.createPipeline(repo.value.id, pipelineOptions.value);
+  // A failed create (e.g. an invalid selection) already surfaces its own toast
+  // via the global error handler in App.vue; this only has to make sure the
+  // form comes back instead of the spinner spinning forever.
+  try {
+    const pipeline = await apiClient.createPipeline(repo.value.id, pipelineOptions.value);
 
-  emit('close');
+    emit('close');
 
-  if (typeof pipeline == 'string') {
-    // if this is a string (http 204) there is no workflow to run with the 'manual' event
+    if (typeof pipeline == 'string') {
+      // if this is a string (http 204) there is no workflow to run with the 'manual' event
 
-    await router.push({
-      name: 'repo',
-    });
+      await router.push({
+        name: 'repo',
+      });
 
-    notifications.notify({ type: 'warn', title: i18n.t('repo.manual_pipeline.no_manual_workflows') });
-  } else {
-    await router.push({
-      name: 'repo-pipeline',
-      params: {
-        pipelineId: pipeline.number,
-      },
-    });
+      notifications.notify({ type: 'warn', title: i18n.t('repo.manual_pipeline.no_manual_workflows') });
+    } else {
+      await router.push({
+        name: 'repo-pipeline',
+        params: {
+          pipelineId: pipeline.number,
+        },
+      });
+    }
+  } finally {
+    loading.value = false;
   }
-
-  loading.value = false;
 }
 
 useWPTitle(computed(() => [i18n.t('repo.manual_pipeline.trigger'), repo.value.full_name]));

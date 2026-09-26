@@ -1,0 +1,54 @@
+# Self-contained server image for testing a branch build against a real
+# instance. Unlike Dockerfile.server.multiarch.rootless, this doesn't require
+# a pre-populated dist/server/<os>_<arch>/ tree from goreleaser/xgo — it runs
+# `make build-server` (UI build + openapi generation + go build) inside the
+# build stage itself, the same way Dockerfile.agent.multiarch already does
+# for the agent.
+#
+#   docker build --platform linux/amd64 -f docker/Dockerfile.server.selftest -t <tag> .
+#
+# No --platform=$BUILDPLATFORM on the build stage on purpose: the server
+# needs CGO (mattn/go-sqlite3), and cross-compiling CGO from a different host
+# arch needs a matching cross-compiler (the real release Dockerfiles use xgo
+# for this). Letting buildx run the whole build stage under the target
+# platform (via QEMU if it isn't the host's own arch) keeps gcc native to
+# whatever we're actually building for, at the cost of being slower.
+
+FROM docker.io/golang:1.27 AS build
+
+RUN groupadd -g 1000 woodpecker && \
+  useradd -u 1000 -g 1000 woodpecker && \
+  mkdir -p /var/lib/woodpecker
+
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+  apt-get install -y nodejs && \
+  corepack enable
+
+WORKDIR /src
+COPY . .
+ARG TARGETOS TARGETARCH
+ENV CI=true
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    --mount=type=cache,target=/root/.local/share/pnpm/store \
+    TARGETOS=${TARGETOS} TARGETARCH=${TARGETARCH} make build-server
+
+FROM scratch
+ENV GODEBUG=netdns=go
+# Internal setting do NOT change! Signals that woodpecker is running inside a container
+ENV WOODPECKER_IN_CONTAINER=true
+ENV XDG_CACHE_HOME=/var/lib/woodpecker
+ENV XDG_DATA_HOME=/var/lib/woodpecker
+ENV SQLITE_TMPDIR=/var/lib/woodpecker
+EXPOSE 8000 9000 80 443
+
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /src/dist/woodpecker-server /bin/
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+COPY --from=build --chown=woodpecker:woodpecker /var/lib/woodpecker /var/lib/woodpecker
+
+USER woodpecker
+
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
+ENTRYPOINT ["/bin/woodpecker-server"]

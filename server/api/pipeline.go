@@ -31,6 +31,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
@@ -102,6 +104,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 		Ref:                 "refs/heads/" + opts.Branch,
 		AdditionalVariables: opts.Variables,
+		SelectedWorkflows:   opts.Workflows,
 
 		Author: user.Login,
 		Email:  user.Email,
@@ -405,6 +408,76 @@ func GetPipelineConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// GetRepoWorkflows
+//
+//	@Summary		List the workflows a trigger can select
+//	@Description	Returns the workflow configs currently defined on a branch, each with the workflows it requires. The names are those accepted by the workflows option of a manual pipeline or a cron job.
+//	@Router			/repos/{repo_id}/workflows [get]
+//	@Produce		json
+//	@Success		200	{array}	WorkflowInfo
+//	@Tags			Pipelines
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			repo_id			path	int		true	"the repository id"
+//	@Param			branch			query	string	false	"the branch to read the workflows from, defaults to the repo default branch"
+func GetRepoWorkflows(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+	user := session.User(c)
+
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	branch := c.Query("branch")
+	if branch == "" {
+		branch = repo.Branch
+	}
+
+	// the branch comes from a query parameter typed by a user, so a lookup
+	// failure is reported as a bad request rather than a server error
+	commit, err := _forge.BranchHead(c, user, repo, branch)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Branch not resolved: %s", err)
+		return
+	}
+
+	// a throw-away pipeline, only used to point the config service at the right ref
+	tmpPipeline := &model.Pipeline{
+		Event:  model.EventManual,
+		Commit: commit.SHA,
+		Branch: branch,
+		Ref:    "refs/heads/" + branch,
+	}
+
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not find repo owner: %w", err))
+		return
+	}
+
+	// the repo owner's token is what the config service reads the repo with, and
+	// it may be stale
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	configs, err := configService.Fetch(c, _forge, repoUser, repo, tmpPipeline, nil, false)
+	// a branch without any config is not an error, it just has no workflows to
+	// offer, and the caller renders that as an empty list
+	if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+		c.JSON(http.StatusOK, []pipeline.WorkflowInfo{})
+		return
+	}
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch workflow configs: %w", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, pipeline.WorkflowInfos(configs))
 }
 
 // GetPipelineMetadata

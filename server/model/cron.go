@@ -33,6 +33,9 @@ type Cron struct {
 	Branch    string            `json:"branch"     xorm:"branch"`
 	Enabled   bool              `json:"enabled"    xorm:"enabled NOT NULL DEFAULT TRUE"`
 	Variables map[string]string `json:"variables"  xorm:"json 'variables'"`
+	// Workflows optionally narrows the run to the named workflows. An empty
+	// list runs every workflow config found in the repo.
+	Workflows []string `json:"workflows" xorm:"json 'workflows'"`
 } //	@name	Cron
 
 // TableName returns the database table name for xorm.
@@ -75,4 +78,5 @@ type CronPatch struct {
 	Branch    *string           `json:"branch"`
 	Enabled   *bool             `json:"enabled"`
 	Variables map[string]string `json:"variables"`
+	Workflows []string          `json:"workflows"`
 } //	@name	CronPatch

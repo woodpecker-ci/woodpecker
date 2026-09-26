@@ -93,6 +93,17 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
 	}
 
+	// narrow the configs down to the workflows the trigger selected, before
+	// anything is persisted, so the pipeline is only ever linked to the configs
+	// it actually runs and a restart replays the same selection
+	forgeYamlConfigs, err = filterConfigsByWorkflows(forgeYamlConfigs, pipeline.SelectedWorkflows)
+	if err != nil {
+		if dErr := _store.DeletePipeline(pipeline); dErr != nil {
+			log.Error().Str("repo", repo.FullName).Err(dErr).Msg("failed to delete pipeline with invalid workflow selection")
+		}
+		return nil, err
+	}
+
 	// persist the pipeline config for historical correctness, restarts, etc
 	var configs []*model.Config
 	for _, forgeYamlConfig := range forgeYamlConfigs {

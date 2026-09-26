@@ -466,6 +466,77 @@ func TestCreatePipeline(t *testing.T) {
 		mockStore.AssertCalled(t, "CreatePipeline", mock.Anything)
 		mockStore.AssertCalled(t, "UpdatePipeline", mock.Anything)
 	})
+
+	// 4. selecting a workflow without a dependency it names must succeed over
+	// the real HTTP handler, not just the pipeline.Create function directly.
+	t.Run("workflow selection - selected workflow's dependency is not selected", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockConfigService := config_service_mocks.NewMockService(t)
+		mockSecretService := secret_service_mocks.NewMockService(t)
+		mockRegistryService := registry_service_mocks.NewMockService(t)
+
+		fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
+		fakeUser := &model.User{ID: 1, Login: "testuser", Email: "test@example.com", Avatar: "avatar.png", Hash: "hash123"}
+		fakeCommit := &model.Commit{SHA: "abc123", ForgeURL: "https://example.com/commit/abc123"}
+
+		mockForge := forge_mocks.NewMockForge(t)
+		mockForge.On("Name").Return("mock").Maybe()
+		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, "main").Return(fakeCommit, nil)
+		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{
+			Machine:  "example.com",
+			Login:    "testuser",
+			Password: "testpass",
+		}, nil).Maybe()
+		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
+
+		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
+
+		mockManager := manager_mocks.NewMockManager(t)
+		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
+		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
+		mockManager.On("SecretServiceFromRepo", fakeRepo).Return(mockSecretService).Maybe()
+		mockManager.On("RegistryServiceFromRepo", fakeRepo).Return(mockRegistryService).Maybe()
+		mockManager.On("EnvironmentService").Return(nil).Maybe()
+		server.Config.Services.Manager = mockManager
+
+		mockQueue := queue_mocks.NewMockQueue(t)
+		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
+		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
+		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), mockStore, mockQueue, memory.New())
+
+		// "build" depends on "test", but only "build" is selected below.
+		configData := []*forge_types.FileMeta{
+			{Name: ".woodpecker/build.yaml", Data: []byte("depends_on:\n  - test\nsteps:\n  build:\n    image: alpine:latest\n    commands:\n      - echo build")},
+			{Name: ".woodpecker/test.yaml", Data: []byte("steps:\n  test:\n    image: alpine:latest\n    commands:\n      - echo test")},
+		}
+		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(configData, nil)
+
+		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
+		mockStore.On("CreatePipeline", mock.Anything).Return(nil)
+		mockStore.On("GetPipelineLastBefore", fakeRepo, "main", mock.Anything).Return(nil, types.ErrRecordNotExist).Maybe()
+		mockStore.On("ConfigPersist", mock.Anything).Return(&model.Config{ID: 1}, nil).Maybe()
+		mockStore.On("ConfigFindIdentical", mock.Anything, mock.Anything).Return(nil, nil).Maybe()
+		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
+		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
+		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Set("repo", fakeRepo)
+		c.Set("user", fakeUser)
+
+		c.Request, _ = http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(`{"branch": "main", "workflows": ["build"]}`)))
+		c.Request.Header.Set("Content-Type", "application/json")
+
+		CreatePipeline(c)
+
+		t.Logf("status=%d body=%s", w.Code, w.Body.String())
+		assert.Equal(t, http.StatusOK, w.Code)
+		mockStore.AssertCalled(t, "CreatePipeline", mock.Anything)
+	})
 }
 
 func TestPostPipeline(t *testing.T) {
