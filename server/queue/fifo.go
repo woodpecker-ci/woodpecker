@@ -38,7 +38,7 @@ type entry struct {
 type worker struct {
 	agentID int64
 	filter  func(*model.Task) (bool, int)
-	channel chan *model.Task
+	channel chan *entry
 	stop    context.CancelCauseFunc
 }
 
@@ -85,12 +85,19 @@ func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 
 // Poll retrieves and removes a task head of this queue.
 func (q *fifo) Poll(c context.Context, agentID int64, filter func(*model.Task) (bool, int)) (*model.Task, error) {
+	return q.pollWithValidation(c, agentID, filter, nil)
+}
+
+// pollWithValidation validates an assignment outside the queue lock, then checks
+// that cancellation or expiry did not remove or replace that exact lease while
+// validation was in progress.
+func (q *fifo) pollWithValidation(c context.Context, agentID int64, filter func(*model.Task) (bool, int), validate func(*model.Task) *model.Task) (*model.Task, error) {
 	q.Lock()
 	ctx, stop := context.WithCancelCause(c)
 
 	w := &worker{
 		agentID: agentID,
-		channel: make(chan *model.Task, 1),
+		channel: make(chan *entry, 1),
 		filter:  filter,
 		stop:    stop,
 	}
@@ -104,8 +111,18 @@ func (q *fifo) Poll(c context.Context, agentID int64, filter func(*model.Task) (
 			delete(q.workers, w)
 			q.Unlock()
 			return nil, ctx.Err()
-		case t := <-w.channel:
-			return t, nil
+		case assigned := <-w.channel:
+			task := assigned.item
+			if validate != nil {
+				task = validate(task)
+			}
+			q.Lock()
+			current := q.running[assigned.item.ID] == assigned
+			q.Unlock()
+			if !current {
+				return nil, nil
+			}
+			return task, nil
 		}
 	}
 }
@@ -280,7 +297,7 @@ func (q *fifo) process() {
 				done:     make(chan bool),
 				deadline: time.Now().Add(q.extension),
 			}
-			worker.channel <- task
+			worker.channel <- q.running[task.ID]
 		}
 		q.Unlock()
 	}
