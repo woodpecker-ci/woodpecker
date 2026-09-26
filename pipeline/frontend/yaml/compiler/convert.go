@@ -77,10 +77,9 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		extraHosts[i].IP = ip
 	}
 
-	var volumes []string
-	if !c.local {
-		volumes = append(volumes, workspaceVolume)
-	}
+	// always mount the workspace volume: it references config.Volume, which the
+	// backend provisions, so steps mount the volume the backend actually creates
+	volumes := []string{workspaceVolume}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
 		volumes = append(volumes, volume.String())

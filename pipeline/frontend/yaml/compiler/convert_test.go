@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 )
 
 func TestConvertPortNumber(t *testing.T) {
@@ -58,4 +59,33 @@ func TestConvertPortWrong(t *testing.T) {
 	portDef := "http"
 	_, err := convertPort(portDef)
 	assert.Error(t, err)
+}
+
+func TestWorkspaceVolumeAlwaysAdded(t *testing.T) {
+	compiler := New(
+		WithPrefix("test"),
+		WithWorkspace("/woodpecker", "src"),
+		WithLocal(true),
+	)
+
+	workflow := &yaml_types.Workflow{
+		SkipClone: true,
+		Steps: yaml_types.ContainerList{
+			ContainerList: []*yaml_types.Container{{
+				Name:     "test",
+				Image:    "alpine",
+				Commands: []string{"echo hello"},
+			}},
+		},
+	}
+
+	config, err := compiler.Compile(workflow)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "test_default", config.Volume)
+
+	assert.NotEmpty(t, config.Stages, "expected at least one stage")
+	assert.NotEmpty(t, config.Stages[0].Steps, "expected at least one step")
+	assert.Contains(t, config.Stages[0].Steps[0].Volumes, "test_default:/woodpecker",
+		"workspace volume must always be added, even in local mode")
 }
