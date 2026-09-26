@@ -29,6 +29,13 @@ import (
 
 // Cancel the pipeline and returns the status.
 func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *model.Repo, user *model.User, pipeline *model.Pipeline, cancelInfo *model.CancelInfo) error {
+	unlock := LockLifecycle(pipeline.ID)
+	defer unlock()
+	fresh, err := store.GetPipeline(pipeline.ID)
+	if err != nil {
+		return err
+	}
+	pipeline = fresh
 	if pipeline.Status != model.StatusRunning && pipeline.Status != model.StatusPending && pipeline.Status != model.StatusBlocked {
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}

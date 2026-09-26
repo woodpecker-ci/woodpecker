@@ -15,9 +15,11 @@
 package queue
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
@@ -167,4 +169,37 @@ func TestPersistentQueueDoneIgnoresAlreadyRemovedBackupTask(t *testing.T) {
 	info := q.Info(ctx)
 	assert.Equal(t, 0, info.Stats.Pending)
 	assert.Equal(t, 0, info.Stats.Running)
+}
+
+func TestPersistentCancellationRetryAndRestore(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+	s := store_mocks.NewMockStore(t)
+	pq := &persistentQueue{Queue: q, store: s}
+	task := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+	s.On("TaskDelete", task.ID).Return(errors.New("database unavailable")).Once()
+	assert.Error(t, pq.ErrorAtOnce(ctx, []string{task.ID}, ErrCancel))
+	s.On("TaskDelete", task.ID).Return(nil).Once()
+	assert.NoError(t, pq.ErrorAtOnce(ctx, []string{task.ID}, ErrCancel), "retry must remove durable task after transient failure")
+	assert.Empty(t, q.Info(ctx).Pending)
+	s.On("TaskList").Return([]*model.Task{}, nil).Once()
+	restored := WithTaskStore(ctx, NewMemoryQueue(ctx), s)
+	assert.Empty(t, restored.Info(ctx).Pending)
+}
+
+func TestPersistentRestoreCanceledDependency(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+	s := store_mocks.NewMockStore(t)
+	dependent := &model.Task{ID: "2", Dependencies: []string{"1"}, DepStatus: map[string]model.StatusValue{}}
+	s.On("TaskList").Return([]*model.Task{dependent}, nil)
+	s.On("WorkflowLoad", int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusCanceled}, nil)
+	s.On("WorkflowLoad", int64(2)).Return(&model.Workflow{ID: 2, State: model.StatusPending}, nil)
+	s.On("TaskDelete", mock.Anything).Return(nil)
+	pq := WithTaskStore(ctx, q, s)
+	task, err := pq.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.NotNil(t, task)
+	assert.False(t, task.ShouldRun(), "restored success-only dependent must skip")
 }

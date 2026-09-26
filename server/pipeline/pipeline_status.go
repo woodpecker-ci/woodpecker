@@ -26,6 +26,18 @@ import (
 // PipelineStatus determine pipeline status based on corresponding workflow list.
 func PipelineStatus(workflows []*model.Workflow) model.StatusValue {
 	status := model.StatusSuccess
+	active := model.StatusValue("")
+	for _, w := range workflows {
+		if w.State == model.StatusRunning {
+			return model.StatusRunning
+		}
+		if w.State == model.StatusPending {
+			active = model.StatusPending
+		}
+	}
+	if active != "" {
+		return active
+	}
 
 	for _, p := range workflows {
 		status = MergeStatusValues(status, p.State)

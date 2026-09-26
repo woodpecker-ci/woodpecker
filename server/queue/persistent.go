@@ -31,7 +31,31 @@ import (
 // WithTaskStore returns a queue that is backed by the TaskStore. This
 // ensures the task Queue can be restored when the system starts.
 func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
-	tasks, _ := s.TaskList()
+	tasks, err := s.TaskList()
+	if err != nil {
+		log.Error().Err(err).Msg("restore task queue")
+	}
+	// Dependency results live in workflow storage; queued task snapshots may
+	// predate their completion (including individual cancellation).
+	for _, task := range tasks {
+		for _, dep := range task.Dependencies {
+			id, err := strconv.ParseInt(dep, 10, 64)
+			if err != nil {
+				continue
+			}
+			workflow, err := s.WorkflowLoad(id)
+			if err != nil {
+				log.Error().Err(err).Str("workflow_id", dep).Msg("restore dependency status")
+				continue
+			}
+			if isTerminalWorkflowState(workflow.State) {
+				if task.DepStatus == nil {
+					task.DepStatus = make(map[string]model.StatusValue)
+				}
+				task.DepStatus[dep] = workflow.State
+			}
+		}
+	}
 	if err := q.PushAtOnce(ctx, tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}

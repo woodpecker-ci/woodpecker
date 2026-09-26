@@ -108,3 +108,97 @@ func TestCancelRunningPipeline(t *testing.T) {
 		assert.Equal(t, model.StatusCanceled, step.State)
 	})
 }
+
+// A single agent slot makes the queued/running distinction observable.
+func TestCancelSingleWorkflow(t *testing.T) {
+	for _, queued := range []bool{false, true} {
+		name := "running"
+		if queued {
+			name = "queued"
+		}
+		t.Run(name, func(t *testing.T) {
+			env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
+				{Name: ".woodpecker/first.yaml", Data: []byte("steps:\n  - name: first\n    image: dummy\n    environment:\n      SLEEP: 2s\n")},
+				{Name: ".woodpecker/second.yaml", Data: []byte("steps:\n  - name: second\n    image: dummy\n    environment:\n      SLEEP: 2s\n")},
+				{Name: ".woodpecker/third.yaml", Data: []byte("steps:\n  - name: third\n    image: dummy\n    environment:\n      SLEEP: 2s\n")},
+			})
+			agent := setup.StartAgent(t, env.GRPCAddr, setup.WithCapacity(1))
+			setup.WaitForAgentRegistered(t, env.Store, agent)
+			created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
+			require.NoError(t, err)
+			setup.WaitForPipelineStatus(t, env.Store, created.ID, model.StatusRunning, 10*time.Second)
+			var selected *model.Workflow
+			require.Eventually(t, func() bool {
+				workflows, err := env.Store.WorkflowGetTree(created)
+				if err != nil {
+					return false
+				}
+				for _, w := range workflows {
+					if queued && w.State == model.StatusPending {
+						selected = w
+						return true
+					}
+					if !queued && w.State == model.StatusRunning {
+						for _, step := range w.Children {
+							if step.State == model.StatusRunning {
+								selected = w
+								return true
+							}
+						}
+					}
+				}
+				return false
+			}, 10*time.Second, 10*time.Millisecond)
+			f, err := env.Manager.ForgeByID(env.Fixtures.Forge.ID)
+			require.NoError(t, err)
+			require.NoError(t, pipeline.CancelWorkflow(t.Context(), f, env.Store, env.Fixtures.Repo, created, selected.ID))
+			active, err := env.Store.GetPipeline(created.ID)
+			require.NoError(t, err)
+			assert.Equal(t, model.StatusRunning, active.Status)
+			assert.Zero(t, active.Finished)
+			assert.Nil(t, active.CancelInfo)
+			final := setup.WaitForPipeline(t, env.Store, created.ID)
+			assert.Equal(t, model.StatusKilled, final.Status)
+			workflows, err := env.Store.WorkflowGetTree(final)
+			require.NoError(t, err)
+			for _, w := range workflows {
+				if w.ID != selected.ID {
+					assert.Equal(t, model.StatusSuccess, w.State)
+					continue
+				}
+				if queued {
+					assert.Equal(t, model.StatusCanceled, w.State)
+					assert.Zero(t, w.Started)
+				} else {
+					assert.Equal(t, model.StatusKilled, w.State)
+				}
+			}
+		})
+	}
+}
+
+func TestCancelPipelineAfterSingleWorkflow(t *testing.T) {
+	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
+		{Name: ".woodpecker/first.yaml", Data: cancelPipelineYAML},
+		{Name: ".woodpecker/second.yaml", Data: cancelPipelineYAML},
+	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
+	require.NoError(t, err)
+	workflows, err := env.Store.WorkflowGetTree(created)
+	require.NoError(t, err)
+	require.Len(t, workflows, 2)
+	f, err := env.Manager.ForgeByID(env.Fixtures.Forge.ID)
+	require.NoError(t, err)
+	require.NoError(t, pipeline.CancelWorkflow(t.Context(), f, env.Store, env.Fixtures.Repo, created, workflows[0].ID))
+	info := &model.CancelInfo{CanceledByUser: env.Fixtures.Owner.Login}
+	require.NoError(t, pipeline.Cancel(t.Context(), f, env.Store, env.Fixtures.Repo, env.Fixtures.Owner, created, info))
+	finished, err := env.Store.GetPipeline(created.ID)
+	require.NoError(t, err)
+	assert.Equal(t, info, finished.CancelInfo)
+	assert.NotZero(t, finished.Finished)
+	assert.Equal(t, model.StatusKilled, finished.Status)
+	workflows, err = env.Store.WorkflowGetTree(finished)
+	require.NoError(t, err)
+	assert.Equal(t, model.StatusCanceled, workflows[0].State)
+	assert.False(t, model.IsThereRunningStage(workflows))
+}

@@ -134,6 +134,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/user/feed`) as Promise<PipelineFeed[]>;
   }
 
+  async cancelWorkflow(repoId: number, pipelineNumber: number, workflowId: number): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}/workflows/${workflowId}/cancel`);
+  }
+
   async cancelPipeline(repoId: number, pipelineNumber: number): Promise<unknown> {
     return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}/cancel`);
   }

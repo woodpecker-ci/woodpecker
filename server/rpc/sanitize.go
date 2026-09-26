@@ -82,8 +82,18 @@ func (s *RPC) lockAgentToWorkflow(_ context.Context, agent *model.Agent, strWork
 		return err
 	}
 
+	unlock := pipeline.LockLifecycle(workflow.PipelineID)
+	defer unlock()
+	workflow, err = s.store.WorkflowLoad(workflowID)
+	if err != nil {
+		return err
+	}
+	if err := checkWorkflowState(workflow.State); err != nil {
+		return err
+	}
+	expected := workflow.State
 	workflow.AgentID = agent.ID
-	return s.store.WorkflowUpdate(workflow)
+	return s.store.WorkflowUpdateIfState(workflow, expected)
 }
 
 // isActiveState returns true for states where work is in progress or not yet started.

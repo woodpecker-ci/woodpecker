@@ -121,6 +121,7 @@ func apiRoutes(e *gin.RouterGroup) {
 					// requires push permissions
 					repo.POST("/pipelines/:pipeline_number", session.MustPush, session.SetPipeline(), api.PostPipeline)
 					repo.POST("/pipelines/:pipeline_number/cancel", session.MustPush, session.SetPipeline(), api.CancelPipeline)
+					repo.POST("/pipelines/:pipeline_number/workflows/:workflow_id/cancel", session.MustPush, session.SetPipeline(), api.CancelWorkflow)
 					repo.POST("/pipelines/:pipeline_number/approve", session.MustPush, session.SetPipeline(), api.PostApproval)
 					repo.POST("/pipelines/:pipeline_number/decline", session.MustPush, session.SetPipeline(), api.PostDecline)
 
