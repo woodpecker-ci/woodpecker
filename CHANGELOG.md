@@ -42,6 +42,7 @@
 
 ### 📦️ Dependency
 
+- Update woodpeckerci/plugin-release Docker tag to v0.3.2 [[#7184](https://github.com/woodpecker-ci/woodpecker/pull/7184)]
 - Update docker.io/woodpeckerci/plugin-surge-preview Docker tag to v1.4.3 [[#7182](https://github.com/woodpecker-ci/woodpecker/pull/7182)]
 - Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.6.1 [[#7183](https://github.com/woodpecker-ci/woodpecker/pull/7183)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v6.1.2 [[#7180](https://github.com/woodpecker-ci/woodpecker/pull/7180)]
