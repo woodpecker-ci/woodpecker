@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-21
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -42,6 +42,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-editorconfig-checker Docker tag to v0.3.4 [[#7181](https://github.com/woodpecker-ci/woodpecker/pull/7181)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.8 [[#7164](https://github.com/woodpecker-ci/woodpecker/pull/7164)]
 - Update golang-packages [[#7127](https://github.com/woodpecker-ci/woodpecker/pull/7127)]
 - Update dependency simple-icons to v16.31.0 [[#7138](https://github.com/woodpecker-ci/woodpecker/pull/7138)]
