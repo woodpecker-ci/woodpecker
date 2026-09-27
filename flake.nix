@@ -34,7 +34,6 @@
 
               # backend
               go
-              glibc.static
               gofumpt
               golangci-lint
               go-mockery
@@ -53,6 +52,7 @@
             LDFLAGS = "-L${pkgs.glibc}/lib";
             GO = "${go}/bin/go";
             GOROOT = "${go}/share/go";
+            STATIC_BUILD = "false";
           };
       }
     );
