@@ -25,6 +25,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 
 - [Convert Drone CI pipelines to Woodpecker CI](https://codeberg.org/lafriks/woodpecker-pipeline-transform)
 - [Ansible NAS](https://github.com/davestephens/ansible-nas/) - a homelab Ansible playbook that can set up Woodpecker CI and Gitea
+- [MASH](https://github.com/mother-of-all-self-hosting/mash-playbook) - an Ansible playbook that can [set up Woodpecker CI](https://github.com/mother-of-all-self-hosting/mash-playbook/blob/main/docs/services/woodpecker-ci.md) alongside 250+ other self-hosted services, including Forgejo and Gitea
 - [picus](https://github.com/windsource/picus) - Picus connects to a Woodpecker CI server and creates an agent in the cloud when there are pending workflows.
 - [Hetzner cloud](https://www.hetzner.com/cloud) based [Woodpecker compatible autoscaler](https://git.ljoonal.xyz/ljoonal/hetzner-ci-autoscaler) - Creates and destroys VPS instances based on the count of pending & running jobs.
 - [woodpecker-lint](https://git.schmidl.dev/schtobia/woodpecker-lint) - A repository for linting a Woodpecker config file via pre-commit hook
